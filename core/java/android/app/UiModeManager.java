@@ -116,12 +116,22 @@ public class UiModeManager {
     }
 
     /**
-     * Turn off special mode if currently in car mode.
+     * Flag for use with {@link #disableCarMode(int)}: go to the normal
+     * home activity as part of the disable.  Disabling this way ensures
+     * a clean transition between the current activity (in car mode) and
+     * the original home activity (which was typically last running without
+     * being in car mode).
      */
-    public void disableCarMode() {
+    public static final int DISABLE_CAR_MODE_GO_HOME = 0x0001;
+    
+    /**
+     * Turn off special mode if currently in car mode.
+     * @param flags May be 0 or {@link #DISABLE_CAR_MODE_GO_HOME}.
+     */
+    public void disableCarMode(int flags) {
         if (mService != null) {
             try {
-                mService.disableCarMode();
+                mService.disableCarMode(flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "disableCarMode: RemoteException", e);
             }

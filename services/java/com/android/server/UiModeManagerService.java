@@ -144,6 +144,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     // change.
                     Configuration newConfig = null;
                     if (mHoldingConfiguration) {
+                        mHoldingConfiguration = false;
                         updateConfigurationLocked(false);
                         newConfig = mConfiguration;
                     }
@@ -151,7 +152,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         ActivityManagerNative.getDefault().startActivityWithConfig(
                                 null, intent, null, null, 0, null, null, 0, false, false,
                                 newConfig);
-                        mContext.startActivity(intent);
                         mHoldingConfiguration = false;
                     } catch (RemoteException e) {
                         Slog.w(TAG, e.getCause());
@@ -190,7 +190,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             mCharging = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
             synchronized (mLock) {
                 if (mSystemReady) {
-                    updateLocked();
+                    updateLocked(0);
                 }
             }
         }
@@ -300,11 +300,11 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 Settings.Secure.UI_NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO);
     }
 
-    public void disableCarMode() {
+    public void disableCarMode(int flags) {
         synchronized (mLock) {
             setCarModeLocked(false);
             if (mSystemReady) {
-                updateLocked();
+                updateLocked(flags);
             }
         }
     }
@@ -316,7 +316,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         synchronized (mLock) {
             setCarModeLocked(true);
             if (mSystemReady) {
-                updateLocked();
+                updateLocked(0);
             }
         }
     }
@@ -347,7 +347,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         Settings.Secure.UI_NIGHT_MODE, mode);
                 Binder.restoreCallingIdentity(ident);
                 mNightMode = mode;
-                updateLocked();
+                updateLocked(0);
             }
         }
     }
@@ -360,7 +360,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         synchronized (mLock) {
             mSystemReady = true;
             mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
-            updateLocked();
+            updateLocked(0);
             mHandler.sendEmptyMessage(MSG_ENABLE_LOCATION_UPDATES);
         }
     }
@@ -381,7 +381,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 mDockState = newState;
                 setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR);
                 if (mSystemReady) {
-                    updateLocked();
+                    updateLocked(0);
                 }
             }
         }
@@ -424,7 +424,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     }
 
-    final void updateLocked() {
+    final void updateLocked(int flags) {
         long ident = Binder.clearCallingIdentity();
 
         try {
@@ -475,7 +475,25 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 mHoldingConfiguration = true;
             }
 
-            updateConfigurationLocked(true);
+            if (oldAction != null && (flags&UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
+                // We are exiting the special mode, and have been asked to return
+                // to the main home screen while doing so.  To keep this clean, we
+                // have the activity manager switch the configuration for us at the
+                // same time as the switch.
+                try {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    updateConfigurationLocked(false);
+                    ActivityManagerNative.getDefault().startActivityWithConfig(
+                            null, intent, null, null, 0, null, null, 0, false, false,
+                            mConfiguration);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, e.getCause());
+                }
+            } else {
+                updateConfigurationLocked(true);
+            }
 
             // keep screen on when charging and in car mode
             boolean keepScreenOn = mCharging &&
@@ -548,7 +566,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         if (isDoingNightMode() && mLocation != null
                                 && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                             updateTwilightLocked();
-                            updateLocked();
+                            updateLocked(0);
                         }
                     }
                     break;
@@ -576,7 +594,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                             if (isDoingNightMode() && mLocation != null
                                     && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                                 updateTwilightLocked();
-                                updateLocked();
+                                updateLocked(0);
                             }
                         }
                     }

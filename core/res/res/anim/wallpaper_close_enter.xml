@@ -20,14 +20,15 @@
 <!-- This version zooms the new non-wallpaper up out of the
      wallpaper, without zooming the wallpaper itself. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
         android:zAdjustment="top">
     <scale android:fromXScale=".5" android:toXScale="1.0"
            android:fromYScale=".5" android:toYScale="1.0"
            android:pivotX="50%p" android:pivotY="50%p"
+           android:interpolator="@anim/decelerate_interpolator"
            android:duration="@android:integer/config_mediumAnimTime" />
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_mediumAnimTime"/>
+           android:interpolator="@anim/accelerate_decelerate_interpolator"
+           android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
 
 <!-- This version zooms the new non-wallpaper down on top of the
