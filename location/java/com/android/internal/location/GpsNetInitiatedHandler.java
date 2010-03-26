@@ -23,6 +23,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -81,7 +82,7 @@ public class GpsNetInitiatedHandler {
     private final Context mContext;
     
     // parent gps location provider
-    private final GpsLocationProvider mGpsLocationProvider;
+    private final LocationManager mLocationManager;
     
     // configuration of notificaiton behavior
     private boolean mPlaySounds = false;
@@ -122,9 +123,9 @@ public class GpsNetInitiatedHandler {
      */
     private Notification mNiNotification;
     
-    public GpsNetInitiatedHandler(Context context, GpsLocationProvider gpsLocationProvider) {
+    public GpsNetInitiatedHandler(Context context) {
     	mContext = context;       
-    	mGpsLocationProvider = gpsLocationProvider;
+    	mLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
     }
     
     // Handles NI events from HAL
@@ -157,13 +158,7 @@ public class GpsNetInitiatedHandler {
     		!notif.needNotify && !notif.needVerify || 
     		 notif.privacyOverride)
     	{
-    		try {
-    			mGpsLocationProvider.getNetInitiatedListener().sendNiResponse(notif.notificationId, GPS_NI_RESPONSE_ACCEPT);
-    		} 
-    		catch (RemoteException e)
-    		{
-    			Log.e(TAG, e.getMessage());
-    		}
+    	    mLocationManager.sendNiResponse(notif.notificationId, GPS_NI_RESPONSE_ACCEPT);
     	}
     	
     	//////////////////////////////////////////////////////////////////////////
