@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.app.IUiModeManager;
+import android.app.UiModeManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -32,7 +33,7 @@ public class DisableCarModeActivity extends Activity {
         try {
             IUiModeManager uiModeManager = IUiModeManager.Stub.asInterface(
                     ServiceManager.getService("uimode"));
-            uiModeManager.disableCarMode();
+            uiModeManager.disableCarMode(UiModeManager.DISABLE_CAR_MODE_GO_HOME);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to disable car mode", e);
         }

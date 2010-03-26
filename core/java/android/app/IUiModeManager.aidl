@@ -30,7 +30,7 @@ interface IUiModeManager {
     /**
      * Disables the car mode.
      */
-    void disableCarMode();
+    void disableCarMode(int flags);
 
     /**
      * Return the current running mode.
