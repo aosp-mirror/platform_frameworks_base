@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -85,7 +86,10 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             layoutInflater.inflate(R.layout.keyguard_screen_password_landscape, this, true);
         }
 
-        boolean isAlpha = lockPatternUtils.getPasswordMode() == LockPatternUtils.MODE_PASSWORD;
+        final int quality = lockPatternUtils.getKeyguardStoredPasswordQuality();
+        final boolean isAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
+                || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality;
+
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);

@@ -27,6 +27,7 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -281,8 +282,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 if (DEBUG) Log.d(TAG,
                     "reportFailedPatternAttempt: #" + failedAttempts +
                     " (enableFallback=" + mEnableFallback + ")");
-                final boolean usingLockPattern = mLockPatternUtils.getPasswordMode()
-                        == LockPatternUtils.MODE_PATTERN;
+                final boolean usingLockPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
+                        == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
                 if (usingLockPattern && mEnableFallback && failedAttempts ==
                         (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
                                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
@@ -639,8 +640,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         final IccCard.State simState = mUpdateMonitor.getSimState();
         if (stuckOnLockScreenBecauseSimMissing() || (simState == IccCard.State.PUK_REQUIRED)) {
             return Mode.LockScreen;
-        } else if (isSecure()
-                && mLockPatternUtils.getPasswordMode() == LockPatternUtils.MODE_PATTERN) {
+        } else if (isSecure()) {
             return Mode.UnlockScreen;
         } else {
             return Mode.LockScreen;
@@ -656,13 +656,15 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (simState == IccCard.State.PIN_REQUIRED || simState == IccCard.State.PUK_REQUIRED) {
             currentMode = UnlockMode.SimPin;
         } else {
-            final int mode = mLockPatternUtils.getPasswordMode();
+            final int mode = mLockPatternUtils.getKeyguardStoredPasswordQuality();
             switch (mode) {
-                case LockPatternUtils.MODE_PIN:
-                case LockPatternUtils.MODE_PASSWORD:
+                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
                     currentMode = UnlockMode.Password;
                     break;
-                case LockPatternUtils.MODE_PATTERN:
+                case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+                case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
                     // "forgot pattern" button is only available in the pattern mode...
                     if (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) {
                         currentMode = UnlockMode.Account;
