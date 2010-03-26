@@ -269,7 +269,6 @@ android.location.ILocationManager$Stub
 android.location.ILocationManager$Stub$Proxy
 android.location.Location
 android.location.LocationManager
-android.location.LocationProviderInterface
 android.media.AudioFormat
 android.media.AudioManager
 android.media.AudioRecord
@@ -633,7 +632,6 @@ com.android.internal.appwidget.IAppWidgetService$Stub
 com.android.internal.content.SyncStateContentProviderHelper
 com.android.internal.graphics.NativeUtils
 com.android.internal.location.DummyLocationProvider
-com.android.internal.location.GpsLocationProvider
 com.android.internal.logging.AndroidHandler
 com.android.internal.os.AndroidPrintStream
 com.android.internal.os.BinderInternal
