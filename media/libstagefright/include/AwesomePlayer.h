@@ -98,6 +98,7 @@ private:
     };
 
     mutable Mutex mLock;
+    Mutex mMiscStateLock;
 
     OMXClient mClient;
     TimedEventQueue mQueue;
@@ -155,7 +156,6 @@ private:
     void postBufferingEvent_l();
     void postStreamDoneEvent_l(status_t status);
     void postCheckAudioStatusEvent_l();
-    status_t getPosition_l(int64_t *positionUs);
     status_t play_l();
 
     MediaBuffer *mLastVideoBuffer;

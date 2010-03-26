@@ -423,21 +423,23 @@ void AwesomePlayer::onBufferingUpdate() {
     }
     mBufferingEventPending = false;
 
-    if (mDurationUs >= 0) {
+    int64_t durationUs;
+    {
+        Mutex::Autolock autoLock(mMiscStateLock);
+        durationUs = mDurationUs;
+    }
+
+    if (durationUs >= 0) {
         int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
 
         LOGV("cache holds %.2f secs worth of data.", cachedDurationUs / 1E6);
 
-        int64_t positionUs = 0;
-        if (mVideoSource != NULL) {
-            positionUs = mVideoTimeUs;
-        } else if (mAudioPlayer != NULL) {
-            positionUs = mAudioPlayer->getMediaTimeUs();
-        }
+        int64_t positionUs;
+        getPosition(&positionUs);
 
         cachedDurationUs += positionUs;
 
-        double percentage = (double)cachedDurationUs / mDurationUs;
+        double percentage = (double)cachedDurationUs / durationUs;
         notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage * 100.0);
 
         postBufferingEvent_l();
@@ -653,7 +655,7 @@ status_t AwesomePlayer::setLooping(bool shouldLoop) {
 }
 
 status_t AwesomePlayer::getDuration(int64_t *durationUs) {
-    Mutex::Autolock autoLock(mLock);
+    Mutex::Autolock autoLock(mMiscStateLock);
 
     if (mDurationUs < 0) {
         return UNKNOWN_ERROR;
@@ -665,12 +667,8 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 }
 
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
-    Mutex::Autolock autoLock(mLock);
-    return getPosition_l(positionUs);
-}
-
-status_t AwesomePlayer::getPosition_l(int64_t *positionUs) {
     if (mVideoSource != NULL) {
+        Mutex::Autolock autoLock(mMiscStateLock);
         *positionUs = mVideoTimeUs;
     } else if (mAudioPlayer != NULL) {
         *positionUs = mAudioPlayer->getMediaTimeUs();
@@ -748,6 +746,7 @@ status_t AwesomePlayer::initAudioDecoder() {
     if (mAudioSource != NULL) {
         int64_t durationUs;
         if (mAudioTrack->getFormat()->findInt64(kKeyDuration, &durationUs)) {
+            Mutex::Autolock autoLock(mMiscStateLock);
             if (mDurationUs < 0 || durationUs > mDurationUs) {
                 mDurationUs = durationUs;
             }
@@ -778,6 +777,7 @@ status_t AwesomePlayer::initVideoDecoder() {
     if (mVideoSource != NULL) {
         int64_t durationUs;
         if (mVideoTrack->getFormat()->findInt64(kKeyDuration, &durationUs)) {
+            Mutex::Autolock autoLock(mMiscStateLock);
             if (mDurationUs < 0 || durationUs > mDurationUs) {
                 mDurationUs = durationUs;
             }
@@ -857,7 +857,10 @@ void AwesomePlayer::onVideoEvent() {
     int64_t timeUs;
     CHECK(mVideoBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
 
-    mVideoTimeUs = timeUs;
+    {
+        Mutex::Autolock autoLock(mMiscStateLock);
+        mVideoTimeUs = timeUs;
+    }
 
     if (mSeeking) {
         if (mAudioPlayer != NULL) {
@@ -1174,7 +1177,7 @@ void AwesomePlayer::onPrepareAsyncEvent() {
         prefetcher.clear();
 
         if (result == OK) {
-            LOGV("prefetcher is done preparing");
+            LOGI("prefetcher is done preparing");
         } else {
             Mutex::Autolock autoLock(mLock);
 
@@ -1231,7 +1234,7 @@ status_t AwesomePlayer::suspend() {
     state->mFileSource = mFileSource;
 
     state->mFlags = mFlags & (PLAYING | LOOPING | AT_EOS);
-    getPosition_l(&state->mPositionUs);
+    getPosition(&state->mPositionUs);
 
     if (mLastVideoBuffer) {
         size_t size = mLastVideoBuffer->range_length();
