@@ -73,30 +73,31 @@ public class Binder implements IBinder {
     public static final native int getCallingUid();
     
     /**
-     * Reset the identity of the incoming IPC to the local process.  This can
+     * Reset the identity of the incoming IPC on the current thread.  This can
      * be useful if, while handling an incoming call, you will be calling
      * on interfaces of other objects that may be local to your process and
      * need to do permission checks on the calls coming into them (so they
      * will check the permission of your own local process, and not whatever
      * process originally called you).
-     * 
+     *
      * @return Returns an opaque token that can be used to restore the
      * original calling identity by passing it to
      * {@link #restoreCallingIdentity(long)}.
-     * 
+     *
      * @see #getCallingPid()
      * @see #getCallingUid()
      * @see #restoreCallingIdentity(long)
      */
     public static final native long clearCallingIdentity();
-    
+
     /**
-     * Restore the identity of the incoming IPC back to a previously identity
-     * that was returned by {@link #clearCallingIdentity}.
-     * 
+     * Restore the identity of the incoming IPC on the current thread
+     * back to a previously identity that was returned by {@link
+     * #clearCallingIdentity}.
+     *
      * @param token The opaque token that was previously returned by
      * {@link #clearCallingIdentity}.
-     * 
+     *
      * @see #clearCallingIdentity
      */
     public static final native void restoreCallingIdentity(long token);
