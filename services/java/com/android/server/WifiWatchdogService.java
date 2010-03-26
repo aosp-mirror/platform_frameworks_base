@@ -251,7 +251,6 @@ public class WifiWatchdogService {
     private void registerForWifiBroadcasts() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
@@ -276,7 +275,7 @@ public class WifiWatchdogService {
     /**
      * Unregister broadcasts and quit the watchdog thread
      */
-    public void quit() {
+    private void quit() {
         unregisterForWifiBroadcasts();
         mContext.getContentResolver().unregisterContentObserver(mContentObserver);
         mHandler.removeAllActions();
@@ -1117,9 +1116,6 @@ public class WifiWatchdogService {
             if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 handleNetworkStateChanged(
                         (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO));
-            } else if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
-                handleSupplicantConnectionChanged(
-                        intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false));
             } else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 handleWifiStateChanged(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                         WifiManager.WIFI_STATE_UNKNOWN));
@@ -1153,15 +1149,9 @@ public class WifiWatchdogService {
             }
         }
 
-        private void handleSupplicantConnectionChanged(boolean connected) {
-            if (!connected) {
-                onDisconnected();
-            }
-        }
-        
         private void handleWifiStateChanged(int wifiState) {
             if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
-                onDisconnected();
+                quit();
             } else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
                 onEnabled();
             }
