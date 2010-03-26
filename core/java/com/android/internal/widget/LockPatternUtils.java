@@ -47,7 +47,6 @@ import java.util.List;
 public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
-    private static final boolean LDEBUG = false;
 
     private static final String LOCK_PATTERN_FILE = "/system/gesture.key";
     private static final String LOCK_PASSWORD_FILE = "/system/password.key";
@@ -81,17 +80,6 @@ public class LockPatternUtils {
     public static final int MIN_LOCK_PATTERN_SIZE = 4;
 
     /**
-     * Type of password being stored.
-     * pattern = pattern screen
-     * pin = digit-only password
-     * password = alphanumeric password
-     */
-    public static final int MODE_UNSPECIFIED = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-    public static final int MODE_PATTERN = DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-    public static final int MODE_PIN = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-    public static final int MODE_PASSWORD = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
-
-    /**
      * The minimum number of dots the user must include in a wrong pattern
      * attempt for it to be counted against the counts that affect
      * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
@@ -110,7 +98,7 @@ public class LockPatternUtils {
     private static String sLockPatternFilename;
     private static String sLockPasswordFilename;
 
-    DevicePolicyManager getDevicePolicyManager() {
+    public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
             mDevicePolicyManager =
                 (DevicePolicyManager)mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -141,22 +129,13 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMinimumLength(null);
     }
 
+
     /**
      * Gets the device policy password mode. If the mode is non-specific, returns
      * MODE_PATTERN which allows the user to choose anything.
      */
-    public int getRequestedPasswordMode() {
-        int policyMode = getDevicePolicyManager().getPasswordQuality(null);
-        switch (policyMode) {
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
-                return MODE_PASSWORD;
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
-                return MODE_PIN;
-            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
-                return MODE_PATTERN;
-        }
-        return MODE_PATTERN;
+    public int getRequestedPasswordQuality() {
+        return getDevicePolicyManager().getPasswordQuality(null);
     }
 
     /**
@@ -232,7 +211,7 @@ public class LockPatternUtils {
         try {
             // Check if we can read a byte from the file
             RandomAccessFile raf = new RandomAccessFile(filename, "r");
-            byte first = raf.readByte();
+            raf.readByte();
             raf.close();
             return true;
         } catch (FileNotFoundException fnfe) {
@@ -273,41 +252,42 @@ public class LockPatternUtils {
      * information it has.
      */
     public int getActivePasswordQuality() {
-        switch (getPasswordMode()) {
-            case MODE_UNSPECIFIED:
-                return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-            case MODE_PATTERN:
+        int activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+        switch (getKeyguardStoredPasswordQuality()) {
+            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                 if (isLockPatternEnabled()) {
-                    return DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-                } else {
-                    return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                    activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
                 }
-            case MODE_PIN:
+                break;
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 if (isLockPasswordEnabled()) {
-                    return DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-                } else {
-                    return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                    activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
                 }
-            case MODE_PASSWORD:
+                break;
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
                 if (isLockPasswordEnabled()) {
-                    return DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
-                } else {
-                    return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                    activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
                 }
+                break;
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+                if (isLockPasswordEnabled()) {
+                    activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+                }
+                break;
         }
-        return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+        return activePasswordQuality;
     }
-    
+
     /**
      * Clear any lock pattern or password.
      */
     public void clearLock() {
         getDevicePolicyManager().setActivePasswordState(
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
-        saveLockPassword(null, LockPatternUtils.MODE_PATTERN);
+        saveLockPassword(null, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
         setLockPatternEnabled(false);
         saveLockPattern(null);
-        setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
+        setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
     }
 
     /**
@@ -330,7 +310,7 @@ public class LockPatternUtils {
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (pattern != null) {
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
-                setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
+                setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern.size());
             } else {
@@ -374,12 +354,13 @@ public class LockPatternUtils {
     }
 
     /**
-     * Save a lock password.  Does not ensure that the pattern is as good
+     * Save a lock password.  Does not ensure that the password is as good
      * as the requested mode, but will adjust the mode to be as good as the
      * pattern.
      * @param password The password to save
+     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      */
-    public void saveLockPassword(String password, int mode) {
+    public void saveLockPassword(String password, int quality) {
         // Compute the hash
         final byte[] hash = passwordToHash(password);
         try {
@@ -394,10 +375,10 @@ public class LockPatternUtils {
             raf.close();
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (password != null) {
-                setLong(PASSWORD_TYPE_KEY, mode);
-                int quality = computePasswordQuality(password);
-                if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                    dpm.setActivePasswordState(quality, password.length());
+                int computedQuality = computePasswordQuality(password);
+                setLong(PASSWORD_TYPE_KEY, computedQuality);
+                if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                    dpm.setActivePasswordState(computedQuality, password.length());
                 } else {
                     // The password is not anything.
                     dpm.setActivePasswordState(
@@ -416,8 +397,14 @@ public class LockPatternUtils {
         }
     }
 
-    public int getPasswordMode() {
-        return (int) getLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
+    /**
+     * Retrieves the quality mode we're in.
+     * {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     *
+     * @return stored password quality
+     */
+    public int getKeyguardStoredPasswordQuality() {
+        return (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
     }
 
     /**
@@ -536,7 +523,10 @@ public class LockPatternUtils {
      */
     public boolean isLockPasswordEnabled() {
         long mode = getLong(PASSWORD_TYPE_KEY, 0);
-        return savedPasswordExists() && (mode == MODE_PASSWORD || mode == MODE_PIN);
+        return savedPasswordExists() &&
+                (mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
+                        || mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+                        || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC);
     }
 
     /**
@@ -544,7 +534,8 @@ public class LockPatternUtils {
      */
     public boolean isLockPatternEnabled() {
         return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED)
-                && getLong(PASSWORD_TYPE_KEY, MODE_PATTERN) == MODE_PATTERN;
+                && getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
+                        == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
     }
 
     /**
@@ -660,9 +651,13 @@ public class LockPatternUtils {
     }
 
     public boolean isSecure() {
-        long mode = getPasswordMode();
-        boolean secure = mode == MODE_PATTERN && isLockPatternEnabled() && savedPatternExists()
-            || (mode == MODE_PIN || mode == MODE_PASSWORD) && savedPasswordExists();
+        long mode = getKeyguardStoredPasswordQuality();
+        final boolean isPattern = mode == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+        final boolean isPassword = mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+        final boolean secure = isPattern && isLockPatternEnabled() && savedPatternExists()
+                || isPassword && savedPasswordExists();
         return secure;
     }
 
