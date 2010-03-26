@@ -69,7 +69,6 @@ import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -781,6 +780,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * configurations.
      */
     int mConfigurationSeq = 0;
+    
+    /**
+     * Set when we know we are going to be calling updateConfiguration()
+     * soon, so want to skip intermediate config checks.
+     */
+    boolean mConfigWillChange;
     
     /**
      * Hardware-reported OpenGLES version.
@@ -3663,12 +3668,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } else {
                 callingPid = callingUid = -1;
             }
+            
+            mConfigWillChange = config != null && mConfiguration.diff(config) != 0;
+            
             final long origId = Binder.clearCallingIdentity();
+            
             int res = startActivityLocked(caller, intent, resolvedType,
                     grantedUriPermissions, grantedMode, aInfo,
                     resultTo, resultWho, requestCode, callingPid, callingUid,
                     onlyIfNeeded, componentSpecified);
-            if (config != null) {
+            
+            if (config != null && mConfigWillChange) {
                 // If the caller also wants to switch to a new configuration,
                 // do so now.  This allows a clean switch, as we are waiting
                 // for the current activity to pause (so we will not destroy
@@ -3677,6 +3687,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         "updateConfiguration()");
                 updateConfigurationLocked(config, null);
             }
+            
             Binder.restoreCallingIdentity(origId);
             
             if (outResult != null) {
@@ -9705,6 +9716,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         pw.println(" ");
         pw.println("  mHomeProcess: " + mHomeProcess);
         pw.println("  mConfiguration: " + mConfiguration);
+        pw.println("  mConfigWillChange: " + mConfigWillChange);
         pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -13452,6 +13464,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     private final boolean ensureActivityConfigurationLocked(HistoryRecord r,
             int globalChanges) {
+        if (!mConfigWillChange) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                    "Skipping config check (will change): " + r);
+            return true;
+        }
+        
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                 "Ensuring correct configuration: " + r);
         

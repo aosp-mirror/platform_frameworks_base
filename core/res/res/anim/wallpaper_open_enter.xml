@@ -17,7 +17,7 @@
 */
 -->
 
-<!-- This version zooms the new non-wallpaper up out of the
+<!-- This version zooms the exiting non-wallpaper down in to the
      wallpaper, without zooming the wallpaper itself. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator"
