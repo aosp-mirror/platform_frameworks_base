@@ -16,7 +16,7 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     
-﻿   <item android:state_window_focused="false" android:state_enabled="true"
+   <item android:state_window_focused="false" android:state_enabled="true"
         android:drawable="@drawable/btn_search_dialog_voice_default" />
         
     <item android:state_pressed="true" 
