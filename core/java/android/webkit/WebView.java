@@ -4012,8 +4012,8 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onDetachedFromWindow() {
         clearTextEntry(false);
-        super.onDetachedFromWindow();
         dismissZoomControl();
+        super.onDetachedFromWindow();
     }
 
     /**
@@ -4076,6 +4076,8 @@ public class WebView extends AbsoluteLayout
             }
             mGotKeyDown = false;
             mShiftIsPressed = false;
+            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+            mTouchMode = TOUCH_DONE_MODE;
             if (mNativeClass != 0) {
                 nativeRecordButtons(false, false, true);
             }
