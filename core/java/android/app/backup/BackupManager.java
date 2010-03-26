@@ -115,8 +115,45 @@ public class BackupManager {
     }
 
     /**
+     * Restore the calling application from backup.  The data will be restored from the
+     * current backup dataset if the application has stored data there, or from
+     * the dataset used during the last full device setup operation if the current
+     * backup dataset has no matching data.  If no backup data exists for this application
+     * in either source, a nonzero value will be returned.
+     *
+     * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
+     * a backed-up dataset from the remote transport, instantiate the application's
+     * backup agent, and pass the dataset to the agent's
+     * {@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
+     * method.
+     *
+     * @return Zero on success; nonzero on error.
+     */
+    public int requestRestore(RestoreObserver observer) {
+        int result = -1;
+        checkServiceBinder();
+        if (sService != null) {
+            RestoreSession session = null;
+            try {
+                String transport = sService.getCurrentTransport();
+                IRestoreSession binder = sService.beginRestoreSession(transport);
+                session = new RestoreSession(mContext, binder);
+                result = session.restorePackage(mContext.getPackageName(), observer);
+            } catch (RemoteException e) {
+                Log.w(TAG, "restoreSelf() unable to contact service");
+            } finally {
+                if (session != null) {
+                    session.endRestoreSession();
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Begin the process of restoring data from backup.  See the
      * {@link android.app.backup.RestoreSession} class for documentation on that process.
+     * @hide
      */
     public RestoreSession beginRestoreSession() {
         RestoreSession session = null;
