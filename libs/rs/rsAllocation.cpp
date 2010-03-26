@@ -170,6 +170,7 @@ void Allocation::uploadToTexture(const Context *rsc)
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
+    rsc->checkError("Allocation::uploadToTexture");
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc)
@@ -201,6 +202,7 @@ void Allocation::uploadToBufferObject(const Context *rsc)
     glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
     glBufferData(GL_ARRAY_BUFFER, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    rsc->checkError("Allocation::uploadToBufferObject");
 }
 
 void Allocation::uploadCheck(const Context *rsc)

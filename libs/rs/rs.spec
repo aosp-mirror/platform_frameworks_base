@@ -480,3 +480,13 @@ SimpleMeshBindVertex {
 	param uint32_t slot
 	}
 
+AnimationCreate {
+	param const float *inValues
+	param const float *outValues
+	param uint32_t valueCount
+	param RsAnimationInterpolation interp
+	param RsAnimationEdge pre
+	param RsAnimationEdge post
+	ret RsAnimation
+	}
+

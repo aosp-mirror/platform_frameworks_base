@@ -30,6 +30,7 @@ extern "C" {
 typedef void * RsAdapter1D;
 typedef void * RsAdapter2D;
 typedef void * RsAllocation;
+typedef void * RsAnimation;
 typedef void * RsContext;
 typedef void * RsDevice;
 typedef void * RsElement;
@@ -205,7 +206,27 @@ enum RsPrimitive {
 enum RsError {
     RS_ERROR_NONE,
     RS_ERROR_BAD_SHADER,
-    RS_ERROR_BAD_SCRIPT
+    RS_ERROR_BAD_SCRIPT,
+    RS_ERROR_BAD_VALUE,
+    RS_ERROR_OUT_OF_MEMORY
+};
+
+enum RsAnimationInterpolation {
+    RS_ANIMATION_INTERPOLATION_STEP,
+    RS_ANIMATION_INTERPOLATION_LINEAR,
+    RS_ANIMATION_INTERPOLATION_BEZIER,
+    RS_ANIMATION_INTERPOLATION_CARDINAL,
+    RS_ANIMATION_INTERPOLATION_HERMITE,
+    RS_ANIMATION_INTERPOLATION_BSPLINE
+};
+
+enum RsAnimationEdge {
+    RS_ANIMATION_EDGE_UNDEFINED,
+    RS_ANIMATION_EDGE_CONSTANT,
+    RS_ANIMATION_EDGE_GRADIENT,
+    RS_ANIMATION_EDGE_CYCLE,
+    RS_ANIMATION_EDGE_OSCILLATE,
+    RS_ANIMATION_EDGE_CYLE_RELATIVE
 };
 
 #ifndef NO_RS_FUNCS

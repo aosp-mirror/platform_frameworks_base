@@ -76,6 +76,7 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SRC_FILES:= \
 	rsAdapter.cpp \
 	rsAllocation.cpp \
+	rsAnimation.cpp \
 	rsComponent.cpp \
 	rsContext.cpp \
 	rsDevice.cpp \
