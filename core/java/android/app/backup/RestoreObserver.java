@@ -16,6 +16,8 @@
 
 package android.app.backup;
 
+import java.lang.String;
+
 /**
  * Callback class for receiving progress reports during a restore operation.  These
  * methods will all be called on your application's main thread.
@@ -32,17 +34,23 @@ public abstract class RestoreObserver {
 
     /**
      * An indication of which package is being restored currently, out of the
-     * total number provided in the restoreStarting() callback.  This method
-     * is not guaranteed to be called.
+     * total number provided in the {@link #restoreStarting(int)} callback.  This method
+     * is not guaranteed to be called: if the transport is unable to obtain
+     * data for one or more of the requested packages, no onUpdate() call will
+     * occur for those packages.
      *
      * @param nowBeingRestored The index, between 1 and the numPackages parameter
-     *   to the restoreStarting() callback, of the package now being restored.
+     *   to the {@link #restoreStarting(int)} callback, of the package now being
+     *   restored.  This may be non-monotonic; it is intended purely as a rough
+     *   indication of the backup manager's progress through the overall restore process.
+     * @param currentPackage The name of the package now being restored.
      */
-    void onUpdate(int nowBeingRestored) {
+    void onUpdate(int nowBeingRestored, String currentPackage) {
     }
 
     /**
-     * The restore operation has completed.
+     * The restore process has completed.  This method will always be called,
+     * even if no individual package restore operations were attempted.
      *
      * @param error Zero on success; a nonzero error code if the restore operation
      *   as a whole failed.
