@@ -153,6 +153,7 @@ public class StatusBarService extends IStatusBar.Stub
     StatusBarView mStatusBarView;
     int mPixelFormat;
     H mHandler = new H();
+    Object mQueueLock = new Object();
     ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
     NotificationCallbacks mNotificationCallbacks;
     
@@ -440,7 +441,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     private void addPendingOp(int code, IBinder key, IconData data, NotificationData n, int i) {
-        synchronized (mQueue) {
+        synchronized (mQueueLock) {
             PendingOp op = new PendingOp();
             op.key = key;
             op.code = code;
@@ -455,7 +456,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     private void addPendingOp(int code, IBinder key, boolean visible) {
-        synchronized (mQueue) {
+        synchronized (mQueueLock) {
             PendingOp op = new PendingOp();
             op.key = key;
             op.code = code;
@@ -468,7 +469,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     private void addPendingOp(int code, int integer) {
-        synchronized (mQueue) {
+        synchronized (mQueueLock) {
             PendingOp op = new PendingOp();
             op.code = code;
             op.integer = integer;
@@ -557,94 +558,94 @@ public class StatusBarService extends IStatusBar.Stub
                 doRevealAnimation();
                 return;
             }
-            boolean expand = false;
+
+            ArrayList<PendingOp> queue;
+            synchronized (mQueueLock) {
+                queue = mQueue;
+                mQueue = new ArrayList<PendingOp>();
+            }
+
+            boolean wasExpanded = mExpanded;
+
+            // for each one in the queue, find all of the ones with the same key
+            // and collapse that down into a final op and/or call to setVisibility, etc
+            boolean expand = wasExpanded;
             boolean doExpand = false;
             boolean doDisable = false;
             int disableWhat = 0;
+            int N = queue.size();
+            while (N > 0) {
+                PendingOp op = queue.get(0);
+                boolean doOp = false;
+                boolean visible = false;
+                boolean doVisibility = false;
+                if (op.code == OP_SET_VISIBLE) {
+                    doVisibility = true;
+                    visible = op.visible;
+                }
+                else if (op.code == OP_EXPAND) {
+                    doExpand = true;
+                    expand = op.visible;
+                }
+                else if (op.code == OP_TOGGLE) {
+                    doExpand = true;
+                    expand = !expand;
+                }
+                else {
+                    doOp = true;
+                }
 
-            synchronized (mQueue) {
-                boolean wasExpanded = mExpanded;
-
-                // for each one in the queue, find all of the ones with the same key
-                // and collapse that down into a final op and/or call to setVisibility, etc
-                expand = wasExpanded;
-                int N = mQueue.size();
-                while (N > 0) {
-                    PendingOp op = mQueue.get(0);
-                    boolean doOp = false;
-                    boolean visible = false;
-                    boolean doVisibility = false;
-                    if (op.code == OP_SET_VISIBLE) {
-                        doVisibility = true;
-                        visible = op.visible;
-                    }
-                    else if (op.code == OP_EXPAND) {
-                        doExpand = true;
-                        expand = op.visible;
-                    }
-                    else if (op.code == OP_TOGGLE) {
-                        doExpand = true;
-                        expand = !expand;
-                    }
-                    else {
-                        doOp = true;
-                    }
-
-                    if (alwaysHandle(op.code)) {
-                        // coalesce these
-                        for (int i=1; i<N; i++) {
-                            PendingOp o = mQueue.get(i);
-                            if (!alwaysHandle(o.code) && o.key == op.key) {
-                                if (o.code == OP_SET_VISIBLE) {
-                                    visible = o.visible;
-                                    doVisibility = true;
-                                }
-                                else if (o.code == OP_EXPAND) {
-                                    expand = o.visible;
-                                    doExpand = true;
-                                }
-                                else {
-                                    op.code = o.code;
-                                    op.iconData = o.iconData;
-                                    op.notificationData = o.notificationData;
-                                }
-                                mQueue.remove(i);
-                                i--;
-                                N--;
+                if (alwaysHandle(op.code)) {
+                    // coalesce these
+                    for (int i=1; i<N; i++) {
+                        PendingOp o = queue.get(i);
+                        if (!alwaysHandle(o.code) && o.key == op.key) {
+                            if (o.code == OP_SET_VISIBLE) {
+                                visible = o.visible;
+                                doVisibility = true;
                             }
+                            else if (o.code == OP_EXPAND) {
+                                expand = o.visible;
+                                doExpand = true;
+                            }
+                            else {
+                                op.code = o.code;
+                                op.iconData = o.iconData;
+                                op.notificationData = o.notificationData;
+                            }
+                            queue.remove(i);
+                            i--;
+                            N--;
                         }
-                    }
-
-                    mQueue.remove(0);
-                    N--;
-
-                    if (doOp) {
-                        switch (op.code) {
-                            case OP_ADD_ICON:
-                            case OP_UPDATE_ICON:
-                                performAddUpdateIcon(op.key, op.iconData, op.notificationData);
-                                break;
-                            case OP_REMOVE_ICON:
-                                performRemoveIcon(op.key);
-                                break;
-                            case OP_DISABLE:
-                                doDisable = true;
-                                disableWhat = op.integer;
-                                break;
-                        }
-                    }
-                    if (doVisibility && op.code != OP_REMOVE_ICON) {
-                        performSetIconVisibility(op.key, visible);
                     }
                 }
 
-                if (mQueue.size() != 0) {
-                    throw new RuntimeException("Assertion failed: mQueue.size=" + mQueue.size());
+                queue.remove(0);
+                N--;
+
+                if (doOp) {
+                    switch (op.code) {
+                        case OP_ADD_ICON:
+                        case OP_UPDATE_ICON:
+                            performAddUpdateIcon(op.key, op.iconData, op.notificationData);
+                            break;
+                        case OP_REMOVE_ICON:
+                            performRemoveIcon(op.key);
+                            break;
+                        case OP_DISABLE:
+                            doDisable = true;
+                            disableWhat = op.integer;
+                            break;
+                    }
+                }
+                if (doVisibility && op.code != OP_REMOVE_ICON) {
+                    performSetIconVisibility(op.key, visible);
                 }
             }
-            // This must be done outside the synchronized block above to prevent a deadlock where
-            // we call into the NotificationManagerService and it is in turn attempting to post a
-            // message to our queue.
+
+            if (queue.size() != 0) {
+                throw new RuntimeException("Assertion failed: queue.size=" + queue.size());
+            }
             if (doExpand) {
                 // this is last so that we capture all of the pending changes before doing it
                 if (expand) {
@@ -1397,7 +1398,7 @@ public class StatusBarService extends IStatusBar.Stub
             return;
         }
         
-        synchronized (mQueue) {
+        synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
             pw.println("  mExpanded=" + mExpanded
                     + ", mExpandedVisible=" + mExpandedVisible);
