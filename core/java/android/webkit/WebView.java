@@ -763,6 +763,8 @@ public class WebView extends AbsoluteLayout
     private ExtendedZoomControls mZoomControls;
     private Runnable mZoomControlRunnable;
 
+    // mZoomButtonsController will be lazy initialized in
+    // getZoomButtonsController() to get better performance.
     private ZoomButtonsController mZoomButtonsController;
 
     // These keep track of the center point of the zoom.  They are used to
@@ -844,18 +846,6 @@ public class WebView extends AbsoluteLayout
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new OverScroller(context);
 
-        mZoomButtonsController = new ZoomButtonsController(this);
-        mZoomButtonsController.setOnZoomListener(mZoomListener);
-        // ZoomButtonsController positions the buttons at the bottom, but in
-        // the middle.  Change their layout parameters so they appear on the
-        // right.
-        View controls = mZoomButtonsController.getZoomControls();
-        ViewGroup.LayoutParams params = controls.getLayoutParams();
-        if (params instanceof FrameLayout.LayoutParams) {
-            FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams)
-                    params;
-            frameParams.gravity = Gravity.RIGHT;
-        }
         updateMultiTouchSupport(context);
     }
 
@@ -875,15 +865,16 @@ public class WebView extends AbsoluteLayout
     private void updateZoomButtonsEnabled() {
         boolean canZoomIn = mActualScale < mMaxZoomScale;
         boolean canZoomOut = mActualScale > mMinZoomScale && !mInZoomOverview;
+        ZoomButtonsController controller = getZoomButtonsController();
         if (!canZoomIn && !canZoomOut) {
             // Hide the zoom in and out buttons, as well as the fit to page
             // button, if the page cannot zoom
-            mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
+            controller.getZoomControls().setVisibility(View.GONE);
         } else {
             // Set each one individually, as a page may be able to zoom in
             // or out.
-            mZoomButtonsController.setZoomInEnabled(canZoomIn);
-            mZoomButtonsController.setZoomOutEnabled(canZoomOut);
+            controller.setZoomInEnabled(canZoomIn);
+            controller.setZoomOutEnabled(canZoomOut);
         }
     }
 
@@ -1760,7 +1751,7 @@ public class WebView extends AbsoluteLayout
         }
         clearTextEntry(false);
         if (getSettings().getBuiltInZoomControls()) {
-            mZoomButtonsController.setVisible(true);
+            getZoomButtonsController().setVisible(true);
         } else {
             mPrivateHandler.removeCallbacks(mZoomControlRunnable);
             mPrivateHandler.postDelayed(mZoomControlRunnable,
@@ -4072,7 +4063,7 @@ public class WebView extends AbsoluteLayout
                 // false for the first parameter
             }
         } else {
-            if (getSettings().getBuiltInZoomControls() && !mZoomButtonsController.isVisible()) {
+            if (getSettings().getBuiltInZoomControls() && !getZoomButtonsController().isVisible()) {
                 /*
                  * The zoom controls come in their own window, so our window
                  * loses focus. Our policy is to not draw the cursor ring if
@@ -5050,7 +5041,7 @@ public class WebView extends AbsoluteLayout
         WebSettings settings = getSettings();
         if (settings.supportZoom()
                 && settings.getBuiltInZoomControls()
-                && !mZoomButtonsController.isVisible()
+                && !getZoomButtonsController().isVisible()
                 && mMinZoomScale < mMaxZoomScale) {
             mZoomButtonsController.setVisible(true);
             int count = settings.getDoubleTapToastCount();
@@ -5593,6 +5584,19 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public ZoomButtonsController getZoomButtonsController() {
+        if (mZoomButtonsController == null) {
+            mZoomButtonsController = new ZoomButtonsController(this);
+            mZoomButtonsController.setOnZoomListener(mZoomListener);
+            // ZoomButtonsController positions the buttons at the bottom, but in
+            // the middle. Change their layout parameters so they appear on the
+            // right.
+            View controls = mZoomButtonsController.getZoomControls();
+            ViewGroup.LayoutParams params = controls.getLayoutParams();
+            if (params instanceof FrameLayout.LayoutParams) {
+                FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) params;
+                frameParams.gravity = Gravity.RIGHT;
+            }
+        }
         return mZoomButtonsController;
     }
 
@@ -5832,7 +5836,9 @@ public class WebView extends AbsoluteLayout
         if (mWebViewCore == null) {
             // maybe called after WebView's destroy(). As we can't get settings,
             // just hide zoom control for both styles.
-            mZoomButtonsController.setVisible(false);
+            if (mZoomButtonsController != null) {
+                mZoomButtonsController.setVisible(false);
+            }
             if (mZoomControls != null) {
                 mZoomControls.hide();
             }
@@ -5840,7 +5846,7 @@ public class WebView extends AbsoluteLayout
         }
         WebSettings settings = getSettings();
         if (settings.getBuiltInZoomControls()) {
-            if (mZoomButtonsController.isVisible()) {
+            if (getZoomButtonsController().isVisible()) {
                 mZoomButtonsController.setVisible(false);
             }
         } else {
