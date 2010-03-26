@@ -94,18 +94,18 @@ public class GpsNetInitiatedHandler {
         
     public static class GpsNiNotification
     {
-        int notificationId;
-        int niType;
-        boolean needNotify;
-        boolean needVerify;
-        boolean privacyOverride;
-        int timeout;
-        int defaultResponse;
-        String requestorId;
-        String text;
-        int requestorIdEncoding;
-        int textEncoding;
-        Bundle extras;
+        public int notificationId;
+        public int niType;
+        public boolean needNotify;
+        public boolean needVerify;
+        public boolean privacyOverride;
+        public int timeout;
+        public int defaultResponse;
+        public String requestorId;
+        public String text;
+        public int requestorIdEncoding;
+        public int textEncoding;
+        public Bundle extras;
     };
     
     public static class GpsNiResponse {

@@ -16,17 +16,6 @@
 
 package com.android.server;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -50,7 +39,6 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.location.LocationProviderInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -68,12 +56,25 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
 
-import com.android.internal.location.GeocoderProxy;
-import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.GpsNetInitiatedHandler;
-import com.android.internal.location.LocationProviderProxy;
-import com.android.internal.location.MockProvider;
-import com.android.internal.location.PassiveProvider;
+
+import com.android.server.location.GeocoderProxy;
+import com.android.server.location.GpsLocationProvider;
+import com.android.server.location.LocationProviderInterface;
+import com.android.server.location.LocationProviderProxy;
+import com.android.server.location.MockProvider;
+import com.android.server.location.PassiveProvider;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Set;
 
 /**
  * The service class that manages LocationProviders and issues location

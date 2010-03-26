@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package com.android.server.location;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -30,7 +30,6 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.location.LocationProviderInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.SntpClient;
@@ -76,37 +75,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final boolean DEBUG = false;
     private static final boolean VERBOSE = false;
-
-    /**
-     * Broadcast intent action indicating that the GPS has either been
-     * enabled or disabled. An intent extra provides this state as a boolean,
-     * where {@code true} means enabled.
-     * @see #EXTRA_ENABLED
-     *
-     * {@hide}
-     */
-    public static final String GPS_ENABLED_CHANGE_ACTION =
-        "android.location.GPS_ENABLED_CHANGE";
-
-    /**
-     * Broadcast intent action indicating that the GPS has either started or
-     * stopped receiving GPS fixes. An intent extra provides this state as a
-     * boolean, where {@code true} means that the GPS is actively receiving fixes.
-     * @see #EXTRA_ENABLED
-     *
-     * {@hide}
-     */
-    public static final String GPS_FIX_CHANGE_ACTION =
-        "android.location.GPS_FIX_CHANGE";
-
-    /**
-     * The lookup key for a boolean that indicates whether GPS is enabled or
-     * disabled. {@code true} means GPS is enabled. Retrieve it with
-     * {@link android.content.Intent#getBooleanExtra(String,boolean)}.
-     *
-     * {@hide}
-     */
-    public static final String EXTRA_ENABLED = "enabled";
 
     // these need to match GpsPositionMode enum in gps.h
     private static final int GPS_POSITION_MODE_STANDALONE = 0;
@@ -1031,8 +999,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
 
             // send an intent to notify that the GPS is receiving fixes.
-            Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
-            intent.putExtra(EXTRA_ENABLED, true);
+            Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
+            intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
             mContext.sendBroadcast(intent);
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
@@ -1108,8 +1076,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 }
 
                 // send an intent to notify that the GPS has been enabled or disabled.
-                Intent intent = new Intent(GPS_ENABLED_CHANGE_ACTION);
-                intent.putExtra(EXTRA_ENABLED, mNavigating);
+                Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
+                intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, mNavigating);
                 mContext.sendBroadcast(intent);
             }
 
@@ -1165,8 +1133,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
             System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT * 1000) {
             // send an intent to notify that the GPS is no longer receiving fixes.
-            Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
-            intent.putExtra(EXTRA_ENABLED, false);
+            Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
+            intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
             mContext.sendBroadcast(intent);
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount);
         }

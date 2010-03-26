@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -62,7 +63,6 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
@@ -387,8 +387,8 @@ public class StatusBarPolicy {
                     action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
                 updateWifi(intent);
             }
-            else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION) ||
-                    action.equals(GpsLocationProvider.GPS_FIX_CHANGE_ACTION)) {
+            else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) ||
+                    action.equals(LocationManager.GPS_FIX_CHANGE_ACTION)) {
                 updateGps(intent);
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
@@ -533,8 +533,8 @@ public class StatusBarPolicy {
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
-        filter.addAction(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION);
-        filter.addAction(GpsLocationProvider.GPS_FIX_CHANGE_ACTION);
+        filter.addAction(LocationManager.GPS_ENABLED_CHANGE_ACTION);
+        filter.addAction(LocationManager.GPS_FIX_CHANGE_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
@@ -1286,13 +1286,13 @@ public class StatusBarPolicy {
 
     private final void updateGps(Intent intent) {
         final String action = intent.getAction();
-        final boolean enabled = intent.getBooleanExtra(GpsLocationProvider.EXTRA_ENABLED, false);
+        final boolean enabled = intent.getBooleanExtra(LocationManager.EXTRA_GPS_ENABLED, false);
 
-        if (action.equals(GpsLocationProvider.GPS_FIX_CHANGE_ACTION) && enabled) {
+        if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && enabled) {
             // GPS is getting fixes
             mService.updateIcon(mGpsIcon, mGpsFixIconData, null);
             mService.setIconVisibility(mGpsIcon, true);
-        } else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
+        } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
             // GPS is off
             mService.setIconVisibility(mGpsIcon, false);
         } else {

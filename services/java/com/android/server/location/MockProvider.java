@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package com.android.server.location;
 
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationProvider;
-import android.location.LocationProviderInterface;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;

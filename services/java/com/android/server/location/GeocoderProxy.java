@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package com.android.server.location;
 
 import android.content.ComponentName;
 import android.content.Context;

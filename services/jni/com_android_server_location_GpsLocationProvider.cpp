@@ -523,9 +523,9 @@ static JNINativeMethod sMethods[] = {
     {"native_get_internal_state", "()Ljava/lang/String;", (void*)android_location_GpsLocationProvider_get_internal_state},
 };
 
-int register_android_location_GpsLocationProvider(JNIEnv* env)
+int register_android_server_location_GpsLocationProvider(JNIEnv* env)
 {
-    return jniRegisterNativeMethods(env, "com/android/internal/location/GpsLocationProvider", sMethods, NELEM(sMethods));
+    return jniRegisterNativeMethods(env, "com/android/server/location/GpsLocationProvider", sMethods, NELEM(sMethods));
 }
 
 } /* namespace android */
