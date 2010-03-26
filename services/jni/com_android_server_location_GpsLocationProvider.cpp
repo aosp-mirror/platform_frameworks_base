@@ -41,6 +41,7 @@ static jmethodID method_reportNiNotification;
 static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
 static const AGpsInterface* sAGpsInterface = NULL;
+static const GpsPrivacyInterface* sGpsPrivacyInterface = NULL;
 static const GpsNiInterface* sGpsNiInterface = NULL;
 static const GpsDebugInterface* sGpsDebugInterface = NULL;
 
@@ -223,9 +224,15 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
         sAGpsInterface->init(&sAGpsCallbacks);
 
     if (!sGpsNiInterface)
-       sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
+        sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
     if (sGpsNiInterface)
-       sGpsNiInterface->init(&sGpsNiCallbacks);
+        sGpsNiInterface->init(&sGpsNiCallbacks);
+
+    // Clear privacy lock while enabled
+    if (!sGpsPrivacyInterface)
+        sGpsPrivacyInterface = (const GpsPrivacyInterface*)sGpsInterface->get_extension(GPS_PRIVACY_INTERFACE);
+    if (sGpsPrivacyInterface)
+        sGpsPrivacyInterface->set_privacy_lock(0);
 
     if (!sGpsDebugInterface)
        sGpsDebugInterface = (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
@@ -235,6 +242,12 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
 
 static void android_location_GpsLocationProvider_disable(JNIEnv* env, jobject obj)
 {
+    // Enable privacy lock while disabled
+    if (!sGpsPrivacyInterface)
+        sGpsPrivacyInterface = (const GpsPrivacyInterface*)sGpsInterface->get_extension(GPS_PRIVACY_INTERFACE);
+    if (sGpsPrivacyInterface)
+        sGpsPrivacyInterface->set_privacy_lock(1);
+
     pthread_mutex_lock(&sEventMutex);
     sPendingCallbacks |= kDisableRequest;
     pthread_cond_signal(&sEventCond);
@@ -476,12 +489,10 @@ static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jo
 static void android_location_GpsLocationProvider_send_ni_response(JNIEnv* env, jobject obj,
       jint notifId, jint response)
 {
-    if (!sGpsNiInterface) {
+    if (!sGpsNiInterface)
         sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
-    }
-    if (sGpsNiInterface) {
+    if (sGpsNiInterface)
         sGpsNiInterface->respond(notifId, response);
-    }
 }
 
 static jstring android_location_GpsLocationProvider_get_internal_state(JNIEnv* env, jobject obj)
