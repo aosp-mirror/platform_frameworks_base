@@ -126,6 +126,77 @@ public class Element extends BaseObj {
         return rs.mElement_USER_F32;
     }
 
+    public static Element USER_ELEMENT(RenderScript rs) {
+        if(rs.mElement_USER_ELEMENT == null) {
+            rs.mElement_USER_ELEMENT = createUser(rs, DataType.RS_ELEMENT);
+        }
+        return rs.mElement_USER_ELEMENT;
+    }
+
+    public static Element USER_TYPE(RenderScript rs) {
+        if(rs.mElement_USER_TYPE == null) {
+            rs.mElement_USER_TYPE = createUser(rs, DataType.RS_TYPE);
+        }
+        return rs.mElement_USER_TYPE;
+    }
+
+    public static Element USER_ALLOCATION(RenderScript rs) {
+        if(rs.mElement_USER_ALLOCATION == null) {
+            rs.mElement_USER_ALLOCATION = createUser(rs, DataType.RS_ALLOCATION);
+        }
+        return rs.mElement_USER_ALLOCATION;
+    }
+
+    public static Element USER_SAMPLER(RenderScript rs) {
+        if(rs.mElement_USER_SAMPLER == null) {
+            rs.mElement_USER_SAMPLER = createUser(rs, DataType.RS_SAMPLER);
+        }
+        return rs.mElement_USER_SAMPLER;
+    }
+
+    public static Element USER_SCRIPT(RenderScript rs) {
+        if(rs.mElement_USER_SCRIPT == null) {
+            rs.mElement_USER_SCRIPT = createUser(rs, DataType.RS_SCRIPT);
+        }
+        return rs.mElement_USER_SCRIPT;
+    }
+
+    public static Element USER_MESH(RenderScript rs) {
+        if(rs.mElement_USER_MESH == null) {
+            rs.mElement_USER_MESH = createUser(rs, DataType.RS_MESH);
+        }
+        return rs.mElement_USER_MESH;
+    }
+
+    public static Element USER_PROGRAM_FRAGMENT(RenderScript rs) {
+        if(rs.mElement_USER_PROGRAM_FRAGMENT == null) {
+            rs.mElement_USER_PROGRAM_FRAGMENT = createUser(rs, DataType.RS_PROGRAM_FRAGMENT);
+        }
+        return rs.mElement_USER_PROGRAM_FRAGMENT;
+    }
+
+    public static Element USER_PROGRAM_VERTEX(RenderScript rs) {
+        if(rs.mElement_USER_PROGRAM_VERTEX == null) {
+            rs.mElement_USER_PROGRAM_VERTEX = createUser(rs, DataType.RS_PROGRAM_VERTEX);
+        }
+        return rs.mElement_USER_PROGRAM_VERTEX;
+    }
+
+    public static Element USER_PROGRAM_RASTER(RenderScript rs) {
+        if(rs.mElement_USER_PROGRAM_RASTER == null) {
+            rs.mElement_USER_PROGRAM_RASTER = createUser(rs, DataType.RS_PROGRAM_RASTER);
+        }
+        return rs.mElement_USER_PROGRAM_RASTER;
+    }
+
+    public static Element USER_PROGRAM_STORE(RenderScript rs) {
+        if(rs.mElement_USER_PROGRAM_STORE == null) {
+            rs.mElement_USER_PROGRAM_STORE = createUser(rs, DataType.RS_PROGRAM_STORE);
+        }
+        return rs.mElement_USER_PROGRAM_STORE;
+    }
+
+
     public static Element A_8(RenderScript rs) {
         if(rs.mElement_A_8 == null) {
             rs.mElement_A_8 = createPixel(rs, DataType.UNSIGNED_8, DataKind.PIXEL_A);

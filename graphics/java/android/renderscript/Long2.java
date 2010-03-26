@@ -24,12 +24,12 @@ import android.util.Log;
  * @hide
  *
  **/
-public class Vector2f {
-    public Vector2f() {
+public class Long2 {
+    public Long2() {
     }
 
-    public float x;
-    public float y;
+    public long x;
+    public long y;
 }
 
 

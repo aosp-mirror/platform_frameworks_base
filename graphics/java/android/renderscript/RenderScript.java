@@ -203,6 +203,17 @@ public class RenderScript {
     Element mElement_USER_I32;
     Element mElement_USER_F32;
 
+    Element mElement_USER_ELEMENT;
+    Element mElement_USER_TYPE;
+    Element mElement_USER_ALLOCATION;
+    Element mElement_USER_SAMPLER;
+    Element mElement_USER_SCRIPT;
+    Element mElement_USER_MESH;
+    Element mElement_USER_PROGRAM_FRAGMENT;
+    Element mElement_USER_PROGRAM_VERTEX;
+    Element mElement_USER_PROGRAM_RASTER;
+    Element mElement_USER_PROGRAM_STORE;
+
     Element mElement_A_8;
     Element mElement_RGB_565;
     Element mElement_RGB_888;
