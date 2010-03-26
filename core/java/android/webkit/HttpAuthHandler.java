@@ -269,7 +269,7 @@ public class HttpAuthHandler extends Handler {
     }
 
     /**
-     * Informs the proxy of a new set of credentials.
+     * Informs the WebView of a new set of credentials.
      * @hide Pending API council review
      */
     public static void onReceivedCredentials(LoadListener loader,
