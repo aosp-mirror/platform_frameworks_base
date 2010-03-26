@@ -29,6 +29,8 @@ import android.text.SpannedString;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.text.util.Rfc822Token;
+import android.text.util.Rfc822Tokenizer;
 import android.text.util.Rfc822Validator;
 import android.test.MoreAsserts;
 
@@ -267,6 +269,24 @@ public class TextUtilsTest extends TestCase {
         for (Map.Entry<String, String> e : fixes.entrySet()) {
             assertEquals(e.getValue(), validator.fixText(e.getKey()).toString());
         }
+    }
+
+    @SmallTest
+    public void testRfc822TokenizerFullAddress() {
+        Rfc822Token[] tokens = Rfc822Tokenizer.tokenize("Foo Bar (something) <foo@google.com>");
+        assertNotNull(tokens);
+        assertEquals(1, tokens.length);
+        assertEquals("foo@google.com", tokens[0].getAddress());
+        assertEquals("Foo Bar", tokens[0].getName());
+        assertEquals("something",tokens[0].getComment());
+    }
+
+    @SmallTest
+    public void testRfc822TokenizeItemWithError() {
+        Rfc822Token[] tokens = Rfc822Tokenizer.tokenize("\"Foo Bar\\");
+        assertNotNull(tokens);
+        assertEquals(1, tokens.length);
+        assertEquals("Foo Bar", tokens[0].getAddress());
     }
 
     @LargeTest
