@@ -249,16 +249,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_RESTORE_ANY_VERSION = 1<<17;
 
     /**
-     * Value for {@link #flags}: this is true if the application has set
-     * its android:neverEncrypt to true, false otherwise. It is used to specify
-     * that this package specifically "opts-out" of a secured file system solution,
-     * and will always store its data in-the-clear.
-     *
-     * {@hide}
-     */
-    public static final int FLAG_NEVER_ENCRYPT = 1<<18;
-
-    /**
      * Value for {@link #flags}: Set to true if the application has been
      * installed using the forward lock option.
      *

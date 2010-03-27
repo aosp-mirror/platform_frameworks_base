@@ -1483,13 +1483,7 @@ public class AccountManagerService
     }
 
     private static String getDatabaseName() {
-        if(Environment.isEncryptedFilesystemEnabled()) {
-            // Hard-coded path in case of encrypted file system
-            return Environment.getSystemSecureDirectory().getPath() + File.separator + DATABASE_NAME;
-        } else {
-            // Regular path in case of non-encrypted file system
-            return DATABASE_NAME;
-        }
+        return DATABASE_NAME;
     }
 
     private class DatabaseHelper extends SQLiteOpenHelper {
