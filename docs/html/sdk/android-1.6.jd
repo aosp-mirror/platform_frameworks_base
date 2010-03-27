@@ -1,4 +1,4 @@
-page.title=Android 1.6, Release 2
+page.title=Android 1.6 Platform
 sdk.platform.version=1.6
 sdk.platform.apiLevel=4
 sdk.platform.majorMinor=minor
@@ -13,7 +13,7 @@ sdk.platform.deployableDate=October 2009
   <h2>In this document</h2>
   <ol>
 	<li><a href="#features">Platform Highlights</a></li>
-	<li><a href="#releases">Release Notes</a></li>
+	<li><a href="#relnotes">Revisions</a></li>
 	<li><a href="#apps">Built-in Applications</a></li>
 	<li><a href="#locs">Locales</a></li>
 	<li><a href="#skins">Emulator Skins</a></li>
@@ -34,7 +34,6 @@ sdk.platform.deployableDate=October 2009
 </div>
 
 <p>
-<em>Date:</em> {@sdkPlatformReleaseDate}<br />
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
 <p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
@@ -63,44 +62,106 @@ href="http://developer.android.com/sdk/android-{@sdkPlatformVersion}-highlights.
 {@sdkPlatformVersion} Platform Highlights</a> document.</p>
 
 
-<h2 id="relnotes">Release Notes</h2>
+<h2 id="relnotes">Revisions</h2>
 
-<p>The sections below provide information about the available releases of the 
-Android 1.6 platform.</p>
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 
-<h3>Android 1.6, Release 2</h3>
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
 
-<p>December 2009. Requires SDK Tools r4 or higher.</p>
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android 1.6, Revision 2</a> <em>(December 2009)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r4 or higher.</p>
+</dd>
 
-<p>API related:</p>
-<ul>
-<li>Properly exposes CDMA-related constants in {@link android.telephony.TelephonyManager android.telephony.TelephonyManager}: <code>DATA_ACTIVITY_DORMANT</code>,
+<dt>API related:</dt> 
+<dd>
+<ul> 
+<li>Properly exposes CDMA-related constants in <code><a href="{@docRoot}reference/android/telephony/TelephonyManager.html">android.telephony.TelephonyManager</a></code>: <code>DATA_ACTIVITY_DORMANT</code>,
 <code>PHONE_TYPE_CDMA</code>, <code>NETWORK_TYPE_CDMA</code>,
 <code>NETWORK_TYPE_EVDO_0</code>, <code>NETWORK_TYPE_EVDO_A</code>, and
-<code>NETWORK_TYPE_1xRTT</code>.</li>
-</ul>
-<p>System image:</p>
-<ul>
-<li>Fixes bug so that Bitmap's density is now propagated through Parcelable.</li>
-<li>Fixes NinePatchDrawable to properly scale its reported padding for compatibility mode.</li>
-<li>Fixes TextView to properly compute styled font metrics based on the screen density.</li>
+<code>NETWORK_TYPE_1xRTT</code>.</li> 
+</ul> 
+</dd>
+<dt>System image:</dt> 
+<dd>
+<ul> 
+<li>Fixes bug so that Bitmap's density is now propagated through Parcelable.</li> 
+<li>Fixes NinePatchDrawable to properly scale its reported padding for compatibility mode.</li> 
+<li>Fixes TextView to properly compute styled font metrics based on the screen density.</li> 
 <li>Updates kernel to 2.6.29, to match kernel on commercially
-available Android-powered devices.</li>
-</ul>
-<p>Tools:</p>
-<ul>
+available Android-powered devices.</li> 
+</ul> 
+</dd>
+<dt>Tools:</dt> 
+<dd>
+<ul> 
 <li>Adds new Ant build system with support for Emma instrumentation projects
-(code coverage).</li>
-<li>Fixes emulator skins to properly emulate d-pad in landscape mode.</li>
-<li>Fixes density rendering in the layout editor in ADT.</li>
-</ul>
+(code coverage).</li> 
+<li>Fixes emulator skins to properly emulate d-pad in landscape mode.</li> 
+<li>Fixes density rendering in the layout editor in ADT.</li> 
+</ul> 
+</dd>
+</dl>
+ </div>
+</div>
 
-
-
-<h3>Android 1.6, Release 1</h3>
-
-<p>September 2009. Initial release. Requires SDK Tools r3 or higher.</p>
-
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        Android 1.6, Revision 1</a> <em>(September 2009)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies</dt>
+<dd>
+<p>Requires SDK Tools r3 or higher.</p>
+</dd>
+</dl>
+ </div>
+</div>
 
 <h2 id="apps">Built-in Applications</h2>
 
@@ -188,7 +249,9 @@ through Settings.</p>
 
 <h2 id="skins">Emulator Skins</h2>
 
-<p>The downloadable platform includes a set of emulator skins that you can use for modeling your application in different screen sizes and resolutions. The emulator skins are: </p>
+<p>The downloadable platform includes a set of emulator skins that you can 
+use for modeling your application in different screen sizes and resolutions. 
+The emulator skins are: </p>
 
 <ul>
   <li>

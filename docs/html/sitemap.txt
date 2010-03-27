@@ -74,7 +74,6 @@ http://developer.android.com/sdk/android-1.1.html
 http://developer.android.com/sdk/tools-notes.html
 http://developer.android.com/sdk/win-usb.html
 http://developer.android.com/sdk/eclipse-adt.html
-http://developer.android.com/sdk/adt-notes.html
 http://developer.android.com/sdk/ndk/1.6_r1/index.html
 http://developer.android.com/sdk/requirements.html
 http://developer.android.com/sdk/RELEASENOTES.html

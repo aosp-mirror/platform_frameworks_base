@@ -5,7 +5,7 @@ page.title=USB Driver for Windows
 <div id="qv">
   <h2>In this document</h2>
   <ol>
-    <li><a href="#RevisionNotes">Revision Notes</a></li>
+    <li><a href="#notes">Revisions</a></li>
     <li><a href="#WinUsbDriver">Installing the USB Driver for Windows</a></li>
   </ol>
   <h2>See also</h2>
@@ -34,18 +34,86 @@ USB driver. Refer to <a
 href="{@docRoot}guide/developing/device.html#setting-up">Setting up a
 Device</a> to start development with a device.</p>
 
-<h2 id="RevisionNotes">Revision Notes</h2>
+<h2 id="notes">Revisions</h2>
 
-<h4>Revision 3</h4>
-<p>Adds support for the Nexus One. Released January 2010.</p>
+<p>The sections below provide notes about successive revisions of the USB Driver
+for Windows, as denoted by revision number. To determine what revision of the
+USB Driver for Windows you are using, refer to the "Installed Packages" listing
+in the Android SDK and AVD Manager.</p>
 
-<h4>Revision 2</h4>
-<p>Adds support for the Verizon Droid (or similar hardware on
-other carriers). Released November 2009.</p>
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
 
-<h4>Revision 1</h4>
-<p>This was the initial release of the WinUsb-based driver, with support
-for the T-Mobile G1 and myTouch 3G (and similar devices).</p>
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+USB Driver for Windows, Revision 3</a> <em>(January 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Adds support for the Nexus One.</p></dt>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+USB Driver for Windows, Revision 2</a> <em>(November 2009)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Adds support for the Verizon Droid (or similar hardware on
+other carriers).</p></dt>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+USB Driver for Windows, Revision 1</a> <em>(October 2009)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Initial release of the WinUsb-based driver, with support
+for the T-Mobile G1 and myTouch 3G (and similar devices).</p></dt>
+</dl>
+ </div>
+</div>
 
 <h2 id="WinUsbDriver">Installing the USB Driver for Windows</h2>
 
@@ -66,21 +134,37 @@ the hardware manufacturer.</p>
 </div>
 </div>
 
-<p>Before you perform the installation below, you must have the USB
-driver saved to your development computer. To get the USB driver, use
-the AVD and SDK Manager included with the SDK Tools to download the USB driver
-as an SDK component. For more information, read <a
-href="adding-components.html">Adding SDK Components</a>.</p>
 
-<p>Once you have the USB driver saved to your computer, select the
-appropriate procedure below, based on your operating system and whether you're
-installing for the first time or upgrading.</p>
+<p>The sections below provide instructions on how to download the USB Driver
+for Windows and install it on your development computer. </p>
 
-<p>If you are connecting an Android-powered
-device to your computer for the first time, follow the below procedure to
-"Perform a fresh installation." If you have installed one of the older
-USB drivers and would like to upgrade to the latest version, follow the
-procedure to "Upgrade an existing driver."</p>
+<h3>Downloading the USB Driver for Windows</h3>
+
+<p>The USB Driver for Windows is available for download as an optional SDK
+component. You need the driver only if you are developing on Windows and 
+want to connect an Android-powered device to your development environment
+over USB. </p>
+
+<p>To install the driver or upgrade your existing driver to the latest
+revision, you must first download the driver to your development computer. </p>
+
+<p>To download the driver, use the Android SDK and AVD Manager tool that is
+included with the Android SDK. If you haven't yet installed the Android SDK, as
+described in <a href="installing.html">Installing the Android SDK</a>, please do
+so before continuing with the driver installation. </p>
+
+<p>When you are ready to download the driver, follow the instructions given in
+<a href="adding-components.html">Adding SDK Components</a> to launch the Android
+SDK and AVD Manager. From the <strong>Available Packages</strong> panel, select
+"Usb Driver Package" and download it to your computer. The driver files are
+downloaded into the <code>&lt;sdk&gt;\usb_driver</code> directory.</p>
+
+<p>After the download, follow the instructions below to install or upgrade the
+driver, based on your needs and Windows operating system version. If you are
+connecting an Android-powered device to your computer for the first time, follow
+the below procedure to "Perform a fresh installation." If you have installed one
+of the older USB drivers and would like to upgrade to the latest version, follow
+the procedure to "Upgrade an existing driver."</p>
 
 <p>Once you've completed the USB driver installation,
 please see <a
