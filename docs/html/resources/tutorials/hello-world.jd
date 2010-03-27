@@ -1,10 +1,10 @@
 page.title=Hello, World
 @jd:body
-
 <div id="qv-wrapper">
-  <div id="qv">
+<div id="qv">
     <h2>In this document</h2>
     <ol>
+      <li><a href="#platform">Install a Platform</a></li>
       <li><a href="#avd">Create an AVD</a></li>
       <li><a href="#create">Create the Project</a></li>
       <li><a href="#ui">Construct the UI</a></li>
@@ -23,14 +23,35 @@ It's particularly easy if you're using Eclipse as your IDE, because we've provid
 great plugin that handles your project creation and management to greatly speed-up your
 development cycles.</p>
 
-<p>If you're not using Eclipse, that's okay. Familiarize yourself with 
+<p>This tutorial assumes that you're using Eclipse. If you're not, see 
 <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.
 You can then return to this tutorial and ignore anything about Eclipse.</p>
 
-<p>Before you start, you should already have the very latest SDK installed, and if you're using
-Eclipse, you should have installed the ADT plugin as well. If you have not installed these, see 
-<a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a> and return
-here when you've completed the installation.</p>
+<p>Before you start, you should already have the SDK installed, and if you're
+using Eclipse, you should have installed the ADT plugin as well. If you have not
+installed these, see <a href="{@docRoot}sdk/installing.html">Installing the
+Android SDK</a> and return here when you've completed the installation.</p>
+
+<h2 id="platform">Install a Platform</h2>
+
+<p>To run the Hello World application, you need to install at least one Android
+platform in your SDK environment. If you have not already performed this step,
+you need to do it now.</p>
+
+<p>To install a platform in Eclipse:</p>
+
+<ol>
+  
+  <li>In the Android SDK and AVD Manager, choose <strong>Available
+Packages</strong> in the left panel.</li> 
+ 
+<li>Click the repository site checkbox to display the components
+available for installation.</li>
+
+  <li>Select at least one platform to install, and click <strong>Install
+Selected</strong>. If you aren't sure which platform to install, use the latest
+version.</li>
+</ol>
 
 <h2 id="avd">Create an AVD</h2>
 
@@ -48,24 +69,25 @@ Before you can launch the emulator, you must create an
 Android Virtual Device (AVD). An AVD defines the system image and
 device settings used by the emulator.</p>
 
-<p>To create an AVD, use the "android" tool provided in the Android SDK.
-Open a command prompt or terminal, navigate to the 
-<code>tools/</code> directory in the SDK package and execute:
-<pre>
-android create avd --target 2 --name my_avd
-</pre>
-
-<p>The tool now asks if you would like to create a custom hardware profile.
-For the time being, press Return to skip it ("no" is the default response). 
-That's it. This configures an AVD named "my_avd" that uses the Android 1.5
-platform. The AVD is now ready for use in the emulator.</p>
-
-<p>In the above command, the <code>--target</code> option is required 
-and specifies the deployment target to run on the emulator.
-The <code>--name</code> option is also required and defines the 
-name for the new AVD.</p>
 
 
+<p>To create an AVD:</p>
+<ol>
+  <li>In Eclipse, choose <strong>Window &gt; Android SDK and AVD Manager</strong>. 
+  <li>Select <strong>Virtual Devices</strong> in the left panel.</li>
+
+  <li>Click <strong>New</strong>. </li>
+ 
+
+<p>The <strong>Create New AVD</strong> dialog appears.</p>
+
+  <li>Type the name of the AVD, such as "my_avd".</li>
+  <li>Choose a target. The target is the platform (that is, the version of the Android
+    SDK, such as 2.1) you want to run on the emulator. </li>
+  
+  <p>You can ignore the rest of the fields for now. </p>
+  <li>Click <strong>Create AVD</strong>.</li>
+</ol>
 <h2 id="create">Create a New Android Project</h2>
 
 <p>After you've created an AVD, the next step is to start a new
@@ -90,7 +112,6 @@ Android project in Eclipse.</p>
           <li><em>Application name:</em> Hello, Android</li>
           <li><em>Package name:</em> com.example.helloandroid (or your own private namespace)</li>
           <li><em>Create Activity:</em> HelloAndroid</li>
-          <li><em>Min SDK Version:</em> 2</li>
         </ul>
         <p>Click <strong>Finish</strong>.</p>
 
@@ -111,7 +132,7 @@ Android project in Eclipse.</p>
                   reside under. This also sets the package name under which the stub
                   Activity will be generated.
                   <p>Your package name must be unique across
-                  all packages installed on the Android system; for this reason, it's very
+                  all packages installed on the Android system; for this reason, it's 
                   important to use a standard domain-style package for your
                   applications.  The example above uses the "com.example" namespace, which is
                   a namespace reserved for example documentation &mdash;
@@ -124,15 +145,9 @@ Android project in Eclipse.</p>
                 chooses, but it doesn't need to. As the checkbox suggests, this is optional, but an
                 Activity is almost always used as the basis for an application.</dd>
             <dt><em>Min SDK Version</em></dt>
-                <dd>This value specifies the minimum API Level required by your application. If the API Level
-                entered here matches the API Level provided by one of the available targets, 
-                then that Build Target will be automatically selected (in this case, entering 
-                "2" as the API Level will select the Android 1.1 target). With each new
-                version of the Android system image and Android SDK, there have likely been 
-                additions or changes made to the APIs. When this occurs, a new API Level is assigned
-                to the system image to regulate which applications are allowed to be run. If an
-                application requires an API Level that is <em>higher</em> than the level supported 
-                by the device, then the application will not be installed.</dd>
+                <dd>This value specifies the minimum API Level required by your application. For
+                more information, see <a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a>.
+               </dd>
         </dl>
       
         <p><em>Other fields</em>: The checkbox for "Use default location" allows you to change 
@@ -172,7 +187,7 @@ public class HelloAndroid extends Activity {
 <p>Notice that the class is based on the {@link android.app.Activity} class. An Activity is a 
 single application entity that is used to perform actions. An application may have many separate 
 activities, but the user interacts with them one at a time. The 
-{@link android.app.Activity#onCreate(Bundle) onCreate()} method 
+{@link android.app.Activity#onCreate(Bundle) onCreate()} method  
 will be called by the Android system when your Activity starts &mdash;
 it is where you should perform all initialization and UI setup. An activity is not required to
 have a user interface, but usually will.</p>
@@ -221,7 +236,7 @@ HelloAndroid class is a subclass of Activity, it is also a Context. So, you can
 pass <code>this</code> as your Context reference to the TextView.</p>
 
 <p>Next, you define the text content with 
-{@link android.widget.TextView setText(CharSequence) setText()}.</p>
+{@link android.widget.TextView#setText(CharSequence) setText()}.</p>
 
 <p>Finally, you pass the TextView to
 {@link android.app.Activity#setContentView(View) setContentView()} in order to
@@ -235,7 +250,7 @@ to see it running.</p>
 
 <h2 id="run">Run the Application</h2>
 
-<p>The Eclipse plugin makes it very easy to run your applications:</p>
+<p>The Eclipse plugin makes it easy to run your applications:</p>
 
 <ol>
   <li>Select <strong>Run > Run</strong>.</li>
@@ -271,7 +286,7 @@ valuable information about developing Android applications.</p>
 UI layout. This means that you constructed and built your application's UI
 directly in source code. If you've done much UI programming, you're
 probably familiar with how brittle that approach can sometimes be: small
-changes in layout can result in big source-code headaches. It's also very
+changes in layout can result in big source-code headaches. It's also
 easy to forget to properly connect Views together, which can result in errors in
 your layout and wasted time debugging your code.</p>
 
@@ -291,7 +306,7 @@ of XML elements, wherein each node is the name of a View class
 (this example, however, is just one View element). You can use the
 name of any class that extends {@link android.view.View} as an element in your XML layouts,
 including custom View classes you define in your own code. This
-structure makes it very easy to quickly build up UIs, using a more simple
+structure makes it easy to quickly build up UIs, using a more simple
 structure and syntax than you would use in a programmatic layout. This model is inspired
 by the web development model, wherein you can separate the presentation of your
 application (its UI) from the application logic used to fetch and fill in data.</p>
