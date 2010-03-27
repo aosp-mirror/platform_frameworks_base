@@ -1128,11 +1128,13 @@ public class GridView extends AbsListView {
             default:
                 if (childCount == 0) {
                     if (!mStackFromBottom) {
-                        setSelectedPositionInt(0);
+                        setSelectedPositionInt(mAdapter == null || isInTouchMode() ?
+                                INVALID_POSITION : 0);
                         sel = fillFromTop(childrenTop);
                     } else {
                         final int last = mItemCount - 1;
-                        setSelectedPositionInt(last);
+                        setSelectedPositionInt(mAdapter == null || isInTouchMode() ?
+                                INVALID_POSITION : last);
                         sel = fillFromBottom(last, childrenBottom);
                     }
                 } else {
