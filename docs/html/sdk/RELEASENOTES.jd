@@ -39,8 +39,8 @@ now available from the "SDK" tab, under "Downloadable SDK Components."</p>
 <li>Notes for the Android 2.0.1 platform are in the <a
 href="{@docRoot}sdk/android-2.0.1.html">Android 2.0.1, Release 1</a> document. </li>
 <li>You can find information about tools changes in the <a
-href="{@docRoot}sdk/tools-notes.html">SDK Tools Notes</a> and <a
-href="{@docRoot}sdk/adt-notes.html">ADT Plugin Notes</a>.</li>
+href="{@docRoot}sdk/tools-notes.html#notes">SDK Tools</a> and <a
+href="{@docRoot}sdk/eclipse-adt.html#notes">ADT Plugin for Eclipse</a>.</li>
 </ul>
 
 <p>To get started with the SDK, review the Quick Start summary on the <a
@@ -109,7 +109,7 @@ Plugin (0.9.3 or higher). </p>
 <p>The new version of ADT is downloadable from the usual remote update site or
 is separately downloadable as a .zip archive. For instructions on how to
 download the plugin, please see <a
-href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>. </p>
+href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a>. </p>
 
 <h3>Android SDK and AVD Manager</h3>
 
@@ -545,7 +545,7 @@ testing.</p>
 Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a
 previous version of ADT, you should update to the latest version for use
 with this SDK. For information about how to update your ADT plugin, see
-<a href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
+<a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
@@ -651,7 +651,7 @@ added.</p>
 Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are
 using a previous version of ADT, you should update to the latest version for use
 with this SDK. For information about how to update your ADT plugin, see <a
-href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
+href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a>.</p>
 
 <h3>Other Notes</h3>
 

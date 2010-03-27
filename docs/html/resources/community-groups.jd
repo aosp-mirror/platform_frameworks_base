@@ -2,21 +2,27 @@ community=true
 page.title=Developer Forums
 @jd:body
 
-<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in discussions with other Android application developers on topics that interest you.</p>
+<div id="qv-wrapper">
+<div id="qv">
 
-<p>The lists on this page are primarily for discussion about Android application development. If you are seeking discussion about Android source code (not application development), then please refer to the <a href="http://source.android.com/discuss">Open Source Project Mailing lists</a>.</p>
-
-<p style="margin-bottom:.5em"><strong>Contents</strong></p>
-<ol class="toc">
-  <li><a href="#StackOverflow">Stack Overflow</a> <span class="new">new!</span></li>
-  <li><a href="#MailingLists">Mailing lists</a><ol>
+  <h2>In this document</h2>
+  <ol>
+  <li><a href="#StackOverflow">Android on Stack Overflow</a></li>
+  <li><a href="#MailingLists">Mailing lists</a>
+  <ol>
     <li><a href="#BeforeYouPost">Before you post</a></li>
     <li><a href="#UsingEmail">Using email with the mailing lists</a></li>
     <li><a href="#ApplicationDeveloperLists">Application developer mailing lists</a></li>
   </ol></li>
   <li><a href="#MarketHelp">Android Market Help Forum</a></li>
-</ol>
+  </ol>
 
+</div>
+</div>
+
+<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in discussions with other Android application developers on topics that interest you.</p>
+
+<p>The lists on this page are primarily for discussion about Android application development. If you are seeking discussion about Android source code (not application development), then please refer to the <a href="http://source.android.com/discuss">Open Source Project Mailing lists</a>.</p>
 
 <h2 id="StackOverflow">Stack Overflow</h2>
 

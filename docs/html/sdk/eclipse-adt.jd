@@ -1,4 +1,4 @@
-page.title=Installing and Updating ADT
+page.title=ADT Plugin for Eclipse
 sdk.preview=0
 
 @jd:body
@@ -8,9 +8,12 @@ sdk.preview=0
 
   <h2>In this document</h2>
   <ol>
-    <li><a href="#preparing">Prepare for Installation</a></li>
+    <li><a href="#notes">Revisions</a></li>
     <li><a href="#installing">Installing the ADT Plugin</a>
       <ol>
+        <li><a href="#preparing">Preparing for Installation</a></li>
+        <li><a href="#downloading">Downloading the ADT Plugin</a>
+        <li><a href="#configuring">Configuring the ADT Plugin</a></li>
         <li><a href="#troubleshooting">Troubleshooting</a></li>
       </ol>
     </li>
@@ -21,50 +24,266 @@ sdk.preview=0
 </div>
 </div>
 
-<p>Android offers a custom plugin for the Eclipse IDE, called Android
-Development Tools (ADT), that is designed to give you a powerful,
-integrated environment in which to build Android applications. </p>
+<p>Android Development Tools (ADT) is a plugin for the Eclipse IDE 
+that is designed to give you a powerful, integrated environment in which
+to build Android applications. </p>
 
 <p>ADT extends the capabilities of Eclipse to let you quickly set up new Android
 projects, create an application UI, add components based on the Android
 Framework API, debug your applications using the Android SDK tools, and even
 export signed (or unsigned) APKs in order to distribute your application.</p>
 
-<p>In general, using Eclipse with ADT is a highly recommended approach to
-Android development and is the fastest way to get started. If you use Eclipse,
-the ADT plugin gives you an incredible boost in developing Android
-applications.</p>
+<p>Developing in Eclipse with ADT is highly recommended and is the fastest way
+to get started. With the guided project setup it provides, as well as tools
+integration, custom XML editors, and debug ouput pane, ADT gives you an
+incredible boost in developing Android applications. </p>
 
-<p>To install and update the ADT Plugin, you can take advantage of the Eclipse
-remote update feature. By setting up a remote update site, you can easily
-download, install, and check for ADT updates. Alternatively, you can download
-the latest ADT to your development computer as a local site archive. The
-sections below provide instructions for both methods.</p>
+<p>This document provides step-by-step instructions on how to download the ADT
+plugin and install it into your Eclipse development environment. Note that
+before you can install or use ADT, you must have compatible versions of both the
+Eclipse IDE and the Android SDK installed. For details, make sure to read <a
+href="#installing">Installing the ADT Plugin</a>, below. </p>
 
+<p>If you are already using ADT, this document also provides instructions on 
+how to update ADT to the latest version or how to uninstall it, if necessary.
+</p>
 
-<h2 id="preparing">Prepare for Installation</h2>
+<h2 id="notes">Revisions</h2>
 
-<p>Before you begin, take a moment to confirm that your development machine
-meets the <a href="requirements.html">System Requirements</a>.</p>
+<p>The sections below provide notes about successive releases of
+the ADT Plugin, as denoted by revision number. </p>
 
-<p>If you will be developing in Eclipse with the Android Development
-Tools (ADT) Plugin &mdash; the recommended path if you are new to
-Android &mdash; make sure that you have a suitable version of Eclipse
-installed on your computer (3.4 or newer is recommended). If you need 
-to install Eclipse, you can download it from this location: </p>
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.6</a> <em>(March 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt>Dependencies:</dt>
+
+<dd><p>ADT 0.9.6 is designed for use with SDK Tools r5 and later. Before 
+updating to ADT 0.9.6, we highly recommend that you use the Android SDK and
+AVD Manager to install SDK Tools r5 into your SDK.</p></dd>
+
+<dt>General Notes:</dt>
+<dd>
+<ul>
+<li>Editing <code>default.properties</code> outside of Eclipse will now
+automatically update the project.</li>
+<li>Loads the SDK content only when a project requires it. This will make
+Eclipse use less resources when the SDK contains many versions of Android.</li>
+<li>Resolves potential deadlock between modal dialogs, when launching ADT the
+first time with the SDK Usage panel.</li>
+<li>Fixes issues with the New Project Wizard when selecting samples.</li>
+</ul>
+</dd>
+<dt>AVD/SDK Manager:</dt>
+<dd>
+<ul>
+<li>Adds support for platform samples components.</li>
+<li>Improves support for dependency between components.</li>
+<li>AVDs now sorted by API level.</li>
+<li>The AVD creation dialog now enforces a minimum SD card size of 9MB.</li>
+<li>Prevents deletion of running AVDs.</li>
+</ul>
+</dd>
+<dt>DDMS:</dt>
+<dd>
+<ul>
+<li>DDMS plug-in now contains the Allocation Tracker view.</li>
+<li>New action in the Logcat view: "Go to problem" lets you go directly from an
+exception trace output to the code.</li>
+</ul>
+</dd>
+<dt>Editors:</dt>
+<dd>
+<ul>
+<li>Explode mode in the Visual Layout Editor adds a margin to all layout objects
+so that it's easier to see embedded or empty layouts.</li>
+<li>Outline mode in the Visual Layout Editor draws layout outline to make it
+easier to see layout objects.</li>
+<li>Several fixes in the configuration selector of the Visual Layout
+Editor.</li>
+</ul>
+</dd>
+<dt>Application launching:</dt>
+<dd>
+<ul>
+<li>Applications launched from ADT now behave as if they were clicked from the
+Home screen.</li>
+<li>Fixes issue where add-on with no optional library would not show up as valid
+targets for application launches.</li>
+<li>Resolves possible crash when launching applications.</li>
+</ul>
+</dd>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.5</a> <em>(December 2009)</em>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+
+<dd><p>ADT 0.9.5 requires features provided in SDK Tools r4 or higher. If you install
+ADT 0.9.5, which is highly recommended, you should use the Android SDK and AVD
+Manager to download thye latest SDK Tools into your SDK. For more information,
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+</dd>
+
+<dt>General Notes:</dt>
+<dd>
+<ul>
+<li>AVD Launch dialog now shows scale value.</li>
+<li>Fixes potential NPE in SDK Manager on AVD launch, for older AVD with no skin name specified.</li>
+<li>Fixes XML validation issue in on older Java versions.</li>
+<li>.apk packaging now properly ignores vi swap files as well as hidden files.</li>
+</ul>
+</dd>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.4</a> <em>(October 2009)</em>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+
+<dd><p>ADT 0.9.4 requires features provided in SDK Tools r3 or higher. If you install
+ADT 0.9.4, which is highly recommended, you should use the Android SDK and AVD
+Manager to download the latest SDK Tools into your SDK. For more information,
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+</dd>
+
+<dt>Project Creation Wizard:</dt>
+<dd>
+<ul>
+<li>New option to create a project from a sample by choosing it from a list.</li>
+</ul>
+</dd>
+
+<dt>Layout Editor:</dt>
+<dd>
+<ul>
+<li>Improved Configuration selector that lets you see how your layout will
+render on different devices. Default device descriptions include ADP1
+and Google Ion, while SDK add-ons can also provide new descriptions.
+A new UI allows you to create custom descriptions.</li>
+<li>Adds a new clipping toggle, to let you see your full layout even if it's
+bigger than the screen.</li>
+</ul>
+</dd>
+
+<dt>DDMS Integration:</dt>
+<dd>
+<ul>
+<li>Includes the improvements from the standlone DDMS, revision 3.</li>
+<li>Adds an option to open HPROF files into eclipse instead of writing them on
+disk. If a profiler such as MAT (<a href="http://eclipse.org/mat">Memory Analyzer 
+Tool</a>) is installed, it'll open the file.</li>
+</ul>
+</dd>
+
+<dt>Android SDK and AVD Manager integration:</dt>
+<dd>
+<ul>
+<li>Includes the improvements from the standalone Android SDK and AVD Manager, 
+revision 3.</li>
+</ul>
+</dd>
+</dl>
+ </div>
+</div>
+
+<h2 id="installing">Installing the ADT Plugin</h2>
+
+<p>The sections below provide instructions on how to download and install
+ADT into your Eclipse environment. If you encounter problems, see the <a
+href="#troubleshooting">Troubleshooting</a> section.</p>
+
+<h3 id="preparing">Preparing Your Development Computer</h3>
+
+<p>ADT is a plugin for the Eclipse IDE. Before you can install or use ADT,
+you must have a compatible version of Eclipse installed on your development
+computer. </p>
+
+<ul>
+<li>If Eclipse is already installed on your computer, make sure that it is
+a version that is compatible with ADT and the Android SDK. Check the <a
+href="requirements.html">System Requirements</a> document for
+a list of Eclipse versions that are compatible with the Android SDK.</li>
+<li>If you need to install or update Eclipse, you can download it from this
+location:
 
 <p style="margin-left:2em;"><a href=
 "http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>
 </p>
 
-<p>A Java or RCP version of Eclipse is recommended. </p>
+<p>A Java or RCP version of Eclipse is recommended.</p></li>
+</ul>
 
-<h2 id="installing">Installing the ADT Plugin</h2>
+<p>Additionally, before you can configure or use ADT, you must install the
+Android SDK starter package, as described in <a
+href="installing.html#Installing">Downloading the SDK Starter Pacskage</a>.
+Specifically, you need to install a compatible version of the Android SDK Tools
+and at least one development platform. To simplify ADT setup, we recommend
+installing the Android SDK prior to installing ADT. </p>
 
-<p>Once you have the Eclipse IDE installed, as described in <a
-href="#preparing">Preparing for Installation</a>, above, follow these steps to
-download the ADT plugin and install it in your respective Eclipse environment.
-</p>
+<p>When your Eclipse and Android SDK environments are ready, continue with the
+ADT installation as described in the steps below. </p>
+
+<h3 id="downloading">Downloading the ADT Plugin</h3>
+
+<p>Use Update Manager feature of your Eclipse installation to install the latest
+revision of ADT on your development computer.<p>
+
+<p>Assuming that you have a compatible version of the Eclipse IDE installed, as
+described in <a href="#preparing">Preparing for Installation</a>, above, follow
+these steps to download the ADT plugin and install it in your Eclipse
+environment. </p>
 
 <table style="font-size:100%">
 <tr><th>Eclipse 3.4 (Ganymede)</th><th>Eclipse 3.5 (Galileo)</th></tr>
@@ -121,7 +340,11 @@ download the ADT plugin and install it in your respective Eclipse environment.
 </tr>
 </table>
 
-<p>Now modify your Eclipse preferences to point to the Android SDK directory:</p>
+<h3 id="preparing">Configuring the ADT Plugin</h3>
+
+<p>Once you've successfully downnloaded ADT as described above, the next step
+is to modify your ADT preferences in Eclipse to point to the Android SDK directory:</p>
+
 <ol>
     <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
         panel (Mac OS X: <strong>Eclipse</strong> &gt; <strong>Preferences</strong>).</li>
@@ -131,8 +354,10 @@ download the ADT plugin and install it in your respective Eclipse environment.
     <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
 </ol>
 
-<p>Done! If you haven't encountered any problems, then you're ready to
-begin developing Android applications. </p>
+<p>Done! If you haven't encountered any problems, then the installation is
+complete. Now read <a href="installing.html#components">Adding Platforms and
+Other Components</a> for instructions on how to complete the setup of your 
+SDK environment. </p>
 
 
 <h3 id="troubleshooting">Troubleshooting ADT Installation</h3>
@@ -179,7 +404,7 @@ manually install it:</p>
 </li>
 
 </li>
-  <li>Follow steps 1 and 2 in the <a href="#InstallingADT">default install 
+  <li>Follow steps 1 and 2 in the <a href="#installing">default install 
       instructions</a> (above).</li>
   <li>In the Add Site dialog, click <strong>Archive</strong>.</li>
   <li>Browse and select the downloaded zip file.</li>
@@ -187,7 +412,7 @@ manually install it:</p>
       "Android Plugin") in the "Name" field.</li>
   <li>Click <strong>OK</strong>.
   <li>Follow the remaining procedures as listed for 
-      <a href="#InstallingADT">default installation</a> above,
+      <a href="#installing">default installation</a> above,
       starting from step 4.</li>
 </ol>
 
@@ -216,13 +441,27 @@ Java 6 will resolve this issue and you can then reinstall the ADT
 Plugin.</p>
 
 
-<h2 id="updating">Updating Your Eclipse ADT Plugin</h2>
+<h2 id="updating">Updating the ADT Plugin</h2>
 
-<p>From time to time, a new version of the ADT Plugin becomes available. Follow 
-the steps below to check whether an update is available and, if so, to install it. 
-For 
-information about new features in ADT, see the <a
-href="{@docRoot}sdk/adt-notes.html">ADT Plugin Notes</a> document. </p>
+<p>From time to time, a new revision of the ADT Plugin becomes available, with
+new features and bug fixes. Generally, when a new revision of ADT is available,
+you should update to it as soon as convenient. </p>
+
+<p>In some cases, a new revision of ADT will have a dependency on a specific
+revision of the Android SDK Tools. If such dependencies exist, you will need to
+update the SDK Tools component of the SDK after installing the new revision of
+ADT. To update the SDK Tools component, use the Android SDK and AVD Manager, as
+described in <a href="adding-components.html">Adding SDK Components</a>.</p>
+
+<p>To learn about new features of each ADT revision and also any dependencies on
+the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
+section. To determine the version currently installed, open the 
+Eclipse Installed Software window using <strong>Help</strong>
+&gt; <strong>Software Updates</strong> and refer to the version listed for 
+"Android Development Tools".</p>
+
+<p>Follow the steps below to check whether an update is available and, if so, 
+to install it. </p>
 
 <table style="font-size:100%">
 <tr><th>Eclipse 3.4 (Ganymede)</th><th>Eclipse 3.5 (Galileo)</th></tr>

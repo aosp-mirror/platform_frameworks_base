@@ -2,48 +2,56 @@ page.title=System Requirements
 @jd:body
 
 <p>The sections below describe the system and software requirements for developing 
-Android applications using the Android Development Tools, revision 3. </p>
+Android applications using the Android SDK. </p>
 
 <h3>Supported Operating Systems</h3>
 <ul>
   <li>Windows XP (32-bit) or Vista (32- or 64-bit)</li>
-  <li>Mac OS X 10.4.8 or later (x86 only)</li>
+  <li>Mac OS X 10.5.8 or later (x86 only)</li>
   <li>Linux (tested on Linux Ubuntu Hardy Heron)
     <ul>
       <li>64-bit distributions must be capable of running 32-bit applications. 
       For information about how to add support for 32-bit applications, see
-      the <a href="installing.html#troublehooting">Ubuntu Linux
+      the <a href="installing.html#troubleshooting">Ubuntu Linux
 installation notes</a>.</li>
     </ul>
   </li>
 </ul>
 
 <h3>Supported Development Environments</h3>
-<ul>
-  <li>Eclipse IDE
+
+<h4 style="margin-top:.25em"><em>Eclipse IDE</em></h4>
     <ul>
-      <li><a href="http://www.eclipse.org/downloads/">Eclipse</a> 3.4 (Ganymede) or 3.5 (Galileo)
-        <ul>
-        <li>Note: Eclipse 3.3 has not been tested with the latest version of 
-ADT and support can no longer be guaranteed. We suggest you upgrade to Eclipse
-3.4 or 3.5.</li>
-        <li>Recommended Eclipse IDE packages: Eclipse IDE for Java EE
-Developers, Eclipse IDE for Java Developers, Eclipse for RCP/Plug-in
-Developers, or Eclipse Classic (3.5.1+)</li>
-        <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin
-(included in most Eclipse IDE packages) </li>
-        </ul>
-      </li>     
-      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
-      <li><a href="eclipse-adt.html">Android Development Tools
-plugin</a> (optional)</li>
+      <li>Eclipse 3.4 (Ganymede) or 3.5 (Galileo)
+      <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
+in most Eclipse IDE packages) </li>
+      <li>If you need to install or update Eclipse, you can download it from <a
+href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>. 
+
+      <p>Several types of Eclipse packages are available for each platform. For
+developing Android applications, we recommend that you install one of these
+packages: </p>
+         <ul>
+           <li>Eclipse IDE for Java EE Developers</li>
+           <li>Eclipse IDE for Java Developers</li>
+           <li>Eclipse for RCP/Plug-in Developers</li>
+           <li>Eclipse Classic (versions 3.5.1 and higher)</li>
+         </ul>
+      </li>
+      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK
+6</a> (JRE alone is not sufficient)</li>
+      <li><a href="eclipse-adt.html">Android Development Tools plugin</a>
+(optional)</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>
-  </li>
-  <li>Other development environments or IDEs
+
+
+<h4><em>Other development environments or IDEs</em></h4>
     <ul>
-      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
-      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.6.5 or later for Linux and Mac, 1.7 or later for Windows</li>
+      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK
+6</a> (JRE alone is not sufficient)</li>
+      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.6.5 or later for
+Linux and Mac, 1.7 or later for Windows</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>
   </li>
@@ -53,7 +61,47 @@ plugin</a> (optional)</li>
 particular, note that some Linux distributions may include JDK 1.4 or Gnu Compiler for Java, both of which are not supported for Android development. </p>
 
 <h3>Hardware requirements</h3>
-<ul>
-  <li>For the base SDK package, at least 600MB of available disk space. For each platform downloaded into the SDK, an additional 100MB is needed. </li>
-</ul>
+
+<p>The Android SDK requires disk storage for all of the components that you choose to install. The table below provides a rough idea of the disk-space requirements to expect, based on the components that you plan to use. </p>
+
+<table>
+<tr>
+<th>Component type</th>
+<th>Approximate size</th>
+<th>Comments</th>
+</tr>
+<tr>
+<td>SDK Tools</td>
+<td>50 MB</td>
+<td>Required.</td>
+</tr>
+<tr>
+<td>Android platform (each)</td>
+<td>150 MB</td>
+<td>At least one platform is required.</td>
+</tr>
+<tr>
+<td>SDK Add-on (each)</td>
+<td>100 MB</td>
+<td>Optional.</td>
+</tr>
+<tr>
+<td>USB Driver for Windows</td>
+<td>10 MB</td>
+<td>Optional. For Windows only.</td>
+</tr>
+<tr>
+<td>Samples (per platform)</td>
+<td>10M</td>
+<td>Optional.</td>
+</tr>
+<tr>
+<td>Offline documentation</td>
+<td>250 MB</td>
+<td>Optional.</td>
+</tr>
+</table>
+
+<p>Note that the disk-space requirements above are <em>in addition to</em> those of the Eclipse IDE, JDK, or other prerequisite tools that you may need to install on your development computer.</p>
+
 

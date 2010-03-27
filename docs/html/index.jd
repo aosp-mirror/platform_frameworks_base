@@ -2,7 +2,7 @@ home=true
 @jd:body
 
 
-	<div id="mainBodyFixed">
+<div id="mainBodyFixed">
               <div id="mainBodyLeft">			
                     <div id="homeMiddle">
                         <div id="topAnnouncement">
@@ -11,10 +11,10 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                  <img src="/assets/images/home/Android_Dev_Lab_l.png" alt="Android developer labs" width="100px" style="padding-left:78px;padding-right:46px;padding-bottom: 8px;"/>
+                                  <img src="{@docRoot}assets/images/home/gdc-logo.png" alt="Android at GDC 2010" width="203px" style="padding-left:22px;padding-bottom:28px;padding-top:22px;"/>
                                   <div id="announcement" style="width:275px">
-<p>We're hosting the next Android Developer Lab in Barcelona at <a href="http://www.mobileworldcongress.com/index.htm">Mobile World Congress&nbsp;&raquo;</a> on Wednesday February 17th at <a href="http://www.mobileworldcongress.com/exhibition/app_planet.htm">App Planet&nbsp;&raquo;</a>, located in Hall 7.  Come visit us to attend a technical presentation, talk to our Android developer relations team, and meet other members of the developer community.</p><p><a href="http://sites.google.com/site/androidmwc/home">Learn more &raquo;</a></p>
-<!--<p><a href="http://android-developers.blogspot.com/2009/11/bring-your-lab-coats.html">Learn more &raquo;</a></p>-->
+<p>Android will be at the <a href="http://www.gdconf.com/">2010 Game Developers Conference</a> in San Francisco, from March 9th to 11th. We're looking forward to seeing you there!</p>
+<p><a href="http://android-developers.blogspot.com/2010/03/android-at-game-developers-conference.html">Learn more &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
