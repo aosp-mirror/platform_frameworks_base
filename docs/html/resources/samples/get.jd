@@ -1,0 +1,90 @@
+page.title=Getting the Samples
+
+@jd:body
+
+<p>Sometimes, the best way to learn how things are done is to look at some
+code.</p>
+
+<p>To help you get started quickly, the Android SDK includes a variety of sample
+code and tutorials that illustrate key concepts and techniques of Android
+application development. For example, the samples show the structure of the
+manifest file and the use of activities, services, resources,
+intents, content providers, and permissions. They also show how to add
+specialized capabilities to your apps, such as Bluetooth and Contacts
+integration, multiple screens support, Live Wallpaper, and more. </p>
+
+<p>The SDK provides the samples both as source code and as browseable HTML, as
+described in the sections below. All of the samples included in the SDK are
+licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache
+2.0 license</a>, so feel free to use any of the code in your own applications as
+needed!</p>
+
+<h3 id="downloading">Downloading the Sample Code</h3>
+
+<p>The SDK sample code is available to you as a set of downloadable SDK
+components, each of which contains the samples for a specific Android platform
+version. Once you have installed the SDK, you can download one or more samples
+component(s) into your SDK environment using the Android SDK and AVD Manager
+tool, which is pre-installed in the SDK. </p>
+
+<p>To download the samples, launch the Android SDK and AVD Manager tool and
+select one of the samples components from the <strong>Available
+Packages</strong> panel, for example "Samples for SDK API 7". Select
+<strong>Install Selected</strong>, verify and accept the download, then select
+<strong>Install Accepted</strong> to download the component into your SDK. If
+you aren't familiar with the Android SDK and AVD Manager and how to launch or
+use it, please read the <a href="{@docRoot}sdk/adding-components.html">Adding
+SDK Components</a> document. </p>
+
+<p>When the download is complete, you can find the samples sources on your
+computer in this location:</p>
+
+<p style="margin-left:2em">
+<code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform-version&gt;</em>/</code>
+</p>
+
+<p>You can easily create new Android projects with the downloaded samples, modify them
+if you'd like, and then run them on an emulator or device. </p>
+
+<p>For example, if you are developing in Eclipse with the ADT Plugin, you can
+create a project for the "API Demos" sample app by starting a new Android
+Project, selecting "Create project from existing source", and then browsing to
+the <code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/ApiDemos</code>
+directory (the <code>samples</code> directory for the platform version you are
+using).</p>
+
+<p>If you are not working in Eclipse, you can create a project for the API Demos
+sample using the <code>android</code> tool, by executing this command:</p>
+
+<pre class="no-pretty-print">
+android update project -s -n API Demos -t <em>&lt;target_ID></em> -p <em>&lt;path&gt;</em>samples/<em>&lt;platforms&gt;</em>/ApiDemos/
+</pre>
+
+<h3 id="browsing">Browsing the Sample Code</h3>
+
+<p>For your convenience, the SDK provides browseable source code for the latest
+versions of the samples. You can use your browser to navigate through the
+structure of each sample and look at the source code in each of its files. </p>
+
+<p>To browse the samples, go to the <a
+href="{@docRoot}resources/samples/index.html">List of Sample Apps</a> first.
+From there you can read a short summary of each sample application and what
+types of concepts, features, or APIs it includes. Then, use the links provided
+to move through the directories and files of each sample. The browseable source
+is generated from the same source code that is downloadable through the Android
+SDK and AVD Manager, as described above. </p>
+
+<p>The browseable samples files are available online, at the Android Developers
+site only and are not included in the downloadable offline documentation.
+Note that, although samples for several platform versions are available for 
+download, only the samples for the latest platform version are browseable online.
+</p>
+
+
+<h3 id="more">More Sample Code</h3>
+
+<p>If you are looking for more sample code, check out
+<a href="http://code.google.com/p/apps-for-android/">apps-for-android</a>, a
+collection of open source applications that demonstrate various Android APIs.</p>
+
+

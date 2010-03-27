@@ -171,9 +171,12 @@
                <span class="zh-TW" style="display:none"></span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>resources/samples/get.html">
+            <span class="en">Getting the Samples</span>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>resources/samples/index.html">
-               <span class="en">List of Sample Apps</span>
+               <span class="en">List of Samples</span>
              </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>resources/samples/ApiDemos/index.html">

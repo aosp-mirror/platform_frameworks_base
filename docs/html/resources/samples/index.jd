@@ -1,38 +1,21 @@
-page.title=Sample Code
+page.title=List of Sample Apps
 @jd:body
 
+<p>The list below provides a summary of the sample applications that are 
+available with the Android SDK. Using the links on this page, you can view
+the source files of the sample applications in your browser. </p>
 
-<p>Sometimes, the best way to learn how things are done is to look at some code.</p>
-
-<p>Here, you can browse the source of some sample Android applications. Also, each version of the
-Android platform available for the SDK includes a set of sample
-applications (which may vary between different versions of the platform).
-You can find the samples in your SDK at:</p>
-
-<p style="margin-left:2em">
-<code><em>&lt;sdk&gt;</em>/platforms/android-<em>&lt;version&gt;</em>/samples/</code>
-</p>
-
-<p>You can easily create new Android projects with these samples, modify them
-if you'd like, then run them on an emulator or device. For example, to create
-a project for the API Demos app from Eclipse,
-start a new Android Project, select "Create project from existing source", then select
-{@code ApiDemos} in the {@code samples/} directory. To create the API Demos project
-using the {@code android} tool, execute:</p>
-<pre>
-android update project -s -n API Demos -t <em>&lt;target_ID></em> -p <em>&lt;path-to-platform></em>/samples/ApiDemos/
-</pre>
-
-<p>The pages below provide an overview of each sample application (available with most
-platforms) and allow you to view the source files in your browser. </p>
-
+<p>You can also download the source of these samples into your SDK, then 
+modify and reuse it as you need. For more information, see <a 
+href="{@docRoot}resources/samples/get.html">Getting the Samples</a>.</p>
+<!--
 <div class="special">
   <p>Some of the samples in this listing may not yet be available in the
   SDK. To ensure that you have the latest versions of the samples, you can
   <a href="{@docRoot}shareables/latest_samples.zip">download the samples pack</a>
   as a .zip archive.</p>
 </div>
-
+-->
 <dl>
 
  <dt><a href="ApiDemos/index.html">API Demos</a></dt>
