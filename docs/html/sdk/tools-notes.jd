@@ -1,39 +1,131 @@
-page.title=SDK Tools Notes
+page.title=SDK Tools
 @jd:body
 
-<p>SDK Tools is a downloadable component for the Android SDK. It
-includes the complete set of development and debugging tools for the Android
-SDK.</p>
+<p>SDK Tools is a downloadable component for the Android SDK. It includes the
+complete set of development and debugging tools for the Android SDK. </p>
 
-<p>This document provides version-specific information about SDK Tools
-releases. To keep up-to-date on new releases, make sure that you view this page
-at <a
-href="http://developer.android.com/sdk/tools-notes.html">http://developer.
-android.com/sdk/tools-notes.html</a>.</p>
+<p>If you are new to the Android SDK, the <a 
+href="{@docRoot}sdk/index.html">SDK starter package</a> installs the
+latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory.</p>
 
-<p>To install SDK Tools in your SDK environment (and replace the
-existing tools), use the Android SDK and AVD Manager. For more information, see
-<a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. </p>
+<p>If you are already using the SDK Tools, you should update to the latest revision by
+using the Android SDK and AVD Manager (rather than by downloading a new SDK package).
+For more information about how to update, see <a 
+href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Adding SDK Components</a>. </p>
 
-<h2 id="4">SDK Tools, Revision 4</h2>
+<h2 id="notes">Revisions</h2>
 
-<p>December 2009. SDK Tools r4 provides several new features for developers and includes
-fixes for several issues, as described below. </p>
+<p>The sections below provide notes about successive releases of
+the SDK Tools, as denoted by revision number. To determine what revision of the SDK
+Tools you are using, refer to the "Installed Packages" listing in the Android SDK
+and AVD Manager. </p>
 
-<h3>Dependencies</h3>
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+SDK Tools, Revision 5</a> <em>(March 2010)</em>
+  <div class="toggleme">
 
-<p>SDK Tools r4 is compatible with ADT 0.9.5 and later, but not
+<dl>
+<dt>Dependencies:</dt>
+<dd><ul>
+<li>If you are developing in Eclipse with ADT, note that SDK Tools r5 is
+designed for use with ADT 0.9.6 and later. After installing SDK Tools r5, we
+highly recommend updating your ADT Plugin to 0.9.6.</li>
+<li>For Mac OS platforms, OS X 10.4.x (Tiger) is no longer
+officially supported. </li>
+</ul>
+</dd>
+
+<dt>SDK and AVD Manager:</dt>
+<dd>
+<ul>
+<li>Fixes SSL download for the standalone version of the SDK Updater.</li>
+<li>Fixes issue with 64-bit JVM on Windows.</li>
+<li>Adds support for platform samples components.</li>
+<li>Improves support for dependency between components.</li>
+<li>AVDs now sorted by API level.</li>
+<li>The AVD creation dialog now enforces a minimum SD card size of 9MB.</li>
+<li>Prevents deletion of running AVDs.</li>
+<li>Settings are now automatically saved, no need to click "Apply".</li>
+</ul>
+</dd>
+
+<dt>Emulator:</dt>
+<dd>
+<ul>
+<li>Emulator now requires SD card to be 9MB or more.</li>
+</ul>
+</dd>
+
+<dt>Layoutopt:</dt>
+<dd>
+<ul>
+<li>Fixes <code>layoutopt.bat</code> to execute correctly on Windows.</li>
+</ul>
+</dd>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+SDK Tools, Revision 4</a> <em>(December 2009)</em>
+  <div class="toggleme">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd><p>SDK Tools r4 is compatible with ADT 0.9.5 and later, but not
 compatible with earlier versions. If you are developing in Eclipse with ADT, you
 <strong>must</strong> update your ADT plugin to version 0.9.5 or higher if you
-install SDK Tools r4 in your SDK. </p>
+install SDK Tools r4 in your SDK. </p></dd>
 
-<h3>General notes</h3>
+<dt>General notes:</dt>
+<dd>
 <ul>
 <li>Launcher script now forces GDK_NATIVE_WINDOW=true (linux only), to fix a 
 compatibility issue between GTK and SWT.</li>
 </ul>
+</dd>
 
-<h3>Android SDK and AVD Manager</h3>
+<dt>Android SDK and AVD Manager:</dt>
+<dd>
 <ul>
 <li>AVD Launch dialog now shows scale value.</li>
 <li>Fixes potential NPE in SDK Manager on AVD launch, for older AVD with no 
@@ -41,38 +133,50 @@ skin name specified.</li>
 <li>Fixes XML validation issue in on older Java versions.</li>
 <li>No longer forces the use of Java 1.5 on Mac OS X.</li>
 </ul>
+</dd>
 
-<h3>Emulator</h3>
+<dt>Emulator:</dt>
+<dd>
 <ul>
 <li>No longer limits the size of the system partition.</li>
 </ul>
+</dd>
 
-<h3>Ant build tools</h3>
+<dt>Ant build tools:</dt>
+<dd>
 <ul>
 <li>.apk packaging now properly ignores vi swap files as well as hidden files.</li>
 </ul>
+</dd>
+</dl>
+ </div>
+</div>
 
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+SDK Tools, Revision 3</a> <em>(October 2009)</em>
+  <div class="toggleme">
 
-<h2 id="3">SDK Tools, Revision 3</h2>
-
-<p>October 2009. SDK Tools r3 provides several new features for developers and includes
-fixes for several tools issues, as described below. </p>
-
-<h3>Dependencies</h3>
-
-<p>SDK Tools r3 is compatible with ADT 0.9.4 and later, but not
+<dl>
+<dt>Dependencies:</dt>
+<dd><p>SDK Tools r3 is compatible with ADT 0.9.4 and later, but not
 compatible with earlier versions. If you are developing in Eclipse with ADT, you
 <strong>must</strong> update your ADT plugin to version 0.9.4 or higher if you
-install SDK Tools r3 in your SDK. </p>
+install SDK Tools r3 in your SDK.</p>
+</dd>
 
-<h3>Android tool</h3>
+<dt>Android tool:</dt>
+<dd>
 <ul>
 <li>Adds new <code>android create test-project</code> and <code>android update
 test-project</code> commands to allow for greater flexibility in the location of the
 main and test projects.</li>
 </ul>
+</dd>
 
-<h3>DDMS</h3>
+<dt>DDMS:</dt>
+<dd>
 <ul>
 <li>Adds a button to dump HPROF file for running appplications (app must be able
 to write to the sdcard).</li>
@@ -83,8 +187,10 @@ display the trace.</li>
 10.6.</li>
 <li>Fixed screenshot support for devices running 32-bit framebuffer.</li>
 </ul>
+</dd>
 
-<h3>Android SDK and AVD Manager</h3>
+<dt>Android SDK and AVD Manager:</dt>
+<dd>
 <ul>
 <li>Provides a new UI that lets you set options for controlling
 the emulator skin, screen size/density, and scale factor used when launching 
@@ -94,14 +200,17 @@ properties of your AVDs.</li>
 <li>Now enforces dependencies between platforms and tools components, and
 between SDK add-ons and platforms.</li>
 </ul>
+</dd>
 
-<h3>Layoutopt, a new tool for optimizing layouts</h3>
+<dt>Layoutopt, a new tool for optimizing layouts:</dt>
 
-<p>The SDK Tools r3 package includes <code>layoutopt</code>, a new command-line 
+<dd><p>The SDK Tools r3 package includes <code>layoutopt</code>, a new command-line 
 tool that helps you optimize your layout hierarchies. When run against your 
 layout files, the tool analyzes their hierarchies and notifies you of 
 inefficiencies and other potential issues. The tool also provides simple 
 solutions for the issues it finds. For usage, see <a 
-href="{@docRoot}guide/developing/tools/layoutopt.html">layoutopt</a>.
-</p>
-
+href="/guide/developing/tools/layoutopt.html">layoutopt</a>.</p>
+</dd>
+</dl>
+ </div>
+</div>

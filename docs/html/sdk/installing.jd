@@ -1,4 +1,4 @@
-page.title=Installing the Android SDK
+page.title=Installing the SDK
 sdk.preview=0
 
 @jd:body
@@ -8,25 +8,28 @@ sdk.preview=0
 
   <h2>In this document</h2>
   <ol>
-    <li><a href="#Preparing">Prepare for Installation</a></li>
-    <li><a href="#Installing">Install the SDK</a></li>
-    <li><a href="#InstallingADT">Install the ADT Plugin for Eclipse</a></li>
-    <li><a href="#components">Add Platforms and Other SDK Components</a></li>
-    <li><a href="#sdkContents">Explore the SDK</a></li>
+    <li><a href="#Preparing">Preparing Your Development Computer</a></li>
+    <li><a href="#Installing">Downloading the SDK Starter Package</a></li>
+    <li><a href="#InstallingADT">Installing the ADT Plugin for Eclipse</a></li>
+    <li><a href="#components">Adding Platforms and Other Components</a>
+    <ol>
+    <li><a href="#which">Which components do I need?</a></li>
+    </ol></li>
+    <li><a href="#sdkContents">Exploring the SDK</a></li>
     <li><a href="#NextSteps">Next Steps</a></li>
     <li><a href="#troubleshooting">Troubleshooting</a></li>
   </ol>
 
 <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}sdk/eclipse-adt.html">Installing ADT</a></li>
+    <li><a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a></li>
     <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
   </ol>
 
 </div>
 </div>
 
-<p>This page describes how to install the latest version of the Android SDK 
+<p>This page describes how to install the Android SDK 
 and set up your development environment for the first time.</p>
 
 <p>If you encounter any problems during installation, see the 
@@ -35,40 +38,51 @@ this page.</p>
 
 <h4>Updating?</h4>
 
-<p>If you are currently using the Android 1.6 SDK, you do not necessarily need
-to install a newer SDK, since you can already update the platforms, tools, and
-other components using the Android SDK and AVD Manager tool. To develop against
-the latest Android platform, for example, you could just download the latest SDK
-Tools and then add the new Android platform into your existing SDK.</p>
+<p>If you are currently using the Android 1.6 SDK or later and want to update 
+to the latest tools or platforms, you do not need to install a new SDK. Instead, 
+you can simply update the individual components in your SDK using the 
+Android SDK and AVD Manager tool. For information about how to do that, see <a 
+href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Updating SDK 
+Components</a></p>
 
-<p>If you are using Android 1.5 SDK or older, you should install the new SDK as
+<p>If you are using Android 1.5 SDK or earlier, you should install a new SDK as
 described in this document and move your application projects to the new
 SDK environment. </p>
 
-<h2 id="Preparing">Prepare for Installation</h2>
 
-<p>Before you begin, take a moment to confirm that your development machine
-meets the <a href="requirements.html">System Requirements</a>.</p>
+<h2 id="Preparing">Step 1. Preparing Your Development Computer</h2>
+
+<p>Before getting started with the Android SDK, take a moment to confirm that
+your development computer meets the <a href="requirements.html">System
+Requirements</a>. In particular, you may need to install the <a 
+href="http://java.sun.com/javase/downloads/index.jsp">JDK</a> before 
+continuing, if it's not already installed on your computer. </p>
 
 <p>If you will be developing in Eclipse with the Android Development
 Tools (ADT) Plugin &mdash; the recommended path if you are new to
 Android &mdash; make sure that you have a suitable version of Eclipse
 installed on your computer (3.4 or newer is recommended). If you need 
-to install Eclipse, you can download it from this location: </p>
-
+to install Eclipse, you can download it from this location: </p> 
+ 
 <p style="margin-left:2em;"><a href=
-"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a></p>
-
+"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a></p> 
+ 
 <p>A Java or RCP version of Eclipse is recommended. For Eclipse 3.5, the 
-"Eclipse Classic" version is recommended.</p>
+"Eclipse Classic" version is recommended.</p> 
 
-<h2 id="Installing">Download and Install the SDK</h2>
 
-<p>Download the SDK package that is appropriate for your development computer.
-You can get the latest version from the <a href="{@docRoot}sdk/index.html">SDK
-download page</a>.</p>
+<h2 id="Installing">Step 2. Downloading the SDK Starter Package</h2>
 
-<p>After downloading, unpack the Android SDK archive to a suitable location on your
+<p>The first step in setting up your environment for developing Android applications
+is downloading the Android SDK starter package. The starter package is not a full
+development environment &mdash; it includes only the core SDK Tools, which you can 
+use to download the rest of the SDK components. </p>
+
+<p>You can get the latest version of the SDK starter package from the <a
+href="{@docRoot}sdk/index.html">SDK download page</a>. Make sure to download the
+package that is appropriate for your development computer.</p>
+
+<p>After downloading, unpack the Android SDK archive to a safe location on your
 machine. By default, the SDK files are unpacked into a directory named
 <code>android-sdk-&lt;machine-platform&gt;</code>. Make a note of the name and
 location of the unpacked SDK directory on your system &mdash; you will need to
@@ -101,71 +115,80 @@ supply the full path to the tools directory. </p>
   <code>tools/</code> directory to the path. </li>
   </ul>
 
-<p>If you will be using the Eclipse IDE as your development environment,
-the next section describes how to install the Android Development Tools (ADT) plugin and set up Eclipse. 
-If you choose not to use Eclipse, you can 
-develop Android applications in an IDE of your choice and then compile, debug and deploy using
-the tools included in the SDK (skip to <a href="#NextSteps">Next Steps</a>).</p>
+<p>If you will be using the Eclipse IDE as your development environment, the
+next section describes how to install the Android Development Tools (ADT) plugin
+and set up Eclipse. If you choose not to use Eclipse, you can develop Android
+applications in an IDE of your choice and then compile, debug and deploy using
+the tools included in the SDK (skip to <a href="#components">Adding Platforms
+and Other Components</a>).</p>
 
 
-<h2 id="InstallingADT">Install the ADT Plugin for Eclipse</h2>
+<h2 id="InstallingADT">Step 3. Installing the ADT Plugin for Eclipse</h2>
 
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
-Development Tools (ADT), that is designed to give you a powerful,
-integrated environment in which to build Android applications. It
-extends the capabilites of Eclipse to let you quickly set up new Android
-projects, create an application UI, add components based on the Android
-Framework API, debug your applications using the Android SDK tools, and even export
-signed (or unsigned) APKs in order to distribute your application.</p>
+Development Tools (ADT), that is designed to give you a powerful, integrated
+environment in which to build Android applications. It extends the capabilites
+of Eclipse to let you quickly set up new Android projects, create an application
+UI, add components based on the Android Framework API, debug your applications
+using the Android SDK tools, and even export signed (or unsigned) APKs in order
+to distribute your application. In general, developing in Eclipse with ADT is a
+highly recommended approach and is the fastest way to get started with Android.
+</p>
 
-<p>In general, using Eclipse with ADT is a highly recommended approach to
-Android development and is the fastest way to get started. For complete 
-information about how to install ADT, see 
-<a href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
+<p>If you'd like to use ADT for developing Android applications, install it now.
+Read <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a> for
+step-by-step installation instructions, then return here to continue with the
+last step in setting up your SDK: adding platforms and other
+components.</p>
 
 <p>If you prefer to work in an IDE other than Eclipse, you do not need to
 install Eclipse or ADT, instead, you can directly use the SDK tools to build and
 debug your application.</p>
 
 
-<h2 id="components">Add Android Platforms and Other Components</h2>
+<h2 id="components">Step 4. Adding Android Platforms and Other Components</h2>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<p>The <strong>Android SDK and AVD Manager</strong> tool is pre-installed in
-your SDK. Using the tool is a key part of performing the initial setup of your
-SDK, as well as keeping it up-to-date with the latest platforms, tools, and
-other components. </p>
+<div class="sidebox-wrapper" style="margin-right:2.5em;">
+<div class="sidebox"> <h2>Using the Android SDK and AVD Manager</h2>
 
-<p style="margin-top:.75em;">For full instructions on how to use the tool, see 
-<a href="/sdk/adding-components.html#installingComponents">Adding SDK
-Components</a>.</p> 
+<p>The <em>Android SDK and AVD Manager</em> is a tool that you will use often,
+to add components to your SDK environment and manage Android Virtual Devices.
+</p>
+
+<p style="margin-top:.5em;">The tool is pre-installed in your SDK. See <a
+href="adding-components.html">Adding SDK Components</a> for details on how to
+launch and use the tool.</p>
 </div>
 </div>
 
-<p>The Android SDK uses a modular structure that separates the major parts of
-the SDK &mdash; platforms, add-ons, tools, and the API documentation &mdash;
-into a set of separately installable components. The SDK components are
-available to you for individual download, as needed, from the Android SDK
-repository site. </p>
+<p>The last step in setting up your SDK is using a tool included the SDK starter
+package &mdash; the <em>Android SDK and AVD Manager</em> &mdash; to download
+essential components into your development environment. Read the information
+below to understand what components you'll need, then see <a
+href="adding-components.html">Adding SDK Components</a> for step-by-step
+instructions on how to launch the Android SDK and AVD Manager and download the
+components into your environment.</p>
 
-<p>The Android SDK starter package includes only a single component: the latest
-version of the SDK Tools. Included in that component is a tool called <em>Android
-SDK and AVD Manager</em> that you can use to download other components from the SDK
-repository site. The tool provides a graphical UI that lets you browse the
-repository, select new or updated components for download, and then install them
-in your SDK. </p>
+<p>The SDK uses a modular structure that separates the major parts of the SDK
+&mdash; Android platform versions, add-ons, tools, samples, and the API
+documentation &mdash; into a set of separately installable components. The SDK
+starter package, which you've already downloaded, includes only a single
+component: the latest version of the SDK Tools. To develop any Android
+application, you also need to download at least one Android platform into your
+environment, although downloading additional components is highly recommended.
+See <a href="#which">Which components do I need?</a> for information about
+which components are required and which are optional.</p>
 
-<p>There are several types of SDK components available:</p>
+<p>The SDK repository offers these types of components:</p>
 
 <ul>
-<li><strong>SDK Tools</strong> (available pre-installed in the Android SDK
+<li><strong>SDK Tools</strong> (pre-installed in the Android SDK starter
 package) &mdash; Contains the full set of SDK tools for developing, debugging,
 and testing your application code and UI. You can read about the tools in the <a
 href="{@docRoot}guide/developing/tools/index.html">Dev Guide</a> and access them
 in the <code>&lt;sdk&gt;/tools/</code> directory. </li>
 
-<li><strong>Android platforms</strong> &mdash; An SDK platform component is
+<li><strong>Android platforms</strong> &mdash; An SDK platform is
 available for every production Android platform deployable to Android-powered
 devices. Each platform component includes a fully compliant Android library and
 system image, sample code, emulator skins, and any version specific tools. For
@@ -180,30 +203,133 @@ access to powerful mapping capabilities through the
 <code>com.google.android.maps</code> library. You can also add additional
 repositories, so that you can download other SDK add-ons, where available. </li>
 
+<li><strong>USB Driver for Windows</strong> &mdash; Contains driver files 
+that you can install on your Windows computer, so that you can run and debug
+your applications on an actual device. You <em>do not</em> need the USB driver unless
+you plan to debug your application on an actual Android-powered device. If you
+develop on Mac OS X or Linux, you do not need a special driver to debug 
+your application on an Android-powered device.</li>
+
+<li><strong>Samples</strong> &mdash; Contains the sample code and apps available
+for each Android development platform. If you are just getting started with
+Android development, make sure to download the samples to your SDK. <!--The download
+includes not only a set of very useful sample apps, but also the source for <a
+href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> and other
+tutorials. --></li>
+
 <li><strong>Documentation</strong> &mdash; Contains a local copy of the latest
-multiversion documentation for the Android framework API. 
-</li>
+multiversion documentation for the Android framework API. </li>
 </ul>
 
-<p>To develop <em>any</em> Android application, even if you are following the <a
-href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> tutorial, you
-<strong>must download at least one Android platform</strong> into your SDK.
-Typically, you will want to download multiple platforms, so that you can build
-your application on the lowest version you want to support, but test against
+<p>To download components, use the graphical UI of the Android SDK and AVD
+Manager, shown in Figure 1, to browse the SDK repository, select new or updated
+components for download, and then install the selected components in your SDK
+environment. </p>
+
+<div style="TEXT-ALIGN:left;width:600px;"> 
+<img src="/images/sdk_manager_packages.png" 
+style="padding-bottom:0;margin-bottom:0;" /> 
+<p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0
+1em;"><strong>Figure 1.</strong> The Android SDK and AVD Manager's 
+<strong>Available Packages</strong>
+panel, which shows the SDK components that are
+available for you to download into your environment. </p>
+</div> 
+
+
+<h3 id="which">Which components do I need?</h3>
+
+<p>The SDK repository contains a range of components that you can download.
+Use the table below to determine which components you need, based on whether you
+want to set up a basic (but functionnal) development environment or a
+recommended or full development environment: </p>
+
+<table style="width:95%">
+
+<tr>
+<th>Environment</th>
+<th>SDK&nbsp;Component</th>
+<th>Comments</th>
+</tr>
+
+<tr>
+<td rowspan="2" style="font-size:.9em;background-color:#FFE;">Basic</td>
+<td style="font-size:.9em;background-color:#FFE;color:gray">SDK Tools</td>
+<td style="font-size:.9em;background-color:#FFE;color:gray">If you've installed
+the SDK starter package, then you already have this component preinstalled. The
+SDK Tools component is required &mdash; you can't develop or build an application 
+without it. </td>
+</tr>
+
+<tr>
+<td style="font-size:.9em;background-color:#FFE;">SDK platform</td>
+<td style="font-size:.9em;background-color:#FFE;">You need to download <strong
+style="color:red">at least one platform</strong> into your environment, so that
+you will be able to compile your application and set up an Android Virtual
+Device (AVD) to run it on (in the emulator). To start with, just download the
+latest version of the platform. Later, if you plan to publish your application,
+you will want to download other platforms as well, so that you can test your
+application on the full range of Android platform versions that your customers
+are using.</td>
+</tr>
+<tr>
+<td colspan="3" style="border:none;text-align:center;font-size:1.5em;font-weight:bold;">+</td>
+</tr>
+<tr>
+<td rowspan="3">Recommended</td>
+<td>Documentation</td>
+<td>The Documentation component is useful because it lets you work offline and
+also look up API reference information from inside Eclipse.</td>
+</tr>
+
+<tr>
+<td>Samples</td>
+<td>The Samples components give you source code that you can use to learn about
+Android, load as a project and run, or reuse in your own app. Note that multiple
+samples components are available &mdash; one for each Android platform version. When
+you are choosing a samples component to download, select the one whose API Level
+matches the API Level of the Android platform that you plan to use.</td>
+</tr>
+<tr>
+<td>Usb Driver</td>
+<td>The Usb Driver component is needed only if you are developing on Windows and
+have an Android-powered device on which you want to install your application for
+debugging and testing. For Mac OS X and Linux platforms, no
+special driver is needed.</td>
+</tr>
+<tr>
+<td colspan="3" style="border:none;text-align:center;font-size:1.5em;font-weight:bold;">+</td>
+</tr>
+<tr>
+<td rowspan="3">Full</td>
+<td>Google APIs</td>
+<td>The Google APIs add-on gives your application access to the Maps external
+library, which makes it easy to display and manipulate Maps data in your
+application. </td>
+</tr>
+<tr>
+<td>Additional SDK Platforms</td>
+<td>If you plan to publish your application, you will want to download
+additional platforms corresponding to the Android platform versions on which you
+want the application to run. The recommended approach is to compile your
+application against the lowest version you want to support, but test it against
 higher versions that you intend the application to run on. You can test your
-applications on different platforms by running in an 
-Android Virtual Device (AVD) on the Android emulator. </p>
+applications on different platforms by running in an Android Virtual Device
+(AVD) on the Android emulator.</td>
+</tr>
+
+</table>
 
 <p>For step-by-step instructions on how to use the Android SDK and AVD Manager
 to add components, see the <a href="{@docRoot}sdk/adding-components.html">Adding
 SDK Components</a> document. </p>
 
-<p>For release notes and other detailed information about individual SDK 
+<p>For revision notes and other detailed information about individual SDK 
 components, see the documents listed under "Downloadable SDK Components" in 
 the navigation at left.</p>
 
 
-<h2 id="sdkContents">Explore the SDK</h2>
+<h2 id="sdkContents">Step 5. Exploring the SDK</h2>
 
 <p>Once you've installed the SDK and downloaded the platforms, documentation,
 and add-ons that you need, open the SDK directory and take a look at what's
@@ -236,7 +362,7 @@ applications against, each in a separate directory.  </td>
 <tr>
 <td style="width:2em;border-bottom-color:white;"></td>
 <td colspan="2"><code>&lt;platform&gt;/</code></td>
-<td>Platform version directory, for example "Android 1.6". All platform version 
+<td>Platform version directory, for example "android-1.6". All platform version 
 directories contain a similar set of files and subdirectory structure.</td>
 </tr>
 
@@ -253,13 +379,6 @@ directories contain a similar set of files and subdirectory structure.</td>
 <td>Storage area for default disk images, including the Android system image, 
 the default userdata image, the default ramdisk image, and more. The images 
 are used in emulator sessions.</td>
-</tr>
-<tr>
-<td style="width:2em;border-bottom-color:white;"></td>
-<td style="width:2em;border-bottom-color:white;"></td>
-<td><code>samples/</code></td>
-<td>Contains a wide variety of sample applications that you can load as projects
-into your development environment, compile, and run on the emulator.</td>
 </tr>
 <tr>
 <td style="width:2em;border-bottom-color:white;"></td>
@@ -288,6 +407,9 @@ designed for a specific screen resolution.</td>
 version.</td>
 </tr>
 <tr>
+<td colspan="3"><code>samples/</code></td>
+<td>Sample code and apps that are specific to platform version.</td>
+</tr>
 <td colspan="3"><code>tools/</code></td>
 <td>Contains the set of development and profiling tools available to you, such
 as the emulator, the <code>android</code> tool, adb, ddms, and more.</td>
@@ -300,7 +422,7 @@ platforms</td>
 </tr>
 <tr>
 <td colspan="3"><code>SDK Setup.exe</code></td>
-<td>For Windows SDK only. A shortcut that launches the Android SDK and AVD 
+<td>Windows SDK only. A shortcut that launches the Android SDK and AVD 
 Manager tool, which you use to add components to your SDK. </td>
 </tr>
 <!--<tr>
@@ -314,6 +436,19 @@ documentation.</td>
 <h2 id="NextSteps">Next Steps</h2>
 <p>Once you have completed installation, you are ready to
 begin developing applications. Here are a few ways you can get started: </p>
+
+<p><strong>Set up the Hello World application</strong></p>
+<ul>
+  <li>If you have just installed the SDK for the first time, <a 
+  href="{@docRoot}resources/tutorials/hello-world.html">go to the Hello
+  World tutorial</a>. The tutorial takes you step-by-step through the process
+  of setting up your first Android project, including setting up an Android
+  Virtual Device (AVD) on which to run the application. 
+</li>
+</ul>
+
+<p class="caution">Following the Hello World tutorial is an essential 
+first step in getting started with Android development. </p>
 
 <p><strong>Learn about Android</strong></p>
 <ul>
@@ -329,7 +464,7 @@ begin developing applications. Here are a few ways you can get started: </p>
   href="{@docRoot}reference/packages.html">Reference</a> tab</li>
 </ul>
 
-<p><strong>Explore the SDK</strong></p>
+<p><strong>Explore the development tools</strong></p>
 <ul>
   <li>Get an overview of the <a
   href="{@docRoot}guide/developing/tools/index.html">development
@@ -340,15 +475,28 @@ begin developing applications. Here are a few ways you can get started: </p>
   </li>
 </ul>
 
-<p><strong>Explore some code</strong></p>
+<p><strong>Follow the Notepad tutorial</strong></p>
+
 <ul>
-  <li>Set up a <a href="{@docRoot}resources/tutorials/hello-world.html">Hello
-  World application</a> (highly recommended, especially for Eclipse users)</li>
-  <li>Follow the <a href="{@docRoot}resources/tutorials/notepad/index.html">
-  Notepad Tutorial</a> to build a full Android application </li>
-  <li>Create a new project for one of the other sample applications
-  included in <code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platform&gt;</em>/samples</code>, 
-  then compile and run it in your development environment</li>
+  <li>The <a href="{@docRoot}resources/tutorials/notepad/index.html">
+  Notepad Tutorial</a> shows you how to build a full Android application 
+  and provides  helpful commentary on the Android system and API. The 
+  Notepad tutorial helps you bring together the important design
+  and architectural concepts in a moderately complex application. 
+  </li>
+</ul>
+<p class="caution">Following the Notepad tutorial is an excellent 
+second step in getting started with Android development. </p>
+
+<p><strong>Explore some code</strong></p>
+
+<ul>
+  <li>The Android SDK includes sample code and applications for each platform
+version. You can browse the samples in the <a 
+href="{@docRoot}resources/index.html">Resources</a> tab or download them
+into your SDK using the Android SDK and AVD Manager. Once you've downloaded the
+samples, you'll find them in
+<code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;/</em></code>. </li>
 </ul>
 
 <p><strong>Visit the Android developer groups</strong></p>
@@ -360,7 +508,6 @@ begin developing applications. Here are a few ways you can get started: </p>
   Developers</a> group to get a sense for what the Android developer
   community is like.</li>
 </ul>
-
 
 <h2 id="troubleshooting">Troubleshooting</h2>
 

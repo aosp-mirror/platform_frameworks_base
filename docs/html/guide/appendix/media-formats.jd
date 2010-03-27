@@ -2,7 +2,6 @@ page.title=Android Supported Media Formats
 @jd:body
 
 <p>The <a href="#core">Core Media Formats</a> table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed in the table. </p>
-<p>For your convenience, the table <a href="#g1">T-Mobile G1 Media Formats</a> describes additional media formats and characteristics provided by the T-Mobile G1 device. Other devices may support additional formats not listed on this page. </p>
 
 <p>As an application developer, you are free to make use of any media codec that is available on any Android-powered device, including those provided by the Android platform and those that are device-specific.</p>
 
@@ -152,56 +151,6 @@ page.title=Android Supported Media Formats
 
 </tbody></table>
 
-<h2 id="g1">T-Mobile G1 Media Formats and Characteristics</h2>
-
-<p>The table below lists media formats supported by the T-Mobile G1 in addition to those provided as part of the Android platform. This table also details G1-specific performance characteristics of some Android core media formats.</p>
-
-<table>
-<tbody>
-
-<tr>
-<th>Type</th>
-<th>Format</th>
-<th>Encoder</th>
-<th>Decoder</th>
-<th>Comment</th>
-<th>File Type(s) Supported</th>
-</tr>
-
-<tr>
-<td>Audio</td>
-<td>WMA</td>
-<td>&nbsp;</td>
-<td style="text-align: center;">X</td>
-<td>Supports WMA standard L1-L3:
-<ul>
-<li>L1: 64 kbps - 161 kbps @ 44.1kHz</li>
-<li>L2: &lt;=161 kbps &lt;=48 kHz</li>
-<li>L3: &lt;385 kbps &lt;=48 kHz</li>
-</ul>
-Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA Pro, Lossless, or Speech codecs. 
-</td>
-<td>Windows Media Audio (.wma)</td>
-</tr>
-
-<tr>
-<td rowspan="2">Video</td>
-<td>WMV</td>
-<td>&nbsp;</td>
-<td style="text-align: center;">X</td>
-<td>Versions 7, 8 and 9. Simple profile only</td>
-<td>Windows Media Video (.wmv)</td>
-</tr>
-
-<tr>
-<td>H.264&nbsp;AVC</td>
-<td>&nbsp;</td>
-<td style="text-align: center;">X</td>
-<td>On the G1, this decoder is limited to baseline profile up to 480x320, and 600 kbps average bitrate for the video stream.</td>
-<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
-</tr>
-
-</tbody></table>
 
 
 
