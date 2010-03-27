@@ -8,10 +8,12 @@ complete set of development and debugging tools for the Android SDK. </p>
 href="{@docRoot}sdk/index.html">SDK starter package</a> installs the
 latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory.</p>
 
-<p>If you are already using the SDK Tools, you should update to the latest revision by
-using the Android SDK and AVD Manager (rather than by downloading a new SDK package).
-For more information about how to update, see <a 
-href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Adding SDK Components</a>. </p>
+<p>If you are already using the SDK and you want to update to the latest version
+of the SDK Tools, use the <em>Android SDK and AVD Manager</em> to get the
+update, rather than downloading a new SDK starter package. For more information
+about how to update, see <a
+href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Updating SDK
+Components</a>. </p>
 
 <h2 id="notes">Revisions</h2>
 

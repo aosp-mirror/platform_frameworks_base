@@ -1,0 +1,422 @@
+page.title=Using the Contacts API
+@jd:body
+
+<p>Starting from Android 2.0 (API Level 5), the Android platform provides an
+improved Contacts API for managing and integrating contacts from multiple
+accounts and from other data sources. To handle overlapping data from multiple
+sources, the contacts content provider aggregates similar contacts and presents
+them to users as a single entity. This article describes how to use the new API
+to manage contacts.</p>
+
+<p>The new Contacts API is defined in the 
+{@link android.provider.ContactsContract android.provider.ContactsContract} 
+and related classes. The older API is still supported, although deprecated. 
+If you have an existing application that uses the older API, 
+see <a href="#legacy">Considerations for legacy apps</a>, below, for ideas 
+on how to support the Contacts API in your app.</p>
+
+<p>If you'd like to look at an applied example of how to use the new Contacts 
+API, including how to support both the new and older API in a single app,
+please see the <a 
+href="{@docRoot}resources/samples/BusinessCard/index.html">Business Card 
+sample application</a>.</p>
+
+<h3>Data structure of Contacts</h3>
+
+<p>In the new Contacts API, data is laid out in three primary tables: 
+<em>contacts</em>, <em>raw contacts</em>, and <em>data</em>, a structure that 
+is slightly different from that used in the older API. The new structure 
+allows the system to more easily store and manage information for a 
+specific contact from multiple contacts sources. </p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; width: 471px; height: 255px;" src="images/contacts-2.png" alt="" border="0">
+
+<ul>
+<li><code>Data</code> is a generic table that stores all of the data points
+associated with a raw contact. Each row stores data of a specific kind &mdash;
+for example  name, photo, email addresses, phone numbers, and group memberships.
+Each row is tagged with a MIME type to identify what type of data it can
+contain, across the entire column. Columns are generic and the type of data they
+contain is determined by the kind of data stored in each row. For example, if a
+row's data kind is <code>Phone.CONTENT_ITEM_TYPE</code>, then the first column
+stores the phone number, but if the data kind is
+<code>Email.CONTENT_ITEM_TYPE</code>, then the column stores the email address. 
+
+<p>The {@link android.provider.ContactsContract.CommonDataKinds ContactsContract.CommonDataKinds} 
+class provides subclasses corresponding to common MIME types for contacts data. 
+If needed, your application or other contacts sources can define additional MIME 
+types for data rows. For more information about the Data table and examples of 
+how to use it, see {@link android.provider.ContactsContract.Data android.provider.ContactsContract.Data}.</p></li>
+
+<li>A row in the <code>RawContacts</code> table represents the set of
+<code>Data</code> and other information describing a person and associated with
+a single contacts source. For example, a row might define the data associated
+with a person's Google or Exchange account or Facebook friend. For more
+information, see 
+{@link android.provider.ContactsContract.RawContacts ContactsContract.RawContacts}.</p>
+
+<li>A row in the <code>Contacts</code> table represents an aggregate of one or
+more <code>RawContacts</code> describing the same person (or entity). 
+
+<p>As mentioned above, the Contacts content provider automatically aggregates
+Raw Contacts into a single Contact entry, where possible, since common data
+fields (such as name or email address) are likely to be stored in each raw
+contact. Since the aggregation logic maintains the entries in the Contact rows,
+the entries can be read but should not be modified.  See the section <a
+href="#aggregation">Aggregation of contacts</a>, below, for more details, 
+including and information on how to
+control aggregation.</li>
+
+</ul>
+
+<p>When displaying contacts to users, applications should typically operate on
+the Contacts level, since it provides a unified, aggregated view of contacts
+from various underlying sources. </p>
+
+<h4>Example: Inserting a Phone Number</h4>
+
+<p>To insert a phone number using the new APIs you'll need the ID of the Raw
+Contact to attach the phone number to, then you'll need to create a Data
+row:</p>
+
+<pre>import android.provider.ContactsContract.CommonDataKinds.Phone;
+...
+ContentValues values = new ContentValues();
+values.put(Phone.RAW_CONTACT_ID, rawContactId);
+values.put(Phone.NUMBER, phoneNumber);
+values.put(Phone.TYPE, Phone.TYPE_MOBILE);
+Uri uri = getContentResolver().insert(Phone.CONTENT_URI, values);</pre>
+
+
+<h3 id="aggregation">Aggregation of contacts</h3>
+
+<p>When users sync contacts from multiple sources, several contacts might refer
+to the same person or entity, but with slightly different (or overlapping) data.
+ For example, "Bob Parr" might be a user's co-worker and also his personal
+friend, so the user might have his contact information stored in both a
+corporate email account and a personal account. To provide a simplified view for
+the user, the system locates such overlapping contacts and combines them into a
+single, aggregate contact.  </p>
+
+<p>The system automatically aggregates contacts by default. However, if needed,
+your application can control how the system handles aggregation or it can
+disable aggregation altogether, as described in the sections below.</p>
+
+<h4>Automatic aggregation</h4>
+
+<p>When a raw contact is added or modified, the system looks for matching
+(overlapping) raw contacts with which to aggregate it. It may not find any
+matching raw contacts, in which case it will create an aggregate contact that
+contains just the original raw contact. If it finds a single match,it creates a
+new contact that contains the two raw contacts. And it may even find multiple
+similar raw contacts, in which case it chooses the closest match. </p>
+
+<p>Two raw contacts are considered to be a match if at least one of these
+conditions is met:</p>
+
+<ul>
+<li>They have matching names.</li>
+<li>Their names consist of the same words but in different order 
+(for example, "Bob Parr" and "Parr, Bob")</li>
+<li>One of them has a common short name for the other (for example, 
+"Bob Parr" and "Robert Parr")</li>
+<li>One of them has just a first or last name and it matches the other 
+raw contact. This rule is less reliable, so it only applies if the two 
+raw contacts are also sharing some other data like a phone number, an 
+email address or a nickname (for example, Helen ["elastigirl"] = Helen 
+Parr ["elastigirl"])</li>
+<li>At least one of the two raw contacts is missing the name altogether 
+and they are sharing a phone number, an email address or a nickname (for 
+example, Bob Parr [incredible@android.com] = incredible@android.com).</li>
+</ul>
+
+<p>When comparing names, the system ignores upper/lower case differences 
+(Bob=BOB=bob) and diacritical marks (Hélène=Helene). When comparing two 
+phone numbers the system ignores special characters such as "*", "#", 
+"(", ")", and whitespace. Also if the only difference between two numbers 
+is that one has a country code and the other does not, then the system 
+considers those to be a match (except for numbers in the Japan country code).</p>
+
+<p>Automatic aggregation is not permanent; any change of a constituent raw 
+contact may create a new aggregate or break up an existing one.</p>
+
+<h4>Explicit aggregation</h4>
+
+<p>In some cases, the system's automatic aggregation may not meet the
+requirements of your application or sync adapter. There are two sets of APIs you
+can use to control aggregation explicitly: <em>aggregation modes</em> allow you
+to control automatic aggregation behaviors and <em>aggregation exceptions</em>
+allow you to override automated aggregation entirely.
+
+<p><strong>Aggregation modes</strong></p>
+
+<p>You can set an aggregation mode for each raw contact individually. To do so,
+add a mode constant as the value of the <code>AGGREGATION_MODE column</code> in
+the <code>RawContact</code> row. The mode constants available include: </p>
+
+<ul>
+<li><code>AGGREGATION_MODE_DEFAULT</code> &mdash; normal mode, automatic
+aggregation is allowed.</li>
+<li><code>AGGREGATION_MODE_DISABLED</code> &mdash; automatic aggregation is not
+allowed. The raw contact will not be aggregated.</li>
+<li><code>AGGREGATION_MODE_SUSPENDED</code> &mdash; automatic aggregation is
+deactivated. If the raw contact is already a part of an aggregated contact when
+aggregation mode changes to suspended, it will remain in the aggregate, even if
+it changes in such a way that it no longer matches the other raw contacts in the
+aggregate.</li>
+</ul>
+
+<p><strong>Aggregation exceptions</strong></p>
+
+<p>To keep two raw contacts unconditionally together or unconditionally apart,
+you can add a row to the 
+{@link android.provider.ContactsContract.AggregationExceptions} table. Exceptions
+defined in the table override all automatic aggregation rules. </p>
+
+
+<h3>Loookup URI</h3>
+
+<p>The new Contacts API introduces the notion of a lookup key for a contact. If
+your application needs to maintain references to contacts, you should use lookup
+keys instead of the traditional row ids. You can acquire a lookup key from the
+contact itself, it is a column on the 
+{@link android.provider.ContactsContract.Contacts} table. Once you have a lookup key,
+you can construct a URI in this way:</p>
+
+<pre>Uri lookupUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, lookupKey)</pre>
+
+<p>and use it like you would use a traditional content URI, for example: </p>
+
+<pre>Cursor c = getContentResolver().query(lookupUri, new String[]{Contacts.DISPLAY_NAME}, ...);
+try {
+    c.moveToFirst();
+    String displayName = c.getString(0);
+} finally {
+    c.close();
+}</pre>
+
+<p>The reason for this complication is that regular contact row IDs are
+inherently volatile. Let's say your app stored a long ID of a contact. Then the
+user goes and manually joins the contact with some other contact. Now there is a
+single contact where there used to be two, and the stored long contact ID points
+nowhere. 
+
+<p>The lookup key helps resolve the contact in this case. The key is a string
+that concatenates the server-side identities of the raw contacts. Your
+application can use that string to find a contact, regardless whether the raw
+contact is aggregated with others or not. </p>
+
+<p>If performance is a concern for your application, you might want to store
+both the lookup and the long ID of a contact and construct a lookup URI out of
+both IDs, as shown here:</p>
+
+<pre>Uri lookupUri = getLookupUri(contactId, lookupKey)</pre>
+
+<p>When both IDs are present in the URI, the system will try to use the long ID
+first. That is a very quick query. If the contact is not found, or if the one
+that is found has the wrong lookup key, the content provider will parse the
+lookup key and track down the constituent raw contacts. If your app
+bulk-processes contacts, you should maintain both IDs. If your app works with a
+single contact per user action, you probably don't need to bother with storing
+the long ID.</p>
+
+Android itself uses lookup URIs whenever there is a need to reference a contact,
+such as with shortcuts or Quick Contact, and also during editing or even viewing
+a contact. The latter case is less obvious &mdash; why would a contact ID change
+while we are simply viewing the contact? It could change because there might be
+a sync going in the background, and the contact might get automatically
+aggregated with another while being viewed.</p>
+
+<p>In summary: whenever you need to reference a contact, we recommend that you
+do so by its lookup URI.</p>
+
+
+<h3 id="legacy">Considerations for legacy applications</h3>
+
+<p>If you have an existing application that uses the older Contacts API, 
+you should consider upgrading it to use the new API. You have four options: </p>
+
+<ul>
+<li>Leave it as-is and rely on the Contacts compatibility mode.</li>
+<li>Upgrade the app and discontinue support of pre-Android 2.0 platforms.</li>
+<li>Build a new version of the app for the new API, while keeping the old version available.</li>
+<li>Make the app use the right set of APIs depending on the platform where it is deployed. </li>
+</ul>
+
+<p>Let's consider these options one by one.</p>
+
+<h4>Using compatibility mode</h4>
+
+<p>Compatibility mode is the easiest option because you just leave the
+application as is, and it should run on Android 2.0 as long as it only uses
+public APIs. A couple examples of the use of non-public API include the use of
+explicit table names in nested queries and the use of columns that were not
+declared as public constants in the {@link android.provider.Contacts} class.
+</p>
+
+<p>Even if the application currently runs, you don't want to leave it like this
+for long. The main reason is that it will only have access to contacts from one
+account, namely the first Google account on the device. If the user opens other
+accounts in addition to or instead of a Google account, your application will
+not be able to access those contacts.</p>
+
+
+<h4>Upgrading to the new API and dropping support for older platforms</h4>
+
+<p>If your application will no longer target platforms older than 
+Android 2.0, you can upgrade to the new API in this way:</p>
+
+<ul>
+<li>Replace all usages of {@link android.provider.Contacts} with calls to new
+API. After you are done, you should not see any deprecation warnings during
+application build. The new application will be able to take full advantage of
+multiple accounts and other new features of Android 2.0. </p>
+
+<li>In the application's manifest, update (or add) the
+<code>android:minSdkVersion</code> attribute to the
+<code>&lt;uses-sdk&gt;</code> element. To use the new Contacts API, you should
+set the value of the attribute to "5" (or higher, as appropriate). For more
+information about <code>android:minSdkVersion</code>, see the documentation for
+the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+element. For more information about the value of the
+<code>minSdkVersion</code>, see <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a>.</li>
+</ul>
+
+<h4>Maintaining two applications</h4>
+
+<p>You may decide to have two different applications: one for pre-Android 2.0 
+platforms and one for Android 2.0 and beyond. If so, here's what you'll need to do:</p>
+
+<ul>
+  <li>Clone your existing app. </li>
+  <li>Change the old application: </li>
+    <ul>
+      <li>At launch time, check the version of the SDK. The version of the SDK 
+is available as {@link android.os.Build.VERSION#SDK android.os.Build.VERSION.SDK}.</li>
+      <li>If the SDK version is greater or equal to 5 (Android 2.0), show a dialog 
+suggesting to the user that it's time to go to Market and find a new version of 
+the app. You can even provide a link to the new app on Market (see <a 
+href="{@docRoot}guide/publishing/publishing.html#marketintent">Using Intents 
+to Launch Market</a>). </li>
+    </ul>
+  <li>Change the new application:</li>
+    <ul>
+      <li>Replace all usages of the older Contacts API with calls to new API. 
+The new application will be able to take full advantage of multiple accounts 
+and other new features of Android 2.0. </li>
+      <li>Modify that application's AndroidManifest.xml file: </li>
+        <ul>
+          <li>Give the application a new name and a new package name. Currently 
+Android Market does not allow you to have two applications with the same 
+name/package.</li>
+          <li>Update (or add) the <code>android:minSdkVersion</code> attribute 
+to the <code>&lt;uses-sdk&gt;</code> element. To use the new Contacts API, 
+you should set the value of the attribute to "5" (or higher, as appropriate).</li>
+        </ul>
+      </ul>
+    <li>Publish both apps on Market, the old app one as an upgrade and the 
+other as new. Make sure to explain the difference between the apps in their 
+descriptions.</li>
+</ul>
+
+<p>This plan has its disadvantages: </p>
+
+<ul>
+<li>The new application will not be able to read the old application's data. 
+Application data can only be accessed by code living in the same package. So 
+databases, shared preferences, and so on, will need to be populated from 
+scratch.</li>
+<li>The upgrade process is too clunky for the user. Some users may choose 
+to either stay with the crippled old version or uninstall altogether.</li>
+</ul>
+
+<h4>Supporting the old and new APIs in the same application</h4>
+
+<p>This is a bit tricky, but the result is worth the effort. You can 
+build a single package that will work on any platform:</p>
+
+<p>Go through the existing application and factor out all access to 
+{@link android.provider.Contacts} into one class, such as ContactAccessorOldApi. 
+For example, if you have code like this:
+
+<pre>    protected void pickContact() {
+        startActivityForResult(new Intent(Intent.ACTION_PICK, People.CONTENT_URI), 0);
+    }</pre>
+
+<p>it will change to:</p>
+
+    
+<pre>    private final ContactAccessorOldApi mContactAccessor = new ContactAccessorOldApi();
+
+    void pickContact() {
+        startActivityForResult(mContactAccessor.getContactPickerIntent(), 0);
+    }</pre>
+
+<p>The corresponding method on ContactAccessorOldApi will look like this:</p>
+
+<pre>    public Intent getContactPickerIntent() {
+        return new Intent(Intent.ACTION_PICK, People.CONTENT_URI);
+    }</pre>
+
+<p>Once you are done, you should see deprecation warnings coming only 
+from ContactAccessorOldApi. </p>
+
+<p>Create a new abstract class ContactAccessor, make sure the abstract 
+class has all method signatures from ContactAccessorOldApi. Make 
+ContactAccessorOldApi extend ContactAccessor:</p>
+
+<pre>    public abstract class ContactAccessor {
+        public abstract Intent getContactPickerIntent();
+        ...
+    }</pre>
+
+<p>Create a new subclass of ContactAccessor, ContactAccessorNewApi and 
+implement all methods using the new API:</p>
+
+<pre>    public class ContactAccessorNewApi extends ContactAccessor {    
+        &#64;Override
+        public Intent getContactPickerIntent() {
+            return new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+        }
+        ...
+    }</pre>
+
+<p>At this point, you have two implementations of the same API, one using the 
+old API and another using the new API. Let's plug them in. Add this code to 
+the ContactAccessor class:</p>
+
+<pre>    private static ContactAccessor sInstance;
+
+    public static ContactAccessor getInstance() {
+        if (sInstance == null) {
+            String className;
+            int sdkVersion = Integer.parseInt(Build.VERSION.SDK);
+            if (sdkVersion &lt; Build.VERSION_CODES.ECLAIR) {
+                className = "ContactAccessorOldApi";
+            } else {
+                className = "ContactAccessorNewApi";
+            }
+            try {
+                Class&lt;? extends ContactAccessor&gt; clazz =
+                        Class.forName(ContactAccessor.class.getPackage() + "." + className)
+                                .asSubclass(ContactAccessor.class);
+                sInstance = clazz.newInstance();
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return sInstance;
+    }</pre>
+
+<p>Now replace references to ContactsAccessorOldApi with references to 
+ContactsAccessor:</p>
+
+<pre>    private final ContactAccessor mContactAccessor = ContactAccessor.getInstance();</pre>
+
+<p>You are done! Now you will want to test on Android 2.0, 1.6 and 1.5.</p>
+
+<p>We hope you like the new features and APIs we've added to Contacts in 
+Android 2.0, and we can't wait to see what cool things developers do with 
+the new APIs.</p>
