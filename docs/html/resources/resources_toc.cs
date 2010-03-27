@@ -95,6 +95,9 @@
         <li><a href="<?cs var:toroot ?>resources/articles/qsb.html">
                 <span class="en">Quick Search Box</span>
                 </a></li>
+        <li><a href="<?cs var:toroot ?>resources/articles/speech-input.html">
+                <span class="en">Speech Input</span>
+                </a></li>
         <li><a href="<?cs var:toroot ?>resources/articles/touch-mode.html">
                 <span class="en">Touch Mode</span>
                 </a></li>
