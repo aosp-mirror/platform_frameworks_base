@@ -154,6 +154,42 @@ public class Am {
             } else if (opt.equals("-f")) {
                 String str = nextArgRequired();
                 intent.setFlags(Integer.decode(str).intValue());
+            } else if (opt.equals("--grant-read-uri-permission")) {
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } else if (opt.equals("--grant-write-uri-permission")) {
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            } else if (opt.equals("--debug-log-resolution")) {
+                intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
+            } else if (opt.equals("--activity-brought-to-front")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+            } else if (opt.equals("--activity-clear-top")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            } else if (opt.equals("--activity-clear-when-task-reset")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            } else if (opt.equals("--activity-exclude-from-recents")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            } else if (opt.equals("--activity-launched-from-history")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+            } else if (opt.equals("--activity-multiple-task")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            } else if (opt.equals("--activity-no-animation")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            } else if (opt.equals("--activity-no-history")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            } else if (opt.equals("--activity-no-user-action")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+            } else if (opt.equals("--activity-previous-is-top")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+            } else if (opt.equals("--activity-reorder-to-front")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            } else if (opt.equals("--activity-reset-task-if-needed")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            } else if (opt.equals("--activity-single-top")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            } else if (opt.equals("--receiver-registered-only")) {
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            } else if (opt.equals("--receiver-replace-pending")) {
+                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             } else if (opt.equals("-D")) {
                 mDebugOption = true;
             } else if (opt.equals("-W")) {
@@ -565,7 +601,18 @@ public class Am {
                 "        [--esn <EXTRA_KEY> ...]\n" +
                 "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
                 "        [-e|--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
-                "        [-n <COMPONENT>] [-f <FLAGS>] [<URI>]\n"
+                "        [-n <COMPONENT>] [-f <FLAGS>]\n" +
+                "        [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
+                "        [--debug-log-resolution]\n" +
+                "        [--activity-brought-to-front] [--activity-clear-top]\n" +
+                "        [--activity-clear-when-task-reset] [--activity-exclude-from-recents]\n" +
+                "        [--activity-launched-from-history] [--activity-multiple-task]\n" +
+                "        [--activity-no-animation] [--activity-no-history]\n" +
+                "        [--activity-no-user-action] [--activity-previous-is-top]\n" +
+                "        [--activity-reorder-to-front] [--activity-reset-task-if-needed]\n" +
+                "        [--activity-single-top]\n" +
+                "        [--receiver-registered-only] [--receiver-replace-pending]\n" +
+                "        [<URI>]\n"
                 );
     }
 }
