@@ -133,31 +133,39 @@ public class ResolverActivity extends AlertActivity implements
                         filter = null;
                     }
                 }
-            } else if (data != null && data.getScheme() != null) {
-                filter.addDataScheme(data.getScheme());
-
-                // Look through the resolved filter to determine which part
-                // of it matched the original Intent.
-                Iterator<IntentFilter.AuthorityEntry> aIt = ri.filter.authoritiesIterator();
-                if (aIt != null) {
-                    while (aIt.hasNext()) {
-                        IntentFilter.AuthorityEntry a = aIt.next();
-                        if (a.match(data) >= 0) {
-                            int port = a.getPort();
-                            filter.addDataAuthority(a.getHost(),
-                                    port >= 0 ? Integer.toString(port) : null);
-                            break;
+            }
+            if (data != null && data.getScheme() != null) {
+                // We need the data specification if there was no type,
+                // OR if the scheme is not one of our magical "file:"
+                // or "content:" schemes (see IntentFilter for the reason).
+                if (cat != IntentFilter.MATCH_CATEGORY_TYPE
+                        || (!"file".equals(data.getScheme())
+                                && !"content".equals(data.getScheme()))) {
+                    filter.addDataScheme(data.getScheme());
+    
+                    // Look through the resolved filter to determine which part
+                    // of it matched the original Intent.
+                    Iterator<IntentFilter.AuthorityEntry> aIt = ri.filter.authoritiesIterator();
+                    if (aIt != null) {
+                        while (aIt.hasNext()) {
+                            IntentFilter.AuthorityEntry a = aIt.next();
+                            if (a.match(data) >= 0) {
+                                int port = a.getPort();
+                                filter.addDataAuthority(a.getHost(),
+                                        port >= 0 ? Integer.toString(port) : null);
+                                break;
+                            }
                         }
                     }
-                }
-                Iterator<PatternMatcher> pIt = ri.filter.pathsIterator();
-                if (pIt != null) {
-                    String path = data.getPath();
-                    while (path != null && pIt.hasNext()) {
-                        PatternMatcher p = pIt.next();
-                        if (p.match(path)) {
-                            filter.addDataPath(p.getPath(), p.getType());
-                            break;
+                    Iterator<PatternMatcher> pIt = ri.filter.pathsIterator();
+                    if (pIt != null) {
+                        String path = data.getPath();
+                        while (path != null && pIt.hasNext()) {
+                            PatternMatcher p = pIt.next();
+                            if (p.match(path)) {
+                                filter.addDataPath(p.getPath(), p.getType());
+                                break;
+                            }
                         }
                     }
                 }
