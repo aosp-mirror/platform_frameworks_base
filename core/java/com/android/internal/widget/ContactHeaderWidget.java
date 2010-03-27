@@ -175,7 +175,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
         mDisplayNameView = (TextView) findViewById(R.id.name);
         mAggregateBadge = findViewById(R.id.aggregate_badge);
-        mAggregateBadge.setVisibility(View.GONE);
 
         mPhoneticNameView = (TextView) findViewById(R.id.phonetic_name);
 
