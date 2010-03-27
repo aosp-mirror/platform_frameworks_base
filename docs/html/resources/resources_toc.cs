@@ -113,6 +113,9 @@
         <li><a href="<?cs var:toroot ?>resources/articles/tts.html">
                 <span class="en">Using Text-to-Speech</span>
                 </a></li>
+        <li><a href="<?cs var:toroot ?>resources/articles/contacts.html">
+                <span class="en">Using the Contacts API</span>
+                </a> <span class="new">new!</span></li>
         <li><a href="<?cs var:toroot ?>resources/articles/using-webviews.html">
                 <span class="en">Using WebViews</span>
                 </a></li>
