@@ -21,7 +21,7 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataInputStream;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupHelper;
-import android.app.backup.BackupHelperAgent;
+import android.app.backup.BackupAgentHelper;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;
@@ -34,7 +34,7 @@ import java.io.IOException;
 /**
  * Backup agent for various system-managed data, currently just the system wallpaper
  */
-public class SystemBackupAgent extends BackupHelperAgent {
+public class SystemBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SystemBackupAgent";
 
     // These paths must match what the WallpaperManagerService uses
