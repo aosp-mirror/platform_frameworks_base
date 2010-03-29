@@ -32,7 +32,7 @@ import java.util.zip.CRC32;
 
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
-import android.app.backup.BackupHelperAgent;
+import android.app.backup.BackupAgentHelper;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -49,7 +49,7 @@ import android.util.Log;
  * Performs backup and restore of the System and Secure settings.
  * List of settings that are backed up are stored in the Settings.java file
  */
-public class SettingsBackupAgent extends BackupHelperAgent {
+public class SettingsBackupAgent extends BackupAgentHelper {
     private static final boolean DEBUG = false;
 
     private static final String KEY_SYSTEM = "system";

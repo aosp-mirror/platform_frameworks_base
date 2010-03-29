@@ -20,7 +20,7 @@ import android.os.ParcelFileDescriptor;
 
 /**
  * A convenient interface to be used with the
- * {@link android.app.backup.BackupHelperAgent} to implement backup and restore of
+ * {@link android.app.backup.BackupAgentHelper} to implement backup and restore of
  * arbitrary data types.
  * <p>
  * STOPSHOP: document!
@@ -36,7 +36,8 @@ public interface BackupHelper {
             ParcelFileDescriptor newState);
 
     /**
-     * Called by BackupHelperAgent to restore one entity from the restore dataset.
+     * Called by {@link android.app.backup.BackupAgentHelper BackupAgentHelper}
+     * to restore one entity from the restore dataset.
      * <p class=note>
      * Do not close the <code>data</code> stream.  Do not read more than
      * <code>data.size()</code> bytes from <code>data</code>.
@@ -44,7 +45,8 @@ public interface BackupHelper {
     public void restoreEntity(BackupDataInputStream data);
 
     /**
-     * Called by BackupHelperAgent to write the new backup state file corresponding to
+     * Called by {@link android.app.backup.BackupAgentHelper BackupAgentHelper}
+     * to write the new backup state file corresponding to
      * the current state of the app's data at the time the backup operation was
      * performed.
      */
