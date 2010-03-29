@@ -467,6 +467,7 @@ android.text.style.StyleSpan
 android.text.style.TextAppearanceSpan
 android.text.util.Linkify
 android.util.AttributeSet
+android.util.Base64$Encoder
 android.util.DisplayMetrics
 android.util.EventLog
 android.util.EventLog$Event
@@ -480,7 +481,6 @@ android.util.StateSet
 android.util.TypedValue
 android.util.Xml
 android.util.Xml$Encoding
-android.util.base64.Base64$Encoder
 android.view.AbsSavedState
 android.view.ContextThemeWrapper
 android.view.Display
