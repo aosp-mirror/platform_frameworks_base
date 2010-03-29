@@ -27,12 +27,12 @@ import java.io.IOException;
  * backup agent. Then, within the agent's onBackup() and onRestore() methods, it
  * will call {@link #addHelper(String, BackupHelper)} one or more times to
  * specify the data sets, then invoke super.onBackup() or super.onRestore() to
- * have the BackupHelperAgent implementation process the data.
+ * have the BackupAgentHelper implementation process the data.
  * <p>
  * STOPSHIP: document!
  */
-public class BackupHelperAgent extends BackupAgent {
-    static final String TAG = "BackupHelperAgent";
+public class BackupAgentHelper extends BackupAgent {
+    static final String TAG = "BackupAgentHelper";
 
     BackupHelperDispatcher mDispatcher = new BackupHelperDispatcher();
 

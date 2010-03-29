@@ -16,11 +16,11 @@
 
 package com.android.backuptest;
 
-import android.app.backup.BackupHelperAgent;
+import android.app.backup.BackupAgentHelper;
 import android.app.backup.FileBackupHelper;
 import android.app.backup.SharedPreferencesBackupHelper;
 
-public class BackupTestAgent extends BackupHelperAgent
+public class BackupTestAgent extends BackupAgentHelper
 {
     public void onCreate() {
         addHelper("data_files", new FileBackupHelper(this, BackupTestActivity.FILE_NAME));
