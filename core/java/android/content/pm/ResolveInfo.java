@@ -133,7 +133,7 @@ public class ResolveInfo implements Parcelable {
         if (resolvePackageName != null && labelRes != 0) {
             label = pm.getText(resolvePackageName, labelRes, null);
             if (label != null) {
-                return label;
+                return label.toString().trim();
             }
         }
         ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
@@ -141,10 +141,14 @@ public class ResolveInfo implements Parcelable {
         if (labelRes != 0) {
             label = pm.getText(ci.packageName, labelRes, ai);
             if (label != null) {
-                return label;
+                return label.toString().trim();
             }
         }
-        return ci.loadLabel(pm);
+
+        CharSequence data = ci.loadLabel(pm);
+        // Make the data safe
+        if (data != null) data = data.toString().trim();
+        return data;
     }
     
     /**
