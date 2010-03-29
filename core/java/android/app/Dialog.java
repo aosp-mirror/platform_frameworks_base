@@ -236,10 +236,14 @@ public class Dialog implements DialogInterface, Window.Callback,
                     WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
             l = nl;
         }
-        mWindowManager.addView(mDecor, l);
-        mShowing = true;
 
-        sendShowMessage();
+        try {
+            mWindowManager.addView(mDecor, l);
+            mShowing = true;
+    
+            sendShowMessage();
+        } finally {
+        }
     }
     
     /**
