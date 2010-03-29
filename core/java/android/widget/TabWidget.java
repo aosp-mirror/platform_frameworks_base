@@ -51,8 +51,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     private int mSelectedTab = 0;
 
-    private Drawable mBottomLeftStrip;
-    private Drawable mBottomRightStrip;
+    private Drawable mLeftStrip;
+    private Drawable mRightStrip;
 
     private boolean mDrawBottomStrips = true;
     private boolean mStripMoved;
@@ -78,8 +78,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
         mDrawBottomStrips = a.getBoolean(R.styleable.TabWidget_stripEnabled, true);
         mDividerDrawable = a.getDrawable(R.styleable.TabWidget_divider);
-        mBottomLeftStrip = a.getDrawable(R.styleable.TabWidget_stripLeft);
-        mBottomRightStrip = a.getDrawable(R.styleable.TabWidget_stripRight);
+        mLeftStrip = a.getDrawable(R.styleable.TabWidget_stripLeft);
+        mRightStrip = a.getDrawable(R.styleable.TabWidget_stripRight);
 
         a.recycle();
 
@@ -114,22 +114,22 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         
         if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
             // Donut apps get old color scheme
-            if (mBottomLeftStrip == null) {
-                mBottomLeftStrip = resources.getDrawable(
+            if (mLeftStrip == null) {
+                mLeftStrip = resources.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_left_v4);
             }
-            if (mBottomRightStrip == null) {
-                mBottomRightStrip = resources.getDrawable(
+            if (mRightStrip == null) {
+                mRightStrip = resources.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_right_v4);
             }
         } else {
             // Use modern color scheme for Eclair and beyond
-            if (mBottomLeftStrip == null) {
-                mBottomLeftStrip = resources.getDrawable(
+            if (mLeftStrip == null) {
+                mLeftStrip = resources.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_left);
             }
-            if (mBottomRightStrip == null) {
-                mBottomRightStrip = resources.getDrawable(
+            if (mRightStrip == null) {
+                mRightStrip = resources.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_right);
             }
         }
@@ -198,7 +198,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param drawable the left strip drawable
      */
     public void setLeftStripDrawable(Drawable drawable) {
-        mBottomLeftStrip = drawable;
+        mLeftStrip = drawable;
         requestLayout();
         invalidate();
     }
@@ -210,7 +210,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * left strip drawable
      */
     public void setLeftStripDrawable(int resId) {
-        mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+        mLeftStrip = mContext.getResources().getDrawable(resId);
         requestLayout();
         invalidate();
     }
@@ -221,7 +221,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param drawable the right strip drawable
      */
     public void setRightStripDrawable(Drawable drawable) {
-        mBottomRightStrip = drawable;
+        mRightStrip = drawable;
         requestLayout();
         invalidate();    }
 
@@ -232,7 +232,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * right strip drawable
      */
     public void setRightStripDrawable(int resId) {
-        mBottomRightStrip = mContext.getResources().getDrawable(resId);
+        mRightStrip = mContext.getResources().getDrawable(resId);
         requestLayout();
         invalidate();
     }
@@ -282,8 +282,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
         final View selectedChild = getChildTabViewAt(mSelectedTab);
 
-        final Drawable leftStrip = mBottomLeftStrip;
-        final Drawable rightStrip = mBottomRightStrip;
+        final Drawable leftStrip = mLeftStrip;
+        final Drawable rightStrip = mRightStrip;
 
         leftStrip.setState(selectedChild.getDrawableState());
         rightStrip.setState(selectedChild.getDrawableState());
