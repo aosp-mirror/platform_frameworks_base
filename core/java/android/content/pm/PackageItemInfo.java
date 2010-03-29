@@ -78,9 +78,11 @@ public class PackageItemInfo {
 
     public PackageItemInfo(PackageItemInfo orig) {
         name = orig.name;
+        if (name != null) name = name.trim();
         packageName = orig.packageName;
         labelRes = orig.labelRes;
         nonLocalizedLabel = orig.nonLocalizedLabel;
+        if (nonLocalizedLabel != null) nonLocalizedLabel = nonLocalizedLabel.toString().trim();
         icon = orig.icon;
         metaData = orig.metaData;
     }
@@ -103,10 +105,10 @@ public class PackageItemInfo {
         if (labelRes != 0) {
             CharSequence label = pm.getText(packageName, labelRes, null);
             if (label != null) {
-                return label;
+                return label.toString().trim();
             }
         }
-        if(name != null) {
+        if (name != null) {
             return name;
         }
         return packageName;
