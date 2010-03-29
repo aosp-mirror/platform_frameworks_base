@@ -217,7 +217,7 @@
     
     <!-- Flag indicating whether the application requests the VM to operate in
          the safe mode.  -->
-    <attr name="safeMode" format="boolean" />
+    <attr name="vmSafeMode" format="boolean" />
 
     <!-- Flag indicating whether the given application component is available
          to other applications.  If false, it can only be accessed by
@@ -709,7 +709,7 @@
              override the component specific values). -->
         <attr name="enabled" />
         <attr name="debuggable" />
-        <attr name="safeMode" />
+        <attr name="vmSafeMode" />
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
