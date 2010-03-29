@@ -15,17 +15,24 @@
 -->
 
 <!-- Layout used as the dialog's content View for EditTextPreference. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+android:id/edittext_container"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="5dip"
-    android:orientation="vertical">
-    
-    <TextView android:id="@+android:id/message"
-        style="?android:attr/textAppearanceSmall"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:overscrollMode="ifContentScrolls">
+
+    <LinearLayout
+        android:id="@+android:id/edittext_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorSecondary" />
-        
-</LinearLayout>
+        android:padding="5dip"
+        android:orientation="vertical">
+
+        <TextView android:id="@+android:id/message"
+            style="?android:attr/textAppearanceSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorSecondary" />
+            
+    </LinearLayout>
+
+</ScrollView>
