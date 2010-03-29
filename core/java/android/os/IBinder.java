@@ -112,7 +112,8 @@ public interface IBinder {
     /**
      * Flag to {@link #transact}: this is a one-way call, meaning that the
      * caller returns immediately, without waiting for a result from the
-     * callee.
+     * callee. Applies only if the caller and callee are in different
+     * processes.
      */
     int FLAG_ONEWAY             = 0x00000001;
     
