@@ -48,4 +48,6 @@ oneway interface IInputMethodSession {
     void appPrivateCommand(String action, in Bundle data);
 
     void toggleSoftInput(int showFlags, int hideFlags);
+
+    void finishSession();
 }
