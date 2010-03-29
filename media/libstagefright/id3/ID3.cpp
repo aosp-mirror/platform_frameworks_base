@@ -28,6 +28,8 @@
 
 namespace android {
 
+static const size_t kMaxMetadataSize = 3 * 1024 * 1024;
+
 ID3::ID3(const sp<DataSource> &source)
     : mIsValid(false),
       mData(NULL),
@@ -109,6 +111,11 @@ bool ID3::parseV2(const sp<DataSource> &source) {
         }
 
         size = (size << 7) | header.enc_size[i];
+    }
+
+    if (size > kMaxMetadataSize) {
+        LOGE("skipping huge ID3 metadata of size %d", size);
+        return false;
     }
 
     mData = (uint8_t *)malloc(size);
