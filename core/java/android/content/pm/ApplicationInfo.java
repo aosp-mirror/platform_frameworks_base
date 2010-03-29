@@ -194,8 +194,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Value for {@link #flags}: set to true if this application would like to
      * request the VM to operate under the safe mode. Comes from
-     * {@link android.R.styleable#AndroidManifestApplication_safeMode
-     * android:safeMode} of the &lt;application&gt; tag.
+     * {@link android.R.styleable#AndroidManifestApplication_vmSafeMode
+     * android:vmSafeMode} of the &lt;application&gt; tag.
      */
     public static final int FLAG_VM_SAFE_MODE = 1<<14;
 
