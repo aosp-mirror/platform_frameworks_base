@@ -410,6 +410,10 @@ public class WebView extends AbsoluteLayout
     // true if onPause has been called (and not onResume)
     private boolean mIsPaused;
 
+    // true if, during a transition to a new page, we're delaying
+    // deleting a root layer until there's something to draw of the new page.
+    private boolean mDelayedDeleteRootLayer;
+
     /**
      * Customizable constant
      */
@@ -6241,6 +6245,12 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case NEW_PICTURE_MSG_ID: {
+                    // If we've previously delayed deleting a root
+                    // layer, do it now.
+                    if (mDelayedDeleteRootLayer) {
+                        mDelayedDeleteRootLayer = false;
+                        nativeSetRootLayer(0);
+                    }
                     WebSettings settings = mWebViewCore.getSettings();
                     // called for new content
                     final int viewWidth = getViewWidth();
@@ -6425,8 +6435,16 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SET_ROOT_LAYER_MSG_ID: {
-                    nativeSetRootLayer(msg.arg1);
-                    invalidate();
+                    if (0 == msg.arg1) {
+                        // Null indicates deleting the old layer, but
+                        // don't actually do so until we've got the
+                        // new page to display.
+                        mDelayedDeleteRootLayer = true;
+                    } else {
+                        mDelayedDeleteRootLayer = false;
+                        nativeSetRootLayer(msg.arg1);
+                        invalidate();
+                    }
                     break;
                 }
                 case REQUEST_FORM_DATA:
