@@ -42,9 +42,9 @@ import android.view.View.OnFocusChangeListener;
  * called on the containing TabHost object.
  * 
  * @attr ref android.R.styleable#TabWidget_divider
- * @attr ref android.R.styleable#TabWidget_stripEnabled
- * @attr ref android.R.styleable#TabWidget_stripLeft
- * @attr ref android.R.styleable#TabWidget_stripRight
+ * @attr ref android.R.styleable#TabWidget_tabStripEnabled
+ * @attr ref android.R.styleable#TabWidget_tabStripLeft
+ * @attr ref android.R.styleable#TabWidget_tabStripRight
  */
 public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     private OnTabSelectionChanged mSelectionChangedListener;
@@ -76,10 +76,10 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.TabWidget,
                     defStyle, 0);
 
-        mDrawBottomStrips = a.getBoolean(R.styleable.TabWidget_stripEnabled, true);
+        mDrawBottomStrips = a.getBoolean(R.styleable.TabWidget_tabStripEnabled, true);
         mDividerDrawable = a.getDrawable(R.styleable.TabWidget_divider);
-        mLeftStrip = a.getDrawable(R.styleable.TabWidget_stripLeft);
-        mRightStrip = a.getDrawable(R.styleable.TabWidget_stripRight);
+        mLeftStrip = a.getDrawable(R.styleable.TabWidget_tabStripLeft);
+        mRightStrip = a.getDrawable(R.styleable.TabWidget_tabStripRight);
 
         a.recycle();
 

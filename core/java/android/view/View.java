@@ -8771,14 +8771,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             newScrollY = top;
             clampedY = true;
         }
-        
-        // Bump the device with some haptic feedback if we're at the edge,
-        // didn't start there, and the scroll is the result of a touch event.
-        if (isTouchEvent &&
-                ((overscrollHorizontal && clampedX && scrollX != left && scrollX != right) ||
-                (overscrollVertical && clampedY && scrollY != top && scrollY != bottom))) {
-            performHapticFeedback(HapticFeedbackConstants.SCROLL_BARRIER);
-        }
 
         onOverscrolled(newScrollX, newScrollY, clampedX, clampedY);
         
