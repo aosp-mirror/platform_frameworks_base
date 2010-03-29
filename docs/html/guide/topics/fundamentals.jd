@@ -990,8 +990,8 @@ the RPC interface itself.
 </p>
 
 <p>
-An RPC interface can include only methods.
-All methods are executed synchronously (the local method blocks until the 
+An RPC interface can include only methods. By default,
+all methods are executed synchronously (the local method blocks until the
 remote method finishes), even if there is no return value.
 </p>
 
