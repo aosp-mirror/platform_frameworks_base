@@ -34,11 +34,6 @@ public class HapticFeedbackConstants {
      * The user has pressed on a virtual on-screen key.
      */
     public static final int VIRTUAL_KEY = 1;
-
-    /**
-     * The user has hit the barrier point while scrolling a view.
-     */
-    public static final int SCROLL_BARRIER = 2;
     
     /**
      * The user has pressed a soft keyboard key.
