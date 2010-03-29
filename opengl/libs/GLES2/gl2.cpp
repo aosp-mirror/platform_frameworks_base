@@ -114,6 +114,6 @@ void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
 {
     GLeglImageOES implImage = 
         (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
-    __glEGLImageTargetRenderbufferStorageOES(target, image);
+    __glEGLImageTargetRenderbufferStorageOES(target, implImage);
 }
 
