@@ -348,7 +348,8 @@ If not supplied, Keytool prompts you to enter the password. In this
 way, your password is not stored in your shell history.</p></td>
 </tr>
 <tr>
-<td><code>-alias &lt;alias_name&gt;</code></td><td>An alias for the key.</td>
+<td><code>-alias &lt;alias_name&gt;</code></td><td>An alias for the key. Only
+the first 8 characters of the alias are used.</td>
 </tr>
 <tr>
 <td><code>-keyalg &lt;alg&gt;</code></td><td>The encryption algorithm to use 
