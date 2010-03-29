@@ -173,9 +173,10 @@ status_t VectorImpl::sort(VectorImpl::compar_r_t cmp, void* state)
                     if (!array) return NO_MEMORY;
                     temp = malloc(mItemSize);
                     if (!temp) return NO_MEMORY;
-                    _do_construct(temp, 1);
                     item = reinterpret_cast<char*>(array) + mItemSize*(i);
                     curr = reinterpret_cast<char*>(array) + mItemSize*(i-1);
+                } else {
+                    _do_destroy(temp, 1);
                 }
 
                 _do_copy(temp, item, 1);
@@ -183,12 +184,14 @@ status_t VectorImpl::sort(VectorImpl::compar_r_t cmp, void* state)
                 ssize_t j = i-1;
                 void* next = reinterpret_cast<char*>(array) + mItemSize*(i);                    
                 do {
+                    _do_destroy(next, 1);
                     _do_copy(next, curr, 1);
                     next = curr;
                     --j;
                     curr = reinterpret_cast<char*>(array) + mItemSize*(j);                    
                 } while (j>=0 && (cmp(curr, temp, state) > 0));
 
+                _do_destroy(next, 1);
                 _do_copy(next, temp, 1);
             }
             i++;
