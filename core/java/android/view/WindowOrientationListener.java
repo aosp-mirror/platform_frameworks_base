@@ -120,39 +120,36 @@ public abstract class WindowOrientationListener {
         private static final int _DATA_Z = 2;
 
         // Internal aliases for the four orientation states.  ROTATION_0 = default portrait mode,
-        // ROTATION_90 = left side of device facing the sky, etc.
+        // ROTATION_90 = right side of device facing the sky, etc.
         private static final int ROTATION_0 = 0;
         private static final int ROTATION_90 = 1;
-        private static final int ROTATION_180 = 2;
-        private static final int ROTATION_270 = 3;
+        private static final int ROTATION_270 = 2;
 
         // Current orientation state
         private int mRotation = ROTATION_0;
 
         // Mapping our internal aliases into actual Surface rotation values
         private final int[] SURFACE_ROTATIONS = new int[] {Surface.ROTATION_0, Surface.ROTATION_90,
-                Surface.ROTATION_180, Surface.ROTATION_270};
+                Surface.ROTATION_270};
 
         // Threshold ranges of orientation angle to transition into other orientation states.
         // The first list is for transitions from ROTATION_0, the next for ROTATION_90, etc.
         // ROTATE_TO defines the orientation each threshold range transitions to, and must be kept
         // in sync with this.
         // The thresholds are nearly regular -- we generally transition about the halfway point
-        // between two states with a swing of 30 degreees for hysteresis.  For ROTATION_180,
+        // between two states with a swing of 30 degrees for hysteresis.  For ROTATION_180,
         // however, we enforce stricter thresholds, pushing the thresholds 15 degrees closer to 180.
         private final int[][][] THRESHOLDS = new int[][][] {
-                {{60, 165}, {165, 195}, {195, 300}},
-                {{0, 45}, {45, 165}, {165, 195}, {330, 360}},
-                {{0, 45}, {45, 135}, {225, 315}, {315, 360}},
-                {{0, 30}, {165, 195}, {195, 315}, {315, 360}}
+                {{60, 180}, {180, 300}},
+                {{0, 45}, {45, 165}, {330, 360}},
+                {{0, 30}, {195, 315}, {315, 360}}
         };
 
         // See THRESHOLDS
         private final int[][] ROTATE_TO = new int[][] {
-                {ROTATION_270, ROTATION_180, ROTATION_90},
-                {ROTATION_0, ROTATION_270, ROTATION_180, ROTATION_0},
-                {ROTATION_0, ROTATION_270, ROTATION_90, ROTATION_0},
-                {ROTATION_0, ROTATION_180, ROTATION_90, ROTATION_0}
+                {ROTATION_270, ROTATION_90},
+                {ROTATION_0, ROTATION_270, ROTATION_0},
+                {ROTATION_0, ROTATION_90, ROTATION_0}
         };
 
         // Maximum absolute tilt angle at which to consider orientation changes.  Beyond this (i.e.
