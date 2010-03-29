@@ -24,6 +24,7 @@
 
 #include "include/TimedEventQueue.h"
 
+#include <sys/prctl.h>
 #include <sys/time.h>
 
 #include <media/stagefright/MediaDebug.h>
@@ -182,7 +183,7 @@ int64_t TimedEventQueue::getRealTimeUs() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
-    return (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
+    return (int64_t)tv.tv_sec * 1000000ll + tv.tv_usec;
 }
 
 // static
@@ -211,8 +212,10 @@ void *TimedEventQueue::ThreadWrapper(void *me) {
 }
 
 void TimedEventQueue::threadEntry() {
+    prctl(PR_SET_NAME, (unsigned long)"TimedEventQueue", 0, 0, 0);
+
     for (;;) {
-        int64_t now_us;
+        int64_t now_us = 0;
         sp<Event> event;
 
         {
@@ -228,6 +231,11 @@ void TimedEventQueue::threadEntry() {
 
             List<QueueItem>::iterator it;
             for (;;) {
+                if (mQueue.empty()) {
+                    // The only event in the queue could have been cancelled
+                    // while we were waiting for its scheduled time.
+                    break;
+                }
                 it = mQueue.begin();
 
                 now_us = getRealTimeUs();
@@ -244,10 +252,25 @@ void TimedEventQueue::threadEntry() {
                     break;
                 }
 
-                status_t err = mQueueHeadChangedCondition.waitRelative(
-                        mLock, delay_us * 1000);
+                static int64_t kMaxTimeoutUs = 10000000ll;  // 10 secs
+                bool timeoutCapped = false;
+                if (delay_us > kMaxTimeoutUs) {
+                    LOGW("delay_us exceeds max timeout: %lld us", delay_us);
 
-                if (err == -ETIMEDOUT) {
+                    // We'll never block for more than 10 secs, instead
+                    // we will split up the full timeout into chunks of
+                    // 10 secs at a time. This will also avoid overflow
+                    // when converting from us to ns.
+                    delay_us = kMaxTimeoutUs;
+                    timeoutCapped = true;
+                }
+
+                status_t err = mQueueHeadChangedCondition.waitRelative(
+                        mLock, delay_us * 1000ll);
+
+                if (!timeoutCapped && err == -ETIMEDOUT) {
+                    // We finally hit the time this event is supposed to
+                    // trigger.
                     now_us = getRealTimeUs();
                     break;
                 }
