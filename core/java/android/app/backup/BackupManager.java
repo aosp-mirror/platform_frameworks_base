@@ -41,7 +41,7 @@ import android.util.Log;
  * of how the backup then proceeds.
  * <p>
  * A simple implementation of a BackupAgent useful for backing up Preferences
- * and files is available by using {@link android.app.backup.BackupHelperAgent}.
+ * and files is available by using {@link android.app.backup.BackupAgentHelper}.
  * <p>
  * STOPSHIP: more documentation!
  * <p>
