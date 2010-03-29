@@ -1874,11 +1874,11 @@
         <!-- Drawable used to draw the divider between tabs. -->
         <attr name="divider" />
         <!-- Determines whether the strip under the tab indicators is drawn or not. -->
-        <attr name="stripEnabled" format="boolean" />
+        <attr name="tabStripEnabled" format="boolean" />
         <!-- Drawable used to draw the left part of the strip underneath the tabs. -->
-        <attr name="stripLeft" format="reference" />
+        <attr name="tabStripLeft" format="reference" />
         <!-- Drawable used to draw the right part of the strip underneath the tabs. -->
-        <attr name="stripRight" format="reference" />
+        <attr name="tabStripRight" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextAppearance">
         <!-- Text color. -->
