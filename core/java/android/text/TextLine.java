@@ -1,0 +1,1053 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.text;
+
+import com.android.internal.util.ArrayUtils;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Paint.FontMetricsInt;
+import android.icu.text.ArabicShaping;
+import android.text.Layout.Directions;
+import android.text.style.CharacterStyle;
+import android.text.style.MetricAffectingSpan;
+import android.text.style.ReplacementSpan;
+import android.text.style.TabStopSpan;
+import android.util.Log;
+
+/**
+ * Represents a line of styled text, for measuring in visual order and
+ * for rendering.
+ *
+ * <p>Get a new instance using obtain(), and when finished with it, return it
+ * to the pool using recycle().
+ *
+ * <p>Call set to prepare the instance for use, then either draw, measure,
+ * metrics, or caretToLeftRightOf.
+ *
+ * @hide
+ */
+class TextLine {
+    private TextPaint mPaint;
+    private CharSequence mText;
+    private int mStart;
+    private int mLen;
+    private int mDir;
+    private Directions mDirections;
+    private boolean mHasTabs;
+    private TabStopSpan[] mTabs;
+
+    private char[] mChars;
+    private boolean mCharsValid;
+    private Spanned mSpanned;
+    private TextPaint mWorkPaint = new TextPaint();
+    private int mPreppedIndex;
+    private int mPreppedLimit;
+
+    private static TextLine[] cached = new TextLine[3];
+
+    /**
+     * Returns a new TextLine from the shared pool.
+     *
+     * @return an uninitialized TextLine
+     */
+    static TextLine obtain() {
+        TextLine tl;
+        synchronized (cached) {
+            for (int i = cached.length; --i >= 0;) {
+                if (cached[i] != null) {
+                    tl = cached[i];
+                    cached[i] = null;
+                    return tl;
+                }
+            }
+        }
+        tl = new TextLine();
+        Log.e("TLINE", "new: " + tl);
+        return tl;
+    }
+
+    /**
+     * Puts a TextLine back into the shared pool. Do not use this TextLine once
+     * it has been returned.
+     * @param tl the textLine
+     * @return null, as a convenience from clearing references to the provided
+     * TextLine
+     */
+    static TextLine recycle(TextLine tl) {
+        tl.mText = null;
+        tl.mPaint = null;
+        tl.mDirections = null;
+        if (tl.mLen < 250) {
+            synchronized(cached) {
+                for (int i = 0; i < cached.length; ++i) {
+                    if (cached[i] == null) {
+                        cached[i] = tl;
+                        break;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Initializes a TextLine and prepares it for use.
+     *
+     * @param paint the base paint for the line
+     * @param text the text, can be Styled
+     * @param start the start of the line relative to the text
+     * @param limit the limit of the line relative to the text
+     * @param dir the paragraph direction of this line
+     * @param directions the directions information of this line
+     * @param hasTabs true if the line might contain tabs or emoji
+     * @param spans array of paragraph-level spans, of which only TabStopSpans
+     * are used.  Can be null.
+     */
+    void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
+            Directions directions, boolean hasTabs, Object[] spans) {
+        mPaint = paint;
+        mText = text;
+        mStart = start;
+        mLen = limit - start;
+        mDir = dir;
+        mDirections = directions;
+        mHasTabs = hasTabs;
+        mSpanned = null;
+        mPreppedIndex = 0;
+        mPreppedLimit = 0;
+
+        boolean hasReplacement = false;
+        if (text instanceof Spanned) {
+            mSpanned = (Spanned) text;
+            hasReplacement = mSpanned.getSpans(start, limit,
+                    ReplacementSpan.class).length > 0;
+        }
+
+        mCharsValid = hasReplacement || hasTabs ||
+            directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
+
+        if (mCharsValid) {
+            if (mChars == null || mChars.length < mLen) {
+                mChars = new char[ArrayUtils.idealCharArraySize(mLen)];
+            }
+            TextUtils.getChars(text, start, limit, mChars, 0);
+
+            if (hasTabs) {
+                TabStopSpan[] tabs = mTabs;
+                int tabLen = 0;
+                if (mSpanned != null && spans == null) {
+                    TabStopSpan[] newTabs = mSpanned.getSpans(start, limit,
+                            TabStopSpan.class);
+                    if (tabs == null || tabs.length < newTabs.length) {
+                        tabs = newTabs;
+                    } else {
+                        for (int i = 0; i < newTabs.length; ++i) {
+                            tabs[i] = newTabs[i];
+                        }
+                    }
+                    tabLen = newTabs.length;
+                } else if (spans != null) {
+                    if (tabs == null || tabs.length < spans.length) {
+                        tabs = new TabStopSpan[spans.length];
+                    }
+                    for (int i = 0; i < spans.length; ++i) {
+                        if (spans[i] instanceof TabStopSpan) {
+                            tabs[tabLen++] = (TabStopSpan) spans[i];
+                        }
+                    }
+                }
+
+                if (tabs != null && tabLen < tabs.length){
+                    tabs[tabLen] = null;
+                }
+                mTabs = tabs;
+            }
+        }
+    }
+
+    /**
+     * Renders the TextLine.
+     *
+     * @param c the canvas to render on
+     * @param x the leading margin position
+     * @param top the top of the line
+     * @param y the baseline
+     * @param bottom the bottom of the line
+     */
+    void draw(Canvas c, float x, int top, int y, int bottom) {
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                drawRun(c, 0, 0, mLen, false, x, top, y, bottom, false);
+                return;
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                drawRun(c, 0, 0, mLen, true, x, top, y, bottom, false);
+                return;
+            }
+        }
+
+        float h = 0;
+        int[] runs = mDirections.mDirections;
+        RectF emojiRect = null;
+
+        int lastRunIndex = runs.length - 2;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i+1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i+1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
+            char[] chars = mChars;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
+                int codept = 0;
+                Bitmap bm = null;
+
+                if (mHasTabs && j < runLimit) {
+                    codept = mChars[j];
+                    if (codept >= 0xd800 && codept < 0xdc00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(mChars, j);
+                        if (codept >= Layout.MIN_EMOJI && codept <= Layout.MAX_EMOJI) {
+                            bm = Layout.EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
+                        } else if (codept > 0xffff) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
+
+                if (j == runLimit || codept == '\t' || bm != null) {
+                    h += drawRun(c, i, segstart, j, runIsRtl, x+h, top, y, bottom,
+                            i != lastRunIndex || j != mLen);
+
+                    if (codept == '\t') {
+                        h = mDir * nextTab(h * mDir);
+                    } else if (bm != null) {
+                        float bmAscent = ascent(j);
+                        float bitmapHeight = bm.getHeight();
+                        float scale = -bmAscent / bitmapHeight;
+                        float width = bm.getWidth() * scale;
+
+                        if (emojiRect == null) {
+                            emojiRect = new RectF();
+                        }
+                        emojiRect.set(x + h, y + bmAscent,
+                                x + h + width, y);
+                        c.drawBitmap(bm, null, emojiRect, mPaint);
+                        h += width;
+                        j++;
+                    }
+                    segstart = j + 1;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns metrics information for the entire line.
+     *
+     * @param fmi receives font metrics information, can be null
+     * @return the signed width of the line
+     */
+    float metrics(FontMetricsInt fmi) {
+        return measure(mLen, false, fmi);
+    }
+
+    /**
+     * Returns information about a position on the line.
+     *
+     * @param offset the line-relative character offset, between 0 and the
+     * line length, inclusive
+     * @param trailing true to measure the trailing edge of the character
+     * before offset, false to measure the leading edge of the character
+     * at offset.
+     * @param fmi receives metrics information about the requested
+     * character, can be null.
+     * @return the signed offset from the leading margin to the requested
+     * character edge.
+     */
+    float measure(int offset, boolean trailing, FontMetricsInt fmi) {
+        int target = trailing ? offset - 1 : offset;
+        if (target < 0) {
+            return 0;
+        }
+
+        float h = 0;
+
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                return measureRun( 0, 0, target, mLen, false, fmi);
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                return measureRun(0, 0, target, mLen, true, fmi);
+            }
+        }
+
+        char[] chars = mChars;
+        int[] runs = mDirections.mDirections;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i+1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i+1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
+                int codept = 0;
+                Bitmap bm = null;
+
+                if (mHasTabs && j < runLimit) {
+                    codept = chars[j];
+                    if (codept >= 0xd800 && codept < 0xdc00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(chars, j);
+                        if (codept >= Layout.MIN_EMOJI && codept <= Layout.MAX_EMOJI) {
+                            bm = Layout.EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
+                        } else if (codept > 0xffff) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
+
+                if (j == runLimit || codept == '\t' || bm != null) {
+                    boolean inSegment = target >= segstart && target < j;
+
+                    boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+                    if (inSegment && advance) {
+                        return h += measureRun(i, segstart, offset, j, runIsRtl, fmi);
+                    }
+
+                    float w = measureRun(i, segstart, j, j, runIsRtl, fmi);
+                    h += advance ? w : -w;
+
+                    if (inSegment) {
+                        return h += measureRun(i, segstart, offset, j, runIsRtl, null);
+                    }
+
+                    if (codept == '\t') {
+                        if (offset == j) {
+                            return h;
+                        }
+                        h = mDir * nextTab(h * mDir);
+                        if (target == j) {
+                            return h;
+                        }
+                    }
+
+                    if (bm != null) {
+                        float bmAscent = ascent(j);
+                        float wid = bm.getWidth() * -bmAscent / bm.getHeight();
+                        h += mDir * wid;
+                        j++;
+                    }
+
+                    segstart = j + 1;
+                }
+            }
+        }
+
+        return h;
+    }
+
+    /**
+     * Draws a unidirectional (but possibly multi-styled) run of text.
+     *
+     * @param c the canvas to draw on
+     * @param runIndex the index of this directional run
+     * @param start the line-relative start
+     * @param limit the line-relative limit
+     * @param runIsRtl true if the run is right-to-left
+     * @param x the position of the run that is closest to the leading margin
+     * @param top the top of the line
+     * @param y the baseline
+     * @param bottom the bottom of the line
+     * @param needWidth true if the width value is required.
+     * @return the signed width of the run, based on the paragraph direction.
+     * Only valid if needWidth is true.
+     */
+    private float drawRun(Canvas c, int runIndex, int start,
+            int limit, boolean runIsRtl, float x, int top, int y, int bottom,
+            boolean needWidth) {
+
+        if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
+            float w = -measureRun(runIndex, start, limit, limit, runIsRtl, null);
+            handleRun(runIndex, start, limit, limit, runIsRtl, c, x + w, top,
+                    y, bottom, null, false, PREP_NONE);
+            return w;
+        }
+
+        return handleRun(runIndex, start, limit, limit, runIsRtl, c, x, top,
+                y, bottom, null, needWidth, PREP_NEEDED);
+    }
+
+    /**
+     * Measures a unidirectional (but possibly multi-styled) run of text.
+     *
+     * @param runIndex the run index
+     * @param start the line-relative start of the run
+     * @param offset the offset to measure to, between start and limit inclusive
+     * @param limit the line-relative limit of the run
+     * @param runIsRtl true if the run is right-to-left
+     * @param fmi receives metrics information about the requested
+     * run, can be null.
+     * @return the signed width from the start of the run to the leading edge
+     * of the character at offset, based on the run (not paragraph) direction
+     */
+    private float measureRun(int runIndex, int start,
+            int offset, int limit, boolean runIsRtl, FontMetricsInt fmi) {
+        return handleRun(runIndex, start, offset, limit, runIsRtl, null,
+                0, 0, 0, 0, fmi, true, PREP_NEEDED);
+    }
+
+    /**
+     * Prepares a run for measurement or rendering.  This ensures that any
+     * required shaping of the text in the run has been performed so that
+     * measurements reflect the shaped text.
+     *
+     * @param runIndex the run index
+     * @param start the line-relative start of the run
+     * @param limit the line-relative limit of the run
+     * @param runIsRtl true if the run is right-to-left
+     */
+    private void prepRun(int runIndex, int start, int limit,
+            boolean runIsRtl) {
+        handleRun(runIndex, start, limit, limit, runIsRtl, null, 0, 0, 0,
+                0, null, false, PREP_ONLY);
+    }
+
+    /**
+     * Walk the cursor through this line, skipping conjuncts and
+     * zero-width characters.
+     *
+     * <p>This function cannot properly walk the cursor off the ends of the line
+     * since it does not know about any shaping on the previous/following line
+     * that might affect the cursor position. Callers must either avoid these
+     * situations or handle the result specially.
+     *
+     * <p>The paint is required because the region around the cursor might not
+     * have been formatted yet, and the valid positions can depend on the glyphs
+     * used to render the text, which in turn depends on the paint.
+     *
+     * @param paint the base paint of the line
+     * @param cursor the starting position of the cursor, between 0 and the
+     * length of the line, inclusive
+     * @param toLeft true if the caret is moving to the left.
+     * @return the new offset.  If it is less than 0 or greater than the length
+     * of the line, the previous/following line should be examined to get the
+     * actual offset.
+     */
+    int getOffsetToLeftRightOf(int cursor, boolean toLeft) {
+        // 1) The caret marks the leading edge of a character. The character
+        // logically before it might be on a different level, and the active caret
+        // position is on the character at the lower level. If that character
+        // was the previous character, the caret is on its trailing edge.
+        // 2) Take this character/edge and move it in the indicated direction.
+        // This gives you a new character and a new edge.
+        // 3) This position is between two visually adjacent characters.  One of
+        // these might be at a lower level.  The active position is on the
+        // character at the lower level.
+        // 4) If the active position is on the trailing edge of the character,
+        // the new caret position is the following logical character, else it
+        // is the character.
+
+        int lineStart = 0;
+        int lineEnd = mLen;
+        boolean paraIsRtl = mDir == -1;
+        int[] runs = mDirections.mDirections;
+
+        int runIndex, runLevel = 0, runStart = lineStart, runLimit = lineEnd, newCaret = -1;
+        boolean trailing = false;
+
+        if (cursor == lineStart) {
+            runIndex = -2;
+        } else if (cursor == lineEnd) {
+            runIndex = runs.length;
+        } else {
+          // First, get information about the run containing the character with
+          // the active caret.
+          for (runIndex = 0; runIndex < runs.length; runIndex += 2) {
+            runStart = lineStart + runs[runIndex];
+            if (cursor >= runStart) {
+              runLimit = runStart + (runs[runIndex+1] & Layout.RUN_LENGTH_MASK);
+              if (runLimit > lineEnd) {
+                  runLimit = lineEnd;
+              }
+              if (cursor < runLimit) {
+                runLevel = (runs[runIndex+1] >>> Layout.RUN_LEVEL_SHIFT) &
+                    Layout.RUN_LEVEL_MASK;
+                if (cursor == runStart) {
+                  // The caret is on a run boundary, see if we should
+                  // use the position on the trailing edge of the previous
+                  // logical character instead.
+                  int prevRunIndex, prevRunLevel, prevRunStart, prevRunLimit;
+                  int pos = cursor - 1;
+                  for (prevRunIndex = 0; prevRunIndex < runs.length; prevRunIndex += 2) {
+                    prevRunStart = lineStart + runs[prevRunIndex];
+                    if (pos >= prevRunStart) {
+                      prevRunLimit = prevRunStart +
+                          (runs[prevRunIndex+1] & Layout.RUN_LENGTH_MASK);
+                      if (prevRunLimit > lineEnd) {
+                          prevRunLimit = lineEnd;
+                      }
+                      if (pos < prevRunLimit) {
+                        prevRunLevel = (runs[prevRunIndex+1] >>> Layout.RUN_LEVEL_SHIFT)
+                            & Layout.RUN_LEVEL_MASK;
+                        if (prevRunLevel < runLevel) {
+                          // Start from logically previous character.
+                          runIndex = prevRunIndex;
+                          runLevel = prevRunLevel;
+                          runStart = prevRunStart;
+                          runLimit = prevRunLimit;
+                          trailing = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
+                break;
+              }
+            }
+          }
+
+          // caret might be == lineEnd.  This is generally a space or paragraph
+          // separator and has an associated run, but might be the end of
+          // text, in which case it doesn't.  If that happens, we ran off the
+          // end of the run list, and runIndex == runs.length.  In this case,
+          // we are at a run boundary so we skip the below test.
+          if (runIndex != runs.length) {
+              boolean runIsRtl = (runLevel & 0x1) != 0;
+              boolean advance = toLeft == runIsRtl;
+              if (cursor != (advance ? runLimit : runStart) || advance != trailing) {
+                  // Moving within or into the run, so we can move logically.
+                  prepRun(runIndex, runStart, runLimit, runIsRtl);
+                  newCaret = getOffsetBeforeAfter(runIndex, cursor, advance);
+                  // If the new position is internal to the run, we're at the strong
+                  // position already so we're finished.
+                  if (newCaret != (advance ? runLimit : runStart)) {
+                      return newCaret;
+                  }
+              }
+          }
+        }
+
+        // If newCaret is -1, we're starting at a run boundary and crossing
+        // into another run. Otherwise we've arrived at a run boundary, and
+        // need to figure out which character to attach to.  Note we might
+        // need to run this twice, if we cross a run boundary and end up at
+        // another run boundary.
+        while (true) {
+          boolean advance = toLeft == paraIsRtl;
+          int otherRunIndex = runIndex + (advance ? 2 : -2);
+          if (otherRunIndex >= 0 && otherRunIndex < runs.length) {
+            int otherRunStart = lineStart + runs[otherRunIndex];
+            int otherRunLimit = otherRunStart +
+            (runs[otherRunIndex+1] & Layout.RUN_LENGTH_MASK);
+            if (otherRunLimit > lineEnd) {
+                otherRunLimit = lineEnd;
+            }
+            int otherRunLevel = (runs[otherRunIndex+1] >>> Layout.RUN_LEVEL_SHIFT) &
+                Layout.RUN_LEVEL_MASK;
+            boolean otherRunIsRtl = (otherRunLevel & 1) != 0;
+
+            advance = toLeft == otherRunIsRtl;
+            if (newCaret == -1) {
+                prepRun(otherRunIndex, otherRunStart, otherRunLimit,
+                        otherRunIsRtl);
+                newCaret = getOffsetBeforeAfter(otherRunIndex,
+                        advance ? otherRunStart : otherRunLimit, advance);
+                if (newCaret == (advance ? otherRunLimit : otherRunStart)) {
+                    // Crossed and ended up at a new boundary,
+                    // repeat a second and final time.
+                    runIndex = otherRunIndex;
+                    runLevel = otherRunLevel;
+                    continue;
+                }
+                break;
+            }
+
+            // The new caret is at a boundary.
+            if (otherRunLevel < runLevel) {
+              // The strong character is in the other run.
+              newCaret = advance ? otherRunStart : otherRunLimit;
+            }
+            break;
+          }
+
+          if (newCaret == -1) {
+              // We're walking off the end of the line.  The paragraph
+              // level is always equal to or lower than any internal level, so
+              // the boundaries get the strong caret.
+              newCaret = getOffsetBeforeAfter(-1, cursor, advance);
+              break;
+          }
+
+          // Else we've arrived at the end of the line.  That's a strong position.
+          // We might have arrived here by crossing over a run with no internal
+          // breaks and dropping out of the above loop before advancing one final
+          // time, so reset the caret.
+          // Note, we use '<=' below to handle a situation where the only run
+          // on the line is a counter-directional run.  If we're not advancing,
+          // we can end up at the 'lineEnd' position but the caret we want is at
+          // the lineStart.
+          if (newCaret <= lineEnd) {
+              newCaret = advance ? lineEnd : lineStart;
+          }
+          break;
+        }
+
+        return newCaret;
+    }
+
+    /**
+     * Returns the next valid offset within this directional run, skipping
+     * conjuncts and zero-width characters.  This should not be called to walk
+     * off the end of the run.
+     *
+     * @param runIndex the run index
+     * @param offset the offset
+     * @param after true if the new offset should logically follow the provided
+     * offset
+     * @return the new offset
+     */
+    private int getOffsetBeforeAfter(int runIndex, int offset, boolean after) {
+        // XXX note currently there is no special handling of zero-width
+        // combining marks, since the only analysis involves mock shaping.
+
+        boolean offEnd = offset == (after ? mLen : 0);
+        if (runIndex >= 0 && !offEnd && mCharsValid) {
+            char[] chars = mChars;
+            if (after) {
+                int cp = Character.codePointAt(chars, offset, mLen);
+                if (cp >= 0x10000) {
+                    ++offset;
+                }
+                while (++offset < mLen && chars[offset] == '\ufeff'){}
+            } else {
+                while (--offset >= 0 && chars[offset] == '\ufeff'){}
+                int cp = Character.codePointBefore(chars, offset + 1);
+                if (cp >= 0x10000) {
+                    --offset;
+                }
+            }
+            return offset;
+        }
+
+        if (after) {
+            return TextUtils.getOffsetAfter(mText, offset + mStart) - mStart;
+        }
+        return TextUtils.getOffsetBefore(mText, offset + mStart) - mStart;
+    }
+
+    /**
+     * Utility function for measuring and rendering text.  The text must
+     * not include a tab or emoji.
+     *
+     * @param wp the working paint
+     * @param start the start of the text
+     * @param limit the limit of the text
+     * @param runIsRtl true if the run is right-to-left
+     * @param c the canvas, can be null if rendering is not needed
+     * @param x the edge of the run closest to the leading margin
+     * @param top the top of the line
+     * @param y the baseline
+     * @param bottom the bottom of the line
+     * @param fmi receives metrics information, can be null
+     * @param needWidth true if the width of the run is needed
+     * @return the signed width of the run based on the run direction; only
+     * valid if needWidth is true
+     */
+    private float handleText(TextPaint wp, int start, int limit,
+            boolean runIsRtl, Canvas c, float x, int top, int y, int bottom,
+            FontMetricsInt fmi, boolean needWidth) {
+
+        float ret = 0;
+
+        int runLen = limit - start;
+        if (needWidth || (c != null && (wp.bgColor != 0 || runIsRtl))) {
+            if (mCharsValid) {
+                ret = wp.measureText(mChars, start, runLen);
+            } else {
+                ret = wp.measureText(mText, mStart + start,
+                        mStart + start + runLen);
+            }
+        }
+
+        if (fmi != null) {
+            wp.getFontMetricsInt(fmi);
+        }
+
+        if (c != null) {
+            if (runIsRtl) {
+                x -= ret;
+            }
+
+            if (wp.bgColor != 0) {
+                int color = wp.getColor();
+                Paint.Style s = wp.getStyle();
+                wp.setColor(wp.bgColor);
+                wp.setStyle(Paint.Style.FILL);
+
+                c.drawRect(x, top, x + ret, bottom, wp);
+
+                wp.setStyle(s);
+                wp.setColor(color);
+            }
+
+            drawTextRun(c, wp, start, limit, runIsRtl, x, y + wp.baselineShift);
+        }
+
+        return runIsRtl ? -ret : ret;
+    }
+
+    /**
+     * Utility function for measuring and rendering a replacement.
+     *
+     * @param replacement the replacement
+     * @param wp the work paint
+     * @param runIndex the run index
+     * @param start the start of the run
+     * @param limit the limit of the run
+     * @param runIsRtl true if the run is right-to-left
+     * @param c the canvas, can be null if not rendering
+     * @param x the edge of the replacement closest to the leading margin
+     * @param top the top of the line
+     * @param y the baseline
+     * @param bottom the bottom of the line
+     * @param fmi receives metrics information, can be null
+     * @param needWidth true if the width of the replacement is needed
+     * @param prepFlags one of PREP_NONE, PREP_REQUIRED, or PREP_ONLY
+     * @return the signed width of the run based on the run direction; only
+     * valid if needWidth is true
+     */
+    private float handleReplacement(ReplacementSpan replacement, TextPaint wp,
+            int runIndex, int start, int limit, boolean runIsRtl, Canvas c,
+            float x, int top, int y, int bottom, FontMetricsInt fmi,
+            boolean needWidth, int prepFlags) {
+
+        float ret = 0;
+
+        // Preparation replaces the first character of the series with the
+        // object-replacement character and the remainder with zero width
+        // non-break space aka BOM.  Cursor movement code skips over the BOMs
+        // so that the replacement character is the only character 'seen'.
+        if (prepFlags != PREP_NONE && limit > start &&
+                (runIndex > mPreppedIndex ||
+                        (runIndex == mPreppedIndex && start >= mPreppedLimit))) {
+            char[] chars = mChars;
+            chars[start] = '\ufffc';
+            for (int i = start + 1; i < limit; ++i) {
+                chars[i] = '\ufeff'; // used as ZWNBS, marks positions to skip
+            }
+            mPreppedIndex = runIndex;
+            mPreppedLimit = limit;
+        }
+
+        if (prepFlags != PREP_ONLY) {
+            int textStart = mStart + start;
+            int textLimit = mStart + limit;
+
+            if (needWidth || (c != null && runIsRtl)) {
+                ret = replacement.getSize(wp, mText, textStart, textLimit, fmi);
+            }
+
+            if (c != null) {
+                if (runIsRtl) {
+                    x -= ret;
+                }
+                replacement.draw(c, mText, textStart, textLimit,
+                        x, top, y, bottom, wp);
+            }
+        }
+
+        return runIsRtl ? -ret : ret;
+    }
+
+    /**
+     * Utility function for handling a unidirectional run.  The run must not
+     * contain tabs or emoji but can contain styles.
+     *
+     * @param p the base paint
+     * @param runIndex the run index
+     * @param start the line-relative start of the run
+     * @param offset the offset to measure to, between start and limit inclusive
+     * @param limit the limit of the run
+     * @param runIsRtl true if the run is right-to-left
+     * @param c the canvas, can be null
+     * @param x the end of the run closest to the leading margin
+     * @param top the top of the line
+     * @param y the baseline
+     * @param bottom the bottom of the line
+     * @param fmi receives metrics information, can be null
+     * @param needWidth true if the width is required
+     * @param prepFlags one of PREP_NONE, PREP_REQUIRED, or PREP_ONLY
+     * @return the signed width of the run based on the run direction; only
+     * valid if needWidth is true
+     */
+    private float handleRun(int runIndex, int start, int offset,
+            int limit, boolean runIsRtl, Canvas c, float x, int top, int y,
+            int bottom, FontMetricsInt fmi, boolean needWidth, int prepFlags) {
+
+        // Shaping needs to take into account context up to metric boundaries,
+        // but rendering needs to take into account character style boundaries.
+        // So we iterate through metric runs, shape using the initial
+        // paint (the same typeface is used up to the next metric boundary),
+        // then within each metric run iterate through character style runs.
+        float ox = x;
+        for (int i = start, inext; i < offset; i = inext) {
+            TextPaint wp = mWorkPaint;
+            wp.set(mPaint);
+
+            int mnext;
+            if (mSpanned == null) {
+                inext = limit;
+                mnext = offset;
+            } else {
+                inext = mSpanned.nextSpanTransition(mStart + i, mStart + limit,
+                        MetricAffectingSpan.class) - mStart;
+
+                mnext = inext < offset ? inext : offset;
+                MetricAffectingSpan[] spans = mSpanned.getSpans(mStart + i,
+                        mStart + mnext, MetricAffectingSpan.class);
+
+                if (spans.length > 0) {
+                    ReplacementSpan replacement = null;
+                    for (int j = 0; j < spans.length; j++) {
+                        MetricAffectingSpan span = spans[j];
+                        if (span instanceof ReplacementSpan) {
+                            replacement = (ReplacementSpan)span;
+                        } else {
+                            span.updateDrawState(wp); // XXX or measureState?
+                        }
+                    }
+
+                    if (replacement != null) {
+                        x += handleReplacement(replacement, wp, runIndex, i,
+                                mnext, runIsRtl, c, x, top, y, bottom, fmi,
+                                needWidth || mnext < offset, prepFlags);
+                        continue;
+                    }
+                }
+            }
+
+            if (prepFlags != PREP_NONE) {
+                handlePrep(wp, runIndex, i, inext, runIsRtl);
+            }
+
+            if (prepFlags != PREP_ONLY) {
+                if (mSpanned == null || c == null) {
+                    x += handleText(wp, i, mnext, runIsRtl, c, x, top,
+                            y, bottom, fmi, needWidth || mnext < offset);
+                } else {
+                    for (int j = i, jnext; j < mnext; j = jnext) {
+                        jnext = mSpanned.nextSpanTransition(mStart + j,
+                                mStart + mnext, CharacterStyle.class) - mStart;
+
+                        CharacterStyle[] spans = mSpanned.getSpans(mStart + j,
+                                mStart + jnext, CharacterStyle.class);
+
+                        wp.set(mPaint);
+                        for (int k = 0; k < spans.length; k++) {
+                            CharacterStyle span = spans[k];
+                            span.updateDrawState(wp);
+                        }
+
+                        x += handleText(wp, j, jnext, runIsRtl, c, x,
+                                top, y, bottom, fmi, needWidth || jnext < offset);
+                    }
+                }
+            }
+        }
+
+        return x - ox;
+    }
+
+    private static final int PREP_NONE = 0;
+    private static final int PREP_NEEDED = 1;
+    private static final int PREP_ONLY = 2;
+
+    /**
+     * Prepares text for measuring or rendering.
+     *
+     * @param paint the paint used to shape the text
+     * @param runIndex the run index
+     * @param start the start of the text to prepare
+     * @param limit the limit of the text to prepare
+     * @param runIsRtl true if the run is right-to-left
+     */
+    private void handlePrep(TextPaint paint, int runIndex, int start, int limit,
+            boolean runIsRtl) {
+
+        // The current implementation 'prepares' text by manipulating the
+        // character array.  In order to keep track of what ranges have
+        // already been prepared, it uses the runIndex and the limit of
+        // the prepared text within that run.  This index is required
+        // since operations that prepare the text always proceed in visual
+        // order and the limit itself does not let us know which runs have
+        // been processed and which have not.
+        //
+        // This bookkeeping is an attempt to let us process a line partially,
+        // for example, by only shaping up to the cursor position.  This may
+        // not make sense if we can reuse the line, say by caching repeated
+        // accesses to the same line for both measuring and drawing, since in
+        // those cases we'd always prepare the entire line.  At the
+        // opposite extreme, we might shape and then immediately discard only
+        // the run of text we're working with at the moment, instead of retaining
+        // the results of shaping (as the chars array is).  In this case as well
+        // we would not need to do the index/limit bookkeeping.
+        //
+        // Technically, the only reason for bookkeeping is so that we don't
+        // re-mirror already-mirrored glyphs, since the shaping and object
+        // replacement operations will not change already-processed text.
+
+        if (runIndex > mPreppedIndex ||
+                (runIndex == mPreppedIndex && start >= mPreppedLimit)) {
+            if (runIsRtl) {
+                int runLen = limit - start;
+                AndroidCharacter.mirror(mChars, start, runLen);
+                ArabicShaping.SHAPER.shape(mChars, start, runLen);
+
+                // Note: tweaked MockShaper to put '\ufeff' in place of
+                // alef when it forms lam-alef ligatures, so no extra
+                // processing is necessary here.
+            }
+            mPreppedIndex = runIndex;
+            mPreppedLimit = limit;
+        }
+    }
+
+    /**
+     * Render a text run with the set-up paint.
+     *
+     * @param c the canvas
+     * @param wp the paint used to render the text
+     * @param start the run start
+     * @param limit the run limit
+     * @param runIsRtl true if the run is right-to-left
+     * @param x the x position of the left edge of the run
+     * @param y the baseline of the run
+     */
+    private void drawTextRun(Canvas c, TextPaint wp, int start, int limit,
+            boolean runIsRtl, float x, int y) {
+
+        // Since currently skia only renders text left-to-right, we need to
+        // put the shaped characters into visual order before rendering.
+        // Since we might want to re-render the line again, we swap them
+        // back when we're done.  If we left them swapped, measurement
+        // would be broken since it expects the characters in logical order.
+        if (runIsRtl) {
+            swapRun(start, limit);
+        }
+        if (mCharsValid) {
+            c.drawText(mChars, start, limit - start, x, y, wp);
+        } else {
+            c.drawText(mText, mStart + start, mStart + limit, x, y, wp);
+        }
+        if (runIsRtl) {
+            swapRun(start, limit);
+        }
+    }
+
+    /**
+     * Reverses the order of characters in the chars array between start and
+     * limit, used by drawTextRun.
+     * @param start the start of the run to reverse
+     * @param limit the limit of the run to reverse
+     */
+    private void swapRun(int start, int limit) {
+        // First we swap all the characters one for one, then we
+        // do another pass looking for surrogate pairs and swapping them
+        // back into their logical order.
+        char[] chars = mChars;
+        for (int s = start, e = limit - 1; s < e; ++s, --e) {
+            char ch = chars[s]; chars[s] = chars[e]; chars[e] = ch;
+        }
+
+        for (int s = start, e = limit - 1; s < e; ++s) {
+            char c1 = chars[s];
+            if (c1 >= 0xdc00 && c1 < 0xe000) {
+                char c2 = chars[s+1];
+                if (c2 >= 0xd800 && c2 < 0xdc00) {
+                    chars[s++] = c2;
+                    chars[s] = c1;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the ascent of the text at start.  This is used for scaling
+     * emoji.
+     *
+     * @param pos the line-relative position
+     * @return the ascent of the text at start
+     */
+    float ascent(int pos) {
+        if (mSpanned == null) {
+            return mPaint.ascent();
+        }
+
+        pos += mStart;
+        MetricAffectingSpan[] spans = mSpanned.getSpans(pos, pos + 1,
+                MetricAffectingSpan.class);
+        if (spans.length == 0) {
+            return mPaint.ascent();
+        }
+
+        TextPaint wp = mWorkPaint;
+        wp.set(mPaint);
+        for (MetricAffectingSpan span : spans) {
+            span.updateMeasureState(wp);
+        }
+        return wp.ascent();
+    }
+
+    /**
+     * Returns the next tab position.
+     *
+     * @param h the (unsigned) offset from the leading margin
+     * @return the (unsigned) tab position after this offset
+     */
+    float nextTab(float h) {
+        float nh = Float.MAX_VALUE;
+        boolean alltabs = false;
+
+        if (mHasTabs && mTabs != null) {
+            TabStopSpan[] tabs = mTabs;
+            for (int i = 0; i < tabs.length && tabs[i] != null; ++i) {
+                int where = tabs[i].getTabStop();
+                if (where < nh && where > h) {
+                    nh = where;
+                }
+            }
+            if (nh != Float.MAX_VALUE) {
+                return nh;
+            }
+        }
+
+        return ((int) ((h + TAB_INCREMENT) / TAB_INCREMENT)) * TAB_INCREMENT;
+    }
+
+    private static final int TAB_INCREMENT = 20;
+}

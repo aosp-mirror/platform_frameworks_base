@@ -23,8 +23,6 @@ import android.graphics.Paint;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
-import android.text.style.ReplacementSpan;
-import android.util.Log;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -96,13 +94,13 @@ extends Layout
         mLineDirections = new Directions[
                              ArrayUtils.idealIntArraySize(2 * mColumns)];
 
+        mMeasured = MeasuredText.obtain();
+
         generate(source, bufstart, bufend, paint, outerwidth, align,
                  spacingmult, spacingadd, includepad, includepad,
                  ellipsize != null, ellipsizedWidth, ellipsize);
 
-        mChdirs = null;
-        mChs = null;
-        mWidths = null;
+        mMeasured = MeasuredText.recycle(mMeasured);
         mFontMetricsInt = null;
     }
 
@@ -113,6 +111,7 @@ extends Layout
         mLines = new int[ArrayUtils.idealIntArraySize(2 * mColumns)];
         mLineDirections = new Directions[
                              ArrayUtils.idealIntArraySize(2 * mColumns)];
+        mMeasured = MeasuredText.obtain();
     }
 
     /* package */ void generate(CharSequence source, int bufstart, int bufend,
@@ -130,38 +129,22 @@ extends Layout
         Paint.FontMetricsInt fm = mFontMetricsInt;
         int[] choosehtv = null;
 
-        int end = TextUtils.indexOf(source, '\n', bufstart, bufend);
-        int bufsiz = end >= 0 ? end - bufstart : bufend - bufstart;
-        boolean first = true;
+        MeasuredText measured = mMeasured;
 
-        if (mChdirs == null) {
-            mChdirs = new byte[ArrayUtils.idealByteArraySize(bufsiz + 1)];
-            mChs = new char[ArrayUtils.idealCharArraySize(bufsiz + 1)];
-            mWidths = new float[ArrayUtils.idealIntArraySize((bufsiz + 1) * 2)];
-        }
-
-        byte[] chdirs = mChdirs;
-        char[] chs = mChs;
-        float[] widths = mWidths;
-
-        AlteredCharSequence alter = null;
         Spanned spanned = null;
-
         if (source instanceof Spanned)
             spanned = (Spanned) source;
 
         int DEFAULT_DIR = DIR_LEFT_TO_RIGHT; // XXX
 
-        for (int start = bufstart; start <= bufend; start = end) {
-            if (first)
-                first = false;
+        int paraEnd;
+        for (int paraStart = bufstart; paraStart <= bufend; paraStart = paraEnd) {
+            paraEnd = TextUtils.indexOf(source, '\n', paraStart, bufend);
+            if (paraEnd < 0)
+                paraEnd = bufend;
             else
-                end = TextUtils.indexOf(source, '\n', start, bufend);
-
-            if (end < 0)
-                end = bufend;
-            else
-                end++;
+                paraEnd++;
+            int paraLen = paraEnd - paraStart;
 
             int firstWidthLineCount = 1;
             int firstwidth = outerwidth;
@@ -170,19 +153,20 @@ extends Layout
             LineHeightSpan[] chooseht = null;
 
             if (spanned != null) {
-                LeadingMarginSpan[] sp;
-
-                sp = spanned.getSpans(start, end, LeadingMarginSpan.class);
+                LeadingMarginSpan[] sp = spanned.getSpans(paraStart, paraEnd,
+                        LeadingMarginSpan.class);
                 for (int i = 0; i < sp.length; i++) {
                     LeadingMarginSpan lms = sp[i];
                     firstwidth -= sp[i].getLeadingMargin(true);
                     restwidth -= sp[i].getLeadingMargin(false);
                     if (lms instanceof LeadingMarginSpan.LeadingMarginSpan2) {
-                        firstWidthLineCount = ((LeadingMarginSpan.LeadingMarginSpan2)lms).getLeadingMarginLineCount();
+                        firstWidthLineCount =
+                            ((LeadingMarginSpan.LeadingMarginSpan2)lms)
+                            .getLeadingMarginLineCount();
                     }
                 }
 
-                chooseht = spanned.getSpans(start, end, LineHeightSpan.class);
+                chooseht = spanned.getSpans(paraStart, paraEnd, LineHeightSpan.class);
 
                 if (chooseht.length != 0) {
                     if (choosehtv == null ||
@@ -194,7 +178,7 @@ extends Layout
                     for (int i = 0; i < chooseht.length; i++) {
                         int o = spanned.getSpanStart(chooseht[i]);
 
-                        if (o < start) {
+                        if (o < paraStart) {
                             // starts in this layout, before the
                             // current paragraph
 
@@ -208,135 +192,48 @@ extends Layout
                 }
             }
 
-            if (end - start > chdirs.length) {
-                chdirs = new byte[ArrayUtils.idealByteArraySize(end - start)];
-                mChdirs = chdirs;
-            }
-            if (end - start > chs.length) {
-                chs = new char[ArrayUtils.idealCharArraySize(end - start)];
-                mChs = chs;
-            }
-            if ((end - start) * 2 > widths.length) {
-                widths = new float[ArrayUtils.idealIntArraySize((end - start) * 2)];
-                mWidths = widths;
-            }
+            measured.setPara(source, paraStart, paraEnd, DIR_REQUEST_DEFAULT_LTR);
+            char[] chs = measured.mChars;
+            float[] widths = measured.mWidths;
+            byte[] chdirs = measured.mLevels;
+            int dir = measured.mDir;
+            boolean easy = measured.mEasy;
 
-            TextUtils.getChars(source, start, end, chs, 0);
-            final int n = end - start;
-
-            boolean easy = true;
-            boolean altered = false;
-            int dir = DEFAULT_DIR; // XXX pass value in
-
-            for (int i = 0; i < n; i++) {
-                if (chs[i] >= FIRST_RIGHT_TO_LEFT) {
-                    easy = false;
-                    break;
-                }
-            }
-
-            // Ensure that none of the underlying characters are treated
-            // as viable breakpoints, and that the entire run gets the
-            // same bidi direction.
-
-            if (source instanceof Spanned) {
-                Spanned sp = (Spanned) source;
-                ReplacementSpan[] spans = sp.getSpans(start, end, ReplacementSpan.class);
-
-                for (int y = 0; y < spans.length; y++) {
-                    int a = sp.getSpanStart(spans[y]);
-                    int b = sp.getSpanEnd(spans[y]);
-
-                    for (int x = a; x < b; x++) {
-                        chs[x - start] = '\uFFFC';
-                    }
-                }
-            }
-
-            if (!easy) {
-                // XXX put override flags, etc. into chdirs
-                // XXX supply dir rather than force
-                dir = AndroidBidi.bidi(DIR_REQUEST_DEFAULT_LTR, chs, chdirs, n, false);
-
-                // Do mirroring for right-to-left segments
-
-                for (int i = 0; i < n; i++) {
-                    if (chdirs[i] == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                        int j;
-
-                        for (j = i; j < n; j++) {
-                            if (chdirs[j] !=
-                                Character.DIRECTIONALITY_RIGHT_TO_LEFT)
-                                break;
-                        }
-
-                        if (AndroidCharacter.mirror(chs, i, j - i))
-                            altered = true;
-
-                        i = j - 1;
-                    }
-                }
-            }
-
-            CharSequence sub;
-
-            if (altered) {
-                if (alter == null)
-                    alter = AlteredCharSequence.make(source, chs, start, end);
-                else
-                    alter.update(chs, start, end);
-
-                sub = alter;
-            } else {
-                sub = source;
-            }
+            CharSequence sub = source;
 
             int width = firstwidth;
 
             float w = 0;
-            int here = start;
+            int here = paraStart;
 
-            int ok = start;
+            int ok = paraStart;
             float okwidth = w;
             int okascent = 0, okdescent = 0, oktop = 0, okbottom = 0;
 
-            int fit = start;
+            int fit = paraStart;
             float fitwidth = w;
             int fitascent = 0, fitdescent = 0, fittop = 0, fitbottom = 0;
 
             boolean tab = false;
 
-            int next;
-            for (int i = start; i < end; i = next) {
+            int spanEnd;
+            for (int spanStart = paraStart; spanStart < paraEnd; spanStart = spanEnd) {
                 if (spanned == null)
-                    next = end;
+                    spanEnd = paraEnd;
                 else
-                    next = spanned.nextSpanTransition(i, end,
-                                                      MetricAffectingSpan.
-                                                      class);
+                    spanEnd = spanned.nextSpanTransition(spanStart, paraEnd,
+                            MetricAffectingSpan.class);
+
+                int spanLen = spanEnd - spanStart;
+                int startInPara = spanStart - paraStart;
+                int endInPara = spanEnd - paraStart;
 
                 if (spanned == null) {
-                    paint.getTextWidths(sub, i, next, widths);
-                    System.arraycopy(widths, 0, widths,
-                                     end - start + (i - start), next - i);
-
-                    paint.getFontMetricsInt(fm);
+                    measured.addStyleRun(paint, spanLen, fm);
                 } else {
-                    mWorkPaint.baselineShift = 0;
-
-                    Styled.getTextWidths(paint, mWorkPaint,
-                                         spanned, i, next,
-                                         widths, fm);
-                    System.arraycopy(widths, 0, widths,
-                                     end - start + (i - start), next - i);
-
-                    if (mWorkPaint.baselineShift < 0) {
-                        fm.ascent += mWorkPaint.baselineShift;
-                        fm.top += mWorkPaint.baselineShift;
-                    } else {
-                        fm.descent += mWorkPaint.baselineShift;
-                        fm.bottom += mWorkPaint.baselineShift;
-                    }
+                    MetricAffectingSpan[] spans =
+                        spanned.getSpans(spanStart, spanEnd, MetricAffectingSpan.class);
+                    measured.addStyleRun(paint, spans, spanLen, fm);
                 }
 
                 int fmtop = fm.top;
@@ -344,27 +241,17 @@ extends Layout
                 int fmascent = fm.ascent;
                 int fmdescent = fm.descent;
 
-                if (false) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int j = i; j < next; j++) {
-                        sb.append(widths[j - start + (end - start)]);
-                        sb.append(' ');
-                    }
-
-                    Log.e("text", sb.toString());
-                }
-
-                for (int j = i; j < next; j++) {
-                    char c = chs[j - start];
+                for (int j = spanStart; j < spanEnd; j++) {
+                    char c = chs[j - paraStart];
                     float before = w;
 
                     if (c == '\n') {
                         ;
                     } else if (c == '\t') {
-                        w = Layout.nextTab(sub, start, end, w, null);
+                        w = Layout.nextTab(sub, paraStart, paraEnd, w, null);
                         tab = true;
-                    } else if (c >= 0xD800 && c <= 0xDFFF && j + 1 < next) {
-                        int emoji = Character.codePointAt(chs, j - start);
+                    } else if (c >= 0xD800 && c <= 0xDFFF && j + 1 < spanEnd) {
+                        int emoji = Character.codePointAt(chs, j - paraStart);
 
                         if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
                             Bitmap bm = EMOJI_FACTORY.
@@ -387,13 +274,13 @@ extends Layout
                                 tab = true;
                                 j++;
                             } else {
-                                w += widths[j - start + (end - start)];
+                                w += widths[j - paraStart];
                             }
                         } else {
-                            w += widths[j - start + (end - start)];
+                            w += widths[j - paraStart];
                         }
                     } else {
-                        w += widths[j - start + (end - start)];
+                        w += widths[j - paraStart];
                     }
 
                     // Log.e("text", "was " + before + " now " + w + " after " + c + " within " + width);
@@ -429,12 +316,12 @@ extends Layout
 
                         if (c == ' ' || c == '\t' ||
                             ((c == '.'  || c == ',' || c == ':' || c == ';') &&
-                             (j - 1 < here || !Character.isDigit(chs[j - 1 - start])) &&
-                             (j + 1 >= next || !Character.isDigit(chs[j + 1 - start]))) ||
+                             (j - 1 < here || !Character.isDigit(chs[j - 1 - paraStart])) &&
+                             (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
                             ((c == '/' || c == '-') &&
-                             (j + 1 >= next || !Character.isDigit(chs[j + 1 - start]))) ||
+                             (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
                             (c >= FIRST_CJK && isIdeographic(c, true) &&
-                             j + 1 < next && isIdeographic(chs[j + 1 - start], false))) {
+                             j + 1 < spanEnd && isIdeographic(chs[j + 1 - paraStart], false))) {
                             okwidth = w;
                             ok = j + 1;
 
@@ -451,7 +338,7 @@ extends Layout
                         if (ok != here) {
                             // Log.e("text", "output ok " + here + " to " +ok);
 
-                            while (ok < next && chs[ok - start] == ' ') {
+                            while (ok < spanEnd && chs[ok - paraStart] == ' ') {
                                 ok++;
                             }
 
@@ -461,9 +348,9 @@ extends Layout
                                     v,
                                     spacingmult, spacingadd, chooseht,
                                     choosehtv, fm, tab,
-                                    needMultiply, start, chdirs, dir, easy,
+                                    needMultiply, paraStart, chdirs, dir, easy,
                                     ok == bufend, includepad, trackpad,
-                                    widths, start, end - start,
+                                    chs, widths, here - paraStart,
                                     where, ellipsizedWidth, okwidth,
                                     paint);
 
@@ -487,7 +374,7 @@ extends Layout
                         if (ok != here) {
                             // Log.e("text", "output ok " + here + " to " +ok);
 
-                            while (ok < next && chs[ok - start] == ' ') {
+                            while (ok < spanEnd && chs[ok - paraStart] == ' ') {
                                 ok++;
                             }
 
@@ -497,9 +384,9 @@ extends Layout
                                     v,
                                     spacingmult, spacingadd, chooseht,
                                     choosehtv, fm, tab,
-                                    needMultiply, start, chdirs, dir, easy,
+                                    needMultiply, paraStart, chdirs, dir, easy,
                                     ok == bufend, includepad, trackpad,
-                                    widths, start, end - start,
+                                    chs, widths, here - paraStart,
                                     where, ellipsizedWidth, okwidth,
                                     paint);
 
@@ -513,18 +400,19 @@ extends Layout
                                     v,
                                     spacingmult, spacingadd, chooseht,
                                     choosehtv, fm, tab,
-                                    needMultiply, start, chdirs, dir, easy,
+                                    needMultiply, paraStart, chdirs, dir, easy,
                                     fit == bufend, includepad, trackpad,
-                                    widths, start, end - start,
+                                    chs, widths, here - paraStart,
                                     where, ellipsizedWidth, fitwidth,
                                     paint);
 
                             here = fit;
                         } else {
                             // Log.e("text", "output one " + here + " to " +(here + 1));
-                            measureText(paint, mWorkPaint,
-                                        source, here, here + 1, fm, tab,
-                                        null);
+                            // XXX not sure why the existing fm wasn't ok.
+                            // measureText(paint, mWorkPaint,
+                            //             source, here, here + 1, fm, tab,
+                            //             null);
 
                             v = out(source,
                                     here, here+1,
@@ -533,18 +421,18 @@ extends Layout
                                     v,
                                     spacingmult, spacingadd, chooseht,
                                     choosehtv, fm, tab,
-                                    needMultiply, start, chdirs, dir, easy,
+                                    needMultiply, paraStart, chdirs, dir, easy,
                                     here + 1 == bufend, includepad,
                                     trackpad,
-                                    widths, start, end - start,
+                                    chs, widths, here - paraStart,
                                     where, ellipsizedWidth,
-                                    widths[here - start], paint);
+                                    widths[here - paraStart], paint);
 
                             here = here + 1;
                         }
 
-                        if (here < i) {
-                            j = next = here; // must remeasure
+                        if (here < spanStart) {
+                            j = spanEnd = here; // must remeasure
                         } else {
                             j = here - 1;    // continue looping
                         }
@@ -561,7 +449,7 @@ extends Layout
                 }
             }
 
-            if (end != here) {
+            if (paraEnd != here) {
                 if ((fittop | fitbottom | fitdescent | fitascent) == 0) {
                     paint.getFontMetricsInt(fm);
 
@@ -574,20 +462,20 @@ extends Layout
                 // Log.e("text", "output rest " + here + " to " + end);
 
                 v = out(source,
-                        here, end, fitascent, fitdescent,
+                        here, paraEnd, fitascent, fitdescent,
                         fittop, fitbottom,
                         v,
                         spacingmult, spacingadd, chooseht,
                         choosehtv, fm, tab,
-                        needMultiply, start, chdirs, dir, easy,
-                        end == bufend, includepad, trackpad,
-                        widths, start, end - start,
+                        needMultiply, paraStart, chdirs, dir, easy,
+                        paraEnd == bufend, includepad, trackpad,
+                        chs, widths, here - paraStart,
                         where, ellipsizedWidth, w, paint);
             }
 
-            start = end;
+            paraStart = paraEnd;
 
-            if (end == bufend)
+            if (paraEnd == bufend)
                 break;
         }
 
@@ -602,9 +490,9 @@ extends Layout
                     v,
                     spacingmult, spacingadd, null,
                     null, fm, false,
-                    needMultiply, bufend, chdirs, DEFAULT_DIR, true,
+                    needMultiply, bufend, null, DEFAULT_DIR, true,
                     true, includepad, trackpad,
-                    widths, bufstart, 0,
+                    null, null, bufstart,
                     where, ellipsizedWidth, 0, paint);
         }
     }
@@ -714,28 +602,6 @@ extends Layout
     }
 */
 
-    private static int getFit(TextPaint paint,
-                              TextPaint workPaint,
-                       CharSequence text, int start, int end,
-                       float wid) {
-        int high = end + 1, low = start - 1, guess;
-
-        while (high - low > 1) {
-            guess = (high + low) / 2;
-
-            if (measureText(paint, workPaint,
-                            text, start, guess, null, true, null) > wid)
-                high = guess;
-            else
-                low = guess;
-        }
-
-        if (low < start)
-            return start;
-        else
-            return low;
-    }
-
     private int out(CharSequence text, int start, int end,
                       int above, int below, int top, int bottom, int v,
                       float spacingmult, float spacingadd,
@@ -744,15 +610,13 @@ extends Layout
                       boolean needMultiply, int pstart, byte[] chdirs,
                       int dir, boolean easy, boolean last,
                       boolean includepad, boolean trackpad,
-                      float[] widths, int widstart, int widoff,
+                      char[] chs, float[] widths, int widstart,
                       TextUtils.TruncateAt ellipsize, float ellipsiswidth,
                       float textwidth, TextPaint paint) {
         int j = mLineCount;
         int off = j * mColumns;
         int want = off + mColumns + TOP;
         int[] lines = mLines;
-
-        // Log.e("text", "line " + start + " to " + end + (last ? "===" : ""));
 
         if (want >= lines.length) {
             int nlen = ArrayUtils.idealIntArraySize(want + 1);
@@ -840,122 +704,12 @@ extends Layout
         if (easy) {
             mLineDirections[j] = linedirs;
         } else {
-            int startOff = start - pstart;
-            int baseLevel = dir == DIR_LEFT_TO_RIGHT ? 0 : 1;
-            int curLevel = chdirs[startOff];
-            int minLevel = curLevel;
-            int runCount = 1;
-            for (int i = start + 1; i < end; ++i) {
-                int level = chdirs[i - pstart];
-                if (level != curLevel) {
-                    curLevel = level;
-                    ++runCount;
-                }
-            }
-
-            // add final run for trailing counter-directional whitespace
-            int visEnd = end;
-            if ((curLevel & 1) != (baseLevel & 1)) {
-                // look for visible end
-                while (--visEnd >= start) {
-                    char ch = text.charAt(visEnd);
-
-                    if (ch == '\n') {
-                        --visEnd;
-                        break;
-                    }
-
-                    if (ch != ' ' && ch != '\t') {
-                        break;
-                    }
-                }
-                ++visEnd;
-                if (visEnd != end) {
-                    ++runCount;
-                }
-            }
-
-            if (runCount == 1 && minLevel == baseLevel) {
-                if ((minLevel & 1) != 0) {
-                    linedirs = DIRS_ALL_RIGHT_TO_LEFT;
-                }
-                // we're done, only one run on this line
-            } else {
-                int[] ld = new int[runCount * 2];
-                int maxLevel = minLevel;
-                int levelBits = minLevel << RUN_LEVEL_SHIFT;
-                {
-                    // Start of first pair is always 0, we write
-                    // length then start at each new run, and the
-                    // last run length after we're done.
-                    int n = 1;
-                    int prev = start;
-                    curLevel = minLevel;
-                    for (int i = start; i < visEnd; ++i) {
-                        int level = chdirs[i - pstart];
-                        if (level != curLevel) {
-                            curLevel = level;
-                            if (level > maxLevel) {
-                                maxLevel = level;
-                            } else if (level < minLevel) {
-                                minLevel = level;
-                            }
-                            // XXX ignore run length limit of 2^RUN_LEVEL_SHIFT
-                            ld[n++] = (i - prev) | levelBits;
-                            ld[n++] = i - start;
-                            levelBits = curLevel << RUN_LEVEL_SHIFT;
-                            prev = i;
-                        }
-                    }
-                    ld[n] = (visEnd - prev) | levelBits;
-                    if (visEnd < end) {
-                        ld[++n] = visEnd - start;
-                        ld[++n] = (end - visEnd) | (baseLevel << RUN_LEVEL_SHIFT);
-                    }
-                }
-
-                // See if we need to swap any runs.
-                // If the min level run direction doesn't match the base
-                // direction, we always need to swap (at this point
-                // we have more than one run).
-                // Otherwise, we don't need to swap the lowest level.
-                // Since there are no logically adjacent runs at the same
-                // level, if the max level is the same as the (new) min
-                // level, we have a series of alternating levels that
-                // is already in order, so there's no more to do.
-                //
-                boolean swap;
-                if ((minLevel & 1) == baseLevel) {
-                    minLevel += 1;
-                    swap = maxLevel > minLevel;
-                } else {
-                    swap = runCount > 1;
-                }
-                if (swap) {
-                    for (int level = maxLevel - 1; level >= minLevel; --level) {
-                        for (int i = 0; i < ld.length; i += 2) {
-                            if (chdirs[startOff + ld[i]] >= level) {
-                                int e = i + 2;
-                                while (e < ld.length && chdirs[startOff + ld[e]] >= level) {
-                                    e += 2;
-                                }
-                                for (int low = i, hi = e - 2; low < hi; low += 2, hi -= 2) {
-                                    int x = ld[low]; ld[low] = ld[hi]; ld[hi] = x;
-                                    x = ld[low+1]; ld[low+1] = ld[hi+1]; ld[hi+1] = x;
-                                }
-                                i = e + 2;
-                            }
-                        }
-                    }
-                }
-                linedirs = new Directions(ld);
-            }
-
-            mLineDirections[j] = linedirs;
+            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, widstart, chs,
+                    widstart, end - start);
 
             // If ellipsize is in marquee mode, do not apply ellipsis on the first line
             if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
-                calculateEllipsis(start, end, widths, widstart, widoff,
+                calculateEllipsis(start, end, widths, widstart,
                                   ellipsiswidth, ellipsize, j,
                                   textwidth, paint);
             }
@@ -966,7 +720,7 @@ extends Layout
     }
 
     private void calculateEllipsis(int linestart, int lineend,
-                                   float[] widths, int widstart, int widoff,
+                                   float[] widths, int widstart,
                                    float avail, TextUtils.TruncateAt where,
                                    int line, float textwidth, TextPaint paint) {
         int len = lineend - linestart;
@@ -986,7 +740,7 @@ extends Layout
             int i;
 
             for (i = len; i >= 0; i--) {
-                float w = widths[i - 1 + linestart - widstart + widoff];
+                float w = widths[i - 1 + linestart - widstart];
 
                 if (w + sum + ellipsiswid > avail) {
                     break;
@@ -1002,7 +756,7 @@ extends Layout
             int i;
 
             for (i = 0; i < len; i++) {
-                float w = widths[i + linestart - widstart + widoff];
+                float w = widths[i + linestart - widstart];
 
                 if (w + sum + ellipsiswid > avail) {
                     break;
@@ -1019,7 +773,7 @@ extends Layout
 
             float ravail = (avail - ellipsiswid) / 2;
             for (right = len; right >= 0; right--) {
-                float w = widths[right - 1 + linestart - widstart + widoff];
+                float w = widths[right - 1 + linestart - widstart];
 
                 if (w + rsum > ravail) {
                     break;
@@ -1030,7 +784,7 @@ extends Layout
 
             float lavail = avail - ellipsiswid - rsum;
             for (left = 0; left < right; left++) {
-                float w = widths[left + linestart - widstart + widoff];
+                float w = widths[left + linestart - widstart];
 
                 if (w + lsum > lavail) {
                     break;
@@ -1047,7 +801,7 @@ extends Layout
         mLines[mColumns * line + ELLIPSIS_COUNT] = ellipsisCount;
     }
 
-    // Override the baseclass so we can directly access our members,
+    // Override the base class so we can directly access our members,
     // rather than relying on member functions.
     // The logic mirrors that of Layout.getLineForVertical
     // FIXME: It may be faster to do a linear search for layouts without many lines.
@@ -1156,10 +910,8 @@ extends Layout
     private static final char FIRST_RIGHT_TO_LEFT = '\u0590';
 
     /*
-     * These are reused across calls to generate()
+     * This is reused across calls to generate()
      */
-    private byte[] mChdirs;
-    private char[] mChs;
-    private float[] mWidths;
+    private MeasuredText mMeasured;
     private Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 }
