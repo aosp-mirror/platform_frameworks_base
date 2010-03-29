@@ -38,9 +38,13 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * Searchability meta-data for an activity.
- * See <a href="SearchManager.html#SearchabilityMetadata">Searchability meta-data</a>
- * for more information.
+ * Searchability meta-data for an activity. Only applications that search other applications
+ * should need to use this class.
+ * See <a href="{@docRoot}guide/topics/search/searchable-config.html">Searchable Configuration</a>
+ * for more information about declaring searchability meta-data for your application.
+ *
+ * @see SearchManager#getSearchableInfo(ComponentName)
+ * @see SearchManager#getSearchablesInGlobalSearch()
  */
 public final class SearchableInfo implements Parcelable {
 
@@ -54,13 +58,13 @@ public final class SearchableInfo implements Parcelable {
     private static final String MD_LABEL_SEARCHABLE = "android.app.searchable";
     private static final String MD_XML_ELEMENT_SEARCHABLE = "searchable";
     private static final String MD_XML_ELEMENT_SEARCHABLE_ACTION_KEY = "actionkey";
-    
+
     // flags in the searchMode attribute
     private static final int SEARCH_MODE_BADGE_LABEL = 0x04;
     private static final int SEARCH_MODE_BADGE_ICON = 0x08;
     private static final int SEARCH_MODE_QUERY_REWRITE_FROM_DATA = 0x10;
     private static final int SEARCH_MODE_QUERY_REWRITE_FROM_TEXT = 0x20;
-    
+
     // true member variables - what we know about the searchability
     private final int mLabelId;
     private final ComponentName mSearchActivity;
@@ -86,7 +90,7 @@ public final class SearchableInfo implements Parcelable {
     // This is not final, to allow lazy initialization.
     private HashMap<Integer,ActionKeyInfo> mActionKeys = null;
     private final String mSuggestProviderPackage;
-    
+
     // Flag values for Searchable_voiceSearchMode
     private static final int VOICE_SEARCH_SHOW_BUTTON = 1;
     private static final int VOICE_SEARCH_LAUNCH_WEB_SEARCH = 2;
@@ -97,11 +101,11 @@ public final class SearchableInfo implements Parcelable {
     private final int mVoiceLanguageId;           // voiceLanguage
     private final int mVoiceMaxResults;           // voiceMaxResults
 
-    
     /**
-     * Retrieve the authority for obtaining search suggestions.
-     * 
-     * @return Returns a string containing the suggestions authority.
+     * Gets the search suggestion content provider authority.
+     *
+     * @return The search suggestions authority, or {@code null} if not set.
+     * @see android.R.styleable#Searchable_searchSuggestAuthority
      */
     public String getSuggestAuthority() {
         return mSuggestAuthority;
@@ -117,6 +121,8 @@ public final class SearchableInfo implements Parcelable {
 
     /**
      * Gets the component name of the searchable activity.
+     *
+     * @return A component name, never {@code null}.
      */
     public ComponentName getSearchActivity() {
         return mSearchActivity;
@@ -124,6 +130,8 @@ public final class SearchableInfo implements Parcelable {
 
     /**
      * Checks whether the badge should be a text label.
+     *
+     * @see android.R.styleable#Searchable_searchMode
      *
      * @hide This feature is deprecated, no need to add it to the API.
      */
@@ -134,6 +142,8 @@ public final class SearchableInfo implements Parcelable {
     /**
      * Checks whether the badge should be an icon.
      *
+     * @see android.R.styleable#Searchable_searchMode
+     *
      * @hide This feature is deprecated, no need to add it to the API.
      */
     public boolean useBadgeIcon() {
@@ -142,6 +152,8 @@ public final class SearchableInfo implements Parcelable {
 
     /**
      * Checks whether the text in the query field should come from the suggestion intent data.
+     *
+     * @see android.R.styleable#Searchable_searchMode
      */
     public boolean shouldRewriteQueryFromData() {
         return 0 != (mSearchMode & SEARCH_MODE_QUERY_REWRITE_FROM_DATA);
@@ -149,80 +161,87 @@ public final class SearchableInfo implements Parcelable {
 
     /**
      * Checks whether the text in the query field should come from the suggestion title.
+     *
+     * @see android.R.styleable#Searchable_searchMode
      */
     public boolean shouldRewriteQueryFromText() {
         return 0 != (mSearchMode & SEARCH_MODE_QUERY_REWRITE_FROM_TEXT);
     }
-    
+
     /**
-     * Gets the resource ID of the description string to use for this source in system search
+     * Gets the resource id of the description string to use for this source in system search
      * settings, or {@code 0} if none has been specified.
+     *
+     * @see android.R.styleable#Searchable_searchSettingsDescription
      */
     public int getSettingsDescriptionId() {
         return mSettingsDescriptionId;
     }
 
     /**
-     * Retrieve the path for obtaining search suggestions.
+     * Gets the content provider path for obtaining search suggestions.
      * 
-     * @return Returns a string containing the suggestions path, or null if not provided.
+     * @return The suggestion path, or {@code null} if not set.
+     * @see android.R.styleable#Searchable_searchSuggestPath
      */
     public String getSuggestPath() {
         return mSuggestPath;
     }
-    
+
     /**
-     * Retrieve the selection pattern for obtaining search suggestions.  This must
-     * include a single ? which will be used for the user-typed characters.
-     * 
-     * @return Returns a string containing the suggestions authority.
+     * Gets the selection for obtaining search suggestions.
+     *
+     * @see android.R.styleable#Searchable_searchSuggestSelection
      */
     public String getSuggestSelection() {
         return mSuggestSelection;
     }
-    
+
     /**
-     * Retrieve the (optional) intent action for use with these suggestions.  This is
-     * useful if all intents will have the same action (e.g. "android.intent.action.VIEW").
-     * 
-     * Can be overriden in any given suggestion via the AUTOSUGGEST_COLUMN_INTENT_ACTION column.
-     * 
-     * @return Returns a string containing the default intent action.
+     * Gets the optional intent action for use with these suggestions. This is
+     * useful if all intents will have the same action
+     * (e.g. {@link android.content.Intent#ACTION_VIEW})
+     *
+     * This can be overriden in any given suggestion using the column
+     * {@link SearchManager#SUGGEST_COLUMN_INTENT_ACTION}.
+     *
+     * @return The default intent action, or {@code null} if not set.
+     * @see android.R.styleable#Searchable_searchSuggestIntentAction
      */
     public String getSuggestIntentAction() {
         return mSuggestIntentAction;
     }
-    
+
     /**
-     * Retrieve the (optional) intent data for use with these suggestions.  This is
-     * useful if all intents will have similar data URIs (e.g. "android.intent.action.VIEW"), 
+     * Gets the optional intent data for use with these suggestions.  This is
+     * useful if all intents will have similar data URIs,
      * but you'll likely need to provide a specific ID as well via the column
-     * AUTOSUGGEST_COLUMN_INTENT_DATA_ID, which will be appended to the intent data URI.
+     * {@link SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID}, which will be appended to the
+     * intent data URI.
      * 
-     * Can be overriden in any given suggestion via the AUTOSUGGEST_COLUMN_INTENT_DATA column.
+     * This can be overriden in any given suggestion using the column
+     * {@link SearchManager#SUGGEST_COLUMN_INTENT_DATA}.
      * 
-     * @return Returns a string containing the default intent data.
+     * @return The default intent data, or {@code null} if not set.
+     * @see android.R.styleable#Searchable_searchSuggestIntentData
      */
     public String getSuggestIntentData() {
         return mSuggestIntentData;
     }
-    
+
     /**
-     * Gets the suggestion threshold for use with these suggestions. 
+     * Gets the suggestion threshold.
      * 
-     * @return The value of the <code>searchSuggestThreshold</code> attribute, 
-     *         or 0 if the attribute is not set.
+     * @return The suggestion threshold, or {@code 0} if not set.
+     * @see android.R.styleable#Searchable_searchSuggestThreshold
      */
     public int getSuggestThreshold() {
         return mSuggestThreshold;
     }
-    
+
     /**
-     * Get the context for the searchable activity.  
-     * 
-     * This is fairly expensive so do it on the original scan, or when an app is
-     * selected, but don't hang on to the result forever.
-     * 
+     * Get the context for the searchable activity.
+     *
      * @param context You need to supply a context to start with
      * @return Returns a context related to the searchable activity
      * @hide
@@ -230,7 +249,7 @@ public final class SearchableInfo implements Parcelable {
     public Context getActivityContext(Context context) {
         return createActivityContext(context, mSearchActivity);
     }
-    
+
     /**
      * Creates a context for another activity.
      */
@@ -246,17 +265,14 @@ public final class SearchableInfo implements Parcelable {
         
         return theirContext;
     }
-    
+
     /**
-     * Get the context for the suggestions provider.  
-     * 
-     * This is fairly expensive so do it on the original scan, or when an app is
-     * selected, but don't hang on to the result forever.
-     * 
+     * Get the context for the suggestions provider.
+     *
      * @param context You need to supply a context to start with
      * @param activityContext If we can determine that the provider and the activity are the
-     * same, we'll just return this one.
-     * @return Returns a context related to the context provider
+     *        same, we'll just return this one.
+     * @return Returns a context related to the suggestion provider
      * @hide
      */
     public Context getProviderContext(Context context, Context activityContext) {
@@ -264,18 +280,18 @@ public final class SearchableInfo implements Parcelable {
         if (mSearchActivity.getPackageName().equals(mSuggestProviderPackage)) {
             return activityContext;
         }
-        if (mSuggestProviderPackage != null)
-        try {
-            theirContext = context.createPackageContext(mSuggestProviderPackage, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            // unexpected, but we deal with this by null-checking theirContext
-        } catch (java.lang.SecurityException e) {
-            // unexpected, but we deal with this by null-checking theirContext
+        if (mSuggestProviderPackage != null) {
+            try {
+                theirContext = context.createPackageContext(mSuggestProviderPackage, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                // unexpected, but we deal with this by null-checking theirContext
+            } catch (java.lang.SecurityException e) {
+                // unexpected, but we deal with this by null-checking theirContext
+            }
         }
-        
         return theirContext;
     }
-    
+
     /**
      * Constructor
      * 
@@ -356,21 +372,22 @@ public final class SearchableInfo implements Parcelable {
             throw new IllegalArgumentException("Search label must be a resource reference.");
         }
     }
-    
+
     /**
      * Information about an action key in searchability meta-data.
-     * See <a href="SearchManager.html#SearchabilityMetadata">Searchability meta-data</a>
-     * for more information.
      *
      * @see SearchableInfo#findActionKey(int)
+     *
+     * @hide This feature is used very little, and on many devices there are no reasonable
+     *       keys to use for actions.
      */
     public static class ActionKeyInfo implements Parcelable {
-        
+
         private final int mKeyCode;
         private final String mQueryActionMsg;
         private final String mSuggestActionMsg;
         private final String mSuggestActionMsgColumn;
-        
+
         /**
          * Create one object using attributeset as input data.
          * @param activityContext runtime context of the activity that the action key information
@@ -417,18 +434,34 @@ public final class SearchableInfo implements Parcelable {
             mSuggestActionMsgColumn = in.readString();
         }
 
+        /**
+         * Gets the key code that this action key info is for.
+         * @see android.R.styleable#SearchableActionKey_keycode
+         */
         public int getKeyCode() {
             return mKeyCode;
         }
 
+        /**
+         * Gets the action message to use for queries.
+         * @see android.R.styleable#SearchableActionKey_queryActionMsg
+         */
         public String getQueryActionMsg() {
             return mQueryActionMsg;
         }
 
+        /**
+         * Gets the action message to use for suggestions.
+         * @see android.R.styleable#SearchableActionKey_suggestActionMsg
+         */
         public String getSuggestActionMsg() {
             return mSuggestActionMsg;
         }
 
+        /**
+         * Gets the name of the column to get the suggestion action message from.
+         * @see android.R.styleable#SearchableActionKey_suggestActionMsgColumn
+         */
         public String getSuggestActionMsgColumn() {
             return mSuggestActionMsgColumn;
         }
@@ -444,12 +477,14 @@ public final class SearchableInfo implements Parcelable {
             dest.writeString(mSuggestActionMsgColumn);
         }
     }
-    
+
     /**
      * If any action keys were defined for this searchable activity, look up and return.
      * 
      * @param keyCode The key that was pressed
-     * @return Returns the ActionKeyInfo record, or null if none defined
+     * @return Returns the action key info, or {@code null} if none defined.
+     *
+     * @hide ActionKeyInfo is hidden
      */
     public ActionKeyInfo findActionKey(int keyCode) {
         if (mActionKeys == null) {
@@ -503,7 +538,7 @@ public final class SearchableInfo implements Parcelable {
         }
         return searchable;
     }
-    
+
     /**
      * Get the metadata for a given activity
      * 
@@ -566,147 +601,170 @@ public final class SearchableInfo implements Parcelable {
     }
 
     /**
-     * Return the "label" (user-visible name) of this searchable context.  This must be 
-     * accessed using the target (searchable) Activity's resources, not simply the context of the
-     * caller.
+     * Gets the "label" (user-visible name) of this searchable context. This must be
+     * read using the searchable Activity's resources.
      * 
-     * @return Returns the resource Id
+     * @return A resource id, or {@code 0} if no label was specified.
+     * @see android.R.styleable#Searchable_label
+     *
+     * @hide deprecated functionality
      */
     public int getLabelId() {
         return mLabelId;
     }
-    
+
     /**
-     * Return the resource Id of the hint text.  This must be 
-     * accessed using the target (searchable) Activity's resources, not simply the context of the
-     * caller.
+     * Gets the resource id of the hint text. This must be
+     * read using the searchable Activity's resources.
      * 
-     * @return Returns the resource Id, or 0 if not specified by this package.
+     * @return A resource id, or {@code 0} if no hint was specified.
+     * @see android.R.styleable#Searchable_hint
      */
     public int getHintId() {
         return mHintId;
     }
-    
+
     /**
-     * Return the icon Id specified by the Searchable_icon meta-data entry.  This must be 
-     * accessed using the target (searchable) Activity's resources, not simply the context of the
-     * caller.
+     * Gets the icon id specified by the Searchable_icon meta-data entry. This must be
+     * read using the searchable Activity's resources.
      * 
-     * @return Returns the resource id.
+     * @return A resource id, or {@code 0} if no icon was specified.
+     * @see android.R.styleable#Searchable_icon
+     *
+     * @hide deprecated functionality
      */
     public int getIconId() {
         return mIconId;
     }
-    
+
     /**
-     * @return true if android:voiceSearchMode="showVoiceSearchButton"
+     * Checks if the searchable activity wants the voice search button to be shown.
+     *
+     * @see android.R.styleable#Searchable_voiceSearchMode
      */
     public boolean getVoiceSearchEnabled() {
         return 0 != (mVoiceSearchMode & VOICE_SEARCH_SHOW_BUTTON);
     }
-    
+
     /**
-     * @return true if android:voiceSearchMode="launchWebSearch"
+     * Checks if voice search should start web search.
+     *
+     * @see android.R.styleable#Searchable_voiceSearchMode
      */
     public boolean getVoiceSearchLaunchWebSearch() {
         return 0 != (mVoiceSearchMode & VOICE_SEARCH_LAUNCH_WEB_SEARCH);
     }
-    
+
     /**
-     * @return true if android:voiceSearchMode="launchRecognizer"
+     * Checks if voice search should start in-app search.
+     *
+     * @see android.R.styleable#Searchable_voiceSearchMode
      */
     public boolean getVoiceSearchLaunchRecognizer() {
         return 0 != (mVoiceSearchMode & VOICE_SEARCH_LAUNCH_RECOGNIZER);
     }
-    
+
     /**
-     * @return the resource Id of the language model string, if specified in the searchable
-     * activity's metadata, or 0 if not specified.  
+     * Gets the resource id of the voice search language model string.
+     *
+     * @return A resource id, or {@code 0} if no language model was specified.
+     * @see android.R.styleable#Searchable_voiceLanguageModel
      */
     public int getVoiceLanguageModeId() {
         return mVoiceLanguageModeId;
     }
-    
+
     /**
-     * @return the resource Id of the voice prompt text string, if specified in the searchable
-     * activity's metadata, or 0 if not specified.  
+     * Gets the resource id of the voice prompt text string.
+     *
+     * @return A resource id, or {@code 0} if no voice prompt text was specified.
+     * @see android.R.styleable#Searchable_voicePromptText
      */
     public int getVoicePromptTextId() {
         return mVoicePromptTextId;
     }
-    
+
     /**
-     * @return the resource Id of the spoken langauge, if specified in the searchable
-     * activity's metadata, or 0 if not specified.  
+     * Gets the resource id of the spoken language to recognize in voice search.
+     *
+     * @return A resource id, or {@code 0} if no language was specified.
+     * @see android.R.styleable#Searchable_voiceLanguage
      */
     public int getVoiceLanguageId() {
         return mVoiceLanguageId;
     }
-    
+
     /**
+     * The maximum number of voice recognition results to return.
+     *
      * @return the max results count, if specified in the searchable
-     * activity's metadata, or 0 if not specified.  
+     *         activity's metadata, or {@code 0} if not specified.
+     * @see android.R.styleable#Searchable_voiceMaxResults
      */
     public int getVoiceMaxResults() {
         return mVoiceMaxResults;
     }
-    
+
     /**
-     * Return the resource Id of replacement text for the "Search" button.
-     * 
-     * @return Returns the resource Id, or 0 if not specified by this package.
+     * Gets the resource id of replacement text for the "Search" button.
+     *
+     * @return A resource id, or {@code 0} if no replacement text was specified.
+     * @see android.R.styleable#Searchable_searchButtonText
+     * @hide This feature is deprecated, no need to add it to the API.
      */
     public int getSearchButtonText() {
         return mSearchButtonText;
     }
-    
+
     /**
-     * Return the input type as specified in the searchable attributes.  This will default to
-     * InputType.TYPE_CLASS_TEXT if not specified (which is appropriate for free text input).
+     * Gets the input type as specified in the searchable attributes. This will default to
+     * {@link InputType#TYPE_CLASS_TEXT} if not specified (which is appropriate
+     * for free text input).
      * 
      * @return the input type
+     * @see android.R.styleable#Searchable_inputType
      */
     public int getInputType() {
         return mSearchInputType;
     }
-    
+
     /**
-     * Return the input method options specified in the searchable attributes.
-     * This will default to EditorInfo.ACTION_GO if not specified (which is
+     * Gets the input method options specified in the searchable attributes.
+     * This will default to {@link EditorInfo#IME_ACTION_GO} if not specified (which is
      * appropriate for a search box).
      * 
      * @return the input type
+     * @see android.R.styleable#Searchable_imeOptions
      */
     public int getImeOptions() {
         return mSearchImeOptions;
     }
-    
+
     /**
-     * Checks whether the searchable is exported.
+     * Checks whether the searchable should be included in global search.
      *
-     * @return The value of the <code>exported</code> attribute,
-     *         or <code>false</code> if the attribute is not set.
+     * @return The value of the {@link android.R.styleable#Searchable_includeInGlobalSearch}
+     *         attribute, or {@code false} if the attribute is not set.
+     * @see android.R.styleable#Searchable_includeInGlobalSearch
      */
     public boolean shouldIncludeInGlobalSearch() {
         return mIncludeInGlobalSearch;
     }
 
     /**
-     * Checks whether this searchable activity should be invoked after a query returned zero
-     * results.
+     * Checks whether this searchable activity should be queried for suggestions if a prefix
+     * of the query has returned no results.
      *
-     * @return The value of the <code>queryAfterZeroResults</code> attribute,
-     *         or <code>false</code> if the attribute is not set.
+     * @see android.R.styleable#Searchable_queryAfterZeroResults
      */
     public boolean queryAfterZeroResults() {
         return mQueryAfterZeroResults;
     }
 
     /**
-     * Checks whether this searchable activity has auto URL detect turned on.
+     * Checks whether this searchable activity has auto URL detection turned on.
      *
-     * @return The value of the <code>autoUrlDetect</code> attribute,
-     *         or <code>false</code> if the attribute is not set.
+     * @see android.R.styleable#Searchable_autoUrlDetect
      */
     public boolean autoUrlDetect() {
         return mAutoUrlDetect;
@@ -727,7 +785,7 @@ public final class SearchableInfo implements Parcelable {
     };
 
     /**
-     * Instantiate a new SearchableInfo from the data in a Parcel that was
+     * Instantiates a new SearchableInfo from the data in a Parcel that was
      * previously written with {@link #writeToParcel(Parcel, int)}.
      *
      * @param in The Parcel containing the previously written SearchableInfo,
