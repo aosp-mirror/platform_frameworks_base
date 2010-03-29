@@ -476,7 +476,9 @@ public class SlidingTab extends ViewGroup {
         int heightSpecSize =  MeasureSpec.getSize(heightMeasureSpec);
 
         if (widthSpecMode == MeasureSpec.UNSPECIFIED || heightSpecMode == MeasureSpec.UNSPECIFIED) {
-            throw new RuntimeException(LOG_TAG + " cannot have UNSPECIFIED dimensions");
+            Log.e("SlidingTab", "SlidingTab cannot have UNSPECIFIED MeasureSpec"
+                    +"(wspec=" + widthSpecMode + ", hspec=" + heightSpecMode + ")",
+                    new RuntimeException(LOG_TAG + "stack:"));
         }
 
         mLeftSlider.measure();
@@ -554,6 +556,9 @@ public class SlidingTab extends ViewGroup {
     public void reset(boolean animate) {
         mLeftSlider.reset(animate);
         mRightSlider.reset(animate);
+        if (!animate) {
+            mAnimating = false;
+        }
     }
 
     @Override
