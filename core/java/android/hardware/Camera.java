@@ -532,11 +532,15 @@ public class Camera {
      * called with value 3. Three ZoomCallback will be generated with zoom value
      * 1, 2, and 3. The applications can call {@link #stopSmoothZoom} to stop
      * the zoom earlier. The applications should not call startSmoothZoom again
-     * or change the zoom value before zoom stops. This method is supported if
-     * {@link android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
+     * or change the zoom value before zoom stops. If the passing zoom value
+     * equals to the current zoom value, no zoom callback will be generated.
+     * This method is supported if {@link
+     * android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
      *
      * @param value zoom value. The valid range is 0 to {@link
      *              android.hardware.Camera.Parameters#getMaxZoom}.
+     * @throws IllegalArgumentException if the zoom value is invalid.
+     * @throws RuntimeException if the method fails.
      */
     public native final void startSmoothZoom(int value);
 
@@ -545,6 +549,8 @@ public class Camera {
      * ZoomCallback} to know when the zoom is actually stopped. This method is
      * supported if {@link
      * android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
+     *
+     * @throws RuntimeException if the method fails.
      */
     public native final void stopSmoothZoom();
 

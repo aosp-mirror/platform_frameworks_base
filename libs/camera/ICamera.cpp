@@ -208,7 +208,7 @@ public:
     }
     virtual status_t sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
     {
-        LOGD("sendCommand");
+        LOGV("sendCommand");
         Parcel data, reply;
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
         data.writeInt32(cmd);
