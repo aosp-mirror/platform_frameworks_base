@@ -48,6 +48,7 @@
                 android:paddingRight="3dip"
                 android:paddingTop="3dip"
                 android:src="@drawable/ic_aggregated"
+                android:visibility="gone"
             />
 
             <TextView android:id="@+id/name"
@@ -59,7 +60,6 @@
                 android:textStyle="bold"
                 android:shadowColor="#BB000000"
                 android:shadowRadius="2.75"
-                android:layout_marginBottom="-4dip"
                 />
         </LinearLayout>
 
@@ -70,6 +70,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:layout_marginTop="-2dip"
+            android:visibility="gone"
         />
 
         <TextView android:id="@+id/status"
@@ -79,6 +80,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:layout_marginTop="-2dip"
+            android:visibility="gone"
         />
 
         <TextView android:id="@+id/status_date"
@@ -88,6 +90,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textSize="12sp"
             android:layout_marginTop="-2dip"
+            android:visibility="gone"
         />
     </LinearLayout>
 
@@ -97,7 +100,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:paddingLeft="3dip"
-        android:paddingRight="6dip"/>
+        android:paddingRight="6dip"
+        android:visibility="gone"
+    />
 
     <CheckBox
         android:id="@+id/star"
