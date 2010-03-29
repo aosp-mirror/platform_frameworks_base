@@ -30,7 +30,8 @@ import java.util.Locale;
  * (green << 8) | blue. Each component ranges between 0..255 with 0
  * meaning no contribution for that component, and 255 meaning 100%
  * contribution. Thus opaque-black would be 0xFF000000 (100% opaque but
- * no contributes from red, gree, blue, and opaque-white would be 0xFFFFFFFF
+ * no contributions from red, green, or blue), and opaque-white would be
+ * 0xFFFFFFFF
  */
 public class Color {
     public static final int BLACK       = 0xFF000000;
