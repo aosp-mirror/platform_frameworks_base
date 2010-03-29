@@ -39,7 +39,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.media.AsyncPlayer;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -98,7 +97,7 @@ class NotificationManagerService extends INotificationManager.Stub
     private int mDefaultNotificationLedOff;
 
     private NotificationRecord mSoundNotification;
-    private AsyncPlayer mSound;
+    private NotificationPlayer mSound;
     private boolean mSystemReady;
     private int mDisabledNotifications;
 
@@ -413,7 +412,7 @@ class NotificationManagerService extends INotificationManager.Stub
         mContext = context;
         mLightsService = lights;
         mAm = ActivityManagerNative.getDefault();
-        mSound = new AsyncPlayer(TAG);
+        mSound = new NotificationPlayer(TAG);
         mSound.setUsesWakeLock(context);
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
