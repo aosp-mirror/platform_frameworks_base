@@ -14,43 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.unit_tests;
+package android.os.storage;
 
-import com.android.unit_tests.PackageManagerTests.StorageListener;
-
-import android.os.storage.IMountService.Stub;
-
-import android.net.Uri;
-import android.os.FileUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.Suppress;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.storage.IMountService;
-import android.os.storage.IMountShutdownObserver;
-import android.os.storage.StorageEventListener;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageResultCode;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.StatFs;
-import android.provider.Settings;
+import android.test.AndroidTestCase;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
 import junit.framework.Assert;
 
 public class AsecTests extends AndroidTestCase {

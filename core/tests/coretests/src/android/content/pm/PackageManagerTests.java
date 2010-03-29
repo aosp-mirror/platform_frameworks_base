@@ -14,61 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.unit_tests;
+package android.content.pm;
 
+import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
 
-import android.os.storage.IMountService.Stub;
-
-import android.net.Uri;
-import android.os.FileUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageMoveObserver;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageStats;
-import android.content.pm.IPackageManager;
-import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
-import android.util.DisplayMetrics;
-import android.util.Log;
+import android.net.Uri;
 import android.os.Environment;
-import android.os.Handler;
+import android.os.FileUtils;
 import android.os.IBinder;
-import android.os.storage.IMountService;
-import android.os.storage.IMountServiceListener;
-import android.os.storage.StorageEventListener;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageResultCode;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
+import android.os.storage.IMountService;
+import android.os.storage.StorageListener;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageResultCode;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.test.AndroidTestCase;
+import android.util.DisplayMetrics;
+import android.util.Log;
+
+import java.io.File;
+import java.io.InputStream;
 
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -573,17 +549,14 @@ public class PackageManagerTests extends AndroidTestCase {
         return ip;
     }
 
-    @MediumTest
     public void testInstallNormalInternal() {
         sampleInstallFromRawResource(0, true);
     }
 
-    @MediumTest
     public void testInstallFwdLockedInternal() {
         sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
     }
 
-    @MediumTest
     public void testInstallSdcard() {
         sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
     }
@@ -674,33 +647,27 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    @MediumTest
     public void testReplaceFailNormalInternal() {
         replaceFromRawResource(0);
     }
 
-    @MediumTest
     public void testReplaceFailFwdLockedInternal() {
         replaceFromRawResource(PackageManager.INSTALL_FORWARD_LOCK);
     }
 
-    @MediumTest
     public void testReplaceFailSdcard() {
         replaceFromRawResource(PackageManager.INSTALL_EXTERNAL);
     }
 
-    @MediumTest
     public void testReplaceNormalInternal() {
         replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
     }
 
-    @MediumTest
     public void testReplaceFwdLockedInternal() {
         replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageManager.INSTALL_FORWARD_LOCK);
     }
 
-    @MediumTest
     public void testReplaceSdcard() {
         replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageManager.INSTALL_EXTERNAL);
@@ -815,32 +782,26 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    @MediumTest
     public void testDeleteNormalInternal() {
         deleteFromRawResource(0, 0);
     }
 
-    @MediumTest
     public void testDeleteFwdLockedInternal() {
         deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, 0);
     }
 
-    @MediumTest
     public void testDeleteSdcard() {
         deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, 0);
     }
 
-    @MediumTest
     public void testDeleteNormalInternalRetainData() {
         deleteFromRawResource(0, PackageManager.DONT_DELETE_DATA);
     }
 
-    @MediumTest
     public void testDeleteFwdLockedInternalRetainData() {
         deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, PackageManager.DONT_DELETE_DATA);
     }
 
-    @MediumTest
     public void testDeleteSdcardRetainData() {
         deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DONT_DELETE_DATA);
     }
@@ -947,27 +908,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    class StorageListener extends StorageEventListener {
-        String oldState;
-        String newState;
-        String path;
-        private boolean doneFlag = false;
-        @Override
-        public void onStorageStateChanged(String path, String oldState, String newState) {
-            if (localLOGV) Log.i(TAG, "Storage state changed from " + oldState + " to " + newState);
-            synchronized (this) {
-                this.oldState = oldState;
-                this.newState = newState;
-                this.path = path;
-                doneFlag = true;
-                notifyAll();
-            }
-        }
 
-        public boolean isDone() {
-            return doneFlag;
-        }
-    }
 
     private boolean unmountMedia() {
         if (!getMediaState()) {

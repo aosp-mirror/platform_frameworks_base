@@ -1618,7 +1618,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     if (mObserver != null) {
                         try {
-                            mObserver.onUpdate(count);
+                            mObserver.onUpdate(count, packageName);
                         } catch (RemoteException e) {
                             Slog.d(TAG, "Restore observer died in onUpdate");
                             mObserver = null;

@@ -1,8 +1,7 @@
-page.title=Android 2.1, Release 1
+page.title=Android 2.1 Platform
 sdk.platform.version=2.1
 sdk.platform.apiLevel=7
 sdk.platform.majorMinor=minor
-sdk.platform.releaseDate=January 2010
 sdk.platform.deployableDate=January 2010
 
 @jd:body
@@ -13,6 +12,7 @@ sdk.platform.deployableDate=January 2010
 <h2>In this document</h2>
 <ol>
   <li><a href="#features">Platform Highlights</a></li>
+  <li><a href="#relnotes">Revisions</a></li>
   <li><a href="#apps">Built-in Applications</a></li>
   <li><a href="#locs">Locales</a></li>
   <li><a href="#skins">Emulator Skins</a></li>
@@ -36,7 +36,6 @@ differences report &raquo;</a> </li>
 </div>
 
 <p>
-<em>Date:</em> {@sdkPlatformReleaseDate}<br />
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
 <p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
@@ -53,7 +52,7 @@ includes no external libraries. </p>
 
 <p>To get started developing or testing against the Android
 {@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
-download the platform into your Android SDK. For more information,
+download the platform into your SDK. For more information,
 see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
 Components</a>.</p>
 
@@ -63,6 +62,64 @@ Components</a>.</p>
 <p>Android {@sdkPlatformVersion} does not add significant user features, see the <a
 href="http://developer.android.com/sdk/android-2.0-highlights.html">Android
 2.0 Platform Highlights</a> document for the latest user features.</p>
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android 2.1, Revision 1</a> <em>(January 2010)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r4 or higher.</p>
+</dd>
+</dl>
+ </div>
+</div>
 
 <h2 id="apps">Built-in Applications</h2>
 

@@ -530,7 +530,12 @@ static void android_hardware_Camera_startSmoothZoom(JNIEnv *env, jobject thiz, j
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    if (camera->sendCommand(CAMERA_CMD_START_SMOOTH_ZOOM, value, 0) != NO_ERROR) {
+    status_t rc = camera->sendCommand(CAMERA_CMD_START_SMOOTH_ZOOM, value, 0);
+    if (rc == BAD_VALUE) {
+        char msg[64];
+        sprintf(msg, "invalid zoom value=%d", value);
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+    } else if (rc != NO_ERROR) {
         jniThrowException(env, "java/lang/RuntimeException", "start smooth zoom failed");
     }
 }

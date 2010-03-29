@@ -197,6 +197,22 @@ public class WebViewClient {
     }
 
     /**
+     * Notify the host application that authentication credentials have been
+     * supplied from Script.
+     * The default behavior is to do nothing.
+     * @hide Pending API council review
+     *
+     * @param view The WebView that is initiating the callback.
+     * @param host The host requiring authentication.
+     * @param realm A description to help store user credentials for future
+     * @param username The username
+     * @param password The password
+     */
+    public void onReceivedHttpAuthCredentials(WebView view, String host,
+            String realm, String username, String password) {
+    }
+
+    /**
      * Give the host application a chance to handle the key event synchronously.
      * e.g. menu shortcut key events need to be filtered this way. If return
      * true, WebView will not handle the key event. If return false, WebView

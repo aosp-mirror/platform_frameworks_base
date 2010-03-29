@@ -2508,11 +2508,13 @@ public final class Settings {
         public static final String WIFI_ON = "wifi_on";
 
         /**
-         * Whether the Wi-Fi AP should be on.
+         * Used to save the Wifi_ON state prior to tethering.
+         * This state will be checked to restore Wifi after
+         * the user turns off tethering.
          *
          * @hide
          */
-        public static final String WIFI_AP_ON = "wifi_ap_on";
+        public static final String WIFI_SAVED_STATE = "wifi_saved_state";
 
         /**
          * AP SSID
@@ -2630,6 +2632,13 @@ public final class Settings {
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
+         * Origins for which browsers should allow geolocation by default.
+         * The value is a space-separated list of origins.
+         */
+        public static final String ALLOWED_GEOLOCATION_ORIGINS
+                = "allowed_geolocation_origins";
+
+        /**
          * Whether mobile data connections are allowed by the user.  See
          * ConnectivityManager for more info.
          * @hide
@@ -2708,14 +2717,6 @@ public final class Settings {
          * @hide
          */
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
-
-        /**
-         * Flag for allowing service provider to use location information to improve products and
-         * services.
-         * Type: int ( 0 = disallow, 1 = allow )
-         * @hide
-         */
-        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
          * Controls whether settings backup is enabled.

@@ -37,8 +37,9 @@ interface IRestoreObserver {
      *
      * @param nowBeingRestored The index, between 1 and the numPackages parameter
      *   to the restoreStarting() callback, of the package now being restored.
+     * @param currentPackage The name of the package now being restored.
      */
-    void onUpdate(int nowBeingRestored);
+    void onUpdate(int nowBeingRestored, String curentPackage);
 
     /**
      * The restore operation has completed.

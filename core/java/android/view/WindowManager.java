@@ -142,6 +142,29 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_INPUT_METHOD
          * @see #TYPE_INPUT_METHOD_DIALOG
          */
+        @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from = TYPE_BASE_APPLICATION, to = "TYPE_BASE_APPLICATION"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION, to = "TYPE_APPLICATION"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION_STARTING, to = "TYPE_APPLICATION_STARTING"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION_PANEL, to = "TYPE_APPLICATION_PANEL"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA, to = "TYPE_APPLICATION_MEDIA"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION_SUB_PANEL, to = "TYPE_APPLICATION_SUB_PANEL"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION_ATTACHED_DIALOG, to = "TYPE_APPLICATION_ATTACHED_DIALOG"),
+            @ViewDebug.IntToString(from = TYPE_STATUS_BAR, to = "TYPE_STATUS_BAR"),
+            @ViewDebug.IntToString(from = TYPE_SEARCH_BAR, to = "TYPE_SEARCH_BAR"),
+            @ViewDebug.IntToString(from = TYPE_PHONE, to = "TYPE_PHONE"),
+            @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT, to = "TYPE_SYSTEM_ALERT"),
+            @ViewDebug.IntToString(from = TYPE_KEYGUARD, to = "TYPE_KEYGUARD"),
+            @ViewDebug.IntToString(from = TYPE_TOAST, to = "TYPE_TOAST"),
+            @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY, to = "TYPE_SYSTEM_OVERLAY"),
+            @ViewDebug.IntToString(from = TYPE_PRIORITY_PHONE, to = "TYPE_PRIORITY_PHONE"),
+            @ViewDebug.IntToString(from = TYPE_STATUS_BAR_PANEL, to = "TYPE_STATUS_BAR_PANEL"),
+            @ViewDebug.IntToString(from = TYPE_SYSTEM_DIALOG, to = "TYPE_SYSTEM_DIALOG"),
+            @ViewDebug.IntToString(from = TYPE_KEYGUARD_DIALOG, to = "TYPE_KEYGUARD_DIALOG"),
+            @ViewDebug.IntToString(from = TYPE_SYSTEM_ERROR, to = "TYPE_SYSTEM_ERROR"),
+            @ViewDebug.IntToString(from = TYPE_INPUT_METHOD, to = "TYPE_INPUT_METHOD"),
+            @ViewDebug.IntToString(from = TYPE_INPUT_METHOD_DIALOG, to = "TYPE_INPUT_METHOD_DIALOG")
+        })
         public int type;
     
         /**
@@ -367,6 +390,30 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_FORCE_NOT_FULLSCREEN
          * @see #FLAG_IGNORE_CHEEK_PRESSES
          */
+        @ViewDebug.ExportedProperty(flagMapping = {
+            @ViewDebug.FlagToString(mask = FLAG_BLUR_BEHIND, equals = FLAG_BLUR_BEHIND,
+                    name = "FLAG_BLUR_BEHIND"),
+            @ViewDebug.FlagToString(mask = FLAG_DIM_BEHIND, equals = FLAG_DIM_BEHIND,
+                    name = "FLAG_DIM_BEHIND"),
+            @ViewDebug.FlagToString(mask = FLAG_NOT_FOCUSABLE, equals = FLAG_NOT_FOCUSABLE,
+                    name = "FLAG_NOT_FOCUSABLE"),
+            @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCHABLE, equals = FLAG_NOT_TOUCHABLE,
+                    name = "FLAG_NOT_TOUCHABLE"),
+            @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCH_MODAL, equals = FLAG_NOT_TOUCH_MODAL,
+                    name = "FLAG_NOT_TOUCH_MODAL"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_SCREEN, equals = FLAG_LAYOUT_IN_SCREEN,
+                    name = "FLAG_LAYOUT_IN_SCREEN"),
+            @ViewDebug.FlagToString(mask = FLAG_DITHER, equals = FLAG_DITHER,
+                    name = "FLAG_DITHER"),
+            @ViewDebug.FlagToString(mask = FLAG_KEEP_SCREEN_ON, equals = FLAG_KEEP_SCREEN_ON,
+                    name = "FLAG_KEEP_SCREEN_ON"),
+            @ViewDebug.FlagToString(mask = FLAG_FULLSCREEN, equals = FLAG_FULLSCREEN,
+                    name = "FLAG_FULLSCREEN"),
+            @ViewDebug.FlagToString(mask = FLAG_FORCE_NOT_FULLSCREEN,
+                    equals = FLAG_FORCE_NOT_FULLSCREEN, name = "FLAG_FORCE_NOT_FULLSCREEN"),
+            @ViewDebug.FlagToString(mask = FLAG_IGNORE_CHEEK_PRESSES,
+                    equals = FLAG_IGNORE_CHEEK_PRESSES, name = "FLAG_IGNORE_CHEEK_PRESSES")
+        })
         public int flags;
         
         /** Window flag: as long as this window is visible to the user, allow

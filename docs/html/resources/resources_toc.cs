@@ -95,6 +95,9 @@
         <li><a href="<?cs var:toroot ?>resources/articles/qsb.html">
                 <span class="en">Quick Search Box</span>
                 </a></li>
+        <li><a href="<?cs var:toroot ?>resources/articles/speech-input.html">
+                <span class="en">Speech Input</span>
+                </a></li>
         <li><a href="<?cs var:toroot ?>resources/articles/touch-mode.html">
                 <span class="en">Touch Mode</span>
                 </a></li>
@@ -113,6 +116,9 @@
         <li><a href="<?cs var:toroot ?>resources/articles/tts.html">
                 <span class="en">Using Text-to-Speech</span>
                 </a></li>
+        <li><a href="<?cs var:toroot ?>resources/articles/contacts.html">
+                <span class="en">Using the Contacts API</span>
+                </a> <span class="new">new!</span></li>
         <li><a href="<?cs var:toroot ?>resources/articles/using-webviews.html">
                 <span class="en">Using WebViews</span>
                 </a></li>
@@ -171,9 +177,12 @@
                <span class="zh-TW" style="display:none"></span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>resources/samples/get.html">
+            <span class="en">Getting the Samples</span>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>resources/samples/index.html">
-               <span class="en">List of Sample Apps</span>
+               <span class="en">List of Samples</span>
              </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>resources/samples/ApiDemos/index.html">

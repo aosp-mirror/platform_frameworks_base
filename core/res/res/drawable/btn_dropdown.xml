@@ -18,7 +18,7 @@
     <item
         android:state_window_focused="false" android:state_enabled="true"
         android:drawable="@drawable/btn_dropdown_normal" />
-    ﻿<item
+    <item
         android:state_window_focused="false" android:state_enabled="false"
         android:drawable="@drawable/btn_dropdown_disabled" />
     <item

@@ -62,4 +62,6 @@ interface ITts {
     int playSilence(in String callingApp, in long duration, in int queueMode, in String[] params);
 
     int setEngineByPackageName(in String enginePackageName);
+
+    String getDefaultEngine();
 }

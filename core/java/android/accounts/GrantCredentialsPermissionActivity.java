@@ -57,6 +57,14 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
         final Bundle extras = getIntent().getExtras();
         mAccount = extras.getParcelable(EXTRAS_ACCOUNT);
         mAuthTokenType = extras.getString(EXTRAS_AUTH_TOKEN_TYPE);
+
+        if (mAccount == null || mAuthTokenType == null) {
+            // we were somehow started with bad parameters. abort the activity.
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+            return;
+        }
+
         mUid = extras.getInt(EXTRAS_REQUESTING_UID);
         final String accountTypeLabel = extras.getString(EXTRAS_ACCOUNT_TYPE_LABEL);
         final String[] packages = extras.getStringArray(EXTRAS_PACKAGES);

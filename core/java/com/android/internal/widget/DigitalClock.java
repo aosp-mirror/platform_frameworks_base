@@ -30,7 +30,7 @@ import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
@@ -39,7 +39,7 @@ import java.util.Calendar;
 /**
  * Displays the time
  */
-public class DigitalClock extends LinearLayout {
+public class DigitalClock extends RelativeLayout {
 
     private final static String M12 = "h:mm";
     private final static String M24 = "kk:mm";

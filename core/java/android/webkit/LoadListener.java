@@ -663,6 +663,11 @@ class LoadListener extends Handler implements EventHandler {
                     // If this is the first attempt to authenticate, try again with the username and
                     // password supplied in the URL, if present.
                     if (!mAuthFailed && mUsername != null && mPassword != null) {
+                        String host = mAuthHeader.isProxy() ?
+                                Network.getInstance(mContext).getProxyHostname() :
+                                mUri.mHost;
+                        HttpAuthHandler.onReceivedCredentials(this, host,
+                                mAuthHeader.getRealm(), mUsername, mPassword);
                         makeAuthResponse(mUsername, mPassword);
                     } else {
                         Network.getInstance(mContext).handleAuthRequest(this);

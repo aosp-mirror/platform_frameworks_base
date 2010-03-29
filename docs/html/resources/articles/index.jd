@@ -127,6 +127,11 @@ page.title=Technical Articles
 </dl>
 
 <dl>
+  <dt><a href="{@docRoot}resources/articles/tts.html">Using the Contacts API</a></dt>
+  <dd>This article discusses the improved Contacts API introduced in Android 2.0 and how to use it to manage and integrate contacts from multiple accounts and data sources. The article also discusses techniques for using the new API on devices that support it, while maintaining backward compatibility with the old API on other devices. </dd>
+</dl>
+
+<dl>
   <dt><a href="{@docRoot}resources/articles/using-webviews.html">Using WebViews</a></dt>
   <dd>WebViews allow an application to dynamically display HTML and execute JavaScript, without relinquishing control to a separate browser application. This article introduces the WebView classes and provides a sample application that demonstrates its use.</dd>
 </dl>

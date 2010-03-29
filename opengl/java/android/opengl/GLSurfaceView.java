@@ -156,6 +156,7 @@ import android.view.SurfaceView;
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private final static boolean LOG_THREADS = false;
+    private final static boolean LOG_PAUSE_RESUME = false;
     private final static boolean LOG_SURFACE = false;
     private final static boolean LOG_RENDERER = false;
     private final static boolean LOG_RENDERER_DRAW_FRAME = false;
@@ -1160,6 +1161,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 break;
                             }
 
+                            // Update the pause state.
+                            if (mPaused != mRequestPaused) {
+                                mPaused = mRequestPaused;
+                                sGLThreadManager.notifyAll();
+                                if (LOG_PAUSE_RESUME) {
+                                    Log.i("GLThread", "mPaused is now " + mPaused + " tid=" + getId());
+                                }
+                            }
+
                             // Have we lost the EGL context?
                             if (lostEglContext) {
                                 stopEglSurfaceLocked();
@@ -1359,6 +1369,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 }
                 mHasSurface = true;
                 sGLThreadManager.notifyAll();
+                while((mWaitingForSurface) && (!mExited)) {
+                    try {
+                        sGLThreadManager.wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         }
 
@@ -1381,16 +1398,43 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         public void onPause() {
             synchronized (sGLThreadManager) {
-                mPaused = true;
+                if (LOG_PAUSE_RESUME) {
+                    Log.i("GLThread", "onPause tid=" + getId());
+                }
+                mRequestPaused = true;
                 sGLThreadManager.notifyAll();
+                while ((! mExited) && (! mPaused)) {
+                    if (LOG_PAUSE_RESUME) {
+                        Log.i("Main thread", "onPause waiting for mPaused.");
+                    }
+                    try {
+                        sGLThreadManager.wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         }
 
         public void onResume() {
             synchronized (sGLThreadManager) {
-                mPaused = false;
+                if (LOG_PAUSE_RESUME) {
+                    Log.i("GLThread", "onResume tid=" + getId());
+                }
+                mRequestPaused = false;
                 mRequestRender = true;
+                mRenderComplete = false;
                 sGLThreadManager.notifyAll();
+                while ((! mExited) && mPaused && (!mRenderComplete)) {
+                    if (LOG_PAUSE_RESUME) {
+                        Log.i("Main thread", "onResume waiting for !mPaused.");
+                    }
+                    try {
+                        sGLThreadManager.wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         }
 
@@ -1451,6 +1495,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         // variables are protected by the sGLThreadManager monitor
         private boolean mShouldExit;
         private boolean mExited;
+        private boolean mRequestPaused;
         private boolean mPaused;
         private boolean mHasSurface;
         private boolean mWaitingForSurface;

@@ -2,7 +2,7 @@ community=true
 page.title=IRC and Twitter
 @jd:body
 
-<p>In addition to the <a href="community-groups.html">Android developer groups</a>, you can also participate in the Android developer community through IRC, and you can also follow us on Twitter. </p>
+<p>In addition to the <a href="community-groups.html">Android developer forums</a>, you can participate in the Android developer community through IRC and you can follow us on Twitter. </p>
 
 <h3 id="irc">IRC</h3>
 
@@ -31,10 +31,10 @@ page.title=IRC and Twitter
 <ul>
 <li>Set your nickname before you join the channel.</li>
 <li>Registering your nickname prevents others from using your nickname or impersonating you later:
-<pre>/nick &lt;yournickname&gt;
-/msg nickserv register &lt;password&gt; &lt;email&gt;</code></pre>
+<pre class="no-pretty-print" style="width:50%;">/nick &lt;yournickname&gt;
+/msg nickserv register &lt;password&gt; &lt;email&gt;</pre>
 <p>Afterwards, when you connect, you'll need to supply a password:</p>
-<pre>/connect irc.freenode.net
+<pre class="no-pretty-print" style="width:50%;">/connect irc.freenode.net
 /nick &lt;yournickname&gt;
 /msg nickserv identify &lt;password&gt;
 /join #android-dev</pre>

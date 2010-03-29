@@ -1855,7 +1855,8 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
                     && mPendingContentInsets.equals(ri.coveredInsets)
-                    && mPendingVisibleInsets.equals(ri.visibleInsets)) {
+                    && mPendingVisibleInsets.equals(ri.visibleInsets)
+                    && ((ResizedInfo)msg.obj).newConfig == null) {
                 break;
             }
             // fall through...

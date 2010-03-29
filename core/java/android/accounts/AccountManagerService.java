@@ -282,6 +282,7 @@ public class AccountManagerService
     }
 
     public String getPassword(Account account) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
 
         long identityToken = clearCallingIdentity();
@@ -312,6 +313,8 @@ public class AccountManagerService
     }
 
     public String getUserData(Account account, String key) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (key == null) throw new IllegalArgumentException("key is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
@@ -382,6 +385,7 @@ public class AccountManagerService
     }
 
     public boolean addAccount(Account account, String password, Bundle extras) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
 
         // fails if the account already exists
@@ -451,6 +455,9 @@ public class AccountManagerService
 
     public void hasFeatures(IAccountManagerResponse response,
             Account account, String[] features) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (features == null) throw new IllegalArgumentException("features is null");
         checkReadAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -509,6 +516,8 @@ public class AccountManagerService
     }
 
     public void removeAccount(IAccountManagerResponse response, Account account) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -565,6 +574,8 @@ public class AccountManagerService
     }
 
     public void invalidateAuthToken(String accountType, String authToken) {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
+        if (authToken == null) throw new IllegalArgumentException("authToken is null");
         checkManageAccountsOrUseCredentialsPermissions();
         long identityToken = clearCallingIdentity();
         try {
@@ -658,6 +669,8 @@ public class AccountManagerService
     }
 
     public String peekAuthToken(Account account, String authTokenType) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
@@ -668,6 +681,8 @@ public class AccountManagerService
     }
 
     public void setAuthToken(Account account, String authTokenType, String authToken) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
@@ -678,6 +693,7 @@ public class AccountManagerService
     }
 
     public void setPassword(Account account, String password) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
@@ -714,6 +730,7 @@ public class AccountManagerService
     }
 
     public void clearPassword(Account account) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -724,6 +741,8 @@ public class AccountManagerService
     }
 
     public void setUserData(Account account, String key, String value) {
+        if (key == null) throw new IllegalArgumentException("key is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         if (account == null) {
@@ -786,6 +805,9 @@ public class AccountManagerService
     public void getAuthToken(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean notifyOnAuthFailure,
             final boolean expectActivityLaunch, final Bundle loginOptions) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
         final int callerUid = Binder.getCallingUid();
         final boolean permissionGranted = permissionIsGranted(account, authTokenType, callerUid);
@@ -955,6 +977,8 @@ public class AccountManagerService
     public void addAcount(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle options) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -981,6 +1005,8 @@ public class AccountManagerService
 
     public void confirmCredentials(IAccountManagerResponse response,
             final Account account, final Bundle options, final boolean expectActivityLaunch) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -1002,6 +1028,9 @@ public class AccountManagerService
     public void updateCredentials(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean expectActivityLaunch,
             final Bundle loginOptions) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -1025,6 +1054,8 @@ public class AccountManagerService
 
     public void editProperties(IAccountManagerResponse response, final String accountType,
             final boolean expectActivityLaunch) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
@@ -1142,6 +1173,8 @@ public class AccountManagerService
 
     public void getAccountsByFeatures(IAccountManagerResponse response,
             String type, String[] features) {
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (type == null) throw new IllegalArgumentException("accountType is null");
         checkReadAccountsPermission();
         if (features != null && type == null) {
             if (response != null) {
@@ -1878,7 +1911,8 @@ public class AccountManagerService
      * @hide
      */
     public void grantAppPermission(Account account, String authTokenType, int uid) {
-        if (account == null  || authTokenType == null) {
+        if (account == null || authTokenType == null) {
+            Log.e(TAG, "grantAppPermission: called with invalid arguments", new Exception());
             return;
         }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -1908,7 +1942,8 @@ public class AccountManagerService
      * @hide
      */
     public void revokeAppPermission(Account account, String authTokenType, int uid) {
-        if (account == null  || authTokenType == null) {
+        if (account == null || authTokenType == null) {
+            Log.e(TAG, "revokeAppPermission: called with invalid arguments", new Exception());
             return;
         }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();

@@ -778,8 +778,8 @@ public class GradientDrawable extends Drawable {
                         com.android.internal.R.styleable.DrawableCorners_bottomLeftRadius, radius);
                 int bottomRightRadius = a.getDimensionPixelSize(
                         com.android.internal.R.styleable.DrawableCorners_bottomRightRadius, radius);
-                if (topLeftRadius != radius && topRightRadius != radius &&
-                        bottomLeftRadius != radius && bottomRightRadius != radius) {
+                if (topLeftRadius != radius || topRightRadius != radius ||
+                        bottomLeftRadius != radius || bottomRightRadius != radius) {
                     setCornerRadii(new float[] {
                             topLeftRadius, topLeftRadius,
                             topRightRadius, topRightRadius,

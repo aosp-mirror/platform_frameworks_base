@@ -1340,4 +1340,43 @@ public class TextToSpeech {
         }
     }
 
+
+    /**
+     * Gets the packagename of the default speech synthesis engine.
+     *
+     * @return Packagename of the TTS engine that the user has chosen as their default.
+     *
+     * @hide
+     */
+    public String getDefaultEngine() {
+        synchronized (mStartLock) {
+            String engineName = "";
+            if (!mStarted) {
+                return engineName;
+            }
+            try {
+                engineName = mITts.getDefaultEngine();
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - setEngineByPackageName", "RemoteException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - setEngineByPackageName", "NullPointerException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - setEngineByPackageName", "IllegalStateException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } finally {
+                return engineName;
+            }
+        }
+    }
 }

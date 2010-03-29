@@ -32,16 +32,16 @@ import android.view.animation.Interpolator;
  * computeScrollOffset() will always return false to indicate that scrolling is over.
  */
 public class Scroller  {
-    int mMode;
+    private int mMode;
 
-    MagneticScroller mScrollerX;
-    MagneticScroller mScrollerY;
+    private MagneticScroller mScrollerX;
+    private MagneticScroller mScrollerY;
 
     private final Interpolator mInterpolator;
 
-    static final int DEFAULT_DURATION = 250;
-    static final int SCROLL_MODE = 0;
-    static final int FLING_MODE = 1;
+    private static final int DEFAULT_DURATION = 250;
+    private static final int SCROLL_MODE = 0;
+    private static final int FLING_MODE = 1;
 
     // This controls the viscous fluid effect (how much of it)
     private final static float VISCOUS_FLUID_SCALE = 8.0f;
@@ -65,15 +65,11 @@ public class Scroller  {
      * null, the default (viscous) interpolator will be used.
      */
     public Scroller(Context context, Interpolator interpolator) {
-        instantiateScrollers();
+        mScrollerX = new MagneticScroller();
+        mScrollerY = new MagneticScroller();
         MagneticScroller.initializeFromContext(context);
 
         mInterpolator = interpolator;
-    }
-    
-    void instantiateScrollers() {
-        mScrollerX = new MagneticScroller();
-        mScrollerY = new MagneticScroller();        
     }
 
     /**
@@ -289,7 +285,7 @@ public class Scroller  {
         mScrollerY.fling(startY, velocityY, minY, maxY);
     }
 
-    private static float viscousFluid(float x) {
+    static float viscousFluid(float x) {
         x *= VISCOUS_FLUID_SCALE;
         if (x < 1.0f) {
             x -= (1.0f - (float)Math.exp(-x));

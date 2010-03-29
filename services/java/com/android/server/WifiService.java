@@ -264,10 +264,11 @@ public class WifiService extends IWifiManager.Stub {
      * if needed
      */
     public void startWifi() {
-        boolean wifiEnabled = getPersistedWifiEnabled();
+        /* Start if Wi-Fi is enabled or the saved state indicates Wi-Fi was on */
+        boolean wifiEnabled = getPersistedWifiEnabled() || testAndClearWifiSavedState();
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
-        setWifiEnabledBlocking(wifiEnabled, false, Process.myUid());
+        setWifiEnabledBlocking(wifiEnabled, true, Process.myUid());
     }
 
     private void updateTetherState(ArrayList<String> available, ArrayList<String> tethered) {
@@ -314,6 +315,19 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
         }
+    }
+
+    private boolean testAndClearWifiSavedState() {
+        final ContentResolver cr = mContext.getContentResolver();
+        int wifiSavedState = 0;
+        try {
+            wifiSavedState = Settings.Secure.getInt(cr, Settings.Secure.WIFI_SAVED_STATE);
+            if(wifiSavedState == 1)
+                Settings.Secure.putInt(cr, Settings.Secure.WIFI_SAVED_STATE, 0);
+        } catch (Settings.SettingNotFoundException e) {
+            ;
+        }
+        return (wifiSavedState == 1);
     }
 
     private boolean getPersistedWifiEnabled() {

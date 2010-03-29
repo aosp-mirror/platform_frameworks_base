@@ -2597,6 +2597,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mTouchMode = TOUCH_MODE_OVERFLING;
                 invalidate();
                 post(this);
+            } else {
+                mTouchMode = TOUCH_MODE_REST;
             }
         }
 
@@ -2610,14 +2612,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         void edgeReached() {
-            mScroller.notifyVerticalEdgeReached(mScrollY, 0, Integer.MAX_VALUE);
-            mTouchMode = TOUCH_MODE_OVERFLING;
-            invalidate();
-            post(this);
-        }
-
-        void marginReached() {
-            mScroller.notifyVerticalBoundaryReached(mScrollY, 0);
+            mScroller.notifyVerticalEdgeReached(mScrollY, 0, getOverscrollMax());
             mTouchMode = TOUCH_MODE_OVERFLING;
             invalidate();
             post(this);
