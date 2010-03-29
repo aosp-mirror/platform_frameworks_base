@@ -39,6 +39,7 @@ import android.view.inputmethod.InputMethodSession;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -64,9 +65,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
    
-    final AbstractInputMethodService mTarget;
+    final WeakReference<AbstractInputMethodService> mTarget;
     final HandlerCaller mCaller;
-    final InputMethod mInputMethod;
+    final WeakReference<InputMethod> mInputMethod;
     
     static class Notifier {
         boolean notified;
@@ -96,21 +97,32 @@ class IInputMethodWrapper extends IInputMethod.Stub
     
     public IInputMethodWrapper(AbstractInputMethodService context,
             InputMethod inputMethod) {
-        mTarget = context;
-        mCaller = new HandlerCaller(context, this);
-        mInputMethod = inputMethod;
+        mTarget = new WeakReference<AbstractInputMethodService>(context);
+        mCaller = new HandlerCaller(context.getApplicationContext(), this);
+        mInputMethod = new WeakReference<InputMethod>(inputMethod);
     }
 
     public InputMethod getInternalInputMethod() {
-        return mInputMethod;
+        return mInputMethod.get();
     }
 
     public void executeMessage(Message msg) {
+        InputMethod inputMethod = mInputMethod.get();
+        // Need a valid reference to the inputMethod for everything except a dump.
+        if (inputMethod == null && msg.what != DO_DUMP) {
+            Log.w(TAG, "Input method reference was null, ignoring message: " + msg.what);
+            return;
+        }
+
         switch (msg.what) {
             case DO_DUMP: {
+                AbstractInputMethodService target = mTarget.get();
+                if (target == null) {
+                    return;
+                }
                 HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
                 try {
-                    mTarget.dump((FileDescriptor)args.arg1,
+                    target.dump((FileDescriptor)args.arg1,
                             (PrintWriter)args.arg2, (String[])args.arg3);
                 } catch (RuntimeException e) {
                     ((PrintWriter)args.arg2).println("Exception: " + e);
@@ -122,22 +134,22 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             
             case DO_ATTACH_TOKEN: {
-                mInputMethod.attachToken((IBinder)msg.obj);
+                inputMethod.attachToken((IBinder)msg.obj);
                 return;
             }
             case DO_SET_INPUT_CONTEXT: {
-                mInputMethod.bindInput((InputBinding)msg.obj);
+                inputMethod.bindInput((InputBinding)msg.obj);
                 return;
             }
             case DO_UNSET_INPUT_CONTEXT:
-                mInputMethod.unbindInput();
+                inputMethod.unbindInput();
                 return;
             case DO_START_INPUT: {
                 HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(inputContext) : null;
-                mInputMethod.startInput(ic, (EditorInfo)args.arg2);
+                inputMethod.startInput(ic, (EditorInfo)args.arg2);
                 return;
             }
             case DO_RESTART_INPUT: {
@@ -145,33 +157,37 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(inputContext) : null;
-                mInputMethod.restartInput(ic, (EditorInfo)args.arg2);
+                inputMethod.restartInput(ic, (EditorInfo)args.arg2);
                 return;
             }
             case DO_CREATE_SESSION: {
-                mInputMethod.createSession(new InputMethodSessionCallbackWrapper(
+                inputMethod.createSession(new InputMethodSessionCallbackWrapper(
                         mCaller.mContext, (IInputMethodCallback)msg.obj));
                 return;
             }
             case DO_SET_SESSION_ENABLED:
-                mInputMethod.setSessionEnabled((InputMethodSession)msg.obj,
+                inputMethod.setSessionEnabled((InputMethodSession)msg.obj,
                         msg.arg1 != 0);
                 return;
             case DO_REVOKE_SESSION:
-                mInputMethod.revokeSession((InputMethodSession)msg.obj);
+                inputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT:
-                mInputMethod.showSoftInput(msg.arg1, (ResultReceiver)msg.obj);
+                inputMethod.showSoftInput(msg.arg1, (ResultReceiver)msg.obj);
                 return;
             case DO_HIDE_SOFT_INPUT:
-                mInputMethod.hideSoftInput(msg.arg1, (ResultReceiver)msg.obj);
+                inputMethod.hideSoftInput(msg.arg1, (ResultReceiver)msg.obj);
                 return;
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
     
     @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        if (mTarget.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+        AbstractInputMethodService target = mTarget.get();
+        if (target == null) {
+            return;
+        }
+        if (target.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             
             fout.println("Permission Denial: can't dump InputMethodManager from from pid="
