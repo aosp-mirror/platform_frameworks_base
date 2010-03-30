@@ -338,6 +338,9 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int MCS_RECONNECT = 10;
     static final int MCS_GIVE_UP = 11;
     static final int UPDATED_MEDIA_STATUS = 12;
+    static final int WRITE_SETTINGS = 13;
+
+    static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
@@ -379,24 +382,38 @@ class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to bind to" +
                     " DefaultContainerService");
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             if (mContext.bindService(service, mDefContainerConn,
                     Context.BIND_AUTO_CREATE)) {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 mBound = true;
                 return true;
             }
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             return false;
         }
 
         private void disconnectService() {
             mContainerService = null;
             mBound = false;
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             mContext.unbindService(mDefContainerConn);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         }
 
         PackageHandler(Looper looper) {
             super(looper);
         }
+        
         public void handleMessage(Message msg) {
+            try {
+                doHandleMessage(msg);
+            } finally {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            }
+        }
+        
+        void doHandleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
                     if (DEBUG_SD_INSTALL) Log.i(TAG, "init_copy");
@@ -499,6 +516,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     ArrayList components[];
                     int size = 0;
                     int uids[];
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mPackages) {
                         if (mPendingBroadcasts == null) {
                             return;
@@ -530,15 +548,18 @@ class PackageManagerService extends IPackageManager.Stub {
                         sendPackageChangedBroadcast(packages[i], true,
                                 (ArrayList<String>)components[i], uids[i]);
                     }
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
                 }
                 case START_CLEANING_PACKAGE: {
                     String packageName = (String)msg.obj;
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mPackages) {
                         if (!mSettings.mPackagesToBeCleaned.contains(packageName)) {
                             mSettings.mPackagesToBeCleaned.add(packageName);
                         }
                     }
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     startCleaningPackages();
                 } break;
                 case POST_INSTALL: {
@@ -598,10 +619,24 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.e(TAG, "MountService not running?");
                     }
                 } break;
+                case WRITE_SETTINGS: {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+                    synchronized (mPackages) {
+                        removeMessages(WRITE_SETTINGS);
+                        mSettings.writeLP();
+                    }
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                } break;
             }
         }
     }
 
+    void scheduleWriteSettingsLocked() {
+        if (!mHandler.hasMessages(WRITE_SETTINGS)) {
+            mHandler.sendEmptyMessageDelayed(WRITE_SETTINGS, WRITE_SETTINGS_DELAY);
+        }
+    }
+    
     static boolean installOnSd(int flags) {
         if (((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) ||
                 ((flags & PackageManager.INSTALL_INTERNAL) != 0)) {
@@ -1633,32 +1668,84 @@ class PackageManagerService extends IPackageManager.Stub {
         throw new SecurityException("No permission tree found for " + permName);
     }
 
+    static boolean compareStrings(CharSequence s1, CharSequence s2) {
+        if (s1 == null) {
+            return s2 == null;
+        }
+        if (s2 == null) {
+            return false;
+        }
+        if (s1.getClass() != s2.getClass()) {
+            return false;
+        }
+        return s1.equals(s2);
+    }
+    
+    static boolean comparePermissionInfos(PermissionInfo pi1, PermissionInfo pi2) {
+        if (pi1.icon != pi2.icon) return false;
+        if (pi1.protectionLevel != pi2.protectionLevel) return false;
+        if (!compareStrings(pi1.name, pi2.name)) return false;
+        if (!compareStrings(pi1.nonLocalizedLabel, pi2.nonLocalizedLabel)) return false;
+        // We'll take care of setting this one.
+        if (!compareStrings(pi1.packageName, pi2.packageName)) return false;
+        // These are not currently stored in settings.
+        //if (!compareStrings(pi1.group, pi2.group)) return false;
+        //if (!compareStrings(pi1.nonLocalizedDescription, pi2.nonLocalizedDescription)) return false;
+        //if (pi1.labelRes != pi2.labelRes) return false;
+        //if (pi1.descriptionRes != pi2.descriptionRes) return false;
+        return true;
+    }
+    
+    boolean addPermissionLocked(PermissionInfo info, boolean async) {
+        if (info.labelRes == 0 && info.nonLocalizedLabel == null) {
+            throw new SecurityException("Label must be specified in permission");
+        }
+        BasePermission tree = checkPermissionTreeLP(info.name);
+        BasePermission bp = mSettings.mPermissions.get(info.name);
+        boolean added = bp == null;
+        boolean changed = true;
+        if (added) {
+            bp = new BasePermission(info.name, tree.sourcePackage,
+                    BasePermission.TYPE_DYNAMIC);
+        } else if (bp.type != BasePermission.TYPE_DYNAMIC) {
+            throw new SecurityException(
+                    "Not allowed to modify non-dynamic permission "
+                    + info.name);
+        } else {
+            if (bp.protectionLevel == info.protectionLevel
+                    && bp.perm.owner.equals(tree.perm.owner)
+                    && bp.uid == tree.uid
+                    && comparePermissionInfos(bp.perm.info, info)) {
+                changed = false;
+            }
+        }
+        bp.protectionLevel = info.protectionLevel;
+        bp.perm = new PackageParser.Permission(tree.perm.owner,
+                new PermissionInfo(info));
+        bp.perm.info.packageName = tree.perm.info.packageName;
+        bp.uid = tree.uid;
+        if (added) {
+            mSettings.mPermissions.put(info.name, bp);
+        }
+        if (changed) {
+            if (!async) {
+                mSettings.writeLP();
+            } else {
+                scheduleWriteSettingsLocked();            
+            }
+        }
+        return added;
+    }
+
     public boolean addPermission(PermissionInfo info) {
         synchronized (mPackages) {
-            if (info.labelRes == 0 && info.nonLocalizedLabel == null) {
-                throw new SecurityException("Label must be specified in permission");
-            }
-            BasePermission tree = checkPermissionTreeLP(info.name);
-            BasePermission bp = mSettings.mPermissions.get(info.name);
-            boolean added = bp == null;
-            if (added) {
-                bp = new BasePermission(info.name, tree.sourcePackage,
-                        BasePermission.TYPE_DYNAMIC);
-            } else if (bp.type != BasePermission.TYPE_DYNAMIC) {
-                throw new SecurityException(
-                        "Not allowed to modify non-dynamic permission "
-                        + info.name);
-            }
-            bp.protectionLevel = info.protectionLevel;
-            bp.perm = new PackageParser.Permission(tree.perm.owner,
-                    new PermissionInfo(info));
-            bp.perm.info.packageName = tree.perm.info.packageName;
-            bp.uid = tree.uid;
-            if (added) {
-                mSettings.mPermissions.put(info.name, bp);
-            }
-            mSettings.writeLP();
-            return added;
+            return addPermissionLocked(info, false);
+        }
+    }
+
+    public boolean addPermissionAsync(PermissionInfo info) {
+        synchronized (mPackages) {
+            return addPermissionLocked(info, true);
         }
     }
 
@@ -6448,7 +6535,7 @@ class PackageManagerService extends IPackageManager.Stub {
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             mSettings.mPreferredActivities.addFilter(
                     new PreferredActivity(filter, match, set, activity));
-            mSettings.writeLP();
+            scheduleWriteSettingsLocked();            
         }
     }
 
@@ -6519,7 +6606,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (clearPackagePreferredActivitiesLP(packageName)) {
-                mSettings.writeLP();
+                scheduleWriteSettingsLocked();            
             }
         }
     }
@@ -6608,18 +6695,28 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             if (className == null) {
                 // We're dealing with an application/package level state change
+                if (pkgSetting.enabled == newState) {
+                    // Nothing to do
+                    return;
+                }
                 pkgSetting.enabled = newState;
             } else {
                 // We're dealing with a component level state change
                 switch (newState) {
                 case COMPONENT_ENABLED_STATE_ENABLED:
-                    pkgSetting.enableComponentLP(className);
+                    if (!pkgSetting.enableComponentLP(className)) {
+                        return;
+                    }
                     break;
                 case COMPONENT_ENABLED_STATE_DISABLED:
-                    pkgSetting.disableComponentLP(className);
+                    if (!pkgSetting.disableComponentLP(className)) {
+                        return;
+                    }
                     break;
                 case COMPONENT_ENABLED_STATE_DEFAULT:
-                    pkgSetting.restoreComponentLP(className);
+                    if (!pkgSetting.restoreComponentLP(className)) {
+                        return;
+                    }
                     break;
                 default:
                     Slog.e(TAG, "Invalid new component state: " + newState);
@@ -7614,19 +7711,22 @@ class PackageManagerService extends IPackageManager.Stub {
             installStatus = base.installStatus;
         }
 
-        void enableComponentLP(String componentClassName) {
-            disabledComponents.remove(componentClassName);
-            enabledComponents.add(componentClassName);
+        boolean enableComponentLP(String componentClassName) {
+            boolean changed = disabledComponents.remove(componentClassName);
+            changed |= enabledComponents.add(componentClassName);
+            return changed;
         }
 
-        void disableComponentLP(String componentClassName) {
-            enabledComponents.remove(componentClassName);
-            disabledComponents.add(componentClassName);
+        boolean disableComponentLP(String componentClassName) {
+            boolean changed = enabledComponents.remove(componentClassName);
+            changed |= disabledComponents.add(componentClassName);
+            return changed;
         }
 
-        void restoreComponentLP(String componentClassName) {
-            enabledComponents.remove(componentClassName);
-            disabledComponents.remove(componentClassName);
+        boolean restoreComponentLP(String componentClassName) {
+            boolean changed = enabledComponents.remove(componentClassName);
+            changed |= disabledComponents.remove(componentClassName);
+            return changed;
         }
 
         int currentEnabledStateLP(String componentName) {

@@ -314,4 +314,6 @@ interface IPackageManager {
     String nextPackageToClean(String lastPackage);
 
     void movePackage(String packageName, IPackageMoveObserver observer, int flags);
+    
+    boolean addPermissionAsync(in PermissionInfo info);
 }
