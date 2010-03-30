@@ -107,6 +107,8 @@ sp<MetaData> MP3Decoder::getFormat() {
         meta->setInt64(kKeyDuration, durationUs);
     }
 
+    meta->setCString(kKeyDecoderComponent, "MP3Decoder");
+
     return meta;
 }
 
