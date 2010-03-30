@@ -1164,7 +1164,7 @@ class CallbackProxy extends Handler {
         // for null.
         WebHistoryItem i = mBackForwardList.getCurrentItem();
         if (i != null) {
-            if (precomposed || i.getTouchIconUrl() != null) {
+            if (precomposed || i.getTouchIconUrl() == null) {
                 i.setTouchIconUrl(url);
             }
         }
