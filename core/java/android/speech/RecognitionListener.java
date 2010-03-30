@@ -19,7 +19,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * Used for receiving notifications from the RecognitionManager when the
+ * Used for receiving notifications from the SpeechRecognizer when the
  * recognition related events occur. All the callbacks are executed on the
  * Application main thread.
  */
@@ -61,7 +61,7 @@ public interface RecognitionListener {
     /**
      * A network or recognition error occurred.
      * 
-     * @param error code is defined in {@link RecognitionManager}
+     * @param error code is defined in {@link SpeechRecognizer}
      */
     void onError(int error);
 
@@ -70,7 +70,7 @@ public interface RecognitionListener {
      * 
      * @param results the recognition results. To retrieve the results in {@code
      *        ArrayList&lt;String&gt;} format use {@link Bundle#getStringArrayList(String)} with
-     *        {@link RecognitionManager#RESULTS_RECOGNITION} as a parameter
+     *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
      */
     void onResults(Bundle results);
 
@@ -78,13 +78,13 @@ public interface RecognitionListener {
      * Called when partial recognition results are available. The callback might be called at any
      * time between {@link #onBeginningOfSpeech()} and {@link #onResults(Bundle)} when partial
      * results are ready. This method may be called zero, one or multiple times for each call to
-     * {@link RecognitionManager#startListening(Intent)}, depending on the speech recognition
+     * {@link SpeechRecognizer#startListening(Intent)}, depending on the speech recognition
      * service implementation.  To request partial results, use
      * {@link RecognizerIntent#EXTRA_PARTIAL_RESULTS}
      * 
      * @param partialResults the returned results. To retrieve the results in
      *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
-     *        {@link RecognitionManager#RESULTS_RECOGNITION} as a parameter
+     *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
      */
     void onPartialResults(Bundle partialResults);
 
