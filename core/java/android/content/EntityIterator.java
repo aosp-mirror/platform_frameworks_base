@@ -16,32 +16,20 @@
 
 package android.content;
 
-import android.os.RemoteException;
+import java.util.Iterator;
 
-public interface EntityIterator {
+/**
+ * A specialization of {@link Iterator} that allows iterating over a collection of
+ * {@link Entity} objects. In addition to the iteration functionality it also allows
+ * resetting the iterator back to the beginning and provides for an explicit {@link #close()}
+ * method to indicate that the iterator is no longer needed and that its resources
+ * can be released.
+ */
+public interface EntityIterator extends Iterator<Entity> {
     /**
-     * Returns whether there are more elements to iterate, i.e. whether the
-     * iterator is positioned in front of an element.
-     *
-     * @return {@code true} if there are more elements, {@code false} otherwise.
-     * @see #next
-     * @since Android 1.0
+     * Reset the iterator back to the beginning.
      */
-    public boolean hasNext() throws RemoteException;
-
-    /**
-     * Returns the next object in the iteration, i.e. returns the element in
-     * front of the iterator and advances the iterator by one position.
-     *
-     * @return the next object.
-     * @throws java.util.NoSuchElementException
-     *             if there are no more elements.
-     * @see #hasNext
-     * @since Android 1.0
-     */
-    public Entity next() throws RemoteException;
-
-    public void reset() throws RemoteException;
+    public void reset();
 
     /**
      * Indicates that this iterator is no longer needed and that any associated resources
