@@ -1853,6 +1853,15 @@ class ContextImpl extends Context {
         }
 
         @Override
+        public boolean addPermissionAsync(PermissionInfo info) {
+            try {
+                return mPM.addPermissionAsync(info);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+
+        @Override
         public void removePermission(String name) {
             try {
                 mPM.removePermission(name);
