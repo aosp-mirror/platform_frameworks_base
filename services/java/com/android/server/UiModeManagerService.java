@@ -484,6 +484,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     Intent intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_HOME);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mHoldingConfiguration = false;
                     updateConfigurationLocked(false);
                     ActivityManagerNative.getDefault().startActivityWithConfig(
                             null, intent, null, null, 0, null, null, 0, false, false,
