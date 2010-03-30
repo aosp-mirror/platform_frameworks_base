@@ -26,7 +26,7 @@ import java.io.File;
  * Like FileBackupHelper, but takes absolute paths for the files instead of
  * subpaths of getFilesDir()
  *
- * STOPSHIP: document!
+ * @hide
  */
 public class AbsoluteFileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "AbsoluteFileBackupHelper";
