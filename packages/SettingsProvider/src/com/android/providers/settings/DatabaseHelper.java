@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 54;
+    private static final int DATABASE_VERSION = 55;
 
     private Context mContext;
 
@@ -681,6 +681,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 54;
         }
 
+        if (upgradeVersion == 54) {
+            /*
+             * Update the screen timeout value if set to never
+             */
+            db.beginTransaction();
+            try {
+                upgradeScreenTimeoutFromNever(db);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 55;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -757,6 +772,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             c.close();
             db.delete("system", "name='lock_pattern'", null);
+        } else {
+            c.close();
+        }
+    }
+
+    private void upgradeScreenTimeoutFromNever(SQLiteDatabase db) {
+        // See if the timeout is -1 (for "Never").
+        Cursor c = db.query("system", new String[] { "_id", "value" }, "name=? AND value=?",
+                new String[] { Settings.System.SCREEN_OFF_TIMEOUT, "-1" },
+                null, null, null);
+
+        SQLiteStatement stmt = null;
+        if (c.getCount() > 0) {
+            c.close();
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                        + " VALUES(?,?);");
+    
+                // Set the timeout to 30 minutes in milliseconds
+                loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT, 30 * 60 * 1000);
+            } finally {
+                if (stmt != null) stmt.close();
+            }
         } else {
             c.close();
         }
