@@ -116,6 +116,15 @@ public class Environment {
      * happened.  You can determine its current state with
      * {@link #getExternalStorageState()}.
      * 
+     * <p>Applications should not directly use this top-level directory, in
+     * order to avoid polluting the user's root namespace.  Any files that are
+     * private to the application should be placed in a directory returned
+     * by {@link android.content.Context#getExternalFilesDir
+     * Context.getExternalFilesDir}, which the system will take care of deleting
+     * if the application is uninstalled.  Other shared files should be placed
+     * in one of the directories returned by
+     * {@link #getExternalStoragePublicDirectory}.
+     * 
      * <p>Here is an example of typical code to monitor the state of
      * external storage:</p>
      * 
