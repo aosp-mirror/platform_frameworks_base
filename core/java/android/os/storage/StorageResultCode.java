@@ -19,6 +19,8 @@ package android.os.storage;
 /**
  * Class that provides access to constants returned from StorageManager
  * and lower level MountService APIs.
+ *
+ * @hide
  */
 public class StorageResultCode
 {

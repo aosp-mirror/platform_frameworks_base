@@ -45,6 +45,8 @@ import java.util.List;
  * {@link android.content.Context#getSystemService(java.lang.String)} with an argument
  * of {@link android.content.Context#STORAGE_SERVICE}.
  *
+ * @hide
+ *
  */
 
 public class StorageManager
