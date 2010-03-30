@@ -254,11 +254,13 @@ public final class Bmgr {
 
     private void doListRestoreSets() {
         try {
-            RestoreSet[] sets = mRestore.getAvailableRestoreSets();
-            if (sets == null || sets.length == 0) {
-                System.out.println("No restore sets available");
+            RestoreObserver observer = new RestoreObserver();
+            int err = mRestore.getAvailableRestoreSets(observer);
+            if (err != 0) {
+                System.out.println("Unable to request restore sets");
             } else {
-                printRestoreSets(sets);
+                observer.waitForCompletion();
+                printRestoreSets(observer.sets);
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -274,6 +276,16 @@ public final class Bmgr {
 
     class RestoreObserver extends IRestoreObserver.Stub {
         boolean done;
+        RestoreSet[] sets = null;
+
+        public void restoreSetsAvailable(RestoreSet[] result) {
+            synchronized (this) {
+                sets = result;
+                done = true;
+                this.notify();
+            }
+        }
+
         public void restoreStarting(int numPackages) {
             System.out.println("restoreStarting: " + numPackages + " packages");
         }
@@ -359,8 +371,11 @@ public final class Bmgr {
                 System.err.println(BMGR_NOT_RUNNING_ERR);
                 return;
             }
-            RestoreSet[] sets = mRestore.getAvailableRestoreSets();
-            if (sets != null) {
+            RestoreSet[] sets = null;
+            int err = mRestore.getAvailableRestoreSets(observer);
+            if (err != 0) {
+                observer.waitForCompletion();
+                sets = observer.sets;
                 for (RestoreSet s : sets) {
                     if (s.token == token) {
                         System.out.println("Scheduling restore: " + s.name);

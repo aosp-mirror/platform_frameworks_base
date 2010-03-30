@@ -104,7 +104,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_RESTORE = 3;
     private static final int MSG_RUN_CLEAR = 4;
     private static final int MSG_RUN_INITIALIZE = 5;
-    private static final int MSG_TIMEOUT = 6;
+    private static final int MSG_RUN_GET_RESTORE_SETS = 6;
+    private static final int MSG_TIMEOUT = 7;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -176,6 +177,19 @@ class BackupManagerService extends IBackupManager.Stub {
     String mCurrentTransport;
     IBackupTransport mLocalTransport, mGoogleTransport;
     ActiveRestoreSession mActiveRestoreSession;
+
+    class RestoreGetSetsParams {
+        public IBackupTransport transport;
+        public ActiveRestoreSession session;
+        public IRestoreObserver observer;
+
+        RestoreGetSetsParams(IBackupTransport _transport, ActiveRestoreSession _session,
+                IRestoreObserver _observer) {
+            transport = _transport;
+            session = _session;
+            observer = _observer;
+        }
+    }
 
     class RestoreParams {
         public IBackupTransport transport;
@@ -330,6 +344,36 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 (new PerformInitializeTask(queue)).run();
+                break;
+            }
+
+            case MSG_RUN_GET_RESTORE_SETS:
+            {
+                // Like other async operations, this is entered with the wakelock held
+                RestoreSet[] sets = null;
+                RestoreGetSetsParams params = (RestoreGetSetsParams)msg.obj;
+                try {
+                    sets = params.transport.getAvailableRestoreSets();
+                    // cache the result in the active session
+                    synchronized (params.session) {
+                        params.session.mRestoreSets = sets;
+                    }
+                    if (sets == null) EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Error from transport getting set list");
+                } finally {
+                    if (params.observer != null) {
+                        try {
+                            params.observer.restoreSetsAvailable(sets);
+                        } catch (RemoteException re) {
+                            Slog.e(TAG, "Unable to report listing to observer");
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Restore observer threw", e);
+                        }
+                    }
+
+                    mWakelock.release();
+                }
                 break;
             }
 
@@ -2343,24 +2387,28 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         // --- Binder interface ---
-        public synchronized RestoreSet[] getAvailableRestoreSets() {
+        public synchronized int getAvailableRestoreSets(IRestoreObserver observer) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "getAvailableRestoreSets");
+            if (observer == null) {
+                throw new IllegalArgumentException("Observer must not be null");
+            }
 
             long oldId = Binder.clearCallingIdentity();
             try {
                 if (mRestoreTransport == null) {
                     Slog.w(TAG, "Null transport getting restore sets");
-                    return null;
+                    return -1;
                 }
-                if (mRestoreSets == null) { // valid transport; do the one-time fetch
-                    mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
-                    if (mRestoreSets == null) EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
-                }
-                return mRestoreSets;
+                // spin off the transport request to our service thread
+                mWakelock.acquire();
+                Message msg = mBackupHandler.obtainMessage(MSG_RUN_GET_RESTORE_SETS,
+                        new RestoreGetSetsParams(mRestoreTransport, this, observer));
+                mBackupHandler.sendMessage(msg);
+                return 0;
             } catch (Exception e) {
                 Slog.e(TAG, "Error in getAvailableRestoreSets", e);
-                return null;
+                return -1;
             } finally {
                 Binder.restoreCallingIdentity(oldId);
             }
