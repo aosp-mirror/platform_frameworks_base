@@ -16,19 +16,19 @@
 
 package android.widget;
 
-import android.util.AttributeSet;
-import android.graphics.Rect;
-import android.view.View;
-import android.view.VelocityTracker;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.KeyEvent;
-import android.view.FocusFinder;
-import android.view.MotionEvent;
-import android.view.ViewParent;
-import android.view.animation.AnimationUtils;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.view.FocusFinder;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.animation.AnimationUtils;
 
 import java.util.List;
 
@@ -63,7 +63,7 @@ public class HorizontalScrollView extends FrameLayout {
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
-    private OverScroller mScroller;
+    private Scroller mScroller;
 
     /**
      * Flag to indicate that we are moving focus ourselves. This is so the
@@ -189,7 +189,7 @@ public class HorizontalScrollView extends FrameLayout {
 
 
     private void initScrollView() {
-        mScroller = new OverScroller(getContext());
+        mScroller = new Scroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
@@ -456,9 +456,6 @@ public class HorizontalScrollView extends FrameLayout {
                 /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
-                if (mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
-                    invalidate();
-                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
@@ -516,11 +513,7 @@ public class HorizontalScrollView extends FrameLayout {
                     final int deltaX = (int) (mLastMotionX - x);
                     mLastMotionX = x;
 
-                    final int oldX = mScrollX;
-                    final int oldY = mScrollY;                    
-                    overscrollBy(deltaX, 0, mScrollX, 0, getScrollRange(), 0,
-                            getOverscrollMax(), 0, true);
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                    scrollBy(deltaX, 0);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -529,15 +522,8 @@ public class HorizontalScrollView extends FrameLayout {
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                     int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
 
-                    if (getChildCount() > 0) {
-                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                            fling(-initialVelocity);
-                        } else {
-                            final int right = getScrollRange();
-                            if (mScroller.springback(mScrollX, mScrollY, 0, right, 0, 0)) {
-                                invalidate();
-                            }
-                        }
+                    if (getChildCount() > 0 && Math.abs(initialVelocity) > mMinimumVelocity) {
+                        fling(-initialVelocity);
                     }
                     
                     mActivePointerId = INVALID_POINTER;
@@ -551,9 +537,6 @@ public class HorizontalScrollView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
-                    if (mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
-                        invalidate();
-                    }
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
                     if (mVelocityTracker != null) {
@@ -583,32 +566,6 @@ public class HorizontalScrollView extends FrameLayout {
             if (mVelocityTracker != null) {
                 mVelocityTracker.clear();
             }
-        }
-    }
-    
-    @Override
-    protected void onOverscrolled(int scrollX, int scrollY,
-            boolean clampedX, boolean clampedY) {
-        // Treat animating scrolls differently; see #computeScroll() for why.
-        if (!mScroller.isFinished()) {
-            mScrollX = scrollX;
-            mScrollY = scrollY;
-            if (clampedX) {
-                mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0);
-            }
-        } else {
-            super.scrollTo(scrollX, scrollY);
-        }
-        awakenScrollBars();
-    }
-    
-    private int getOverscrollMax() {
-        int childCount = getChildCount();
-        int containerOverscroll = (getWidth() - mPaddingLeft - mPaddingRight) / 3;
-        if (childCount > 0) {
-            return Math.min(containerOverscroll, getChildAt(0).getWidth() / 3);
-        } else {
-            return containerOverscroll;
         }
     }
     
@@ -994,16 +951,7 @@ public class HorizontalScrollView extends FrameLayout {
             return contentWidth;
         }
         
-        int scrollRange = getChildAt(0).getRight();
-        final int scrollX = mScrollX;
-        final int overscrollRight = Math.max(0, scrollRange - contentWidth);
-        if (scrollX < 0) {
-            scrollRange -= scrollX;
-        } else if (scrollX > overscrollRight) {
-            scrollRange += scrollX - overscrollRight;
-        }
-        
-        return scrollRange;
+        return getChildAt(0).getRight();
     }
     
     @Override
@@ -1064,10 +1012,15 @@ public class HorizontalScrollView extends FrameLayout {
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
 
-            if (oldX != x || oldY != y) {
-                overscrollBy(x - oldX, y - oldY, oldX, oldY, getScrollRange(), 0,
-                        getOverscrollMax(), 0, false);
-                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+            if (getChildCount() > 0) {
+                View child = getChildAt(0);
+                x = clamp(x, getWidth() - mPaddingRight - mPaddingLeft, child.getWidth());
+                y = clamp(y, getHeight() - mPaddingBottom - mPaddingTop, child.getHeight());
+                if (x != oldX || y != oldY) {
+                    mScrollX = x;
+                    mScrollY = y;
+                    onScrollChanged(x, y, oldX, oldY);
+                }
             }
 
             // Keep on drawing until the animation has finished.
@@ -1302,7 +1255,7 @@ public class HorizontalScrollView extends FrameLayout {
             int right = getChildAt(0).getWidth();
     
             mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0, 
-                    Math.max(0, right - width), 0, 0, width/2, 0);
+                    Math.max(0, right - width), 0, 0);
     
             final boolean movingRight = velocityX > 0;
     
