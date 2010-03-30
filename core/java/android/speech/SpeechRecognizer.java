@@ -38,16 +38,16 @@ import java.util.Queue;
 /**
  * This class provides access to the speech recognition service. This service allows access to the
  * speech recognizer. Do not instantiate this class directly, instead, call
- * {@link RecognitionManager#createRecognitionManager(Context)}. This class's methods must be
+ * {@link SpeechRecognizer#createSpeechRecognizer(Context)}. This class's methods must be
  * invoked only from the main application thread. Please note that the application must have
  * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this class.
  */
-public class RecognitionManager {
+public class SpeechRecognizer {
     /** DEBUG value to enable verbose debug prints */
     private final static boolean DBG = false;
 
     /** Log messages identifier */
-    private static final String TAG = "RecognitionManager";
+    private static final String TAG = "SpeechRecognizer";
 
     /**
      * Used to retrieve an {@code ArrayList&lt;String&gt;} from the {@link Bundle} passed to the
@@ -133,10 +133,10 @@ public class RecognitionManager {
     private final InternalListener mListener = new InternalListener();
 
     /**
-     * The right way to create a {@code RecognitionManager} is by using
-     * {@link #createRecognitionManager} static factory method
+     * The right way to create a {@code SpeechRecognizer} is by using
+     * {@link #createSpeechRecognizer} static factory method
      */
-    private RecognitionManager(final Context context, final ComponentName serviceComponent) {
+    private SpeechRecognizer(final Context context, final ComponentName serviceComponent) {
         mContext = context;
         mServiceComponent = serviceComponent;
     }
@@ -167,10 +167,10 @@ public class RecognitionManager {
 
     /**
      * Checks whether a speech recognition service is available on the system. If this method
-     * returns {@code false}, {@link RecognitionManager#createRecognitionManager(Context)} will
+     * returns {@code false}, {@link SpeechRecognizer#createSpeechRecognizer(Context)} will
      * fail.
      * 
-     * @param context with which {@code RecognitionManager} will be created
+     * @param context with which {@code SpeechRecognizer} will be created
      * @return {@code true} if recognition is available, {@code false} otherwise
      */
     public static boolean isRecognitionAvailable(final Context context) {
@@ -180,41 +180,41 @@ public class RecognitionManager {
     }
 
     /**
-     * Factory method to create a new {@code RecognitionManager}. Please note that
+     * Factory method to create a new {@code SpeechRecognizer}. Please note that
      * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
-     * command to the created {@code RecognitionManager}, otherwise no notifications will be
+     * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
      * received.
      *
-     * @param context in which to create {@code RecognitionManager}
-     * @return a new {@code RecognitionManager}
+     * @param context in which to create {@code SpeechRecognizer}
+     * @return a new {@code SpeechRecognizer}
      */
-    public static RecognitionManager createRecognitionManager(final Context context) {
-        return createRecognitionManager(context, null);
+    public static SpeechRecognizer createSpeechRecognizer(final Context context) {
+        return createSpeechRecognizer(context, null);
     }
 
     /**
-     * Factory method to create a new {@code RecognitionManager}. Please note that
+     * Factory method to create a new {@code SpeechRecognizer}. Please note that
      * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
-     * command to the created {@code RecognitionManager}, otherwise no notifications will be
+     * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
      * received.
      *
      * Use this version of the method to specify a specific service to direct this
-     * {@link RecognitionManager} to. Normally you would not use this; use
-     * {@link #createRecognitionManager(Context)} instead to use the system default recognition
+     * {@link SpeechRecognizer} to. Normally you would not use this; use
+     * {@link #createSpeechRecognizer(Context)} instead to use the system default recognition
      * service.
      * 
-     * @param context in which to create {@code RecognitionManager}
+     * @param context in which to create {@code SpeechRecognizer}
      * @param serviceComponent the {@link ComponentName} of a specific service to direct this
-     *        {@code RecognitionManager} to
-     * @return a new {@code RecognitionManager}
+     *        {@code SpeechRecognizer} to
+     * @return a new {@code SpeechRecognizer}
      */
-    public static RecognitionManager createRecognitionManager(final Context context,
+    public static SpeechRecognizer createSpeechRecognizer(final Context context,
             final ComponentName serviceComponent) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null)");
         }
         checkIsCalledFromMainThread();
-        return new RecognitionManager(context, serviceComponent);
+        return new SpeechRecognizer(context, serviceComponent);
     }
 
     /**
@@ -223,7 +223,7 @@ public class RecognitionManager {
      * listener.
      * 
      * @param listener listener that will receive all the callbacks from the created
-     *        {@link RecognitionManager}, this must not be null.
+     *        {@link SpeechRecognizer}, this must not be null.
      */
     public void setRecognitionListener(RecognitionListener listener) {
         checkIsCalledFromMainThread();
@@ -303,7 +303,7 @@ public class RecognitionManager {
     private static void checkIsCalledFromMainThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new RuntimeException(
-                    "RecognitionManager should be used only from the application's main thread");
+                    "SpeechRecognizer should be used only from the application's main thread");
         }
     }
 
@@ -373,7 +373,7 @@ public class RecognitionManager {
     }
 
     /**
-     * Destroys the {@code RecognitionManager} object.
+     * Destroys the {@code SpeechRecognizer} object.
      */
     public void destroy() {
         if (mConnection != null) {
