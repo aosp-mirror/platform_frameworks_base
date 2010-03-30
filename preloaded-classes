@@ -60,7 +60,7 @@ android.appwidget.AppWidgetProviderInfo
 android.app.backup.BackupDataInput
 android.app.backup.BackupDataInput$EntityHeader
 android.app.backup.BackupDataOutput
-android.app.backup.BackupHelperAgent
+android.app.backup.BackupAgentHelper
 android.app.backup.BackupHelperDispatcher
 android.app.backup.BackupHelperDispatcher$Header
 android.app.backup.FileBackupHelperBase
