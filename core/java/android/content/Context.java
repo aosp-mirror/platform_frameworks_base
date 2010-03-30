@@ -417,7 +417,7 @@ public abstract class Context {
     /**
      * Returns the absolute path to the directory on the external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
-     * Environment.getExternalStorageDirectory()} where the application can
+     * Environment.getExternalStorageDirectory()}) where the application can
      * place persistent files it owns.  These files are private to the
      * applications, and not typically visible to the user as media.
      * 
@@ -439,7 +439,7 @@ public abstract class Context {
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_file}
      *
-     * <p>If you install a non-null <var>type</var> to this function, the returned
+     * <p>If you supply a non-null <var>type</var> to this function, the returned
      * file will be a path to a sub-directory of the given type.  Though these files
      * are not automatically scanned by the media scanner, you can explicitly
      * add them to the media database with
@@ -450,7 +450,7 @@ public abstract class Context {
      * Environment.getExternalStoragePublicDirectory()}, which provides
      * directories of media shared by all applications.  The
      * directories returned here are
-     * owned by the application, and its contents will be removed when the
+     * owned by the application, and their contents will be removed when the
      * application is uninstalled.  Unlike
      * {@link android.os.Environment#getExternalStoragePublicDirectory
      * Environment.getExternalStoragePublicDirectory()}, the directory
@@ -479,6 +479,7 @@ public abstract class Context {
      * this method again when it is available.
      *
      * @see #getFilesDir
+     * @see android.os.Environment#getExternalStoragePublicDirectory
      */
     public abstract File getExternalFilesDir(String type);
     
@@ -1372,6 +1373,7 @@ public abstract class Context {
     public static final String SENSOR_SERVICE = "sensor";
     
     /**
+     * @hide
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.os.storage.StorageManager} for accesssing system storage
      * functions.
