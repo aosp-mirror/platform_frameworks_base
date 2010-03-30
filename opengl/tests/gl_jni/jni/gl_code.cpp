@@ -181,3 +181,4 @@ JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_changeBackground(JNIEnv *
 {
     background = 1.0f - background;
 }
+
