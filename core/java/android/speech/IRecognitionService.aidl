@@ -25,7 +25,7 @@ import android.speech.IRecognitionListener;
 * you want to begin capturing audio; RecognitionService will automatically
 * determine when the user has finished speaking, stream the audio to the
 * recognition servers, and notify you when results are ready. In most of the cases, 
-* this class should not be used directly, instead use {@link RecognitionManager} for
+* this class should not be used directly, instead use {@link SpeechRecognizer} for
 * accessing recognition service. 
 * {@hide}
 */
