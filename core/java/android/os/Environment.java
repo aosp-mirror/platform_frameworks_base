@@ -28,8 +28,6 @@ public class Environment {
     private static final File ROOT_DIRECTORY
             = getDirectory("ANDROID_ROOT", "/system");
 
-    private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
-
     private static IMountService mMntSvc = null;
 
     /**
@@ -39,54 +37,8 @@ public class Environment {
         return ROOT_DIRECTORY;
     }
 
-    /**
-     * Gets the system directory available for secure storage.
-     * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure/system).
-     * Otherwise, it returns the unencrypted /data/system directory.
-     * @return File object representing the secure storage system directory.
-     * @hide
-     */
-    public static File getSystemSecureDirectory() {
-        if (isEncryptedFilesystemEnabled()) {
-            return new File(SECURE_DATA_DIRECTORY, "system");
-        } else {
-            return new File(DATA_DIRECTORY, "system");
-        }
-    }
-
-    /**
-     * Gets the data directory for secure storage.
-     * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure).
-     * Otherwise, it returns the unencrypted /data directory.
-     * @return File object representing the data directory for secure storage.
-     * @hide
-     */
-    public static File getSecureDataDirectory() {
-        if (isEncryptedFilesystemEnabled()) {
-            return SECURE_DATA_DIRECTORY;
-        } else {
-            return DATA_DIRECTORY;
-        }
-    }
-
-    /**
-     * Returns whether the Encrypted File System feature is enabled on the device or not.
-     * @return <code>true</code> if Encrypted File System feature is enabled, <code>false</code>
-     * if disabled.
-     * @hide
-     */
-    public static boolean isEncryptedFilesystemEnabled() {
-        return SystemProperties.getBoolean(SYSTEM_PROPERTY_EFS_ENABLED, false);
-    }
-
     private static final File DATA_DIRECTORY
             = getDirectory("ANDROID_DATA", "/data");
-
-    /**
-     * @hide
-     */
-    private static final File SECURE_DATA_DIRECTORY
-            = getDirectory("ANDROID_SECURE_DATA", "/data/secure");
 
     private static final File EXTERNAL_STORAGE_DIRECTORY
             = getDirectory("EXTERNAL_STORAGE", "/sdcard");
