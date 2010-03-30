@@ -385,7 +385,8 @@ rinse_repeat:
 
     ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
 
-    if (num_bytes_received < 0) {
+    if (num_bytes_received < 0
+            || (mContentLengthValid && num_bytes_received < contentLength)) {
         if (mNumRetriesLeft-- > 0) {
             disconnect();
             if (connect() == OK) {
