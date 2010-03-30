@@ -110,6 +110,8 @@ sp<MetaData> AMRWBDecoder::getFormat() {
         meta->setInt64(kKeyDuration, durationUs);
     }
 
+    meta->setCString(kKeyDecoderComponent, "AMRWBDecoder");
+
     return meta;
 }
 

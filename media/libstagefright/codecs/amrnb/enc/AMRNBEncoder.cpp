@@ -138,6 +138,8 @@ sp<MetaData> AMRNBEncoder::getFormat() {
         meta->setInt64(kKeyDuration, durationUs);
     }
 
+    meta->setCString(kKeyDecoderComponent, "AMRNBEncoder");
+
     return meta;
 }
 
