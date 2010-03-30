@@ -79,13 +79,6 @@
          by applications. -->
     <attr name="allowClearUserData" format="boolean" />
 
-    <!-- Option to let applications specify that user data should
-         never be encrypted if an Encrypted File System solution
-         is enabled. Specifically, this is an "opt-out" feature, meaning
-         that, by default, user data will be encrypted if the EFS feature
-         is enabled. -->
-    <attr name="neverEncrypt" format="boolean" />
-
     <!-- Option to indicate this application is only for testing purposes.
          For example, it may expose functionality or data outside of itself
          that would cause a security hole, but is useful for testing.  This
@@ -217,7 +210,7 @@
     
     <!-- Flag indicating whether the application requests the VM to operate in
          the safe mode.  -->
-    <attr name="safeMode" format="boolean" />
+    <attr name="vmSafeMode" format="boolean" />
 
     <!-- Flag indicating whether the given application component is available
          to other applications.  If false, it can only be accessed by
@@ -709,7 +702,7 @@
              override the component specific values). -->
         <attr name="enabled" />
         <attr name="debuggable" />
-        <attr name="safeMode" />
+        <attr name="vmSafeMode" />
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
@@ -719,7 +712,6 @@
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
-        <attr name="neverEncrypt" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be

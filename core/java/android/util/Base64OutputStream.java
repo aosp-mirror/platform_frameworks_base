@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.util.base64;
+package android.util;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

@@ -312,9 +312,7 @@ public class SyncStorageEngine extends Handler {
         if (sSyncStorageEngine != null) {
             return;
         }
-        // This call will return the correct directory whether Encrypted File Systems is
-        // enabled or not.
-        File dataDir = Environment.getSecureDataDirectory();
+        File dataDir = Environment.getDataDirectory();
         sSyncStorageEngine = new SyncStorageEngine(context, dataDir);
     }
 

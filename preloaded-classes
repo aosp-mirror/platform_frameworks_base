@@ -60,7 +60,7 @@ android.appwidget.AppWidgetProviderInfo
 android.app.backup.BackupDataInput
 android.app.backup.BackupDataInput$EntityHeader
 android.app.backup.BackupDataOutput
-android.app.backup.BackupHelperAgent
+android.app.backup.BackupAgentHelper
 android.app.backup.BackupHelperDispatcher
 android.app.backup.BackupHelperDispatcher$Header
 android.app.backup.FileBackupHelperBase
@@ -468,6 +468,7 @@ android.text.style.StyleSpan
 android.text.style.TextAppearanceSpan
 android.text.util.Linkify
 android.util.AttributeSet
+android.util.Base64$Encoder
 android.util.DisplayMetrics
 android.util.EventLog
 android.util.EventLog$Event
@@ -481,7 +482,6 @@ android.util.StateSet
 android.util.TypedValue
 android.util.Xml
 android.util.Xml$Encoding
-android.util.base64.Base64$Encoder
 android.view.AbsSavedState
 android.view.ContextThemeWrapper
 android.view.Display

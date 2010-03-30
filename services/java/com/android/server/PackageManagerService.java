@@ -147,8 +147,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private static final boolean GET_CERTIFICATES = true;
 
-    private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
-
     private static final int REMOVE_EVENTS =
         FileObserver.CLOSE_WRITE | FileObserver.DELETE | FileObserver.MOVED_FROM;
     private static final int ADD_EVENTS =
@@ -200,10 +198,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
     // This is where all application persistent data goes.
     final File mAppDataDir;
-
-    // If Encrypted File System feature is enabled, all application persistent data
-    // should go here instead.
-    final File mSecureAppDataDir;
 
     // This is the object monitoring the framework dir.
     final FileObserver mFrameworkInstallObserver;
@@ -717,7 +711,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
-            mSecureAppDataDir = new File(dataDir, "secure/data");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
             if (mInstaller == null) {
@@ -727,7 +720,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 File miscDir = new File(dataDir, "misc");
                 miscDir.mkdirs();
                 mAppDataDir.mkdirs();
-                mSecureAppDataDir.mkdirs();
                 mDrmAppPrivateInstallDir.mkdirs();
             }
 
@@ -888,9 +880,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             + " no longer exists; wiping its data";
                     reportSettingsProblem(Log.WARN, msg);
                     if (mInstaller != null) {
-                        // XXX how to set useEncryptedFSDir for packages that
-                        // are not encrypted?
-                        mInstaller.remove(ps.name, true);
+                        mInstaller.remove(ps.name);
                     }
                 }
             }
@@ -960,8 +950,7 @@ class PackageManagerService extends IPackageManager.Stub {
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         if (mInstaller != null) {
-            boolean useSecureFS = useEncryptedFilesystemForPackage(ps.pkg);
-            int retCode = mInstaller.remove(ps.name, useSecureFS);
+            int retCode = mInstaller.remove(ps.name);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove app data directory for package: "
                            + ps.name + ", retcode=" + retCode);
@@ -2616,11 +2605,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
         return performed ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
     }
-
-    private static boolean useEncryptedFilesystemForPackage(PackageParser.Package pkg) {
-        return Environment.isEncryptedFilesystemEnabled() &&
-                ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_NEVER_ENCRYPT) == 0);
-    }
     
     private boolean verifyPackageUpdate(PackageSetting oldPkg, PackageParser.Package newPkg) {
         if ((oldPkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
@@ -2638,14 +2622,7 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private File getDataPathForPackage(PackageParser.Package pkg) {
-        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
-        File dataPath;
-        if (useEncryptedFSDir) {
-            dataPath = new File(mSecureAppDataDir, pkg.packageName);
-        } else {
-            dataPath = new File(mAppDataDir, pkg.packageName);
-        }
-        return dataPath;
+        return new File(mAppDataDir, pkg.packageName);
     }
     
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
@@ -2997,7 +2974,6 @@ class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.dataDir = dataPath.getPath();
         } else {
             // This is a normal package, need to make its data directory.
-            boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
             dataPath = getDataPathForPackage(pkg);
             
             boolean uidError = false;
@@ -3014,7 +2990,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
                         if (mInstaller != null) {
-                            int ret = mInstaller.remove(pkgName, useEncryptedFSDir);
+                            int ret = mInstaller.remove(pkgName);
                             if (ret >= 0) {
                                 // Old data gone!
                                 String msg = "System package " + pkg.packageName
@@ -3025,7 +3001,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 recovered = true;
 
                                 // And now re-install the app.
-                                ret = mInstaller.install(pkgName, useEncryptedFSDir, pkg.applicationInfo.uid,
+                                ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
                                         pkg.applicationInfo.uid);
                                 if (ret == -1) {
                                     // Ack should not happen!
@@ -3065,7 +3041,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     Log.v(TAG, "Want this data dir: " + dataPath);
                 //invoke installer to do the actual installation
                 if (mInstaller != null) {
-                    int ret = mInstaller.install(pkgName, useEncryptedFSDir, pkg.applicationInfo.uid,
+                    int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
                             pkg.applicationInfo.uid);
                     if(ret < 0) {
                         // Error from installer
@@ -6030,9 +6006,8 @@ class PackageManagerService extends IPackageManager.Stub {
             deletedPs = mSettings.mPackages.get(packageName);
         }
         if ((flags&PackageManager.DONT_DELETE_DATA) == 0) {
-            boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
             if (mInstaller != null) {
-                int retCode = mInstaller.remove(packageName, useEncryptedFSDir);
+                int retCode = mInstaller.remove(packageName);
                 if (retCode < 0) {
                     Slog.w(TAG, "Couldn't remove app data or cache directory for package: "
                                + packageName + ", retcode=" + retCode);
@@ -6271,7 +6246,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 p = ps.pkg;
             }
         }
-        boolean useEncryptedFSDir = false;
 
         if(!dataOnly) {
             //need to check this only for fully installed applications
@@ -6284,10 +6258,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
                 return false;
             }
-            useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
         }
         if (mInstaller != null) {
-            int retCode = mInstaller.clearUserData(packageName, useEncryptedFSDir);
+            int retCode = mInstaller.clearUserData(packageName);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove cache files for package: "
                         + packageName);
@@ -6338,9 +6311,8 @@ class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
             return false;
         }
-        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
         if (mInstaller != null) {
-            int retCode = mInstaller.deleteCacheFiles(packageName, useEncryptedFSDir);
+            int retCode = mInstaller.deleteCacheFiles(packageName);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove cache files for package: "
                            + packageName);
@@ -6402,10 +6374,9 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             publicSrcDir = isForwardLocked(p) ? applicationInfo.publicSourceDir : null;
         }
-        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
         if (mInstaller != null) {
             int res = mInstaller.getSizeInfo(packageName, p.mPath,
-                    publicSrcDir, pStats, useEncryptedFSDir);
+                    publicSrcDir, pStats);
             if (res < 0) {
                 return false;
             } else {
@@ -7539,8 +7510,7 @@ class PackageManagerService extends IPackageManager.Stub {
         void setFlags(int pkgFlags) {
             this.pkgFlags = (pkgFlags & ApplicationInfo.FLAG_SYSTEM) |
             (pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) |
-            (pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) |
-            (pkgFlags & ApplicationInfo.FLAG_NEVER_ENCRYPT);
+            (pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE);
         }
     }
 
@@ -7798,14 +7768,8 @@ class PackageManagerService extends IPackageManager.Stub {
             File dataDir = Environment.getDataDirectory();
             File systemDir = new File(dataDir, "system");
             // TODO(oam): This secure dir creation needs to be moved somewhere else (later)
-            File systemSecureDir = new File(dataDir, "secure/system");
             systemDir.mkdirs();
-            systemSecureDir.mkdirs();
             FileUtils.setPermissions(systemDir.toString(),
-                    FileUtils.S_IRWXU|FileUtils.S_IRWXG
-                    |FileUtils.S_IROTH|FileUtils.S_IXOTH,
-                    -1, -1);
-            FileUtils.setPermissions(systemSecureDir.toString(),
                     FileUtils.S_IRWXU|FileUtils.S_IRWXG
                     |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                     -1, -1);

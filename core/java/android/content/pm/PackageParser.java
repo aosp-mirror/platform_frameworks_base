@@ -1510,7 +1510,7 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestApplication_safeMode,
+                com.android.internal.R.styleable.AndroidManifestApplication_vmSafeMode,
                 false)) {
             ai.flags |= ApplicationInfo.FLAG_VM_SAFE_MODE;
         }
@@ -1537,12 +1537,6 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_testOnly,
                 false)) {
             ai.flags |= ApplicationInfo.FLAG_TEST_ONLY;
-        }
-
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestApplication_neverEncrypt,
-                false)) {
-            ai.flags |= ApplicationInfo.FLAG_NEVER_ENCRYPT;
         }
 
         String str;

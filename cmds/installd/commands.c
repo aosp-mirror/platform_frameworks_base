@@ -16,7 +16,7 @@
 
 #include "installd.h"
 
-int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid)
+int install(const char *pkgname, uid_t uid, gid_t gid)
 {
     char pkgdir[PKG_PATH_MAX];
     char libdir[PKG_PATH_MAX];
@@ -27,17 +27,11 @@ int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid)
         
     }
 
-    if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
-        if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
-            return -1;
-        if (create_pkg_path(libdir, PKG_LIB_PREFIX, pkgname, PKG_LIB_POSTFIX))
-            return -1;
-    } else {
-        if (create_pkg_path(pkgdir, PKG_SEC_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
-            return -1;
-        if (create_pkg_path(libdir, PKG_SEC_LIB_PREFIX, pkgname, PKG_LIB_POSTFIX))
-            return -1;
-    }
+    if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
+        return -1;
+    if (create_pkg_path(libdir, PKG_LIB_PREFIX, pkgname, PKG_LIB_POSTFIX))
+        return -1;
+
 
     if (mkdir(pkgdir, 0751) < 0) {
         LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
@@ -62,38 +56,27 @@ int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid)
     return 0;
 }
 
-int uninstall(const char *pkgname, int encrypted_fs_flag)
+int uninstall(const char *pkgname)
 {
     char pkgdir[PKG_PATH_MAX];
 
-    if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
-        if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
-            return -1;
-    } else {
-        if (create_pkg_path(pkgdir, PKG_SEC_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
-            return -1;
-    }
+    if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
+        return -1;
 
         /* delete contents AND directory, no exceptions */
     return delete_dir_contents(pkgdir, 1, 0);
 }
 
-int renamepkg(const char *oldpkgname, const char *newpkgname, int encrypted_fs_flag)
+int renamepkg(const char *oldpkgname, const char *newpkgname)
 {
     char oldpkgdir[PKG_PATH_MAX];
     char newpkgdir[PKG_PATH_MAX];
 
-    if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
-        if (create_pkg_path(oldpkgdir, PKG_DIR_PREFIX, oldpkgname, PKG_DIR_POSTFIX))
-            return -1;
-        if (create_pkg_path(newpkgdir, PKG_DIR_PREFIX, newpkgname, PKG_DIR_POSTFIX))
-            return -1;
-    } else {
-        if (create_pkg_path(oldpkgdir, PKG_SEC_DIR_PREFIX, oldpkgname, PKG_DIR_POSTFIX))
-            return -1;
-        if (create_pkg_path(newpkgdir, PKG_SEC_DIR_PREFIX, newpkgname, PKG_DIR_POSTFIX))
-            return -1;
-    }
+    if (create_pkg_path(oldpkgdir, PKG_DIR_PREFIX, oldpkgname, PKG_DIR_POSTFIX))
+        return -1;
+    if (create_pkg_path(newpkgdir, PKG_DIR_PREFIX, newpkgname, PKG_DIR_POSTFIX))
+        return -1;
+
 
     if (rename(oldpkgdir, newpkgdir) < 0) {
         LOGE("cannot rename dir '%s' to '%s': %s\n", oldpkgdir, newpkgdir, strerror(errno));
@@ -102,41 +85,29 @@ int renamepkg(const char *oldpkgname, const char *newpkgname, int encrypted_fs_f
     return 0;
 }
 
-int delete_user_data(const char *pkgname, int encrypted_fs_flag)
+int delete_user_data(const char *pkgname)
 {
     char pkgdir[PKG_PATH_MAX];
 
-    if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
-        if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
-            return -1;
-    } else {
-        if (create_pkg_path(pkgdir, PKG_SEC_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
-            return -1;
-    }
+    if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
+        return -1;
 
         /* delete contents, excluding "lib", but not the directory itself */
     return delete_dir_contents(pkgdir, 0, "lib");
 }
 
-int delete_cache(const char *pkgname, int encrypted_fs_flag)
+int delete_cache(const char *pkgname)
 {
     char cachedir[PKG_PATH_MAX];
 
-    if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
-        if (create_pkg_path(cachedir, CACHE_DIR_PREFIX, pkgname, CACHE_DIR_POSTFIX))
-            return -1;
-    } else {
-        if (create_pkg_path(cachedir, CACHE_SEC_DIR_PREFIX, pkgname, CACHE_DIR_POSTFIX))
-            return -1;
-    }
+    if (create_pkg_path(cachedir, CACHE_DIR_PREFIX, pkgname, CACHE_DIR_POSTFIX))
+        return -1;
+
 
         /* delete contents, not the directory, no exceptions */
     return delete_dir_contents(cachedir, 0, 0);
 }
 
-/* TODO(oam): depending on use case (ecryptfs or dmcrypt)
- * change implementation
- */
 static int disk_free()
 {
     struct statfs sfs;
@@ -168,39 +139,6 @@ int free_cache(int free_size)
     LOGI("free_cache(%d) avail %d\n", free_size, avail);
     if (avail >= free_size) return 0;
 
-    /* First try encrypted dir */
-    d = opendir(PKG_SEC_DIR_PREFIX);
-    if (d == NULL) {
-        LOGE("cannot open %s\n", PKG_SEC_DIR_PREFIX);
-    } else {
-        dfd = dirfd(d);
-
-        while ((de = readdir(d))) {
-           if (de->d_type != DT_DIR) continue;
-           name = de->d_name;
-
-            /* always skip "." and ".." */
-            if (name[0] == '.') {
-                if (name[1] == 0) continue;
-                if ((name[1] == '.') && (name[2] == 0)) continue;
-            }
-
-            subfd = openat(dfd, name, O_RDONLY | O_DIRECTORY);
-            if (subfd < 0) continue;
-
-            delete_dir_contents_fd(subfd, "cache");
-            close(subfd);
-
-            avail = disk_free();
-            if (avail >= free_size) {
-                closedir(d);
-                return 0;
-            }
-        }
-        closedir(d);
-    }
-
-    /* Next try unencrypted dir... */
     d = opendir(PKG_DIR_PREFIX);
     if (d == NULL) {
         LOGE("cannot open %s\n", PKG_DIR_PREFIX);
@@ -376,7 +314,7 @@ static int calculate_dir_size(int dfd)
 
 int get_size(const char *pkgname, const char *apkpath,
              const char *fwdlock_apkpath,
-             int *_codesize, int *_datasize, int *_cachesize, int encrypted_fs_flag)
+             int *_codesize, int *_datasize, int *_cachesize)
 {
     DIR *d;
     int dfd;
@@ -411,14 +349,8 @@ int get_size(const char *pkgname, const char *apkpath,
         }
     }
 
-    if (encrypted_fs_flag == 0) {
-        if (create_pkg_path(path, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX)) {
-            goto done;
-        }
-    } else {
-        if (create_pkg_path(path, PKG_SEC_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX)) {
-            goto done;
-        }
+    if (create_pkg_path(path, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX)) {
+        goto done;
     }
 
     d = opendir(path);

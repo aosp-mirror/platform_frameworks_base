@@ -458,8 +458,10 @@ class HistoryRecord extends IApplicationToken.Stub {
     }
 
     public boolean keyDispatchingTimedOut() {
+        HistoryRecord r;
+        ProcessRecord anrApp = null;
         synchronized(service) {
-            HistoryRecord r = getWaitingHistoryRecordLocked();
+            r = getWaitingHistoryRecordLocked();
             if (r != null && r.app != null) {
                 if (r.app.debugging) {
                     return false;
@@ -472,8 +474,7 @@ class HistoryRecord extends IApplicationToken.Stub {
                 }
                 
                 if (r.app.instrumentationClass == null) { 
-                    service.appNotRespondingLocked(r.app, r, this,
-                            "keyDispatchingTimedOut");
+                    anrApp = r.app;
                 } else {
                     Bundle info = new Bundle();
                     info.putString("shortMsg", "keyDispatchingTimedOut");
@@ -482,8 +483,14 @@ class HistoryRecord extends IApplicationToken.Stub {
                             r.app, Activity.RESULT_CANCELED, info);
                 }
             }
-            return true;
         }
+        
+        if (anrApp != null) {
+            service.appNotResponding(anrApp, r, this,
+                    "keyDispatchingTimedOut");
+        }
+        
+        return true;
     }
     
     /** Returns the key dispatching timeout for this application token. */

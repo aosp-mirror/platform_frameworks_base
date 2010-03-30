@@ -1445,6 +1445,16 @@ public class TtsService extends Service implements OnCompletionListener {
             return mSelf.getDefaultEngine();
         }
 
+        /**
+         * Returns whether or not the user is forcing their defaults to override the
+         * Text-To-Speech settings set by applications.
+         *
+         * @return Whether or not defaults are enforced.
+         */
+        public boolean areDefaultsEnforced() {
+            return mSelf.isDefaultEnforced();
+        }
+
     };
 
 }

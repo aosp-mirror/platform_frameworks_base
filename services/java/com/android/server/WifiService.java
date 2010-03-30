@@ -268,7 +268,7 @@ public class WifiService extends IWifiManager.Stub {
         boolean wifiEnabled = getPersistedWifiEnabled() || testAndClearWifiSavedState();
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
-        setWifiEnabledBlocking(wifiEnabled, true, Process.myUid());
+        setWifiEnabled(wifiEnabled);
     }
 
     private void updateTetherState(ArrayList<String> available, ArrayList<String> tethered) {
@@ -1857,10 +1857,10 @@ public class WifiService extends IWifiManager.Stub {
             switch (msg.what) {
 
                 case MESSAGE_ENABLE_WIFI:
+                    setWifiEnabledBlocking(true, msg.arg1 == 1, msg.arg2);
                     if (mWifiWatchdogService == null) {
                         mWifiWatchdogService = new WifiWatchdogService(mContext, mWifiStateTracker);
                     }
-                    setWifiEnabledBlocking(true, msg.arg1 == 1, msg.arg2);
                     sWakeLock.release();
                     break;
 
@@ -1878,10 +1878,7 @@ public class WifiService extends IWifiManager.Stub {
                     // a non-zero msg.arg1 value means the "enabled" setting
                     // should be persisted
                     setWifiEnabledBlocking(false, msg.arg1 == 1, msg.arg2);
-                    if (mWifiWatchdogService != null) {
-                        mWifiWatchdogService.quit();
-                        mWifiWatchdogService = null;
-                    }
+                    mWifiWatchdogService = null;
                     sWakeLock.release();
                     break;
 

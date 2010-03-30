@@ -37,7 +37,7 @@ import java.io.IOException;
  * respectively.
  * <p>
  * A backup agent based on convenient helper classes is available in
- * {@link android.app.backup.BackupHelperAgent} for less complex implementation
+ * {@link android.app.backup.BackupAgentHelper} for less complex implementation
  * requirements.
  * <p>
  * STOPSHIP write more documentation about the backup process here.
