@@ -1539,12 +1539,6 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_TEST_ONLY;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestApplication_neverEncrypt,
-                false)) {
-            ai.flags |= ApplicationInfo.FLAG_NEVER_ENCRYPT;
-        }
-
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);

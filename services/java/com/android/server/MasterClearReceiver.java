@@ -39,11 +39,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
         try {
             Slog.w(TAG, "!!! FACTORY RESET !!!");
-            if (intent.hasExtra("enableEFS")) {
-                RecoverySystem.rebootToggleEFS(context, intent.getBooleanExtra("enableEFS", false));
-            } else {
-                RecoverySystem.rebootWipeUserData(context);
-            }
+            RecoverySystem.rebootWipeUserData(context);
             Log.wtf(TAG, "Still running after master clear?!");
         } catch (IOException e) {
             Slog.e(TAG, "Can't perform master clear/factory reset", e);
