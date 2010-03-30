@@ -144,6 +144,8 @@ sp<MetaData> AACDecoder::getFormat() {
         meta->setInt64(kKeyDuration, durationUs);
     }
 
+    meta->setCString(kKeyDecoderComponent, "AACDecoder");
+
     return meta;
 }
 
