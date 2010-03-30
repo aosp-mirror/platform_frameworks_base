@@ -1120,6 +1120,15 @@ public abstract class PackageManager {
     public abstract boolean addPermission(PermissionInfo info);
 
     /**
+     * Like {@link #addPermission(PermissionInfo)} but asynchronously
+     * persists the package manager state after returning from the call,
+     * allowing it to return quicker and batch a series of adds at the
+     * expense of no guarantee the added permission will be retained if
+     * the device is rebooted before it is written.
+     */
+    public abstract boolean addPermissionAsync(PermissionInfo info);
+    
+    /**
      * Removes a permission that was previously added with
      * {@link #addPermission(PermissionInfo)}.  The same ownership rules apply
      * -- you are only allowed to remove permissions that you are allowed
