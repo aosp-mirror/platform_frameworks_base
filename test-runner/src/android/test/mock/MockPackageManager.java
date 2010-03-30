@@ -142,6 +142,11 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean addPermissionAsync(PermissionInfo info) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void removePermission(String name) {
         throw new UnsupportedOperationException();
     }
