@@ -3670,6 +3670,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             mConfigWillChange = config != null && mConfiguration.diff(config) != 0;
+            if (DEBUG_CONFIGURATION) Slog.v(TAG,
+                    "Starting activity when config will change = " + mConfigWillChange);
             
             final long origId = Binder.clearCallingIdentity();
             
@@ -3678,13 +3680,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     resultTo, resultWho, requestCode, callingPid, callingUid,
                     onlyIfNeeded, componentSpecified);
             
-            if (config != null && mConfigWillChange) {
+            if (mConfigWillChange) {
                 // If the caller also wants to switch to a new configuration,
                 // do so now.  This allows a clean switch, as we are waiting
                 // for the current activity to pause (so we will not destroy
                 // it), and have not yet started the next activity.
                 enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                         "updateConfiguration()");
+                mConfigWillChange = false;
+                if (DEBUG_CONFIGURATION) Slog.v(TAG,
+                        "Updating to new configuration after starting activity.");
                 updateConfigurationLocked(config, null);
             }
             
@@ -13493,7 +13498,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     private final boolean ensureActivityConfigurationLocked(HistoryRecord r,
             int globalChanges) {
-        if (!mConfigWillChange) {
+        if (mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Skipping config check (will change): " + r);
             return true;
