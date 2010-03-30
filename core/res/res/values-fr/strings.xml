@@ -416,7 +416,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permet à une application de lire tous les mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"Enregistrement dans le dictionnaire défini par l\'utilisateur"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"Modifier/supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Autorise une application à écrire sur la carte SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet à une application de lire et d\'écrire dans le système de fichiers en cache."</string>
@@ -849,8 +849,8 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Changer de fond d\'écran"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocole de tunnelisation point-à-point"</string>
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocole de tunnelisation de niveau 2"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Clé pré-partagée basée sur L2TP/IPSec VPN"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificat basé sur L2TP/IPSec VPN"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basé sur une clé pré-partagée"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basé sur un certificat"</string>
     <string name="upload_file" msgid="2897957172366730416">"Sélectionner un fichier"</string>
     <string name="reset" msgid="2448168080964209908">"Réinitialiser"</string>
     <string name="submit" msgid="1602335572089911941">"Envoyer"</string>
