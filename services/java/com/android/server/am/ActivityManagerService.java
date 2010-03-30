@@ -4757,32 +4757,46 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return tracesFile;
     }
 
-    final void appNotRespondingLocked(ProcessRecord app, HistoryRecord activity,
+    final void appNotResponding(ProcessRecord app, HistoryRecord activity,
             HistoryRecord parent, final String annotation) {
-        // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-        if (mShuttingDown || app.notResponding || app.crashing) {
-            return;
-        }
-
-        // Log the ANR to the event log.
-        EventLog.writeEvent(EventLogTags.AM_ANR, app.pid, app.processName, app.info.flags,
-                annotation);
-
-        // Dump thread traces as quickly as we can, starting with "interesting" processes.
         ArrayList<Integer> pids = new ArrayList<Integer>(20);
-        pids.add(app.pid);
+        
+        synchronized (this) {
+            // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
+            if (mShuttingDown) {
+                Slog.i(TAG, "During shutdown skipping ANR: " + app + " " + annotation);
+                return;
+            } else if (app.notResponding) {
+                Slog.i(TAG, "Skipping duplicate ANR: " + app + " " + annotation);
+                return;
+            } else if (app.crashing) {
+                Slog.i(TAG, "Crashing app skipping ANR: " + app + " " + annotation);
+                return;
+            }
+            
+            // In case we come through here for the same app before completing
+            // this one, mark as anring now so we will bail out.
+            app.notResponding = true;
 
-        int parentPid = app.pid;
-        if (parent != null && parent.app != null && parent.app.pid > 0) parentPid = parent.app.pid;
-        if (parentPid != app.pid) pids.add(parentPid);
+            // Log the ANR to the event log.
+            EventLog.writeEvent(EventLogTags.AM_ANR, app.pid, app.processName, app.info.flags,
+                    annotation);
 
-        if (MY_PID != app.pid && MY_PID != parentPid) pids.add(MY_PID);
+            // Dump thread traces as quickly as we can, starting with "interesting" processes.
+            pids.add(app.pid);
+    
+            int parentPid = app.pid;
+            if (parent != null && parent.app != null && parent.app.pid > 0) parentPid = parent.app.pid;
+            if (parentPid != app.pid) pids.add(parentPid);
+    
+            if (MY_PID != app.pid && MY_PID != parentPid) pids.add(MY_PID);
 
-        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
-            ProcessRecord r = mLruProcesses.get(i);
-            if (r != null && r.thread != null) {
-                int pid = r.pid;
-                if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) pids.add(pid);
+            for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+                ProcessRecord r = mLruProcesses.get(i);
+                if (r != null && r.thread != null) {
+                    int pid = r.pid;
+                    if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) pids.add(pid);
+                }
             }
         }
 
@@ -4806,7 +4820,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         String cpuInfo = null;
         if (MONITOR_CPU_USAGE) {
             updateCpuStatsNow();
-            synchronized (mProcessStatsThread) { cpuInfo = mProcessStats.printCurrentState(); }
+            synchronized (mProcessStatsThread) {
+                cpuInfo = mProcessStats.printCurrentState();
+            }
             info.append(cpuInfo);
         }
 
@@ -4834,29 +4850,31 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Unless configured otherwise, swallow ANRs in background processes & kill the process.
         boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-        if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
-            Process.killProcess(app.pid);
-            return;
+        
+        synchronized (this) {
+            if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
+                Process.killProcess(app.pid);
+                return;
+            }
+    
+            // Set the app's notResponding state, and look up the errorReportReceiver
+            makeAppNotRespondingLocked(app,
+                    activity != null ? activity.shortComponentName : null,
+                    annotation != null ? "ANR " + annotation : "ANR",
+                    info.toString());
+    
+            // Bring up the infamous App Not Responding dialog
+            Message msg = Message.obtain();
+            HashMap map = new HashMap();
+            msg.what = SHOW_NOT_RESPONDING_MSG;
+            msg.obj = map;
+            map.put("app", app);
+            if (activity != null) {
+                map.put("activity", activity);
+            }
+    
+            mHandler.sendMessage(msg);
         }
-
-        // Set the app's notResponding state, and look up the errorReportReceiver
-        makeAppNotRespondingLocked(app,
-                activity != null ? activity.shortComponentName : null,
-                annotation != null ? "ANR " + annotation : "ANR",
-                info.toString());
-
-        // Bring up the infamous App Not Responding dialog
-        Message msg = Message.obtain();
-        HashMap map = new HashMap();
-        msg.what = SHOW_NOT_RESPONDING_MSG;
-        msg.obj = map;
-        map.put("app", app);
-        if (activity != null) {
-            map.put("activity", activity);
-        }
-
-        mHandler.sendMessage(msg);
-        return;
     }
 
     private final void decPersistentCountLocked(ProcessRecord app)
@@ -11855,6 +11873,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void serviceTimeout(ProcessRecord proc) {
+        String anrMessage = null;
+        
         synchronized(this) {
             if (proc.executingServices.size() == 0 || proc.thread == null) {
                 return;
@@ -11875,12 +11895,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (timeout != null && mLruProcesses.contains(proc)) {
                 Slog.w(TAG, "Timeout executing service: " + timeout);
-                appNotRespondingLocked(proc, null, null, "Executing service " + timeout.shortName);
+                anrMessage = "Executing service " + timeout.shortName;
             } else {
                 Message msg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
                 msg.obj = proc;
                 mHandler.sendMessageAtTime(msg, nextTime+SERVICE_TIMEOUT);
             }
+        }
+        
+        if (anrMessage != null) {
+            appNotResponding(proc, null, null, anrMessage);
         }
     }
     
@@ -12680,6 +12704,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private final void broadcastTimeout() {
+        ProcessRecord app = null;
+        String anrMessage = null;
+
         synchronized (this) {
             if (mOrderedBroadcasts.size() == 0) {
                 return;
@@ -12705,8 +12732,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
-            ProcessRecord app = null;
-
             Object curReceiver = r.receivers.get(r.nextReceiver-1);
             Slog.w(TAG, "Receiver during timeout: " + curReceiver);
             logBroadcastReceiverDiscard(r);
@@ -12724,7 +12749,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             if (app != null) {
-                appNotRespondingLocked(app, null, null, "Broadcast of " + r.intent.toString());
+                anrMessage = "Broadcast of " + r.intent.toString();
             }
 
             if (mPendingBroadcast == r) {
@@ -12735,6 +12760,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, true);
             scheduleBroadcastsLocked();
+        }
+        
+        if (anrMessage != null) {
+            appNotResponding(app, null, null, anrMessage);
         }
     }
 
