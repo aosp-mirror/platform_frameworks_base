@@ -30,7 +30,7 @@
     <string name="untitled" msgid="6071602020171759109">"(未命名)"</string>
     <string name="ellipsis" msgid="7899829516048813237">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(沒有電話號碼)"</string>
-    <string name="unknownName" msgid="2277556546742746522">"(未知的)"</string>
+    <string name="unknownName" msgid="2277556546742746522">"(不明)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"語音留言"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"連線發生問題或錯誤的 MMI 碼。"</string>
@@ -724,7 +724,7 @@
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="yes" msgid="5362982303337969312">"確定"</string>
     <string name="no" msgid="5141531044935541497">"取消"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"請注意"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="capital_on" msgid="1544682755514494298">"開啟"</string>
     <string name="capital_off" msgid="6815870386972805832">"關閉"</string>
     <string name="whichApplication" msgid="4533185947064773386">"完成操作需使用"</string>
