@@ -86,7 +86,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fadingEdge="none"
-            android:overscrollMode="ifContentScrolls"
             >
             <com.android.server.status.NotificationLinearLayout
                 android:id="@+id/notificationLinearLayout"

@@ -118,9 +118,6 @@ public class ListView extends AbsListView {
     Drawable mDivider;
     int mDividerHeight;
     
-    Drawable mOverscrollHeader;
-    Drawable mOverscrollFooter;
-
     private boolean mIsCacheColorOpaque;
     private boolean mDividerIsOpaque;
     private boolean mClipDivider;
@@ -175,16 +172,6 @@ public class ListView extends AbsListView {
             setDivider(d);
         }
         
-        final Drawable osHeader = a.getDrawable(com.android.internal.R.styleable.ListView_overscrollHeader);
-        if (osHeader != null) {
-            setOverscrollHeader(osHeader);
-        }
-        
-        final Drawable osFooter = a.getDrawable(com.android.internal.R.styleable.ListView_overscrollFooter);
-        if (osFooter != null) {
-            setOverscrollFooter(osFooter);
-        }
-
         // Use the height specified, zero being the default
         final int dividerHeight = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ListView_dividerHeight, 0);
@@ -2955,52 +2942,14 @@ public class ListView extends AbsListView {
         }
         super.setCacheColorHint(color);
     }
-
-    void drawOverscrollHeader(Canvas canvas, Drawable drawable, Rect bounds) {
-        final int height = drawable.getMinimumHeight();
-
-        canvas.save();
-        canvas.clipRect(bounds);
-
-        final int span = bounds.bottom - bounds.top;
-        if (span < height) {
-            bounds.top = bounds.bottom - height; 
-        }
-
-        drawable.setBounds(bounds);
-        drawable.draw(canvas);
-
-        canvas.restore();
-    }
-
-    void drawOverscrollFooter(Canvas canvas, Drawable drawable, Rect bounds) {
-        final int height = drawable.getMinimumHeight();
-
-        canvas.save();
-        canvas.clipRect(bounds);
-
-        final int span = bounds.bottom - bounds.top;
-        if (span < height) {
-            bounds.bottom = bounds.top + height;
-        }
-
-        drawable.setBounds(bounds);
-        drawable.draw(canvas);
-
-        canvas.restore();
-    }
-
+    
     @Override
     protected void dispatchDraw(Canvas canvas) {
         // Draw the dividers
         final int dividerHeight = mDividerHeight;
-        final Drawable overscrollHeader = mOverscrollHeader;
-        final Drawable overscrollFooter = mOverscrollFooter;
-        final boolean drawOverscrollHeader = overscrollHeader != null;
-        final boolean drawOverscrollFooter = overscrollFooter != null;
         final boolean drawDividers = dividerHeight > 0 && mDivider != null;
 
-        if (drawDividers || drawOverscrollHeader || drawOverscrollFooter) {
+        if (drawDividers) {
             // Only modify the top and bottom in the loop, we set the left and right here
             final Rect bounds = mTempRect;
             bounds.left = mPaddingLeft;
@@ -3031,28 +2980,14 @@ public class ListView extends AbsListView {
             if (!mStackFromBottom) {
                 int bottom = 0;
                 
-                // Draw top divider or header for overscroll
                 final int scrollY = mScrollY;
-                if (count > 0 && scrollY < 0) {
-                    if (drawOverscrollHeader) {
-                        bounds.bottom = 0;
-                        bounds.top = scrollY;
-                        drawOverscrollHeader(canvas, overscrollHeader, bounds);
-                    } else if (drawDividers) {
-                        bounds.bottom = 0;
-                        bounds.top = -dividerHeight;
-                        drawDivider(canvas, bounds, -1);
-                    }
-                }
-
                 for (int i = 0; i < count; i++) {
                     if ((headerDividers || first + i >= headerCount) &&
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
                         // Don't draw dividers next to items that are not enabled
-                        if (drawDividers &&
-                                (bottom < listBottom && !(drawOverscrollFooter && i == count - 1))) {
+                        if (drawDividers) {
                             if ((areAllItemsSelectable ||
                                     (adapter.isEnabled(first + i) && (i == count - 1 ||
                                             adapter.isEnabled(first + i + 1))))) {
@@ -3067,28 +3002,13 @@ public class ListView extends AbsListView {
                         }
                     }
                 }
-                
-                final int overFooterBottom = mBottom + mScrollY;
-                if (drawOverscrollFooter && first + count == itemCount &&
-                        overFooterBottom > bottom) {
-                    bounds.top = bottom;
-                    bounds.bottom = overFooterBottom;
-                    drawOverscrollFooter(canvas, overscrollFooter, bounds);
-                }
             } else {
                 int top;
                 int listTop = mListPadding.top;
 
                 final int scrollY = mScrollY;
-                
-                if (count > 0 && drawOverscrollHeader) {
-                    bounds.top = scrollY;
-                    bounds.bottom = getChildAt(0).getTop();
-                    drawOverscrollHeader(canvas, overscrollHeader, bounds);
-                }
 
-                final int start = drawOverscrollHeader ? 1 : 0;
-                for (int i = start; i < count; i++) {
+                for (int i = 0; i < count; i++) {
                     if ((headerDividers || first + i >= headerCount) &&
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
@@ -3114,17 +3034,10 @@ public class ListView extends AbsListView {
                     }
                 }
                 
-                if (count > 0 && scrollY > 0) {
-                    if (drawOverscrollFooter) {
-                        final int absListBottom = mBottom;
-                        bounds.top = absListBottom;
-                        bounds.bottom = absListBottom + scrollY;
-                        drawOverscrollFooter(canvas, overscrollFooter, bounds);
-                    } else if (drawDividers) {
-                        bounds.top = listBottom;
-                        bounds.bottom = listBottom + dividerHeight;
-                        drawDivider(canvas, bounds, -1);
-                    }
+                if (count > 0 && scrollY > 0 && drawDividers) {
+                    bounds.top = listBottom;
+                    bounds.bottom = listBottom + dividerHeight;
+                    drawDivider(canvas, bounds, -1);
                 }
             }
         }
@@ -3233,45 +3146,6 @@ public class ListView extends AbsListView {
         invalidate();
     }
     
-    /**
-     * Sets the drawable that will be drawn above all other list content.
-     * This area can become visible when the user overscrolls the list.
-     * 
-     * @param header The drawable to use
-     */
-    public void setOverscrollHeader(Drawable header) {
-        mOverscrollHeader = header;
-        if (mScrollY < 0) {
-            invalidate();
-        }
-    }
-    
-    /**
-     * @return The drawable that will be drawn above all other list content
-     */
-    public Drawable getOverscrollHeader() {
-        return mOverscrollHeader;
-    }
-    
-    /**
-     * Sets the drawable that will be drawn below all other list content.
-     * This area can become visible when the user overscrolls the list,
-     * or when the list's content does not fully fill the container area.
-     * 
-     * @param footer The drawable to use
-     */
-    public void setOverscrollFooter(Drawable footer) {
-        mOverscrollFooter = footer;
-        invalidate();
-    }
-    
-    /**
-     * @return The drawable that will be drawn below all other list content
-     */
-    public Drawable getOverscrollFooter() {
-        return mOverscrollFooter;
-    }
-
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
@@ -3690,20 +3564,6 @@ public class ListView extends AbsListView {
         if (mCheckedIdStates != null) {
             mCheckedIdStates.clear();
         }
-    }
-    
-    @Override
-    int getOverscrollMax() {
-        if (mStackFromBottom) {
-            final int childCount = getChildCount();
-            if (childCount > 0) {
-                return Math.min(mOverscrollMax,
-                        (getHeight() - getChildAt(0).getTop()) / OVERSCROLL_LIMIT_DIVISOR);
-            } else {
-                return mOverscrollMax;
-            }
-        }
-        return super.getOverscrollMax();
     }
 
     static class SavedState extends BaseSavedState {

@@ -1230,13 +1230,10 @@
   <public type="attr" name="installLocation" id="0x010102b7" />
   <public type="attr" name="vmSafeMode" id="0x010102b8" />
   <public type="attr" name="webTextViewStyle" id="0x010102b9" />
-  <public type="attr" name="overscrollMode" id="0x010102ba" />
-  <public type="attr" name="restoreAnyVersion" id="0x010102bb" />
-  <public type="attr" name="tabStripLeft" id="0x010102bc" />
-  <public type="attr" name="tabStripRight" id="0x010102bd" />
-  <public type="attr" name="tabStripEnabled" id="0x010102be" />
-  <public type="attr" name="overscrollHeader" id="0x010102bf" />
-  <public type="attr" name="overscrollFooter" id="0x010102c0" />
+  <public type="attr" name="restoreAnyVersion" id="0x010102ba" />
+  <public type="attr" name="tabStripLeft" id="0x010102bb" />
+  <public type="attr" name="tabStripRight" id="0x010102bc" />
+  <public type="attr" name="tabStripEnabled" id="0x010102bd" />
 
   <public type="id" name="custom" id="0x0102002b" />
     
