@@ -1379,4 +1379,45 @@ public class TextToSpeech {
             }
         }
     }
+
+
+    /**
+     * Returns whether or not the user is forcing their defaults to override the
+     * Text-To-Speech settings set by applications.
+     *
+     * @return Whether or not defaults are enforced.
+     *
+     * @hide
+     */
+    public boolean areDefaultsEnforced() {
+        synchronized (mStartLock) {
+            boolean defaultsEnforced = false;
+            if (!mStarted) {
+                return defaultsEnforced;
+            }
+            try {
+                defaultsEnforced = mITts.areDefaultsEnforced();
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - areDefaultsEnforced", "RemoteException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - areDefaultsEnforced", "NullPointerException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - areDefaultsEnforced", "IllegalStateException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } finally {
+                return defaultsEnforced;
+            }
+        }
+    }
 }
