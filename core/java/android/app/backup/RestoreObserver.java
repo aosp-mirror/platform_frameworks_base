@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import java.lang.String;
+import android.app.backup.RestoreSet;
 
 /**
  * Callback class for receiving progress reports during a restore operation.  These
@@ -24,12 +25,27 @@ import java.lang.String;
  */
 public abstract class RestoreObserver {
     /**
+     * Supply a list of the restore datasets available from the current transport.  This
+     * method is invoked as a callback following the application's use of the
+     * {@link android.app.backup.IRestoreSession.getAvailableRestoreSets} method.
+     *
+     * @param result An array of {@link android.app.backup.RestoreSet RestoreSet} objects
+     *   describing all of the available datasets that are candidates for restoring to
+     *   the current device.  If no applicable datasets exist, {@code result} will be
+     *   {@code null}.
+     *
+     * @hide
+     */
+    public void restoreSetsAvailable(RestoreSet[] result) {
+    }
+
+    /**
      * The restore operation has begun.
      *
      * @param numPackages The total number of packages being processed in
      *   this restore operation.
      */
-    void restoreStarting(int numPackages) {
+    public void restoreStarting(int numPackages) {
     }
 
     /**
@@ -45,7 +61,7 @@ public abstract class RestoreObserver {
      *   indication of the backup manager's progress through the overall restore process.
      * @param currentPackage The name of the package now being restored.
      */
-    void onUpdate(int nowBeingRestored, String currentPackage) {
+    public void onUpdate(int nowBeingRestored, String currentPackage) {
     }
 
     /**
@@ -55,6 +71,6 @@ public abstract class RestoreObserver {
      * @param error Zero on success; a nonzero error code if the restore operation
      *   as a whole failed.
      */
-    void restoreFinished(int error) {
+    public void restoreFinished(int error) {
     }
 }
