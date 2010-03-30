@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="byteShort" msgid="8340973892742019101">"b"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Kb"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Mb"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"Gb"</string>
@@ -294,7 +294,7 @@
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Tillader, at et program tilføjer eller ændrer begivenhederne i din kalender, hvilket kan sende e-mail til gæster. Ondsindede programmer kan bruge dette til at slette eller ændre dine kalenderbegivenheder eller til at sende e-mail til gæster."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imiterede placeringskilder til test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Opret imiterede placeringskilder til testning. Ondsindede programmer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til ekstra kommandoer for placeringsudbyder"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Få adgang til ekstra kommandoer fra placeringsudbyder. Ondsindede programmer kan bruge dette til at gribe ind i driften af GPS\'en eller andre placeringskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"tilladelse til at installere en placeringsudbyder"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Opret imiterede placeringskilder til testning. Ondsindede programmer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere eller til at overvåge og rapportere din placering til en ekstern kilde."</string>
@@ -380,7 +380,7 @@
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Tillader, at et program anmoder om godkendelsestokens"</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"vis netværkstilstand"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Tillader, at et program viser tilstanden for alle netværk."</string>
-    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"Fuld internetadgang"</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"fuld internetadgang"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Tillader, at et program opretter netværks-sockets."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"skriv indstillinger for adgangspunktnavn"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Tillader, at et program ændrer APN-indstillingerne, f.eks. enhver APNs Proxy og Port."</string>
