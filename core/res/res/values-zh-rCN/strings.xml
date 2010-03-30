@@ -154,7 +154,7 @@
     <string name="permgroupdesc_personalInfo" msgid="5488050357388806068">"直接访问手机上存储的联系人和日历。"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"您的位置"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"监视您的物理位置"</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"网络通讯"</string>
+    <string name="permgrouplab_network" msgid="5808983377727109831">"网络通信"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"允许应用程序访问各种网络功能。"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帐户"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
@@ -416,7 +416,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"允许应用程序读取用户在用户词典中存储的任意私有字词、名称和短语。"</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"写入用户定义的词典"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"允许应用程序向用户词典中写入新词。"</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"修改/删除 SD 卡内容"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"修改/删除 SD 卡中的内容"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"允许应用程序写入 SD 卡。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允许应用程序读取和写入缓存文件系统。"</string>

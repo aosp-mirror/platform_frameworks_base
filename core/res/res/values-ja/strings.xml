@@ -220,7 +220,7 @@
     <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"実行するプロセス数の上限の制御をアプリケーションに許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"バックグラウンドアプリケーションをすべて終了する"</string>
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"バックグラウンドになり次第必ず操作を終了させるかどうかの制御をアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
-    <string name="permlab_batteryStats" msgid="7863923071360031652">"電池統計情報の変国"</string>
+    <string name="permlab_batteryStats" msgid="7863923071360031652">"電池統計情報の変更"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"収集した電池統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"システムのバックアップと復元を制御する"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"システムのバックアップと復元メカニズムの制御をアプリケーションに許可します。通常のアプリケーションでは使用しません。"</string>

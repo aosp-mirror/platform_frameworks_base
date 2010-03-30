@@ -294,7 +294,7 @@
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"응용프로그램이 캘린더에 일정을 추가하거나 변경할 수 있도록 합니다. 이렇게 하면 참석자에게 이메일을 보낼 수 있습니다. 악성 응용프로그램이 이를 사용하여 캘린더 일정을 삭제, 수정하거나 참석자에게 이메일을 보낼 수 있습니다."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 소스로 가장"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"테스트용 가짜 위치 소스를 만듭니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS, 네트워크 제공업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령 액세스"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"추가 위치 제공업체 명령에 액세스합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"위치 정보 공급자 설치 권한"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"테스트용 가짜 위치 소스를 만듭니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS, 네트워크 제공업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓰거나 사용자의 위치를 모니터링하여 외부 소스로 보고할 수 있습니다."</string>
