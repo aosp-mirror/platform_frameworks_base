@@ -29,12 +29,12 @@ interface IRestoreSession {
     /**
      * Ask the current transport what the available restore sets are.
      *
-     * @return A bundle containing two elements:  an int array under the key
-     *   "tokens" whose entries are a transport-private identifier for each backup set;
-     *   and a String array under the key "names" whose entries are the user-meaningful
-     *   text corresponding to the backup sets at each index in the tokens array.
+     * @param observer This binder points to an object whose onRestoreSetsAvailable()
+     *   method will be called to supply the results of the transport's lookup.
+     * @return Zero on success; nonzero on error.  The observer will only receive a
+     *   result callback if this method returned zero.
      */
-    RestoreSet[] getAvailableRestoreSets();
+    int getAvailableRestoreSets(IRestoreObserver observer);
 
     /**
      * Restore the given set onto the device, replacing the current data of any app
