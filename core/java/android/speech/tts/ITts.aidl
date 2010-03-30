@@ -64,4 +64,6 @@ interface ITts {
     int setEngineByPackageName(in String enginePackageName);
 
     String getDefaultEngine();
+
+    boolean areDefaultsEnforced();
 }
