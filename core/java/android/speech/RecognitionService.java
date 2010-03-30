@@ -89,7 +89,7 @@ public abstract class RecognitionService extends Service {
             RecognitionService.this.onStartListening(intent, mCurrentCallback);
         } else {
             try {
-                listener.onError(RecognitionManager.ERROR_RECOGNIZER_BUSY);
+                listener.onError(SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
             } catch (RemoteException e) {
                 Log.d(TAG, "onError call from startListening failed");
             }
@@ -100,10 +100,10 @@ public abstract class RecognitionService extends Service {
     private void dispatchStopListening(IRecognitionListener listener) {
         try {
             if (mCurrentCallback == null) {
-                listener.onError(RecognitionManager.ERROR_CLIENT);
+                listener.onError(SpeechRecognizer.ERROR_CLIENT);
                 Log.w(TAG, "stopListening called with no preceding startListening - ignoring");
             } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
-                listener.onError(RecognitionManager.ERROR_RECOGNIZER_BUSY);
+                listener.onError(SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
                 Log.w(TAG, "stopListening called by other caller than startListening - ignoring");
             } else { // the correct state
                 RecognitionService.this.onStopListening(mCurrentCallback);
@@ -175,7 +175,7 @@ public abstract class RecognitionService extends Service {
         }
         try {
             Log.e(TAG, "call for recognition service without RECORD_AUDIO permissions");
-            listener.onError(RecognitionManager.ERROR_INSUFFICIENT_PERMISSIONS);
+            listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
         } catch (RemoteException re) {
             Log.e(TAG, "sending ERROR_INSUFFICIENT_PERMISSIONS message failed", re);
         }
@@ -252,7 +252,7 @@ public abstract class RecognitionService extends Service {
         /**
          * The service should call this method when a network or recognition error occurred.
          * 
-         * @param error code is defined in {@link RecognitionManager}
+         * @param error code is defined in {@link SpeechRecognizer}
          */
         public void error(int error) throws RemoteException {
             mCurrentCallback = null;
@@ -263,12 +263,12 @@ public abstract class RecognitionService extends Service {
          * The service should call this method when partial recognition results are available. This
          * method can be called at any time between {@link #beginningOfSpeech()} and
          * {@link #results(Bundle)} when partial results are ready. This method may be called zero,
-         * one or multiple times for each call to {@link RecognitionManager#startListening(Intent)},
+         * one or multiple times for each call to {@link SpeechRecognizer#startListening(Intent)},
          * depending on the speech recognition service implementation.
          * 
          * @param partialResults the returned results. To retrieve the results in
          *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
-         *        {@link RecognitionManager#RESULTS_RECOGNITION} as a parameter
+         *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void partialResults(Bundle partialResults) throws RemoteException {
             mListener.onPartialResults(partialResults);
@@ -289,7 +289,7 @@ public abstract class RecognitionService extends Service {
          * 
          * @param results the recognition results. To retrieve the results in {@code
          *        ArrayList&lt;String&gt;} format use {@link Bundle#getStringArrayList(String)} with
-         *        {@link RecognitionManager#RESULTS_RECOGNITION} as a parameter
+         *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void results(Bundle results) throws RemoteException {
             mCurrentCallback = null;
