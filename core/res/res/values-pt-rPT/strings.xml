@@ -160,7 +160,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Aceda às contas disponíveis."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controlos de hardware"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Aceda directamente ao hardware no telefone."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Chamadas"</string>
+    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Chamadas telefónicas"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Monitorize, grave e processe chamadas telefónicas."</string>
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Ferramentas do sistema"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Acesso e controlo de nível inferior do sistema."</string>
@@ -352,7 +352,7 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Permite à aplicação controlar as funcionalidades do telefone do dispositivo. Uma aplicação com esta autorização pode alternar entre redes, ligar e desligar o rádio do telefone, etc., sem nunca notificar o utilizador."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"ler identidade e estado do telefone"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Permite à aplicação aceder às funcionalidades do dispositivo. Uma aplicação com esta autorização pode determinar o número deste telefone assim como o número de série do mesmo, se existe uma chamada activa, o número a que a essa chamada está ligada, etc."</string>
-    <string name="permlab_wakeLock" msgid="573480187941496130">"impedir que o telefone entre em inactividade"</string>
+    <string name="permlab_wakeLock" msgid="573480187941496130">"impedir modo de inactividade do telefone"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Permite a uma aplicação impedir o telefone de entrar em inactividade."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"ligar ou desligar o telefone"</string>
     <string name="permdesc_devicePower" msgid="4577331933252444818">"Permite a uma aplicação ligar ou desligar o telefone."</string>
@@ -380,7 +380,7 @@
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Permitir que uma aplicação solicite tokens de autenticação."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"ver estado da rede"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Permite a uma aplicação ver o estado de todas as redes."</string>
-    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"acesso total à Internet"</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"acesso total à internet"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Permite a uma aplicação criar sockets de rede."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"escrever definições de Nome do ponto de acesso"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Permite a uma aplicaçaõ modificar as definições de APN, tais como Proxy e Porta de qualquer APN."</string>
@@ -416,7 +416,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permite a uma aplicação ler quaisquer palavras, nomes e expressões privadas que o utilizador possa ter armazenado no dicionário do utilizador."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"escrever no dicionário definido pelo utilizador"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permite a uma aplicação escrever novas palavras no dicionário do utilizador."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificar/eliminar os conteúdos do cartão SD"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificar/eliminar conteúdo do cartão SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Permite que uma aplicação escreva no cartão SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"aceder ao sistema de ficheiros da cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permite a uma aplicação ler e escrever no sistema de ficheiros da cache."</string>
