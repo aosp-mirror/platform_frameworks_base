@@ -1873,12 +1873,7 @@ public class GridView extends AbsListView {
         // TODO: Account for vertical spacing too
         final int numColumns = mNumColumns;
         final int rowCount = (mItemCount + numColumns - 1) / numColumns;
-        int result = Math.max(rowCount * 100, 0);
-        if (mScrollY != 0) {
-            // Compensate for overscroll
-            result += Math.abs((int) ((float) mScrollY / getHeight() * rowCount * 100));
-        }
-        return result;
+        return Math.max(rowCount * 100, 0);
     }
 }
 
