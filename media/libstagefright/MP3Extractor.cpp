@@ -311,15 +311,19 @@ static bool Resync(
         // Skip an optional ID3 header if syncing at the very beginning
         // of the datasource.
 
-        uint8_t id3header[10];
-        if (source->readAt(0, id3header, sizeof(id3header))
-                < (ssize_t)sizeof(id3header)) {
-            // If we can't even read these 10 bytes, we might as well bail out,
-            // even if there _were_ 10 bytes of valid mp3 audio data...
-            return false;
-        }
+        for (;;) {
+            uint8_t id3header[10];
+            if (source->readAt(*inout_pos, id3header, sizeof(id3header))
+                    < (ssize_t)sizeof(id3header)) {
+                // If we can't even read these 10 bytes, we might as well bail
+                // out, even if there _were_ 10 bytes of valid mp3 audio data...
+                return false;
+            }
 
-        if (id3header[0] == 'I' && id3header[1] == 'D' && id3header[2] == '3') {
+            if (memcmp("ID3", id3header, 3)) {
+                break;
+            }
+
             // Skip the ID3v2 header.
 
             size_t len =
@@ -331,50 +335,30 @@ static bool Resync(
             len += 10;
 
             *inout_pos += len;
+
+            LOGV("skipped ID3 tag, new starting offset is %ld (0x%08lx)",
+                 *inout_pos, *inout_pos);
         }
     }
 
-    const size_t kMaxFrameSize = 4096;
-    uint8_t *buffer = new uint8_t[kMaxFrameSize];
-
-    off_t pos = *inout_pos - kMaxFrameSize;
-    size_t buffer_offset = kMaxFrameSize;
-    size_t buffer_length = kMaxFrameSize;
+    off_t pos = *inout_pos;
     bool valid = false;
     do {
-        if (buffer_offset + 3 >= buffer_length) {
-            if (buffer_length < kMaxFrameSize) {
-                break;
-            }
-
-            pos += buffer_offset;
-
-            if (pos >= *inout_pos + 128 * 1024) {
-                // Don't scan forever.
-                LOGV("giving up at offset %ld", pos);
-                break;
-            }
-
-            memmove(buffer, &buffer[buffer_offset], buffer_length - buffer_offset);
-            buffer_length = buffer_length - buffer_offset;
-            buffer_offset = 0;
-
-            ssize_t n = source->readAt(
-                    pos, &buffer[buffer_length], kMaxFrameSize - buffer_length);
-
-            if (n <= 0) {
-                break;
-            }
-
-            buffer_length += (size_t)n;
-
-            continue;
+        if (pos >= *inout_pos + 128 * 1024) {
+            // Don't scan forever.
+            LOGV("giving up at offset %ld", pos);
+            break;
         }
 
-        uint32_t header = U32_AT(&buffer[buffer_offset]);
+        uint8_t tmp[4];
+        if (source->readAt(pos, tmp, 4) != 4) {
+            break;
+        }
+
+        uint32_t header = U32_AT(tmp);
 
         if (match_header != 0 && (header & kMask) != (match_header & kMask)) {
-            ++buffer_offset;
+            ++pos;
             continue;
         }
 
@@ -382,16 +366,16 @@ static bool Resync(
         int sample_rate, num_channels, bitrate;
         if (!get_mp3_frame_size(header, &frame_size,
                                &sample_rate, &num_channels, &bitrate)) {
-            ++buffer_offset;
+            ++pos;
             continue;
         }
 
-        LOGV("found possible 1st frame at %ld", pos + buffer_offset);
+        LOGV("found possible 1st frame at %ld (header = 0x%08x)", pos, header);
 
         // We found what looks like a valid frame,
         // now find its successors.
 
-        off_t test_pos = pos + buffer_offset + frame_size;
+        off_t test_pos = pos + frame_size;
 
         valid = true;
         for (int j = 0; j < 3; ++j) {
@@ -422,7 +406,7 @@ static bool Resync(
         }
 
         if (valid) {
-            *inout_pos = pos + buffer_offset;
+            *inout_pos = pos;
 
             if (out_header != NULL) {
                 *out_header = header;
@@ -431,12 +415,8 @@ static bool Resync(
             LOGV("no dice, no valid sequence of frames found.");
         }
 
-        ++buffer_offset;
-
+        ++pos;
     } while (!valid);
-
-    delete[] buffer;
-    buffer = NULL;
 
     return valid;
 }
