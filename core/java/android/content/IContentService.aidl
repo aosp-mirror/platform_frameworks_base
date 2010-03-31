@@ -17,7 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
-import android.content.ActiveSyncInfo;
+import android.content.SyncInfo;
 import android.content.ISyncStatusObserver;
 import android.content.SyncAdapterType;
 import android.content.SyncStatusInfo;
@@ -104,7 +104,7 @@ interface IContentService {
      */
     boolean isSyncActive(in Account account, String authority);
 
-    ActiveSyncInfo getActiveSync();
+    SyncInfo getCurrentSync();
 
     /**
      * Returns the types of the SyncAdapters that are registered with the system.

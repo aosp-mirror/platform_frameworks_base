@@ -24,7 +24,6 @@ import android.content.Entity.NamedContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
@@ -522,10 +521,6 @@ public class VCardComposer {
                     }
                 }
             }
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, String.format("RemoteException at id %s (%s)",
-                    contactId, e.getMessage()));
-            return "";
         } finally {
             if (entityIterator != null) {
                 entityIterator.close();

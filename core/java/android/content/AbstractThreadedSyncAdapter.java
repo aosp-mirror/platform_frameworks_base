@@ -17,12 +17,10 @@
 package android.content;
 
 import android.accounts.Account;
-import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.util.EventLog;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -113,12 +111,13 @@ public abstract class AbstractThreadedSyncAdapter {
         public void cancelSync(ISyncContext syncContext) {
             // synchronize to make sure that mSyncThread doesn't change between when we
             // check it and when we use it
+            final SyncThread syncThread;
             synchronized (mSyncThreadLock) {
-                if (mSyncThread != null
-                        && mSyncThread.mSyncContext.getSyncContextBinder()
-                        == syncContext.asBinder()) {
-                    onSyncCanceled(mSyncThread);
-                }
+                syncThread = mSyncThread;
+            }
+            if (syncThread != null
+                    && syncThread.mSyncContext.getSyncContextBinder() == syncContext.asBinder()) {
+                onSyncCanceled();
             }
         }
 
@@ -213,9 +212,14 @@ public abstract class AbstractThreadedSyncAdapter {
      * thread than the sync thread and so you must consider the multi-threaded implications
      * of the work that you do in this method.
      *
-     * @param thread the thread that is running the sync operation to cancel
      */
-    public void onSyncCanceled(Thread thread) {
-        thread.interrupt();
+    public void onSyncCanceled() {
+        final SyncThread syncThread;
+        synchronized (mSyncThreadLock) {
+            syncThread = mSyncThread;
+        }
+        if (syncThread != null) {
+            syncThread.interrupt();
+        }
     }
 }

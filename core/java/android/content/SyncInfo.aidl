@@ -16,4 +16,4 @@
 
 package android.content;
 
-parcelable ActiveSyncInfo;
+parcelable SyncInfo;

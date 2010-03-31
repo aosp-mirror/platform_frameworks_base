@@ -1179,11 +1179,11 @@ public abstract class ContentResolver {
 
     /**
      * If a sync is active returns the information about it, otherwise returns false.
-     * @return the ActiveSyncInfo for the currently active sync or null if one is not active.
+     * @return the SyncInfo for the currently active sync or null if one is not active.
      */
-    public static ActiveSyncInfo getActiveSync() {
+    public static SyncInfo getCurrentSync() {
         try {
-            return getContentService().getActiveSync();
+            return getContentService().getCurrentSync();
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
