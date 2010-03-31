@@ -1406,7 +1406,9 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         boolean ret;
-        if (getBondState(address) == BluetoothDevice.BOND_BONDED) {
+        // Just do the SDP if the device is already  created and UUIDs are not
+        // NULL, else create the device and then do SDP.
+        if (isRemoteDeviceInCache(address) && getRemoteUuids(address) != null) {
             String path = getObjectPathFromAddress(address);
             if (path == null) return false;
 

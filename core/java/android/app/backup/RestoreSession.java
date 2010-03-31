@@ -40,19 +40,22 @@ public class RestoreSession {
     /**
      * Ask the current transport what the available restore sets are.
      *
-     * @return A bundle containing two elements:  an int array under the key
-     *   "tokens" whose entries are a transport-private identifier for each backup set;
-     *   and a String array under the key "names" whose entries are the user-meaningful
-     *   text corresponding to the backup sets at each index in the tokens array.
-     *   On error, returns null.
+     * @param observer a RestoreObserver object whose restoreSetsAvailable() method will
+     *   be called on the application's main thread in order to supply the results of
+     *   the restore set lookup by the backup transport.  This parameter must not be
+     *   null.
+     * @return Zero on success, nonzero on error.  The observer's restoreSetsAvailable()
+     *   method will only be called if this method returned zero.
      */
-    public RestoreSet[] getAvailableRestoreSets() {
+    public int getAvailableRestoreSets(RestoreObserver observer) {
+        int err = -1;
+        RestoreObserverWrapper obsWrapper = new RestoreObserverWrapper(mContext, observer);
         try {
-            return mBinder.getAvailableRestoreSets();
+            err = mBinder.getAvailableRestoreSets(obsWrapper);
         } catch (RemoteException e) {
             Log.d(TAG, "Can't contact server to get available sets");
-            return null;
         }
+        return err;
     }
 
     /**
@@ -151,6 +154,7 @@ public class RestoreSession {
         static final int MSG_RESTORE_STARTING = 1;
         static final int MSG_UPDATE = 2;
         static final int MSG_RESTORE_FINISHED = 3;
+        static final int MSG_RESTORE_SETS_AVAILABLE = 4;
 
         RestoreObserverWrapper(Context context, RestoreObserver appObserver) {
             mHandler = new Handler(context.getMainLooper()) {
@@ -166,6 +170,9 @@ public class RestoreSession {
                     case MSG_RESTORE_FINISHED:
                         mAppObserver.restoreFinished(msg.arg1);
                         break;
+                    case MSG_RESTORE_SETS_AVAILABLE:
+                        mAppObserver.restoreSetsAvailable((RestoreSet[])msg.obj);
+                        break;
                     }
                 }
             };
@@ -173,6 +180,11 @@ public class RestoreSession {
         }
 
         // Binder calls into this object just enqueue on the main-thread handler
+        public void restoreSetsAvailable(RestoreSet[] result) {
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_RESTORE_SETS_AVAILABLE, result));
+        }
+
         public void restoreStarting(int numPackages) {
             mHandler.sendMessage(
                     mHandler.obtainMessage(MSG_RESTORE_STARTING, numPackages, 0));

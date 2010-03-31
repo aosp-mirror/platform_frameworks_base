@@ -59,7 +59,7 @@ oneway interface IRecognitionListener {
     /**
      * A network or recognition error occurred.
      *
-     * @param error code is defined in {@link RecognitionManager}
+     * @param error code is defined in {@link SpeechRecognizer}
      */
     void onError(in int error);
 

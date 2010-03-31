@@ -16,12 +16,26 @@
 
 package android.app.backup;
 
+import android.app.backup.RestoreSet;
+
 /**
  * Callback class for receiving progress reports during a restore operation.
  *
  * @hide
  */
-interface IRestoreObserver {
+oneway interface IRestoreObserver {
+    /**
+     * Supply a list of the restore datasets available from the current transport.  This
+     * method is invoked as a callback following the application's use of the
+     * {@link android.app.backup.IRestoreSession.getAvailableRestoreSets} method.
+     *
+     * @param result An array of {@link android.app.backup.RestoreSet RestoreSet} objects
+     *   describing all of the available datasets that are candidates for restoring to
+     *   the current device.  If no applicable datasets exist, {@code result} will be
+     *   {@code null}.
+     */
+    void restoreSetsAvailable(in RestoreSet[] result);
+
     /**
      * The restore operation has begun.
      *
@@ -32,8 +46,8 @@ interface IRestoreObserver {
 
     /**
      * An indication of which package is being restored currently, out of the
-     * total number provided in the restoreStarting() callback.  This method
-     * is not guaranteed to be called.
+     * total number provided in the {@link #restoreStarting(int numPackages)} callback.
+     * This method is not guaranteed to be called.
      *
      * @param nowBeingRestored The index, between 1 and the numPackages parameter
      *   to the restoreStarting() callback, of the package now being restored.

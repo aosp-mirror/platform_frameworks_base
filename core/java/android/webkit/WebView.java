@@ -3101,12 +3101,12 @@ public class WebView extends AbsoluteLayout
         canvas.restoreToCount(saveCount);
 
         // Now draw the shadow.
-        if (mTitleBar != null) {
-            int y = mScrollY + getVisibleTitleHeight();
+        int titleH = getVisibleTitleHeight();
+        if (mTitleBar != null && titleH == 0) {
             int height = (int) (5f * getContext().getResources()
                     .getDisplayMetrics().density);
-            mTitleShadow.setBounds(mScrollX, y, mScrollX + getWidth(),
-                    y + height);
+            mTitleShadow.setBounds(mScrollX, mScrollY, mScrollX + getWidth(),
+                    mScrollY + height);
             mTitleShadow.draw(canvas);
         }
         if (AUTO_REDRAW_HACK && mAutoRedraw) {

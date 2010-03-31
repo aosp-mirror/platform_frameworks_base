@@ -18,6 +18,7 @@ package android.os.storage;
 
 /**
  * Used for receiving notifications from the StorageManager
+ * @hide
  */
 public abstract class StorageEventListener {
     /**

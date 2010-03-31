@@ -80,7 +80,7 @@ public class SyncOperation implements Comparable {
         sb.append("authority: ").append(authority);
         sb.append(" account: ").append(account);
         sb.append(" extras: ");
-        extrasToStringBuilder(extras, sb);
+        extrasToStringBuilder(extras, sb, false /* asKey */);
         sb.append(" syncSource: ").append(syncSource);
         sb.append(" when: ").append(earliestRunTime);
         sb.append(" expedited: ").append(expedited);
@@ -92,13 +92,19 @@ public class SyncOperation implements Comparable {
         sb.append("authority: ").append(authority);
         sb.append(" account: ").append(account);
         sb.append(" extras: ");
-        extrasToStringBuilder(extras, sb);
+        extrasToStringBuilder(extras, sb, true /* asKey */);
         return sb.toString();
     }
 
-    public static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
+    public static void extrasToStringBuilder(Bundle bundle, StringBuilder sb, boolean asKey) {
         sb.append("[");
         for (String key : bundle.keySet()) {
+            // if we are writing this as a key don't consider whether this
+            // is an initialization sync or not when computing the key since
+            // we set this flag appropriately when dispatching the sync request.
+            if (asKey && ContentResolver.SYNC_EXTRAS_INITIALIZE.equals(key)) {
+                continue;
+            }
             sb.append(key).append("=").append(bundle.get(key)).append(" ");
         }
         sb.append("]");

@@ -160,14 +160,15 @@ public class WifiService extends IWifiManager.Stub {
     // Wake lock used by other operations
     private static PowerManager.WakeLock sWakeLock;
 
-    private static final int MESSAGE_ENABLE_WIFI      = 0;
-    private static final int MESSAGE_DISABLE_WIFI     = 1;
-    private static final int MESSAGE_STOP_WIFI        = 2;
-    private static final int MESSAGE_START_WIFI       = 3;
-    private static final int MESSAGE_RELEASE_WAKELOCK = 4;
-    private static final int MESSAGE_UPDATE_STATE     = 5;
+    private static final int MESSAGE_ENABLE_WIFI        = 0;
+    private static final int MESSAGE_DISABLE_WIFI       = 1;
+    private static final int MESSAGE_STOP_WIFI          = 2;
+    private static final int MESSAGE_START_WIFI         = 3;
+    private static final int MESSAGE_RELEASE_WAKELOCK   = 4;
+    private static final int MESSAGE_UPDATE_STATE       = 5;
     private static final int MESSAGE_START_ACCESS_POINT = 6;
     private static final int MESSAGE_STOP_ACCESS_POINT  = 7;
+    private static final int MESSAGE_SET_CHANNELS       = 8;
 
 
     private final  WifiHandler mWifiHandler;
@@ -1542,6 +1543,7 @@ public class WifiService extends IWifiManager.Stub {
         Slog.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
                 " with persist set to "+persist);
         enforceChangePermission();
+
         /*
          * Validate the argument. We'd like to let the Wi-Fi driver do this,
          * but if Wi-Fi isn't currently enabled, that's not possible, and
@@ -1559,13 +1561,28 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
+        if (mWifiHandler == null) return false;
+
+        Message.obtain(mWifiHandler,
+                MESSAGE_SET_CHANNELS, numChannels, (persist ? 1 : 0)).sendToTarget();
+
+        return true;
+    }
+
+    /**
+     * sets the number of allowed radio frequency channels synchronously
+     * @param numChannels the number of allowed channels. Must be greater than 0
+     * and less than or equal to 16.
+     * @param persist {@code true} if the setting should be remembered.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
+    private boolean setNumAllowedChannelsBlocking(int numChannels, boolean persist) {
         if (persist) {
             Settings.Secure.putInt(mContext.getContentResolver(),
-                                   Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
-                                   numChannels);
+                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
+                    numChannels);
         }
-        mWifiStateTracker.setNumAllowedChannels(numChannels);
-        return true;
+        return mWifiStateTracker.setNumAllowedChannels(numChannels);
     }
 
     /**
@@ -1904,6 +1921,11 @@ public class WifiService extends IWifiManager.Stub {
                                              (WifiConfiguration) msg.obj);
                     sWakeLock.release();
                     break;
+
+                case MESSAGE_SET_CHANNELS:
+                    setNumAllowedChannelsBlocking(msg.arg1, msg.arg2 == 1);
+                    break;
+
             }
         }
     }

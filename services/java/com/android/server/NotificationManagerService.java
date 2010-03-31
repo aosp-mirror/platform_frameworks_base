@@ -472,7 +472,7 @@ class NotificationManagerService extends INotificationManager.Stub
     // ============================================================================
     public void enqueueToast(String pkg, ITransientNotification callback, int duration)
     {
-        Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback + " duration=" + duration);
+        if (DBG) Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback + " duration=" + duration);
 
         if (pkg == null || callback == null) {
             Slog.e(TAG, "Not doing toast. pkg=" + pkg + " callback=" + callback);
