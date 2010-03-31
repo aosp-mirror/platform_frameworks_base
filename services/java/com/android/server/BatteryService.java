@@ -177,12 +177,24 @@ class BatteryService extends Binder {
     void systemReady() {
         // check our power situation now that it is safe to display the shutdown dialog.
         shutdownIfNoPower();
+        shutdownIfOverTemp();
     }
 
     private final void shutdownIfNoPower() {
         // shut down gracefully if our battery is critically low and we are not powered.
         // wait until the system has booted before attempting to display the shutdown dialog.
         if (mBatteryLevel == 0 && !isPowered() && ActivityManagerNative.isSystemReady()) {
+            Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
+            intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        }
+    }
+
+    private final void shutdownIfOverTemp() {
+        // shut down gracefully if temperature is too high (> 68.0C)
+        // wait until the system has booted before attempting to display the shutdown dialog.
+        if (mBatteryTemperature > 680 && ActivityManagerNative.isSystemReady()) {
             Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
             intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -199,6 +211,7 @@ class BatteryService extends Binder {
         long dischargeDuration = 0;
 
         shutdownIfNoPower();
+        shutdownIfOverTemp();
 
         mBatteryLevelCritical = mBatteryLevel <= CRITICAL_BATTERY_LEVEL;
         if (mAcOnline) {
