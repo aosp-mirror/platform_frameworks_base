@@ -647,11 +647,11 @@ effects, which are shown below, are used to create depth.</p>
 <table class="image-caption">
 <tr>
 <td class="image-caption-i">
-  <img src="{@docRoot}images/icon_design/menu_light.png" alt="A view of light, effects, and shadows for launcher icons."/>
+  <img src="{@docRoot}images/icon_design/menu_light.png" alt="A view of light, effects, and shadows for menu icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 8. </strong>Light, effects, and shadows for launcher icons.</p>
+    <p><strong>Figure 8. </strong>Light, effects, and shadows for menu icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
     <tr><td style="padding-right:1em"><em>1.</em></td><td>Front part:</td><td>Use fill gradient from primary color palette</td></tr>
@@ -709,7 +709,7 @@ of 48x48 px on a transparent background. Mind the safeframe.</li>
 
 <h4 id="dodonts_menu">"Do's and don'ts"</h4>
 
-<p>Below are some "do and don't" examples to consider when creating status bar creating icons for
+<p>Below are some "do and don't" examples to consider when creating menu icons for
 your application. </p>
 
 
@@ -765,7 +765,7 @@ face-on to enhance clarity at small sizes.</p>
 <tr>
 <td class="image-caption-i">
   <img src="{@docRoot}images/icon_design/statusbar_light.png" alt="A view of
-light, effects, and shadows for launcher icons."/>
+light, effects, and shadows for status bar icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
@@ -836,7 +836,7 @@ lower 2 pixels free.</li>
 
 <h4 id="dodonts_status">"Do's and don'ts"</h4>
 
-<p>Below are some "do and don't" examples to consider when creating status bar creating icons for
+<p>Below are some "do and don't" examples to consider when creating status bar icons for
 your application. </p>
 
 
