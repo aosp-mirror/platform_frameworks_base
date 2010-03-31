@@ -1026,11 +1026,11 @@ public class SyncManager implements OnAccountsUpdateListener {
             pw.println(sb.toString());
         }
 
-        ActiveSyncInfo active = mSyncStorageEngine.getActiveSync();
+        SyncInfo active = mSyncStorageEngine.getCurrentSync();
         if (active != null) {
             SyncStorageEngine.AuthorityInfo authority
-                    = mSyncStorageEngine.getAuthority(active.getAuthorityId());
-            final long durationInSeconds = (now - active.getStartTime()) / 1000;
+                    = mSyncStorageEngine.getAuthority(active.authorityId);
+            final long durationInSeconds = (now - active.startTime) / 1000;
             pw.print("Active sync: ");
                     pw.print(authority != null ? authority.account : "<no account>");
                     pw.print(" ");

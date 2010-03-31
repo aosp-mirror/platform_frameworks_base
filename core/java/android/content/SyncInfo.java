@@ -23,44 +23,29 @@ import android.os.Parcelable.Creator;
 /**
  * Information about the sync operation that is currently underway.
  */
-public class ActiveSyncInfo {
-    private final int authorityId;
-    private final Account account;
-    private final String authority;
-    private final long startTime;
-
-    /**
-     * Get the {@link Account} that is currently being synced.
-     * @return the account
-     */
-    public Account getAccount() {
-        return new Account(account.name, account.type);
-    }
-
+public class SyncInfo {
     /** @hide */
-    public int getAuthorityId() {
-        return authorityId;
-    }
+    public final int authorityId;
 
     /**
-     * Get the authority of the provider that is currently being synced.
-     * @return the authority
+     * The {@link Account} that is currently being synced.
      */
-    public String getAuthority() {
-        return authority;
-    }
+    public final Account account;
 
     /**
-     * Get the start time of the current sync operation. This is represented in elapsed real time.
+     * The authority of the provider that is currently being synced.
+     */
+    public final String authority;
+
+    /**
+     * The start time of the current sync operation in milliseconds since boot.
+     * This is represented in elapsed real time.
      * See {@link android.os.SystemClock#elapsedRealtime()}.
-     * @return the start time in milliseconds since boot
      */
-    public long getStartTime() {
-        return startTime;
-    }
+    public final long startTime;
 
     /** @hide */
-    ActiveSyncInfo(int authorityId, Account account, String authority,
+    SyncInfo(int authorityId, Account account, String authority,
             long startTime) {
         this.authorityId = authorityId;
         this.account = account;
@@ -82,7 +67,7 @@ public class ActiveSyncInfo {
     }
 
     /** @hide */
-    ActiveSyncInfo(Parcel parcel) {
+    SyncInfo(Parcel parcel) {
         authorityId = parcel.readInt();
         account = new Account(parcel);
         authority = parcel.readString();
@@ -90,13 +75,13 @@ public class ActiveSyncInfo {
     }
 
     /** @hide */
-    public static final Creator<ActiveSyncInfo> CREATOR = new Creator<ActiveSyncInfo>() {
-        public ActiveSyncInfo createFromParcel(Parcel in) {
-            return new ActiveSyncInfo(in);
+    public static final Creator<SyncInfo> CREATOR = new Creator<SyncInfo>() {
+        public SyncInfo createFromParcel(Parcel in) {
+            return new SyncInfo(in);
         }
 
-        public ActiveSyncInfo[] newArray(int size) {
-            return new ActiveSyncInfo[size];
+        public SyncInfo[] newArray(int size) {
+            return new SyncInfo[size];
         }
     };
 }
