@@ -238,6 +238,8 @@ public class RequestQueue implements RequestFeeder {
             mContext.registerReceiver(mProxyChangeReceiver,
                                       new IntentFilter(Proxy.PROXY_CHANGE_ACTION));
         }
+        // we need to resample the current proxy setup
+        setProxyConfig();
     }
 
     /**
