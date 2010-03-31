@@ -269,9 +269,19 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                             bindContactInfo(cursor);
                             Uri lookupUri = Contacts.getLookupUri(cursor.getLong(ContactQuery._ID),
                                     cursor.getString(ContactQuery.LOOKUP_KEY));
-                            startPhotoQuery(cursor.getLong(ContactQuery.PHOTO_ID),
-                                    lookupUri, false /* don't reset query handler */);
-                            invalidate();
+
+                            final long photoId = cursor.getLong(ContactQuery.PHOTO_ID);
+
+                            if (photoId == 0) {
+                                mPhotoView.setImageBitmap(loadPlaceholderPhoto(null));
+                                if (cookie != null && cookie instanceof Uri) {
+                                    mPhotoView.assignContactUri((Uri) cookie);
+                                }
+                                invalidate();
+                            } else {
+                                startPhotoQuery(photoId, lookupUri,
+                                        false /* don't reset query handler */);
+                            }
                         } else {
                             // shouldn't really happen
                             setDisplayName(null, null);
