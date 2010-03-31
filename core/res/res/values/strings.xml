@@ -2257,4 +2257,8 @@
     <!-- Shown when the device is tethered -->
     <string name="tethered_notification_title">Tethering active</string>
     <string name="tethered_notification_message">Touch to configure</string>
+
+    <!--  Strings for possible PreferenceActivity Back/Next buttons -->
+    <string name="back_button_label">Back</string>
+    <string name="next_button_label">Next</string>
 </resources>
