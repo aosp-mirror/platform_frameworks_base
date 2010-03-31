@@ -395,6 +395,7 @@ void AwesomePlayer::reset_l() {
     mVideoTimeUs = 0;
 
     mSeeking = false;
+    mSeekNotificationSent = false;
     mSeekTimeUs = 0;
 
     mUri.setTo("");
@@ -686,10 +687,19 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     mSeeking = true;
+    mSeekNotificationSent = false;
     mSeekTimeUs = timeUs;
     mFlags &= ~AT_EOS;
 
     seekAudioIfNecessary_l();
+
+    if (!(mFlags & PLAYING)) {
+        LOGV("seeking while paused, sending SEEK_COMPLETE notification"
+             " immediately.");
+
+        notifyListener_l(MEDIA_SEEK_COMPLETE);
+        mSeekNotificationSent = true;
+    }
 
     return OK;
 }
@@ -701,6 +711,7 @@ void AwesomePlayer::seekAudioIfNecessary_l() {
         mWatchForAudioSeekComplete = true;
         mWatchForAudioEOS = true;
         mSeeking = false;
+        mSeekNotificationSent = false;
     }
 }
 
@@ -869,7 +880,7 @@ void AwesomePlayer::onVideoEvent() {
             mAudioPlayer->seekTo(timeUs);
             mWatchForAudioSeekComplete = true;
             mWatchForAudioEOS = true;
-        } else {
+        } else if (!mSeekNotificationSent) {
             // If we're playing video only, report seek complete now,
             // otherwise audio player will notify us later.
             notifyListener_l(MEDIA_SEEK_COMPLETE);
@@ -877,6 +888,7 @@ void AwesomePlayer::onVideoEvent() {
 
         mFlags |= FIRST_FRAME;
         mSeeking = false;
+        mSeekNotificationSent = false;
     }
 
     if (mFlags & FIRST_FRAME) {
@@ -984,7 +996,11 @@ void AwesomePlayer::onCheckAudioStatus() {
 
     if (mWatchForAudioSeekComplete && !mAudioPlayer->isSeeking()) {
         mWatchForAudioSeekComplete = false;
-        notifyListener_l(MEDIA_SEEK_COMPLETE);
+
+        if (!mSeekNotificationSent) {
+            notifyListener_l(MEDIA_SEEK_COMPLETE);
+            mSeekNotificationSent = true;
+        }
     }
 
     status_t finalStatus;
