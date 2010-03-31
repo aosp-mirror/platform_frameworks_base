@@ -1518,4 +1518,22 @@ public class AudioManager {
       * {@hide}
       */
      private IBinder mICallBack = new Binder();
+
+    /**
+     * Checks whether the phone is in silent mode, with or without vibrate.
+     *
+     * @return true if phone is in silent mode, with or without vibrate.
+     *
+     * @see #getRingerMode()
+     *
+     * @hide pending API Council approval
+     */
+    public boolean isSilentMode() {
+        int ringerMode = getRingerMode();
+        boolean silentMode =
+            (ringerMode == RINGER_MODE_SILENT) ||
+            (ringerMode == RINGER_MODE_VIBRATE);
+        return silentMode;
+    }
+
 }
