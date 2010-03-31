@@ -5464,6 +5464,17 @@ class PackageManagerService extends IPackageManager.Stub {
         boolean dataDirExists = getDataPathForPackage(pkg).exists();
         res.name = pkgName;
         synchronized(mPackages) {
+            if (mSettings.mRenamedPackages.containsKey(pkgName)) {
+                // A package with the same name is already installed, though
+                // it has been renamed to an older name.  The package we
+                // are trying to install should be installed as an update to
+                // the existing one, but that has not been requested, so bail.
+                Slog.w(TAG, "Attempt to re-install " + pkgName
+                        + " without first uninstalling package running as "
+                        + mSettings.mRenamedPackages.get(pkgName));
+                res.returnCode = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+                return;
+            }
             if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.mPath)) {
                 // Don't allow installation over an existing package with the same name.
                 Slog.w(TAG, "Attempt to re-install " + pkgName
@@ -5595,7 +5606,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 PackageInstalledInfo restoreRes = new PackageInstalledInfo();
                 restoreRes.removedInfo = new PackageRemovedInfo();
                 // Parse old package
-                parseFlags |= ~PackageManager.INSTALL_REPLACE_EXISTING;
+                parseFlags &= ~PackageManager.INSTALL_REPLACE_EXISTING;
                 scanPackageLI(restoreFile, parseFlags, scanMode);
                 synchronized (mPackages) {
                     updatePermissionsLP(deletedPackage.packageName, deletedPackage,
