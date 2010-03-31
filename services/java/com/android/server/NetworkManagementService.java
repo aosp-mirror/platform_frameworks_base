@@ -65,6 +65,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         public static final int InterfaceGetCfgResult     = 213;
         public static final int SoftapStatusResult        = 214;
         public static final int UsbRNDISStatusResult      = 215;
+        public static final int InterfaceRxCounterResult  = 216;
+        public static final int InterfaceTxCounterResult  = 217;
+        public static final int InterfaceRxThrottleResult = 218;
+        public static final int InterfaceTxThrottleResult = 219;
 
         public static final int InterfaceChange           = 600;
     }
@@ -523,5 +527,90 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                                        wifiConfig.preSharedKey);
             mConnector.doCommand(str);
         }
+    }
+
+    private long getInterfaceCounter(String iface, boolean rx) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        try {
+            String rsp = mConnector.doCommand(
+                    String.format("interface read%scounter %s", (rx ? "rx" : "tx"), iface)).get(0);
+            String []tok = rsp.split(" ");
+            int code;
+            try {
+                code = Integer.parseInt(tok[0]);
+            } catch (NumberFormatException nfe) {
+                Slog.e(TAG, String.format("Error parsing code %s", tok[0]));
+                return -1;
+            }
+            if ((rx && code != NetdResponseCode.InterfaceRxCounterResult) || (
+                    !rx && code != NetdResponseCode.InterfaceTxCounterResult)) {
+                Slog.e(TAG, String.format("Unexpected response code %d", code));
+                return -1;
+            }
+            return Long.parseLong(tok[1]);
+        } catch (Exception e) {
+            Slog.e(TAG, String.format(
+                    "Failed to read interface %s counters", (rx ? "rx" : "tx")), e);
+        }
+        return -1;
+    }
+
+    public long getInterfaceRxCounter(String iface) {
+        return getInterfaceCounter(iface, true);
+    }
+
+    public long getInterfaceTxCounter(String iface) {
+        return getInterfaceCounter(iface, false);
+    }
+
+    private void setInterfaceThrottle(String iface, boolean rx, int kbps) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mConnector.doCommand(String.format(
+                "interface setthrottle %s %s %d", iface, (rx ? "rx" : "tx"), kbps));
+    }
+
+    public void setInterfaceRxThrottle(String iface, int kbps) {
+        setInterfaceThrottle(iface, true, kbps);
+    }
+
+    public void setInterfaceTxThrottle(String iface, int kbps) {
+        setInterfaceThrottle(iface, false, kbps);
+    }
+
+    private int getInterfaceThrottle(String iface, boolean rx) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        try {
+            String rsp = mConnector.doCommand(
+                    String.format("interface getthrottle %s %s", iface,(rx ? "rx" : "tx"))).get(0);
+            String []tok = rsp.split(" ");
+            int code;
+            try {
+                code = Integer.parseInt(tok[0]);
+            } catch (NumberFormatException nfe) {
+                Slog.e(TAG, String.format("Error parsing code %s", tok[0]));
+                return -1;
+            }
+            if ((rx && code != NetdResponseCode.InterfaceRxThrottleResult) || (
+                    !rx && code != NetdResponseCode.InterfaceTxThrottleResult)) {
+                Slog.e(TAG, String.format("Unexpected response code %d", code));
+                return -1;
+            }
+            return Integer.parseInt(tok[1]);
+        } catch (Exception e) {
+            Slog.e(TAG, String.format(
+                    "Failed to read interface %s throttle value", (rx ? "rx" : "tx")), e);
+        }
+        return -1;
+    }
+
+    public int getInterfaceRxThrottle(String iface) {
+        return getInterfaceThrottle(iface, true);
+    }
+
+    public int getInterfaceTxThrottle(String iface) {
+        return getInterfaceThrottle(iface, false);
     }
 }

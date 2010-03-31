@@ -179,4 +179,36 @@ interface INetworkManagementService
      * Set Access Point config
      */
     void setAccessPoint(in WifiConfiguration wifiConfig, String wlanIface, String softapIface);
+
+    /**
+     * Read number of bytes sent over an interface
+     */
+    long getInterfaceTxCounter(String iface);
+
+    /**
+     * Read number of bytes received over an interface
+     */
+    long getInterfaceRxCounter(String iface);
+
+    /**
+     * Configures RX bandwidth throttling on an interface
+     */
+    void setInterfaceRxThrottle(String iface, int kbps);
+
+    /**
+     * Configures TX bandwidth throttling on an interface
+     */
+    void setInterfaceTxThrottle(String iface, int kbps);
+
+    /**
+     * Returns the currently configured RX throttle values
+     * for the specified interface
+     */
+    int getInterfaceRxThrottle(String iface);
+
+    /**
+     * Returns the currently configured TX throttle values
+     * for the specified interface
+     */
+    int getInterfaceTxThrottle(String iface);
 }
