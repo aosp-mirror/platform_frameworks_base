@@ -21,7 +21,9 @@ import com.google.android.collect.Maps;
 import android.app.ActivityThread;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
 import android.database.DatabaseUtils;
+import android.database.DefaultDatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.Debug;
@@ -295,6 +297,11 @@ public class SQLiteDatabase extends SQLiteClosable {
     private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
     private final int mSlowQueryThreshold;
 
+    /** {@link DatabaseErrorHandler} to be used when SQLite returns any of the following errors
+     *    Corruption
+     * */
+    private DatabaseErrorHandler errorHandler;
+
     /**
      * @param closable
      */
@@ -352,19 +359,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     private boolean mLockingEnabled = true;
 
     /* package */ void onCorruption() {
-        Log.e(TAG, "Removing corrupt database: " + mPath);
         EventLog.writeEvent(EVENT_DB_CORRUPT, mPath);
-        try {
-            // Close the database (if we can), which will cause subsequent operations to fail.
-            close();
-        } finally {
-            // Delete the corrupt file.  Don't re-create it now -- that would just confuse people
-            // -- but the next time someone tries to open it, they can set it up from scratch.
-            if (!mPath.equalsIgnoreCase(":memory")) {
-                // delete is only for non-memory database files
-                new File(mPath).delete();
-            }
-        }
+        errorHandler.onCorruption(this);
     }
 
     /**
@@ -816,10 +812,25 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLiteException if the database cannot be opened
      */
     public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags) {
-        SQLiteDatabase sqliteDatabase = null;
+        return openDatabase(path, factory, flags, new DefaultDatabaseErrorHandler());
+    }
+
+    /**
+     * same as {@link #openDatabase(String, CursorFactory, int)} except for an additional param
+     * errorHandler.
+     * @param errorHandler the {@link DatabaseErrorHandler} obj to be used when database
+     * corruption is detected on the database.
+     */
+    public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags,
+            DatabaseErrorHandler errorHandler) {
+        SQLiteDatabase sqliteDatabase = new SQLiteDatabase(path, factory, flags);
+
+        // set the ErrorHandler to be used when SQLite reports exceptions
+        sqliteDatabase.errorHandler = errorHandler;
+
         try {
             // Open the database.
-            sqliteDatabase = new SQLiteDatabase(path, factory, flags);
+            sqliteDatabase.openDatabase(path, flags);
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                 sqliteDatabase.enableSqlTracing(path);
             }
@@ -827,19 +838,25 @@ public class SQLiteDatabase extends SQLiteClosable {
                 sqliteDatabase.enableSqlProfiling(path);
             }
         } catch (SQLiteDatabaseCorruptException e) {
-            // Try to recover from this, if we can.
-            // TODO: should we do this for other open failures?
-            Log.e(TAG, "Deleting and re-creating corrupt database " + path, e);
-            EventLog.writeEvent(EVENT_DB_CORRUPT, path);
-            if (!path.equalsIgnoreCase(":memory")) {
-                // delete is only for non-memory database files
-                new File(path).delete();
-            }
+            // Database is not even openable.
+            errorHandler.onCorruption(sqliteDatabase);
             sqliteDatabase = new SQLiteDatabase(path, factory, flags);
         }
         ActiveDatabases.getInstance().mActiveDatabases.add(
                 new WeakReference<SQLiteDatabase>(sqliteDatabase));
         return sqliteDatabase;
+    }
+
+    private void openDatabase(String path, int flags) {
+        // Open the database.
+        dbopen(path, flags);
+        try {
+            setLocale(Locale.getDefault());
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Failed to setLocale(). closing the database", e);
+            dbclose();
+            throw e;
+        }
     }
 
     /**
@@ -854,6 +871,17 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase openOrCreateDatabase(String path, CursorFactory factory) {
         return openDatabase(path, factory, CREATE_IF_NECESSARY);
+    }
+
+    /**
+     * same as {@link #openOrCreateDatabase(String, CursorFactory)} except for an additional param
+     * errorHandler.
+     * @param errorHandler the {@link DatabaseErrorHandler} obj to be used when database
+     * corruption is detected on the database.
+     */
+    public static SQLiteDatabase openOrCreateDatabase(String path, CursorFactory factory,
+            DatabaseErrorHandler errorHandler) {
+        return openDatabase(path, factory, CREATE_IF_NECESSARY, errorHandler);
     }
 
     /**
@@ -1821,21 +1849,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         mFactory = factory;
-        dbopen(mPath, mFlags);
         if (SQLiteDebug.DEBUG_SQL_CACHE) {
             mTimeOpened = getTime();
         }
         mPrograms = new WeakHashMap<SQLiteClosable,Object>();
-        try {
-            setLocale(Locale.getDefault());
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Failed to setLocale() when constructing, closing the database", e);
-            dbclose();
-            if (SQLiteDebug.DEBUG_SQL_CACHE) {
-                mTimeClosed = getTime();
-            }
-            throw e;
-        }
     }
 
     private String getTime() {
@@ -2139,7 +2156,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             String lastnode = path.substring((indx != -1) ? ++indx : 0);
 
             // get list of attached dbs and for each db, get its size and pagesize
-            ArrayList<Pair<String, String>> attachedDbs = getAttachedDbs(db);
+            ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
             if (attachedDbs == null) {
                 continue;
             }
@@ -2193,21 +2210,71 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * returns list of full pathnames of all attached databases
-     * including the main database
-     * TODO: move this to {@link DatabaseUtils}
+     * returns list of full pathnames of all attached databases including the main database
+     * @return ArrayList of pairs of (database name, database file path) or null if the database
+     * is not open.
      */
-    private static ArrayList<Pair<String, String>> getAttachedDbs(SQLiteDatabase dbObj) {
-        if (!dbObj.isOpen()) {
+    public ArrayList<Pair<String, String>> getAttachedDbs() {
+        if (!isOpen()) {
             return null;
         }
         ArrayList<Pair<String, String>> attachedDbs = new ArrayList<Pair<String, String>>();
-        Cursor c = dbObj.rawQuery("pragma database_list;", null);
-        while (c.moveToNext()) {
-             attachedDbs.add(new Pair<String, String>(c.getString(1), c.getString(2)));
+        Cursor c = null;
+        try {
+            c = rawQuery("pragma database_list;", null);
+            while (c.moveToNext()) {
+                // sqlite returns a row for each database in the returned list of databases.
+                //   in each row,
+                //       1st column is the database name such as main, or the database
+                //                              name specified on the "ATTACH" command
+                //       2nd column is the database file path.
+                attachedDbs.add(new Pair<String, String>(c.getString(1), c.getString(2)));
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
         }
-        c.close();
         return attachedDbs;
+    }
+
+    /**
+     * run pragma integrity_check on the given database (and all the attached databases)
+     * and return true if the given database (and all its attached databases) pass integrity_check,
+     * false otherwise.
+     *
+     * if the result is false, then this method logs the errors reported by the integrity_check
+     * command execution.
+     *
+     * @return true if the given database (and all its attached databases) pass integrity_check,
+     * false otherwise
+     */
+    public boolean isDatabaseIntegrityOk() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database: " + getPath() + " is NOT open");
+        }
+        ArrayList<Pair<String, String>> attachedDbs = getAttachedDbs();
+        if (attachedDbs == null) {
+            throw new IllegalStateException("databaselist for: " + getPath() + " couldn't " +
+                    "be retrieved. probably because the database is closed");
+        }
+        boolean isDatabaseCorrupt = false;
+        for (int i = 0; i < attachedDbs.size(); i++) {
+            Pair<String, String> p = attachedDbs.get(i);
+            SQLiteStatement prog = null;
+            try {
+                prog = compileStatement("PRAGMA " + p.first + ".integrity_check(1);");
+                String rslt = prog.simpleQueryForString();
+                if (!rslt.equalsIgnoreCase("ok")) {
+                    // integrity_checker failed on main or attached databases
+                    isDatabaseCorrupt = true;
+                    Log.e(TAG, "PRAGMA integrity_check on " + p.second + " returned: " + rslt);
+                }
+            } finally {
+                if (prog != null) prog.close();
+            }
+        }
+        return isDatabaseCorrupt;
     }
 
     /**

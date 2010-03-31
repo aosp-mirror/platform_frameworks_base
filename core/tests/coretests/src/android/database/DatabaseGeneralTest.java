@@ -519,13 +519,13 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         assertEquals(1, c.getCount());
         assertTrue(c.moveToFirst());
         assertEquals("don't forget to handled 's", c.getString(1));
-        c.deactivate();
+        c.close();
 
         // make sure code should checking null string properly so that
         // it won't crash
         try {
             mDatabase.query("test", new String[]{"_id"},
-                    "_id=?", new String[]{null}, null, null, null);
+                    "_id=?", null, null, null, null);
             fail("expected exception not thrown");
         } catch (IllegalArgumentException e) {
             // expected
@@ -1021,6 +1021,34 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         } catch (Throwable t) {
             fail("unexpected, of course");
         }
+    }
+
+    @MediumTest
+    public void testUnionsWithBindArgs() {
+        /* make sure unions with bindargs work http://b/issue?id=1061291 */
+        mDatabase.execSQL("CREATE TABLE A (i int);");
+        mDatabase.execSQL("create table B (k int);");
+        mDatabase.execSQL("create table C (n int);");
+        mDatabase.execSQL("insert into A values(1);");
+        mDatabase.execSQL("insert into A values(2);");
+        mDatabase.execSQL("insert into A values(3);");
+        mDatabase.execSQL("insert into B values(201);");
+        mDatabase.execSQL("insert into B values(202);");
+        mDatabase.execSQL("insert into B values(203);");
+        mDatabase.execSQL("insert into C values(901);");
+        mDatabase.execSQL("insert into C values(902);");
+        String s = "select i from A where i > 2 " +
+                "UNION select k from B where k > 201 " +
+                "UNION select n from C where n !=900;";
+        Cursor c = mDatabase.rawQuery(s, null);
+        int n = c.getCount();
+        c.close();
+        String s1 = "select i from A where i > ? " +
+                "UNION select k from B where k > ? " +
+                "UNION select n from C where n != ?;";
+        Cursor c1 = mDatabase.rawQuery(s1, new String[]{"2", "201", "900"});
+        assertEquals(n, c1.getCount());
+        c1.close();
     }
 
     /**
