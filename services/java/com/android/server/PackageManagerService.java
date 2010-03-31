@@ -6303,7 +6303,7 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.i(TAG, "Removing non-system package:"+p.packageName);
             // Kill application pre-emptively especially for apps on sd.
             killApplication(packageName, p.applicationInfo.uid);
-            ret = deleteInstalledPackageLI (p, deleteCodeAndResources, flags, outInfo);
+            ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo);
         }
         return ret;
     }
@@ -7634,10 +7634,11 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         void setFlags(int pkgFlags) {
-            this.pkgFlags = (pkgFlags & ApplicationInfo.FLAG_SYSTEM) |
-            (pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) |
-            (pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) |
-            (pkgFlags & ApplicationInfo.FLAG_NEVER_ENCRYPT);
+            this.pkgFlags = pkgFlags & (
+                    ApplicationInfo.FLAG_SYSTEM |
+                    ApplicationInfo.FLAG_FORWARD_LOCK |
+                    ApplicationInfo.FLAG_EXTERNAL_STORAGE |;
+                    ApplicationInfo.FLAG_NEVER_ENCRYPT);
         }
     }
 
@@ -9642,7 +9643,7 @@ class PackageManagerService extends IPackageManager.Stub {
                }
                // Parse package
                int parseFlags = PackageParser.PARSE_CHATTY |
-               PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
+                       PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
                PackageParser pp = new PackageParser(codePath);
                pp.setSeparateProcesses(mSeparateProcesses);
                final PackageParser.Package pkg = pp.parsePackage(new File(codePath),
@@ -9718,7 +9719,7 @@ class PackageManagerService extends IPackageManager.Stub {
                if (res) {
                    pkgList.add(pkgName);
                } else {
-                   Slog.e(TAG, "Failed to delete pkg  from sdcard : " + pkgName);
+                   Slog.e(TAG, "Failed to delete pkg from sdcard : " + pkgName);
                    failedList.add(args);
                }
            }
