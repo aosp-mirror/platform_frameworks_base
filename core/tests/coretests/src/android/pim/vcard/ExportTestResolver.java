@@ -21,7 +21,6 @@ import android.content.Entity;
 import android.content.EntityIterator;
 import android.database.Cursor;
 import android.net.Uri;
-import android.pim.vcard.VCardComposer;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -67,6 +66,10 @@ import java.util.List;
 
     public Entity next() {
         return mIterator.next();
+    }
+
+    public void remove() {
+        throw new UnsupportedOperationException("remove not supported");
     }
 
     public void reset() {

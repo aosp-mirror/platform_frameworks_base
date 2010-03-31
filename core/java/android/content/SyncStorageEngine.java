@@ -230,7 +230,7 @@ public class SyncStorageEngine extends Handler {
     private final ArrayList<PendingOperation> mPendingOperations =
             new ArrayList<PendingOperation>();
 
-    private ActiveSyncInfo mActiveSync;
+    private SyncInfo mCurrentSync;
 
     private final SparseArray<SyncStatusInfo> mSyncStatus =
             new SparseArray<SyncStatusInfo>();
@@ -680,8 +680,8 @@ public class SyncStorageEngine extends Handler {
                 }
             }
 
-            if (mActiveSync != null) {
-                AuthorityInfo ainfo = getAuthority(mActiveSync.getAuthorityId());
+            if (mCurrentSync != null) {
+                AuthorityInfo ainfo = getAuthority(mCurrentSync.authorityId);
                 if (ainfo != null && ainfo.account.equals(account)
                         && ainfo.authority.equals(authority)) {
                     return true;
@@ -866,7 +866,7 @@ public class SyncStorageEngine extends Handler {
                         + " auth=" + activeSyncContext.mSyncOperation.authority
                         + " src=" + activeSyncContext.mSyncOperation.syncSource
                         + " extras=" + activeSyncContext.mSyncOperation.extras);
-                if (mActiveSync != null) {
+                if (mCurrentSync != null) {
                     Log.w(TAG, "setActiveSync called with existing active sync!");
                 }
                 AuthorityInfo authority = getAuthorityLocked(
@@ -876,12 +876,12 @@ public class SyncStorageEngine extends Handler {
                 if (authority == null) {
                     return;
                 }
-                mActiveSync = new ActiveSyncInfo(authority.ident,
+                mCurrentSync = new SyncInfo(authority.ident,
                         authority.account, authority.authority,
                         activeSyncContext.mStartTime);
             } else {
                 if (DEBUG) Log.v(TAG, "setActiveSync: null");
-                mActiveSync = null;
+                mCurrentSync = null;
             }
         }
 
@@ -1065,9 +1065,9 @@ public class SyncStorageEngine extends Handler {
      * active sync.  Note that the returned object is the real, live active
      * sync object, so be careful what you do with it.
      */
-    public ActiveSyncInfo getActiveSync() {
+    public SyncInfo getCurrentSync() {
         synchronized (mAuthorities) {
-            return mActiveSync;
+            return mCurrentSync;
         }
     }
 
