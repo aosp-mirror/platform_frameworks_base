@@ -400,7 +400,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     }
     
     public long timeToNextAlarm() {
-        long nextAlarm = 0xfffffffffffffffl;
+        long nextAlarm = Long.MAX_VALUE;
         synchronized (mLock) {
             for (int i=AlarmManager.RTC_WAKEUP;
                     i<=AlarmManager.ELAPSED_REALTIME; i++) {
@@ -420,7 +420,18 @@ class AlarmManagerService extends IAlarmManager.Stub {
     {
         if (mDescriptor != -1)
         {
-            set(mDescriptor, alarm.type, (alarm.when * 1000 * 1000));
+            // The kernel never triggers alarms with negative wakeup times
+            // so we ensure they are positive.
+            long alarmSeconds, alarmNanoseconds;
+            if (alarm.when < 0) {
+                alarmSeconds = 0;
+                alarmNanoseconds = 0;
+            } else {
+                alarmSeconds = alarm.when / 1000;
+                alarmNanoseconds = (alarm.when % 1000) * 1000 * 1000;
+            }
+            
+            set(mDescriptor, alarm.type, alarmSeconds, alarmNanoseconds);
         }
         else
         {
@@ -499,7 +510,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     
     private native int init();
     private native void close(int fd);
-    private native void set(int fd, int type, long nanoseconds);
+    private native void set(int fd, int type, long seconds, long nanoseconds);
     private native int waitForAlarm(int fd);
     private native int setKernelTimezone(int fd, int minuteswest);
 
