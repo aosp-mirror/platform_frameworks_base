@@ -2148,31 +2148,7 @@ class ContextImpl extends Context {
         }
 
         @Override public Drawable getApplicationIcon(ApplicationInfo info) {
-            final int icon = info.icon;
-            if (icon != 0) {
-                ResourceName name = new ResourceName(info, icon);
-                Drawable dr = getCachedIcon(name);
-                if (dr != null) {
-                    return dr;
-                }
-                try {
-                    Resources r = getResourcesForApplication(info);
-                    dr = r.getDrawable(icon);
-                    if (DEBUG_ICONS) Log.v(TAG, "Getting drawable 0x"
-                            + Integer.toHexString(icon) + " from " + r
-                            + ": " + dr);
-                    putCachedIcon(name, dr);
-                    return dr;
-                } catch (NameNotFoundException e) {
-                    Log.w("PackageManager", "Failure retrieving resources for"
-                            + info.packageName);
-                } catch (RuntimeException e) {
-                    // If an exception was thrown, fall through to return
-                    // default icon.
-                    Log.w("PackageManager", "Failure retrieving app icon", e);
-                }
-            }
-            return getDefaultActivityIcon();
+            return info.loadIcon(this);
         }
 
         @Override public Drawable getApplicationIcon(String packageName)
@@ -2413,25 +2389,6 @@ class ContextImpl extends Context {
             }
         }
 
-        private CharSequence getLabel(ResourceName name, ApplicationInfo app, int id) {
-            CharSequence cs = getCachedString(name);
-            if (cs != null) {
-                return cs;
-            }
-            try {
-                Resources r = getResourcesForApplication(app);
-                cs = r.getText(id);
-                putCachedString(name, cs);
-            } catch (NameNotFoundException e) {
-                Log.w("PackageManager", "Failure retrieving resources for"
-                        + app.packageName);
-            } catch (RuntimeException e) {
-                // If an exception was thrown, fall through to return null
-                Log.w("ApplicationInfo", "Failure retrieving activity name", e);
-            }
-            return cs;
-        }
-
         @Override
         public CharSequence getText(String packageName, int resid,
                 ApplicationInfo appInfo) {
@@ -2493,17 +2450,7 @@ class ContextImpl extends Context {
 
         @Override
         public CharSequence getApplicationLabel(ApplicationInfo info) {
-            if (info.nonLocalizedLabel != null) {
-                return info.nonLocalizedLabel;
-            }
-            final int id = info.labelRes;
-            if (id != 0) {
-                CharSequence cs = getLabel(new ResourceName(info, id), info, id);
-                if (cs != null) {
-                    return cs;
-                }
-            }
-            return info.packageName;
+            return info.loadLabel(this);
         }
 
         @Override

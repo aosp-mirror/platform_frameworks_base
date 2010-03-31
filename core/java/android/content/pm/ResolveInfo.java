@@ -163,8 +163,6 @@ public class ResolveInfo implements Parcelable {
      * item does not have an icon, the default activity icon is returned.
      */
     public Drawable loadIcon(PackageManager pm) {
-        ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
-        ApplicationInfo ai = ci.applicationInfo;
         Drawable dr;
         if (resolvePackageName != null && icon != 0) {
             dr = pm.getDrawable(resolvePackageName, icon, null);
@@ -172,6 +170,8 @@ public class ResolveInfo implements Parcelable {
                 return dr;
             }
         }
+        ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
+        ApplicationInfo ai = ci.applicationInfo;
         if (icon != 0) {
             dr = pm.getDrawable(ci.packageName, icon, ai);
             if (dr != null) {
