@@ -16,67 +16,112 @@
 
 package android.provider;
 
-import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.net.Uri;
-import android.widget.SimpleCursorAdapter;
+
+import java.util.List;
 
 /**
- * <p>The Applications provider gives information about installed applications.</p>
- * 
- * <p>This provider provides the following columns:
- * 
- * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
+ * The Applications provider gives information about installed applications.
  *
- *     <thead>
- *     <tr><th>Column Name</th> <th>Description</th> </tr>
- *     </thead>
- *
- * <tbody>
- * <tr><th>{@link SearchManager#SUGGEST_COLUMN_TEXT_1}</th>
- *     <td>The application name.</td>
- * </tr>
- * 
- * <tr><th>{@link SearchManager#SUGGEST_COLUMN_INTENT_COMPONENT}</th>
- *     <td>The component to be used when forming the intent.</td>
- * </tr>
- * 
- * <tr><th>{@link SearchManager#SUGGEST_COLUMN_ICON_1}</th>
- *     <td>The application's icon resource id, prepended by its package name and
- *         separated by a colon, e.g., "com.android.alarmclock:2130837524". The
- *         package name is required for an activity interpreting this value to
- *         be able to correctly access the icon drawable, for example, in an override of
- *         {@link SimpleCursorAdapter#setViewImage(android.widget.ImageView, String)}.</td>
- * </tr>
- * 
- * <tr><th>{@link SearchManager#SUGGEST_COLUMN_ICON_2}</th>
- *     <td><i>Unused - column provided to conform to the {@link SearchManager} stipulation
- *            that all providers provide either both or neither of
- *            {@link SearchManager#SUGGEST_COLUMN_ICON_1} and
- *            {@link SearchManager#SUGGEST_COLUMN_ICON_2}.</td>
- * </tr>
- * 
- * @hide pending API council approval - should be unhidden at the same time as
- *       {@link SearchManager#SUGGEST_COLUMN_INTENT_COMPONENT}
+ * @hide Only used by ApplicationsProvider so far.
  */
 public class Applications {
-    private static final String TAG = "Applications";
 
     /**
      * The content authority for this provider.
-     *
-     * @hide
      */
     public static final String AUTHORITY = "applications";
 
     /**
      * The content:// style URL for this provider
-     *
-     * @hide
      */
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+
+    /**
+     * The content path for application component URIs.
+     */
+    public static final String APPLICATION_PATH = "applications";
+
+    /**
+     * The content path for application search.
+     */
+    public static final String SEARCH_PATH = "search";
+
+    private static final String APPLICATION_SUB_TYPE = "vnd.android.application";
+
+    /**
+     * The MIME type for a single application item.
+     */
+    public static final String APPLICATION_ITEM_TYPE =
+            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + APPLICATION_SUB_TYPE;
+
+    /**
+     * The MIME type for a list of application items.
+     */
+    public static final String APPLICATION_DIR_TYPE =
+            ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + APPLICATION_SUB_TYPE;
 
     /**
      * no public constructor since this is a utility class
      */
     private Applications() {}
+
+    /**
+     * Gets a cursor with application search results.
+     * See {@link ApplicationColumns} for the columns available in the returned cursor.
+     */
+    public static Cursor search(ContentResolver resolver, String query) {
+        Uri searchUri = CONTENT_URI.buildUpon().appendPath(SEARCH_PATH).appendPath(query).build();
+        return resolver.query(searchUri, null, null, null, null);
+    }
+
+    /**
+     * Gets the application component name from an application URI.
+     *
+     * @param appUri A URI of the form
+     * "content://applications/applications/&lt;packageName&gt;/&lt;className&gt;".
+     * @return The component name for the application, or
+     * <code>null</code> if the given URI was <code>null</code>
+     * or malformed.
+     */
+    public static ComponentName uriToComponentName(Uri appUri) {
+        if (appUri == null) return null;
+        if (!ContentResolver.SCHEME_CONTENT.equals(appUri.getScheme())) return null;
+        if (!AUTHORITY.equals(appUri.getAuthority())) return null;
+        List<String> pathSegments = appUri.getPathSegments();
+        if (pathSegments.size() != 3) return null;
+        if (!APPLICATION_PATH.equals(pathSegments.get(0))) return null;
+        String packageName = pathSegments.get(1);
+        String name = pathSegments.get(2);
+        return new ComponentName(packageName, name);
+    }
+
+    /**
+     * Gets the URI for an application component.
+     *
+     * @param packageName The name of the application's package.
+     * @param className The class name of the application.
+     * @return A URI of the form
+     * "content://applications/applications/&lt;packageName&gt;/&lt;className&gt;".
+     */
+    public static Uri componentNameToUri(String packageName, String className) {
+        return Applications.CONTENT_URI.buildUpon()
+                .appendEncodedPath(APPLICATION_PATH)
+                .appendPath(packageName)
+                .appendPath(className)
+                .build();
+    }
+
+    /**
+     * The columns in application cursors, like those returned by
+     * {@link Applications#search(ContentResolver, String)}.
+     */
+    public interface ApplicationColumns extends BaseColumns {
+        public static final String NAME = "name";
+        public static final String ICON = "icon";
+        public static final String URI = "uri";
+    }
 }
