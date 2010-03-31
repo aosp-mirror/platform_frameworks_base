@@ -16,6 +16,7 @@
 
 package android.content;
 
+import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import android.util.Pair;
@@ -120,14 +121,16 @@ public class SyncQueue {
 
     /**
      * Find the operation that should run next. Operations are sorted by their earliestRunTime,
-     * prioritizing expedited operations. The earliestRunTime is adjusted by the sync adapter's
-     * backoff and delayUntil times, if any.
+     * prioritizing first those with a syncable state of "unknown" that aren't retries then
+     * expedited operations.
+     * The earliestRunTime is adjusted by the sync adapter's backoff and delayUntil times, if any.
      * @return the operation that should run next and when it should run. The time may be in
      * the future. It is expressed in milliseconds since boot.
      */
     public Pair<SyncOperation, Long> nextOperation() {
         SyncOperation best = null;
         long bestRunTime = 0;
+        boolean bestSyncableIsUnknownAndNotARetry = false;
         for (SyncOperation op : mOperationsMap.values()) {
             long opRunTime = op.earliestRunTime;
             if (!op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
@@ -137,12 +140,23 @@ public class SyncQueue {
                         Math.max(opRunTime, delayUntil),
                         backoff != null ? backoff.first : 0);
             }
-            // if the expedited state of both ops are the same then compare their runtime.
-            // Otherwise the candidate is only better than the current best if the candidate
-            // is expedited.
+            // we know a sync is a retry if the intialization flag is set, since that will only
+            // be set by the sync dispatching code, thus if it is set it must have already been
+            // dispatched
+            final boolean syncableIsUnknownAndNotARetry =
+                    !op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
+                    && mSyncStorageEngine.getIsSyncable(op.account, op.authority) < 0;
+            // if the unsyncable state differs, make the current the best if it is unsyncable
+            // else, if the expedited state differs, make the current the best if it is expedited
+            // else, make the current the best if it is earlier than the best
             if (best == null
-                    || (best.expedited == op.expedited ? opRunTime < bestRunTime : op.expedited)) {
+                    || ((bestSyncableIsUnknownAndNotARetry == syncableIsUnknownAndNotARetry)
+                        ? (best.expedited == op.expedited
+                           ? opRunTime < bestRunTime
+                           : op.expedited)
+                        : syncableIsUnknownAndNotARetry)) {
                 best = op;
+                bestSyncableIsUnknownAndNotARetry = syncableIsUnknownAndNotARetry;
                 bestRunTime = opRunTime;
             }
         }
