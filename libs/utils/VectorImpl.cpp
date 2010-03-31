@@ -351,7 +351,6 @@ void* VectorImpl::_grow(size_t where, size_t amount)
         {
             const SharedBuffer* cur_sb = SharedBuffer::sharedBuffer(mStorage);
             SharedBuffer* sb = cur_sb->editResize(new_capacity * mItemSize);
-            release_storage();
             mStorage = sb->data();
         } else {
             SharedBuffer* sb = SharedBuffer::alloc(new_capacity * mItemSize);
@@ -404,7 +403,6 @@ void VectorImpl::_shrink(size_t where, size_t amount)
         {
             const SharedBuffer* cur_sb = SharedBuffer::sharedBuffer(mStorage);
             SharedBuffer* sb = cur_sb->editResize(new_capacity * mItemSize);
-            release_storage();
             mStorage = sb->data();
         } else {
             SharedBuffer* sb = SharedBuffer::alloc(new_capacity * mItemSize);
