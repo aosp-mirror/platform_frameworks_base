@@ -123,6 +123,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     // that modifies the contents of the text field. But if the user then edits
     // the suggestion, the resulting string is saved.
     private String mUserQuery;
+    // The query passed in when opening the SearchDialog.  Used in the browser
+    // case to determine whether the user has edited the query.
+    private String mInitialQuery;
     
     // A weak map of drawables we've gotten from other packages, so we don't load them
     // more than once.
@@ -253,6 +256,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
 
+        mInitialQuery = initialQuery == null ? "" : initialQuery;
         // finally, load the user's initial text (which may trigger suggestions)
         setUserQuery(initialQuery);
         if (selectInitialQuery) {
@@ -329,6 +333,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mAppSearchData = null;
         mSearchable = null;
         mUserQuery = null;
+        mInitialQuery = null;
     }
 
     /**
@@ -687,13 +692,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             if (mSearchable == null) {
                 return;
             }
-            updateWidgetState();
             if (!mSearchAutoComplete.isPerformingCompletion()) {
                 // The user changed the query, remember it.
                 mUserQuery = s == null ? "" : s.toString();
             }
+            updateWidgetState();
             // Always want to show the microphone if the context is voice.
+            // Also show the microphone if this is a browser search and the
+            // query matches the initial query.
             updateVoiceButton(mSearchAutoComplete.isEmpty()
+                    || (isBrowserSearch() && mInitialQuery.equals(mUserQuery))
                     || (mAppSearchData != null && mAppSearchData.getBoolean(
                     SearchManager.CONTEXT_IS_VOICE)));
         }
@@ -724,8 +732,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // enable the button if we have one or more non-space characters
         boolean enabled = !mSearchAutoComplete.isEmpty();
         if (isBrowserSearch()) {
-            // In the browser, we hide the search button when there is no text
-            if (enabled) {
+            // In the browser, we hide the search button when there is no text,
+            // or if the text matches the initial query.
+            if (enabled && !mInitialQuery.equals(mUserQuery)) {
                 mSearchAutoComplete.setBackgroundResource(
                         com.android.internal.R.drawable.textfield_search);
                 mGoButton.setVisibility(View.VISIBLE);
