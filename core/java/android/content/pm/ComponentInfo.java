@@ -99,24 +99,6 @@ public class ComponentInfo extends PackageItemInfo {
         return name;
     }
     
-    @Override public Drawable loadIcon(PackageManager pm) {
-        ApplicationInfo ai = applicationInfo;
-        Drawable dr;
-        if (icon != 0) {
-            dr = pm.getDrawable(packageName, icon, ai);
-            if (dr != null) {
-                return dr;
-            }
-        }
-        if (ai.icon != 0) {
-            dr = pm.getDrawable(packageName, ai.icon, ai);
-            if (dr != null) {
-                return dr;
-            }
-        }
-        return pm.getDefaultActivityIcon();
-    }
-    
     /**
      * Return the icon resource identifier to use for this component.  If
      * the component defines an icon, that is used; else, the application
@@ -155,7 +137,7 @@ public class ComponentInfo extends PackageItemInfo {
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(exported ? 1 : 0);
     }
-
+    
     protected ComponentInfo(Parcel source) {
         super(source);
         applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);
@@ -163,5 +145,19 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);
         exported = (source.readInt() != 0);
+    }
+    
+    /**
+     * @hide
+     */
+    @Override protected Drawable loadDefaultIcon(PackageManager pm) {
+        return applicationInfo.loadIcon(pm);
+    }
+    
+    /**
+     * @hide
+     */
+    @Override protected ApplicationInfo getApplicationInfo() {
+        return applicationInfo;
     }
 }

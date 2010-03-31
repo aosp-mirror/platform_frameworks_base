@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -506,7 +509,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public CharSequence loadDescription(PackageManager pm) {
         if (descriptionRes != 0) {
-            CharSequence label = pm.getText(packageName, descriptionRes, null);
+            CharSequence label = pm.getText(packageName, descriptionRes, this);
             if (label != null) {
                 return label;
             }
@@ -523,5 +526,32 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
                 FLAG_SUPPORTS_SCREEN_DENSITIES);
+    }
+    
+    /**
+     * @hide
+     */
+    @Override protected Drawable loadDefaultIcon(PackageManager pm) {
+        if ((flags & FLAG_EXTERNAL_STORAGE) != 0
+                && isPackageUnavailable(pm)) {
+            return Resources.getSystem().getDrawable(
+                    com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon);
+        }
+        return pm.getDefaultActivityIcon();
+    }
+    
+    private boolean isPackageUnavailable(PackageManager pm) {
+        try {
+            return pm.getPackageInfo(packageName, 0) == null;
+        } catch (NameNotFoundException ex) {
+            return true;
+        }
+    }
+    
+    /**
+     * @hide
+     */
+    @Override protected ApplicationInfo getApplicationInfo() {
+        return this;
     }
 }

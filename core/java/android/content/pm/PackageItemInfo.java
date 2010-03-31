@@ -103,7 +103,7 @@ public class PackageItemInfo {
             return nonLocalizedLabel;
         }
         if (labelRes != 0) {
-            CharSequence label = pm.getText(packageName, labelRes, null);
+            CharSequence label = pm.getText(packageName, labelRes, getApplicationInfo());
             if (label != null) {
                 return label.toString().trim();
             }
@@ -123,15 +123,31 @@ public class PackageItemInfo {
      * the PackageManager from which you originally retrieved this item.
      * 
      * @return Returns a Drawable containing the item's icon.  If the
-     * item does not have an icon, the default activity icon is returned.
+     * item does not have an icon, the item's default icon is returned
+     * such as the default activity icon.
      */
     public Drawable loadIcon(PackageManager pm) {
         if (icon != 0) {
-            Drawable dr = pm.getDrawable(packageName, icon, null);
+            Drawable dr = pm.getDrawable(packageName, icon, getApplicationInfo());
             if (dr != null) {
                 return dr;
             }
         }
+        return loadDefaultIcon(pm);
+    }
+    
+    /**
+     * Retrieve the default graphical icon associated with this item.
+     * 
+     * @param pm A PackageManager from which the icon can be loaded; usually
+     * the PackageManager from which you originally retrieved this item.
+     * 
+     * @return Returns a Drawable containing the item's default icon
+     * such as the default activity icon.
+     * 
+     * @hide
+     */
+    protected Drawable loadDefaultIcon(PackageManager pm) {
         return pm.getDefaultActivityIcon();
     }
     
@@ -152,7 +168,7 @@ public class PackageItemInfo {
         if (metaData != null) {
             int resid = metaData.getInt(name);
             if (resid != 0) {
-                return pm.getXml(packageName, resid, null);
+                return pm.getXml(packageName, resid, getApplicationInfo());
             }
         }
         return null;
@@ -182,7 +198,7 @@ public class PackageItemInfo {
         dest.writeInt(icon);
         dest.writeBundle(metaData);
     }
-
+    
     protected PackageItemInfo(Parcel source) {
         name = source.readString();
         packageName = source.readString();
@@ -191,6 +207,18 @@ public class PackageItemInfo {
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
         metaData = source.readBundle();
+    }
+
+    /**
+     * Get the ApplicationInfo for the application to which this item belongs,
+     * if available, otherwise returns null.
+     * 
+     * @return Returns the ApplicationInfo of this item, or null if not known.
+     * 
+     * @hide
+     */
+    protected ApplicationInfo getApplicationInfo() {
+        return null;
     }
 
     public static class DisplayNameComparator
