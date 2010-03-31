@@ -51,7 +51,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         long historyId = engine.insertStartSyncEvent(
                 account, authority, time0, SyncStorageEngine.SOURCE_LOCAL);
         long time1 = time0 + SyncStorageEngine.MILLIS_IN_4WEEKS * 2;
-        engine.stopSyncEvent(historyId, new Bundle(), time1 - time0, "yay", 0, 0);
+        engine.stopSyncEvent(historyId, time1 - time0, "yay", 0, 0);
     }
 
     /**
