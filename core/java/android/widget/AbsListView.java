@@ -1688,11 +1688,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // bail out before bad things happen
             if (mDataChanged) return;
 
-            if (mAdapter != null && mItemCount > 0 &&
-                    mClickMotionPosition != INVALID_POSITION &&
-                    mClickMotionPosition < mAdapter.getCount() && sameWindow()) {
-                performItemClick(mChild, mClickMotionPosition, getAdapter().getItemId(
-                        mClickMotionPosition));
+            final ListAdapter adapter = mAdapter;
+            final int motionPosition = mClickMotionPosition;
+            if (adapter != null && mItemCount > 0 &&
+                    motionPosition != INVALID_POSITION &&
+                    motionPosition < adapter.getCount() && sameWindow()) {
+                performItemClick(mChild, motionPosition, adapter.getItemId(motionPosition));
             }
         }
     }
@@ -2118,8 +2119,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mPendingCheckForTap : mPendingCheckForLongPress);
                         }
                         mLayoutMode = LAYOUT_NORMAL;
-                        mTouchMode = TOUCH_MODE_TAP;
-                        if (!mDataChanged) {
+                        if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
+                            mTouchMode = TOUCH_MODE_TAP;
                             setSelectedPositionInt(mMotionPosition);
                             layoutChildren();
                             child.setPressed(true);
@@ -2141,12 +2142,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_REST;
                                 }
                             }, ViewConfiguration.getPressedStateDuration());
+                        } else {
+                            mTouchMode = TOUCH_MODE_REST;
                         }
                         return true;
-                    } else {
-                        if (!mDataChanged) {
-                            post(performClick);
-                        }
+                    } else if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
+                        post(performClick);
                     }
                 }
                 mTouchMode = TOUCH_MODE_REST;
