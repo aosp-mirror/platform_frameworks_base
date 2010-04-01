@@ -1824,21 +1824,19 @@ class PackageManagerService extends IPackageManager.Stub {
         if (s2 == null) {
             return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
         }
-        final int N1 = s1.length;
-        final int N2 = s2.length;
-        for (int i=0; i<N1; i++) {
-            boolean match = false;
-            for (int j=0; j<N2; j++) {
-                if (s1[i].equals(s2[j])) {
-                    match = true;
-                    break;
-                }
-            }
-            if (!match) {
-                return PackageManager.SIGNATURE_NO_MATCH;
-            }
+        HashSet<Signature> set1 = new HashSet<Signature>();
+        for (Signature sig : s1) {
+            set1.add(sig);
         }
-        return PackageManager.SIGNATURE_MATCH;
+        HashSet<Signature> set2 = new HashSet<Signature>();
+        for (Signature sig : s2) {
+            set2.add(sig);
+        }
+        // Make sure s2 contains all signatures in s1.
+        if (set1.equals(set2)) {
+            return PackageManager.SIGNATURE_MATCH;
+        }
+        return PackageManager.SIGNATURE_NO_MATCH;
     }
 
     public String[] getPackagesForUid(int uid) {
@@ -2490,6 +2488,9 @@ class PackageManagerService extends IPackageManager.Stub {
                     mLastScanError = pp.getParseError();
                     return false;
                 }
+            } else {
+                // Lets implicitly assign existing certificates.
+                pkg.mSignatures = ps.signatures.mSignatures;
             }
         }
         return true;
@@ -2618,28 +2619,27 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private boolean verifySignaturesLP(PackageSetting pkgSetting,
-            PackageParser.Package pkg, int parseFlags, boolean updateSignature) {
-        if (pkg.mSignatures != null) {
-            if (!pkgSetting.signatures.updateSignatures(pkg.mSignatures,
-                    updateSignature)) {
-                Slog.e(TAG, "Package " + pkg.packageName
-                        + " signatures do not match the previously installed version; ignoring!");
-                mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-                return false;
-            }
-
-            if (pkgSetting.sharedUser != null) {
-                if (!pkgSetting.sharedUser.signatures.mergeSignatures(
-                        pkg.mSignatures, updateSignature)) {
+            PackageParser.Package pkg) {
+        if (pkgSetting.signatures.mSignatures != null) {
+            // Already existing package. Make sure signatures match
+            if (checkSignaturesLP(pkgSetting.signatures.mSignatures, pkg.mSignatures) !=
+                PackageManager.SIGNATURE_MATCH) {
                     Slog.e(TAG, "Package " + pkg.packageName
-                            + " has no signatures that match those in shared user "
-                            + pkgSetting.sharedUser.name + "; ignoring!");
-                    mLastScanError = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+                            + " signatures do not match the previously installed version; ignoring!");
+                    mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
                     return false;
                 }
+        }
+        // Check for shared user signatures
+        if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
+            if (checkSignaturesLP(pkgSetting.sharedUser.signatures.mSignatures,
+                    pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
+                Slog.e(TAG, "Package " + pkg.packageName
+                        + " has no signatures that match those in shared user "
+                        + pkgSetting.sharedUser.name + "; ignoring!");
+                mLastScanError = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+                return false;
             }
-        } else {
-            pkg.mSignatures = pkgSetting.signatures.mSignatures;
         }
         return true;
     }
@@ -2973,10 +2973,8 @@ class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.uid = pkgSetting.userId;
             pkg.mExtras = pkgSetting;
 
-            if (!verifySignaturesLP(pkgSetting, pkg, parseFlags,
-                    (scanMode&SCAN_UPDATE_SIGNATURE) != 0)) {
+            if (!verifySignaturesLP(pkgSetting, pkg)) {
                 if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                    mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
                     return null;
                 }
                 // The signature has changed, but this package is in the system
@@ -2988,8 +2986,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 // associated with an overall shared user, which doesn't seem all
                 // that unreasonable.
                 if (pkgSetting.sharedUser != null) {
-                    if (!pkgSetting.sharedUser.signatures.mergeSignatures(
-                            pkg.mSignatures, false)) {
+                    if (checkSignaturesLP(pkgSetting.sharedUser.signatures.mSignatures,
+                            pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
+                        Log.w(TAG, "Signature mismatch for shared user : " + pkgSetting.sharedUser);
                         mLastScanError = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
                         return null;
                     }
@@ -5464,6 +5463,17 @@ class PackageManagerService extends IPackageManager.Stub {
         boolean dataDirExists = getDataPathForPackage(pkg).exists();
         res.name = pkgName;
         synchronized(mPackages) {
+            if (mSettings.mRenamedPackages.containsKey(pkgName)) {
+                // A package with the same name is already installed, though
+                // it has been renamed to an older name.  The package we
+                // are trying to install should be installed as an update to
+                // the existing one, but that has not been requested, so bail.
+                Slog.w(TAG, "Attempt to re-install " + pkgName
+                        + " without first uninstalling package running as "
+                        + mSettings.mRenamedPackages.get(pkgName));
+                res.returnCode = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+                return;
+            }
             if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.mPath)) {
                 // Don't allow installation over an existing package with the same name.
                 Slog.w(TAG, "Attempt to re-install " + pkgName
@@ -5508,7 +5518,7 @@ class PackageManagerService extends IPackageManager.Stub {
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
-            if (checkSignaturesLP(pkg.mSignatures, oldPackage.mSignatures)
+            if (checkSignaturesLP(oldPackage.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
                 res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
                 return;
@@ -5536,7 +5546,6 @@ class PackageManagerService extends IPackageManager.Stub {
             oldInstallerPackageName = mSettings.getInstallerPackageName(pkgName);
         }
 
-        parseFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
         // First delete the existing package while retaining the data directory
         if (!deletePackageLI(pkgName, true, PackageManager.DONT_DELETE_DATA,
                 res.removedInfo)) {
@@ -5560,20 +5569,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-            // If we deleted an exisiting package, the old source and resource files that we
-            // were keeping around in case we needed them (see below) can now be deleted.
-            // This info will be set on the res.removedInfo to clean up later on as post
-            // install action.
-
-            //update signature on the new package setting
-            //this should always succeed, since we checked the
-            //signature earlier.
-            synchronized(mPackages) {
-                verifySignaturesLP(mSettings.mPackages.get(pkgName), pkg,
-                        parseFlags, true);
-            }
-        } else {
+        if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
             // remove package from internal structures.  Note that we want deletePackageX to
             // delete the package data and cache directories that it created in
             // scanPackageLocked, unless those directories existed before we even tried to
@@ -5592,19 +5588,23 @@ class PackageManagerService extends IPackageManager.Stub {
                     Slog.e(TAG, "Failed allocating storage when restoring pkg : " + pkgName);
                     return;
                 }
-                PackageInstalledInfo restoreRes = new PackageInstalledInfo();
-                restoreRes.removedInfo = new PackageRemovedInfo();
                 // Parse old package
-                parseFlags |= ~PackageManager.INSTALL_REPLACE_EXISTING;
-                scanPackageLI(restoreFile, parseFlags, scanMode);
+                boolean oldOnSd = isExternal(deletedPackage);
+                int oldParseFlags  = mDefParseFlags | PackageParser.PARSE_CHATTY |
+                        (isForwardLocked(deletedPackage) ? PackageParser.PARSE_FORWARD_LOCK : 0) |
+                        (oldOnSd ? PackageParser.PARSE_ON_SDCARD : 0);
+                int oldScanMode = (oldOnSd ? 0 : SCAN_MONITOR) | SCAN_UPDATE_SIGNATURE;
+                if (scanPackageLI(restoreFile, oldParseFlags, oldScanMode) == null) {
+                    Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade");
+                    return;
+                }
+                // Restore of old package succeeded. Update permissions.
                 synchronized (mPackages) {
                     updatePermissionsLP(deletedPackage.packageName, deletedPackage,
                             true, false);
                     mSettings.writeLP();
                 }
-                if (restoreRes.returnCode != PackageManager.INSTALL_SUCCEEDED) {
-                    Slog.e(TAG, "Failed restoring pkg : " + pkgName + " after failed upgrade");
-                }
+                Slog.i(TAG, "Successfully restored package : " + pkgName + " after failed upgrade");
             }
         }
     }
@@ -5656,15 +5656,7 @@ class PackageManagerService extends IPackageManager.Stub {
             updatedSettings = true;
         }
 
-        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-            //update signature on the new package setting
-            //this should always succeed, since we checked the
-            //signature earlier.
-            synchronized(mPackages) {
-                verifySignaturesLP(mSettings.mPackages.get(packageName), pkg,
-                        parseFlags, true);
-            }
-        } else {
+        if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
             // Re installation failed. Restore old information
             // Remove new pkg information
             if (newPackage != null) {
@@ -5746,7 +5738,7 @@ class PackageManagerService extends IPackageManager.Stub {
         boolean forwardLocked = ((pFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
         boolean onSd = ((pFlags & PackageManager.INSTALL_EXTERNAL) != 0);
         boolean replace = false;
-        int scanMode = SCAN_MONITOR | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE
+        int scanMode = (onSd ? 0 : SCAN_MONITOR) | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE
                 | (newInstall ? SCAN_NEW_INSTALL : 0);
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
@@ -5874,6 +5866,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private boolean isForwardLocked(PackageParser.Package pkg) {
         return  ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+    }
+
+    private boolean isExternal(PackageParser.Package pkg) {
+        return  ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
     }
 
     private void extractPublicFiles(PackageParser.Package newPackage,
@@ -7305,101 +7301,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        /**
-         * If any of the given 'sigs' is contained in the existing signatures,
-         * then completely replace the current signatures with the ones in
-         * 'sigs'.  This is used for updating an existing package to a newly
-         * installed version.
-         */
-        boolean updateSignatures(Signature[] sigs, boolean update) {
-            if (mSignatures == null) {
-                if (update) {
-                    assignSignatures(sigs);
-                }
-                return true;
-            }
-            if (sigs == null) {
-                return false;
-            }
-
-            for (int i=0; i<sigs.length; i++) {
-                Signature sig = sigs[i];
-                for (int j=0; j<mSignatures.length; j++) {
-                    if (mSignatures[j].equals(sig)) {
-                        if (update) {
-                            assignSignatures(sigs);
-                        }
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        /**
-         * If any of the given 'sigs' is contained in the existing signatures,
-         * then add in any new signatures found in 'sigs'.  This is used for
-         * including a new package into an existing shared user id.
-         */
-        boolean mergeSignatures(Signature[] sigs, boolean update) {
-            if (mSignatures == null) {
-                if (update) {
-                    assignSignatures(sigs);
-                }
-                return true;
-            }
-            if (sigs == null) {
-                return false;
-            }
-
-            Signature[] added = null;
-            int addedCount = 0;
-            boolean haveMatch = false;
-            for (int i=0; i<sigs.length; i++) {
-                Signature sig = sigs[i];
-                boolean found = false;
-                for (int j=0; j<mSignatures.length; j++) {
-                    if (mSignatures[j].equals(sig)) {
-                        found = true;
-                        haveMatch = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    if (added == null) {
-                        added = new Signature[sigs.length];
-                    }
-                    added[i] = sig;
-                    addedCount++;
-                }
-            }
-
-            if (!haveMatch) {
-                // Nothing matched -- reject the new signatures.
-                return false;
-            }
-            if (added == null) {
-                // Completely matched -- nothing else to do.
-                return true;
-            }
-
-            // Add additional signatures in.
-            if (update) {
-                Signature[] total = new Signature[addedCount+mSignatures.length];
-                System.arraycopy(mSignatures, 0, total, 0, mSignatures.length);
-                int j = mSignatures.length;
-                for (int i=0; i<added.length; i++) {
-                    if (added[i] != null) {
-                        total[j] = added[i];
-                        j++;
-                    }
-                }
-                mSignatures = total;
-            }
-            return true;
-        }
-
         private void assignSignatures(Signature[] sigs) {
             if (sigs == null) {
                 mSignatures = null;
@@ -8180,6 +8081,15 @@ class PackageManagerService extends IPackageManager.Stub {
              if (pkg.mVersionCode != p.versionCode) {
                 p.versionCode = pkg.mVersionCode;
             }
+             // Update signatures if needed.
+             if (p.signatures.mSignatures == null) {
+                 p.signatures.assignSignatures(pkg.mSignatures);
+             }
+             // If this app defines a shared user id initialize
+             // the shared user signatures as well.
+             if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
+                 p.sharedUser.signatures.assignSignatures(pkg.mSignatures);
+             }
             addPackageSettingLP(p, pkg.packageName, p.sharedUser);
         }
 
@@ -9608,22 +9518,12 @@ class PackageManagerService extends IPackageManager.Stub {
                // Parse package
                int parseFlags = PackageParser.PARSE_CHATTY |
                        PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
-               PackageParser pp = new PackageParser(codePath);
-               pp.setSeparateProcesses(mSeparateProcesses);
-               final PackageParser.Package pkg = pp.parsePackage(new File(codePath),
-                       codePath, mMetrics, parseFlags);
-               pp = null;
                doGc = true;
-               // Check for parse errors
-               if (pkg == null) {
-                   Slog.e(TAG, "Parse error when installing install pkg : "
-                           + args.cid + " from " + args.cachePath);
-                   continue;
-               }
-               setApplicationInfoPaths(pkg, codePath, codePath);
                synchronized (mInstallLock) {
+                   final PackageParser.Package pkg =  scanPackageLI(new File(codePath),
+                           parseFlags, 0);
                    // Scan the package
-                   if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
+                   if (pkg != null) {
                        synchronized (mPackages) {
                            retCode = PackageManager.INSTALL_SUCCEEDED;
                            pkgList.add(pkg.packageName);
@@ -9631,8 +9531,8 @@ class PackageManagerService extends IPackageManager.Stub {
                            args.doPostInstall(PackageManager.INSTALL_SUCCEEDED);
                        }
                    } else {
-                       Slog.i(TAG, "Failed to install pkg: " +
-                               pkg.packageName + " from sdcard");
+                       Slog.i(TAG, "Failed to install pkg from  " +
+                               codePath + " from sdcard");
                    }
                }
 

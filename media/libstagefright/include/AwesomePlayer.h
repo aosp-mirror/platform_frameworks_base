@@ -132,6 +132,7 @@ private:
     int64_t mVideoTimeUs;
 
     bool mSeeking;
+    bool mSeekNotificationSent;
     int64_t mSeekTimeUs;
 
     bool mWatchForAudioSeekComplete;

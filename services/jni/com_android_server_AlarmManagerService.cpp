@@ -38,10 +38,6 @@
 #include <linux/android_alarm.h>
 #endif
 
-#define ONE_NANOSECOND 1000000000LL
-#define NANOSECONDS_TO_SECONDS(x) (x / ONE_NANOSECOND)
-#define SECONDS_TO_NANOSECONDS(x) (x * ONE_NANOSECOND)
-
 namespace android {
 
 static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv* env, jobject obj, jint fd, jint minswest)
@@ -82,17 +78,17 @@ static void android_server_AlarmManagerService_close(JNIEnv* env, jobject obj, j
 #endif
 }
 
-static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jint fd, jint type, jlong nanoseconds)
+static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jint fd, jint type, jlong seconds, jlong nanoseconds)
 {
 #if HAVE_ANDROID_OS
     struct timespec ts;
-    ts.tv_sec = NANOSECONDS_TO_SECONDS(nanoseconds);
-    ts.tv_nsec = nanoseconds - SECONDS_TO_NANOSECONDS(ts.tv_sec);
+    ts.tv_sec = seconds;
+    ts.tv_nsec = nanoseconds;
     
 	int result = ioctl(fd, ANDROID_ALARM_SET(type), &ts);
 	if (result < 0)
 	{
-        LOGE("Unable to set alarm to %lld: %s\n", nanoseconds, strerror(errno));
+        LOGE("Unable to set alarm to %lld.%09lld: %s\n", seconds, nanoseconds, strerror(errno));
     }
 #endif
 }
@@ -121,7 +117,7 @@ static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
 	{"init", "()I", (void*)android_server_AlarmManagerService_init},
 	{"close", "(I)V", (void*)android_server_AlarmManagerService_close},
-	{"set", "(IIJ)V", (void*)android_server_AlarmManagerService_set},
+	{"set", "(IIJJ)V", (void*)android_server_AlarmManagerService_set},
     {"waitForAlarm", "(I)I", (void*)android_server_AlarmManagerService_waitForAlarm},
     {"setKernelTimezone", "(II)I", (void*)android_server_AlarmManagerService_setKernelTimezone},
 };

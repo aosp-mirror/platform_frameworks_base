@@ -15,6 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          android:installLocation="internalOnly"
           package="com.android.frameworks.coretests">
 
     <permission android:name="com.android.frameworks.coretests.permission.TEST_GRANTED"

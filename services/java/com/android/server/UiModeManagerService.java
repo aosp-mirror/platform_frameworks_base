@@ -19,14 +19,12 @@ package com.android.server;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
-import android.app.IActivityManager;
 import android.app.IUiModeManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -310,9 +308,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
     }
 
     public void enableCarMode() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ENABLE_CAR_MODE,
-                "Need ENABLE_CAR_MODE permission");
         synchronized (mLock) {
             setCarModeLocked(true);
             if (mSystemReady) {
@@ -394,7 +389,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
             uiMode = Configuration.UI_MODE_TYPE_DESK;
         }
-        if (uiMode != 0) {
+        if (mCarModeEnabled) {
             if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                 updateTwilightLocked();
                 uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES

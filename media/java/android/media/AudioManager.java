@@ -1245,7 +1245,7 @@ public class AudioManager {
 
     /**
      * Used to indicate a gain of audio focus, or a request of audio focus, of unknown duration.
-     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
      */
     public static final int AUDIOFOCUS_GAIN = 1;
@@ -1253,7 +1253,7 @@ public class AudioManager {
      * Used to indicate a temporary gain or request of audio focus, anticipated to last a short
      * amount of time. Examples of temporary changes are the playback of driving directions, or an
      * event notification.
-     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT = 2;
@@ -1263,25 +1263,25 @@ public class AudioManager {
      * after having lowered their output level (also referred to as "ducking").
      * Examples of temporary changes are the playback of driving directions where playback of music
      * in the background is acceptable.
-     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK = 3;
     /**
      * Used to indicate a loss of audio focus of unknown duration.
-     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      */
     public static final int AUDIOFOCUS_LOSS = -1 * AUDIOFOCUS_GAIN;
     /**
      * Used to indicate a transient loss of audio focus.
-     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      */
     public static final int AUDIOFOCUS_LOSS_TRANSIENT = -1 * AUDIOFOCUS_GAIN_TRANSIENT;
     /**
      * Used to indicate a transient loss of audio focus where the loser of the audio focus can
      * lower its output volume if it wants to continue playing (also referred to as "ducking"), as
      * the new focus owner doesn't require others to be silent.
-     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      */
     public static final int AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK =
             -1 * AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
@@ -1303,7 +1303,7 @@ public class AudioManager {
          *   {@link AudioManager#AUDIOFOCUS_LOSS}, {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT}
          *   and {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}.
          */
-        public void onAudioFocusChanged(int focusChange);
+        public void onAudioFocusChange(int focusChange);
     }
 
     /**
@@ -1350,7 +1350,7 @@ public class AudioManager {
                             listener = findFocusListener((String)msg.obj);
                         }
                         if (listener != null) {
-                            listener.onAudioFocusChanged(msg.what);
+                            listener.onAudioFocusChange(msg.what);
                         }
                     }
                 };

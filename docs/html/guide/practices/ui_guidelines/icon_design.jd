@@ -1,4 +1,4 @@
-page.title=Icon Design Guidelines
+page.title=Icon Design Guidelines, Android 2.0
 @jd:body
 
 <div id="qv-wrapper">
@@ -8,9 +8,8 @@ page.title=Icon Design Guidelines
 
 <ul>
 <li>You can use several types of icons in an Android application.</li>
-<li>Your icons should follow the specification in this document.</li>
-<li>A set of standard icons is provided by the Android platform. Your
-application can use the standard icons by referencing them as resources.</li>
+<li>Your icons should follow the general specification in this document.</li>
+<li>You should create separate icon sets for high-, medium-, and low-density screens.</li>
 </ul>
 
 <h2>In this document</h2>
@@ -23,13 +22,14 @@ application can use the standard icons by referencing them as resources.</li>
 <li><a href="#dialogstructure">Dialog icon</a></li>
 <li><a href="#listviewstructure">List view icon</a></li>
 
-<li style="margin-top:4px;"><a href="#dodonts">General guidelines</a></li>
+<li style="margin-top:3px;"><a href="#design_tips">Tips for Designers</a></li>
 <li><a href="#templatespack">Using the Icon Templates Pack</a></li>
+
 <li><a href="#iconappendix">Icon appendix</a>
 	<ol>
-	<li><a href="#launcherapx">Launcher icons</a></li>
-	<li><a href="#menuapx">Menu icons</a></li>
-	<li><a href="#statusbarapx">Status bar icons</a></li>
+	<li><a href="#launcherapx">Standard Launcher icons</a></li>
+	<li><a href="#menuapx">Standard Menu icons</a></li>
+	<li><a href="#statusbarapx">Standard Status bar icons</a></li>
 	</ol>
 </li>
 
@@ -38,175 +38,559 @@ application can use the standard icons by referencing them as resources.</li>
 <h2>See also</h2>
 
 <ol>
-<li><a href="{@docRoot}shareables/icon_templates-v1.0.zip">Android Icon
-Templates Pack &raquo;</a></li>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+<li><a href="{@docRoot}shareables/icon_templates-v2.0.zip">Android Icon
+Templates Pack, v2.0 &raquo;</a></li>
 </ol>
+
+<h2>Older versions</h2>
+
+<ol>
+<li style="margin-top:4px;"><a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design_1.html">Icon Design
+Guidelines, Android 1.0</a></li>
+<li><a href="{@docRoot}shareables/icon_templates-v1.0.zip">Android Icon
+Templates Pack, v1.0 &raquo;</a></li>
+</ol>
+
 
 </div>
 </div>
 
 <p>Creating a unified look and feel throughout a user interface adds value to
 your product. Streamlining the graphic style will also make the UI seem more
-professional to the user.</p>
+professional to users.</p>
 
-<p>This document shows you how to create icons for various parts
-of your application’s user interface that fit the style set by the Android UI
-team. Following these guidelines will help you to create a polished and unified
-experience for the user.</p>
+<p>This document provides information to help you create icons for various parts
+of your application’s user interface that match the general styles used by the
+Android 2.x framework. Following these guidelines will help you to create a 
+polished and unified experience for the user.</p>
 
-<p>To get started creating conforming icons more quickly, you can download 
+<p>To get started creating your icons more quickly, you can download 
 the Android Icon Templates Pack. For more information, see 
 <a href="#templatespack">Using the Android Icon Template Pack</a>.</p>
 
-<h2 id="launcherstructure">Launcher icon</h2>
 
-<p>A launcher icon is the graphic that represents your application on an Android
-device’s Home screen. It is a simplified 3D icon with a fixed perspective. The
-required perspective is shown in Figure 1.</p>
+<h2 id="icon-sets">Providing Density-Specific Icon Sets</h2>
 
-<h4 id="launcherstructure">Structure</h4>
+<p>Android is designed to run on a variety of devices that offer a range of
+screen sizes and resolutions. When you design the icons for your application,
+it's important keep in mind that your application may be installed on any of
+those devices. As described in the <a 
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a> document, the Android platform makes it straightforward for you to
+provide icons in such a way that they will be displayed properly on any device,
+regardless of the device's screen size or resolution.</p>
 
-<ul>
-<li>The base of a launcher icon can face either the top view or the front
-view.</li>
+<p>In general, the recommended approach is to create a separate set of icons for
+each of the three generalized screen densities listed in Table 1, below, then
+store them in density-specific resource directories in your application. When
+your application runs, the Android platform will check the characteristics of
+the device screen and load icons from the appropriate density-specific
+resources. For more information about how to store density-specific resources in
+your application, see <a
+href="{@docRoot}guide/practices/screens_support.html#qualifiers">Resource
+directory qualifiers for screen size and density</a>. </p>
 
-<li>The majority of a launcher icon’s surface should be created using the
-launcher icon <a href="#launcherpalette">color palette</a>. To add emphasis, use
-one or more bright accent colors to highlight specific characteristics.</li>
-
-<li>All launcher icons must be created with rounded corners to make them look
-friendly and simple—as shown in Figure 2.</li>
-
-<li>All dimensions specified are based on a 250x250 pixel artboard size
-in a vector graphics editor like Adobe Illustrator, where the icon fits within
-the artboard boundaries.</li>
-
-<li><strong>Final art must be scaled down and exported as a transparent 48x48 px
-PNG file using a raster image editor such as Adobe Photoshop.</strong></li>
-
-<li>Templates for creating launcher icons in Adobe Illustrator and Photoshop are
-available in the Icon Templates Pack.</li>
-</ul>
-
-<table class="image-caption">
-<tr>
-<td class="image-caption-i" style="padding-right:0">
-  <img src="{@docRoot}images/icon_design/launcher_structure.png" alt="A view of
-launcher icon corners and perspective angles" />
-</td>
-<td class="image-caption-c">
-  <div class="caption grad-rule-top">
-    <p><strong>Figure 1.</strong> Perspective angles for launcher icons (90° is
-vertical).</p>
-    <div class="image-caption-nested">
-      <table style="margin-top:0;">
-      <tr><td style="padding-right:1em"><em>1.</em></td><td>92°</td></tr>
-      <tr><td><em>2.</em></td><td>92°</td></tr>
-      <tr><td><em>3.</em></td><td>173°</td></tr>
-      <tr><td><em>4.</em></td><td>171°</td></tr>
-      <tr><td><em>5.</em></td><td>49°</td></tr>
-      <tr><td><em>6.</em></td><td>171°</td></tr>
-      <tr><td><em>7.</em></td><td>64°</td></tr>
-      <tr><td><em>8.</em></td><td>97°</td></tr>
-      <tr><td><em>9.</em></td><td>75°</td></tr>
-      <tr><td><em>10.</em></td><td>93°</td></tr>
-      <tr><td><em>11.</em></td><td>169°</td></tr>
-      </table>
-    </div>
-  </div>
-  <div class="caption grad-rule-top">
-    <p><strong>Figure 2.</strong> Rounded corners for launcher icons.</p>
-  </div>
-</td>
-</tr>
-</table>
-
-<h4 id="launcherlight">Light, effects, and shadows</h4>
-
-<p>Launcher icons are simplified 3D icons using light and shadows for
-definition. A light source is placed slightly to the left in front of the icon,
-and therefore the shadow expands to the right and back.</p>
-
-<table class="image-caption">
-<tr>
-<td class="image-caption-i">
-  <img src="{@docRoot}images/icon_design/launcher_light.png" alt="A view of
-light, effects, and shadows for launcher icons."/>
-</td>
-<td class="image-caption-c">
-  <div class="caption grad-rule-top">
-    <p><strong>Figure 3. </strong>Light, effects, and shadows for launcher icons.</p>
-    <div class="image-caption-nested">
-    <table style="margin-top:0;">
-    <tr><td style="padding-right:1em"><em>1.</em></td><td>Edge highlight:</td><td>white</td></tr>
-    <tr><td><em>2.</em></td><td>Icon shadow:</td><td>black | 20px blur<br>50% opacity | angle 67°</td></tr>
-    <tr><td><em>3.</em></td><td>Front part:</td><td>Use light gradient from color palette</td></tr>
-    <tr><td><em>4.</em></td><td>Detail shadow:</td><td>black | 10px blur<br>75% opacity</td></tr>
-    <tr><td><em>5.</em></td><td> Side part:</td><td>Use medium gradient from color palette</td></tr>
-    </table>
-    </div>
-  </div>
-</td>
-</tr>
-</table>
-
-<table style="margin:0px;padding:0px;">
-<tr>
-<td style="border:0;width:350px;">
-
-<h4 id="launcherpalette">Launcher icon color palette</h4>
-
-<table style="margin:0px;padding:0px;">
-<tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_white.png" alt="Color palette, white" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">White<br>r 0 | g 0 | b 0<br>Used for highlights on edges.</td>
-</tr>
-
-<tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_gradient_light.png" alt="Color palette, light gradient" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">Light gradient<br><em>1:&nbsp;&nbsp;</em>r 0  | g 0  | b 0<br><em>2:&nbsp;&nbsp;</em>r 217 | g 217 | b 217<br>Used on the front (lit) part of the icon.</td>
-</tr>
-
-<tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_gradient_medium.png" alt="Color palette, medium gradien" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">Medium gradient<br><em>1:&nbsp;&nbsp;</em>r 190 | g 190 | b 190<br><em>2:&nbsp;&nbsp;</em>r 115 | g 115 | b 115<br>Used on the side (shaded) part of the icon.</td>
-</tr>
-
-<tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_gradient_dark.png" alt="Color palette, dark gradient" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">Dark gradient<br><em>1:&nbsp;&nbsp;</em>r 100 | g 100 | b 100<br><em>2:&nbsp;&nbsp;</em>r 25  | g 25  | b 25<br>Used on details and parts in the shade of the icon.</td>
-</tr>
-
-<tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_black.png" alt="Color palette, black" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">Black<br>r 255 | g 255 | b 255<br>Used as base color in shadows.</td>
-</tr>
-
-</table>
-
-</td>
-
-<td style="border:0;width:350px">
-
-<h4 id="launchersteps">Step by step</h4>
+<p>The baseline screen density for Android devices is medium
+(<code>mdpi</code>). For this reason, a recommended approach to creating icon
+sets for multiple screen densities is to:</p>
 
 <ol>
-  <li>Create the basic shapes with a tool like Adobe Illustrator, using the
-angles described in <a href="#launcherstructure">Launcher icon: structure</a>.
-The shapes and effects must fit within a 250x250 pixel artboard.</li>
-  <li>Add depth to shapes by extruding them and create the rounded corners as
-described for the launcher icon structure.</li>
-  <li>Add details and colors. Gradients should be treated as if there is a light
-source placed slightly to the left in front of the icon.</li>
-  <li>Create the shadows with the correct angle and blur effect.</li>
-  <li>Import the icon into a tool like Adobe Photoshop and scale to fit an image
-size of 48x48 px on a transparent background.</li>
-  <li>Export the icon at 48x48 as a PNG file with transparency enabled.</li>
+<li>Design the icons for the baseline density first (see Table 1 for the actual
+pixel dimensions at which to design the icons). </li>
+<li>Place the icons in the application's default drawable resources, then run
+the application on an Android Virtual Device (AVD) or an HVGA device such as the
+T-Mobile G1. </li>
+<li>Test and adjust your baseline icons as needed.</li>
+<li>When you are satisfied with the icons you've developed at the baseline
+density, create scaled copies for the other densities. </li>
+
+<ul>
+<li>Scale the baseline icons up 150% to create the high-density assets.</li>
+<li>Scale the baseline icons down 75% to create the low-density assets.</li>
+</ul></li>
+
+<li>Place the icons in density-specific resource directories in your
+application. For example:
+<ul>
+<li>Medium-density assets go in a <code>res/drawable-mdpi/</code>
+directory (or in the default <code>res/drawable/</code> directory),</li>
+<li>High-density assets go in a <code>res/drawable-hdpi/</code> directory,
+and</li>
+<li>Low-density assets go in a <code>res/drawable-ldpi/</code>
+directory.</li>
+</ul></li>
+<li>Test and adjust the high- and low-density icons if needed</li>
 </ol>
 
+<p>For tips on how to create and manage icon sets for multiple densities, see 
+<a href="#design_tips">Tips for Designers</a>.</p>
+
+
+<p class="caption"><strong>Table 1.</strong> Summary of finished icon
+dimensions for each of the three generalized screen densities, by
+icon type.</p>
+
+  <table id="screens-table" style="margin-top:2em;">
+    <tbody>
+<tr>
+<th>Icon Type</th><th colspan="3">Standard Asset Sizes (in Pixels), for
+Generalized Screen Densities</th></tr>
+    <tr>
+      <td></td>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        <nobr>Low density screen <em>(ldpi)</em></nobr>
+      </th>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        <nobr>Medium density screen <em>(mdpi)</em></nobr>
+      </th>
+      <th  style="background-color:#f3f3f3;font-weight:normal">
+        <nobr>High density screen <em>(hdpi)</em><nobr>
+      </th>
+    </tr>
+
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        Launcher
+      </th>
+      <td style="font-size:.9em;">
+          36 x 36 px
+      </td>
+
+      <td style="font-size:.9em;">
+         48 x 48 px
+      </td>
+      <td style="font-size:.9em;">
+          72 x 72 px
+      </td>
+    </tr>
+
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        Menu
+      </th>
+      <td style="font-size:.9em;">
+          36 x 36 px
+      </td>
+
+      <td style="font-size:.9em;">
+         48 x 48 px
+      </td>
+      <td style="font-size:.9em;">
+          72 x 72 px
+      </td>
+    </tr>
+
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        Status Bar
+      </th>
+      <td style="font-size:.9em;">
+          24 x 24 px
+      </td>
+
+      <td style="font-size:.9em;">
+         32 x 32 px
+      </td>
+      <td style="font-size:.9em;">
+          48 x 48 px
+      </td>
+    </tr>
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        Tab
+      </th>
+      <td style="font-size:.9em;">
+          24 x 24 px
+      </td>
+
+      <td style="font-size:.9em;">
+         32 x 32 px
+      </td>
+      <td style="font-size:.9em;">
+          48 x 48 px
+      </td>
+    </tr>
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        Dialog
+      </th>
+      <td style="font-size:.9em;">
+          24 x 24 px
+      </td>
+
+      <td style="font-size:.9em;">
+         32 x 32 px
+      </td>
+      <td style="font-size:.9em;">
+          48 x 48 px
+      </td>
+    </tr>
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        List View
+      </th>
+      <td style="font-size:.9em;">
+          24 x 24 px
+      </td>
+
+      <td style="font-size:.9em;">
+         32 x 32 px
+      </td>
+      <td style="font-size:.9em;">
+          48 x 48 px
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+<h2 id="launcherstructure">Launcher Icon</h2>
+
+<p>A Launcher icon is a graphic that represents your application on the device’s
+Home screen and in the Launcher window.  </p>
+
+<p>The user opens the Launcher by touching the icon at the bottom of the Home
+screen. The Launcher opens and exposes the icons for all of the installed 
+applications, which are arranged in a grid. The user selects an application and 
+opens it by touching the Launcher icon or by means of any hardware navigation 
+controls available, such as a trackball or d-pad. </p>
+
+<p>The user can also drag an icon out of the Launcher window and onto the Home
+screen itself, for more convenient access to the application. In this case, the
+system displays your application's Launcher icon against the Home screen
+wallpaper, rendering it at the same dimensions as it is rendered inside the
+Launcher.</p>
+
+<p>The system manages the scaling of all Launcher icons so that they rendered at
+a uniform height and width. The actual pixel dimensions of the rendered Launcher
+icons on any given device varies, based on the size and pixel-density
+characteristics of the device's screen. To ensure the best possible rendering
+for your icons, supply versions of the icons that are designed for low, medium,
+and high density screens. For information, see <a
+href="#icon_sets">Providing Density-Specific Icon Sets</a>, above, or <a
+href="#design_tips">Tips for Designers</a>, below.</p>
+
+<h3 id="style">Style</h3>
+
+<p>The launcher icons that you create should follow the general style principles
+below. The guidelines aren't meant to restrict what you can do with your icons,
+but rather they are meant to emphasize the common approaches that your icons can
+share with others on the device. Figure 1, at right, provides examples.  </p>
+
+<div class="figure" style="padding:3em">
+  <img src="{@docRoot}images/icon_design/IconGraphic_Icons_i.png" 
+    width="340">
+  <p class="caption" style="margin:0;padding:0;margin-left:36px;">
+  <strong>Figure 1.</strong> Illustration of Launcher icon style.</p>
+</div>
+
+<p>Clean and contemporary:</p>
+
+<ul>
+  <li>Launcher icons should be current and sometimes quirky, but they should not
+appear aged or ragged. You should avoid overused symbolic metaphors whenever
+possible.</li>
+</ul>
+
+<p>Simple and iconic:</p>
+<ul>
+  <li> Android Launcher icons are caricatural in nature; your icons should be
+highly simplified and exaggerated, so that they are appropriate for use at small
+sizes. Your icons should not be overly complicated. </li>
+  <li>Try featuring a single part of an application as a symbolic
+representation of the whole (for example, the Music icon features a speaker).
+</li>
+  <li>Consider using natural outlines and shapes, both geometric and organic,
+with a realistic (but never photorealistic) rendering. </li>
+  <li>Your icons <em>should not</em> present a cropped view of a larger
+image.</li>
+</ul>
+
+<p>Tactile and textured:</p>
+<ul>
+  <li>Icons should feature non-glossy, textured material. See
+  <a href="#materials-colors">Materials and colors</a>, below, for more
+  information.</li>
+</ul>
+
+<p>Forward-facing and top-lit:</p>
+<ul>
+  <li><em>New for Android 2.0 and later platforms</em>: Android Launcher
+icons should be forward-facing, with very little perspective, and they
+should be top-lit.</li>
+</ul>
+
+Additionally, note all icons will have separate text labels, so rather than
+working to include embedded text in the design of of your icons, focus your
+efforts on the icon's visual distinctiveness and memorability instead.</p>
+
+<p>To look at more examples of the Launcher icons used by built-in Android
+applications, see <a href="#launcherapx">Standard Launcher Icons</a> in the
+Icons Appendix of this document. </p>
+
+
+
+<h3 id="dodonts">Do's and Don'ts</h3>
+
+<p>Below are some "do and don't" examples to consider when creating icons for
+your application.  </p>
+
+
+<table>
+<tr>
+<td style="border:0;width:50%;">
+
+<h4>Android Launcher icons are...</h4>
+
+<ul>
+<li>Modern, minimal, matte, tactile, and textured</li>
+<li>Forward-facing and top-lit, whole, limited in color
+palette</li>
+</ul>
+</td>
+<td style="border:0;width:50%;">
+
+<h4>Android Launcher icons are not...</h4>
+
+<ul>
+<li>Antique, over-complicated, glossy, flat vector</li>
+<li>Rotated, Cropped, Over-Saturated</li>
+</ul>
+</td>
+</tr>
+<tr>
+</table>
+
+<div style="margin-left:2em">
+<img src="{@docRoot}images/icon_design/IconGraphic_DosDonts.png" alt="Side-by-side examples
+of good/bad icon design." />
+<p class="caption" style="margin-top:.5em;">
+<strong>Figure 2.</strong> Side-by-side examples of "do's and don'ts" for
+Android launcher icons. </p>
+</div>
+
+<h3 id="materials-colors">Materials and colors</h3>
+
+<p>Launcher icons should make use of tactile, top-lit, textured materials. Even
+if your icon is just a simple shape, you should try to render in a way that
+makes it appear to be sculpted from some real-world material.</p>
+
+<p>The Launcher icons for the platform's default applications use the set of
+materials shown in Figure 3, below. Your icons can use these materials or you
+can create new materials.</p>
+
+<p>Android launcher icons usually consist of a smaller shape within a
+larger base shape and combine one neutral and one primary color. Icons may
+use a combination of neutral colors but should maintain a fairly high level of
+contrast. Icons should not use more than one primary color per icon, if
+possible.</p>
+
+<p>Launcher icons should use a limited color palette that includes a range
+of neutral and primary colors. The icons should not be over-saturated.</p>
+
+<p>The recommended color palette to use for Launcher icons is shown in Figure 4.
+You can use elements of the palette for both the base color and the highlight
+color. You can use the colors of the palette in conjunction with a
+white-to-black vertical linear gradient overlay. This creates the impression
+that the icon is lit from above and keeps the color less saturated.</p>
+
+
+
+<div style="margin:2em">
+<img src="{@docRoot}images/icon_design/IconGraphic_Materials.png" width="450" style="padding-top:2px;">
+<p class="caption" style="margin-top:.5em;">
+<strong>Figure 3.</strong> Example materials that you can use to create
+your icons.</p>
+</div>
+
+<div style="margin:2em">
+<img src="{@docRoot}images/icon_design/IconGraphic_AccentColor.png" width="450">
+<p class="caption" xstyle="margin-top:.5em;">
+<strong>Figure 4.</strong> Examples of materials combined with base
+and highlight colors from the recommended palette.</p>
+</div>
+
+
+<p>When you combine the materials above with a color highlight from the
+recommended pallete, you can create materials combinations such as those shown
+in Figure 5. To get you started, the <a href="#templatespack">icons pack</a>
+includes a Photoshop template file (<code>Launcher-icon-template.psd</code>)
+that provides all of the default materials, colors, and gradients. </p>
+
+<div style="margin:2em">
+<img src="{@docRoot}images/icon_design/IconGraphic_Colors.png" width="450" style="padding-top:2px;">
+<p class="caption" style="margin-top:.5em;">
+<strong>Figure 5.</strong> Recommended color palette for icons.</p>
+</div>
+
+
+<h3 id="size">Size and positioning</h3>
+
+<p>Launcher icons should use a variety of shapes and forms and those must be
+scaled and positioned to create consistent visual weight.</p>
+
+<p>Launcher icons should use a variety of shapes and forms and those must be
+scaled and positioned inside the asset to create consistent visual weight with
+other </p>
+
+<p>Figure 6 illustrates various ways of positioning the icon inside the asset.
+As detailed in the table below, you should size the icons <em>smaller than the
+actual bounds of the asset</em>, to create a consistent visual weight and to
+allow for the inclusion of shadows. If your icon is square or nearly square, it
+should be scaled even smaller.</p>
+
+
+<ul>
+<li>The bounding box for the full asset is shown in red.</li>
+<li>The recommended bounding box for the actual icon itself is shown in blue.
+The icon box is sized smaller than the full asset box so that there is space to
+include shadows and special icon treatments. </li>
+<li>The recommended bounding box for an icon that is square is shown in orange.
+The box for square icons is smaller than that for other icons to establish a
+consistent visual weight across the two types.</li>
+</ul>
+
+<table style="margin:2.5em 0 1em 0;">
+<tr>
+
+<td style="border:0;padding-left:72;">
+<ol class="nolist">
+  <li>Icon dimensions for high-density (<code>hdpi</code>) screens:</li>
+  <ol class="nolist">
+    <li>Full Asset: 72 x 72 px</li>
+    <li>Icon: 60 x 60 px</li>
+    <li>Square Icon: 56 x 56 px</li>
+  </ol>
+  </li>
+</ol>
+</td>
+<td style="border:0;">
+  <img src="{@docRoot}images/icon_design/IconGraphic_OpticalSize_l.png"
+   style="padding:0;margin:0;" width="450">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Icon Dimensions for medium-density (<code>mdpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 48 x 48 px</li>
+      <li>Icon: 40 x 40 px</li>
+      <li>Square Icon: 38 x 38 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;padding-left:72;">
+ <img src="{@docRoot}images/icon_design/IconGraphic_OpticalSize_s.png"
+ style="padding:0;margin:0;" width="450">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Icon Dimensions for low-density (<code>ldpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 36 x 36 px</li>
+      <li>Icon: 30 x 30 px</li>
+      <li>Square Icon: 28 x 28 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;padding-left:72;">
+ <img src="{@docRoot}images/icon_design/IconGraphic_OpticalSize_ldpi.png"
+ style="padding:0;margin:0;" width="450">
+
+ <p class="caption" style="margin:0;padding:0;margin-top:1.5em;"><strong>Figure
+ 6.</strong> Icon sizing and positioning inside the bounds of the
+ icon asset.</p>
+</td>
+</tr>
+
+</table>
+
+
+
+<h3>Using the Launcher Icon Template</h3>
+
+<p>Included in the Android Icon Templates Pack 2.0 is a template containing
+palettes for default icon materials and colors. The template is provided in .psd
+format for Adobe Photoshop or similar raster image editor. </p>
+
+<p>To get started, first <a
+href="{@docRoot}shareables/icon_templates-v2.0.zip">download the Android Icon
+Templates Pack 2.0 &raquo;</a>. </p>
+
+<p>Once you've downloaded the pack, unzip it and open the file
+<code>Launcher-icon-template.psd</code> in Adobe Photoshop or similar raster
+image editing program. Notice the palettes for materials and colors.  You can
+use as the template as a starting point for creating your Launcher icons. </p>
+
+<p>After you create your icon, you can add a shadow effect according to the
+specification below, as appropriate for the size of image you are creating. </p>
+
+
+<table style="margin:2.5em 0 1em 0;">
+<tr>
+
+<td style="border:0;padding-left:72;">
+  <img src="{@docRoot}images/icon_design/IconGraphic_Shadow_WVGA.png"
+   style="padding:0;margin:0;" width="450">
+</td>
+<td style="border:0;">
+<p style="padding-top:.5em;">Shadow for WVGA (high density) sreens:</p>
+  <ol class="nolist">
+    <li>Effect: Drop Shadow</li>
+    <li>Color: #000000</li>
+    <li>Blend Mode: Multiply</li>
+    <li>Opacity: 75%</li>
+    <li>Angle: 90°</li>
+    <li>Distance: 2px</li>
+    <li>Spread: 0% </li>
+    <li>Size: 5px </li>
+  </ol>
+</li>
+</ol>
+</td>
+</tr>
+<tr>
+<td style="border:0;padding-left:72;">
+  <img src="{@docRoot}images/icon_design/IconGraphic_Shadow_HVGA.png"
+   style="padding:0;margin:0;" width="450">
+</td>
+
+<td style="border:0;">
+<p style="padding-top:.5em;">Shadow for HVGA (medium density) sreens:</p>
+  <ol class="nolist">
+    <li>Effect: Drop Shadow</li>
+    <li>Color: #000000</li>
+    <li>Blend Mode: Multiply</li>
+    <li>Opacity: 75%</li>
+    <li>Angle: 90°</li>
+    <li>Distance: 1px</li>
+    <li>Spread: 0% </li>
+    <li>Size: 3px </li>
+  </ol>
+</li>
+</ol>
 </td>
 </tr>
 </table>
+
+<p>When the shadow is added and the icon is complete, export it as a PNG file
+with transparency enabled, ensuring that you size the icon at 72 x 72px for
+high-density screens and 48 x 48px for medium density screens. For more
+information about why you should provide different Launcher assets for high-,
+medium, and low-density screens, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
+
+
 
 <h2 id="menustructure">Menu icon</h2>
 
@@ -222,7 +606,7 @@ primary palette and the same effects. For more information, see the
 menu icon <a href="#menupalette">color palette</a>. </li>
 
 <li>Menu icons should include rounded corners, but only when logically
-appropriate. For example, in Figure 3 the logical place for rounded corners is
+appropriate. For example, in Figure 7 the logical place for rounded corners is
 the roof and not the rest of the building.</span></li>
 
 <li>All dimensions specified on this page are based on a 48x48 pixel artboard 
@@ -247,7 +631,7 @@ icon structure." />
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 4. </strong>Safeframe and corner-rounding for menu
+    <p><strong>Figure 7. </strong>Safeframe and corner-rounding for menu
 icons. Icon size is 48x48.</p>
   </div>
 </td>
@@ -263,11 +647,11 @@ effects, which are shown below, are used to create depth.</p>
 <table class="image-caption">
 <tr>
 <td class="image-caption-i">
-  <img src="{@docRoot}images/icon_design/menu_light.png" alt="A view of light, effects, and shadows for launcher icons."/>
+  <img src="{@docRoot}images/icon_design/menu_light.png" alt="A view of light, effects, and shadows for menu icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 5. </strong>Light, effects, and shadows for launcher icons.</p>
+    <p><strong>Figure 8. </strong>Light, effects, and shadows for menu icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
     <tr><td style="padding-right:1em"><em>1.</em></td><td>Front part:</td><td>Use fill gradient from primary color palette</td></tr>
@@ -315,13 +699,21 @@ effects, which are shown below, are used to create depth.</p>
 <li>Create the basic shapes using a tool like Adobe Illustrator.</li>
 <li>Import the shape into a tool like Adobe Photoshop and scale to fit an image
 of 48x48 px on a transparent background. Mind the safeframe.</li>
-<li>Add the effects seen as described in Figure 5.</li>
+<li>Add the effects seen as described in Figure 8.</li>
 <li>Export the icon at 48x48 as a PNG file with transparency enabled.</li>
 </ol>
 
 </td>
 </tr>
 </table>
+
+<h4 id="dodonts_menu">"Do's and don'ts"</h4>
+
+<p>Below are some "do and don't" examples to consider when creating menu icons for
+your application. </p>
+
+
+<img src="{@docRoot}images/icon_design/do_dont_menuicons.png" style="padding:0;margin:0;padding-right:30%" width="400">
 
 
 <h2 id="statusbarstructure">Status bar icon</h2>
@@ -334,7 +726,7 @@ smaller and higher in contrast.</p>
 
 <ul>
 <li>Rounded corners must always be applied to the base shape and to the details
-of a status bar icon shown Figure 7.</li>
+of a status bar icon shown Figure 9.</li>
 
 <li>All dimensions specified are based on a 25x25 pixel artboard size with a 2
 pixel safeframe.</li>
@@ -356,7 +748,7 @@ status bar icon structure." />
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 6. </strong>Safeframe and corner-rounding for status bar
+    <p><strong>Figure 9. </strong>Safeframe and corner-rounding for status bar
 icons. Icon size is 25x25.</p>
   </div>
 </td>
@@ -373,11 +765,11 @@ face-on to enhance clarity at small sizes.</p>
 <tr>
 <td class="image-caption-i">
   <img src="{@docRoot}images/icon_design/statusbar_light.png" alt="A view of
-light, effects, and shadows for launcher icons."/>
+light, effects, and shadows for status bar icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 7. </strong>Light, effects, and shadows for launcher icons.</p>
+    <p><strong>Figure 10. </strong>Light, effects, and shadows for status bar icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
     <tr><td style="padding-right:1em"><em>1.</em></td><td>Front part:</td><td>Use fill gradient from primary color palette</td></tr>
@@ -432,14 +824,24 @@ light, effects, and shadows for launcher icons."/>
 <li>In a tool like Adobe Photoshop, create the base shape within a 25x25 px
 image on a transparent background. Mind the safeframe, and keep the upper and
 lower 2 pixels free.</li>
-<li>Add rounded corners as specified in Figure 6.</li>
-<li>Add light, effects, and shadows as specified in Figure 7.</li>
+<li>Add rounded corners as specified in Figure 9.</li>
+<li>Add light, effects, and shadows as specified in Figure 10.</li>
 <li>Export the icon at 25x25 as a PNG file with transparency enabled.</li>
 </ol>
 
 </td>
 </tr>
 </table>
+
+
+<h4 id="dodonts_status">"Do's and don'ts"</h4>
+
+<p>Below are some "do and don't" examples to consider when creating status bar icons for
+your application. </p>
+
+
+<img src="{@docRoot}images/icon_design/do_dont_statusicons.png" style="padding:0;margin:0;padding-right:30%" width="400">
+
 
 
 <h2 id="tabstructure">Tab icon</h2>
@@ -477,7 +879,7 @@ unselected tab icon structure." />
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 8. </strong>Safeframe and fill gradient for unselected tab
+    <p><strong>Figure 11. </strong>Safeframe and fill gradient for unselected tab
 icons. Icon size is 32x32.</p>
   </div>
 </td>
@@ -489,7 +891,7 @@ selected tab icon structure." />
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 9. </strong>Safeframe and fill gradient for tab icons in
+    <p><strong>Figure 12. </strong>Safeframe and fill gradient for tab icons in
 selected state. Icon size is 32x32.</p>
   </div>
 </td>
@@ -511,7 +913,7 @@ of light, effects, and shadows for unselected tab icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 10. </strong>Light, effects, and shadows for unselected
+    <p><strong>Figure 13. </strong>Light, effects, and shadows for unselected
 tab icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
@@ -536,7 +938,7 @@ tab icons.</p>
 <li>Create the basic shapes using a tool like Adobe Illustrator.</li>
 <li>Import the shape to a tool like Adobe Photoshop and scale to fit an image of
 32x32 px on a transparent background.</li>
-<li>Add the effects seen in Figure 10 for the unselected state filter.</li>
+<li>Add the effects seen in Figure 13 for the unselected state filter.</li>
 <li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
 </ol>
 
@@ -557,7 +959,7 @@ light, effects, and shadows for selected tab icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 11. </strong>Light, effects, and shadows for selected tab
+    <p><strong>Figure 14. </strong>Light, effects, and shadows for selected tab
 icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
@@ -595,7 +997,7 @@ icons.</p>
 <li>Create the basic shape using a tool like Adobe Illustrator.</li>
 <li>Import the shape into a tool like Adobe Photoshop and scale to fit a 32x32
 px artboard with a transparent background. </li>
-<li>Add the effects seen in Figure 11 for the selected state filter.</li>
+<li>Add the effects seen in Figure 14 for the selected state filter.</li>
 <li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
 </ol>
 
@@ -635,7 +1037,7 @@ icon structure." />
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 12. </strong>Safeframe and fill gradient for dialog icons.
+    <p><strong>Figure 15. </strong>Safeframe and fill gradient for dialog icons.
 Icon size is 32x32.</p>
   </div>
 </td>
@@ -656,7 +1058,7 @@ effects, and shadows for dialog icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 13. </strong>Light, effects, and shadows for dialog
+    <p><strong>Figure 16. </strong>Light, effects, and shadows for dialog
 icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
@@ -680,7 +1082,7 @@ icons.</p>
 <li>Create the basic shapes using a tool like Adobe Illustrator.</li>
 <li>Import the shape into a tool like Adobe Photoshop and scale to fit an image
 of 32x32 px on a transparent background. </li>
-<li>Add the effects seen in Figure 13 for the proper filter.</li>
+<li>Add the effects seen in Figure 16 for the proper filter.</li>
 <li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
 </ol>
 
@@ -693,8 +1095,9 @@ of 32x32 px on a transparent background. </li>
 
 <p>List view icons look a lot like dialog icons, but they use an inner shadow
 effect where the light source is above the object. They are also designed to be
-used only in a list view. Examples include the Android Market application home
-screen and the driving directions screen in the Maps application.</p>
+used only in a {@link android.widget.ListView}. Examples include the Android 
+Market application home screen and the driving directions screen in the Maps
+application.</p>
 
 <h4>Structure</h4>
 
@@ -720,7 +1123,7 @@ view icon structure." />
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 14. </strong>Safeframe and fill gradient for list view
+    <p><strong>Figure 17. </strong>Safeframe and fill gradient for list view
 icons. Icon size is 32x32.</p>
   </div>
 </td>
@@ -741,7 +1144,7 @@ of light, effects, and shadows for list view icons."/>
 </td>
 <td class="image-caption-c">
   <div class="caption grad-rule-top">
-    <p><strong>Figure 15. </strong>Light, effects, and shadows for list view
+    <p><strong>Figure 18. </strong>Light, effects, and shadows for list view
 icons.</p>
     <div class="image-caption-nested">
     <table style="margin-top:0;">
@@ -762,7 +1165,7 @@ icons.</p>
 <h4 id="menusteps">Step by step</h4>
 
 <ol>
-<li>Add the effects seen in Figure 15 for the proper filter.</li>
+<li>Add the effects seen in Figure 18 for the proper filter.</li>
 <li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
 <li>Create the basic shapes using a tool like Adobe Illustrator.</li>
 <li>Import the shape into a tool like Adobe Photoshop and scale to fit an image
@@ -773,47 +1176,265 @@ of 32x32 px on a transparent background. </li>
 </tr>
 </table>
 
+<h2 id="design_tips">Tips for Designers</h2>
 
-<h2 id="dodonts">General guidelines</h2>
+<p>Here are some tips that you might find useful as you develop icons or other
+drawable assets for your application. The tips assume that you are using
+Photoshop or similar raster image-editing program.</p>
 
-<p>Below are some "do and don't" guidelines to consider when creating icons for
-your application. By following the guidelines, you can ensure that your icons
-will work well with other parts of the Android platform UI and will meet the
-expectations of your application's users. </p>
+<h4>Use common naming conventions for icon assets</h4>
 
-<table style="margin:0px;padding:0px;">
+<p>Try to name files so that related assets will group together inside a
+directory when they are sorted alphabetically. In particular, it helps to use a
+common prefix for each icon type. For example:</p>
+
+<table>
 <tr>
-<td style="border:0;width:350px;">
-
-<h4>Do...</h4>
-
-<ul>
-<li>Use a normal perspective. The depth of an object should be realistic.</li>
-<li>Keep it simple! By overdoing an icon, it loses it purpose and
-readability.</li>
-<li>Use colors only when necessary. Mind that the base of a launcher icon should
-be grey and feel solid. </li>
-<li>Use the correct angles for the specific icon types.</li>
-</ul>
-</td>
-<td style="border:0;width:350px;">
-
-<h4>Don’t...</h4>
-
-<ul>
-<li>Use open elements like text alone as icons. Instead place those elements on
-a base shape.</li>
-<li>Use colors for your status bar notifications. Those are reserved for
-specific phone-only functions.</li>
-</ul>
-</td>
+<th>Asset Type</th>
+<th>Prefix</th>
+<th>Example</th>
 </tr>
 <tr>
-<td colspan="2" style="border:0;">
-<img src="{@docRoot}images/icon_design/do_dont.png" alt="Side-by-side examples
-of good/bad icon design."/>
-</td>
+<td>Icons</td>
+<td><code>ic_</code></td>
+<td><code>ic_star.png</code></td>
+</tr>
+<tr>
+<td>Launcher icons</td>
+<td><code>ic_launcher</code></td>
+<td><code>ic_launcher_calendar.png</code></td>
+</tr>
+<tr>
+<td>Menu icons</td>
+<td><code>ic_menu</code></td>
+<td><code>ic_menu_archive.png</code></td>
+</tr>
+<tr>
+<td>Status bar icons</td>
+<td><code>ic_stat_sys</code> or <code>ic_stat_notify</code></td>
+<td><code>ic_stat_notify_msg.png</code></td>
+</tr>
+<tr>
+<td>Tab icons</td>
+<td><code>ic_tab</code></td>
+<td><code>ic_tab_recent.png</code></td>
+</tr>
+<tr>
+<td>Dialog icons</td>
+<td><code>ic_dialog</code></td>
+<td><code>ic_dialog_info.png</code></td>
+</tr>
 </table>
+
+<p>Note that you are not required to use a shared prefix of any type &mdash;
+doing so is for your convenience only.</p>
+
+
+<h4>Set up a working space that organizes files for multiple densities</h4>
+
+<p>Developing multiple sets of assets for different screen densities means
+creating multiple copies of files. To help keep the multiple copies of files
+safe and easier to find, we recommend creating a directory structure in your
+working space that organizes asset files per resolution. For example:</p>
+
+<pre>assets/...
+    ldpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png
+    mdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png
+    hdpi/...
+        _pre_production/...
+            <em>working_file</em>.psd
+        <em>finished_asset</em>.png</pre>
+
+<p>This structure parallels the density-specific structure in which you will
+ultimately store the finished assets in your application's resources. Because
+the structure in your working space is similar to that of the application, you
+can quickly determine which assets should be copied to each application
+resources directory. Separating assets by density also helps you detect any
+variances in filenames across densities, which is important because
+corresponding assets for different densities must share the same filename.</p>
+
+<p>For comparison, here's the resources directory structure of a typical
+application: </p>
+
+<pre>res/...
+    drawable-ldpi/...
+        <em>finished_asset</em>.png
+    drawable-mdpi/...
+        <em>finished_asset</em>.png
+    drawable-hdpi/...
+        <em>finished_asset</em>.png</pre>
+
+
+<h4>Create medium-density assets first</h4>
+
+<p>Since medium density is the baseline for Android, begin your designing work
+by creating the <code>mdpi</code> assets. See <a href="#screens-table">Table
+1</a>, above, for the actual pixel dimensions of various icon types. When
+possible, use vector art or paths within Photoshop layers so that it will be
+easier to scale the assets up or down later.</p>
+
+<p>For each discreet asset, or set of like assets that share the same bounding
+box dimensions, create a working Photoshop file and save it in the
+<code>_pre_production</code> directory. For example:
+<code>ic_tabs_phone_mdpi.psd</code>. This will make it easier to locate and edit
+individual assets if changes are required. It's also helpful to use a
+density-specific suffix in the filename for the working file, to avoid confusion
+when editing the files. For example: <code>_mdpi.psd</code>.</p>
+
+<p>From the <code>mdpi</code> working files, save individual flattened assets to
+the corresponding density-specific resource directory (in this case,
+<code>mdpi/</code>) in your working space.</p>
+
+
+<h4>Create high- and low-density assets from the medium-density sources</h4>
+
+<p>When you are finished working with your medium-density assets, copy the
+working files from the your workspace's <code>mdpi/_pre_production</code>
+directory to the corresponding locations in the <code>ldpi</code> and
+<code>hdpi</code> directories. If any of the working files use a
+density-specific suffix, rename the suffix to match the intended density.</p>
+
+<p>Next, open each working file in the high- and low-density directories and
+scale the image up or down to match the intended density. To create an
+<code>hdpi</code> asset, scale the image by 150%. To create an <code>ldpi</code>
+asset, scale the image down by 75%. To scale the images, follow these steps:</p>
+
+<ol>
+<li>Open the working file in Photoshop or similar program.</li>
+<li>Under the <strong>Image</strong> menu, choose <strong>Image Size</strong>.</li>
+<li>On the Image Size panel, change the Width pop up menu to "percent."</li>
+<li>Change the Width value to "150" for <code>hdpi</code> assets and "75" for <code>ldpi</code> assets.</li>
+<li>Select the Scale Styles checkbox.</li>
+<li>Select the Constrain Proportions checkbox.</li>
+<li>Select the Resample Image checkbox and set the pop up menu to "Bicubic (Best for smooth gradients)."</li>
+<li>Click <strong>OK</strong>.</li>
+</ol>
+
+<p>After you scale each image, save it to the target density-specific resource
+directory.</p>
+
+<p>If you are scaling a nine-patch image, see the section below for notes on how
+to handle the tick marks at the edge of the image. </p>
+
+
+<h4>After scaling, redraw bitmap layers as needed</h4>
+
+<p>If you scaled an image up from a bitmap layer, rather than from a vector
+layer, those layers may need to be redrawn manually to accommodate the higher
+density. For example if a 60x60 circle was painted as a bitmap for
+<code>mdpi</code> it will need to be repainted as a 90x90 circle for
+<code>hdpi</code>.</p>
+
+
+<h4>When scaling a 9-patch image, crop tick marks before scaling and replace
+them after</h4>
+
+<p>Nine-patch images include tick marks at the outer edge of the image. When you
+scale a nine-patch image, the tick marks are also scaled, which produces an
+inaccurate result. The recommended way to handle the scaling of nine-patch
+images is to remove the tick marks from the source image before scaling and then
+manually replace the tick marks at the proper size after scaling.</p>
+
+<p>To more easily determine the tick marks after the working file has been
+scaled to a new resolution, first create a temporary duplicate flattened image
+which includes the tick marks: </p>
+
+<ol>
+<li>Under the <strong>Select</strong> menu choose <strong>All</strong>.</li>
+<li>Under the <strong>Edit</strong> menu choose 
+<strong>Copy Merged</strong>.</li>
+<li>Under the <strong>File</strong> menu choose <strong>New</strong> and then
+click <strong>OK</strong> on the new panel.</li>
+<li>Under the <strong>Edit</strong> choose <strong>Paste</strong>.</li>
+</ol>
+
+<p>After creating the temporary copy, go back to the working file and crop
+the tick marks out of the working file before scaling the image:</p>
+<ol>
+<li>Under the <strong>Image</strong> menu, choose the 
+<strong>Canvas Size</strong> command.</li>
+<li>On the Canvas Size panel, subtract 2 pixels from the Width and
+Height values.</li>
+<li>Set the Anchor to "Center."</li>
+<li>Click <strong>OK</strong></li>
+</ol>
+
+<p>Scale the working file to the target density. With the working file scaled
+and the canvas enlarged so that the tick marks can be repainted:</p>
+
+<ol>
+<li>Under the <strong>Image</strong> menu, choose the 
+<strong>Canvas Size</strong> command.</li>
+<li>On the <strong>Canvas Size</strong> panel, add 2 pixels to the Width
+and Height values.</li>
+<li>Set the Anchor to "Center."</li>
+<li>Click <strong>OK</strong>.</li>
+</ol>
+
+<p>To determine tick marks, go back to duplicate flattened image and scale it to
+the target resolution. </p>
+
+<p>Copy the scaled duplicate flattened image into a new layer in the working
+file to use as reference. Create a new layer in which to paint new tick marks at
+the single pixel outer edge of the image. Note tickmarks must be 100% opaque
+black, without transparency, and all other areas of the tick mark region must be
+100% transparent, otherwise the system will not interpret the 9-patch image
+correctly. </p>
+
+<p>Using the scaled duplicate flattened image as reference paint new tick marks
+in the new layer that align with the reference layer. Note round up pixels for
+tick marks. Any pixels that are partially opaque in the reference layer should
+be fully opaqe in the new layer.</p>
+
+
+<h4>Adjust stroke and drop shadow after scaling an image</h4>
+
+<p>While it is desirable to scale layer styles for the most part (such as for
+Gradient Overlay or Inner Glow), you may need to manually reset the Stroke and
+Drop Shadow in the scaled image to 1 px before saving, especially when scaling
+to <code>hdpi</code>.
+
+<h4>Save nine-patch images with the appropriate filename suffix</h4>
+
+<p>If an asset is a 9-patch asset (with tick marks), be sure to save the asset
+in PNG format with a filename that includes the <code>.9.png</code> suffix. If
+the filename does not use the suffix, the system won't recognize the image as a
+nine-patch asset and won't resize it as intended. </p>
+
+
+<h4>When saving image assets, remove the Photoshop header</h4>
+
+<p>To help keep each image asset as small as possible, make sure to remove the
+Photoshop headers from the file. To remove the Photoshop header, follow these
+steps: </p>
+
+<ol>
+<li>Under the <strong>File</strong> menu, choose the <strong>Save for Web &amp;
+Devices</strong> command </li>
+<li>On the "Save for Web &amp; Devices" panel, set the Preset pop-up to
+"PNG-24," set the pop-up under Presets to "PNG-24" as well, and select the
+Transparency box (if the image uses transparency)</li>
+<li>Select <strong>Save</strong>.</li>
+</ol>
+
+<h4>Make sure that corresponding assets for different densities use the same
+filenames</h4>
+
+<p>Corresponding icon asset files for each density must use the same filename,
+but be stored in density-specific resource directories. This allows the system
+to look up and load the proper resource according to the resource requested by
+the application and the screen characteristics of the device. For this reason,
+make sure that the set of assets in each density-specific is consistent and do
+not use density-specific suffixes in the filenames. For more information about
+how to manage density-specific resources, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>. </p>
 
 <h2 id="templatespack">Using the Android Icon Templates Pack</h2>
 
@@ -831,7 +1452,7 @@ layers and treatments may vary based on the program you are using.</p>
 <p>You can obtain the Icon Templates Pack archive using the link below: </p>
 
 <p style="margin-left:2em"><a
-href="{@docRoot}shareables/icon_templates-v1.0.zip">Download the Icon Templates
+href="{@docRoot}shareables/icon_templates-v2.0.zip">Download the Icon Templates
 Pack &raquo;</a>
 
 
@@ -843,148 +1464,20 @@ Pack &raquo;</a>
 icons are provided for your reference only &mdash; please do not reuse these
 icons in your applications.</code>.
 
-<table class="image-caption">
-<tr>
+<img src="{@docRoot}images/icon_design/IconGraphic_Icons.png" style="margin-top:2em;" />
 
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_alarmclock.png" alt="Android asset" />
-  <div class="caption">Alarm Clock</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_browser.png" alt="Android asset" />
-  <div class="caption">Browser</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_calculator.png" alt="Android asset" />
-  <div class="caption">Calculator</div></td>
-	
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_calendar.png" alt="Android asset" />
-  <div class="caption">Calendar</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_video_camera.png" alt="Android asset" />
-  <div class="caption">Camcorder</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_camera.png" alt="Android asset" />
-  <div class="caption">Camera</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_contacts.png" alt="Android asset" />
-  <div class="caption">Contacts</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_phone_dialer.png" alt="Android asset" />
-  <div class="caption">Dialer</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_email_generic.png" alt="Android asset" />
-  <div class="caption">Email</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_gallery.png" alt="Android asset" />
-  <div class="caption">Gallery</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_generic_application.png" alt="Android asset" />
-  <div class="caption">Generic application</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_email.png" alt="Android asset" />
-  <div class="caption">Gmail</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_google_talk.png" alt="Android asset" />
-  <div class="caption">Google Talk</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_IM.png" alt="Android asset" />
-  <div class="caption">IM</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_maps.png" alt="Android asset" />
-  <div class="caption">Maps</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_marketplace.png" alt="Android asset" />
-  <div class="caption">Market </div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_sms_mms.png" alt="Android asset" />
-  <div class="caption">Messaging </div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_musicplayer_2.png" alt="Android asset" />
-  <div class="caption">Music</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_settings.png" alt="Android asset" />
-  <div class="caption">Settings</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_voicedial.png" alt="Android asset" />
-  <div class="caption">Voice Dialer</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_voicesearch.png" alt="Android asset" />
-  <div class="caption">Voice Search</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_launcher_youtube.png" alt="Android asset" />
-  <div class="caption">YouTube</div></td>
-</tr>
-</table>
 
 <h3 id="menuapx">Standard menu icons</h3>
 
-<p>Shown below are standard menu icons that are included in the Android platform
-(as of Android 1.5). You can reference any of these icon resources from your
-application as needed, but make sure that the action you assign to the icon is
-consistent with that listed. Note that this is not a complete list of icons and
-that the actual appearance of standard icons may change across platform
-versions.</p>
+<p>Shown below are standard menu icons that are used in the Android
+system. Because these resources can change between platform versions, you 
+should not reference the system's copy of the resources. If you want
+use any icons or other internal drawable resources, you should store a
+local copy of those icons or drawables in your application resources, 
+then reference the local copy from your application code. In that way, you can
+maintain control over the appearance of your icons, even if the system's
+copy changes. Note that the list below is not intended to be complete.</p>
 
-<p>To reference one of the icons from your code, use
-<code>android.R.drawable.&lt;icon_resource_identifier&gt;</code>. For example,
-you can call a menu item's {@link android.view.MenuItem#setIcon(android.graphics.drawable.Drawable) setIcon()}
-method and pass the resource name:</p> 
-
-<p style="margin-left:2em"><code>.setIcon(android.R.drawable.ic_menu_more);</code>.
-
-<p>You could reference the same icon from a layout file using
-<code>android:icon="@android:drawable/ic_menu_more"></code>.</p>
-
-<p>To determine the resource ID for an icon listed below, hover over the icon or
-simply look at image filenames, which use the format
-"&lt;icon_resource_identifier&gt;.png".</p>
 
 <table class="image-caption">
 <tr>
@@ -1115,24 +1608,14 @@ simply look at image filenames, which use the format
 
 <h3 id="statusbarapx">Standard status bar icons</h3>
 
-<p>Shown below are standard status bar icons included in the Android platform
-(as of Android 1.5). You can reference any of these icon resources from your
-application as needed, but make sure that the meaning of the icon is consistent
-with the standard meaning listed. Note that this is not a complete list of icons
-and that the actual appearance of standard icons may change across platform
-versions.</p>
-
-<p>To reference one of the icons from your code, use
-<code>android.R.drawable.&lt;icon_resource_identifier&gt;</code>. For example,
-you can construct a simple notification that references one of the icons like
-this: </p>
-
-<p style="margin-left:2em"><code>new Notification(R.drawable.stat_notify_calendar, 
-"sample text", System.currentTimeMillis());</code></p>
-
-<p>To determine the resource ID for an icon listed below, hover over the icon 
-or simply look at the image filename, which use the format 
-"&lt;icon_resource_identifier&gt;.png".</p>
+<p>Shown below are standard status bar icons that are used in the Android
+platform. Because these resources can change between platform versions, you 
+should not reference the system's copy of the resources. If you want
+use any icons or other internal drawable resources, you should store a
+local copy of those icons or drawables in your application resources, 
+then reference the local copy from your application code. In that way, you can
+maintain control over the appearance of your icons, even if the system's
+copy changes. Note that the list below is not intended to be complete.</p>
 
 
 <table class="image-caption">
@@ -1186,5 +1669,4 @@ or simply look at the image filename, which use the format
 
 </tr>
 </table>
-
 

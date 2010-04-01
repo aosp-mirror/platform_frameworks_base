@@ -88,6 +88,8 @@ struct event_loop_native_data_t {
     int envVer;
     /* reference to our java self */
     jobject me;
+    /* flag to indicate if the event loop thread is running */
+    bool running;
 };
 
 struct _Properties {

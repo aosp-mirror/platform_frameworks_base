@@ -2996,7 +2996,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (!ret.finishing) {
                         int index = indexOfTokenLocked(ret);
                         if (index >= 0) {
-                            finishActivityLocked(ret, 0, Activity.RESULT_CANCELED,
+                            finishActivityLocked(ret, index, Activity.RESULT_CANCELED,
                                     null, "clear");
                         }
                         return null;
@@ -8910,6 +8910,34 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 removeProcessLocked(app, false);
                 return false;
             }
+        } else {
+            HistoryRecord r = topRunningActivityLocked(null);
+            if (r.app == app) {
+                // If the top running activity is from this crashing
+                // process, then terminate it to avoid getting in a loop.
+                Slog.w(TAG, "  Force finishing activity "
+                        + r.intent.getComponent().flattenToShortString());
+                int index = indexOfTokenLocked(r);
+                finishActivityLocked(r, index,
+                        Activity.RESULT_CANCELED, null, "crashed");
+                // Also terminate an activities below it that aren't yet
+                // stopped, to avoid a situation where one will get
+                // re-start our crashing activity once it gets resumed again.
+                index--;
+                if (index >= 0) {
+                    r = (HistoryRecord)mHistory.get(index);
+                    if (r.state == ActivityState.RESUMED
+                            || r.state == ActivityState.PAUSING
+                            || r.state == ActivityState.PAUSED) {
+                        if (!r.isHomeActivity) {
+                            Slog.w(TAG, "  Force finishing activity "
+                                    + r.intent.getComponent().flattenToShortString());
+                            finishActivityLocked(r, index,
+                                    Activity.RESULT_CANCELED, null, "crashed");
+                        }
+                    }
+                }
+            }
         }
 
         // Bump up the crash count of any services currently running in the proc.
@@ -10228,12 +10256,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         int count = mHistory.size();
 
         // convert the token to an entry in the history.
-        HistoryRecord r = null;
         int index = -1;
         for (int i=count-1; i>=0; i--) {
             Object o = mHistory.get(i);
             if (o == token) {
-                r = (HistoryRecord)o;
                 index = i;
                 break;
             }
