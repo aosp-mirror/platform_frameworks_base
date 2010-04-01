@@ -736,14 +736,12 @@ class CallbackProxy extends Handler {
                 }
                 break;
             case AUTH_CREDENTIALS:
-                if (mWebViewClient != null) {
-                    String host = msg.getData().getString("host");
-                    String realm = msg.getData().getString("realm");
-                    username = msg.getData().getString("username");
-                    password = msg.getData().getString("password");
-                    mWebViewClient.onReceivedHttpAuthCredentials(
-                            mWebView, host, realm, username, password);
-                }
+                String host = msg.getData().getString("host");
+                String realm = msg.getData().getString("realm");
+                username = msg.getData().getString("username");
+                password = msg.getData().getString("password");
+                mWebView.setHttpAuthUsernamePassword(
+                        host, realm, username, password);
                 break;
         }
     }
@@ -929,19 +927,6 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
-    public void onReceivedHttpAuthCredentials(String host, String realm,
-            String username, String password) {
-        if (mWebViewClient == null) {
-            return;
-        }
-        Message msg = obtainMessage(AUTH_CREDENTIALS);
-        msg.getData().putString("host", host);
-        msg.getData().putString("realm", realm);
-        msg.getData().putString("username", username);
-        msg.getData().putString("password", password);
-        sendMessage(msg);
-    }
-
     /**
      * @hide - hide this because it contains a parameter of type SslError.
      * SslError is located in a hidden package.
@@ -1076,6 +1061,16 @@ class CallbackProxy extends Handler {
         }
         // Doesn't matter here
         return false;
+    }
+
+    public void onReceivedHttpAuthCredentials(String host, String realm,
+            String username, String password) {
+        Message msg = obtainMessage(AUTH_CREDENTIALS);
+        msg.getData().putString("host", host);
+        msg.getData().putString("realm", realm);
+        msg.getData().putString("username", username);
+        msg.getData().putString("password", password);
+        sendMessage(msg);
     }
 
     //--------------------------------------------------------------------------
