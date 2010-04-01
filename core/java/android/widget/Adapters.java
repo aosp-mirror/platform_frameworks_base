@@ -148,7 +148,9 @@ import static com.android.internal.R.*;
  *  drawable and must be bound to an {@link android.widget.ImageView}</li>
  *  <li>A fully qualified class name: The name of a class corresponding to an implementation of
  *  {@link android.widget.Adapters.CursorBinder}. Cursor binders can be used to provide
- *  bindings not supported by default</li>
+ *  bindings not supported by default. Custom binders cannot be used with
+ *  {@link android.content.Context#isRestricted() restricted contexts}, for instance in an
+ *  app widget</li>
  * </ul>
  * 
  * <a name="xml-cursor-adapter-bind-transformation" />
@@ -190,8 +192,11 @@ import static com.android.internal.R.*;
  *  if <code>android:withClass</code> is not specified and ignored if <code>android:withClass</code>
  *  is specified</li>
  *  <li><code>android:withClass</code>: A fully qualified class name corresponding to an
- *  implementation of {@link android.widget.Adapters.CursorTransformation}.
- *  This attribute is mandatory if <code>android:withExpression</code> is not specified</li>
+ *  implementation of {@link android.widget.Adapters.CursorTransformation}. Custom
+ *  transformationscannot be used with
+ *  {@link android.content.Context#isRestricted() restricted contexts}, for instance in
+ *  an app widget This attribute is mandatory if <code>android:withExpression</code> is
+ *  not specified</li>
  * </ul>
  * 
  * <h3>Example</h3>
@@ -395,7 +400,7 @@ public class Adapters {
             Object... parameters) {
 
         XmlCursorAdapter adapter = (XmlCursorAdapter) loadAdapter(context, id, ADAPTER_CURSOR,
-                (Object[]) null);
+                parameters);
 
         if (uri != null) {
             adapter.setUri(uri);
@@ -433,7 +438,7 @@ public class Adapters {
             Object... parameters) {
 
         XmlCursorAdapter adapter = (XmlCursorAdapter) loadAdapter(context, id, ADAPTER_CURSOR,
-                (Object[]) null);
+                parameters);
 
         if (cursor != null) {
             adapter.changeCursor(cursor);
@@ -462,7 +467,7 @@ public class Adapters {
      * @see #loadCursorAdapter(android.content.Context, int, String, Object[]) 
      */
     public static BaseAdapter loadAdapter(Context context, int id, Object... parameters) {
-        final BaseAdapter adapter = loadAdapter(context, id, null, (Object[]) null);
+        final BaseAdapter adapter = loadAdapter(context, id, null, parameters);
         if (adapter instanceof ManagedAdapter) {
             ((ManagedAdapter) adapter).load();
         }
@@ -879,6 +884,7 @@ public class Adapters {
         private final String mSortOrder;
         private final String[] mColumns;
         private final CursorBinder[] mBinders;
+        private AsyncTask<Void,Void,Cursor> mLoadTask;
 
         XmlCursorAdapter(Context context, int layout, String uri, String[] from, int[] to,
                 String selection, String[] selectionArgs, String sortOrder,
@@ -923,12 +929,21 @@ public class Adapters {
         
         public void load() {
             if (mUri != null) {
-                new QueryTask().execute();
+                mLoadTask = new QueryTask().execute();
             }
         }
 
         void setUri(String uri) {
             mUri = uri;
+        }
+
+        @Override
+        public void changeCursor(Cursor c) {
+            if (mLoadTask != null && mLoadTask.getStatus() != QueryTask.Status.FINISHED) {
+                mLoadTask.cancel(true);
+                mLoadTask = null;
+            }
+            super.changeCursor(c);
         }
 
         class QueryTask extends AsyncTask<Void, Void, Cursor> {
@@ -945,10 +960,9 @@ public class Adapters {
 
             @Override
             protected void onPostExecute(Cursor cursor) {
-                // TODO: We should not do this if the adapter has been "destroyed"
-                // This would happen in the case of Activity.onDestroy() finishing before
-                // we return from doInBackground()
-                changeCursor(cursor);
+                if (!isCancelled()) {
+                    XmlCursorAdapter.super.changeCursor(cursor);
+                }
             }
         }
     }
