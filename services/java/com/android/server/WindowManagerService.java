@@ -11269,6 +11269,8 @@ public class WindowManagerService extends IWindowManager.Stub
         float mDimTargetAlpha;
         float mDimDeltaPerMs;
         long mLastDimAnimTime;
+        
+        int mLastDimWidth, mLastDimHeight;
 
         DimAnimator (SurfaceSession session) {
             if (mDimSurface == null) {
@@ -11294,12 +11296,18 @@ public class WindowManagerService extends IWindowManager.Stub
                         dw + "x" + dh + ")");
                 mDimShown = true;
                 try {
+                    mLastDimWidth = dw;
+                    mLastDimHeight = dh;
                     mDimSurface.setPosition(0, 0);
                     mDimSurface.setSize(dw, dh);
                     mDimSurface.show();
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Failure showing dim surface", e);
                 }
+            } else if (mLastDimWidth != dw || mLastDimHeight != dh) {
+                mLastDimWidth = dw;
+                mLastDimHeight = dh;
+                mDimSurface.setSize(dw, dh);
             }
         }
 
