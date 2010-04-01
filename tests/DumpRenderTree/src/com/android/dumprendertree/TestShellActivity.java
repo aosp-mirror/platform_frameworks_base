@@ -515,6 +515,13 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         @Override
         public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler,
                 String host, String realm) {
+            if (handler.useHttpAuthUsernamePassword() && view != null) {
+                String[] credentials = view.getHttpAuthUsernamePassword(host, realm);
+                if (credentials != null && credentials.length == 2) {
+                    handler.proceed(credentials[0], credentials[1]);
+                    return;
+                }
+            }
             handler.cancel();
         }
 
