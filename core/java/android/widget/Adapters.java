@@ -73,14 +73,14 @@ import static com.android.internal.R.*;
  *  each item of the adapter. This attribute is mandatory.</li>
  *  <li><code>android:selection</code>: Selection expression, used when the
  *  <code>android:uri</code> attribute is defined or when the adapter is loaded with
- *  {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object...)}.
+ *  {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}.
  *  This attribute is optional.</li>
  *  <li><code>android:sortOrder</code>: Sort expression, used when the
  *  <code>android:uri</code> attribute is defined or when the adapter is loaded with
- *  {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object...)}.
+ *  {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}.
  *  This attribute is optional.</li>
  *  <li><code>android:uri</code>: URI of the content provider to query to retrieve a cursor.
- *  Specifying this attribute is equivalent to calling {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object...)}.
+ *  Specifying this attribute is equivalent to calling {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}.
  *  If you call this method, the value of the XML attribute is ignored. This attribute is
  *  optional.</li>
  * </ul>
@@ -220,7 +220,7 @@ import static com.android.internal.R.*;
  * <h3>Related APIs</h3>
  * <ul>
  *  <li>{@link android.widget.Adapters#loadAdapter(android.content.Context, int, Object[])}</li>
- *  <li>{@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, android.database.Cursor, Object...)}</li>
+ *  <li>{@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, android.database.Cursor, Object[])}</li>
  *  <li>{@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}</li>
  *  <li>{@link android.widget.Adapters.CursorBinder}</li>
  *  <li>{@link android.widget.Adapters.CursorTransformation}</li>
@@ -389,7 +389,7 @@ public class Adapters {
      * 
      * @see android.content.ContentProvider
      * @see android.widget.CursorAdapter
-     * @see #loadAdapter(android.content.Context, int, Object...) 
+     * @see #loadAdapter(android.content.Context, int, Object[]) 
      */
     public static CursorAdapter loadCursorAdapter(Context context, int id, String uri,
             Object... parameters) {
@@ -427,7 +427,7 @@ public class Adapters {
      * @see android.content.ContentProvider
      * @see android.widget.CursorAdapter
      * @see android.database.Cursor
-     * @see #loadAdapter(android.content.Context, int, Object...) 
+     * @see #loadAdapter(android.content.Context, int, Object[]) 
      */
     public static CursorAdapter loadCursorAdapter(Context context, int id, Cursor cursor,
             Object... parameters) {
@@ -458,8 +458,8 @@ public class Adapters {
      *  
      * @return An adapter instance.
      * 
-     * @see #loadCursorAdapter(android.content.Context, int, android.database.Cursor, Object...) 
-     * @see #loadCursorAdapter(android.content.Context, int, String, Object...) 
+     * @see #loadCursorAdapter(android.content.Context, int, android.database.Cursor, Object[]) 
+     * @see #loadCursorAdapter(android.content.Context, int, String, Object[]) 
      */
     public static BaseAdapter loadAdapter(Context context, int id, Object... parameters) {
         final BaseAdapter adapter = loadAdapter(context, id, null, (Object[]) null);
