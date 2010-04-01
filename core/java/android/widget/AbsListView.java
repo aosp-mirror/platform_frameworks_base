@@ -2493,16 +2493,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     delta = Math.max(-(getHeight() - mPaddingBottom - mPaddingTop - 1), delta);
                 }
 
-                // Check to see if we have bumped into the scroll limit
-                View motionView = getChildAt(mMotionPosition - mFirstPosition);
-                int oldTop = 0;
-                if (motionView != null) {
-                    oldTop = motionView.getTop();
-                }
+                final boolean atEnd = trackMotionScroll(delta, delta);
 
-                trackMotionScroll(delta, delta);
-
-                if (more) {
+                if (more && !atEnd) {
                     invalidate();
                     mLastFlingY = y;
                     post(this);
