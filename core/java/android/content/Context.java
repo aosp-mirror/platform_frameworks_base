@@ -1373,7 +1373,6 @@ public abstract class Context {
     public static final String SENSOR_SERVICE = "sensor";
     
     /**
-     * @hide
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.os.storage.StorageManager} for accesssing system storage
      * functions.
