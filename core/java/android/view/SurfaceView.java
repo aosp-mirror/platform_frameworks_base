@@ -105,6 +105,7 @@ public class SurfaceView extends View {
     
     static final int KEEP_SCREEN_ON_MSG = 1;
     static final int GET_NEW_SURFACE_MSG = 2;
+    static final int UPDATE_WINDOW_MSG = 3;
     
     int mWindowType = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
     
@@ -119,6 +120,9 @@ public class SurfaceView extends View {
                 } break;
                 case GET_NEW_SURFACE_MSG: {
                     handleGetNewSurface();
+                } break;
+                case UPDATE_WINDOW_MSG: {
+                    updateWindow(false);
                 } break;
             }
         }
@@ -152,6 +156,9 @@ public class SurfaceView extends View {
     int mFormat = -1;
     int mType = -1;
     final Rect mSurfaceFrame = new Rect();
+    int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
+    boolean mUpdateWindowNeeded;
+    boolean mReportDrawNeeded;
     private Translator mTranslator;
     
     public SurfaceView(Context context) {
@@ -369,7 +376,8 @@ public class SurfaceView extends View {
                 || mNewSurfaceNeeded;
         final boolean typeChanged = mType != mRequestedType;
         if (force || creating || formatChanged || sizeChanged || visibleChanged
-            || typeChanged || mLeft != mLocation[0] || mTop != mLocation[1]) {
+            || typeChanged || mLeft != mLocation[0] || mTop != mLocation[1]
+            || mUpdateWindowNeeded || mReportDrawNeeded) {
 
             if (localLOGV) Log.i(TAG, "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
@@ -425,28 +433,47 @@ public class SurfaceView extends View {
 
                 mNewSurfaceNeeded = false;
                 
-                mSurfaceLock.lock();
-                mDrawingStopped = !visible;
-
-                final int relayoutResult = mSession.relayout(
-                    mWindow, mLayout, mWidth, mHeight,
-                        visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
-                        mVisibleInsets, mConfiguration, mSurface);
-
-                if (localLOGV) Log.i(TAG, "New surface: " + mSurface
-                        + ", vis=" + visible + ", frame=" + mWinFrame);
+                boolean realSizeChanged;
+                boolean reportDrawNeeded;
                 
-                mSurfaceFrame.left = 0;
-                mSurfaceFrame.top = 0;
-                if (mTranslator == null) {
-                    mSurfaceFrame.right = mWinFrame.width();
-                    mSurfaceFrame.bottom = mWinFrame.height();
-                } else {
-                    float appInvertedScale = mTranslator.applicationInvertedScale;
-                    mSurfaceFrame.right = (int) (mWinFrame.width() * appInvertedScale + 0.5f);
-                    mSurfaceFrame.bottom = (int) (mWinFrame.height() * appInvertedScale + 0.5f);
+                mSurfaceLock.lock();
+                try {
+                    mUpdateWindowNeeded = false;
+                    reportDrawNeeded = mReportDrawNeeded;
+                    mReportDrawNeeded = false;
+                    mDrawingStopped = !visible;
+    
+                    final int relayoutResult = mSession.relayout(
+                        mWindow, mLayout, mWidth, mHeight,
+                            visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
+                            mVisibleInsets, mConfiguration, mSurface);
+                    if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
+                        mReportDrawNeeded = true;
+                    }
+                    
+                    if (localLOGV) Log.i(TAG, "New surface: " + mSurface
+                            + ", vis=" + visible + ", frame=" + mWinFrame);
+                    
+                    mSurfaceFrame.left = 0;
+                    mSurfaceFrame.top = 0;
+                    if (mTranslator == null) {
+                        mSurfaceFrame.right = mWinFrame.width();
+                        mSurfaceFrame.bottom = mWinFrame.height();
+                    } else {
+                        float appInvertedScale = mTranslator.applicationInvertedScale;
+                        mSurfaceFrame.right = (int) (mWinFrame.width() * appInvertedScale + 0.5f);
+                        mSurfaceFrame.bottom = (int) (mWinFrame.height() * appInvertedScale + 0.5f);
+                    }
+                    
+                    final int surfaceWidth = mSurfaceFrame.right;
+                    final int surfaceHeight = mSurfaceFrame.bottom;
+                    realSizeChanged = mLastSurfaceWidth != surfaceWidth
+                            || mLastSurfaceHeight != surfaceHeight;
+                    mLastSurfaceWidth = surfaceWidth;
+                    mLastSurfaceHeight = surfaceHeight;
+                } finally {
+                    mSurfaceLock.unlock();
                 }
-                mSurfaceLock.unlock();
 
                 try {
                     if (visible) {
@@ -465,9 +492,9 @@ public class SurfaceView extends View {
                             }
                         }
                         if (creating || formatChanged || sizeChanged
-                                || visibleChanged) {
+                                || visibleChanged || realSizeChanged) {
                             for (SurfaceHolder.Callback c : callbacks) {
-                                c.surfaceChanged(mSurfaceHolder, mFormat, mWidth, mHeight);
+                                c.surfaceChanged(mSurfaceHolder, mFormat, myWidth, myHeight);
                             }
                         }
                     } else {
@@ -475,7 +502,7 @@ public class SurfaceView extends View {
                     }
                 } finally {
                     mIsCreating = false;
-                    if (creating || (relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
+                    if (creating || reportDrawNeeded) {
                         mSession.finishDrawing(mWindow);
                     }
                 }
@@ -533,17 +560,19 @@ public class SurfaceView extends View {
                 if (localLOGV) Log.v(
                         "SurfaceView", surfaceView + " got resized: w=" +
                                 w + " h=" + h + ", cur w=" + mCurWidth + " h=" + mCurHeight);
-                synchronized (this) {
-                    if (mCurWidth != w || mCurHeight != h) {
-                        mCurWidth = w;
-                        mCurHeight = h;
-                    }
+                surfaceView.mSurfaceLock.lock();
+                try {
                     if (reportDraw) {
-                        try {
-                            surfaceView.mSession.finishDrawing(surfaceView.mWindow);
-                        } catch (RemoteException e) {
-                        }
+                        surfaceView.mUpdateWindowNeeded = true;
+                        surfaceView.mReportDrawNeeded = true;
+                        surfaceView.mHandler.sendEmptyMessage(UPDATE_WINDOW_MSG);
+                    } else if (surfaceView.mWinFrame.width() != w
+                            || surfaceView.mWinFrame.height() != h) {
+                        surfaceView.mUpdateWindowNeeded = true;
+                        surfaceView.mHandler.sendEmptyMessage(UPDATE_WINDOW_MSG);
                     }
+                } finally {
+                    surfaceView.mSurfaceLock.unlock();
                 }
             }
         }
