@@ -219,9 +219,9 @@ import static com.android.internal.R.*;
  * 
  * <h3>Related APIs</h3>
  * <ul>
- *  <li>{@link android.widget.Adapters#loadAdapter(android.content.Context, int, Object...)}</li>
+ *  <li>{@link android.widget.Adapters#loadAdapter(android.content.Context, int, Object[])}</li>
  *  <li>{@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, android.database.Cursor, Object...)}</li>
- *  <li>{@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object...)}</li>
+ *  <li>{@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}</li>
  *  <li>{@link android.widget.Adapters.CursorBinder}</li>
  *  <li>{@link android.widget.Adapters.CursorTransformation}</li>
  *  <li>{@link android.widget.CursorAdapter}</li>
@@ -243,6 +243,7 @@ import static com.android.internal.R.*;
  * @attr ref android.R.styleable#CursorAdapter_TransformItem_withClass 
  * @attr ref android.R.styleable#CursorAdapter_TransformItem_withExpression 
  */
+@SuppressWarnings({"JavadocReference"})
 public class Adapters {
     private static final String ADAPTER_CURSOR = "cursor-adapter";
 
