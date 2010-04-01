@@ -16,6 +16,7 @@
 
 package com.android.internal.location;
 
+import android.location.ILocationManager;
 import android.location.LocationProvider;
 
 /**
@@ -41,8 +42,8 @@ public class DummyLocationProvider extends LocationProvider {
     int mPowerRequirement;
     int mAccuracy;
 
-    public DummyLocationProvider(String name) {
-        super(name);
+    public DummyLocationProvider(String name, ILocationManager service) {
+        super(name, service);
     }
 
     public void setRequiresNetwork(boolean requiresNetwork) {

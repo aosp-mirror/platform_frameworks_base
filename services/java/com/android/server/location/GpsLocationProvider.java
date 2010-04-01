@@ -150,6 +150,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int UPDATE_LOCATION = 7;
     private static final int ADD_LISTENER = 8;
     private static final int REMOVE_LISTENER = 9;
+    private static final int REQUEST_SINGLE_SHOT = 10;
 
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
 
@@ -189,6 +190,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     // true if we started navigation
     private boolean mStarted;
+
+    // true if single shot request is in progress
+    private boolean mSingleShot;
 
     // capabilities of the GPS engine
     private int mEngineCapabilities;
@@ -318,7 +322,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
             if (action.equals(ALARM_WAKEUP)) {
                 if (DEBUG) Log.d(TAG, "ALARM_WAKEUP");
-                startNavigating();
+                startNavigating(false);
             } else if (action.equals(ALARM_TIMEOUT)) {
                 if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
                 hibernate();
@@ -599,6 +603,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     /**
+     * Returns true if this provider meets the given criteria,
+     * false otherwise.
+     */
+    public boolean meetsCriteria(Criteria criteria) {
+        return (criteria.getPowerRequirement() != Criteria.POWER_LOW);
+    }
+
+    /**
      * Returns the horizontal accuracy of this provider
      *
      * @return the accuracy of location from this provider, as one
@@ -707,6 +719,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void enableLocationTracking(boolean enable) {
+        // FIXME - should set a flag here to avoid race conditions with single shot request
         synchronized (mHandler) {
             sendMessage(ENABLE_TRACKING, (enable ? 1 : 0), null);
         }
@@ -716,7 +729,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (enable) {
             mTTFF = 0;
             mLastFixTime = 0;
-            startNavigating();
+            startNavigating(false);
         } else {
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 mAlarmManager.cancel(mWakeupIntent);
@@ -724,6 +737,25 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
             stopNavigating();
         }
+    }
+
+    public boolean requestSingleShotFix() {
+        if (mStarted) {
+            // cannot do single shot if already navigating
+            return false;
+        }
+        synchronized (mHandler) {
+            mHandler.removeMessages(REQUEST_SINGLE_SHOT);
+            Message m = Message.obtain(mHandler, REQUEST_SINGLE_SHOT);
+            mHandler.sendMessage(m);
+        }
+        return true;
+    }
+
+    private void handleRequestSingleShot() {
+        mTTFF = 0;
+        mLastFixTime = 0;
+        startNavigating(true);
     }
 
     public void setMinTime(long minTime) {
@@ -875,16 +907,20 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return false;
     }
 
-    private void startNavigating() {
+    private void startNavigating(boolean singleShot) {
         if (!mStarted) {
             if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
-            if (hasCapability(GPS_CAPABILITY_MSB) &&
-                Settings.Secure.getInt(mContext.getContentResolver(),
+            mSingleShot = singleShot;
+            mPositionMode = GPS_POSITION_MODE_STANDALONE;
+
+             if (Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ASSISTED_GPS_ENABLED, 1) != 0) {
-                mPositionMode = GPS_POSITION_MODE_MS_BASED;
-            } else {
-                mPositionMode = GPS_POSITION_MODE_STANDALONE;
+                if (singleShot && hasCapability(GPS_CAPABILITY_MSA)) {
+                    mPositionMode = GPS_POSITION_MODE_MS_ASSISTED;
+                } else if (hasCapability(GPS_CAPABILITY_MSA)) {
+                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                }
             }
 
             int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
@@ -918,6 +954,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (DEBUG) Log.d(TAG, "stopNavigating");
         if (mStarted) {
             mStarted = false;
+            mSingleShot = false;
             native_stop();
             mTTFF = 0;
             mLastFixTime = 0;
@@ -1008,6 +1045,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
 
+        if (mSingleShot) {
+            stopNavigating();
+        }
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
             // we want to time out if we do not receive a fix
             // within the time out and we are requesting infrequent fixes
@@ -1022,7 +1062,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
 
-       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval > 1000) {
+       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted && mFixInterval > 1000) {
             if (DEBUG) Log.d(TAG, "got fix, hibernating");
             hibernate();
         }
@@ -1368,6 +1408,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     break;
                 case ENABLE_TRACKING:
                     handleEnableLocationTracking(msg.arg1 == 1);
+                    break;
+                case REQUEST_SINGLE_SHOT:
+                    handleRequestSingleShot();
                     break;
                 case UPDATE_NETWORK_STATE:
                     handleUpdateNetworkState(msg.arg1, (NetworkInfo)msg.obj);

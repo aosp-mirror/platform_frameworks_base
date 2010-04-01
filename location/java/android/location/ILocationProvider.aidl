@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.location.Criteria;
 import android.location.Location;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ interface ILocationProvider {
     boolean supportsSpeed();
     boolean supportsBearing();
     int getPowerRequirement();
+    boolean meetsCriteria(in Criteria criteria);
     int getAccuracy();
     void enable();
     void disable();

@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Criteria;
 import android.location.ILocationProvider;
 import android.location.Location;
 import android.net.NetworkInfo;
@@ -97,7 +98,7 @@ public class LocationProviderProxy implements LocationProviderInterface {
 
             if (mCachedAttributes == null) {
                 try {
-                    mCachedAttributes = new DummyLocationProvider(mName);
+                    mCachedAttributes = new DummyLocationProvider(mName, null);
                     mCachedAttributes.setRequiresNetwork(provider.requiresNetwork());
                     mCachedAttributes.setRequiresSatellite(provider.requiresSatellite());
                     mCachedAttributes.setRequiresCell(provider.requiresCell());
@@ -199,6 +200,39 @@ public class LocationProviderProxy implements LocationProviderInterface {
         }
     }
 
+    public boolean meetsCriteria(Criteria criteria) {
+       ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                return provider.meetsCriteria(criteria);
+            } catch (RemoteException e) {
+            }
+        }
+        // default implementation if we lost connection to the provider
+        if ((criteria.getAccuracy() != Criteria.NO_REQUIREMENT) &&
+            (criteria.getAccuracy() < getAccuracy())) {
+            return false;
+        }
+        int criteriaPower = criteria.getPowerRequirement();
+        if ((criteriaPower != Criteria.NO_REQUIREMENT) &&
+            (criteriaPower < getPowerRequirement())) {
+            return false;
+        }
+        if (criteria.isAltitudeRequired() && !supportsAltitude()) {
+            return false;
+        }
+        if (criteria.isSpeedRequired() && !supportsSpeed()) {
+            return false;
+        }
+        if (criteria.isBearingRequired() && !supportsBearing()) {
+            return false;
+        }
+        return true;
+    }
+
     public int getAccuracy() {
         if (mCachedAttributes != null) {
             return mCachedAttributes.getAccuracy();
@@ -295,6 +329,10 @@ public class LocationProviderProxy implements LocationProviderInterface {
             } catch (RemoteException e) {
             }
         }
+    }
+
+    public boolean requestSingleShotFix() {
+        return false;
     }
 
     public long getMinTime() {
