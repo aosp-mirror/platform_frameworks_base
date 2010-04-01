@@ -19,41 +19,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-       <Button android:id="@+id/button"
-               android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:onClick="onButtonClick"
-               android:text="@string/button_text"
-               android:textSize="32dip"
-        />
-
-        <TextView android:id="@+id/textview"
-                  android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:textSize="32dip"
-                  android:text="@string/textview_text"
-        />
-
-        <EditText android:id="@+id/textview"
-                  android:layout_height="wrap_content"
-                  android:layout_width="match_parent"
-                  android:textSize="32dip"
-        />
-
-    </LinearLayout>
-
     <SeekBar android:id="@+id/seekbar"
                android:layout_height="wrap_content"
                android:layout_width="match_parent"
                />
 
     <view class="com.android.bidi.BiDiTestView"
-        android:id="@+id/main"
+        android:id="@+id/testview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FF0000"
