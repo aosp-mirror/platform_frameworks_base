@@ -13,7 +13,7 @@ home=true
                             <!-- total max width is 520px -->
                                   <img src="{@docRoot}assets/images/home/gdc-logo.png" alt="Android at GDC 2010" width="203px" style="padding-left:22px;padding-bottom:28px;padding-top:22px;"/>
                                   <div id="announcement" style="width:275px">
-<p>Android will be at the <a href="http://www.gdconf.com/">2010 Game Developers Conference</a> in San Francisco, from March 9th to 11th. We're looking forward to seeing you there!</p>
+<p>Thanks to everyone who attended our sessions at the <a href="http://www.gdconf.com/">2010 Game Developers Conference</a> in San Francisco. We're looking forward to seeing your games running on Android!</p>
 <p><a href="http://android-developers.blogspot.com/2010/03/android-at-game-developers-conference.html">Learn more &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->

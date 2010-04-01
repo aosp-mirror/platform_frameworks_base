@@ -63,12 +63,12 @@ In many ways, each Android application lives in its own world:
 </p>
 
 <ul>
-<li>By default, every application runs in its own Linux process.  
+<li>By default, every application runs in its own Linux process.
 Android starts the process when any of the application's code needs to be 
 executed, and shuts down the process when it's no longer needed and system 
 resources are required by other applications.</li>
 
-<li>Each process has its own Java virtual machine (VM), so application code 
+<li>Each process has its own virtual machine (VM), so application code 
 runs in isolation from the code of all other applications.</li>
 
 <li>By default, each application is assigned a unique Linux user ID.  
