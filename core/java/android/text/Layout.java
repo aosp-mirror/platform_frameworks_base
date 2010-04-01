@@ -530,32 +530,42 @@ public abstract class Layout {
      */
     public abstract int getBottomPadding();
 
-    // return the level of the character at offset.
-    // XXX remove if not needed
-    private int getRunLevelAtOffset(int offset) {
+
+    /**
+     * Returns true if the character at offset and the preceding character
+     * are at different run levels (and thus there's a split caret).
+     * @param offset the offset
+     * @return true if at a level boundary
+     */
+    private boolean isLevelBoundary(int offset) {
         int line = getLineForOffset(offset);
+        Directions dirs = getLineDirections(line);
+        if (dirs == DIRS_ALL_LEFT_TO_RIGHT || dirs == DIRS_ALL_RIGHT_TO_LEFT) {
+            return false;
+        }
+
+        int[] runs = dirs.mDirections;
         int lineStart = getLineStart(line);
-        int lineEnd = getLineVisibleEnd(line);
-        int[] runs = getLineDirections(line).mDirections;
+        int lineEnd = getLineEnd(line);
+        if (offset == lineStart || offset == lineEnd) {
+            int paraLevel = getParagraphDirection(line) == 1 ? 0 : 1;
+            int runIndex = offset == lineStart ? 0 : runs.length - 2;
+            return ((runs[runIndex + 1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK) != paraLevel;
+        }
+
+        offset -= lineStart;
         for (int i = 0; i < runs.length; i += 2) {
-            int start = runs[i];
-            if (offset >= start) {
-               int limit = start + (runs[i+1] & RUN_LENGTH_MASK);
-               if (limit > lineEnd) {
-                   limit = lineEnd;
-               }
-               if (offset < limit) {
-                   return (runs[i+1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK;
-               }
+            if (offset == runs[i]) {
+                return true;
             }
         }
-        return getParagraphDirection(line) == 1 ? 0 : 1;
+        return false;
     }
 
     private boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
-        int lineEnd = getLineVisibleEnd(line);
+        int lineEnd = getLineEnd(line);
         int[] runs = getLineDirections(line).mDirections;
 
         int levelAt = -1;
@@ -1161,7 +1171,7 @@ public abstract class Layout {
     /**
      * Fills in the specified Path with a representation of a cursor
      * at the specified offset.  This will often be a vertical line
-     * but can be multiple discontinous lines in text with multiple
+     * but can be multiple discontinuous lines in text with multiple
      * directionalities.
      */
     public void getCursorPath(int point, Path dest,
@@ -1173,7 +1183,8 @@ public abstract class Layout {
         int bottom = getLineTop(line+1);
 
         float h1 = getPrimaryHorizontal(point) - 0.5f;
-        float h2 = getSecondaryHorizontal(point) - 0.5f;
+        float h2 = isLevelBoundary(point) ?
+                    getSecondaryHorizontal(point) - 0.5f : h1;
 
         int caps = TextKeyListener.getMetaState(editingBuffer,
                                                 KeyEvent.META_SHIFT_ON) |
