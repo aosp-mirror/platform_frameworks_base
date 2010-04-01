@@ -19,17 +19,19 @@ package android.media;
 /**
  * The CamcorderProfile class is used to retrieve the
  * predefined camcorder profile settings for camcorder applications.
+ * These settings are read-only.
+ *
  * The compressed output from a recording session with a given
  * CamcorderProfile contains two tracks: one for auido and one for video.
  *
  * <p>Each profile specifies the following set of parameters:
  * <ul>
- * <li> The file output format, @see android.media.MediaRecorder.OutputFormat
- * <li> Video codec format, @see android.media.MediaRecorder.VideoEncoder
+ * <li> The file output format
+ * <li> Video codec format
  * <li> Video bit rate in bits per second
  * <li> Video frame rate in frames per second
  * <li> Video frame width and height,
- * <li> Audio codec format, @see android.media.MediaRecorder.AudioEncoder
+ * <li> Audio codec format
  * <li> Audio bit rate in bits per second,
  * <li> Audio sample rate
  * <li> Number of audio channels for recording.
@@ -37,98 +39,95 @@ package android.media;
  */
 public class CamcorderProfile
 {
-    private final int mDuration;  // Recording duration in seconds
-
     /**
-     * The Quality class represents the quality level of each CamcorderProfile.
+     * The output from camcorder recording sessions can have different quality levels.
      *
-     * The output from recording sessions with high quality level usually may have
-     * larger output bit rate, better video and/or audio recording quality, and
-     * laerger video frame resolution and higher audio sampling rate, etc, than those
-     * with low quality level.
+     * Currently, we define two quality levels: high quality and low quality.
+     * A camcorder recording session with high quality level usually has higher output bit
+     * rate, better video and/or audio recording quality, larger video frame
+     * resolution and higher audio sampling rate, etc, than those with low quality
+     * level.
+     *
+     * Do not change these values/ordinals without updating their counterpart
+     * in include/media/MediaProfiles.h!
      */
-    public enum Quality {
-       /* Do not change these values/ordinals without updating their counterpart
-        * in include/media/MediaProfiles.h!
-        */
-        HIGH,
-        LOW
-    };
+    public static final int QUALITY_LOW  = 0;
+    public static final int QUALITY_HIGH = 1;
 
     /**
-     * Returns the recording duration in seconds for LOW quality CamcorderProfile
-     * used by the MMS application.
+     * Default recording duration in seconds before the session is terminated.
+     * This is useful for applications like MMS has limited file size requirement.
      */
-    public static final int getMmsRecordingDurationInSeconds() {
-        return get(Quality.LOW).mDuration;
-    }
+    public int duration;
 
     /**
      * The quality level of the camcorder profile
-     * @see android.media.CamcorderProfile.Quality
      */
-    public final Quality mQuality;
+    public int quality;
 
     /**
      * The file output format of the camcorder profile
      * @see android.media.MediaRecorder.OutputFormat
      */
-    public final int mFileFormat;
+    public int fileFormat;
 
     /**
      * The video encoder being used for the video track
      * @see android.media.MediaRecorder.VideoEncoder
      */
-    public final int mVideoCodec;
+    public int videoCodec;
 
     /**
      * The target video output bit rate in bits per second
      */
-    public final int mVideoBitRate;
+    public int videoBitRate;
 
     /**
      * The target video frame rate in frames per second
      */
-    public final int mVideoFrameRate;
+    public int videoFrameRate;
 
     /**
      * The target video frame width in pixels
      */
-    public final int mVideoFrameWidth;
+    public int videoFrameWidth;
 
     /**
      * The target video frame height in pixels
      */
-    public final int mVideoFrameHeight;
+    public int videoFrameHeight;
 
     /**
      * The audio encoder being used for the audio track.
      * @see android.media.MediaRecorder.AudioEncoder
      */
-    public final int mAudioCodec;
+    public int audioCodec;
 
     /**
      * The target audio output bit rate in bits per second
      */
-    public final int mAudioBitRate;
+    public int audioBitRate;
 
     /**
      * The audio sampling rate used for the audio track
      */
-    public final int mAudioSampleRate;
+    public int audioSampleRate;
 
     /**
      * The number of audio channels used for the audio track
      */
-    public final int mAudioChannels;
+    public int audioChannels;
 
     /**
-     * Returns the camcorder profile for the given quality.
+     * Returns the camcorder profile for the given quality level.
      * @param quality the target quality level for the camcorder profile
-     * @see android.media.CamcorderProfile.Quality
      */
-    public static CamcorderProfile get(Quality quality) {
-        return native_get_camcorder_profile(quality.ordinal());
+    public static CamcorderProfile get(int quality) {
+        if (quality < QUALITY_LOW || quality > QUALITY_HIGH) {
+            String errMessage = "Unsupported quality level: " + quality;
+            throw new IllegalArgumentException(errMessage);
+        }
+        return native_get_camcorder_profile(quality);
     }
 
     static {
@@ -150,18 +149,18 @@ public class CamcorderProfile
                              int audioSampleRate,
                              int audioChannels) {
 
-        mDuration         = duration;
-        mQuality          = Quality.values()[quality];
-        mFileFormat       = fileFormat;
-        mVideoCodec       = videoCodec;
-        mVideoBitRate     = videoBitRate;
-        mVideoFrameRate   = videoFrameRate;
-        mVideoFrameWidth  = videoWidth;
-        mVideoFrameHeight = videoHeight;
-        mAudioCodec       = audioCodec;
-        mAudioBitRate     = audioBitRate;
-        mAudioSampleRate  = audioSampleRate;
-        mAudioChannels    = audioChannels;
+        this.duration         = duration;
+        this.quality          = quality;
+        this.fileFormat       = fileFormat;
+        this.videoCodec       = videoCodec;
+        this.videoBitRate     = videoBitRate;
+        this.videoFrameRate   = videoFrameRate;
+        this.videoFrameWidth  = videoWidth;
+        this.videoFrameHeight = videoHeight;
+        this.audioCodec       = audioCodec;
+        this.audioBitRate     = audioBitRate;
+        this.audioSampleRate  = audioSampleRate;
+        this.audioChannels    = audioChannels;
     }
 
     // Methods implemented by JNI
