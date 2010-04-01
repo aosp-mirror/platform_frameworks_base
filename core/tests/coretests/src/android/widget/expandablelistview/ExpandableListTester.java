@@ -28,11 +28,11 @@ import android.widget.ExpandableListView;
 import junit.framework.Assert;
 
 public class ExpandableListTester {
-    private ExpandableListView mExpandableListView;
-    private ExpandableListAdapter mAdapter;
-    private ListUtil mListUtil;
+    private final ExpandableListView mExpandableListView;
+    private final ExpandableListAdapter mAdapter;
+    private final ListUtil mListUtil;
 
-    private ActivityInstrumentationTestCase2<? extends ExpandableListScenario>
+    private final ActivityInstrumentationTestCase2<? extends ExpandableListScenario>
         mActivityInstrumentation;
 
     Instrumentation mInstrumentation;
@@ -76,6 +76,8 @@ public class ExpandableListTester {
             View headerChild = mExpandableListView.getChildAt(index
                     - mExpandableListView.getFirstVisiblePosition());
             mExpandableListView.showContextMenuForChild(headerChild);
+            mInstrumentation.waitForIdleSync();
+            Assert.assertNull(menuListener.getErrorMessage(), menuListener.getErrorMessage());
             index++;
         }
 
@@ -92,6 +94,8 @@ public class ExpandableListTester {
             View groupChild = mExpandableListView.getChildAt(index
                     - mExpandableListView.getFirstVisiblePosition());
             mExpandableListView.showContextMenuForChild(groupChild);
+            mInstrumentation.waitForIdleSync();
+            Assert.assertNull(menuListener.getErrorMessage(), menuListener.getErrorMessage());
             index++;
 
             final int childrenCount = mAdapter.getChildrenCount(groupIndex);
@@ -102,6 +106,8 @@ public class ExpandableListTester {
                 View child = mExpandableListView.getChildAt(index
                         - mExpandableListView.getFirstVisiblePosition());
                 mExpandableListView.showContextMenuForChild(child);
+                mInstrumentation.waitForIdleSync();
+                Assert.assertNull(menuListener.getErrorMessage(), menuListener.getErrorMessage());
                 index++;
             }
         }
@@ -115,6 +121,8 @@ public class ExpandableListTester {
             View footerChild = mExpandableListView.getChildAt(index
                     - mExpandableListView.getFirstVisiblePosition());
             mExpandableListView.showContextMenuForChild(footerChild);
+            mInstrumentation.waitForIdleSync();
+            Assert.assertNull(menuListener.getErrorMessage(), menuListener.getErrorMessage());
             index++;
         }
 
