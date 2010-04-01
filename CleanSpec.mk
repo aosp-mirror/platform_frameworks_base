@@ -50,6 +50,8 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/com/android/internal/backup)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/app)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/content)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/FrameworkTest_intermediates/)
+
 
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
