@@ -80,6 +80,18 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
     protected FilterQueryProvider mFilterQueryProvider;
 
     /**
+     * If set the adapter will call requery() on the cursor whenever a content change
+     * notification is delivered. Implies {@link #FLAG_REGISTER_CONTENT_OBSERVER}
+     */
+    public static final int FLAG_AUTO_REQUERY = 0x01;
+
+    /**
+     * If set the adapter will register a content observer on the cursor and will call
+     * {@link #onContentChanged()} when a notification comes in.
+     */
+    public static final int FLAG_REGISTER_CONTENT_OBSERVER = 0x02;
+
+    /**
      * Constructor. The adapter will call requery() on the cursor whenever
      * it changes so that the most recent data is always displayed.
      *
@@ -87,7 +99,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      * @param context The context
      */
     public CursorAdapter(Context context, Cursor c) {
-        init(context, c, true);
+        init(context, c, FLAG_AUTO_REQUERY);
     }
 
     /**
@@ -99,19 +111,43 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      *                    data is always displayed.
      */
     public CursorAdapter(Context context, Cursor c, boolean autoRequery) {
-        init(context, c, autoRequery);
+        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : 0);
+    }
+
+    /**
+     * Constructor
+     * @param c The cursor from which to get the data.
+     * @param context The context
+     * @param flags flags used to determine the behavior of the adapter
+     */
+    public CursorAdapter(Context context, Cursor c, int flags) {
+        init(context, c, flags);
     }
 
     protected void init(Context context, Cursor c, boolean autoRequery) {
+        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : 0);
+    }
+
+    protected void init(Context context, Cursor c, int flags) {
+        if ((flags & FLAG_AUTO_REQUERY) == FLAG_AUTO_REQUERY) {
+            flags |= FLAG_REGISTER_CONTENT_OBSERVER;
+            mAutoRequery = true;
+        } else {
+            mAutoRequery = false;
+        }
         boolean cursorPresent = c != null;
-        mAutoRequery = autoRequery;
         mCursor = c;
         mDataValid = cursorPresent;
         mContext = context;
         mRowIDColumn = cursorPresent ? c.getColumnIndexOrThrow("_id") : -1;
-        mChangeObserver = new ChangeObserver();
+        if ((flags & FLAG_REGISTER_CONTENT_OBSERVER) == FLAG_REGISTER_CONTENT_OBSERVER) {
+            mChangeObserver = new ChangeObserver();
+        } else {
+            mChangeObserver = null;
+        }
+
         if (cursorPresent) {
-            c.registerContentObserver(mChangeObserver);
+            if (mChangeObserver != null) c.registerContentObserver(mChangeObserver);
             c.registerDataSetObserver(mDataSetObserver);
         }
     }
@@ -246,13 +282,13 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
             return;
         }
         if (mCursor != null) {
-            mCursor.unregisterContentObserver(mChangeObserver);
+            if (mChangeObserver != null) mCursor.unregisterContentObserver(mChangeObserver);
             mCursor.unregisterDataSetObserver(mDataSetObserver);
             mCursor.close();
         }
         mCursor = cursor;
         if (cursor != null) {
-            cursor.registerContentObserver(mChangeObserver);
+            if (mChangeObserver != null) cursor.registerContentObserver(mChangeObserver);
             cursor.registerDataSetObserver(mDataSetObserver);
             mRowIDColumn = cursor.getColumnIndexOrThrow("_id");
             mDataValid = true;
