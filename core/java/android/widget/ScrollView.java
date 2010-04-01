@@ -1023,6 +1023,7 @@ public class ScrollView extends FrameLayout {
                     onScrollChanged(x, y, oldX, oldY);
                 }
             }
+            awakenScrollBars();
 
             // Keep on drawing until the animation has finished.
             postInvalidate();
