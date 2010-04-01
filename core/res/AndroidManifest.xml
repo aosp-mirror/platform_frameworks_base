@@ -562,14 +562,6 @@
         android:label="@string/permlab_changeConfiguration"
         android:description="@string/permdesc_changeConfiguration" />
 
-    <!-- Allows an application to enable the car mode.
-         @hide -->
-    <permission android:name="android.permission.ENABLE_CAR_MODE"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature"
-        android:label="@string/permlab_enableCarMode"
-        android:description="@string/permdesc_enableCarMode" />
-
     <!-- @deprecated The {@link android.app.ActivityManager#restartPackage}
         API is no longer supported. -->
     <permission android:name="android.permission.RESTART_PACKAGES"

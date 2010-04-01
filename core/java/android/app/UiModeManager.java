@@ -125,6 +125,22 @@ public class UiModeManager {
     public static final int DISABLE_CAR_MODE_GO_HOME = 0x0001;
     
     /**
+     * Force device into car mode, like it had been placed in the car dock.
+     * This will cause the device to switch to the car home UI as part of
+     * the mode switch.
+     * @param flags Must be 0.
+     */
+    public void enableCarMode(int flags) {
+        if (mService != null) {
+            try {
+                mService.enableCarMode();
+            } catch (RemoteException e) {
+                Log.e(TAG, "disableCarMode: RemoteException", e);
+            }
+        }
+    }
+
+    /**
      * Turn off special mode if currently in car mode.
      * @param flags May be 0 or {@link #DISABLE_CAR_MODE_GO_HOME}.
      */
