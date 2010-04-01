@@ -82,7 +82,6 @@ public class FileFilter {
         // This first block of tests are for HTML5 features, for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
-        ignoreResultList.add("http/tests/appcache/auth.html"); // DumpRenderTree throws exception when authentication fails
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
