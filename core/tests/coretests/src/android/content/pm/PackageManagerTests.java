@@ -23,10 +23,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.Suppress;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
@@ -497,6 +505,15 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    private PackageParser.Package getParsedPackage(String outFileName, int rawResId) {
+        PackageManager pm = mContext.getPackageManager();
+        File filesDir = mContext.getFilesDir();
+        File outFile = new File(filesDir, outFileName);
+        Uri packageURI = getInstallablePackage(rawResId, outFile);
+        PackageParser.Package pkg = parsePackage(packageURI);
+        return pkg;
+    }
+
     /*
      * Utility function that reads a apk bundled as a raw resource
      * copies it into own data directory and invokes
@@ -529,7 +546,9 @@ public class PackageManagerTests extends AndroidTestCase {
             if (fail) {
                 assertTrue(invokeInstallPackageFail(packageURI, flags,
                         pkg.packageName, result));
-                assertNotInstalled(pkg.packageName);
+                if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
+                    assertNotInstalled(pkg.packageName);
+                }
             } else {
                 InstallReceiver receiver = new InstallReceiver(pkg.packageName);
                 assertTrue(invokeInstallPackage(packageURI, flags,
@@ -621,7 +640,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * PackageManager api to install first and then replace it
      * again.
      */
-    public void replaceFromRawResource(int flags) {
+    private void sampleReplaceFromRawResource(int flags) {
         InstallParams ip = sampleInstallFromRawResource(flags, false);
         boolean replace = ((flags & PackageManager.INSTALL_REPLACE_EXISTING) != 0);
         Log.i(TAG, "replace=" + replace);
@@ -648,28 +667,28 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     public void testReplaceFailNormalInternal() {
-        replaceFromRawResource(0);
+        sampleReplaceFromRawResource(0);
     }
 
     public void testReplaceFailFwdLockedInternal() {
-        replaceFromRawResource(PackageManager.INSTALL_FORWARD_LOCK);
+        sampleReplaceFromRawResource(PackageManager.INSTALL_FORWARD_LOCK);
     }
 
     public void testReplaceFailSdcard() {
-        replaceFromRawResource(PackageManager.INSTALL_EXTERNAL);
+        sampleReplaceFromRawResource(PackageManager.INSTALL_EXTERNAL);
     }
 
     public void testReplaceNormalInternal() {
-        replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
+        sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
     }
 
     public void testReplaceFwdLockedInternal() {
-        replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
+        sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageManager.INSTALL_FORWARD_LOCK);
     }
 
     public void testReplaceSdcard() {
-        replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
+        sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageManager.INSTALL_EXTERNAL);
     }
 
@@ -1013,6 +1032,19 @@ public class PackageManagerTests extends AndroidTestCase {
         if (outFile != null && outFile.exists()) {
             outFile.delete();
         }
+    }
+    void cleanUpInstall(String pkgName) {
+        if (pkgName == null) {
+            return;
+        }
+        Log.i(TAG, "Deleting package : " + pkgName);
+        try {
+            ApplicationInfo info = getPm().getApplicationInfo(pkgName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+            if (info != null) {
+                getPm().deletePackage(pkgName, null, 0);
+            }
+        } catch (NameNotFoundException e) {}
     }
 
     public void testManifestInstallLocationInternal() {
@@ -2151,6 +2183,360 @@ public class PackageManagerTests extends AndroidTestCase {
             }
 
         }
+    }
+    /*
+     * The following series of tests are related to upgrading apps with
+     * different certificates. 
+     */
+    private int APP1_UNSIGNED = R.raw.install_app1_unsigned;
+    private int APP1_CERT1 = R.raw.install_app1_cert1;
+    private int APP1_CERT2 = R.raw.install_app1_cert2;
+    private int APP1_CERT1_CERT2 = R.raw.install_app1_cert1_cert2;
+    private int APP1_CERT3_CERT4 = R.raw.install_app1_cert3_cert4;
+    private int APP1_CERT3 = R.raw.install_app1_cert3;
+    private int APP2_UNSIGNED = R.raw.install_app2_unsigned;
+    private int APP2_CERT1 = R.raw.install_app2_cert1;
+    private int APP2_CERT2 = R.raw.install_app2_cert2;
+    private int APP2_CERT1_CERT2 = R.raw.install_app2_cert1_cert2;
+    private int APP2_CERT3 = R.raw.install_app2_cert3;
+
+    private InstallParams replaceCerts(int apk1, int apk2, boolean cleanUp, boolean fail, int retCode) {
+        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+        String apk1Name = "install1.apk";
+        String apk2Name = "install2.apk";
+        PackageParser.Package pkg1 = getParsedPackage(apk1Name, apk1);
+        try {
+            InstallParams ip = installFromRawResource(apk1Name, apk1, 0, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            installFromRawResource(apk2Name, apk2, rFlags, false,
+                    fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            return ip;
+        } catch (Exception e) {
+            failStr(e.getMessage());
+        } finally {
+            if (cleanUp) {
+                cleanUpInstall(pkg1.packageName);
+            }
+        }
+        return null;
+    }
+    /*
+     * Test that an app signed with two certificates can be upgraded by the
+     * same app signed with two certificates.
+     */
+    public void testReplaceMatchAllCerts() {
+        replaceCerts(APP1_CERT1_CERT2, APP1_CERT1_CERT2, true, false, -1);
+    }
+
+    /*
+     * Test that an app signed with two certificates cannot be upgraded
+     * by an app signed with a different certificate.
+     */
+    public void testReplaceMatchNoCerts1() {
+        replaceCerts(APP1_CERT1_CERT2, APP1_CERT3, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+    /*
+     * Test that an app signed with two certificates cannot be upgraded
+     * by an app signed with a different certificate.
+     */
+    public void testReplaceMatchNoCerts2() {
+        replaceCerts(APP1_CERT1_CERT2, APP1_CERT3_CERT4, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+    /*
+     * Test that an app signed with two certificates cannot be upgraded by
+     * an app signed with a subset of initial certificates.
+     */
+    public void testReplaceMatchSomeCerts1() {
+        replaceCerts(APP1_CERT1_CERT2, APP1_CERT1, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+    /*
+     * Test that an app signed with two certificates cannot be upgraded by
+     * an app signed with the last certificate.
+     */
+    public void testReplaceMatchSomeCerts2() {
+        replaceCerts(APP1_CERT1_CERT2, APP1_CERT2, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+    /*
+     * Test that an app signed with a certificate can be upgraded by app
+     * signed with a superset of certificates.
+     */
+    public void testReplaceMatchMoreCerts() {
+        replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, true, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+    }
+    /*
+     * Test that an app signed with a certificate can be upgraded by app
+     * signed with a superset of certificates. Then verify that the an app
+     * signed with the original set of certs cannot upgrade the new one.
+     */
+    public void testReplaceMatchMoreCertsReplaceSomeCerts() {
+        InstallParams ip = replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, false, true,
+                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+        try {
+            int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+            installFromRawResource("install.apk", APP1_CERT1, rFlags, false,
+                    false, -1,
+                    PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        } catch (Exception e) {
+            failStr(e.getMessage());
+        } finally {
+            if (ip != null) {
+                cleanUpInstall(ip);
+            }
+        }
+    }
+    /*
+     * The following tests are related to testing the checkSignatures
+     * api.
+     */
+    private void checkSignatures(int apk1, int apk2, int expMatchResult) {
+        checkSharedSignatures(apk1, apk2, true, false, -1, expMatchResult);
+    }
+    public void testCheckSignaturesAllMatch() {
+        int apk1 = APP1_CERT1_CERT2;
+        int apk2 = APP2_CERT1_CERT2;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
+    }
+    public void testCheckSignaturesNoMatch() {
+        int apk1 = APP1_CERT1;
+        int apk2 = APP2_CERT2;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
+    }
+    public void testCheckSignaturesSomeMatch1() {
+        int apk1 = APP1_CERT1_CERT2;
+        int apk2 = APP2_CERT1;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
+    }
+    public void testCheckSignaturesSomeMatch2() {
+        int apk1 = APP1_CERT1_CERT2;
+        int apk2 = APP2_CERT2;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
+    }
+    public void testCheckSignaturesMoreMatch() {
+        int apk1 = APP1_CERT1;
+        int apk2 = APP2_CERT1_CERT2;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
+    }
+    public void testCheckSignaturesUnknown() {
+        int apk1 = APP1_CERT1_CERT2;
+        int apk2 = APP2_CERT1_CERT2;
+        String apk1Name = "install1.apk";
+        String apk2Name = "install2.apk";
+        InstallParams ip1 = null;
+
+        try {
+            ip1 = installFromRawResource(apk1Name, apk1, 0, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            PackageManager pm = mContext.getPackageManager();
+            // Delete app2
+            File filesDir = mContext.getFilesDir();
+            File outFile = new File(filesDir, apk2Name);
+            int rawResId = apk2;
+            Uri packageURI = getInstallablePackage(rawResId, outFile);
+            PackageParser.Package pkg = parsePackage(packageURI);
+            getPm().deletePackage(pkg.packageName, null, 0);
+            // Check signatures now
+            int match = mContext.getPackageManager().checkSignatures(
+                    ip1.pkg.packageName, pkg.packageName);
+            assertEquals(PackageManager.SIGNATURE_UNKNOWN_PACKAGE, match);
+        } finally {
+            if (ip1 != null) {
+                cleanUpInstall(ip1);
+            }
+        }
+    }
+    public void testInstallNoCertificates() {
+        int apk1 = APP1_UNSIGNED;
+        String apk1Name = "install1.apk";
+        InstallParams ip1 = null;
+
+        try {
+            installFromRawResource(apk1Name, apk1, 0, false,
+                    true, PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                    PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        } finally {
+        }
+    }
+    /* The following tests are related to apps using shared uids signed
+     * with different certs.
+     */
+    private int SHARED1_UNSIGNED = R.raw.install_shared1_unsigned;
+    private int SHARED1_CERT1 = R.raw.install_shared1_cert1;
+    private int SHARED1_CERT2 = R.raw.install_shared1_cert2;
+    private int SHARED1_CERT1_CERT2 = R.raw.install_shared1_cert1_cert2;
+    private int SHARED2_UNSIGNED = R.raw.install_shared2_unsigned;
+    private int SHARED2_CERT1 = R.raw.install_shared2_cert1;
+    private int SHARED2_CERT2 = R.raw.install_shared2_cert2;
+    private int SHARED2_CERT1_CERT2 = R.raw.install_shared2_cert1_cert2;
+    private void checkSharedSignatures(int apk1, int apk2, boolean cleanUp, boolean fail, int retCode, int expMatchResult) {
+        String apk1Name = "install1.apk";
+        String apk2Name = "install2.apk";
+        PackageParser.Package pkg1 = getParsedPackage(apk1Name, apk1);
+        PackageParser.Package pkg2 = getParsedPackage(apk2Name, apk2);
+
+        try {
+            // Clean up before testing first.
+            cleanUpInstall(pkg1.packageName);
+            cleanUpInstall(pkg2.packageName);
+            installFromRawResource(apk1Name, apk1, 0, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            if (fail) {
+                installFromRawResource(apk2Name, apk2, 0, false,
+                        true, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            } else {
+                installFromRawResource(apk2Name, apk2, 0, false,
+                        false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+                int match = mContext.getPackageManager().checkSignatures(
+                        pkg1.packageName, pkg2.packageName);
+                assertEquals(expMatchResult, match);
+            }
+        } finally {
+            if (cleanUp) {
+                cleanUpInstall(pkg1.packageName);
+                cleanUpInstall(pkg2.packageName);
+            }
+        }
+    }
+    public void testCheckSignaturesSharedAllMatch() {
+        int apk1 = SHARED1_CERT1_CERT2;
+        int apk2 = SHARED2_CERT1_CERT2;
+        boolean fail = false;
+        int retCode = -1;
+        int expMatchResult = PackageManager.SIGNATURE_MATCH;
+        checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
+    }
+    public void testCheckSignaturesSharedNoMatch() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT2;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+        int expMatchResult = -1;
+        checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
+    }
+    /*
+     * Test that an app signed with cert1 and cert2 cannot be replaced when signed with cert1 alone.
+     */
+    public void testCheckSignaturesSharedSomeMatch1() {
+        int apk1 = SHARED1_CERT1_CERT2;
+        int apk2 = SHARED2_CERT1;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+        int expMatchResult = -1;
+        checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
+    }
+    /*
+     * Test that an app signed with cert1 and cert2 cannot be replaced when signed with cert2 alone.
+     */
+    public void testCheckSignaturesSharedSomeMatch2() {
+        int apk1 = SHARED1_CERT1_CERT2;
+        int apk2 = SHARED2_CERT2;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+        int expMatchResult = -1;
+        checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
+    }
+    public void testCheckSignaturesSharedUnknown() {
+        int apk1 = SHARED1_CERT1_CERT2;
+        int apk2 = SHARED2_CERT1_CERT2;
+        String apk1Name = "install1.apk";
+        String apk2Name = "install2.apk";
+        InstallParams ip1 = null;
+
+        try {
+            ip1 = installFromRawResource(apk1Name, apk1, 0, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            PackageManager pm = mContext.getPackageManager();
+            // Delete app2
+            PackageParser.Package pkg = getParsedPackage(apk2Name, apk2);
+            getPm().deletePackage(pkg.packageName, null, 0);
+            // Check signatures now
+            int match = mContext.getPackageManager().checkSignatures(
+                    ip1.pkg.packageName, pkg.packageName);
+            assertEquals(PackageManager.SIGNATURE_UNKNOWN_PACKAGE, match);
+        } finally {
+            if (ip1 != null) {
+                cleanUpInstall(ip1);
+            }
+        }
+    }
+    
+    public void testReplaceFirstSharedMatchAllCerts() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT1;
+        int rapk1 = SHARED1_CERT1;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
+        replaceCerts(apk1, rapk1, true, false, -1);
+    }
+    public void testReplaceSecondSharedMatchAllCerts() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT1;
+        int rapk2 = SHARED2_CERT1;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
+        replaceCerts(apk2, rapk2, true, false, -1);
+    }
+    public void testReplaceFirstSharedMatchSomeCerts() {
+        int apk1 = SHARED1_CERT1_CERT2;
+        int apk2 = SHARED2_CERT1_CERT2;
+        int rapk1 = SHARED1_CERT1;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
+        installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
+                fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+    public void testReplaceSecondSharedMatchSomeCerts() {
+        int apk1 = SHARED1_CERT1_CERT2;
+        int apk2 = SHARED2_CERT1_CERT2;
+        int rapk2 = SHARED2_CERT1;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
+        installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
+                fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+    public void testReplaceFirstSharedMatchNoCerts() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT1;
+        int rapk1 = SHARED1_CERT2;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
+        installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
+                fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+    public void testReplaceSecondSharedMatchNoCerts() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT1;
+        int rapk2 = SHARED2_CERT2;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
+        installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
+                fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+    public void testReplaceFirstSharedMatchMoreCerts() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT1;
+        int rapk1 = SHARED1_CERT1_CERT2;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
+        installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
+                fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+    public void testReplaceSecondSharedMatchMoreCerts() {
+        int apk1 = SHARED1_CERT1;
+        int apk2 = SHARED2_CERT1;
+        int rapk2 = SHARED2_CERT1_CERT2;
+        boolean fail = true;
+        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
+        installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
+                fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
     /*---------- Recommended install location tests ----*/
     /*
