@@ -32,6 +32,7 @@ import android.net.NetworkInfo.State;
 
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 
@@ -58,6 +59,11 @@ public class ConnectivityManagerTestActivity extends Activity {
     public String mReason;
     public boolean mScanResultIsAvailable = false;
     public ConnectivityManager mCM;
+    public Object wifiObject = new Object();
+    public Object connectivityObject = new Object();
+    public int mWifiState;
+    public NetworkInfo mWifiNetworkInfo;
+    public String mBssid;
 
     /*
      * Control Wifi States
@@ -67,7 +73,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     /*
      * Verify connectivity state
      */
-    public static final int NUM_NETWORK_TYPES = ConnectivityManager.MAX_NETWORK_TYPE;
+    public static final int NUM_NETWORK_TYPES = ConnectivityManager.MAX_NETWORK_TYPE + 1;
     NetworkState[] connectivityState = new NetworkState[NUM_NETWORK_TYPES];
 
     /**
@@ -77,6 +83,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     private class ConnectivityReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.v(LOG_TAG, "ConnectivityReceiver: onReceive() is called with " + intent);
             String action = intent.getAction();
             if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 Log.v("ConnectivityReceiver", "onReceive() called with " + intent);
@@ -100,10 +107,16 @@ public class ConnectivityManagerTestActivity extends Activity {
 
             mReason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
             mIsFailOver = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
+
+            Log.v(LOG_TAG, "mNetworkInfo: " + mNetworkInfo.toString());
+            if (mOtherNetworkInfo != null) {
+                Log.v(LOG_TAG, "mOtherNetworkInfo: " + mOtherNetworkInfo.toString());
+            }
             recordNetworkState(mNetworkInfo.getType(), mNetworkInfo.getState());
             if (mOtherNetworkInfo != null) {
                 recordNetworkState(mOtherNetworkInfo.getType(), mOtherNetworkInfo.getState());
             }
+            notifyNetworkConnectivityChange();
         }
     }
 
@@ -111,11 +124,25 @@ public class ConnectivityManagerTestActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (!action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-                Log.v(LOG_TAG, "onReceive() is calleld with " + intent);
+            Log.v("WifiReceiver", "onReceive() is calleld with " + intent);
+            if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                notifyScanResult();
+            } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                mWifiNetworkInfo =
+                    (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                Log.v(LOG_TAG, "mWifiNetworkInfo: " + mWifiNetworkInfo.toString());
+                if (mWifiNetworkInfo.getState() == State.CONNECTED) {
+                    mBssid = intent.getStringExtra(WifiManager.EXTRA_BSSID);
+                }
+                notifyWifiState();
+            } else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                                                WifiManager.WIFI_STATE_UNKNOWN);
+                notifyWifiState();
+            }
+            else {
                 return;
             }
-            notifyScanResult();
         }
     }
 
@@ -134,14 +161,19 @@ public class ConnectivityManagerTestActivity extends Activity {
         setContentView(contentView);
         setTitle("ConnectivityManagerTestActivity");
 
-        mConnectivityReceiver = new ConnectivityReceiver();
+
         // register a connectivity receiver for CONNECTIVITY_ACTION;
+        mConnectivityReceiver = new ConnectivityReceiver();
         registerReceiver(mConnectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         mWifiReceiver = new WifiReceiver();
-        registerReceiver(mWifiReceiver,
-                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        IntentFilter mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        registerReceiver(mWifiReceiver, mIntentFilter);
+
         // Get an instance of ConnectivityManager
         mCM = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get an instance of WifiManager
@@ -166,7 +198,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     // deposit a network state
     public void recordNetworkState(int networkType, State networkState) {
         Log.v(LOG_TAG, "record network state for network " +  networkType +
-                " state is " + networkState);
+                ", state is " + networkState);
         connectivityState[networkType].recordState(networkState);
     }
 
@@ -190,10 +222,23 @@ public class ConnectivityManagerTestActivity extends Activity {
         return connectivityState[networkType].getReason();
     }
 
+    private void notifyNetworkConnectivityChange() {
+        synchronized(connectivityObject) {
+            Log.v(LOG_TAG, "notify network connectivity changed");
+            connectivityObject.notifyAll();
+        }
+    }
     private void notifyScanResult() {
         synchronized (this) {
             Log.v(LOG_TAG, "notify that scan results are available");
             this.notify();
+        }
+    }
+
+    public void notifyWifiState() {
+        synchronized (wifiObject) {
+            Log.v(LOG_TAG, "notify wifi state changed");
+            wifiObject.notify();
         }
     }
 
@@ -259,9 +304,9 @@ public class ConnectivityManagerTestActivity extends Activity {
                 config.SSID = sr.SSID;
                 config.allowedKeyManagement.set(KeyMgmt.NONE);
                 int networkId = mWifiManager.addNetwork(config);
-                mWifiManager.saveConfiguration();
                 // Connect to network by disabling others.
                 mWifiManager.enableNetwork(networkId, true);
+                mWifiManager.saveConfiguration();
                 mWifiManager.reconnect();
                 break;
            }
@@ -275,21 +320,17 @@ public class ConnectivityManagerTestActivity extends Activity {
         return true;
     }
 
-    /**
-     * Disable Wifi
-     * @return true if Wifi is disabled successfully
+    /*
+     * Disconnect from the current AP
      */
-    public boolean disableWiFi() {
-        return mWifiManager.setWifiEnabled(false);
-    }
-
-    /**
-     * Disconnect from the current Wifi and clear the configuration list
-     */
-    public boolean clearWifi() {
-       if (mWifiManager.isWifiEnabled()) {
+    public boolean disconnectAP() {
+        if (mWifiManager.isWifiEnabled()) {
             //remove the current network Id
-            int curNetworkId = mWifiManager.getConnectionInfo().getNetworkId();
+            WifiInfo curWifi = mWifiManager.getConnectionInfo();
+            if (curWifi == null) {
+                return false;
+            }
+            int curNetworkId = curWifi.getNetworkId();
             mWifiManager.removeNetwork(curNetworkId);
             mWifiManager.saveConfiguration();
 
@@ -303,16 +344,33 @@ public class ConnectivityManagerTestActivity extends Activity {
                     mWifiManager.removeNetwork(conf.networkId);
                 }
             }
-            mWifiManager.saveConfiguration();
-            // disable Wifi
+        }
+        mWifiManager.saveConfiguration();
+        return true;
+    }
+    /**
+     * Disable Wifi
+     * @return true if Wifi is disabled successfully
+     */
+    public boolean disableWifi() {
+        return mWifiManager.setWifiEnabled(false);
+    }
+
+    /**
+     * Disconnect from the current Wifi and clear the configuration list
+     */
+    public boolean clearWifi() {
+            if (!disconnectAP()) {
+                return false;
+            }
+            // Disable Wifi
             if (!mWifiManager.setWifiEnabled(false)) {
                 return false;
             }
-            // wait for the actions to be completed
+            // Wait for the actions to be completed
             try {
                 Thread.sleep(5*1000);
             } catch (InterruptedException e) {}
-        }
         return true;
     }
 

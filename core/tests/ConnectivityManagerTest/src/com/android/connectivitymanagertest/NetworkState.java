@@ -143,14 +143,14 @@ public class NetworkState {
         }
         State lastState = mStateDepository.get(mStateDepository.size() - 1);
         if ( lastState != mTransitionTarget) {
-            mReason += " the last state should be CONNECTED, but it is " + lastState;
+            mReason += "The last state should be " + mTransitionTarget + ", but it is " + lastState;
             return false;
         }
         for (int i = 1; i < mStateDepository.size(); i++) {
             State preState = mStateDepository.get(i-1);
             State curState = mStateDepository.get(i);
             if ((preState == State.DISCONNECTED) && ((curState == State.CONNECTING) ||
-                    (curState == State.CONNECTED))) {
+                    (curState == State.CONNECTED) || (curState == State.DISCONNECTED))) {
                 continue;
             } else if ((preState == State.CONNECTING) && (curState == State.CONNECTED)) {
                 continue;
