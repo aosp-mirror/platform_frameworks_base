@@ -1488,7 +1488,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         // for all its buffers to be filled before processing it
         mAudioMixer->setActiveTrack(track->name());
         if (cblk->framesReady() && (track->isReady() || track->isStopped()) &&
-                !track->isPaused())
+                !track->isPaused() && !track->isTerminated())
         {
             //LOGV("track %d u=%08x, s=%08x [OK] on thread %p", track->name(), cblk->user, cblk->server, this);
 
