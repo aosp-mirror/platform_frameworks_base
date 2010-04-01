@@ -1634,7 +1634,7 @@ void Decoder_amr(
             {
                 if (st->old_T0 < PIT_MAX)
                 {                               /* Graceful pitch */
-                    st->old_T0 += 1;            /* degradation    */
+                    st->old_T0 += 0;            /* degradation    */
                 }
                 T0 = st->old_T0;
                 T0_frac = 0;
