@@ -24,7 +24,7 @@ import com.android.mediaframeworktest.functional.MediaPlayerApiTest;
 import com.android.mediaframeworktest.functional.MediaRecorderTest;
 import com.android.mediaframeworktest.functional.SimTonesTest;
 import com.android.mediaframeworktest.functional.MediaPlayerInvokeTest;
-
+import com.android.mediaframeworktest.functional.MediaAudioManagerTest;
 import junit.framework.TestSuite;
 
 import android.test.InstrumentationTestRunner;
@@ -54,6 +54,7 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaAudioTrackTest.class);
         suite.addTestSuite(MediaMimeTest.class);
         suite.addTestSuite(MediaPlayerInvokeTest.class);
+        suite.addTestSuite(MediaAudioManagerTest.class);
         return suite;
     }
 
