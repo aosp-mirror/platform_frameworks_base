@@ -6413,10 +6413,15 @@ public class WebView extends AbsoluteLayout
                                     mLastDeferTouchY = y;
                                     startDrag();
                                 }
-                                doDrag((int) (mLastDeferTouchX - x),
-                                        (int) (mLastDeferTouchY - y));
-                                mLastDeferTouchX = x;
-                                mLastDeferTouchY = y;
+                                int deltaX = pinLocX((int) (mScrollX
+                                        + mLastDeferTouchX - x))
+                                        - mScrollX;
+                                int deltaY = pinLocY((int) (mScrollY
+                                        + mLastDeferTouchY - y))
+                                        - mScrollY;
+                                doDrag(deltaX, deltaY);
+                                if (deltaX != 0) mLastDeferTouchX = x;
+                                if (deltaY != 0) mLastDeferTouchY = y;
                                 break;
                             }
                             case MotionEvent.ACTION_UP:
