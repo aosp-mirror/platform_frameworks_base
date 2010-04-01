@@ -548,6 +548,8 @@ static void *eventLoopMain(void *ptr) {
     dbus_connection_set_watch_functions(nat->conn, dbusAddWatch,
             dbusRemoveWatch, dbusToggleWatch, ptr, NULL);
 
+    nat->running = true;
+
     while (1) {
         for (int i = 0; i < nat->pollMemberCount; i++) {
             if (!nat->pollData[i].revents) {
@@ -591,7 +593,7 @@ static void *eventLoopMain(void *ptr) {
                 break;
             }
         }
-        while (dbus_connection_dispatch(nat->conn) == 
+        while (dbus_connection_dispatch(nat->conn) ==
                 DBUS_DISPATCH_DATA_REMAINS) {
         }
 
@@ -606,6 +608,8 @@ static jboolean startEventLoopNative(JNIEnv *env, jobject object) {
     event_loop_native_data_t *nat = get_native_data(env, object);
 
     pthread_mutex_lock(&(nat->thread_mutex));
+
+    nat->running = false;
 
     if (nat->pollData) {
         LOGW("trying to start EventLoop a second time!");
@@ -703,6 +707,7 @@ static void stopEventLoopNative(JNIEnv *env, jobject object) {
         nat->controlFdW = 0;
         close(fd);
     }
+    nat->running = false;
     pthread_mutex_unlock(&(nat->thread_mutex));
 #endif // HAVE_BLUETOOTH
 }
@@ -713,7 +718,7 @@ static jboolean isEventLoopRunningNative(JNIEnv *env, jobject object) {
     native_data_t *nat = get_native_data(env, object);
 
     pthread_mutex_lock(&(nat->thread_mutex));
-    if (nat->pollData) {
+    if (nat->running) {
         result = JNI_TRUE;
     }
     pthread_mutex_unlock(&(nat->thread_mutex));
