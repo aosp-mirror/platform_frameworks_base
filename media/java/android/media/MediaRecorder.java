@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.media.CamcorderProfile;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
@@ -257,6 +258,25 @@ public class MediaRecorder
      */
     public native void setVideoSource(int video_source)
             throws IllegalStateException;
+
+    /**
+     * Uses the settings from a CamcorderProfile object for recording. This method should
+     * be called after the video AND audio sources are set, and before setOutputFile().
+     *
+     * @param profile the CamcorderProfile to use
+     * @see android.media.CamcorderProfile
+     */
+    public void setProfile(CamcorderProfile profile) {
+        setOutputFormat(profile.fileFormat);
+        setVideoFrameRate(profile.videoFrameRate);
+        setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        setVideoEncodingBitRate(profile.videoBitRate);
+        setAudioEncodingBitRate(profile.audioBitRate);
+        setAudioChannels(profile.audioChannels);
+        setAudioSamplingRate(profile.audioSampleRate);
+        setVideoEncoder(profile.videoCodec);
+        setAudioEncoder(profile.audioCodec);
+    }
 
     /**
      * Sets the format of the output file produced during recording. Call this
