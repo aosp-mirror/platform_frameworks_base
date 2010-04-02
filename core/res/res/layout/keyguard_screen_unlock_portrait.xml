@@ -153,6 +153,7 @@
         android:layout_height="0dip"
         android:layout_weight="1"
         android:layout_marginTop="2dip"
+        android:aspect="@string/lock_pattern_view_aspect"
          />
 
     <!-- footer -->
