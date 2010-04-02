@@ -3916,13 +3916,14 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (hasWindowFocus()) onWindowFocusChanged(true);
+        if (hasWindowFocus()) setActive(true);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         clearTextEntry(false);
         dismissZoomControl();
+        if (hasWindowFocus()) setActive(false);
         super.onDetachedFromWindow();
     }
 
@@ -3949,11 +3950,8 @@ public class WebView extends AbsoluteLayout
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
     }
 
-    // To avoid drawing the cursor ring, and remove the TextView when our window
-    // loses focus.
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (hasWindowFocus) {
+    private void setActive(boolean active) {
+        if (active) {
             if (hasFocus()) {
                 // If our window regained focus, and we have focus, then begin
                 // drawing the cursor ring
@@ -3973,7 +3971,8 @@ public class WebView extends AbsoluteLayout
                 // false for the first parameter
             }
         } else {
-            if (getSettings().getBuiltInZoomControls() && !getZoomButtonsController().isVisible()) {
+            if (getSettings().getBuiltInZoomControls()
+                    && !getZoomButtonsController().isVisible()) {
                 /*
                  * The zoom controls come in their own window, so our window
                  * loses focus. Our policy is to not draw the cursor ring if
@@ -3994,6 +3993,18 @@ public class WebView extends AbsoluteLayout
             setFocusControllerInactive();
         }
         invalidate();
+    }
+
+    // To avoid drawing the cursor ring, and remove the TextView when our window
+    // loses focus.
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        setActive(hasWindowFocus);
+        if (hasWindowFocus) {
+            BrowserFrame.sJavaBridge.setActiveWebView(this);
+        } else {
+            BrowserFrame.sJavaBridge.removeActiveWebView(this);
+        }
         super.onWindowFocusChanged(hasWindowFocus);
     }
 
