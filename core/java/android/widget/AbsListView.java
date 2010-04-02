@@ -2069,12 +2069,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
                     
-                    int motionViewPrevTop = 0;
-                    View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
-                    if (motionView != null) {
-                        motionViewPrevTop = motionView.getTop();
-                    }
-                    
                     // No need to do all this work if we're not going to move anyway
                     boolean atEdge = false;
                     if (incrementalDeltaY != 0) {
@@ -2082,14 +2076,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
 
                     // Check to see if we have bumped into the scroll limit
-                    motionView = this.getChildAt(mMotionPosition - mFirstPosition);
-                    if (motionView != null) {
-                        // Check if the top of the motion view is where it is
-                        // supposed to be
-                        final int motionViewRealTop = motionView.getTop();
-                        if (atEdge) {
-                            invalidate();
+                    if (atEdge && getChildCount() > 0) {
+                        // Treat this like we're starting a new scroll from the current
+                        // position. This will let the user start scrolling back into
+                        // content immediately rather than needing to scroll back to the
+                        // point where they hit the limit first.
+                        int motionPosition = findMotionRow(y);
+                        if (motionPosition >= 0) {
+                            final View motionView = getChildAt(motionPosition - mFirstPosition);
+                            mMotionViewOriginalTop = motionView.getTop();
                         }
+                        mMotionY = y;
+                        mMotionPosition = motionPosition;
+                        invalidate();
                     }
                     mLastY = y;
                 }
