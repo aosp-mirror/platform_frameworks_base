@@ -819,7 +819,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         Intent voiceIntent = new Intent(baseIntent);
         ComponentName searchActivity = searchable.getSearchActivity();
         voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                searchActivity == null ? null : searchActivity.toShortString());
+                searchActivity == null ? null : searchActivity.flattenToShortString());
         return voiceIntent;
     }
     
@@ -878,7 +878,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                searchActivity == null ? null : searchActivity.toShortString());
+                searchActivity == null ? null : searchActivity.flattenToShortString());
         
         // Add the values that configure forwarding the results
         voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT, pending);
