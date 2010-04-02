@@ -321,6 +321,10 @@ public class TtsService extends Service implements OnCompletionListener {
                 TextToSpeech.Engine.DEFAULT_RATE);
     }
 
+    private int getDefaultPitch() {
+        // Pitch is not user settable; the default pitch is always 100.
+        return 100;
+    }
 
     private String getDefaultLanguage() {
         String defaultLang = android.provider.Settings.Secure.getString(mResolver,
@@ -786,6 +790,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     String variant = "";
                     String speechRate = "";
                     String engine = "";
+                    String pitch = "";
                     if (speechItem.mParams != null){
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
@@ -809,6 +814,8 @@ public class TtsService extends Service implements OnCompletionListener {
                                     }
                                 } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_ENGINE)) {
                                     engine = speechItem.mParams.get(i + 1);
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_PITCH)) {
+                                    pitch = speechItem.mParams.get(i + 1);
                                 }
                             }
                         }
@@ -830,6 +837,11 @@ public class TtsService extends Service implements OnCompletionListener {
                             setSpeechRate("", Integer.parseInt(speechRate));
                         } else {
                             setSpeechRate("", getDefaultRate());
+                        }
+                        if (pitch.length() > 0){
+                            setPitch("", Integer.parseInt(pitch));
+                        } else {
+                            setPitch("", getDefaultPitch());
                         }
                         try {
                             sNativeSynth.speak(speechItem.mText, streamType);
@@ -885,6 +897,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     String variant = "";
                     String speechRate = "";
                     String engine = "";
+                    String pitch = "";
                     if (speechItem.mParams != null){
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
@@ -901,6 +914,8 @@ public class TtsService extends Service implements OnCompletionListener {
                                     utteranceId = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_ENGINE)) {
                                     engine = speechItem.mParams.get(i + 1);
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_PITCH)) {
+                                    pitch = speechItem.mParams.get(i + 1);
                                 }
                             }
                         }
@@ -922,6 +937,11 @@ public class TtsService extends Service implements OnCompletionListener {
                             setSpeechRate("", Integer.parseInt(speechRate));
                         } else {
                             setSpeechRate("", getDefaultRate());
+                        }
+                        if (pitch.length() > 0){
+                            setPitch("", Integer.parseInt(pitch));
+                        } else {
+                            setPitch("", getDefaultPitch());
                         }
                         try {
                             sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
@@ -1377,7 +1397,17 @@ public class TtsService extends Service implements OnCompletionListener {
          *      TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE as defined in
          *      android.speech.tts.TextToSpeech.
          */
-        public int isLanguageAvailable(String lang, String country, String variant) {
+        public int isLanguageAvailable(String lang, String country, String variant,
+                String[] params) {
+            for (int i = 0; i < params.length - 1; i = i + 2){
+                String param = params[i];
+                if (param != null) {
+                    if (param.equals(TextToSpeech.Engine.KEY_PARAM_ENGINE)) {
+                        mSelf.setEngine(params[i + 1]);
+                        break;
+                    }
+                }
+            }
             return mSelf.isLanguageAvailable(lang, country, variant);
         }
 
