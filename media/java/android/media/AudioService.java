@@ -2063,6 +2063,9 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
 
+            // focus requester might already be somewhere below in the stack, remove it
+            removeFocusStackEntry(clientId, false);
+
             // push focus requester at the top of the audio focus stack
             mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, false, fd, cb,
                     clientId));
@@ -2215,7 +2218,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** see AudioManager.unregisterMediaButtonEventReceiver(ComponentName eventReceiver) */
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
-        Log.i(TAG, "  Remote Control   registerMediaButtonEventReceiver() for " + eventReceiver);
+        Log.i(TAG, "  Remote Control   unregisterMediaButtonEventReceiver() for " + eventReceiver);
 
         synchronized(mRCStack) {
             removeMediaButtonReceiver(eventReceiver);
