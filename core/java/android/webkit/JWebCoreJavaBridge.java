@@ -16,7 +16,6 @@
 
 package android.webkit;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -43,7 +42,9 @@ final class JWebCoreJavaBridge extends Handler {
     private boolean mTimerPaused;
     private boolean mHasDeferredTimers;
 
-    private Context mContext;
+    // keep track of the main WebView attached to the current window so that we
+    // can get the proper Context.
+    private WebView mCurrentMainWebView;
 
     /* package */
     static final int REFRESH_PLUGINS = 100;
@@ -52,14 +53,29 @@ final class JWebCoreJavaBridge extends Handler {
      * Construct a new JWebCoreJavaBridge to interface with
      * WebCore timers and cookies.
      */
-    public JWebCoreJavaBridge(Context context) {
-        mContext = context;
+    public JWebCoreJavaBridge() {
         nativeConstructor();
     }
 
     @Override
     protected void finalize() {
         nativeFinalize();
+    }
+
+    synchronized void setActiveWebView(WebView webview) {
+        if (mCurrentMainWebView != null) {
+            // it is possible if there is a sub-WebView. Do nothing.
+            return;
+        }
+        mCurrentMainWebView = webview;
+    }
+
+    synchronized void removeActiveWebView(WebView webview) {
+        if (mCurrentMainWebView != webview) {
+            // it is possible if there is a sub-WebView. Do nothing.
+            return;
+        }
+        mCurrentMainWebView = null;
     }
 
     /**
@@ -238,9 +254,17 @@ final class JWebCoreJavaBridge extends Handler {
         return CertTool.getKeyStrengthList();
     }
 
-    private String getSignedPublicKey(int index, String challenge, String url) {
-        // generateKeyPair expects organizations which we don't have. Ignore url.
-        return CertTool.getSignedPublicKey(mContext, index, challenge);
+    synchronized private String getSignedPublicKey(int index, String challenge,
+            String url) {
+        if (mCurrentMainWebView != null) {
+            // generateKeyPair expects organizations which we don't have. Ignore
+            // url.
+            return CertTool.getSignedPublicKey(
+                    mCurrentMainWebView.getContext(), index, challenge);
+        } else {
+            Log.e(LOGTAG, "There is no active WebView for getSignedPublicKey");
+            return "";
+        }
     }
 
     private native void nativeConstructor();
