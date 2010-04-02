@@ -3625,7 +3625,18 @@
         <!-- Use "horizontal" for a row, "vertical" for a column.  The default is horizontal. -->
         <attr name="orientation" />
     </declare-styleable>
-    
+
+    <!-- =============================== -->
+    <!-- LockPatternView class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <declare-styleable name="LockPatternView">
+        <!-- Aspect to use when drawing LockPatternView. Choices are "square"(default), "lock_width"
+             or "lock_height" -->
+        <attr name="aspect" format="string" />
+    </declare-styleable>
+
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
          describes a {@link android.speech.RecognitionService}, which is reference from
          its {@link android.speech.RecognitionService#SERVICE_META_DATA} meta-data entry.

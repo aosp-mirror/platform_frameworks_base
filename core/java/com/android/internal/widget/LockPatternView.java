@@ -21,6 +21,7 @@ import com.android.internal.R;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -50,6 +51,11 @@ import java.util.List;
  * "correct" states.
  */
 public class LockPatternView extends View {
+    // Aspect to use when rendering this view
+    private static final int ASPECT_SQUARE = 0; // View will be the minimum of width/height
+    private static final int ASPECT_LOCK_WIDTH = 1; // Fixed width; height will be minimum of (w,h)
+    private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
+
     // Vibrator pattern for creating a tactile bump
     private static final long[] DEFAULT_VIBE_PATTERN = {0, 1, 40, 41};
 
@@ -116,11 +122,13 @@ public class LockPatternView extends View {
 
     private int mBitmapWidth;
     private int mBitmapHeight;
-   
+
 
     private Vibrator vibe; // Vibrator for creating tactile feedback
 
     private long[] mVibePattern;
+
+    private int mAspect;
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -236,6 +244,20 @@ public class LockPatternView extends View {
     public LockPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
         vibe = new Vibrator();
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView);
+
+        final String aspect = a.getString(R.styleable.LockPatternView_aspect);
+
+        if ("square".equals(aspect)) {
+            mAspect = ASPECT_SQUARE;
+        } else if ("lock_width".equals(aspect)) {
+            mAspect = ASPECT_LOCK_WIDTH;
+        } else if ("lock_height".equals(aspect)) {
+            mAspect = ASPECT_LOCK_HEIGHT;
+        } else {
+            mAspect = ASPECT_SQUARE;
+        }
 
         setClickable(true);
 
@@ -425,8 +447,22 @@ public class LockPatternView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int height = MeasureSpec.getSize(heightMeasureSpec);
-        final int squareSide = Math.min(width, height);
-        setMeasuredDimension(squareSide, squareSide);
+        int viewWidth = width;
+        int viewHeight = height;
+        switch (mAspect) {
+            case ASPECT_SQUARE:
+                viewWidth = viewHeight = Math.min(width, height);
+                break;
+            case ASPECT_LOCK_WIDTH:
+                viewWidth = width;
+                viewHeight = Math.min(width, height);
+                break;
+            case ASPECT_LOCK_HEIGHT:
+                viewWidth = Math.min(width, height);
+                viewHeight = height;
+                break;
+        }
+        setMeasuredDimension(viewWidth, viewHeight);
     }
 
     /**
@@ -890,17 +926,17 @@ public class LockPatternView extends View {
         Matrix matrix = new Matrix();
         final int cellWidth = mBitmapCircleDefault.getWidth();
         final int cellHeight = mBitmapCircleDefault.getHeight();
-        
+
         // the up arrow bitmap is at 12:00, so find the rotation from x axis and add 90 degrees.
         final float theta = (float) Math.atan2(
                 (double) (endRow - startRow), (double) (endColumn - startColumn));
-        final float angle = (float) Math.toDegrees(theta) + 90.0f; 
-        
+        final float angle = (float) Math.toDegrees(theta) + 90.0f;
+
         // compose matrix
         matrix.setTranslate(leftX + offsetX, topY + offsetY); // transform to cell position
         matrix.preRotate(angle, cellWidth / 2.0f, cellHeight / 2.0f);  // rotate about cell center
         matrix.preTranslate((cellWidth - arrow.getWidth()) / 2.0f, 0.0f); // translate to 12:00 pos
-        canvas.drawBitmap(arrow, matrix, mPaint); 
+        canvas.drawBitmap(arrow, matrix, mPaint);
     }
 
     /**
@@ -1004,7 +1040,7 @@ public class LockPatternView extends View {
             mInStealthMode = (Boolean) in.readValue(null);
             mTactileFeedbackEnabled = (Boolean) in.readValue(null);
         }
-        
+
         public String getSerializedPattern() {
             return mSerializedPattern;
         }
