@@ -261,7 +261,6 @@ public class TextToSpeech {
          * the TextToSpeech engine returns an ArrayList<String> of all the available voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         * {@hide}
          */
         public static final String EXTRA_AVAILABLE_VOICES = "availableVoices";
         /**
@@ -269,7 +268,6 @@ public class TextToSpeech {
          * the TextToSpeech engine returns an ArrayList<String> of all the unavailable voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         * {@hide}
          */
         public static final String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
         /**
@@ -278,7 +276,6 @@ public class TextToSpeech {
          * check for by sending an ArrayList<String> of the voices that are of interest.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         * {@hide}
          */
         public static final String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
 
@@ -1375,8 +1372,6 @@ public class TextToSpeech {
      * Gets the packagename of the default speech synthesis engine.
      *
      * @return Packagename of the TTS engine that the user has chosen as their default.
-     *
-     * @hide
      */
     public String getDefaultEngine() {
         synchronized (mStartLock) {
@@ -1416,8 +1411,6 @@ public class TextToSpeech {
      * Text-To-Speech settings set by applications.
      *
      * @return Whether or not defaults are enforced.
-     *
-     * @hide
      */
     public boolean areDefaultsEnforced() {
         synchronized (mStartLock) {
