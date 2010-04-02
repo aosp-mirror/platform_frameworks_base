@@ -101,11 +101,19 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
                         }
                     }
                 }
-            } else if (event.getAction() == KeyEvent.ACTION_UP
-                    && event.isTracking() && !event.isCanceled()) {
-                mMenu.close(true);
-                dialog.dismiss();
-                return true;
+            } else if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
+                Window win = mDialog.getWindow();
+                if (win != null) {
+                    View decor = win.getDecorView();
+                    if (decor != null) {
+                        KeyEvent.DispatcherState ds = decor.getKeyDispatcherState();
+                        if (ds != null && ds.isTracking(event)) {
+                            mMenu.close(true);
+                            dialog.dismiss();
+                            return true;
+                        }
+                    }
+                }
             }
         }
 
