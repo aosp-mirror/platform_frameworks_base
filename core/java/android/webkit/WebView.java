@@ -2066,7 +2066,7 @@ public class WebView extends AbsoluteLayout
                 mScrollX = pinLocX(mScrollX);
                 mScrollY = pinLocY(mScrollY);
                 if (oldX != mScrollX || oldY != mScrollY) {
-                    sendOurVisibleRect();
+                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
                 }
                 if (!mScroller.isFinished()) {
                     // We are in the middle of a scroll.  Repin the final scroll
@@ -2130,9 +2130,12 @@ public class WebView extends AbsoluteLayout
                 mScrollX = pinLocX(Math.round(sx));
                 mScrollY = pinLocY(Math.round(sy));
 
+                if (oldX != mScrollX || oldY != mScrollY) {
+                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                }
+
                 // update webkit
                 sendViewSizeZoom();
-                sendOurVisibleRect();
             }
         }
     }
@@ -2634,9 +2637,7 @@ public class WebView extends AbsoluteLayout
             mScrollY = mScroller.getCurrY();
             postInvalidate();  // So we draw again
             if (oldX != mScrollX || oldY != mScrollY) {
-                // As onScrollChanged() is not called, sendOurVisibleRect()
-                // needs to be called explicitly.
-                sendOurVisibleRect();
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
         } else {
             super.computeScroll();
@@ -3347,8 +3348,10 @@ public class WebView extends AbsoluteLayout
                 mUserScroll = false;
                 mWebViewCore.sendMessage(EventHub.SYNC_SCROLL, oldScrollX,
                         oldScrollY);
+                onScrollChanged(mScrollX, mScrollY, oldScrollX, oldScrollY);
+            } else {
+                sendOurVisibleRect();
             }
-            sendOurVisibleRect();
         }
     }
 
