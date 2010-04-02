@@ -18,8 +18,11 @@ package com.android.common;
 
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public class OperationSchedulerTest extends AndroidTestCase {
+    @MediumTest
     public void testScheduler() throws Exception {
         String name = "OperationSchedulerTest.testScheduler";
         SharedPreferences storage = getContext().getSharedPreferences(name, 0);
@@ -112,6 +115,7 @@ public class OperationSchedulerTest extends AndroidTestCase {
         assertTrue(afterSuccess + 1000000 >= scheduler.getNextTimeMillis(options));
     }
 
+    @SmallTest
     public void testParseOptions() throws Exception {
          OperationScheduler.Options options = new OperationScheduler.Options();
          assertEquals(
@@ -132,6 +136,7 @@ public class OperationSchedulerTest extends AndroidTestCase {
                  OperationScheduler.parseOptions("", options).toString());
     }
 
+    @SmallTest
     public void testMoratoriumWithHttpDate() throws Exception {
         String name = "OperationSchedulerTest.testMoratoriumWithHttpDate";
         SharedPreferences storage = getContext().getSharedPreferences(name, 0);
