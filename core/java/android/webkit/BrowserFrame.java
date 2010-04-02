@@ -188,7 +188,7 @@ class BrowserFrame extends Handler {
         // Create a global JWebCoreJavaBridge to handle timers and
         // cookies in the WebCore thread.
         if (sJavaBridge == null) {
-            sJavaBridge = new JWebCoreJavaBridge(appContext);
+            sJavaBridge = new JWebCoreJavaBridge();
             // set WebCore native cache size
             ActivityManager am = (ActivityManager) context
                     .getSystemService(Context.ACTIVITY_SERVICE);
