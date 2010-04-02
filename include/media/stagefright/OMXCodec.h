@@ -87,16 +87,17 @@ private:
     };
 
     enum Quirks {
-        kNeedsFlushBeforeDisable             = 1,
-        kWantsNALFragments                   = 2,
-        kRequiresLoadedToIdleAfterAllocation = 4,
-        kRequiresAllocateBufferOnInputPorts  = 8,
-        kRequiresFlushCompleteEmulation      = 16,
-        kRequiresAllocateBufferOnOutputPorts = 32,
-        kRequiresFlushBeforeShutdown         = 64,
-        kDefersOutputBufferAllocation        = 128,
-        kDecoderLiesAboutNumberOfChannels    = 256,
-        kInputBufferSizesAreBogus            = 512,
+        kNeedsFlushBeforeDisable              = 1,
+        kWantsNALFragments                    = 2,
+        kRequiresLoadedToIdleAfterAllocation  = 4,
+        kRequiresAllocateBufferOnInputPorts   = 8,
+        kRequiresFlushCompleteEmulation       = 16,
+        kRequiresAllocateBufferOnOutputPorts  = 32,
+        kRequiresFlushBeforeShutdown          = 64,
+        kDefersOutputBufferAllocation         = 128,
+        kDecoderLiesAboutNumberOfChannels     = 256,
+        kInputBufferSizesAreBogus             = 512,
+        kSupportsMultipleFramesPerInputBuffer = 1024,
     };
 
     struct BufferInfo {
@@ -136,6 +137,8 @@ private:
     bool mNoMoreOutputData;
     bool mOutputPortSettingsHaveChanged;
     int64_t mSeekTimeUs;
+
+    MediaBuffer *mLeftOverBuffer;
 
     Mutex mLock;
     Condition mAsyncCompletion;
