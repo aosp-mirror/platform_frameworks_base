@@ -383,7 +383,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
     }
 
     final void updateConfigurationLocked(boolean sendIt) {
-        int uiMode = 0;
+        int uiMode = Configuration.UI_MODE_TYPE_NORMAL;
         if (mCarModeEnabled) {
             uiMode = Configuration.UI_MODE_TYPE_CAR;
         } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
@@ -399,8 +399,15 @@ class UiModeManagerService extends IUiModeManager.Stub {
             }
         } else {
             // Disabling the car mode clears the night mode.
-            uiMode = Configuration.UI_MODE_TYPE_NORMAL |
-                    Configuration.UI_MODE_NIGHT_NO;
+            uiMode = (uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_NO;
+        }
+
+        if (LOG) {
+            Slog.d(TAG, 
+                "updateConfigurationLocked: mDockState=" + mDockState 
+                + "; mCarMode=" + mCarModeEnabled
+                + "; mNightMode=" + mNightMode
+                + "; uiMode=" + uiMode);
         }
 
         mCurUiMode = uiMode;
