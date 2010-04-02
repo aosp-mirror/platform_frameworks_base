@@ -158,6 +158,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     MediaSource::ReadOptions options;
 
     int64_t sumDecodeUs = 0;
+    int64_t totalBytes = 0;
 
     while (numIterationsLeft-- > 0) {
         long numFrames = 0;
@@ -188,6 +189,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
             }
 
             sumDecodeUs += delayDecodeUs;
+            totalBytes += buffer->range_length();
 
             buffer->release();
             buffer = NULL;
@@ -216,11 +218,20 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     printf("\n");
 
     int64_t delay = getNowUs() - startTime;
-    printf("avg. %.2f fps\n", n * 1E6 / delay);
-    printf("avg. time to decode one buffer %.2f usecs\n",
-           (double)sumDecodeUs / n);
+    if (!strncasecmp("video/", mime, 6)) {
+        printf("avg. %.2f fps\n", n * 1E6 / delay);
 
-    printf("decoded a total of %d frame(s).\n", n);
+        printf("avg. time to decode one buffer %.2f usecs\n",
+               (double)sumDecodeUs / n);
+
+        printf("decoded a total of %d frame(s).\n", n);
+    } else if (!strncasecmp("audio/", mime, 6)) {
+        // Frame count makes less sense for audio, as the output buffer
+        // sizes may be different across decoders.
+        printf("avg. %.2f KB/sec\n", totalBytes / 1024 * 1E6 / delay);
+
+        printf("decoded a total of %lld bytes\n", totalBytes);
+    }
 }
 
 static void usage(const char *me) {

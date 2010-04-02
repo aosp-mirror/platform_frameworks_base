@@ -103,6 +103,7 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.PV.mp3dec" },
+//    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBDecoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrdec" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
@@ -284,6 +285,7 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
     if (!strcmp(componentName, "OMX.TI.AAC.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
         quirks |= kRequiresFlushCompleteEmulation;
+        quirks |= kSupportsMultipleFramesPerInputBuffer;
     }
     if (!strncmp(componentName, "OMX.qcom.video.encoder.", 23)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
@@ -533,7 +535,28 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
                 return err;
             }
         }
+    } else if (!strncasecmp(mMIME, "audio/", 6)) {
+        if ((mQuirks & kSupportsMultipleFramesPerInputBuffer)
+            && !strcmp(mComponentName, "OMX.TI.AAC.decode")) {
+            OMX_PARAM_PORTDEFINITIONTYPE def;
+            InitOMXParams(&def);
+            def.nPortIndex = kPortIndexInput;
+
+            status_t err = mOMX->getParameter(
+                    mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+            CHECK_EQ(err, OK);
+
+            const size_t kMinBufferSize = 100 * 1024;
+            if (def.nBufferSize < kMinBufferSize) {
+                def.nBufferSize = kMinBufferSize;
+            }
+
+            err = mOMX->setParameter(
+                    mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+            CHECK_EQ(err, OK);
+        }
     }
+
     if (!strcasecmp(mMIME, MEDIA_MIMETYPE_IMAGE_JPEG)
         && !strcmp(mComponentName, "OMX.TI.JPEG.decode")) {
         OMX_COLOR_FORMATTYPE format =
@@ -1049,7 +1072,8 @@ OMXCodec::OMXCodec(
       mSignalledEOS(false),
       mNoMoreOutputData(false),
       mOutputPortSettingsHaveChanged(false),
-      mSeekTimeUs(-1) {
+      mSeekTimeUs(-1),
+      mLeftOverBuffer(NULL) {
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
 
@@ -1938,66 +1962,104 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         return;
     }
 
-    MediaBuffer *srcBuffer;
     status_t err;
-    if (mSeekTimeUs >= 0) {
-        MediaSource::ReadOptions options;
-        options.setSeekTo(mSeekTimeUs);
 
-        mSeekTimeUs = -1;
-        mBufferFilled.signal();
+    bool signalEOS = false;
+    int64_t timestampUs = 0;
 
-        err = mSource->read(&srcBuffer, &options);
-    } else {
-        err = mSource->read(&srcBuffer);
+    size_t offset = 0;
+    int32_t n = 0;
+    for (;;) {
+        MediaBuffer *srcBuffer;
+        if (mSeekTimeUs >= 0) {
+            if (mLeftOverBuffer) {
+                mLeftOverBuffer->release();
+                mLeftOverBuffer = NULL;
+            }
+
+            MediaSource::ReadOptions options;
+            options.setSeekTo(mSeekTimeUs);
+
+            mSeekTimeUs = -1;
+            mBufferFilled.signal();
+
+            err = mSource->read(&srcBuffer, &options);
+        } else if (mLeftOverBuffer) {
+            srcBuffer = mLeftOverBuffer;
+            mLeftOverBuffer = NULL;
+
+            err = OK;
+        } else {
+            err = mSource->read(&srcBuffer);
+        }
+
+        if (err != OK) {
+            signalEOS = true;
+            mFinalStatus = err;
+            mSignalledEOS = true;
+            break;
+        }
+
+        size_t remainingBytes = info->mSize - offset;
+
+        if (srcBuffer->range_length() > remainingBytes) {
+            if (offset == 0) {
+                CODEC_LOGE(
+                     "Codec's input buffers are too small to accomodate "
+                     "buffer read from source (info->mSize = %d, srcLength = %d)",
+                     info->mSize, srcBuffer->range_length());
+
+                srcBuffer->release();
+                srcBuffer = NULL;
+
+                setState(ERROR);
+                return;
+            }
+
+            mLeftOverBuffer = srcBuffer;
+            break;
+        }
+
+        memcpy((uint8_t *)info->mData + offset,
+               (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
+               srcBuffer->range_length());
+
+        if (offset == 0) {
+            CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &timestampUs));
+            CHECK(timestampUs >= 0);
+        }
+
+        offset += srcBuffer->range_length();
+
+        srcBuffer->release();
+        srcBuffer = NULL;
+
+        ++n;
+
+        if (!(mQuirks & kSupportsMultipleFramesPerInputBuffer)) {
+            break;
+        }
+    }
+
+    if (n > 1) {
+        LOGV("coalesced %d frames into one input buffer", n);
     }
 
     OMX_U32 flags = OMX_BUFFERFLAG_ENDOFFRAME;
-    OMX_TICKS timestampUs = 0;
-    size_t srcLength = 0;
 
-    if (err != OK) {
-        CODEC_LOGV("signalling end of input stream.");
+    if (signalEOS) {
         flags |= OMX_BUFFERFLAG_EOS;
-
-        mFinalStatus = err;
-        mSignalledEOS = true;
     } else {
         mNoMoreOutputData = false;
-
-        srcLength = srcBuffer->range_length();
-
-        if (info->mSize < srcLength) {
-            CODEC_LOGE(
-                 "Codec's input buffers are too small to accomodate "
-                 "buffer read from source (info->mSize = %d, srcLength = %d)",
-                 info->mSize, srcLength);
-
-            srcBuffer->release();
-            srcBuffer = NULL;
-
-            setState(ERROR);
-            return;
-        }
-        memcpy(info->mData,
-               (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
-               srcLength);
-
-        if (srcBuffer->meta_data()->findInt64(kKeyTime, &timestampUs)) {
-            CODEC_LOGV("Calling emptyBuffer on buffer %p (length %d), "
-                       "timestamp %lld us (%.2f secs)",
-                       info->mBuffer, srcLength,
-                       timestampUs, timestampUs / 1E6);
-        }
     }
 
-    if (srcBuffer != NULL) {
-        srcBuffer->release();
-        srcBuffer = NULL;
-    }
+    CODEC_LOGV("Calling emptyBuffer on buffer %p (length %d), "
+               "timestamp %lld us (%.2f secs)",
+               info->mBuffer, offset,
+               timestampUs, timestampUs / 1E6);
 
     err = mOMX->emptyBuffer(
-            mNode, info->mBuffer, 0, srcLength,
+            mNode, info->mBuffer, 0, offset,
             flags, timestampUs);
 
     if (err != OK) {
@@ -2350,6 +2412,11 @@ status_t OMXCodec::stop() {
             CHECK(!"should not be here.");
             break;
         }
+    }
+
+    if (mLeftOverBuffer) {
+        mLeftOverBuffer->release();
+        mLeftOverBuffer = NULL;
     }
 
     mSource->stop();
