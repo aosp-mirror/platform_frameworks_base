@@ -16,10 +16,8 @@
 
 package android.text;
 
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.Layout.Directions;
 import android.text.StaticLayoutTest.LayoutBuilder;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Formatter;
@@ -33,10 +31,21 @@ public class StaticLayoutDirectionsTest extends TestCase {
         return new Directions(dirs);
     }
 
-    private static final int LVL1_1 = 1 | (1 << Layout.RUN_LEVEL_SHIFT);
-    private static final int LVL2_1 = 1 | (2 << Layout.RUN_LEVEL_SHIFT);
-    private static final int LVL2_2 = 2 | (2 << Layout.RUN_LEVEL_SHIFT);
-    
+    // constants from Layout that are package-protected
+    private static final int RUN_LENGTH_MASK = 0x03ffffff;
+    private static final int RUN_LEVEL_SHIFT = 26;
+    private static final int RUN_LEVEL_MASK = 0x3f;
+    private static final int RUN_RTL_FLAG = 1 << RUN_LEVEL_SHIFT;
+
+    private static final Directions DIRS_ALL_LEFT_TO_RIGHT =
+        new Directions(new int[] { 0, RUN_LENGTH_MASK });
+    private static final Directions DIRS_ALL_RIGHT_TO_LEFT =
+        new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
+
+    private static final int LVL1_1 = 1 | (1 << RUN_LEVEL_SHIFT);
+    private static final int LVL2_1 = 1 | (2 << RUN_LEVEL_SHIFT);
+    private static final int LVL2_2 = 2 | (2 << RUN_LEVEL_SHIFT);
+
     private static String[] texts = {
         "",
         " ",
@@ -63,12 +72,12 @@ public class StaticLayoutDirectionsTest extends TestCase {
     // Expected directions are an array of start/length+level pairs,
     // in visual order from the leading margin.
     private static Directions[] expected = {
-        Layout.DIRS_ALL_LEFT_TO_RIGHT,
-        Layout.DIRS_ALL_LEFT_TO_RIGHT,
-        Layout.DIRS_ALL_LEFT_TO_RIGHT,
-        Layout.DIRS_ALL_LEFT_TO_RIGHT,
+        DIRS_ALL_LEFT_TO_RIGHT,
+        DIRS_ALL_LEFT_TO_RIGHT,
+        DIRS_ALL_LEFT_TO_RIGHT,
+        DIRS_ALL_LEFT_TO_RIGHT,
         dirs(0, 1, 1, LVL1_1),
-        Layout.DIRS_ALL_LEFT_TO_RIGHT,
+        DIRS_ALL_LEFT_TO_RIGHT,
         dirs(0, 2, 2, LVL1_1),
         dirs(0, 1, 2, LVL2_1, 1, LVL1_1),
         dirs(0, 1, 1, LVL1_1, 2, 1),
@@ -76,7 +85,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
         dirs(0, 1, 4, LVL2_1, 3, LVL1_1, 2, LVL2_1, 1, LVL1_1),
 
         // rtl
-        Layout.DIRS_ALL_RIGHT_TO_LEFT,
+        DIRS_ALL_RIGHT_TO_LEFT,
         dirs(0, LVL1_1, 1, LVL2_1),
         dirs(0, LVL1_1, 1, LVL2_1),
         dirs(0, LVL1_1, 1, LVL2_1, 2, LVL1_1),
@@ -111,7 +120,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
             fail(buf.toString());
         }
     }
-    
+
     // @SmallTest
     public void testTrailingWhitespace() {
         LayoutBuilder b = StaticLayoutTest.builder();
@@ -143,7 +152,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
         for (int i = 1; i < expected.length; ++i) {
             int t = l.getOffsetToRightOf(n);
             if (t != expected[i]) {
-                fail("offset[" + i + "] to right of: " + n + " expected: " + 
+                fail("offset[" + i + "] to right of: " + n + " expected: " +
                         expected[i] + " got: " + t);
             }
             n = t;
@@ -159,21 +168,22 @@ public class StaticLayoutDirectionsTest extends TestCase {
         for (int i = expected.length - 1; --i >= 0;) {
             int t = l.getOffsetToLeftOf(n);
             if (t != expected[i]) {
-                fail("offset[" + i + "] to left of: " + n + " expected: " + 
+                fail("offset[" + i + "] to left of: " + n + " expected: " +
                         expected[i] + " got: " + t);
             }
             n = t;
         }
     }
-    
+
     // utility, not really a test
+    /*
     public void testMeasureText1() {
         LayoutBuilder b = StaticLayoutTest.builder();
         String text = "ABC"; // "abAB"
         b.setText(pseudoBidiToReal(text));
         Layout l = b.build();
         Directions directions = l.getLineDirections(0);
-        
+
         TextPaint workPaint = new TextPaint();
 
         int dir = -1; // LEFT_TO_RIGHT
@@ -196,8 +206,8 @@ public class StaticLayoutDirectionsTest extends TestCase {
                 }
             } while (!trailing);
         } while (dir > 0);
-        
     }
+    */
 
     // utility for displaying arrays in hex
     private static String hexArray(int[] array) {
@@ -212,21 +222,21 @@ public class StaticLayoutDirectionsTest extends TestCase {
         sb.append('}');
         return sb.toString();
     }
-    
-    private void checkDirections(Layout l, int i, String text, 
+
+    private void checkDirections(Layout l, int i, String text,
             Directions[] expectedDirs, Formatter f) {
         Directions expected = expectedDirs[i];
         Directions result = l.getLineDirections(0);
         if (!Arrays.equals(expected.mDirections, result.mDirections)) {
-            f.format("%n[%2d] '%s', %s != %s", i, text, 
+            f.format("%n[%2d] '%s', %s != %s", i, text,
                     hexArray(expected.mDirections),
                     hexArray(result.mDirections));
         }
     }
-    
+
     private void expectDirections(String msg, Directions expected, Directions result) {
         if (!Arrays.equals(expected.mDirections, result.mDirections)) {
-            fail("expected: " + hexArray(expected.mDirections) + 
+            fail("expected: " + hexArray(expected.mDirections) +
                     " got: " + hexArray(result.mDirections));
         }
     }
