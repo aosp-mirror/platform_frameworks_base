@@ -533,6 +533,7 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_TEST}
  *     <li> {@link #CATEGORY_CAR_DOCK}
  *     <li> {@link #CATEGORY_DESK_DOCK}
+ *     <li> {@link #CATEGORY_CAR_MODE}
  * </ul>
  *
  * <h3>Standard Extra Data</h3>
@@ -2023,6 +2024,12 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_DESK_DOCK = "android.intent.category.DESK_DOCK";
 
+    /**
+     * Used to indicate that the activity can be used in a car environment.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_CAR_MODE = "android.intent.category.CAR_MODE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard extra data keys.
@@ -2118,7 +2125,7 @@ public class Intent implements Parcelable, Cloneable {
      * number to call in a {@link android.content.Intent#ACTION_CALL}.
      */
     public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
-    
+
     /**
      * Used as an int extra field in {@link android.content.Intent#ACTION_UID_REMOVED}
      * intents to supply the uid the package had been assigned.  Also an optional
