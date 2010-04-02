@@ -1946,42 +1946,42 @@ public class PackageManagerTests extends AndroidTestCase {
     static final String BASE_PERMISSIONS_DEFINED[] = new String[] {
         PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
         PERM_DEFINED,
-        "com.android.unit_tests.NORMAL",
-        "com.android.unit_tests.DANGEROUS",
-        "com.android.unit_tests.SIGNATURE",
+        "com.android.frameworks.coretests.NORMAL",
+        "com.android.frameworks.coretests.DANGEROUS",
+        "com.android.frameworks.coretests.SIGNATURE",
     };
     
     static final String BASE_PERMISSIONS_UNDEFINED[] = new String[] {
-        PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
+        PERM_PACKAGE, "com.android.frameworks.coretests.install_decl_perm",
         PERM_UNDEFINED,
-        "com.android.unit_tests.NORMAL",
-        "com.android.unit_tests.DANGEROUS",
-        "com.android.unit_tests.SIGNATURE",
+        "com.android.frameworks.coretests.NORMAL",
+        "com.android.frameworks.coretests.DANGEROUS",
+        "com.android.frameworks.coretests.SIGNATURE",
     };
     
     static final String BASE_PERMISSIONS_USED[] = new String[] {
-        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_PACKAGE, "com.android.frameworks.coretests.install_use_perm_good",
         PERM_USED,
-        "com.android.unit_tests.NORMAL",
-        "com.android.unit_tests.DANGEROUS",
-        "com.android.unit_tests.SIGNATURE",
+        "com.android.frameworks.coretests.NORMAL",
+        "com.android.frameworks.coretests.DANGEROUS",
+        "com.android.frameworks.coretests.SIGNATURE",
     };
     
     static final String BASE_PERMISSIONS_NOTUSED[] = new String[] {
-        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_PACKAGE, "com.android.frameworks.coretests.install_use_perm_good",
         PERM_NOTUSED,
-        "com.android.unit_tests.NORMAL",
-        "com.android.unit_tests.DANGEROUS",
-        "com.android.unit_tests.SIGNATURE",
+        "com.android.frameworks.coretests.NORMAL",
+        "com.android.frameworks.coretests.DANGEROUS",
+        "com.android.frameworks.coretests.SIGNATURE",
     };
     
     static final String BASE_PERMISSIONS_SIGUSED[] = new String[] {
-        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_PACKAGE, "com.android.frameworks.coretests.install_use_perm_good",
         PERM_USED,
-        "com.android.unit_tests.SIGNATURE",
+        "com.android.frameworks.coretests.SIGNATURE",
         PERM_NOTUSED,
-        "com.android.unit_tests.NORMAL",
-        "com.android.unit_tests.DANGEROUS",
+        "com.android.frameworks.coretests.NORMAL",
+        "com.android.frameworks.coretests.DANGEROUS",
     };
     
     /*
