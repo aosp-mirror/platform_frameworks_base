@@ -33,6 +33,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
 
@@ -48,6 +49,9 @@ public final class ShutdownThread extends Thread {
     // maximum time we wait for the shutdown broadcast before going on.
     private static final int MAX_BROADCAST_TIME = 10*1000;
     private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
+
+    // length of vibration before shutting down
+    private static final int SHUTDOWN_VIBRATE_MS = 500;
     
     // state tracking
     private static Object sIsStartedGuard = new Object();
@@ -323,6 +327,15 @@ public final class ShutdownThread extends Thread {
                 Power.reboot(mRebootReason);
             } catch (Exception e) {
                 Log.e(TAG, "Reboot failed, will attempt shutdown instead", e);
+            }
+        } else if (SHUTDOWN_VIBRATE_MS > 0) {
+            // vibrate before shutting down
+            Vibrator vibrator = new Vibrator();
+            vibrator.vibrate(SHUTDOWN_VIBRATE_MS);
+            // vibrator is asynchronous so we need to wait to avoid shutting down too soon.
+            try {
+                Thread.sleep(SHUTDOWN_VIBRATE_MS);
+            } catch (InterruptedException e) {
             }
         }
 
