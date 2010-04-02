@@ -73,6 +73,17 @@ public final class BluetoothHeadset {
     public static final String EXTRA_AUDIO_STATE =
             "android.bluetooth.headset.extra.AUDIO_STATE";
 
+    /** Extra to be used with the Headset State change intent.
+     * This will be used only when Headset state changes to
+     * {@link #STATE_DISCONNECTED} from any previous state.
+     * This extra field is optional and will be used when
+     * we have deterministic information regarding whether
+     * the disconnect was initiated by the remote device or
+     * by the local adapter.
+     */
+    public static final String EXTRA_DISCONNECT_INITIATOR =
+            "android.bluetooth.headset.extra.DISCONNECT_INITIATOR";
+
     /**
      * TODO(API release): Consider incorporating as new state in
      * HEADSET_STATE_CHANGED
@@ -99,6 +110,11 @@ public final class BluetoothHeadset {
     public static final int RESULT_SUCCESS = 1;
     /** Connection canceled before completetion. */
     public static final int RESULT_CANCELED = 2;
+
+    /** Values for {@link #EXTRA_DISCONNECT_INITIATOR} */
+    public static final int REMOTE_DISCONNECT = 0;
+    public static final int LOCAL_DISCONNECT = 1;
+
 
     /** Default priority for headsets that  for which we will accept
      * inconing connections and auto-connect */
