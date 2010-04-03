@@ -895,9 +895,15 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 String[] nameStringArray = mProcWakelocksName;
                 long[] wlData = mProcWakelocksData;
+                // Stomp out any bad characters since this is from a circular buffer
+                // A corruption is seen sometimes that results in the vm crashing
+                // This should prevent crashes and the line will probably fail to parse
+                for (int j = startIndex; j < endIndex; j++) {
+                    if ((wlBuffer[j] & 0x80) != 0) wlBuffer[j] = (byte) '?';
+                }
                 boolean parsed = Process.parseProcLine(wlBuffer, startIndex, endIndex,
                         PROC_WAKELOCKS_FORMAT, nameStringArray, wlData, null);
-                
+
                 name = nameStringArray[0];
                 count = (int) wlData[1];
                 // convert nanoseconds to microseconds with rounding.
