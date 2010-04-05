@@ -41,7 +41,6 @@ static jmethodID method_reportNiNotification;
 static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
 static const AGpsInterface* sAGpsInterface = NULL;
-static const GpsPrivacyInterface* sGpsPrivacyInterface = NULL;
 static const GpsNiInterface* sGpsNiInterface = NULL;
 static const GpsDebugInterface* sGpsDebugInterface = NULL;
 
@@ -246,12 +245,6 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
     if (sGpsNiInterface)
         sGpsNiInterface->init(&sGpsNiCallbacks);
 
-    // Clear privacy lock while enabled
-    if (!sGpsPrivacyInterface)
-        sGpsPrivacyInterface = (const GpsPrivacyInterface*)sGpsInterface->get_extension(GPS_PRIVACY_INTERFACE);
-    if (sGpsPrivacyInterface)
-        sGpsPrivacyInterface->set_privacy_lock(0);
-
     if (!sGpsDebugInterface)
        sGpsDebugInterface = (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
 
@@ -260,12 +253,6 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
 
 static void android_location_GpsLocationProvider_disable(JNIEnv* env, jobject obj)
 {
-    // Enable privacy lock while disabled
-    if (!sGpsPrivacyInterface)
-        sGpsPrivacyInterface = (const GpsPrivacyInterface*)sGpsInterface->get_extension(GPS_PRIVACY_INTERFACE);
-    if (sGpsPrivacyInterface)
-        sGpsPrivacyInterface->set_privacy_lock(1);
-
     pthread_mutex_lock(&sEventMutex);
     sPendingCallbacks |= kDisableRequest;
     pthread_cond_signal(&sEventCond);
