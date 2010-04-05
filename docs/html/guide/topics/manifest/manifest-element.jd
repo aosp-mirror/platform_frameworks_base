@@ -8,7 +8,8 @@ page.title=&lt;manifest&gt;
           android:<a href="#uid">sharedUserId</a>="<i>string</i>"
           android:<a href="#uidlabel">sharedUserLabel</a>="<i>string resource</i>" <!-- ##api level 3## -->
           android:<a href="#vcode">versionCode</a>="<i>integer</i>"
-          android:<a href="#vname">versionName</a>="<i>string</i>" &gt;
+          android:<a href="#vname">versionName</a>="<i>string</i>"
+          android:<a href="#install">installLocation</a>=["auto" | "internalOnly" | "preferExternal"] &gt;
     . . .
 &lt;/manifest&gt;</pre></dd>
 
@@ -37,7 +38,8 @@ contain an <code><a href="{@docRoot}guide/topics/manifest/application-element.ht
 and specify {@code xlmns:android} and {@code package} attributes.</dd>
 
 <dt>attributes:</dt>
-<dd><dl class="attr">
+<dd>
+<dl class="attr">
 <dt><a name="nspace"></a>{@code xmlns:android}</dt>
 <dd>Defines the Android namespace.  This attribute should always be set 
 to "{@code http://schemas.android.com/apk/res/android}".</dd>
@@ -50,18 +52,19 @@ package name parts may only start with letters.  For example, applications
 published by Google could have names in the form
 <code>com.google.app.<i>application_name</i></code>.
 
-<p>
-The package name serves as a unique identifier for the application.  
-It's also the default name for the application process (see the 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
-element's
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html#aff">process</a></code>
-process</a></code> attribute) and the default task affinity of an activity
-(see the 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
-element's
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> attribute).
-</p></dd>
+  <p>
+  The package name serves as a unique identifier for the application.
+  It's also the default name for the application process (see the
+  <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+  element's
+  <code><a href="{@docRoot}guide/topics/manifest/application-element.html#aff">process</a></code>
+  process</a></code> attribute) and the default task affinity of an activity
+  (see the
+  <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+  element's
+  <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> attribute).
+  </p>
+</dd>
 
 <dt><a name="uid"></a>{@code android:sharedUserId}</dt>
 <dd>The name of a Linux user ID that will be shared with other applications.  
@@ -75,33 +78,84 @@ other's data and, if desired, run in the same process.</dd>
 <dd>A user-readable label for the shared user ID.  The label must be set as
 a reference to a string resource; it cannot be a raw string.
 
-<p>
-<!-- ##api level indication## -->
-This attribute was introduced in API Level 3.  It is meaningful only if the 
-<code><a href="#uid">sharedUserId</a></code> attribute is also set.
-</p></dd>      
+  <p>
+  <!-- ##api level indication## -->
+  This attribute was introduced in API Level 3.  It is meaningful only if the
+  <code><a href="#uid">sharedUserId</a></code> attribute is also set.
+  </p>
+</dd>
 
 <dt><a name="vcode"></a>{@code android:versionCode}</dt>
-<dd>An internal version number.  This number is used only to determine whether 
+<dd>An internal version number.  This number is used only to determine whether
 one version is more recent than another, with higher numbers indicating more 
 recent versions.  This is not the version number shown to users; that number 
 is set by the {@code versionName} attribute.
 
-<p>
-The value must be set as an integer, such as "100".  You can define it however
-you want, as long as each successive version has a higher number.  For example, 
-it could be a build number.  Or you could translate a version number in "x.y" 
-format to an integer by encoding the "x" and "y" separately in the lower and 
-upper 16 bits.  Or you could simply increase the number by one each time a new 
-version is released.
-</p></dd>
+  <p>
+  The value must be set as an integer, such as "100".  You can define it however
+  you want, as long as each successive version has a higher number.  For example,
+  it could be a build number.  Or you could translate a version number in "x.y"
+  format to an integer by encoding the "x" and "y" separately in the lower and
+  upper 16 bits.  Or you could simply increase the number by one each time a new
+  version is released.
+  </p>
+</dd>
 
 <dt><a name="vname"></a>{@code android:versionName}</dt>
 <dd>The version number shown to users.  This attribute can be set as a raw 
 string or as a reference to a string resource.  The string has no other purpose 
 than to be displayed to users.  The {@code versionCode} attribute holds 
 the significant version number used internally.
-</dl></dd>
+</dd>
+
+<dt><a name="install"></a>{@code android:installLocation}</dt>
+<dd>The default install location for your application.
+<p>This attribute was introduced in API Level 8.</p>
+
+<p>The following keyword strings are accepted:</p>
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Description</th>
+</tr><tr>
+   <td>"{@code auto}"</td>
+   <td>Let the system decide the ideal install location. This will usually be based on the user's
+saved preference.</td>
+</tr><tr>
+   <td>"{@code internalOnly}"</td>
+   <td>Request to be installed only on the internal device storage. If this is set, then
+the application will never be installed on the external storage (SD card). If the internal storage
+is full, then the application will not install.</td>
+</tr><tr>
+   <td>"{@code preferExternal}"</td>
+   <td>Prefer to be installed on external storage (SD card). There is no guarantee that the system
+will honor this request. The application might be installed on internal storage if the
+external media is unavailable or full, or if the application uses the forward-locking mechanism
+(not supported on external storage).</td>
+</tr>
+</table>
+
+<p>When an application is installed on the external storage:</p>
+<ul>
+  <li>The {@code .apk} file is saved
+to the external storage, but any application data (such as databases) is still saved on
+the internal device memory.</li>
+  <li>The container in which the {@code .apk} file is saved is encrypted with a key that allows
+the application to operate only on the device that installed it. (A user cannot
+transfer the SD card to another device and use applications installed on the card.) Though,
+multiple SD cards can be used with the same device.</li>
+  <li>At the user's request, the application can be moved to the internal storage.</li>
+</ul>
+
+<p>The user may also request to move an application from the internal storage to the external
+storage. However, this will not be allowed if this attribute is set to {@code internalOnly}.
+</p>
+
+</dd>
+
+</dl>
+</dd><!-- end attributes -->
 
 <!-- ##api level indication## -->
 <dt>introduced in:</dt>
