@@ -252,7 +252,6 @@ implements MovementMethod
               int offset = getOffset(x, y, widget);
 
               if (cap) {
-
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset,
                                  Spannable.SPAN_POINT_POINT);
 
@@ -286,13 +285,13 @@ implements MovementMethod
                           Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                   }
               }
-            } else if (event.getAction() == MotionEvent.ACTION_MOVE ) {
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
                                 KeyEvent.META_SHIFT_ON) == 1) ||
                               (MetaKeyKeyListener.getMetaState(buffer,
                                 MetaKeyKeyListener.META_SELECTING) != 0);
 
-                if (cap & handled) {
+                if (cap && handled) {
                     // Before selecting, make sure we've moved out of the "slop".
                     // handled will be true, if we're in select mode AND we're
                     // OUT of the slop
@@ -308,28 +307,35 @@ implements MovementMethod
                     int y = (int) event.getY();
                     int offset = getOffset(x, y, widget);
 
-                    // Get the last down touch position (the position at which the
-                    // user started the selection)
-                    int lastDownOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+                    final OnePointFiveTapState[] tap = buffer.getSpans(0, buffer.length(),
+                            OnePointFiveTapState.class);
 
-                    // Compute the selection boundaries
-                    int spanstart;
-                    int spanend;
-                    if (offset >= lastDownOffset) {
-                        // Expand from word start of the original tap to new word
-                        // end, since we are selecting "forwards"
-                        spanstart = findWordStart(buffer, lastDownOffset);
-                        spanend = findWordEnd(buffer, offset);
+                    if (tap.length > 0 && tap[0].active) {
+                        // Get the last down touch position (the position at which the
+                        // user started the selection)
+                        int lastDownOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+
+                        // Compute the selection boundaries
+                        int spanstart;
+                        int spanend;
+                        if (offset >= lastDownOffset) {
+                            // Expand from word start of the original tap to new word
+                            // end, since we are selecting "forwards"
+                            spanstart = findWordStart(buffer, lastDownOffset);
+                            spanend = findWordEnd(buffer, offset);
+                        } else {
+                            // Expand to from new word start to word end of the original
+                            // tap since we are selecting "backwards".
+                            // The spanend will always need to be associated with the touch
+                            // up position, so that refining the selection with the
+                            // trackball will work as expected.
+                            spanstart = findWordEnd(buffer, lastDownOffset);
+                            spanend = findWordStart(buffer, offset);
+                        }
+                        Selection.setSelection(buffer, spanstart, spanend);
                     } else {
-                        // Expand to from new word start to word end of the original
-                        // tap since we are selecting "backwards".
-                        // The spanend will always need to be associated with the touch
-                        // up position, so that refining the selection with the
-                        // trackball will work as expected.
-                        spanstart = findWordEnd(buffer, lastDownOffset);
-                        spanend = findWordStart(buffer, offset);
+                        Selection.extendSelection(buffer, offset);
                     }
-                    Selection.setSelection(buffer, spanstart, spanend);
                     return true;
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -393,6 +399,8 @@ implements MovementMethod
                         // If we selecting something with the onepointfivetap-and
                         // swipe gesture, stop it on finger up.
                         MetaKeyKeyListener.stopSelecting(widget, buffer);
+                    } else {
+                        Selection.extendSelection(buffer, off);
                     }
                 } else if (doubletap) {
                     Selection.setSelection(buffer,
