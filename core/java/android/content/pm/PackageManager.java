@@ -738,6 +738,14 @@ public abstract class PackageManager {
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's display has a touch screen.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
+    
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's touch screen supports
      * multitouch sufficient for basic two-finger gesture detection.
      */
