@@ -891,7 +891,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 for (endIndex=startIndex; 
                         endIndex < len && wlBuffer[endIndex] != '\n' && wlBuffer[endIndex] != '\0'; 
                         endIndex++);
-                endIndex++; // endIndex is an exclusive upper bound.
+                // Don't go over the end of the buffer
+                if (endIndex < len) {
+                    endIndex++; // endIndex is an exclusive upper bound.
+                }
 
                 String[] nameStringArray = mProcWakelocksName;
                 long[] wlData = mProcWakelocksData;
