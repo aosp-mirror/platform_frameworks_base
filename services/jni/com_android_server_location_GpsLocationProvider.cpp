@@ -20,8 +20,8 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "hardware_legacy/gps.h"
-#include "hardware_legacy/gps_ni.h"
+#include "hardware/hardware.h"
+#include "hardware/gps.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
 
@@ -205,16 +205,34 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification", "(IIIIILjava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
 }
 
+static const GpsInterface* get_gps_interface() {
+    int err;
+    hw_module_t* module;
+    const GpsInterface* interface = NULL;
+
+    err = hw_get_module(GPS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
+    if (err == 0) {
+        hw_device_t* device;
+        err = module->methods->open(module, GPS_HARDWARE_MODULE_ID, &device);
+        if (err == 0) {
+            gps_device_t* gps_device = (gps_device_t *)device;
+            interface = gps_device->get_gps_interface(gps_device);
+        }
+    }
+
+    return interface;
+}
+
 static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, jclass clazz) {
     if (!sGpsInterface)
-        sGpsInterface = gps_get_interface();
+        sGpsInterface = get_gps_interface();
     return (sGpsInterface != NULL);
 }
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
 {
     if (!sGpsInterface)
-        sGpsInterface = gps_get_interface();
+        sGpsInterface = get_gps_interface();
     if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
         return false;
 
