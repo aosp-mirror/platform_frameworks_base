@@ -818,8 +818,10 @@ import java.util.ArrayList;
         boolean single = true;
         boolean inPassword = false;
         int maxLength = -1;
-        int inputType = EditorInfo.TYPE_CLASS_TEXT
-                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
+        int inputType = EditorInfo.TYPE_CLASS_TEXT;
+        if (mWebView.nativeFocusCandidateHasNextTextfield()) {
+            inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
+        }
         int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         switch (type) {
