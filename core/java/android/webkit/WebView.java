@@ -7168,6 +7168,7 @@ public class WebView extends AbsoluteLayout
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
     /* package */ native int      nativeFocusCandidateFramePointer();
+    /* package */ native boolean  nativeFocusCandidateHasNextTextfield();
     private native boolean  nativeFocusCandidateIsPassword();
     private native boolean  nativeFocusCandidateIsRtlText();
     private native boolean  nativeFocusCandidateIsTextInput();

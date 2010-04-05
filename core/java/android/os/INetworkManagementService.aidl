@@ -191,14 +191,9 @@ interface INetworkManagementService
     long getInterfaceRxCounter(String iface);
 
     /**
-     * Configures RX bandwidth throttling on an interface
+     * Configures bandwidth throttling on an interface
      */
-    void setInterfaceRxThrottle(String iface, int kbps);
-
-    /**
-     * Configures TX bandwidth throttling on an interface
-     */
-    void setInterfaceTxThrottle(String iface, int kbps);
+    void setInterfaceThrottle(String iface, int maxKbits, int rxKbps, int txKbps);
 
     /**
      * Returns the currently configured RX throttle values
@@ -211,4 +206,5 @@ interface INetworkManagementService
      * for the specified interface
      */
     int getInterfaceTxThrottle(String iface);
+
 }
