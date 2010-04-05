@@ -34,6 +34,7 @@ import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Images.Thumbnails;
 import android.util.Log;
 
+import java.io.FileInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,14 +62,14 @@ public class ThumbnailUtils {
     public static final int OPTIONS_RECYCLE_INPUT = 0x2;
 
     /**
-     * Constant used to indicate the dimension of mini thumbnail in
-     * {@link #extractThumbnail(Bitmap, int, int, int)}.
+     * Constant used to indicate the dimension of mini thumbnail.
+     * @hide Only used by media framework and media provider internally.
      */
     public static final int TARGET_SIZE_MINI_THUMBNAIL = 320;
 
     /**
-     * Constant used to indicate the dimension of micro thumbnail in
-     * {@link #extractThumbnail(Bitmap, int, int, int)}.
+     * Constant used to indicate the dimension of micro thumbnail.
+     * @hide Only used by media framework and media provider internally.
      */
     public static final int TARGET_SIZE_MICRO_THUMBNAIL = 96;
 
@@ -80,23 +81,20 @@ public class ThumbnailUtils {
      *
      * This method always returns a "square thumbnail" for MICRO_KIND thumbnail.
      *
-     * @param cr ContentResolver
-     * @param filePath file path needed by EXIF interface
-     * @param uri URI of original image
-     * @param origId image id
-     * @param kind either MINI_KIND or MICRO_KIND
-     * @param saveMini Whether to save MINI_KIND thumbnail obtained in this method.
+     * @param filePath the path of image file
+     * @param kind could be MINI_KIND or MICRO_KIND
      * @return Bitmap
      *
      * @hide This method is only used by media framework and media provider internally.
      */
-    public static Bitmap createImageThumbnail(ContentResolver cr, String filePath, Uri uri,
-            long origId, int kind, boolean saveMini) {
-        boolean wantMini = (kind == Images.Thumbnails.MINI_KIND || saveMini);
-        int targetSize = wantMini ?
-                TARGET_SIZE_MINI_THUMBNAIL : TARGET_SIZE_MICRO_THUMBNAIL;
-        int maxPixels = wantMini ?
-                MAX_NUM_PIXELS_THUMBNAIL : MAX_NUM_PIXELS_MICRO_THUMBNAIL;
+    public static Bitmap createImageThumbnail(String filePath, int kind) {
+        boolean wantMini = (kind == Images.Thumbnails.MINI_KIND);
+        int targetSize = wantMini
+                ? TARGET_SIZE_MINI_THUMBNAIL
+                : TARGET_SIZE_MICRO_THUMBNAIL;
+        int maxPixels = wantMini
+                ? MAX_NUM_PIXELS_THUMBNAIL
+                : MAX_NUM_PIXELS_MICRO_THUMBNAIL;
         SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
         Bitmap bitmap = null;
         MediaFileType fileType = MediaFile.getFileType(filePath);
@@ -106,21 +104,25 @@ public class ThumbnailUtils {
         }
 
         if (bitmap == null) {
-            bitmap = makeBitmap(targetSize, maxPixels, uri, cr);
-        }
+            try {
+                FileDescriptor fd = new FileInputStream(filePath).getFD();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 1;
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFileDescriptor(fd, null, options);
+                if (options.mCancel || options.outWidth == -1
+                        || options.outHeight == -1) {
+                    return null;
+                }
+                options.inSampleSize = computeSampleSize(
+                        options, targetSize, maxPixels);
+                options.inJustDecodeBounds = false;
 
-        if (bitmap == null) {
-            return null;
-        }
-
-        if (saveMini) {
-            if (sizedThumbnailBitmap.mThumbnailData != null) {
-                storeThumbnail(cr, origId,
-                        sizedThumbnailBitmap.mThumbnailData,
-                        sizedThumbnailBitmap.mThumbnailWidth,
-                        sizedThumbnailBitmap.mThumbnailHeight);
-            } else {
-                storeThumbnail(cr, origId, bitmap);
+                options.inDither = false;
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                bitmap = BitmapFactory.decodeFileDescriptor(fd, null, options);
+            } catch (IOException ex) {
+                Log.e(TAG, "", ex);
             }
         }
 
@@ -137,9 +139,10 @@ public class ThumbnailUtils {
      * Create a video thumbnail for a video. May return null if the video is
      * corrupt or the format is not supported.
      *
-     * @param filePath
+     * @param filePath the path of video file
+     * @param kind could be MINI_KIND or MICRO_KIND
      */
-    public static Bitmap createVideoThumbnail(String filePath) {
+    public static Bitmap createVideoThumbnail(String filePath, int kind) {
         Bitmap bitmap = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
@@ -156,6 +159,12 @@ public class ThumbnailUtils {
             } catch (RuntimeException ex) {
                 // Ignore failures while cleaning up.
             }
+        }
+        if (kind == Images.Thumbnails.MICRO_KIND && bitmap != null) {
+            bitmap = extractThumbnail(bitmap,
+                    TARGET_SIZE_MICRO_THUMBNAIL,
+                    TARGET_SIZE_MICRO_THUMBNAIL,
+                    OPTIONS_RECYCLE_INPUT);
         }
         return bitmap;
     }
@@ -259,25 +268,6 @@ public class ThumbnailUtils {
             return lowerBound;
         } else {
             return upperBound;
-        }
-    }
-
-    /**
-     * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
-     * The image data will be read from specified ContentResolver.
-     */
-    private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
-            Uri uri, ContentResolver cr) {
-        ParcelFileDescriptor input = null;
-        try {
-            input = cr.openFileDescriptor(uri, "r");
-            return makeBitmap(minSideLength, maxNumOfPixels, uri, cr, input,
-                    null);
-        } catch (IOException ex) {
-            Log.e(TAG, "", ex);
-            return null;
-        } finally {
-            closeSilently(input);
         }
     }
 
@@ -436,81 +426,6 @@ public class ThumbnailUtils {
         }
 
         return b2;
-    }
-
-    private static final String[] THUMB_PROJECTION = new String[] {
-        BaseColumns._ID // 0
-    };
-
-    /**
-     * Look up thumbnail uri by given imageId, it will be automatically created if it's not created
-     * yet. Most of the time imageId is identical to thumbId, but it's not always true.
-     */
-    private static Uri getImageThumbnailUri(ContentResolver cr, long origId, int width, int height) {
-        Uri thumbUri = Images.Thumbnails.EXTERNAL_CONTENT_URI;
-        Cursor c = cr.query(thumbUri, THUMB_PROJECTION,
-              Thumbnails.IMAGE_ID + "=?",
-              new String[]{String.valueOf(origId)}, null);
-        if (c == null) return null;
-        try {
-            if (c.moveToNext()) {
-                return ContentUris.withAppendedId(thumbUri, c.getLong(0));
-            }
-        } finally {
-            if (c != null) c.close();
-        }
-
-        ContentValues values = new ContentValues(4);
-        values.put(Thumbnails.KIND, Thumbnails.MINI_KIND);
-        values.put(Thumbnails.IMAGE_ID, origId);
-        values.put(Thumbnails.HEIGHT, height);
-        values.put(Thumbnails.WIDTH, width);
-        try {
-            return cr.insert(thumbUri, values);
-        } catch (Exception ex) {
-            Log.w(TAG, ex);
-            return null;
-        }
-    }
-
-    /**
-     * Store a given thumbnail in the database. (Bitmap)
-     */
-    private static boolean storeThumbnail(ContentResolver cr, long origId, Bitmap thumb) {
-        if (thumb == null) return false;
-        try {
-            Uri uri = getImageThumbnailUri(cr, origId, thumb.getWidth(), thumb.getHeight());
-            if (uri == null) return false;
-            OutputStream thumbOut = cr.openOutputStream(uri);
-            thumb.compress(Bitmap.CompressFormat.JPEG, 85, thumbOut);
-            thumbOut.close();
-            return true;
-        } catch (Throwable t) {
-            Log.e(TAG, "Unable to store thumbnail", t);
-            return false;
-        }
-    }
-
-    /**
-     * Store a given thumbnail in the database. (byte array)
-     */
-    private static boolean storeThumbnail(ContentResolver cr, long origId, byte[] jpegThumbnail,
-            int width, int height) {
-        if (jpegThumbnail == null) return false;
-
-        Uri uri = getImageThumbnailUri(cr, origId, width, height);
-        if (uri == null) {
-            return false;
-        }
-        try {
-            OutputStream thumbOut = cr.openOutputStream(uri);
-            thumbOut.write(jpegThumbnail);
-            thumbOut.close();
-            return true;
-        } catch (Throwable t) {
-            Log.e(TAG, "Unable to store thumbnail", t);
-            return false;
-        }
     }
 
     /**
