@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Downloads;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.FileObserver;
@@ -44,6 +45,14 @@ public class BootReceiver extends BroadcastReceiver {
     private static final int LOG_SIZE = 65536;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
+
+    // The pre-froyo package and class of the system updater, which
+    // ran in the system process.  We need to remove its packages here
+    // in order to clean up after a pre-froyo-to-froyo update.
+    private static final String OLD_UPDATER_PACKAGE =
+        "com.google.android.systemupdater";
+    private static final String OLD_UPDATER_CLASS =
+        "com.google.android.systemupdater.SystemUpdateReceiver";
 
     // Keep a reference to the observer so the finalizer doesn't disable it.
     private static FileObserver sTombstoneObserver = null;
@@ -70,8 +79,19 @@ public class BootReceiver extends BroadcastReceiver {
                 } catch (Exception e) {
                     Slog.e(TAG, "Can't log boot events", e);
                 }
+                try {
+                    removeOldUpdatePackages(context);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Can't remove old update packages", e);
+                }
+
             }
         }.start();
+    }
+
+    private void removeOldUpdatePackages(Context ctx) {
+        Downloads.ByUri.removeAllDownloadsByPackage(
+            ctx, OLD_UPDATER_PACKAGE, OLD_UPDATER_CLASS);
     }
 
     private void logBootEvents(Context ctx) throws IOException {
