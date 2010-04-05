@@ -68,7 +68,28 @@ public class VCardParser_V21 extends VCardParser {
     private static final HashSet<String> sAvailableEncodingV21 =
         new HashSet<String>(Arrays.asList(
                 "7BIT", "8BIT", "QUOTED-PRINTABLE", "BASE64", "B"));
-    
+
+    private static final class CustomBufferedReader extends BufferedReader {
+        private long mTime;
+
+        public CustomBufferedReader(Reader in) {
+            super(in);
+        }
+
+        @Override
+        public String readLine() throws IOException {
+            long start = System.currentTimeMillis();
+            String ret = super.readLine();
+            long end = System.currentTimeMillis();
+            mTime += end - start;
+            return ret;
+        }
+
+        public long getTotalmillisecond() {
+            return mTime;
+        }
+    }
+
     // Used only for parsing END:VCARD.
     private String mPreviousLine;
     
@@ -839,19 +860,17 @@ public class VCardParser_V21 extends VCardParser {
             return null;
         }
     }
-    
-    @Override
-    public boolean parse(final InputStream is, final VCardInterpreter builder)
-            throws IOException, VCardException {
-        return parse(is, VCardConfig.DEFAULT_CHARSET, builder);
-    }
-    
+
     @Override
     public boolean parse(InputStream is, String charset, VCardInterpreter builder)
             throws IOException, VCardException {
-        if (charset == null) {
-            charset = VCardConfig.DEFAULT_CHARSET;
+        if (is == null) {
+            throw new NullPointerException("InputStream must not be null.");
         }
+        if (charset == null) {
+            charset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
+        }
+
         final InputStreamReader tmpReader = new InputStreamReader(is, charset);
         if (VCardConfig.showPerformanceLog()) {
             mReader = new CustomBufferedReader(tmpReader);
@@ -911,26 +930,5 @@ public class VCardParser_V21 extends VCardParser {
             return true;
         }
         return false;
-    }
-}
-
-class CustomBufferedReader extends BufferedReader {
-    private long mTime;
-    
-    public CustomBufferedReader(Reader in) {
-        super(in);
-    }
-    
-    @Override
-    public String readLine() throws IOException {
-        long start = System.currentTimeMillis();
-        String ret = super.readLine();
-        long end = System.currentTimeMillis();
-        mTime += end - start;
-        return ret;
-    }
-    
-    public long getTotalmillisecond() {
-        return mTime;
     }
 }

@@ -47,7 +47,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The class which lets users create their own vCard String.
+ * <p>
+ * The class which lets users create their own vCard String. Typical usage is as follows:
+ * </p>
+ * <pre class="prettyprint">final VCardBuilder builder = new VCardBuilder(vcardType);
+ * builder.appendNameProperties(contentValuesListMap.get(StructuredName.CONTENT_ITEM_TYPE))
+ *     .appendNickNames(contentValuesListMap.get(Nickname.CONTENT_ITEM_TYPE))
+ *     .appendPhones(contentValuesListMap.get(Phone.CONTENT_ITEM_TYPE))
+ *     .appendEmails(contentValuesListMap.get(Email.CONTENT_ITEM_TYPE))
+ *     .appendPostals(contentValuesListMap.get(StructuredPostal.CONTENT_ITEM_TYPE))
+ *     .appendOrganizations(contentValuesListMap.get(Organization.CONTENT_ITEM_TYPE))
+ *     .appendWebsites(contentValuesListMap.get(Website.CONTENT_ITEM_TYPE))
+ *     .appendPhotos(contentValuesListMap.get(Photo.CONTENT_ITEM_TYPE))
+ *     .appendNotes(contentValuesListMap.get(Note.CONTENT_ITEM_TYPE))
+ *     .appendEvents(contentValuesListMap.get(Event.CONTENT_ITEM_TYPE))
+ *     .appendIms(contentValuesListMap.get(Im.CONTENT_ITEM_TYPE))
+ *     .appendRelation(contentValuesListMap.get(Relation.CONTENT_ITEM_TYPE)); </pre>
  */
 public class VCardBuilder {
     private static final String LOG_TAG = "VCardBuilder";
@@ -81,7 +96,6 @@ public class VCardBuilder {
     private static final String VCARD_PARAM_ENCODING_BASE64_V30 = "ENCODING=b";
 
     private static final String SHIFT_JIS = "SHIFT_JIS";
-    private static final String UTF_8 = "UTF-8";
 
     private final int mVCardType;
 
@@ -92,21 +106,28 @@ public class VCardBuilder {
     private final boolean mShouldUseQuotedPrintable;
     private final boolean mUsesAndroidProperty;
     private final boolean mUsesDefactProperty;
-    private final boolean mUsesUtf8;
-    private final boolean mUsesShiftJis;
     private final boolean mAppendTypeParamName;
     private final boolean mRefrainsQPToNameProperties;
     private final boolean mNeedsToConvertPhoneticString;
 
     private final boolean mShouldAppendCharsetParam;
 
-    private final String mCharsetString;
+    private final String mCharset;
     private final String mVCardCharsetParameter;
 
     private StringBuilder mBuilder;
     private boolean mEndAppended;
 
     public VCardBuilder(final int vcardType) {
+        // Default charset should be used
+        this(vcardType, null);
+    }
+
+    /**
+     * @param vcardType
+     * @param charset If null, we use default charset for export.
+     */
+    public VCardBuilder(final int vcardType, String charset) {
         mVCardType = vcardType;
 
         mIsV30 = VCardConfig.isV30(vcardType);
@@ -116,40 +137,77 @@ public class VCardBuilder {
         mOnlyOneNoteFieldIsAvailable = VCardConfig.onlyOneNoteFieldIsAvailable(vcardType);
         mUsesAndroidProperty = VCardConfig.usesAndroidSpecificProperty(vcardType);
         mUsesDefactProperty = VCardConfig.usesDefactProperty(vcardType);
-        mUsesUtf8 = VCardConfig.usesUtf8(vcardType);
-        mUsesShiftJis = VCardConfig.usesShiftJis(vcardType);
         mRefrainsQPToNameProperties = VCardConfig.shouldRefrainQPToNameProperties(vcardType);
         mAppendTypeParamName = VCardConfig.appendTypeParamName(vcardType);
         mNeedsToConvertPhoneticString = VCardConfig.needsToConvertPhoneticString(vcardType);
 
-        mShouldAppendCharsetParam = !(mIsV30 && mUsesUtf8);
+        final boolean shouldUseUtf8 = VCardConfig.shouldUseUtf8ForExport(vcardType);
+        final boolean shouldUseShiftJis = VCardConfig.shouldUseShiftJisForExport(vcardType);
 
-        if (mIsDoCoMo) {
-            String charset;
-            try {
-                charset = CharsetUtils.charsetForVendor(SHIFT_JIS, "docomo").name();
-            } catch (UnsupportedCharsetException e) {
-                Log.e(LOG_TAG, "DoCoMo-specific SHIFT_JIS was not found. Use SHIFT_JIS as is.");
-                charset = SHIFT_JIS;
+        // vCard 2.1 requires charset.
+        // vCard 3.0 does not allow it but we found some devices use it to determine
+        // the exact charset.
+        // We currently append it only when charset other than UTF_8 is used.
+        mShouldAppendCharsetParam = !(mIsV30 && shouldUseUtf8);
+
+        if (VCardConfig.isDoCoMo(vcardType) || shouldUseShiftJis) {
+            if (!SHIFT_JIS.equalsIgnoreCase(charset)) {
+                Log.w(LOG_TAG,
+                        "The charset \"" + charset + "\" is used while "
+                        + SHIFT_JIS + " is needed to be used.");
+                if (TextUtils.isEmpty(charset)) {
+                    mCharset = SHIFT_JIS;
+                } else {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(charset).name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.i(LOG_TAG,
+                                "Career-specific \"" + charset + "\" was not found (as usual). "
+                                + "Use it as is.");
+                    }
+                    mCharset = charset;
+                }
+            } else {
+                if (mIsDoCoMo) {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(SHIFT_JIS, "docomo").name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.e(LOG_TAG,
+                                "DoCoMo-specific SHIFT_JIS was not found. "
+                                + "Use SHIFT_JIS as is.");
+                        charset = SHIFT_JIS;
+                    }
+                } else {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(SHIFT_JIS).name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.e(LOG_TAG,
+                                "Career-specific SHIFT_JIS was not found. "
+                                + "Use SHIFT_JIS as is.");
+                        charset = SHIFT_JIS;
+                    }
+                }
+                mCharset = charset;
             }
-            mCharsetString = charset;
-            // Do not use mCharsetString bellow since it is different from "SHIFT_JIS" but
-            // may be "DOCOMO_SHIFT_JIS" or something like that (internal expression used in
-            // Android, not shown to the public).
-            mVCardCharsetParameter = "CHARSET=" + SHIFT_JIS;
-        } else if (mUsesShiftJis) {
-            String charset;
-            try {
-                charset = CharsetUtils.charsetForVendor(SHIFT_JIS).name();
-            } catch (UnsupportedCharsetException e) {
-                Log.e(LOG_TAG, "Vendor-specific SHIFT_JIS was not found. Use SHIFT_JIS as is.");
-                charset = SHIFT_JIS;
-            }
-            mCharsetString = charset;
             mVCardCharsetParameter = "CHARSET=" + SHIFT_JIS;
         } else {
-            mCharsetString = UTF_8;
-            mVCardCharsetParameter = "CHARSET=" + UTF_8;
+            if (TextUtils.isEmpty(charset)) {
+                Log.i(LOG_TAG,
+                        "Use the charset \"" + VCardConfig.DEFAULT_EXPORT_CHARSET
+                        + "\" for export.");
+                mCharset = VCardConfig.DEFAULT_EXPORT_CHARSET;
+                mVCardCharsetParameter = "CHARSET=" + VCardConfig.DEFAULT_EXPORT_CHARSET;
+            } else {
+                try {
+                    charset = CharsetUtils.charsetForVendor(charset).name();
+                } catch (UnsupportedCharsetException e) {
+                    Log.i(LOG_TAG,
+                            "Career-specific \"" + charset + "\" was not found (as usual). "
+                            + "Use it as is.");
+                }
+                mCharset = charset;
+                mVCardCharsetParameter = "CHARSET=" + charset;
+            }
         }
         clear();
     }
@@ -379,8 +437,8 @@ public class VCardBuilder {
             mBuilder.append(VCardConstants.PROPERTY_FN);
 
             // Note: "CHARSET" param is not allowed in vCard 3.0, but we may add it
-            //       when it would be useful for external importers, assuming no external
-            //       importer allows this vioration.
+            //       when it would be useful or necessary for external importers,
+            //       assuming the external importer allows this vioration of the spec.
             if (shouldAppendCharsetParam(displayName)) {
                 mBuilder.append(VCARD_PARAM_SEPARATOR);
                 mBuilder.append(mVCardCharsetParameter);
@@ -454,18 +512,18 @@ public class VCardBuilder {
             mBuilder.append(VCARD_END_OF_LINE);
         } else if (mIsJapaneseMobilePhone) {
             // Note: There is no appropriate property for expressing
-            //       phonetic name in vCard 2.1, while there is in
+            //       phonetic name (Yomigana in Japanese) in vCard 2.1, while there is in
             //       vCard 3.0 (SORT-STRING).
-            //       We chose to use DoCoMo's way when the device is Japanese one
-            //       since it is supported by
-            //       a lot of Japanese mobile phones. This is "X-" property, so
-            //       any parser hopefully would not get confused with this.
+            //       We use DoCoMo's way when the device is Japanese one since it is already
+            //       supported by a lot of Japanese mobile phones.
+            //       This is "X-" property, so any parser hopefully would not get
+            //       confused with this.
             //
             //       Also, DoCoMo's specification requires vCard composer to use just the first
             //       column.
             //       i.e.
-            //       o  SOUND;X-IRMC-N:Miyakawa Daisuke;;;;
-            //       x  SOUND;X-IRMC-N:Miyakawa;Daisuke;;;
+            //       good:  SOUND;X-IRMC-N:Miyakawa Daisuke;;;;
+            //       bad :  SOUND;X-IRMC-N:Miyakawa;Daisuke;;;
             mBuilder.append(VCardConstants.PROPERTY_SOUND);
             mBuilder.append(VCARD_PARAM_SEPARATOR);
             mBuilder.append(VCardConstants.PARAM_TYPE_X_IRMC_N);
@@ -519,10 +577,10 @@ public class VCardBuilder {
                     mBuilder.append(encodedPhoneticGivenName);
                 }
             }
-            mBuilder.append(VCARD_ITEM_SEPARATOR);
-            mBuilder.append(VCARD_ITEM_SEPARATOR);
-            mBuilder.append(VCARD_ITEM_SEPARATOR);
-            mBuilder.append(VCARD_ITEM_SEPARATOR);
+            mBuilder.append(VCARD_ITEM_SEPARATOR);  // family;given
+            mBuilder.append(VCARD_ITEM_SEPARATOR);  // given;middle
+            mBuilder.append(VCARD_ITEM_SEPARATOR);  // middle;prefix
+            mBuilder.append(VCARD_ITEM_SEPARATOR);  // prefix;suffix
             mBuilder.append(VCARD_END_OF_LINE);
         }
 
@@ -549,7 +607,7 @@ public class VCardBuilder {
                 mBuilder.append(VCARD_DATA_SEPARATOR);
                 mBuilder.append(encodedPhoneticGivenName);
                 mBuilder.append(VCARD_END_OF_LINE);
-            }
+            }  // if (!TextUtils.isEmpty(phoneticGivenName))
             if (!TextUtils.isEmpty(phoneticMiddleName)) {
                 final boolean reallyUseQuotedPrintable =
                     (mShouldUseQuotedPrintable &&
@@ -572,7 +630,7 @@ public class VCardBuilder {
                 mBuilder.append(VCARD_DATA_SEPARATOR);
                 mBuilder.append(encodedPhoneticMiddleName);
                 mBuilder.append(VCARD_END_OF_LINE);
-            }
+            }  // if (!TextUtils.isEmpty(phoneticGivenName))
             if (!TextUtils.isEmpty(phoneticFamilyName)) {
                 final boolean reallyUseQuotedPrintable =
                     (mShouldUseQuotedPrintable &&
@@ -595,7 +653,7 @@ public class VCardBuilder {
                 mBuilder.append(VCARD_DATA_SEPARATOR);
                 mBuilder.append(encodedPhoneticFamilyName);
                 mBuilder.append(VCARD_END_OF_LINE);
-            }
+            }  // if (!TextUtils.isEmpty(phoneticFamilyName))
         }
     }
 
@@ -903,21 +961,21 @@ public class VCardBuilder {
                 encodedCountry = escapeCharacters(rawCountry);
                 encodedNeighborhood = escapeCharacters(rawNeighborhood);
             }
-            final StringBuffer addressBuffer = new StringBuffer();
-            addressBuffer.append(encodedPoBox);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedStreet);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedLocality);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedRegion);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedPostalCode);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedCountry);
+            final StringBuilder addressBuilder = new StringBuilder();
+            addressBuilder.append(encodedPoBox);
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // PO BOX ; Extended Address
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Extended Address : Street
+            addressBuilder.append(encodedStreet);
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Street : Locality
+            addressBuilder.append(encodedLocality);
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Locality : Region
+            addressBuilder.append(encodedRegion);
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Region : Postal Code
+            addressBuilder.append(encodedPostalCode);
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Postal Code : Country
+            addressBuilder.append(encodedCountry);
             return new PostalStruct(
-                    reallyUseQuotedPrintable, appendCharset, addressBuffer.toString());
+                    reallyUseQuotedPrintable, appendCharset, addressBuilder.toString());
         } else {  // VCardUtils.areAllEmpty(rawAddressArray) == true
             // Try to use FORMATTED_ADDRESS instead.
             final String rawFormattedAddress =
@@ -940,16 +998,16 @@ public class VCardBuilder {
             // We use the second value ("Extended Address") just because Japanese mobile phones
             // do so. If the other importer expects the value be in the other field, some flag may
             // be needed.
-            final StringBuffer addressBuffer = new StringBuffer();
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedFormattedAddress);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            final StringBuilder addressBuilder = new StringBuilder();
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // PO BOX ; Extended Address
+            addressBuilder.append(encodedFormattedAddress);
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Extended Address : Street
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Street : Locality
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Locality : Region
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Region : Postal Code
+            addressBuilder.append(VCARD_ITEM_SEPARATOR);  // Postal Code : Country
             return new PostalStruct(
-                    reallyUseQuotedPrintable, appendCharset, addressBuffer.toString());
+                    reallyUseQuotedPrintable, appendCharset, addressBuilder.toString());
         }
     }
 
@@ -1146,6 +1204,8 @@ public class VCardBuilder {
     }
 
     public VCardBuilder appendEvents(final List<ContentValues> contentValuesList) {
+        // There's possibility where a given object may have more than one birthday, which
+        // is inappropriate. We just build one birthday.
         if (contentValuesList != null) {
             String primaryBirthday = null;
             String secondaryBirthday = null;
@@ -1213,16 +1273,19 @@ public class VCardBuilder {
         return this;
     }
 
+    /**
+     * @param emitEveryTime If true, builder builds the line even when there's no entry.
+     */
     public void appendPostalLine(final int type, final String label,
             final ContentValues contentValues,
-            final boolean isPrimary, final boolean emitLineEveryTime) {
+            final boolean isPrimary, final boolean emitEveryTime) {
         final boolean reallyUseQuotedPrintable;
         final boolean appendCharset;
         final String addressValue;
         {
             PostalStruct postalStruct = tryConstructPostalStruct(contentValues);
             if (postalStruct == null) {
-                if (emitLineEveryTime) {
+                if (emitEveryTime) {
                     reallyUseQuotedPrintable = false;
                     appendCharset = false;
                     addressValue = "";
@@ -1537,7 +1600,8 @@ public class VCardBuilder {
         mBuilder.append(VCARD_END_OF_LINE);
     }
 
-    public void appendAndroidSpecificProperty(final String mimeType, ContentValues contentValues) {
+    public void appendAndroidSpecificProperty(
+            final String mimeType, ContentValues contentValues) {
         if (!sAllowedAndroidPropertySet.contains(mimeType)) {
             return;
         }
@@ -1659,7 +1723,7 @@ public class VCardBuilder {
             encodedValue = encodeQuotedPrintable(rawValue);
         } else {
             // TODO: one line may be too huge, which may be invalid in vCard spec, though
-            //       several (even well-known) applications do not care this.
+            //       several (even well-known) applications do not care that violation.
             encodedValue = escapeCharacters(rawValue);
         }
 
@@ -1794,9 +1858,9 @@ public class VCardBuilder {
         byte[] strArray = null;
 
         try {
-            strArray = str.getBytes(mCharsetString);
+            strArray = str.getBytes(mCharset);
         } catch (UnsupportedEncodingException e) {
-            Log.e(LOG_TAG, "Charset " + mCharsetString + " cannot be used. "
+            Log.e(LOG_TAG, "Charset " + mCharset + " cannot be used. "
                     + "Try default charset");
             strArray = str.getBytes();
         }

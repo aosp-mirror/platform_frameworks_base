@@ -68,7 +68,7 @@ public class VNodeBuilder implements VCardInterpreter {
     private boolean mStrictLineBreakParsing;
     
     public VNodeBuilder() {
-        this(VCardConfig.DEFAULT_CHARSET, TARGET_CHARSET, false);
+        this(VCardConfig.DEFAULT_IMPORT_CHARSET, TARGET_CHARSET, false);
     }
 
     public VNodeBuilder(String charset, boolean strictLineBreakParsing) {
@@ -83,7 +83,7 @@ public class VNodeBuilder implements VCardInterpreter {
         if (sourceCharset != null) {
             mSourceCharset = sourceCharset;
         } else {
-            mSourceCharset = VCardConfig.DEFAULT_CHARSET;
+            mSourceCharset = VCardConfig.DEFAULT_IMPORT_CHARSET;
         }
         if (targetCharset != null) {
             mTargetCharset = targetCharset;

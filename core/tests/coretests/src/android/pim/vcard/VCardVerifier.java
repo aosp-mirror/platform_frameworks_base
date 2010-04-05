@@ -214,7 +214,7 @@ import java.util.Arrays;
         InputStream is = null;
         try {
             String charset =
-                (VCardConfig.usesShiftJis(mVCardType) ? "SHIFT_JIS" : "UTF-8");
+                (VCardConfig.shouldUseShiftJisForExport(mVCardType) ? "SHIFT_JIS" : "UTF-8");
             is = new ByteArrayInputStream(vcard.getBytes(charset));
             mTestCase.assertEquals(true, parser.parse(is, null, builder));
         } catch (IOException e) {
@@ -292,8 +292,7 @@ import java.util.Arrays;
             while (!composer.isAfterLast()) {
                 try {
                     final Method mockGetEntityIteratorMethod = getMockGetEntityIteratorMethod();
-                    mTestCase.assertTrue(
-                            composer.createOneEntry(getMockGetEntityIteratorMethod()));
+                    mTestCase.assertTrue(composer.createOneEntry(getMockGetEntityIteratorMethod()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     mTestCase.fail();

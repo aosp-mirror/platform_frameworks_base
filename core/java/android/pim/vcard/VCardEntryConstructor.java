@@ -80,7 +80,7 @@ public class VCardEntryConstructor implements VCardInterpreter {
         if (inputCharset != null) {
             mInputCharset = inputCharset;
         } else {
-            mInputCharset = VCardConfig.DEFAULT_CHARSET;
+            mInputCharset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
         }
         if (charsetForDetodedBytes != null) {
             mCharsetForDecodedBytes = charsetForDetodedBytes;
