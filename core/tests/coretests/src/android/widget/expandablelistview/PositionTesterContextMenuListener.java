@@ -23,8 +23,6 @@ import android.view.View.OnCreateContextMenuListener;
 import android.widget.ExpandableListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-import junit.framework.Assert;
-
 public class PositionTesterContextMenuListener implements OnCreateContextMenuListener {
 
     private int groupPosition, childPosition;
@@ -32,6 +30,9 @@ public class PositionTesterContextMenuListener implements OnCreateContextMenuLis
     // Fake constant to store in testType a test type specific to headers and footers
     private static final int ADAPTER_TYPE = -1;
     private int testType; // as returned by getPackedPositionType
+
+    // Will be set to null by each call to onCreateContextMenu, unless an error occurred. 
+    private String errorMessage;
 
     public void expectGroupContextMenu(int groupPosition) {
         this.groupPosition = groupPosition;
@@ -50,30 +51,61 @@ public class PositionTesterContextMenuListener implements OnCreateContextMenuLis
     }
 
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        errorMessage = null;
         if (testType == ADAPTER_TYPE) {
-            Assert.assertTrue("MenuInfo is not an AdapterContextMenuInfo",
-                    menuInfo instanceof AdapterContextMenuInfo);
+            if (!isTrue("MenuInfo is not an AdapterContextMenuInfo",
+                    menuInfo instanceof AdapterContextMenuInfo)) {
+                return;
+            }
             AdapterContextMenuInfo adapterContextMenuInfo = (AdapterContextMenuInfo) menuInfo;
-            Assert.assertEquals("Wrong flat position",
-                    groupPosition,
-                    adapterContextMenuInfo.position);
+            if (!areEqual("Wrong flat position", groupPosition, adapterContextMenuInfo.position)) {
+                return;
+            }
         } else {
-            Assert.assertTrue("MenuInfo is not an ExpandableListContextMenuInfo",
-                    menuInfo instanceof ExpandableListView.ExpandableListContextMenuInfo);
+            if (!isTrue("MenuInfo is not an ExpandableListContextMenuInfo",
+                    menuInfo instanceof ExpandableListView.ExpandableListContextMenuInfo)) {
+                return;
+            }
             ExpandableListView.ExpandableListContextMenuInfo elvMenuInfo =
                 (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
             long packedPosition = elvMenuInfo.packedPosition;
 
             int packedPositionType = ExpandableListView.getPackedPositionType(packedPosition);
-            Assert.assertEquals("Wrong packed position type", testType, packedPositionType);
+            if (!areEqual("Wrong packed position type", testType, packedPositionType)) {
+                return;
+            }
 
             int packedPositionGroup = ExpandableListView.getPackedPositionGroup(packedPosition);
-            Assert.assertEquals("Wrong group position", groupPosition, packedPositionGroup);
+            if (!areEqual("Wrong group position", groupPosition, packedPositionGroup)) {
+                return;
+            }
 
             if (testType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                int packedPosChild = ExpandableListView.getPackedPositionChild(packedPosition);
-                Assert.assertEquals("Wrong child position", childPosition, packedPosChild);
+                int packedPositionChild = ExpandableListView.getPackedPositionChild(packedPosition);
+                if (!areEqual("Wrong child position", childPosition, packedPositionChild)) {
+                    return;
+                }
             }
         }
+    }
+
+    private boolean areEqual(String message, int expected, int actual) {
+        if (expected != actual) {
+            errorMessage = String.format(message + " (%d vs %d", expected, actual);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isTrue(String message, boolean value) {
+        if (!value) {
+            errorMessage = message;
+            return false;
+        }
+        return true;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

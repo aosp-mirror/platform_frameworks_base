@@ -22,4 +22,6 @@
     <string name="default_text_encoding">Latin-1</string>
     <!-- @hide DO NOT TRANSLATE. Workaround for resource race condition in lockscreen. -->
     <bool name="lockscreen_isPortrait">true</bool>
+    <!-- @hide DO NOT TRANSLATE. Control aspect ratio of lock pattern -->
+    <string name="lock_pattern_view_aspect">square</string>
 </resources>

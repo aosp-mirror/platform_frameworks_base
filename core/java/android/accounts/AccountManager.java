@@ -539,14 +539,15 @@ public class AccountManager {
      * {@link android.Manifest.permission#MANAGE_ACCOUNTS} or
      * {@link android.Manifest.permission#USE_CREDENTIALS}
      *
-     * @param accountType The account type of the auth token to invalidate
-     * @param authToken The auth token to invalidate
+     * @param accountType The account type of the auth token to invalidate, must not be null
+     * @param authToken The auth token to invalidate, may be null
      */
     public void invalidateAuthToken(final String accountType, final String authToken) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
-        if (authToken == null) throw new IllegalArgumentException("authToken is null");
         try {
-            mService.invalidateAuthToken(accountType, authToken);
+            if (authToken != null) {
+                mService.invalidateAuthToken(accountType, authToken);
+            }
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);

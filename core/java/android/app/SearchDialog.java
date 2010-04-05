@@ -795,7 +795,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             SearchableInfo searchable = mSearchable;
             try {
                 if (searchable.getVoiceSearchLaunchWebSearch()) {
-                    getContext().startActivity(mVoiceWebSearchIntent);
+                    Intent webSearchIntent = createVoiceWebSearchIntent(mVoiceWebSearchIntent,
+                            searchable);
+                    getContext().startActivity(webSearchIntent);
                 } else if (searchable.getVoiceSearchLaunchRecognizer()) {
                     Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent,
                             searchable);
@@ -809,6 +811,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             dismiss();
          }
     };
+    
+    /**
+     * Create and return an Intent that can launch the voice search activity for web search.
+     */
+    private Intent createVoiceWebSearchIntent(Intent baseIntent, SearchableInfo searchable) {
+        Intent voiceIntent = new Intent(baseIntent);
+        ComponentName searchActivity = searchable.getSearchActivity();
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
+                searchActivity == null ? null : searchActivity.flattenToShortString());
+        return voiceIntent;
+    }
     
     /**
      * Create and return an Intent that can launch the voice search activity, perform a specific
@@ -865,7 +878,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                searchActivity == null ? null : searchActivity.toShortString());
+                searchActivity == null ? null : searchActivity.flattenToShortString());
         
         // Add the values that configure forwarding the results
         voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT, pending);

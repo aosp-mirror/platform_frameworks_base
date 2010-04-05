@@ -2681,7 +2681,13 @@ class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Apk not found for dexopt: " + path);
                 ret = -1;
             } catch (IOException e) {
-                Slog.w(TAG, "Exception reading apk: " + path, e);
+                Slog.w(TAG, "IOException reading apk: " + path, e);
+                ret = -1;
+            } catch (dalvik.system.StaleDexCacheError e) {
+                Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
+                ret = -1;
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception when doing dexopt : ", e);
                 ret = -1;
             }
             if (ret < 0) {

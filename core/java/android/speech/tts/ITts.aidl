@@ -43,7 +43,7 @@ interface ITts {
 
     String[] getLanguage();
 
-    int isLanguageAvailable(in String language, in String country, in String variant);
+    int isLanguageAvailable(in String language, in String country, in String variant, in String[] params);
 
     int setLanguage(in String callingApp, in String language, in String country, in String variant);
 

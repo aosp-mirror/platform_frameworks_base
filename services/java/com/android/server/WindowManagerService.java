@@ -367,6 +367,8 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSafeMode;
     boolean mDisplayEnabled = false;
     boolean mSystemBooted = false;
+    int mInitialDisplayWidth = 0;
+    int mInitialDisplayHeight = 0;
     int mRotation = 0;
     int mRequestedRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -1842,6 +1844,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDisplay == null) {
                 WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
                 mDisplay = wm.getDefaultDisplay();
+                mInitialDisplayWidth = mDisplay.getWidth();
+                mInitialDisplayHeight = mDisplay.getHeight();
                 mQueue.setDisplay(mDisplay);
                 reportNewConfig = true;
             }
@@ -3025,7 +3029,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // app window. No point in continuing further.
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
-            if (!wtoken.isVisibleLw()) {
+            if (!wtoken.isVisibleLw() || !wtoken.mPolicyVisibilityAfterAnim) {
                 continue;
             }
             int req = wtoken.mAttrs.screenOrientation;
@@ -3154,6 +3158,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * android.os.IBinder)
      */
     boolean updateOrientationFromAppTokensLocked() {
+        if (mDisplayFrozen) {
+            // If the display is frozen, some activities may be in the middle
+            // of restarting, and thus have removed their old window.  If the
+            // window has the flag to hide the lock screen, then the lock screen
+            // can re-appear and inflict its own orientation on us.  Keep the
+            // orientation stable until this all settles down.
+            return false;
+        }
+
         boolean changed = false;
         long ident = Binder.clearCallingIdentity();
         try {
@@ -4843,8 +4856,13 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
         mQueue.getInputConfiguration(config);
-        final int dw = mDisplay.getWidth();
-        final int dh = mDisplay.getHeight();
+
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int dw = rotated ? mInitialDisplayHeight : mInitialDisplayWidth;
+        final int dh = rotated ? mInitialDisplayWidth : mInitialDisplayHeight;
+
         int orientation = Configuration.ORIENTATION_SQUARE;
         if (dw < dh) {
             orientation = Configuration.ORIENTATION_PORTRAIT;
@@ -10996,6 +11014,14 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mKeyWaiter) {
             mKeyWaiter.mWasFrozen = true;
             mKeyWaiter.notifyAll();
+        }
+
+        // While the display is frozen we don't re-compute the orientation
+        // to avoid inconsistent states.  However, something interesting
+        // could have actually changed during that time so re-evaluate it
+        // now to catch that.
+        if (updateOrientationFromAppTokensLocked()) {
+            mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
 
         // A little kludge: a lot could have happened while the

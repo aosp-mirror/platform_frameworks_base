@@ -161,10 +161,10 @@ private final IRemoteService.Stub mBinder = new IRemoteService.Stub(){
 <p>A few rules about implementing your interface: </p>
 <ul>
     <li>No exceptions that you throw will be sent back to the caller.</li>
-    <li>IPC calls are synchronous. If you know that an IPC service takes more than
+    <li>By default, IPC calls are synchronous. If you know that an IPC service takes more than
         a few milliseconds to complete, you should not call it in the Activity/View thread,
         because it might hang the application (Android might display an &quot;Application
-        is Not Responding&quot; dialog).
+        is Not Responding&quot; dialog). 
         Try to call them in a separate thread. </li>
     <li>Only methods are supported; you cannot declare static fields in an AIDL interface.</li>
 </ul>

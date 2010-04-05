@@ -261,7 +261,6 @@ public class TextToSpeech {
          * the TextToSpeech engine returns an ArrayList<String> of all the available voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         * {@hide}
          */
         public static final String EXTRA_AVAILABLE_VOICES = "availableVoices";
         /**
@@ -269,7 +268,6 @@ public class TextToSpeech {
          * the TextToSpeech engine returns an ArrayList<String> of all the unavailable voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         * {@hide}
          */
         public static final String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
         /**
@@ -278,7 +276,6 @@ public class TextToSpeech {
          * check for by sending an ArrayList<String> of the voices that are of interest.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         * {@hide}
          */
         public static final String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
 
@@ -314,6 +311,10 @@ public class TextToSpeech {
          * {@hide}
          */
         public static final String KEY_PARAM_ENGINE = "engine";
+        /**
+         * {@hide}
+         */
+        public static final String KEY_PARAM_PITCH = "pitch";
         /**
          * Parameter key to specify the audio stream type to be used when speaking text
          * or playing back a file.
@@ -365,7 +366,12 @@ public class TextToSpeech {
         /**
          * {@hide}
          */
-        protected static final int NB_CACHED_PARAMS = 7;
+        protected static final int PARAM_POSITION_PITCH = 14;
+
+        /**
+         * {@hide}
+         */
+        protected static final int NB_CACHED_PARAMS = 8;
     }
 
     /**
@@ -409,9 +415,10 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_STREAM] = Engine.KEY_PARAM_STREAM;
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID] = Engine.KEY_PARAM_UTTERANCE_ID;
         mCachedParams[Engine.PARAM_POSITION_ENGINE] = Engine.KEY_PARAM_ENGINE;
+        mCachedParams[Engine.PARAM_POSITION_PITCH] = Engine.KEY_PARAM_PITCH;
 
-        // Leave all defaults that are shown in Settings uninitialized so that
-        // the values set in Settings will take effect if the application does
+        // Leave all defaults that are shown in Settings uninitialized/at the default
+        // so that the values set in Settings will take effect if the application does
         // not try to change these settings itself.
         mCachedParams[Engine.PARAM_POSITION_RATE + 1] = "";
         mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = "";
@@ -421,6 +428,7 @@ public class TextToSpeech {
                 String.valueOf(Engine.DEFAULT_STREAM);
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = "";
         mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = "";
+        mCachedParams[Engine.PARAM_POSITION_PITCH + 1] = "100";
 
         initTts();
     }
@@ -435,6 +443,9 @@ public class TextToSpeech {
                 synchronized(mStartLock) {
                     mITts = ITts.Stub.asInterface(service);
                     mStarted = true;
+                    // Cache the default engine and current language
+                    setEngineByPackageName(getDefaultEngine());
+                    setLanguage(getLanguage());
                     if (mInitListener != null) {
                         // TODO manage failures and missing resources
                         mInitListener.onInit(SUCCESS);
@@ -1008,15 +1019,13 @@ public class TextToSpeech {
                 return result;
             }
             try {
+                // the pitch is not set here, instead it is cached so it will be associated
+                // with all upcoming utterances.
                 if (pitch > 0) {
-                    result = mITts.setPitch(mPackageName, (int)(pitch*100));
+                    int p = (int)(pitch*100);
+                    mCachedParams[Engine.PARAM_POSITION_PITCH + 1] = String.valueOf(p);
+                    result = SUCCESS;
                 }
-            } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setPitch", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
                 Log.e("TextToSpeech.java - setPitch", "NullPointerException");
@@ -1057,16 +1066,27 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = loc.getISO3Language();
-                mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = loc.getISO3Country();
-                mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = loc.getVariant();
-                // the language is not set here, instead it is cached so it will be associated
-                // with all upcoming utterances. But we still need to report the language support,
-                // which is achieved by calling isLanguageAvailable()
-                result = mITts.isLanguageAvailable(
-                        mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1],
-                        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1],
-                        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] );
+                String language = loc.getISO3Language();
+                String country = loc.getISO3Country();
+                String variant = loc.getVariant();
+                // Check if the language, country, variant are available, and cache
+                // the available parts.
+                // Note that the language is not actually set here, instead it is cached so it
+                // will be associated with all upcoming utterances.
+                result = mITts.isLanguageAvailable(language, country, variant, mCachedParams);
+                if (result >= LANG_AVAILABLE){
+                    mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = language;
+                    if (result >= LANG_COUNTRY_AVAILABLE){
+                        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = country;
+                    } else {
+                        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = "";
+                    }
+                    if (result >= LANG_COUNTRY_VAR_AVAILABLE){
+                        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = variant;
+                    } else {
+                        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = "";
+                    }
+                }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 Log.e("TextToSpeech.java - setLanguage", "RemoteException");
@@ -1104,11 +1124,18 @@ public class TextToSpeech {
                 return null;
             }
             try {
-                String[] locStrings = mITts.getLanguage();
-                if ((locStrings != null) && (locStrings.length == 3)) {
-                    return new Locale(locStrings[0], locStrings[1], locStrings[2]);
+                // Only do a call to the native synth if there is nothing in the cached params
+                if (mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1].length() < 1){
+                    String[] locStrings = mITts.getLanguage();
+                    if ((locStrings != null) && (locStrings.length == 3)) {
+                        return new Locale(locStrings[0], locStrings[1], locStrings[2]);
+                    } else {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    return new Locale(mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1],
+                            mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1],
+                            mCachedParams[Engine.PARAM_POSITION_VARIANT + 1]);
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -1151,7 +1178,7 @@ public class TextToSpeech {
             }
             try {
                 result = mITts.isLanguageAvailable(loc.getISO3Language(),
-                        loc.getISO3Country(), loc.getVariant());
+                        loc.getISO3Country(), loc.getVariant(), mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 Log.e("TextToSpeech.java - isLanguageAvailable", "RemoteException");
@@ -1345,8 +1372,6 @@ public class TextToSpeech {
      * Gets the packagename of the default speech synthesis engine.
      *
      * @return Packagename of the TTS engine that the user has chosen as their default.
-     *
-     * @hide
      */
     public String getDefaultEngine() {
         synchronized (mStartLock) {
@@ -1386,8 +1411,6 @@ public class TextToSpeech {
      * Text-To-Speech settings set by applications.
      *
      * @return Whether or not defaults are enforced.
-     *
-     * @hide
      */
     public boolean areDefaultsEnforced() {
         synchronized (mStartLock) {

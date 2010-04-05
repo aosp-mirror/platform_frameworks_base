@@ -693,8 +693,17 @@ public final class CookieManager {
      */
     private String[] getHostAndPath(WebAddress uri) {
         if (uri.mHost != null && uri.mPath != null) {
+
+            /*
+             * The domain (i.e. host) portion of the cookie is supposed to be
+             * case-insensitive. We will consistently return the domain in lower
+             * case, which allows us to do the more efficient equals comparison
+             * instead of equalIgnoreCase.
+             *
+             * See: http://www.ieft.org/rfc/rfc2965.txt (Section 3.3.3)
+             */
             String[] ret = new String[2];
-            ret[0] = uri.mHost;
+            ret[0] = uri.mHost.toLowerCase();
             ret[1] = uri.mPath;
 
             int index = ret[0].indexOf(PERIOD);
@@ -728,6 +737,7 @@ public final class CookieManager {
             if (index != -1) {
                 ret[1] = ret[1].substring(0, index);
             }
+
             return ret;
         } else
             return null;

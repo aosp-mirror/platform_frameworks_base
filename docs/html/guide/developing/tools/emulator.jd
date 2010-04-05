@@ -7,7 +7,7 @@ page.title=Android Emulator
 that runs on your computer. The emulator lets you prototype, develop, and test 
 Android applications without using a physical device. </p>
 
-<p>The Android emulator mimics all of the typical hardware and software features 
+<p>The Android emulator all of the hardware and software features 
 of a typical mobile device, except that it can not receive or place actual phone 
 calls. It provides a variety of navigation and control keys, which you can "press" 
 using your mouse or keyboard to generate events for your application. It also 
