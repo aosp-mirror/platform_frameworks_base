@@ -3974,7 +3974,7 @@ public class WebView extends AbsoluteLayout
                 // false for the first parameter
             }
         } else {
-            if (getSettings().getBuiltInZoomControls()
+            if (mWebViewCore != null && getSettings().getBuiltInZoomControls()
                     && !getZoomButtonsController().isVisible()) {
                 /*
                  * The zoom controls come in their own window, so our window
