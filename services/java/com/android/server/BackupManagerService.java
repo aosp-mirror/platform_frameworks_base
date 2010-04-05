@@ -2567,8 +2567,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
             pw.println("Ancestral packages: "
                     + (mAncestralPackages == null ? "none" : mAncestralPackages.size()));
-            for (String pkg : mAncestralPackages) {
-                pw.println("    " + pkg);
+            if (mAncestralPackages != null) {
+                for (String pkg : mAncestralPackages) {
+                    pw.println("    " + pkg);
+                }
             }
 
             pw.println("Ever backed up: " + mEverStoredApps.size());
