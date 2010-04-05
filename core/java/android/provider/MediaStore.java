@@ -374,8 +374,8 @@ public final class MediaStore {
 
                 // We probably run out of space, so create the thumbnail in memory.
                 if (bitmap == null) {
-                    Log.v(TAG, "We probably run out of space, so create the thumbnail in memory.");
-
+                    Log.v(TAG, "Create the thumbnail in memory: origId=" + origId
+                            + ", kind=" + kind + ", isVideo="+isVideo);
                     Uri uri = Uri.parse(
                             baseUri.buildUpon().appendPath(String.valueOf(origId))
                                     .toString().replaceFirst("thumbnails", "media"));
@@ -388,16 +388,9 @@ public final class MediaStore {
                         filePath = c.getString(1);
                     }
                     if (isVideo) {
-                        bitmap = ThumbnailUtils.createVideoThumbnail(filePath);
-                        if (kind == MICRO_KIND && bitmap != null) {
-                            bitmap = ThumbnailUtils.extractThumbnail(bitmap,
-                                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL,
-                                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL,
-                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                        }
+                        bitmap = ThumbnailUtils.createVideoThumbnail(filePath, kind);
                     } else {
-                        bitmap = ThumbnailUtils.createImageThumbnail(cr, filePath, uri, origId,
-                                kind, false);
+                        bitmap = ThumbnailUtils.createImageThumbnail(filePath, kind);
                     }
                 }
             } catch (SQLiteException ex) {
@@ -613,8 +606,12 @@ public final class MediaStore {
                         }
 
                         long id = ContentUris.parseId(url);
-                        Bitmap miniThumb  = StoreThumbnail(cr, source, id, 320F, 240F, Images.Thumbnails.MINI_KIND);
-                        Bitmap microThumb = StoreThumbnail(cr, miniThumb, id, 50F, 50F, Images.Thumbnails.MICRO_KIND);
+                        // Wait until MINI_KIND thumbnail is generated.
+                        Bitmap miniThumb = Images.Thumbnails.getThumbnail(cr, id,
+                                Images.Thumbnails.MINI_KIND, null);
+                        // This is for backward compatibility.
+                        Bitmap microThumb = StoreThumbnail(cr, miniThumb, id, 50F, 50F,
+                                Images.Thumbnails.MICRO_KIND);
                     } else {
                         Log.e(TAG, "Failed to create thumbnail, removing original");
                         cr.delete(url, null, null);
