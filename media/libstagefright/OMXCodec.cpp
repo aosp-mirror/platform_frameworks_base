@@ -535,26 +535,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
                 return err;
             }
         }
-    } else if (!strncasecmp(mMIME, "audio/", 6)) {
-        if ((mQuirks & kSupportsMultipleFramesPerInputBuffer)
-            && !strcmp(mComponentName, "OMX.TI.AAC.decode")) {
-            OMX_PARAM_PORTDEFINITIONTYPE def;
-            InitOMXParams(&def);
-            def.nPortIndex = kPortIndexInput;
-
-            status_t err = mOMX->getParameter(
-                    mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-            CHECK_EQ(err, OK);
-
-            const size_t kMinBufferSize = 100 * 1024;
-            if (def.nBufferSize < kMinBufferSize) {
-                def.nBufferSize = kMinBufferSize;
-            }
-
-            err = mOMX->setParameter(
-                    mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-            CHECK_EQ(err, OK);
-        }
     }
 
     if (!strcasecmp(mMIME, MEDIA_MIMETYPE_IMAGE_JPEG)
