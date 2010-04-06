@@ -44,13 +44,12 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
 
     static private StatusBarManager sStatusBar;
 
-    private static final int NUM_BUTTONS = 6;
+    private static final int NUM_BUTTONS = 8;
     private static final int MAX_RECENT_TASKS = NUM_BUTTONS * 2;    // allow for some discards
 
-    final View[] mButtons = new View[NUM_BUTTONS];
+    final TextView[] mIcons = new TextView[NUM_BUTTONS];
     View mNoAppsText;
     IntentFilter mBroadcastIntentFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-
 
     private int mIconSize;
 
@@ -77,26 +76,32 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
             sStatusBar = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
         }
 
-        Window theWindow = getWindow();
-        theWindow.requestFeature(Window.FEATURE_NO_TITLE);
-        theWindow.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        theWindow.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        theWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+        Window window = getWindow();
+        window.requestFeature(Window.FEATURE_NO_TITLE);
+        window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        window.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        theWindow.setTitle("Recents");
+        window.setTitle("Recents");
 
         setContentView(com.android.internal.R.layout.recent_apps_dialog);
 
-        mButtons[0] = findViewById(com.android.internal.R.id.button1);
-        mButtons[1] = findViewById(com.android.internal.R.id.button2);
-        mButtons[2] = findViewById(com.android.internal.R.id.button3);
-        mButtons[3] = findViewById(com.android.internal.R.id.button4);
-        mButtons[4] = findViewById(com.android.internal.R.id.button5);
-        mButtons[5] = findViewById(com.android.internal.R.id.button6);
+        final WindowManager.LayoutParams params = window.getAttributes();
+        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+        params.height = WindowManager.LayoutParams.MATCH_PARENT;
+        window.setAttributes(params);
+        window.setFlags(0, WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+        mIcons[0] = (TextView)findViewById(com.android.internal.R.id.button0);
+        mIcons[1] = (TextView)findViewById(com.android.internal.R.id.button1);
+        mIcons[2] = (TextView)findViewById(com.android.internal.R.id.button2);
+        mIcons[3] = (TextView)findViewById(com.android.internal.R.id.button3);
+        mIcons[4] = (TextView)findViewById(com.android.internal.R.id.button4);
+        mIcons[5] = (TextView)findViewById(com.android.internal.R.id.button5);
+        mIcons[6] = (TextView)findViewById(com.android.internal.R.id.button6);
+        mIcons[7] = (TextView)findViewById(com.android.internal.R.id.button7);
         mNoAppsText = findViewById(com.android.internal.R.id.no_applications_message);
 
-        for (View b : mButtons) {
+        for (TextView b: mIcons) {
             b.setOnClickListener(this);
         }
     }
@@ -106,7 +111,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
      */
     public void onClick(View v) {
 
-        for (View b : mButtons) {
+        for (TextView b: mIcons) {
             if (b == v) {
                 // prepare a launch intent and send it
                 Intent intent = (Intent)b.getTag();
@@ -143,9 +148,9 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         super.onStop();
 
         // dump extra memory we're hanging on to
-        for (View b : mButtons) {
-            setButtonAppearance(b, null, null);
-            b.setTag(null);
+        for (TextView icon: mIcons) {
+            icon.setCompoundDrawables(null, null, null, null);
+            icon.setTag(null);
         }
 
         if (sStatusBar != null) {
@@ -172,12 +177,14 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
                 new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME),
                 0);
 
+        IconUtilities iconUtilities = new IconUtilities(getContext());
+
         // Performance note:  Our android performance guide says to prefer Iterator when
         // using a List class, but because we know that getRecentTasks() always returns
         // an ArrayList<>, we'll use a simple index instead.
-        int button = 0;
+        int index = 0;
         int numTasks = recentTasks.size();
-        for (int i = 0; i < numTasks && (button < NUM_BUTTONS); ++i) {
+        for (int i = 0; i < numTasks && (index < NUM_BUTTONS); ++i) {
             final ActivityManager.RecentTaskInfo info = recentTasks.get(i);
 
             // for debug purposes only, disallow first result to create empty lists
@@ -204,39 +211,29 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
             if (resolveInfo != null) {
                 final ActivityInfo activityInfo = resolveInfo.activityInfo;
                 final String title = activityInfo.loadLabel(pm).toString();
-                final Drawable icon = activityInfo.loadIcon(pm);
+                Drawable icon = activityInfo.loadIcon(pm);
 
                 if (title != null && title.length() > 0 && icon != null) {
-                    final View b = mButtons[button];
-                    setButtonAppearance(b, title, icon);
-                    b.setTag(intent);
-                    b.setVisibility(View.VISIBLE);
-                    b.setPressed(false);
-                    b.clearFocus();
-                    ++button;
+                    final TextView tv = mIcons[index];
+                    tv.setText(title);
+                    icon = iconUtilities.createIconDrawable(icon);
+                    tv.setCompoundDrawables(null, icon, null, null);
+                    tv.setTag(intent);
+                    tv.setVisibility(View.VISIBLE);
+                    tv.setPressed(false);
+                    tv.clearFocus();
+                    ++index;
                 }
             }
         }
 
         // handle the case of "no icons to show"
-        mNoAppsText.setVisibility((button == 0) ? View.VISIBLE : View.GONE);
+        mNoAppsText.setVisibility((index == 0) ? View.VISIBLE : View.GONE);
 
         // hide the rest
-        for ( ; button < NUM_BUTTONS; ++button) {
-            mButtons[button].setVisibility(View.GONE);
+        for (; index < NUM_BUTTONS; ++index) {
+            mIcons[index].setVisibility(View.GONE);
         }
-    }
-
-    /**
-     * Adjust appearance of each icon-button
-     */
-    private void setButtonAppearance(View theButton, final String theTitle, final Drawable icon) {
-        TextView tv = (TextView) theButton;
-        tv.setText(theTitle);
-        if (icon != null) {
-            icon.setBounds(0, 0, mIconSize, mIconSize);
-        }
-        tv.setCompoundDrawables(null, icon, null, null);
     }
 
     /**
