@@ -1298,7 +1298,7 @@ sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
         format = PIXEL_FORMAT_RGBA_8888;
         break;
     case PIXEL_FORMAT_OPAQUE:
-        format = PIXEL_FORMAT_RGB_565;
+        format = PIXEL_FORMAT_RGBX_8888;
         break;
     }
 
