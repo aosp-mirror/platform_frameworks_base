@@ -213,15 +213,14 @@ class MountService extends IMountService.Stub
                 }
                 case H_UNMOUNT_PM_DONE: {
                     if (DEBUG_UNMOUNT) Slog.i(TAG, "H_UNMOUNT_PM_DONE");
-                    if (!mUpdatingStatus) {
-                        // Does not correspond to unmount's status update.
-                        return;
-                    }
                     if (DEBUG_UNMOUNT) Slog.i(TAG, "Updated status. Processing requests");
                     mUpdatingStatus = false;
                     int size = mForceUnmounts.size();
                     int sizeArr[] = new int[size];
                     int sizeArrN = 0;
+                    // Kill processes holding references first
+                    ActivityManagerService ams = (ActivityManagerService)
+                    ServiceManager.getService("activity");
                     for (int i = 0; i < size; i++) {
                         UnmountCallBack ucb = mForceUnmounts.get(i);
                         String path = ucb.path;
@@ -233,35 +232,30 @@ class MountService extends IMountService.Stub
                             if (pids == null || pids.length == 0) {
                                 done = true;
                             } else {
-                                // Kill processes holding references first
-                                ActivityManagerService ams = (ActivityManagerService)
-                                ServiceManager.getService("activity");
                                 // Eliminate system process here?
-                                boolean ret = ams.killPids(pids, "Unmount media");
-                                if (ret) {
-                                    // Confirm if file references have been freed.
-                                    pids = getStorageUsers(path);
-                                    if (pids == null || pids.length == 0) {
-                                        done = true;
-                                    }
+                                ams.killPids(pids, "unmount media");
+                                // Confirm if file references have been freed.
+                                pids = getStorageUsers(path);
+                                if (pids == null || pids.length == 0) {
+                                    done = true;
                                 }
                             }
                         }
-                        if (done) {
+                        if (!done && (ucb.retries < MAX_UNMOUNT_RETRIES)) {
+                            // Retry again
+                            Slog.i(TAG, "Retrying to kill storage users again");
+                            mHandler.sendMessageDelayed(
+                                    mHandler.obtainMessage(H_UNMOUNT_PM_DONE,
+                                            ucb.retries++),
+                                    RETRY_UNMOUNT_DELAY);
+                        } else {
+                            if (ucb.retries >= MAX_UNMOUNT_RETRIES) {
+                                Slog.i(TAG, "Failed to unmount media inspite of " +
+                                        MAX_UNMOUNT_RETRIES + " retries. Forcibly killing processes now");
+                            }
                             sizeArr[sizeArrN++] = i;
                             mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_MS,
                                     ucb));
-                        } else {
-                            if (ucb.retries >= MAX_UNMOUNT_RETRIES) {
-                                Slog.i(TAG, "Cannot unmount media inspite of " +
-                                        MAX_UNMOUNT_RETRIES + " retries");
-                                // Send final broadcast indicating failure to unmount.                 
-                            } else {
-                                mHandler.sendMessageDelayed(
-                                        mHandler.obtainMessage(H_UNMOUNT_PM_DONE,
-                                                ucb.retries++),
-                                        RETRY_UNMOUNT_DELAY);
-                            }
                         }
                     }
                     // Remove already processed elements from list.
