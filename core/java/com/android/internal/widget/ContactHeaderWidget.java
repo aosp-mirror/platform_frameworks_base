@@ -489,7 +489,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             resetAsyncQueryHandler();
         }
 
-        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, contactUri, ContactQuery.COLUMNS,
+        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, contactUri, contactUri, ContactQuery.COLUMNS,
                 null, null, null);
     }
 
