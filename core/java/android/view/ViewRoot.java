@@ -852,7 +852,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         boolean windowShouldResize = mLayoutRequested && windowResizesToFitContent
-            && (mWidth != host.mMeasuredWidth || mHeight != host.mMeasuredHeight);
+            && ((mWidth != host.mMeasuredWidth || mHeight != host.mMeasuredHeight)
+                || (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT &&
+                        frame.width() < desiredWindowWidth && frame.width() != mWidth)
+                || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
+                        frame.height() < desiredWindowHeight && frame.height() != mHeight));
 
         final boolean computesInternalInsets =
                 attachInfo.mTreeObserver.hasComputeInternalInsetsListeners();
