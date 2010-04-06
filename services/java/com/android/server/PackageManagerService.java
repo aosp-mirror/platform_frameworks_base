@@ -954,7 +954,20 @@ class PackageManagerService extends IPackageManager.Stub {
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            updatePermissionsLP(null, null, true, false);
+            // If the platform SDK has changed since the last time we booted,
+            // we need to re-grant app permission to catch any new ones that
+            // appear.  This is really a hack, and means that apps can in some
+            // cases get permissions that the user didn't initially explicitly
+            // allow...  it would be nice to have some better way to handle
+            // this situation.
+            final boolean regrantPermissions = mSettings.mInternalSdkPlatform
+                    != mSdkVersion;
+            if (regrantPermissions) Slog.i(TAG, "Platform changed from "
+                    + mSettings.mInternalSdkPlatform + " to " + mSdkVersion
+                    + "; regranting permissions for internal storage");
+            mSettings.mInternalSdkPlatform = mSdkVersion;
+            
+            updatePermissionsLP(null, null, true, regrantPermissions);
 
             mSettings.writeLP();
 
@@ -7707,6 +7720,12 @@ class PackageManagerService extends IPackageManager.Stub {
         final HashMap<String, PackageSetting> mDisabledSysPackages =
             new HashMap<String, PackageSetting>();
 
+        // These are the last platform API version we were using for
+        // the apps installed on internal and external storage.  It is
+        // used to grant newer permissions one time during a system upgrade.
+        int mInternalSdkPlatform;
+        int mExternalSdkPlatform;
+        
         // The user's preferred activities associated with particular intent
         // filters.
         private final IntentResolver<PreferredActivity, PreferredActivity> mPreferredActivities =
@@ -8291,6 +8310,11 @@ class PackageManagerService extends IPackageManager.Stub {
 
                 serializer.startTag(null, "packages");
 
+                serializer.startTag(null, "last-platform-version");
+                serializer.attribute(null, "internal", Integer.toString(mInternalSdkPlatform));
+                serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
+                serializer.endTag(null, "last-platform-version");
+                
                 serializer.startTag(null, "permission-trees");
                 for (BasePermission bp : mPermissionTrees.values()) {
                     writePermission(serializer, bp);
@@ -8683,6 +8707,19 @@ class PackageManagerService extends IPackageManager.Stub {
                         String oname = parser.getAttributeValue(null, "old");
                         if (nname != null && oname != null) {
                             mRenamedPackages.put(nname, oname);
+                        }
+                    } else if (tagName.equals("last-platform-version")) {
+                        mInternalSdkPlatform = mExternalSdkPlatform = 0;
+                        try {
+                            String internal = parser.getAttributeValue(null, "internal");
+                            if (internal != null) {
+                                mInternalSdkPlatform = Integer.parseInt(internal);
+                            }
+                            String external = parser.getAttributeValue(null, "external");
+                            if (external != null) {
+                                mInternalSdkPlatform = Integer.parseInt(external);
+                            }
+                        } catch (NumberFormatException e) {
                         }
                     } else {
                         Slog.w(TAG, "Unknown element under <packages>: "
@@ -9553,9 +9590,22 @@ class PackageManagerService extends IPackageManager.Stub {
            }
        }
        synchronized (mPackages) {
+           // If the platform SDK has changed since the last time we booted,
+           // we need to re-grant app permission to catch any new ones that
+           // appear.  This is really a hack, and means that apps can in some
+           // cases get permissions that the user didn't initially explicitly
+           // allow...  it would be nice to have some better way to handle
+           // this situation.
+           final boolean regrantPermissions = mSettings.mExternalSdkPlatform
+                   != mSdkVersion;
+           if (regrantPermissions) Slog.i(TAG, "Platform changed from "
+                   + mSettings.mExternalSdkPlatform + " to " + mSdkVersion
+                   + "; regranting permissions for external storage");
+           mSettings.mExternalSdkPlatform = mSdkVersion;
+           
            // Make sure group IDs have been assigned, and any permission
            // changes in other apps are accounted for
-           updatePermissionsLP(null, null, true, false);
+           updatePermissionsLP(null, null, true, regrantPermissions);
            // Persist settings
            mSettings.writeLP();
        }
