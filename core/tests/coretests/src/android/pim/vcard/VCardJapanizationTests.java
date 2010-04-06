@@ -17,14 +17,12 @@
 package android.pim.vcard;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardConfig;
+import android.pim.vcard.PropertyNodesVerifierElem.TypeSet;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-
-import android.pim.vcard.PropertyNodesVerifierElem.TypeSet;
 
 import java.util.Arrays;
 
@@ -114,7 +112,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
 
         final ContentValues contentValues =
-            (VCardConfig.usesShiftJis(vcardType) ?
+            (VCardConfig.shouldUseShiftJisForExport(vcardType) ?
                     (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
                             mContentValuesForQPAndSJis) :
                     (VCardConfig.isV30(vcardType) ? null : mContentValuesForQPAndUtf8));
@@ -214,7 +212,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
                 .put(StructuredPostal.LABEL, "\u304A\u3082\u3061\u304B\u3048\u308A");
 
-        ContentValues contentValues = (VCardConfig.usesShiftJis(vcardType) ?
+        ContentValues contentValues = (VCardConfig.shouldUseShiftJisForExport(vcardType) ?
                 (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
                     mContentValuesForQPAndSJis) :
                 (VCardConfig.isV30(vcardType) ? mContentValuesForUtf8 :

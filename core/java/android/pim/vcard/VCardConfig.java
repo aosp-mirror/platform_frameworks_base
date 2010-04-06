@@ -43,10 +43,28 @@ public class VCardConfig {
     /* package */ static final int PARSE_TYPE_FOMA = 3;  // For Japanese FOMA mobile phones.
     /* package */ static final int PARSE_TYPE_WINDOWS_MOBILE_JP = 4;
 
-    // Assumes that "iso-8859-1" is able to map "all" 8bit characters to some unicode and
-    // decode the unicode to the original charset. If not, this setting will cause some bug. 
-    public static final String DEFAULT_CHARSET = "iso-8859-1";
-    
+    /**
+     * <P>
+     * The charset used during import.
+     * </P>
+     * <P>
+     * We cannot determine which charset should be used to interpret a given vCard file,
+     * while we have to decode sime encoded data (e.g. BASE64) to binary.
+     * In order to avoid "misinterpretation" of charset as much as possible,
+     * "ISO-8859-1" (a.k.a Latin-1) is first used for reading a stream.
+     * When charset is specified in a property (with "CHARSET=..." parameter),
+     * the string is decoded to raw bytes and encoded into the specific charset,
+     * assuming "ISO-8859-1" is able to map "all" 8bit characters to some unicode,
+     * and it has 1 to 1 mapping in all 8bit characters.
+     * If the assumption is not correct, this setting will cause some bug.
+     * </P>
+     */
+    /* package */ static final String DEFAULT_TEMPORARY_CHARSET = "ISO-8859-1";
+
+    // TODO: still intermediate procedures uses this charset. Fix it.
+    public static final String DEFAULT_IMPORT_CHARSET = "ISO-8859-1";
+    public static final String DEFAULT_EXPORT_CHARSET = "UTF-8";
+
     public static final int FLAG_V21 = 0;
     public static final int FLAG_V30 = 1;
 
@@ -58,10 +76,13 @@ public class VCardConfig {
     private static final int NAME_ORDER_MASK = 0xC;
 
     // 0x10 is reserved for safety
-    
-    private static final int FLAG_CHARSET_UTF8 = 0;
-    private static final int FLAG_CHARSET_SHIFT_JIS = 0x100;
-    private static final int FLAG_CHARSET_MASK = 0xF00;
+
+    /*
+     * These flags are ignored when charset is explicitly given by a caller.
+     */
+    private static final int FLAG_USE_UTF8_FOR_EXPORT = 0;
+    private static final int FLAG_USE_SHIFT_JIS_FOR_EXPORT = 0x100;
+    private static final int FLAG_CHARSET_MASK_FOR_EKPORT = 0xF00;
 
     /**
      * The flag indicating the vCard composer will add some "X-" properties used only in Android
@@ -196,7 +217,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V21_GENERIC_UTF8 =
-        (FLAG_V21 | NAME_ORDER_DEFAULT | FLAG_CHARSET_UTF8 |
+        (FLAG_V21 | NAME_ORDER_DEFAULT | FLAG_USE_UTF8_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
     /* package */ static String VCARD_TYPE_V21_GENERIC_UTF8_STR = "v21_generic";
@@ -210,7 +231,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V30_GENERIC_UTF8 =
-        (FLAG_V30 | NAME_ORDER_DEFAULT | FLAG_CHARSET_UTF8 |
+        (FLAG_V30 | NAME_ORDER_DEFAULT | FLAG_USE_UTF8_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
     /* package */ static final String VCARD_TYPE_V30_GENERIC_UTF8_STR = "v30_generic";
@@ -222,7 +243,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V21_EUROPE_UTF8 =
-        (FLAG_V21 | NAME_ORDER_EUROPE | FLAG_CHARSET_UTF8 |
+        (FLAG_V21 | NAME_ORDER_EUROPE | FLAG_USE_UTF8_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
     
     /* package */ static final String VCARD_TYPE_V21_EUROPE_UTF8_STR = "v21_europe";
@@ -236,7 +257,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V30_EUROPE_UTF8 =
-        (FLAG_V30 | NAME_ORDER_EUROPE | FLAG_CHARSET_UTF8 |
+        (FLAG_V30 | NAME_ORDER_EUROPE | FLAG_USE_UTF8_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
     
     /* package */ static final String VCARD_TYPE_V30_EUROPE_STR = "v30_europe";
@@ -250,7 +271,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V21_JAPANESE_UTF8 =
-        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_CHARSET_UTF8 |
+        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_UTF8_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_UTF8_STR = "v21_japanese_utf8";
@@ -265,7 +286,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V21_JAPANESE_SJIS =
-        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_CHARSET_SHIFT_JIS |
+        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_SJIS_STR = "v21_japanese_sjis";
@@ -280,7 +301,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V30_JAPANESE_SJIS =
-        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_CHARSET_SHIFT_JIS |
+        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
         
     /* package */ static final String VCARD_TYPE_V30_JAPANESE_SJIS_STR = "v30_japanese_sjis";
@@ -294,7 +315,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V30_JAPANESE_UTF8 =
-        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_CHARSET_UTF8 |
+        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_UTF8_FOR_EXPORT |
                 FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
     /* package */ static final String VCARD_TYPE_V30_JAPANESE_UTF8_STR = "v30_japanese_utf8";
@@ -310,7 +331,7 @@ public class VCardConfig {
      * </P>
      */
     public static final int VCARD_TYPE_V21_JAPANESE_MOBILE =
-        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_CHARSET_SHIFT_JIS |
+        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
                 FLAG_CONVERT_PHONETIC_NAME_STRINGS |
                 FLAG_REFRAIN_QP_TO_NAME_PROPERTIES);
 
@@ -379,12 +400,17 @@ public class VCardConfig {
         return !isV30(vcardType);
     }
 
-    public static boolean usesUtf8(final int vcardType) {
-        return ((vcardType & FLAG_CHARSET_MASK) == FLAG_CHARSET_UTF8);
+    /* package */ static boolean shouldUseUtf8ForExport(final int vcardType) {
+        return ((vcardType & FLAG_CHARSET_MASK_FOR_EKPORT) == FLAG_USE_UTF8_FOR_EXPORT);
     }
 
-    public static boolean usesShiftJis(final int vcardType) {
-        return ((vcardType & FLAG_CHARSET_MASK) == FLAG_CHARSET_SHIFT_JIS);
+    /**
+     * Shift_JIS (a charset for Japanese text files) needs special handling to select
+     * carrer specific variants.
+     * @hide just for test
+     */
+    public static boolean shouldUseShiftJisForExport(final int vcardType) {
+        return ((vcardType & FLAG_CHARSET_MASK_FOR_EKPORT) == FLAG_USE_SHIFT_JIS_FOR_EXPORT);
     }
 
     public static int getNameOrderType(final int vcardType) {

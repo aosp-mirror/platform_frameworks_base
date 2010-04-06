@@ -41,6 +41,7 @@ import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.text.TextUtils;
 import android.util.CharsetUtils;
 import android.util.Log;
 
@@ -61,15 +62,11 @@ import java.util.Map;
 
 /**
  * <p>
- * The class for composing VCard from Contacts information. Note that this is
- * completely differnt implementation from
- * android.syncml.pim.vcard.VCardComposer, which is not maintained anymore.
+ * The class for composing vCard from Contacts information.
  * </p>
- *
  * <p>
  * Usually, this class should be used like this.
  * </p>
- *
  * <pre class="prettyprint">VCardComposer composer = null;
  * try {
  *     composer = new VCardComposer(context);
@@ -94,13 +91,16 @@ import java.util.Map;
  *         composer.terminate();
  *     }
  * } </pre>
+ * <P>
+ * Users have to manually take care of memory efficiency. Even one vCard may contain
+ * image of non-trivial size for mobile devices.
+ * </P>
+ * <P>
+ * In default, Default {@link VCardBuilder} class is used to build each vCard.
+ * </P>
  */
 public class VCardComposer {
     private static final String LOG_TAG = "VCardComposer";
-
-    public static final int DEFAULT_PHONE_TYPE = Phone.TYPE_HOME;
-    public static final int DEFAULT_POSTAL_TYPE = StructuredPostal.TYPE_HOME;
-    public static final int DEFAULT_EMAIL_TYPE = Email.TYPE_OTHER;
 
     public static final String FAILURE_REASON_FAILED_TO_GET_DATABASE_INFO =
         "Failed to get database information";
@@ -119,6 +119,8 @@ public class VCardComposer {
 
     public static final String VCARD_TYPE_STRING_DOCOMO = "docomo";
 
+    // Strictly speaking, "Shift_JIS" is the most appropriate, but we use upper version here,
+    // since usual vCard devices for Japanese devices already use it.
     private static final String SHIFT_JIS = "SHIFT_JIS";
     private static final String UTF_8 = "UTF-8";
 
@@ -141,7 +143,7 @@ public class VCardComposer {
         sImMap.put(Im.PROTOCOL_ICQ, VCardConstants.PROPERTY_X_ICQ);
         sImMap.put(Im.PROTOCOL_JABBER, VCardConstants.PROPERTY_X_JABBER);
         sImMap.put(Im.PROTOCOL_SKYPE, VCardConstants.PROPERTY_X_SKYPE_USERNAME);
-        // Google talk is a special case.
+        // We don't add Google talk here since it has to be handled separately.
     }
 
     public static interface OneEntryHandler {
@@ -152,37 +154,37 @@ public class VCardComposer {
 
     /**
      * <p>
-     * An useful example handler, which emits VCard String to outputstream one by one.
+     * An useful handler for emitting vCard String to an OutputStream object one by one.
      * </p>
      * <p>
      * The input OutputStream object is closed() on {@link #onTerminate()}.
-     * Must not close the stream outside.
+     * Must not close the stream outside this class.
      * </p>
      */
     public class HandlerForOutputStream implements OneEntryHandler {
         @SuppressWarnings("hiding")
         private static final String LOG_TAG = "vcard.VCardComposer.HandlerForOutputStream";
 
-        final private OutputStream mOutputStream; // mWriter will close this.
-        private Writer mWriter;
-
         private boolean mOnTerminateIsCalled = false;
+
+        final private OutputStream mOutputStream; // mWriter will close this.
+        protected Writer mWriter;
 
         /**
          * Input stream will be closed on the detruction of this object.
          */
-        public HandlerForOutputStream(OutputStream outputStream) {
+        public HandlerForOutputStream(final OutputStream outputStream) {
             mOutputStream = outputStream;
         }
 
-        public boolean onInit(Context context) {
+        public final boolean onInit(final Context context) {
             try {
                 mWriter = new BufferedWriter(new OutputStreamWriter(
-                        mOutputStream, mCharsetString));
+                        mOutputStream, mCharset));
             } catch (UnsupportedEncodingException e1) {
-                Log.e(LOG_TAG, "Unsupported charset: " + mCharsetString);
+                Log.e(LOG_TAG, "Unsupported charset: " + mCharset);
                 mErrorReason = "Encoding is not supported (usually this does not happen!): "
-                        + mCharsetString;
+                        + mCharset;
                 return false;
             }
 
@@ -205,7 +207,7 @@ public class VCardComposer {
             return true;
         }
 
-        public boolean onEntryCreated(String vcard) {
+        public final boolean onEntryCreated(String vcard) {
             try {
                 mWriter.write(vcard);
             } catch (IOException e) {
@@ -218,7 +220,7 @@ public class VCardComposer {
             return true;
         }
 
-        public void onTerminate() {
+        public final void onTerminate() {
             mOnTerminateIsCalled = true;
             if (mWriter != null) {
                 try {
@@ -235,11 +237,18 @@ public class VCardComposer {
                             "IOException during closing the output stream: "
                                     + e.getMessage());
                 } finally {
-                    try {
-                        mWriter.close();
-                    } catch (IOException e) {
-                    }
+                    closeOutputStream();
                 }
+            }
+        }
+
+        // Users can override this if they want to (e.g. if they don't want to close the stream).
+        // TODO: Should expose bare OutputStream instead?
+        public void closeOutputStream() {
+            try {
+                mWriter.close();
+            } catch (IOException e) {
+                Log.w(LOG_TAG, "IOException is thrown during close(). Ignoring.");
             }
         }
 
@@ -257,11 +266,10 @@ public class VCardComposer {
     private final ContentResolver mContentResolver;
 
     private final boolean mIsDoCoMo;
-    private final boolean mUsesShiftJis;
     private Cursor mCursor;
     private int mIdColumn;
 
-    private final String mCharsetString;
+    private final String mCharset;
     private boolean mTerminateIsCalled;
     private final List<OneEntryHandler> mHandlerList;
 
@@ -272,11 +280,14 @@ public class VCardComposer {
     };
 
     public VCardComposer(Context context) {
-        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true);
+        this(context, VCardConfig.VCARD_TYPE_DEFAULT, null, true);
     }
 
+    /**
+     * The variant which sets charset to null and sets careHandlerErrors to true.
+     */
     public VCardComposer(Context context, int vcardType) {
-        this(context, vcardType, true);
+        this(context, vcardType, null, true);
     }
 
     public VCardComposer(Context context, String vcardTypeStr, boolean careHandlerErrors) {
@@ -284,9 +295,25 @@ public class VCardComposer {
     }
 
     /**
-     * Construct for supporting call log entry vCard composing.
+     * The variant which sets charset to null.
      */
     public VCardComposer(final Context context, final int vcardType,
+            final boolean careHandlerErrors) {
+        this(context, vcardType, null, careHandlerErrors);
+    }
+
+    /**
+     * Construct for supporting call log entry vCard composing.
+     *
+     * @param context Context to be used during the composition.
+     * @param vcardType The type of vCard, typically available via {@link VCardConfig}.
+     * @param charset The charset to be used. Use null when you don't need the charset.
+     * @param careHandlerErrors If true, This object returns false everytime
+     * a Handler object given via {{@link #addHandler(OneEntryHandler)} returns false.
+     * If false, this ignores those errors.
+     */
+    public VCardComposer(final Context context, final int vcardType,
+            String charset,
             final boolean careHandlerErrors) {
         mContext = context;
         mVCardType = vcardType;
@@ -294,30 +321,62 @@ public class VCardComposer {
         mContentResolver = context.getContentResolver();
 
         mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
-        mUsesShiftJis = VCardConfig.usesShiftJis(vcardType);
         mHandlerList = new ArrayList<OneEntryHandler>();
 
-        if (mIsDoCoMo) {
-            String charset;
-            try {
-                charset = CharsetUtils.charsetForVendor(SHIFT_JIS, "docomo").name();
-            } catch (UnsupportedCharsetException e) {
-                Log.e(LOG_TAG, "DoCoMo-specific SHIFT_JIS was not found. Use SHIFT_JIS as is.");
-                charset = SHIFT_JIS;
+        if (mIsDoCoMo || VCardConfig.shouldUseShiftJisForExport(vcardType)) {
+            if (!SHIFT_JIS.equalsIgnoreCase(charset)) {
+                Log.w(LOG_TAG,
+                        "The charset \"" + charset + "\" is used while "
+                        + SHIFT_JIS + " is needed to be used.");
+                if (TextUtils.isEmpty(charset)) {
+                    mCharset = SHIFT_JIS;
+                } else {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(charset).name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.i(LOG_TAG,
+                                "Career-specific \"" + charset + "\" was not found (as usual). "
+                                + "Use it as is.");
+                    }
+                    mCharset = charset;
+                }
+            } else {
+                if (mIsDoCoMo) {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(SHIFT_JIS, "docomo").name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.e(LOG_TAG,
+                                "DoCoMo-specific SHIFT_JIS was not found. "
+                                + "Use SHIFT_JIS as is.");
+                        charset = SHIFT_JIS;
+                    }
+                } else {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(SHIFT_JIS).name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.e(LOG_TAG,
+                                "Career-specific SHIFT_JIS was not found. "
+                                + "Use SHIFT_JIS as is.");
+                        charset = SHIFT_JIS;
+                    }
+                }
+                mCharset = charset;
             }
-            mCharsetString = charset;
-        } else if (mUsesShiftJis) {
-            String charset;
-            try {
-                charset = CharsetUtils.charsetForVendor(SHIFT_JIS).name();
-            } catch (UnsupportedCharsetException e) {
-                Log.e(LOG_TAG, "Vendor-specific SHIFT_JIS was not found. Use SHIFT_JIS as is.");
-                charset = SHIFT_JIS;
-            }
-            mCharsetString = charset;
         } else {
-            mCharsetString = UTF_8;
+            if (TextUtils.isEmpty(charset)) {
+                mCharset = UTF_8;
+            } else {
+                try {
+                    charset = CharsetUtils.charsetForVendor(charset).name();
+                } catch (UnsupportedCharsetException e) {
+                    Log.i(LOG_TAG,
+                            "Career-specific \"" + charset + "\" was not found (as usual). "
+                            + "Use it as is.");
+                }
+                mCharset = charset;
+            }
         }
+        Log.d(LOG_TAG, "use the charset \"" + mCharset + "\""); 
     }
 
     /**
@@ -351,7 +410,7 @@ public class VCardComposer {
         }
 
         if (mCareHandlerErrors) {
-            List<OneEntryHandler> finishedList = new ArrayList<OneEntryHandler>(
+            final List<OneEntryHandler> finishedList = new ArrayList<OneEntryHandler>(
                     mHandlerList.size());
             for (OneEntryHandler handler : mHandlerList) {
                 if (!handler.onInit(mContext)) {
@@ -414,7 +473,7 @@ public class VCardComposer {
             mErrorReason = FAILURE_REASON_NOT_INITIALIZED;
             return false;
         }
-        String vcard;
+        final String vcard;
         try {
             if (mIdColumn >= 0) {
                 vcard = createOneEntryInternal(mCursor.getString(mIdColumn),
@@ -437,8 +496,7 @@ public class VCardComposer {
             mCursor.moveToNext();
         }
 
-        // This function does not care the OutOfMemoryError on the handler side
-        // :-P
+        // This function does not care the OutOfMemoryError on the handler side :-P
         if (mCareHandlerErrors) {
             List<OneEntryHandler> finishedList = new ArrayList<OneEntryHandler>(
                     mHandlerList.size());
@@ -457,7 +515,7 @@ public class VCardComposer {
     }
 
     private String createOneEntryInternal(final String contactId,
-            Method getEntityIteratorMethod) throws VCardException {
+            final Method getEntityIteratorMethod) throws VCardException {
         final Map<String, List<ContentValues>> contentValuesListMap =
                 new HashMap<String, List<ContentValues>>();
         // The resolver may return the entity iterator with no data. It is possible.
@@ -527,20 +585,34 @@ public class VCardComposer {
             }
         }
 
-        final VCardBuilder builder = new VCardBuilder(mVCardType);
-        builder.appendNameProperties(contentValuesListMap.get(StructuredName.CONTENT_ITEM_TYPE))
-                .appendNickNames(contentValuesListMap.get(Nickname.CONTENT_ITEM_TYPE))
-                .appendPhones(contentValuesListMap.get(Phone.CONTENT_ITEM_TYPE))
-                .appendEmails(contentValuesListMap.get(Email.CONTENT_ITEM_TYPE))
-                .appendPostals(contentValuesListMap.get(StructuredPostal.CONTENT_ITEM_TYPE))
-                .appendOrganizations(contentValuesListMap.get(Organization.CONTENT_ITEM_TYPE))
-                .appendWebsites(contentValuesListMap.get(Website.CONTENT_ITEM_TYPE))
-                .appendPhotos(contentValuesListMap.get(Photo.CONTENT_ITEM_TYPE))
-                .appendNotes(contentValuesListMap.get(Note.CONTENT_ITEM_TYPE))
-                .appendEvents(contentValuesListMap.get(Event.CONTENT_ITEM_TYPE))
-                .appendIms(contentValuesListMap.get(Im.CONTENT_ITEM_TYPE))
-                .appendRelation(contentValuesListMap.get(Relation.CONTENT_ITEM_TYPE));
-        return builder.toString();
+        return buildVCard(contentValuesListMap);
+    }
+
+    /**
+     * Builds and returns vCard using given map, whose key is CONTENT_ITEM_TYPE defined in
+     * {ContactsContract}. Developers can override this method to customize the output.
+     */
+    public String buildVCard(final Map<String, List<ContentValues>> contentValuesListMap) {
+        if (contentValuesListMap == null) {
+            Log.e(LOG_TAG, "The given map is null. Ignore and return empty String");
+            return "";
+        } else {
+            final VCardBuilder builder = new VCardBuilder(mVCardType, mCharset);
+            // TODO: Android-specific X attributes?
+            builder.appendNameProperties(contentValuesListMap.get(StructuredName.CONTENT_ITEM_TYPE))
+                    .appendNickNames(contentValuesListMap.get(Nickname.CONTENT_ITEM_TYPE))
+                    .appendPhones(contentValuesListMap.get(Phone.CONTENT_ITEM_TYPE))
+                    .appendEmails(contentValuesListMap.get(Email.CONTENT_ITEM_TYPE))
+                    .appendPostals(contentValuesListMap.get(StructuredPostal.CONTENT_ITEM_TYPE))
+                    .appendOrganizations(contentValuesListMap.get(Organization.CONTENT_ITEM_TYPE))
+                    .appendWebsites(contentValuesListMap.get(Website.CONTENT_ITEM_TYPE))
+                    .appendPhotos(contentValuesListMap.get(Photo.CONTENT_ITEM_TYPE))
+                    .appendNotes(contentValuesListMap.get(Note.CONTENT_ITEM_TYPE))
+                    .appendEvents(contentValuesListMap.get(Event.CONTENT_ITEM_TYPE))
+                    .appendIms(contentValuesListMap.get(Im.CONTENT_ITEM_TYPE))
+                    .appendRelation(contentValuesListMap.get(Relation.CONTENT_ITEM_TYPE));
+            return builder.toString();
+        }
     }
 
     public void terminate() {
@@ -563,26 +635,38 @@ public class VCardComposer {
     @Override
     public void finalize() {
         if (!mTerminateIsCalled) {
+            Log.w(LOG_TAG, "terminate() is not called yet. We call it in finalize() step.");
             terminate();
         }
     }
 
+    /**
+     * @return returns the number of available entities. The return value is undefined
+     * when this object is not ready yet (typically when {{@link #init()} is not called
+     * or when {@link #terminate()} is already called).
+     */
     public int getCount() {
         if (mCursor == null) {
+            Log.w(LOG_TAG, "This object is not ready yet.");
             return 0;
         }
         return mCursor.getCount();
     }
 
+    /**
+     * @return true when there's no entity to be built. The return value is undefined
+     * when this object is not ready yet.
+     */
     public boolean isAfterLast() {
         if (mCursor == null) {
+            Log.w(LOG_TAG, "This object is not ready yet.");
             return false;
         }
         return mCursor.isAfterLast();
     }
 
     /**
-     * @return Return the error reason if possible.
+     * @return Returns the error reason.
      */
     public String getErrorReason() {
         return mErrorReason;

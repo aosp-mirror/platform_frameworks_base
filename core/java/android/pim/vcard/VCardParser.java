@@ -34,26 +34,17 @@ public abstract class VCardParser {
 
     /**
      * <P>
-     * Parses the given stream and send the VCard data into VCardBuilderBase object.
+     * Parses the given stream and send the vCard data into VCardBuilderBase object.
      * </P.
      * <P>
      * Note that vCard 2.1 specification allows "CHARSET" parameter, and some career sets
      * local encoding to it. For example, Japanese phone career uses Shift_JIS, which is
-     * formally allowed in VCard 2.1, but not recommended in VCard 3.0. In VCard 2.1,
-     * In some exreme case, some VCard may have different charsets in one VCard (though
-     * we do not see any device which emits such kind of malicious data)
+     * formally allowed in vCard 2.1, but not allowed in vCard 3.0. In vCard 2.1,
+     * In some exreme case, it is allowed for vCard to have different charsets in one vCard.
      * </P>
      * <P>
-     * In order to avoid "misunderstanding" charset as much as possible, this method
-     * use "ISO-8859-1" for reading the stream. When charset is specified in some property
-     * (with "CHARSET=..." parameter), the string is decoded to raw bytes and encoded to
-     * the charset. This method assumes that "ISO-8859-1" has 1 to 1 mapping in all 8bit
-     * characters, which is not completely sure. In some cases, this "decoding-encoding"
-     * scheme may fail. To avoid the case,
-     * </P>
-     * <P>
-     * We recommend you to use {@link VCardSourceDetector} and detect which kind of source the
-     * VCard comes from and explicitly specify a charset using the result.
+     * We recommend you use {@link VCardSourceDetector} and detect which kind of source the
+     * vCard comes from and explicitly specify a charset using the result.
      * </P>
      *
      * @param is The source to parse.
@@ -61,27 +52,24 @@ public abstract class VCardParser {
      * @return Returns true for success. Otherwise returns false.
      * @throws IOException, VCardException
      */
-    public abstract boolean parse(InputStream is, VCardInterpreter interepreter)
-            throws IOException, VCardException;
-    
+    public final boolean parse(InputStream is, VCardInterpreter interepreter)
+            throws IOException, VCardException {
+        return parse(is, VCardConfig.DEFAULT_TEMPORARY_CHARSET, interepreter);
+    }
+
     /**
      * <P>
      * The method variants which accept charset.
      * </P>
-     * <P>
-     * RFC 2426 "recommends" (not forces) to use UTF-8, so it may be OK to use
-     * UTF-8 as an encoding when parsing vCard 3.0. But note that some Japanese
-     * phone uses Shift_JIS as a charset (e.g. W61SH), and another uses
-     * "CHARSET=SHIFT_JIS", which is explicitly prohibited in vCard 3.0 specification (e.g. W53K).
-     * </P>
      *
      * @param is The source to parse.
      * @param charset Charset to be used.
-     * @param builder The VCardBuilderBase object.
+     * @param interpreter The VCardBuilderBase object.
      * @return Returns true when successful. Otherwise returns false.
      * @throws IOException, VCardException
      */
-    public abstract boolean parse(InputStream is, String charset, VCardInterpreter builder)
+    public abstract boolean parse(InputStream is, String charset,
+            VCardInterpreter interpreter)
             throws IOException, VCardException;
     
     /**
