@@ -190,6 +190,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     private int mLastEnableUid = Process.myUid();
 
+    /*
+     * Last UID that asked to enable WIFI AP.
+     */
+    private int mLastApEnableUid = Process.myUid();
+
+
     /**
      * Number of allowed radio frequency channels in various regulatory domains.
      * This list is sufficient for 802.11b/g networks (2.4GHz range).
@@ -240,6 +246,10 @@ public class WifiService extends IWifiManager.Stub {
                     public void onReceive(Context context, Intent intent) {
                         // clear our flag indicating the user has overwridden airplane mode
                         mAirplaneModeOverwridden = false;
+                        // on airplane disable, restore Wifi if the saved state indicates so
+                        if (!isAirplaneModeOn() && testAndClearWifiSavedState()) {
+                            persistWifiEnabled(true);
+                        }
                         updateWifiState();
                     }
                 },
@@ -613,8 +623,7 @@ public class WifiService extends IWifiManager.Stub {
             sWakeLock.acquire();
             Binder.restoreCallingIdentity(ident);
 
-            mLastEnableUid = Binder.getCallingUid();
-
+            mLastApEnableUid = Binder.getCallingUid();
             sendAccessPointMessage(enabled, wifiConfig, Binder.getCallingUid());
         }
 
@@ -1802,6 +1811,14 @@ public class WifiService extends IWifiManager.Stub {
             if ((mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLING) && !airplaneMode) {
                 return;
             }
+
+            /* Disable tethering when airplane mode is enabled */
+            if (airplaneMode &&
+                (mWifiApState == WIFI_AP_STATE_ENABLING || mWifiApState == WIFI_AP_STATE_ENABLED)) {
+                sWakeLock.acquire();
+                sendAccessPointMessage(false, null, mLastApEnableUid);
+            }
+
             if (wifiShouldBeEnabled) {
                 if (wifiShouldBeStarted) {
                     sWakeLock.acquire();
