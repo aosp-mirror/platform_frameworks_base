@@ -10,4 +10,4 @@ LOCAL_SRC_FILES := \
 LOCAL_MODULE := android.policy_phone
 LOCAL_UNINSTALLABLE_MODULE := true
 
-include $(BUILD_JAVA_LIBRARY)
+#include $(BUILD_JAVA_LIBRARY)
