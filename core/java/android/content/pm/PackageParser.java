@@ -343,6 +343,9 @@ public class PackageParser {
         } catch (IOException e) {
             Log.w(TAG, "Exception reading " + je.getName() + " in "
                     + jarFile.getName(), e);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Exception reading " + je.getName() + " in "
+                    + jarFile.getName(), e);
         }
         return null;
     }
