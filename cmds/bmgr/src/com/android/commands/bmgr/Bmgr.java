@@ -373,7 +373,7 @@ public final class Bmgr {
             }
             RestoreSet[] sets = null;
             int err = mRestore.getAvailableRestoreSets(observer);
-            if (err != 0) {
+            if (err == 0) {
                 observer.waitForCompletion();
                 sets = observer.sets;
                 for (RestoreSet s : sets) {
