@@ -8,7 +8,8 @@ page.title=&lt;activity&gt;
           android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
           android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
                                  "touchscreen", "keyboard", "keyboardHidden",
-                                 "navigation", "orientation", "fontScale"]
+                                 "navigation", "orientation", "screenLayout",
+                                 "fontScale", "uiMode"]
           android:<a href="#enabled">enabled</a>=["true" | "false"]
           android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
@@ -152,13 +153,19 @@ as described above.
 </p></dd>
 
 <dt><a name="config"></a>{@code android:configChanges}</dt>
-<dd>Lists configuration changes that the activity will handle itself.  When 
-changes that are not listed occur, the activity is shut down and restarted.  
-When a listed change occurs, the activity remains running and its <code>{@link android.app.Activity#onConfigurationChanged onConfigurationChanged()}</code> 
-method is called.
+<dd>Lists configuration changes that the activity will handle itself.  When a configuration
+change occurs at runtime, the activity is shut down and restarted by default, but declaring a
+configuration with this attribute will prevent the activity from being restarted. Instead, the
+activity remains running and its <code>{@link android.app.Activity#onConfigurationChanged
+onConfigurationChanged()}</code> method is called.
+
+<p class="note"><strong>Note:</strong> Using this attribute should be
+avoided and used only as a last-resort. Please read <a
+href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a> for more
+information about how to properly handle a restart due to a configuration change.</p>
 
 <p>
-Any or all of the following strings can be used to set this attribute.  Values are 
+Any or all of the following strings are valid values for this attribute. Multiple values are
 separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientation}".
 </p>
 
@@ -168,39 +175,48 @@ separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientat
    <th>Description</th>
 </tr><tr>
    <td>"{@code mcc}"</td>
-   <td>The IMSI mobile country code (MCC) has changed &mdash; 
-       that is, a SIM has been detected and updated the MCC.</td>
+   <td>The IMSI mobile country code (MCC) has changed &mdash;
+       a SIM has been detected and updated the MCC.</td>
 </tr><tr>
    <td>"{@code mnc}"</td>
-   <td>The IMSI mobile network code (MNC) has changed &mdash; 
-       that is, a SIM has been detected and updated the MNC.</td>
+   <td>The IMSI mobile network code (MNC) has changed &mdash;
+       a SIM has been detected and updated the MNC.</td>
 </tr><tr>
    <td>"{@code locale}"</td>
-   <td>The locale has changed &mdash; for example, the user has selected a new 
+   <td>The locale has changed &mdash; the user has selected a new
        language that text should be displayed in.</td>
 </tr><tr>
    <td>"{@code touchscreen}"</td>
    <td>The touchscreen has changed.  (This should never normally happen.)</td>
 </tr><tr>
    <td>"{@code keyboard}"</td>
-   <td>The keyboard type has changed &mdash; for example, the user has 
+   <td>The keyboard type has changed &mdash; for example, the user has
        plugged in an external keyboard.</td>
 </tr><tr>
    <td>"{@code keyboardHidden}"</td>
-   <td>The keyboard accessibility has changed &mdash; for example, the 
-       user has slid the keyboard out to expose it.</td>
+   <td>The keyboard accessibility has changed &mdash; for example, the
+       user has revealed the hardware keyboard.</td>
 </tr><tr>
    <td>"{@code navigation}"</td>
-   <td>The navigation type has changed.  (This should never normally happen.)</td>
+   <td>The navigation type (trackball/dpad) has changed.  (This should never normally happen.)</td>
 </tr><tr>
-   <td>"{@code orientation}"</td> 
-   <td>The screen orientation has changed &mdash; that is, the user has rotated 
+   <td>"{@code orientation}"</td>
+   <td>The screen orientation has changed &mdash; the user has rotated
        the device.</td>
  </tr><tr>
+   <td>"{@code screenLayout}"</td>
+   <td>The screen layout has changed &mdash; this might be caused by a
+             different display being activated.</td>
+ </tr><tr>
   <td>"{@code fontScale}"</td>
-   <td>The font scaling factor has changed &mdash; that is, the user has selected 
+   <td>The font scaling factor has changed &mdash; the user has selected
        a new global font size.</td>
-</tr>
+  </tr><tr>
+  <td>"{@code uiMode}"</td>
+   <td>The user interface mode has changed &mdash; this can be caused when the user places the
+device into a desk/car dock or when the the night mode changes. See {@link
+android.app.UiModeManager}. <em>Introduced in API Level 8</em>.</td>
+  </tr>
 </table>
 
 <p>
