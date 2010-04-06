@@ -343,6 +343,9 @@ public class PackageParser {
         } catch (IOException e) {
             Log.w(TAG, "Exception reading " + je.getName() + " in "
                     + jarFile.getName(), e);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Exception reading " + je.getName() + " in "
+                    + jarFile.getName(), e);
         }
         return null;
     }
@@ -1212,7 +1215,7 @@ public class PackageParser {
         if (procSeq == null || procSeq.length() <= 0) {
             return defProc;
         }
-        return buildCompoundName(pkg, procSeq, "package", outError);
+        return buildCompoundName(pkg, procSeq, "process", outError);
     }
 
     private static String buildTaskAffinityName(String pkg, String defProc,
@@ -1544,14 +1547,32 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);
         ai.permission = (str != null && str.length() > 0) ? str.intern() : null;
 
-        str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity, 0);
+        if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {
+            str = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity, 0);
+        } else {
+            // Some older apps have been seen to use a resource reference
+            // here that on older builds was ignored (with a warning).  We
+            // need to continue to do this for them so they don't break.
+            str = sa.getNonResourceString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity);
+        }
         ai.taskAffinity = buildTaskAffinityName(ai.packageName, ai.packageName,
                 str, outError);
 
         if (outError[0] == null) {
-            ai.processName = buildProcessName(ai.packageName, null, sa.getNonConfigurationString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_process, 0),
+            CharSequence pname;
+            if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {
+                pname = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestApplication_process, 0);
+            } else {
+                // Some older apps have been seen to use a resource reference
+                // here that on older builds was ignored (with a warning).  We
+                // need to continue to do this for them so they don't break.
+                pname = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestApplication_process);
+            }
+            ai.processName = buildProcessName(ai.packageName, null, pname,
                     flags, mSeparateProcesses, outError);
     
             ai.enabled = sa.getBoolean(
@@ -2796,9 +2817,17 @@ public class PackageParser {
             }
 
             if (args.processRes != 0) {
+                CharSequence pname;
+                if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {
+                    pname = args.sa.getNonConfigurationString(args.processRes, 0);
+                } else {
+                    // Some older apps have been seen to use a resource reference
+                    // here that on older builds was ignored (with a warning).  We
+                    // need to continue to do this for them so they don't break.
+                    pname = args.sa.getNonResourceString(args.processRes);
+                }
                 outInfo.processName = buildProcessName(owner.applicationInfo.packageName,
-                        owner.applicationInfo.processName,
-                        args.sa.getNonConfigurationString(args.processRes, 0),
+                        owner.applicationInfo.processName, pname,
                         args.flags, args.sepProcesses, args.outError);
             }
             

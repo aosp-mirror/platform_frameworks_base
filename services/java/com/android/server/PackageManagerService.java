@@ -4006,6 +4006,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (bp.protectionLevel == PermissionInfo.PROTECTION_NORMAL
                         || bp.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS) {
                     allowed = true;
+                } else if (bp.packageSetting == null) {
+                    // This permission is invalid; skip it.
+                    allowed = false;
                 } else if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE
                         || bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
                     allowed = (checkSignaturesLP(bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
