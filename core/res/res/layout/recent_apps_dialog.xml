@@ -17,17 +17,19 @@
 */
 -->
 
-<LinearLayout
+<com.android.internal.policy.impl.RecentApplicationsBackground
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/recent_dialog_background"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="3dip"
+    android:layout_height="match_parent"
+    android:paddingTop="3dip"
+    android:paddingBottom="3dip"
     android:orientation="vertical">
 
     <!-- This is only intended to be visible when all buttons (below) are invisible -->
     <TextView
         android:id="@+id/no_applications_message"
-        android:layout_width="285dip"
+        android:layout_width="320dip"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dip"
         android:layout_marginBottom="15dip"
@@ -40,9 +42,13 @@
          adjust height based on number of rows. -->
     <!-- TODO Adjust all sizes, padding, etc. to meet pixel-perfect specs -->
     <LinearLayout
-        android:layout_width="285dip"
+        android:layout_width="320dip"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
+
+        <include
+            layout="@android:layout/recent_apps_icon"
+            android:id="@+id/button0" />
 
         <include
             layout="@android:layout/recent_apps_icon"
@@ -59,7 +65,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
@@ -75,5 +81,9 @@
             layout="@android:layout/recent_apps_icon"
             android:id="@+id/button6" />
 
+        <include
+            layout="@android:layout/recent_apps_icon"
+            android:id="@+id/button7" />
+
     </LinearLayout>
-</LinearLayout>
+</com.android.internal.policy.impl.RecentApplicationsBackground>
