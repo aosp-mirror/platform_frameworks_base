@@ -30,11 +30,11 @@ import android.util.Log;
 
 
 /**
- * MediaScannerConnection provides a way for applications to pass a 
+ * MediaScannerConnection provides a way for applications to pass a
  * newly created or downloaded media file to the media scanner service.
- * The media scanner service will read metadata from the file and add 
+ * The media scanner service will read metadata from the file and add
  * the file to the media content provider.
- * The MediaScannerConnectionClient provides an interface for the 
+ * The MediaScannerConnectionClient provides an interface for the
  * media scanner service to return the Uri for a newly scanned file
  * to the client of the MediaScannerConnection class.
  */
@@ -46,7 +46,7 @@ public class MediaScannerConnection implements ServiceConnection {
     private MediaScannerConnectionClient mClient;
     private IMediaScannerService mService;
     private boolean mConnected; // true if connect() has been called since last disconnect()
-    
+
     private IMediaScannerListener.Stub mListener = new IMediaScannerListener.Stub() {
         public void scanCompleted(String path, Uri uri) {
             MediaScannerConnectionClient client = mClient;
@@ -60,36 +60,36 @@ public class MediaScannerConnection implements ServiceConnection {
      * Interface for notifying clients of the result of scanning a
      * requested media file.
      */
-    public interface ScanResultListener {
+    public interface OnScanCompletedListener {
         /**
          * Called to notify the client when the media scanner has finished
          * scanning a file.
          * @param path the path to the file that has been scanned.
-         * @param uri the Uri for the file if the scanning operation succeeded 
-         * and the file was added to the media database, or null if scanning failed. 
-         */    
+         * @param uri the Uri for the file if the scanning operation succeeded
+         * and the file was added to the media database, or null if scanning failed.
+         */
         public void onScanCompleted(String path, Uri uri);
     }
-    
+
     /**
      * An interface for notifying clients of MediaScannerConnection
      * when a connection to the MediaScanner service has been established
      * and when the scanning of a file has completed.
      */
-    public interface MediaScannerConnectionClient extends ScanResultListener {
+    public interface MediaScannerConnectionClient extends OnScanCompletedListener {
         /**
-         * Called to notify the client when a connection to the 
+         * Called to notify the client when a connection to the
          * MediaScanner service has been established.
-         */    
+         */
         public void onMediaScannerConnected();
-        
+
         /**
          * Called to notify the client when the media scanner has finished
          * scanning a file.
          * @param path the path to the file that has been scanned.
-         * @param uri the Uri for the file if the scanning operation succeeded 
-         * and the file was added to the media database, or null if scanning failed. 
-         */    
+         * @param uri the Uri for the file if the scanning operation succeeded
+         * and the file was added to the media database, or null if scanning failed.
+         */
         public void onScanCompleted(String path, Uri uri);
     }
 
@@ -140,7 +140,7 @@ public class MediaScannerConnection implements ServiceConnection {
             }
         }
     }
-    
+
     /**
      * Returns whether we are connected to the media scanner service
      * @return true if we are connected, false otherwise
@@ -151,9 +151,9 @@ public class MediaScannerConnection implements ServiceConnection {
 
     /**
      * Requests the media scanner to scan a file.
-     * Success or failure of the scanning operation cannot be determined until 
+     * Success or failure of the scanning operation cannot be determined until
      * {@link MediaScannerConnectionClient#onScanCompleted(String, Uri)} is called.
-     * 
+     *
      * @param path the path to the file to be scanned.
      * @param mimeType  an optional mimeType for the file.
      * If mimeType is null, then the mimeType will be inferred from the file extension.
@@ -175,31 +175,31 @@ public class MediaScannerConnection implements ServiceConnection {
             }
         }
     }
-    
+
     static class ClientProxy implements MediaScannerConnectionClient {
         final String[] mPaths;
         final String[] mMimeTypes;
-        final ScanResultListener mClient;
+        final OnScanCompletedListener mClient;
         MediaScannerConnection mConnection;
         int mNextPath;
-        
-        ClientProxy(String[] paths, String[] mimeTypes, ScanResultListener client) {
+
+        ClientProxy(String[] paths, String[] mimeTypes, OnScanCompletedListener client) {
             mPaths = paths;
             mMimeTypes = mimeTypes;
             mClient = client;
         }
-        
+
         public void onMediaScannerConnected() {
             scanNextPath();
         }
-        
+
         public void onScanCompleted(String path, Uri uri) {
             if (mClient != null) {
                 mClient.onScanCompleted(path, uri);
             }
             scanNextPath();
         }
-        
+
         void scanNextPath() {
             if (mNextPath >= mPaths.length) {
                 mConnection.disconnect();
@@ -210,7 +210,7 @@ public class MediaScannerConnection implements ServiceConnection {
             mNextPath++;
         }
     }
-    
+
     /**
      * Convenience for constructing a {@link MediaScannerConnection}, calling
      * {@link #connect} on it, and calling {@link #scanFile} with the given
@@ -218,7 +218,7 @@ public class MediaScannerConnection implements ServiceConnection {
      * established.
      * @param context The caller's Context, required for establishing a connection to
      * the media scanner service.
-     * Success or failure of the scanning operation cannot be determined until 
+     * Success or failure of the scanning operation cannot be determined until
      * {@link MediaScannerConnectionClient#onScanCompleted(String, Uri)} is called.
      * @param paths Array of paths to be scanned.
      * @param mimeTypes Optional array of MIME types for each path.
@@ -229,13 +229,13 @@ public class MediaScannerConnection implements ServiceConnection {
      * @see scanFile(String, String)
      */
     public static void scanFile(Context context, String[] paths, String[] mimeTypes,
-            ScanResultListener callback) {
+            OnScanCompletedListener callback) {
         ClientProxy client = new ClientProxy(paths, mimeTypes, callback);
         MediaScannerConnection connection = new MediaScannerConnection(context, client);
         client.mConnection = connection;
         connection.connect();
     }
-     
+
     /**
      * Part of the ServiceConnection interface.  Do not call.
      */
