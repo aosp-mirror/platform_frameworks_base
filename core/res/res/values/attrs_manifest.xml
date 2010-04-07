@@ -534,6 +534,9 @@
         <!-- The screen layout has changed.  This might be caused by a
              different display being activated. -->
         <flag name="screenLayout" value="0x0100" />
+        <!-- The global user interface mode has changed.  For example,
+             going in or out of car mode, night mode changing, etc. -->
+        <flag name="uiMode" value="0x0200" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
