@@ -26,9 +26,9 @@ import android.os.Message;
 /**
  * IntentService is a base class for {@link Service}s that handle asynchronous
  * requests (expressed as {@link Intent}s) on demand.  Clients send requests
- * through {@link Context#startService(Intent)} calls; the service is started as
- * needed, handles each Intent in turn using a worker thread, and stops itself
- * when it runs out of work.
+ * through {@link android.content.Context#startService(Intent)} calls; the
+ * service is started as needed, handles each Intent in turn using a worker
+ * thread, and stops itself when it runs out of work.
  *
  * <p>This "work queue processor" pattern is commonly used to offload tasks
  * from an application's main thread.  The IntentService class exists to
@@ -136,7 +136,8 @@ public abstract class IntentService extends Service {
      * So, if this code takes a long time, it will hold up other requests to
      * the same IntentService, but it will not hold up anything else.
      *
-     * @param Intent The value passed to {@link Context#startService(Intent)}.
+     * @param intent The value passed to {@link
+     *               android.content.Context#startService(Intent)}.
      */
     protected abstract void onHandleIntent(Intent intent);
 }
