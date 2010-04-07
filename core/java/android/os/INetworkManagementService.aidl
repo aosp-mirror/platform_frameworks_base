@@ -193,7 +193,7 @@ interface INetworkManagementService
     /**
      * Configures bandwidth throttling on an interface
      */
-    void setInterfaceThrottle(String iface, int maxKbits, int rxKbps, int txKbps);
+    void setInterfaceThrottle(String iface, int rxKbps, int txKbps);
 
     /**
      * Returns the currently configured RX throttle values
