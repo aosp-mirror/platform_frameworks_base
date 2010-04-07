@@ -24,11 +24,24 @@ import android.os.Looper;
 import android.os.Message;
 
 /**
- * An abstract {@link Service} that serializes the handling of the Intents passed upon service
- * start and handles them on a handler thread.
+ * IntentService is a base class for {@link Service}s that handle asynchronous
+ * requests (expressed as {@link Intent}s) on demand.  Clients send requests
+ * through {@link Context#startService(Intent)} calls; the service is started as
+ * needed, handles each Intent in turn using a worker thread, and stops itself
+ * when it runs out of work.
  *
- * <p>To use this class extend it and implement {@link #onHandleIntent}. The {@link Service} will
- * automatically be stopped when the last enqueued {@link Intent} is handled.
+ * <p>This "work queue processor" pattern is commonly used to offload tasks
+ * from an application's main thread.  The IntentService class exists to
+ * simplify this pattern and take care of the mechanics.  To use it, extend
+ * IntentService and implement {@link #onHandleIntent(Intent)}.  IntentService
+ * will receive the Intents, launch a worker thread, and stop the service as
+ * appropriate.
+ *
+ * <p>All requests are handled on a single worker thread -- they may take as
+ * long as necessary (and will not block the application's main loop), but
+ * only one request will be processed at a time.
+ *
+ * @see android.os.AsyncTask
  */
 public abstract class IntentService extends Service {
     private volatile Looper mServiceLooper;
@@ -48,26 +61,42 @@ public abstract class IntentService extends Service {
         }
     }
 
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     *
+     * @param name Used to name the worker thread, important only for debugging.
+     */
     public IntentService(String name) {
         super();
         mName = name;
     }
 
     /**
-     * Control redelivery of intents.  If called with true,
+     * Sets intent redelivery preferences.  Usually called from the constructor
+     * with your preferred semantics.
+     *
+     * <p>If enabled is true,
      * {@link #onStartCommand(Intent, int, int)} will return
-     * {@link Service#START_REDELIVER_INTENT} instead of
-     * {@link Service#START_NOT_STICKY}, so that if this service's process
-     * is killed while it is executing the Intent in
-     * {@link #onHandleIntent(Intent)}, then when later restarted the same Intent
-     * will be re-delivered to it, to retry its execution.
+     * {@link Service#START_REDELIVER_INTENT}, so if this process dies before
+     * {@link #onHandleIntent(Intent)} returns, the process will be restarted
+     * and the intent redelivered.  If multiple Intents have been sent, only
+     * the most recent one is guaranteed to be redelivered.
+     *
+     * <p>If enabled is false (the default),
+     * {@link #onStartCommand(Intent, int, int)} will return
+     * {@link Service#START_NOT_STICKY}, and if the process dies, the Intent
+     * dies along with it.
      */
     public void setIntentRedelivery(boolean enabled) {
         mRedelivery = enabled;
     }
-    
+
     @Override
     public void onCreate() {
+        // TODO: It would be nice to have an option to hold a partial wakelock
+        // during processing, and to have a static startService(Context, Intent)
+        // method that would launch the service & hand off a wakelock.
+
         super.onCreate();
         HandlerThread thread = new HandlerThread("IntentService[" + mName + "]");
         thread.start();
@@ -89,7 +118,7 @@ public abstract class IntentService extends Service {
         onStart(intent, startId);
         return mRedelivery ? START_REDELIVER_INTENT : START_NOT_STICKY;
     }
-    
+
     @Override
     public void onDestroy() {
         mServiceLooper.quit();
@@ -101,9 +130,13 @@ public abstract class IntentService extends Service {
     }
 
     /**
-     * Invoked on the Handler thread with the {@link Intent} that is passed to {@link #onStart}.
-     * Note that this will be invoked from a different thread than the one that handles the
-     * {@link #onStart} call.
+     * This method is invoked on the worker thread with a request to process.
+     * Only one Intent is processed at a time, but the processing happens on a
+     * worker thread that runs independently from other application logic.
+     * So, if this code takes a long time, it will hold up other requests to
+     * the same IntentService, but it will not hold up anything else.
+     *
+     * @param Intent The value passed to {@link Context#startService(Intent)}.
      */
     protected abstract void onHandleIntent(Intent intent);
 }
