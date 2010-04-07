@@ -51,6 +51,8 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/app)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/content)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/FrameworkTest_intermediates/)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/android.policy*)
+$(call add-clean-step, rm -rf $(TARGET_OUT_JAVA_LIBRARIES)/android.policy.jar)
 
 
 # ************************************************
