@@ -275,6 +275,16 @@ public class VCardExporterTests extends VCardTestsBase {
         testPhoneBasicCommon(V30);
     }
 
+    public void testPhoneRefrainFormatting() {
+        mVerifier.initForExportTest(V21 | VCardConfig.FLAG_REFRAIN_PHONE_NUMBER_FORMATTING);
+        mVerifier.addInputEntry().addContentValues(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "1234567890(abcdefghijklmnopqrstuvwxyz)")
+                .put(Phone.TYPE, Phone.TYPE_HOME);
+        mVerifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addExpectedNode("TEL", "1234567890(abcdefghijklmnopqrstuvwxyz)",
+                        new TypeSet("HOME"));
+    }
+
     /**
      * Tests that vCard composer emits corresponding type param which we expect.
      */
