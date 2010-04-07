@@ -4882,6 +4882,9 @@ public class WebView extends AbsoluteLayout
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
+                                // to get better performance, pause updating the
+                                // picture
+                                WebViewCore.pauseUpdatePicture(mWebViewCore);
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
                                 break;
@@ -4916,8 +4919,14 @@ public class WebView extends AbsoluteLayout
                             doFling();
                             break;
                         }
+                        // fall through
+                    case TOUCH_DRAG_START_MODE:
+                        // TOUCH_DRAG_START_MODE should not happen for the real
+                        // device as we almost certain will get a MOVE. But this
+                        // is possible on emulator.
                         mLastVelocity = 0;
                         WebViewCore.resumePriority();
+                        WebViewCore.resumeUpdatePicture(mWebViewCore);
                         break;
                 }
                 stopTouch();
@@ -4963,6 +4972,8 @@ public class WebView extends AbsoluteLayout
 
     private void startDrag() {
         WebViewCore.reducePriority();
+        // to get better performance, pause updating the picture
+        WebViewCore.pauseUpdatePicture(mWebViewCore);
         if (!mDragFromTextInput) {
             nativeHideCursor();
         }
@@ -5026,6 +5037,7 @@ public class WebView extends AbsoluteLayout
         }
         if (mTouchMode == TOUCH_DRAG_MODE) {
             WebViewCore.resumePriority();
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -5360,6 +5372,7 @@ public class WebView extends AbsoluteLayout
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
@@ -6369,6 +6382,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 case RESUME_WEBCORE_PRIORITY:
                     WebViewCore.resumePriority();
+                    WebViewCore.resumeUpdatePicture(mWebViewCore);
                     break;
 
                 case LONG_PRESS_CENTER:
