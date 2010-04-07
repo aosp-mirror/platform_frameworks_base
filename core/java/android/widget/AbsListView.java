@@ -2856,13 +2856,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final int firstPosition = mFirstPosition;
 
-        if (firstPosition == 0 && firstTop >= listPadding.top && deltaY > 0) {
+        if (firstPosition == 0 && firstTop >= listPadding.top && deltaY >= 0) {
             // Don't need to move views down if the top of the first position
             // is already visible
             return true;
         }
 
-        if (firstPosition + childCount == mItemCount && lastBottom <= end && deltaY < 0) {
+        if (firstPosition + childCount == mItemCount && lastBottom <= end && deltaY <= 0) {
             // Don't need to move views up if the bottom of the last position
             // is already visible
             return true;
