@@ -49,7 +49,6 @@ public class MediaMimeTest extends ActivityInstrumentationTestCase2<MediaFramewo
     private final String TAG = "MediaMimeTest";
     private Context mContext;
     private final String MP3_FILE = "/sdcard/media_api/music/SHORTMP3.mp3";
-    private final String MEDIA_PLAYBACK_NAME = "com.android.music.MediaPlaybackActivityStarter";
 
     public MediaMimeTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -129,7 +128,6 @@ public class MediaMimeTest extends ActivityInstrumentationTestCase2<MediaFramewo
         ResolveInfo ri = resolveMime(mime);
 
         assertNotNull(ri);
-        assertEquals(MEDIA_PLAYBACK_NAME, ri.activityInfo.name.toString());
     }
 
     // Helper method to check that NO activity handles the given mime type.
