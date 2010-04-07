@@ -381,6 +381,8 @@ web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/ApiDemos \
 		            resources/samples/ApiDemos "API Demos" \
+		-samplecode $(sample_dir)/BackupRestore \
+		            resources/samples/BackupRestore "Backup and Restore" \
 		-samplecode $(sample_dir)/BluetoothChat \
 		            resources/samples/BluetoothChat "Bluetooth Chat" \
 		-samplecode $(sample_dir)/BusinessCard \
