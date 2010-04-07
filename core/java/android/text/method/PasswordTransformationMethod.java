@@ -51,6 +51,8 @@ implements TransformationMethod, TextWatcher
                 sp.removeSpan(vr[i]);
             }
 
+            removeVisibleSpans(sp);
+
             sp.setSpan(new ViewReference(view), 0, 0,
                        Spannable.SPAN_POINT_POINT);
         }
@@ -100,10 +102,7 @@ implements TransformationMethod, TextWatcher
             int pref = TextKeyListener.getInstance().getPrefs(v.getContext());
             if ((pref & TextKeyListener.SHOW_PASSWORD) != 0) {
                 if (count > 0) {
-                    Visible[] old = sp.getSpans(0, sp.length(), Visible.class);
-                    for (int i = 0; i < old.length; i++) {
-                        sp.removeSpan(old[i]);
-                    }
+                    removeVisibleSpans(sp);
 
                     if (count == 1) {
                         sp.setSpan(new Visible(sp, this), start, start + count,
@@ -125,11 +124,15 @@ implements TransformationMethod, TextWatcher
             if (sourceText instanceof Spannable) {
                 Spannable sp = (Spannable) sourceText;
 
-                Visible[] old = sp.getSpans(0, sp.length(), Visible.class);
-                for (int i = 0; i < old.length; i++) {
-                    sp.removeSpan(old[i]);
-                }
+                removeVisibleSpans(sp);
             }
+        }
+    }
+
+    private static void removeVisibleSpans(Spannable sp) {
+        Visible[] old = sp.getSpans(0, sp.length(), Visible.class);
+        for (int i = 0; i < old.length; i++) {
+            sp.removeSpan(old[i]);
         }
     }
 

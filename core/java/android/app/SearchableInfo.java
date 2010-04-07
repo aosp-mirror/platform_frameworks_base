@@ -258,9 +258,9 @@ public final class SearchableInfo implements Parcelable {
         try {
             theirContext = context.createPackageContext(activity.getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
-            // unexpected, but we deal with this by null-checking theirContext
+            Log.e(LOG_TAG, "Package not found " + activity.getPackageName());
         } catch (java.lang.SecurityException e) {
-            // unexpected, but we deal with this by null-checking theirContext
+            Log.e(LOG_TAG, "Can't make context for " + activity.getPackageName(), e);
         }
         
         return theirContext;
@@ -552,7 +552,8 @@ public final class SearchableInfo implements Parcelable {
             final ComponentName cName)  {
         SearchableInfo result = null;
         Context activityContext = createActivityContext(context, cName);
-        
+        if (activityContext == null) return null;
+
         // in order to use the attributes mechanism, we have to walk the parser
         // forward through the file until it's reading the tag of interest.
         try {
