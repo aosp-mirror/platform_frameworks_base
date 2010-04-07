@@ -25,7 +25,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection.ScanResultListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -444,7 +443,7 @@ public abstract class Context {
      * are not automatically scanned by the media scanner, you can explicitly
      * add them to the media database with
      * {@link android.media.MediaScannerConnection#scanFile(Context, String[], String[],
-     *      ScanResultListener) MediaScannerConnection.scanFile}.
+     *      OnScanCompletedListener) MediaScannerConnection.scanFile}.
      * Note that this is not the same as
      * {@link android.os.Environment#getExternalStoragePublicDirectory
      * Environment.getExternalStoragePublicDirectory()}, which provides
