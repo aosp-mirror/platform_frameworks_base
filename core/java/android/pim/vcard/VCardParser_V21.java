@@ -34,10 +34,45 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class is used to parse vCard. Please refer to vCard Specification 2.1 for more detail.
+ * </p>
+ * vCard parser implementation mostly for vCard 2.1. See the specification for more detail
+ * about the spec itself.
+ * </p>
+ * <p>
+ * The spec is written in 1996, and currently various types of "vCard 2.1" exist.
+ * To handle real the world vCard formats appropriately and effectively, this class does not
+ * obey with strict vCard 2.1. In stead, not only vCard spec but also real world
+ * vCard is considered.
+ * </p>
+ * e.g. A lot of devices and softwares let vCard importer/exporter to use
+ * the PNG format to determine the type of image, while it is not allowed in
+ * the original specification. As of 2010, we can see even the FLV format
+ * (possible in Japanese mobile phones).
+ * </p>
  */
 public class VCardParser_V21 extends VCardParser {
     private static final String LOG_TAG = "VCardParser_V21";
+
+    private static final class CustomBufferedReader extends BufferedReader {
+        private long mTime;
+
+        public CustomBufferedReader(Reader in) {
+            super(in);
+        }
+
+        @Override
+        public String readLine() throws IOException {
+            long start = System.currentTimeMillis();
+            String ret = super.readLine();
+            long end = System.currentTimeMillis();
+            mTime += end - start;
+            return ret;
+        }
+
+        public long getTotalmillisecond() {
+            return mTime;
+        }
+    }
 
     /** Store the known-type */
     private static final HashSet<String> sKnownTypeSet = new HashSet<String>(
@@ -69,52 +104,62 @@ public class VCardParser_V21 extends VCardParser {
         new HashSet<String>(Arrays.asList(
                 "7BIT", "8BIT", "QUOTED-PRINTABLE", "BASE64", "B"));
 
-    private static final class CustomBufferedReader extends BufferedReader {
-        private long mTime;
+    private static final String sDefaultEncoding = "8BIT";
 
-        public CustomBufferedReader(Reader in) {
-            super(in);
-        }
 
-        @Override
-        public String readLine() throws IOException {
-            long start = System.currentTimeMillis();
-            String ret = super.readLine();
-            long end = System.currentTimeMillis();
-            mTime += end - start;
-            return ret;
-        }
+    //// Protected members
 
-        public long getTotalmillisecond() {
-            return mTime;
-        }
-    }
-
-    // Used only for parsing END:VCARD.
-    private String mPreviousLine;
-    
-    /** The builder to build parsed data */
-    protected VCardInterpreter mBuilder = null;
+    protected VCardInterpreter mInterpreter;
 
     /** 
-     * The encoding type. "Encoding" in vCard is different from "Charset".
-     * e.g. 7BIT, 8BIT, QUOTED-PRINTABLE. 
+     * <p>
+     * The encoding type for deconding byte streams. This member variable is reset to
+     * {{@link #sDefaultEncoding} every time when a new item comes.
+     * </p>
+     * <p>
+     * "Encoding" in vCard is different from "Charset".
+     * It is mainly used for addresses, notes, images. "7BIT", "8BIT", "BASE64", and
+     * "QUOTED-PRINTABLE" are known examples.
+     * </p>
      */
-    protected String mEncoding = null;
-    
-    protected final String sDefaultEncoding = "8BIT";
-    
-    // Should not directly read a line from this object. Use getLine() instead.
+    protected String mCurrentEncoding;
+
+    /**
+     * <p>
+     * The reader object to be used internally.
+     * </p>
+     * <p>
+     * Developers should not directly read a line from this object. Use getLine() unless
+     * there some reason.
+     * </p>
+     */
     protected BufferedReader mReader;
-    
+
+    /**
+     * <p>
+     * Set for storing unkonwn TYPE attributes, which is not acceptable in vCard specification,
+     * but happens to be seen in real world vCard.
+     * </p>
+     */
+    protected final Set<String> mUnknownTypeSet = new HashSet<String>();
+
+    /**
+     * <p>
+     * Set for storing unkonwn VALUE attributes, which is not acceptable in vCard specification,
+     * but happens to be seen in real world vCard.
+     * </p>
+     */
+    protected final Set<String> mUnknownValueSet = new HashSet<String>();
+
+
+    //// Private members
+
     // In some cases, vCard is nested. Currently, we only consider the most interior vCard data.
     // See v21_foma_1.vcf in test directory for more information.
     private int mNestCount;
-    
-    // In order to reduce warning message as much as possible, we hold the value which made Logger
-    // emit a warning message.
-    protected Set<String> mUnknownTypeMap = new HashSet<String>();
-    protected Set<String> mUnknownValueMap = new HashSet<String>();
+
+    // Used only for parsing END:VCARD.
+    private String mPreviousLine;
 
     // For measuring performance.
     private long mTimeTotal;
@@ -130,14 +175,34 @@ public class VCardParser_V21 extends VCardParser {
     private long mTimeHandleQuotedPrintable;
     private long mTimeHandleBase64;
 
+    /**
+     * <p>
+     * Same as {{@link #VCardParser_V21(VCardSourceDetector)} with
+     * {@link VCardConfig#PARSE_TYPE_UNKNOWN}.
+     * </p>
+     */
     public VCardParser_V21() {
-        this(null);
+        this(VCardConfig.PARSE_TYPE_UNKNOWN);
     }
 
+    /**
+     * <p>
+     * The constructor which uses the estimated type available from a given detector.
+     * </p>
+     */
     public VCardParser_V21(VCardSourceDetector detector) {
         this(detector != null ? detector.getEstimatedType() : VCardConfig.PARSE_TYPE_UNKNOWN);
     }
 
+    /**
+     * <p>
+     * The constructor which uses a given parse type like
+     * {@link VCardConfig#PARSE_TYPE_UNKNOWN}.
+     * </p>
+     * <p>
+     * This should be used only when you already know the exact type to be used.
+     * </p>
+     */
     public VCardParser_V21(int parseType) {
         super(parseType);
         if (parseType == VCardConfig.PARSE_TYPE_FOMA) {
@@ -146,10 +211,11 @@ public class VCardParser_V21 extends VCardParser {
     }
 
     /**
+     * <p>
      * Parses the file at the given position.
-     *
-     * vcard_file = [wsls] vcard [wsls]
+     * </p>
      */
+    // <pre class="prettyprint">vcard_file = [wsls] vcard [wsls]</pre>
     protected void parseVCardFile() throws IOException, VCardException {
         boolean firstReading = true;
         while (true) {
@@ -171,22 +237,28 @@ public class VCardParser_V21 extends VCardParser {
         }
     }
 
+    /**
+     * @return {@link VCardConfig#FLAG_V21}
+     */
     protected int getVersion() {
         return VCardConfig.FLAG_V21;
     }
 
+    /**
+     * @return {@link VCardConfig#FLAG_V30}
+     */
     protected String getVersionString() {
         return VCardConstants.VERSION_V21;
     }
 
     /**
-     * @return true when the propertyName is a valid property name.
+     * @return true when a given property name is a valid property name.
      */
-    protected boolean isValidPropertyName(String propertyName) {
+    protected boolean isValidPropertyName(final String propertyName) {
         if (!(sAvailablePropertyNameSetV21.contains(propertyName.toUpperCase()) ||
                 propertyName.startsWith("X-")) && 
-                !mUnknownTypeMap.contains(propertyName)) {
-            mUnknownTypeMap.add(propertyName);
+                !mUnknownTypeSet.contains(propertyName)) {
+            mUnknownTypeSet.add(propertyName);
             Log.w(LOG_TAG, "Property name unsupported by vCard 2.1: " + propertyName);
         }
         return true;
@@ -224,7 +296,7 @@ public class VCardParser_V21 extends VCardParser {
         }
     }
 
-    /**
+    /*
      * vcard = "BEGIN" [ws] ":" [ws] "VCARD" [ws] 1*CRLF
      *         items *CRLF
      *         "END" [ws] ":" [ws] "VCARD"
@@ -246,18 +318,18 @@ public class VCardParser_V21 extends VCardParser {
             return false;
         }
         long start;
-        if (mBuilder != null) {
+        if (mInterpreter != null) {
             start = System.currentTimeMillis();
-            mBuilder.startEntry();
+            mInterpreter.startEntry();
             mTimeReadStartRecord += System.currentTimeMillis() - start;
         }
         start = System.currentTimeMillis();
         parseItems();
         mTimeParseItems += System.currentTimeMillis() - start;
         readEndVCard(true, false);
-        if (mBuilder != null) {
+        if (mInterpreter != null) {
             start = System.currentTimeMillis();
-            mBuilder.endEntry();
+            mInterpreter.endEntry();
             mTimeReadEndRecord += System.currentTimeMillis() - start;
         }
         return true;
@@ -306,8 +378,10 @@ public class VCardParser_V21 extends VCardParser {
     }
 
     /**
+     * <p>
      * The arguments useCache and allowGarbase are usually true and false accordingly when
-     * this function is called outside this function itself. 
+     * this function is called outside this function itself.
+     * </p>
      *
      * @param useCache When true, line is obtained from mPreviousline. Otherwise, getLine()
      * is used.
@@ -346,30 +420,30 @@ public class VCardParser_V21 extends VCardParser {
         } while (allowGarbage);
     }
     
-    /**
+    /*
      * items = *CRLF item 
      *       / item
      */
     protected void parseItems() throws IOException, VCardException {
         boolean ended = false;
         
-        if (mBuilder != null) {
+        if (mInterpreter != null) {
             long start = System.currentTimeMillis();
-            mBuilder.startProperty();
+            mInterpreter.startProperty();
             mTimeStartProperty += System.currentTimeMillis() - start;
         }
         ended = parseItem();
-        if (mBuilder != null && !ended) {
+        if (mInterpreter != null && !ended) {
             long start = System.currentTimeMillis();
-            mBuilder.endProperty();
+            mInterpreter.endProperty();
             mTimeEndProperty += System.currentTimeMillis() - start;
         }
 
         while (!ended) {
             // follow VCARD ,it wont reach endProperty
-            if (mBuilder != null) {
+            if (mInterpreter != null) {
                 long start = System.currentTimeMillis();
-                mBuilder.startProperty();
+                mInterpreter.startProperty();
                 mTimeStartProperty += System.currentTimeMillis() - start;
             }
             try {
@@ -378,15 +452,15 @@ public class VCardParser_V21 extends VCardParser {
                 Log.e(LOG_TAG, "Invalid line which looks like some comment was found. Ignored.");
                 ended = false;
             }
-            if (mBuilder != null && !ended) {
+            if (mInterpreter != null && !ended) {
                 long start = System.currentTimeMillis();
-                mBuilder.endProperty();
+                mInterpreter.endProperty();
                 mTimeEndProperty += System.currentTimeMillis() - start;
             }
         }
     }
     
-    /**
+    /*
      * item = [groups "."] name    [params] ":" value CRLF
      *      / [groups "."] "ADR"   [params] ":" addressparts CRLF
      *      / [groups "."] "ORG"   [params] ":" orgparts CRLF
@@ -394,7 +468,7 @@ public class VCardParser_V21 extends VCardParser {
      *      / [groups "."] "AGENT" [params] ":" vcard CRLF
      */
     protected boolean parseItem() throws IOException, VCardException {
-        mEncoding = sDefaultEncoding;
+        mCurrentEncoding = sDefaultEncoding;
 
         final String line = getNonEmptyLine();
         long start = System.currentTimeMillis();
@@ -458,8 +532,10 @@ public class VCardParser_V21 extends VCardParser {
             throw new VCardInvalidCommentLineException();
         }
 
+        // This loop is developed so that we don't have to take care of bottle neck here.
+        // Refactor carefully when you need to do so.
         for (int i = 0; i < length; i++) {
-            char ch = line.charAt(i); 
+            final char ch = line.charAt(i);
             switch (state) {
                 case STATE_GROUP_OR_PROPNAME: {
                     if (ch == ':') {
@@ -468,8 +544,8 @@ public class VCardParser_V21 extends VCardParser {
                             mPreviousLine = line;
                             return null;
                         }
-                        if (mBuilder != null) {
-                            mBuilder.propertyName(propertyName);
+                        if (mInterpreter != null) {
+                            mInterpreter.propertyName(propertyName);
                         }
                         propertyNameAndValue[0] = propertyName;
                         if (i < length - 1) {
@@ -480,8 +556,8 @@ public class VCardParser_V21 extends VCardParser {
                         return propertyNameAndValue;
                     } else if (ch == '.') {
                         String groupName = line.substring(nameIndex, i);
-                        if (mBuilder != null) {
-                            mBuilder.propertyGroup(groupName);
+                        if (mInterpreter != null) {
+                            mInterpreter.propertyGroup(groupName);
                         }
                         nameIndex = i + 1;
                     } else if (ch == ';') {
@@ -490,8 +566,8 @@ public class VCardParser_V21 extends VCardParser {
                             mPreviousLine = line;
                             return null;
                         }
-                        if (mBuilder != null) {
-                            mBuilder.propertyName(propertyName);
+                        if (mInterpreter != null) {
+                            mInterpreter.propertyName(propertyName);
                         }
                         propertyNameAndValue[0] = propertyName;
                         nameIndex = i + 1;
@@ -528,7 +604,7 @@ public class VCardParser_V21 extends VCardParser {
         throw new VCardInvalidLineException("Invalid line: \"" + line + "\"");
     }
 
-    /**
+    /*
      * params     = ";" [ws] paramlist
      * paramlist  = paramlist [ws] ";" [ws] param
      *            / param
@@ -579,13 +655,13 @@ public class VCardParser_V21 extends VCardParser {
     protected void handleType(final String ptypeval) {
         String upperTypeValue = ptypeval;
         if (!(sKnownTypeSet.contains(upperTypeValue) || upperTypeValue.startsWith("X-")) && 
-                !mUnknownTypeMap.contains(ptypeval)) {
-            mUnknownTypeMap.add(ptypeval);
+                !mUnknownTypeSet.contains(ptypeval)) {
+            mUnknownTypeSet.add(ptypeval);
             Log.w(LOG_TAG, "TYPE unsupported by vCard 2.1: " + ptypeval);
         }
-        if (mBuilder != null) {
-            mBuilder.propertyParamType("TYPE");
-            mBuilder.propertyParamValue(upperTypeValue);
+        if (mInterpreter != null) {
+            mInterpreter.propertyParamType("TYPE");
+            mInterpreter.propertyParamValue(upperTypeValue);
         }
     }
     
@@ -595,13 +671,13 @@ public class VCardParser_V21 extends VCardParser {
     protected void handleValue(final String pvalueval) {
         if (!sKnownValueSet.contains(pvalueval.toUpperCase()) &&
                 pvalueval.startsWith("X-") &&
-                !mUnknownValueMap.contains(pvalueval)) {
-            mUnknownValueMap.add(pvalueval);
+                !mUnknownValueSet.contains(pvalueval)) {
+            mUnknownValueSet.add(pvalueval);
             Log.w(LOG_TAG, "VALUE unsupported by vCard 2.1: " + pvalueval);
         }
-        if (mBuilder != null) {
-            mBuilder.propertyParamType("VALUE");
-            mBuilder.propertyParamValue(pvalueval);
+        if (mInterpreter != null) {
+            mInterpreter.propertyParamType("VALUE");
+            mInterpreter.propertyParamValue(pvalueval);
         }
     }
     
@@ -611,11 +687,11 @@ public class VCardParser_V21 extends VCardParser {
     protected void handleEncoding(String pencodingval) throws VCardException {
         if (isValidEncoding(pencodingval) ||
                 pencodingval.startsWith("X-")) {
-            if (mBuilder != null) {
-                mBuilder.propertyParamType("ENCODING");
-                mBuilder.propertyParamValue(pencodingval);
+            if (mInterpreter != null) {
+                mInterpreter.propertyParamType("ENCODING");
+                mInterpreter.propertyParamValue(pencodingval);
             }
-            mEncoding = pencodingval;
+            mCurrentEncoding = pencodingval;
         } else {
             throw new VCardException("Unknown encoding \"" + pencodingval + "\"");
         }
@@ -626,9 +702,9 @@ public class VCardParser_V21 extends VCardParser {
      * but today's vCard often contains other charset, so we allow them.
      */
     protected void handleCharset(String charsetval) {
-        if (mBuilder != null) {
-            mBuilder.propertyParamType("CHARSET");
-            mBuilder.propertyParamValue(charsetval);
+        if (mInterpreter != null) {
+            mInterpreter.propertyParamType("CHARSET");
+            mInterpreter.propertyParamValue(charsetval);
         }
     }
 
@@ -643,81 +719,100 @@ public class VCardParser_V21 extends VCardParser {
         String tmp = strArray[0];
         int length = tmp.length();
         for (int i = 0; i < length; i++) {
-            if (!isLetter(tmp.charAt(i))) {
+            if (!isAsciiLetter(tmp.charAt(i))) {
                 throw new VCardException("Invalid Language: \"" + langval + "\"");
             }
         }
         tmp = strArray[1];
         length = tmp.length();
         for (int i = 0; i < length; i++) {
-            if (!isLetter(tmp.charAt(i))) {
+            if (!isAsciiLetter(tmp.charAt(i))) {
                 throw new VCardException("Invalid Language: \"" + langval + "\"");
             }
         }
-        if (mBuilder != null) {
-            mBuilder.propertyParamType("LANGUAGE");
-            mBuilder.propertyParamValue(langval);
+        if (mInterpreter != null) {
+            mInterpreter.propertyParamType("LANGUAGE");
+            mInterpreter.propertyParamValue(langval);
         }
+    }
+
+    private boolean isAsciiLetter(char ch) {
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            return true;
+        }
+        return false;
     }
 
     /**
      * Mainly for "X-" type. This accepts any kind of type without check.
      */
     protected void handleAnyParam(String paramName, String paramValue) {
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(paramName);
-            mBuilder.propertyParamValue(paramValue);
+        if (mInterpreter != null) {
+            mInterpreter.propertyParamType(paramName);
+            mInterpreter.propertyParamValue(paramValue);
         }
     }
 
     protected void handlePropertyValue(String propertyName, String propertyValue)
             throws IOException, VCardException {
-        if (mEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
+        if (mCurrentEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
             final long start = System.currentTimeMillis();
             final String result = getQuotedPrintable(propertyValue);
-            if (mBuilder != null) {
+            if (mInterpreter != null) {
                 ArrayList<String> v = new ArrayList<String>();
                 v.add(result);
-                mBuilder.propertyValues(v);
+                mInterpreter.propertyValues(v);
             }
             mTimeHandleQuotedPrintable += System.currentTimeMillis() - start;
-        } else if (mEncoding.equalsIgnoreCase("BASE64") ||
-                mEncoding.equalsIgnoreCase("B")) {
+        } else if (mCurrentEncoding.equalsIgnoreCase("BASE64") ||
+                mCurrentEncoding.equalsIgnoreCase("B")) {
             final long start = System.currentTimeMillis();
             // It is very rare, but some BASE64 data may be so big that
             // OutOfMemoryError occurs. To ignore such cases, use try-catch.
             try {
                 final String result = getBase64(propertyValue);
-                if (mBuilder != null) {
+                if (mInterpreter != null) {
                     ArrayList<String> v = new ArrayList<String>();
                     v.add(result);
-                    mBuilder.propertyValues(v);
+                    mInterpreter.propertyValues(v);
                 }
             } catch (OutOfMemoryError error) {
                 Log.e(LOG_TAG, "OutOfMemoryError happened during parsing BASE64 data!");
-                if (mBuilder != null) {
-                    mBuilder.propertyValues(null);
+                if (mInterpreter != null) {
+                    mInterpreter.propertyValues(null);
                 }
             }
             mTimeHandleBase64 += System.currentTimeMillis() - start;
         } else {
-            if (!(mEncoding == null || mEncoding.equalsIgnoreCase("7BIT")
-                    || mEncoding.equalsIgnoreCase("8BIT")
-                    || mEncoding.toUpperCase().startsWith("X-"))) {
-                Log.w(LOG_TAG, "The encoding unsupported by vCard spec: \"" + mEncoding + "\".");
+            if (!(mCurrentEncoding == null || mCurrentEncoding.equalsIgnoreCase("7BIT")
+                    || mCurrentEncoding.equalsIgnoreCase("8BIT")
+                    || mCurrentEncoding.toUpperCase().startsWith("X-"))) {
+                Log.w(LOG_TAG, "The encoding unsupported by vCard spec: \"" + mCurrentEncoding + "\".");
             }
 
             final long start = System.currentTimeMillis();
-            if (mBuilder != null) {
+            if (mInterpreter != null) {
                 ArrayList<String> v = new ArrayList<String>();
                 v.add(maybeUnescapeText(propertyValue));
-                mBuilder.propertyValues(v);
+                mInterpreter.propertyValues(v);
             }
             mTimeHandleMiscPropertyValue += System.currentTimeMillis() - start;
         }
     }
     
-    protected String getQuotedPrintable(String firstString) throws IOException, VCardException {
+    /**
+     * <p>
+     * Parses and returns Quoted-Printable.
+     * </p>
+     *
+     * @param firstString The string following a parameter name and attributes.
+     * Example: "string" in "ADR:ENCODING=QUOTED-PRINTABLE:string\n\r".
+     * @return whole Quoted-Printable string, including a given argument and following lines.
+     * Excludes the last empty line following to Quoted Printable lines.
+     * @throws IOException
+     * @throws VCardException
+     */
+    private String getQuotedPrintable(String firstString) throws IOException, VCardException {
         // Specifically, there may be some padding between = and CRLF.
         // See the following:
         //
@@ -743,7 +838,7 @@ public class VCardParser_V21 extends VCardParser {
                 line = getLine();
                 if (line == null) {
                     throw new VCardException(
-                            "File ended during parsing quoted-printable String");
+                            "File ended during parsing a Quoted-Printable String");
                 }
                 if (line.trim().endsWith("=")) {
                     // remove "transport-padding"
@@ -762,7 +857,7 @@ public class VCardParser_V21 extends VCardParser {
             return firstString;
         }
     }
-    
+
     protected String getBase64(String firstString) throws IOException, VCardException {
         StringBuilder builder = new StringBuilder();
         builder.append(firstString);
@@ -783,8 +878,11 @@ public class VCardParser_V21 extends VCardParser {
     }
     
     /**
+     * <p>
      * Mainly for "ADR", "ORG", and "N"
-     * We do not care the number of strnosemi here.
+     * </p>
+     */
+    /*
      * 
      * addressparts = 0*6(strnosemi ";") strnosemi
      *              ; PO Box, Extended Addr, Street, Locality, Region,
@@ -798,26 +896,30 @@ public class VCardParser_V21 extends VCardParser {
      * strnosemi    = *(*nonsemi ("\;" / "\" CRLF)) *nonsemi
      *              ; To include a semicolon in this string, it must be escaped
      *              ; with a "\" character.
-     *              
-     * We are not sure whether we should add "\" CRLF to each value.
-     * For now, we exclude them.               
+     *
+     * We do not care the number of "strnosemi" here.
+     *
+     * We are not sure whether we should add "\" CRLF to each value. We exclude them for now.
      */
     protected void handleMultiplePropertyValue(String propertyName, String propertyValue)
             throws IOException, VCardException {
-        // vCard 2.1 does not allow QUOTED-PRINTABLE here,
-        // but some softwares/devices emit such data.
-        if (mEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
+        // vCard 2.1 does not allow QUOTED-PRINTABLE here, but some softwares/devices
+        // emit such data.
+        if (mCurrentEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
             propertyValue = getQuotedPrintable(propertyValue);
         }
 
-        if (mBuilder != null) {
-            mBuilder.propertyValues(VCardUtils.constructListFromValue(
+        if (mInterpreter != null) {
+            mInterpreter.propertyValues(VCardUtils.constructListFromValue(
                     propertyValue, (getVersion() == VCardConfig.FLAG_V30)));
         }
     }
 
-    /**
-     * vCard 2.1 specifies AGENT allows one vcard entry. It is not encoded at all.
+    /*
+     * vCard 2.1 specifies AGENT allows one vcard entry. Currently we emit an error
+     * toward the AGENT property.
+     *
+     * // TODO: Support AGENT property.
      *
      * item  = ...
      *       / [groups "."] "AGENT"
@@ -832,7 +934,6 @@ public class VCardParser_V21 extends VCardParser {
         } else {
             throw new VCardAgentNotSupportedException("AGENT Property is not supported now.");
         }
-        // TODO: Support AGENT property.
     }
     
     /**
@@ -862,31 +963,31 @@ public class VCardParser_V21 extends VCardParser {
     }
 
     @Override
-    public boolean parse(InputStream is, String charset, VCardInterpreter builder)
+    public boolean parse(InputStream is, String inputCharset, VCardInterpreter interpreter)
             throws IOException, VCardException {
         if (is == null) {
             throw new NullPointerException("InputStream must not be null.");
         }
-        if (charset == null) {
-            charset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
+        if (inputCharset == null) {
+            inputCharset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
         }
 
-        final InputStreamReader tmpReader = new InputStreamReader(is, charset);
+        final InputStreamReader tmpReader = new InputStreamReader(is, inputCharset);
         if (VCardConfig.showPerformanceLog()) {
             mReader = new CustomBufferedReader(tmpReader);
         } else {
             mReader = new BufferedReader(tmpReader);
         }
         
-        mBuilder = builder;
+        mInterpreter = interpreter;
 
         long start = System.currentTimeMillis();
-        if (mBuilder != null) {
-            mBuilder.start();
+        if (mInterpreter != null) {
+            mInterpreter.start();
         }
         parseVCardFile();
-        if (mBuilder != null) {
-            mBuilder.end();
+        if (mInterpreter != null) {
+            mInterpreter.end();
         }
         mTimeTotal += System.currentTimeMillis() - start;
         
@@ -896,14 +997,14 @@ public class VCardParser_V21 extends VCardParser {
         
         return true;
     }
-    
+
     @Override
     public void parse(InputStream is, String charset, VCardInterpreter builder, boolean canceled)
             throws IOException, VCardException {
         mCanceled = canceled;
         parse(is, charset, builder);
     }
-        
+
     private void showPerformanceInfo() {
         Log.d(LOG_TAG, "Total parsing time:  " + mTimeTotal + " ms");
         if (mReader instanceof CustomBufferedReader) {
@@ -923,12 +1024,5 @@ public class VCardParser_V21 extends VCardParser {
         Log.d(LOG_TAG, "Time for handling Quoted-Printable: " +
                 mTimeHandleQuotedPrintable + " ms");
         Log.d(LOG_TAG, "Time for handling Base64: " + mTimeHandleBase64 + " ms");
-    }
-
-    private boolean isLetter(char ch) {
-        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-            return true;
-        }
-        return false;
     }
 }

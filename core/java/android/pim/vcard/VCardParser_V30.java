@@ -92,8 +92,8 @@ public class VCardParser_V30 extends VCardParser_V21 {
         if (!(sAcceptablePropsWithParam.contains(propertyName) ||
                 acceptablePropsWithoutParam.contains(propertyName) ||
                 propertyName.startsWith("X-")) &&
-                !mUnknownTypeMap.contains(propertyName)) {
-            mUnknownTypeMap.add(propertyName);
+                !mUnknownTypeSet.contains(propertyName)) {
+            mUnknownTypeSet.add(propertyName);
             Log.w(LOG_TAG, "Property name unsupported by vCard 3.0: " + propertyName);
         }
         return true;
@@ -248,13 +248,13 @@ public class VCardParser_V30 extends VCardParser_V21 {
     @Override
     protected void handleType(String ptypevalues) {
         String[] ptypeArray = ptypevalues.split(",");
-        mBuilder.propertyParamType("TYPE");
+        mInterpreter.propertyParamType("TYPE");
         for (String value : ptypeArray) {
             int length = value.length();
             if (length >= 2 && value.startsWith("\"") && value.endsWith("\"")) {
-                mBuilder.propertyParamValue(value.substring(1, value.length() - 1));
+                mInterpreter.propertyParamValue(value.substring(1, value.length() - 1));
             } else {
-                mBuilder.propertyParamValue(value);
+                mInterpreter.propertyParamValue(value);
             }
         }
     }

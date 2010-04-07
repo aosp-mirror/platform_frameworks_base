@@ -62,7 +62,8 @@ import java.util.Set;
  *     .appendNotes(contentValuesListMap.get(Note.CONTENT_ITEM_TYPE))
  *     .appendEvents(contentValuesListMap.get(Event.CONTENT_ITEM_TYPE))
  *     .appendIms(contentValuesListMap.get(Im.CONTENT_ITEM_TYPE))
- *     .appendRelation(contentValuesListMap.get(Relation.CONTENT_ITEM_TYPE)); </pre>
+ *     .appendRelation(contentValuesListMap.get(Relation.CONTENT_ITEM_TYPE));
+ * return builder.toString();</pre>
  */
 public class VCardBuilder {
     private static final String LOG_TAG = "VCardBuilder";
