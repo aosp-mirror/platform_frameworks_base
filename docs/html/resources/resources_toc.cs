@@ -188,6 +188,9 @@
           <li><a href="<?cs var:toroot ?>resources/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/BackupRestore/index.html">
+                <span class="en">Backup and Restore</span>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/BluetoothChat/index.html">
                 <span class="en">Bluetooth Chat</span>
               </a></li>
