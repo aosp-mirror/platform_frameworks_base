@@ -390,6 +390,20 @@ static jboolean android_net_wifi_setPowerModeCommand(JNIEnv* env, jobject clazz,
     return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
 }
 
+static jint android_net_wifi_getPowerModeCommand(JNIEnv* env, jobject clazz)
+{
+    char reply[256];
+    int power;
+
+    if (doCommand("DRIVER GETPOWER", reply, sizeof(reply)) != 0) {
+        return (jint)-1;
+    }
+    // reply comes back in the form "powermode = XX" where XX is the
+    // number we're interested in.
+    sscanf(reply, "%*s = %u", &power);
+    return (jint)power;
+}
+
 static jboolean android_net_wifi_setNumAllowedChannelsCommand(JNIEnv* env, jobject clazz, jint numChannels)
 {
     char cmdstr[256];
@@ -538,6 +552,7 @@ static JNINativeMethod gWifiMethods[] = {
     { "startPacketFiltering", "()Z", (void*) android_net_wifi_startPacketFiltering },
     { "stopPacketFiltering", "()Z", (void*) android_net_wifi_stopPacketFiltering },
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
+    { "getPowerModeCommand", "()I", (void*) android_net_wifi_getPowerModeCommand },
     { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
     { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
