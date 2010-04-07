@@ -470,10 +470,7 @@ public class ConnectivityManagerMobileTest
         }
 
         // Prepare for state validation
-        NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_MOBILE,
-                networkInfo.getState(),NetworkState.DO_NOTHING,State.DISCONNECTED);
-        networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         assertEquals(State.DISCONNECTED, networkInfo.getState());
         cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_WIFI,
                 networkInfo.getState(), NetworkState.TO_CONNECTION, State.CONNECTED);
@@ -482,19 +479,15 @@ public class ConnectivityManagerMobileTest
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
 
         waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-            STATE_TRANSITION_LONG_TIMEOUT);
+                            STATE_TRANSITION_LONG_TIMEOUT);
+        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
+                            STATE_TRANSITION_LONG_TIMEOUT);
 
         // validate the state transition
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
             Log.v(LOG_TAG, "Wifi state transition validation failed.");
             Log.v(LOG_TAG, "reason: " +
                     cmActivity.getTransitionFailureReason(ConnectivityManager.TYPE_WIFI));
-            assertTrue(false);
-        }
-        if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_MOBILE)) {
-            Log.v(LOG_TAG, "Mobile state transition validation failed.");
-            Log.v(LOG_TAG, "reason: " +
-                    cmActivity.getTransitionFailureReason(ConnectivityManager.TYPE_MOBILE));
             assertTrue(false);
         }
     }
