@@ -564,11 +564,11 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         return getInterfaceCounter(iface, false);
     }
 
-    public void setInterfaceThrottle(String iface, int maxKbps, int rxKbps, int txKbps) {
+    public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mConnector.doCommand(String.format(
-                "interface setthrottle %s %d %d %d", iface, maxKbps, rxKbps, txKbps));
+                "interface setthrottle %s %d %d", iface, rxKbps, txKbps));
     }
 
     private int getInterfaceThrottle(String iface, boolean rx) {
