@@ -1611,21 +1611,6 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /**
-         * Let user pick default install location.
-         * @hide
-         */
-        public static final String SET_INSTALL_LOCATION = "set_install_location";
-
-        /**
-         * Default install location value.
-         * 0 = auto, let system decide
-         * 1 = internal
-         * 2 = sdcard
-         * @hide
-         */
-        public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
-
-        /**
          * Show pointer location on screen?
          * 0 = no
          * 1 = yes
@@ -3295,6 +3280,21 @@ public final class Settings {
          * @hide
          */
         public static final String UI_NIGHT_MODE = "ui_night_mode";
+
+        /**
+         * Let user pick default install location.
+         * @hide
+         */
+        public static final String SET_INSTALL_LOCATION = "set_install_location";
+
+        /**
+         * Default install location value.
+         * 0 = auto, let system decide
+         * 1 = internal
+         * 2 = sdcard
+         * @hide
+         */
+        public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
         
         /**
          * @hide

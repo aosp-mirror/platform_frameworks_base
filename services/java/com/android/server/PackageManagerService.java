@@ -31,8 +31,8 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
-import android.content.ComponentName;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -83,6 +83,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.security.SystemKeyStore;
 import android.util.*;
 import android.view.Display;
@@ -9820,6 +9821,27 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        });
+   }
+
+   public boolean setInstallLocation(int loc) {
+       mContext.enforceCallingOrSelfPermission(
+               android.Manifest.permission.WRITE_SECURE_SETTINGS, null);
+       if (getInstallLocation() == loc) {
+           return true;
+       }
+       if (loc == PackageHelper.APP_INSTALL_AUTO ||
+               loc == PackageHelper.APP_INSTALL_INTERNAL ||
+               loc == PackageHelper.APP_INSTALL_EXTERNAL) {
+           android.provider.Settings.System.putInt(mContext.getContentResolver(),
+                   android.provider.Settings.Secure.DEFAULT_INSTALL_LOCATION, loc);
+           return true;
+       }
+       return false;
+   }
+
+   public int getInstallLocation() {
+       return android.provider.Settings.System.getInt(mContext.getContentResolver(),
+               android.provider.Settings.Secure.DEFAULT_INSTALL_LOCATION, PackageHelper.APP_INSTALL_AUTO);
    }
 }
 
