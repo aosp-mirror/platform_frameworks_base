@@ -9699,9 +9699,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
    public void movePackage(final String packageName,
            final IPackageMoveObserver observer, final int flags) {
-       if (packageName == null) {
-           return;
-       }
        mContext.enforceCallingOrSelfPermission(
                android.Manifest.permission.MOVE_PACKAGE, null);
        int returnCode = PackageManager.MOVE_SUCCEEDED;
@@ -9711,30 +9708,31 @@ class PackageManagerService extends IPackageManager.Stub {
            PackageParser.Package pkg = mPackages.get(packageName);
            if (pkg == null) {
                returnCode =  PackageManager.MOVE_FAILED_DOESNT_EXIST;
-           }
-           // Disable moving fwd locked apps and system packages
-           if (pkg.applicationInfo != null &&
-                   (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-               Slog.w(TAG, "Cannot move system application");
-               returnCode = PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
-           } else if (pkg.applicationInfo != null &&
-                   (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) {
-               Slog.w(TAG, "Cannot move forward locked app.");
-               returnCode = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
            } else {
-               // Find install location first
-               if ((flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 &&
-                       (flags & PackageManager.MOVE_INTERNAL) != 0) {
-                   Slog.w(TAG, "Ambigous flags specified for move location.");
-                   returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+               // Disable moving fwd locked apps and system packages
+               if (pkg.applicationInfo != null &&
+                       (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                   Slog.w(TAG, "Cannot move system application");
+                   returnCode = PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
+               } else if (pkg.applicationInfo != null &&
+                       (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) {
+                   Slog.w(TAG, "Cannot move forward locked app.");
+                   returnCode = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
                } else {
-                   newFlags = (flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 ?
-                           PackageManager.INSTALL_EXTERNAL : 0;
-                   currFlags = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0 ?
-                           PackageManager.INSTALL_EXTERNAL : 0;
-                   if (newFlags == currFlags) {
-                       Slog.w(TAG, "No move required. Trying to move to same location");
+                   // Find install location first
+                   if ((flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 &&
+                           (flags & PackageManager.MOVE_INTERNAL) != 0) {
+                       Slog.w(TAG, "Ambigous flags specified for move location.");
                        returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+                   } else {
+                       newFlags = (flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 ?
+                               PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL;
+                       currFlags = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0 ?
+                               PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL;
+                       if (newFlags == currFlags) {
+                           Slog.w(TAG, "No move required. Trying to move to same location");
+                           returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+                       }
                    }
                }
            }
@@ -9758,67 +9756,87 @@ class PackageManagerService extends IPackageManager.Stub {
            public void run() {
                mHandler.removeCallbacks(this);
                int returnCode = currentStatus;
-               boolean moveSucceeded = (returnCode == PackageManager.MOVE_SUCCEEDED);
-               if (moveSucceeded) {
-                   int uid = -1;
+               if (currentStatus == PackageManager.MOVE_SUCCEEDED) {
+                   int uidArr[] = null;
+                   ArrayList<String> pkgList = null;
                    synchronized (mPackages) {
-                       uid = mPackages.get(mp.packageName).applicationInfo.uid;
-                   }
-                   ArrayList<String> pkgList = new ArrayList<String>();
-                   pkgList.add(mp.packageName);
-                   int uidArr[] = new int[] { uid };
-                   // Send resources unavailable broadcast
-                   sendResourcesChangedBroadcast(false, pkgList, uidArr);
-
-                   // Update package code and resource paths
-                   synchronized (mInstallLock) {
-                       synchronized (mPackages) {
-                           PackageParser.Package pkg = mPackages.get(mp.packageName);
-                           if (pkg != null) {
-                               String oldCodePath = pkg.mPath;
-                               String newCodePath = mp.targetArgs.getCodePath();
-                               String newResPath = mp.targetArgs.getResourcePath();
-                               pkg.mPath = newCodePath;
-                               // Move dex files around
-                               if (moveDexFilesLI(pkg)
-                                       != PackageManager.INSTALL_SUCCEEDED) {
-                                   // Moving of dex files failed. Set
-                                   // error code and abort move.
-                                   pkg.mPath = pkg.mScanPath;
-                                   returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                                   moveSucceeded = false;
-                               } else {
-                                   pkg.mScanPath = newCodePath;
-                                   pkg.applicationInfo.sourceDir = newCodePath;
-                                   pkg.applicationInfo.publicSourceDir = newResPath;
-                                   PackageSetting ps = (PackageSetting) pkg.mExtras;
-                                   ps.codePath = new File(pkg.applicationInfo.sourceDir);
-                                   ps.codePathString = ps.codePath.getPath();
-                                   ps.resourcePath = new File(pkg.applicationInfo.publicSourceDir);
-                                   ps.resourcePathString = ps.resourcePath.getPath();
-                                   // Set the application info flag correctly.
-                                   if ((mp.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                                       pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
-                                   } else {
-                                       pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_EXTERNAL_STORAGE;
-                                   }
-                                   ps.setFlags(pkg.applicationInfo.flags);
-                                   mAppDirs.remove(oldCodePath);
-                                   mAppDirs.put(newCodePath, pkg);
-                                   // Persist settings
-                                   mSettings.writeLP();
-                               }
-                           }
+                       PackageParser.Package pkg = mPackages.get(mp.packageName);
+                       if (pkg == null ) {
+                           Slog.w(TAG, " Package " + mp.packageName +
+                           " doesn't exist. Aborting move");
+                           returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
+                       } else if (!mp.srcArgs.getCodePath().equals(pkg.applicationInfo.sourceDir)) {
+                           Slog.w(TAG, "Package " + mp.packageName + " code path changed from " +
+                                   mp.srcArgs.getCodePath() + " to " + pkg.applicationInfo.sourceDir +
+                           " Aborting move and returning error");
+                           returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
+                       } else {
+                           uidArr = new int[] { pkg.applicationInfo.uid };
+                           pkgList = new ArrayList<String>();
+                           pkgList.add(mp.packageName);
                        }
                    }
-                   // Send resources available broadcast
-                   sendResourcesChangedBroadcast(true, pkgList, uidArr);
+                   if (returnCode == PackageManager.MOVE_SUCCEEDED) {
+                       // Send resources unavailable broadcast
+                       sendResourcesChangedBroadcast(false, pkgList, uidArr);
+                       // Update package code and resource paths
+                       synchronized (mInstallLock) {
+                           synchronized (mPackages) {
+                               PackageParser.Package pkg = mPackages.get(mp.packageName);
+                               // Recheck for package again.
+                               if (pkg == null ) {
+                                   Slog.w(TAG, " Package " + mp.packageName +
+                                   " doesn't exist. Aborting move");
+                                   returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
+                               } else if (!mp.srcArgs.getCodePath().equals(pkg.applicationInfo.sourceDir)) {
+                                   Slog.w(TAG, "Package " + mp.packageName + " code path changed from " +
+                                           mp.srcArgs.getCodePath() + " to " + pkg.applicationInfo.sourceDir +
+                                   " Aborting move and returning error");
+                                   returnCode = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
+                               } else {
+                                   String oldCodePath = pkg.mPath;
+                                   String newCodePath = mp.targetArgs.getCodePath();
+                                   String newResPath = mp.targetArgs.getResourcePath();
+                                   pkg.mPath = newCodePath;
+                                   // Move dex files around
+                                   if (moveDexFilesLI(pkg)
+                                           != PackageManager.INSTALL_SUCCEEDED) {
+                                       // Moving of dex files failed. Set
+                                       // error code and abort move.
+                                       pkg.mPath = pkg.mScanPath;
+                                       returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                   } else {
+                                       pkg.mScanPath = newCodePath;
+                                       pkg.applicationInfo.sourceDir = newCodePath;
+                                       pkg.applicationInfo.publicSourceDir = newResPath;
+                                       PackageSetting ps = (PackageSetting) pkg.mExtras;
+                                       ps.codePath = new File(pkg.applicationInfo.sourceDir);
+                                       ps.codePathString = ps.codePath.getPath();
+                                       ps.resourcePath = new File(pkg.applicationInfo.publicSourceDir);
+                                       ps.resourcePathString = ps.resourcePath.getPath();
+                                       // Set the application info flag correctly.
+                                       if ((mp.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+                                           pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+                                       } else {
+                                           pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+                                       }
+                                       ps.setFlags(pkg.applicationInfo.flags);
+                                       mAppDirs.remove(oldCodePath);
+                                       mAppDirs.put(newCodePath, pkg);
+                                       // Persist settings
+                                       mSettings.writeLP();
+                                   }
+                               }
+                           }
+                           // Send resources available broadcast
+                           sendResourcesChangedBroadcast(true, pkgList, uidArr);
+                       }
+                   }
                }
-               if (!moveSucceeded){
+               if (returnCode != PackageManager.MOVE_SUCCEEDED){
                    // Clean up failed installation
                    if (mp.targetArgs != null) {
-                       mp.targetArgs.doPostInstall(
-                               returnCode);
+                       mp.targetArgs.doPostInstall(PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
                    }
                } else {
                    // Force a gc to clear things up.
@@ -9840,3 +9858,4 @@ class PackageManagerService extends IPackageManager.Stub {
        });
    }
 }
+
