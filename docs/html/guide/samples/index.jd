@@ -41,6 +41,10 @@ platforms) and allow you to view the source files in your browser. </p>
   <dd>A variety of small applications that demonstrate an extensive collection of
   framework topics.</dd>
 
+ <dt><a href="{@docRoot}resources/samples/BackupRestore/index.html">Backup and Restore</a></dt>
+  <dd>An simple example that illustrates a few different ways for an application to
+  implement support for the Android data backup and restore mechanism.</dd>
+
  <dt><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat</a></dt>
   <dd>An application for two-way text messaging over Bluetooth.</dd>
 
