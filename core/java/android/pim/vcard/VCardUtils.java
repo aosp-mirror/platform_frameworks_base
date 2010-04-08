@@ -329,8 +329,8 @@ public class VCardUtils {
             if (ch == '\\' && i < length - 1) {
                 char nextCh = value.charAt(i + 1);
                 final String unescapedString =
-                    (isV30 ? VCardParser_V30.unescapeCharacter(nextCh) :
-                        VCardParser_V21.unescapeCharacter(nextCh));
+                    (isV30 ? VCardParserImpl_V30.unescapeCharacter(nextCh) :
+                        VCardParserImpl_V21.unescapeCharacter(nextCh));
                 if (unescapedString != null) {
                     builder.append(unescapedString);
                     i++;

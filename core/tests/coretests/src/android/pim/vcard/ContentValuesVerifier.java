@@ -56,7 +56,7 @@ import java.util.List;
     public void verify(InputStream is, int vCardType) throws IOException, VCardException {
         final VCardParser vCardParser;
         if (VCardConfig.isV30(vCardType)) {
-            vCardParser = new VCardParser_V30(true);  // use StrictParsing
+            vCardParser = new VCardParser_V30();
         } else {
             vCardParser = new VCardParser_V21();
         }

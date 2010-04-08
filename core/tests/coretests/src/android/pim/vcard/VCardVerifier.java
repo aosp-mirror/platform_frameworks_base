@@ -209,8 +209,7 @@ import java.util.Arrays;
             }
         }
 
-        final VCardParser parser =
-                (mIsV30 ? new VCardParser_V30(true) : new VCardParser_V21());
+        final VCardParser parser = (mIsV30 ? new VCardParser_V30() : new VCardParser_V21());
         InputStream is = null;
         try {
             String charset =
