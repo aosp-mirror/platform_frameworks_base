@@ -58,6 +58,7 @@ LOCAL_SRC_FILES:= \
 	android_os_UEventObserver.cpp \
 	android_net_LocalSocketImpl.cpp \
 	android_net_NetUtils.cpp \
+	android_net_TrafficStats.cpp \
 	android_net_wifi_Wifi.cpp \
 	android_nio_utils.cpp \
 	android_pim_EventRecurrence.cpp \
