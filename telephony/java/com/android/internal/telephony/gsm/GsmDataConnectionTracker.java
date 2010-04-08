@@ -30,10 +30,10 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
-import android.os.INetStatService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -83,7 +83,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     //***** Instance Variables
 
-    INetStatService netstat;
     // Indicates baseband will not auto-attach
     private boolean noAutoAttach = false;
 
@@ -218,8 +217,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         p.mSST.registerForRoamingOff(this, EVENT_ROAMING_OFF, null);
         p.mSST.registerForPsRestrictedEnabled(this, EVENT_PS_RESTRICT_ENABLED, null);
         p.mSST.registerForPsRestrictedDisabled(this, EVENT_PS_RESTRICT_DISABLED, null);
-
-        this.netstat = INetStatService.Stub.asInterface(ServiceManager.getService("netstat"));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_RECONNECT_ALARM);
@@ -841,13 +838,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             preTxPkts = txPkts;
             preRxPkts = rxPkts;
 
-            try {
-                txPkts = netstat.getMobileTxPackets();
-                rxPkts = netstat.getMobileRxPackets();
-            } catch (RemoteException e) {
-                txPkts = 0;
-                rxPkts = 0;
-            }
+            txPkts = TrafficStats.getMobileTxPackets();
+            rxPkts = TrafficStats.getMobileRxPackets();
 
             //Log.d(LOG_TAG, "rx " + String.valueOf(rxPkts) + " tx " + String.valueOf(txPkts));
 
