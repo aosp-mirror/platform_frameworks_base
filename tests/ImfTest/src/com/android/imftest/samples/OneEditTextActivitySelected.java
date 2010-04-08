@@ -55,7 +55,11 @@ public class OneEditTextActivitySelected extends Activity
 
         ((ScrollView) mRootView).addView(layout);
         setContentView(mRootView);
-    }  
+        
+        // set to resize so IME is always shown (and also so
+        // ImfBaseTestCase#destructiveCheckImeInitialState thinks it should always be shown
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
 
     public View getRootView() {
         return mRootView;
