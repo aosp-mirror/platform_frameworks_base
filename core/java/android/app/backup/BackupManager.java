@@ -25,9 +25,9 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 /**
- * BackupManager is the interface to the system's backup service. Applications
- * simply instantiate one, and then use that instance to communicate with the
- * backup infrastructure.
+ * The BackupManager class is interface through which an application's user interface
+ * code will interact with the Android backup service.  Applications simply instantiate one
+ * and then issue calls through that instance.
  * <p>
  * When an application has made changes to data which should be backed up, a
  * call to {@link #dataChanged()} will notify the backup service. The system
@@ -35,24 +35,23 @@ import android.util.Log;
  * calls to {@link #dataChanged()} have no further effect until the backup
  * operation actually occurs.
  * <p>
- * The backup operation itself begins with the system launching the
+ * A backup or restore operation begins with the system launching the
  * {@link android.app.backup.BackupAgent} subclass declared in your manifest. See the
  * documentation for {@link android.app.backup.BackupAgent} for a detailed description
- * of how the backup then proceeds.
- * <p>
- * A simple implementation of a BackupAgent useful for backing up Preferences
- * and files is available by using {@link android.app.backup.BackupAgentHelper}.
- * <p>
- * STOPSHIP: more documentation!
+ * of how the operation then proceeds.
  * <p>
  * <b>XML attributes</b>
  * <p>
- * See {@link android.R.styleable#AndroidManifestApplication 
- * AndroidManifest.xml's application attributes}
+ * Several attributes affecting the operation of the backup and restore mechanism
+ * can be set on the &lt;application&gt; tag in the application's
+ * AndroidManifest.xml file.  See the documentation on the
+ * {@link android.R.styleable#AndroidManifestApplication AndroidManifest.xml's application attributes}
+ * for details.
  * 
  * @attr ref android.R.styleable#AndroidManifestApplication_allowBackup
  * @attr ref android.R.styleable#AndroidManifestApplication_backupAgent
  * @attr ref android.R.styleable#AndroidManifestApplication_killAfterRestore
+ * @attr ref android.R.styleable#AndroidManifestApplication_restoreAnyVersion
  */
 public class BackupManager {
     private static final String TAG = "BackupManager";
@@ -82,7 +81,8 @@ public class BackupManager {
     /**
      * Notifies the Android backup system that your application wishes to back up
      * new changes to its data.  A backup operation using your application's
-     * {@link android.app.backup.BackupAgent} subclass will be scheduled when you call this method.
+     * {@link android.app.backup.BackupAgent} subclass will be scheduled when you
+     * call this method.
      */
     public void dataChanged() {
         checkServiceBinder();
@@ -97,11 +97,12 @@ public class BackupManager {
 
     /**
      * Convenience method for callers who need to indicate that some other package
-     * needs a backup pass.  This can be relevant in the case of groups of packages
-     * that share a uid, for example.
-     *
+     * needs a backup pass.  This can be useful in the case of groups of packages
+     * that share a uid.
+     * <p>
      * This method requires that the application hold the "android.permission.BACKUP"
-     * permission if the package named in the argument is not the caller's own.
+     * permission if the package named in the argument does not run under the same uid
+     * as the caller.
      */
     public static void dataChanged(String packageName) {
         checkServiceBinder();

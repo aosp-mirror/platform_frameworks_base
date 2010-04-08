@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import java.io.IOException;
  * have the BackupAgentHelper implementation process the data.
  * <p>
  * STOPSHIP: document!
+ *
+ * @see FileBackupHelper
+ * @see SharedPreferencesBackupHelper
  */
 public class BackupAgentHelper extends BackupAgent {
     static final String TAG = "BackupAgentHelper";

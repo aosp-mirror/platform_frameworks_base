@@ -26,18 +26,13 @@ import java.io.File;
  * A helper class which can be used in conjunction with
  * {@link android.app.backup.BackupAgentHelper} to manage the backup of a set of
  * files. Whenever backup is performed, all files changed since the last backup
- * will be saved in their entirety. During the first time the backup happens,
- * all the files in the list will be backed up. Note that this should only be
- * used with small configuration files and not with large binary files.
+ * will be saved in their entirety.  During the first time the backup happens,
+ * every file in the list will be backed up.  Note that this should only be
+ * used with small configuration files, not with large binary files.
  * <p>
- * Any files not present in the list of files during the restore procedure will
- * be ignored. If files present in a previous version of an application are
- * removed in subsequent versions, it is the responsibility of the developer to
- * design a mechanism to remove those files. Otherwise files no longer needed
- * will linger and consume space on the device.
- * <p>
- * STOPSHIP: document! [manages backup of a set of files; restore is totally
- * opaque]
+ * During restore, if the helper encounters data for a file that was not
+ * specified when the FileBackupHelper object was constructed, that data
+ * will be ignored.
  */
 public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";
@@ -69,8 +64,8 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
      * now. When <code>oldState</code> is <code>null</code>, all the files will
      * be backed up.
      * <p>
-     * This should be called from {@link android.app.backup.BackupAgentHelper}
-     * directly. See
+     * This should only be called directly from within the {@link BackupAgentHelper}
+     * implementation. See
      * {@link android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
      * for a description of parameter meanings.
      */
@@ -91,6 +86,9 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
 
     /**
      * Restore one record [representing a single file] from the restore dataset.
+     * <p>
+     * This should only be called directly from within the {@link BackupAgentHelper}
+     * implementation.
      */
     public void restoreEntity(BackupDataInputStream data) {
         if (DEBUG) Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
