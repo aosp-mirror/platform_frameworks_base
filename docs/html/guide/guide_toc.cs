@@ -99,18 +99,36 @@
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
-               <span class="en">Resources and Assets</span> 
+               <span class="en">Application Resources</span>
              </a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>guide/topics/resources/resources-i18n.html">
-                <span class="en">Resources and I18n</span>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
+                <span class="en">Providing Resources</span>
               </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
-                <span class="en">Available Resource Types</span>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/accessing-resources.html">
+                <span class="en">Accessing Resources</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
+                <span class="en">Handling Runtime Changes</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
                 <span class="en">Localization</span>
               </a></li>
+          <li class="toggle-list">
+            <div><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
+              <span class="en">Resource Types</span>
+            </a></div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/animation-resource.html">Animation</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/color-list-resource.html">Color State List</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/drawable-resource.html">Drawable</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/layout-resource.html">Layout</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/menu-resource.html">Menu</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/string-resource.html">String</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/style-resource.html">Style</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/resources/more-resources.html">More Types</a></li>
+            </ul>
+          </li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">

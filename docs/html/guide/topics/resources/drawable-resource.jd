@@ -1,0 +1,711 @@
+page.title=Drawable Resources
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">2D Graphics</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>A drawable resource is a general concept for a graphic that you
+can retrieve with {@link android.content.res.Resources#getDrawable(int)}
+and draw on the screen. There are several different types of drawables:</p>
+<dl>
+  <dt><a href="#Bitmap">Bitmap File</a><dt>
+    <dd>A bitmap graphic file ({@code .png}, {@code .jpg}, or {@code .gif}).
+      A {@link android.graphics.drawable.BitmapDrawable}.</dd>
+  <dt><a href="#NinePatch">Nine-Patch File</a></dt>
+    <dd>A PNG file with stretchable regions to allow image resizing based on content ({@code
+.9.png}). A {@link android.graphics.drawable.NinePatchDrawable}.</dd>
+<!--  <dt><a href="#BitmapAlias">Bitmap Alias</a><dt>
+    <dd>An alias for a drawable.</dd>  -->
+  <dt><a href="#StateList">State List</a></dt>
+    <dd>An XML file that references different bitmap graphics
+    for different states (for example, to use a different image when a button is pressed).
+    A {@link android.graphics.drawable.StateListDrawable}.</dd>
+  <dt><a href="#Color">Color</a></dt>
+    <dd>A resource defined in XML that specifies a rectangle of color, with
+    optionally rounded corners. A {@link android.graphics.drawable.PaintDrawable}.</dd>
+  <dt><a href="#Shape">Shape</a></dt>
+    <dd>An XML file that defines a geometric shape, including colors and gradients.
+    A {@link android.graphics.drawable.ShapeDrawable}.</dd>
+</dl>
+
+<p>Documentation for the {@link android.graphics.drawable.AnimationDrawable} resource
+is in the <a href="animation-resource.html">Animation Resource</a> document.</p>
+
+<h2 id="Bitmap">Bitmap File</h2>
+
+<p>A basic bitmap image. Android supports basic bitmap files in a few different formats:
+{@code .png} (preferred), {@code .jpg} (acceptable), {@code .gif} (discouraged).</p>
+
+<p class="note"><strong>Note:</strong> Bitmap files may be automatically optimized with lossless
+image compression by the <a href="{@docRoot}guide/developing/tools/aapt.html">aapt</a> tool. For
+example, a true-color PNG that does not require more than 256 colors may be converted to an 8-bit
+PNG with a color palette. This will result in an image of equal quality but which requires less
+memory. So be aware that the image binaries placed in this directory can change during the build. If
+you plan on reading an image as a bit stream in order to convert it to a bitmap, put your images in
+the <code>res/raw/</code> folder instead, where they will not be optimized.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.png</code> ({@code .png}, {@code .jpg}, or {@code .gif})<br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.BitmapDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code></li><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>example:</dt>
+<dd>With an image saved at <code>res/drawable/myimage.png</code>, this layout XML will apply
+the image to a View:
+<pre>
+&lt;ImageView
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    <strong>android:src="@drawable/myimage"</strong> />
+</pre>
+<p>This application code will retrieve the image as a {@link
+android.graphics.drawable.Drawable}:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+Drawable drawable = res.{@link android.content.res.Resources#getDrawable(int) getDrawable}(R.drawable.myimage);
+</pre>
+</dd>
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">2D Graphics</a></li>
+  <li>{@link android.graphics.drawable.BitmapDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+<h2 id="NinePatch">Nine-Patch File</h2>
+
+<p>A {@link android.graphics.NinePatch} is a PNG image in which you can define stretchable regions
+that Android will scale when content within the View exceeds the normal image bounds. You will
+typically assign this type of image as the background of a View that has at least one dimension set
+to {@code "wrap_content"}, and when the View grows to accomodate the content, the Nine-Patch image
+will also be scaled to match the size of the View. An example use of a Nine-Patch image is the
+background used by Android's standard {@link android.widget.Button} widget, which must stretch to
+accommodate the text (or image) inside the button.</p>
+
+<p>For a complete discussion about how to define a Nine-Patch file with stretchable regions,
+see the <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a>
+document.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.9.png</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.NinePatchDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>example:</dt>
+<dd>With an image saved at <code>res/drawable/myninepatch.9.png</code>, this layout XML will
+apply the Nine-Patch to a View:
+<pre>
+&lt;Button
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    <strong>android:background="@drawable/myninepatch"</strong> />
+</pre>
+</dd>
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a></li>
+  <li>{@link android.graphics.drawable.NinePatchDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+
+<h2 id="StateList">State List</h2>
+
+<p>A {@link android.graphics.drawable.StateListDrawable} is a drawable object defined in XML
+that uses a several different images to represent the same graphic, depending on the state of
+the object. For example, a {@link
+android.widget.Button} widget can exist in one of several different states (pressed, focused,
+or niether) and, using a state list drawable, you can provide a different button image for each
+state.</p>
+
+<p>You can describe the state list in an XML file. Each graphic is represented by an {@code
+&lt;item>} element inside a single {@code &lt;selector>} element. Each {@code &lt;item>}
+uses various attributes to describe the state in which it should be used as the graphic for the
+drawable.</p>
+<p>During each state change, the state list is traversed top to bottom and the first item that
+matches the current state will be used&mdash;the selection is <em>not</em> based on the "best
+match," but simply the first item that meets the minimum criteria of the state.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.StateListDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#selector-element">selector</a> xmlns:android="http://schemas.android.com/apk/res/android"
+    android:constantSize=["true" | "false"]
+    android:dither=["true" | "false"]
+    android:variablePadding=["true" | "false"] >
+    &lt;<a href="#item-element">item</a>
+        android:drawable="@[package:]drawable/<em>drawable_resource</em>"
+        android:state_pressed=["true" | "false"]
+        android:state_focused=["true" | "false"]
+        android:state_selected=["true" | "false"]
+        android:state_active=["true" | "false"]
+        android:state_checkable=["true" | "false"]
+        android:state_checked=["true" | "false"]
+        android:state_enabled=["true" | "false"]
+        android:state_window_focused=["true" | "false"] /> 
+&lt;/selector>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="selector-element"><code>&lt;selector&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
+&lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
+        <dt><code>android:constantSize</code></dt>
+          <dd><em>Boolean</em>. "true" if the drawable's reported internal size will remain constant as the state
+changes (the size will be the maximum of all of the states); "false" if the size will vary based on
+the current state. Default is false.</dd>
+        <dt><code>android:dither</code></dt>
+          <dd><em>Boolean</em>. "true" to enable dithering of the bitmap if the bitmap does not have the same pixel
+configuration as the screen (for instance, an ARGB 8888 bitmap with an RGB 565 screen); "false" to
+disable dithering. Default is true.</dd>
+        <dt><code>android:variablePadding</code></dt>
+          <dd><em>Boolean</em>. "true" if the drawable's padding should change based on the current
+state that is selected; "false" if the padding should stay the same (based on the maximum
+padding of all the states). Enabling this feature requires that you deal with
+performing layout when the state changes, which is often not supported. Default is false.</dd>
+      </dl>
+    </dd>
+  <dt id="item-element"><code>&lt;item&gt;</code></dt>
+    <dd>Defines a drawable to use during certain states, as described by its attributes. Must be a
+child of a <code>&lt;selector&gt;</code> element.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:drawable</code></dt>
+          <dd><em>Drawable resource</em>. <strong>Required</strong>. Reference to a drawable resource.</dd>
+        <dt><code>android:state_pressed</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is pressed (such as when a button
+is touched/clicked); "false" if this item should be used in the default, non-pressed state.</dd>
+        <dt><code>android:state_focused</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is focused (such as when a button
+is highlighted using the trackball/d-pad); "false" if this item should be used in the default,
+non-focused state.</dd>
+        <dt><code>android:state_selected</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is selected (such as when a
+tab is opened); "false" if this item should be used when the object is not selected.</dd>
+        <dt><code>android:state_checkable</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is checkable; "false" if this
+item should be used when the object is not checkable. (Only useful if the object can
+transition between a checkable and non-checkable widget.)</dd>
+        <dt><code>android:state_checked</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is checked; "false" if it
+should be used when the object is un-checked.</dd>
+        <dt><code>android:state_enabled</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is enabled (capable of
+receiving touch/click events); "false" if it should be used when the object is disabled.</dd>
+        <dt><code>android:state_window_focused</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the application window has focus (the
+application is in the foreground), "false" if this item should be used when the application
+window does not have focus (for example, if the notification shade is pulled down or a dialog appears).</dd>
+      </dl>
+      <p class="note"><strong>Note:</strong>Remember that the first item in the state list that
+matches the current state of the object will be applied. So if the first item in the list contains
+none of the state attributes above, then it will be applied every time, which is why your
+default value should always be last (as demonstrated in the following example).</p>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/drawable/button.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:state_pressed="true"
+          android:drawable="@drawable/button_pressed" /> &lt;!-- pressed --&gt;
+    &lt;item android:state_focused="true"
+          android:drawable="@drawable/button_focused" /> &lt;!-- focused --&gt;
+    &lt;item android:drawable="@drawable/button_normal" /> &lt;!-- default --&gt;
+&lt;/selector>
+</pre>
+
+<p>This layout XML will apply the drawable to a View:</p>
+<pre>
+&lt;ImageView
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    <strong>android:src="@drawable/button"</strong> />
+</pre>
+</dd> <!-- end example -->
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.StateListDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="Color">Color</h2>
+
+<p>This is a color defined in XML that's used as a drawable to fill a rectangular space,
+with optionally rounded corners. This kind of drawable behaves like a color fill.</p>
+
+<p class="note"><strong>Note:</strong> A color drawable is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine a color drawable resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.png</code><br/>
+The filename is arbitrary. The element's {@code name} will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.PaintDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>color_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>color_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;<a href="#color-resources-element">resources</a>>
+    &lt;<a href="#drawable-element">drawable</a>
+        name="<em>color_name</em>"
+        &gt;<em>color</em>&lt;/drawable&gt;
+&lt;/resources&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="color-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="drawable-element"><code>&lt;drawable&gt;</code></dt>
+    <dd>A color to use as a drawable rectangle. The value can be
+    any valid hexadecimal color value or a <a href="more-resources.html#Color">color
+    resource</a>. A color value always begins with a pound (#) character, followed
+    by the Alpha-Red-Green-Blue information in one of the following formats:
+    #<em>RGB</em>, #<em>RRGGBB</em>, #<em>ARGB</em>, or #<em>AARRGGBB</em>.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. <strong>Required</strong>.
+        A name for the color. This name will be used as the resource ID.</dd>
+      </dl>
+
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/drawable/colors.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;drawable name="solid_red">#f00&lt;/drawable>
+    &lt;drawable name="solid_blue">#0000ff&lt;/drawable>
+&lt;/resources>
+</pre>
+    <p>This layout XML will apply a color drawable to a View:</p>
+<pre>
+&lt;TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    <strong>android:background="@drawable/solid_blue"</strong> />
+</pre>
+    <p>This application code will get a color drawable and apply it to a View:</p>
+<pre>
+Resources res =  {@link android.content.Context#getResources()};
+Drawable redDrawable = res.{@link android.content.res.Resources#getDrawable(int) getDrawable}(R.drawable.solid_red);
+
+TextView tv = (TextView) findViewByID(R.id.text);
+tv.setBackground(redDrawable);
+</pre>
+</dd> <!-- end example -->
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li>{@link android.graphics.drawable.PaintDrawable}</li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="Shape">Shape</h2>
+
+<p>This is a generic shape defined in XML.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.graphics.drawable.ShapeDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#shape-element">shape</a> xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape=["rectangle" | "oval" | "line" | "ring"] >
+    &lt;<a href="#gradient-element">gradient</a>
+        android:angle="<em>integer</em>"
+        android:centerX="<em>integer</em>"
+        android:centerY="<em>integer</em>"
+        android:centerColor="<em>integer</em>"
+        android:gradientRadius="<em>integer</em>"
+        android:type=""
+        android:usesLevel=""
+        android:startColor="<em>color</em>"
+        android:endColor="<em>color</em>" />
+    &lt;<a href="#solid-element">solid</a>
+        android:color="<em>color</em>" />
+    &lt;<a href="#stroke-element">stroke</a>
+        android:width="<em>integer</em>"
+        android:color="<em>color</em>"
+        android:dashWidth="<em>integer</em>"
+        android:dashGap="<em>integer</em>" />
+    &lt;<a href="#padding-element">padding</a>
+        android:left="<em>integer</em>"
+        android:top="<em>integer</em>"
+        android:right="<em>integer</em>"
+        android:bottom="<em>integer</em>" />
+    &lt;<a href="#corners-element">corners</a>
+        android:radius="<em>integer</em>"
+        android:topLeftRadius="<em>integer</em>"
+        android:topRightRadius="<em>integer</em>"
+        android:bottomLeftRadius="<em>integer</em>"
+        android:bottomRightRadius="<em>integer</em>" />
+&lt;/shape>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="shape-element"><code>&lt;shape&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root element.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:shape</code></dt>
+        <dd><em>Keyword</em>. Defines the type of shape. Valid values are:
+          <table>
+            <tr><th>Value</th><th>Desciption</th></tr>
+            <tr><td>{@code "rectangle"}</td>
+                <td>A rectangle that fills the containing View. This is the default shape.</td></tr>
+            <tr><td>{@code "oval"}</td>
+                <td>An oval shape that fits the dimensions of the containing View.</td></tr>
+            <tr><td>{@code "line"}</td>
+                <td>A horizontal line that spans the width of the containing View. This
+                shape requires the {@code &lt;stroke>} element to define the width of the
+                line.</td></tr>
+            <tr><td>{@code "ring"}</td>
+                <td>A ring shape.</td></tr>
+          </table>
+        </dd>
+      </dl>
+      <p>The following attributes are used only when {@code android:shape="ring"}:</p>
+      <dl class="atn-list">
+        <dt><code>android:innerRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the
+inner part of the ring (the hole in the middle), as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:innerRadiusRatio</code></dt>
+        <dd><em>Float</em>. The radius for the inner
+part of the ring, expressed as a ratio of the ring's width. For instance, if {@code
+android:innerRadiusRatio="5"}, then the inner radius equals the ring's width divided by 5. This
+value will be overridden by {@code android:innerRadius}. Default value is 9.</dd>
+        <dt><code>android:thickness</code></dt>
+        <dd><em>Dimension</em>. The thickness of the
+ring, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:thicknessRatio</code></dt>
+        <dd><em>Float</em>. The thickness of the ring,
+expressed as a ratio of the ring's width. For instance, if {@code android:thicknessRatio="2"}, then
+the thickness equals the ring's width divided by 2. This value will be overridden by {@code
+android:innerRadius}. Default value is 3.</dd>
+        <dt><code>android:useLevel</code></dt>
+        <dd><em>Boolean</em>. "true" if this is used as
+a {@link android.graphics.drawable.LevelListDrawable}. This should normally be "false"
+          or your shape may not appear.</dd>
+      </dl>
+  <dt id="gradient-element"><code>&lt;gradient&gt;</code></dt>
+    <dd>Specifies a gradient color for the shape.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:type</code></dt>
+        <dd><em>Keyword</em>. The type of gradient pattern to apply. Valid values are:
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td>{@code "linear"}</td>
+                <td>A linear gradient. This is the default.</td></tr>
+            <tr><td>{@code "radial"}</td>
+                <td>A radial gradient. The start color is the center color.</td></tr>
+            <tr><td>{@code "sweep"}</td>
+                <td>A sweeping line gradient. </td></tr>
+          </table>
+        </dd>
+        <dt><code>android:angle</code></dt>
+        <dd><em>Integer</em>. The angle for the gradient, in degrees. 0 is left to right, 90 is
+bottom to top. It must be a multiple of 45. Default is 0.</dd>
+        <dt><code>android:centerX</code></dt>
+        <dd><em>Float</em>. The relative X-position for the center of the gradient (0 - 1.0).
+Does not apply when {@code android:type="linear"}.</dd>
+        <dt><code>android:centerY</code></dt>
+        <dd><em>Float</em>. The relative Y-position for the center of the gradient (0 - 1.0).
+Does not apply when {@code android:type="linear"}.</dd>
+        <dt><code>android:centerColor</code></dt>
+        <dd><em>Color</em>. Optional color that comes between the start and end colors, as a
+hexadecimal value or <a href="more-resources.html#Color">color resource</a>.</dd>
+        <dt><code>android:gradientRadius</code></dt>
+        <dd><em>Float</em>. The radius for the gradient. Only applied when {@code
+android:type="radial"}.</dd>
+        <dt><code>android:useLevel</code></dt>
+        <dd><em>Boolean</em>. "true" if this is used as a {@link
+android.graphics.drawable.LevelListDrawable}.</dd>
+        <dt><code>android:startColor</code></dt>
+        <dd><em>Color</em>. The starting color, as a hexadecimal
+value or <a href="more-resources.html#Color">color resource</a>.</dd>
+        <dt><code>android:endColor</code></dt>
+        <dd><em>Color</em>. The ending color, as a hexadecimal
+value or <a href="more-resources.html#Color">color resource</a>.</dd>
+      </dl>
+    </dd>
+  <dt id="solid-element"><code>&lt;solid&gt;</code></dt>
+    <dd>A solid color to fill the shape.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:color</code></dt>
+        <dd><em>Color</em>. The color to apply to the shape, as a hexadecimal
+value or <a href="more-resources.html#Color">color resource</a>.</dd>
+      </dl>
+    </dd>
+  <dt id="stroke-element"><code>&lt;stroke&gt;</code></dt>
+    <dd>A stroke line for the shape.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:width</code></dt>
+        <dd><em>Dimension</em>. The thickness of the line, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:color</code></dt>
+        <dd><em>Color</em>. The color of the line, as a
+hexadecimal value or <a href="more-resources.html#Color">color resource</a>.</dd>
+        <dt><code>android:dashGap</code></dt>
+        <dd><em>Dimension</em>. The distance between line dashes, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>. Only valid if {@code
+android:dashWidth} is set.</dd>
+        <dt><code>android:dashWidth</code></dt>
+        <dd><em>Dimension</em>. The size of each dash line, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>. Only valid if {@code
+android:dashGap} is set.</dd>
+      </dl>
+    </dd>
+  <dt id="padding-element"><code>&lt;padding&gt;</code></dt>
+    <dd>Padding to apply to the containing View element (this pads the position of the View
+content, not the shape).
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:left</code></dt>
+        <dd><em>Dimension</em>. Left padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:top</code></dt>
+        <dd><em>Dimension</em>. Top padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:right</code></dt>
+        <dd><em>Dimension</em>. Right padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:bottom</code></dt>
+        <dd><em>Dimension</em>. Bottom padding, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+      </dl>
+    </dd>
+  <dt id="corners-element"><code>&lt;corners&gt;</code></dt>
+    <dd>Creates rounded corners for the shape. Applies only when the shape is a rectangle.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:radius</code></dt>
+        <dd><em>Dimension</em>. The radius for all corners, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>. This will be overridden for each
+corner by the following attributes.</dd>
+        <dt><code>android:topLeftRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the top-left corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:topRightRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the top-right corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:bottomLeftRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the bottom-left corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+        <dt><code>android:bottomRightRadius</code></dt>
+        <dd><em>Dimension</em>. The radius for the bottom-right corner, as a dimension value or <a
+href="more-resources.html#Dimension">dimension resource</a>.</dd>
+      </dl>
+      <p class="note"><strong>Note:</strong> Every corner must (initially) be provided a corner
+radius greater than zero, or else no corners will be rounded. If you want specific corners
+to <em>not</em> be rounded, a work-around is to use {@code android:radius} to set a default corner
+radius greater than zero, but then override each and every corner with the values you really
+want, providing zero ("0dp") where you don't want rounded corners.</p>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/drawable/gradient_box.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    &lt;gradient 
+        android:startColor="#FFFF0000" 
+        android:endColor="#80FF00FF"
+        android:angle="45"/>
+    &lt;padding android:left="7dp" 
+        android:top="7dp"
+        android:right="7dp" 
+        android:bottom="7dp" />
+    &lt;corners android:radius="8dp" />
+&lt;/shape>
+</pre>
+    <p>This layout XML will apply the shape drawable to a View:</p>
+<pre>
+&lt;TextView
+    android:background="@drawable/gradient_box"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content" />
+</pre>
+    <p>This application code will get the shape drawable and apply it to a View:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+Drawable shape = res. {@link android.content.res.Resources#getDrawable(int) getDrawable}(R.drawable.gradient_box);
+
+TextView tv = (TextView)findViewByID(R.id.textview);
+tv.setBackground(shape);
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+

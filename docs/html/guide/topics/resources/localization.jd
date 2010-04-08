@@ -1,5 +1,5 @@
 page.title=Localization
-parent.title=Resources and Assets
+parent.title=Application Resources
 parent.link=index.html
 @jd:body
 
@@ -25,12 +25,11 @@ defaults.</li>
 <ol><li><a href="#defaults-r-important">Why Default Resources Are Important</a></li></ol>
 <li><a href="#using-framework">Using Resources for Localization</a>
   <ol>
-  <li><a href="#creating-defaults">How to Create Default Resources</a></li><li>
-    <a href="#creating-alternates">How to Create Alternate Resources</a></li>
+    <li><a href="#creating-defaults">How to Create Default Resources</a></li>
+    <li><a href="#creating-alternatives">How to Create Alternative Resources</a></li>
     <li><a href="#resource-precedence">Which Resources Take Precedence?</a></li>
     <li><a href="#referring-to-resources">Referring to Resources in Java</a></li>
-
-    </ol>
+  </ol>
 </li>
 <li><a href="#strategies">Localization Strategies</a></li>
 <li><a href="#testing">Testing Localized Applications</a></li>
@@ -52,7 +51,7 @@ defaults.</li>
   <ol>
   <li><a
 href="{@docRoot}resources/tutorials/localization/index.html">Hello, L10N Tutorial</a></li>
-    <li><a href="resources-i18n.html">Resources</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></li>
     <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
     <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">Activity Lifecycle</a></li>
 </ol>
@@ -80,7 +79,7 @@ functionality:</p>
 <ul>
   <li>You can put most or all of the <em>contents</em> of your application's
 user interface into resource files, as described in this document and in <a
-href="index.html">Resources</a>. </li>
+href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a>.</li>
   <li>The <em>behavior</em> of the user interface, on the other hand, is driven
 by your Java code. 
     For example, if users input data that needs to be formatted or sorted
@@ -107,14 +106,15 @@ resources that best match the device.</p>
 <p>(This document focuses on localization and locale. For a complete description
 of resource-switching and all the types of configurations that you can
 specify &#8212; screen orientation, touchscreen type, and so on &#8212; see <a
-href="resources-i18n.html#AlternateResources">Alternate Resources</a>.)</p>
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing
+Alternative Resources</a>.)</p>
 
 <table border="0" cellspacing="0" cellpadding="0">
   <tr border="0">
     <td width="180" style="border: 0pt none ;"><p class="special-note">
     <strong>When you write your application:</strong>
     <br><br>
-    You create a set of default resources, plus alternates to be used in
+    You create a set of default resources, plus alternatives to be used in
     different locales.</p></td>
     <td style="border: 0pt none; padding:0">
     <p style="border:0; padding:0"><img src="../../../images/resources/right-arrow.png" alt="right-arrow" 
@@ -126,7 +126,7 @@ href="resources-i18n.html#AlternateResources">Alternate Resources</a>.)</p>
   </tr>
 </table>
 
-<p>When you write your application, you create default and alternate resources
+<p>When you write your application, you create default and alternative resources
 for your application to use. To create  resources, you place files within
 specially named subdirectories of the project's <code>res/</code> directory.
 </p>
@@ -204,18 +204,19 @@ speak.  </p>
 	<em>default</em> string file must contain them all. 
 </p>
 
-<h3 id="creating-alternates">How to Create Alternate Resources</h3>
+<h3 id="creating-alternatives">How to Create Alternative Resources</h3>
 
-<p>A large part of localizing an application is providing alternate text for
-different languages. In some cases you will also provide alternate graphics,
+<p>A large part of localizing an application is providing alternative text for
+different languages. In some cases you will also provide alternative graphics,
 sounds, layouts, and other locale-specific resources. </p>
 
 <p>An application can specify many <code>res/<em>&lt;qualifiers&gt;</em>/</code>
-directories, each with different qualifiers. To create an alternate resource for 
+directories, each with different qualifiers. To create an alternative resource for
 a different locale, you use a qualifier that specifies a language or a 
 language-region combination. (The name of a resource directory must conform 
 to the naming scheme described in 
-<a href="resources-i18n.html#AlternateResources">Alternate Resources</a>, 
+<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing
+Alternative Resources</a>,
 or else it will not compile.)</p>
 
 <p><em>Example:</em></p>
@@ -223,7 +224,7 @@ or else it will not compile.)</p>
 <p>Suppose that your application's default language is English. Suppose also
 that you want to localize all the text in your application to French, and most
 of the text in your application (everything except the application's title) to
-Japanese. In this case, you could create three alternate <code>strings.xml</code>
+Japanese. In this case, you could create three alternative <code>strings.xml</code>
 files, each stored in a locale-specific resource directory:</p>
 
 <ol>
@@ -315,19 +316,21 @@ configured for Hindi. That is because in the resource-selection process, Android
 will prefer an MCC match over a language match. </p>
 
 <p>The selection process is not always as straightforward as these examples
-suggest. Please read  <a href="resources-i18n.html#best-match">How Android finds
-the best matching directory</a> for a more nuanced description of the
+suggest. Please read  <a
+href="{@docRoot}guide/topics/resources/creating-resources.html#BestMatch">How Android Finds
+the Best-matching Resource</a> for a more nuanced description of the
 process. All the qualifiers are described and listed in order of
-precedence in <a href="resources-i18n.html#table2">Table 2 in the Resources
-document</a>.</p>
+precedence in <a
+href="{@docRoot}guide/topics/resources/creating-resources.html#table2">Table 2 of Providing
+Alternative Resources</a>.</p>
 
 <h3 id="referring-to-resources">Referring to Resources in Java</h3>
 
 <p>In your application's Java code, you refer to  resources using the syntax
 <code>R.<em>resource_type</em>.<em>resource_name</em></code> or
 <code>android.R.<em>resource_type</em>.<em>resource_name</em></code><em>.</em>
-For more about this, see <a href="resources-i18n.html#ResourcesInCode">Using
-Resources in Code</a>.</p>
+For more about this, see <a
+href="{@docRoot}guide/topics/resources/using-resources.html">Accessing Resources</a>.</p>
 
 <h2 id="strategies">Localization Strategies</h2>
 
@@ -359,7 +362,7 @@ that your application will need. </p>
 <h4>Design a flexible layout</h4>
 
 <p> If you need to rearrange your layout to fit a certain language (for example
-German with its long words), you can create an alternate layout for that
+German with its long words), you can create an alternative layout for that
 language (for example <code>res/layout-de/main.xml</code>). However, doing this
 can make your application harder to maintain.  It is better to create a single
 layout that is more flexible.</p>
@@ -383,10 +386,10 @@ languages.</li>
 <p>You probably do not need to create a locale-specific
 alternative for every resource in your application. For example, the layout
 defined in the <code>res/layout/main.xml</code> file might work in any locale,
-in which case there would be no need to create any alternate layout files.
+in which case there would be no need to create any alternative layout files.
 </p>
 
-<p>Also, you might not need to create alternate text for every
+<p>Also, you might not need to create alternative text for every
 string. For example, assume the following:</p>
 
 <ul>
@@ -395,7 +398,7 @@ English. Every string that the application uses is defined, using American
 English spellings, in <code>res/values/strings.xml</code>. </li>
 
   <li>For  a few important phrases, you want to provide
-British English spelling. You want these alternate strings to be used when your
+British English spelling. You want these alternative strings to be used when your
 application runs on a device in the United Kingdom. </li>
 </ul>
 

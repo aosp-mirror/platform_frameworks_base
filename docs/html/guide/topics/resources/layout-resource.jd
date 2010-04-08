@@ -1,0 +1,224 @@
+page.title=Layout Resource
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>A layout resource defines the architecture for the UI in an Activity or a component of a UI.</p>
+
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/layout/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.view.View} (or subclass) resource.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.layout.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]layout/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/<em>name</em>"
+    android:layout_height="@+id/<em>string_name</em>"
+    android:layout_width="@+id/<em>string_name</em>"
+    [<em>other attributes</em>] &gt;
+    &lt;<a href="#view-element"><em>View</em></a>
+        android:id="@+id/<em>name</em>"
+        android:layout_height="@+id/<em>string_name</em>"
+        android:layout_width="@+id/<em>string_name</em>"
+        [<em>other attributes</em>] &gt;
+        &lt;<a href="#requestfocus-element">requestFocus</a>/&gt;
+    &lt;/<em>View</em>&gt;
+    &lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> &gt;
+        &lt;<a href="#view-element"><em>View</em></a> /&gt;
+    &lt;/<em>ViewGroup</em>&gt;
+&lt;/<em>ViewGroup</em>&gt;
+</pre>
+<p class="note"><strong>Note:</strong> The root element can be either a
+{@link android.view.ViewGroup} or a {@link android.view.View}, but there must be only
+one root element and it must contain the {@code xmlns:android} attribute with the {@code android}
+namespace as shown.</p>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+  <dl class="tag-list">
+
+  <dt id="viewgroup-element"><code>&lt;ViewGroup&gt;</code></dt>
+    <dd>A container for other {@link android.view.View} elements. There are many
+    different kinds of {@link android.view.ViewGroup} objects and each one lets you
+    specify the layout of the child elements in different ways. Different kinds of
+    {@link android.view.ViewGroup} objects include {@link android.widget.LinearLayout},
+    {@link android.widget.RelativeLayout}, and {@link android.widget.FrameLayout}.
+    <p>You should not assume that any derivation of {@link android.view.ViewGroup}
+    will accept nested {@link android.view.View}s. Some {@link android.view.ViewGroup}s
+    are implementations of the {@link android.widget.AdapterView} class, which determines
+    its children only from an {@link android.widget.Adapter}.</p>
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:id</code></dt>
+        <dd><em>Resource name</em>. A unique resource name for the element, which you can
+use to obtain a reference to the {@link android.view.ViewGroup} from your application.
+          The value takes the form: <code>"@+id/<em>name</em>"</code>. See more about the
+          <a href="#idvalue">value for {@code android:id}</a> below.
+        </dd>
+        <dt><code>android:layout_height</code></dt>
+        <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The height for the group, as a
+dimension value (or <a
+href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
+or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+        </dd>
+        <dt><code>android:layout_width</code></dt>
+        <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The width for the group, as a
+dimension value (or <a
+href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
+or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+        </dd>
+      </dl>
+      <p>More attributes are supported by the {@link android.view.ViewGroup}
+      base class, and many more are supported by each implementation of
+      {@link android.view.ViewGroup}. For a reference of all available attributes,
+      see the corresponding reference documentation for the {@link android.view.ViewGroup} class
+(for example, the <a
+      href="{@docRoot}reference/android/widget/LinearLayout#lattrs">LinearLayout XML attributes</a>).</p>
+    </dd>
+  <dt id="view-element"><code>&lt;View&gt;</code></dt>
+    <dd>An individual UI component, generally referred to as a "widget". Different
+    kinds of {@link android.view.View} objects include {@link android.widget.TextView},
+    {@link android.widget.Button}, and {@link android.widget.CheckBox}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:id</code></dt>
+        <dd><em>Resource name</em>. A unique resource name for the element, which you can use to
+          obtain a reference to the {@link android.view.View} from your application.
+          The value takes the form: <code>"@+id/<em>name</em>"</code>. See more about the
+          <a href="#idvalue">value for {@code android:id}</a> below.
+        </dd>
+        <dt><code>android:layout_height</code></dt>
+        <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The height for the element, as
+a dimension value (or <a
+href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
+or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+        </dd>
+        <dt><code>android:layout_width</code></dt>
+        <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The width for the element, as
+a dimension value (or <a
+href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
+or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+        </dd>
+      </dl>
+      <p>More attributes are supported by the {@link android.view.View}
+      base class, and many more are supported by each implementation of
+      {@link android.view.View}. Read <a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring
+      Layout</a> for more information. For a reference of all available attributes,
+      see the corresponding reference documentation (for example, the <a
+      href="{@docRoot}reference/android/widget/TextView.html#lattrs">TextView XML attributes</a>).</p>
+    </dd>
+  <dt id="requestfocus-element"><code>&lt;requestFocus&gt;</code></dt>
+    <dd>Any element representing a {@link android.view.View} object can include this empty element,
+    which gives it's parent initial focus on the screen. You can have only one of these
+    elements per file.</dd>
+
+  </dl>
+
+<h4 id="idvalue">Value for <code>android:id</code></h4>
+
+<p>For the ID value, you should use this syntax form: <code>"@+id/<em>name</em>"</code>. The plus symbol,
+{@code +}, indicates that this is a new resource ID and the aapt tool will create
+a new resource number to the {@code R.java} class, if it doesn't already exist. For example:</p>
+<pre>
+&lt;TextView android:id="@+id/nameTextbox"/>
+</pre>
+<p>You can then refer to it this way in Java:</p>
+<pre>
+findViewById(R.id.nameTextbox);
+</pre>
+
+<h4 id="layoutvalues">Value for <code>android:layout_height</code> and
+<code>android:layout_width</code>:</h4>
+
+  <p>The height and width value can be expressed using any of the
+  <a href="more-resources.html#Dimension">dimension
+  units</a> supported by Android (px, dp, sp, pt, in, mm) or with the following keywords:</p>
+  <table><tr><th>Value</th><th>Description</th></tr>
+    <tr>
+      <td><code>match_parent</code></td>
+      <td>Sets the dimension to match that of the parent element. Added in API Level 8 to
+deprecate <code>fill_parent</code>.</td>
+    </tr>
+    <tr>
+      <td><code>fill_parent</code></td>
+      <td>Sets the dimension to match that of the parent element.</td>
+    </tr><tr>
+      <td><code>wrap_content</code></td>
+      <td>Sets the dimension only to the size required to fit the content of this element.</td>
+    </tr>
+  </table>
+
+<h4>Custom View elements</h4>
+
+<p>You can create your own custom {@link android.view.View} and {@link android.view.ViewGroup}
+elements and apply them to your layout the same as a standard layout
+element. You can also specify the attributes supported in the XML element. To learn more,
+read <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>.
+</p>
+
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/layout/main_activity.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent" 
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+    <p>This application code will load the layout for an {@link android.app.Activity}, in the
+    {@link android.app.Activity#onCreate(Bundle) onCreate()} method:</dt>
+    <dd>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView.(R.layout.main_activity);
+}
+</pre>
+</dd> <!-- end example -->
+
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
+  <li>{@link android.view.View}</li>
+  <li>{@link android.view.ViewGroup}</li>
+</ul>
+</dd>
+
+</dl>
