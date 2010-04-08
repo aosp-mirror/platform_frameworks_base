@@ -1752,9 +1752,9 @@ final class WebViewCore {
 
     final DrawFilter mZoomFilter =
                     new PaintFlagsDrawFilter(ZOOM_BITS, Paint.LINEAR_TEXT_FLAG);
-    final DrawFilter mScrollFilter = null;
-    // If we need to trade more speed for less quality on slower devices
-    // use this: new PaintFlagsDrawFilter(SCROLL_BITS, 0);
+    // If we need to trade better quality for speed, set mScrollFilter to null
+    final DrawFilter mScrollFilter =
+                new PaintFlagsDrawFilter(SCROLL_BITS, 0);
 
     /* package */ void drawContentPicture(Canvas canvas, int color,
                                           boolean animatingZoom,
