@@ -150,5 +150,19 @@
         android:layout_marginBottom="80dip"
         />
 
+    <!-- emergency call button shown when sim is PUKd and tab_selector is
+         hidden -->
+    <Button
+        android:id="@+id/emergencyCallButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_emergency"
+        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dip"
+        style="@style/Widget.Button.Transparent"
+        android:drawablePadding="8dip"
+        />
+
 </RelativeLayout>
 
