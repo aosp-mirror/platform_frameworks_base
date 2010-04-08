@@ -54,7 +54,7 @@ protected:
 
 private:
     enum {
-        kBufferSize = 32 * 1024,
+        kBufferSize = 64 * 1024,
 
         // If we encounter a socket-read error we'll try reconnecting
         // and restarting the read for at most this many times.
