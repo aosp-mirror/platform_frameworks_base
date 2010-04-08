@@ -1,17 +1,17 @@
 page.title=Android SDK
 sdk.redirect=0
 
-sdk.win_download=android-sdk_r05-windows.zip
-sdk.win_bytes=23449838
-sdk.win_checksum=cc2c51a24e2f876e0fa652e182ef5840
+sdk.win_download=android-sdk_r06-windows.zip
+sdk.win_bytes=
+sdk.win_checksum=
 
-sdk.mac_download=android-sdk_r05-mac_86.zip
-sdk.mac_bytes=19871714
-sdk.mac_checksum=6fcfeed0e1c36624c926551637eb3308
+sdk.mac_download=android-sdk_r06-mac_86.zip
+sdk.mac_bytes=
+sdk.mac_checksum=
 
-sdk.linux_download=android-sdk_r05-linux_86.tgz
-sdk.linux_bytes=16208523
-sdk.linux_checksum=1d695d6a31310406f5d49092a1bd9850
+sdk.linux_download=android-sdk_r06-linux_86.tgz
+sdk.linux_bytes=
+sdk.linux_checksum=
 
 @jd:body
 

@@ -61,28 +61,21 @@
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/android-2.1.html">Android 2.1
-        Platform</a> <span class="new">new!</span>
-      </li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 
-        Platform</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.2.html">Android 2.2 Platform</a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.1.html">Android 2.1 Platform</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Platform</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Platform</a></li>
       <li class="toggle-list">
         <div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">Older Platforms</a></div>
         <ul> 
-          <li><a href="<?cs var:toroot ?>sdk/android-2.0.1.html">Android 2.0.1
-            Platform</a>
-          </li>
-          <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0
-            Platform</a>
-          </li>
-          <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Platform</a>
-          </li>
+          <li><a href="<?cs var:toroot ?>sdk/android-2.0.1.html">Android 2.0.1 Platform</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0 Platform</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Platform</a></li>
         </ul>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r5</a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r6</a> <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
       Windows, r3</a>
       </li>
@@ -100,8 +93,7 @@
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT
-      <?cs var:adt.zip.version ?></a>  <span class="new">new!</span>
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 0.9.7
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -109,6 +101,7 @@
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
+        <span class="new">new!</span>
       </li>
     </ul>
   </li>
