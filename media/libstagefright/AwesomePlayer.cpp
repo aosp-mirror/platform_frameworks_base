@@ -1091,7 +1091,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         }
 
         dataSource = new CachingDataSource(
-                mConnectingDataSource, 32 * 1024, 20);
+                mConnectingDataSource, 64 * 1024, 10);
 
         mConnectingDataSource.clear();
     } else {
