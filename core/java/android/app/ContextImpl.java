@@ -1482,8 +1482,9 @@ class ContextImpl extends Context {
         mPackageInfo = packageInfo;
         mResources = mPackageInfo.getResources(mainThread);
 
-        if (container != null && container.getCompatibilityInfo().applicationScale !=
-            mResources.getCompatibilityInfo().applicationScale) {
+        if (mResources != null && container != null
+                && container.getCompatibilityInfo().applicationScale !=
+                        mResources.getCompatibilityInfo().applicationScale) {
             if (DEBUG) {
                 Log.d(TAG, "loaded context has different scaling. Using container's" +
                         " compatiblity info:" + container.getDisplayMetrics());
