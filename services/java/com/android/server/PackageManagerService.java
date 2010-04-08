@@ -33,6 +33,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.content.Context;
 import android.content.ComponentName;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -583,11 +584,11 @@ class PackageManagerService extends IPackageManager.Stub {
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                                     res.pkg.applicationInfo.packageName,
-                                    extras);
+                                    extras, null);
                             if (update) {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                                         res.pkg.applicationInfo.packageName,
-                                        extras);
+                                        extras, null);
                             }
                             if (res.removedInfo.args != null) {
                                 // Remove the replaced package's older resources safely now
@@ -4472,7 +4473,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     };
 
-    private static final void sendPackageBroadcast(String action, String pkg, Bundle extras) {
+    private static final void sendPackageBroadcast(String action, String pkg,
+            Bundle extras, IIntentReceiver finishedReceiver) {
         IActivityManager am = ActivityManagerNative.getDefault();
         if (am != null) {
             try {
@@ -4482,9 +4484,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     intent.putExtras(extras);
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                am.broadcastIntent(
-                    null, intent,
-                            null, null, 0, null, null, null, false, false);
+                am.broadcastIntent(null, intent, null, finishedReceiver,
+                        0, null, null, null, finishedReceiver != null, false);
             } catch (RemoteException ex) {
             }
         }
@@ -4606,12 +4607,14 @@ class PackageManagerService extends IPackageManager.Stub {
                 Bundle extras = new Bundle(1);
                 extras.putInt(Intent.EXTRA_UID, removedUid);
                 extras.putBoolean(Intent.EXTRA_DATA_REMOVED, false);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, extras);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
+                        extras, null);
             }
             if (addedPackage != null) {
                 Bundle extras = new Bundle(1);
                 extras.putInt(Intent.EXTRA_UID, addedUid);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage, extras);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage,
+                        extras, null);
             }
         }
 
@@ -6053,8 +6056,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 extras.putInt(Intent.EXTRA_UID, info.removedUid >= 0 ? info.removedUid : info.uid);
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
 
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName, extras);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, extras);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName, extras, null);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, extras, null);
             }
         }
         // Force a gc here.
@@ -6085,10 +6088,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
             if (removedPackage != null) {
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, extras);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, extras, null);
             }
             if (removedUid >= 0) {
-                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras);
+                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, null);
             }
         }
     }
@@ -6790,7 +6793,7 @@ class PackageManagerService extends IPackageManager.Stub {
         extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras);
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, null);
     }
 
     public String getInstallerPackageName(String packageName) {
@@ -9513,7 +9516,7 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    private void sendResourcesChangedBroadcast(boolean mediaStatus,
-           ArrayList<String> pkgList, int uidArr[]) {
+           ArrayList<String> pkgList, int uidArr[], IIntentReceiver finishedReceiver) {
        int size = pkgList.size();
        if (size > 0) {
            // Send broadcasts here
@@ -9525,7 +9528,7 @@ class PackageManagerService extends IPackageManager.Stub {
            }
            String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                    : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-           sendPackageBroadcast(action, null, extras);
+           sendPackageBroadcast(action, null, extras, finishedReceiver);
        }
    }
 
@@ -9612,7 +9615,7 @@ class PackageManagerService extends IPackageManager.Stub {
        }
        // Send a broadcast to let everyone know we are done processing
        if (pkgList.size() > 0) {
-           sendResourcesChangedBroadcast(true, pkgList, uidArr);
+           sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
        }
        if (doGc) {
            Runtime.getRuntime().gc();
@@ -9650,10 +9653,15 @@ class PackageManagerService extends IPackageManager.Stub {
        }
        // Send broadcasts
        if (pkgList.size() > 0) {
-           sendResourcesChangedBroadcast(false, pkgList, uidArr);
+           sendResourcesChangedBroadcast(false, pkgList, uidArr, new IIntentReceiver.Stub() {
+               public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                       boolean ordered, boolean sticky) throws RemoteException {
+                   // Force gc now that everyone is done cleaning up, to release
+                   // references on assets.
+                   Runtime.getRuntime().gc();
+               }
+           });
        }
-       // Force gc
-       Runtime.getRuntime().gc();
        // Just unmount all valid containers.
        for (SdInstallArgs args : keys) {
            synchronized (mInstallLock) {
@@ -9743,7 +9751,7 @@ class PackageManagerService extends IPackageManager.Stub {
                    }
                    if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                        // Send resources unavailable broadcast
-                       sendResourcesChangedBroadcast(false, pkgList, uidArr);
+                       sendResourcesChangedBroadcast(false, pkgList, uidArr, null);
                        // Update package code and resource paths
                        synchronized (mInstallLock) {
                            synchronized (mPackages) {
@@ -9794,7 +9802,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                }
                            }
                            // Send resources available broadcast
-                           sendResourcesChangedBroadcast(true, pkgList, uidArr);
+                           sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
                        }
                    }
                }
