@@ -316,4 +316,7 @@ interface IPackageManager {
     void movePackage(String packageName, IPackageMoveObserver observer, int flags);
     
     boolean addPermissionAsync(in PermissionInfo info);
+
+    boolean setInstallLocation(int loc);
+    int getInstallLocation();
 }

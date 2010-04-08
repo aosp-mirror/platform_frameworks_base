@@ -339,25 +339,19 @@ public class DefaultContainerService extends IntentService {
                 checkBoth = true;
                 break check_inner;
             }
-            // Check if user option is enabled
-            boolean setInstallLoc = Settings.System.getInt(getApplicationContext()
+            // Pick user preference
+            int installPreference = Settings.System.getInt(getApplicationContext()
                     .getContentResolver(),
-                    Settings.System.SET_INSTALL_LOCATION, 0) != 0;
-            if (setInstallLoc) {
-                // Pick user preference
-                int installPreference = Settings.System.getInt(getApplicationContext()
-                        .getContentResolver(),
-                        Settings.System.DEFAULT_INSTALL_LOCATION,
-                        PackageHelper.APP_INSTALL_AUTO);
-                if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
-                    checkInt = true;
-                    checkBoth = true;
-                    break check_inner;
-                } else if (installPreference == PackageHelper.APP_INSTALL_EXTERNAL) {
-                    checkExt = true;
-                    checkBoth = true;
-                    break check_inner;
-                }
+                    Settings.Secure.DEFAULT_INSTALL_LOCATION,
+                    PackageHelper.APP_INSTALL_AUTO);
+            if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
+                checkInt = true;
+                checkBoth = true;
+                break check_inner;
+            } else if (installPreference == PackageHelper.APP_INSTALL_EXTERNAL) {
+                checkExt = true;
+                checkBoth = true;
+                break check_inner;
             }
             // Fall back to default policy if nothing else is specified.
             checkInt = true;

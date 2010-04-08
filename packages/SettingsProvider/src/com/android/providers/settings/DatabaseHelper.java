@@ -39,6 +39,8 @@ import android.util.AttributeSet;
 import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
+
+import com.android.internal.content.PackageHelper;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -61,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 55;
+    private static final int DATABASE_VERSION = 56;
 
     private Context mContext;
 
@@ -608,21 +610,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
        if (upgradeVersion == 50) {
            /*
-            * New settings for set install location UI.
+            * Install location no longer initiated here.
             */
-           db.beginTransaction();
-           SQLiteStatement stmt = null;
-           try {
-                stmt = db.compileStatement("INSERT INTO system(name,value)"
-                        + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
-                        R.bool.set_install_location);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
-            }
-
            upgradeVersion = 51;
        }
 
@@ -663,21 +652,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         if (upgradeVersion == 53) {
             /*
-             * New settings for set install location UI.
+             * New settings for set install location UI no longer initiated here.
              */
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                 stmt = db.compileStatement("INSERT INTO system(name,value)"
-                         + " VALUES(?,?);");
-                 loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
-                         R.integer.def_install_location);
-                 db.setTransactionSuccessful();
-             } finally {
-                 db.endTransaction();
-                 if (stmt != null) stmt.close();
-             }
-
             upgradeVersion = 54;
         }
 
@@ -696,6 +672,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 55;
         }
 
+        if (upgradeVersion == 55) {
+            /* Move the install location settings. */
+            String[] settingsToMove = {
+                    Secure.SET_INSTALL_LOCATION,
+                    Secure.DEFAULT_INSTALL_LOCATION
+            };
+            moveFromSystemToSecure(db, settingsToMove);
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadSetting(stmt, Secure.SET_INSTALL_LOCATION, 0);
+                loadSetting(stmt, Secure.DEFAULT_INSTALL_LOCATION,
+                        PackageHelper.APP_INSTALL_AUTO);
+                db.setTransactionSuccessful();
+             } finally {
+                 db.endTransaction();
+                 if (stmt != null) stmt.close();
+             }
+            upgradeVersion = 56;
+        }
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1021,10 +1019,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
                     R.bool.def_notification_pulse);
-            loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
-                    R.bool.set_install_location);
-            loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
-                    R.integer.def_install_location);
+            loadSetting(stmt, Settings.Secure.SET_INSTALL_LOCATION, 0);
+            loadSetting(stmt, Settings.Secure.DEFAULT_INSTALL_LOCATION,
+                    PackageHelper.APP_INSTALL_AUTO);
     
             loadUISoundEffectsSettings(stmt);
     
