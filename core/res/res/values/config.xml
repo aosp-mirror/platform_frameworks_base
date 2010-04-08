@@ -128,11 +128,15 @@
          in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
     <integer name="config_carDockKeepsScreenOn">1</integer>
 
-    <!-- Control whether being in the desk dock should enable accelerometer based screen orientation -->
+    <!-- Control whether being in the desk dock should enable accelerometer
+         based screen orientation.  Note this should probably default to true
+         like car dock, but we haven't had a chance to test it. -->
     <bool name="config_deskDockEnablesAccelerometer">false</bool>
 
-    <!-- Control whether being in the car dock should enable accelerometer based screen orientation -->
-    <bool name="config_carDockEnablesAccelerometer">false</bool>
+    <!-- Control whether being in the car dock should enable accelerometer based
+         screen orientation.  This defaults to true because putting a device in
+         a car dock make the accelerometer more a physical input (like a lid). -->
+    <bool name="config_carDockEnablesAccelerometer">true</bool>
 
     <!-- Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
