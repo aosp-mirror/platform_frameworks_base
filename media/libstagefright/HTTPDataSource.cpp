@@ -29,74 +29,101 @@
 
 namespace android {
 
-// Given a connected HTTPStream, determine if the given path redirects
-// somewhere else, if so, disconnect the stream, update host path and port
-// accordingly and return true, otherwise return false and leave the stream
-// connected.
-static bool PerformRedirectIfNecessary(
-        HTTPStream *http, const String8 &headers,
-        string *host, string *path, int *port,
-        status_t *result) {
-    String8 request;
-    request.append("GET ");
-    request.append(path->c_str());
-    request.append(" HTTP/1.1\r\n");
-    request.append(headers);
-    request.append("Host: ");
-    request.append(host->c_str());
-    request.append("\r\n\r\n");
+status_t HTTPDataSource::connectWithRedirectsAndRange(off_t rangeStart) {
+    string host = mStartingHost.string();
+    string path = mStartingPath.string();
+    int port = mStartingPort;
 
-    status_t err = http->send(request.string());
+    LOGV("Connecting to host '%s', port %d, path '%s'",
+         host.c_str(), port, path.c_str());
 
-    int http_status;
-    if (err == OK) {
-        err = http->receive_header(&http_status);
+    int numRedirectsRemaining = 5;
+    while (numRedirectsRemaining-- > 0) {
+        status_t err = mHttp->connect(host.c_str(), port);
+
+        if (err != OK) {
+            return err;
+        }
+
+        String8 request;
+        request.append("GET ");
+        request.append(path.c_str());
+        request.append(" HTTP/1.1\r\n");
+        request.append(mHeaders);
+        request.append("Host: ");
+        request.append(host.c_str());
+        request.append("\r\n");
+
+        if (rangeStart > 0) {
+            char range[128];
+            sprintf(range, "Range: bytes=%ld-\r\n", rangeStart);
+
+            request.append(range);
+        }
+
+        request.append("\r\n");
+
+        err = mHttp->send(request.string());
+
+        if (err != OK) {
+            return err;
+        }
+
+        int httpStatus;
+        err = mHttp->receive_header(&httpStatus);
+
+        if (err != OK) {
+            return err;
+        }
+
+        if (httpStatus >= 200 && httpStatus < 300) {
+            return OK;
+        }
+
+        if (httpStatus != 301 && httpStatus != 302) {
+            LOGE("HTTP request failed w/ http status %d", httpStatus);
+            return ERROR_IO;
+        }
+
+        string location;
+        CHECK(mHttp->find_header_value("Location", &location));
+
+        CHECK(string(location, 0, 7) == "http://");
+        location.erase(0, 7);
+        string::size_type slashPos = location.find('/');
+        if (slashPos == string::npos) {
+            slashPos = location.size();
+            location += '/';
+        }
+
+        mHttp->disconnect();
+
+        LOGV("Redirecting to %s\n", location.c_str());
+
+        host = string(location, 0, slashPos);
+
+        string::size_type colonPos = host.find(':');
+        if (colonPos != string::npos) {
+            const char *start = host.c_str() + colonPos + 1;
+            char *end;
+            long tmp = strtol(start, &end, 10);
+            CHECK(end > start && (*end == '\0'));
+
+            port = (tmp >= 0 && tmp < 65536) ? (int)tmp : 80;
+
+            host.erase(colonPos, host.size() - colonPos);
+        } else {
+            port = 80;
+        }
+
+        path = string(location, slashPos);
+
+        mStartingHost = host.c_str();
+        mStartingPath = path.c_str();
+        mStartingPort = port;
     }
 
-    *result = err;
-
-    if (err != OK) {
-        return false;
-    }
-
-    if (http_status != 301 && http_status != 302) {
-        return false;
-    }
-
-    string location;
-    CHECK(http->find_header_value("Location", &location));
-
-    CHECK(string(location, 0, 7) == "http://");
-    location.erase(0, 7);
-    string::size_type slashPos = location.find('/');
-    if (slashPos == string::npos) {
-        slashPos = location.size();
-        location += '/';
-    }
-
-    http->disconnect();
-
-    LOGI("Redirecting to %s\n", location.c_str());
-
-    *host = string(location, 0, slashPos);
-
-    string::size_type colonPos = host->find(':');
-    if (colonPos != string::npos) {
-        const char *start = host->c_str() + colonPos + 1;
-        char *end;
-        long tmp = strtol(start, &end, 10);
-        CHECK(end > start && (*end == '\0'));
-
-        *port = (tmp >= 0 && tmp < 65536) ? (int)tmp : 80;
-
-        host->erase(colonPos, host->size() - colonPos);
-    } else {
-        *port = 80;
-    }
-
-    *path = string(location, slashPos);
-
-    return true;
+    return ERROR_IO;
 }
 
 HTTPDataSource::HTTPDataSource(
@@ -150,10 +177,6 @@ void HTTPDataSource::init(const KeyedVector<String8, String8> *headers) {
     mState = DISCONNECTED;
     mHttp = new HTTPStream;
 
-    mHost = NULL;
-    mPort = 0;
-    mPath = NULL;
-
     initHeaders(headers);
 
     mBuffer = malloc(kBufferSize);
@@ -176,39 +199,17 @@ status_t HTTPDataSource::connect() {
     mBufferOffset = 0;
     mContentLengthValid = false;
 
-    string host = mStartingHost.string();
-    string path = mStartingPath.string();
-    int port = mStartingPort;
+    status_t err = connectWithRedirectsAndRange(0);
 
-    LOGI("Connecting to host '%s', port %d, path '%s'",
-         host.c_str(), port, path.c_str());
-
-    int numRedirectsRemaining = 5;
-    status_t result;
-    do {
-        status_t err = mHttp->connect(host.c_str(), port);
-
-        if (err != OK) {
-            Mutex::Autolock autoLock(mStateLock);
-
-            if (mState != CONNECTING) {
-                LOGV("connect() cancelled");
-            }
-            mState = DISCONNECTED;
-
-            return err;
-        }
-    } while (PerformRedirectIfNecessary(
-                mHttp, mHeaders, &host, &path, &port, &result)
-             && numRedirectsRemaining-- > 0);
-
-    if (result != OK) {
-        // An error occurred while attempting to follow redirections/connect.
+    if (err != OK) {
         Mutex::Autolock autoLock(mStateLock);
 
+        if (mState != CONNECTING) {
+            LOGV("connect() cancelled");
+        }
         mState = DISCONNECTED;
 
-        return result;
+        return err;
     }
 
     string value;
@@ -217,10 +218,6 @@ status_t HTTPDataSource::connect() {
         mContentLength = strtoull(value.c_str(), &end, 10);
         mContentLengthValid = true;
     }
-
-    mHost = strdup(host.c_str());
-    mPort = port;
-    mPath = strdup(path.c_str());
 
     Mutex::Autolock autoLock(mStateLock);
 
@@ -233,6 +230,7 @@ status_t HTTPDataSource::connect() {
     }
 
     mState = CONNECTED;
+
     return OK;
 }
 
@@ -278,57 +276,13 @@ HTTPDataSource::~HTTPDataSource() {
 
     free(mBuffer);
     mBuffer = NULL;
-
-    if (mPath) {
-        free(mPath);
-        mPath = NULL;
-    }
-
-    if (mHost) {
-        free(mHost);
-        mHost = NULL;
-    }
 }
 
 ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
-    char host[128];
-    sprintf(host, "Host: %s\r\n", mHost);
+    status_t err = connectWithRedirectsAndRange(offset);
 
-    char range[128];
-    if (offset > 0) {
-        sprintf(range, "Range: bytes=%d-\r\n", offset);
-    } else {
-        range[0] = '\0';
-    }
-
-    int http_status;
-
-    status_t err;
-    int attempt = 1;
-    for (;;) {
-        if ((err = mHttp->send("GET ")) != OK
-            || (err = mHttp->send(mPath)) != OK
-            || (err = mHttp->send(" HTTP/1.1\r\n")) != OK
-            || (err = mHttp->send(mHeaders.string())) != OK
-            || (err = mHttp->send(host)) != OK
-            || (err = mHttp->send(range)) != OK
-            || (err = mHttp->send("\r\n")) != OK
-            || (err = mHttp->receive_header(&http_status)) != OK) {
-
-            if (attempt == 3) {
-                return err;
-            }
-
-            mHttp->connect(mHost, mPort);
-            ++attempt;
-        } else {
-            break;
-        }
-    }
-
-    if ((http_status / 100) != 2) {
-        LOGE("HTTP request failed, http status = %d", http_status);
-        return UNKNOWN_ERROR;
+    if (err != OK) {
+        return err;
     }
 
     string value;
@@ -407,8 +361,10 @@ rinse_repeat:
     if (num_bytes_received < 0
             || (mContentLengthValid && num_bytes_received < contentLength)) {
         if (mNumRetriesLeft-- > 0) {
-            disconnect();
-            if (connect() == OK) {
+            mHttp->disconnect();
+            mBufferLength = 0;
+            num_bytes_received = connectWithRedirectsAndRange(mBufferOffset);
+            if (num_bytes_received == OK) {
                 LOGI("retrying connection succeeded.");
                 goto rinse_repeat;
             }
