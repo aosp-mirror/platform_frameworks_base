@@ -16,6 +16,8 @@
 
 package android.content;
 
+import com.google.android.collect.Maps;
+
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 
@@ -55,6 +57,7 @@ import android.util.Pair;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -126,14 +129,13 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private static final int INITIALIZATION_UNBIND_DELAY_MS = 5000;
 
-    private static final String SYNC_WAKE_LOCK = "SyncManagerSyncWakeLock";
+    private static final String SYNC_WAKE_LOCK_PREFIX = "SyncWakeLock";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarmWakeLock";
 
     private Context mContext;
 
     private volatile Account[] mAccounts = INITIAL_ACCOUNTS_ARRAY;
 
-    volatile private PowerManager.WakeLock mSyncWakeLock;
     volatile private PowerManager.WakeLock mHandleAlarmWakeLock;
     volatile private boolean mDataConnectionIsConnected = false;
     volatile private boolean mStorageIsLow = false;
@@ -194,6 +196,8 @@ public class SyncManager implements OnAccountsUpdateListener {
     };
 
     private static final Account[] INITIAL_ACCOUNTS_ARRAY = new Account[0];
+
+    private final PowerManager mPowerManager;
 
     public void onAccountsUpdated(Account[] accounts) {
         // remember if this was the first time this was called after an update
@@ -356,15 +360,13 @@ public class SyncManager implements OnAccountsUpdateListener {
         } else {
             mNotificationMgr = null;
         }
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mSyncWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, SYNC_WAKE_LOCK);
-        mSyncWakeLock.setReferenceCounted(false);
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
         // This WakeLock is used to ensure that we stay awake between the time that we receive
         // a sync alarm notification and when we finish processing it. We need to do this
         // because we don't do the work in the alarm handler, rather we do it in a message
         // handler.
-        mHandleAlarmWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+        mHandleAlarmWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 HANDLE_SYNC_ALARM_WAKE_LOCK);
         mHandleAlarmWakeLock.setReferenceCounted(false);
 
@@ -1302,6 +1304,9 @@ public class SyncManager implements OnAccountsUpdateListener {
         public final SyncNotificationInfo mSyncNotificationInfo = new SyncNotificationInfo();
         private Long mAlarmScheduleTime = null;
         public final SyncTimeTracker mSyncTimeTracker = new SyncTimeTracker();
+        private PowerManager.WakeLock mSyncWakeLock;
+        private final HashMap<Pair<String, String>,  PowerManager.WakeLock> mWakeLocks =
+                Maps.newHashMap();
 
         // used to track if we have installed the error notification so that we don't reinstall
         // it if sync is still failing
@@ -1313,6 +1318,18 @@ public class SyncManager implements OnAccountsUpdateListener {
             if (mReadyToRunLatch != null) {
                 mReadyToRunLatch.countDown();
             }
+        }
+
+        private PowerManager.WakeLock getSyncWakeLock(String accountType, String authority) {
+            final Pair<String, String> wakeLockKey = Pair.create(accountType, authority);
+            PowerManager.WakeLock wakeLock = mWakeLocks.get(wakeLockKey);
+            if (wakeLock == null) {
+                final String name = SYNC_WAKE_LOCK_PREFIX + "_" + authority + "_" + accountType;
+                wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, name);
+                wakeLock.setReferenceCounted(false);
+                mWakeLocks.put(wakeLockKey, wakeLock);
+            }
+            return wakeLock;
         }
 
         private void waitUntilReadyToRun() {
@@ -1477,8 +1494,9 @@ public class SyncManager implements OnAccountsUpdateListener {
                 }
             } finally {
                 final boolean isSyncInProgress = mActiveSyncContext != null;
-                if (!isSyncInProgress) {
+                if (!isSyncInProgress && mSyncWakeLock != null) {
                     mSyncWakeLock.release();
+                    mSyncWakeLock = null;
                 }
                 manageSyncNotification();
                 manageErrorNotification();
@@ -1708,7 +1726,26 @@ public class SyncManager implements OnAccountsUpdateListener {
                 return;
             }
 
-            mSyncWakeLock.acquire();
+            // Find the wakelock for this account and authority and store it in mSyncWakeLock.
+            // Be sure to release the previous wakelock so that we don't end up with it being
+            // held until it is used again.
+            // There are a couple tricky things about this code:
+            // - make sure that we acquire the new wakelock before releasing the old one,
+            //   otherwise the device might go to sleep as soon as we release it.
+            // - since we use non-reference counted wakelocks we have to be sure not to do
+            //   the release if the wakelock didn't change. Othewise we would do an
+            //   acquire followed by a release on the same lock, resulting in no lock
+            //   being held.
+            PowerManager.WakeLock oldWakeLock = mSyncWakeLock;
+            try {
+                mSyncWakeLock = getSyncWakeLock(op.account.type, op.authority);
+                mSyncWakeLock.acquire();
+            } finally {
+                if (oldWakeLock != null && oldWakeLock != mSyncWakeLock) {
+                    oldWakeLock.release();
+                }
+            }
+
             // no need to schedule an alarm, as that will be done by our caller.
 
             // the next step will occur when we get either a timeout or a
