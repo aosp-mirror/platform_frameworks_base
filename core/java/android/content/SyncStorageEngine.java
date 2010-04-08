@@ -330,11 +330,11 @@ public class SyncStorageEngine extends Handler {
 
     @Override public void handleMessage(Message msg) {
         if (msg.what == MSG_WRITE_STATUS) {
-            synchronized (mAccounts) {
+            synchronized (mAuthorities) {
                 writeStatusLocked();
             }
         } else if (msg.what == MSG_WRITE_STATISTICS) {
-            synchronized (mAccounts) {
+            synchronized (mAuthorities) {
                 writeStatisticsLocked();
             }
         }

@@ -818,7 +818,7 @@ public class StatusBarPolicy {
 
         final ContentResolver cr = mContext.getContentResolver();
         if (Settings.System.getInt(cr,
-                Settings.System.POWER_SOUNDS_ENABLED, 1) == 1) 
+                Settings.System.POWER_SOUNDS_ENABLED, 1) == 1)
         {
             final String soundPath = Settings.System.getString(cr,
                 Settings.System.LOW_BATTERY_SOUND);
@@ -972,7 +972,8 @@ public class StatusBarPolicy {
         int iconLevel = -1;
         int[] iconList;
 
-        if (!hasService()) {
+        // Display signal strength while in "emergency calls only" mode
+        if (!hasService() && !mServiceState.isEmergencyOnly()) {
             //Slog.d(TAG, "updateSignalStrength: no service");
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {

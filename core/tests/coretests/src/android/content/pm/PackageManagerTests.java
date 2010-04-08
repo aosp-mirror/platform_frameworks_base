@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -327,14 +328,14 @@ public class PackageManagerTests extends AndroidTestCase {
         boolean checkSd = false;
         int setLoc = 0;
         try {
-            setLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION);
+            setLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION);
         } catch (SettingNotFoundException e) {
             failStr(e);
         }
         if (setLoc == 1) {
             int userPref = APP_INSTALL_AUTO;
             try {
-                userPref = Settings.System.getInt(mContext.getContentResolver(), Settings.System.DEFAULT_INSTALL_LOCATION);
+                userPref = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.DEFAULT_INSTALL_LOCATION);
             } catch (SettingNotFoundException e) {
                 failStr(e);
             }
@@ -1218,8 +1219,15 @@ public class PackageManagerTests extends AndroidTestCase {
     private class PackageMoveObserver extends IPackageMoveObserver.Stub {
         public int returnCode;
         private boolean doneFlag = false;
-
+        public String packageName;
+        public PackageMoveObserver(String pkgName) {
+            packageName = pkgName;
+        }
         public void packageMoved(String packageName, int returnCode) {
+            Log.i("DEBUG_MOVE::", "pkg = " + packageName + ", " + "ret = " + returnCode);
+            if (!packageName.equals(this.packageName)) {
+                return;
+            }
             synchronized(this) {
                 this.returnCode = returnCode;
                 doneFlag = true;
@@ -1234,7 +1242,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public boolean invokeMovePackage(String pkgName, int flags,
             GenericReceiver receiver) throws Exception {
-        PackageMoveObserver observer = new PackageMoveObserver();
+        PackageMoveObserver observer = new PackageMoveObserver(pkgName);
         final boolean received = false;
         mContext.registerReceiver(receiver, receiver.filter);
         try {
@@ -1269,13 +1277,33 @@ public class PackageManagerTests extends AndroidTestCase {
             mContext.unregisterReceiver(receiver);
         }
     }
+    private boolean invokeMovePackageFail(String pkgName, int flags, int errCode) throws Exception {
+        PackageMoveObserver observer = new PackageMoveObserver(pkgName);
+        try {
+            // Wait on observer
+            synchronized(observer) {
+                getPm().movePackage(pkgName, observer, flags);
+                long waitTime = 0;
+                while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                    observer.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if(!observer.isDone()) {
+                    throw new Exception("Timed out waiting for pkgmove callback");
+                }
+                assertEquals(errCode, observer.returnCode);
+            }
+        } finally {
+        }
+        return true;
+    }
 
     private int getInstallLoc() {
         boolean userSetting = false;
         int origDefaultLoc = PackageInfo.INSTALL_LOCATION_AUTO;
         try {
-            userSetting = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION) != 0;
-            origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.System.DEFAULT_INSTALL_LOCATION);
+            userSetting = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
+            origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.DEFAULT_INSTALL_LOCATION);
         } catch (SettingNotFoundException e1) {
         }
         return origDefaultLoc;
@@ -1283,33 +1311,39 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private void setInstallLoc(int loc) {
         Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.DEFAULT_INSTALL_LOCATION, loc);
+                Settings.Secure.DEFAULT_INSTALL_LOCATION, loc);
     }
+    /*
+     * Tests for moving apps between internal and external storage
+     */
     /*
      * Utility function that reads a apk bundled as a raw resource
      * copies it into own data directory and invokes
      * PackageManager api to install first and then replace it
      * again.
      */
-    public void moveFromRawResource(int installFlags, int moveFlags,
-            int expRetCode) {
+    
+    private void moveFromRawResource(String outFileName,
+            int rawResId, int installFlags, int moveFlags, boolean cleanUp,
+            boolean fail, int result) {
         int origDefaultLoc = getInstallLoc();
-        setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
-        // Install first
-        InstallParams ip = sampleInstallFromRawResource(installFlags, false);
-        ApplicationInfo oldAppInfo = null;
+        InstallParams ip = null;
         try {
-            oldAppInfo = getPm().getApplicationInfo(ip.pkg.packageName, 0);
-        } catch (NameNotFoundException e) {
-            failStr("Pkg hasnt been installed correctly");
-        }
-
-        // Create receiver based on expRetCode
-        MoveReceiver receiver = new MoveReceiver(ip.pkg.packageName);
-        try {
-            boolean retCode = invokeMovePackage(ip.pkg.packageName, moveFlags,
-                    receiver);
-            if (expRetCode == PackageManager.MOVE_SUCCEEDED) {
+            setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
+            // Install first
+            ip = installFromRawResource("install.apk", rawResId, installFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            ApplicationInfo oldAppInfo = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+            if (fail) {
+                assertTrue(invokeMovePackageFail(ip.pkg.packageName, moveFlags, result));
+                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+                assertNotNull(info);
+                assertEquals(oldAppInfo.flags, info.flags);
+            } else {
+                // Create receiver based on expRetCode
+                MoveReceiver receiver = new MoveReceiver(ip.pkg.packageName);
+                boolean retCode = invokeMovePackage(ip.pkg.packageName, moveFlags,
+                        receiver);
                 assertTrue(retCode);
                 ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
                 assertNotNull(info);
@@ -1318,40 +1352,91 @@ public class PackageManagerTests extends AndroidTestCase {
                 } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
                     assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 }
-            } else {
-                assertFalse(retCode);
-                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
-                assertNotNull(info);
-                assertEquals(oldAppInfo.flags, info.flags);
             }
+        } catch (NameNotFoundException e) {
+            failStr("Pkg hasnt been installed correctly");
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
         } finally {
-            cleanUpInstall(ip);
+            if (ip != null) {
+                cleanUpInstall(ip);
+            }
             // Restore default install location
             setInstallLoc(origDefaultLoc);
         }
     }
+    private void sampleMoveFromRawResource(int installFlags, int moveFlags, boolean fail,
+            int result) {
+        moveFromRawResource("install.apk",
+                R.raw.install, installFlags, moveFlags, true,
+                fail, result);
+    }
 
     public void testMoveAppInternalToExternal() {
-        moveFromRawResource(0, PackageManager.MOVE_EXTERNAL_MEDIA,
-                PackageManager.MOVE_SUCCEEDED);
+        int installFlags = PackageManager.INSTALL_INTERNAL;
+        int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
+        boolean fail = false;
+        int result = PackageManager.MOVE_SUCCEEDED;
+        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
 
     public void testMoveAppInternalToInternal() {
-        moveFromRawResource(0, PackageManager.MOVE_INTERNAL,
-                PackageManager.MOVE_FAILED_INVALID_LOCATION);
+        int installFlags = PackageManager.INSTALL_INTERNAL;
+        int moveFlags = PackageManager.MOVE_INTERNAL;
+        boolean fail = true;
+        int result = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
 
     public void testMoveAppExternalToExternal() {
-        moveFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.MOVE_EXTERNAL_MEDIA,
-                PackageManager.MOVE_FAILED_INVALID_LOCATION);
+        int installFlags = PackageManager.INSTALL_EXTERNAL;
+        int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
+        boolean fail = true;
+        int result = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
     public void testMoveAppExternalToInternal() {
-        moveFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.MOVE_INTERNAL,
-                PackageManager.MOVE_SUCCEEDED);
+        int installFlags = PackageManager.INSTALL_EXTERNAL;
+        int moveFlags = PackageManager.MOVE_INTERNAL;
+        boolean fail = false;
+        int result = PackageManager.MOVE_SUCCEEDED;
+        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
-
+    public void testMoveAppForwardLocked() {
+        int installFlags = PackageManager.INSTALL_FORWARD_LOCK;
+        int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
+        boolean fail = true;
+        int result = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
+        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
+    }
+    public void testMoveAppFailInternalToExternalDelete() {
+        int installFlags = 0;
+        int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
+        boolean fail = true;
+        final int result = PackageManager.MOVE_FAILED_DOESNT_EXIST;
+        
+        int rawResId = R.raw.install;
+        int origDefaultLoc = getInstallLoc();
+        InstallParams ip = null;
+        try {
+            PackageManager pm = getPm();
+            setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
+            // Install first
+            ip = installFromRawResource("install.apk", R.raw.install, installFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            // Delete the package now retaining data.
+            pm.deletePackage(ip.pkg.packageName, null, PackageManager.DONT_DELETE_DATA);
+            assertTrue(invokeMovePackageFail(ip.pkg.packageName, moveFlags, result));
+        } catch (Exception e) {
+            failStr(e);
+        } finally {
+            if (ip != null) {
+                cleanUpInstall(ip);
+            }
+            // Restore default install location
+            setInstallLoc(origDefaultLoc);
+        }
+    }
     /*
      * Test that an install error code is returned when media is unmounted
      * and package installed on sdcard via package manager flag.
@@ -1799,7 +1884,7 @@ public class PackageManagerTests extends AndroidTestCase {
                rFlags,
                true,
                false, -1,
-               PackageInfo.INSTALL_LOCATION_AUTO);
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
    /*
     * The following set of tests check install location for existing
@@ -1878,7 +1963,7 @@ public class PackageManagerTests extends AndroidTestCase {
     */
    private boolean getUserSettingSetInstallLocation() {
        try {
-           return Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION) != 0;
+           return Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
            
        } catch (SettingNotFoundException e1) {
        }
@@ -1887,7 +1972,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
    private void setUserSettingSetInstallLocation(boolean value) {
        Settings.System.putInt(mContext.getContentResolver(),
-               Settings.System.SET_INSTALL_LOCATION, value ? 1 : 0);
+               Settings.Secure.SET_INSTALL_LOCATION, value ? 1 : 0);
    }
    private void setUserX(boolean enable, int userSetting, int iloc) {
        boolean origUserSetting = getUserSettingSetInstallLocation();

@@ -668,7 +668,9 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 }
 
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
-    if (mVideoSource != NULL) {
+    if (mSeeking) {
+        *positionUs = mSeekTimeUs;
+    } else if (mVideoSource != NULL) {
         Mutex::Autolock autoLock(mMiscStateLock);
         *positionUs = mVideoTimeUs;
     } else if (mAudioPlayer != NULL) {
@@ -710,7 +712,6 @@ void AwesomePlayer::seekAudioIfNecessary_l() {
 
         mWatchForAudioSeekComplete = true;
         mWatchForAudioEOS = true;
-        mSeeking = false;
         mSeekNotificationSent = false;
     }
 }
@@ -1001,6 +1002,8 @@ void AwesomePlayer::onCheckAudioStatus() {
             notifyListener_l(MEDIA_SEEK_COMPLETE);
             mSeekNotificationSent = true;
         }
+
+        mSeeking = false;
     }
 
     status_t finalStatus;

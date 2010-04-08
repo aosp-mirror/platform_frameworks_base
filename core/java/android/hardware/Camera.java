@@ -78,7 +78,7 @@ public class Camera {
     private PreviewCallback mPreviewCallback;
     private PictureCallback mPostviewCallback;
     private AutoFocusCallback mAutoFocusCallback;
-    private ZoomCallback mZoomCallback;
+    private OnZoomChangeListener mZoomListener;
     private ErrorCallback mErrorCallback;
     private boolean mOneShot;
     private boolean mWithBuffer;
@@ -96,7 +96,7 @@ public class Camera {
         mJpegCallback = null;
         mPreviewCallback = null;
         mPostviewCallback = null;
-        mZoomCallback = null;
+        mZoomListener = null;
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -270,16 +270,18 @@ public class Camera {
     }
 
     /**
-     * Adds a pre-allocated buffer to the callback buffer queue. Applications
-     * can add one or more buffers to the queue. When a preview frame arrives
-     * and there is still available buffer, buffer will be filled and it is
-     * removed from the queue. Then preview callback is invoked with the buffer.
-     * If a frame arrives and there is no buffer left, the frame is discarded.
-     * Applications should add the buffers back when they finish the processing.
+     * Adds a pre-allocated buffer to the preview callback buffer queue.
+     * Applications can add one or more buffers to the queue. When a preview
+     * frame arrives and there is still available buffer, buffer will be filled
+     * and it is removed from the queue. Then preview callback is invoked with
+     * the buffer. If a frame arrives and there is no buffer left, the frame is
+     * discarded. Applications should add the buffers back when they finish the
+     * processing.
      *
-     * Preview width and height can be determined from getPreviewSize, and bitsPerPixel can be
-     * found from {@link android.hardware.Camera.Parameters#getPreviewFormat()}
-     * and {@link android.graphics.ImageFormat#getBitsPerPixel(int)}.
+     * The image format of the callback buffer can be read from {@link
+     * android.hardware.Camera.Parameters#getPreviewFormat()}. bitsPerPixel can
+     * be read from {@link android.graphics.ImageFormat#getBitsPerPixel(int)}.
+     * Preview width and height can be determined from getPreviewSize.
      *
      * Alternatively, a buffer from a previous callback may be passed in or used
      * to determine the size of new preview frame buffers.
@@ -350,8 +352,8 @@ public class Camera {
                 return;
 
             case CAMERA_MSG_ZOOM:
-                if (mZoomCallback != null) {
-                    mZoomCallback.onZoomUpdate(msg.arg1, msg.arg2 != 0, mCamera);
+                if (mZoomListener != null) {
+                    mZoomListener.onZoomChange(msg.arg1, msg.arg2 != 0, mCamera);
                 }
                 return;
 
@@ -526,15 +528,15 @@ public class Camera {
     }
 
     /**
-     * Zooms to the requested value smoothly. Driver will generate {@link
-     * ZoomCallback} for the zoom value and whether zoom is stopped at the
-     * time. For example, suppose the current zoom is 0 and startSmoothZoom is
-     * called with value 3. Three ZoomCallback will be generated with zoom value
-     * 1, 2, and 3. The applications can call {@link #stopSmoothZoom} to stop
-     * the zoom earlier. The applications should not call startSmoothZoom again
-     * or change the zoom value before zoom stops. If the passing zoom value
-     * equals to the current zoom value, no zoom callback will be generated.
-     * This method is supported if {@link
+     * Zooms to the requested value smoothly. Driver will notify {@link
+     * OnZoomChangeListener} of the zoom value and whether zoom is stopped at
+     * the time. For example, suppose the current zoom is 0 and startSmoothZoom
+     * is called with value 3. Method onZoomChange will be called three times
+     * with zoom value 1, 2, and 3. The applications can call {@link
+     * #stopSmoothZoom} to stop the zoom earlier. The applications should not
+     * call startSmoothZoom again or change the zoom value before zoom stops. If
+     * the passing zoom value equals to the current zoom value, no zoom callback
+     * will be generated. This method is supported if {@link
      * android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
      *
      * @param value zoom value. The valid range is 0 to {@link
@@ -546,8 +548,8 @@ public class Camera {
 
     /**
      * Stops the smooth zoom. The applications should wait for the {@link
-     * ZoomCallback} to know when the zoom is actually stopped. This method is
-     * supported if {@link
+     * OnZoomChangeListener} to know when the zoom is actually stopped. This
+     * method is supported if {@link
      * android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
      *
      * @throws RuntimeException if the method fails.
@@ -570,35 +572,34 @@ public class Camera {
     public native final void setDisplayOrientation(int degrees);
 
     /**
-     * Handles the zoom callback.
-     *
+     * Interface for a callback to be invoked when zoom value changes.
      */
-    public interface ZoomCallback
+    public interface OnZoomChangeListener
     {
         /**
-         * Callback for zoom updates
+         * Called when the zoom value has changed.
          *
          * @param zoomValue the current zoom value. In smooth zoom mode, camera
-         *                  generates this callback for every new zoom value.
+         *                  calls this for every new zoom value.
          * @param stopped whether smooth zoom is stopped. If the value is true,
          *                this is the last zoom update for the application.
          *
          * @param camera  the Camera service object
          * @see #startSmoothZoom(int)
          */
-        void onZoomUpdate(int zoomValue, boolean stopped, Camera camera);
+        void onZoomChange(int zoomValue, boolean stopped, Camera camera);
     };
 
     /**
-     * Registers a callback to be invoked when the zoom value is updated by the
+     * Registers a listener to be notified when the zoom value is updated by the
      * camera driver during smooth zoom.
      *
-     * @param cb the callback to run
+     * @param listener the listener to notify
      * @see #startSmoothZoom(int)
      */
-    public final void setZoomCallback(ZoomCallback cb)
+    public final void setZoomChangeListener(OnZoomChangeListener listener)
     {
-        mZoomCallback = cb;
+        mZoomListener = listener;
     }
 
     // These match the enum in include/ui/Camera.h
@@ -992,7 +993,7 @@ public class Camera {
         /**
          * Gets the supported preview sizes.
          *
-         * @return a List of Size object. This method will always return a list
+         * @return a list of Size object. This method will always return a list
          *         with at least one element.
          */
         public List<Size> getSupportedPreviewSizes() {
@@ -1027,7 +1028,7 @@ public class Camera {
         /**
          * Gets the supported jpeg thumbnail sizes.
          *
-         * @return a List of Size object. This method will always return a list
+         * @return a list of Size object. This method will always return a list
          *         with at least two elements. Size 0,0 (no thumbnail) is always
          *         supported.
          */
@@ -1098,8 +1099,8 @@ public class Camera {
         /**
          * Gets the supported preview frame rates.
          *
-         * @return a List of Integer objects (preview frame rates). null if
-         *         preview frame rate setting is not supported.
+         * @return a list of supported preview frame rates. null if preview
+         *         frame rate setting is not supported.
          */
         public List<Integer> getSupportedPreviewFrameRates() {
             String str = get(KEY_PREVIEW_FRAME_RATE + SUPPORTED_VALUES_SUFFIX);
@@ -1130,11 +1131,11 @@ public class Camera {
         }
 
         /**
-         * Returns the image format for preview pictures got from
+         * Returns the image format for preview frames got from
          * {@link PreviewCallback}.
          *
-         * @return the {@link android.graphics.ImageFormat} int representing
-         *         the preview picture format.
+         * @return the preview format.
+         * @see android.graphics.ImageFormat
          */
         public int getPreviewFormat() {
             return pixelFormatForCameraFormat(get(KEY_PREVIEW_FORMAT));
@@ -1143,8 +1144,9 @@ public class Camera {
         /**
          * Gets the supported preview formats.
          *
-         * @return a List of Integer objects. This method will always return a
-         *         list with at least one element.
+         * @return a list of supported preview formats. This method will always
+         *         return a list with at least one element.
+         * @see android.graphics.ImageFormat
          */
         public List<Integer> getSupportedPreviewFormats() {
             String str = get(KEY_PREVIEW_FORMAT + SUPPORTED_VALUES_SUFFIX);
@@ -1182,8 +1184,8 @@ public class Camera {
         /**
          * Gets the supported picture sizes.
          *
-         * @return a List of Size objects. This method will always return a list
-         *         with at least one element.
+         * @return a list of supported picture sizes. This method will always
+         *         return a list with at least one element.
          */
         public List<Size> getSupportedPictureSizes() {
             String str = get(KEY_PICTURE_SIZE + SUPPORTED_VALUES_SUFFIX);
@@ -1212,7 +1214,8 @@ public class Camera {
         /**
          * Returns the image format for pictures.
          *
-         * @return the ImageFormat int representing the picture format
+         * @return the picture format
+         * @see android.graphics.ImageFormat
          */
         public int getPictureFormat() {
             return pixelFormatForCameraFormat(get(KEY_PICTURE_FORMAT));
@@ -1221,8 +1224,9 @@ public class Camera {
         /**
          * Gets the supported picture formats.
          *
-         * @return a List of Integer objects (values are ImageFormat.XXX). This
-         *         method will always return a list with at least one element.
+         * @return supported picture formats. This method will always return a
+         *         list with at least one element.
+         * @see android.graphics.ImageFormat
          */
         public List<Integer> getSupportedPictureFormats() {
             String str = get(KEY_PICTURE_FORMAT + SUPPORTED_VALUES_SUFFIX);
@@ -1361,8 +1365,17 @@ public class Camera {
         /**
          * Gets the current white balance setting.
          *
-         * @return one of WHITE_BALANCE_XXX string constant. null if white
-         *         balance setting is not supported.
+         * @return current white balance. null if white balance setting is not
+         *         supported.
+         * @see #WHITE_BALANCE_AUTO
+         * @see #WHITE_BALANCE_INCANDESCENT
+         * @see #WHITE_BALANCE_FLUORESCENT
+         * @see #WHITE_BALANCE_WARM_FLUORESCENT
+         * @see #WHITE_BALANCE_DAYLIGHT
+         * @see #WHITE_BALANCE_CLOUDY_DAYLIGHT
+         * @see #WHITE_BALANCE_TWILIGHT
+         * @see #WHITE_BALANCE_SHADE
+         *
          */
         public String getWhiteBalance() {
             return get(KEY_WHITE_BALANCE);
@@ -1371,7 +1384,8 @@ public class Camera {
         /**
          * Sets the white balance.
          *
-         * @param value WHITE_BALANCE_XXX string constant.
+         * @param value new white balance.
+         * @see #getWhiteBalance()
          */
         public void setWhiteBalance(String value) {
             set(KEY_WHITE_BALANCE, value);
@@ -1380,8 +1394,9 @@ public class Camera {
         /**
          * Gets the supported white balance.
          *
-         * @return a List of WHITE_BALANCE_XXX string constants. null if white
-         *         balance setting is not supported.
+         * @return a list of supported white balance. null if white balance
+         *         setting is not supported.
+         * @see #getWhiteBalance()
          */
         public List<String> getSupportedWhiteBalance() {
             String str = get(KEY_WHITE_BALANCE + SUPPORTED_VALUES_SUFFIX);
@@ -1391,8 +1406,17 @@ public class Camera {
         /**
          * Gets the current color effect setting.
          *
-         * @return one of EFFECT_XXX string constant. null if color effect
+         * @return current color effect. null if color effect
          *         setting is not supported.
+         * @see #EFFECT_NONE
+         * @see #EFFECT_MONO
+         * @see #EFFECT_NEGATIVE
+         * @see #EFFECT_SOLARIZE
+         * @see #EFFECT_SEPIA
+         * @see #EFFECT_POSTERIZE
+         * @see #EFFECT_WHITEBOARD
+         * @see #EFFECT_BLACKBOARD
+         * @see #EFFECT_AQUA
          */
         public String getColorEffect() {
             return get(KEY_EFFECT);
@@ -1401,7 +1425,8 @@ public class Camera {
         /**
          * Sets the current color effect setting.
          *
-         * @param value EFFECT_XXX string constants.
+         * @param value new color effect.
+         * @see #getColorEffect()
          */
         public void setColorEffect(String value) {
             set(KEY_EFFECT, value);
@@ -1410,8 +1435,9 @@ public class Camera {
         /**
          * Gets the supported color effects.
          *
-         * @return a List of EFFECT_XXX string constants. null if color effect
+         * @return a list of supported color effects. null if color effect
          *         setting is not supported.
+         * @see #getColorEffect()
          */
         public List<String> getSupportedColorEffects() {
             String str = get(KEY_EFFECT + SUPPORTED_VALUES_SUFFIX);
@@ -1422,8 +1448,12 @@ public class Camera {
         /**
          * Gets the current antibanding setting.
          *
-         * @return one of ANTIBANDING_XXX string constant. null if antibanding
-         *         setting is not supported.
+         * @return current antibanding. null if antibanding setting is not
+         *         supported.
+         * @see #ANTIBANDING_AUTO
+         * @see #ANTIBANDING_50HZ
+         * @see #ANTIBANDING_60HZ
+         * @see #ANTIBANDING_OFF
          */
         public String getAntibanding() {
             return get(KEY_ANTIBANDING);
@@ -1432,7 +1462,8 @@ public class Camera {
         /**
          * Sets the antibanding.
          *
-         * @param antibanding ANTIBANDING_XXX string constant.
+         * @param antibanding new antibanding value.
+         * @see #getAntibanding()
          */
         public void setAntibanding(String antibanding) {
             set(KEY_ANTIBANDING, antibanding);
@@ -1441,8 +1472,9 @@ public class Camera {
         /**
          * Gets the supported antibanding values.
          *
-         * @return a List of ANTIBANDING_XXX string constants. null if
-         *         antibanding setting is not supported.
+         * @return a list of supported antibanding values. null if antibanding
+         *         setting is not supported.
+         * @see #getAntibanding()
          */
         public List<String> getSupportedAntibanding() {
             String str = get(KEY_ANTIBANDING + SUPPORTED_VALUES_SUFFIX);
@@ -1454,6 +1486,21 @@ public class Camera {
          *
          * @return one of SCENE_MODE_XXX string constant. null if scene mode
          *         setting is not supported.
+         * @see #SCENE_MODE_AUTO
+         * @see #SCENE_MODE_ACTION
+         * @see #SCENE_MODE_PORTRAIT
+         * @see #SCENE_MODE_LANDSCAPE
+         * @see #SCENE_MODE_NIGHT
+         * @see #SCENE_MODE_NIGHT_PORTRAIT
+         * @see #SCENE_MODE_THEATRE
+         * @see #SCENE_MODE_BEACH
+         * @see #SCENE_MODE_SNOW
+         * @see #SCENE_MODE_SUNSET
+         * @see #SCENE_MODE_STEADYPHOTO
+         * @see #SCENE_MODE_FIREWORKS
+         * @see #SCENE_MODE_SPORTS
+         * @see #SCENE_MODE_PARTY
+         * @see #SCENE_MODE_CANDLELIGHT
          */
         public String getSceneMode() {
             return get(KEY_SCENE_MODE);
@@ -1466,7 +1513,8 @@ public class Camera {
          * applications should call getParameters to know if some parameters are
          * changed.
          *
-         * @param value SCENE_MODE_XXX string constants.
+         * @param value scene mode.
+         * @see #getSceneMode()
          */
         public void setSceneMode(String value) {
             set(KEY_SCENE_MODE, value);
@@ -1475,8 +1523,9 @@ public class Camera {
         /**
          * Gets the supported scene modes.
          *
-         * @return a List of SCENE_MODE_XXX string constant. null if scene mode
-         *         setting is not supported.
+         * @return a list of supported scene modes. null if scene mode setting
+         *         is not supported.
+         * @see #getSceneMode()
          */
         public List<String> getSupportedSceneModes() {
             String str = get(KEY_SCENE_MODE + SUPPORTED_VALUES_SUFFIX);
@@ -1486,8 +1535,13 @@ public class Camera {
         /**
          * Gets the current flash mode setting.
          *
-         * @return one of FLASH_MODE_XXX string constant. null if flash mode
-         *         setting is not supported.
+         * @return current flash mode. null if flash mode setting is not
+         *         supported.
+         * @see #FLASH_MODE_OFF
+         * @see #FLASH_MODE_AUTO
+         * @see #FLASH_MODE_ON
+         * @see #FLASH_MODE_RED_EYE
+         * @see #FLASH_MODE_TORCH
          */
         public String getFlashMode() {
             return get(KEY_FLASH_MODE);
@@ -1496,7 +1550,8 @@ public class Camera {
         /**
          * Sets the flash mode.
          *
-         * @param value FLASH_MODE_XXX string constants.
+         * @param value flash mode.
+         * @see #getFlashMode()
          */
         public void setFlashMode(String value) {
             set(KEY_FLASH_MODE, value);
@@ -1505,8 +1560,9 @@ public class Camera {
         /**
          * Gets the supported flash modes.
          *
-         * @return a List of FLASH_MODE_XXX string constants. null if flash mode
-         *         setting is not supported.
+         * @return a list of supported flash modes. null if flash mode setting
+         *         is not supported.
+         * @see #getFlashMode()
          */
         public List<String> getSupportedFlashModes() {
             String str = get(KEY_FLASH_MODE + SUPPORTED_VALUES_SUFFIX);
@@ -1516,11 +1572,15 @@ public class Camera {
         /**
          * Gets the current focus mode setting.
          *
-         * @return one of FOCUS_MODE_XXX string constant. If the camera does not
-         *         support auto-focus, this should return {@link
-         *         #FOCUS_MODE_FIXED}. If the focus mode is not FOCUS_MODE_FIXED
-         *         or {@link #FOCUS_MODE_INFINITY}, applications should call
-         *         {@link #autoFocus(AutoFocusCallback)} to start the focus.
+         * @return current focus mode. If the camera does not support
+         *         auto-focus, this should return {@link #FOCUS_MODE_FIXED}. If
+         *         the focus mode is not FOCUS_MODE_FIXED or {@link
+         *         #FOCUS_MODE_INFINITY}, applications should call {@link
+         *         #autoFocus(AutoFocusCallback)} to start the focus.
+         * @see #FOCUS_MODE_AUTO
+         * @see #FOCUS_MODE_INFINITY
+         * @see #FOCUS_MODE_MACRO
+         * @see #FOCUS_MODE_FIXED
          */
         public String getFocusMode() {
             return get(KEY_FOCUS_MODE);
@@ -1529,7 +1589,8 @@ public class Camera {
         /**
          * Sets the focus mode.
          *
-         * @param value FOCUS_MODE_XXX string constants.
+         * @param value focus mode.
+         * @see #getFocusMode()
          */
         public void setFocusMode(String value) {
             set(KEY_FOCUS_MODE, value);
@@ -1538,8 +1599,9 @@ public class Camera {
         /**
          * Gets the supported focus modes.
          *
-         * @return a List of FOCUS_MODE_XXX string constants. This method will
-         *         always return a list with at least one element.
+         * @return a list of supported focus modes. This method will always
+         *         return a list with at least one element.
+         * @see #getFocusMode()
          */
         public List<String> getSupportedFocusModes() {
             String str = get(KEY_FOCUS_MODE + SUPPORTED_VALUES_SUFFIX);

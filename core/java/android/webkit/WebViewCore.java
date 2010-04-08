@@ -1705,6 +1705,7 @@ final class WebViewCore {
         Region mInvalRegion;
         Point mViewPoint;
         Point mWidthHeight;
+        int mMinPrefWidth;
         RestoreState mRestoreState; // only non-null if it is for the first
                                     // picture set after the first layout
         boolean mFocusSizeChanged;
@@ -1724,6 +1725,13 @@ final class WebViewCore {
             // layout.
             draw.mFocusSizeChanged = nativeFocusBoundsChanged();
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
+            if (mSettings.getUseWideViewPort()) {
+                draw.mMinPrefWidth = Math.max(
+                        mViewportWidth == -1 ? WebView.DEFAULT_VIEWPORT_WIDTH
+                                : (mViewportWidth == 0 ? mCurrentViewWidth
+                                        : mViewportWidth),
+                        nativeGetContentMinPrefWidth());
+            }
             if (mRestoreState != null) {
                 draw.mRestoreState = mRestoreState;
                 mRestoreState = null;
@@ -1752,9 +1760,9 @@ final class WebViewCore {
 
     final DrawFilter mZoomFilter =
                     new PaintFlagsDrawFilter(ZOOM_BITS, Paint.LINEAR_TEXT_FLAG);
-    final DrawFilter mScrollFilter = null;
-    // If we need to trade more speed for less quality on slower devices
-    // use this: new PaintFlagsDrawFilter(SCROLL_BITS, 0);
+    // If we need to trade better quality for speed, set mScrollFilter to null
+    final DrawFilter mScrollFilter =
+                new PaintFlagsDrawFilter(SCROLL_BITS, 0);
 
     /* package */ void drawContentPicture(Canvas canvas, int color,
                                           boolean animatingZoom,
@@ -2077,7 +2085,7 @@ final class WebViewCore {
             restoreState.mDefaultScale = adjust;
             // as mViewportWidth is not 0, it is not mobile site.
             restoreState.mMobileSite = false;
-            // for non-mobile site, we don't need contentWidth, set it as 0
+            // for non-mobile site, we don't need minPrefWidth, set it as 0
             restoreState.mScrollX = 0;
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.UPDATE_ZOOM_RANGE, restoreState).sendToTarget();
