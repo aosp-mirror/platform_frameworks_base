@@ -3295,7 +3295,43 @@ public final class Settings {
          * @hide
          */
         public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
-        
+
+        /**
+         * The bandwidth throttle polling freqency in seconds
+         * @hide
+         */
+        public static final String THROTTLE_POLLING_SEC = "throttle_polling_sec";
+
+        /**
+         * The bandwidth throttle threshold (long)
+         * @hide
+         */
+        public static final String THROTTLE_THRESHOLD = "throttle_threshold";
+
+        /**
+         * The bandwidth throttle value (kbps)
+         * @hide
+         */
+        public static final String THROTTLE_VALUE = "throttle_value";
+
+        /**
+         * The bandwidth throttle reset calendar day (1-28)
+         * @hide
+         */
+        public static final String THROTTLE_RESET_DAY = "throttle_reset_day";
+
+        /**
+         * The throttling notifications we should send
+         * @hide
+         */
+        public static final String THROTTLE_NOTIFICATION_TYPE = "throttle_notification_type";
+
+        /**
+         * The interface we throttle
+         * @hide
+         */
+        public static final String THROTTLE_IFACE = "throttle_iface";
+
         /**
          * @hide
          */
