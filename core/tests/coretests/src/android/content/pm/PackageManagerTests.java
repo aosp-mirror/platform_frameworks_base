@@ -328,14 +328,14 @@ public class PackageManagerTests extends AndroidTestCase {
         boolean checkSd = false;
         int setLoc = 0;
         try {
-            setLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION);
+            setLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION);
         } catch (SettingNotFoundException e) {
             failStr(e);
         }
         if (setLoc == 1) {
             int userPref = APP_INSTALL_AUTO;
             try {
-                userPref = Settings.System.getInt(mContext.getContentResolver(), Settings.System.DEFAULT_INSTALL_LOCATION);
+                userPref = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.DEFAULT_INSTALL_LOCATION);
             } catch (SettingNotFoundException e) {
                 failStr(e);
             }
@@ -1302,8 +1302,8 @@ public class PackageManagerTests extends AndroidTestCase {
         boolean userSetting = false;
         int origDefaultLoc = PackageInfo.INSTALL_LOCATION_AUTO;
         try {
-            userSetting = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION) != 0;
-            origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.System.DEFAULT_INSTALL_LOCATION);
+            userSetting = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
+            origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.DEFAULT_INSTALL_LOCATION);
         } catch (SettingNotFoundException e1) {
         }
         return origDefaultLoc;
@@ -1311,7 +1311,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private void setInstallLoc(int loc) {
         Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.DEFAULT_INSTALL_LOCATION, loc);
+                Settings.Secure.DEFAULT_INSTALL_LOCATION, loc);
     }
     /*
      * Tests for moving apps between internal and external storage
@@ -1963,7 +1963,7 @@ public class PackageManagerTests extends AndroidTestCase {
     */
    private boolean getUserSettingSetInstallLocation() {
        try {
-           return Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION) != 0;
+           return Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
            
        } catch (SettingNotFoundException e1) {
        }
@@ -1972,7 +1972,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
    private void setUserSettingSetInstallLocation(boolean value) {
        Settings.System.putInt(mContext.getContentResolver(),
-               Settings.System.SET_INSTALL_LOCATION, value ? 1 : 0);
+               Settings.Secure.SET_INSTALL_LOCATION, value ? 1 : 0);
    }
    private void setUserX(boolean enable, int userSetting, int iloc) {
        boolean origUserSetting = getUserSettingSetInstallLocation();

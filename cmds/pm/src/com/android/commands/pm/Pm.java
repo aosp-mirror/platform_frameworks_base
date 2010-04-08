@@ -16,6 +16,8 @@
 
 package com.android.commands.pm;
 
+import com.android.internal.content.PackageHelper;
+
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
@@ -33,6 +35,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -104,6 +107,16 @@ public final class Pm {
 
         if ("disable".equals(op)) {
             runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+            return;
+        }
+
+        if ("setInstallLocation".equals(op)) {
+            runSetInstallLocation();
+            return;
+        }
+
+        if ("getInstallLocation".equals(op)) {
+            runGetInstallLocation();
             return;
         }
 
@@ -575,6 +588,51 @@ public final class Pm {
         return Integer.toString(result);
     }
 
+    private void runSetInstallLocation() {
+        int loc;
+
+        String arg = nextArg();
+        if (arg == null) {
+            System.err.println("Error: no install location specified.");
+            showUsage();
+            return;
+        }
+        try {
+            loc = Integer.parseInt(arg);
+        } catch (NumberFormatException e) {
+            System.err.println("Error: install location has to be a number.");
+            showUsage();
+            return;
+        }
+        try {
+            if (!mPm.setInstallLocation(loc)) {
+                System.err.println("Error: install location has to be a number.");
+                showUsage();
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void runGetInstallLocation() {
+        try {
+            int loc = mPm.getInstallLocation();
+            String locStr = "invalid";
+            if (loc == PackageHelper.APP_INSTALL_AUTO) {
+                locStr = "auto";
+            } else if (loc == PackageHelper.APP_INSTALL_INTERNAL) {
+                locStr = "internal";
+            } else if (loc == PackageHelper.APP_INSTALL_EXTERNAL) {
+                locStr = "external";
+            }
+            System.out.println(loc + "[" + locStr + "]");
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
     private void runInstall() {
         int installFlags = 0;
         String installerPackageName = null;
@@ -832,6 +890,7 @@ public final class Pm {
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
+        System.err.println("       pm setInstallLocation [0/auto] [1/internal] [2/external]");
         System.err.println("");
         System.err.println("The list packages command prints all packages.  Options:");
         System.err.println("  -f: see their associated file.");
@@ -867,10 +926,17 @@ public final class Pm {
         System.err.println("  -k: keep the data and cache directories around.");
         System.err.println("after the package removal.");
         System.err.println("");
-        System.err.println("The mountsd command simulates mounting/unmounting sdcard.Options:");
-        System.err.println("  -m: true or false.");
-        System.err.println("");
         System.err.println("The enable and disable commands change the enabled state of");
         System.err.println("a given package or component (written as \"package/class\").");
+        System.err.println("");
+        System.err.println("The getInstallLocation command gets the current install location");
+        System.err.println("  0 [auto]: Let system decide the best location");
+        System.err.println("  1 [internal]: Install on internal device storage");
+        System.err.println("  2 [external]: Install on external media");
+        System.err.println("");
+        System.err.println("The setInstallLocation command changes the default install location");
+        System.err.println("  0 [auto]: Let system decide the best location");
+        System.err.println("  1 [internal]: Install on internal device storage");
+        System.err.println("  2 [external]: Install on external media");
     }
 }
