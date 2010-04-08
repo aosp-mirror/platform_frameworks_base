@@ -19,7 +19,7 @@ package com.android.internal.policy.impl;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.IStatusBar;
+import android.app.IStatusBarService;
 import android.app.IUiModeManager;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
@@ -1145,7 +1145,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // this key doesn't exist on current hardware, but if a device
                 // didn't have a touchscreen, it would want one of these to open
                 // the status bar.
-                IStatusBar sbs = IStatusBar.Stub.asInterface(ServiceManager.getService("statusbar"));
+                IStatusBarService sbs = IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar"));
                 if (sbs != null) {
                     try {
                         sbs.toggle();
@@ -1537,7 +1537,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         
         if (changes != 0 && hiding) {
-            IStatusBar sbs = IStatusBar.Stub.asInterface(ServiceManager.getService("statusbar"));
+            IStatusBarService sbs = IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar"));
             if (sbs != null) {
                 try {
                     // Make sure the window shade is hidden.
