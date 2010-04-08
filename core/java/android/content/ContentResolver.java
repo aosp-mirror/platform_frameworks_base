@@ -1307,7 +1307,7 @@ public abstract class ContentResolver {
         String blockingPackage = ActivityThread.currentPackageName();
 
         EventLog.writeEvent(
-            EventLogTags.CONTENT_QUERY_OPERATION,
+            EventLogTags.CONTENT_QUERY_SAMPLE,
             uri.toString(),
             projectionBuffer.toString(),
             selection != null ? selection : "",
@@ -1329,7 +1329,7 @@ public abstract class ContentResolver {
         }
         String blockingPackage = ActivityThread.currentPackageName();
         EventLog.writeEvent(
-            EventLogTags.CONTENT_UPDATE_OPERATION,
+            EventLogTags.CONTENT_UPDATE_SAMPLE,
             uri.toString(),
             operation,
             selection != null ? selection : "",
