@@ -2496,16 +2496,25 @@ class PackageManagerService extends IPackageManager.Stub {
     private boolean collectCertificatesLI(PackageParser pp, PackageSetting ps,
             PackageParser.Package pkg, File srcFile, int parseFlags) {
         if (GET_CERTIFICATES) {
-            if (ps == null || !ps.codePath.equals(srcFile)
-                    || ps.getTimeStamp() != srcFile.lastModified()) {
-                Log.i(TAG, srcFile.toString() + " changed; collecting certs");
-                if (!pp.collectCertificates(pkg, parseFlags)) {
-                    mLastScanError = pp.getParseError();
-                    return false;
+            if (ps != null
+                    && ps.codePath.equals(srcFile)
+                    && ps.getTimeStamp() == srcFile.lastModified()) {
+                if (ps.signatures.mSignatures != null
+                        && ps.signatures.mSignatures.length != 0) {
+                    // Optimization: reuse the existing cached certificates
+                    // if the package appears to be unchanged.
+                    pkg.mSignatures = ps.signatures.mSignatures;
+                    return true;
                 }
+                
+                Slog.w(TAG, "PackageSetting for " + ps.name + " is missing signatures.  Collecting certs again to recover them.");
             } else {
-                // Lets implicitly assign existing certificates.
-                pkg.mSignatures = ps.signatures.mSignatures;
+                Log.i(TAG, srcFile.toString() + " changed; collecting certs");
+            }
+            
+            if (!pp.collectCertificates(pkg, parseFlags)) {
+                mLastScanError = pp.getParseError();
+                return false;
             }
         }
         return true;
