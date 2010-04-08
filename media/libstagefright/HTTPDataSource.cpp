@@ -35,7 +35,8 @@ namespace android {
 // connected.
 static bool PerformRedirectIfNecessary(
         HTTPStream *http, const String8 &headers,
-        string *host, string *path, int *port) {
+        string *host, string *path, int *port,
+        status_t *result) {
     String8 request;
     request.append("GET ");
     request.append(path->c_str());
@@ -51,6 +52,8 @@ static bool PerformRedirectIfNecessary(
     if (err == OK) {
         err = http->receive_header(&http_status);
     }
+
+    *result = err;
 
     if (err != OK) {
         return false;
@@ -181,6 +184,7 @@ status_t HTTPDataSource::connect() {
          host.c_str(), port, path.c_str());
 
     int numRedirectsRemaining = 5;
+    status_t result;
     do {
         status_t err = mHttp->connect(host.c_str(), port);
 
@@ -194,8 +198,18 @@ status_t HTTPDataSource::connect() {
 
             return err;
         }
-    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port)
+    } while (PerformRedirectIfNecessary(
+                mHttp, mHeaders, &host, &path, &port, &result)
              && numRedirectsRemaining-- > 0);
+
+    if (result != OK) {
+        // An error occurred while attempting to follow redirections/connect.
+        Mutex::Autolock autoLock(mStateLock);
+
+        mState = DISCONNECTED;
+
+        return result;
+    }
 
     string value;
     if (mHttp->find_header_value("Content-Length", &value)) {
@@ -282,7 +296,7 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
 
     char range[128];
     if (offset > 0) {
-        sprintf(range, "Range: bytes=%d-\r\n\r\n", offset);
+        sprintf(range, "Range: bytes=%d-\r\n", offset);
     } else {
         range[0] = '\0';
     }
@@ -313,6 +327,7 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
     }
 
     if ((http_status / 100) != 2) {
+        LOGE("HTTP request failed, http status = %d", http_status);
         return UNKNOWN_ERROR;
     }
 
@@ -348,6 +363,10 @@ rinse_repeat:
         }
 
         memcpy(data, (const char *)mBuffer + (offset - mBufferOffset), copy);
+
+        if (copy < size) {
+            LOGV("short read (1), returning %d vs. %d requested", copy, size);
+        }
 
         return copy;
     }
