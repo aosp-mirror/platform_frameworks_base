@@ -464,6 +464,7 @@ class ServerThread extends Thread {
         }
 
         // These are needed to propagate to the runnable below.
+        final StatusBarService statusBarF = statusBar;
         final BatteryService batteryF = battery;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
@@ -485,6 +486,7 @@ class ServerThread extends Thread {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 
+                if (statusBarF != null) statusBarF.systemReady2();
                 if (batteryF != null) batteryF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
