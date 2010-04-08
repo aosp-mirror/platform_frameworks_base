@@ -362,7 +362,8 @@ public class ThrottleService extends IThrottleManager.Stub {
 
                     postNotification(com.android.internal.R.string.throttled_notification_title,
                             com.android.internal.R.string.throttled_notification_message,
-                            com.android.internal.R.drawable.stat_sys_throttled);
+                            com.android.internal.R.drawable.stat_sys_throttled,
+                            Notification.FLAG_ONGOING_EVENT);
 
                     Intent broadcast = new Intent(ThrottleManager.THROTTLE_ACTION);
                     broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL, mPolicyThrottleValue);
@@ -380,7 +381,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                                 throttle_warning_notification_title,
                                 com.android.internal.R.string.
                                 throttle_warning_notification_message,
-                                com.android.internal.R.drawable.stat_sys_throttle_warning);
+                                com.android.internal.R.drawable.stat_sys_throttle_warning,
+                                0);
                     } else {
                         mWarningNotificationSent =false;
                     }
@@ -388,7 +390,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             }
         }
 
-        private void postNotification(int titleInt, int messageInt, int icon) {
+        private void postNotification(int titleInt, int messageInt, int icon, int flags) {
             Intent intent = new Intent();
             // TODO - fix up intent
             intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
@@ -405,8 +407,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                 // TODO -  fixup icon
                 mThrottlingNotification.icon = icon;
                 mThrottlingNotification.defaults &= ~Notification.DEFAULT_SOUND;
-//                mThrottlingNotification.flags = Notification.FLAG_ONGOING_EVENT;
             }
+            mThrottlingNotification.flags = flags;
             mThrottlingNotification.tickerText = title;
             mThrottlingNotification.setLatestEventInfo(mContext, title, message, pi);
 
