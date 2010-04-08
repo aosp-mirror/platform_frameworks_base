@@ -105,7 +105,7 @@ sp<DataSource> DataSource::CreateFromURI(
         if (httpSource->connect() != OK) {
             return NULL;
         }
-        source = new CachingDataSource(httpSource, 32 * 1024, 20);
+        source = new CachingDataSource(httpSource, 64 * 1024, 10);
     } else {
         // Assume it's a filename.
         source = new FileSource(uri);
