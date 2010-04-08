@@ -313,6 +313,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                                                 "Need BLUETOOTH_ADMIN permission");
         if (DBG) log("connectSink(" + device + ")");
 
+        if (!mBluetoothService.isEnabled()) return false;
+
         // ignore if there are any active sinks
         if (lookupSinksMatchingStates(new int[] {
                 BluetoothA2dp.STATE_CONNECTING,
