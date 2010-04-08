@@ -77,9 +77,6 @@ private:
     int mStartingPort;
 
     HTTPStream *mHttp;
-    char *mHost;
-    int mPort;
-    char *mPath;
 
     void *mBuffer;
     size_t mBufferLength;
@@ -94,6 +91,8 @@ private:
 
     ssize_t sendRangeRequest(size_t offset);
     void initHeaders(const KeyedVector<String8, String8> *overrides);
+
+    status_t connectWithRedirectsAndRange(off_t rangeStart);
 
     HTTPDataSource(const HTTPDataSource &);
     HTTPDataSource &operator=(const HTTPDataSource &);
