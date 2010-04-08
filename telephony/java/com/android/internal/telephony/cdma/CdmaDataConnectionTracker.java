@@ -26,9 +26,9 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
-import android.os.INetStatService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -175,8 +175,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         p.mSST.registerForRoamingOn(this, EVENT_ROAMING_ON, null);
         p.mSST.registerForRoamingOff(this, EVENT_ROAMING_OFF, null);
         p.mCM.registerForCdmaOtaProvision(this, EVENT_CDMA_OTA_PROVISION, null);
-
-        this.netstat = INetStatService.Stub.asInterface(ServiceManager.getService("netstat"));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_RECONNECT_ALARM);
@@ -495,78 +493,70 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             preTxPkts = txPkts;
             preRxPkts = rxPkts;
 
-            // check if netstat is still valid to avoid NullPointerException after NTC
-            if (netstat != null) {
-                try {
-                    txPkts = netstat.getMobileTxPackets();
-                    rxPkts = netstat.getMobileRxPackets();
-                } catch (RemoteException e) {
-                    txPkts = 0;
-                    rxPkts = 0;
-                }
+            txPkts = TrafficStats.getMobileTxPackets();
+            rxPkts = TrafficStats.getMobileRxPackets();
 
-                //Log.d(LOG_TAG, "rx " + String.valueOf(rxPkts) + " tx " + String.valueOf(txPkts));
+            //Log.d(LOG_TAG, "rx " + String.valueOf(rxPkts) + " tx " + String.valueOf(txPkts));
 
-                if (netStatPollEnabled && (preTxPkts > 0 || preRxPkts > 0)) {
-                    sent = txPkts - preTxPkts;
-                    received = rxPkts - preRxPkts;
+            if (netStatPollEnabled && (preTxPkts > 0 || preRxPkts > 0)) {
+                sent = txPkts - preTxPkts;
+                received = rxPkts - preRxPkts;
 
-                    if ( sent > 0 && received > 0 ) {
-                        sentSinceLastRecv = 0;
-                        newActivity = Activity.DATAINANDOUT;
-                    } else if (sent > 0 && received == 0) {
-                        if (phone.getState()  == Phone.State.IDLE) {
-                            sentSinceLastRecv += sent;
-                        } else {
-                            sentSinceLastRecv = 0;
-                        }
-                        newActivity = Activity.DATAOUT;
-                    } else if (sent == 0 && received > 0) {
-                        sentSinceLastRecv = 0;
-                        newActivity = Activity.DATAIN;
-                    } else if (sent == 0 && received == 0) {
-                        newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
+                if ( sent > 0 && received > 0 ) {
+                    sentSinceLastRecv = 0;
+                    newActivity = Activity.DATAINANDOUT;
+                } else if (sent > 0 && received == 0) {
+                    if (phone.getState()  == Phone.State.IDLE) {
+                        sentSinceLastRecv += sent;
                     } else {
                         sentSinceLastRecv = 0;
-                        newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
                     }
-
-                    if (activity != newActivity) {
-                        activity = newActivity;
-                        phone.notifyDataActivity();
-                    }
-                }
-
-                if (sentSinceLastRecv >= NUMBER_SENT_PACKETS_OF_HANG) {
-                    // Packets sent without ack exceeded threshold.
-
-                    if (mNoRecvPollCount == 0) {
-                        EventLog.writeEvent(
-                                EventLogTags.PDP_RADIO_RESET_COUNTDOWN_TRIGGERED,
-                                sentSinceLastRecv);
-                    }
-
-                    if (mNoRecvPollCount < NO_RECV_POLL_LIMIT) {
-                        mNoRecvPollCount++;
-                        // Slow down the poll interval to let things happen
-                        netStatPollPeriod = POLL_NETSTAT_SLOW_MILLIS;
-                    } else {
-                        if (DBG) log("Sent " + String.valueOf(sentSinceLastRecv) +
-                                            " pkts since last received");
-                        // We've exceeded the threshold.  Restart the radio.
-                        netStatPollEnabled = false;
-                        stopNetStatPoll();
-                        restartRadio();
-                        EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, NO_RECV_POLL_LIMIT);
-                    }
+                    newActivity = Activity.DATAOUT;
+                } else if (sent == 0 && received > 0) {
+                    sentSinceLastRecv = 0;
+                    newActivity = Activity.DATAIN;
+                } else if (sent == 0 && received == 0) {
+                    newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
                 } else {
-                    mNoRecvPollCount = 0;
-                    netStatPollPeriod = POLL_NETSTAT_MILLIS;
+                    sentSinceLastRecv = 0;
+                    newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
                 }
 
-                if (netStatPollEnabled) {
-                    mDataConnectionTracker.postDelayed(this, netStatPollPeriod);
+                if (activity != newActivity) {
+                    activity = newActivity;
+                    phone.notifyDataActivity();
                 }
+            }
+
+            if (sentSinceLastRecv >= NUMBER_SENT_PACKETS_OF_HANG) {
+                // Packets sent without ack exceeded threshold.
+
+                if (mNoRecvPollCount == 0) {
+                    EventLog.writeEvent(
+                            EventLogTags.PDP_RADIO_RESET_COUNTDOWN_TRIGGERED,
+                            sentSinceLastRecv);
+                }
+
+                if (mNoRecvPollCount < NO_RECV_POLL_LIMIT) {
+                    mNoRecvPollCount++;
+                    // Slow down the poll interval to let things happen
+                    netStatPollPeriod = POLL_NETSTAT_SLOW_MILLIS;
+                } else {
+                    if (DBG) log("Sent " + String.valueOf(sentSinceLastRecv) +
+                                        " pkts since last received");
+                    // We've exceeded the threshold.  Restart the radio.
+                    netStatPollEnabled = false;
+                    stopNetStatPoll();
+                    restartRadio();
+                    EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, NO_RECV_POLL_LIMIT);
+                }
+            } else {
+                mNoRecvPollCount = 0;
+                netStatPollPeriod = POLL_NETSTAT_MILLIS;
+            }
+
+            if (netStatPollEnabled) {
+                mDataConnectionTracker.postDelayed(this, netStatPollPeriod);
             }
         }
     };

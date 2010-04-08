@@ -19,7 +19,6 @@ package com.android.internal.telephony;
 import android.app.PendingIntent;
 import android.os.AsyncResult;
 import android.os.Handler;
-import android.os.INetStatService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -172,7 +171,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected Handler mDataConnectionTracker = null;
 
 
-    protected INetStatService netstat;
     protected long txPkts, rxPkts, sentSinceLastRecv;
     protected int netStatPollPeriod;
     protected int mNoRecvPollCount = 0;
