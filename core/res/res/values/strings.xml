@@ -2260,11 +2260,11 @@
 
     <!-- Strings for throttling notification -->
     <!-- Shown when the user is in danger of being throttled -->
-    <string name="throttle_warning_notification_title">Excessive data use warning</string>
-    <string name="throttle_warning_notification_message">If your data use pattern continues you may be subject to bandwidth restrictions - touch for more information</string>
+    <string name="throttle_warning_notification_title">High mobile data use</string>
+    <string name="throttle_warning_notification_message">Touch to learn more about mobile data use</string>
 
     <!-- Strings for throttling notification -->
     <!-- Shown when the users bandwidth is reduced because of excessive data use -->
-    <string name="throttled_notification_title">Bandwidth Restricted</string>
-    <string name="throttled_notification_message">Your mobile data bandwidth is being reduced because of excessive data use - touch for more information</string>
+    <string name="throttled_notification_title">Mobile data limit exceeded</string>
+    <string name="throttled_notification_message">Touch to learn more about mobile data use</string>
 </resources>
