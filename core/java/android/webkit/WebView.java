@@ -6153,7 +6153,7 @@ public class WebView extends AbsoluteLayout
                 case UPDATE_ZOOM_RANGE: {
                     WebViewCore.RestoreState restoreState
                             = (WebViewCore.RestoreState) msg.obj;
-                    // mScrollX contains the new contentWidth
+                    // mScrollX contains the new minPrefWidth
                     updateZoomRange(restoreState, getViewWidth(),
                             restoreState.mScrollX, false);
                     break;
@@ -6176,7 +6176,7 @@ public class WebView extends AbsoluteLayout
                     boolean hasRestoreState = restoreState != null;
                     if (hasRestoreState) {
                         updateZoomRange(restoreState, viewSize.x,
-                                draw.mWidthHeight.x, true);
+                                draw.mMinPrefWidth, true);
                         if (!mDrawHistory) {
                             mInZoomOverview = false;
 
@@ -6238,12 +6238,10 @@ public class WebView extends AbsoluteLayout
                         // sMaxViewportWidth so that if the page doesn't behave
                         // well, the WebView won't go insane. limit the lower
                         // bound to match the default scale for mobile sites.
-                        // we choose the content width to be mZoomOverviewWidth.
-                        // this works for most of the sites. But some sites may
-                        // cause the page layout wider than it needs.
                         mZoomOverviewWidth = Math.min(sMaxViewportWidth, Math
-                                .max((int) (viewWidth / mDefaultScale),
-                                        draw.mWidthHeight.x));
+                                .max((int) (viewWidth / mDefaultScale), Math
+                                        .max(draw.mMinPrefWidth,
+                                                draw.mViewPoint.x)));
                     }
                     if (!mMinZoomScaleFixed) {
                         mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
@@ -6893,13 +6891,12 @@ public class WebView extends AbsoluteLayout
                 new InvokeListBox(array, enabledArray, selectedArray));
     }
 
-    // viewWidth/contentWidth/updateZoomOverview are only used for mobile sites
     private void updateZoomRange(WebViewCore.RestoreState restoreState,
-            int viewWidth, int contentWidth, boolean updateZoomOverview) {
+            int viewWidth, int minPrefWidth, boolean updateZoomOverview) {
         if (restoreState.mMinScale == 0) {
             if (restoreState.mMobileSite) {
-                if (contentWidth > Math.max(0, viewWidth)) {
-                    mMinZoomScale = (float) viewWidth / contentWidth;
+                if (minPrefWidth > Math.max(0, viewWidth)) {
+                    mMinZoomScale = (float) viewWidth / minPrefWidth;
                     mMinZoomScaleFixed = false;
                     if (updateZoomOverview) {
                         WebSettings settings = getSettings();
