@@ -214,9 +214,11 @@ public class Environment {
      * Standard directory in which to place files that have been downloaded by
      * the user.  Note that this is primarily a convention for the top-level
      * public directory, you are free to download files anywhere in your own
-     * private directories.
+     * private directories.  Also note that though the constant here is
+     * named DIRECTORY_DOWNLOADS (plural), the actual file name is non-plural for
+     * backwards compatibility reasons.
      */
-    public static String DIRECTORY_DOWNLOADS = "Downloads";
+    public static String DIRECTORY_DOWNLOADS = "Download";
     
     /**
      * The traditional location for pictures and videos when mounting the
