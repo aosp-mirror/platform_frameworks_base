@@ -1369,7 +1369,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         return;
                     }
                 } else {
-                    procs = service.mLruProcesses;
+                    procs = new ArrayList<ProcessRecord>(service.mLruProcesses);
                 }
             }
             dumpApplicationMemoryUsage(fd, pw, procs, "  ", args);
@@ -10202,7 +10202,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return numPers;
     }
 
-    private static final void dumpApplicationMemoryUsage(FileDescriptor fd,
+    static final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, List list, String prefix, String[] args) {
         final boolean isCheckinRequest = scanArgs(args, "--checkin");
         long uptime = SystemClock.uptimeMillis();
