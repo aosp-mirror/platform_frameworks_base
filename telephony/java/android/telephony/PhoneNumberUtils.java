@@ -55,6 +55,12 @@ public class PhoneNumberUtils
     public static final char WILD = 'N';
 
     /*
+     * Calling Line Identification Restriction (CLIR)
+     */
+    private static final String CLIR_ON = "*31#+";
+    private static final String CLIR_OFF = "#31#+";
+
+    /*
      * TOA = TON + NPI
      * See TS 24.008 section 10.5.4.7 for details.
      * These are the only really useful TOA values
@@ -179,8 +185,6 @@ public class PhoneNumberUtils
      *  Please note that the GSM wild character is allowed in the result.
      *  This must be resolved before dialing.
      *
-     *  Allows + only in the first  position in the result string.
-     *
      *  Returns null if phoneNumber == null
      */
     public static String
@@ -201,6 +205,11 @@ public class PhoneNumberUtils
             } else if (isStartsPostDial (c)) {
                 break;
             }
+        }
+
+        int pos = addPlusChar(phoneNumber);
+        if (pos >= 0 && ret.length() > pos) {
+            ret.insert(pos, '+');
         }
 
         return ret.toString();
@@ -302,6 +311,28 @@ public class PhoneNumberUtils
         } else {
             return trimIndex - 1;
         }
+    }
+
+    /** GSM codes
+     *  Finds if a GSM code includes the international prefix (+).
+     *
+     * @param number the number to dial.
+     *
+     * @return the position where the + char will be inserted, -1 if the GSM code was not found.
+     */
+    private static int
+    addPlusChar(String number) {
+        int pos = -1;
+
+        if (number.startsWith(CLIR_OFF)) {
+            pos = CLIR_OFF.length() - 1;
+        }
+
+        if (number.startsWith(CLIR_ON)) {
+            pos = CLIR_ON.length() - 1;
+        }
+
+        return pos;
     }
 
     /**
