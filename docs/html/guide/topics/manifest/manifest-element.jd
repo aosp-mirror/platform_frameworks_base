@@ -109,7 +109,7 @@ the significant version number used internally.
 </dd>
 
 <dt><a name="install"></a>{@code android:installLocation}</dt>
-<dd>The default install location for your application.
+<dd>The default install location for the application.
 <p>This attribute was introduced in API Level 8.</p>
 
 <p>The following keyword strings are accepted:</p>
@@ -124,15 +124,15 @@ the significant version number used internally.
 saved preference.</td>
 </tr><tr>
    <td>"{@code internalOnly}"</td>
-   <td>Request to be installed only on the internal device storage. If this is set, then
-the application will never be installed on the external storage (SD card). If the internal storage
-is full, then the application will not install.</td>
+   <td>The application requests to be installed on the internal device storage only. If this is set,
+then the application will never be installed on the external storage (SD card). If the internal
+storage is full, then the system will not install the application.</td>
 </tr><tr>
    <td>"{@code preferExternal}"</td>
-   <td>Prefer to be installed on external storage (SD card). There is no guarantee that the system
-will honor this request. The application might be installed on internal storage if the
-external media is unavailable or full, or if the application uses the forward-locking mechanism
-(not supported on external storage).</td>
+   <td>The application prefers to be installed on the external storage (SD card). There is no
+guarantee that the system will honor this request. The application might be installed on internal
+storage if the external media is unavailable or full, or if the application uses the forward-locking
+mechanism (not supported on external storage).</td>
 </tr>
 </table>
 
@@ -149,7 +149,8 @@ multiple SD cards can be used with the same device.</li>
 </ul>
 
 <p>The user may also request to move an application from the internal storage to the external
-storage. However, this will not be allowed if this attribute is set to {@code internalOnly}.
+storage. However, the system will not allow the user to move the application to external storage if
+this attribute is set to {@code internalOnly}.
 </p>
 
 </dd>
@@ -159,9 +160,7 @@ storage. However, this will not be allowed if this attribute is set to {@code in
 
 <!-- ##api level indication## -->
 <dt>introduced in:</dt>
-<dd>API Level 1 for all attributes except for 
-<code><a href="#uidlabel">sharedUserLabel</a></code>, which was added in 
-level 3.</dd>
+<dd>API Level 1 for all attributes, unless noted otherwise in the attribute description.</dd>
 
 <p>
 <dt>see also:</dt>
