@@ -1398,7 +1398,7 @@ public abstract class Context {
      * @see android.os.Vibrator
      */
     public static final String VIBRATOR_SERVICE = "vibrator";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.app.StatusBarManager} for interacting with the status bar.
@@ -1418,6 +1418,17 @@ public abstract class Context {
      * @see android.net.ConnectivityManager
      */
     public static final String CONNECTIVITY_SERVICE = "connectivity";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.ThrottleManager} for handling management of
+     * throttling.
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.net.ThrottleManager
+     */
+    public static final String THROTTLE_SERVICE = "throttle";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
