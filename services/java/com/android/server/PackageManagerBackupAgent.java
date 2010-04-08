@@ -122,8 +122,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
             ParcelFileDescriptor newState) {
         if (DEBUG) Slog.v(TAG, "onBackup()");
 
-        ByteArrayOutputStream bufStream = new ByteArrayOutputStream();  // we'll reuse these
-        DataOutputStream outWriter = new DataOutputStream(bufStream);
+        ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();  // we'll reuse these
+        DataOutputStream outputBufferStream = new DataOutputStream(outputBuffer);
         parseStateFile(oldState);
 
         // If the stored version string differs, we need to re-backup all
@@ -148,11 +148,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
              */
             if (!mExisting.contains(GLOBAL_METADATA_KEY)) {
                 if (DEBUG) Slog.v(TAG, "Storing global metadata key");
-                outWriter.writeInt(Build.VERSION.SDK_INT);
-                outWriter.writeUTF(Build.VERSION.INCREMENTAL);
-                byte[] metadata = bufStream.toByteArray();
-                data.writeEntityHeader(GLOBAL_METADATA_KEY, metadata.length);
-                data.writeEntityData(metadata, metadata.length);
+                outputBufferStream.writeInt(Build.VERSION.SDK_INT);
+                outputBufferStream.writeUTF(Build.VERSION.INCREMENTAL);
+                writeEntity(data, GLOBAL_METADATA_KEY, outputBuffer.toByteArray());
             } else {
                 if (DEBUG) Slog.v(TAG, "Global metadata key already stored");
                 // don't consider it to have been skipped/deleted
@@ -178,49 +176,46 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         continue;
                     }
 
-                    boolean doBackup = false;
-                    if (!mExisting.contains(packName)) {
-                        // We haven't backed up this app before
-                        doBackup = true;
-                    } else {
-                        // We *have* backed this one up before.  Check whether the version
+                    if (mExisting.contains(packName)) {
+                        // We have backed up this app before.  Check whether the version
                         // of the backup matches the version of the current app; if they
                         // don't match, the app has been updated and we need to store its
                         // metadata again.  In either case, take it out of mExisting so that
                         // we don't consider it deleted later.
-                        if (info.versionCode != mStateVersions.get(packName).versionCode) {
-                            doBackup = true;
-                        }
                         mExisting.remove(packName);
-                    }
-
-                    if (doBackup) {
-                        // We need to store this app's metadata
-                        /*
-                         * Metadata for each package:
-                         *
-                         * int version       -- [4] the package's versionCode
-                         * byte[] signatures -- [len] flattened Signature[] of the package
-                         */
-
-                        // marshal the version code in a canonical form
-                        bufStream.reset();
-                        outWriter.writeInt(info.versionCode);
-                        byte[] versionBuf = bufStream.toByteArray();
-
-                        byte[] sigs = flattenSignatureArray(info.signatures);
-
-                        if (DEBUG) {
-                            Slog.v(TAG, "+ metadata for " + packName
-                                    + " version=" + info.versionCode
-                                    + " versionLen=" + versionBuf.length
-                                    + " sigsLen=" + sigs.length);
+                        if (info.versionCode == mStateVersions.get(packName).versionCode) {
+                            continue;
                         }
-                        // Now we can write the backup entity for this package
-                        data.writeEntityHeader(packName, versionBuf.length + sigs.length);
-                        data.writeEntityData(versionBuf, versionBuf.length);
-                        data.writeEntityData(sigs, sigs.length);
                     }
+                    
+                    if (info.signatures == null || info.signatures.length == 0)
+                    {
+                        Slog.w(TAG, "Not backing up package " + packName
+                                + " since it appears to have no signatures.");
+                        continue;
+                    }
+
+                    // We need to store this app's metadata
+                    /*
+                     * Metadata for each package:
+                     *
+                     * int version       -- [4] the package's versionCode
+                     * byte[] signatures -- [len] flattened Signature[] of the package
+                     */
+
+                    // marshal the version code in a canonical form
+                    outputBuffer.reset();
+                    outputBufferStream.writeInt(info.versionCode);
+                    writeSignatureArray(outputBufferStream, info.signatures);
+
+                    if (DEBUG) {
+                        Slog.v(TAG, "+ writing metadata for " + packName
+                                + " version=" + info.versionCode
+                                + " entityLen=" + outputBuffer.size());
+                    }
+                    
+                    // Now we can write the backup entity for this package
+                    writeEntity(data, packName, outputBuffer.toByteArray());
                 }
             }
 
@@ -245,6 +240,12 @@ public class PackageManagerBackupAgent extends BackupAgent {
         // Finally, write the new state blob -- just the list of all apps we handled
         writeStateFile(mAllPackages, newState);
     }
+    
+    private static void writeEntity(BackupDataOutput data, String key, byte[] bytes)
+            throws IOException {
+        data.writeEntityHeader(key, bytes.length);
+        data.writeEntityData(bytes, bytes.length);
+    }
 
     // "Restore" here is a misnomer.  What we're really doing is reading back the
     // set of app signatures associated with each backed-up app in this restore
@@ -263,13 +264,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
             if (DEBUG) Slog.v(TAG, "   got key=" + key + " dataSize=" + dataSize);
 
             // generic setup to parse any entity data
-            byte[] dataBuf = new byte[dataSize];
-            data.readEntityData(dataBuf, 0, dataSize);
-            ByteArrayInputStream baStream = new ByteArrayInputStream(dataBuf);
-            DataInputStream in = new DataInputStream(baStream);
+            byte[] inputBytes = new byte[dataSize];
+            data.readEntityData(inputBytes, 0, dataSize);
+            ByteArrayInputStream inputBuffer = new ByteArrayInputStream(inputBytes);
+            DataInputStream inputBufferStream = new DataInputStream(inputBuffer);
 
             if (key.equals(GLOBAL_METADATA_KEY)) {
-                int storedSdkVersion = in.readInt();
+                int storedSdkVersion = inputBufferStream.readInt();
                 if (DEBUG) Slog.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
                 if (storedSystemVersion > Build.VERSION.SDK_INT) {
                     // returning before setting the sig map means we rejected the restore set
@@ -277,7 +278,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     return;
                 }
                 mStoredSdkVersion = storedSdkVersion;
-                mStoredIncrementalVersion = in.readUTF();
+                mStoredIncrementalVersion = inputBufferStream.readUTF();
                 mHasMetadata = true;
                 if (DEBUG) {
                     Slog.i(TAG, "Restore set version " + storedSystemVersion
@@ -287,12 +288,18 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 }
             } else {
                 // it's a file metadata record
-                int versionCode = in.readInt();
-                Signature[] sigs = unflattenSignatureArray(in);
+                int versionCode = inputBufferStream.readInt();
+                Signature[] sigs = readSignatureArray(inputBufferStream);
                 if (DEBUG) {
-                    Slog.i(TAG, "   restored metadata for " + key
+                    Slog.i(TAG, "   read metadata for " + key
                             + " dataSize=" + dataSize
                             + " versionCode=" + versionCode + " sigs=" + sigs);
+                }
+                
+                if (sigs == null || sigs.length == 0) {
+                    Slog.w(TAG, "Not restoring package " + key
+                            + " since it appears to have no signatures.");
+                    continue;
                 }
 
                 ApplicationInfo app = new ApplicationInfo();
@@ -306,63 +313,50 @@ public class PackageManagerBackupAgent extends BackupAgent {
         mRestoredSignatures = sigMap;
     }
 
+    private static void writeSignatureArray(DataOutputStream out, Signature[] sigs)
+            throws IOException {
+        // write the number of signatures in the array
+        out.writeInt(sigs.length);
 
-    // Util: convert an array of Signatures into a flattened byte buffer.  The
-    // flattened format contains enough info to reconstruct the signature array.
-    private byte[] flattenSignatureArray(Signature[] allSigs) {
-        ByteArrayOutputStream outBuf = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(outBuf);
-
-        // build the set of subsidiary buffers
-        try {
-            // first the # of signatures in the array
-            out.writeInt(allSigs.length);
-
-            // then the signatures themselves, length + flattened buffer
-            for (Signature sig : allSigs) {
-                byte[] flat = sig.toByteArray();
-                out.writeInt(flat.length);
-                out.write(flat);
-            }
-        } catch (IOException e) {
-            // very strange; we're writing to memory here.  abort.
-            return null;
+        // write the signatures themselves, length + flattened buffer
+        for (Signature sig : sigs) {
+            byte[] flat = sig.toByteArray();
+            out.writeInt(flat.length);
+            out.write(flat);
         }
-
-        return outBuf.toByteArray();
     }
 
-    private Signature[] unflattenSignatureArray(/*byte[] buffer*/ DataInputStream in) {
-        Signature[] sigs = null;
-
+    private static Signature[] readSignatureArray(DataInputStream in) {
         try {
-            int num = in.readInt();
+            int num;
+            try {
+                num = in.readInt();
+            } catch (EOFException e) {
+                // clean termination
+                Slog.w(TAG, "Read empty signature block");
+                return null;
+            }
+            
             if (DEBUG) Slog.v(TAG, " ... unflatten read " + num);
-
+            
             // Sensical?
             if (num > 20) {
                 Slog.e(TAG, "Suspiciously large sig count in restore data; aborting");
                 throw new IllegalStateException("Bad restore state");
             }
-
-            sigs = new Signature[num];
+            
+            Signature[] sigs = new Signature[num];
             for (int i = 0; i < num; i++) {
                 int len = in.readInt();
                 byte[] flatSig = new byte[len];
                 in.read(flatSig);
                 sigs[i] = new Signature(flatSig);
             }
-        } catch (EOFException e) {
-            // clean termination
-            if (sigs == null) {
-                Slog.w(TAG, "Empty signature block found");
-            }
+            return sigs;
         } catch (IOException e) {
-            Slog.e(TAG, "Unable to unflatten sigs");
+            Slog.e(TAG, "Unable to read signatures");
             return null;
         }
-
-        return sigs;
     }
 
     // Util: parse out an existing state file into a usable structure
