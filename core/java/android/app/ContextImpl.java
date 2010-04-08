@@ -2743,6 +2743,13 @@ class ContextImpl extends Context {
                 return v != null ? v : defValue;
             }
         }
+        
+        public Set<String> getStringSet(String key, Set<String> defValues) {
+            synchronized (this) {
+                Set<String> v = (Set<String>) mMap.get(key);
+                return v != null ? v : defValues;
+            }
+        }
 
         public int getInt(String key, int defValue) {
             synchronized (this) {
@@ -2782,6 +2789,12 @@ class ContextImpl extends Context {
             public Editor putString(String key, String value) {
                 synchronized (this) {
                     mModified.put(key, value);
+                    return this;
+                }
+            }
+            public Editor putStringSet(String key, Set<String> values) {
+                synchronized (this) {
+                    mModified.put(key, values);
                     return this;
                 }
             }

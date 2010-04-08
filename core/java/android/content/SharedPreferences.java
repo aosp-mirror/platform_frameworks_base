@@ -17,6 +17,7 @@
 package android.content;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for accessing and modifying preference data returned by {@link
@@ -67,6 +68,17 @@ public interface SharedPreferences {
          * chain put calls together.
          */
         Editor putString(String key, String value);
+        
+        /**
+         * Set a set of String values in the preferences editor, to be written
+         * back once {@link #commit} is called.
+         * 
+         * @param key The name of the preference to modify.
+         * @param values The new values for the preference.
+         * @return Returns a reference to the same Editor object, so you can
+         * chain put calls together.
+         */
+        Editor putStringSet(String key, Set<String> values);
         
         /**
          * Set an int value in the preferences editor, to be written back once
@@ -184,6 +196,20 @@ public interface SharedPreferences {
      * @throws ClassCastException
      */
     String getString(String key, String defValue);
+    
+    /**
+     * Retrieve a set of String values from the preferences.
+     * 
+     * @param key The name of the preference to retrieve.
+     * @param defValues Values to return if this preference does not exist.
+     * 
+     * @return Returns the preference values if they exist, or defValues.
+     * Throws ClassCastException if there is a preference with this name
+     * that is not a Set.
+     * 
+     * @throws ClassCastException
+     */
+    Set<String> getStringSet(String key, Set<String> defValues);
     
     /**
      * Retrieve an int value from the preferences.

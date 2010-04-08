@@ -3343,6 +3343,16 @@
         <attr name="entryValues" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="MultiSelectListPreference">
+        <!-- The human-readable array to present as a list. Each entry must have a corresponding
+             index in entryValues. -->
+        <attr name="entries" />
+        <!-- The array to find the value to save for a preference when an entry from
+             entries is selected. If a user clicks the second item in entries, the
+             second item in this array will be saved to the preference. -->
+        <attr name="entryValues" />
+    </declare-styleable>
+
     <!-- Base attributes available to RingtonePreference. -->
     <declare-styleable name="RingtonePreference">
         <!-- Which ringtone type(s) to show in the picker. -->

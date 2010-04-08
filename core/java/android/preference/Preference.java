@@ -16,8 +16,7 @@
 
 package android.preference;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.android.internal.util.CharSequences;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,13 +27,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import com.android.internal.util.CharSequences;
 import android.view.AbsSavedState;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents the basic Preference UI building
@@ -1247,6 +1249,61 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         }
         
         return mPreferenceManager.getSharedPreferences().getString(mKey, defaultReturnValue);
+    }
+    
+    /**
+     * Attempts to persist a set of Strings to the {@link android.content.SharedPreferences}.
+     * <p>
+     * This will check if this Preference is persistent, get an editor from
+     * the {@link PreferenceManager}, put in the strings, and check if we should commit (and
+     * commit if so).
+     * 
+     * @param values The values to persist.
+     * @return True if the Preference is persistent. (This is not whether the
+     *         value was persisted, since we may not necessarily commit if there
+     *         will be a batch commit later.)
+     * @see #getPersistedString(Set)
+     * 
+     * @hide Pending API approval
+     */
+    protected boolean persistStringSet(Set<String> values) {
+        if (shouldPersist()) {
+            // Shouldn't store null
+            if (values.equals(getPersistedStringSet(null))) {
+                // It's already there, so the same as persisting
+                return true;
+            }
+            
+            SharedPreferences.Editor editor = mPreferenceManager.getEditor();
+            editor.putStringSet(mKey, values);
+            tryCommit(editor);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to get a persisted set of Strings from the
+     * {@link android.content.SharedPreferences}.
+     * <p>
+     * This will check if this Preference is persistent, get the SharedPreferences
+     * from the {@link PreferenceManager}, and get the value.
+     * 
+     * @param defaultReturnValue The default value to return if either the
+     *            Preference is not persistent or the Preference is not in the
+     *            shared preferences.
+     * @return The value from the SharedPreferences or the default return
+     *         value.
+     * @see #persistStringSet(Set)
+     * 
+     * @hide Pending API approval
+     */
+    protected Set<String> getPersistedStringSet(Set<String> defaultReturnValue) {
+        if (!shouldPersist()) {
+            return defaultReturnValue;
+        }
+        
+        return mPreferenceManager.getSharedPreferences().getStringSet(mKey, defaultReturnValue);
     }
     
     /**
