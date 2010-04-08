@@ -19,6 +19,7 @@ package com.android.imftest.samples;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
 import android.view.KeyEvent;
@@ -43,7 +44,6 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
     public final int IME_MIN_HEIGHT = 150;
     public final int IME_MAX_HEIGHT = 300;
 
-    public final String TARGET_PACKAGE_NAME = "com.android.imftest";
     protected InputMethodManager mImm;
     protected T mTargetActivity;
     protected boolean mExpectAutoPop;
@@ -56,9 +56,12 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        final String packageName = getInstrumentation().getTargetContext().getPackageName();
+        mTargetActivity = launchActivity(packageName, mTargetActivityClass, null);
+        // expect ime to auto pop up if device has no hard keyboard
+        mExpectAutoPop = mTargetActivity.getResources().getConfiguration().hardKeyboardHidden == 
+            Configuration.HARDKEYBOARDHIDDEN_YES;
         
-        mTargetActivity = launchActivity(TARGET_PACKAGE_NAME, mTargetActivityClass, null);
-        mExpectAutoPop = mTargetActivity.getResources().getBoolean(R.bool.def_expect_ime_autopop);
         mImm = InputMethodManager.getInstance(mTargetActivity);
 
         KeyguardManager keyguardManager =
@@ -104,9 +107,9 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
     }
 
     public void destructiveCheckImeInitialState(View rootView, View servedView) {
-        if (mExpectAutoPop && (mTargetActivity.getWindow().getAttributes().
-                softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) 
-                == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+        int windowSoftInputMode = mTargetActivity.getWindow().getAttributes().softInputMode;
+        int adjustMode = windowSoftInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+        if (mExpectAutoPop && adjustMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
             assertTrue(destructiveCheckImeUp(rootView, servedView));
         } else {
             assertFalse(destructiveCheckImeUp(rootView, servedView));
