@@ -129,9 +129,10 @@ class HTML5VideoViewProxy extends Handler
                     // is invoked.
                     mTimer.cancel();
                     mTimer = null;
-                    mCurrentProxy.playbackEnded();
+                    if (mVideoView.isPlaying()) {
+                        mVideoView.stopPlayback();
+                    }
                     mCurrentProxy = null;
-                    mVideoView.stopPlayback();
                     mLayout.removeView(mVideoView);
                     mVideoView = null;
                     if (mProgressView != null) {
