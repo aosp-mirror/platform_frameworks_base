@@ -102,7 +102,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * Mark when service state is in emergency call only mode
      */
     private boolean mEmergencyOnly = false;
-    private boolean mNewEmergencyOnly = false;
 
     private RegistrantList gprsAttachedRegistrants = new RegistrantList();
     private RegistrantList gprsDetachedRegistrants = new RegistrantList();
@@ -591,8 +590,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         if (rule != curSpnRule
                 || !TextUtils.equals(spn, curSpn)
                 || !TextUtils.equals(plmn, curPlmn)) {
-            boolean showSpn = mEmergencyOnly
-                || (rule & SIMRecords.SPN_RULE_SHOW_SPN) == SIMRecords.SPN_RULE_SHOW_SPN;
+            boolean showSpn = !mEmergencyOnly
+                && (rule & SIMRecords.SPN_RULE_SHOW_SPN) == SIMRecords.SPN_RULE_SHOW_SPN;
             boolean showPlmn =
                 (rule & SIMRecords.SPN_RULE_SHOW_PLMN) == SIMRecords.SPN_RULE_SHOW_PLMN;
 
@@ -672,9 +671,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     newSS.setState (regCodeToServiceState(regState));
 
                     if (regState == 10 || regState == 12 || regState == 13 || regState == 14) {
-                        mNewEmergencyOnly = true;
+                        mEmergencyOnly = true;
                     } else {
-                        mNewEmergencyOnly = false;
+                        mEmergencyOnly = false;
                     }
 
                     // LAC and CID are -1 if not avail
@@ -741,6 +740,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 roaming = false;
             }
             newSS.setRoaming(roaming);
+            newSS.setEmergencyOnly(mEmergencyOnly);
             pollStateDone();
         }
     }
@@ -886,8 +886,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         boolean hasLocationChanged = !newCellLoc.equals(cellLoc);
 
-        boolean hasEmergencyOnlyChanged = mNewEmergencyOnly != mEmergencyOnly;
-
         // Add an event log when connection state changes
         if (ss.getState() != newSS.getState() || gprsState != newGPRSState) {
             EventLog.writeEvent(EventLogTags.GSM_SERVICE_STATE_CHANGE,
@@ -904,8 +902,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         GsmCellLocation tcl = cellLoc;
         cellLoc = newCellLoc;
         newCellLoc = tcl;
-
-        mEmergencyOnly = mNewEmergencyOnly;
 
         // Add an event log when network type switched
         // TODO: we may add filtering to reduce the event logged,
@@ -936,6 +932,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         if (hasChanged) {
             String operatorNumeric;
+
+            updateSpnDisplay();
 
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
                 ss.getOperatorAlphaLong());
@@ -1003,10 +1001,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 ss.getRoaming() ? "true" : "false");
 
             phone.notifyServiceStateChanged(ss);
-        }
-
-        if (hasChanged || hasEmergencyOnlyChanged) {
-            updateSpnDisplay();
         }
 
         if (hasGprsAttached) {
