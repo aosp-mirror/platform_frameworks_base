@@ -124,7 +124,8 @@ public class OperationScheduler {
     }
 
     /**
-     * Compute the time of the next operation.  Does not modify any state.
+     * Compute the time of the next operation.  Does not modify any state
+     * (unless the clock rolls backwards, in which case timers are reset).
      *
      * @param options to use for this computation.
      * @return the wall clock time ({@link System#currentTimeMillis()}) when the
@@ -143,11 +144,11 @@ public class OperationScheduler {
         // clipped to the current time so we don't languish forever.
 
         int errorCount = mStorage.getInt(PREFIX + "errorCount", 0);
-        long now = System.currentTimeMillis();
+        long now = currentTimeMillis();
         long lastSuccessTimeMillis = getTimeBefore(PREFIX + "lastSuccessTimeMillis", now);
         long lastErrorTimeMillis = getTimeBefore(PREFIX + "lastErrorTimeMillis", now);
         long triggerTimeMillis = mStorage.getLong(PREFIX + "triggerTimeMillis", Long.MAX_VALUE);
-        long moratoriumSetMillis = mStorage.getLong(PREFIX + "moratoriumSetTimeMillis", 0);
+        long moratoriumSetMillis = getTimeBefore(PREFIX + "moratoriumSetTimeMillis", now);
         long moratoriumTimeMillis = getTimeBefore(PREFIX + "moratoriumTimeMillis",
                 moratoriumSetMillis + options.maxMoratoriumMillis);
 
@@ -155,9 +156,8 @@ public class OperationScheduler {
         if (options.periodicIntervalMillis > 0) {
             time = Math.min(time, lastSuccessTimeMillis + options.periodicIntervalMillis);
         }
-        if (time >= moratoriumTimeMillis - options.maxMoratoriumMillis) {
-            time = Math.max(time, moratoriumTimeMillis);
-        }
+
+        time = Math.max(time, moratoriumTimeMillis);
         time = Math.max(time, lastSuccessTimeMillis + options.minTriggerMillis);
         if (errorCount > 0) {
             time = Math.max(time, lastErrorTimeMillis + options.backoffFixedMillis +
@@ -205,7 +205,7 @@ public class OperationScheduler {
     /**
      * Request an operation to be performed at a certain time.  The actual
      * scheduled time may be affected by error backoff logic and defined
-     * minimum intervals.
+     * minimum intervals.  Use {@link Long#MAX_VALUE} to disable triggering.
      *
      * @param millis wall clock time ({@link System#currentTimeMillis()}) to
      * trigger another operation; 0 to trigger immediately
@@ -218,13 +218,13 @@ public class OperationScheduler {
      * Forbid any operations until after a certain (absolute) time.
      * Limited by {@link #Options.maxMoratoriumMillis}.
      *
-     * @param millis wall clock time ({@link System#currentTimeMillis()}) to
-     * wait before attempting any more operations; 0 to remove moratorium
+     * @param millis wall clock time ({@link System#currentTimeMillis()})
+     * when operations should be allowed again; 0 to remove moratorium
      */
     public void setMoratoriumTimeMillis(long millis) {
         mStorage.edit()
                 .putLong(PREFIX + "moratoriumTimeMillis", millis)
-                .putLong(PREFIX + "moratoriumSetTimeMillis", System.currentTimeMillis())
+                .putLong(PREFIX + "moratoriumSetTimeMillis", currentTimeMillis())
                 .commit();
     }
 
@@ -239,7 +239,7 @@ public class OperationScheduler {
     public boolean setMoratoriumTimeHttp(String retryAfter) {
         try {
             long ms = Long.valueOf(retryAfter) * 1000;
-            setMoratoriumTimeMillis(ms + System.currentTimeMillis());
+            setMoratoriumTimeMillis(ms + currentTimeMillis());
             return true;
         } catch (NumberFormatException nfe) {
             try {
@@ -269,13 +269,12 @@ public class OperationScheduler {
     public void onSuccess() {
         resetTransientError();
         resetPermanentError();
-        long now = System.currentTimeMillis();
         mStorage.edit()
                 .remove(PREFIX + "errorCount")
                 .remove(PREFIX + "lastErrorTimeMillis")
                 .remove(PREFIX + "permanentError")
                 .remove(PREFIX + "triggerTimeMillis")
-                .putLong(PREFIX + "lastSuccessTimeMillis", now).commit();
+                .putLong(PREFIX + "lastSuccessTimeMillis", currentTimeMillis()).commit();
     }
 
     /**
@@ -284,8 +283,7 @@ public class OperationScheduler {
      * purposes.
      */
     public void onTransientError() {
-        long now = System.currentTimeMillis();
-        mStorage.edit().putLong(PREFIX + "lastErrorTimeMillis", now).commit();
+        mStorage.edit().putLong(PREFIX + "lastErrorTimeMillis", currentTimeMillis()).commit();
         mStorage.edit().putInt(PREFIX + "errorCount",
                 mStorage.getInt(PREFIX + "errorCount", 0) + 1).commit();
     }
@@ -337,5 +335,14 @@ public class OperationScheduler {
             }
         }
         return out.append("]").toString();
+    }
+
+    /**
+     * Gets the current time.  Can be overridden for unit testing.
+     *
+     * @return {@link System#currentTimeMillis()}
+     */
+    protected long currentTimeMillis() {
+        return System.currentTimeMillis();
     }
 }
