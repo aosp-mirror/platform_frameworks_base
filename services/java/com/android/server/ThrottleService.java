@@ -44,6 +44,8 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.telephony.TelephonyProperties;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -319,15 +321,19 @@ public class ThrottleService extends IThrottleManager.Stub {
             } catch (RemoteException e) {
                 Slog.e(TAG, "got remoteException in onPollAlarm:" + e);
             }
-
-            mRecorder.addData(incRead, incWrite);
+            // don't count this data if we're roaming.
+            boolean roaming = "true".equals(
+                    SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
+            if (!roaming) {
+                mRecorder.addData(incRead, incWrite);
+            }
 
             long periodRx = mRecorder.getPeriodRx(0);
             long periodTx = mRecorder.getPeriodTx(0);
             long total = periodRx + periodTx;
             if (DBG) {
-                Slog.d(TAG, "onPollAlarm - now =" + now + ", read =" + incRead +
-                        ", written =" + incWrite + ", new total =" + total);
+                Slog.d(TAG, "onPollAlarm - now =" + now + ", roaming =" + roaming +
+                        ", read =" + incRead + ", written =" + incWrite + ", new total =" + total);
             }
             mLastRead += incRead;
             mLastWrite += incWrite;
@@ -686,12 +692,6 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         long getPeriodRx(int which) {
-            if (DBG) { // TODO - remove
-                Slog.d(TAG, "reading slot "+ which +" with current =" + mCurrentPeriod);
-                for(int x = 0; x<mPeriodCount; x++) {
-                    Slog.d(TAG, "  " + x + " = " + mPeriodRxData[x]);
-                }
-            }
             synchronized (mParent) {
                 if (which > mPeriodCount) return 0;
                 which = mCurrentPeriod - which;
