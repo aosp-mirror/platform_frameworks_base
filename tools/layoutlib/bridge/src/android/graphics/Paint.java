@@ -208,6 +208,12 @@ public class Paint extends _Original_Paint {
         this(0);
     }
 
+    /*
+     * Do not remove or com.android.layoutlib.bridge.TestClassReplacement fails.
+     */
+    @Override
+    public void finalize() { }
+
     public Paint(int flags) {
         setFlags(flags | DEFAULT_PAINT_FLAGS);
         initFont();
