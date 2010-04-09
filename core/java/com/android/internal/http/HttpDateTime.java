@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.http;
+package com.android.internal.http;
 
 import android.text.format.Time;
 
@@ -82,7 +82,7 @@ public final class HttpDateTime {
         int second;
     }
 
-    public static Long parse(String timeString)
+    public static long parse(String timeString)
             throws IllegalArgumentException {
 
         int date = 1;
