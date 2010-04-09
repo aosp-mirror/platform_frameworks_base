@@ -35,4 +35,6 @@ interface IThrottleManager
     long getCliffThreshold(String iface, int cliff);
 
     int getCliffLevel(String iface, int cliff);
+
+    String getHelpUri();
 }

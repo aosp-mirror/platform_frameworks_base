@@ -157,6 +157,12 @@ public class ThrottleService extends IThrottleManager.Stub {
         return 0;
     }
 
+    public String getHelpUri() {
+        enforceAccessPermission();
+        return Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.THROTTLE_HELP_URI);
+    }
+
     public synchronized long getByteCount(String iface, int dir, int period, int ago) {
         enforceAccessPermission();
         if (iface.equals(mPolicyIface) &&

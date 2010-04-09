@@ -171,6 +171,19 @@ public class ThrottleManager
         }
     }
 
+    /**
+     * returns the help URI for throttling
+     * {@hide}
+     */
+    public String getHelpUri() {
+        try {
+            return mService.getHelpUri();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+
     private IThrottleManager mService;
 
     /**
