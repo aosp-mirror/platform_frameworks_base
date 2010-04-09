@@ -8,7 +8,7 @@ parent.link=index.html
 
   <h2>In this document</h2>
   <ol>
-    <li><a href="#CarryingAnObject">Carrying an Object During a Configuration Change</a></li>
+    <li><a href="#RetainingAnObject">Retaining an Object During a Configuration Change</a></li>
     <li><a href="#HandlingTheChange">Handling the Configuration Change Yourself</a>
   </ol>
 
@@ -24,80 +24,80 @@ Orientation Change</a></li>
 
 <p>Some device configurations can change during runtime
 (such as screen orientation, keyboard availability, and language). When such a change occurs,
-Android's default behavior is to restart the running
+Android restarts the running
 Activity ({@link android.app.Activity#onDestroy()} is called, followed by {@link
-android.app.Activity#onCreate(Bundle) onCreate()}). In doing so, the system re-queries your
-application resources for alternatives that might apply to the new configuration.</p>
+android.app.Activity#onCreate(Bundle) onCreate()}). The restart behavior is designed to help your
+application adapt to new configurations by automatically reloading your application with
+alternative resources.</p>
 
-<p>It is important that your Activity safely handles restarts and restores its previous
+<p>To properly handle a restart, it is important that your Activity restores its previous
 state through the normal <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity
-lifecycle</a>. In fact, it's a useful field test to invoke configuration changes (such as changing
-the screen orientation) during various states of your application to be sure that it properly
-restarts itself with the application state intact. So it's in the best interest of your application
-to allow the system to restart your application during any configuration change&mdash;this behavior
-is in place to help you by automatically handling configuration changes and adapting your
-application as necessary.</p>
+lifecycle</a>, in which Android calls
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} before it destroys
+your Activity so that you can save data about the application state. You can then restore the state
+during {@link android.app.Activity#onCreate(Bundle) onCreate()} or {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()}. To test
+that your application restarts itself with the application state intact, you should
+invoke configuration changes (such as changing the screen orientation) while performing various
+tasks in your application.</p>
+
+<p>Your application should be able to restart at any time without loss of user data or
+state in order to handle events such as when the user receives an incoming phone call and then
+returns to your application (read about the
+<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity lifecycle</a>).</p>
 
 <p>However, you might encounter a situation in which restarting your application and
-restoring significant amounts of data can be costly, create a slow user experience, and
-using {@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} does not
-suffice. In such a situation, you have two options:</p>
+restoring significant amounts of data can be costly and create a poor user experience. In such a
+situation, you have two options:</p>
 
 <ol type="a">
-  <li><a href="#CarryingAnObject">Carrying an Object During a Configuration Change</a>
-  <p>Allow your
-application to restart so that the appropriate configuration changes can take effect, but also
-implement {@link android.app.Activity#onRetainNonConfigurationInstance()} paired with {@link
-android.app.Activity#getLastNonConfigurationInstance()} to carry an {@link java.lang.Object} over
-to the new instance of your Activity.</p>
-  <p>This is the recommended technique if you're facing performance issues during the
-configuration restart. It allows your Activity to properly restart and reload resources for
-the new configuration and also allows you to carry your arbitrary data that may be expensive to
-collect again.</p>
+  <li><a href="#RetainAnObject">Retain an object during a configuration change</a>
+  <p>Allow your Activity to restart when a configuration changes, but carry a stateful
+{@link java.lang.Object} to the new instance of your Activity.</p>
+
   </li>
-  <li><a href="#HandlingTheChange">Handling the Configuration Change Yourself</a>
-  <p>Declare that your
-application will handle certain configuration changes and prevent the system from restarting your
-application when such a change occurs. For example, you can declare in your manifest that your
-Activity will handle configuration changes to the screen orientation. When the orientation
-changes, your Activity will not be restarted and your Activity will receive a call to {@link
-android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} so that you can
-perform necessary changes based on the new configuration.</p>
-  <p>This technique should be considered a last resort and temporary solution, because not all
-runtime configuration changes can be handled this way&mdash;your application will eventually
-encounter a runtime configuration in which you cannot prevent the Activity from being restarted,
-whereas the first option will handle all configuration changes.</p>
+  <li><a href="#HandlingTheChange">Handle the configuration change yourself</a>
+  <p>Prevent the system from restarting your Activity during certain configuration
+changes and receive a callback when the configurations do change, so that you can manually update
+your Activity as necessary.</p>
   </li>
 </ol>
 
-<p class="note"><strong>Note:</strong> Your application should always be able to successfully
-restart at any time without any loss of user data or state in order to handle other events such as
-when the user receives an incoming phone call and then returns to your application (read about the
-<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity lifecycle</a>). The following
-techniques for handling runtime configuration changes should only be necessary to optimize
-performance during specific configuration changes.</p>
 
+<h2 id="RetainingAnObject">Retaining an Object During a Configuration Change</h2>
 
-<h2 id="CarryingAnObject">Carrying an Object During a Configuration Change</h2>
+<p>If restarting your Activity requires that you recover large sets of data, re-establish a
+network connection, or perform other intensive operations, then a full restart due to a
+configuration change might
+be an unpleasant user experience. Also, it may not be possible for you to completely
+maintain your Activity state with the {@link android.os.Bundle} that the system saves for you during
+the Activity lifecycle&mdash;it is not designed to carry large objects (such as bitmaps) and the
+data within it must be serialized then deserialized, which can consume a lot of memory and make the
+configuration change slow. In such a situation, you can alleviate the burden of reinitializing
+your Activity by retaining a stateful Object when your Activity is restarted due to a configuration
+change.</p>
 
-<p>If your application has acquired significant amounts of data during its life, which would be
-costly to recover due to a restart of the Activity, you can use {@link
-android.app.Activity#onRetainNonConfigurationInstance()} paired with {@link
-android.app.Activity#getLastNonConfigurationInstance()} to pass an {@link java.lang.Object}
-to the new Activity instance. The {@link android.app.Activity#onRetainNonConfigurationInstance()}
-method is called between {@link android.app.Activity#onStop()} and {@link
-android.app.Activity#onDestroy()} when your Activity is being shut down due to a configuration
-change. In your implementation of this method, you can return any {@link java.lang.Object} that you
-need to efficiently restore your state after the configuration change. When your Activity is
-created again, you can call {@link
-android.app.Activity#getLastNonConfigurationInstance()} to retrieve the {@link
-java.lang.Object}.</p>
+<p>To retain an Object during a runtime configuration change:</p>
+<ol>
+  <li>Override the {@link android.app.Activity#onRetainNonConfigurationInstance()} method to return
+the Object you would like to retain.</li>
+  <li>When your Activity is created again, call {@link
+android.app.Activity#getLastNonConfigurationInstance()} to recover your Object.</li>
+</ol>
+
+<p>Android calls {@link android.app.Activity#onRetainNonConfigurationInstance()} between {@link
+android.app.Activity#onStop()} and {@link
+android.app.Activity#onDestroy()} when it shuts down your Activity due to a configuration
+change. In your implementation of {@link
+android.app.Activity#onRetainNonConfigurationInstance()}, you can return any {@link
+java.lang.Object} that you need in order to efficiently restore your state after the configuration
+change.</p>
 
 <p>A scenario in which this can be valuable is if your application loads a lot of data from the
 web. If the user changes the orientation of the device and the Activity restarts, your application
-will need to re-fetch the data, which could be slow. What you can do is implement
+must re-fetch the data, which could be slow. What you can do instead is implement
 {@link android.app.Activity#onRetainNonConfigurationInstance()} to return an object carrying your
-data and then retrieve the data when your Activity restarts with {@link
+data and then retrieve the data when your Activity starts again with {@link
 android.app.Activity#getLastNonConfigurationInstance()}. For example:</p>
 
 <pre>
@@ -116,7 +116,7 @@ leak all the Views and resources of the original Activity instance. (To leak the
 means that your application maintains a hold on them and they cannot be garbage-collected, so
 lots of memory can be lost.)</p>
 
-<p>Then get the {@code data} after the restart:</p>
+<p>Then retrieve the {@code data} when your Activity starts again:</p>
 
 <pre>
 &#64;Override
@@ -132,9 +132,10 @@ public void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
-<p>In this case, {@link android.app.Activity#getLastNonConfigurationInstance()} is called to get
-the data saved during the configuration change, and if it is null (which will happen if the
-Activity is started in any case other than a configuration change) then the data is loaded
+<p>In this case, {@link android.app.Activity#getLastNonConfigurationInstance()} retrieves
+the data saved by {@link android.app.Activity#onRetainNonConfigurationInstance()}. If {@code data}
+is null (which happens when the
+Activity starts due to any reason other than a configuration change) then the data object is loaded
 from the original source.</p>
 
 
@@ -146,11 +147,12 @@ from the original source.</p>
 <p>If your application doesn't need to update resources during a specific configuration
 change <em>and</em> you have a performance limitation that requires you to
 avoid the Activity restart, then you can declare that your Activity handles the configuration change
-itself, which will prevent the system from restarting your Activity.</p>
+itself, which prevents the system from restarting your Activity.</p>
 
 <p class="note"><strong>Note:</strong> Handling the configuration change yourself can make it much
-more difficult to use alternative resources, because the system will not automatically apply them
-for you.</p>
+more difficult to use alternative resources, because the system does not automatically apply them
+for you. This technique should be considered a last resort and is not recommended for most
+applications.</p>
 
 <p>To declare that your Activity handles a configuration change, edit the appropriate <a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
