@@ -31,7 +31,8 @@ struct ID3 {
         ID3_V1,
         ID3_V1_1,
         ID3_V2_2,
-        ID3_V2_3
+        ID3_V2_3,
+        ID3_V2_4,
     };
 
     ID3(const sp<DataSource> &source);
@@ -79,6 +80,8 @@ private:
     bool parseV1(const sp<DataSource> &source);
     bool parseV2(const sp<DataSource> &source);
     void removeUnsynchronization();
+
+    static bool ParseSyncsafeInteger(const uint8_t encoded[4], size_t *x);
 
     ID3(const ID3 &);
     ID3 &operator=(const ID3 &);
