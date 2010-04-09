@@ -421,18 +421,40 @@ public class ThrottleService extends IThrottleManager.Stub {
             } else {
                 if ((mPolicyNotificationsAllowedMask & NOTIFICATION_WARNING) != 0) {
                     // check if we should warn about throttle
-                    if (currentTotal > (mPolicyThreshold/2) && !mWarningNotificationSent) {
-                        mWarningNotificationSent = true;
-                        mNotificationManager.cancel(com.android.internal.R.drawable.
-                                stat_sys_throttle_warning);
-                        postNotification(com.android.internal.R.string.
-                                throttle_warning_notification_title,
-                                com.android.internal.R.string.
-                                throttle_warning_notification_message,
-                                com.android.internal.R.drawable.stat_sys_throttle_warning,
-                                0);
+                    // pretend we only have 1/2 the time remaining that we actually do
+                    // if our burn rate in the period so far would have us exceed the limit
+                    // in that 1/2 window, warn the user.
+                    // this gets more generous in the early to middle period and converges back
+                    // to the limit as we move toward the period end.
+
+                    // adding another factor - it must be greater than the total cap/4
+                    // else we may get false alarms very early in the period..  in the first
+                    // tenth of a percent of the period if we used more than a tenth of a percent
+                    // of the cap we'd get a warning and that's not desired.
+                    long start = mRecorder.getPeriodStart();
+                    long end = mRecorder.getPeriodEnd();
+                    long periodLength = end - start;
+                    long now = System.currentTimeMillis();
+                    long timeUsed = now - start;
+                    long warningThreshold = 2*mPolicyThreshold*timeUsed/(timeUsed+periodLength);
+                    if ((currentTotal > warningThreshold) && (currentTotal > mPolicyThreshold/4)) {
+                        if (mWarningNotificationSent == false) {
+                            mWarningNotificationSent = true;
+                            mNotificationManager.cancel(com.android.internal.R.drawable.
+                                    stat_sys_throttle_warning);
+                            postNotification(com.android.internal.R.string.
+                                    throttle_warning_notification_title,
+                                    com.android.internal.R.string.
+                                    throttle_warning_notification_message,
+                                    com.android.internal.R.drawable.stat_sys_throttle_warning,
+                                    0);
+                        }
                     } else {
-                        mWarningNotificationSent =false;
+                        if (mWarningNotificationSent == true) {
+                            mNotificationManager.cancel(com.android.internal.R.drawable.
+                                    stat_sys_throttle_warning);
+                            mWarningNotificationSent =false;
+                        }
                     }
                 }
             }
