@@ -22,12 +22,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
 import android.net.IThrottleManager;
 import android.net.ThrottleManager;
 import android.os.Binder;
@@ -98,8 +100,6 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     private DataRecorder mRecorder;
 
-    private int mThrottleLevel; // 0 for none, 1 for first throttle val, 2 for next, etc
-
     private String mPolicyIface;
 
     private static final int NOTIFICATION_WARNING   = 2;
@@ -108,6 +108,12 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     private Notification mThrottlingNotification;
     private boolean mWarningNotificationSent = false;
+
+    private SettingsObserver mSettingsObserver;
+
+    private int mThrottleIndex; // 0 for none, 1 for first throttle val, 2 for next, etc
+    private static final int THROTTLE_INDEX_UNINITIALIZED = -1;
+    private static final int THROTTLE_INDEX_UNTHROTTLED   =  0;
 
     public ThrottleService(Context context) {
         if (DBG) Slog.d(TAG, "Starting ThrottleService");
@@ -124,6 +130,38 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         mNotificationManager = (NotificationManager)mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
+    }
+
+    private static class SettingsObserver extends ContentObserver {
+        private int mMsg;
+        private Handler mHandler;
+        SettingsObserver(Handler handler, int msg) {
+            super(handler);
+            mHandler = handler;
+            mMsg = msg;
+        }
+
+        void observe(Context context) {
+            ContentResolver resolver = context.getContentResolver();
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_POLLING_SEC), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_THRESHOLD), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_VALUE), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_RESET_DAY), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_NOTIFICATION_TYPE), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_IFACE), false, this);
+                    // TODO - add help url
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            mHandler.obtainMessage(mMsg).sendToTarget();
+        }
     }
 
     private void enforceAccessPermission() {
@@ -145,7 +183,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     //TODO - a better name?  getCliffByteCountThreshold?
     public synchronized long getCliffThreshold(String iface, int cliff) {
         enforceAccessPermission();
-        if ((cliff == 0) && iface.equals(mPolicyIface)) {
+        if ((cliff == 1) && iface.equals(mPolicyIface)) {
             return mPolicyThreshold;
         }
         return 0;
@@ -153,7 +191,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     // TODO - a better name? getThrottleRate?
     public synchronized int getCliffLevel(String iface, int cliff) {
         enforceAccessPermission();
-        if ((cliff == 0) && iface.equals(mPolicyIface)) {
+        if ((cliff == 1) && iface.equals(mPolicyIface)) {
             return mPolicyThrottleValue;
         }
         return 0;
@@ -179,7 +217,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     // TODO - a better name - getCurrentThrottleRate?
     public synchronized int getThrottle(String iface) {
         enforceAccessPermission();
-        if (iface.equals(mPolicyIface) && (mThrottleLevel == 1)) {
+        if (iface.equals(mPolicyIface) && (mThrottleIndex == 1)) {
             return mPolicyThrottleValue;
         }
         return 0;
@@ -208,6 +246,9 @@ public class ThrottleService extends IThrottleManager.Stub {
         mThread.start();
         mHandler = new MyHandler(mThread.getLooper());
         mHandler.obtainMessage(EVENT_REBOOT_RECOVERY).sendToTarget();
+
+        mSettingsObserver = new SettingsObserver(mHandler, EVENT_POLICY_CHANGED);
+        mSettingsObserver.observe(mContext);
     }
 
 
@@ -242,8 +283,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             // check for sim change TODO
             // reregister for notification of policy change
 
-            // register for roaming indication change
-            // check for roaming TODO
+            mThrottleIndex = THROTTLE_INDEX_UNINITIALIZED;
 
             mRecorder = new DataRecorder(mContext, ThrottleService.this);
 
@@ -300,14 +340,10 @@ public class ThrottleService extends IThrottleManager.Stub {
                     ", resetDay=" + mPolicyResetDay + ", noteType=" +
                     mPolicyNotificationsAllowedMask);
 
-            Calendar end = calculatePeriodEnd();
-            Calendar start = calculatePeriodStart(end);
+            onResetAlarm();
 
-            mRecorder.setNextPeriod(start,end);
-
-            mAlarmManager.cancel(mPendingResetIntent);
-            mAlarmManager.set(AlarmManager.RTC_WAKEUP, end.getTimeInMillis(),
-                    mPendingResetIntent);
+            Intent broadcast = new Intent(ThrottleManager.POLICY_CHANGED_ACTION);
+            mContext.sendBroadcast(broadcast);
         }
 
         private void onPollAlarm() {
@@ -357,9 +393,9 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             // check if we need to throttle
             if (currentTotal > mPolicyThreshold) {
-                if (mThrottleLevel != 1) {
+                if (mThrottleIndex != 1) {
                     synchronized (ThrottleService.this) {
-                        mThrottleLevel = 1;
+                        mThrottleIndex = 1;
                     }
                     if (DBG) Slog.d(TAG, "Threshold " + mPolicyThreshold + " exceeded!");
                     try {
@@ -429,9 +465,9 @@ public class ThrottleService extends IThrottleManager.Stub {
 
 
         private synchronized void clearThrottleAndNotification() {
-            if (mThrottleLevel == 1) {
+            if (mThrottleIndex != THROTTLE_INDEX_UNTHROTTLED) {
                 synchronized (ThrottleService.this) {
-                    mThrottleLevel = 0;
+                    mThrottleIndex = THROTTLE_INDEX_UNTHROTTLED;
                 }
                 try {
                     mNMService.setInterfaceThrottle(mPolicyIface, -1, -1);
@@ -499,6 +535,7 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             mRecorder.setNextPeriod(start,end);
 
+            mAlarmManager.cancel(mPendingResetIntent);
             mAlarmManager.set(AlarmManager.RTC_WAKEUP, end.getTimeInMillis(),
                     mPendingResetIntent);
         }
