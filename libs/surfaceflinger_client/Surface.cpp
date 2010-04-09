@@ -495,9 +495,12 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     // below we make sure we AT LEAST have the usage flags we want
     const uint32_t usage(getUsage());
     const sp<GraphicBuffer>& backBuffer(mBuffers[bufIdx]);
+
+    // Always call needNewBuffer(), since it clears the needed buffers flags
+    bool needNewBuffer = mSharedBufferClient->needNewBuffer(bufIdx);
     if (backBuffer == 0 || 
         ((uint32_t(backBuffer->usage) & usage) != usage) ||
-        mSharedBufferClient->needNewBuffer(bufIdx)) 
+        needNewBuffer)
     {
         err = getBufferLocked(bufIdx, usage);
         LOGE_IF(err, "getBufferLocked(%ld, %08x) failed (%s)",
@@ -717,25 +720,25 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             Region scratch(bounds);
             Region& newDirtyRegion(dirtyIn ? *dirtyIn : scratch);
 
+            const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
             if (mNeedFullUpdate) {
-                // reset newDirtyRegion to bounds when a buffer is reallocated
-                // it would be better if this information was associated with
-                // the buffer and made available to outside of Surface.
-                // This will do for now though.
                 mNeedFullUpdate = false;
-                newDirtyRegion.set(bounds);
-            } else {
-                newDirtyRegion.andSelf(bounds);
+                Region uninitialized(bounds);
+                uninitialized.subtractSelf(copyback | newDirtyRegion);
+                // reset newDirtyRegion to bounds when a buffer is reallocated
+                // and we have nothing to copy back to it
+                if (!uninitialized.isEmpty())
+                    newDirtyRegion.set(bounds);
             }
+            newDirtyRegion.andSelf(bounds);
 
             const sp<GraphicBuffer>& frontBuffer(mPostedBuffer);
-            if (frontBuffer !=0 &&
+            if (frontBuffer != 0 &&
                 backBuffer->width  == frontBuffer->width && 
                 backBuffer->height == frontBuffer->height &&
                 !(mFlags & ISurfaceComposer::eDestroyBackbuffer)) 
             {
-                const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
-                if (!copyback.isEmpty() && frontBuffer!=0) {
+                if (!copyback.isEmpty()) {
                     // copy front to back
                     copyBlt(backBuffer, frontBuffer, copyback);
                 }
