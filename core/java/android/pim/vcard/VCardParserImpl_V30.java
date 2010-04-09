@@ -21,11 +21,22 @@ import java.util.Set;
 import android.pim.vcard.exception.VCardException;
 import android.util.Log;
 
+/**
+ * <p>
+ * Basic implementation achieving vCard 3.0 parsing.
+ * </p>
+ * <p>
+ * This class inherits vCard 2.1 implementation since technically they are similar,
+ * while specifically there's logical no relevance between them.
+ * So that developers are not confused with the inheritance,
+ * {@link VCardParser_V30} does not inherit {@link VCardParser_V21}, while
+ * {@link VCardParserImpl_V30} inherits {@link VCardParserImpl_V21}.
+ * </p>
+ */
 /* package */ class VCardParserImpl_V30 extends VCardParserImpl_V21 {
     private static final String LOG_TAG = "VCardParserImpl_V30";
 
     private String mPreviousLine;
-
     private boolean mEmittedAgentWarning = false;
 
     public VCardParserImpl_V30() {
@@ -239,8 +250,7 @@ import android.util.Log;
         while (true) {
             final String line = getLine();
             if (line == null) {
-                throw new VCardException(
-                        "File ended during parsing BASE64 binary");
+                throw new VCardException("File ended during parsing BASE64 binary");
             }
             if (line.length() == 0) {
                 break;

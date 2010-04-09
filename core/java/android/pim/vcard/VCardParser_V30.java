@@ -25,22 +25,46 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The class used to parse vCard 3.0.
- * Please refer to vCard Specification 3.0 (http://tools.ietf.org/html/rfc2426).
+ * <p>
+ * vCard parser for vCard 3.0. See RFC 2426 for more detail.
+ * </p>
+ * <p>
+ * This parser allows vCard format which is not allowed in the RFC, since
+ * we have seen several vCard 3.0 files which don't comply with it.
+ * </p>
+ * <p>
+ * e.g. vCard 3.0 does not allow "CHARSET" attribute, but some actual files
+ * have it and they uses non UTF-8 charsets. UTF-8 is recommended in RFC 2426,
+ * but it is not a must. We silently allow "CHARSET".
+ * </p>
  */
 public class VCardParser_V30 implements VCardParser {
-    public static final Set<String> sKnownPropertyNameSet =
+    /* package */ static final Set<String> sKnownPropertyNameSet =
             Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
                     "BEGIN", "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND", 
                     "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
                     "BDAY", "ROLE", "REV", "UID", "KEY", "MAILER", // 2.1
                     "NAME", "PROFILE", "SOURCE", "NICKNAME", "CLASS",
                     "SORT-STRING", "CATEGORIES", "PRODID"))); // 3.0
-    
-    // Although "7bit" and "BASE64" is not allowed in vCard 3.0, we allow it for safety.
-    public static final Set<String> sAcceptableEncoding =
+
+    /**
+     * <p>
+     * A unmodifiable Set storing the values for the type "ENCODING", available in the vCard 3.0.
+     * </p>
+     * <p>
+     * Though vCard 2.1 specification does not allow "7BIT" or "BASE64", we allow them for safety.
+     * </p>
+     * <p>
+     * "QUOTED-PRINTABLE" is not allowed in vCard 3.0 and not in this parser either,
+     * because the encoding ambiguates how the vCard file to be parsed.
+     * </p>
+     */
+    /* package */ static final Set<String> sAcceptableEncoding =
             Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-                    "7BIT", "8BIT", "BASE64", "B")));
+                    VCardConstants.PARAM_ENCODING_7BIT,
+                    VCardConstants.PARAM_ENCODING_8BIT,
+                    VCardConstants.PARAM_ENCODING_BASE64,
+                    VCardConstants.PARAM_ENCODING_B)));
 
     private final VCardParserImpl_V30 mVCardParserImpl;
 
@@ -55,7 +79,6 @@ public class VCardParser_V30 implements VCardParser {
     public VCardParser_V30(int parseType) {
         mVCardParserImpl = new VCardParserImpl_V30(parseType);
     }
-
 
     //// Implemented methods 
     

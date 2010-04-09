@@ -109,6 +109,12 @@ public class VCardConstants {
     public static final String PARAM_TYPE_BBS = "BBS";
     public static final String PARAM_TYPE_VIDEO = "VIDEO";
 
+    public static final String PARAM_ENCODING_7BIT = "7BIT";
+    public static final String PARAM_ENCODING_8BIT = "8BIT";
+    public static final String PARAM_ENCODING_QP = "QUOTED-PRINTABLE";
+    public static final String PARAM_ENCODING_BASE64 = "BASE64";  // Available in vCard 2.1
+    public static final String PARAM_ENCODING_B = "B";  // Available in vCard 3.0
+
     // TYPE parameters for Phones, which are not formally valid in vCard (at least 2.1).
     // These types are basically encoded to "X-" parameters when composing vCard.
     // Parser passes these when "X-" is added to the parameter or not.
@@ -130,10 +136,6 @@ public class VCardConstants {
     // Do not use in composer side.
     public static final String PARAM_EXTRA_TYPE_COMPANY = "COMPANY";
 
-    // DoCoMo specific type parameter. Used with "SOUND" property, which is alternate of SORT-STRING in
-    // vCard 3.0.
-    public static final String PARAM_TYPE_X_IRMC_N = "X-IRMC-N";
-
     public interface ImportOnly {
         public static final String PROPERTY_X_NICKNAME = "X-NICKNAME";
         // Some device emits this "X-" parameter for expressing Google Talk,
@@ -141,6 +143,12 @@ public class VCardConstants {
         // in some special case (for that device/application).
         public static final String PROPERTY_X_GOOGLE_TALK_WITH_SPACE = "X-GOOGLE TALK";
     }
+
+    //// Mainly for package constants.
+
+    // DoCoMo specific type parameter. Used with "SOUND" property, which is alternate of
+    // SORT-STRING invCard 3.0.
+    /* package */ static final String PARAM_TYPE_X_IRMC_N = "X-IRMC-N";
 
     /* package */ static final int MAX_DATA_COLUMN = 15;
 

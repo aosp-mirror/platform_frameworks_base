@@ -26,14 +26,13 @@ import java.util.Set;
 
 /**
  * </p>
- * vCard parser implementation mostly for vCard 2.1. See the specification for more detail
- * about the spec itself.
+ * vCard parser for vCard 2.1. See the specification for more detail about the spec itself.
  * </p>
  * <p>
  * The spec is written in 1996, and currently various types of "vCard 2.1" exist.
  * To handle real the world vCard formats appropriately and effectively, this class does not
- * obey with strict vCard 2.1. In stead, not only vCard spec but also real world
- * vCard is considered.
+ * obey with strict vCard 2.1.
+ * In stead, not only vCard spec but also real world vCard is considered.
  * </p>
  * e.g. A lot of devices and softwares let vCard importer/exporter to use
  * the PNG format to determine the type of image, while it is not allowed in
@@ -45,7 +44,7 @@ public final class VCardParser_V21 implements VCardParser {
     /**
      * A unmodifiable Set storing the property names available in the vCard 2.1 specification.
      */
-    public static final Set<String> sKnownPropertyNameSet =
+    /* package */ static final Set<String> sKnownPropertyNameSet =
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList("BEGIN", "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND",
                             "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
@@ -54,7 +53,7 @@ public final class VCardParser_V21 implements VCardParser {
     /**
      * A unmodifiable Set storing the types known in vCard 2.1.
      */
-    public static final Set<String> sKnownTypeSet =
+    /* package */ static final Set<String> sKnownTypeSet =
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList("DOM", "INTL", "POSTAL", "PARCEL", "HOME", "WORK",
                             "PREF", "VOICE", "FAX", "MSG", "CELL", "PAGER", "BBS",
@@ -66,20 +65,28 @@ public final class VCardParser_V21 implements VCardParser {
                             "WAVE", "AIFF", "PCM", "X509", "PGP")));
 
     /**
-     * A unmodifiable Set storing the values available in the vCard 2.1 specification.
+     * A unmodifiable Set storing the values for the type "VALUE", available in the vCard 2.1.
      */
-    public static final Set<String> sKnownValueSet =
+    /* package */ static final Set<String> sKnownValueSet =
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList("INLINE", "URL", "CONTENT-ID", "CID")));
 
     /**
+     * <p>
+     * A unmodifiable Set storing the values for the type "ENCODING", available in the vCard 2.1.
+     * </p>
+     * <p>
      * Though vCard 2.1 specification does not allow "B" encoding, some data may have it.
-     * We allow it for safety...
+     * We allow it for safety.
+     * </p>
      */
-    // TODO: move B to another something and make this member public
-    /* package */ static final HashSet<String> sAvailableEncoding =
-        new HashSet<String>(Arrays.asList(
-                "7BIT", "8BIT", "QUOTED-PRINTABLE", "BASE64", "B"));
+    /* package */ static final Set<String> sAvailableEncoding =
+        Collections.unmodifiableSet(new HashSet<String>(
+                Arrays.asList(VCardConstants.PARAM_ENCODING_7BIT,
+                        VCardConstants.PARAM_ENCODING_8BIT,
+                        VCardConstants.PARAM_ENCODING_QP,
+                        VCardConstants.PARAM_ENCODING_BASE64,
+                        VCardConstants.PARAM_ENCODING_B)));
 
     private final VCardParserImpl_V21 mVCardParserImpl;
 

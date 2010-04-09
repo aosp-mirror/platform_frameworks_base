@@ -91,10 +91,12 @@ public class VCardBuilder {
     private static final String VCARD_WS = " ";
     private static final String VCARD_PARAM_EQUAL = "=";
 
-    private static final String VCARD_PARAM_ENCODING_QP = "ENCODING=QUOTED-PRINTABLE";
-
-    private static final String VCARD_PARAM_ENCODING_BASE64_V21 = "ENCODING=BASE64";
-    private static final String VCARD_PARAM_ENCODING_BASE64_V30 = "ENCODING=b";
+    private static final String VCARD_PARAM_ENCODING_QP =
+            "ENCODING=" + VCardConstants.PARAM_ENCODING_QP;
+    private static final String VCARD_PARAM_ENCODING_BASE64_V21 =
+            "ENCODING=" + VCardConstants.PARAM_ENCODING_BASE64;
+    private static final String VCARD_PARAM_ENCODING_BASE64_V30 =
+            "ENCODING=" + VCardConstants.PARAM_ENCODING_B;
 
     private static final String SHIFT_JIS = "SHIFT_JIS";
 
