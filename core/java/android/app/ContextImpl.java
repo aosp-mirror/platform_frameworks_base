@@ -67,6 +67,8 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.ThrottleManager;
+import android.net.IThrottleManager;
 import android.net.Uri;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
@@ -164,6 +166,7 @@ class ContextImpl extends Context {
     private static AlarmManager sAlarmManager;
     private static PowerManager sPowerManager;
     private static ConnectivityManager sConnectivityManager;
+    private static ThrottleManager sThrottleManager;
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
     private static final HashMap<File, SharedPreferencesImpl> sSharedPrefs =
@@ -929,6 +932,8 @@ class ContextImpl extends Context {
             return getPowerManager();
         } else if (CONNECTIVITY_SERVICE.equals(name)) {
             return getConnectivityManager();
+        } else if (THROTTLE_SERVICE.equals(name)) {
+            return getThrottleManager();
         } else if (WIFI_SERVICE.equals(name)) {
             return getWifiManager();
         } else if (NOTIFICATION_SERVICE.equals(name)) {
@@ -1026,6 +1031,18 @@ class ContextImpl extends Context {
             }
         }
         return sConnectivityManager;
+    }
+
+    private ThrottleManager getThrottleManager()
+    {
+        synchronized (sSync) {
+            if (sThrottleManager == null) {
+                IBinder b = ServiceManager.getService(THROTTLE_SERVICE);
+                IThrottleManager service = IThrottleManager.Stub.asInterface(b);
+                sThrottleManager = new ThrottleManager(service);
+            }
+        }
+        return sThrottleManager;
     }
 
     private WifiManager getWifiManager()

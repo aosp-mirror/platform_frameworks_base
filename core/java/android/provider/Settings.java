@@ -3333,6 +3333,13 @@ public final class Settings {
         public static final String THROTTLE_IFACE = "throttle_iface";
 
         /**
+         * Help URI for data throttling policy
+         * @hide
+         */
+        public static final String THROTTLE_HELP_URI = "throttle_help_uri";
+
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
