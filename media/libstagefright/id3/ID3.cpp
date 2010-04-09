@@ -58,13 +58,27 @@ ID3::Version ID3::version() const {
     return mVersion;
 }
 
+// static
+bool ID3::ParseSyncsafeInteger(const uint8_t encoded[4], size_t *x) {
+    *x = 0;
+    for (int32_t i = 0; i < 4; ++i) {
+        if (encoded[i] & 0x80) {
+            return false;
+        }
+
+        *x = ((*x) << 7) | encoded[i];
+    }
+
+    return true;
+}
+
 bool ID3::parseV2(const sp<DataSource> &source) {
-    struct id3_header {
-        char id[3];
-        uint8_t version_major;
-        uint8_t version_minor;
-        uint8_t flags;
-        uint8_t enc_size[4];
+struct id3_header {
+    char id[3];
+    uint8_t version_major;
+    uint8_t version_minor;
+    uint8_t flags;
+    uint8_t enc_size[4];
     };
 
     id3_header header;
@@ -100,17 +114,18 @@ bool ID3::parseV2(const sp<DataSource> &source) {
             // set, we cannot guarantee to understand the tag format.
             return false;
         }
+    } else if (header.version_major == 4) {
+        if (header.flags & 0x0f) {
+            // The lower 4 bits are undefined in this spec.
+            return false;
+        }
     } else {
         return false;
     }
 
-    size_t size = 0;
-    for (int32_t i = 0; i < 4; ++i) {
-        if (header.enc_size[i] & 0x80) {
-            return false;
-        }
-
-        size = (size << 7) | header.enc_size[i];
+    size_t size;
+    if (!ParseSyncsafeInteger(header.enc_size, &size)) {
+        return false;
     }
 
     if (size > kMaxMetadataSize) {
@@ -178,13 +193,42 @@ bool ID3::parseV2(const sp<DataSource> &source) {
                 LOGV("have crc");
             }
         }
+    } else if (header.version_major == 4 && (header.flags & 0x40)) {
+        // Version 2.4 has an optional extended header, that's different
+        // from Version 2.3's...
+
+        if (mSize < 4) {
+            free(mData);
+            mData = NULL;
+
+            return false;
+        }
+
+        size_t ext_size;
+        if (!ParseSyncsafeInteger(mData, &ext_size)) {
+            free(mData);
+            mData = NULL;
+
+            return false;
+        }
+
+        if (ext_size < 6 || ext_size > mSize) {
+            free(mData);
+            mData = NULL;
+
+            return false;
+        }
+
+        mFirstFrameOffset = ext_size;
     }
 
     if (header.version_major == 2) {
         mVersion = ID3_V2_2;
-    } else {
-        CHECK_EQ(header.version_major, 3);
+    } else if (header.version_major == 3) {
         mVersion = ID3_V2_3;
+    } else {
+        CHECK_EQ(header.version_major, 4);
+        mVersion = ID3_V2_4;
     }
 
     return true;
@@ -242,7 +286,7 @@ void ID3::Iterator::getID(String8 *id) const {
 
     if (mParent.mVersion == ID3_V2_2) {
         id->setTo((const char *)&mParent.mData[mOffset], 3);
-    } else if (mParent.mVersion == ID3_V2_3) {
+    } else if (mParent.mVersion == ID3_V2_3 || mParent.mVersion == ID3_V2_4) {
         id->setTo((const char *)&mParent.mData[mOffset], 4);
     } else {
         CHECK(mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1);
@@ -346,6 +390,26 @@ void ID3::Iterator::getString(String8 *id) const {
     if (*mFrameData == 0x00) {
         // ISO 8859-1
         convertISO8859ToString8(mFrameData + 1, n, id);
+    } else if (*mFrameData == 0x03) {
+        // UTF-8
+        id->setTo((const char *)(mFrameData + 1), n);
+    } else if (*mFrameData == 0x02) {
+        // UTF-16 BE, no byte order mark.
+        // API wants number of characters, not number of bytes...
+        int len = n / 2;
+        const char16_t *framedata = (const char16_t *) (mFrameData + 1);
+        char16_t *framedatacopy = NULL;
+#if BYTE_ORDER == LITTLE_ENDIAN
+        framedatacopy = new char16_t[len];
+        for (int i = 0; i < len; i++) {
+            framedatacopy[i] = bswap_16(framedata[i]);
+        }
+        framedata = framedatacopy;
+#endif
+        id->setTo(framedata, len);
+        if (framedatacopy != NULL) {
+            delete[] framedatacopy;
+        }
     } else {
         // UCS-2
         // API wants number of characters, not number of bytes...
@@ -387,7 +451,7 @@ const uint8_t *ID3::Iterator::getData(size_t *length) const {
 size_t ID3::Iterator::getHeaderLength() const {
     if (mParent.mVersion == ID3_V2_2) {
         return 6;
-    } else if (mParent.mVersion == ID3_V2_3) {
+    } else if (mParent.mVersion == ID3_V2_3 || mParent.mVersion == ID3_V2_4) {
         return 10;
     } else {
         CHECK(mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1);
@@ -435,7 +499,8 @@ void ID3::Iterator::findFrame() {
             if (!strcmp(id, mID)) {
                 break;
             }
-        } else if (mParent.mVersion == ID3_V2_3) {
+        } else if (mParent.mVersion == ID3_V2_3
+                || mParent.mVersion == ID3_V2_4) {
             if (mOffset + 10 > mParent.mSize) {
                 return;
             }
@@ -444,12 +509,36 @@ void ID3::Iterator::findFrame() {
                 return;
             }
 
-            mFrameSize = 10 + U32_AT(&mParent.mData[mOffset + 4]);
+            size_t baseSize;
+            if (mParent.mVersion == ID3_V2_4) {
+                if (!ParseSyncsafeInteger(
+                            &mParent.mData[mOffset + 4], &baseSize)) {
+                    return;
+                }
+            } else {
+                baseSize = U32_AT(&mParent.mData[mOffset + 4]);
+            }
+
+            mFrameSize = 10 + baseSize;
 
             if (mOffset + mFrameSize > mParent.mSize) {
                 LOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
                      mOffset, mFrameSize, mParent.mSize - mOffset - 10);
                 return;
+            }
+
+            uint16_t flags = U16_AT(&mParent.mData[mOffset + 8]);
+
+            if ((mParent.mVersion == ID3_V2_4 && (flags & 0x000e))
+                || (mParent.mVersion == ID3_V2_3 && (flags & 0x00c0))) {
+                // Compression, Encryption or per-Frame unsynchronization
+                // are not supported at this time.
+
+                LOGV("Skipping unsupported frame (compression, encryption "
+                     "or per-frame unsynchronization flagged");
+
+                mOffset += mFrameSize;
+                continue;
             }
 
             mFrameData = &mParent.mData[mOffset + 10];
@@ -518,8 +607,8 @@ void ID3::Iterator::findFrame() {
 }
 
 static size_t StringSize(const uint8_t *start, uint8_t encoding) {
-    if (encoding== 0x00) {
-        // ISO 8859-1
+    if (encoding == 0x00 || encoding == 0x03) {
+        // ISO 8859-1 or UTF-8
         return strlen((const char *)start) + 1;
     }
 
@@ -537,13 +626,15 @@ ID3::getAlbumArt(size_t *length, String8 *mime) const {
     *length = 0;
     mime->setTo("");
 
-    Iterator it(*this, mVersion == ID3_V2_3 ? "APIC" : "PIC");
+    Iterator it(
+            *this,
+            (mVersion == ID3_V2_3 || mVersion == ID3_V2_4) ? "APIC" : "PIC");
 
     while (!it.done()) {
         size_t size;
         const uint8_t *data = it.getData(&size);
 
-        if (mVersion == ID3_V2_3) {
+        if (mVersion == ID3_V2_3 || mVersion == ID3_V2_4) {
             uint8_t encoding = data[0];
             mime->setTo((const char *)&data[1]);
             size_t mimeLen = strlen((const char *)&data[1]) + 1;
