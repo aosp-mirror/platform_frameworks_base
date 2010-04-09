@@ -913,10 +913,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
             if (mItemClickListener != null) {
                 final DropDownListView list = mDropDownList;
-                // Note that we don't have a View here, so we will need to
-                // supply null.  Hopefully no existing apps crash...
-                mItemClickListener.onItemClick(list, null, completion.getPosition(),
-                        completion.getId());
+                final int position = completion.getPosition();
+                mItemClickListener.onItemClick(list,
+                        list.getChildAt(position - list.getFirstVisiblePosition()),
+                        position, completion.getId());
             }
         }
     }
