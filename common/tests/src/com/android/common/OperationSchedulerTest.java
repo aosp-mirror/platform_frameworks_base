@@ -22,19 +22,34 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 public class OperationSchedulerTest extends AndroidTestCase {
+    /**
+     * OperationScheduler subclass which uses an artificial time.
+     * Set {@link #timeMillis} to whatever value you like.
+     */
+    private class TimeTravelScheduler extends OperationScheduler {
+        static final long DEFAULT_TIME = 1250146800000L;  // 13-Aug-2009, 12:00:00 am
+        public long timeMillis = DEFAULT_TIME;
+
+        @Override
+        protected long currentTimeMillis() { return timeMillis; }
+        public TimeTravelScheduler() { super(getFreshStorage()); }
+    }
+
+    private SharedPreferences getFreshStorage() {
+        SharedPreferences sp = getContext().getSharedPreferences("OperationSchedulerTest", 0);
+        sp.edit().clear().commit();
+        return sp;
+    }
+
     @MediumTest
     public void testScheduler() throws Exception {
-        String name = "OperationSchedulerTest.testScheduler";
-        SharedPreferences storage = getContext().getSharedPreferences(name, 0);
-        storage.edit().clear().commit();
-
-        OperationScheduler scheduler = new OperationScheduler(storage);
+        TimeTravelScheduler scheduler = new TimeTravelScheduler();
         OperationScheduler.Options options = new OperationScheduler.Options();
         assertEquals(Long.MAX_VALUE, scheduler.getNextTimeMillis(options));
         assertEquals(0, scheduler.getLastSuccessTimeMillis());
         assertEquals(0, scheduler.getLastAttemptTimeMillis());
 
-        long beforeTrigger = System.currentTimeMillis();
+        long beforeTrigger = scheduler.timeMillis;
         scheduler.setTriggerTimeMillis(beforeTrigger + 1000000);
         assertEquals(beforeTrigger + 1000000, scheduler.getNextTimeMillis(options));
 
@@ -51,33 +66,26 @@ public class OperationSchedulerTest extends AndroidTestCase {
         assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
 
         // Backoff interval after an error
-        long beforeError = System.currentTimeMillis();
+        long beforeError = (scheduler.timeMillis += 100);
         scheduler.onTransientError();
-        long afterError = System.currentTimeMillis();
         assertEquals(0, scheduler.getLastSuccessTimeMillis());
-        assertTrue(beforeError <= scheduler.getLastAttemptTimeMillis());
-        assertTrue(afterError >= scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeError, scheduler.getLastAttemptTimeMillis());
         assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
         options.backoffFixedMillis = 1000000;
         options.backoffIncrementalMillis = 500000;
-        assertTrue(beforeError + 1500000 <= scheduler.getNextTimeMillis(options));
-        assertTrue(afterError + 1500000 >= scheduler.getNextTimeMillis(options));
+        assertEquals(beforeError + 1500000, scheduler.getNextTimeMillis(options));
 
         // Two errors: backoff interval increases
-        beforeError = System.currentTimeMillis();
+        beforeError = (scheduler.timeMillis += 100);
         scheduler.onTransientError();
-        afterError = System.currentTimeMillis();
-        assertTrue(beforeError <= scheduler.getLastAttemptTimeMillis());
-        assertTrue(afterError >= scheduler.getLastAttemptTimeMillis());
-        assertTrue(beforeError + 2000000 <= scheduler.getNextTimeMillis(options));
-        assertTrue(afterError + 2000000 >= scheduler.getNextTimeMillis(options));
+        assertEquals(beforeError, scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeError + 2000000, scheduler.getNextTimeMillis(options));
 
         // Reset transient error: no backoff interval
         scheduler.resetTransientError();
         assertEquals(0, scheduler.getLastSuccessTimeMillis());
         assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
-        assertTrue(beforeError <= scheduler.getLastAttemptTimeMillis());
-        assertTrue(afterError >= scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeError, scheduler.getLastAttemptTimeMillis());
 
         // Permanent error holds true even if transient errors are reset
         // However, we remember that the transient error was reset...
@@ -89,30 +97,26 @@ public class OperationSchedulerTest extends AndroidTestCase {
         assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
 
         // Success resets the trigger
-        long beforeSuccess = System.currentTimeMillis();
+        long beforeSuccess = (scheduler.timeMillis += 100);
         scheduler.onSuccess();
-        long afterSuccess = System.currentTimeMillis();
-        assertTrue(beforeSuccess <= scheduler.getLastAttemptTimeMillis());
-        assertTrue(afterSuccess >= scheduler.getLastAttemptTimeMillis());
-        assertTrue(beforeSuccess <= scheduler.getLastSuccessTimeMillis());
-        assertTrue(afterSuccess >= scheduler.getLastSuccessTimeMillis());
+        assertEquals(beforeSuccess, scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeSuccess, scheduler.getLastSuccessTimeMillis());
         assertEquals(Long.MAX_VALUE, scheduler.getNextTimeMillis(options));
 
         // The moratorium is not reset by success!
-        scheduler.setTriggerTimeMillis(beforeSuccess + 500000);
+        scheduler.setTriggerTimeMillis(0);
         assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
         scheduler.setMoratoriumTimeMillis(0);
-        assertEquals(beforeSuccess + 500000, scheduler.getNextTimeMillis(options));
+        assertEquals(beforeSuccess, scheduler.getNextTimeMillis(options));
 
         // Periodic interval after success
         options.periodicIntervalMillis = 250000;
-        assertTrue(beforeSuccess + 250000 <= scheduler.getNextTimeMillis(options));
-        assertTrue(afterSuccess + 250000 >= scheduler.getNextTimeMillis(options));
+        scheduler.setTriggerTimeMillis(Long.MAX_VALUE);
+        assertEquals(beforeSuccess + 250000, scheduler.getNextTimeMillis(options));
 
         // Trigger minimum is also since the last success
         options.minTriggerMillis = 1000000;
-        assertTrue(beforeSuccess + 1000000 <= scheduler.getNextTimeMillis(options));
-        assertTrue(afterSuccess + 1000000 >= scheduler.getNextTimeMillis(options));
+        assertEquals(beforeSuccess + 1000000, scheduler.getNextTimeMillis(options));
     }
 
     @SmallTest
@@ -138,23 +142,19 @@ public class OperationSchedulerTest extends AndroidTestCase {
 
     @SmallTest
     public void testMoratoriumWithHttpDate() throws Exception {
-        String name = "OperationSchedulerTest.testMoratoriumWithHttpDate";
-        SharedPreferences storage = getContext().getSharedPreferences(name, 0);
-        storage.edit().clear().commit();
-
-        OperationScheduler scheduler = new OperationScheduler(storage);
+        TimeTravelScheduler scheduler = new TimeTravelScheduler();
         OperationScheduler.Options options = new OperationScheduler.Options();
 
-        long beforeTrigger = System.currentTimeMillis();
+        long beforeTrigger = scheduler.timeMillis;
         scheduler.setTriggerTimeMillis(beforeTrigger + 1000000);
         assertEquals(beforeTrigger + 1000000, scheduler.getNextTimeMillis(options));
 
         scheduler.setMoratoriumTimeMillis(beforeTrigger + 2000000);
         assertEquals(beforeTrigger + 2000000, scheduler.getNextTimeMillis(options));
 
-        long beforeMoratorium = System.currentTimeMillis();
+        long beforeMoratorium = scheduler.timeMillis;
         assertTrue(scheduler.setMoratoriumTimeHttp("3000"));
-        long afterMoratorium = System.currentTimeMillis();
+        long afterMoratorium = scheduler.timeMillis;
         assertTrue(beforeMoratorium + 3000000 <= scheduler.getNextTimeMillis(options));
         assertTrue(afterMoratorium + 3000000 >= scheduler.getNextTimeMillis(options));
 
@@ -163,5 +163,57 @@ public class OperationSchedulerTest extends AndroidTestCase {
         assertEquals(1924991999000L, scheduler.getNextTimeMillis(options));
 
         assertFalse(scheduler.setMoratoriumTimeHttp("not actually a date"));
+    }
+
+    @SmallTest
+    public void testClockRollbackScenario() throws Exception {
+        TimeTravelScheduler scheduler = new TimeTravelScheduler();
+        OperationScheduler.Options options = new OperationScheduler.Options();
+        options.minTriggerMillis = 2000;
+
+        // First, set up a scheduler with reasons to wait: a transient
+        // error with backoff and a moratorium for a few minutes.
+
+        long beforeTrigger = scheduler.timeMillis;
+        long triggerTime = beforeTrigger - 10000000;
+        scheduler.setTriggerTimeMillis(triggerTime);
+        assertEquals(triggerTime, scheduler.getNextTimeMillis(options));
+        assertEquals(0, scheduler.getLastAttemptTimeMillis());
+
+        long beforeSuccess = (scheduler.timeMillis += 100);
+        scheduler.onSuccess();
+        scheduler.setTriggerTimeMillis(triggerTime);
+        assertEquals(beforeSuccess, scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeSuccess + 2000, scheduler.getNextTimeMillis(options));
+
+        long beforeError = (scheduler.timeMillis += 100);
+        scheduler.onTransientError();
+        assertEquals(beforeError, scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeError + 5000, scheduler.getNextTimeMillis(options));
+
+        long beforeMoratorium = (scheduler.timeMillis += 100);
+        scheduler.setMoratoriumTimeMillis(beforeTrigger + 1000000);
+        assertEquals(beforeTrigger + 1000000, scheduler.getNextTimeMillis(options));
+
+        // Now set the time back a few seconds.
+        // The moratorium time should still be honored.
+        long beforeRollback = (scheduler.timeMillis = beforeTrigger - 10000);
+        assertEquals(beforeTrigger + 1000000, scheduler.getNextTimeMillis(options));
+
+        // The rollback also moved the last-attempt clock back to the rollback time.
+        assertEquals(scheduler.timeMillis, scheduler.getLastAttemptTimeMillis());
+
+        // But if we set the time back more than a day, the moratorium
+        // resets to the maximum moratorium (a day, by default), exposing
+        // the original trigger time.
+        beforeRollback = (scheduler.timeMillis = beforeTrigger - 100000000);
+        assertEquals(triggerTime, scheduler.getNextTimeMillis(options));
+        assertEquals(beforeRollback, scheduler.getLastAttemptTimeMillis());
+
+        // If we roll forward until after the re-set moratorium, then it expires.
+        scheduler.timeMillis = triggerTime + 5000000;
+        assertEquals(triggerTime, scheduler.getNextTimeMillis(options));
+        assertEquals(beforeRollback, scheduler.getLastAttemptTimeMillis());
+        assertEquals(beforeRollback, scheduler.getLastSuccessTimeMillis());
     }
 }
