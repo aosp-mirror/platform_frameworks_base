@@ -1722,8 +1722,7 @@ public class WebView extends AbsoluteLayout
      *  Return true if the browser is displaying a TextView for text input.
      */
     private boolean inEditingMode() {
-        return mWebTextView != null && mWebTextView.getParent() != null
-                && mWebTextView.hasFocus();
+        return mWebTextView != null && mWebTextView.getParent() != null;
     }
 
     /**
