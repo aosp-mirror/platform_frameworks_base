@@ -165,14 +165,32 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
     jint *tagValues = env->GetIntArrayElements(tags, NULL);
 
     uint8_t buf[LOGGER_ENTRY_MAX_LEN];
+    struct timeval timeout = {0, 0};
+    fd_set readset;
+    FD_ZERO(&readset);
+
     for (;;) {
+        // Use a short select() to try to avoid problems hanging on read().
+        // This means we block for 5ms at the end of the log -- oh well.
+        timeout.tv_usec = 5000;
+        FD_SET(fd, &readset);
+        int r = select(fd + 1, &readset, NULL, NULL, &timeout);
+        if (r == 0) {
+            break;  // no more events
+        } else if (r < 0 && errno == EINTR) {
+            continue;  // interrupted by signal, try again
+        } else if (r < 0) {
+            jniThrowIOException(env, errno);  // Will throw on return
+            break;
+        }
+
         int len = read(fd, buf, sizeof(buf));
         if (len == 0 || (len < 0 && errno == EAGAIN)) {
-            break;
+            break;  // no more events
+        } else if (len < 0 && errno == EINTR) {
+            continue;  // interrupted by signal, try again
         } else if (len < 0) {
-            // This calls env->ThrowNew(), which doesn't throw an exception
-            // now, but sets a flag to trigger an exception after we return.
-            jniThrowIOException(env, errno);
+            jniThrowIOException(env, errno);  // Will throw on return
             break;
         } else if ((size_t) len < sizeof(logger_entry) + sizeof(int32_t)) {
             jniThrowException(env, "java/io/IOException", "Event too short");
