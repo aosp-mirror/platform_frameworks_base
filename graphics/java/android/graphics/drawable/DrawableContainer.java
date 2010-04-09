@@ -17,8 +17,16 @@
 package android.graphics.drawable;
 
 import android.content.res.Resources;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 
+/**
+ * A helper class that contains several {@link Drawable}s and selects which one to use.
+ *
+ * You can subclass it to create your own DrawableContainers or directly use one its child classes.
+ */
 public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     /**
@@ -196,8 +204,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mDrawableContainerState.getOpacity();
     }
 
-    public boolean selectDrawable(int idx)
-    {
+    public boolean selectDrawable(int idx) {
         if (idx == mCurIndex) {
             return false;
         }
@@ -255,6 +262,12 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    /**
+     * A ConstantState that can contain several {@link Drawable}s.
+     *
+     * This class was made public to enable testing, and its visibility may change in a future
+     * release.
+     */
     public abstract static class DrawableContainerState extends ConstantState {
         final DrawableContainer mOwner;
 
@@ -443,12 +456,12 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return mConstantMinimumHeight;
         }
 
-        private void computeConstantSize() {
+        protected void computeConstantSize() {
             mComputedConstantSize = true;
 
             final int N = getChildCount();
             final Drawable[] drawables = mDrawables;
-            mConstantWidth = mConstantHeight = 0;
+            mConstantWidth = mConstantHeight = -1;
             mConstantMinimumWidth = mConstantMinimumHeight = 0;
             for (int i = 0; i < N; i++) {
                 Drawable dr = drawables[i];

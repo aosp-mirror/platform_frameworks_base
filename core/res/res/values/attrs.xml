@@ -2506,6 +2506,10 @@
         <attr name="drawable" />
     </declare-styleable>
 
+    <declare-styleable name="MipmapDrawableItem">
+        <attr name="drawable" />
+    </declare-styleable>
+
     <declare-styleable name="RotateDrawable">
         <attr name="visible" />
         <attr name="fromDegrees" format="float" />

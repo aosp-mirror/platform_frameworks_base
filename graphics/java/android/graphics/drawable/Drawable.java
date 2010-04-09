@@ -16,21 +16,30 @@
 
 package android.graphics.drawable;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.NinePatch;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.StateSet;
-import android.util.Xml;
 import android.util.TypedValue;
+import android.util.Xml;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -750,6 +759,8 @@ public abstract class Drawable {
             drawable = new StateListDrawable();
         } else if (name.equals("level-list")) {
             drawable = new LevelListDrawable();
+        } else if (name.equals("mipmap")) {
+            drawable = new MipmapDrawable();
         } else if (name.equals("layer-list")) {
             drawable = new LayerDrawable();
         } else if (name.equals("transition")) {
@@ -771,7 +782,7 @@ public abstract class Drawable {
         } else if (name.equals("inset")) {
             drawable = new InsetDrawable();
         } else if (name.equals("bitmap")) {
-            drawable = new BitmapDrawable();
+            drawable = new BitmapDrawable(r);
             if (r != null) {
                ((BitmapDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
             }
