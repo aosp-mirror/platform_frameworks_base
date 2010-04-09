@@ -304,9 +304,7 @@ public class RecoverySystem {
     /**
      * Reboots the device in order to install the given update
      * package.
-     * Requires the {@link android.Manifest.permission#REBOOT}
-     * and {@link android.Manifest.permission#ACCESS_CACHE_FILESYSTEM}
-     * permissions.
+     * Requires the {@link android.Manifest.permission#REBOOT} permission.
      *
      * @param context      the Context to use
      * @param packageFile  the update package to install.  Currently
@@ -337,9 +335,7 @@ public class RecoverySystem {
      * sometimes called a "factory reset", which is something of a
      * misnomer because the system partition is not restored to its
      * factory state.
-     * Requires the {@link android.Manifest.permission#REBOOT}
-     * and {@link android.Manifest.permission#ACCESS_CACHE_FILESYSTEM}
-     * permissions.
+     * Requires the {@link android.Manifest.permission#REBOOT} permission.
      *
      * @param context  the Context to use
      *
