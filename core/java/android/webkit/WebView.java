@@ -1274,30 +1274,57 @@ public class WebView extends AbsoluteLayout
      *             overwritten with this WebView's picture data.
      * @return True if the picture was successfully saved.
      */
-    public boolean savePicture(Bundle b, File dest) {
+    public boolean savePicture(Bundle b, final File dest) {
         if (dest == null || b == null) {
             return false;
         }
         final Picture p = capturePicture();
-        try {
-            final FileOutputStream out = new FileOutputStream(dest);
-            p.writeToStream(out);
-            out.close();
-            // now update the bundle
-            b.putInt("scrollX", mScrollX);
-            b.putInt("scrollY", mScrollY);
-            b.putFloat("scale", mActualScale);
-            b.putFloat("textwrapScale", mTextWrapScale);
-            b.putBoolean("overview", mInZoomOverview);
-            return true;
-        } catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-        return false;
+        // Use a temporary file while writing to ensure the destination file
+        // contains valid data.
+        final File temp = new File(dest.getPath() + ".writing");
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    FileOutputStream out = new FileOutputStream(temp);
+                    p.writeToStream(out);
+                    out.close();
+                    // Writing the picture succeeded, rename the temporary file
+                    // to the destination.
+                    temp.renameTo(dest);
+                } catch (Exception e) {
+                    // too late to do anything about it.
+                } finally {
+                    temp.delete();
+                }
+            }
+        }).start();
+        // now update the bundle
+        b.putInt("scrollX", mScrollX);
+        b.putInt("scrollY", mScrollY);
+        b.putFloat("scale", mActualScale);
+        b.putFloat("textwrapScale", mTextWrapScale);
+        b.putBoolean("overview", mInZoomOverview);
+        return true;
+    }
+
+    private void restoreHistoryPictureFields(Picture p, Bundle b) {
+        int sx = b.getInt("scrollX", 0);
+        int sy = b.getInt("scrollY", 0);
+        float scale = b.getFloat("scale", 1.0f);
+        mDrawHistory = true;
+        mHistoryPicture = p;
+        mScrollX = sx;
+        mScrollY = sy;
+        mHistoryWidth = Math.round(p.getWidth() * scale);
+        mHistoryHeight = Math.round(p.getHeight() * scale);
+        // as getWidth() / getHeight() of the view are not available yet, set up
+        // mActualScale, so that when onSizeChanged() is called, the rest will
+        // be set correctly
+        mActualScale = scale;
+        mInvActualScale = 1 / scale;
+        mTextWrapScale = b.getFloat("textwrapScale", scale);
+        mInZoomOverview = b.getBoolean("overview");
+        invalidate();
     }
 
     /**
@@ -1311,42 +1338,35 @@ public class WebView extends AbsoluteLayout
         if (src == null || b == null) {
             return false;
         }
-        if (src.exists()) {
-            Picture p = null;
-            try {
-                final FileInputStream in = new FileInputStream(src);
-                p = Picture.createFromStream(in);
-                in.close();
-            } catch (FileNotFoundException e){
-                e.printStackTrace();
-            } catch (RuntimeException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (p != null) {
-                int sx = b.getInt("scrollX", 0);
-                int sy = b.getInt("scrollY", 0);
-                float scale = b.getFloat("scale", 1.0f);
-                mDrawHistory = true;
-                mHistoryPicture = p;
-                mScrollX = sx;
-                mScrollY = sy;
-                mHistoryWidth = Math.round(p.getWidth() * scale);
-                mHistoryHeight = Math.round(p.getHeight() * scale);
-                // as getWidth() / getHeight() of the view are not
-                // available yet, set up mActualScale, so that when
-                // onSizeChanged() is called, the rest will be set
-                // correctly
-                mActualScale = scale;
-                mInvActualScale = 1 / scale;
-                mTextWrapScale = b.getFloat("textwrapScale", scale);
-                mInZoomOverview = b.getBoolean("overview");
-                invalidate();
-                return true;
-            }
+        if (!src.exists()) {
+            return false;
         }
-        return false;
+        try {
+            final FileInputStream in = new FileInputStream(src);
+            final Bundle copy = new Bundle(b);
+            new Thread(new Runnable() {
+                public void run() {
+                    final Picture p = Picture.createFromStream(in);
+                    if (p != null) {
+                        // Post a runnable on the main thread to update the
+                        // history picture fields.
+                        mPrivateHandler.post(new Runnable() {
+                            public void run() {
+                                restoreHistoryPictureFields(p, copy);
+                            }
+                        });
+                    }
+                    try {
+                        in.close();
+                    } catch (Exception e) {
+                        // Nothing we can do now.
+                    }
+                }
+            }).start();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+        return true;
     }
 
     /**
@@ -3339,6 +3359,7 @@ public class WebView extends AbsoluteLayout
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
         if (mDrawHistory && mWebViewCore.pictureReady()) {
             mDrawHistory = false;
+            mHistoryPicture = null;
             invalidate();
             int oldScrollX = mScrollX;
             int oldScrollY = mScrollY;
