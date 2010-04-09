@@ -1867,7 +1867,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 // The first time a track is added we wait
                 // for all its buffers to be filled before processing it
                 if (cblk->framesReady() && (track->isReady() || track->isStopped()) &&
-                        !track->isPaused())
+                        !track->isPaused() && !track->isTerminated())
                 {
                     //LOGV("track %d u=%08x, s=%08x [OK]", track->name(), cblk->user, cblk->server);
 
