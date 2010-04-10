@@ -380,7 +380,8 @@ class LoadListener extends Handler implements EventHandler {
         }
         // At this point, mMimeType has been set to non-null.
         if (mIsMainPageLoader && mIsMainResourceLoader && mUserGesture &&
-                Pattern.matches(XML_MIME_TYPE, mMimeType)) {
+                Pattern.matches(XML_MIME_TYPE, mMimeType) &&
+                !mMimeType.equalsIgnoreCase("application/xhtml+xml")) {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setDataAndType(Uri.parse(url()), mMimeType);
             ResolveInfo info = mContext.getPackageManager().resolveActivity(i,
