@@ -17,8 +17,8 @@
 package android.webkit;
 
 import android.content.Context;
+import android.net.http.AndroidHttpClient;
 import android.net.http.Headers;
-import android.net.http.HttpDateTime;
 import android.os.FileUtils;
 import android.util.Log;
 import java.io.File;
@@ -716,7 +716,7 @@ public final class CacheManager {
         ret.expiresString = headers.getExpires();
         if (ret.expiresString != null) {
             try {
-                ret.expires = HttpDateTime.parse(ret.expiresString);
+                ret.expires = AndroidHttpClient.parseDate(ret.expiresString);
             } catch (IllegalArgumentException ex) {
                 // Take care of the special "-1" and "0" cases
                 if ("-1".equals(ret.expiresString)
@@ -831,7 +831,7 @@ public final class CacheManager {
                 // 24 * 60 * 60 * 1000
                 long lastmod = System.currentTimeMillis() + 86400000;
                 try {
-                    lastmod = HttpDateTime.parse(ret.lastModified);
+                    lastmod = AndroidHttpClient.parseDate(ret.lastModified);
                 } catch (IllegalArgumentException ex) {
                     Log.e(LOGTAG, "illegal lastModified: " + ret.lastModified);
                 }
