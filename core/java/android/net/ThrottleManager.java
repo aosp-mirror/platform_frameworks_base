@@ -73,6 +73,12 @@ public class ThrottleManager
      */
     public static final String EXTRA_THROTTLE_LEVEL = "level";
 
+    /**
+     * Broadcast on boot and whenever the settings change.
+     * {@hide}
+     */
+    public static final String POLICY_CHANGED_ACTION = "android.net.thrott.POLICY_CHANGED_ACTION";
+
     // {@hide}
     public static final int DIRECTION_TX = 0;
     // {@hide}
@@ -102,6 +108,8 @@ public class ThrottleManager
     public static final int PERIOD_60SEC  = 10;
     // @hide
     public static final int PERIOD_SECOND = 11;
+
+    
 
     /**
      * returns a long of the ms from the epoch to the time the current cycle ends for the
@@ -147,7 +155,7 @@ public class ThrottleManager
 
     /**
      * returns the number of bytes read+written after which a particular cliff
-     * takes effect on the named iface.  Currently only cliff #0 is supported (1 step)
+     * takes effect on the named iface.  Currently only cliff #1 is supported (1 step)
      * {@hide}
      */
     public long getCliffThreshold(String iface, int cliff) {
@@ -160,7 +168,7 @@ public class ThrottleManager
 
     /**
      * returns the thottling bandwidth (bps) for a given cliff # on the named iface.
-     * only cliff #0 is currently supported.
+     * only cliff #1 is currently supported.
      * {@hide}
      */
     public int getCliffLevel(String iface, int cliff) {
