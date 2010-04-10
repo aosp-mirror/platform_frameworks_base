@@ -312,7 +312,7 @@ android.net.http.AndroidHttpClientConnection
 android.net.http.EventHandler
 android.net.http.Headers
 android.net.http.HttpsConnection
-android.net.http.HttpDateTime
+com.android.internal.http.HttpDateTime
 android.net.http.Request
 android.net.http.RequestQueue
 android.net.http.SslCertificate
