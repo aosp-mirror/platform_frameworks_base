@@ -824,6 +824,12 @@ public class Camera {
         public static final String SCENE_MODE_PARTY = "party";
         public static final String SCENE_MODE_CANDLELIGHT = "candlelight";
 
+        /**
+         * Applications are looking for a barcode. Camera driver will be
+         * optimized for barcode reading.
+         */
+        public static final String SCENE_MODE_BARCODE = "barcode";
+
         // Values for focus mode settings.
         /**
          * Auto-focus mode.
@@ -844,6 +850,13 @@ public class Camera {
          * not call {@link #autoFocus(AutoFocusCallback)} in this mode.
          */
         public static final String FOCUS_MODE_FIXED = "fixed";
+
+        /**
+         * Extended depth of field (EDOF). Focusing is done digitally and
+         * continuously. Applications should not call {@link
+         * #autoFocus(AutoFocusCallback)} in this mode.
+         */
+        public static final String FOCUS_MODE_EDOF = "edof";
 
         // Formats for setPreviewFormat and setPictureFormat.
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
@@ -1507,9 +1520,11 @@ public class Camera {
         }
 
         /**
-         * Sets the scene mode. Other parameters may be changed after changing
-         * scene mode. For example, flash and supported flash mode may be
-         * changed to "off" in night scene mode. After setting scene mode,
+         * Sets the scene mode. Changing scene mode may override other
+         * parameters (such as flash mode, focus mode, white balance). For
+         * example, suppose originally flash mode is on and supported flash
+         * modes are on/off. In night scene mode, both flash mode and supported
+         * flash mode may be changed to off. After setting scene mode,
          * applications should call getParameters to know if some parameters are
          * changed.
          *
