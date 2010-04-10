@@ -1,0 +1,444 @@
+page.title=String Resources
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<p>A string resource provides text strings for your application
+with optional text styling and formatting. There are three types of resources that can provide
+your application with strings:</p>
+
+<dl>
+  <dt><a href="#String">String</a></dt>
+    <dd>XML resource that provides a single string.</dd>
+  <dt><a href="#StringArray">String Array</a></dt>
+    <dd>XML resource that provides an array of strings.</dd>
+  <dt><a href="#Plurals">Plurals</a></dt>
+    <dd>XML resource that carries different strings for different pluralizations
+    of the same word or phrase.</dd>
+</dl>
+
+<p>All strings are capable of applying some styling markup and formatting arguments. For
+information about styling and formatting strings, see the section about <a
+href="#FormattingAndStyling">Formatting and Styling</a>.</p>
+
+
+
+
+<h2 id="String">String</h2>
+
+<p>A single string that can be referenced from the application or from other resource files (such
+as an XML layout).</p>
+
+<p class="note"><strong>Note:</strong> A string is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). So, you can
+combine string resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;string>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link java.lang.String}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.string.<em>string_name</em></code><br/>
+In XML:<code>@string/<em>string_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#string-resources-element">resources</a>>
+    &lt;<a href="#string-element">string</a>
+        name="<em>string_name</em>"
+        &gt;<em>text_string</em>&lt;/string&gt;
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="string-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="string-element"><code>&lt;string&gt;</code></dt>
+    <dd>A string, which can include styling tags. Beware that you must escape apostrophes and
+quotation marks. For more information about how to properly style and format your strings see <a
+href="#FormattingAndStyling">Formatting and Styling</a>, below.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the string. This name will be used as the resource
+ID.</dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values/strings.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+  <p>This layout XML applies a string to a View:</p>
+<pre>
+&lt;TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    <strong>android:text="@string/hello"</strong> />
+</pre>
+
+  <p>This application code retrieves a string:</p>
+<pre>
+String string = {@link android.content.Context#getString(int) getString}(R.string.hello);
+</pre>
+<p>You can use either {@link android.content.Context#getString(int)} or
+{@link android.content.Context#getText(int)} to retieve a string. {@link
+android.content.Context#getText(int)} will retain any rich text styling applied to the string.</p>
+
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+
+
+
+
+<h2 id="StringArray">String Array</h2>
+
+<p>An array of strings that can be referenced from the application.</p>
+
+<p class="note"><strong>Note:</strong> A string array is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine string array resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;string-array>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to an array of {@link java.lang.String}s.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.array.<em>string_array_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#string-array-resources-element">resources</a>>
+    &lt;<a href="#string-array-element">string-array</a>
+        name="<em>string_array_name</em>">
+        &lt;<a href="#string-array-item-element">item</a>
+            &gt;<em>text_string</em>&lt;/item&gt;
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+  <dt id="string-array-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="string-array-element"><code>&lt;string-array&gt;</code></dt>
+    <dd>Defines an array of strings. Contains one or more {@code &lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the array. This name will be used as the resource
+ID to reference the array.</dd>
+      </dl>
+
+    </dd>
+  <dt id="string-array-item-element"><code>&lt;item&gt;</code></dt>
+    <dd>A string, which can include styling tags. The value can be a referenced to another
+string resource. Must be a child of a {@code &lt;string-array&gt;} element. Beware that you
+must escape apostrophes and
+quotation marks. See <a href="#FormattingAndStyling">Formatting and Styling</a>, below, for
+information about to properly style and format your strings.
+      <p>No attributes.</p>
+    </dd>
+</dl>
+</dd> <!-- end  elements -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values/strings.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string-array name="planets_array">
+        &lt;item>Mercury&lt;/item>
+        &lt;item>Venus&lt;/item>
+        &lt;item>Earth&lt;/item>
+        &lt;item>Mars&lt;/item>
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+
+  <p>This application code retrieves a string array:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+String[] planets = res.{@link android.content.res.Resources#getStringArray(int)
+getStringArray}(R.array.planets_array);
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+
+
+<h2 id="Plurals">Plurals</h2>
+
+<p>A pair of strings that each provide a different plural form of the same word or phrase,
+which you can collectively reference from the application. When you request the plurals
+resource using a method such as {@link android.content.res.Resources#getQuantityString(int,int)
+getQuantityString()}, you must pass a "count", which will determine the plural form you
+require and return that string to you.</p>
+
+<p class="note"><strong>Note:</strong> A plurals collection is a simple resource that is
+referenced using the value provided in the {@code name} attribute (not the name of the XML
+file). As such, you can combine plurals resources with other simple resources in the one
+XML file, under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;plurals>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.plurals.<em>plural_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#plurals-resources-element">resources</a>>
+    &lt;<a href="#plurals-element">plurals</a>
+        name="<em>plural_name</em>">
+        &lt;<a href="#plurals-item-element">item</a>
+            quantity=["one" | "other"]
+            &gt;<em>text_string</em>&lt;/item>
+    &lt;/plurals>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="plurals-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="plurals-element"><code>&lt;plurals&gt;</code></dt>
+    <dd>A collection of strings, of which, one string is provided depending on the amount of
+something. Contains one or more {@code &lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the pair of strings. This name will be used as the
+resource ID.</dd>
+      </dl>
+
+    </dd>
+  <dt id="plurals-item-element"><code>&lt;item&gt;</code></dt>
+    <dd>A plural or singular string. The value can be a referenced to another
+string resource. Must be a child of a {@code &lt;plurals&gt;} element. Beware that you must
+escape apostrophes and quotation marks. See <a href="#FormattingAndStyling">Formatting and
+Styling</a>, below, for information about to properly style and format your strings.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>quantity</code></dt>
+        <dd><em>Keyword</em>. A value indicating the case in which this string should be used. Valid
+values:
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr>
+              <td>{@code one}</td><td>When there is one (a singular string).</td>
+            </tr>
+            <tr>
+              <td>{@code other}</td><td>When the quantity is anything other than one (a plural
+string, but also used when the count is zero).</td>
+            </tr>
+          </table>
+        </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end elements -->
+
+<dt>example:</dt>
+<dd>XML file saved at {@code res/values/strings.xml}:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;plurals name="numberOfSongsAvailable">
+        &lt;item quantity="one">One song found.&lt;/item>
+        &lt;item quantity="other">%d songs found.&lt;/item>
+    &lt;/plurals>
+&lt;/resources>
+</pre>
+    <p>Java code:</p>
+<pre>
+int count = getNumberOfsongsAvailable();
+Resources res = {@link android.content.Context#getResources()};
+String songsFound = res.{@link android.content.res.Resources#getQuantityString(int,int)
+getQuantityString}(R.plurals.numberOfSongsAvailable, count);
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+
+
+
+<h2 id="FormattingAndStyling">Formatting and Styling</h2>
+
+<p>Here are a few important things you should know about how to properly
+format and style your string resources.</p>
+
+
+<h3>Escaping apostrophes and quotes</h3>
+
+<p>If you have an apostrophe or a quote in your string, you must either escape it or enclose the
+whole string in the other type of enclosing quotes. For example, here are some stings that
+do and don't work:</p>
+
+<pre>
+&lt;string name="good_example">"This'll work"&lt;/string>
+&lt;string name="good_example_2">This\'ll also work&lt;/string>
+&lt;string name="bad_example">This doesn't work&lt;/string>
+&lt;string name="bad_example_2">XML encodings don&amp;apos;t work&lt;/string>
+</pre>
+
+
+<h3>Formatting strings</h3>
+
+<p>If you need to format your strings using <a
+href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,
+java.lang.Object...)">{@code String.format(String, Object...)}</a>,
+then you can do so by putting
+your format arguments in the string resource. For example, with the following resource:</p>
+
+<pre>
+&lt;string name="welcome_messages">Hello, %1$s! You have %2$d new messages.&lt;/string>
+</pre>
+
+<p>In this example, the format string has two arguments: {@code %1$s} is a string and {@code %2$d}
+is a decimal number. You can format the string with arguements from your application like this:</p>
+
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+String text = String.<a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,
+java.lang.Object...)">format</a>(res.getString(R.string.welcome_messages), username, mailCount);
+</pre>
+
+
+
+<h3>Styling with HTML markup</h3>
+
+<p>You can add styling to your strings with HTML markup. For example:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="welcome">Welcome to &lt;b>Android&lt;/b>!&lt;/string>
+&lt;/resources>
+</pre>
+<p>Supported HTML elements include:</p>
+<ul>
+  <li>{@code &lt;b>} for <b>bold</b> text.</li>
+  <li>{@code &lt;i>} for <i>italic</i> text.</li>
+  <li>{@code &lt;u>} for <u>underline</u> text.</li>
+</ul>
+
+<p>Sometimes you may want to create a styled text resource that is also used as a format
+string. Normally, this won't work because the <a
+href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,
+java.lang.Object...)">{@code String.format(String, Object...)}</a>
+method will strip all the style
+information from the string. The work-around to this is to write the HTML tags with escaped
+entities, which are then recovered with {@link android.text.Html#fromHtml(String)},
+after the formatting takes place. For example:</p>
+
+<ol>
+  <li>Store your styled text resource as an HTML-escaped string:
+<pre>
+&lt;resources&gt;
+  &lt;string name="welcome_messages"&gt;Hello, %1$s! You have &amp;lt;b>%2$d new messages&amp;lt;/b>.&lt;/string>
+&lt;/resources&gt;
+</pre>
+<p>In this formatted string, a {@code &lt;b>} element is added. Notice that the opening bracket is
+HTML-escaped, using the {@code &amp;lt;} notation.</p>
+  </li>
+  <li>Then format the string as usual, but also call {@link android.text.Html#fromHtml} to
+convert the HTML text into styled text:
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+String text = String.<a
+href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,
+java.lang.Object...)">format</a>(res.getString(R.string.welcome_messages), username, mailCount);
+CharSequence styledText = Html.fromHtml(text);
+</pre>
+  </li>
+</ol>
+
+<p>Because the {@link android.text.Html#fromHtml} method will format all HTML entities, be sure to
+escape any possible HTML characters in the strings you use with the formatted text, using
+{@link android.text.TextUtils#htmlEncode}. For instance, if you'll be passing a string argument to
+<a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,
+java.lang.Object...)">{@code String.format()}</a> that may contain characters such as
+"&lt;" or "&amp;", then they must be escaped before formatting, so that when the formatted string
+is passed through {@link android.text.Html#fromHtml}, the characters come out the way they were
+originally written. For example:</p>
+<pre>
+String escapedUsername = TextUtil.{@link android.text.TextUtils#htmlEncode htmlEncode}(username);
+
+Resources res = {@link android.content.Context#getResources()};
+String text = String.<a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String,
+java.lang.Object...)">format</a>(res.getString(R.string.welcome_messages), escapedUsername, mailCount);
+CharSequence styledText = Html.fromHtml(text);
+</pre>
+
+
+
