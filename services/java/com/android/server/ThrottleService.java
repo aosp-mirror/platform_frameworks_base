@@ -28,11 +28,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.IThrottleManager;
 import android.net.ThrottleManager;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -48,7 +48,12 @@ import android.util.Slog;
 
 import com.android.internal.telephony.TelephonyProperties;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -353,6 +358,8 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             onResetAlarm();
 
+            onPollAlarm();
+
             Intent broadcast = new Intent(ThrottleManager.POLICY_CHANGED_ACTION);
             mContext.sendBroadcast(broadcast);
         }
@@ -591,7 +598,6 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         ThrottleService mParent;
         Context mContext;
-        SharedPreferences mSharedPreferences;
 
         DataRecorder(Context context, ThrottleService parent) {
             mContext = context;
@@ -604,9 +610,6 @@ public class ThrottleService extends IThrottleManager.Stub {
 
                 mPeriodStart = Calendar.getInstance();
                 mPeriodEnd = Calendar.getInstance();
-
-                mSharedPreferences = mContext.getSharedPreferences("ThrottleData",
-                        android.content.Context.MODE_PRIVATE);
 
                 zeroData(0);
                 retrieve();
@@ -698,24 +701,35 @@ public class ThrottleService extends IThrottleManager.Stub {
             record();
         }
 
-        private void record() {
-            // serialize into a secure setting
+        private File getDataFile() {
+            File dataDir = Environment.getDataDirectory();
+            File throttleDir = new File(dataDir, "system/throttle");
+            throttleDir.mkdirs();
+            File dataFile = new File(throttleDir, "data");
+            return dataFile;
+        }
 
+        private static final int DATA_FILE_VERSION = 1;
+
+        private void record() {
+            // 1 int version
             // 1 int mPeriodCount
             // 13*6 long[PERIOD_COUNT] mPeriodRxData
             // 13*6 long[PERIOD_COUNT] mPeriodTxData
             // 1  int mCurrentPeriod
             // 13 long periodStartMS
             // 13 long periodEndMS
-            // 199 chars max
+            // 200 chars max
             StringBuilder builder = new StringBuilder();
+            builder.append(DATA_FILE_VERSION);
+            builder.append(":");
             builder.append(mPeriodCount);
             builder.append(":");
-            for(int i=0; i < mPeriodCount; i++) {
+            for(int i = 0; i < mPeriodCount; i++) {
                 builder.append(mPeriodRxData[i]);
                 builder.append(":");
             }
-            for(int i=0; i < mPeriodCount; i++) {
+            for(int i = 0; i < mPeriodCount; i++) {
                 builder.append(mPeriodTxData[i]);
                 builder.append(":");
             }
@@ -726,32 +740,64 @@ public class ThrottleService extends IThrottleManager.Stub {
             builder.append(mPeriodEnd.getTimeInMillis());
             builder.append(":");
 
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-
-            editor.putString("Data", builder.toString());
-            editor.commit();
+            BufferedWriter out = null;
+            try {
+                out = new BufferedWriter(new FileWriter(getDataFile()),256);
+                out.write(builder.toString());
+            } catch (IOException e) {
+                Slog.e(TAG, "Error writing data file");
+                return;
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (Exception e) {}
+                }
+            }
         }
 
         private void retrieve() {
-            String data = mSharedPreferences.getString("Data", "");
-//            String data = Settings.Secure.getString(mContext.getContentResolver(),
-//                    Settings.Secure.THROTTLE_VALUE);
+            File f = getDataFile();
+            byte[] buffer;
+            FileInputStream s = null;
+            try {
+                buffer = new byte[(int)f.length()];
+                s = new FileInputStream(f);
+                s.read(buffer);
+            } catch (IOException e) {
+                Slog.e(TAG, "Error reading data file");
+                return;
+            } finally {
+                if (s != null) {
+                    try {
+                        s.close();
+                    } catch (Exception e) {}
+                }
+            }
+            String data = new String(buffer);
             if (data == null || data.length() == 0) return;
-
             synchronized (mParent) {
                 String[] parsed = data.split(":");
                 int parsedUsed = 0;
-                if (parsed.length < 6) return;
+                if (parsed.length < 6) {
+                    Slog.e(TAG, "reading data file with insufficient length - ignoring");
+                    return;
+                }
+
+                if (Integer.parseInt(parsed[parsedUsed++]) != DATA_FILE_VERSION) {
+                    Slog.e(TAG, "reading data file with bad version - ignoring");
+                    return;
+                }
 
                 mPeriodCount = Integer.parseInt(parsed[parsedUsed++]);
                 if (parsed.length != 4 + (2 * mPeriodCount)) return;
 
                 mPeriodRxData = new long[mPeriodCount];
-                for(int i=0; i < mPeriodCount; i++) {
+                for(int i = 0; i < mPeriodCount; i++) {
                     mPeriodRxData[i] = Long.parseLong(parsed[parsedUsed++]);
                 }
                 mPeriodTxData = new long[mPeriodCount];
-                for(int i=0; i < mPeriodCount; i++) {
+                for(int i = 0; i < mPeriodCount; i++) {
                     mPeriodTxData[i] = Long.parseLong(parsed[parsedUsed++]);
                 }
                 mCurrentPeriod = Integer.parseInt(parsed[parsedUsed++]);
