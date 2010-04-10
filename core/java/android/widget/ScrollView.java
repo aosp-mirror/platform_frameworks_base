@@ -330,7 +330,7 @@ public class ScrollView extends FrameLayout {
         mTempRect.setEmpty();
 
         if (!canScroll()) {
-            if (isFocused()) {
+            if (isFocused() && event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
                 View currentFocused = findFocus();
                 if (currentFocused == this) currentFocused = null;
                 View nextFocused = FocusFinder.getInstance().findNextFocus(this,
