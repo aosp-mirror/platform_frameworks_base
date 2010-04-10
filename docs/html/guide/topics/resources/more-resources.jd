@@ -1,0 +1,684 @@
+page.title=More Resource Types
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<p>This page defines more types of resources you can externalize, including:</p>
+
+<dl>
+  <dt><a href="#Bool">Bool</a></dt>
+    <dd>XML resource that carries a boolean value.</dd>
+  <dt><a href="#Color">Color</a></dt>
+    <dd>XML resource that carries a color value (a hexadecimal color).</dd>
+  <dt><a href="#Dimension">Dimension</a></dt>
+    <dd>XML resource that carries a dimension value (with a unit of measure).</dd>
+  <dt><a href="#Integer">Integer</a></dt>
+    <dd>XML resource that carries an integer value.</dd>
+  <dt><a href="#IntegerArray">Integer Array</a></dt>
+    <dd>XML resource that provides an array of integers.</dd>
+  <dt><a href="#TypedArray">Typed Array</a></dt>
+    <dd>XML resource that provides a {@link android.content.res.TypedArray} (which you can use
+for an array of drawables).</dd>
+</dl>
+
+
+
+
+<h2 id="Bool">Bool</h2>
+
+<p>A boolean value defined in XML.</p>
+
+<p class="note"><strong>Note:</strong> A bool is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine bool resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;bool>} element's {@code name} will be used as the resource
+ID.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.bool.<em>bool_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]bool/<em>bool_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#bool-resources-element">resources</a>&gt;
+    &lt;<a href="#bool-element">bool</a>
+        name="<em>bool_name</em>"
+        &gt;[true | false]&lt;/bool>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="bool-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="bool-element"><code>&lt;bool&gt;</code></dt>
+    <dd>A boolean value: {@code true} or {@code false}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the bool value. This will be used as the resource ID.</dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values-small/bools.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources&gt;
+    &lt;bool name="screen_small">true&lt;/bool>
+    &lt;bool name="adjust_view_bounds">true&lt;/bool>
+&lt;/resources>
+</pre>
+
+  <p>This application code retrieves the boolean:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+boolean screenIsSmall = res.{@link android.content.res.Resources#getBoolean(int) getBoolean}(R.bool.screen_small);
+</pre>
+  <p>This layout XML uses the boolean for an attribute:</p>
+<pre>
+&lt;ImageView
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    android:src="@drawable/logo"
+    android:adjustViewBounds="@bool/adjust_view_bounds" />
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+<h2 id="Color">Color</h2>
+
+<p>A color value defined in XML.
+The color is specified with an RGB value and alpha channel. A color resource can be used
+any place that expects a hexadecimal color value.</p>
+
+<p>The value always begins with a pound (#) character and then followed by the
+Alpha-Red-Green-Blue information in one of the following formats:</p>
+<ul>
+  <li>#<em>RGB</em></li>
+  <li>#<em>ARGB</em></li>
+  <li>#<em>RRGGBB</em></li>
+  <li>#<em>AARRGGBB</em></li>
+</ul>
+
+<p class="note"><strong>Note:</strong> A color is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine color resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/colors.xml</code><br/>
+The filename is arbitrary. The {@code &lt;color>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.color.<em>color_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]color/<em>color_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#color-resources-element">resources</a>>
+    &lt;<a href="#color-element">color</a>
+        name="<em>color_name</em>"
+        &gt;<em>hex_color</em>&lt;/color>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="color-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="color-element"><code>&lt;color&gt;</code></dt>
+    <dd>A color expressed in hexadecimal, as described above.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the color. This will be used as the resource ID.
+        </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values/colors.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;color name="translucent_red">#80ff0000&lt;/color>
+&lt;/resources>
+</pre>
+
+    <p>This application code retrieves the color resource:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+int color = res.{@link android.content.res.Resources#getColor(int) getColor}(R.color.opaque_red);
+</pre>
+  <p>This layout XML applies the color to an attribute:</p>
+<pre>
+&lt;TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textColor="@color/translucent_red"
+    android:text="Hello"/>
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+<h2 id="Dimension">Dimension</h2>
+
+<p>A dimension value defined in XML. A dimension
+is specified with a number followed by a unit of measure.
+For example: 10px, 2in, 5sp. The following units of measure are supported by Android:</p>
+<dl>
+  <dt>{@code dp}</dt>
+    <dd>Density-independent Pixels - an abstract unit that is based on the physical density of the screen.
+    These units are relative to a 160 dpi screen, so one dp is one pixel on a 160 dpi screen. The ratio of
+    dp-to-pixel will change with the screen density, but not necessarily in direct proportion. The
+      compiler accepts both "dip" and "dp", though "dp" is more consistent with "sp".</dd>
+  <dt>{@code sp}</dt>
+    <dd>Scale-independent Pixels - this is like the dp unit, but it is also scaled by the user's font
+    size preference. It is recommend you use this unit when specifying font sizes, so they will be adjusted
+    for both the screen density and the user's preference.</dd>
+  <dt>{@code pt}</dt>
+    <dd>Points - 1/72 of an inch based on the physical size of the screen.</dd>
+  <dt>{@code px}</dt>
+    <dd>Pixels - corresponds to actual pixels on the screen. This unit of measure is not recommended because
+    the actual representation can vary across devices; each devices may have a different number of pixels
+    per inch and may have more or fewer total pixels available on the screen.</dd>
+  <dt>{@code mm}</dt>
+    <dd>Millimeters - based on the physical size of the screen.</dd>
+  <dt>{@code in}</dt>
+    <dd>Inches - based on the physical size of the screen.</dd>
+</dl>
+
+<p class="note"><strong>Note:</strong> A dimension is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine dimension resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;dimen>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.dimen.<em>dimension_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]dimen/<em>dimension_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#dimen-resources-element">resources</a>>
+    &lt;<a href="#dimen-element">dimen</a>
+        name="<em>dimension_name</em>"
+        &gt;<em>dimension</em>&lt;/dimen&gt;
+&lt;/resources&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="dimen-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="dimen-element"><code>&lt;dimen&gt;</code></dt>
+    <dd>A dimension, represented by a float, followed by a unit of measurement (dp, sp, pt, px, mm, in),
+      as described above.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the dimension. This will be used as the resource ID.
+        </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values/dimens.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;dimen name="textview_height">25dp&lt;/dimen>
+    &lt;dimen name="textview_width">150dp&lt;/dimen>
+    &lt;dimen name="ball_radius">30dp&lt;/dimen>
+    &lt;dimen name="font_size">16sp&lt;/dimen>
+&lt;/resources>
+</pre>
+
+    <p>This application code retrieves a dimension:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+float fontSize = res.{@link android.content.res.Resources#getDimension(int) getDimension}(R.dimen.font_size);
+</pre>
+  <p>This layout XML applies dimensions to attributes:</p>
+<pre>
+&lt;TextView
+    android:layout_height="@dimen/textview_height"
+    android:layout_width="@dimen/textview_width"
+    android:textSize="@dimen/sixteen_sp"/>
+</pre>
+  </dl>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+
+<h2 id="Integer">Integer</h2>
+
+<p>An integer defined in XML.</p>
+
+<p class="note"><strong>Note:</strong> An integer is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine integer resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename.xml</em></code><br/>
+The filename is arbitrary. The {@code &lt;integer>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.integer.<em>integer_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]integer/<em>integer_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#integer-resources-element">resources</a>>
+    &lt;<a href="#integer-element">integer</a>
+        name="<em>integer_name</em>"
+        &gt;<em>integer</em>&lt;/dimen&gt;
+&lt;/resources&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="integer-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="integer-element"><code>&lt;integer&gt;</code></dt>
+    <dd>An integer.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A name for the integer. This will be used as the resource ID.
+        </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+  <p>XML file saved at <code>res/values/integers.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;integer name="max_speed">75&lt;/dimen>
+    &lt;integer name="min_speed">5&lt;/dimen>
+&lt;/resources>
+</pre>
+    <p>This application code retrieves an integer:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+int maxSpeed = res.{@link android.content.res.Resources#getInteger(int) getInteger}(R.integer.max_speed);
+</pre>
+</dd> <!-- end example -->
+
+
+</dl>
+
+
+
+
+
+<h2 id="IntegerArray">Integer Array</h2>
+
+<p>An array of integers defined in XML.</p>
+
+<p class="note"><strong>Note:</strong> An integer array is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine integer array resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;integer-array>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to an array of integers.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.array.<em>string_array_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]array.<em>integer_array_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#integer-array-resources-element">resources</a>>
+    &lt;<a href="#integer-array-element">integer-array</a>
+        name="<em>integer_array_name</em>">
+        &lt;<a href="#integer-array-item-element">item</a>
+            &gt;<em>integer</em>&lt;/item&gt;
+    &lt;/integer-array>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+  <dt id="integer-array-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="integer-array-element"><code>&lt;string-array&gt;</code></dt>
+    <dd>Defines an array of integers. Contains one or more child {@code &lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:name</code></dt>
+        <dd><em>String</em>. A name for the array. This name will be used as the resource
+ID to reference the array.</dd>
+      </dl>
+    </dd>
+  <dt id="integer-array-item-element"><code>&lt;item&gt;</code></dt>
+    <dd>An integer. The value can be a referenced to another
+integer resource. Must be a child of a {@code &lt;integer-array&gt;} element.
+      <p>No attributes.</p>
+    </dd>
+</dl>
+</dd> <!-- end  elements -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values/integers.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;integer-array name="bits">
+        &lt;item>4&lt;/item>
+        &lt;item>8&lt;/item>
+        &lt;item>16&lt;/item>
+        &lt;item>32&lt;/item>
+    &lt;/integer-array>
+&lt;/resources>
+</pre>
+
+  <p>This application code retrieves the integer array:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+int[] bits = res.{@link android.content.res.Resources#getIntArray(int) getIntArray}(R.array.bits);
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+<h2 id="TypedArray">Typed Array</h2>
+
+<p>A {@link android.content.res.TypedArray} defined in XML. You can use
+this to create an array of other resources, such as drawables. Note that the array
+is not required to be homogeneous, so you can create an array of mixed resource types, but
+you must be aware of what and where the data types are in the array so that you can properly obtain
+each item with the {@link android.content.res.TypedArray}'s {@code get...()} methods.</p>
+
+<p class="note"><strong>Note:</strong> A typed array is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine typed array resources with other simple resources in the one XML file,
+under one {@code &lt;resources&gt;} element.</p>
+
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The {@code &lt;array>} element's {@code name} will be used as the
+resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.content.res.TypedArray}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.array.<em>array_name</em></code><br/>
+In XML: <code>@[<em>package</em>:]array.<em>array_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#array-resources-element">resources</a>>
+    &lt;<a href="#array-element">array</a>
+        name="<em>integer_array_name</em>">
+        &lt;<a href="#array-item-element">item</a>&gt;<em>resource</em>&lt;/item&gt;
+    &lt;/array>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+  <dt id="array-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="array-element"><code>&lt;array&gt;</code></dt>
+    <dd>Defines an array. Contains one or more child {@code &lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:name</code></dt>
+        <dd><em>String</em>. A name for the array. This name will be used as the resource
+ID to reference the array.</dd>
+      </dl>
+    </dd>
+  <dt id="array-item-element"><code>&lt;item&gt;</code></dt>
+    <dd>A generic resource. The value can be a reference to a resource or a simple data type.
+Must be a child of an {@code &lt;array&gt;} element.
+      <p>No attributes.</p>
+    </dd>
+</dl>
+</dd> <!-- end  elements -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/values/arrays.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;array name="icons">
+        &lt;item>@drawable/home&lt;/item>
+        &lt;item>@drawable/settings&lt;/item>
+        &lt;item>@drawable/logout&lt;/item>
+    &lt;/array>
+    &lt;array name="colors">
+        &lt;item>#FFFF0000&lt;/item>
+        &lt;item>#FF00FF00&lt;/item>
+        &lt;item>#FF0000FF&lt;/item>
+    &lt;/array>
+&lt;/resources>
+</pre>
+
+  <p>This application code retrieves each array and then obtains the first entry in each array:</p>
+<pre>
+Resources res = {@link android.content.Context#getResources()};
+TypedArray icons = res.{@link android.content.res.Resources#obtainTypedArray(int) obtainTypedArray}(R.array.icons);
+Drawable drawable = icons.{@link android.content.res.TypedArray#getDrawable(int) getDrawable}(0);
+
+TypedArray colors = res.{@link android.content.res.Resources#obtainTypedArray(int) obtainTypedArray}(R.array.icons);
+int color = colors.{@link android.content.res.TypedArray#getColor(int,int) getColor}(0,0);
+</pre>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
+
+
+
+
+
+
+
+<!-- TODO
+
+
+<h2>Styleable Attribute</h2>
+
+
+<dl class="xml">
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+</pre>
+</dd>
+
+<dt>file location:</dt>
+<dd><code>res/</code></dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.view.Menu} (or subclass) resource.</dd>
+
+<dt>resource reference:</dt>
+<dd>Java: <code>R.</code><br/>
+    XML:
+</dd>
+
+<dt>elements and attributes:</dt>
+<dd>
+<dl class="attr">
+
+  <dt><code></code></dt>
+    <dd></dd>
+  <dt><code></code></dt>
+    <dd>Valid attributes:
+      <dl>
+        <dt><code></code></dt>
+        <dd>
+        </dd>
+        <dt><code></code></dt>
+        <dd>
+        </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> 
+
+<dt>example:</dt>
+<dd>
+  <dl>
+
+    <dt>XML file saved at <code>res/</code>:</dt>
+    <dd>
+<pre>
+
+</pre>
+    </dd>
+
+    <dt>Java code :</dt>
+    <dd>
+<pre>
+
+</pre>
+    </dd>
+
+  </dl>
+</dd> 
+
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li></li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+
+-->
+
+
+
+

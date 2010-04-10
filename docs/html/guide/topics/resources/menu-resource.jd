@@ -1,0 +1,207 @@
+page.title=Menu Resource
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>A menu resource defines an application menu (Options Menu, Context Menu, or Sub Menu) that
+can be inflated with {@link android.view.MenuInflater}.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/menu/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.view.Menu} (or subclass) resource.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.menu.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#menu-element">menu</a> xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;<a href="#item-element">item</a> android:id="<em>resource ID</em>"
+          android:menuCategory=["container" | "system" | "secondary" | "alternative"]
+          android:orderInCategory="<em>integer</em>"
+          android:title="<em>string</em>"
+          android:titleCondensed="<em>string</em>"
+          android:icon="<em>drawable resource</em>"
+          android:alphabeticShortcut="<em>string</em>"
+          android:numericShortcut="<em>string</em>"
+          android:checkable=["true" | "false"]
+          android:visible=["visible" | "invisible" | "gone"]
+          android:enabled=["enabled" | "disabled"] /&gt;
+    &lt;<a href="#group-element">group</a> android:id="<em>resource ID</em>"
+           android:menuCategory=["container" | "system" | "secondary" | "alternative"]
+           android:orderInCategory="<em>integer</em>"
+           android:checkableBehavior=["none" | "all" | "single"]
+           android:visible=["visible" | "invisible" | "gone"]
+           android:enabled=["enabled" | "disabled"] &gt;
+        &lt;<a href="#item-element">item</a> /&gt;
+    &lt;/group&gt;
+    &lt;<a href="#item-element">item</a> &gt;
+        &lt;<a href="#menu-element">menu</a>&gt;
+          &lt;<a href="#item-element">item</a> /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="menu-element"><code>&lt;menu&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node. Contains <code>&lt;item></code> and/or
+      <code>&lt;group></code> elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
+      </dl>
+    </dd>
+  <dt id="group-element"><code>&lt;group&gt;</code></dt>
+    <dd>A menu group (to create a collection of items that share traits, such as whether they are
+visible, enabled, or checkable). Contains one or more <code>&lt;item&gt;</code> elements. Must be a
+child of a <code>&lt;menu&gt;</code> element.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:id</code></dt>
+        <dd><em>Resource name</em>. A unique resource name. The value takes the form:
+<code>"@+id/<em>name</em>"</code>.</dd>
+        <dt><code>android:menuCategory</code></dt>
+          <dd><em>Keyword</em>. Value corresponding to {@link android.view.Menu} {@code CATEGORY_*}
+          constants, which define the group's priority. Valid values:
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td><code>container</code></td><td>For groups that are part of a
+container.</td></tr>
+            <tr><td><code>system</code></td><td>For groups that are provided by the
+system.</td></tr>
+            <tr><td><code>secondary</code></td><td>For groups that are user-supplied secondary
+(infrequently used) options.</td></tr>
+            <tr><td><code>alternative</code></td><td>For groups that are alternative actions
+on the data that is currently displayed.</td></tr>
+          </table>
+        </dd>
+        <dt><code>android:orderInCategory</code></dt>
+        <dd><em>Integer</em>. The default order of the items within the category.</dd>
+        <dt><code>android:checkableBehavior</code></dt>
+        <dd><em>Keyword</em>. The type of checkable behavior for the group. Valid values:
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td><code>none</code></td><td>Not checkable</td></tr>
+            <tr><td><code>all</code></td><td>All items can be checked (use checkboxes)</td></tr>
+            <tr><td><code>single</code></td><td>Only one item can be checked (use radio buttons)</td></tr>
+          </table>
+        </dd>
+        <dt><code>android:visible</code></dt>
+        <dd><em>Boolean</em>. "true" if the group is visible.</dd>
+        <dt><code>android:enabled</code></dt>
+        <dd><em>Boolean</em>. "true" if the group is enabled.</dd>
+      </dl>
+    </dd>
+  <dt id="item-element"><code>&lt;item&gt;</code></dt>
+    <dd>A menu item. May contain a <code>&lt;menu&gt;</code> element (for a Sub
+      Menu). Must be a child of a <code>&lt;menu&gt;</code> or <code>&lt;group&gt;</code> element.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:id</code></dt>
+        <dd><em>Resource name</em>. A unique resource name. The value takes the form:
+<code>"@+id/<em>name</em>"</code>.</dd>
+        <dt><code>android:menuCategory</code></dt>
+          <dd><em>Keyword</em>. Value corresponding to {@link android.view.Menu} {@code CATEGORY_*}
+          constants, which define the item's priority. Valid values:
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td><code>container</code></td><td>For items that are part of a
+container.</td></tr>
+            <tr><td><code>system</code></td><td>For items that are provided by the
+system.</td></tr>
+            <tr><td><code>secondary</code></td><td>For items that are user-supplied secondary
+(infrequently used) options.</td></tr>
+            <tr><td><code>alternative</code></td><td>For items that are alternative actions
+on the data that is currently displayed.</td></tr>
+          </table>
+        </dd>
+        <dt><code>android:orderInCategory</code></dt>
+          <dd><em>Integer</em>. The order of "importance" of the item, within a group.</dd>
+        <dt><code>android:title</code></dt>
+          <dd><em>String</em>. The menu title.</dd>
+        <dt><code>android:titleCondensed</code></dt>
+          <dd><em>String</em>. A condensed title, for situations in which the normal title is
+too long.</dd>
+        <dt><code>android:icon</code></dt>
+          <dd><em>Drawable resource</em>. An image to be used as the menu item icon.</dd>
+        <dt><code>android:alphabeticShortcut</code></dt>
+          <dd><em>Char</em>. A character for the alphabetic shortcut key.</dd>
+        <dt><code>android:numericShortcut</code></dt>
+          <dd><em>Integer</em>. A number for the numeric shortcut key.</dd>
+        <dt><code>android:checkable</code></dt>
+          <dd><em>Boolean</em>. "true" if the item is checkable.</dd>
+        <dt><code>android:checked</code></dt>
+          <dd><em>Boolean</em>. "true" if the item is checked by default.</dd>
+        <dt><code>android:visible</code></dt>
+          <dd><em>Boolean</em>. "true" if the item is visible by default.</dd>
+        <dt><code>android:enabled</code></dt>
+          <dd><em>Boolean</em>. "true" if the item is enabled by default.</dd>
+      </dl>
+    </dd>
+</dl>
+
+</dd>
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/menu/example_menu.xml</code>:
+<pre>
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:id="@+id/example_item"
+          android:title="Example Item"
+          android:icon="@drawable/example_item_icon" />
+    &lt;group android:id="@+id/example_group">
+        &lt;item android:id="@+id/group_item1"
+              android:title="Group Item 1"
+              android:icon="@drawable/example_item1_icon" />
+        &lt;item android:id="@+id/group_item2"
+              android:title="Group Item 2"
+              android:icon="@drawable/example_item2_icon" />
+    &lt;/group>
+    &lt;item android:id="@+id/submenu"
+          android:title="Sub Menu" >
+        &lt;menu>
+            &lt;item android:id="@+id/submenu_item"
+                  android:title="Sub Menu Item" />
+        &lt;/menu>
+    &lt;/item>
+&lt;/menu>
+</pre>
+    <p>This application code will inflate the menu from the {@link
+android.app.Activity#onCreateOptionsMenu(Menu)} callback:</p>
+<pre>
+public boolean onCreateOptionsMenu(Menu menu) {
+  MenuInflater inflater = getMenuInflater();
+  inflater.inflate(R.menu.example_menu, menu);
+  return true;
+}
+</pre>
+</dd> <!-- end example -->
+
+
+</dl>
