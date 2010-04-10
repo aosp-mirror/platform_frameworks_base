@@ -310,7 +310,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, o));
         } else {
             if (DBG) log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
-            sendMessage(obtainMessage(EVENT_DEACTIVATE_DONE, o));
+            AsyncResult ar = new AsyncResult(o, null, null);
+            sendMessage(obtainMessage(EVENT_DEACTIVATE_DONE, ar));
         }
     }
 
