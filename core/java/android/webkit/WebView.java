@@ -475,6 +475,7 @@ public class WebView extends AbsoluteLayout
     private static final int MOTIONLESS_FALSE           = 0;
     private static final int MOTIONLESS_PENDING         = 1;
     private static final int MOTIONLESS_TRUE            = 2;
+    private static final int MOTIONLESS_IGNORE          = 3;
     private int mHeldMotionless;
 
     // whether support multi-touch
@@ -4923,9 +4924,6 @@ public class WebView extends AbsoluteLayout
                     case TOUCH_DRAG_MODE:
                         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
                         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
-                        mHeldMotionless = MOTIONLESS_TRUE;
-                        // redraw in high-quality, as we're done dragging
-                        invalidate();
                         // if the user waits a while w/o moving before the
                         // up, we don't want to do a fling
                         if (eventTime - mLastTouchTime <= MIN_FLING_TIME) {
@@ -4937,9 +4935,16 @@ public class WebView extends AbsoluteLayout
                                         + mDeferTouchProcess);
                             }
                             mVelocityTracker.addMovement(ev);
+                            // set to MOTIONLESS_IGNORE so that it won't keep
+                            // removing and sending message in
+                            // drawCoreAndCursorRing()
+                            mHeldMotionless = MOTIONLESS_IGNORE;
                             doFling();
                             break;
                         }
+                        // redraw in high-quality, as we're done dragging
+                        mHeldMotionless = MOTIONLESS_TRUE;
+                        invalidate();
                         // fall through
                     case TOUCH_DRAG_START_MODE:
                         // TOUCH_DRAG_START_MODE should not happen for the real
