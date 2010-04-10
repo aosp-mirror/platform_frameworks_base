@@ -25,6 +25,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -103,6 +104,14 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private StatusBarManager mStatusBarManager;
     private final PowerManager.WakeLock mWakeLock;
 
+    static Intent buildHomeIntent(String category) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(category);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        return intent;
+    }
+    
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
     // code of RESULT_OK. If any of the registered broadcast receivers changes this value, e.g.,
@@ -114,24 +123,36 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 return;
             }
 
+            final int  enableFlags = intent.getIntExtra("enableFlags", 0);
+            final int  disableFlags = intent.getIntExtra("disableFlags", 0);
+            
             synchronized (mLock) {
                 // Launch a dock activity
-                String category;
+                String category = null;
                 if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
-                    // Only launch car home when car mode is enabled.
-                    category = Intent.CATEGORY_CAR_DOCK;
+                    // Only launch car home when car mode is enabled and the caller
+                    // has asked us to switch to it.
+                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                        category = Intent.CATEGORY_CAR_DOCK;
+                    }
                 } else if (UiModeManager.ACTION_ENTER_DESK_MODE.equals(intent.getAction())) {
-                    category = Intent.CATEGORY_DESK_DOCK;
+                    // Only launch car home when desk mode is enabled and the caller
+                    // has asked us to switch to it.  Currently re-using the car
+                    // mode flag since we don't have a formal API for "desk mode".
+                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                        category = Intent.CATEGORY_DESK_DOCK;
+                    }
                 } else {
-                    category = null;
+                    // Launch the standard home app if requested.
+                    if ((disableFlags&UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
+                        category = Intent.CATEGORY_HOME;
+                    }
                 }
+                
                 if (category != null) {
                     // This is the new activity that will serve as home while
                     // we are in care mode.
-                    intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(category);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    Intent homeIntent = buildHomeIntent(category);
                     
                     // Now we are going to be careful about switching the
                     // configuration and starting the activity -- we need to
@@ -148,7 +169,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     }
                     try {
                         ActivityManagerNative.getDefault().startActivityWithConfig(
-                                null, intent, null, null, 0, null, null, 0, false, false,
+                                null, homeIntent, null, null, 0, null, null, 0, false, false,
                                 newConfig);
                         mHoldingConfiguration = false;
                     } catch (RemoteException e) {
@@ -188,7 +209,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             mCharging = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
             synchronized (mLock) {
                 if (mSystemReady) {
-                    updateLocked(0);
+                    updateLocked(0, 0);
                 }
             }
         }
@@ -302,16 +323,16 @@ class UiModeManagerService extends IUiModeManager.Stub {
         synchronized (mLock) {
             setCarModeLocked(false);
             if (mSystemReady) {
-                updateLocked(flags);
+                updateLocked(0, flags);
             }
         }
     }
 
-    public void enableCarMode() {
+    public void enableCarMode(int flags) {
         synchronized (mLock) {
             setCarModeLocked(true);
             if (mSystemReady) {
-                updateLocked(0);
+                updateLocked(flags, 0);
             }
         }
     }
@@ -342,7 +363,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         Settings.Secure.UI_NIGHT_MODE, mode);
                 Binder.restoreCallingIdentity(ident);
                 mNightMode = mode;
-                updateLocked(0);
+                updateLocked(0, 0);
             }
         }
     }
@@ -355,7 +376,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         synchronized (mLock) {
             mSystemReady = true;
             mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
-            updateLocked(0);
+            updateLocked(0, 0);
             mHandler.sendEmptyMessage(MSG_ENABLE_LOCATION_UPDATES);
         }
     }
@@ -376,7 +397,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 mDockState = newState;
                 setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR);
                 if (mSystemReady) {
-                    updateLocked(0);
+                    updateLocked(UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME, 0);
                 }
             }
         }
@@ -426,7 +447,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     }
 
-    final void updateLocked(int flags) {
+    final void updateLocked(int enableFlags, int disableFlags) {
         long ident = Binder.clearCallingIdentity();
 
         try {
@@ -469,34 +490,39 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 // not launch the corresponding dock application. This gives apps a chance
                 // to override the behavior and stay in their app even when the device is
                 // placed into a dock.
-                mContext.sendOrderedBroadcast(new Intent(action), null,
+                Intent intent = new Intent(action);
+                intent.putExtra("enableFlags", enableFlags);
+                intent.putExtra("disableFlags", disableFlags);
+                mContext.sendOrderedBroadcast(intent, null,
                         mResultReceiver, null, Activity.RESULT_OK, null, null);
                 // Attempting to make this transition a little more clean, we are going
                 // to hold off on doing a configuration change until we have finished
-                // the broacast and started the home activity.
+                // the broadcast and started the home activity.
                 mHoldingConfiguration = true;
+            } else {
+                Intent homeIntent = null;
+                if (mCarModeEnabled) {
+                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                        homeIntent = buildHomeIntent(Intent.CATEGORY_CAR_DOCK);
+                    }
+                } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                        homeIntent = buildHomeIntent(Intent.CATEGORY_DESK_DOCK);
+                    }
+                } else {
+                    if ((disableFlags&UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
+                        homeIntent = buildHomeIntent(Intent.CATEGORY_HOME);
+                    }
+                }
+                if (homeIntent != null) {
+                    try {
+                        mContext.startActivity(homeIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
+                }
             }
 
-            if (oldAction != null && (flags&UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
-                // We are exiting the special mode, and have been asked to return
-                // to the main home screen while doing so.  To keep this clean, we
-                // have the activity manager switch the configuration for us at the
-                // same time as the switch.
-                try {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(Intent.CATEGORY_HOME);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mHoldingConfiguration = false;
-                    updateConfigurationLocked(false);
-                    ActivityManagerNative.getDefault().startActivityWithConfig(
-                            null, intent, null, null, 0, null, null, 0, false, false,
-                            mConfiguration);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, e.getCause());
-                }
-            } else {
-                updateConfigurationLocked(true);
-            }
+            updateConfigurationLocked(true);
 
             // keep screen on when charging and in car mode
             boolean keepScreenOn = mCharging &&
@@ -569,7 +595,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         if (isDoingNightMode() && mLocation != null
                                 && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                             updateTwilightLocked();
-                            updateLocked(0);
+                            updateLocked(0, 0);
                         }
                     }
                     break;
@@ -597,7 +623,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                             if (isDoingNightMode() && mLocation != null
                                     && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                                 updateTwilightLocked();
-                                updateLocked(0);
+                                updateLocked(0, 0);
                             }
                         }
                     }
