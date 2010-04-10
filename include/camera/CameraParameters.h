@@ -289,6 +289,9 @@ public:
     static const char SCENE_MODE_SPORTS[];
     static const char SCENE_MODE_PARTY[];
     static const char SCENE_MODE_CANDLELIGHT[];
+    // Applications are looking for a barcode. Camera driver will be optimized
+    // for barcode reading.
+    static const char SCENE_MODE_BARCODE[];
 
     // Formats for setPreviewFormat and setPictureFormat.
     static const char PIXEL_FORMAT_YUV422SP[];
@@ -309,6 +312,10 @@ public:
     // focus, which is usually at hyperfocal distance. Applications should
     // not call CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_FIXED[];
+    // Extended depth of field (EDOF). Focusing is done digitally and
+    // continuously. Applications should not call
+    // CameraHardwareInterface.autoFocus in this mode.
+    static const char FOCUS_MODE_EDOF[];
 
 private:
     DefaultKeyedVector<String8,String8>    mMap;
