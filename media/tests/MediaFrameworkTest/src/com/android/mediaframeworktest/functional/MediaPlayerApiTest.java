@@ -439,7 +439,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @MediumTest
     public void testPrepareAsyncReset() throws Exception {
-      assertTrue(MediaFrameworkTest.checkStreamingServer());
+      //assertTrue(MediaFrameworkTest.checkStreamingServer());
       boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_MP3);
       assertTrue("PrepareAsync Reset", isReset);         
     }
@@ -472,7 +472,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testStreamPrepareAsyncCallback() throws Exception {
-        assertTrue(MediaFrameworkTest.checkStreamingServer());
+        //assertTrue(MediaFrameworkTest.checkStreamingServer());
         boolean onPrepareSuccess = 
             CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, false);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
@@ -480,7 +480,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testStreamPrepareAsyncCallbackReset() throws Exception {
-        assertTrue(MediaFrameworkTest.checkStreamingServer());
+        //assertTrue(MediaFrameworkTest.checkStreamingServer());
         boolean onPrepareSuccess = 
             CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, true);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
