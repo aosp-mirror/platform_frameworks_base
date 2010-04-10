@@ -239,7 +239,7 @@ struct tls_t
 
 // ----------------------------------------------------------------------------
 
-egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
+static egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
 static egl_display_t gDisplay[NUM_DISPLAYS];
 static pthread_mutex_t gThreadLocalStorageKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t gEGLThreadLocalStorageKey = -1;
