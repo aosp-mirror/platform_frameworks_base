@@ -16,6 +16,7 @@
 
 package android.net.http;
 
+import com.android.internal.http.HttpDateTime;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -443,5 +444,23 @@ public final class AndroidHttpClient implements HttpClient {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * Returns the date of the given HTTP date string. This method can identify
+     * and parse the date formats emitted by common HTTP servers, such as
+     * <a href="http://www.ietf.org/rfc/rfc0822.txt">RFC 822</a>,
+     * <a href="http://www.ietf.org/rfc/rfc0850.txt">RFC 850</a>,
+     * <a href="http://www.ietf.org/rfc/rfc1036.txt">RFC 1036</a>,
+     * <a href="http://www.ietf.org/rfc/rfc1123.txt">RFC 1123</a> and
+     * <a href="http://www.opengroup.org/onlinepubs/007908799/xsh/asctime.html">ANSI
+     * C's asctime()</a>.
+     *
+     * @return the number of milliseconds since Jan. 1, 1970, midnight GMT.
+     * @throws IllegalArgumentException if {@code dateString} is not a date or
+     *     of an unsupported format.
+     */
+    public static long parseDate(String dateString) {
+        return HttpDateTime.parse(dateString);
     }
 }

@@ -17,7 +17,7 @@
 package com.android.common;
 
 import android.content.SharedPreferences;
-import android.net.http.HttpDateTime;
+import android.net.http.AndroidHttpClient;
 import android.text.format.Time;
 
 import java.util.Map;
@@ -243,7 +243,7 @@ public class OperationScheduler {
             return true;
         } catch (NumberFormatException nfe) {
             try {
-                setMoratoriumTimeMillis(HttpDateTime.parse(retryAfter));
+                setMoratoriumTimeMillis(AndroidHttpClient.parseDate(retryAfter));
                 return true;
             } catch (IllegalArgumentException iae) {
                 return false;
