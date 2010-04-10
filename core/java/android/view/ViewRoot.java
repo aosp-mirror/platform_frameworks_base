@@ -766,7 +766,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // make sure touch mode code executes by setting cached value
                 // to opposite of the added touch mode.
                 mAttachInfo.mInTouchMode = !mAddedTouchMode;
-                ensureTouchModeLocally(mAddedTouchMode, false);
+                ensureTouchModeLocally(mAddedTouchMode);
             } else {
                 if (!mAttachInfo.mContentInsets.equals(mPendingContentInsets)) {
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
@@ -983,7 +983,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
-                    (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0, true);
+                    (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0);
             if (focusChangedDueToTouchMode || mWidth != host.mMeasuredWidth
                     || mHeight != host.mMeasuredHeight || contentInsetsChanged) {
                 childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
@@ -1043,13 +1043,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                 startTime = SystemClock.elapsedRealtime();
             }
             host.layout(0, 0, host.mMeasuredWidth, host.mMeasuredHeight);
-            if (mFirst) {
-                if (mAddedTouchMode) {
-                    enterTouchMode();
-                } else {
-                    leaveTouchMode();
-                }
-            }
 
             if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
                 if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
@@ -1899,7 +1892,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mAttachInfo.mHasWindowFocus = hasWindowFocus;
                 if (hasWindowFocus) {
                     boolean inTouchMode = msg.arg2 != 0;
-                    ensureTouchModeLocally(inTouchMode, true);
+                    ensureTouchModeLocally(inTouchMode);
 
                     if (mGlWanted) {
                         checkEglErrors();
@@ -2009,17 +2002,16 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         // handle the change
-        return ensureTouchModeLocally(inTouchMode, true);
+        return ensureTouchModeLocally(inTouchMode);
     }
 
     /**
      * Ensure that the touch mode for this window is set, and if it is changing,
      * take the appropriate action.
      * @param inTouchMode Whether we want to be in touch mode.
-     * @param dispatchFocus
      * @return True if the touch mode changed and focus changed was changed as a result
      */
-    private boolean ensureTouchModeLocally(boolean inTouchMode, boolean dispatchFocus) {
+    private boolean ensureTouchModeLocally(boolean inTouchMode) {
         if (DBG) Log.d("touchmode", "ensureTouchModeLocally(" + inTouchMode + "), current "
                 + "touch mode is " + mAttachInfo.mInTouchMode);
 
@@ -2028,7 +2020,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAttachInfo.mInTouchMode = inTouchMode;
         mAttachInfo.mTreeObserver.dispatchOnTouchModeChanged(inTouchMode);
 
-        return dispatchFocus && (inTouchMode) ? enterTouchMode() : leaveTouchMode();
+        return (inTouchMode) ? enterTouchMode() : leaveTouchMode();
     }
 
     private boolean enterTouchMode() {
