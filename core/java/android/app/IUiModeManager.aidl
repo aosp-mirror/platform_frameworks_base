@@ -25,7 +25,7 @@ interface IUiModeManager {
      * Enables the car mode. Only the system can do this.
      * @hide
      */
-    void enableCarMode();
+    void enableCarMode(int flags);
 
     /**
      * Disables the car mode.
