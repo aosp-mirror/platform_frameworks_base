@@ -116,13 +116,13 @@ public class UiModeManager {
     }
 
     /**
-     * Flag for use with {@link #disableCarMode(int)}: go to the normal
-     * home activity as part of the disable.  Disabling this way ensures
-     * a clean transition between the current activity (in car mode) and
-     * the original home activity (which was typically last running without
-     * being in car mode).
+     * Flag for use with {@link #enableCarMode(int)}: go to the car
+     * home activity as part of the enable.  Enabling this way ensures
+     * a clean transition between the current activity (in non-car-mode) and
+     * the car home activity that will serve as home while in car mode.  This
+     * will switch to the car home activity even if we are already in car mode.
      */
-    public static final int DISABLE_CAR_MODE_GO_HOME = 0x0001;
+    public static final int ENABLE_CAR_MODE_GO_CAR_HOME = 0x0001;
     
     /**
      * Force device into car mode, like it had been placed in the car dock.
@@ -133,13 +133,22 @@ public class UiModeManager {
     public void enableCarMode(int flags) {
         if (mService != null) {
             try {
-                mService.enableCarMode();
+                mService.enableCarMode(flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "disableCarMode: RemoteException", e);
             }
         }
     }
 
+    /**
+     * Flag for use with {@link #disableCarMode(int)}: go to the normal
+     * home activity as part of the disable.  Disabling this way ensures
+     * a clean transition between the current activity (in car mode) and
+     * the original home activity (which was typically last running without
+     * being in car mode).
+     */
+    public static final int DISABLE_CAR_MODE_GO_HOME = 0x0001;
+    
     /**
      * Turn off special mode if currently in car mode.
      * @param flags May be 0 or {@link #DISABLE_CAR_MODE_GO_HOME}.
