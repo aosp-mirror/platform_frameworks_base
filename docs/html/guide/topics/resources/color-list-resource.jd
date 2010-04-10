@@ -1,0 +1,165 @@
+page.title=Color State List Resource
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>See also</h2>
+    <ol>
+      <li><a href="more-resources.html#Color">Color (simple value)</a></li>
+    </ol>
+  </div>
+</div>
+
+
+<p>A {@link android.content.res.ColorStateList} is an object you can define in XML
+that you can apply as a color, but will actually change colors, depending on the state of
+the {@link android.view.View} object to which it is applied. For example, a {@link
+android.widget.Button} widget can exist in one of several different states (pressed, focused,
+or niether) and, using a color state list, you can provide a different color during each state.</p>
+
+<p>You can describe the state list in an XML file. Each color is defined in an {@code
+&lt;item>} element inside a single {@code &lt;selector>} element. Each {@code &lt;item>}
+uses various attributes to describe the state in which it should be used.</p>
+
+<p>During each state change, the state list is traversed top to bottom and the first item that
+matches the current state will be used&mdash;the selection is <em>not</em> based on the "best
+match," but simply the first item that meets the minimum criteria of the state.</p>
+
+<p class="note"><strong>Note:</strong> If you want to provide a static color resource, use a
+simple <a href="more-resources.html#Color">Color</a> value.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/color/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.content.res.ColorStateList}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.color.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]color/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#selector-element">selector</a> xmlns:android="http://schemas.android.com/apk/res/android" >
+    &lt;<a href="#item-element">item</a>
+        android:color="<em>hex_color</em>"
+        android:state_pressed=["true" | "false"]
+        android:state_focused=["true" | "false"]
+        android:state_selected=["true" | "false"]
+        android:state_active=["true" | "false"]
+        android:state_checkable=["true" | "false"]
+        android:state_checked=["true" | "false"]
+        android:state_enabled=["true" | "false"]
+        android:state_window_focused=["true" | "false"] />
+&lt;/selector>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="selector-element"><code>&lt;selector&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
+&lt;item>} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>xmlns:android</code></dt>
+          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
+          <code>"http://schemas.android.com/apk/res/android"</code>.
+      </dl>
+    </dd>
+  <dt id="item-element"><code>&lt;item&gt;</code></dt>
+    <dd>Defines a color to use during certain states, as described by its attributes. Must be a
+child of a <code>&lt;selector&gt;</code> element.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:color</code></dt>
+          <dd><em>Hexadeximal color</em>. <strong>Required</strong>. The color is specified with an
+RGB value and optional alpha channel.
+<p>The value always begins with a pound (#) character and then followed by the
+Alpha-Red-Green-Blue information in one of the following formats:</p>
+<ul>
+  <li>#<em>RGB</em></li>
+  <li>#<em>ARGB</em></li>
+  <li>#<em>RRGGBB</em></li>
+  <li>#<em>AARRGGBB</em></li>
+</ul></dd>
+        <dt><code>android:state_pressed</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is pressed (such as when a button
+is touched/clicked); "false" if this item should be used in the default, non-pressed state.</dd>
+        <dt><code>android:state_focused</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is focused (such as when a button
+is highlighted using the trackball/d-pad); "false" if this item should be used in the default,
+non-focused state.</dd>
+        <dt><code>android:state_selected</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is selected (such as when a
+tab is opened); "false" if this item should be used when the object is not selected.</dd>
+        <dt><code>android:state_checkable</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is checkable; "false" if this
+item should be used when the object is not checkable. (Only useful if the object can
+transition between a checkable and non-checkable widget.)</dd>
+        <dt><code>android:state_checked</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is checked; "false" if it
+should be used when the object is un-checked.</dd>
+        <dt><code>android:state_enabled</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the object is enabled (capable of
+receiving touch/click events); "false" if it should be used when the object is disabled.</dd>
+        <dt><code>android:state_window_focused</code></dt>
+          <dd><em>Boolean</em>. "true" if this item should be used when the application window has focus (the
+application is in the foreground), "false" if this item should be used when the application
+window does not have focus (for example, if the notification shade is pulled down or a dialog appears).</dd>
+      </dl>
+      <p class="note"><strong>Note:</strong> Remember that the first item in the state list that
+matches the current state of the object will be applied. So if the first item in the list contains
+none of the state attributes above, then it will be applied every time, which is why your
+default value should always be last (as demonstrated in the following example).</p>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>XML file saved at <code>res/color/button_text.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:state_pressed="true"
+          android:color="#ffff0000"/> &lt;!-- pressed --&gt;
+    &lt;item android:state_focused="true"
+          android:color="#ff0000ff"/> &lt;!-- focused --&gt;
+    &lt;item android:color="#ff000000"/> &lt;!-- default --&gt;
+&lt;/selector>
+</pre>
+
+<p>This layout XML will apply the color list to a View:</p>
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/button_text"
+    android:textColor="@color/button_text" />
+</pre>
+</dd> <!-- end example -->
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="more-resources.html#Color">Color (simple value)</a></li>
+  <li>{@link android.content.res.ColorStateList}</li>
+  <li><a href="drawable-resource.html#StateList">State List Drawable</a></li>
+</ul>
+</dd>
+
+</dl>
+
+
