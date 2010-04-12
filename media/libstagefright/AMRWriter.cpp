@@ -53,8 +53,6 @@ status_t AMRWriter::initCheck() const {
 }
 
 status_t AMRWriter::addSource(const sp<MediaSource> &source) {
-    Mutex::Autolock autoLock(mLock);
-
     if (mInitCheck != OK) {
         return mInitCheck;
     }
@@ -95,8 +93,6 @@ status_t AMRWriter::addSource(const sp<MediaSource> &source) {
 }
 
 status_t AMRWriter::start() {
-    Mutex::Autolock autoLock(mLock);
-
     if (mInitCheck != OK) {
         return mInitCheck;
     }
@@ -127,15 +123,11 @@ status_t AMRWriter::start() {
 }
 
 void AMRWriter::stop() {
-    {
-        Mutex::Autolock autoLock(mLock);
-
-        if (!mStarted) {
-            return;
-        }
-
-        mDone = true;
+    if (!mStarted) {
+        return;
     }
+
+    mDone = true;
 
     void *dummy;
     pthread_join(mThread, &dummy);
@@ -153,13 +145,7 @@ void *AMRWriter::ThreadWrapper(void *me) {
 }
 
 void AMRWriter::threadFunc() {
-    for (;;) {
-        Mutex::Autolock autoLock(mLock);
-
-        if (mDone) {
-            break;
-        }
-
+    while (!mDone) {
         MediaBuffer *buffer;
         status_t err = mSource->read(&buffer);
 
@@ -184,12 +170,10 @@ void AMRWriter::threadFunc() {
         buffer = NULL;
     }
 
-    Mutex::Autolock autoLock(mLock);
     mReachedEOS = true;
 }
 
 bool AMRWriter::reachedEOS() {
-    Mutex::Autolock autoLock(mLock);
     return mReachedEOS;
 }
 

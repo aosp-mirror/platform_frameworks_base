@@ -42,14 +42,12 @@ protected:
     virtual ~AMRWriter();
 
 private:
-    Mutex mLock;
-
     FILE *mFile;
     status_t mInitCheck;
     sp<MediaSource> mSource;
     bool mStarted;
     volatile bool mDone;
-    bool mReachedEOS;
+    volatile bool mReachedEOS;
     pthread_t mThread;
 
     static void *ThreadWrapper(void *);

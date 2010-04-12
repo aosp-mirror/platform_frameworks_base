@@ -19,6 +19,7 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "TimedEventQueue"
 #include <utils/Log.h>
 
@@ -169,6 +170,8 @@ void TimedEventQueue::cancelEvents(
             mQueueHeadChangedCondition.signal();
         }
 
+        LOGV("cancelling event %d", (*it).event->eventID());
+
         (*it).event->setEventID(0);
         it = mQueue.erase(it);
 
@@ -229,14 +232,16 @@ void TimedEventQueue::threadEntry() {
                 mQueueNotEmptyCondition.wait(mLock);
             }
 
-            List<QueueItem>::iterator it;
+            event_id eventID = 0;
             for (;;) {
                 if (mQueue.empty()) {
                     // The only event in the queue could have been cancelled
                     // while we were waiting for its scheduled time.
                     break;
                 }
-                it = mQueue.begin();
+
+                List<QueueItem>::iterator it = mQueue.begin();
+                eventID = (*it).event->eventID();
 
                 now_us = getRealTimeUs();
                 int64_t when_us = (*it).realtime_us;
@@ -276,18 +281,38 @@ void TimedEventQueue::threadEntry() {
                 }
             }
 
-            if (mQueue.empty()) {
-                continue;
-            }
-
-            event = (*it).event;
-            event->setEventID(0);
-            mQueue.erase(it);
+            // The event w/ this id may have been cancelled while we're
+            // waiting for its trigger-time, in that case
+            // removeEventFromQueue_l will return NULL.
+            // Otherwise, the QueueItem will be removed
+            // from the queue and the referenced event returned.
+            event = removeEventFromQueue_l(eventID);
         }
 
-        // Fire event with the lock NOT held.
-        event->fire(this, now_us);
+        if (event != NULL) {
+            // Fire event with the lock NOT held.
+            event->fire(this, now_us);
+        }
     }
+}
+
+sp<TimedEventQueue::Event> TimedEventQueue::removeEventFromQueue_l(
+        event_id id) {
+    for (List<QueueItem>::iterator it = mQueue.begin();
+         it != mQueue.end(); ++it) {
+        if ((*it).event->eventID() == id) {
+            sp<Event> event = (*it).event;
+            event->setEventID(0);
+
+            mQueue.erase(it);
+
+            return event;
+        }
+    }
+
+    LOGW("Event %d was not found in the queue, already cancelled?", id);
+
+    return NULL;
 }
 
 }  // namespace android
