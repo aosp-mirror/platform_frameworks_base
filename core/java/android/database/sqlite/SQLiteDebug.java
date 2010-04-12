@@ -134,11 +134,16 @@ public final class SQLiteDebug {
         /** documented here http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html */
         public int lookaside;
 
-        public DbStats(String dbName, long pageCount, long pageSize, int lookaside) {
+        /** statement cache stats: hits/misses/cachesize */
+        public String cache;
+
+        public DbStats(String dbName, long pageCount, long pageSize, int lookaside,
+            int hits, int misses, int cachesize) {
             this.dbName = dbName;
-            this.pageSize = pageSize;
+            this.pageSize = pageSize / 1024;
             dbSize = (pageCount * pageSize) / 1024;
             this.lookaside = lookaside;
+            this.cache = hits + "/" + misses + "/" + cachesize;
         }
     }
 
