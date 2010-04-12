@@ -56,8 +56,8 @@ import java.io.IOException;
  *
  * <p>
  * The intrinsic size of a MipmapDrawable are inferred from those of the largest mipmap (in terms of
- * {@link #Drawable.getIntrinsicHeight()}). On the opposite, its minimum size is defined by the
- * smallest provided mipmap.
+ * {@link Drawable#getIntrinsicHeight()}). On the opposite, its minimum
+ * size is defined by the smallest provided mipmap.
  * </p>
 
  * It can be defined in an XML file with the <code>&lt;mipmap></code> element.
@@ -229,8 +229,8 @@ public class MipmapDrawable extends DrawableContainer {
 
         /**
          * Adds a Drawable to the list of available mipmap Drawables. This list can be retrieved
-         * using {@link #DrawableContainer.getChildren()} and this method ensures that it is
-         * always sorted by increasing Drawable {@link #Drawable.getIntrinsicHeight()}.
+         * using {@link DrawableContainer.DrawableContainerState#getChildren()} and this method
+         * ensures that it is always sorted by increasing {@link Drawable#getIntrinsicHeight()}.
          *
          * @param drawable The Drawable that will be added to children list
          */
