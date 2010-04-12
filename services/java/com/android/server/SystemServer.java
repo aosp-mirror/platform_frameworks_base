@@ -99,6 +99,7 @@ class ServerThread extends Thread {
         DockObserver dock = null;
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
+        ThrottleService throttle = null;
 
         // Critical services...
         try {
@@ -266,6 +267,15 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Connectivity Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "Throttle Service");
+                throttle = new ThrottleService(context);
+                ServiceManager.addService(
+                        Context.THROTTLE_SERVICE, throttle);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting ThrottleService", e);
             }
 
             try {
@@ -457,6 +467,7 @@ class ServerThread extends Thread {
         final BatteryService batteryF = battery;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
+        final ThrottleService throttleF = throttle;
         final UiModeManagerService uiModeF = uiMode;
         final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
@@ -488,6 +499,7 @@ class ServerThread extends Thread {
                 if (wallpaperF != null) wallpaperF.systemReady();
                 if (immF != null) immF.systemReady();
                 if (locationF != null) locationF.systemReady();
+                if (throttleF != null) throttleF.systemReady();
             }
         });
 

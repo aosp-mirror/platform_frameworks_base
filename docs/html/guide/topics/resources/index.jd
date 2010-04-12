@@ -1,40 +1,104 @@
-page.title=Resources and Assets
+page.title=Application Resources
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-
-  <h2>Key classes</h2>
+  <h2>Topics</h2>
   <ol>
-    <li>{@link android.content.res.Resources}</li>
-    <li>{@link android.content.res.AssetManager}</li>
+    <li><a href="providing-resources.html">Providing Resources</a></li>
+    <li><a href="accessing-resources.html">Accessing Resources</a></li>
+    <li><a href="runtime-changes.html">Handling Runtime Changes</a></li>
+    <li><a href="localization.html">Localization</a></li>
   </ol>
 
+  <h2>Reference</h2>
+  <ol>
+    <li><a href="available-resources.html">Resource Types</a></li>
+  </ol>
 </div>
 </div>
 
-<p>Resources are an integral part of an Android application. 
-In general, these are external elements that you want to include and reference within your application, 
-like images, audio, video, text strings, layouts, themes, etc. Every Android application contains 
-a directory for resources (<code>res/</code>) and a directory for assets (<code>assets/</code>). 
-Assets are used less often, because their applications are far fewer. You only need to save data
-as an asset when you need to read the raw bytes. The directories for resources and assets both 
-reside at the top of an Android project tree, at the same level as your source code directory 
-(<code>src/</code>).</p>
 
-<p>The difference between "resources" and "assets" isn't much on the surface, but in general, 
-you'll use resources to store your external content much more often than you'll use assets. 
-The real difference is that anything 
-placed in the resources directory will be easily accessible from your application from the 
-<code>R</code> class, which is compiled by Android. Whereas, anything placed in the assets
-directory will maintain its raw file format and, in order to read it, you must use the
-{@link android.content.res.AssetManager} to read the file as a stream of bytes. So keeping
-files and data in resources (<code>res/</code>) makes them easily accessible.</p>
+<p>You should always externalize resources such as images and strings from your application
+code, so that you can maintain them independently. Externalizing your
+resources also allows you to provide alternative resources that support specific device
+configurations such as different languages or screen sizes, which becomes increasingly
+important as more Android-powered devices become available with different configurations. In order
+to provide this functionality, you must organize resources in your project's {@code res/}
+directory, using various sub-directories that group resources by type and configuration.</p>
 
-<p>Within the documents of this topic, you'll find information on the kinds of standard resources
-that are typically used in an Android application and how to reference them from you code.
-<a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources and Internationalization</a>
-is where you should start, to learn more about how Android utilizes project resources. Then, the 
-<a href="{@docRoot}guide/topics/resources/available-resources.html">Available Resource Types</a>
-document offers a summary of various resource types and a reference to their specifications.
-</p>
+<div class="figure" style="width:441px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="137" alt="" />
+<p class="img-caption">
+<strong>Figure 1.</strong> Two device configurations, both using default
+resources.</p>
+</div>
+
+<div class="figure" style="width:441px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="137" alt="" />
+<p class="img-caption">
+<strong>Figure 2.</strong> Two device configurations, one using alternative
+resources.</p>
+</div>
+
+<p>For any type of resource, you can specify <em>default</em> and multiple
+<em>alternative</em> resources for your application:</p>
+<ul>
+  <li>Default resources are those that should be used regardless of
+the device configuration or when there are no alternative resources that match the current
+configuration.</li>
+  <li>Alternative resources are those that you've designed for use with a specific
+configuration. To specify that a group of resources are for a specific configuration,
+append an appropriate configuration qualifier to the directory name.</li>
+</ul>
+
+<p>For example, while your default UI
+layout is saved in the {@code res/layout/} directory, you might specify a different UI layout to
+be used when the screen is in landscape orientation, by saving it in the {@code res/layout-land/}
+directory. The Android system will automatically apply the appropriate resources by matching the
+device's current configuration to your resource directory names.</p>
+
+<p>Figure 1 demonstrates how a collection of default resources from an application will be applied
+to two different devices when there are no alternative resources available. Figure 2 shows
+the same application with a set of alternative resources that qualify for one of the device
+configurations, thus, the two devices uses different resources.</p>
+
+<p>The information above is just an introduction to how application resources work on Android.
+The following documents provide a complete guide to how you can organize your application resources,
+specify alternative resources, access them in your application, and more:</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">Providing Resources</a></strong></dt>
+  <dd>What kinds of resources you can provide in your app, where to save them, and how to create
+alternative resources for specific device configurations.</dd>
+  <dt><strong><a href="accessing-resources.html">Accessing Resources</a></strong></dt>
+  <dd>How to use the resources you've provided, either by referencing them from your application
+code or from other XML resources.</dd>
+  <dt><strong><a href="runtime-changes.html">Handling Runtime Changes</a></strong></dt>
+  <dd>How to manage configuration changes that occur while your Activity is running.</dd>
+  <dt><strong><a href="localization.html">Localization</a></strong></dt>
+  <dd>A bottom-up guide to localizing your application using alternative resources. While this is
+just one specific use of alternative resources, it is very important in order to reach more
+users.</dd>
+  <dt><strong><a href="available-resources.html">Resource Types</a></strong></dt>
+  <dd>A reference of various resource types you can provide, describing their XML elements,
+attributes, and syntax. For example, this reference shows you how to create a resource for
+application menus, drawables, animations, and more.</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

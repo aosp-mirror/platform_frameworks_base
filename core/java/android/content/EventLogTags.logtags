@@ -2,6 +2,6 @@
 
 option java_package android.content;
 
-52002 content_query_operation (uri|3),(projection|3),(selection|3),(sortorder|3),(time|1|3),(blocking_package|3),(sample_percent|1|6)
-52003 content_update_operation (uri|3),(operation|3),(selection|3),(time|1|3),(blocking_package|3),(sample_percent|1|6)
-52004 binder_operation (descriptor|3),(method_num|1|5),(time|1|3),(blocking_package|3),(sample_percent|1|6)
+52002 content_query_sample (uri|3),(projection|3),(selection|3),(sortorder|3),(time|1|3),(blocking_package|3),(sample_percent|1|6)
+52003 content_update_sample (uri|3),(operation|3),(selection|3),(time|1|3),(blocking_package|3),(sample_percent|1|6)
+52004 binder_sample (descriptor|3),(method_num|1|5),(time|1|3),(blocking_package|3),(sample_percent|1|6)

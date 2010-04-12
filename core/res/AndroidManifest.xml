@@ -1031,7 +1031,8 @@
         android:description="@string/permdesc_deletePackages"
         android:protectionLevel="signatureOrSystem" />
 
-    <!-- Allows an application to move location of installed package. -->
+    <!-- Allows an application to move location of installed package.
+         @hide -->
     <permission android:name="android.permission.MOVE_PACKAGE"
         android:label="@string/permlab_movePackage"
         android:description="@string/permdesc_movePackage"
@@ -1207,7 +1208,8 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signatureOrSystem" />
 
-    <!-- Allow an application to read and write the cache partition. -->
+    <!-- Allow an application to read and write the cache partition.
+         @hide -->
     <permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"
         android:label="@string/permlab_cache_filesystem"
         android:description="@string/permdesc_cache_filesystem"

@@ -1,0 +1,128 @@
+page.title=Style Resource
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a></li>
+    </ol>
+  </div>
+</div>
+
+
+<p>A style resource defines the format and look for a UI.
+A style can be applied to an individual {@link android.view.View} (from within a layout file) or to
+an entire {@link android.app.Activity} or application (from within the manifest file).</p>
+
+<p>For more information about creating and applying styles, please read
+<a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
+
+<p class="note"><strong>Note:</strong> A style is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine style resources with other simple resources in the one XML file,
+under one {@code &lt;resources>} element.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename</em>.xml</code><br/>
+The filename is arbitrary. The element's {@code name} will be used as the resource ID.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In XML: <code>@[package:]style/<em>style_name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#resources-element">resources</a>>
+    &lt;<a href="#style-element">style</a>
+        name="<em>style_name</em>"
+        parent="@[package:]style/<em>style_to_inherit</em>">
+        &lt;<a href="#item-element">item</a>
+            name="<em>[package:]style_property_name</em>"
+            &gt;<em>style_value</em>&lt;/item>
+    &lt;/style>
+&lt;/resources>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="style-element"><code>&lt;style&gt;</code></dt>
+    <dd>Defines a single style. Contains {@code &lt;item&gt;} elements.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. <strong>Required</strong>. A name for the style, which is used as the
+resource ID to apply the style to a View, Activity, or application.
+        </dd>
+        <dt><code>parent</code></dt>
+        <dd><em>Style resource</em>. Reference to a style from which this
+style should inherit style properties.
+        </dd>
+      </dl>
+
+    </dd>
+  <dt id="item-element"><code>&lt;item&gt;</code></dt>
+    <dd>Defines a single property for the style. Must be a child of a
+      <code>&lt;style&gt;</code> element.</p>
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>name</code></dt>
+        <dd><em>Attribute resource</em>. <strong>Required</strong>. The name of the style property
+to be defined, with a package prefix if necessary (for example {@code android:textColor}).
+        </dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+  <dl>
+
+    <dt>XML file for the style (saved in <code>res/values/</code>):</dt>
+    <dd>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;style name="CustomText" parent="@style/Text">
+        &lt;item name="android:textSize">20sp&lt;/item>
+        &lt;item name="android:textColor">#008&lt;/item>
+    &lt;/style>
+&lt;/resources>
+</pre>
+    </dd>
+
+    <dt>XML file that applies the style to a {@link android.widget.TextView}
+        (saved in <code>res/layout/</code>):</dt>
+    <dd>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;EditText
+    style="@style/CustomText"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="Hello, World!" />
+</pre>
+    </dd>
+
+  </dl>
+</dd> <!-- end example -->
+
+</dl>
+
+

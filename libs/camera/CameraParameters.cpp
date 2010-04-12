@@ -122,6 +122,7 @@ const char CameraParameters::SCENE_MODE_FIREWORKS[] = "fireworks";
 const char CameraParameters::SCENE_MODE_SPORTS[] = "sports";
 const char CameraParameters::SCENE_MODE_PARTY[] = "party";
 const char CameraParameters::SCENE_MODE_CANDLELIGHT[] = "candlelight";
+const char CameraParameters::SCENE_MODE_BARCODE[] = "barcode";
 
 // Formats for setPreviewFormat and setPictureFormat.
 const char CameraParameters::PIXEL_FORMAT_YUV422SP[] = "yuv422sp";
@@ -135,6 +136,7 @@ const char CameraParameters::FOCUS_MODE_AUTO[] = "auto";
 const char CameraParameters::FOCUS_MODE_INFINITY[] = "infinity";
 const char CameraParameters::FOCUS_MODE_MACRO[] = "macro";
 const char CameraParameters::FOCUS_MODE_FIXED[] = "fixed";
+const char CameraParameters::FOCUS_MODE_EDOF[] = "edof";
 
 CameraParameters::CameraParameters()
                 : mMap()

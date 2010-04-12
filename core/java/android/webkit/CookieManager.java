@@ -18,7 +18,7 @@ package android.webkit;
 
 import android.net.ParseException;
 import android.net.WebAddress;
-import android.net.http.HttpDateTime;
+import android.net.http.AndroidHttpClient;
 import android.util.Log;
 
 
@@ -939,7 +939,7 @@ public final class CookieManager {
                     }
                     if (name.equals(EXPIRES)) {
                         try {
-                            cookie.expires = HttpDateTime.parse(value);
+                            cookie.expires = AndroidHttpClient.parseDate(value);
                         } catch (IllegalArgumentException ex) {
                             Log.e(LOGTAG,
                                     "illegal format for expires: " + value);

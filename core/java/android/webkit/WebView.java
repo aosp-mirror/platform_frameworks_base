@@ -475,6 +475,7 @@ public class WebView extends AbsoluteLayout
     private static final int MOTIONLESS_FALSE           = 0;
     private static final int MOTIONLESS_PENDING         = 1;
     private static final int MOTIONLESS_TRUE            = 2;
+    private static final int MOTIONLESS_IGNORE          = 3;
     private int mHeldMotionless;
 
     // whether support multi-touch
@@ -1274,30 +1275,57 @@ public class WebView extends AbsoluteLayout
      *             overwritten with this WebView's picture data.
      * @return True if the picture was successfully saved.
      */
-    public boolean savePicture(Bundle b, File dest) {
+    public boolean savePicture(Bundle b, final File dest) {
         if (dest == null || b == null) {
             return false;
         }
         final Picture p = capturePicture();
-        try {
-            final FileOutputStream out = new FileOutputStream(dest);
-            p.writeToStream(out);
-            out.close();
-            // now update the bundle
-            b.putInt("scrollX", mScrollX);
-            b.putInt("scrollY", mScrollY);
-            b.putFloat("scale", mActualScale);
-            b.putFloat("textwrapScale", mTextWrapScale);
-            b.putBoolean("overview", mInZoomOverview);
-            return true;
-        } catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-        return false;
+        // Use a temporary file while writing to ensure the destination file
+        // contains valid data.
+        final File temp = new File(dest.getPath() + ".writing");
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    FileOutputStream out = new FileOutputStream(temp);
+                    p.writeToStream(out);
+                    out.close();
+                    // Writing the picture succeeded, rename the temporary file
+                    // to the destination.
+                    temp.renameTo(dest);
+                } catch (Exception e) {
+                    // too late to do anything about it.
+                } finally {
+                    temp.delete();
+                }
+            }
+        }).start();
+        // now update the bundle
+        b.putInt("scrollX", mScrollX);
+        b.putInt("scrollY", mScrollY);
+        b.putFloat("scale", mActualScale);
+        b.putFloat("textwrapScale", mTextWrapScale);
+        b.putBoolean("overview", mInZoomOverview);
+        return true;
+    }
+
+    private void restoreHistoryPictureFields(Picture p, Bundle b) {
+        int sx = b.getInt("scrollX", 0);
+        int sy = b.getInt("scrollY", 0);
+        float scale = b.getFloat("scale", 1.0f);
+        mDrawHistory = true;
+        mHistoryPicture = p;
+        mScrollX = sx;
+        mScrollY = sy;
+        mHistoryWidth = Math.round(p.getWidth() * scale);
+        mHistoryHeight = Math.round(p.getHeight() * scale);
+        // as getWidth() / getHeight() of the view are not available yet, set up
+        // mActualScale, so that when onSizeChanged() is called, the rest will
+        // be set correctly
+        mActualScale = scale;
+        mInvActualScale = 1 / scale;
+        mTextWrapScale = b.getFloat("textwrapScale", scale);
+        mInZoomOverview = b.getBoolean("overview");
+        invalidate();
     }
 
     /**
@@ -1311,42 +1339,35 @@ public class WebView extends AbsoluteLayout
         if (src == null || b == null) {
             return false;
         }
-        if (src.exists()) {
-            Picture p = null;
-            try {
-                final FileInputStream in = new FileInputStream(src);
-                p = Picture.createFromStream(in);
-                in.close();
-            } catch (FileNotFoundException e){
-                e.printStackTrace();
-            } catch (RuntimeException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (p != null) {
-                int sx = b.getInt("scrollX", 0);
-                int sy = b.getInt("scrollY", 0);
-                float scale = b.getFloat("scale", 1.0f);
-                mDrawHistory = true;
-                mHistoryPicture = p;
-                mScrollX = sx;
-                mScrollY = sy;
-                mHistoryWidth = Math.round(p.getWidth() * scale);
-                mHistoryHeight = Math.round(p.getHeight() * scale);
-                // as getWidth() / getHeight() of the view are not
-                // available yet, set up mActualScale, so that when
-                // onSizeChanged() is called, the rest will be set
-                // correctly
-                mActualScale = scale;
-                mInvActualScale = 1 / scale;
-                mTextWrapScale = b.getFloat("textwrapScale", scale);
-                mInZoomOverview = b.getBoolean("overview");
-                invalidate();
-                return true;
-            }
+        if (!src.exists()) {
+            return false;
         }
-        return false;
+        try {
+            final FileInputStream in = new FileInputStream(src);
+            final Bundle copy = new Bundle(b);
+            new Thread(new Runnable() {
+                public void run() {
+                    final Picture p = Picture.createFromStream(in);
+                    if (p != null) {
+                        // Post a runnable on the main thread to update the
+                        // history picture fields.
+                        mPrivateHandler.post(new Runnable() {
+                            public void run() {
+                                restoreHistoryPictureFields(p, copy);
+                            }
+                        });
+                    }
+                    try {
+                        in.close();
+                    } catch (Exception e) {
+                        // Nothing we can do now.
+                    }
+                }
+            }).start();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+        return true;
     }
 
     /**
@@ -1701,8 +1722,7 @@ public class WebView extends AbsoluteLayout
      *  Return true if the browser is displaying a TextView for text input.
      */
     private boolean inEditingMode() {
-        return mWebTextView != null && mWebTextView.getParent() != null
-                && mWebTextView.hasFocus();
+        return mWebTextView != null && mWebTextView.getParent() != null;
     }
 
     /**
@@ -3339,6 +3359,7 @@ public class WebView extends AbsoluteLayout
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
         if (mDrawHistory && mWebViewCore.pictureReady()) {
             mDrawHistory = false;
+            mHistoryPicture = null;
             invalidate();
             int oldScrollX = mScrollX;
             int oldScrollY = mScrollY;
@@ -4882,6 +4903,9 @@ public class WebView extends AbsoluteLayout
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
+                                // to get better performance, pause updating the
+                                // picture
+                                WebViewCore.pauseUpdatePicture(mWebViewCore);
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
                                 break;
@@ -4899,9 +4923,6 @@ public class WebView extends AbsoluteLayout
                     case TOUCH_DRAG_MODE:
                         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
                         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
-                        mHeldMotionless = MOTIONLESS_TRUE;
-                        // redraw in high-quality, as we're done dragging
-                        invalidate();
                         // if the user waits a while w/o moving before the
                         // up, we don't want to do a fling
                         if (eventTime - mLastTouchTime <= MIN_FLING_TIME) {
@@ -4913,11 +4934,24 @@ public class WebView extends AbsoluteLayout
                                         + mDeferTouchProcess);
                             }
                             mVelocityTracker.addMovement(ev);
+                            // set to MOTIONLESS_IGNORE so that it won't keep
+                            // removing and sending message in
+                            // drawCoreAndCursorRing()
+                            mHeldMotionless = MOTIONLESS_IGNORE;
                             doFling();
                             break;
                         }
+                        // redraw in high-quality, as we're done dragging
+                        mHeldMotionless = MOTIONLESS_TRUE;
+                        invalidate();
+                        // fall through
+                    case TOUCH_DRAG_START_MODE:
+                        // TOUCH_DRAG_START_MODE should not happen for the real
+                        // device as we almost certain will get a MOVE. But this
+                        // is possible on emulator.
                         mLastVelocity = 0;
                         WebViewCore.resumePriority();
+                        WebViewCore.resumeUpdatePicture(mWebViewCore);
                         break;
                 }
                 stopTouch();
@@ -4963,6 +4997,8 @@ public class WebView extends AbsoluteLayout
 
     private void startDrag() {
         WebViewCore.reducePriority();
+        // to get better performance, pause updating the picture
+        WebViewCore.pauseUpdatePicture(mWebViewCore);
         if (!mDragFromTextInput) {
             nativeHideCursor();
         }
@@ -5026,6 +5062,7 @@ public class WebView extends AbsoluteLayout
         }
         if (mTouchMode == TOUCH_DRAG_MODE) {
             WebViewCore.resumePriority();
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -5360,6 +5397,7 @@ public class WebView extends AbsoluteLayout
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
@@ -6369,6 +6407,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 case RESUME_WEBCORE_PRIORITY:
                     WebViewCore.resumePriority();
+                    WebViewCore.resumeUpdatePicture(mWebViewCore);
                     break;
 
                 case LONG_PRESS_CENTER:

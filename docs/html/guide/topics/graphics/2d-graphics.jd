@@ -442,7 +442,7 @@ class is the basis for frame animations.</p>
 <p>While you can define the frames of an animation in your code, using the 
 {@link android.graphics.drawable.AnimationDrawable} class API, it's more simply accomplished with a single XML 
 file that lists the frames that compose the animation. Like the tween animation above, the XML file for this kind 
-of animation belongs in the <code>res/anim/</code> directory of your Android project. In this case, 
+of animation belongs in the <code>res/drawable/</code> directory of your Android project. In this case,
 the instructions are the order and duration for each frame of the animation.</p>
 
 <p>The XML file consists of an <code>&lt;animation-list></code> element as the root node and a series
@@ -459,7 +459,7 @@ Here's an example XML file for a frame-by-frame animation:</p>
 
 <p>This animation runs for just three frames. By setting the <code>android:oneshot</code> attribute of the 
 list to <var>true</var>, it will cycle just once then stop and hold on the last frame. If it is set <var>false</var> then
-the animation will loop. With this XML saved as <code>rocket_thrust.xml</code> in the <code>res/anim/</code> directory
+the animation will loop. With this XML saved as <code>rocket_thrust.xml</code> in the <code>res/drawable/</code> directory
 of the project, it can be added as the background image to a View and then called to play. Here's an example Activity,
 in which the animation is added to an {@link android.widget.ImageView} and then animated when the screen is touched:</p>
 <pre>
@@ -470,7 +470,7 @@ public void onCreate(Bundle savedInstanceState) {
   setContentView(R.layout.main);
 
   ImageView rocketImage = (ImageView) findViewById(R.id.rocket_image);
-  rocketImage.setBackgroundResource(R.anim.rocket_thrust);
+  rocketImage.setBackgroundResource(R.drawable.rocket_thrust);
   rocketAnimation = (AnimationDrawable) rocketImage.getBackground();
 }
 
