@@ -66,8 +66,9 @@ import android.view.WindowManager.LayoutParams;
  * {@link #setZoomInEnabled(boolean)} and {@link #setZoomOutEnabled(boolean)}.
  * <p>
  * If you are using this with a custom View, please call
- * {@link #setVisible(boolean) setVisible(false)} from the
- * {@link View#onDetachedFromWindow}.
+ * {@link #setVisible(boolean) setVisible(false)} from
+ * {@link View#onDetachedFromWindow} and from {@link View#onVisibilityChanged}
+ * when <code>visibility != View.VISIBLE</code>.
  *
  */
 public class ZoomButtonsController implements View.OnTouchListener {
