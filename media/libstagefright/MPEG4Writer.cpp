@@ -24,6 +24,7 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/Utils.h>
 
@@ -65,9 +66,14 @@ private:
     static void *ThreadWrapper(void *me);
     void threadEntry();
 
+    status_t makeAVCCodecSpecificData(
+            const uint8_t *data, size_t size);
+
     Track(const Track &);
     Track &operator=(const Track &);
 };
+
+#define USE_NALLEN_FOUR         1
 
 MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
@@ -213,23 +219,55 @@ off_t MPEG4Writer::addSample(MediaBuffer *buffer) {
     return old_offset;
 }
 
+static void StripStartcode(MediaBuffer *buffer) {
+    if (buffer->range_length() < 4) {
+        return;
+    }
+
+    const uint8_t *ptr =
+        (const uint8_t *)buffer->data() + buffer->range_offset();
+
+    if (!memcmp(ptr, "\x00\x00\x00\x01", 4)) {
+        buffer->set_range(
+                buffer->range_offset() + 4, buffer->range_length() - 4);
+    }
+}
+
 off_t MPEG4Writer::addLengthPrefixedSample(MediaBuffer *buffer) {
     Mutex::Autolock autoLock(mLock);
+
+    StripStartcode(buffer);
 
     off_t old_offset = mOffset;
 
     size_t length = buffer->range_length();
+
+#if USE_NALLEN_FOUR
+    uint8_t x = length >> 24;
+    fwrite(&x, 1, 1, mFile);
+    x = (length >> 16) & 0xff;
+    fwrite(&x, 1, 1, mFile);
+    x = (length >> 8) & 0xff;
+    fwrite(&x, 1, 1, mFile);
+    x = length & 0xff;
+    fwrite(&x, 1, 1, mFile);
+#else
     CHECK(length < 65536);
 
     uint8_t x = length >> 8;
     fwrite(&x, 1, 1, mFile);
     x = length & 0xff;
     fwrite(&x, 1, 1, mFile);
+#endif
 
     fwrite((const uint8_t *)buffer->data() + buffer->range_offset(),
            1, length, mFile);
 
+#if USE_NALLEN_FOUR
+    mOffset += length + 4;
+#else
     mOffset += length + 2;
+#endif
 
     return old_offset;
 }
@@ -380,6 +418,60 @@ void *MPEG4Writer::Track::ThreadWrapper(void *me) {
     return NULL;
 }
 
+status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
+        const uint8_t *data, size_t size) {
+    if (mCodecSpecificData != NULL) {
+        return ERROR_MALFORMED;
+    }
+
+    if (size < 4 || memcmp("\x00\x00\x00\x01", data, 4)) {
+        // Must start with a start-code.
+        return ERROR_MALFORMED;
+    }
+
+    size_t picParamOffset = 4;
+    while (picParamOffset + 3 < size
+            && memcmp("\x00\x00\x00\x01", &data[picParamOffset], 4)) {
+        ++picParamOffset;
+    }
+
+    if (picParamOffset + 3 >= size) {
+        // Could not find start-code for pictureParameterSet.
+        return ERROR_MALFORMED;
+    }
+
+    size_t seqParamSetLength = picParamOffset - 4;
+    size_t picParamSetLength = size - picParamOffset - 4;
+
+    mCodecSpecificDataSize =
+        6 + 1 + seqParamSetLength + 2 + picParamSetLength + 2;
+
+    mCodecSpecificData = malloc(mCodecSpecificDataSize);
+    uint8_t *header = (uint8_t *)mCodecSpecificData;
+    header[0] = 1;
+    header[1] = 0x42;  // profile
+    header[2] = 0x80;
+    header[3] = 0x1e;  // level
+
+#if USE_NALLEN_FOUR
+    header[4] = 0xfc | 3;  // length size == 4 bytes
+#else
+    header[4] = 0xfc | 1;  // length size == 2 bytes
+#endif
+
+    header[5] = 0xe0 | 1;
+    header[6] = seqParamSetLength >> 8;
+    header[7] = seqParamSetLength & 0xff;
+    memcpy(&header[8], &data[4], seqParamSetLength);
+    header += 8 + seqParamSetLength;
+    header[0] = 1;
+    header[1] = picParamSetLength >> 8;
+    header[2] = picParamSetLength & 0xff;
+    memcpy(&header[3], &data[picParamOffset + 4], picParamSetLength);
+
+    return OK;
+}
+
 void MPEG4Writer::Track::threadEntry() {
     sp<MetaData> meta = mSource->getFormat();
     const char *mime;
@@ -399,54 +491,40 @@ void MPEG4Writer::Track::threadEntry() {
 
         ++count;
 
-        if (is_avc && count < 3) {
-            size_t size = buffer->range_length();
+        int32_t isCodecConfig;
+        if (buffer->meta_data()->findInt32(kKeyIsCodecConfig, &isCodecConfig)
+                && isCodecConfig) {
+            if (is_avc) {
+                status_t err = makeAVCCodecSpecificData(
+                        (const uint8_t *)buffer->data()
+                            + buffer->range_offset(),
+                        buffer->range_length());
 
-            switch (count) {
-                case 1:
-                {
-                    CHECK_EQ(mCodecSpecificData, NULL);
-                    mCodecSpecificData = malloc(size + 8);
-                    uint8_t *header = (uint8_t *)mCodecSpecificData;
-                    header[0] = 1;
-                    header[1] = 0x42;  // profile
-                    header[2] = 0x80;
-                    header[3] = 0x1e;  // level
-                    header[4] = 0xfc | 3;
-                    header[5] = 0xe0 | 1;
-                    header[6] = size >> 8;
-                    header[7] = size & 0xff;
-                    memcpy(&header[8],
-                            (const uint8_t *)buffer->data() + buffer->range_offset(),
-                            size);
-
-                    mCodecSpecificDataSize = size + 8;
+                if (err != OK) {
+                    LOGE("failed to parse avc codec specific data.");
+                    break;
+                }
+            } else if (is_mpeg4) {
+                if (mCodecSpecificData != NULL) {
                     break;
                 }
 
-                case 2:
-                {
-                    size_t offset = mCodecSpecificDataSize;
-                    mCodecSpecificDataSize += size + 3;
-                    mCodecSpecificData = realloc(mCodecSpecificData, mCodecSpecificDataSize);
-                    uint8_t *header = (uint8_t *)mCodecSpecificData;
-                    header[offset] = 1;
-                    header[offset + 1] = size >> 8;
-                    header[offset + 2] = size & 0xff;
-                    memcpy(&header[offset + 3],
-                            (const uint8_t *)buffer->data() + buffer->range_offset(),
-                            size);
-                    break;
-                }
+                mCodecSpecificDataSize = buffer->range_length();
+                mCodecSpecificData = malloc(mCodecSpecificDataSize);
+                memcpy(mCodecSpecificData,
+                        (const uint8_t *)buffer->data()
+                            + buffer->range_offset(),
+                       buffer->range_length());
             }
 
             buffer->release();
             buffer = NULL;
 
             continue;
-        }
+        } else if (count == 1 && is_mpeg4 && mCodecSpecificData == NULL) {
+            // The TI mpeg4 encoder does not properly set the
+            // codec-specific-data flag.
 
-        if (mCodecSpecificData == NULL && is_mpeg4) {
             const uint8_t *data =
                 (const uint8_t *)buffer->data() + buffer->range_offset();
 
@@ -474,13 +552,70 @@ void MPEG4Writer::Track::threadEntry() {
             memcpy(mCodecSpecificData, data, offset);
 
             buffer->set_range(buffer->range_offset() + offset, size - offset);
+
+            if (size == offset) {
+                buffer->release();
+                buffer = NULL;
+
+                continue;
+            }
+        } else if (is_avc && count < 3) {
+            // The TI video encoder does not flag codec specific data
+            // as such and also splits up SPS and PPS across two buffers.
+
+            const uint8_t *data =
+                (const uint8_t *)buffer->data() + buffer->range_offset();
+
+            size_t size = buffer->range_length();
+
+            CHECK(count == 2 || mCodecSpecificData == NULL);
+
+            size_t offset = mCodecSpecificDataSize;
+            mCodecSpecificDataSize += size + 4;
+            mCodecSpecificData =
+                realloc(mCodecSpecificData, mCodecSpecificDataSize);
+
+            memcpy((uint8_t *)mCodecSpecificData + offset,
+                   "\x00\x00\x00\x01", 4);
+
+            memcpy((uint8_t *)mCodecSpecificData + offset + 4, data, size);
+
+            buffer->release();
+            buffer = NULL;
+
+            if (count == 2) {
+                void *tmp = mCodecSpecificData;
+                size = mCodecSpecificDataSize;
+                mCodecSpecificData = NULL;
+                mCodecSpecificDataSize = 0;
+
+                status_t err = makeAVCCodecSpecificData(
+                        (const uint8_t *)tmp, size);
+
+                free(tmp);
+                tmp = NULL;
+
+                if (err != OK) {
+                    LOGE("failed to parse avc codec specific data.");
+                    break;
+                }
+            }
+
+            continue;
         }
 
         off_t offset = is_avc ? mOwner->addLengthPrefixedSample(buffer)
                               : mOwner->addSample(buffer);
 
         SampleInfo info;
-        info.size = is_avc ? buffer->range_length() + 2 : buffer->range_length();
+        info.size = is_avc
+#if USE_NALLEN_FOUR
+            ? buffer->range_length() + 4
+#else
+            ? buffer->range_length() + 2
+#endif
+            : buffer->range_length();
+
         info.offset = offset;
 
         int64_t timestampUs;
@@ -733,19 +868,29 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
           mOwner->beginBox("stts");
             mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mSampleInfos.size() - 1);
+            mOwner->writeInt32(mSampleInfos.size());
 
             List<SampleInfo>::iterator it = mSampleInfos.begin();
             int64_t last = (*it).timestamp;
+            int64_t lastDuration = 1;
+
             ++it;
             while (it != mSampleInfos.end()) {
                 mOwner->writeInt32(1);
-                mOwner->writeInt32((*it).timestamp - last);
+                lastDuration = (*it).timestamp - last;
+                mOwner->writeInt32(lastDuration);
 
                 last = (*it).timestamp;
 
                 ++it;
             }
+
+            // We don't really know how long the last frame lasts, since
+            // there is no frame time after it, just repeat the previous
+            // frame's duration.
+            mOwner->writeInt32(1);
+            mOwner->writeInt32(lastDuration);
+
           mOwner->endBox();  // stts
 
           mOwner->beginBox("stsz");
