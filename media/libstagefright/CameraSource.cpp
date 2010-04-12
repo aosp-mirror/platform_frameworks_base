@@ -142,13 +142,6 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mFirstFrameTimeUs(0),
       mNumFrames(0),
       mStarted(false) {
-    char value[PROPERTY_VALUE_MAX];
-    if (property_get("ro.hardware", value, NULL) && !strcmp(value, "sholes")) {
-        // The hardware encoder(s) do not support yuv420, but only YCbYCr,
-        // fortunately the camera also supports this, so we needn't transcode.
-        mCamera->setParameters(String8("preview-format=yuv422i-yuyv"));
-    }
-
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
 

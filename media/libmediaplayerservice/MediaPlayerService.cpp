@@ -228,14 +228,10 @@ MediaPlayerService::~MediaPlayerService()
 
 sp<IMediaRecorder> MediaPlayerService::createMediaRecorder(pid_t pid)
 {
-#ifndef NO_OPENCORE
     sp<MediaRecorderClient> recorder = new MediaRecorderClient(this, pid);
     wp<MediaRecorderClient> w = recorder;
     Mutex::Autolock lock(mLock);
     mMediaRecorderClients.add(w);
-#else
-    sp<MediaRecorderClient> recorder = NULL;
-#endif
     LOGV("Create new media recorder client from pid %d", pid);
     return recorder;
 }

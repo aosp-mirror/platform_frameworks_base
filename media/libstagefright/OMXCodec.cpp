@@ -137,6 +137,7 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.encoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.encoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263enc" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.encoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.encoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcenc" },
 };
@@ -679,6 +680,7 @@ static size_t getFrameSize(
         case OMX_COLOR_FormatCbYCrY:
             return width * height * 2;
 
+        case OMX_COLOR_FormatYUV420Planar:
         case OMX_COLOR_FormatYUV420SemiPlanar:
             return (width * height * 3) / 2;
 
@@ -706,7 +708,7 @@ void OMXCodec::setVideoInputFormat(
 
     OMX_COLOR_FORMATTYPE colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
     if (!strcasecmp("OMX.TI.Video.encoder", mComponentName)) {
-        colorFormat = OMX_COLOR_FormatYCbYCr;
+        colorFormat = OMX_COLOR_FormatYUV420Planar;
     }
 
     CHECK_EQ(setVideoPortFormatType(
@@ -759,6 +761,14 @@ void OMXCodec::setVideoInputFormat(
     video_def->eColorFormat = colorFormat;
 
     video_def->xFramerate = 24 << 16;  // XXX crucial!
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
@@ -911,7 +921,7 @@ status_t OMXCodec::setupAVCEncoderParameters() {
     CHECK_EQ(err, OK);
 
     bitrateType.eControlRate = OMX_Video_ControlRateVariable;
-    bitrateType.nTargetBitrate = 1000000;
+    bitrateType.nTargetBitrate = 3000000;
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoBitrate,
@@ -2068,7 +2078,13 @@ void OMXCodec::fillOutputBuffer(BufferInfo *info) {
 
     CODEC_LOGV("Calling fill_buffer on buffer %p", info->mBuffer);
     status_t err = mOMX->fillBuffer(mNode, info->mBuffer);
-    CHECK_EQ(err, OK);
+
+    if (err != OK) {
+        CODEC_LOGE("fillBuffer failed w/ error 0x%08x", err);
+
+        setState(ERROR);
+        return;
+    }
 
     info->mOwnedByComponent = true;
 }
