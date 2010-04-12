@@ -2090,14 +2090,18 @@ public class AudioService extends IAudioService.Stub {
         Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
 
         // this will take care of notifying the new focus owner if needed
-        removeFocusStackEntry(clientId, true);
+        synchronized(mFocusStack) {
+            removeFocusStackEntry(clientId, true);
+        }
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
 
     public void unregisterAudioFocusClient(String clientId) {
-        removeFocusStackEntry(clientId, false);
+        synchronized(mFocusStack) {
+            removeFocusStackEntry(clientId, false);
+        }
     }
 
 

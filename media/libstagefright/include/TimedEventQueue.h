@@ -121,6 +121,8 @@ private:
     static void *ThreadWrapper(void *me);
     void threadEntry();
 
+    sp<Event> removeEventFromQueue_l(event_id id);
+
     TimedEventQueue(const TimedEventQueue &);
     TimedEventQueue &operator=(const TimedEventQueue &);
 };

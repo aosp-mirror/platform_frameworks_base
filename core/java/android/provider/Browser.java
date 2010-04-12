@@ -574,7 +574,9 @@ public class Browser {
     }
     
     /**
-     *  Request all icons from the database.
+     *  Request all icons from the database.  This call must either be called
+     *  in the main thread or have had Looper.prepare() invoked in the calling
+     *  thread.
      *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
      *  @param  cr The ContentResolver used to access the database.
      *  @param  where Clause to be used to limit the query from the database.
@@ -584,25 +586,8 @@ public class Browser {
      */
     public static final void requestAllIcons(ContentResolver cr, String where,
             WebIconDatabase.IconListener listener) {
-        Cursor c = null;
-        try {
-            c = cr.query(
-                    BOOKMARKS_URI,
-                    new String[] { BookmarkColumns.URL },
-                    where, null, null);
-            if (c.moveToFirst()) {
-                final WebIconDatabase db = WebIconDatabase.getInstance();
-                do {
-                    db.requestIconForPageUrl(c.getString(0), listener);
-                } while (c.moveToNext());
-            }
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "requestAllIcons", e);
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
+        WebIconDatabase.getInstance()
+                .bulkRequestIconForPageUrl(cr, where, listener);
     }
 
     public static class BookmarkColumns implements BaseColumns {

@@ -203,25 +203,32 @@ status_t AACDecoder::read(
 
     Int decoderErr = PVMP4AudioDecodeFrame(mConfig, mDecoderBuf);
 
+    size_t numOutBytes =
+        mConfig->frameLength * sizeof(int16_t) * mConfig->desiredChannels;
+
     if (decoderErr != MP4AUDEC_SUCCESS) {
-        LOGE("AAC decoder returned error %d", decoderErr);
+        LOGW("AAC decoder returned error %d, substituting silence", decoderErr);
 
-        buffer->release();
-        buffer = NULL;
+        memset(buffer->data(), 0, numOutBytes);
 
-        return ERROR_MALFORMED;
-    }
-
-    buffer->set_range(
-            0, mConfig->frameLength * sizeof(int16_t) * mConfig->desiredChannels);
-
-    mInputBuffer->set_range(
-            mInputBuffer->range_offset() + mConfig->inputBufferUsedLength,
-            mInputBuffer->range_length() - mConfig->inputBufferUsedLength);
-
-    if (mInputBuffer->range_length() == 0) {
+        // Discard input buffer.
         mInputBuffer->release();
         mInputBuffer = NULL;
+
+        // fall through
+    }
+
+    buffer->set_range(0, numOutBytes);
+
+    if (mInputBuffer != NULL) {
+        mInputBuffer->set_range(
+                mInputBuffer->range_offset() + mConfig->inputBufferUsedLength,
+                mInputBuffer->range_length() - mConfig->inputBufferUsedLength);
+
+        if (mInputBuffer->range_length() == 0) {
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+        }
     }
 
     buffer->meta_data()->setInt64(

@@ -16,10 +16,15 @@
 
 package android.webkit;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
-import android.graphics.Bitmap;
+import android.provider.Browser;
+import android.util.Log;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -30,6 +35,7 @@ import java.util.Vector;
  * single object.
  */
 public final class WebIconDatabase {
+    private static final String LOGTAG = "WebIconDatabase";
     // Global instance of a WebIconDatabase
     private static WebIconDatabase sIconDatabase;
     // EventHandler for handling messages before and after the WebCore thread is
@@ -45,6 +51,7 @@ public final class WebIconDatabase {
         static final int REQUEST_ICON = 3;
         static final int RETAIN_ICON  = 4;
         static final int RELEASE_ICON = 5;
+        static final int BULK_REQUEST_ICON = 6;
         // Message for dispatching icon request results
         private static final int ICON_RESULT = 10;
         // Actual handler that runs in WebCore thread
@@ -100,12 +107,11 @@ public final class WebIconDatabase {
                             case REQUEST_ICON:
                                 IconListener l = (IconListener) msg.obj;
                                 String url = msg.getData().getString("url");
-                                Bitmap icon = nativeIconForPageUrl(url);
-                                if (icon != null) {
-                                    EventHandler.this.sendMessage(
-                                            Message.obtain(null, ICON_RESULT,
-                                                new IconResult(url, icon, l)));
-                                }
+                                requestIconAndSendResult(url, l);
+                                break;
+
+                            case BULK_REQUEST_ICON:
+                                bulkRequestIcons(msg);
                                 break;
 
                             case RETAIN_ICON:
@@ -126,11 +132,48 @@ public final class WebIconDatabase {
             }
         }
 
+        private synchronized boolean hasHandler() {
+            return mHandler != null;
+        }
+
         private synchronized void postMessage(Message msg) {
             if (mMessages != null) {
                 mMessages.add(msg);
             } else {
                 mHandler.sendMessage(msg);
+            }
+        }
+
+        private void bulkRequestIcons(Message msg) {
+            HashMap map = (HashMap) msg.obj;
+            IconListener listener = (IconListener) map.get("listener");
+            ContentResolver cr = (ContentResolver) map.get("contentResolver");
+            String where = (String) map.get("where");
+
+            Cursor c = null;
+            try {
+                c = cr.query(
+                        Browser.BOOKMARKS_URI,
+                        new String[] { Browser.BookmarkColumns.URL },
+                        where, null, null);
+                if (c.moveToFirst()) {
+                    do {
+                        String url = c.getString(0);
+                        requestIconAndSendResult(url, listener);
+                    } while (c.moveToNext());
+                }
+            } catch (IllegalStateException e) {
+                Log.e(LOGTAG, "BulkRequestIcons", e);
+            } finally {
+                if (c != null) c.close();
+            }
+        }
+
+        private void requestIconAndSendResult(String url, IconListener listener) {
+            Bitmap icon = nativeIconForPageUrl(url);
+            if (icon != null) {
+                sendMessage(obtainMessage(ICON_RESULT,
+                            new IconResult(url, icon, listener)));
             }
         }
     }
@@ -190,6 +233,30 @@ public final class WebIconDatabase {
         Message msg = Message.obtain(null, EventHandler.REQUEST_ICON, listener);
         msg.getData().putString("url", url);
         mEventHandler.postMessage(msg);
+    }
+
+    /** {@hide}
+     */
+    public void bulkRequestIconForPageUrl(ContentResolver cr, String where,
+            IconListener listener) {
+        if (listener == null) {
+            return;
+        }
+
+        // Special case situation: we don't want to add this message to the
+        // queue if there is no handler because we may never have a real
+        // handler to service the messages and the cursor will never get
+        // closed.
+        if (mEventHandler.hasHandler()) {
+            // Don't use Bundle as it is parcelable.
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("contentResolver", cr);
+            map.put("where", where);
+            map.put("listener", listener);
+            Message msg =
+                    Message.obtain(null, EventHandler.BULK_REQUEST_ICON, map);
+            mEventHandler.postMessage(msg);
+        }
     }
 
     /**
