@@ -116,7 +116,7 @@ screen. </p>
 generalized densities: high, medium, and low. Applications can provide custom
 resources for each of these three densities &mdash; the platform handles the
 scaling of the resources up or down to meet the actual screen density. </p></dd>
-<dt><em>Density independent pixel (dip)</em></dt>
+<dt><em>Density-independent pixel (dip)</em></dt>
   <dd>A virtual pixel unit that applications can use in defining their UI, to
 express layout dimensions or position in a density-independent way. 
   <p>The density-independent pixel is equivalent to one physical pixel on a 160
@@ -432,7 +432,7 @@ does this in three ways: </p>
 <ul>
 <li>Through pre-scaling of drawable resources (scaled at resource loading
 time)</li>
-<li>Through auto-scaling of device-independent pixel (dip) values used in
+<li>Through auto-scaling of density-independent pixel (dip) values used in
 layouts</li>
 <li>Through auto-scaling of absolute pixel values used in the application (only
 needed if the application has set <code>android:anyDensity="false"</code> in its
@@ -573,7 +573,7 @@ installing the application on small-screen devices. </li>
 are signaling to the platform that your application wants to manage its UI by
 itself, for all screen densities, using the actual screen dimensions and pixels.
 In this case, the application must ensure that it declares its UI dimensions
-using device-independent pixels and scales any actual pixel values or math by
+using density-independent pixels and scales any actual pixel values or math by
 the scaling factor available from 
 {@link android.util.DisplayMetrics#density android.util.DisplayMetrics.density}.</p>
 
