@@ -659,7 +659,7 @@ int register_android_hardware_Camera(JNIEnv *env)
 {
     field fields_to_find[] = {
         { "android/hardware/Camera", "mNativeContext",   "I", &fields.context },
-        { "android/view/Surface",    "mSurface",         "I", &fields.surface }
+        { "android/view/Surface",    ANDROID_VIEW_SURFACE_JNI_ID, "I", &fields.surface }
     };
 
     if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)

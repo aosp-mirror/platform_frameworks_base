@@ -30,6 +30,8 @@
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/ISurfaceFlingerClient.h>
 
+#define ANDROID_VIEW_SURFACE_JNI_ID    "mNativeSurface"
+
 namespace android {
 
 // ---------------------------------------------------------------------------
