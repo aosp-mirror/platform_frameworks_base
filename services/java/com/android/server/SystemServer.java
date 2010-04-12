@@ -17,7 +17,7 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
-import com.android.server.status.StatusBarService;
+import com.android.server.status.StatusBarManagerService;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 
@@ -206,7 +206,7 @@ class ServerThread extends Thread {
         }
 
         DevicePolicyManagerService devicePolicy = null;
-        StatusBarService statusBar = null;
+        StatusBarManagerService statusBar = null;
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
         NotificationManagerService notification = null;
@@ -224,10 +224,10 @@ class ServerThread extends Thread {
 
             try {
                 Slog.i(TAG, "Status Bar");
-                statusBar = new StatusBarService(context);
+                statusBar = new StatusBarManagerService(context);
                 ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting StatusBarService", e);
+                Slog.e(TAG, "Failure starting StatusBarManagerService", e);
             }
 
             try {
@@ -464,7 +464,7 @@ class ServerThread extends Thread {
         }
 
         // These are needed to propagate to the runnable below.
-        final StatusBarService statusBarF = statusBar;
+        final StatusBarManagerService statusBarF = statusBar;
         final BatteryService batteryF = battery;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;

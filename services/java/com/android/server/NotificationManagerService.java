@@ -18,7 +18,7 @@ package com.android.server;
 
 import com.android.server.status.IconData;
 import com.android.server.status.NotificationData;
-import com.android.server.status.StatusBarService;
+import com.android.server.status.StatusBarManagerService;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -86,7 +86,7 @@ class NotificationManagerService extends INotificationManager.Stub
     final IBinder mForegroundToken = new Binder();
 
     private WorkerHandler mHandler;
-    private StatusBarService mStatusBarService;
+    private StatusBarManagerService mStatusBar;
     private LightsService mLightsService;
     private LightsService.Light mBatteryLight;
     private LightsService.Light mNotificationLight;
@@ -238,8 +238,8 @@ class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
-    private StatusBarService.NotificationCallbacks mNotificationCallbacks
-            = new StatusBarService.NotificationCallbacks() {
+    private StatusBarManagerService.NotificationCallbacks mNotificationCallbacks
+            = new StatusBarManagerService.NotificationCallbacks() {
 
         public void onSetDisabled(int status) {
             synchronized (mNotificationList) {
@@ -405,7 +405,7 @@ class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
-    NotificationManagerService(Context context, StatusBarService statusBar,
+    NotificationManagerService(Context context, StatusBarManagerService statusBar,
             LightsService lights)
     {
         super();
@@ -417,7 +417,7 @@ class NotificationManagerService extends INotificationManager.Stub
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
 
-        mStatusBarService = statusBar;
+        mStatusBar = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
 
         mBatteryLight = lights.getLight(LightsService.LIGHT_ID_BATTERY);
@@ -734,7 +734,7 @@ class NotificationManagerService extends INotificationManager.Stub
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        mStatusBarService.updateIcon(r.statusBarKey, icon, n);
+                        mStatusBar.updateIcon(r.statusBarKey, icon, n);
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -742,7 +742,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 } else {
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        r.statusBarKey = mStatusBarService.addIcon(icon, n);
+                        r.statusBarKey = mStatusBar.addIcon(icon, n);
                         mAttentionLight.pulse();
                     }
                     finally {
@@ -756,7 +756,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 if (old != null && old.statusBarKey != null) {
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        mStatusBarService.removeIcon(old.statusBarKey);
+                        mStatusBar.removeIcon(old.statusBarKey);
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -864,7 +864,7 @@ class NotificationManagerService extends INotificationManager.Stub
         if (r.notification.icon != 0) {
             long identity = Binder.clearCallingIdentity();
             try {
-                mStatusBarService.removeIcon(r.statusBarKey);
+                mStatusBar.removeIcon(r.statusBarKey);
             }
             finally {
                 Binder.restoreCallingIdentity(identity);

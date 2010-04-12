@@ -545,7 +545,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             mStatusBarManager = (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE);
         }
 
-        // Fear not: StatusBarService manages a list of requests to disable
+        // Fear not: StatusBarManagerService manages a list of requests to disable
         // features of the status bar; these are ORed together to form the
         // active disabled list. So if (for example) the device is locked and
         // the status bar should be totally disabled, the calls below will

@@ -27,7 +27,7 @@ import android.util.Slog;
 
 
 public class ExpandedView extends LinearLayout {
-    StatusBarService mService;
+    StatusBarManagerService mService;
     int mPrevHeight = -1;
 
     public ExpandedView(Context context, AttributeSet attrs) {
@@ -50,9 +50,9 @@ public class ExpandedView extends LinearLayout {
          super.onLayout(changed, left, top, right, bottom);
          int height = bottom - top;
          if (height != mPrevHeight) {
-             //Slog.d(StatusBarService.TAG, "height changed old=" + mPrevHeight + " new=" + height);
+             //Slog.d(StatusBarManagerService.TAG, "height changed old=" + mPrevHeight + " new=" + height);
              mPrevHeight = height;
-             mService.updateExpandedViewPos(StatusBarService.EXPANDED_LEAVE_ALONE);
+             mService.updateExpandedViewPos(StatusBarManagerService.EXPANDED_LEAVE_ALONE);
          }
      }
 }

@@ -153,7 +153,7 @@ class StatusBarIcon {
             try {
                 r = context.getPackageManager().getResourcesForApplication(data.iconPackage);
             } catch (PackageManager.NameNotFoundException ex) {
-                Slog.e(StatusBarService.TAG, "Icon package not found: " + data.iconPackage, ex);
+                Slog.e(StatusBarManagerService.TAG, "Icon package not found: " + data.iconPackage, ex);
                 return null;
             }
         } else {
@@ -161,14 +161,14 @@ class StatusBarIcon {
         }
 
         if (data.iconId == 0) {
-            Slog.w(StatusBarService.TAG, "No icon ID for slot " + data.slot);
+            Slog.w(StatusBarManagerService.TAG, "No icon ID for slot " + data.slot);
             return null;
         }
         
         try {
             return r.getDrawable(data.iconId);
         } catch (RuntimeException e) {
-            Slog.w(StatusBarService.TAG, "Icon not found in "
+            Slog.w(StatusBarManagerService.TAG, "Icon not found in "
                   + (data.iconPackage != null ? data.iconId : "<system>")
                   + ": " + Integer.toHexString(data.iconId));
         }
