@@ -529,7 +529,7 @@ samples, you'll find them in
       <code>apt-get:</code>:
       <pre>apt-get install ia32-libs</pre>
       </li>
-      <li>Next, install Java: <pre>apt-get install sun-java6-bin</pre></li>
+      <li>Next, install Java: <pre>apt-get install sun-java6-jdk</pre></li>
       <li>The Ubuntu package manager does not currently offer an Eclipse 3.3
       version for download, so we recommend that you download Eclipse from
       eclipse.org (<a
