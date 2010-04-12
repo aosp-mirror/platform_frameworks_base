@@ -2078,7 +2078,13 @@ void OMXCodec::fillOutputBuffer(BufferInfo *info) {
 
     CODEC_LOGV("Calling fill_buffer on buffer %p", info->mBuffer);
     status_t err = mOMX->fillBuffer(mNode, info->mBuffer);
-    CHECK_EQ(err, OK);
+
+    if (err != OK) {
+        CODEC_LOGE("fillBuffer failed w/ error 0x%08x", err);
+
+        setState(ERROR);
+        return;
+    }
 
     info->mOwnedByComponent = true;
 }
