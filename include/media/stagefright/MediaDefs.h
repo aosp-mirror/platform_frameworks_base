@@ -31,6 +31,7 @@ extern const char *MEDIA_MIMETYPE_AUDIO_AMR_NB;
 extern const char *MEDIA_MIMETYPE_AUDIO_AMR_WB;
 extern const char *MEDIA_MIMETYPE_AUDIO_MPEG;
 extern const char *MEDIA_MIMETYPE_AUDIO_AAC;
+extern const char *MEDIA_MIMETYPE_AUDIO_QCELP;
 extern const char *MEDIA_MIMETYPE_AUDIO_RAW;
 
 extern const char *MEDIA_MIMETYPE_CONTAINER_MPEG4;

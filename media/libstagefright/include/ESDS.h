@@ -31,6 +31,7 @@ public:
 
     status_t InitCheck() const;
 
+    status_t getObjectTypeIndication(uint8_t *objectTypeIndication) const;
     status_t getCodecSpecificInfo(const void **data, size_t *size) const;
 
 private:
@@ -47,6 +48,7 @@ private:
 
     size_t mDecoderSpecificOffset;
     size_t mDecoderSpecificLength;
+    uint8_t mObjectTypeIndication;
 
     status_t skipDescriptorHeader(
             size_t offset, size_t size,
