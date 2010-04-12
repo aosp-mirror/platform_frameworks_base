@@ -25,9 +25,6 @@ import java.io.IOException;
 public class BackupDataOutput {
     int mBackupWriter;
 
-    public static final int OP_UPDATE = 1;
-    public static final int OP_DELETE = 2;
-
     /** @hide */
     public BackupDataOutput(FileDescriptor fd) {
         if (fd == null) throw new NullPointerException();
@@ -71,6 +68,7 @@ public class BackupDataOutput {
         }
     }
 
+    /** @hide */
     public void setKeyPrefix(String keyPrefix) {
         setKeyPrefix_native(mBackupWriter, keyPrefix);
     }
