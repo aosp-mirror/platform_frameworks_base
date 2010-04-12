@@ -601,10 +601,8 @@ public class AudioService extends IAudioService.Stub {
                 return mRingerMode == AudioManager.RINGER_MODE_VIBRATE;
 
             case AudioManager.VIBRATE_SETTING_OFF:
-                // Phone ringer should always vibrate in vibrate mode
-                if (vibrateType == AudioManager.VIBRATE_TYPE_RINGER) {
-                    return mRingerMode == AudioManager.RINGER_MODE_VIBRATE;
-                }
+                // return false, even for incoming calls
+                return false;
 
             default:
                 return false;
