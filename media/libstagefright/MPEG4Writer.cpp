@@ -60,6 +60,7 @@ private:
 
     void *mCodecSpecificData;
     size_t mCodecSpecificDataSize;
+    bool mGotAllCodecSpecificData;
 
     bool mReachedEOS;
 
@@ -358,6 +359,7 @@ MPEG4Writer::Track::Track(
       mMaxTimeStampUs(0),
       mCodecSpecificData(NULL),
       mCodecSpecificDataSize(0),
+      mGotAllCodecSpecificData(false),
       mReachedEOS(false) {
 }
 
@@ -418,14 +420,58 @@ void *MPEG4Writer::Track::ThreadWrapper(void *me) {
     return NULL;
 }
 
+#include <ctype.h>
+static void hexdump(const void *_data, size_t size) {
+    const uint8_t *data = (const uint8_t *)_data;
+    size_t offset = 0;
+    while (offset < size) {
+        printf("0x%04x  ", offset);
+
+        size_t n = size - offset;
+        if (n > 16) {
+            n = 16;
+        }
+
+        for (size_t i = 0; i < 16; ++i) {
+            if (i == 8) {
+                printf(" ");
+            }
+
+            if (offset + i < size) {
+                printf("%02x ", data[offset + i]);
+            } else {
+                printf("   ");
+            }
+        }
+
+        printf(" ");
+
+        for (size_t i = 0; i < n; ++i) {
+            if (isprint(data[offset + i])) {
+                printf("%c", data[offset + i]);
+            } else {
+                printf(".");
+            }
+        }
+
+        printf("\n");
+
+        offset += 16;
+    }
+}
+
+
 status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
         const uint8_t *data, size_t size) {
+    // hexdump(data, size);
+
     if (mCodecSpecificData != NULL) {
+        LOGE("Already have codec specific data");
         return ERROR_MALFORMED;
     }
 
     if (size < 4 || memcmp("\x00\x00\x00\x01", data, 4)) {
-        // Must start with a start-code.
+        LOGE("Must start with a start code");
         return ERROR_MALFORMED;
     }
 
@@ -436,7 +482,7 @@ status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
     }
 
     if (picParamOffset + 3 >= size) {
-        // Could not find start-code for pictureParameterSet.
+        LOGE("Could not find start-code for pictureParameterSet");
         return ERROR_MALFORMED;
     }
 
@@ -494,6 +540,8 @@ void MPEG4Writer::Track::threadEntry() {
         int32_t isCodecConfig;
         if (buffer->meta_data()->findInt32(kKeyIsCodecConfig, &isCodecConfig)
                 && isCodecConfig) {
+            CHECK(!mGotAllCodecSpecificData);
+
             if (is_avc) {
                 status_t err = makeAVCCodecSpecificData(
                         (const uint8_t *)buffer->data()
@@ -505,10 +553,6 @@ void MPEG4Writer::Track::threadEntry() {
                     break;
                 }
             } else if (is_mpeg4) {
-                if (mCodecSpecificData != NULL) {
-                    break;
-                }
-
                 mCodecSpecificDataSize = buffer->range_length();
                 mCodecSpecificData = malloc(mCodecSpecificDataSize);
                 memcpy(mCodecSpecificData,
@@ -520,8 +564,10 @@ void MPEG4Writer::Track::threadEntry() {
             buffer->release();
             buffer = NULL;
 
+            mGotAllCodecSpecificData = true;
             continue;
-        } else if (count == 1 && is_mpeg4 && mCodecSpecificData == NULL) {
+        } else if (!mGotAllCodecSpecificData &&
+                count == 1 && is_mpeg4 && mCodecSpecificData == NULL) {
             // The TI mpeg4 encoder does not properly set the
             // codec-specific-data flag.
 
@@ -559,7 +605,9 @@ void MPEG4Writer::Track::threadEntry() {
 
                 continue;
             }
-        } else if (is_avc && count < 3) {
+
+            mGotAllCodecSpecificData = true;
+        } else if (!mGotAllCodecSpecificData && is_avc && count < 3) {
             // The TI video encoder does not flag codec specific data
             // as such and also splits up SPS and PPS across two buffers.
 
@@ -599,6 +647,8 @@ void MPEG4Writer::Track::threadEntry() {
                     LOGE("failed to parse avc codec specific data.");
                     break;
                 }
+
+                mGotAllCodecSpecificData = true;
             }
 
             continue;
