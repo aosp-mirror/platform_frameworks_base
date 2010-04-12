@@ -20,10 +20,10 @@ import android.os.ParcelFileDescriptor;
 
 /**
  * A convenient interface to be used with the
- * {@link android.app.backup.BackupAgentHelper} to implement backup and restore of
+ * {@link android.app.backup.BackupAgentHelper} class to implement backup and restore of
  * arbitrary data types.
  * <p>
- * STOPSHOP: document!
+ * STOPSHIP: document!
  */
 public interface BackupHelper {
     /**
@@ -46,9 +46,8 @@ public interface BackupHelper {
 
     /**
      * Called by {@link android.app.backup.BackupAgentHelper BackupAgentHelper}
-     * to write the new backup state file corresponding to
-     * the current state of the app's data at the time the backup operation was
-     * performed.
+     * after a restore operation to write the backup state file corresponding to
+     * the data as processed by the helper.
      */
     public void writeNewStateDescription(ParcelFileDescriptor fd);
 }

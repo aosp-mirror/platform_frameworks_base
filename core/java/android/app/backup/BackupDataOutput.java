@@ -16,11 +16,49 @@
 
 package android.app.backup;
 
+import android.os.ParcelFileDescriptor;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
- * STOPSHIP: document 
+ * This class is the structured conduit through which a {@link BackupAgent} commits
+ * information to the current backup data set.  Data written for backup is presented
+ * as a set of "entities," key/value pairs in which each binary data record "value" is
+ * named with a string "key."
+ * <p>
+ * To commit a data record to the backup transport, the agent's
+ * {@link BackupAgent#onBackup(android.os.ParcelFileDescriptor, BackupDataOutput, android.os.ParcelFileDescriptor)}
+ * method first writes an "entity header" that supplies the key string for the record
+ * and the total size of the binary value for the record.  After the header has been
+ * written the agent then writes the binary entity value itself.  The entity value can
+ * be written in multiple chunks if desired, as long as the total count of bytes written
+ * matches what was supplied to {@link #writeEntityHeader(String, int)}.
+ * <p>
+ * Entity key strings are considered to be unique within a given application's backup
+ * data set.  If a new entity is written under an existing key string, its value will
+ * replace any previous value in the transport's remote data store.  A record can be
+ * removed entirely from the remote data set by writing a new entity header using the
+ * existing record's key, but supplying a negative <code>dataSize</code> parameter.
+ * When doing this the agent does not need to call {@link #writeEntityData(byte[], int)}.
+ * <p>
+ * <b>Example</b>
+ * <p>
+ * Here is an example illustrating a way to back up the value of a String variable
+ * called <code>mStringToBackUp</code>:
+ * <pre>
+ * static final String MY_STRING_KEY = "storedstring";
+ *
+ * public void {@link BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup(ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState)}
+ *         throws IOException {
+ *     ...
+ *     byte[] stringBytes = mStringToBackUp.getBytes();
+ *     data.writeEntityHeader(MY_STRING_KEY, stringBytes.length);
+ *     data.writeEntityData(stringBytes, stringBytes.length);
+ *     ...
+ * }</pre>
+ *
+ * @see BackupAgent
  */
 public class BackupDataOutput {
     int mBackupWriter;
