@@ -837,7 +837,8 @@ public abstract class Drawable {
          * Create a new drawable without supplying resources the caller
          * is running in.  Note that using this means the density-dependent
          * drawables (like bitmaps) will not be able to update their target
-         * density correctly.
+         * density correctly. One should use {@link #newDrawable(Resources)}
+         * instead to provide a resource.
          */
         public abstract Drawable newDrawable();
         /**
