@@ -591,8 +591,8 @@
     <!-- Application's requirement for five way navigation -->
     <attr name="reqFiveWayNav" format="boolean" />
 
-    <!-- The name of the class implementing <code>BackupAgent</code> to manage
-         backup and restore of application data on external storage. -->
+    <!-- The name of the class subclassing <code>BackupAgent</code> to manage
+         backup and restore of the application's data on external storage. -->
     <attr name="backupAgent" format="string" />
 
     <!-- Whether to allow the application to participate in backup

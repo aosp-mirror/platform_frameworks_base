@@ -29,18 +29,57 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * This is the central interface between an application and Android's settings
- * backup mechanism. Any implementation of a backup agent should perform backup
- * and restore actions in
+ * {@link android.app.backup.BackupAgent} is the central interface between an
+ * application and Android's data backup infrastructure.  An application that wishes
+ * to participate in the backup and restore mechanism will declare a subclass of
+ * {@link android.app.backup.BackupAgent}, implement the
  * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
- * and {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor)}
- * respectively.
+ * and {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor)} methods,
+ * and provide the name of its agent class in the AndroidManifest.xml file via
+ * the &lt;application&gt; tag's android:backupAgent attribute.
  * <p>
- * A backup agent based on convenient helper classes is available in
- * {@link android.app.backup.BackupAgentHelper} for less complex implementation
- * requirements.
+ * <b>Basic Operation</b>
  * <p>
- * STOPSHIP write more documentation about the backup process here.
+ * When the application makes changes to data that it wishes to keep backed up,
+ * it should call the
+ * {@link android.app.backup.BackupManager#dataChanged() BackupManager.dataChanged()} method.
+ * This notifies the Android backup manager that the application needs an opportunity
+ * to update its backup image.  The backup manager, in turn, will then schedule a
+ * backup pass to be performed at an opportune time.
+ * <p>
+ * Restore operations are typically only performed when applications are first
+ * installed on a device.  At that time, the operating system checks to see whether
+ * there is a previously-saved data set available for the application, and if so,
+ * begins an immediate restore pass to deliver that data as part of the installation
+ * process.
+ * <p>
+ * When a backup or restore pass is run, the application's process will be launched
+ * (if not already running), the manifest-declared agent class instantiated within
+ * that process, and the agent's {@link #onCreate()} method invoked.  This prepares the
+ * agent instance to run the actual backup or restore logic.  At this point the
+ * agent's
+ * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup()} or
+ * {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} method will be
+ * invoked as appropriate for the operation being performed.
+ * <p>
+ * A backup data set consists of one or more "entities," flattened binary data records
+ * that are each identified with a key string unique within the data set.  Adding a
+ * record to the active data set, or updating an existing record, are done by simply
+ * writing new entity data under the desired key.  Deleting an entity from the data set
+ * is done by writing an entity under that key with header specifying a negative data
+ * size, and no actual entity data.
+ * <p>
+ * <b>Helper Classes</b>
+ * <p>
+ * An extensible agent based on convenient helper classes is available in
+ * {@link android.app.backup.BackupAgentHelper}.  That class is particularly
+ * suited to handling of simple file or {@link android.content.SharedPreferences}
+ * backup and restore.
+ *
+ * @see android.app.backup.BackupManager
+ * @see android.app.backup.BackupAgentHelper
+ * @see android.app.backup.BackupDataInput
+ * @see android.app.backup.BackupDataOutput
  */
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
@@ -50,9 +89,22 @@ public abstract class BackupAgent extends ContextWrapper {
         super(null);
     }
 
+    /**
+     * Provided as a convenience for agent implementations that need an opportunity
+     * to do one-time initialization before the actual backup or restore operation
+     * is begun.
+     * <p>
+     * Agents do not need to override this method.
+     */
     public void onCreate() {
     }
 
+    /**
+     * Provided as a convenience for agent implementations that need to do some
+     * sort of shutdown process after backup or restore is completed.
+     * <p>
+     * Agents do not need to override this method.
+     */
     public void onDestroy() {
     }
 
@@ -65,18 +117,26 @@ public abstract class BackupAgent extends ContextWrapper {
      * cases, a representation of the final backup state after this pass should
      * be written to the file pointed to by the file descriptor wrapped in
      * <code>newState</code>.
+     * <p>
+     * Each entity written to the {@link android.app.backup.BackupDataOutput}
+     * <code>data</code> stream will be transmitted
+     * over the current backup transport and stored in the remote data set under
+     * the key supplied as part of the entity.  Writing an entity with a negative
+     * data size instructs the transport to delete whatever entity currently exists
+     * under that key from the remote data set.
      * 
      * @param oldState An open, read-only ParcelFileDescriptor pointing to the
      *            last backup state provided by the application. May be
      *            <code>null</code>, in which case no prior state is being
      *            provided and the application should perform a full backup.
      * @param data A structured wrapper around an open, read/write
-     *            ParcelFileDescriptor pointing to the backup data destination.
+     *            file descriptor pointing to the backup data destination.
      *            Typically the application will use backup helper classes to
      *            write to this file.
      * @param newState An open, read/write ParcelFileDescriptor pointing to an
      *            empty file. The application should record the final backup
-     *            state here after writing the requested data to dataFd.
+     *            state here after writing the requested data to the <code>data</code>
+     *            output stream.
      */
     public abstract void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
              ParcelFileDescriptor newState) throws IOException;
@@ -84,8 +144,7 @@ public abstract class BackupAgent extends ContextWrapper {
     /**
      * The application is being restored from backup and should replace any
      * existing data with the contents of the backup. The backup data is
-     * provided in the file descriptor pointed to by the
-     * {@link android.app.backup.BackupDataInput} instance <code>data</code>. Once
+     * provided through the <code>data</code> parameter. Once
      * the restore is finished, the application should write a representation of
      * the final state to the <code>newState</code> file descriptor.
      * <p>
@@ -98,17 +157,18 @@ public abstract class BackupAgent extends ContextWrapper {
      * before proceeding.
      * 
      * @param data A structured wrapper around an open, read-only
-     *            ParcelFileDescriptor pointing to a full snapshot of the
-     *            application's data. Typically the application will use helper
-     *            classes to read this data.
-     * @param appVersionCode The android:versionCode value of the application
-     *            that backed up this particular data set. This makes it easier
-     *            for an application's agent to distinguish among several
+     *            file descriptor pointing to a full snapshot of the
+     *            application's data.  The application should consume every
+     *            entity represented in this data stream.
+     * @param appVersionCode The
+     *            {@link android.R.styleable#AndroidManifest_versionCode android:versionCode}
+     *            value of the application that backed up this particular data set. This
+     *            makes it possible for an application's agent to distinguish among any
      *            possible older data versions when asked to perform the restore
      *            operation.
      * @param newState An open, read/write ParcelFileDescriptor pointing to an
      *            empty file. The application should record the final backup
-     *            state here after restoring its data from dataFd.
+     *            state here after restoring its data from the <code>data</code> stream.
      */
     public abstract void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState)
