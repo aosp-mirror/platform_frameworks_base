@@ -1239,7 +1239,19 @@ status_t AwesomePlayer::suspend() {
     Mutex::Autolock autoLock(mLock);
 
     if (mSuspensionState != NULL) {
-        return INVALID_OPERATION;
+        if (mLastVideoBuffer == NULL) {
+            //go into here if video is suspended again
+            //after resuming without being played between
+            //them
+            SuspensionState *state = mSuspensionState;
+            mSuspensionState = NULL;
+            reset_l();
+            mSuspensionState = state;
+            return OK;
+        }
+
+        delete mSuspensionState;
+        mSuspensionState = NULL;
     }
 
     if (mFlags & PREPARING) {
@@ -1344,7 +1356,7 @@ status_t AwesomePlayer::resume() {
         play_l();
     }
 
-    delete state;
+    mSuspensionState = state;
     state = NULL;
 
     return OK;
