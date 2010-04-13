@@ -19,11 +19,21 @@ package android.app.backup;
 import android.os.ParcelFileDescriptor;
 
 /**
- * A convenient interface to be used with the
- * {@link android.app.backup.BackupAgentHelper} class to implement backup and restore of
- * arbitrary data types.
+ * This interface defines the calling interface that {@link BackupAgentHelper} uses
+ * when dispatching backup and restore operations to the installed helpers.
+ * Applications can define and install their own helpers as well as using those
+ * provided as part of the Android framework.
  * <p>
- * STOPSHIP: document!
+ * Although multiple helper objects may be installed simultaneously, each helper
+ * is responsible only for handling its own data, and will not see entities
+ * created by other components within the backup system.  Invocations of multiple
+ * helpers are performed sequentially by the {@link BackupAgentHelper}, with each
+ * helper given a chance to access its own saved state from within the state record
+ * produced during the previous backup operation.
+ *
+ * @see BackupAgentHelper
+ * @see FileBackupHelper
+ * @see SharedPreferencesBackupHelper
  */
 public interface BackupHelper {
     /**
@@ -31,24 +41,46 @@ public interface BackupHelper {
      * application's data directory need to be backed up, write them to
      * <code>data</code>, and fill in <code>newState</code> with the state as it
      * exists now.
+     * <p>
+     * Implementing this method is much like implementing
+     * {@link BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
+     * &mdash; the method parameters are the same.  When this method is invoked the
+     * {@code oldState} descriptor points to the beginning of the state data
+     * written during this helper's previous backup operation, and the {@code newState}
+     * descriptor points to the file location at which the helper should write its
+     * new state after performing the backup operation.
+     * <p class="note">
+     * <em>Note:</em> The helper should not close or seek either the {@code oldState} or
+     * the {@code newState} file descriptors.</p>
      */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState);
 
     /**
      * Called by {@link android.app.backup.BackupAgentHelper BackupAgentHelper}
-     * to restore one entity from the restore dataset.
-     * <p class=note>
-     * Do not close the <code>data</code> stream.  Do not read more than
-     * <code>data.size()</code> bytes from <code>data</code>.
+     * to restore a single entity from the restore data set.  This method will be
+     * called for each entity in the data set that belongs to this handler.
+     * <p class="note">
+     * <em>Note:</em> Do not close the <code>data</code> stream.  Do not read more than
+     * <code>data.size()</code> bytes from <code>data</code>.</p>
      */
     public void restoreEntity(BackupDataInputStream data);
 
     /**
      * Called by {@link android.app.backup.BackupAgentHelper BackupAgentHelper}
      * after a restore operation to write the backup state file corresponding to
-     * the data as processed by the helper.
+     * the data as processed by the helper.  The data written here will be
+     * available to the helper during the next call to its
+     * {@link #performBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
+     * method.
+     * <p>
+     * Note that this method will be called even if the handler's
+     * {@link #restoreEntity(BackupDataInputStream)} method was never invoked during
+     * the restore operation.
+     * <p class="note">
+     * <em>Note:</em> The helper should not close or seek the {@code newState}
+     * file descriptor.</p>
      */
-    public void writeNewStateDescription(ParcelFileDescriptor fd);
+    public void writeNewStateDescription(ParcelFileDescriptor newState);
 }
 
