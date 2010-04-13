@@ -66,23 +66,17 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     private Context mContext;
 
-    private int mPolicyPollPeriodSec;
-    private static final int DEFAULT_POLLING_PERIOD_SEC = 60 * 10;
     private static final int TESTING_POLLING_PERIOD_SEC = 60 * 1;
-
     private static final int TESTING_RESET_PERIOD_SEC = 60 * 3;
+    private static final long TESTING_THRESHOLD = 1 * 1024 * 1024;
 
     private static final int PERIOD_COUNT = 6;
 
+    private int mPolicyPollPeriodSec;
     private long mPolicyThreshold;
-    // TODO - remove testing stuff?
-    private static final long DEFAULT_TESTING_THRESHOLD = 1 * 1024 * 1024;
-    private static final long DEFAULT_THRESHOLD = 0; // off by default
-
     private int mPolicyThrottleValue;
-    private static final int DEFAULT_THROTTLE_VALUE = 100; // 100 Kbps
-
     private int mPolicyResetDay; // 1-28
+    private int mPolicyNotificationsAllowedMask;
 
     private long mLastRead; // read byte count from last poll
     private long mLastWrite; // write byte count from last poll
@@ -100,11 +94,10 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     private DataRecorder mRecorder;
 
-    private String mPolicyIface;
+    private String mIface;
 
     private static final int NOTIFICATION_WARNING   = 2;
     private static final int NOTIFICATION_ALL       = 0xFFFFFFFF;
-    private int mPolicyNotificationsAllowedMask;
 
     private Notification mThrottlingNotification;
     private boolean mWarningNotificationSent = false;
@@ -146,16 +139,15 @@ public class ThrottleService extends IThrottleManager.Stub {
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.THROTTLE_POLLING_SEC), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.THROTTLE_THRESHOLD), false, this);
+                    Settings.Secure.THROTTLE_THRESHOLD_BYTES), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.THROTTLE_VALUE), false, this);
+                    Settings.Secure.THROTTLE_VALUE_KBITSPS), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.THROTTLE_RESET_DAY), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.THROTTLE_NOTIFICATION_TYPE), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.THROTTLE_IFACE), false, this);
-                    // TODO - add help url
+                    Settings.Secure.THROTTLE_HELP_URI), false, this);
         }
 
         @Override
@@ -172,18 +164,26 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     public synchronized long getResetTime(String iface) {
         enforceAccessPermission();
-        if (iface.equals(mPolicyIface) && (mRecorder != null)) mRecorder.getPeriodEnd();
+        if ((iface != null) &&
+                iface.equals(mIface) &&
+                (mRecorder != null)) {
+            mRecorder.getPeriodEnd();
+        }
         return 0;
     }
     public synchronized long getPeriodStartTime(String iface) {
         enforceAccessPermission();
-        if (iface.equals(mPolicyIface) && (mRecorder != null)) mRecorder.getPeriodStart();
+        if ((iface != null) &&
+                iface.equals(mIface) &&
+                (mRecorder != null)) {
+            mRecorder.getPeriodStart();
+        }
         return 0;
     }
     //TODO - a better name?  getCliffByteCountThreshold?
     public synchronized long getCliffThreshold(String iface, int cliff) {
         enforceAccessPermission();
-        if ((cliff == 1) && iface.equals(mPolicyIface)) {
+        if ((iface != null) && (cliff == 1) && iface.equals(mIface)) {
             return mPolicyThreshold;
         }
         return 0;
@@ -191,7 +191,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     // TODO - a better name? getThrottleRate?
     public synchronized int getCliffLevel(String iface, int cliff) {
         enforceAccessPermission();
-        if ((cliff == 1) && iface.equals(mPolicyIface)) {
+        if ((iface != null) && (cliff == 1) && iface.equals(mIface)) {
             return mPolicyThrottleValue;
         }
         return 0;
@@ -205,7 +205,8 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     public synchronized long getByteCount(String iface, int dir, int period, int ago) {
         enforceAccessPermission();
-        if (iface.equals(mPolicyIface) &&
+        if ((iface != null) &&
+                iface.equals(mIface) &&
                 (period == ThrottleManager.PERIOD_CYCLE) &&
                 (mRecorder != null)) {
             if (dir == ThrottleManager.DIRECTION_TX) return mRecorder.getPeriodTx(ago);
@@ -217,7 +218,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     // TODO - a better name - getCurrentThrottleRate?
     public synchronized int getThrottle(String iface) {
         enforceAccessPermission();
-        if (iface.equals(mPolicyIface) && (mThrottleIndex == 1)) {
+        if ((iface != null) && iface.equals(mIface) && (mThrottleIndex == 1)) {
             return mPolicyThrottleValue;
         }
         return 0;
@@ -302,20 +303,27 @@ public class ThrottleService extends IThrottleManager.Stub {
         private void onPolicyChanged() {
             boolean testing = SystemProperties.get(TESTING_ENABLED_PROPERTY).equals("true");
 
-            int pollingPeriod = DEFAULT_POLLING_PERIOD_SEC;
-            if (testing) pollingPeriod = TESTING_POLLING_PERIOD_SEC;
+            int pollingPeriod = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_datause_polling_period_sec);
             mPolicyPollPeriodSec = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.THROTTLE_POLLING_SEC, pollingPeriod);
 
             // TODO - remove testing stuff?
-            long defaultThreshold = DEFAULT_THRESHOLD;
-            if (testing) defaultThreshold = DEFAULT_TESTING_THRESHOLD;
+            long defaultThreshold = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_datause_threshold_bytes);
+            int defaultValue = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_datause_throttle_kbitsps);
             synchronized (ThrottleService.this) {
                 mPolicyThreshold = Settings.Secure.getLong(mContext.getContentResolver(),
-                        Settings.Secure.THROTTLE_THRESHOLD, defaultThreshold);
+                        Settings.Secure.THROTTLE_THRESHOLD_BYTES, defaultThreshold);
                 mPolicyThrottleValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.THROTTLE_VALUE, DEFAULT_THROTTLE_VALUE);
+                        Settings.Secure.THROTTLE_VALUE_KBITSPS, defaultValue);
+                if (testing) {
+                    mPolicyPollPeriodSec = TESTING_POLLING_PERIOD_SEC;
+                    mPolicyThreshold = TESTING_THRESHOLD;
+                }
             }
+
             mPolicyResetDay = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.THROTTLE_RESET_DAY, -1);
             if (mPolicyResetDay == -1 ||
@@ -325,15 +333,18 @@ public class ThrottleService extends IThrottleManager.Stub {
                 Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.THROTTLE_RESET_DAY, mPolicyResetDay);
             }
+            mIface = mContext.getResources().getString(
+                    com.android.internal.R.string.config_datause_iface);
             synchronized (ThrottleService.this) {
-                mPolicyIface = Settings.Secure.getString(mContext.getContentResolver(),
-                        Settings.Secure.THROTTLE_IFACE);
-                // TODO - read default from resource so it's device-specific
-                if (mPolicyIface == null) mPolicyIface = "rmnet0";
+                if (mIface == null) {
+                    mPolicyThreshold = 0;
+                }
             }
 
+            int defaultNotificationType = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_datause_notification_type);
             mPolicyNotificationsAllowedMask = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.THROTTLE_NOTIFICATION_TYPE, NOTIFICATION_ALL);
+                    Settings.Secure.THROTTLE_NOTIFICATION_TYPE, defaultNotificationType);
 
             Slog.d(TAG, "onPolicyChanged testing=" + testing +", period=" + mPolicyPollPeriodSec +
                     ", threshold=" + mPolicyThreshold + ", value=" + mPolicyThrottleValue +
@@ -352,8 +363,8 @@ public class ThrottleService extends IThrottleManager.Stub {
             long incRead = 0;
             long incWrite = 0;
             try {
-                incRead = mNMService.getInterfaceRxCounter(mPolicyIface) - mLastRead;
-                incWrite = mNMService.getInterfaceTxCounter(mPolicyIface) - mLastWrite;
+                incRead = mNMService.getInterfaceRxCounter(mIface) - mLastRead;
+                incWrite = mNMService.getInterfaceTxCounter(mIface) - mLastWrite;
             } catch (RemoteException e) {
                 Slog.e(TAG, "got remoteException in onPollAlarm:" + e);
             }
@@ -383,11 +394,12 @@ public class ThrottleService extends IThrottleManager.Stub {
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_END, mRecorder.getPeriodEnd());
             mContext.sendStickyBroadcast(broadcast);
 
+            mAlarmManager.cancel(mPendingPollIntent);
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, next, mPendingPollIntent);
         }
 
         private void checkThrottleAndPostNotification(long currentTotal) {
-            // are we even doing this?
+            // is throttling enabled?
             if (mPolicyThreshold == 0)
                 return;
 
@@ -399,7 +411,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                     }
                     if (DBG) Slog.d(TAG, "Threshold " + mPolicyThreshold + " exceeded!");
                     try {
-                        mNMService.setInterfaceThrottle(mPolicyIface,
+                        mNMService.setInterfaceThrottle(mIface,
                                 mPolicyThrottleValue, mPolicyThrottleValue);
                     } catch (Exception e) {
                         Slog.e(TAG, "error setting Throttle: " + e);
@@ -492,7 +504,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                     mThrottleIndex = THROTTLE_INDEX_UNTHROTTLED;
                 }
                 try {
-                    mNMService.setInterfaceThrottle(mPolicyIface, -1, -1);
+                    mNMService.setInterfaceThrottle(mIface, -1, -1);
                 } catch (Exception e) {
                     Slog.e(TAG, "error clearing Throttle: " + e);
                 }

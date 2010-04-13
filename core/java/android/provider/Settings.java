@@ -3306,13 +3306,13 @@ public final class Settings {
          * The bandwidth throttle threshold (long)
          * @hide
          */
-        public static final String THROTTLE_THRESHOLD = "throttle_threshold";
+        public static final String THROTTLE_THRESHOLD_BYTES = "throttle_threshold_bytes";
 
         /**
          * The bandwidth throttle value (kbps)
          * @hide
          */
-        public static final String THROTTLE_VALUE = "throttle_value";
+        public static final String THROTTLE_VALUE_KBITSPS = "throttle_value_kbitsps";
 
         /**
          * The bandwidth throttle reset calendar day (1-28)
@@ -3325,12 +3325,6 @@ public final class Settings {
          * @hide
          */
         public static final String THROTTLE_NOTIFICATION_TYPE = "throttle_notification_type";
-
-        /**
-         * The interface we throttle
-         * @hide
-         */
-        public static final String THROTTLE_IFACE = "throttle_iface";
 
         /**
          * Help URI for data throttling policy
