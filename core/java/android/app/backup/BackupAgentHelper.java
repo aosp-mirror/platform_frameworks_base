@@ -21,16 +21,28 @@ import android.os.ParcelFileDescriptor;
 import java.io.IOException;
 
 /**
- * A convenient BackupAgent wrapper class that automatically manages
+ * A convenient {@link BackupAgent} wrapper class that automatically manages
  * heterogeneous data sets within the backup data, each identified by a unique
- * key prefix. An application will typically extend this class in their own
- * backup agent. Then, within the agent's onBackup() and onRestore() methods, it
- * will call {@link #addHelper(String, BackupHelper)} one or more times to
- * specify the data sets, then invoke super.onBackup() or super.onRestore() to
- * have the BackupAgentHelper implementation process the data.
+ * key prefix.  When processing a backup or restore operation, the BackupAgentHelper
+ * dispatches to one or more installed {@link BackupHelper helpers} objects, each
+ * of which is responsible for a defined subset of the data being processed.
  * <p>
- * STOPSHIP: document!
+ * An application will typically extend this class in their own
+ * backup agent. Then, within the agent's {@link BackupAgent#onCreate() onCreate()}
+ * method, it will call {@link #addHelper(String, BackupHelper)} one or more times to
+ * install the handlers for each kind of data it wishes to manage within its backups.
+ * <p>
+ * The Android framework currently provides two predefined {@link BackupHelper} classes:
+ * {@link FileBackupHelper}, which manages the backup and restore of entire files
+ * within an application's data directory hierarchy; and {@link SharedPreferencesBackupHelper},
+ * which manages the backup and restore of an application's
+ * {@link android.content.SharedPreferences} data.
+ * <p>
+ * An application can also implement its own helper classes to work within the
+ * {@link BackupAgentHelper} framework.  See the {@link BackupHelper} interface
+ * documentation for details.
  *
+ * @see BackupHelper
  * @see FileBackupHelper
  * @see SharedPreferencesBackupHelper
  */
