@@ -463,7 +463,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         private void postNotification(int titleInt, int messageInt, int icon, int flags) {
             Intent intent = new Intent();
             // TODO - fix up intent
-            intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
+            intent.setClassName("com.android.phone", "com.android.phone.DataUsage");
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
