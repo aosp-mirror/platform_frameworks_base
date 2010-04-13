@@ -552,6 +552,7 @@
         <item name="android:background">@android:drawable/quickcontact_badge</item>
         <item name="android:clickable">true</item>
         <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@android:drawable/ic_contact_picture</item>
     </style>
     
     <style name="Widget.QuickContactBadgeSmall">
