@@ -162,6 +162,7 @@
         android:layout_marginBottom="80dip"
         style="@style/Widget.Button.Transparent"
         android:drawablePadding="8dip"
+        android:visibility="gone"
         />
 
 </RelativeLayout>
