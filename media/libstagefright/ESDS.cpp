@@ -25,7 +25,8 @@ ESDS::ESDS(const void *data, size_t size)
       mSize(size),
       mInitCheck(NO_INIT),
       mDecoderSpecificOffset(0),
-      mDecoderSpecificLength(0) {
+      mDecoderSpecificLength(0),
+      mObjectTypeIndication(0) {
     memcpy(mData, data, size);
 
     mInitCheck = parse();
@@ -38,6 +39,16 @@ ESDS::~ESDS() {
 
 status_t ESDS::InitCheck() const {
     return mInitCheck;
+}
+
+status_t ESDS::getObjectTypeIndication(uint8_t *objectTypeIndication) const {
+    if (mInitCheck != OK) {
+        return mInitCheck;
+    }
+
+    *objectTypeIndication = mObjectTypeIndication;
+
+    return OK;
 }
 
 status_t ESDS::getCodecSpecificInfo(const void **data, size_t *size) const {
@@ -163,6 +174,8 @@ status_t ESDS::parseDecoderConfigDescriptor(size_t offset, size_t size) {
     if (size < 13) {
         return ERROR_MALFORMED;
     }
+
+    mObjectTypeIndication = mData[offset];
 
     offset += 13;
     size -= 13;
