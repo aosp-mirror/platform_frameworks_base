@@ -20,9 +20,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "SineSource.h"
+
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
+#include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/HTTPDataSource.h>
@@ -42,6 +45,7 @@ static long gNumRepetitions;
 static long gMaxNumFrames;  // 0 means decode all available.
 static long gReproduceBug;  // if not -1.
 static bool gPreferSoftwareCodec;
+static bool gPlaybackAudio;
 
 static int64_t getNowUs() {
     struct timeval tv;
@@ -73,7 +77,20 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     rawSource->start();
 
-    if (gReproduceBug >= 3 && gReproduceBug <= 5) {
+    if (gPlaybackAudio) {
+        AudioPlayer *player = new AudioPlayer(NULL);
+        player->setSource(rawSource);
+
+        player->start(true /* sourceAlreadyStarted */);
+
+        status_t finalStatus;
+        while (!player->reachedEOS(&finalStatus)) {
+            usleep(100000ll);
+        }
+
+        delete player;
+        player = NULL;
+    } else if (gReproduceBug >= 3 && gReproduceBug <= 5) {
         int64_t durationUs;
         CHECK(meta->findInt64(kKeyDuration, &durationUs));
 
@@ -245,6 +262,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -p(rofiles) dump decoder profiles supported\n");
     fprintf(stderr, "       -t(humbnail) extract video thumbnail or album art\n");
     fprintf(stderr, "       -s(oftware) prefer software codec\n");
+    fprintf(stderr, "       -o playback audio\n");
 }
 
 int main(int argc, char **argv) {
@@ -258,9 +276,10 @@ int main(int argc, char **argv) {
     gMaxNumFrames = 0;
     gReproduceBug = -1;
     gPreferSoftwareCodec = false;
+    gPlaybackAudio = false;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:pts")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptso")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -314,6 +333,12 @@ int main(int argc, char **argv) {
                 break;
             }
 
+            case 'o':
+            {
+                gPlaybackAudio = true;
+                break;
+            }
+
             case '?':
             case 'h':
             default:
@@ -323,6 +348,11 @@ int main(int argc, char **argv) {
                 break;
             }
         }
+    }
+
+    if (gPlaybackAudio && !audioOnly) {
+        // This doesn't make any sense if we're decoding the video track.
+        gPlaybackAudio = false;
     }
 
     argc -= optind;
@@ -456,6 +486,11 @@ int main(int argc, char **argv) {
             dataSource = new FileSource(filename);
         }
 
+        if (dataSource == NULL) {
+            fprintf(stderr, "Unable to create data source.\n");
+            return 1;
+        }
+
         bool isJPEG = false;
 
         size_t len = strlen(filename);
@@ -467,10 +502,18 @@ int main(int argc, char **argv) {
 
         if (isJPEG) {
             mediaSource = new JPEGSource(dataSource);
+        } else if (!strncasecmp("sine:", filename, 5)) {
+            char *end;
+            long sampleRate = strtol(filename + 5, &end, 10);
+
+            if (end == filename + 5) {
+                sampleRate = 44100;
+            }
+            mediaSource = new SineSource(sampleRate, 1);
         } else {
             sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
             if (extractor == NULL) {
-                fprintf(stderr, "could not create data source\n");
+                fprintf(stderr, "could not create extractor.\n");
                 return -1;
             }
 
@@ -492,6 +535,17 @@ int main(int argc, char **argv) {
                 if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
                     break;
                 }
+
+                meta = NULL;
+            }
+
+            if (meta == NULL) {
+                fprintf(stderr,
+                        "No suitable %s track found. The '-a' option will "
+                        "target audio tracks only, the default is to target "
+                        "video tracks only.\n",
+                        audioOnly ? "audio" : "video");
+                return -1;
             }
 
             int64_t thumbTimeUs;

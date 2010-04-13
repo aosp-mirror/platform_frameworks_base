@@ -102,7 +102,7 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
                 (numChannels == 2)
                     ? AudioSystem::CHANNEL_OUT_STEREO
                     : AudioSystem::CHANNEL_OUT_MONO,
-                8192, 0, &AudioCallback, this, 0);
+                0, 0, &AudioCallback, this, 0);
 
         if ((err = mAudioTrack->initCheck()) != OK) {
             delete mAudioTrack;
