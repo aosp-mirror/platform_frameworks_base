@@ -96,7 +96,7 @@ static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
     gConfig_EGLConfigFieldID   = _env->GetFieldID(gConfig_class,  "mEGLConfig",  "I");
 
     jclass surface_class = _env->FindClass("android/view/Surface");
-    gSurface_SurfaceFieldID = _env->GetFieldID(surface_class, "mSurface", "I");
+    gSurface_SurfaceFieldID = _env->GetFieldID(surface_class, ANDROID_VIEW_SURFACE_JNI_ID, "I");
 
     jclass bitmap_class = _env->FindClass("android/graphics/Bitmap");
     gBitmap_NativeBitmapFieldID = _env->GetFieldID(bitmap_class, "mNativeBitmap", "I");
