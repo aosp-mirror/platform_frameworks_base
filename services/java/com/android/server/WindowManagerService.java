@@ -148,6 +148,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
     static final boolean DEBUG_WALLPAPER = false;
+    static final boolean DEBUG_FREEZE = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean HIDE_STACK_CRAWLS = true;
     static final boolean MEASURE_LATENCY = false;
@@ -10695,23 +10696,28 @@ public class WindowManagerService extends IWindowManager.Stub
         } else if (animating) {
             requestAnimationLocked(currentTime+(1000/60)-SystemClock.uptimeMillis());
         }
-        mQueue.setHoldScreenLocked(holdScreen != null);
-        if (screenBrightness < 0 || screenBrightness > 1.0f) {
-            mPowerManager.setScreenBrightnessOverride(-1);
-        } else {
-            mPowerManager.setScreenBrightnessOverride((int)
-                    (screenBrightness * Power.BRIGHTNESS_ON));
-        }
-        if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
-            mPowerManager.setButtonBrightnessOverride(-1);
-        } else {
-            mPowerManager.setButtonBrightnessOverride((int)
-                    (buttonBrightness * Power.BRIGHTNESS_ON));
-        }
-        if (holdScreen != mHoldingScreenOn) {
-            mHoldingScreenOn = holdScreen;
-            Message m = mH.obtainMessage(H.HOLD_SCREEN_CHANGED, holdScreen);
-            mH.sendMessage(m);
+        
+        if (DEBUG_FREEZE) Slog.v(TAG, "Layout: mDisplayFrozen=" + mDisplayFrozen
+                + " holdScreen=" + holdScreen);
+        if (!mDisplayFrozen) {
+            mQueue.setHoldScreenLocked(holdScreen != null);
+            if (screenBrightness < 0 || screenBrightness > 1.0f) {
+                mPowerManager.setScreenBrightnessOverride(-1);
+            } else {
+                mPowerManager.setScreenBrightnessOverride((int)
+                        (screenBrightness * Power.BRIGHTNESS_ON));
+            }
+            if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
+                mPowerManager.setButtonBrightnessOverride(-1);
+            } else {
+                mPowerManager.setButtonBrightnessOverride((int)
+                        (buttonBrightness * Power.BRIGHTNESS_ON));
+            }
+            if (holdScreen != mHoldingScreenOn) {
+                mHoldingScreenOn = holdScreen;
+                Message m = mH.obtainMessage(H.HOLD_SCREEN_CHANGED, holdScreen);
+                mH.sendMessage(m);
+            }
         }
 
         if (mTurnOnScreen) {
@@ -10988,6 +10994,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mFreezeGcPending = now;
         }
 
+        if (DEBUG_FREEZE) Slog.v(TAG, "*** FREEZING DISPLAY", new RuntimeException());
+        
         mDisplayFrozen = true;
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
@@ -11010,6 +11018,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mWaitingForConfig || mAppsFreezingScreen > 0 || mWindowsFreezingScreen) {
             return;
         }
+        
+        if (DEBUG_FREEZE) Slog.v(TAG, "*** UNFREEZING DISPLAY", new RuntimeException());
         
         mDisplayFrozen = false;
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);
