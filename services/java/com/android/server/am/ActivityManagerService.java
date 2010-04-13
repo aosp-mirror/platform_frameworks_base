@@ -6887,6 +6887,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
                     "getRecentTasks()");
 
+            IPackageManager pm = ActivityThread.getPackageManager();
+            
             final int N = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res
                     = new ArrayList<ActivityManager.RecentTaskInfo>(
@@ -6903,6 +6905,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     rti.baseIntent = new Intent(
                             tr.intent != null ? tr.intent : tr.affinityIntent);
                     rti.origActivity = tr.origActivity;
+                    
+                    if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
+                        // Check whether this activity is currently available.
+                        try {
+                            if (rti.origActivity != null) {
+                                if (pm.getActivityInfo(rti.origActivity, 0) == null) {
+                                    continue;
+                                }
+                            } else if (rti.baseIntent != null) {
+                                if (pm.queryIntentActivities(rti.baseIntent,
+                                        null, 0) == null) {
+                                    continue;
+                                }
+                            }
+                        } catch (RemoteException e) {
+                            // Will never happen.
+                        }
+                    }
+                    
                     res.add(rti);
                     maxNum--;
                 }
