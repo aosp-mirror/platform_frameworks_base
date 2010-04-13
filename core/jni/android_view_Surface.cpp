@@ -19,6 +19,7 @@
 #include "android_util_Binder.h"
 
 #include <surfaceflinger/SurfaceComposerClient.h>
+#include <surfaceflinger/Surface.h>
 #include <ui/Region.h>
 #include <ui/Rect.h>
 
@@ -670,7 +671,7 @@ static JNINativeMethod gSurfaceMethods[] = {
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
 {
-    so.surface = env->GetFieldID(clazz, "mSurface", "I");
+    so.surface = env->GetFieldID(clazz, ANDROID_VIEW_SURFACE_JNI_ID, "I");
     so.surfaceControl = env->GetFieldID(clazz, "mSurfaceControl", "I");
 	so.saveCount = env->GetFieldID(clazz, "mSaveCount", "I");
 	so.canvas    = env->GetFieldID(clazz, "mCanvas", "Landroid/graphics/Canvas;");
