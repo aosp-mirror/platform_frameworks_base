@@ -636,7 +636,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         return;
     }
 
-    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
+    fields.surface_native = env->GetFieldID(surface, ANDROID_VIEW_SURFACE_JNI_ID, "I");
     if (fields.surface_native == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
         return;
