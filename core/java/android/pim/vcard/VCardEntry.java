@@ -61,9 +61,6 @@ public class VCardEntry {
 
     private final static int DEFAULT_ORGANIZATION_TYPE = Organization.TYPE_WORK;
 
-    private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
-    private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
-
     private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
 
     static {
@@ -1060,23 +1057,6 @@ public class VCardEntry {
         if (mAccount != null) {
             builder.withValue(RawContacts.ACCOUNT_NAME, mAccount.name);
             builder.withValue(RawContacts.ACCOUNT_TYPE, mAccount.type);
-
-            // Assume that caller side creates this group if it does not exist.
-            if (ACCOUNT_TYPE_GOOGLE.equals(mAccount.type)) {
-                final Cursor cursor = resolver.query(Groups.CONTENT_URI, new String[] {
-                        Groups.SOURCE_ID },
-                        Groups.TITLE + "=?", new String[] {
-                        GOOGLE_MY_CONTACTS_GROUP }, null);
-                try {
-                    if (cursor != null && cursor.moveToFirst()) {
-                        myGroupsId = cursor.getString(0);
-                    }
-                } finally {
-                    if (cursor != null) {
-                        cursor.close();
-                    }
-                }
-            }
         } else {
             builder.withValue(RawContacts.ACCOUNT_NAME, null);
             builder.withValue(RawContacts.ACCOUNT_TYPE, null);

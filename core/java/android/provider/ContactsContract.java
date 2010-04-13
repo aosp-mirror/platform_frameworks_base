@@ -4902,6 +4902,23 @@ public final class ContactsContract {
          * Type: INTEGER (boolean)
          */
         public static final String SHOULD_SYNC = "should_sync";
+
+        /**
+         * Any newly created contacts will automatically be added to groups that have this
+         * flag set to true.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String AUTO_ADD = "auto_add";
+
+        /**
+         * When a contacts is marked as a favorites it will be automatically added
+         * to the groups that have this flag set, and when it is removed from favorites
+         * it will be removed from these groups.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String FAVORITES = "favorites";
     }
 
     /**
@@ -5042,6 +5059,8 @@ public final class ContactsContract {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, NOTES);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SHOULD_SYNC);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, FAVORITES);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, AUTO_ADD);
                 cursor.moveToNext();
                 return new Entity(values);
             }
@@ -5567,7 +5586,7 @@ public final class ContactsContract {
          * <p>
          * The user's selection will be returned from
          * {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)}
-         * if the resultCode is 
+         * if the resultCode is
          * {@link android.app.Activity#RESULT_OK}, the array of picked phone
          * numbers are in the Intent's
          * {@link #EXTRA_PHONE_URIS}; otherwise, the
@@ -5610,7 +5629,7 @@ public final class ContactsContract {
          * <p>
          * Type: array of URIs, the tel URI is used for the phone numbers which don't
          * belong to any contact, the content URI is used for phone id in contacts.
-         * 
+         *
          * @hide
          */
         public static final String EXTRA_PHONE_URIS =
