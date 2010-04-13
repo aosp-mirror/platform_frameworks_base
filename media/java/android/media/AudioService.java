@@ -102,6 +102,9 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_MEDIA_SERVER_DIED = 5;
     private static final int MSG_MEDIA_SERVER_STARTED = 6;
     private static final int MSG_PLAY_SOUND_EFFECT = 7;
+    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 8;
+
+    private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -1651,6 +1654,11 @@ public class AudioService extends IAudioService.Stub {
                 case MSG_PLAY_SOUND_EFFECT:
                     playSoundEffect(msg.arg1, msg.arg2);
                     break;
+
+                case MSG_BTA2DP_DOCK_TIMEOUT:
+                    // msg.obj  == address of BTA2DP device
+                    makeA2dpDeviceUnavailableNow( (String) msg.obj );
+                    break;
             }
         }
     }
@@ -1705,6 +1713,38 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    private void makeA2dpDeviceAvailable(String address) {
+        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                AudioSystem.DEVICE_STATE_AVAILABLE,
+                address);
+        // Reset A2DP suspend state each time a new sink is connected
+        AudioSystem.setParameters("A2dpSuspended=false");
+        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
+                address);
+    }
+
+    private void makeA2dpDeviceUnavailableNow(String address) {
+        Intent noisyIntent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        mContext.sendBroadcast(noisyIntent);
+        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                address);
+        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+    }
+
+    private void makeA2dpDeviceUnavailableLater(String address) {
+        // the device will be made unavailable later, so consider it disconnected right away
+        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+        // send the delayed message to make the device unavailable later
+        Message msg = mAudioHandler.obtainMessage(MSG_BTA2DP_DOCK_TIMEOUT, address);
+        mAudioHandler.sendMessageDelayed(msg, BTA2DP_DOCK_TIMEOUT_MILLIS);
+
+    }
+
+    private void cancelA2dpDeviceTimeout(String address) {
+        mAudioHandler.removeMessages(MSG_BTA2DP_DOCK_TIMEOUT);
+    }
+
     /**
      * Receiver for misc intent broadcasts the Phone app cares about.
      */
@@ -1739,20 +1779,25 @@ public class AudioService extends IAudioService.Stub {
 
                 if (isConnected &&
                     state != BluetoothA2dp.STATE_CONNECTED && state != BluetoothA2dp.STATE_PLAYING) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            address);
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+                    if (btDevice.isBluetoothDock()) {
+                        if (state == BluetoothA2dp.STATE_DISCONNECTED) {
+                            // introduction of a delay for transient disconnections of docks when
+                            // power is rapidly turned off/on, this message will be canceled if
+                            // we reconnect the dock under a preset delay
+                            makeA2dpDeviceUnavailableLater(address);
+                            // the next time isConnected is evaluated, it will be false for the dock
+                        }
+                    } else {
+                        makeA2dpDeviceUnavailableNow(address);
+                    }
                 } else if (!isConnected &&
                              (state == BluetoothA2dp.STATE_CONNECTED ||
                               state == BluetoothA2dp.STATE_PLAYING)) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                                         AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                         address);
-                    // Reset A2DP suspend state each time a new sink is connected
-                    AudioSystem.setParameters("A2dpSuspended=false");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
-                            address);
+                    if (btDevice.isBluetoothDock()) {
+                        // this could be a reconnection after a transient disconnection
+                        cancelA2dpDeviceTimeout(address);
+                    }
+                    makeA2dpDeviceAvailable(address);
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE,

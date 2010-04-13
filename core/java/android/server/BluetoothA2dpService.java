@@ -487,12 +487,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (state != prevState) {
             if (state == BluetoothA2dp.STATE_DISCONNECTED ||
                     state == BluetoothA2dp.STATE_DISCONNECTING) {
-                if (prevState == BluetoothA2dp.STATE_CONNECTED ||
-                        prevState == BluetoothA2dp.STATE_PLAYING) {
-                   // disconnecting or disconnected
-                   Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-                   mContext.sendBroadcast(intent);
-                }
                 mSinkCount--;
             } else if (state == BluetoothA2dp.STATE_CONNECTED) {
                 mSinkCount ++;
