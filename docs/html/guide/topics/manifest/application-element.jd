@@ -3,19 +3,23 @@ page.title=&lt;application&gt;
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;application android:<a href="#clear">allowClearUserData</a>=["true" | "false"]
+<dd><pre class="stx">&lt;application android:<a href="#backup">allowBackup</a>=["true" | "false"]
+             android:<a href="#clear">allowClearUserData</a>=["true" | "false"]
              android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+             android:<a href="#agent">backupAgent</a>="<i>string</i>"
              android:<a href="#debug">debuggable</a>=["true" | "false"]
              android:<a href="#desc">description</a>="<i>string resource</i>"
              android:<a href="#enabled">enabled</a>=["true" | "false"]
              android:<a href="#code">hasCode</a>=["true" | "false"]
              android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+             android:<a href="#killrst">killAfterRestore</a>=["true" | "false"]
              android:<a href="#label">label</a>="<i>string resource</i>"
              android:<a href="#space">manageSpaceActivity</a>="<i>string</i>"
              android:<a href="#nm">name</a>="<i>string</i>"
              android:<a href="#prmsn">permission</a>="<i>string</i>"
              android:<a href="#persistent">persistent</a>=["true" | "false"]
              android:<a href="#proc">process</a>="<i>string</i>"
+             android:<a href="#restoreany">restoreAnyVersion</a>=["true" | "false"]
              android:<a href="#aff">taskAffinity</a>="<i>string</i>"
              android:<a href="#theme">theme</a>="<i>resource or theme</i>" &gt;
     . . .
@@ -45,6 +49,16 @@ cannot be overridden by the components.</dd>
 
 <dt>attributes</dt>
 <dd><dl class="attr">
+<dt><a name="backup"></a>{@code android:allowBackup}</dt>
+<dd>Whether the application allows its data to be backed up through the Android
+Backup Manager &mdash; "{@code true}" if it does, "{@code false}" if not.  By
+default this attribute is "{@code true}".  If an application declares this
+attribute to be "{@code false}" the Backup Manager will never attempt to
+perform any backup or restore operation, even if the application declares a
+valid <a href="#agent">{@code android:backupAgent}</a> attribute in its
+manifest.
+</dd>
+
 <dt><a name="clear"></a>{@code android:allowClearUserData}</dt>
 <dd>Whether or not users are given the option to remove user data &mdash; 
 "{@code true}" if they are, and "{@code false}" if not.  If the value is 
@@ -65,6 +79,20 @@ element has its own
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code>
 attribute that can override the value set here.  See that attribute for more 
 information.
+</p></dd>
+
+<dt><a name="agent"></a>{@code android:backupAgent}</dt>
+<dd>The name of the class that implement's the application's backup agent,
+a subclass of {@link android.app.backup.BackupAgent}.  The attribute value should be
+a fully qualified  class name (such as, "{@code com.example.project.MyBackupAgent}").  
+However, as a shorthand, if the first character of the name is a period 
+(for example, "{@code .MyBackupAgent}"), it is appended to the 
+package name specified in the 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+element.
+
+<p>
+There is no default.  The name must be specified.
 </p></dd>
 
 <dt><a name="debug"></a>{@code android:debuggable}</dt>
@@ -111,6 +139,19 @@ each of the application's components.  See the individual
 <p>
 This attribute must be set as a reference to a drawable resource containing
 the image definition.   There is no default icon.
+</p></dd>
+
+<dt><a name="killrst"></a>{@code android:killAfterRestore}</dt>
+<dd>Whether the application in question should be terminated after its
+settings have been restored during a full-system restore operation.
+Single-package restore operations will never cause the application to
+be shut down.  Full-system restore operations typically only occur once,
+when the phone is first set up.  Third-party applications will not normally
+need to use this attribute.
+
+<p>The default is {@code true}, which means that after the application
+has finished processing its data during a full-system restore, it will be
+terminated.
 </p></dd>
 
 <dt><a name="label"></a>{@code android:label}</dt>
@@ -194,6 +235,17 @@ process, private to the application, is created when it's needed.
 If the process name begins with a lowercase character, a global process 
 of that name is created.  A global process can be shared with other
 applications, reducing resource usage.
+</p></dd>
+
+<dt><a href name="restoreany"></a>{@code android:restoreAnyVersion}</dt>
+<dd>Indicate that the application is prepared to attempt a restore of any
+backed-up data set, even if the backup was stored by a newer version
+of the application than is currently installed on the device.  Setting
+this attribute to {@code true} will permit the Backup Manager to
+attempt restore even when a version mismatch suggests that the data are
+incompatible.  <em>Use with caution!</em>
+
+<p>The default value of this attribute is {@code false}.
 </p></dd>
 
 <dt><a href name="aff"></a>{@code android:taskAffinity}</dt>
