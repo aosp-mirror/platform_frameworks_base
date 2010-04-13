@@ -3050,7 +3050,7 @@ status_t QueryCodecs(
             continue;
         }
 
-        OMXCodec::setComponentRole(omx, node, queryDecoders, mime);
+        OMXCodec::setComponentRole(omx, node, !queryDecoders, mime);
 
         results->push();
         CodecCapabilities *caps = &results->editItemAt(results->size() - 1);
