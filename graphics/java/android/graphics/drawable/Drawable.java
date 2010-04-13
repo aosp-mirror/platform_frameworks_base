@@ -654,6 +654,8 @@ public abstract class Drawable {
      * Calling this method on a mutable Drawable will have no effect.
      *
      * @return This drawable.
+     * @see ConstantState
+     * @see #getConstantState()
      */
     public Drawable mutate() {
         return this;
@@ -817,6 +819,9 @@ public abstract class Drawable {
         return null;
     }
 
+    /**
+     * Inflate this Drawable from an XML resource.
+     */
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
 
@@ -825,6 +830,12 @@ public abstract class Drawable {
         a.recycle();
     }
 
+    /**
+     * Inflate a Drawable from an XML resource.
+     *
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     void inflateWithAttributes(Resources r, XmlPullParser parser,
             TypedArray attrs, int visibleAttr)
             throws XmlPullParserException, IOException {
@@ -832,6 +843,20 @@ public abstract class Drawable {
         mVisible = attrs.getBoolean(visibleAttr, mVisible);
     }
 
+    /**
+     * This abstract class is used by {@link Drawable}s to store shared constant state and data
+     * between Drawables. {@link BitmapDrawable}s created from the same resource will for instance
+     * share a unique bitmap stored in their ConstantState.
+     *
+     * <p>
+     * {@link #newDrawable(Resources)} can be used as a factory to create new Drawable instances
+     * from this ConstantState.
+     * </p>
+     *
+     * Use {@link Drawable#getConstantState()} to retrieve the ConstantState of a Drawable. Calling
+     * {@link Drawable#mutate()} on a Drawable should typically create a new ConstantState for that
+     * Drawable.
+     */
     public static abstract class ConstantState {
         /**
          * Create a new drawable without supplying resources the caller
@@ -857,6 +882,13 @@ public abstract class Drawable {
         public abstract int getChangingConfigurations();
     }
 
+    /**
+     * Return a {@link ConstantState} instance that holds the shared state of this Drawable.
+     *q
+     * @return The ConstantState associated to that Drawable.
+     * @see ConstantState
+     * @see Drawable#mutate()
+     */
     public ConstantState getConstantState() {
         return null;
     }
