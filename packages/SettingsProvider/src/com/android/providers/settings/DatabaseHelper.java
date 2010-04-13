@@ -789,7 +789,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         + " VALUES(?,?);");
     
                 // Set the timeout to 30 minutes in milliseconds
-                loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT, 30 * 60 * 1000);
+                loadSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
+                        Integer.toString(30 * 60 * 1000));
             } finally {
                 if (stmt != null) stmt.close();
             }
