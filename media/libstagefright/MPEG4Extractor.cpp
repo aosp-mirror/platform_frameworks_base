@@ -1642,6 +1642,8 @@ bool SniffMPEG4(
     }
 
     if (!memcmp(header, "ftyp3gp", 7) || !memcmp(header, "ftypmp42", 8)
+        || !memcmp(header, "ftyp3gr6", 8) || !memcmp(header, "ftyp3gs6", 8)
+        || !memcmp(header, "ftyp3ge6", 8) || !memcmp(header, "ftyp3gg6", 8)
         || !memcmp(header, "ftypisom", 8) || !memcmp(header, "ftypM4V ", 8)
         || !memcmp(header, "ftypM4A ", 8) || !memcmp(header, "ftypf4v ", 8)
         || !memcmp(header, "ftypkddi", 8) || !memcmp(header, "ftypM4VP", 8)) {
