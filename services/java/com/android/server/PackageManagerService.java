@@ -621,10 +621,27 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                 } break;
                 case UPDATED_MEDIA_STATUS: {
-                    try {
-                        PackageHelper.getMountService().finishMediaUpdate();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "MountService not running?");
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Got message UPDATED_MEDIA_STATUS");
+                    boolean reportStatus = msg.arg1 == 1;
+                    boolean doGc = msg.arg2 == 1;
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "reportStatus=" + reportStatus + ", doGc = " + doGc);
+                    if (doGc) {
+                        // Force a gc to clear up stale containers.
+                        Runtime.getRuntime().gc();
+                    }
+                    if (msg.obj != null) {
+                        Set<SdInstallArgs> args = (Set<SdInstallArgs>) msg.obj;
+                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading all containers");
+                        // Unload containers
+                        unloadAllContainers(args);
+                    }
+                    if (reportStatus) {
+                        try {
+                            if (DEBUG_SD_INSTALL) Log.i(TAG, "Invoking MountService call back");
+                            PackageHelper.getMountService().finishMediaUpdate();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "MountService not running?");
+                        }
                     }
                 } break;
                 case WRITE_SETTINGS: {
@@ -9465,9 +9482,9 @@ class PackageManagerService extends IPackageManager.Stub {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
                    mediaStatus+", mMediaMounted=" + mMediaMounted);
            if (mediaStatus == mMediaMounted) {
-               if (reportStatus) {
-                   mHandler.sendEmptyMessage(UPDATED_MEDIA_STATUS);
-               }
+               Message msg = mHandler.obtainMessage(UPDATED_MEDIA_STATUS,
+                       reportStatus ? 1 : 0, -1);
+               mHandler.sendMessage(msg);
                return;
            }
            mMediaMounted = mediaStatus;
@@ -9476,38 +9493,42 @@ class PackageManagerService extends IPackageManager.Stub {
        mHandler.post(new Runnable() {
            public void run() {
                mHandler.removeCallbacks(this);
-               try {
-                   updateExternalMediaStatusInner(mediaStatus);
-               } finally {
-                   if (reportStatus) {
-                       mHandler.sendEmptyMessage(UPDATED_MEDIA_STATUS);
-                   }
-               }
+               updateExternalMediaStatusInner(mediaStatus, reportStatus);
            }
        });
    }
 
-   private void updateExternalMediaStatusInner(boolean mediaStatus) {
-       // If we are up here that means there are packages to be
-       // enabled or disabled.
+   /*
+    * Collect information of applications on external media, map them
+    * against existing containers and update information based on current
+    * mount status. Please note that we always have to report status
+    * if reportStatus has been set to true especially when unloading packages.
+    */
+   private void updateExternalMediaStatusInner(boolean mediaStatus,
+           boolean reportStatus) {
+       // Collection of uids
+       int uidArr[] = null;
+       // Collection of stale containers
+       HashSet<String> removeCids = new HashSet<String>();
+       // Collection of packages on external media with valid containers.
+       HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
+       // Get list of secure containers.
        final String list[] = PackageHelper.getSecureContainerList();
        if (list == null || list.length == 0) {
            Log.i(TAG, "No secure containers on sdcard");
-           return;
-       }
-
-       int uidList[] = new int[list.length];
-       int num = 0;
-       HashSet<String> removeCids = new HashSet<String>();
-       HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
-       synchronized (mPackages) {
-           for (String cid : list) {
-               SdInstallArgs args = new SdInstallArgs(cid);
-               if (DEBUG_SD_INSTALL) Log.i(TAG, "Processing container " + cid);
-               boolean failed = true;
-               try {
+       } else {
+           // Process list of secure containers and categorize them
+           // as active or stale based on their package internal state.
+           int uidList[] = new int[list.length];
+           int num = 0;
+           synchronized (mPackages) {
+               for (String cid : list) {
+                   SdInstallArgs args = new SdInstallArgs(cid);
+                   if (DEBUG_SD_INSTALL) Log.i(TAG, "Processing container " + cid);
                    String pkgName = args.getPackageName();
                    if (pkgName == null) {
+                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid + " stale");
+                       removeCids.add(cid);
                        continue;
                    }
                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Looking for pkg : " + pkgName);
@@ -9519,33 +9540,29 @@ class PackageManagerService extends IPackageManager.Stub {
                                " at code path: " + ps.codePathString);
                        // We do have a valid package installed on sdcard
                        processCids.put(args, ps.codePathString);
-                       failed = false;
                        int uid = ps.userId;
                        if (uid != -1) {
                            uidList[num++] = uid;
                        }
-                   }
-               } finally {
-                   if (failed) {
+                   } else {
                        // Stale container on sdcard. Just delete
                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid + " stale");
                        removeCids.add(cid);
                    }
                }
            }
-       }
-       // Organize uids
-       int uidArr[] = null;
-       if (num > 0) {
-           // Sort uid list
-           Arrays.sort(uidList, 0, num);
-           // Throw away duplicates
-           uidArr = new int[num];
-           uidArr[0] = uidList[0];
-           int di = 0;
-           for (int i = 1; i < num; i++) {
-               if (uidList[i-1] != uidList[i]) {
-                   uidArr[di++] = uidList[i];
+
+           if (num > 0) {
+               // Sort uid list
+               Arrays.sort(uidList, 0, num);
+               // Throw away duplicates
+               uidArr = new int[num];
+               uidArr[0] = uidList[0];
+               int di = 0;
+               for (int i = 1; i < num; i++) {
+                   if (uidList[i-1] != uidList[i]) {
+                       uidArr[di++] = uidList[i];
+                   }
                }
            }
        }
@@ -9556,7 +9573,7 @@ class PackageManagerService extends IPackageManager.Stub {
            startCleaningPackages();
        } else {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
-           unloadMediaPackages(processCids, uidArr);
+           unloadMediaPackages(processCids, uidArr, reportStatus);
        }
    }
 
@@ -9581,10 +9598,7 @@ class PackageManagerService extends IPackageManager.Stub {
     * Look at potentially valid container ids from processCids
     * If package information doesn't match the one on record
     * or package scanning fails, the cid is added to list of
-    * removeCids and cleaned up. Since cleaning up containers
-    * involves destroying them, we do not want any parse
-    * references to such stale containers. So force gc's
-    * to avoid unnecessary crashes.
+    * removeCids. We currently don't delete stale containers.
     */
    private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids,
            int uidArr[], HashSet<String> removeCids) {
@@ -9662,6 +9676,7 @@ class PackageManagerService extends IPackageManager.Stub {
        if (pkgList.size() > 0) {
            sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
        }
+       // Force gc to avoid any stale parser references that we might have.
        if (doGc) {
            Runtime.getRuntime().gc();
        }
@@ -9673,12 +9688,33 @@ class PackageManagerService extends IPackageManager.Stub {
        }
    }
 
+   /*
+    * Utility method to unload a list of specified containers
+    */
+   private void unloadAllContainers(Set<SdInstallArgs> cidArgs) {
+       // Just unmount all valid containers.
+       for (SdInstallArgs arg : cidArgs) {
+           synchronized (mInstallLock) {
+               arg.doPostDeleteLI(false);
+           }
+       }
+   }
+
+   /*
+    * Unload packages mounted on external media. This involves deleting
+    * package data from internal structures, sending broadcasts about
+    * diabled packages, gc'ing to free up references, unmounting all
+    * secure containers corresponding to packages on external media, and
+    * posting a UPDATED_MEDIA_STATUS message if status has been requested.
+    * Please note that we always have to post this message if status has
+    * been requested no matter what.
+    */
    private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids,
-           int uidArr[]) {
+           int uidArr[], final boolean reportStatus) {
        if (DEBUG_SD_INSTALL) Log.i(TAG, "unloading media packages");
        ArrayList<String> pkgList = new ArrayList<String>();
        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
-       Set<SdInstallArgs> keys = processCids.keySet();
+       final Set<SdInstallArgs> keys = processCids.keySet();
        for (SdInstallArgs args : keys) {
            String cid = args.cid;
            String pkgName = args.getPackageName();
@@ -9696,22 +9732,23 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
-       // Send broadcasts
+       // We have to absolutely send UPDATED_MEDIA_STATUS only
+       // after confirming that all the receivers processed the ordered
+       // broadcast when packages get disabled, force a gc to clean things up.
+       // and unload all the containers.
        if (pkgList.size() > 0) {
            sendResourcesChangedBroadcast(false, pkgList, uidArr, new IIntentReceiver.Stub() {
                public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
                        boolean ordered, boolean sticky) throws RemoteException {
-                   // Force gc now that everyone is done cleaning up, to release
-                   // references on assets.
-                   Runtime.getRuntime().gc();
+                   Message msg = mHandler.obtainMessage(UPDATED_MEDIA_STATUS,
+                           reportStatus ? 1 : 0, 1, keys);
+                   mHandler.sendMessage(msg);
                }
            });
-       }
-       // Just unmount all valid containers.
-       for (SdInstallArgs args : keys) {
-           synchronized (mInstallLock) {
-               args.doPostDeleteLI(false);
-           }
+       } else {
+           Message msg = mHandler.obtainMessage(UPDATED_MEDIA_STATUS,
+                   reportStatus ? 1 : 0, -1, keys);
+           mHandler.sendMessage(msg);
        }
    }
 
