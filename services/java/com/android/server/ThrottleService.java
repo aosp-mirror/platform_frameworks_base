@@ -425,7 +425,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                     }
 
                     mNotificationManager.cancel(com.android.internal.R.drawable.
-                            stat_sys_throttle_warning);
+                            stat_sys_throttled);
 
                     postNotification(com.android.internal.R.string.throttled_notification_title,
                             com.android.internal.R.string.throttled_notification_message,
@@ -460,18 +460,18 @@ public class ThrottleService extends IThrottleManager.Stub {
                         if (mWarningNotificationSent == false) {
                             mWarningNotificationSent = true;
                             mNotificationManager.cancel(com.android.internal.R.drawable.
-                                    stat_sys_throttle_warning);
+                                    stat_sys_throttled);
                             postNotification(com.android.internal.R.string.
                                     throttle_warning_notification_title,
                                     com.android.internal.R.string.
                                     throttle_warning_notification_message,
-                                    com.android.internal.R.drawable.stat_sys_throttle_warning,
+                                    com.android.internal.R.drawable.stat_sys_throttled,
                                     0);
                         }
                     } else {
                         if (mWarningNotificationSent == true) {
                             mNotificationManager.cancel(com.android.internal.R.drawable.
-                                    stat_sys_throttle_warning);
+                                    stat_sys_throttled);
                             mWarningNotificationSent =false;
                         }
                     }
@@ -519,7 +519,6 @@ public class ThrottleService extends IThrottleManager.Stub {
                 broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL, -1);
                 mContext.sendStickyBroadcast(broadcast);
             }
-            mNotificationManager.cancel(com.android.internal.R.drawable.stat_sys_throttle_warning);
             mNotificationManager.cancel(com.android.internal.R.drawable.stat_sys_throttled);
             mWarningNotificationSent = false;
         }
