@@ -741,19 +741,25 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             uint16_t data_ref_index = U16_AT(&buffer[6]);
             uint16_t num_channels = U16_AT(&buffer[16]);
 
-            if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB,
-                            FourCC2MIME(chunk_type))
-                || !strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB,
-                               FourCC2MIME(chunk_type))) {
-                // AMR audio is always mono.
-                num_channels = 1;
-            }
-
             uint16_t sample_size = U16_AT(&buffer[18]);
             uint32_t sample_rate = U32_AT(&buffer[24]) >> 16;
 
-            // printf("*** coding='%s' %d channels, size %d, rate %d\n",
-            //        chunk, num_channels, sample_size, sample_rate);
+            if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB,
+                            FourCC2MIME(chunk_type))) {
+                // AMR NB audio is always mono, 8kHz
+                num_channels = 1;
+                sample_rate = 8000;
+            } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB,
+                               FourCC2MIME(chunk_type))) {
+                // AMR WB audio is always mono, 16kHz
+                num_channels = 1;
+                sample_rate = 16000;
+            }
+
+#if 0
+            printf("*** coding='%s' %d channels, size %d, rate %d\n",
+                   chunk, num_channels, sample_size, sample_rate);
+#endif
 
             mLastTrack->meta->setCString(kKeyMIMEType, FourCC2MIME(chunk_type));
             mLastTrack->meta->setInt32(kKeyChannelCount, num_channels);
@@ -1235,6 +1241,18 @@ status_t MPEG4Extractor::verifyTrack(Track *track) {
 status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
         const void *esds_data, size_t esds_size) {
     ESDS esds(esds_data, esds_size);
+
+    uint8_t objectTypeIndication;
+    if (esds.getObjectTypeIndication(&objectTypeIndication) != OK) {
+        return ERROR_MALFORMED;
+    }
+
+    if (objectTypeIndication == 0xe1) {
+        // This isn't MPEG4 audio at all, it's QCELP 14k...
+        mLastTrack->meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_QCELP);
+        return OK;
+    }
+
     const uint8_t *csd;
     size_t csd_size;
     if (esds.getCodecSpecificInfo(
