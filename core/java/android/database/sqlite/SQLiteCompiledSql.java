@@ -54,6 +54,9 @@ import android.util.Log;
     private boolean mInUse = false;
 
     /* package */ SQLiteCompiledSql(SQLiteDatabase db, String sql) {
+        if (!db.isOpen()) {
+            throw new IllegalStateException("database " + db.getPath() + " already closed");
+        }
         mDatabase = db;
         mSqlStmt = sql;
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
@@ -75,6 +78,9 @@ import android.util.Log;
      *  existing compiled SQL program already around
      */
     private void compile(String sql, boolean forceCompilation) {
+        if (!mDatabase.isOpen()) {
+            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+        }
         // Only compile if we don't have a valid statement already or the caller has
         // explicitly requested a recompile.
         if (forceCompilation) {
@@ -90,6 +96,9 @@ import android.util.Log;
     }
 
     /* package */ void releaseSqlStatement() {
+        if (!mDatabase.isOpen()) {
+            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+        }
         // Note that native_finalize() checks to make sure that nStatement is
         // non-null before destroying it.
         if (nStatement != 0) {
