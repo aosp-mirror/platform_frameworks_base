@@ -2150,11 +2150,15 @@ public class WebView extends AbsoluteLayout
                 mScrollX = pinLocX(Math.round(sx));
                 mScrollY = pinLocY(Math.round(sy));
 
+                // update webkit
                 if (oldX != mScrollX || oldY != mScrollY) {
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                } else {
+                    // the scroll position is adjusted at the beginning of the
+                    // zoom animation. But we want to update the WebKit at the
+                    // end of the zoom animation. See comments in onScaleEnd().
+                    sendOurVisibleRect();
                 }
-
-                // update webkit
                 sendViewSizeZoom();
             }
         }
