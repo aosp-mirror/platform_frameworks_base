@@ -540,10 +540,10 @@ public class WebView extends AbsoluteLayout
     static final int FIND_AGAIN                         = 126;
     static final int CENTER_FIT_RECT                    = 127;
     static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
+    static final int SET_SCROLLBAR_MODES                = 129;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
-    private static final int LAST_PACKAGE_MSG_ID
-            = REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID;
+    private static final int LAST_PACKAGE_MSG_ID = SET_SCROLLBAR_MODES;
 
     static final String[] HandlerPrivateDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -586,7 +586,8 @@ public class WebView extends AbsoluteLayout
         "RETURN_LABEL", //                   = 125;
         "FIND_AGAIN", //                     = 126;
         "CENTER_FIT_RECT", //                = 127;
-        "REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID" // = 128;
+        "REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID", // = 128;
+        "SET_SCROLLBAR_MODES" //             = 129;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -656,6 +657,14 @@ public class WebView extends AbsoluteLayout
     private static final int DRAW_EXTRAS_FIND = 1;
     private static final int DRAW_EXTRAS_SELECTION = 2;
     private static final int DRAW_EXTRAS_CURSOR_RING = 3;
+
+    // keep this in sync with WebCore:ScrollbarMode in WebKit
+    private static final int SCROLLBAR_AUTO = 0;
+    private static final int SCROLLBAR_ALWAYSOFF = 1;
+    // as we auto fade scrollbar, this is ignored.
+    private static final int SCROLLBAR_ALWAYSON = 2;
+    private int mHorizontalScrollBarMode = SCROLLBAR_AUTO;
+    private int mVerticalScrollBarMode = SCROLLBAR_AUTO;
 
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
@@ -2277,6 +2286,8 @@ public class WebView extends AbsoluteLayout
     protected int computeHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
+        } else if (mHorizontalScrollBarMode == SCROLLBAR_ALWAYSOFF) {
+            return computeHorizontalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
             return (int) Math.floor(mContentWidth * mActualScale);
@@ -2287,6 +2298,8 @@ public class WebView extends AbsoluteLayout
     protected int computeVerticalScrollRange() {
         if (mDrawHistory) {
             return mHistoryHeight;
+        } else if (mVerticalScrollBarMode == SCROLLBAR_ALWAYSOFF) {
+            return computeVerticalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
             return (int) Math.floor(mContentHeight * mActualScale);
@@ -5024,7 +5037,9 @@ public class WebView extends AbsoluteLayout
         if (settings.supportZoom()
                 && settings.getBuiltInZoomControls()
                 && !getZoomButtonsController().isVisible()
-                && mMinZoomScale < mMaxZoomScale) {
+                && mMinZoomScale < mMaxZoomScale
+                && (mHorizontalScrollBarMode != SCROLLBAR_ALWAYSOFF
+                        || mVerticalScrollBarMode != SCROLLBAR_ALWAYSOFF)) {
             mZoomButtonsController.setVisible(true);
             int count = settings.getDoubleTapToastCount();
             if (mInZoomOverview && count > 0) {
@@ -6639,6 +6654,11 @@ public class WebView extends AbsoluteLayout
                     Rect r = (Rect)msg.obj;
                     mInZoomOverview = false;
                     centerFitRect(r.left, r.top, r.width(), r.height());
+                    break;
+
+                case SET_SCROLLBAR_MODES:
+                    mHorizontalScrollBarMode = msg.arg1;
+                    mVerticalScrollBarMode = msg.arg2;
                     break;
 
                 default:
