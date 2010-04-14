@@ -102,8 +102,9 @@ class FrameLoader {
                                 com.android.internal.R.string.httpErrorBadUrl));
                 return false;
             }
-            // Make sure it is correctly URL encoded before sending the request
-            if (!URLUtil.verifyURLEncoding(url)) {
+            // Make sure the host part of the url is correctly
+            // encoded before sending the request
+            if (!URLUtil.verifyURLEncoding(mListener.host())) {
                 mListener.error(EventHandler.ERROR_BAD_URL,
                         mListener.getContext().getString(
                         com.android.internal.R.string.httpErrorBadUrl));
