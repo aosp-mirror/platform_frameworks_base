@@ -93,7 +93,9 @@ public class Paint {
         /**
          * Geometry and text drawn with this style will be both filled and
          * stroked at the same time, respecting the stroke-related fields on
-         * the paint.
+         * the paint. This mode can give unexpected results if the geometry
+         * is oriented counter-clockwise. This restriction does not apply to
+         * either FILL or STROKE.
          */
         FILL_AND_STROKE (2);
         
