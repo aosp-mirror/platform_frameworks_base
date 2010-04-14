@@ -414,6 +414,10 @@ web_docs_sample_code_flags := \
 		            resources/samples/Snake "Snake" \
 		-samplecode $(sample_dir)/SoftKeyboard \
 		            resources/samples/SoftKeyboard "Soft Keyboard" \
+		-samplecode $(sample_dir)/Spinner  \
+		            resources/samples/Spinner "Spinner" \
+		-samplecode $(sample_dir)/SpinnerTest \
+		            resources/samples/SpinnerTest "SpinnerTest" \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \
