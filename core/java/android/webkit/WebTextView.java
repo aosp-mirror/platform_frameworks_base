@@ -343,6 +343,7 @@ import java.util.ArrayList;
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
+        if (mInSetTextAndKeepSelection) return;
         // This code is copied from TextView.onDraw().  That code does not get
         // executed, however, because the WebTextView does not draw, allowing
         // webkit's drawing to show through.
@@ -799,8 +800,14 @@ import java.util.ArrayList;
     /* package */ void setTextAndKeepSelection(String text) {
         mPreChange = text.toString();
         Editable edit = (Editable) getText();
+        int selStart = Selection.getSelectionStart(edit);
+        int selEnd = Selection.getSelectionEnd(edit);
         mInSetTextAndKeepSelection = true;
         edit.replace(0, edit.length(), text);
+        int newLength = edit.length();
+        if (selStart > newLength) selStart = newLength;
+        if (selEnd > newLength) selEnd = newLength;
+        Selection.setSelection(edit, selStart, selEnd);
         mInSetTextAndKeepSelection = false;
         updateCachedTextfield();
     }
