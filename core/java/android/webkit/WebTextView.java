@@ -300,6 +300,33 @@ import java.util.ArrayList;
         return connection;
     }
 
+    /**
+     * In general, TextView makes a call to InputMethodManager.updateSelection
+     * in onDraw.  However, in the general case of WebTextView, we do not draw.
+     * This method is called by WebView.onDraw to take care of the part that
+     * needs to be called.
+     */
+    /* package */ void onDrawSubstitute() {
+        if (!willNotDraw()) {
+            // If the WebTextView is set to draw, such as in the case of a
+            // password, onDraw calls updateSelection(), so this code path is
+            // unnecessary.
+            return;
+        }
+        // This code is copied from TextView.onDraw().  That code does not get
+        // executed, however, because the WebTextView does not draw, allowing
+        // webkit's drawing to show through.
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && imm.isActive(this)) {
+            Spannable sp = (Spannable) getText();
+            int selStart = Selection.getSelectionStart(sp);
+            int selEnd = Selection.getSelectionEnd(sp);
+            int candStart = EditableInputConnection.getComposingSpanStart(sp);
+            int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+            imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
+        }
+    }
+
     @Override
     public void onEditorAction(int actionCode) {
         switch (actionCode) {
@@ -343,19 +370,8 @@ import java.util.ArrayList;
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
-        if (mInSetTextAndKeepSelection) return;
-        // This code is copied from TextView.onDraw().  That code does not get
-        // executed, however, because the WebTextView does not draw, allowing
-        // webkit's drawing to show through.
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if (imm != null && imm.isActive(this)) {
-            Spannable sp = (Spannable) getText();
-            int candStart = EditableInputConnection.getComposingSpanStart(sp);
-            int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
-            imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
-        }
         if (!mFromWebKit && !mFromFocusChange && !mFromSetInputType
-                && mWebView != null) {
+                && mWebView != null && !mInSetTextAndKeepSelection) {
             if (DebugFlags.WEB_TEXT_VIEW) {
                 Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
                         + " selEnd=" + selEnd);
