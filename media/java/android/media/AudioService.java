@@ -492,27 +492,19 @@ public class AudioService extends IAudioService.Stub {
 
         // If stream is muted, set last audible index only
         if (streamState.muteCount() != 0) {
-            streamState.setLastAudibleIndex(index);
-            // Post a persist volume msg
-            sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
-                    SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+            // Do not allow last audible index to be 0
+            if (index != 0) {
+                streamState.setLastAudibleIndex(index);
+                // Post a persist volume msg
+                sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
+                        SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+            }
         } else {
             if (streamState.setIndex(index, lastAudible) || force) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist).
-                // If we are in silent mode and stream is affected by ringer mode
-                // and the new volume is not 0, just persist the new volume but do not change
-                // current value
-                if (mRingerMode == AudioManager.RINGER_MODE_NORMAL ||
-                    !isStreamAffectedByRingerMode(streamType) ||
-                    index == 0) {
-                    sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamType, SENDMSG_NOOP, 0, 0,
-                            streamState, 0);
-                } else {
-                    // Post a persist volume msg
-                    sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
-                            SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
-                }
+                sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamType, SENDMSG_NOOP, 0, 0,
+                        streamState, 0);
             }
         }
     }
