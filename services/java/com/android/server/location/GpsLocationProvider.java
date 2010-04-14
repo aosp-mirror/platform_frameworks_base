@@ -33,6 +33,7 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.SntpClient;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -839,23 +840,25 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     public boolean sendExtraCommand(String command, Bundle extras) {
         
+        long identity = Binder.clearCallingIdentity();
+        boolean result = false;
+
         if ("delete_aiding_data".equals(command)) {
-            return deleteAidingData(extras);
-        }
-        if ("force_time_injection".equals(command)) {
+            result = deleteAidingData(extras);
+        } else if ("force_time_injection".equals(command)) {
             sendMessage(INJECT_NTP_TIME, 0, null);
-            return true;
-        }
-        if ("force_xtra_injection".equals(command)) {
+            result = true;
+        } else if ("force_xtra_injection".equals(command)) {
             if (native_supports_xtra()) {
                 xtraDownloadRequest();
-                return true;
+                result = true;
             }
-            return false;
+        } else {
+            Log.w(TAG, "sendExtraCommand: unknown command " + command);
         }
         
-        Log.w(TAG, "sendExtraCommand: unknown command " + command);
-        return false;
+        Binder.restoreCallingIdentity(identity);
+        return result;
     }
 
     private boolean deleteAidingData(Bundle extras) {
