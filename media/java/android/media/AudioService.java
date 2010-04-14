@@ -1128,6 +1128,9 @@ public class AudioService extends IAudioService.Stub {
             if (direction == AudioManager.ADJUST_RAISE) {
                 // exiting silent mode
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+            } else {
+                // prevent last audible index to reach 0
+                adjustVolumeIndex = false;
             }
         }
 
