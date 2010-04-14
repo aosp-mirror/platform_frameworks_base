@@ -4659,13 +4659,16 @@ public class WebView extends AbsoluteLayout
                         ted.mY = contentY;
                         ted.mMetaState = ev.getMetaState();
                         ted.mReprocess = mDeferTouchProcess;
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (mDeferTouchProcess) {
                             // still needs to set them for compute deltaX/Y
                             mLastTouchX = x;
                             mLastTouchY = y;
+                            ted.mViewX = x;
+                            ted.mViewY = y;
+                            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                             break;
                         }
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (!inFullScreenMode()) {
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
                                     .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
@@ -4691,17 +4694,20 @@ public class WebView extends AbsoluteLayout
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent() && mConfirmMove && (firstMove
                         || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
+                    mLastSentTouchTime = eventTime;
                     TouchEventData ted = new TouchEventData();
                     ted.mAction = action;
                     ted.mX = contentX;
                     ted.mY = contentY;
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
-                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    mLastSentTouchTime = eventTime;
                     if (mDeferTouchProcess) {
+                        ted.mViewX = x;
+                        ted.mViewY = y;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         break;
                     }
+                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     if (firstMove && !inFullScreenMode()) {
                         mPrivateHandler.sendMessageDelayed(mPrivateHandler
                                 .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
@@ -4866,6 +4872,10 @@ public class WebView extends AbsoluteLayout
                     ted.mY = contentY;
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
+                    if (mDeferTouchProcess) {
+                        ted.mViewX = x;
+                        ted.mViewY = y;
+                    }
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
@@ -4880,6 +4890,10 @@ public class WebView extends AbsoluteLayout
                             ted.mY = contentY;
                             ted.mMetaState = ev.getMetaState();
                             ted.mReprocess = mDeferTouchProcess;
+                            if (mDeferTouchProcess) {
+                                ted.mViewX = x;
+                                ted.mViewY = y;
+                            }
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mPreventDefault != PREVENT_DEFAULT_YES){
                             doDoubleTap();
@@ -6156,6 +6170,10 @@ public class WebView extends AbsoluteLayout
                         // simplicity for now, we don't set it.
                         ted.mMetaState = 0;
                         ted.mReprocess = mDeferTouchProcess;
+                        if (mDeferTouchProcess) {
+                            ted.mViewX = mLastTouchX;
+                            ted.mViewY = mLastTouchY;
+                        }
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
@@ -6452,31 +6470,27 @@ public class WebView extends AbsoluteLayout
                         TouchEventData ted = (TouchEventData) msg.obj;
                         switch (ted.mAction) {
                             case MotionEvent.ACTION_DOWN:
-                                mLastDeferTouchX = contentToViewX(ted.mX)
-                                        - mScrollX;
-                                mLastDeferTouchY = contentToViewY(ted.mY)
-                                        - mScrollY;
+                                mLastDeferTouchX = ted.mViewX;
+                                mLastDeferTouchY = ted.mViewY;
                                 mDeferTouchMode = TOUCH_INIT_MODE;
                                 break;
                             case MotionEvent.ACTION_MOVE: {
                                 // no snapping in defer process
-                                int x = contentToViewX(ted.mX) - mScrollX;
-                                int y = contentToViewY(ted.mY) - mScrollY;
                                 if (mDeferTouchMode != TOUCH_DRAG_MODE) {
                                     mDeferTouchMode = TOUCH_DRAG_MODE;
-                                    mLastDeferTouchX = x;
-                                    mLastDeferTouchY = y;
+                                    mLastDeferTouchX = ted.mViewX;
+                                    mLastDeferTouchY = ted.mViewY;
                                     startDrag();
                                 }
                                 int deltaX = pinLocX((int) (mScrollX
-                                        + mLastDeferTouchX - x))
+                                        + mLastDeferTouchX - ted.mViewX))
                                         - mScrollX;
                                 int deltaY = pinLocY((int) (mScrollY
-                                        + mLastDeferTouchY - y))
+                                        + mLastDeferTouchY - ted.mViewY))
                                         - mScrollY;
                                 doDrag(deltaX, deltaY);
-                                if (deltaX != 0) mLastDeferTouchX = x;
-                                if (deltaY != 0) mLastDeferTouchY = y;
+                                if (deltaX != 0) mLastDeferTouchX = ted.mViewX;
+                                if (deltaY != 0) mLastDeferTouchY = ted.mViewY;
                                 break;
                             }
                             case MotionEvent.ACTION_UP:
@@ -6489,8 +6503,8 @@ public class WebView extends AbsoluteLayout
                                 break;
                             case WebViewCore.ACTION_DOUBLETAP:
                                 // doDoubleTap() needs mLastTouchX/Y as anchor
-                                mLastTouchX = contentToViewX(ted.mX) - mScrollX;
-                                mLastTouchY = contentToViewY(ted.mY) - mScrollY;
+                                mLastTouchX = ted.mViewX;
+                                mLastTouchY = ted.mViewY;
                                 doDoubleTap();
                                 mDeferTouchMode = TOUCH_DONE_MODE;
                                 break;

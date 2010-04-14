@@ -708,6 +708,8 @@ final class WebViewCore {
         int mY;
         int mMetaState;
         boolean mReprocess;
+        float mViewX;
+        float mViewY;
     }
 
     static class GeolocationPermissionsData {
