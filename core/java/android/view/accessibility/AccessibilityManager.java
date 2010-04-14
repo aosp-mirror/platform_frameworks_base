@@ -110,7 +110,7 @@ public final class AccessibilityManager {
         IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
         mService = IAccessibilityManager.Stub.asInterface(iBinder);
         try {
-            mService.addClient(mClient);
+            mIsEnabled = mService.addClient(mClient);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
         }
