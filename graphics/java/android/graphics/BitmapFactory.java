@@ -18,7 +18,6 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.os.MemoryFile;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
@@ -532,18 +531,6 @@ public class BitmapFactory {
      * @return the decoded bitmap, or null
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
-        try {
-            if (MemoryFile.isMemoryFile(fd)) {
-                int mappedlength = MemoryFile.getSize(fd);
-                MemoryFile file = new MemoryFile(fd, mappedlength, "r");
-                InputStream is = file.getInputStream();
-                Bitmap bm = decodeStream(is, outPadding, opts);
-                return finishDecode(bm, outPadding, opts);
-            }
-        } catch (IOException ex) {
-            // invalid filedescriptor, no need to call nativeDecodeFileDescriptor()
-            return null;
-        }
         Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
         return finishDecode(bm, outPadding, opts);
     }
@@ -630,12 +617,6 @@ public class BitmapFactory {
      */
     public static LargeBitmap createLargeBitmap(
             FileDescriptor fd, boolean isShareable) throws IOException {
-        if (MemoryFile.isMemoryFile(fd)) {
-            int mappedlength = MemoryFile.getSize(fd);
-            MemoryFile file = new MemoryFile(fd, mappedlength, "r");
-            InputStream is = file.getInputStream();
-            return createLargeBitmap(is, isShareable);
-        }
         return nativeCreateLargeBitmap(fd, isShareable);
     }
 

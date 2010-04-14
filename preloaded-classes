@@ -138,7 +138,6 @@ android.database.CursorWrapper
 android.database.MatrixCursor
 android.database.sqlite.SQLiteClosable
 android.database.sqlite.SQLiteCompiledSql
-android.database.sqlite.SQLiteContentHelper
 android.database.sqlite.SQLiteCursor
 android.database.sqlite.SQLiteDatabase
 android.database.sqlite.SQLiteDebug

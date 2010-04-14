@@ -31,6 +31,7 @@ import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
@@ -702,6 +703,34 @@ public class DatabaseUtils {
     public static String stringForQuery(SQLiteStatement prog, String[] selectionArgs) {
         prog.bindAllArgsAsStrings(selectionArgs);
         return prog.simpleQueryForString();
+    }
+
+    /**
+     * Utility method to run the query on the db and return the blob value in the
+     * first column of the first row.
+     *
+     * @return A read-only file descriptor for a copy of the blob value.
+     */
+    public static ParcelFileDescriptor blobFileDescriptorForQuery(SQLiteDatabase db,
+            String query, String[] selectionArgs) {
+        SQLiteStatement prog = db.compileStatement(query);
+        try {
+            return blobFileDescriptorForQuery(prog, selectionArgs);
+        } finally {
+            prog.close();
+        }
+    }
+
+    /**
+     * Utility method to run the pre-compiled query and return the blob value in the
+     * first column of the first row.
+     *
+     * @return A read-only file descriptor for a copy of the blob value.
+     */
+    public static ParcelFileDescriptor blobFileDescriptorForQuery(SQLiteStatement prog,
+            String[] selectionArgs) {
+        prog.bindAllArgsAsStrings(selectionArgs);
+        return prog.simpleQueryForBlobFileDescriptor();
     }
 
     /**

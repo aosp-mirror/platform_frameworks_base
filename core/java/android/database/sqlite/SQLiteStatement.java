@@ -17,7 +17,11 @@
 package android.database.sqlite;
 
 import android.database.DatabaseUtils;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
+import android.util.Log;
+
+import java.io.IOException;
 
 import dalvik.system.BlockGuard;
 
@@ -33,6 +37,9 @@ import dalvik.system.BlockGuard;
 @SuppressWarnings("deprecation")
 public class SQLiteStatement extends SQLiteProgram
 {
+
+    private static final String TAG = "SQLiteStatement";
+
     private static final boolean READ = true;
     private static final boolean WRITE = false;
 
@@ -150,6 +157,30 @@ public class SQLiteStatement extends SQLiteProgram
     }
 
     /**
+     * Executes a statement that returns a 1 by 1 table with a blob value.
+     *
+     * @return A read-only file descriptor for a copy of the blob value, or {@code null}
+     *         if the value is null or could not be read for some reason.
+     *
+     * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
+     */
+    public ParcelFileDescriptor simpleQueryForBlobFileDescriptor() {
+        synchronized(this) {
+            long timeStart = acquireAndLock(READ);
+            try {
+                ParcelFileDescriptor retValue = native_1x1_blob_ashmem();
+                mDatabase.logTimeStat(mSql, timeStart);
+                return retValue;
+            } catch (IOException ex) {
+                Log.e(TAG, "simpleQueryForBlobFileDescriptor() failed", ex);
+                return null;
+            } finally {
+                releaseAndUnlock();
+            }
+        }
+    }
+
+    /**
      * Called before every method in this class before executing a SQL statement,
      * this method does the following:
      * <ul>
@@ -244,4 +275,5 @@ public class SQLiteStatement extends SQLiteProgram
     private final native long native_executeInsert();
     private final native long native_1x1_long();
     private final native String native_1x1_string();
+    private final native ParcelFileDescriptor native_1x1_blob_ashmem() throws IOException;
 }

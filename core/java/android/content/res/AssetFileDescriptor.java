@@ -25,8 +25,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.FileChannel;
 
 /**
  * File descriptor of an entry in the AssetManager.  This provides your own
@@ -51,7 +49,7 @@ public class AssetFileDescriptor implements Parcelable {
      * @param startOffset The location within the file that the asset starts.
      * This must be 0 if length is UNKNOWN_LENGTH.
      * @param length The number of bytes of the asset, or
-     * {@link #UNKNOWN_LENGTH if it extends to the end of the file.
+     * {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
      */
     public AssetFileDescriptor(ParcelFileDescriptor fd, long startOffset,
             long length) {
@@ -125,17 +123,6 @@ public class AssetFileDescriptor implements Parcelable {
     public void close() throws IOException {
         mFd.close();
     }
-    
-    /**
-     * Checks whether this file descriptor is for a memory file.
-     */
-    private boolean isMemoryFile() {
-        try {
-            return MemoryFile.isMemoryFile(mFd.getFileDescriptor());
-        } catch (IOException e) {
-            return false;
-        }
-    }
 
     /**
      * Create and return a new auto-close input stream for this asset.  This
@@ -146,12 +133,6 @@ public class AssetFileDescriptor implements Parcelable {
      * should only call this once for a particular asset.
      */
     public FileInputStream createInputStream() throws IOException {
-        if (isMemoryFile()) {
-            if (mLength > Integer.MAX_VALUE) {
-                throw new IOException("File length too large for a memory file: " + mLength);
-            }
-            return new AutoCloseMemoryFileInputStream(mFd, (int)mLength);
-        }
         if (mLength < 0) {
             return new ParcelFileDescriptor.AutoCloseInputStream(mFd);
         }
@@ -280,66 +261,6 @@ public class AssetFileDescriptor implements Parcelable {
             super.reset();
         }
     }
-    
-    /**
-     * An input stream that reads from a MemoryFile and closes it when the stream is closed.
-     * This extends FileInputStream just because {@link #createInputStream} returns
-     * a FileInputStream. All the FileInputStream methods are
-     * overridden to use the MemoryFile instead.
-     */
-    private static class AutoCloseMemoryFileInputStream extends FileInputStream {
-        private ParcelFileDescriptor mParcelFd;
-        private MemoryFile mFile;
-        private InputStream mStream;
-
-        public AutoCloseMemoryFileInputStream(ParcelFileDescriptor fd, int length)
-                throws IOException {
-            super(fd.getFileDescriptor());
-            mParcelFd = fd;
-            mFile = new MemoryFile(fd.getFileDescriptor(), length, "r");
-            mStream = mFile.getInputStream();
-        }
-
-        @Override
-        public int available() throws IOException {
-            return mStream.available();
-        }
-
-        @Override
-        public void close() throws IOException {
-            mParcelFd.close();  // must close ParcelFileDescriptor, not just the file descriptor,
-                                // since it could be a subclass of ParcelFileDescriptor.
-                                // E.g. ContentResolver.ParcelFileDescriptorInner.close() releases
-                                // a content provider
-            mFile.close();      // to unmap the memory file from the address space.
-            mStream.close();    // doesn't actually do anything
-        }
-
-        @Override
-        public FileChannel getChannel() {
-            return null;
-        }
-
-        @Override
-        public int read() throws IOException {
-            return mStream.read();
-        }
-
-        @Override
-        public int read(byte[] buffer, int offset, int count) throws IOException {
-            return mStream.read(buffer, offset, count);
-        }
-
-        @Override
-        public int read(byte[] buffer) throws IOException {
-            return mStream.read(buffer);
-        }
-
-        @Override
-        public long skip(long count) throws IOException {
-            return mStream.skip(count);
-        }
-    }
 
     /**
      * An OutputStream you can create on a ParcelFileDescriptor, which will
@@ -425,16 +346,5 @@ public class AssetFileDescriptor implements Parcelable {
             return new AssetFileDescriptor[size];
         }
     };
-
-    /**
-     * Creates an AssetFileDescriptor from a memory file.
-     *
-     * @hide
-     */
-    public static AssetFileDescriptor fromMemoryFile(MemoryFile memoryFile)
-            throws IOException {
-        ParcelFileDescriptor fd = memoryFile.getParcelFileDescriptor();
-        return new AssetFileDescriptor(fd, 0, memoryFile.length());
-    }
 
 }
