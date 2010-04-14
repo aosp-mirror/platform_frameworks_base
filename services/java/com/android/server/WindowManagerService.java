@@ -4418,7 +4418,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = mWindows.size();
             for (int i=0; i<N; i++) {
                 WindowState w = (WindowState)mWindows.get(i);
-                if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
+                if (w.isVisibleLw() && !w.mObscured
+                        && (w.mOrientationChanging || !w.isDrawnLw())) {
                     return;
                 }
             }
@@ -7925,7 +7926,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken atoken = mAppToken;
             return mSurface != null && !mAttachedHidden
                     && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                    && !mDrawPending && !mCommitDrawPending
+                    && (mOrientationChanging || (!mDrawPending && !mCommitDrawPending))
                     && !mExiting && !mDestroying;
         }
 
@@ -8029,12 +8030,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
         /**
          * Returns true if the window has a surface that it has drawn a
-         * complete UI in to.
+         * complete UI in to.  Note that this returns true if the orientation
+         * is changing even if the window hasn't redrawn because we don't want
+         * to stop things from executing during that time.
          */
         public boolean isDrawnLw() {
             final AppWindowToken atoken = mAppToken;
             return mSurface != null && !mDestroying
-                && !mDrawPending && !mCommitDrawPending;
+                && (mOrientationChanging || (!mDrawPending && !mCommitDrawPending));
         }
 
         public boolean fillsScreenLw(int screenWidth, int screenHeight,
@@ -10292,6 +10295,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (w.mAttachedHidden || !w.isReadyForDisplay()) {
                         if (!w.mLastHidden) {
                             //dump();
+                            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Window hiding: waitingToShow="
+                                    + w.mRootToken.waitingToShow + " polvis="
+                                    + w.mPolicyVisibility + " atthid="
+                                    + w.mAttachedHidden + " tokhid="
+                                    + w.mRootToken.hidden + " vis="
+                                    + w.mViewVisibility);
                             w.mLastHidden = true;
                             if (SHOW_TRANSACTIONS) logSurface(w,
                                     "HIDE (performLayout)", null);
