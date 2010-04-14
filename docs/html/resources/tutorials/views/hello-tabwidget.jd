@@ -37,7 +37,7 @@ public class ArtistsActivity extends Activity {
 </pre>
   <p>Notice that this doesn't use a layout file. Just create a {@link
 android.widget.TextView}, give it some text and set that as the content. Duplicate this for
-each of the three activities.</p>
+each of the three activities, and add the corresponding <code>&lt;activity/&gt;</code> tags to the Android Manifest file.</p>
 
   <li>You're going to need an icon for each of your tabs. And for each one, you should create an 
 image for two different states: one for when the tab is selected, and one for when it is not. The
@@ -86,7 +86,7 @@ switch between the images defined here.</p>
             android:id="@android:id/tabcontent"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android;padding="5dp" />
+            android:padding="5dp" />
     &lt;/LinearLayout>
 &lt;/TabHost>
 </pre>
@@ -136,7 +136,7 @@ public void onCreate(Bundle savedInstanceState) {
     spec = tabHost.newTabSpec("albums").setIndicator("Albums",
                       res.getDrawable(R.drawable.ic_tab_albums))
                   .setContent(intent);
-    mTabHost.addTab(spec);
+    tabHost.addTab(spec);
 
     intent = new Intent().setClass(this, SongsActivity.class);
     spec = tabHost.newTabSpec("songs").setIndicator("Songs",
@@ -144,7 +144,7 @@ public void onCreate(Bundle savedInstanceState) {
                   .setContent(intent);
     tabHost.addTab(spec);
 
-    tabHost.setCurrentTab(getIntent());
+    tabHost.setCurrentTab(2);
 }
 </pre>
     <p>This sets up each tab with their text and icon, and assigns each one an {@link
@@ -157,7 +157,7 @@ android.widget.TabHost.TabSpec} identified by the given string tag. For each
 {@link android.widget.TabHost.TabSpec}, {@link
 android.widget.TabHost.TabSpec#setIndicator(CharSequence,Drawable)} is called to set the text and
 icon for the tab, and {@link android.widget.TabHost.TabSpec#setContent(Intent)} is called to specify
-the {@link android.content.Intent} to opens the appropriate {@link android.app.Activity}. Each
+the {@link android.content.Intent} to open the appropriate {@link android.app.Activity}. Each
 {@link android.widget.TabHost.TabSpec} is then added to the {@link android.widget.TabHost} by
 calling {@link android.widget.TabHost#addTab(TabHost.TabSpec)}.</p>
 
