@@ -796,7 +796,7 @@ class ContextImpl extends Context {
                     scheduler = mMainThread.getHandler();
                 }
                 rd = new ActivityThread.PackageInfo.ReceiverDispatcher(
-                        receiver, context, scheduler, null, false).getIIntentReceiver();
+                        receiver, context, scheduler, null, true).getIIntentReceiver();
             }
         }
         try {
