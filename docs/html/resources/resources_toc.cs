@@ -159,9 +159,17 @@
       <li><a href="<?cs var:toroot ?>resources/tutorials/localization/index.html">
             <span class="en">Hello Localization</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>resources/tutorials/testing/helloandroid_test.html">
+            <span class="en">Hello Testing</span></a>
+            <span class="new">new!</span>
+      </li>
       <li><a href="<?cs var:toroot ?>resources/tutorials/notepad/index.html">
             <span class="en">Notepad Tutorial</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>resources/tutorials/testing/activity_test.html">
+            <span class="en">Activity Testing</span></a>
+            <span class="new">new!</span>
+      </li>
     </ul>
   </li>
 
@@ -230,6 +238,12 @@
           <li><a href="<?cs var:toroot ?>resources/samples/SoftKeyboard/index.html">
                 <span class="en">Soft Keyboard</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/Spinner/index.html">
+                <span class="en">Spinner</span>
+                </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/SpinnerTest/index.html">
+                <span class="en">SpinnerTest</span>
+                </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Wiktionary/index.html">
                 <span class="en">Wiktionary</span>
               </a></li>

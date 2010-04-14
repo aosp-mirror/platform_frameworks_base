@@ -201,7 +201,7 @@ have a user interface, but usually will.</p>
 The bold items are lines that have been added.</p>
 
 <pre>
-package com.android.helloandroid;
+package com.example.helloandroid;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -297,6 +297,7 @@ programmatically-constructed example:</p>
 
 <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+  android:id=&quot;@id+/textview&quot;
   android:layout_width=&quot;fill_parent&quot;
   android:layout_height=&quot;fill_parent&quot;
   android:text=&quot;@string/hello&quot;/&gt;</pre>
@@ -312,7 +313,7 @@ by the web development model, wherein you can separate the presentation of your
 application (its UI) from the application logic used to fetch and fill in data.</p>
 
 <p>In the above XML example, there's just one View element: the <code>TextView</code>, 
-which has four XML attributes.  Here's a summary of what they mean:</p>
+which has five XML attributes.  Here's a summary of what they mean:</p>
 
 <table>
     <tbody>
@@ -334,11 +335,21 @@ which has four XML attributes.  Here's a summary of what they mean:</p>
         </tr>
         <tr>
             <td>
+                <code>android:id</code>
+            </td>
+            <td>
+                This attribute assigns a unique identifier to the <code>TextView</code> element.
+                You can use the assigned ID to reference this View from your source code or from other 
+                XML resource declarations.
+            </td>
+        </tr>
+        <tr>
+            <td>
                 <code>android:layout_width</code>
             </td>
             <td>
                 This attribute defines how much of the available width on the screen this View should consume. 
-In this case, it's the only View so you want it to take up the entire screen, which is what a value of "fill_parent" means.<br>
+                In this case, it's the only View so you want it to take up the entire screen, which is what a value of "fill_parent" means.<br>
             </td>
         </tr>
         <tr>
@@ -397,6 +408,7 @@ the following XML:
 
 <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+  android:id=&quot;@id+/textview&quot;
   android:layout_width=&quot;fill_parent&quot;
   android:layout_height=&quot;fill_parent&quot;
   android:text=&quot;@string/hello&quot;/&gt;</pre>
@@ -478,6 +490,9 @@ public final class R {
     public static final class drawable {
         public static final int icon=0x7f020000;
     }
+    public static final class id {
+        public static final int textview=0x7f050000;
+    }
     public static final class layout {
         public static final int main=0x7f030000;
     }
@@ -512,7 +527,7 @@ debugger. To demonstrate this, introduce a bug into
 your code. Change your HelloAndroid source code to look like this:</p>
 
 <pre>
-package com.android.helloandroid;
+package com.example.helloandroid;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -568,7 +583,7 @@ just as you would for any other application.</p>
   
   <pre>
 android create project \
-    --package com.android.helloandroid \
+    --package com.example.helloandroid \
     --activity HelloAndroid \ 
     --target 2 \
     --path <em>&lt;path-to-your-project></em>/HelloAndroid 
