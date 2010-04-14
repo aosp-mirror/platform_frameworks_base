@@ -36,6 +36,7 @@ static jmethodID method_reportStatus;
 static jmethodID method_reportSvStatus;
 static jmethodID method_reportAGpsStatus;
 static jmethodID method_reportNmea;
+static jmethodID method_setEngineCapabilities;
 static jmethodID method_xtraDownloadRequest;
 static jmethodID method_reportNiNotification;
 
@@ -72,6 +73,8 @@ static GpsSvStatus  sGpsSvStatusCopy;
 static AGpsStatus   sAGpsStatusCopy;
 static NmeaSentence sNmeaBufferCopy[NMEA_SENTENCE_COUNT];
 static GpsNiNotification  sGpsNiNotificationCopy;
+static uint32_t     sEngineCapabilities;
+
 
 enum CallbackType {
     kLocation = 1,
@@ -82,6 +85,7 @@ enum CallbackType {
     kDisableRequest = 32,
     kNmeaAvailable = 64,
     kNiNotification = 128,
+    kSetCapabilities = 256,
 }; 
 static int sPendingCallbacks;
 
@@ -144,6 +148,19 @@ static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
     pthread_mutex_unlock(&sEventMutex);
 }
 
+static void set_capabilities_callback(uint32_t capabilities)
+{
+   LOGD("set_capabilities_callback: %08X", capabilities);
+
+   pthread_mutex_lock(&sEventMutex);
+
+   sPendingCallbacks |= kSetCapabilities;
+   sEngineCapabilities = capabilities;
+
+   pthread_cond_signal(&sEventCond);
+   pthread_mutex_unlock(&sEventMutex);
+}
+
 static void acquire_wakelock_callback()
 {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_NAME);
@@ -171,6 +188,7 @@ GpsCallbacks sGpsCallbacks = {
     status_callback,
     sv_status_callback,
     nmea_callback,
+    set_capabilities_callback,
     acquire_wakelock_callback,
     release_wakelock_callback,
 };
@@ -216,6 +234,7 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(IJ)V");
+    method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification", "(IIIIILjava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
 }
@@ -280,14 +299,15 @@ static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject ob
     sGpsInterface->cleanup();
 }
 
-static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject obj, jint positionMode,
-        jboolean singleFix, jint fixFrequency)
+static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* env, jobject obj,
+        jint mode, jint recurrence, jint min_interval, jint preferred_accuracy, jint preferred_time)
 {
-    int result = sGpsInterface->set_position_mode(positionMode, (singleFix ? 0 : fixFrequency));
-    if (result) {
-        return false;
-    }
+    return (sGpsInterface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
+            preferred_time) == 0);
+}
 
+static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject obj)
+{
     return (sGpsInterface->start() == 0);
 }
 
@@ -374,6 +394,9 @@ static void android_location_GpsLocationProvider_wait_for_event(JNIEnv* env, job
              sGpsNiNotificationCopy.text_encoding,
              extras
        );
+    }
+    if (pendingCallbacks & kSetCapabilities) {
+        env->CallVoidMethod(obj, method_setEngineCapabilities, sEngineCapabilities);
     }
 }
 
@@ -539,7 +562,8 @@ static JNINativeMethod sMethods[] = {
     {"native_init", "()Z", (void*)android_location_GpsLocationProvider_init},
     {"native_disable", "()V", (void*)android_location_GpsLocationProvider_disable},
     {"native_cleanup", "()V", (void*)android_location_GpsLocationProvider_cleanup},
-    {"native_start", "(IZI)Z", (void*)android_location_GpsLocationProvider_start},
+    {"native_set_position_mode", "(IIIII)Z", (void*)android_location_GpsLocationProvider_set_position_mode},
+    {"native_start", "()Z", (void*)android_location_GpsLocationProvider_start},
     {"native_stop", "()Z", (void*)android_location_GpsLocationProvider_stop},
     {"native_delete_aiding_data", "(I)V", (void*)android_location_GpsLocationProvider_delete_aiding_data},
     {"native_wait_for_event", "()V", (void*)android_location_GpsLocationProvider_wait_for_event},
