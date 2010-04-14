@@ -126,7 +126,9 @@ class BroadcastRecord extends Binder {
             pw.println(prefix + "curApp=" + curApp);
             pw.println(prefix + "curComponent="
                     + (curComponent != null ? curComponent.toShortString() : "--"));
-            pw.println(prefix + "curSourceDir=" + curReceiver.applicationInfo.sourceDir);
+            if (curReceiver != null && curReceiver.applicationInfo != null) {
+                pw.println(prefix + "curSourceDir=" + curReceiver.applicationInfo.sourceDir);
+            }
         }
         String stateStr = " (?)";
         switch (state) {
