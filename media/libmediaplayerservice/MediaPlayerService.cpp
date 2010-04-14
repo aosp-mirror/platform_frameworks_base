@@ -743,6 +743,11 @@ player_type getPlayerType(const char* url)
         }
     }
 
+    // Use PV_PLAYER for rtsp for now
+    if (!strncasecmp(url, "rtsp://", 7)) {
+        return PV_PLAYER;
+    }
+
     return getDefaultPlayerType();
 }
 
