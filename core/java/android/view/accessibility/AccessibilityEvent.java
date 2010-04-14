@@ -622,6 +622,7 @@ public final class AccessibilityEvent implements Parcelable {
         mPackageName = null;
         mContentDescription = null;
         mBeforeText = null;
+        mParcelableData = null;
         mText.clear();
     }
 
