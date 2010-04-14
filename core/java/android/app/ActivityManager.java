@@ -145,6 +145,13 @@ public class ActivityManager {
     public static final int RECENT_WITH_EXCLUDED = 0x0001;
     
     /**
+     * @hide
+     * TODO: Make this public.  Provides a list that does not contain any
+     * recent tasks that currently are not available to the user.
+     */
+    public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
+    
+    /**
      * Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      * 
