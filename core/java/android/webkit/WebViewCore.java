@@ -2453,6 +2453,15 @@ final class WebViewCore {
                 new Rect(x, y, x + width, y + height)).sendToTarget();
     }
 
+    // called by JNI
+    private void setScrollbarModes(int hMode, int vMode) {
+        if (mWebView == null) {
+            return;
+        }
+        mWebView.mPrivateHandler.obtainMessage(WebView.SET_SCROLLBAR_MODES,
+                hMode, vMode).sendToTarget();
+    }
+
     private native void nativePause();
     private native void nativeResume();
     private native void nativeFreeMemory();
