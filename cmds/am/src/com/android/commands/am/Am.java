@@ -88,6 +88,8 @@ public class Am {
 
         if (op.equals("start")) {
             runStart();
+        } else if (op.equals("start-service")) {
+            runStartService();
         } else if (op.equals("instrument")) {
             runInstrument();
         } else if (op.equals("broadcast")) {
@@ -235,6 +237,19 @@ public class Am {
                 System.err.println(
                         "Error: Activity not started, unknown error code " + res);
                 break;
+        }
+    }
+
+    private void runStartService() throws Exception {
+        Intent intent = makeIntent();
+
+        if (intent != null) {
+            System.out.println("Starting: " + intent);
+            try {
+                mAm.startService(null, intent, intent.getType());
+            } catch (Exception e) {
+                System.err.println("Error: " + e);
+            }
         }
     }
 
