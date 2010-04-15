@@ -742,6 +742,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mDumpWebKitData = false;
         mGetDrawtime = false;
         mSaveImagePath = null;
+        setDefaultWebSettings(mWebView);
     }
 
     private long[] getDrawWebViewTime(WebView view, int count) {
@@ -786,6 +787,19 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             return;
         }
 
+        setDefaultWebSettings(webview);
+
+        webview.setWebChromeClient(mChromeClient);
+        webview.setWebViewClient(mViewClient);
+        // Setting a touch interval of -1 effectively disables the optimisation in WebView
+        // that stops repeated touch events flooding WebCore. The Event Sender only sends a
+        // single event rather than a stream of events (like what would generally happen in
+        // a real use of touch events in a WebView)  and so if the WebView drops the event,
+        // the test will fail as the test expects one callback for every touch it synthesizes.
+        webview.setTouchInterval(-1);
+    }
+
+    public void setDefaultWebSettings(WebView webview) {
         WebSettings settings = webview.getSettings();
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
@@ -798,15 +812,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setDatabasePath(getDir("databases",0).getAbsolutePath());
         settings.setDomStorageEnabled(true);
         settings.setWorkersEnabled(false);
-
-        webview.setWebChromeClient(mChromeClient);
-        webview.setWebViewClient(mViewClient);
-        // Setting a touch interval of -1 effectively disables the optimisation in WebView
-        // that stops repeated touch events flooding WebCore. The Event Sender only sends a
-        // single event rather than a stream of events (like what would generally happen in
-        // a real use of touch events in a WebView)  and so if the WebView drops the event,
-        // the test will fail as the test expects one callback for every touch it synthesizes.
-        webview.setTouchInterval(-1);
     }
 
     private WebView mWebView;
