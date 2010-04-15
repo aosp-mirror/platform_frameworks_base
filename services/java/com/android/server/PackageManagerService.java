@@ -6113,7 +6113,6 @@ class PackageManagerService extends IPackageManager.Stub {
             this.args = args;
             this.deleteOld = deleteOld;
         }
-        @Override
         public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
                 boolean ordered, boolean sticky) throws RemoteException {
             // Force a gc to clear up things
