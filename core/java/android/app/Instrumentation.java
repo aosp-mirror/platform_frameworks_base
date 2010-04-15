@@ -1072,7 +1072,7 @@ public class Instrumentation {
           }
       }
       
-      activity.onDestroy();
+      activity.performDestroy();
       
       if (mActivityMonitors != null) {
           synchronized (mSync) {

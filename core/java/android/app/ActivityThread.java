@@ -3643,7 +3643,7 @@ public final class ActivityThread {
             }
             try {
                 r.activity.mCalled = false;
-                r.activity.onDestroy();
+                mInstrumentation.callActivityOnDestroy(r.activity);
                 if (!r.activity.mCalled) {
                     throw new SuperNotCalledException(
                         "Activity " + safeToComponentShortString(r.intent) +

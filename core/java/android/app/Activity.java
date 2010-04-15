@@ -650,6 +650,65 @@ public class Activity extends ContextThemeWrapper
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
+    final FragmentManager mFragments = new FragmentManager();
+    
+    private final class FragmentTransactionImpl implements FragmentTransaction {
+        ArrayList<Fragment> mAdded;
+        ArrayList<Fragment> mRemoved;
+        
+        public FragmentTransaction add(Fragment fragment, int containerViewId) {
+            return add(fragment, null, containerViewId);
+        }
+
+        public FragmentTransaction add(Fragment fragment, String name, int containerViewId) {
+            if (fragment.mActivity != null) {
+                throw new IllegalStateException("Fragment already added: " + fragment);
+            }
+            if (name != null) {
+                fragment.mName = name;
+            }
+            if (mRemoved != null) {
+                mRemoved.remove(fragment);
+            }
+            if (mAdded == null) {
+                mAdded = new ArrayList<Fragment>();
+            }
+            fragment.mContainerId = containerViewId;
+            mAdded.add(fragment);
+            return this;
+        }
+
+        public FragmentTransaction remove(Fragment fragment) {
+            if (fragment.mActivity == null) {
+                throw new IllegalStateException("Fragment not added: " + fragment);
+            }
+            if (mAdded != null) {
+                mAdded.remove(fragment);
+            }
+            if (mRemoved == null) {
+                mRemoved = new ArrayList<Fragment>();
+            }
+            mRemoved.add(fragment);
+            return this;
+        }
+
+        public void commit() {
+            if (mRemoved != null) {
+                for (int i=mRemoved.size()-1; i>=0; i--) {
+                    mFragments.removeFragment(mRemoved.get(i));
+                }
+            }
+            if (mAdded != null) {
+                for (int i=mAdded.size()-1; i>=0; i--) {
+                    mFragments.addFragment(mAdded.get(i));
+                }
+            }
+            if (mFragments != null) {
+                mFragments.moveToState(mFragments.mCurState);
+            }
+        }
+    }
+    
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -1461,6 +1520,14 @@ public class Activity extends ContextThemeWrapper
     
     public void onLowMemory() {
         mCalled = true;
+    }
+    
+    /**
+     * Start a series of edit operations on the Fragments associated with
+     * this activity.
+     */
+    public FragmentTransaction openFragmentTransaction() {
+        return new FragmentTransactionImpl();
     }
     
     /**
@@ -3743,6 +3810,8 @@ public class Activity extends ContextThemeWrapper
             Configuration config) {
         attachBaseContext(context);
 
+        mFragments.attachActivity(this);
+        
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
@@ -3776,6 +3845,11 @@ public class Activity extends ContextThemeWrapper
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
 
+    final void performCreate(Bundle icicle) {
+        onCreate(icicle);
+        mFragments.dispatchCreate(icicle);
+    }
+    
     final void performStart() {
         mCalled = false;
         mInstrumentation.callActivityOnStart(this);
@@ -3784,6 +3858,7 @@ public class Activity extends ContextThemeWrapper
                 "Activity " + mComponent.toShortString() +
                 " did not call through to super.onStart()");
         }
+        mFragments.dispatchStart();
     }
     
     final void performRestart() {
@@ -3830,6 +3905,9 @@ public class Activity extends ContextThemeWrapper
         // Now really resume, and install the current status bar and menu.
         mResumed = true;
         mCalled = false;
+        
+        mFragments.dispatchResume();
+        
         onPostResume();
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -3839,6 +3917,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performPause() {
+        mFragments.dispatchPause();
         onPause();
     }
     
@@ -3853,6 +3932,8 @@ public class Activity extends ContextThemeWrapper
                 mWindow.closeAllPanels();
             }
 
+            mFragments.dispatchStop();
+            
             mCalled = false;
             mInstrumentation.callActivityOnStop(this);
             if (!mCalled) {
@@ -3877,6 +3958,11 @@ public class Activity extends ContextThemeWrapper
         mResumed = false;
     }
 
+    final void performDestroy() {
+        mFragments.dispatchDestroy();
+        onDestroy();
+    }
+    
     final boolean isResumed() {
         return mResumed;
     }
