@@ -103,13 +103,22 @@ public class SntpClient
             long receiveTime = readTimeStamp(buffer, RECEIVE_TIME_OFFSET);
             long transmitTime = readTimeStamp(buffer, TRANSMIT_TIME_OFFSET);
             long roundTripTime = responseTicks - requestTicks - (transmitTime - receiveTime);
-            long clockOffset = (receiveTime - originateTime) + (transmitTime - responseTime);
+            // receiveTime = originateTime + transit + skew
+            // responseTime = transmitTime + transit - skew
+            // clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2
+            //             = ((originateTime + transit + skew - originateTime) +
+            //                (transmitTime - (transmitTime + transit - skew)))/2
+            //             = ((transit + skew) + (transmitTime - transmitTime - transit + skew))/2
+            //             = (transit + skew - transit + skew)/2
+            //             = (2 * skew)/2 = skew
+            long clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2;
             if (Config.LOGD) Log.d(TAG, "round trip: " + roundTripTime + " ms");
             if (Config.LOGD) Log.d(TAG, "clock offset: " + clockOffset + " ms");
 
-            // save our results
-            mNtpTime = requestTime + clockOffset;
-            mNtpTimeReference = requestTicks;
+            // save our results - use the times on this side of the network latency
+            // (response rather than request time)
+            mNtpTime = responseTime + clockOffset;
+            mNtpTimeReference = responseTicks;
             mRoundTripTime = roundTripTime;
         } catch (Exception e) {
             if (Config.LOGD) Log.d(TAG, "request time failed: " + e);
