@@ -43,6 +43,7 @@ public class SQLiteQueryBuilder
     private StringBuilder mWhereClause = null;  // lazily created
     private boolean mDistinct;
     private SQLiteDatabase.CursorFactory mFactory;
+    private boolean mStrictProjectionMap;
 
     public SQLiteQueryBuilder() {
         mDistinct = false;
@@ -141,6 +142,13 @@ public class SQLiteQueryBuilder
      */
     public void setCursorFactory(SQLiteDatabase.CursorFactory factory) {
         mFactory = factory;
+    }
+
+    /**
+     * @hide
+     */
+    public void setStrictProjectionMap(boolean flag) {
+        mStrictProjectionMap = flag;
     }
 
     /**
@@ -505,8 +513,8 @@ public class SQLiteQueryBuilder
                         continue;
                     }
 
-                    if (userColumn.contains(" AS ")
-                            || userColumn.contains(" as ")) {
+                    if (!mStrictProjectionMap &&
+                            ( userColumn.contains(" AS ") || userColumn.contains(" as "))) {
                         /* A column alias already exist */
                         projection[i] = userColumn;
                         continue;
