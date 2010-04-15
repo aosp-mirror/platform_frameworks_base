@@ -501,10 +501,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * {@link #yieldIfContendedSafely}.
      */
     public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
+        lockForced();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        lockForced();
         boolean ok = false;
         try {
             // If this thread already had the lock then get out
@@ -948,11 +948,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the database version
      */
     public int getVersion() {
+        SQLiteStatement prog = null;
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        SQLiteStatement prog = null;
-        lock();
         try {
             prog = new SQLiteStatement(this, "PRAGMA user_version;");
             long version = prog.simpleQueryForLong();
@@ -969,9 +969,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param version the new database version
      */
     public void setVersion(int version) {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         execSQL("PRAGMA user_version = " + version);
     }
 
@@ -981,11 +978,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the new maximum database size
      */
     public long getMaximumSize() {
+        SQLiteStatement prog = null;
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        SQLiteStatement prog = null;
-        lock();
         try {
             prog = new SQLiteStatement(this,
                     "PRAGMA max_page_count;");
@@ -1005,11 +1002,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the new maximum database size
      */
     public long setMaximumSize(long numBytes) {
+        SQLiteStatement prog = null;
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        SQLiteStatement prog = null;
-        lock();
         try {
             long pageSize = getPageSize();
             long numPages = numBytes / pageSize;
@@ -1033,11 +1030,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the database page size, in bytes
      */
     public long getPageSize() {
+        SQLiteStatement prog = null;
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        SQLiteStatement prog = null;
-        lock();
         try {
             prog = new SQLiteStatement(this,
                     "PRAGMA page_size;");
@@ -1057,9 +1054,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param numBytes the database page size, in bytes
      */
     public void setPageSize(long numBytes) {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         execSQL("PRAGMA page_size = " + numBytes);
     }
 
@@ -1176,10 +1170,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return a pre-compiled statement object.
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        lock();
         try {
             return new SQLiteStatement(this, sql);
         } finally {
@@ -1619,10 +1613,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      *         whereClause.
      */
     public int delete(String table, String whereClause, String[] whereArgs) {
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        lock();
         SQLiteStatement statement = null;
         try {
             statement = compileStatement("DELETE FROM " + table
@@ -1674,10 +1668,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
-
         if (values == null || values.size() == 0) {
             throw new IllegalArgumentException("Empty values");
         }
@@ -1706,6 +1696,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
 
         lock();
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql.toString());
@@ -1757,11 +1750,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
+        long timeStart = SystemClock.uptimeMillis();
+        lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
-        long timeStart = SystemClock.uptimeMillis();
-        lock();
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
         try {
             native_execSQL(sql);
@@ -1792,14 +1785,14 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
         long timeStart = SystemClock.uptimeMillis();
         lock();
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql);

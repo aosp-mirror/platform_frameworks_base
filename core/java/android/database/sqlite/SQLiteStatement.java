@@ -44,6 +44,9 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
+        if (!mDatabase.isOpen()) {
+            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+        }
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -67,6 +70,9 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
+        if (!mDatabase.isOpen()) {
+            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+        }
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -90,6 +96,9 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
+        if (!mDatabase.isOpen()) {
+            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+        }
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -113,6 +122,9 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
+        if (!mDatabase.isOpen()) {
+            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+        }
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
