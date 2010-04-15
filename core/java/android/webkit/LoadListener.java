@@ -476,6 +476,7 @@ class LoadListener extends Handler implements EventHandler {
             }
             WebViewWorker.CacheEncoding ce = new WebViewWorker.CacheEncoding();
             ce.mEncoding = mEncoding;
+            ce.mListener = this;
             WebViewWorker.getHandler().obtainMessage(
                     WebViewWorker.MSG_UPDATE_CACHE_ENCODING, ce).sendToTarget();
         }
