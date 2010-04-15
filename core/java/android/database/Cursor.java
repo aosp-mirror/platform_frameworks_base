@@ -493,6 +493,10 @@ public interface Cursor {
      * contents. This may be done at any time, including after a call to {@link
      * #deactivate}.
      *
+     * Since this method could execute a query on the database and potentially take
+     * a while, it could cause ANR if it is called on Main (UI) thread.
+     * A warning is printed if this method is being executed on Main thread.
+     *
      * @return true if the requery succeeded, false if not, in which case the
      *         cursor becomes invalid.
      */

@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package android.database.sqlite;
+package android.database;
 
 /**
- * An exception that indicates that garbage-collector is finalizing a database object
- * that is not explicitly closed
+ * An exception that indicates invoking {@link Cursor#requery()} on Main thread could cause ANR.
+ * This exception should encourage apps to invoke {@link Cursor#requery()} in a background thread. 
  * @hide
  */
-public class DatabaseObjectNotClosedException extends RuntimeException {
-    private static final String s = "Application did not close the cursor or database object " +
-            "that was opened here";
-
-    public DatabaseObjectNotClosedException() {
-        super(s);
+public class RequeryOnUiThreadException extends RuntimeException {
+    public RequeryOnUiThreadException(String packageName) {
+        super("In " + packageName + " Requery is executing on main (UI) thread. could cause ANR. " +
+                "do it in background thread.");
     }
 }

@@ -16,15 +16,14 @@
 
 package android.database;
 
+import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.util.Config;
 import android.util.Log;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.Message;
+import android.os.Process;
 
 import java.lang.ref.WeakReference;
 import java.lang.UnsupportedOperationException;
@@ -88,8 +87,16 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         }
         mDataSetObservable.notifyInvalidated();
     }
-    
+
     public boolean requery() {
+        // print a warning if this method is being called from Main (UI) thread
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            // yes this is UI thread.
+            String packageName = ActivityThread.currentPackageName();
+            Log.w(TAG, "should not attempt requery on main (UI) thread: app = " +
+                    packageName == null ? "'unknown'" : packageName,
+                    new RequeryOnUiThreadException(packageName));
+        }
         if (mSelfObserver != null && mSelfObserverRegistered == false) {
             mContentResolver.registerContentObserver(mNotifyUri, true, mSelfObserver);
             mSelfObserverRegistered = true;

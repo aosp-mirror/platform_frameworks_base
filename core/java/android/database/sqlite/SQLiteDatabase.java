@@ -16,8 +16,6 @@
 
 package android.database.sqlite;
 
-import com.google.android.collect.Maps;
-
 import android.app.ActivityThread;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -37,11 +35,11 @@ import android.util.Pair;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -253,7 +251,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private WeakHashMap<SQLiteClosable, Object> mPrograms;
 
     /**
-     * for each instance of this class, a cache is maintained to store
+     * for each instance of this class, a LRU cache is maintained to store
      * the compiled query statement ids returned by sqlite database.
      *     key = sql statement with "?" for bind args
      *     value = {@link SQLiteCompiledSql}
@@ -265,30 +263,29 @@ public class SQLiteDatabase extends SQLiteClosable {
      * invoked.
      *
      * this cache has an upper limit of mMaxSqlCacheSize (settable by calling the method
-     * (@link setMaxCacheSize(int)}). its default is 0 - i.e., no caching by default because
-     * most of the apps don't use "?" syntax in their sql, caching is not useful for them.
+     * (@link setMaxCacheSize(int)}).
      */
-    /* package */ Map<String, SQLiteCompiledSql> mCompiledQueries = Maps.newHashMap();
+    // default statement-cache size per database connection ( = instance of this class)
+    private int mMaxSqlCacheSize = 25;
+    /* package */ Map<String, SQLiteCompiledSql> mCompiledQueries =
+        new LinkedHashMap<String, SQLiteCompiledSql>(mMaxSqlCacheSize + 1, 0.75f, true) {
+            @Override
+            public boolean removeEldestEntry(Map.Entry<String, SQLiteCompiledSql> eldest) {
+                return this.size() > mMaxSqlCacheSize;
+            }
+        };
     /**
-     * absolute max value that can set by {@link #setMaxSqlCacheSize(int)}
+     * absolute max value that can be set by {@link #setMaxSqlCacheSize(int)}
      * size of each prepared-statement is between 1K - 6K, depending on the complexity of the
      * sql statement & schema.
      */
     public static final int MAX_SQL_CACHE_SIZE = 100;
-
-    // default statement-cache size per database connection ( = instance of this class)
-    private int mMaxSqlCacheSize = 25;
-
     private int mCacheFullWarnings;
     private static final int MAX_WARNINGS_ON_CACHESIZE_CONDITION = 1;
 
     /** maintain stats about number of cache hits and misses */
     private int mNumCacheHits;
     private int mNumCacheMisses;
-
-    /** the following 2 members maintain the time when a database is opened and closed */
-    private String mTimeOpened = null;
-    private String mTimeClosed = null;
 
     /** Used to find out where this object was created in case it never got closed. */
     private Throwable mStackTrace = null;
@@ -326,9 +323,6 @@ public class SQLiteDatabase extends SQLiteClosable {
     @Override
     protected void onAllReferencesReleased() {
         if (isOpen()) {
-            if (SQLiteDebug.DEBUG_SQL_CACHE) {
-                mTimeClosed = getTime();
-            }
             dbclose();
         }
     }
@@ -1842,14 +1836,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         mFactory = factory;
-        if (SQLiteDebug.DEBUG_SQL_CACHE) {
-            mTimeOpened = getTime();
-        }
         mPrograms = new WeakHashMap<SQLiteClosable,Object>();
-    }
-
-    private String getTime() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS ").format(System.currentTimeMillis());
     }
 
     /**
@@ -1997,29 +1984,26 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (compiledSql != null) {
                 return;
             }
-            // add this <sql, compiledStatement> to the cache
+
             if (mCompiledQueries.size() == mMaxSqlCacheSize) {
                 /*
                  * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
-                 * log a warning MAX_WARNINGS_ON_CACHESIZE_CONDITION times
-                 * chances are it is NOT using ? for bindargs - so caching is useless.
-                 * TODO: either let the callers set max cchesize for their app, or intelligently
-                 * figure out what should be cached for a given app.
+                 * log a warning.
+                 * chances are it is NOT using ? for bindargs - or cachesize is too small.
                  */
                 if (++mCacheFullWarnings == MAX_WARNINGS_ON_CACHESIZE_CONDITION) {
                     Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
-                            getPath() + "; i.e., NO space for this sql statement in cache: " +
-                            sql + ". Please change your sql statements to use '?' for " +
-                            "bindargs, instead of using actual values");
+                            getPath() + ". Consider increasing cachesize.");
                 }
-                // don't add this entry to cache
-            } else {
-                // cache is NOT full. add this to cache.
-                mCompiledQueries.put(sql, compiledStatement);
-                if (SQLiteDebug.DEBUG_SQL_CACHE) {
-                    Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" +
-                            mCompiledQueries.size() + "|" + sql);
-                }
+            } 
+            /* add the given SQLiteCompiledSql compiledStatement to cache.
+             * no need to worry about the cache size - because {@link #mCompiledQueries}
+             * self-limits its size to {@link #mMaxSqlCacheSize}.
+             */
+            mCompiledQueries.put(sql, compiledStatement);
+            if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" +
+                        mCompiledQueries.size() + "|" + sql);
             }
         }
         return;
@@ -2055,7 +2039,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             Log.v(TAG, "|cache_stats|" +
                     getPath() + "|" + mCompiledQueries.size() +
                     "|" + mNumCacheHits + "|" + mNumCacheMisses +
-                    "|" + cacheHit + "|" + mTimeOpened + "|" + mTimeClosed + "|" + sql);
+                    "|" + cacheHit + "|" + sql);
         }
         return compiledStatement;
     }

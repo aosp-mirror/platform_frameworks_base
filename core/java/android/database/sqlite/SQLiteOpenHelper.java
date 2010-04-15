@@ -99,6 +99,10 @@ public abstract class SQLiteOpenHelper {
             }
 
             int version = db.getVersion();
+            if (version > mNewVersion) {
+                throw new IllegalStateException("Database " + mName +
+                        " cannot be downgraded. instead, please uninstall new version first.");
+            }
             if (version != mNewVersion) {
                 db.beginTransaction();
                 try {
