@@ -181,6 +181,8 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_NEW_INSTALL = 1<<4;
     static final int SCAN_NO_PATHS = 1<<5;
 
+    static final int REMOVE_CHATTY = 1<<16;
+    
     static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
             "com.android.defcontainer",
             "com.android.defcontainer.DefaultContainerService");
@@ -6092,7 +6094,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         
         synchronized (mInstallLock) {
-            res = deletePackageLI(packageName, deleteCodeAndResources, flags, info);
+            res = deletePackageLI(packageName, deleteCodeAndResources,
+                    flags | REMOVE_CHATTY, info);
         }
 
         if(res && sendBroadCast) {
@@ -6158,7 +6161,7 @@ class PackageManagerService extends IPackageManager.Stub {
         if (outInfo != null) {
             outInfo.removedPackage = packageName;
         }
-        removePackageLI(p, true);
+        removePackageLI(p, (flags&REMOVE_CHATTY) != 0);
         // Retrieve object to delete permissions for shared user later on
         PackageSetting deletedPs;
         synchronized (mPackages) {
@@ -9625,8 +9628,7 @@ class PackageManagerService extends IPackageManager.Stub {
                    continue;
                }
                // Parse package
-               int parseFlags = PackageParser.PARSE_CHATTY |
-                       PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
+               int parseFlags = PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
                doGc = true;
                synchronized (mInstallLock) {
                    final PackageParser.Package pkg =  scanPackageLI(new File(codePath),

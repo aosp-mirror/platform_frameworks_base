@@ -150,13 +150,13 @@ public final class ActivityThread {
 
     public static IPackageManager getPackageManager() {
         if (sPackageManager != null) {
-            //Log.v("PackageManager", "returning cur default = " + sPackageManager);
+            //Slog.v("PackageManager", "returning cur default = " + sPackageManager);
             return sPackageManager;
         }
         IBinder b = ServiceManager.getService("package");
-        //Log.v("PackageManager", "default service binder = " + b);
+        //Slog.v("PackageManager", "default service binder = " + b);
         sPackageManager = IPackageManager.Stub.asInterface(b);
-        //Log.v("PackageManager", "default service = " + sPackageManager);
+        //Slog.v("PackageManager", "default service = " + sPackageManager);
         return sPackageManager;
     }
 
@@ -170,7 +170,7 @@ public final class ActivityThread {
         }
         DisplayMetrics metrics = mDisplayMetrics = new DisplayMetrics();
         mDisplay.getMetrics(metrics);
-        //Log.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
+        //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
         //        + metrics.heightPixels + " den=" + metrics.density
         //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
         return metrics;
@@ -189,14 +189,14 @@ public final class ActivityThread {
         synchronized (mPackages) {
             // Resources is app scale dependent.
             if (false) {
-                Log.w(TAG, "getTopLevelResources: " + resDir + " / "
+                Slog.w(TAG, "getTopLevelResources: " + resDir + " / "
                         + compInfo.applicationScale);
             }
             WeakReference<Resources> wr = mActiveResources.get(key);
             r = wr != null ? wr.get() : null;
             if (r != null && r.getAssets().isUpToDate()) {
                 if (false) {
-                    Log.w(TAG, "Returning cached resources " + r + " " + resDir
+                    Slog.w(TAG, "Returning cached resources " + r + " " + resDir
                             + ": appScale=" + r.getCompatibilityInfo().applicationScale);
                 }
                 return r;
@@ -204,7 +204,7 @@ public final class ActivityThread {
         }
 
         //if (r != null) {
-        //    Log.w(TAG, "Throwing away out-of-date resources!!!! "
+        //    Slog.w(TAG, "Throwing away out-of-date resources!!!! "
         //            + r + " " + resDir);
         //}
 
@@ -213,11 +213,11 @@ public final class ActivityThread {
             return null;
         }
 
-        //Log.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
+        //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
         DisplayMetrics metrics = getDisplayMetricsLocked(false);
         r = new Resources(assets, metrics, getConfiguration(), compInfo);
         if (false) {
-            Log.i(TAG, "Created app resources " + resDir + " " + r + ": "
+            Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                     + r.getConfiguration() + " appScale="
                     + r.getCompatibilityInfo().applicationScale);
         }
@@ -306,7 +306,7 @@ public final class ActivityThread {
                     mSystemContext.getResources().updateConfiguration(
                              mainThread.getConfiguration(),
                              mainThread.getDisplayMetricsLocked(false));
-                    //Log.i(TAG, "Created system resources "
+                    //Slog.i(TAG, "Created system resources "
                     //        + mSystemContext.getResources() + ": "
                     //        + mSystemContext.getResources().getConfiguration());
                 }
@@ -465,7 +465,7 @@ public final class ActivityThread {
                      * create the class loader.
                      */
 
-                    if (localLOGV) Log.v(TAG, "Class path: " + zip);
+                    if (localLOGV) Slog.v(TAG, "Class path: " + zip);
 
                     mClassLoader =
                         ApplicationLoaders.getDefault().getClassLoader(
@@ -692,7 +692,7 @@ public final class ActivityThread {
                 }
             }
             mUnregisteredReceivers.remove(context);
-            //Log.i(TAG, "Receiver registrations: " + mReceivers);
+            //Slog.i(TAG, "Receiver registrations: " + mReceivers);
             HashMap<ServiceConnection, ServiceDispatcher> smap =
                 mServices.remove(context);
             if (smap != null) {
@@ -714,7 +714,7 @@ public final class ActivityThread {
                 }
             }
             mUnboundServices.remove(context);
-            //Log.i(TAG, "Service registrations: " + mServices);
+            //Slog.i(TAG, "Service registrations: " + mServices);
         }
 
         public IIntentReceiver getReceiverDispatcher(BroadcastReceiver r,
@@ -810,8 +810,8 @@ public final class ActivityThread {
                     ReceiverDispatcher rd = mDispatcher.get();
                     if (DEBUG_BROADCAST) {
                         int seq = intent.getIntExtra("seq", -1);
-                        Log.i(TAG, "Receiving broadcast " + intent.getAction() + " seq=" + seq
-                                + " to " + rd);
+                        Slog.i(TAG, "Receiving broadcast " + intent.getAction() + " seq=" + seq
+                                + " to " + (rd != null ? rd.mReceiver : null));
                     }
                     if (rd != null) {
                         rd.performReceive(intent, resultCode, data, extras,
@@ -821,9 +821,8 @@ public final class ActivityThread {
                         // receiver in this process, but before it could be delivered the
                         // receiver was unregistered.  Acknowledge the broadcast on its
                         // behalf so that the system's broadcast sequence can continue.
-                        if (DEBUG_BROADCAST) {
-                            Log.i(TAG, "Broadcast to unregistered receiver");
-                        }
+                        if (DEBUG_BROADCAST) Slog.i(TAG,
+                                "Finishing broadcast to unregistered receiver");
                         IActivityManager mgr = ActivityManagerNative.getDefault();
                         try {
                             mgr.finishReceiver(this, resultCode, data, extras, false);
@@ -855,16 +854,29 @@ public final class ActivityThread {
                     BroadcastReceiver receiver = mReceiver;
                     if (DEBUG_BROADCAST) {
                         int seq = mCurIntent.getIntExtra("seq", -1);
-                        Log.i(TAG, "Dispatching broadcast " + mCurIntent.getAction()
+                        Slog.i(TAG, "Dispatching broadcast " + mCurIntent.getAction()
                                 + " seq=" + seq + " to " + mReceiver);
+                        Slog.i(TAG, "  mRegistered=" + mRegistered
+                                + " mCurOrdered=" + mCurOrdered);
                     }
-                    if (receiver == null) {
-                        return;
-                    }
-
+                    
                     IActivityManager mgr = ActivityManagerNative.getDefault();
                     Intent intent = mCurIntent;
                     mCurIntent = null;
+                    
+                    if (receiver == null) {
+                        if (mRegistered && mCurOrdered) {
+                            try {
+                                if (DEBUG_BROADCAST) Slog.i(TAG,
+                                        "Finishing null broadcast to " + mReceiver);
+                                mgr.finishReceiver(mIIntentReceiver,
+                                        mCurCode, mCurData, mCurMap, false);
+                            } catch (RemoteException ex) {
+                            }
+                        }
+                        return;
+                    }
+
                     try {
                         ClassLoader cl =  mReceiver.getClass().getClassLoader();
                         intent.setExtrasClassLoader(cl);
@@ -880,6 +892,8 @@ public final class ActivityThread {
                     } catch (Exception e) {
                         if (mRegistered && mCurOrdered) {
                             try {
+                                if (DEBUG_BROADCAST) Slog.i(TAG,
+                                        "Finishing failed broadcast to " + mReceiver);
                                 mgr.finishReceiver(mIIntentReceiver,
                                         mCurCode, mCurData, mCurMap, false);
                             } catch (RemoteException ex) {
@@ -894,6 +908,8 @@ public final class ActivityThread {
                     }
                     if (mRegistered && mCurOrdered) {
                         try {
+                            if (DEBUG_BROADCAST) Slog.i(TAG,
+                                    "Finishing broadcast to " + mReceiver);
                             mgr.finishReceiver(mIIntentReceiver,
                                     receiver.getResultCode(),
                                     receiver.getResultData(),
@@ -961,7 +977,7 @@ public final class ActivityThread {
                     String data, Bundle extras, boolean ordered, boolean sticky) {
                 if (DEBUG_BROADCAST) {
                     int seq = intent.getIntExtra("seq", -1);
-                    Log.i(TAG, "Enqueueing broadcast " + intent.getAction() + " seq=" + seq
+                    Slog.i(TAG, "Enqueueing broadcast " + intent.getAction() + " seq=" + seq
                             + " to " + mReceiver);
                 }
                 Args args = new Args();
@@ -972,9 +988,11 @@ public final class ActivityThread {
                 args.mCurOrdered = ordered;
                 args.mCurSticky = sticky;
                 if (!mActivityThread.post(args)) {
-                    if (mRegistered) {
+                    if (mRegistered && ordered) {
                         IActivityManager mgr = ActivityManagerNative.getDefault();
                         try {
+                            if (DEBUG_BROADCAST) Slog.i(TAG,
+                                    "Finishing sync broadcast to " + mReceiver);
                             mgr.finishReceiver(mIIntentReceiver, args.mCurCode,
                                     args.mCurData, args.mCurMap, false);
                         } catch (RemoteException ex) {
@@ -2134,7 +2152,7 @@ public final class ActivityThread {
                 IActivityManager am = ActivityManagerNative.getDefault();
                 ActivityRecord prev;
                 do {
-                    if (localLOGV) Log.v(
+                    if (localLOGV) Slog.v(
                         TAG, "Reporting idle of " + a +
                         " finished=" +
                         (a.activity != null ? a.activity.mFinished : false));
@@ -2253,7 +2271,7 @@ public final class ActivityThread {
                 ref = mResourcePackages.get(packageName);
             }
             PackageInfo packageInfo = ref != null ? ref.get() : null;
-            //Log.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
+            //Slog.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
             if (packageInfo != null && (packageInfo.mResources == null
                     || packageInfo.mResources.getAssets().isUpToDate())) {
                 if (packageInfo.isSecurityViolation()
@@ -2320,7 +2338,7 @@ public final class ActivityThread {
             PackageInfo packageInfo = ref != null ? ref.get() : null;
             if (packageInfo == null || (packageInfo.mResources != null
                     && !packageInfo.mResources.getAssets().isUpToDate())) {
-                if (localLOGV) Log.v(TAG, (includeCode ? "Loading code package "
+                if (localLOGV) Slog.v(TAG, (includeCode ? "Loading code package "
                         : "Loading resource-only package ") + aInfo.packageName
                         + " (in " + (mBoundApplication != null
                                 ? mBoundApplication.processName : null)
@@ -2403,7 +2421,7 @@ public final class ActivityThread {
                 context.getResources().updateConfiguration(
                         getConfiguration(), getDisplayMetricsLocked(false));
                 mSystemContext = context;
-                //Log.i(TAG, "Created system resources " + context.getResources()
+                //Slog.i(TAG, "Created system resources " + context.getResources()
                 //        + ": " + context.getResources().getConfiguration());
             }
         }
@@ -2443,10 +2461,10 @@ public final class ActivityThread {
     void doGcIfNeeded() {
         mGcIdlerScheduled = false;
         final long now = SystemClock.uptimeMillis();
-        //Log.i(TAG, "**** WE MIGHT WANT TO GC: then=" + Binder.getLastGcTime()
+        //Slog.i(TAG, "**** WE MIGHT WANT TO GC: then=" + Binder.getLastGcTime()
         //        + "m now=" + now);
         if ((BinderInternal.getLastGcTime()+MIN_TIME_BETWEEN_GCS) < now) {
-            //Log.i(TAG, "**** WE DO, WE DO WANT TO GC!");
+            //Slog.i(TAG, "**** WE DO, WE DO WANT TO GC!");
             BinderInternal.forceGc("bg");
         }
     }
@@ -2482,7 +2500,7 @@ public final class ActivityThread {
             } else {
                 name = "(Intent " + intent + ").getComponent() returned null";
             }
-            Log.v(TAG, "Performing launch: action=" + intent.getAction()
+            Slog.v(TAG, "Performing launch: action=" + intent.getAction()
                     + ", comp=" + name
                     + ", token=" + token);
         }
@@ -2496,7 +2514,7 @@ public final class ActivityThread {
     public final void sendActivityResult(
             IBinder token, String id, int requestCode,
             int resultCode, Intent data) {
-        if (DEBUG_RESULTS) Log.v(TAG, "sendActivityResult: id=" + id
+        if (DEBUG_RESULTS) Slog.v(TAG, "sendActivityResult: id=" + id
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
@@ -2515,7 +2533,7 @@ public final class ActivityThread {
 
     private final void queueOrSendMessage(int what, Object obj, int arg1, int arg2) {
         synchronized (this) {
-            if (localLOGV) Log.v(
+            if (localLOGV) Slog.v(
                 TAG, "SCHEDULE " + what + " " + mH.codeToString(what)
                 + ": " + arg1 + " / " + obj);
             Message msg = Message.obtain();
@@ -2577,8 +2595,8 @@ public final class ActivityThread {
         try {
             Application app = r.packageInfo.makeApplication(false, mInstrumentation);
 
-            if (localLOGV) Log.v(TAG, "Performing launch of " + r);
-            if (localLOGV) Log.v(
+            if (localLOGV) Slog.v(TAG, "Performing launch of " + r);
+            if (localLOGV) Slog.v(
                     TAG, r + ": app=" + app
                     + ", appName=" + app.getPackageName()
                     + ", pkg=" + r.packageInfo.getPackageName()
@@ -2591,7 +2609,7 @@ public final class ActivityThread {
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config = new Configuration(mConfiguration);
-                if (DEBUG_CONFIGURATION) Log.v(TAG, "Launching activity "
+                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Launching activity "
                         + r.activityInfo.name + " with config " + config);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
@@ -2660,7 +2678,7 @@ public final class ActivityThread {
         // we are back active so skip it.
         unscheduleGcIdler();
 
-        if (localLOGV) Log.v(
+        if (localLOGV) Slog.v(
             TAG, "Handling launch of " + r);
         Activity a = performLaunchActivity(r, customIntent);
 
@@ -2766,6 +2784,8 @@ public final class ActivityThread {
             receiver = (BroadcastReceiver)cl.loadClass(component).newInstance();
         } catch (Exception e) {
             try {
+                if (DEBUG_BROADCAST) Slog.i(TAG,
+                        "Finishing failed broadcast to " + data.intent.getComponent());
                 mgr.finishReceiver(mAppThread.asBinder(), data.resultCode,
                                    data.resultData, data.resultExtras, data.resultAbort);
             } catch (RemoteException ex) {
@@ -2778,7 +2798,7 @@ public final class ActivityThread {
         try {
             Application app = packageInfo.makeApplication(false, mInstrumentation);
 
-            if (localLOGV) Log.v(
+            if (localLOGV) Slog.v(
                 TAG, "Performing receive of " + data.intent
                 + ": app=" + app
                 + ", appName=" + app.getPackageName()
@@ -2795,6 +2815,8 @@ public final class ActivityThread {
                     data.intent);
         } catch (Exception e) {
             try {
+                if (DEBUG_BROADCAST) Slog.i(TAG,
+                        "Finishing failed broadcast to " + data.intent.getComponent());
                 mgr.finishReceiver(mAppThread.asBinder(), data.resultCode,
                     data.resultData, data.resultExtras, data.resultAbort);
             } catch (RemoteException ex) {
@@ -2808,11 +2830,15 @@ public final class ActivityThread {
 
         try {
             if (data.sync) {
+                if (DEBUG_BROADCAST) Slog.i(TAG,
+                        "Finishing ordered broadcast to " + data.intent.getComponent());
                 mgr.finishReceiver(
                     mAppThread.asBinder(), receiver.getResultCode(),
                     receiver.getResultData(), receiver.getResultExtras(false),
                         receiver.getAbortBroadcast());
             } else {
+                if (DEBUG_BROADCAST) Slog.i(TAG,
+                        "Finishing broadcast to " + data.intent.getComponent());
                 mgr.finishReceiver(mAppThread.asBinder(), 0, null, null, false);
             }
         } catch (RemoteException ex) {
@@ -2821,7 +2847,7 @@ public final class ActivityThread {
 
     // Instantiate a BackupAgent and tell it that it's alive
     private final void handleCreateBackupAgent(CreateBackupAgentData data) {
-        if (DEBUG_BACKUP) Log.v(TAG, "handleCreateBackupAgent: " + data);
+        if (DEBUG_BACKUP) Slog.v(TAG, "handleCreateBackupAgent: " + data);
 
         // no longer idle; we have backup work to do
         unscheduleGcIdler();
@@ -2830,7 +2856,7 @@ public final class ActivityThread {
         PackageInfo packageInfo = getPackageInfoNoCheck(data.appInfo);
         String packageName = packageInfo.mPackageName;
         if (mBackupAgents.get(packageName) != null) {
-            Log.d(TAG, "BackupAgent " + "  for " + packageName
+            Slog.d(TAG, "BackupAgent " + "  for " + packageName
                     + " already exists");
             return;
         }
@@ -2852,7 +2878,7 @@ public final class ActivityThread {
                 agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
 
                 // set up the agent's context
-                if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
+                if (DEBUG_BACKUP) Slog.v(TAG, "Initializing BackupAgent "
                         + data.appInfo.backupAgentName);
 
                 ContextImpl context = new ContextImpl();
@@ -2887,7 +2913,7 @@ public final class ActivityThread {
 
     // Tear down a BackupAgent
     private final void handleDestroyBackupAgent(CreateBackupAgentData data) {
-        if (DEBUG_BACKUP) Log.v(TAG, "handleDestroyBackupAgent: " + data);
+        if (DEBUG_BACKUP) Slog.v(TAG, "handleDestroyBackupAgent: " + data);
 
         PackageInfo packageInfo = getPackageInfoNoCheck(data.appInfo);
         String packageName = packageInfo.mPackageName;
@@ -2925,7 +2951,7 @@ public final class ActivityThread {
         }
 
         try {
-            if (localLOGV) Log.v(TAG, "Creating service " + data.info.name);
+            if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
             ContextImpl context = new ContextImpl();
             context.init(packageInfo, null, this);
@@ -3050,7 +3076,7 @@ public final class ActivityThread {
         Service s = mServices.remove(token);
         if (s != null) {
             try {
-                if (localLOGV) Log.v(TAG, "Destroying service " + s);
+                if (localLOGV) Slog.v(TAG, "Destroying service " + s);
                 s.onDestroy();
                 Context context = s.getBaseContext();
                 if (context instanceof ContextImpl) {
@@ -3071,13 +3097,13 @@ public final class ActivityThread {
                 }
             }
         }
-        //Log.i(TAG, "Running services: " + mServices);
+        //Slog.i(TAG, "Running services: " + mServices);
     }
 
     public final ActivityRecord performResumeActivity(IBinder token,
             boolean clearHide) {
         ActivityRecord r = mActivities.get(token);
-        if (localLOGV) Log.v(TAG, "Performing resume of " + r
+        if (localLOGV) Slog.v(TAG, "Performing resume of " + r
                 + " finished=" + r.activity.mFinished);
         if (r != null && !r.activity.mFinished) {
             if (clearHide) {
@@ -3123,7 +3149,7 @@ public final class ActivityThread {
         if (r != null) {
             final Activity a = r.activity;
 
-            if (localLOGV) Log.v(
+            if (localLOGV) Slog.v(
                 TAG, "Resume " + r + " started activity: " +
                 a.mStartedActivity + ", hideForNow: " + r.hideForNow
                 + ", finished: " + a.mFinished);
@@ -3160,7 +3186,7 @@ public final class ActivityThread {
             // we started another activity, then don't yet make the
             // window visible.
             } else if (!willBeVisible) {
-                if (localLOGV) Log.v(
+                if (localLOGV) Slog.v(
                     TAG, "Launch " + r + " mStartedActivity set");
                 r.hideForNow = true;
             }
@@ -3170,12 +3196,12 @@ public final class ActivityThread {
             if (!r.activity.mFinished && willBeVisible
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
-                    if (DEBUG_CONFIGURATION) Log.v(TAG, "Resuming activity "
+                    if (DEBUG_CONFIGURATION) Slog.v(TAG, "Resuming activity "
                             + r.activityInfo.name + " with newConfig " + r.newConfig);
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
                 }
-                if (localLOGV) Log.v(TAG, "Resuming " + r + " with isForward="
+                if (localLOGV) Slog.v(TAG, "Resuming " + r + " with isForward="
                         + isForward);
                 WindowManager.LayoutParams l = r.window.getAttributes();
                 if ((l.softInputMode
@@ -3199,7 +3225,7 @@ public final class ActivityThread {
 
             r.nextIdle = mNewActivities;
             mNewActivities = r;
-            if (localLOGV) Log.v(
+            if (localLOGV) Slog.v(
                 TAG, "Scheduling idle handler for " + r);
             Looper.myQueue().addIdleHandler(new Idler());
 
@@ -3257,7 +3283,7 @@ public final class ActivityThread {
             boolean userLeaving, int configChanges) {
         ActivityRecord r = mActivities.get(token);
         if (r != null) {
-            //Log.v(TAG, "userLeaving=" + userLeaving + " handling pause of " + r);
+            //Slog.v(TAG, "userLeaving=" + userLeaving + " handling pause of " + r);
             if (userLeaving) {
                 performUserLeavingActivity(r);
             }
@@ -3352,7 +3378,7 @@ public final class ActivityThread {
 
     private final void performStopActivityInner(ActivityRecord r,
             StopInfo info, boolean keepShown) {
-        if (localLOGV) Log.v(TAG, "Performing stop of " + r);
+        if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
         if (r != null) {
             if (!keepShown && r.stopped) {
                 if (r.activity.mFinished) {
@@ -3413,7 +3439,7 @@ public final class ActivityThread {
                     }
                 }
                 if (r.newConfig != null) {
-                    if (DEBUG_CONFIGURATION) Log.v(TAG, "Updating activity vis "
+                    if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
                             + r.activityInfo.name + " with new config " + r.newConfig);
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
@@ -3435,7 +3461,7 @@ public final class ActivityThread {
         StopInfo info = new StopInfo();
         performStopActivityInner(r, info, show);
 
-        if (localLOGV) Log.v(
+        if (localLOGV) Slog.v(
             TAG, "Finishing stop of " + r + ": show=" + show
             + " win=" + r.window);
 
@@ -3470,7 +3496,7 @@ public final class ActivityThread {
             r.stopped = false;
         }
         if (r.activity.mDecor != null) {
-            if (Config.LOGV) Log.v(
+            if (Config.LOGV) Slog.v(
                 TAG, "Handle window " + r + " visibility: " + show);
             updateVisibility(r, show);
         }
@@ -3484,7 +3510,7 @@ public final class ActivityThread {
                 if (ri.mData != null) {
                     ri.mData.setExtrasClassLoader(r.activity.getClassLoader());
                 }
-                if (DEBUG_RESULTS) Log.v(TAG,
+                if (DEBUG_RESULTS) Slog.v(TAG,
                         "Delivering result to activity " + r + " : " + ri);
                 r.activity.dispatchActivityResult(ri.mResultWho,
                         ri.mRequestCode, ri.mResultCode, ri.mData);
@@ -3501,7 +3527,7 @@ public final class ActivityThread {
 
     private final void handleSendResult(ResultData res) {
         ActivityRecord r = mActivities.get(res.token);
-        if (DEBUG_RESULTS) Log.v(TAG, "Handling send result to " + r);
+        if (DEBUG_RESULTS) Slog.v(TAG, "Handling send result to " + r);
         if (r != null) {
             final boolean resumed = !r.paused;
             if (!r.activity.mFinished && r.activity.mDecor != null
@@ -3546,7 +3572,7 @@ public final class ActivityThread {
     private final ActivityRecord performDestroyActivity(IBinder token, boolean finishing,
             int configChanges, boolean getNonConfigInstance) {
         ActivityRecord r = mActivities.get(token);
-        if (localLOGV) Log.v(TAG, "Performing finish of " + r);
+        if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
         if (r != null) {
             r.activity.mConfigChangeFlags |= configChanges;
             if (finishing) {
@@ -3696,7 +3722,7 @@ public final class ActivityThread {
 
         Configuration changedConfig = null;
 
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "Relaunching activity "
+        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Relaunching activity "
                 + tmp.token + " with configChanges=0x"
                 + Integer.toHexString(configChanges));
         
@@ -3718,7 +3744,7 @@ public final class ActivityThread {
             }
 
             if (tmp == null) {
-                if (DEBUG_CONFIGURATION) Log.v(TAG, "Abort, activity not relaunching!");
+                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Abort, activity not relaunching!");
                 return;
             }
 
@@ -3742,7 +3768,7 @@ public final class ActivityThread {
             }
         }
         
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "Relaunching activity "
+        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Relaunching activity "
                 + tmp.token + ": changedConfig=" + changedConfig);
         
         // If there was a pending configuration change, execute it first.
@@ -3751,7 +3777,7 @@ public final class ActivityThread {
         }
 
         ActivityRecord r = mActivities.get(tmp.token);
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "Handling relaunch of " + r);
+        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handling relaunch of " + r);
         if (r == null) {
             return;
         }
@@ -3837,7 +3863,7 @@ public final class ActivityThread {
                         // the activity manager may, before then, decide the
                         // activity needs to be destroyed to handle its new
                         // configuration.
-                        if (DEBUG_CONFIGURATION) Log.v(TAG, "Setting activity "
+                        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Setting activity "
                                 + ar.activityInfo.name + " newConfig=" + newConfig);
                         ar.newConfig = newConfig;
                     }
@@ -3896,7 +3922,7 @@ public final class ActivityThread {
             }
         }
 
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "Config callback " + cb
+        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Config callback " + cb
                 + ": shouldChangeConfig=" + shouldChangeConfig);
         if (shouldChangeConfig) {
             cb.onConfigurationChanged(config);
@@ -3918,7 +3944,7 @@ public final class ActivityThread {
             mResConfiguration = new Configuration();
         }
         if (!mResConfiguration.isOtherSeqNewer(config)) {
-            if (DEBUG_CONFIGURATION) Log.v(TAG, "Skipping new config: curSeq="
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
                     + mResConfiguration.seq + ", newSeq=" + config.seq);
             return false;
         }
@@ -3933,7 +3959,7 @@ public final class ActivityThread {
         Resources.updateSystemConfiguration(config, dm);
 
         ContextImpl.ApplicationPackageManager.configurationChanged();
-        //Log.i(TAG, "Configuration changed in " + currentPackageName());
+        //Slog.i(TAG, "Configuration changed in " + currentPackageName());
         
         Iterator<WeakReference<Resources>> it =
             mActiveResources.values().iterator();
@@ -3943,13 +3969,13 @@ public final class ActivityThread {
             WeakReference<Resources> v = it.next();
             Resources r = v.get();
             if (r != null) {
-                if (DEBUG_CONFIGURATION) Log.v(TAG, "Changing resources "
+                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
                         + r + " config to: " + config);
                 r.updateConfiguration(config, dm);
-                //Log.i(TAG, "Updated app resources " + v.getKey()
+                //Slog.i(TAG, "Updated app resources " + v.getKey()
                 //        + " " + r + ": " + r.getConfiguration());
             } else {
-                //Log.i(TAG, "Removing old resources " + v.getKey());
+                //Slog.i(TAG, "Removing old resources " + v.getKey());
                 it.remove();
             }
         }
@@ -3973,7 +3999,7 @@ public final class ActivityThread {
                 return;
             }
             
-            if (DEBUG_CONFIGURATION) Log.v(TAG, "Handle configuration changed: "
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle configuration changed: "
                     + config);
         
             applyConfigurationToResourcesLocked(config);
@@ -4003,7 +4029,7 @@ public final class ActivityThread {
             return;
         }
 
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "Handle activity config changed: "
+        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                 + r.activityInfo.name);
         
         performConfigurationChanged(r.activity, mConfiguration);
@@ -4096,7 +4122,7 @@ public final class ActivityThread {
             // XXX should have option to change the port.
             Debug.changeDebugPort(8100);
             if (data.debugMode == IApplicationThread.DEBUG_WAIT) {
-                Log.w(TAG, "Application " + data.info.getPackageName()
+                Slog.w(TAG, "Application " + data.info.getPackageName()
                       + " is waiting for the debugger on port 8100...");
 
                 IActivityManager mgr = ActivityManagerNative.getDefault();
@@ -4113,7 +4139,7 @@ public final class ActivityThread {
                 }
 
             } else {
-                Log.w(TAG, "Application " + data.info.getPackageName()
+                Slog.w(TAG, "Application " + data.info.getPackageName()
                       + " can be debugged on port 8100...");
             }
         }
@@ -4209,7 +4235,7 @@ public final class ActivityThread {
         if (mBoundApplication.profileFile != null && mBoundApplication.handlingProfiling) {
             Debug.stopMethodTracing();
         }
-        //Log.i(TAG, "am: " + ActivityManagerNative.getDefault()
+        //Slog.i(TAG, "am: " + ActivityManagerNative.getDefault()
         //      + ", app thr: " + mAppThread);
         try {
             am.finishInstrumentation(mAppThread, resultCode, results);
@@ -4276,12 +4302,12 @@ public final class ActivityThread {
 
         IContentProvider prov = installProvider(context, holder.provider,
                 holder.info, true);
-        //Log.i(TAG, "noReleaseNeeded=" + holder.noReleaseNeeded);
+        //Slog.i(TAG, "noReleaseNeeded=" + holder.noReleaseNeeded);
         if (holder.noReleaseNeeded || holder.provider == null) {
             // We are not going to release the provider if it is an external
             // provider that doesn't care about being released, or if it is
             // a local provider running in this process.
-            //Log.i(TAG, "*** NO RELEASE NEEDED");
+            //Slog.i(TAG, "*** NO RELEASE NEEDED");
             synchronized(mProviderMap) {
                 mProviderRefCountMap.put(prov.asBinder(), new ProviderRefCount(10000));
             }
@@ -4313,7 +4339,7 @@ public final class ActivityThread {
         synchronized(mProviderMap) {
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
             if(prc == null) {
-                if(localLOGV) Log.v(TAG, "releaseProvider::Weird shouldnt be here");
+                if(localLOGV) Slog.v(TAG, "releaseProvider::Weird shouldnt be here");
                 return false;
             } else {
                 prc.count--;
@@ -4345,7 +4371,7 @@ public final class ActivityThread {
         
         if (name != null) {
             try {
-                if(localLOGV) Log.v(TAG, "removeProvider::Invoking " +
+                if(localLOGV) Slog.v(TAG, "removeProvider::Invoking " +
                         "ActivityManagerNative.removeContentProvider(" + name);
                 ActivityManagerNative.getDefault().removeContentProvider(
                         getApplicationThread(), name);
@@ -4371,10 +4397,10 @@ public final class ActivityThread {
             if (myBinder == providerBinder) {
                 //find if its published by this process itself
                 if(pr.mLocalProvider != null) {
-                    if(localLOGV) Log.i(TAG, "removeProvider::found local provider returning");
+                    if(localLOGV) Slog.i(TAG, "removeProvider::found local provider returning");
                     return name;
                 }
-                if(localLOGV) Log.v(TAG, "removeProvider::Not local provider Unlinking " +
+                if(localLOGV) Slog.v(TAG, "removeProvider::Not local provider Unlinking " +
                         "death recipient");
                 //content provider is in another process
                 myBinder.unlinkToDeath(pr, 0);
@@ -4393,7 +4419,7 @@ public final class ActivityThread {
         synchronized(mProviderMap) {
             ProviderRecord pr = mProviderMap.get(name);
             if (pr.mProvider.asBinder() == provider.asBinder()) {
-                Log.i(TAG, "Removing dead content provider: " + name);
+                Slog.i(TAG, "Removing dead content provider: " + name);
                 ProviderRecord removed = mProviderMap.remove(name);
                 if (removed != null) {
                     removed.mProvider.asBinder().unlinkToDeath(removed, 0);
@@ -4405,7 +4431,7 @@ public final class ActivityThread {
     final void removeDeadProviderLocked(String name, IContentProvider provider) {
         ProviderRecord pr = mProviderMap.get(name);
         if (pr.mProvider.asBinder() == provider.asBinder()) {
-            Log.i(TAG, "Removing dead content provider: " + name);
+            Slog.i(TAG, "Removing dead content provider: " + name);
             ProviderRecord removed = mProviderMap.remove(name);
             if (removed != null) {
                 removed.mProvider.asBinder().unlinkToDeath(removed, 0);
@@ -4418,7 +4444,7 @@ public final class ActivityThread {
         ContentProvider localProvider = null;
         if (provider == null) {
             if (noisy) {
-                Log.d(TAG, "Loading provider " + info.authority + ": "
+                Slog.d(TAG, "Loading provider " + info.authority + ": "
                         + info.name);
             }
             Context c = null;
@@ -4453,7 +4479,7 @@ public final class ActivityThread {
                           info.applicationInfo.sourceDir);
                     return null;
                 }
-                if (Config.LOGV) Log.v(
+                if (Config.LOGV) Slog.v(
                     TAG, "Instantiating local provider " + info.name);
                 // XXX Need to create the correct context for this provider.
                 localProvider.attachInfo(c, info);
@@ -4466,7 +4492,7 @@ public final class ActivityThread {
                 return null;
             }
         } else if (localLOGV) {
-            Log.v(TAG, "Installing external provider " + info.authority + ": "
+            Slog.v(TAG, "Installing external provider " + info.authority + ": "
                     + info.name);
         }
 
@@ -4587,6 +4613,6 @@ public final class ActivityThread {
         String name = (thread.mInitialApplication != null)
             ? thread.mInitialApplication.getPackageName()
             : "<unknown>";
-        Log.i(TAG, "Main thread of " + name + " is now exiting");
+        Slog.i(TAG, "Main thread of " + name + " is now exiting");
     }
 }

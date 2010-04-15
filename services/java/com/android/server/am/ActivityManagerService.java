@@ -9884,7 +9884,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (mOrderedBroadcasts.size() > 0) {
                 pw.println(" ");
-                pw.println("  Active serialized broadcasts:");
+                pw.println("  Active ordered broadcasts:");
             }
             for (int i=mOrderedBroadcasts.size()-1; i>=0; i--) {
                 pw.println("  Serialized Broadcast #" + i + ":");
@@ -12898,7 +12898,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             try {
                 if (DEBUG_BROADCAST_LIGHT) {
                     int seq = r.intent.getIntExtra("seq", -1);
-                    Slog.i(TAG, "Delivering to " + filter.receiverList.app
+                    Slog.i(TAG, "Delivering to " + filter
                             + " (seq=" + seq + "): " + r);
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
@@ -12938,7 +12938,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             if (DEBUG_BROADCAST) Slog.v(TAG, "processNextBroadcast: "
                     + mParallelBroadcasts.size() + " broadcasts, "
-                    + mOrderedBroadcasts.size() + " serialized broadcasts");
+                    + mOrderedBroadcasts.size() + " ordered broadcasts");
 
             updateCpuStats();
             
@@ -12956,7 +12956,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 for (int i=0; i<N; i++) {
                     Object target = r.receivers.get(i);
                     if (DEBUG_BROADCAST)  Slog.v(TAG,
-                            "Delivering non-serialized to registered "
+                            "Delivering non-ordered to registered "
                             + target + ": " + r);
                     deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
                 }
@@ -13094,12 +13094,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // a direct call.
                 BroadcastFilter filter = (BroadcastFilter)nextReceiver;
                 if (DEBUG_BROADCAST)  Slog.v(TAG,
-                        "Delivering serialized to registered "
+                        "Delivering ordered to registered "
                         + filter + ": " + r);
                 deliverToRegisteredReceiver(r, filter, r.ordered);
                 if (r.receiver == null || !r.ordered) {
                     // The receiver has already finished, so schedule to
                     // process the next one.
+                    if (DEBUG_BROADCAST) Slog.v(TAG, "Quick finishing: ordered="
+                            + r.ordered + " receiver=" + r.receiver);
                     r.state = BroadcastRecord.IDLE;
                     scheduleBroadcastsLocked();
                 }
