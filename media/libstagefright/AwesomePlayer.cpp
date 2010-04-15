@@ -444,6 +444,8 @@ void AwesomePlayer::onBufferingUpdate() {
         notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage * 100.0);
 
         postBufferingEvent_l();
+    } else {
+        LOGE("Not sending buffering status because duration is unknown.");
     }
 }
 
@@ -551,8 +553,6 @@ status_t AwesomePlayer::play_l() {
         // and we're just starting up again, honor the request now.
         seekAudioIfNecessary_l();
     }
-
-    postBufferingEvent_l();
 
     if (mFlags & AT_EOS) {
         // Legacy behaviour, if a stream finishes playing and then
@@ -1230,6 +1230,8 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
+
+    postBufferingEvent_l();
 }
 
 status_t AwesomePlayer::suspend() {
