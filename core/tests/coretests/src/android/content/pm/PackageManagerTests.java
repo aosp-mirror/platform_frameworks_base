@@ -165,12 +165,18 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    PackageManager getPm() {
+    private PackageManager getPm() {
         return mContext.getPackageManager();
     }
 
+    private IPackageManager getIPm() {
+        IPackageManager ipm  = IPackageManager.Stub.asInterface(
+                ServiceManager.getService("package"));
+        return ipm;
+    }
+
     public boolean invokeInstallPackage(Uri packageURI, int flags,
-            final String pkgName, GenericReceiver receiver) throws Exception {
+            GenericReceiver receiver) throws Exception {
         PackageInstallObserver observer = new PackageInstallObserver();
         final boolean received = false;
         mContext.registerReceiver(receiver, receiver.filter);
@@ -209,8 +215,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public boolean invokeInstallPackageFail(Uri packageURI, int flags,
-            final String pkgName, int result) throws Exception {
+    public void invokeInstallPackageFail(Uri packageURI, int flags, int result) throws Exception {
         PackageInstallObserver observer = new PackageInstallObserver();
         try {
             // Wait on observer
@@ -224,7 +229,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 if(!observer.isDone()) {
                     throw new Exception("Timed out waiting for packageInstalled callback");
                 }
-                return (observer.returnCode == result);
+                assertEquals(observer.returnCode, result);
             }
         } finally {
         }
@@ -284,17 +289,6 @@ public class PackageManagerTests extends AndroidTestCase {
     private static final int INSTALL_LOC_INT = 1;
     private static final int INSTALL_LOC_SD = 2;
     private static final int INSTALL_LOC_ERR = -1;
-    private int checkDefaultPolicy(long pkgLen) {
-        // Check for free memory internally
-        if (checkInt(pkgLen)) {
-            return INSTALL_LOC_INT;
-        }
-        // Check for free memory externally
-        if (checkSd(pkgLen)) {
-            return INSTALL_LOC_SD;
-        }
-        return INSTALL_LOC_ERR;
-    }
     private int getInstallLoc(int flags, int expInstallLocation, long pkgLen) {
         // Flags explicitly over ride everything else.
         if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 ) {
@@ -306,7 +300,6 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         // Manifest option takes precedence next
         if (expInstallLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
-            // TODO fitsonSd check
             if (checkSd(pkgLen)) {
                return INSTALL_LOC_SD;
             }
@@ -322,36 +315,36 @@ public class PackageManagerTests extends AndroidTestCase {
             return INSTALL_LOC_ERR;
         }
         if (expInstallLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
-            return checkDefaultPolicy(pkgLen);
+            // Check for free memory internally
+            if (checkInt(pkgLen)) {
+                return INSTALL_LOC_INT;
+            }
+            // Check for free memory externally
+            if (checkSd(pkgLen)) {
+                return INSTALL_LOC_SD;
+            }
+            return INSTALL_LOC_ERR;
         }
         // Check for settings preference.
         boolean checkSd = false;
-        int setLoc = 0;
-        try {
-            setLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION);
-        } catch (SettingNotFoundException e) {
-            failStr(e);
-        }
-        if (setLoc == 1) {
-            int userPref = APP_INSTALL_AUTO;
-            try {
-                userPref = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.DEFAULT_INSTALL_LOCATION);
-            } catch (SettingNotFoundException e) {
-                failStr(e);
+        int userPref = getDefaultInstallLoc();
+        if (userPref == APP_INSTALL_DEVICE) {
+            if (checkInt(pkgLen)) {
+                return INSTALL_LOC_INT;
             }
-            if (userPref == APP_INSTALL_DEVICE) {
-                if (checkInt(pkgLen)) {
-                    return INSTALL_LOC_INT;
-                }
-                return INSTALL_LOC_ERR;
-            } else if (userPref == APP_INSTALL_SDCARD) {
-                if (checkSd(pkgLen)) {
-                    return INSTALL_LOC_SD;
-                }
-                return INSTALL_LOC_ERR;
+            return INSTALL_LOC_ERR;
+        } else if (userPref == APP_INSTALL_SDCARD) {
+            if (checkSd(pkgLen)) {
+                return INSTALL_LOC_SD;
             }
+            return INSTALL_LOC_ERR;
         }
-        return checkDefaultPolicy(pkgLen);
+        // Default system policy for apps with no manifest option specified.
+        // Check for free memory internally
+        if (checkInt(pkgLen)) {
+            return INSTALL_LOC_INT;
+        }
+        return INSTALL_LOC_ERR;
     }
     
     private void assertInstall(PackageParser.Package pkg, int flags, int expInstallLocation) {
@@ -402,13 +395,19 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     class InstallParams {
-        String outFileName;
         Uri packageURI;
         PackageParser.Package pkg;
-        InstallParams(PackageParser.Package pkg, String outFileName, Uri packageURI) {
-            this.outFileName = outFileName;
-            this.packageURI = packageURI;
+        InstallParams(String outFileName, int rawResId) {
+            this.pkg = getParsedPackage(outFileName, rawResId);
+            this.packageURI = Uri.fromFile(new File(pkg.mScanPath));
+        }
+        InstallParams(PackageParser.Package pkg) {
+            this.packageURI = Uri.fromFile(new File(pkg.mScanPath));
             this.pkg = pkg;
+        }
+        long getApkSize() {
+            File file = new File(pkg.mScanPath);
+            return file.length();
         }
     }
 
@@ -520,45 +519,36 @@ public class PackageManagerTests extends AndroidTestCase {
      * copies it into own data directory and invokes
      * PackageManager api to install it.
      */
-    private InstallParams installFromRawResource(String outFileName,
-            int rawResId, int flags, boolean cleanUp, boolean fail, int result,
+    private void installFromRawResource(InstallParams ip,
+            int flags, boolean cleanUp, boolean fail, int result,
             int expInstallLocation) {
         PackageManager pm = mContext.getPackageManager();
-        File filesDir = mContext.getFilesDir();
-        File outFile = new File(filesDir, outFileName);
-        Uri packageURI = getInstallablePackage(rawResId, outFile);
-        PackageParser.Package pkg = parsePackage(packageURI);
-        assertNotNull(pkg);
+        PackageParser.Package pkg = ip.pkg;
+        Uri packageURI = ip.packageURI;
         if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
             // Make sure the package doesn't exist
             try {
                 ApplicationInfo appInfo = pm.getApplicationInfo(pkg.packageName,
                         PackageManager.GET_UNINSTALLED_PACKAGES);
                 GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
-                invokeDeletePackage(packageURI, 0,
-                        pkg.packageName, receiver);
+                invokeDeletePackage(pkg.packageName, 0, receiver);
             } catch (NameNotFoundException e1) {
             } catch (Exception e) {
                 failStr(e);
             }
         }
-        InstallParams ip = null;
         try {
             if (fail) {
-                assertTrue(invokeInstallPackageFail(packageURI, flags,
-                        pkg.packageName, result));
+                invokeInstallPackageFail(packageURI, flags, result);
                 if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
                     assertNotInstalled(pkg.packageName);
                 }
             } else {
                 InstallReceiver receiver = new InstallReceiver(pkg.packageName);
-                assertTrue(invokeInstallPackage(packageURI, flags,
-                        pkg.packageName, receiver));
+                assertTrue(invokeInstallPackage(packageURI, flags, receiver));
                 // Verify installed information
                 assertInstall(pkg, flags, expInstallLocation);
-                ip = new InstallParams(pkg, outFileName, packageURI);
             }
-            return ip;
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
         } finally {
@@ -566,6 +556,19 @@ public class PackageManagerTests extends AndroidTestCase {
                 cleanUpInstall(ip);
             }
         }
+    }
+
+    /*
+     * Utility function that reads a apk bundled as a raw resource
+     * copies it into own data directory and invokes
+     * PackageManager api to install it.
+     */
+    private InstallParams installFromRawResource(String outFileName,
+            int rawResId, int flags, boolean cleanUp, boolean fail, int result,
+            int expInstallLocation) {
+        PackageManager pm = mContext.getPackageManager();
+        InstallParams ip = new InstallParams(outFileName, rawResId);
+        installFromRawResource(ip, flags, cleanUp, fail, result, expInstallLocation);
         return ip;
     }
 
@@ -654,8 +657,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         try {
             try {
-                assertEquals(invokeInstallPackage(ip.packageURI, flags,
-                        ip.pkg.packageName, receiver), replace);
+                assertEquals(invokeInstallPackage(ip.packageURI, flags, receiver), replace);
                 if (replace) {
                     assertInstall(ip.pkg, flags, ip.pkg.installLocation);
                 }
@@ -736,8 +738,8 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public boolean invokeDeletePackage(Uri packageURI, int flags,
-            final String pkgName, GenericReceiver receiver) throws Exception {
+    public boolean invokeDeletePackage(final String pkgName, int flags,
+            GenericReceiver receiver) throws Exception {
         DeleteObserver observer = new DeleteObserver();
         final boolean received = false;
         mContext.registerReceiver(receiver, receiver.filter);
@@ -777,8 +779,7 @@ public class PackageManagerTests extends AndroidTestCase {
         GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
         DeleteObserver observer = new DeleteObserver();
         try {
-            assertTrue(invokeDeletePackage(ip.packageURI, dFlags,
-                    ip.pkg.packageName, receiver));
+            assertTrue(invokeDeletePackage(ip.pkg.packageName, dFlags, receiver));
             ApplicationInfo info = null;
             Log.i(TAG, "okay4");
             try {
@@ -907,7 +908,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     boolean getMediaState() {
         try {
-        String mPath = Environment.getExternalStorageDirectory().toString();
+        String mPath = Environment.getExternalStorageDirectory().getPath();
         String state = getMs().getVolumeState(mPath);
         return Environment.MEDIA_MOUNTED.equals(state);
         } catch (RemoteException e) {
@@ -928,13 +929,17 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-
-
     private boolean unmountMedia() {
-        if (!getMediaState()) {
-            return true;
+        String path = Environment.getExternalStorageDirectory().getPath();
+        try {
+            String state = getMs().getVolumeState(path);
+            if (Environment.MEDIA_UNMOUNTED.equals(state)) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            failStr(e);
         }
-        String path = Environment.getExternalStorageDirectory().toString();
+        
         StorageListener observer = new StorageListener();
         StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
         sm.registerListener(observer);
@@ -948,11 +953,12 @@ public class PackageManagerTests extends AndroidTestCase {
                     waitTime += WAIT_TIME_INCR;
                 }
                 if(!observer.isDone()) {
-                    throw new Exception("Timed out waiting for packageInstalled callback");
+                    throw new Exception("Timed out waiting for unmount media notification");
                 }
                 return true;
             }
         } catch (Exception e) {
+            Log.e(TAG, "Exception : " + e);
             return false;
         } finally {
             sm.unregisterListener(observer);
@@ -1029,7 +1035,7 @@ public class PackageManagerTests extends AndroidTestCase {
         Runtime.getRuntime().gc();
         Log.i(TAG, "Deleting package : " + ip.pkg.packageName);
         getPm().deletePackage(ip.pkg.packageName, null, 0);
-        File outFile = new File(ip.outFileName);
+        File outFile = new File(ip.pkg.mScanPath);
         if (outFile != null && outFile.exists()) {
             outFile.delete();
         }
@@ -1095,8 +1101,7 @@ public class PackageManagerTests extends AndroidTestCase {
         GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
-            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags,
-                    ip.pkg.packageName, receiver), true);
+            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags, receiver), true);
             assertInstall(ip.pkg, rFlags, ip.pkg.installLocation);
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
@@ -1117,8 +1122,7 @@ public class PackageManagerTests extends AndroidTestCase {
         GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
-            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags,
-                    ip.pkg.packageName, receiver), true);
+            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags, receiver), true);
             assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
@@ -1298,11 +1302,9 @@ public class PackageManagerTests extends AndroidTestCase {
         return true;
     }
 
-    private int getInstallLoc() {
-        boolean userSetting = false;
+    private int getDefaultInstallLoc() {
         int origDefaultLoc = PackageInfo.INSTALL_LOCATION_AUTO;
         try {
-            userSetting = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
             origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.DEFAULT_INSTALL_LOCATION);
         } catch (SettingNotFoundException e1) {
         }
@@ -1326,7 +1328,7 @@ public class PackageManagerTests extends AndroidTestCase {
     private void moveFromRawResource(String outFileName,
             int rawResId, int installFlags, int moveFlags, boolean cleanUp,
             boolean fail, int result) {
-        int origDefaultLoc = getInstallLoc();
+        int origDefaultLoc = getDefaultInstallLoc();
         InstallParams ip = null;
         try {
             setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
@@ -1416,7 +1418,7 @@ public class PackageManagerTests extends AndroidTestCase {
         final int result = PackageManager.MOVE_FAILED_DOESNT_EXIST;
         
         int rawResId = R.raw.install;
-        int origDefaultLoc = getInstallLoc();
+        int origDefaultLoc = getDefaultInstallLoc();
         InstallParams ip = null;
         try {
             PackageManager pm = getPm();
@@ -1447,10 +1449,10 @@ public class PackageManagerTests extends AndroidTestCase {
             // Unmount sdcard
             assertTrue(unmountMedia());
             // Try to install and make sure an error code is returned.
-            assertNull(installFromRawResource("install.apk", R.raw.install,
+            installFromRawResource("install.apk", R.raw.install,
                     PackageManager.INSTALL_EXTERNAL, false,
                     true, PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE,
-                    PackageInfo.INSTALL_LOCATION_AUTO));
+                    PackageInfo.INSTALL_LOCATION_AUTO);
         } finally {
             // Restore original media state
             if (origState) {
@@ -1470,11 +1472,9 @@ public class PackageManagerTests extends AndroidTestCase {
        try {
            // Unmount sdcard
            assertTrue(unmountMedia());
-           // Try to install and make sure an error code is returned.
-           assertNotNull(installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                   0, false,
-                   false, -1,
-                   PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY));
+           InstallParams ip = new InstallParams("install.apk", R.raw.install_loc_sdcard);
+           installFromRawResource(ip, 0, true, false, -1,
+                   PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
        } finally {
            // Restore original media state
            if (origState) {
@@ -1912,7 +1912,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false,
                false, -1,
                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-       int origSetting = getInstallLoc();
+       int origSetting = getDefaultInstallLoc();
        try {
            // Set user setting
            setInstallLoc(userSetting);
@@ -1976,7 +1976,7 @@ public class PackageManagerTests extends AndroidTestCase {
    }
    private void setUserX(boolean enable, int userSetting, int iloc) {
        boolean origUserSetting = getUserSettingSetInstallLocation();
-       int origSetting = getInstallLoc();
+       int origSetting = getDefaultInstallLoc();
        try {
            setUserSettingSetInstallLocation(enable);
            // Set user setting
@@ -2101,8 +2101,7 @@ public class PackageManagerTests extends AndroidTestCase {
             GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
            
             try {
-                invokeDeletePackage(ip.packageURI, PackageManager.DONT_DELETE_DATA,
-                        ip.pkg.packageName, receiver);
+                invokeDeletePackage(ip.pkg.packageName, PackageManager.DONT_DELETE_DATA, receiver);
             } catch (Exception e) {
                 failStr(e);
             }
@@ -2121,8 +2120,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // **: Upon deleting package, are all permissions removed?
            
             try {
-                invokeDeletePackage(ip.packageURI, 0,
-                        ip.pkg.packageName, receiver);
+                invokeDeletePackage(ip.pkg.packageName, 0, receiver);
                 ip = null;
             } catch (Exception e) {
                 failStr(e);
@@ -2134,8 +2132,7 @@ public class PackageManagerTests extends AndroidTestCase {
            
             GenericReceiver receiver2 = new DeleteReceiver(ip2.pkg.packageName);
             try {
-                invokeDeletePackage(ip2.packageURI, 0,
-                        ip2.pkg.packageName, receiver);
+                invokeDeletePackage(ip2.pkg.packageName, 0, receiver);
                 ip2 = null;
             } catch (Exception e) {
                 failStr(e);
@@ -2170,8 +2167,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // **: Upon deleting package, are all permissions removed?
             
             try {
-                invokeDeletePackage(ip.packageURI, 0,
-                        ip.pkg.packageName, receiver);
+                invokeDeletePackage(ip.pkg.packageName, 0, receiver);
                 ip = null;
             } catch (Exception e) {
                 failStr(e);
@@ -2182,8 +2178,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // **: Delete package using permissions; nothing to check here.
             
             try {
-                invokeDeletePackage(ip2.packageURI, 0,
-                        ip2.pkg.packageName, receiver);
+                invokeDeletePackage(ip2.pkg.packageName, 0, receiver);
                 ip2 = null;
             } catch (Exception e) {
                 failStr(e);
@@ -2252,7 +2247,7 @@ public class PackageManagerTests extends AndroidTestCase {
             unmountMedia();
             // Delete the app on sdcard to leave a stale container on sdcard.
             GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
-            assertTrue(invokeDeletePackage(packageURI, 0, pkg.packageName, receiver));
+            assertTrue(invokeDeletePackage(pkg.packageName, 0, receiver));
             mountMedia();
             // Reinstall the app and make sure it gets installed.
             installFromRawResource(outFileName, rawResId,

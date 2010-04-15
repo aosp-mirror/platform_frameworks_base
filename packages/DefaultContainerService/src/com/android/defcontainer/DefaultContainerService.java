@@ -346,16 +346,13 @@ public class DefaultContainerService extends IntentService {
                     PackageHelper.APP_INSTALL_AUTO);
             if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
                 checkInt = true;
-                checkBoth = true;
                 break check_inner;
             } else if (installPreference == PackageHelper.APP_INSTALL_EXTERNAL) {
                 checkExt = true;
-                checkBoth = true;
                 break check_inner;
             }
             // Fall back to default policy if nothing else is specified.
             checkInt = true;
-            checkBoth = true;
         }
 
         // Package size = code size + cache size + data size
