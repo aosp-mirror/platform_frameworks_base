@@ -137,6 +137,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_PREFERRED = false;
     private static final boolean DEBUG_UPGRADE = false;
     private static final boolean DEBUG_INSTALL = false;
+    private static final boolean DEBUG_NATIVE = false;
 
     private static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -2618,6 +2619,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             + " better than installed " + ps.versionCode);
                     InstallArgs args = new FileInstallArgs(ps.codePathString, ps.resourcePathString);
                     args.cleanUpResourcesLI();
+                    removeNativeBinariesLI(pkg);
                     mSettings.enableSystemPackageLP(ps.name);
                 }
             }
@@ -3232,11 +3234,22 @@ class PackageManagerService extends IPackageManager.Stub {
         if (mInstaller != null) {
             String path = scanFile.getPath();
             if (scanFileNewer) {
-                Log.i(TAG, path + " changed; unpacking");
-                int err = cachePackageSharedLibsLI(pkg, dataPath, scanFile);
-                if (err != PackageManager.INSTALL_SUCCEEDED) {
-                    mLastScanError = err;
-                    return null;
+                // Note: We don't want to unpack the native binaries for
+                //       system applications, unless they have been updated
+                //       (the binaries are already under /system/lib).
+                //
+                //       In other words, we're going to unpack the binaries
+                //       only for non-system apps and system app upgrades.
+                //
+                int flags = pkg.applicationInfo.flags;
+                if ((flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
+                    (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                    Log.i(TAG, path + " changed; unpacking");
+                    int err = cachePackageSharedLibsLI(pkg, scanFile);
+                    if (err != PackageManager.INSTALL_SUCCEEDED) {
+                        mLastScanError = err;
+                        return null;
+                    }
                 }
             }
             pkg.mScanPath = path;
@@ -3552,6 +3565,13 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final int PACKAGE_INSTALL_NATIVE_NO_LIBRARIES = 1;
     private static final int PACKAGE_INSTALL_NATIVE_ABI_MISMATCH = 2;
 
+    // Return the path of the directory that will contain the native binaries
+    // of a given installed package. This is relative to the data path.
+    //
+    private static File getNativeBinaryDirForPackage(PackageParser.Package pkg) {
+        return new File(pkg.applicationInfo.dataDir + "/lib");
+    }
+
     // Find all files of the form lib/<cpuAbi>/lib<name>.so in the .apk
     // and automatically copy them to /data/data/<appname>/lib if present.
     //
@@ -3561,8 +3581,8 @@ class PackageManagerService extends IPackageManager.Stub {
     // file is malformed.
     //
     private int cachePackageSharedLibsForAbiLI(PackageParser.Package pkg,
-        File dataPath, File scanFile, String cpuAbi) throws IOException, ZipException {
-        File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
+        File scanFile, String cpuAbi) throws IOException, ZipException {
+        File sharedLibraryDir = getNativeBinaryDirForPackage(pkg);
         final String apkLib = "lib/";
         final int apkLibLen = apkLib.length();
         final int cpuAbiLen = cpuAbi.length();
@@ -3659,8 +3679,8 @@ class PackageManagerService extends IPackageManager.Stub {
     // or PACKAGE_INSTALL_NATIVE_NO_LIBRARIES otherwise.
     //
     private int cachePackageGdbServerLI(PackageParser.Package pkg,
-        File dataPath, File scanFile, String cpuAbi) throws IOException, ZipException {
-        File installGdbServerDir = new File(dataPath.getPath() + "/lib");
+        File scanFile, String cpuAbi) throws IOException, ZipException {
+        File installGdbServerDir = getNativeBinaryDirForPackage(pkg);
         final String GDBSERVER = "gdbserver";
         final String apkGdbServerPath = "lib/" + cpuAbi + "/" + GDBSERVER;
 
@@ -3707,11 +3727,10 @@ class PackageManagerService extends IPackageManager.Stub {
     // (which corresponds to ro.product.cpu.abi), and also try an alternate
     // one if ro.product.cpu.abi2 is defined.
     //
-    private int cachePackageSharedLibsLI(PackageParser.Package  pkg,
-        File dataPath, File scanFile) {
+    private int cachePackageSharedLibsLI(PackageParser.Package pkg, File scanFile) {
         String cpuAbi = Build.CPU_ABI;
         try {
-            int result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi);
+            int result = cachePackageSharedLibsForAbiLI(pkg, scanFile, cpuAbi);
 
             // some architectures are capable of supporting several CPU ABIs
             // for example, 'armeabi-v7a' also supports 'armeabi' native code
@@ -3722,7 +3741,7 @@ class PackageManagerService extends IPackageManager.Stub {
             if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
                 final String cpuAbi2 = SystemProperties.get("ro.product.cpu.abi2",null);
                 if (cpuAbi2 != null) {
-                    result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi2);
+                    result = cachePackageSharedLibsForAbiLI(pkg, scanFile, cpuAbi2);
                 }
 
                 if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
@@ -3739,7 +3758,7 @@ class PackageManagerService extends IPackageManager.Stub {
             // into /data/data/<appname>/lib too.
             if (result == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES &&
                 (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                int result2 = cachePackageGdbServerLI(pkg, dataPath, scanFile, cpuAbi);
+                int result2 = cachePackageGdbServerLI(pkg, scanFile, cpuAbi);
                 if (result2 == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES) {
                     pkg.applicationInfo.flags |= ApplicationInfo.FLAG_NATIVE_DEBUGGABLE;
                 }
@@ -3778,6 +3797,37 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         } finally {
             inputStream.close();
+        }
+    }
+
+    // Remove the native binaries of a given package. This simply
+    // gets rid of the files in the 'lib' sub-directory.
+    private void removeNativeBinariesLI(PackageParser.Package pkg) {
+        File binaryDir = getNativeBinaryDirForPackage(pkg);
+
+        if (DEBUG_NATIVE) {
+            Slog.w(TAG,"Deleting native binaries from: " + binaryDir.getPath());
+        }
+
+        // Just remove any file in the directory. Since the directory
+        // is owned by the 'system' UID, the application is not supposed
+        // to have written anything there.
+        //
+        if (binaryDir.exists()) {
+            File[]  binaries = binaryDir.listFiles();
+            if (binaries != null) {
+                for (int nn=0; nn < binaries.length; nn++) {
+                    if (DEBUG_NATIVE) {
+                        Slog.d(TAG,"    Deleting " + binaries[nn].getName());
+                    }
+                    if (!binaries[nn].delete()) {
+                        Slog.w(TAG,"Could not delete native binary: " +
+                                binaries[nn].getPath());
+                    }
+                }
+            }
+            // Do not delete 'lib' directory itself, or this will prevent
+            // installation of future updates.
         }
     }
 
@@ -6261,6 +6311,8 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Reinstate the old system package
             mSettings.enableSystemPackageLP(p.packageName);
+            // Remove any native libraries.
+            removeNativeBinariesLI(p);
         }
         // Install the system package
         PackageParser.Package newPkg = scanPackageLI(ps.codePath,
