@@ -570,14 +570,15 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
                     PostInstallData data = mRunningInstalls.get(msg.arg1);
                     mRunningInstalls.delete(msg.arg1);
-                    boolean deleteOld = false;
 
                     if (data != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo res = data.res;
 
                         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                            res.removedInfo.sendBroadcast(false, true);
+                            res.removedInfo.sendBroadcast(false, true,
+                                    new PackageRemovedIntentReceiver(res.removedInfo.args,
+                                            res.removedInfo.args != null));
                             Bundle extras = new Bundle(1);
                             extras.putInt(Intent.EXTRA_UID, res.uid);
                             final boolean update = res.removedInfo.removedPackage != null;
@@ -591,18 +592,6 @@ class PackageManagerService extends IPackageManager.Stub {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                                         res.pkg.applicationInfo.packageName,
                                         extras, null);
-                            }
-                            if (res.removedInfo.args != null) {
-                                // Remove the replaced package's older resources safely now
-                                deleteOld = true;
-                            }
-                        }
-                        // Force a gc to clear up things
-                        Runtime.getRuntime().gc();
-                        // We delete after a gc for applications  on sdcard.
-                        if (deleteOld) {
-                            synchronized (mInstallLock) {
-                                res.removedInfo.args.doPostDeleteLI(true);
                             }
                         }
                         if (args.observer != null) {
@@ -6076,7 +6065,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
         if(res && sendBroadCast) {
             boolean systemUpdate = info.isRemovedPackageSystemUpdate;
-            info.sendBroadcast(deleteCodeAndResources, systemUpdate);
+            info.sendBroadcast(deleteCodeAndResources, systemUpdate,
+                    new PackageRemovedIntentReceiver(info.args, deleteCodeAndResources));
 
             // If the removed package was a system update, the old system packaged
             // was re-enabled; we need to broadcast this information
@@ -6089,18 +6079,29 @@ class PackageManagerService extends IPackageManager.Stub {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, extras, null);
             }
         }
-        // Force a gc here.
-        Runtime.getRuntime().gc();
-        // Delete the resources here after sending the broadcast to let
-        // other processes clean up before deleting resources.
-        if (info.args != null) {
-            synchronized (mInstallLock) {
-                info.args.doPostDeleteLI(deleteCodeAndResources);
-            }
-        }
         return res;
     }
 
+    class PackageRemovedIntentReceiver extends IIntentReceiver.Stub {
+        boolean deleteOld;
+        InstallArgs args;
+        PackageRemovedIntentReceiver(InstallArgs args, boolean deleteOld) {
+            this.args = args;
+            this.deleteOld = deleteOld;
+        }
+        @Override
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky) throws RemoteException {
+            // Force a gc to clear up things
+            Runtime.getRuntime().gc();
+            // We delete after a gc for applications  on sdcard.
+            if (deleteOld && args != null) {
+                synchronized (mInstallLock) {
+                    args.doPostDeleteLI(true);
+                }
+            }
+        }
+    }
     static class PackageRemovedInfo {
         String removedPackage;
         int uid = -1;
@@ -6109,7 +6110,8 @@ class PackageManagerService extends IPackageManager.Stub {
         // Clean up resources deleted packages.
         InstallArgs args = null;
 
-        void sendBroadcast(boolean fullRemove, boolean replacing) {
+        void sendBroadcast(boolean fullRemove, boolean replacing,
+                IIntentReceiver finishedReceiver) {
             Bundle extras = new Bundle(1);
             extras.putInt(Intent.EXTRA_UID, removedUid >= 0 ? removedUid : uid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, fullRemove);
@@ -6117,7 +6119,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
             if (removedPackage != null) {
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, extras, null);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, extras, finishedReceiver);
             }
             if (removedUid >= 0) {
                 sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, null);
@@ -9799,6 +9801,7 @@ class PackageManagerService extends IPackageManager.Stub {
                    }
                    if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                        // Send resources unavailable broadcast
+                       // TODO Add an ordered broadcast receiver here.
                        sendResourcesChangedBroadcast(false, pkgList, uidArr, null);
                        // Update package code and resource paths
                        synchronized (mInstallLock) {
@@ -9849,9 +9852,9 @@ class PackageManagerService extends IPackageManager.Stub {
                                    }
                                }
                            }
-                           // Send resources available broadcast
-                           sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
                        }
+                       // Send resources available broadcast
+                       sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
                    }
                }
                if (returnCode != PackageManager.MOVE_SUCCEEDED){
