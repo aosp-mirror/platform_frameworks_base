@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"關閉 USB 儲存裝置前，請務必先將 Android 系統的 SD 卡從電腦上卸下 (退出)。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"關閉 USB 儲存裝置"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"開啟 USB 儲存裝置"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"如果您開啟 USB 儲存裝置，則您正在使用的某些應用程式會停止運作，而且可能無法使用，待您將 USB 儲存裝置關閉才會恢復正常。"</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"USB 操作失敗"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"將 SD 卡格式化"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"確定要將 SD 卡格式化嗎？該 SD 卡中的所有資料將會遺失。"</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"選取結束車用模式。"</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"啟用數據連線"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"輕觸以設定"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>

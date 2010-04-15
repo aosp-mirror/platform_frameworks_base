@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Voordat u USB-opslag uitschakelt, moet u de SD-kaart van uw Android hebben ontkoppeld (\'uitgeworpen\') van uw computer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB-opslag uitschakelen"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Er is een probleem opgetreden tijdens het uitschakelen van de USB-opslag. Controleer of u de USB-host heeft losgekoppeld en probeer het opnieuw."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB-opslag inschakelen"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Als u USB-opslag inschakelt, worden bepaalde toepassingen die u gebruikt, gestopt en worden deze mogelijk pas weer beschikbaar wanneer u USB-opslag uitschakelt."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"USB-bewerking mislukt"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD-kaart formatteren"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecteer dit om de automodus af te sluiten."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering actief"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Aanraken om te configureren"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>

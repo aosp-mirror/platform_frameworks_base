@@ -1256,4 +1256,20 @@
   <public type="attr" name="withExpression" id="0x010102c8" />
   <public type="attr" name="withClass" id="0x010102c9" />
 
+<!-- ===============================================================
+     Resources introduced in kraken.
+     =============================================================== -->
+     
+  <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
+  <public-padding type="id" name="kraken_resource_pad" end="0x01020040" />
+  <public-padding type="anim" name="kraken_resource_pad" end="0x010a0020" />
+  <public-padding type="drawable" name="kraken_resource_pad" end="0x01080100" />
+  <public-padding type="style" name="kraken_resource_pad" end="0x01030090" />
+  <public-padding type="string" name="kraken_resource_pad" end="0x01040020" />
+  <public-padding type="integer" name="kraken_resource_pad" end="0x010e0010" />
+  <public-padding type="layout" name="kraken_resource_pad" end="0x01090020" />
+  <public-padding type="dimen" name="kraken_resource_pad" end="0x01050010" />
+  <public-padding type="color" name="kraken_resource_pad" end="0x01060020" />
+  <public-padding type="array" name="kraken_resource_pad" end="0x01070010" />
+
 </resources>
