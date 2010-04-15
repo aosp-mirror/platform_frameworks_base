@@ -1125,6 +1125,8 @@ class PowerManagerService extends IPowerManager.Stub
             mBroadcastQueue[0] = on ? 1 : 0;
             mBroadcastQueue[1] = -1;
             mBroadcastQueue[2] = -1;
+            mBroadcastWakeLock.release();
+            mBroadcastWakeLock.release();
             index = 0;
         }
         if (index == 1 && !on) {
