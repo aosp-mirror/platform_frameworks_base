@@ -15,6 +15,8 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "GraphicBufferAllocator"
+
 #include <cutils/log.h>
 
 #include <utils/Singleton.h>
@@ -61,9 +63,9 @@ void GraphicBufferAllocator::dump(String8& result) const
     const size_t c = list.size();
     for (size_t i=0 ; i<c ; i++) {
         const alloc_rec_t& rec(list.valueAt(i));
-        snprintf(buffer, SIZE, "%10p: %7.2f KiB | %4u x %4u | %2d | 0x%08x\n",
+        snprintf(buffer, SIZE, "%10p: %7.2f KiB | %4u (%4u) x %4u | %2d | 0x%08x\n",
             list.keyAt(i), rec.size/1024.0f, 
-            rec.w, rec.h, rec.format, rec.usage);
+            rec.w, rec.s, rec.h, rec.format, rec.usage);
         result.append(buffer);
         total += rec.size;
     }
@@ -71,16 +73,13 @@ void GraphicBufferAllocator::dump(String8& result) const
     result.append(buffer);
 }
 
-static inline uint32_t clamp(uint32_t c) {
-    return c>0 ? c : 1;
-}
-
 status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
         int usage, buffer_handle_t* handle, int32_t* stride)
 {
-    // make sure to not allocate a 0 x 0 buffer
-    w = clamp(w);
-    h = clamp(h);
+    // make sure to not allocate a N x 0 or 0 x N buffer, since this is
+    // allowed from an API stand-point allocate a 1x1 buffer instead.
+    if (!w || !h)
+        w = h = 1;
 
     // we have a h/w allocator and h/w buffer is requested
     status_t err; 
@@ -100,9 +99,9 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
         alloc_rec_t rec;
         rec.w = w;
         rec.h = h;
+        rec.s = *stride;
         rec.format = format;
         rec.usage = usage;
-        rec.vaddr = 0;
         rec.size = h * stride[0] * bytesPerPixel(format);
         list.add(*handle, rec);
     } else {
