@@ -222,6 +222,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // Wakelocks
     private final static String WAKELOCK_KEY = "GpsLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
+    // bitfield of pending messages to our Handler
+    // used only for messages that cannot have multiple instances queued
+    private int mPendingMessageBits;
+    // separate counter for ADD_LISTENER and REMOVE_LISTENER messages,
+    // which might have multiple instances queued
+    private int mPendingListenerMessages;
 
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
@@ -323,6 +329,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         // Create a wake lock
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+        mWakeLock.setReferenceCounted(false);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
@@ -401,11 +408,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void updateNetworkState(int state, NetworkInfo info) {
-        mHandler.removeMessages(UPDATE_NETWORK_STATE);
-        Message m = Message.obtain(mHandler, UPDATE_NETWORK_STATE);
-        m.arg1 = state;
-        m.obj = info;
-        mHandler.sendMessage(m);
+        sendMessage(UPDATE_NETWORK_STATE, state, info);
     }
 
     private void handleUpdateNetworkState(int state, NetworkInfo info) {
@@ -434,12 +437,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         if (mNetworkAvailable) {
             if (mInjectNtpTimePending) {
-                mHandler.removeMessages(INJECT_NTP_TIME);
-                mHandler.sendMessage(Message.obtain(mHandler, INJECT_NTP_TIME));
+                sendMessage(INJECT_NTP_TIME, 0, null);
             }
             if (mDownloadXtraDataPending) {
-                mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
-                mHandler.sendMessage(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA));
+                sendMessage(DOWNLOAD_XTRA_DATA, 0, null);
             }
         }
     }
@@ -485,6 +486,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         // send delayed message for next NTP injection
+        // since this is delayed and not urgent we do not hold a wake lock here
         mHandler.removeMessages(INJECT_NTP_TIME);
         mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
     }
@@ -507,6 +509,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             native_inject_xtra_data(data, data.length);
         } else {
             // try again later
+            // since this is delayed and not urgent we do not hold a wake lock here
             mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
             mHandler.sendMessageDelayed(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA), RETRY_INTERVAL);
         }
@@ -517,10 +520,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * Someday we might use this for network location injection to aid the GPS
      */
     public void updateLocation(Location location) {
-        mHandler.removeMessages(UPDATE_LOCATION);
-        Message m = Message.obtain(mHandler, UPDATE_LOCATION);
-        m.obj = location;
-        mHandler.sendMessage(m);
+        sendMessage(UPDATE_LOCATION, 0, location);
     }
 
     private void handleUpdateLocation(Location location) {
@@ -614,10 +614,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
      */
     public void enable() {
         synchronized (mHandler) {
-            mHandler.removeMessages(ENABLE);
-            Message m = Message.obtain(mHandler, ENABLE);
-            m.arg1 = 1;
-            mHandler.sendMessage(m);
+            sendMessage(ENABLE, 1, null);
         }
     }
 
@@ -649,10 +646,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
      */
     public void disable() {
         synchronized (mHandler) {
-            mHandler.removeMessages(ENABLE);
-            Message m = Message.obtain(mHandler, ENABLE);
-            m.arg1 = 0;
-            mHandler.sendMessage(m);
+            sendMessage(ENABLE, 0, null);
         }
     }
 
@@ -713,10 +707,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     public void enableLocationTracking(boolean enable) {
         synchronized (mHandler) {
-            mHandler.removeMessages(ENABLE_TRACKING);
-            Message m = Message.obtain(mHandler, ENABLE_TRACKING);
-            m.arg1 = (enable ? 1 : 0);
-            mHandler.sendMessage(m);
+            sendMessage(ENABLE_TRACKING, (enable ? 1 : 0), null);
         }
     }
 
@@ -770,9 +761,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void addListener(int uid) {
-        Message m = Message.obtain(mHandler, ADD_LISTENER);
-        m.arg1 = uid;
-        mHandler.sendMessage(m);
+        synchronized (mWakeLock) {
+            mPendingListenerMessages++;
+           mWakeLock.acquire();
+            Message m = Message.obtain(mHandler, ADD_LISTENER);
+            m.arg1 = uid;
+            mHandler.sendMessage(m);
+        }
     }
 
     private void handleAddListener(int uid) {
@@ -794,9 +789,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void removeListener(int uid) {
-        Message m = Message.obtain(mHandler, REMOVE_LISTENER);
-        m.arg1 = uid;
-        mHandler.sendMessage(m);
+        synchronized (mWakeLock) {
+            mPendingListenerMessages++;
+            mWakeLock.acquire();
+            Message m = Message.obtain(mHandler, REMOVE_LISTENER);
+            m.arg1 = uid;
+            mHandler.sendMessage(m);
+        }
     }
 
     private void handleRemoveListener(int uid) {
@@ -823,8 +822,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             return deleteAidingData(extras);
         }
         if ("force_time_injection".equals(command)) {
-            mHandler.removeMessages(INJECT_NTP_TIME);
-            mHandler.sendMessage(Message.obtain(mHandler, INJECT_NTP_TIME));
+            sendMessage(INJECT_NTP_TIME, 0, null);
             return true;
         }
         if ("force_xtra_injection".equals(command)) {
@@ -1037,12 +1035,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     break;
             }
 
-            // beware, the events can come out of order
-            if ((mNavigating || mEngineOn) && !mWakeLock.isHeld()) {
-                if (DEBUG) Log.d(TAG, "Acquiring wakelock");
-                 mWakeLock.acquire();
-            }
-
             if (wasNavigating != mNavigating) {
                 int size = mListeners.size();
                 for (int i = 0; i < size; i++) {
@@ -1079,12 +1071,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
                 intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, mNavigating);
                 mContext.sendBroadcast(intent);
-            }
-
-            // beware, the events can come out of order
-            if (!mNavigating && !mEngineOn && mWakeLock.isHeld()) {
-                if (DEBUG) Log.d(TAG, "Releasing wakelock");
-                mWakeLock.release();
             }
         }
     }
@@ -1213,8 +1199,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
      */
     private void xtraDownloadRequest() {
         if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
-        mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
-        mHandler.sendMessage(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA));
+        sendMessage(DOWNLOAD_XTRA_DATA, 0, null);
     }
 
     //=============================================================
@@ -1329,11 +1314,25 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
+    private void sendMessage(int message, int arg, Object obj) {
+        // hold a wake lock while messages are pending
+        synchronized (mWakeLock) {
+            mPendingMessageBits |= (1 << message);
+            mWakeLock.acquire();
+            mHandler.removeMessages(message);
+            Message m = Message.obtain(mHandler, message);
+            m.arg1 = arg;
+            m.obj = obj;
+            mHandler.sendMessage(m);
+        }
+    }
+
     private final class ProviderHandler extends Handler {
         @Override
         public void handleMessage(Message msg)
         {
-            switch (msg.what) {
+            int message = msg.what;
+            switch (message) {
                 case ENABLE:
                     if (msg.arg1 == 1) {
                         handleEnable();
@@ -1364,6 +1363,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 case REMOVE_LISTENER:
                     handleRemoveListener(msg.arg1);
                     break;
+            }
+            // release wake lock if no messages are pending
+            synchronized (mWakeLock) {
+                mPendingMessageBits &= ~(1 << message);
+                if (message == ADD_LISTENER || message == REMOVE_LISTENER) {
+                    mPendingListenerMessages--;
+                }
+                if (mPendingMessageBits == 0 && mPendingListenerMessages == 0) {
+                    mWakeLock.release();
+                }
             }
         }
     };
