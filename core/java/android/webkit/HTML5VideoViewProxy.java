@@ -132,6 +132,7 @@ class HTML5VideoViewProxy extends Handler
                     if (mVideoView.isPlaying()) {
                         mVideoView.stopPlayback();
                     }
+                    mCurrentProxy.dispatchOnEnded();
                     mCurrentProxy = null;
                     mLayout.removeView(mVideoView);
                     mVideoView = null;
@@ -154,7 +155,7 @@ class HTML5VideoViewProxy extends Handler
 
             if (mCurrentProxy != null) {
                 // Some other video is already playing. Notify the caller that its playback ended.
-                proxy.playbackEnded();
+                proxy.dispatchOnEnded();
                 return;
             }
 
@@ -245,7 +246,10 @@ class HTML5VideoViewProxy extends Handler
 
     // MediaPlayer.OnCompletionListener;
     public void onCompletion(MediaPlayer mp) {
-        playbackEnded();
+        // The video ended by itself, so we need to
+        // send a message to the UI thread to dismiss
+        // the video view and to return to the WebView.
+        sendMessage(obtainMessage(ENDED));
     }
 
     // MediaPlayer.OnErrorListener
@@ -254,11 +258,9 @@ class HTML5VideoViewProxy extends Handler
         return false;
     }
 
-    public void playbackEnded() {
+    public void dispatchOnEnded() {
         Message msg = Message.obtain(mWebCoreHandler, ENDED);
         mWebCoreHandler.sendMessage(msg);
-        // also send a message to ourselves to return to the WebView
-        sendMessage(obtainMessage(ENDED));
     }
 
     public void onTimeupdate() {
