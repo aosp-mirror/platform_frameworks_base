@@ -81,6 +81,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_POSITION_MODE_MS_BASED = 1;
     private static final int GPS_POSITION_MODE_MS_ASSISTED = 2;
 
+    // these need to match GpsPositionRecurrence enum in gps.h
+    private static final int GPS_POSITION_RECURRENCE_PERIODIC = 0;
+    private static final int GPS_POSITION_RECURRENCE_SINGLE = 1;
+
     // these need to match GpsStatusValue defines in gps.h
     private static final int GPS_STATUS_NONE = 0;
     private static final int GPS_STATUS_SESSION_BEGIN = 1;
@@ -119,6 +123,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_DELETE_CELLDB_INFO = 0x8000;
     private static final int GPS_DELETE_ALL = 0xFFFF;
 
+    // The GPS_CAPABILITY_* flags must match the values in gps.h
+    private static final int GPS_CAPABILITY_SCHEDULING = 0x0000001;
+    private static final int GPS_CAPABILITY_MSB = 0x0000002;
+    private static final int GPS_CAPABILITY_MSA = 0x0000004;
+    private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
+
+
     // these need to match AGpsType enum in gps.h
     private static final int AGPS_TYPE_SUPL = 1;
     private static final int AGPS_TYPE_C2K = 2;
@@ -150,13 +161,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private long mStatusUpdateTime = SystemClock.elapsedRealtime();
     
     // turn off GPS fix icon if we haven't received a fix in 10 seconds
-    private static final long RECENT_FIX_TIMEOUT = 10;
+    private static final long RECENT_FIX_TIMEOUT = 10 * 1000;
     
     // number of fixes to receive before disabling GPS
     private static final int MIN_FIX_COUNT = 10;
 
     // stop trying if we do not receive a fix within 60 seconds
-    private static final int NO_FIX_TIMEOUT = 60;
+    private static final int NO_FIX_TIMEOUT = 60 * 1000;
 
     // true if we are enabled
     private volatile boolean mEnabled;
@@ -175,8 +186,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // true if GPS engine is on
     private boolean mEngineOn;
     
-    // requested frequency of fixes, in seconds
-    private int mFixInterval = 1;
+    // requested frequency of fixes, in milliseconds
+    private int mFixInterval = 1000;
 
     // number of fixes we have received since we started navigating
     private int mFixCount;
@@ -184,12 +195,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // true if we started navigation
     private boolean mStarted;
 
+    // capabilities of the GPS engine
+    private int mEngineCapabilities;
+
     // for calculating time to first fix
     private long mFixRequestTime = 0;
     // time to first fix for most recent session
     private int mTTFF = 0;
     // time we received our last fix
     private long mLastFixTime;
+
+    private int mPositionMode;
 
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
@@ -717,8 +733,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
             mLastFixTime = 0;
             startNavigating();
         } else {
-            mAlarmManager.cancel(mWakeupIntent);
-            mAlarmManager.cancel(mTimeoutIntent);
+            if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
+                mAlarmManager.cancel(mWakeupIntent);
+                mAlarmManager.cancel(mTimeoutIntent);
+            }
             stopNavigating();
         }
     }
@@ -727,11 +745,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (DEBUG) Log.d(TAG, "setMinTime " + minTime);
         
         if (minTime >= 0) {
-            int interval = (int)(minTime/1000);
-            if (interval < 1) {
-                interval = 1;
+            mFixInterval = (int)minTime;
+
+            if (mStarted && hasCapability(GPS_CAPABILITY_SCHEDULING)) {
+                if (!native_set_position_mode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
+                        mFixInterval, 0, 0)) {
+                    Log.e(TAG, "set_position_mode failed in setMinTime()");
+                }
             }
-            mFixInterval = interval;
         }
     }
 
@@ -871,15 +892,22 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (!mStarted) {
             if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
-            int positionMode;
-            if (Settings.Secure.getInt(mContext.getContentResolver(),
+            if (hasCapability(GPS_CAPABILITY_MSB) &&
+                Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ASSISTED_GPS_ENABLED, 1) != 0) {
-                positionMode = GPS_POSITION_MODE_MS_BASED;
+                mPositionMode = GPS_POSITION_MODE_MS_BASED;
             } else {
-                positionMode = GPS_POSITION_MODE_STANDALONE;
+                mPositionMode = GPS_POSITION_MODE_STANDALONE;
             }
 
-            if (!native_start(positionMode, false, 1)) {
+            int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
+            if (!native_set_position_mode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
+                    interval, 0, 0)) {
+                mStarted = false;
+                Log.e(TAG, "set_position_mode failed in startNavigating()");
+                return;
+            }
+            if (!native_start()) {
                 mStarted = false;
                 Log.e(TAG, "native_start failed in startNavigating()");
                 return;
@@ -889,11 +917,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
             mFixCount = 0;
             mFixRequestTime = System.currentTimeMillis();
-            // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
-            // and our fix interval is not short
-            if (mFixInterval >= NO_FIX_TIMEOUT) {
-                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT * 1000, mTimeoutIntent);
+            if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
+                // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
+                // and our fix interval is not short
+                if (mFixInterval >= NO_FIX_TIMEOUT) {
+                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
+                }
             }
         }
     }
@@ -920,7 +950,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mAlarmManager.cancel(mWakeupIntent);
         long now = SystemClock.elapsedRealtime();
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + mFixInterval * 1000, mWakeupIntent);
+                SystemClock.elapsedRealtime() + mFixInterval, mWakeupIntent);
+    }
+
+    private boolean hasCapability(int capability) {
+        return ((mEngineCapabilities & capability) != 0);
     }
 
     /**
@@ -992,7 +1026,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
             // we still want to time out if we do not receive MIN_FIX_COUNT
             // within the time out and we are requesting infrequent fixes
-            if (mFixInterval < NO_FIX_TIMEOUT) {
+            if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval < NO_FIX_TIMEOUT) {
                 mAlarmManager.cancel(mTimeoutIntent);
             }
 
@@ -1003,7 +1037,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
 
-        if (mFixCount++ >= MIN_FIX_COUNT && mFixInterval > 1) {
+       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) &&
+                mFixCount++ >= MIN_FIX_COUNT && mFixInterval > 1000) {
             if (DEBUG) Log.d(TAG, "exceeded MIN_FIX_COUNT");
             hibernate();
         }
@@ -1117,7 +1152,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         updateStatus(mStatus, svCount);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
-            System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT * 1000) {
+            System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
             // send an intent to notify that the GPS is no longer receiving fixes.
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
@@ -1192,6 +1227,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 }
             }
         }
+    }
+
+    /**
+     * called from native code to inform us what the GPS engine capabilities are
+     */
+    private void setEngineCapabilities(int capabilities) {
+        mEngineCapabilities = capabilities;
     }
 
     /**
@@ -1417,9 +1459,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private native boolean native_init();
     private native void native_disable();
     private native void native_cleanup();
-    private native boolean native_start(int positionMode, boolean singleFix, int fixInterval);
+    private native boolean native_set_position_mode(int mode, int recurrence, int min_interval,
+            int preferred_accuracy, int preferred_time);
+    private native boolean native_start();
     private native boolean native_stop();
-    private native void native_set_fix_frequency(int fixFrequency);
     private native void native_delete_aiding_data(int flags);
     private native void native_wait_for_event();
     // returns number of SVs
