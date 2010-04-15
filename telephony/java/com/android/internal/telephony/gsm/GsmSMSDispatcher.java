@@ -57,6 +57,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
      * @param ar AsyncResult passed into the message handler.  ar.result should
      *           be a String representing the status report PDU, as ASCII hex.
      */
+    @Override
     protected void handleStatusReport(AsyncResult ar) {
         String pduString = (String) ar.result;
         SmsMessage sms = SmsMessage.newFromCDS(pduString);
@@ -85,6 +86,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
 
     /** {@inheritDoc} */
+    @Override
     protected int dispatchMessage(SmsMessageBase smsb) {
 
         // If sms is null, means there was a parsing error.
@@ -145,6 +147,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void sendData(String destAddr, String scAddr, int destPort,
             byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
         SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
@@ -153,6 +156,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void sendText(String destAddr, String scAddr, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
@@ -161,6 +165,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void sendMultipartText(String destinationAddress, String scAddress,
             ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
             ArrayList<PendingIntent> deliveryIntents) {
@@ -300,8 +305,9 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void sendSms(SmsTracker tracker) {
-        HashMap map = tracker.mData;
+        HashMap<String, Object> map = tracker.mData;
 
         byte smsc[] = (byte[]) map.get("smsc");
         byte pdu[] = (byte[]) map.get("pdu");
@@ -316,12 +322,13 @@ final class GsmSMSDispatcher extends SMSDispatcher {
      *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
+    @Override
     protected void sendMultipartSms (SmsTracker tracker) {
         ArrayList<String> parts;
         ArrayList<PendingIntent> sentIntents;
         ArrayList<PendingIntent> deliveryIntents;
 
-        HashMap map = tracker.mData;
+        HashMap<String, Object> map = tracker.mData;
 
         String destinationAddress = (String) map.get("destination");
         String scAddress = (String) map.get("scaddress");
@@ -336,6 +343,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void acknowledgeLastIncomingSms(boolean success, int result, Message response){
         // FIXME unit test leaves cm == null. this should change
         if (mCm != null) {
@@ -344,6 +352,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void activateCellBroadcastSms(int activate, Message response) {
         // Unless CBS is implemented for GSM, this point should be unreachable.
         Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
@@ -351,6 +360,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void getCellBroadcastSmsConfig(Message response){
         // Unless CBS is implemented for GSM, this point should be unreachable.
         Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
@@ -358,6 +368,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected  void setCellBroadcastConfig(int[] configValuesArray, Message response) {
         // Unless CBS is implemented for GSM, this point should be unreachable.
         Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");

@@ -21,7 +21,6 @@ import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
 
 import android.util.Log;
-import android.util.SparseIntArray;
 
 import android.telephony.SmsMessage;
 
@@ -33,7 +32,6 @@ import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
-import com.android.internal.util.HexDump;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 
@@ -45,7 +43,7 @@ public final class BearerData {
     private final static String LOG_TAG = "SMS";
 
     /**
-     * Bearer Data Subparameter Indentifiers
+     * Bearer Data Subparameter Identifiers
      * (See 3GPP2 C.S0015-B, v2.0, table 4.5-1)
      * NOTE: Commented subparameter types are not implemented.
      */
@@ -802,9 +800,9 @@ public final class BearerData {
      * Create serialized representation for BearerData object.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
      *
-     * @param bearerData an instance of BearerData.
+     * @param bData an instance of BearerData.
      *
-     * @return data byta array of raw encoded SMS bearer data.
+     * @return data byte array of raw encoded SMS bearer data.
      */
     public static byte[] encode(BearerData bData) {
         bData.hasUserDataHeader = ((bData.userData != null) &&

@@ -747,10 +747,10 @@ public class PhoneNumberUtils
         if (prependPlus) {
             // This is an "international number" and should have
             // a plus prepended to the dialing number. But there
-            // can also be Gsm MMI codes as defined in TS 22.030 6.5.2
+            // can also be GSM MMI codes as defined in TS 22.030 6.5.2
             // so we need to handle those also.
             //
-            // http://web.telia.com/~u47904776/gsmkode.htm is a
+            // http://web.telia.com/~u47904776/gsmkode.htm
             // has a nice list of some of these GSM codes.
             //
             // Examples are:
@@ -838,10 +838,10 @@ public class PhoneNumberUtils
 
             // FIXME(mkf) TS 23.040 9.1.2.3 says
             // "if a mobile receives 1111 in a position prior to
-            // the last semi-octet then processing shall commense with
+            // the last semi-octet then processing shall commence with
             // the next semi-octet and the intervening
             // semi-octet shall be ignored"
-            // How does this jive with 24,008 10.5.4.7
+            // How does this jive with 24.008 10.5.4.7
 
             b = (byte)((bytes[i] >> 4) & 0xf);
 
@@ -972,7 +972,7 @@ public class PhoneNumberUtils
      * Convert a dialing number to BCD byte array
      *
      * @param number dialing number string
-     *        if the dialing number starts with '+', set to internationl TOA
+     *        if the dialing number starts with '+', set to international TOA
      * @return BCD byte array
      */
     public static byte[]
@@ -1076,10 +1076,10 @@ public class PhoneNumberUtils
      *
      * @param source the phone number to format
      * @param defaultFormattingType The default formatting rules to apply if the number does
-     * not begin with +<country_code>
+     * not begin with +[country_code]
      * @return The phone number formatted with the given formatting type.
      *
-     * @hide TODO:Shuold be unhidden.
+     * @hide TODO: Should be unhidden.
      */
     public static String formatNumber(String source, int defaultFormattingType) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
@@ -1106,7 +1106,7 @@ public class PhoneNumberUtils
      *
      * @param text The number to be formatted, will be modified with the formatting
      * @param defaultFormattingType The default formatting rules to apply if the number does
-     * not begin with +<country_code>
+     * not begin with +[country_code]
      */
     public static void formatNumber(Editable text, int defaultFormattingType) {
         int formatType = defaultFormattingType;
@@ -1502,7 +1502,7 @@ public class PhoneNumberUtils
      * @hide
      */
     public static String
-    cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int currFormat,int defaultFormt) {
+    cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int currFormat,int defaultFormat) {
         String retStr = dialStr;
 
         // Checks if the plus sign character is in the passed-in dial string
@@ -1510,7 +1510,7 @@ public class PhoneNumberUtils
             dialStr.lastIndexOf(PLUS_SIGN_STRING) != -1) {
             // Format the string based on the rules for the country the number is from,
             // and the current country the phone is camped on.
-            if ((currFormat == defaultFormt) && (currFormat == FORMAT_NANP)) {
+            if ((currFormat == defaultFormat) && (currFormat == FORMAT_NANP)) {
                 // Handle case where default and current telephone numbering plans are NANP.
                 String postDialStr = null;
                 String tempDialStr = dialStr;
@@ -1688,7 +1688,7 @@ public class PhoneNumberUtils
         return -1;
     }
 
-    // This function appends the non-diablable P/W character to the original
+    // This function appends the non-dialable P/W character to the original
     // dial string based on the dialable index passed in
     private static String
     appendPwCharBackToOrigDialStr(int dialableIndex,String origStr, String dialStr) {
@@ -1708,7 +1708,7 @@ public class PhoneNumberUtils
         return retStr;
     }
 
-    //===== Begining of utility methods used in compareLoosely() =====
+    //===== Beginning of utility methods used in compareLoosely() =====
 
     /**
      * Phone numbers are stored in "lookup" form in the database
@@ -1830,12 +1830,12 @@ public class PhoneNumberUtils
 
     //===== End of utility methods used only in compareLoosely() =====
 
-    //===== Beggining of utility methods used only in compareStrictly() ====
+    //===== Beginning of utility methods used only in compareStrictly() ====
 
     /*
      * If true, the number is country calling code.
      */
-    private static final boolean COUNTLY_CALLING_CALL[] = {
+    private static final boolean COUNTRY_CALLING_CALL[] = {
         true, true, false, false, false, false, false, true, false, false,
         false, false, false, false, false, false, false, false, false, false,
         true, false, false, false, false, false, false, true, true, false,
@@ -1847,18 +1847,18 @@ public class PhoneNumberUtils
         false, true, true, true, true, false, true, false, false, true,
         true, true, true, true, true, true, false, false, true, false,
     };
-    private static final int CCC_LENGTH = COUNTLY_CALLING_CALL.length;
+    private static final int CCC_LENGTH = COUNTRY_CALLING_CALL.length;
 
     /**
      * @return true when input is valid Country Calling Code.
      */
     private static boolean isCountryCallingCode(int countryCallingCodeCandidate) {
         return countryCallingCodeCandidate > 0 && countryCallingCodeCandidate < CCC_LENGTH &&
-                COUNTLY_CALLING_CALL[countryCallingCodeCandidate];
+                COUNTRY_CALLING_CALL[countryCallingCodeCandidate];
     }
 
     /**
-     * Returns interger corresponding to the input if input "ch" is
+     * Returns integer corresponding to the input if input "ch" is
      * ISO-LATIN characters 0-9.
      * Returns -1 otherwise
      */
@@ -1993,7 +1993,7 @@ public class PhoneNumberUtils
 
     /**
      * Return true if the prefix of "str" is "ignorable". Here, "ignorable" means
-     * that "str" has only one digit and separater characters. The one digit is
+     * that "str" has only one digit and separator characters. The one digit is
      * assumed to be trunk prefix.
      */
     private static boolean checkPrefixIsIgnorable(final String str,

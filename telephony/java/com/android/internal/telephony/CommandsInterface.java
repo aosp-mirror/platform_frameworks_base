@@ -27,8 +27,8 @@ import android.os.Handler;
  */
 public interface CommandsInterface {
     enum RadioState {
-        RADIO_OFF,         /* Radio explictly powered off (eg CFUN=0) */
-        RADIO_UNAVAILABLE, /* Radio unavailable (eg, resetting or not booted) */
+        RADIO_OFF,         /* Radio explicitly powered off (e.g. CFUN=0) */
+        RADIO_UNAVAILABLE, /* Radio unavailable (e.g. resetting or not booted) */
         SIM_NOT_READY,     /* Radio is on, but the SIM interface is not ready */
         SIM_LOCKED_OR_ABSENT,  /* SIM PIN locked, PUK required, network
                                personalization, or SIM absent */
@@ -121,7 +121,7 @@ public interface CommandsInterface {
     // See 27.007 +CCFC or +CLCK
     static final int SERVICE_CLASS_NONE     = 0; // no user input
     static final int SERVICE_CLASS_VOICE    = (1 << 0);
-    static final int SERVICE_CLASS_DATA     = (1 << 1); //synoym for 16+32+64+128
+    static final int SERVICE_CLASS_DATA     = (1 << 1); //synonym for 16+32+64+128
     static final int SERVICE_CLASS_FAX      = (1 << 2);
     static final int SERVICE_CLASS_SMS      = (1 << 3);
     static final int SERVICE_CLASS_DATA_SYNC = (1 << 4);
@@ -939,19 +939,19 @@ public interface CommandsInterface {
     void writeSmsToRuim(int status, String pdu, Message response);
 
     /**
-     * @deprecated
      * @param apn
      * @param user
      * @param password
      * @param response
      */
+    @Deprecated
     void setupDefaultPDP(String apn, String user, String password, Message response);
 
     /**
-     * @deprecated
      * @param cid
      * @param response
      */
+    @Deprecated
     void deactivateDefaultPDP(int cid, Message response);
 
     void setRadioPower(boolean on, Message response);
@@ -961,7 +961,7 @@ public interface CommandsInterface {
     void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message response);
 
     /**
-     * parameters equivilient to 27.007 AT+CRSM command
+     * parameters equivalent to 27.007 AT+CRSM command
      * response.obj will be an AsyncResult
      * response.obj.userObj will be a IccIoResult on success
      */
@@ -1066,7 +1066,7 @@ public interface CommandsInterface {
 
     /**
      * (AsyncResult)response.obj).result will be an Integer representing
-     * the sum of enabled serivice classes (sum of SERVICE_CLASS_*)
+     * the sum of enabled service classes (sum of SERVICE_CLASS_*)
      *
      * @param facility one of CB_FACILTY_*
      * @param password password or "" if not required
@@ -1139,7 +1139,7 @@ public interface CommandsInterface {
 
     /**
      * Request to enable/disable network state change notifications when
-     * location informateion (lac and/or cid) has changed.
+     * location information (lac and/or cid) has changed.
      *
      * @param enable true to enable, false to disable
      * @param response callback message
@@ -1170,7 +1170,7 @@ public interface CommandsInterface {
 
     /**
      * Indicates to the vendor ril that StkService is running
-     * rand is eady to receive RIL_UNSOL_STK_XXXX commands.
+     * and is ready to receive RIL_UNSOL_STK_XXXX commands.
      *
      * @param result callback message
      */

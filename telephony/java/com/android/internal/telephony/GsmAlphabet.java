@@ -16,14 +16,13 @@
 
 package com.android.internal.telephony;
 
-import android.telephony.SmsMessage;
 import android.util.SparseIntArray;
 
 import android.util.Log;
 
 /**
  * This class implements the character set mapping between
- * the GSM SMS 7-bit alphabet specifed in TS 23.038 6.2.1
+ * the GSM SMS 7-bit alphabet specified in TS 23.038 6.2.1
  * and UTF-16
  *
  * {@hide}
@@ -171,7 +170,7 @@ public class GsmAlphabet {
      * array cannot contain more than 255 septets.
      *
      * @param data The text string to encode.
-     * @param header Optional header (includeing length byte) that precedes
+     * @param header Optional header (including length byte) that precedes
      * the encoded data, padded to septet boundary.
      * @return Byte array containing header and encoded data.
      */
@@ -204,7 +203,7 @@ public class GsmAlphabet {
      * the packed septets. The returned array cannot contain more than 255
      * septets.
      *
-     * @param data the data string to endcode
+     * @param data the data string to encode
      * @throws EncodeException if String is too large to encode
      */
     public static byte[] stringToGsm7BitPacked(String data)
@@ -223,7 +222,7 @@ public class GsmAlphabet {
      *
      * @param data the text to convert to septets
      * @param startingSeptetOffset the number of padding septets to put before
-     *  the character data at the begining of the array
+     *  the character data at the beginning of the array
      * @param throwException If true, throws EncodeException on invalid char.
      *   If false, replaces unencodable char with GSM alphabet space char.
      *
@@ -257,7 +256,7 @@ public class GsmAlphabet {
     }
 
     /**
-     * Pack a 7-bit char into its appropirate place in a byte array
+     * Pack a 7-bit char into its appropriate place in a byte array
      *
      * @param bitOffset the bit offset that the septet should be packed at
      *                  (septet index * 7)

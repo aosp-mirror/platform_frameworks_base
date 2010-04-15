@@ -142,7 +142,7 @@ public abstract class SMSDispatcher extends Handler {
 
     private SmsCounter mCounter;
 
-    private ArrayList mSTrackers = new ArrayList(MO_MSG_QUEUE_LIMIT);
+    private ArrayList<SmsTracker> mSTrackers = new ArrayList<SmsTracker>(MO_MSG_QUEUE_LIMIT);
 
     /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
     private PowerManager.WakeLock mWakeLock;
@@ -264,6 +264,7 @@ public abstract class SMSDispatcher extends Handler {
         mCm.unregisterForOn(this);
     }
 
+    @Override
     protected void finalize() {
         Log.d(TAG, "SMSDispatcher finalized");
     }
@@ -344,7 +345,7 @@ public abstract class SMSDispatcher extends Handler {
             msg.obj = null;
             if (mSTrackers.isEmpty() == false) {
                 try {
-                    SmsTracker sTracker = (SmsTracker)mSTrackers.remove(0);
+                    SmsTracker sTracker = mSTrackers.remove(0);
                     sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
                 } catch (CanceledException ex) {
                     Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
@@ -357,7 +358,7 @@ public abstract class SMSDispatcher extends Handler {
 
         case EVENT_SEND_CONFIRMED_SMS:
             if (mSTrackers.isEmpty() == false) {
-                SmsTracker sTracker = (SmsTracker)mSTrackers.remove(mSTrackers.size() - 1);
+                SmsTracker sTracker = mSTrackers.remove(mSTrackers.size() - 1);
                 if (isMultipartTracker(sTracker)) {
                     sendMultipartSms(sTracker);
                 } else {
@@ -371,7 +372,7 @@ public abstract class SMSDispatcher extends Handler {
             if (mSTrackers.isEmpty() == false) {
                 // Remove the latest one.
                 try {
-                    SmsTracker sTracker = (SmsTracker)mSTrackers.remove(mSTrackers.size() - 1);
+                    SmsTracker sTracker = mSTrackers.remove(mSTrackers.size() - 1);
                     sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
                 } catch (CanceledException ex) {
                     Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
@@ -671,7 +672,7 @@ public abstract class SMSDispatcher extends Handler {
      * @param destPort the port to deliver the message to
      * @param data the body of the message to send
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
+     *  broadcast when the message is successfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
      *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
@@ -681,7 +682,7 @@ public abstract class SMSDispatcher extends Handler {
      *  the extra "errorCode" containing a radio technology specific value,
      *  generally only useful for troubleshooting.<br>
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is delivered to the recipient.  The
@@ -698,7 +699,7 @@ public abstract class SMSDispatcher extends Handler {
      *  the current default SMSC
      * @param text the body of the message to send
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
+     *  broadcast when the message is successfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
      *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
@@ -734,7 +735,7 @@ public abstract class SMSDispatcher extends Handler {
      *   <code>RESULT_ERROR_RADIO_OFF</code>
      *   <code>RESULT_ERROR_NULL_PDU</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
      *   <code>PendingIntent</code>s (one for each message part) that is
@@ -750,17 +751,17 @@ public abstract class SMSDispatcher extends Handler {
      * Send a SMS
      *
      * @param smsc the SMSC to send the message through, or NULL for the
-     *  defatult SMSC
+     *  default SMSC
      * @param pdu the raw PDU to send
      * @param sentIntent if not NULL this <code>Intent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
+     *  broadcast when the message is successfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
      *  or one of these errors:
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
      *  <code>RESULT_ERROR_RADIO_OFF</code>
      *  <code>RESULT_ERROR_NULL_PDU</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntent if not NULL this <code>Intent</code> is
      *  broadcast when the message is delivered to the recipient.  The
@@ -929,14 +930,14 @@ public abstract class SMSDispatcher extends Handler {
      */
     static protected class SmsTracker {
         // fields need to be public for derived SmsDispatchers
-        public HashMap mData;
+        public HashMap<String, Object> mData;
         public int mRetryCount;
         public int mMessageRef;
 
         public PendingIntent mSentIntent;
         public PendingIntent mDeliveryIntent;
 
-        SmsTracker(HashMap data, PendingIntent sentIntent,
+        SmsTracker(HashMap<String, Object> data, PendingIntent sentIntent,
                 PendingIntent deliveryIntent) {
             mData = data;
             mSentIntent = sentIntent;
@@ -945,7 +946,7 @@ public abstract class SMSDispatcher extends Handler {
         }
     }
 
-    protected SmsTracker SmsTrackerFactory(HashMap data, PendingIntent sentIntent,
+    protected SmsTracker SmsTrackerFactory(HashMap<String, Object> data, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
         return new SmsTracker(data, sentIntent, deliveryIntent);
     }
