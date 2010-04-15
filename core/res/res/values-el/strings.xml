@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Προτού απενεργοποιήσετε το χώρο αποθήκευσης USB, βεβαιωθείτε ότι έχετε αποσυνδέσει (“αφαιρέσει”) την κάρτα SD του Android από τον υπολογιστή σας."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Απενεργοποίηση χώρου αποθήκευσης USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Παρουσιάστηκε πρόβλημα κατά την απενεργοποίηση του αποθηκευτικού χώρου USB. Βεβαιωθείτε ότι έχετε αφαιρέσει την υποδοχή USB και προσπαθήστε ξανά."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ενεργοποίηση αποθηκευτικού χώρου USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Εάν ενεργοποιήσετε τον αποθηκευτικό χώρο USB, ορισμένες από τις εφαρμογές που χρησιμοποιείτε θα σταματήσουν και ενδέχεται να μην είναι διαθέσιμες μέχρι να απενεργοποιήσετε τον αποθηκευτικό χώρο USB."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"Απέτυχε η λειτουργία USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ΟΚ"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Διαμόρφωση κάρτας SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Είστε βέβαιοι ότι θέλετε να διαμορφώσετε την κάρτα SD; Όλα τα δεδομένα στην κάρτα σας θα χαθούν."</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Επιλέξτε για έξοδο από τη λειτουργία αυτοκινήτου."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Η σύνδεση μέσω κινητής συσκευής είναι ενεργή"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Αγγίξτε για να γίνει διαμόρφωση"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>
