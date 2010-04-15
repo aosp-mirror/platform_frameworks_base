@@ -31,8 +31,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
- * A Service is an application component that runs in the background, not
- * interacting with the user, for an indefinite period of time.  Each service
+ * A Service is an application component representing either an application's desire
+ * to perform a longer-running operation while not interacting with the user
+ * or to supply functionality for other applications to use.  Each service
  * class must have a corresponding
  * {@link android.R.styleable#AndroidManifestService &lt;service&gt;}
  * declaration in its package's <code>AndroidManifest.xml</code>.  Services
@@ -46,19 +47,64 @@ import java.io.PrintWriter;
  * networking) operations, it should spawn its own thread in which to do that
  * work.  More information on this can be found in
  * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
- * Processes and Threads</a>.</p>
+ * Processes and Threads</a>.  The {@link IntentService} class is available
+ * as a standard implementation of Service that has its own thread where it
+ * schedules its work to be done.</p>
  * 
  * <p>The Service class is an important part of an
  * <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">application's overall lifecycle</a>.</p>
  * 
  * <p>Topics covered here:
  * <ol>
+ * <li><a href="#WhatIsAService">What is a Service?</a>
  * <li><a href="#ServiceLifecycle">Service Lifecycle</a>
  * <li><a href="#Permissions">Permissions</a>
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
  * <li><a href="#LocalServiceSample">Local Service Sample</a>
  * <li><a href="#RemoteMessengerServiceSample">Remote Messenger Service Sample</a>
  * </ol>
+ * 
+ * <a name="WhatIsAService"></a>
+ * <h3>What is a Service?</h3>
+ * 
+ * <p>Most confusion about the Service class actually revolves around what
+ * it is <em>not</em>:</p>
+ * 
+ * <ul>
+ * <li> A Service is <b>not</b> a separate process.  The Service object itself
+ * does not imply it is running in its own process; unless otherwise specified,
+ * it runs in the same process as the application it is part of.
+ * <li> A Service is <b>not</b> a thread.  It is not a means itself to do work off
+ * of the main thread (to avoid Application Not Responding errors).
+ * </ul>
+ * 
+ * <p>Thus a Service itself is actually very simple, providing two main features:</p>
+ * 
+ * <ul>
+ * <li>A facility for the application to tell the system <em>about</em>
+ * something it wants to be doing in the background (even when the user is not
+ * directly interacting with the application).  This corresponds to calls to
+ * {@link android.content.Context#startService Context.startService()}, which
+ * ask the system to schedule work for the service, to be run until the service
+ * or someone else explicitly stop it.
+ * <li>A facility for an application to expose some of its functionality to
+ * other applications.  This corresponds to calls to
+ * {@link android.content.Context#bindService Context.bindService()}, which
+ * allows a long-standing connection to be made to the service in order to
+ * interact with it.
+ * </ul>
+ * 
+ * <p>When a Service component is actually created, for either of these reasons,
+ * all that the system actually does is instantiate the component
+ * and call its {@link #onCreate} and any other appropriate callbacks on the
+ * main thread.  It is up to the Service to implement these with the appropriate
+ * behavior, such as creating a secondary thread in which it does its work.</p>
+ * 
+ * <p>Note that because Service itself is so simple, you can make your
+ * interaction with it as simple or complicated as you want: from treating it
+ * as a local Java object that you make direct method calls on (as illustrated
+ * by <a href="#LocalServiceSample">Local Service Sample</a>), to providing
+ * a full remoteable interface using AIDL.</p>
  * 
  * <a name="ServiceLifecycle"></a>
  * <h3>Service Lifecycle</h3>
