@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Antes de desactivar el almacenamiento USB, asegúrate de haber desmontado (\"expulsado\") la tarjeta SD de Android de tu computadora."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desactivar el almacenamiento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Se ha producido un problema al desactivar el almacenamiento USB. Asegúrate de haber desmontado el host USB, luego vuelve a intentarlo."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activar el almacenamiento USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activas el almacenamiento USB, algunas aplicaciones que estás usando se detendrán y es posible que no estén disponibles hasta que desactives el almacenamiento USB."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"Error en el funcionamiento del USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatear tarjeta SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de tu tarjeta."</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Seleccionar para salir del modo auto"</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Conexión de anclaje a red activa"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocar para configurar"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>

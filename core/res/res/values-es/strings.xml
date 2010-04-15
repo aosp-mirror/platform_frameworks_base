@@ -415,7 +415,7 @@
     <string name="permlab_readDictionary" msgid="432535716804748781">"leer diccionario definido por el usuario"</string>
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permite a una aplicación leer cualquier frase, palabra o nombre privado que el usuario haya almacenado en su diccionario."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"escribir en el diccionario definido por el usuario"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permite a una aplicación escribir palabras nuevas en el diccionario del usuario."</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permite a una aplicación escribir palabras nuevas en el diccionario de usuario."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificar/eliminar contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Permite que una aplicación escriba en la tarjeta SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acceder al sistema de archivos almacenado en caché"</string>
@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Antes de desactivar el almacenamiento USB, asegúrate de haber desmontado (\"retirado\") la tarjeta SD del teléfono con Android del equipo."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desactivar almacenamiento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Se ha producido un problema al desactivar el almacenamiento USB. Asegúrate de haber desactivado el host USB y, a continuación, vuelve a intentarlo."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activar almacenamiento USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activas el almacenamiento USB, se detendrán algunas aplicaciones que estás utilizando y estas no estarán disponibles hasta que lo desactives."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"No se ha podido realizar la operación USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatear tarjeta SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de la tarjeta."</string>
@@ -829,7 +826,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"Buscar"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Enviar"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Siguiente"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Hecho"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Listo"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Ejecutar"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Marcar número"\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Crear un contacto"\n"a partir de <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecciona esta opción para salir del modo coche."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Anclaje a red activo"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Toca para iniciar la configuración."</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>

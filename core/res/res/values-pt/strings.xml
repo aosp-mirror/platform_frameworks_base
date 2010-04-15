@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Antes de desativar o armazenamento USB, verifique se desconectou (“ejetou”) o cartão SD do Android do computador."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desativar o armazenamento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Houve um problema ao desativar o armazenamento USB. Verifique se desconectou o host USB e tente novamente."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ativar o armazenamento USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Se você ativar o armazenamento USB, alguns aplicativos que estão em uso serão interrompidos e poderão não estar disponíveis até você desativar o armazenamento USB."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"Falha de operação de USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatar cartão SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Tem certeza de que deseja formatar o cartão SD? Todos os dados no seu cartão serão perdidos."</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecione para sair do modo de carro."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Vínculo ativo"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Toque para configurar"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>
