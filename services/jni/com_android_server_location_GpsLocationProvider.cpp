@@ -22,6 +22,7 @@
 #include "jni.h"
 #include "hardware/hardware.h"
 #include "hardware/gps.h"
+#include "hardware_legacy/power.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
 
@@ -50,6 +51,8 @@ static GpsStatus    sGpsStatus;
 static GpsSvStatus  sGpsSvStatus;
 static AGpsStatus   sAGpsStatus;
 static GpsNiNotification  sGpsNiNotification;
+
+#define WAKE_LOCK_NAME  "GPS"
 
 // buffer for NMEA data
 #define NMEA_SENTENCE_LENGTH    100
@@ -141,6 +144,16 @@ static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
     pthread_mutex_unlock(&sEventMutex);
 }
 
+static void acquire_wakelock_callback()
+{
+    acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_NAME);
+}
+
+static void release_wakelock_callback()
+{
+    release_wake_lock(WAKE_LOCK_NAME);
+}
+
 static void agps_status_callback(AGpsStatus* agps_status)
 {
     pthread_mutex_lock(&sEventMutex);
@@ -153,10 +166,13 @@ static void agps_status_callback(AGpsStatus* agps_status)
 }
 
 GpsCallbacks sGpsCallbacks = {
+    sizeof(GpsCallbacks),
     location_callback,
     status_callback,
     sv_status_callback,
-    nmea_callback
+    nmea_callback,
+    acquire_wakelock_callback,
+    release_wakelock_callback,
 };
 
 static void
