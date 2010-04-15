@@ -90,6 +90,8 @@ float DisplayHardware::getRefreshRate() const   { return mRefreshRate; }
 int DisplayHardware::getWidth() const           { return mWidth; }
 int DisplayHardware::getHeight() const          { return mHeight; }
 PixelFormat DisplayHardware::getFormat() const  { return mFormat; }
+uint32_t DisplayHardware::getMaxTextureSize() const { return mMaxTextureSize; }
+uint32_t DisplayHardware::getMaxViewportDims() const { return mMaxViewportDims; }
 
 void DisplayHardware::init(uint32_t dpy)
 {
@@ -246,6 +248,11 @@ void DisplayHardware::init(uint32_t dpy)
     LOGI("version   : %s", glGetString(GL_VERSION));
     LOGI("extensions: %s", gl_extensions);
 
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, &mMaxViewportDims);
+    LOGI("GL_MAX_TEXTURE_SIZE = %d", mMaxTextureSize);
+    LOGI("GL_MAX_VIEWPORT_DIMS = %d", mMaxViewportDims);
+
 #if 0
     // for drivers that don't have proper support for flushing cached buffers
     // on gralloc unlock, uncomment this block and test for the specific
@@ -272,6 +279,7 @@ void DisplayHardware::init(uint32_t dpy)
 #else
 #warning "EGL_ANDROID_image_native_buffer not supported"
 #endif
+
 
     // Unbind the context from this thread
     eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
