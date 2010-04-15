@@ -296,13 +296,13 @@ public class WebSettings {
             "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us)"
             + " AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0"
             + " Safari/530.17";
-    private static final String IPHONE_USERAGENT = 
+    private static final String IPHONE_USERAGENT =
             "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us)"
             + " AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0"
             + " Mobile/7A341 Safari/528.16";
     private static Locale sLocale;
     private static Object sLockForLocaleSettings;
-    
+
     /**
      * Package constructor to prevent clients from creating a new settings
      * instance.
@@ -327,6 +327,8 @@ public class WebSettings {
                 android.os.Process.myUid()) != PackageManager.PERMISSION_GRANTED;
     }
 
+    private static final String ACCEPT_LANG_FOR_US_LOCALE = "en-US";
+
     /**
      * Looks at sLocale and returns current AcceptLanguage String.
      * @return Current AcceptLanguage String.
@@ -336,32 +338,53 @@ public class WebSettings {
         synchronized(sLockForLocaleSettings) {
             locale = sLocale;
         }
-        StringBuffer buffer = new StringBuffer();
-        final String language = locale.getLanguage();
-        if (language != null) {
-            buffer.append(language);
-            final String country = locale.getCountry();
-            if (country != null) {
-                buffer.append("-");
-                buffer.append(country);
+        StringBuilder buffer = new StringBuilder();
+        addLocaleToHttpAcceptLanguage(buffer, locale);
+
+        if (!Locale.US.equals(locale)) {
+            if (buffer.length() > 0) {
+                buffer.append(", ");
             }
-        }
-        if (!locale.equals(Locale.US)) {
-            buffer.append(", ");
-            java.util.Locale us = Locale.US;
-            if (us.getLanguage() != null) {
-                buffer.append(us.getLanguage());
-                final String country = us.getCountry();
-                if (country != null) {
-                    buffer.append("-");
-                    buffer.append(country);
-                }
-            }
+            buffer.append(ACCEPT_LANG_FOR_US_LOCALE);
         }
 
         return buffer.toString();
     }
-    
+
+    /**
+     * Convert obsolete language codes, including Hebrew/Indonesian/Yiddish,
+     * to new standard.
+     */
+    private static String convertObsoleteLanguageCodeToNew(String langCode) {
+        if (langCode == null) {
+            return null;
+        }
+        if ("iw".equals(langCode)) {
+            // Hebrew
+            return "he";
+        } else if ("in".equals(langCode)) {
+            // Indonesian
+            return "id";
+        } else if ("ji".equals(langCode)) {
+            // Yiddish
+            return "yi";
+        }
+        return langCode;
+    }
+
+    private static void addLocaleToHttpAcceptLanguage(StringBuilder builder,
+                                                      Locale locale) {
+        String language = convertObsoleteLanguageCodeToNew(locale.getLanguage());
+        if (language != null) {
+            builder.append(language);
+            String country = locale.getCountry();
+            if (country != null) {
+                builder.append("-");
+                builder.append(country);
+            }
+        }
+    }
+
     /**
      * Looks at sLocale and mContext and returns current UserAgent String.
      * @return Current UserAgent String.
@@ -379,11 +402,11 @@ public class WebSettings {
         } else {
             // default to "1.0"
             buffer.append("1.0");
-        }  
+        }
         buffer.append("; ");
         final String language = locale.getLanguage();
         if (language != null) {
-            buffer.append(language.toLowerCase());
+            buffer.append(convertObsoleteLanguageCodeToNew(language));
             final String country = locale.getCountry();
             if (country != null) {
                 buffer.append("-");
