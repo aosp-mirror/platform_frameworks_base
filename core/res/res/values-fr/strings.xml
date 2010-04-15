@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Avant de mettre hors tension le stockage USB, assurez-vous d\'avoir désactivé (\"éjecté\") la carte SD de votre téléphone Android à partir de votre ordinateur."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Désactiver le périphérique de stockage USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Un problème est survenu lors de la mise hors tension du périphérique de stockage USB. Assurez-vous que l\'hôte USB a bien été désactivé, puis essayez à nouveau."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activer le périphérique de stockage USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si vous activez le périphérique de stockage USB, certaines applications que vous utilisez se fermeront et risquent de n\'être de nouveau disponibles qu\'après la désactivation du périphérique."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"Échec du fonctionnement USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formater la carte SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Voulez-vous vraiment formater la carte SD ? Toutes les données de cette carte seront perdues."</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Sélectionnez cette option pour quitter le mode Voiture."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Partage de connexion activé"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Toucher pour configurer"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>

@@ -790,12 +790,9 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"USBストレージをOFFにする前に、パソコンで必ずAndroidのSDカードのマウントを解除して（カードを取り出して）ください。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USBストレージをOFFにする"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USBストレージをOFFにする際に問題が発生しました。USBホストのマウントが解除されていることを確認してからもう一度お試しください。"</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
-    <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
-    <skip />
-    <!-- no translation found for dlg_error_title (8048999973837339174) -->
-    <skip />
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USBストレージをONにする"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USBストレージをONにすると、使用中のアプリケーションの一部が停止し、USBストレージをOFFにするまで使用できなくなる場合があります。"</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"USB操作に失敗しました"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SDカードをフォーマット"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"SDカードをフォーマットしてもよろしいですか？カード内のすべてのデータが失われます。"</string>
@@ -859,4 +856,12 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"運転モードを終了するには選択してください。"</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"テザリングが有効です"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"タップして設定する"</string>
+    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
+    <skip />
+    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
+    <skip />
+    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
+    <skip />
+    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
+    <skip />
 </resources>

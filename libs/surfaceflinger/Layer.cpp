@@ -41,6 +41,10 @@
 
 namespace android {
 
+template <typename T> inline T min(T a, T b) {
+    return a<b ? a : b;
+}
+
 // ---------------------------------------------------------------------------
 
 const uint32_t Layer::typeInfo = LayerBaseClient::typeInfo | 4;
@@ -109,17 +113,26 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
 
     // the display's pixel format
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    uint32_t const maxSurfaceDims = min(
+            hw.getMaxTextureSize(), hw.getMaxViewportDims());
+
+    // never allow a surface larger than what our underlying GL implementation
+    // can handle.
+    if ((uint32_t(w)>maxSurfaceDims) || (uint32_t(h)>maxSurfaceDims)) {
+        return BAD_VALUE;
+    }
+
     PixelFormatInfo displayInfo;
     getPixelFormatInfo(hw.getFormat(), &displayInfo);
     const uint32_t hwFlags = hw.getFlags();
     
     mFormat = format;
-    mWidth = w;
+    mWidth  = w;
     mHeight = h;
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
     mNoEGLImageForSwBuffers = !(hwFlags & DisplayHardware::CACHED_BUFFERS);
-    
+
     // we use the red index
     int displayRedSize = displayInfo.getSize(PixelFormatInfo::INDEX_RED);
     int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);

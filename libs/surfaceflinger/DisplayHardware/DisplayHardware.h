@@ -76,6 +76,8 @@ public:
     PixelFormat getFormat() const;
     uint32_t    getFlags() const;
     void        makeCurrent() const;
+    uint32_t    getMaxTextureSize() const;
+    uint32_t    getMaxViewportDims() const;
 
     uint32_t getPageFlipCount() const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
@@ -104,6 +106,8 @@ private:
     PixelFormat     mFormat;
     uint32_t        mFlags;
     mutable uint32_t mPageFlipCount;
+    GLint           mMaxViewportDims;
+    GLint           mMaxTextureSize;
     
     sp<FramebufferNativeWindow> mNativeWindow;
     overlay_control_device_t* mOverlayEngine;

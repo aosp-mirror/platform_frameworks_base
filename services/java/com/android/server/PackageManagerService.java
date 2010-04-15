@@ -9758,7 +9758,7 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
            if (returnCode != PackageManager.MOVE_SUCCEEDED) {
-               processPendingMove(new MoveParams(null, observer, 0, null), returnCode);
+               processPendingMove(new MoveParams(null, observer, 0, packageName), returnCode);
            } else {
                Message msg = mHandler.obtainMessage(INIT_COPY);
                InstallArgs srcArgs = createInstallArgs(currFlags, pkg.applicationInfo.sourceDir,
@@ -9849,9 +9849,9 @@ class PackageManagerService extends IPackageManager.Stub {
                                    }
                                }
                            }
-                           // Send resources available broadcast
-                           sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
                        }
+                       // Send resources available broadcast
+                       sendResourcesChangedBroadcast(true, pkgList, uidArr, null);
                    }
                }
                if (returnCode != PackageManager.MOVE_SUCCEEDED){
