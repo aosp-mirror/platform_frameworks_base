@@ -372,6 +372,14 @@ public class ThrottleService extends IThrottleManager.Stub {
             try {
                 incRead = mNMService.getInterfaceRxCounter(mIface) - mLastRead;
                 incWrite = mNMService.getInterfaceTxCounter(mIface) - mLastWrite;
+                // handle iface resets - on some device the 3g iface comes and goes and gets
+                // totals reset to 0.  Deal with it
+                if ((incRead < 0) || (incWrite < 0)) {
+                    incRead += mLastRead;
+                    incWrite += mLastWrite;
+                    mLastRead = 0;
+                    mLastWrite = 0;
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "got remoteException in onPollAlarm:" + e);
             }
@@ -529,6 +537,8 @@ public class ThrottleService extends IThrottleManager.Stub {
             end.set(Calendar.DAY_OF_MONTH, mPolicyResetDay);
             end.set(Calendar.HOUR_OF_DAY, 0);
             end.set(Calendar.MINUTE, 0);
+            end.set(Calendar.SECOND, 0);
+            end.set(Calendar.MILLISECOND, 0);
             if (day >= mPolicyResetDay) {
                 int month = end.get(Calendar.MONTH);
                 if (month == Calendar.DECEMBER) {
@@ -845,6 +855,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                 "and ends in " + (mRecorder.getPeriodEnd() - System.currentTimeMillis()) / 1000 +
                 " seconds.");
         pw.println("Polling every " + mPolicyPollPeriodSec + " seconds");
+        pw.println("Current Throttle Index is " + mThrottleIndex);
+
         for (int i = 0; i < mRecorder.getPeriodCount(); i++) {
             pw.println(" Period[" + i + "] - read:" + mRecorder.getPeriodRx(i) + ", written:" +
                     mRecorder.getPeriodTx(i));
