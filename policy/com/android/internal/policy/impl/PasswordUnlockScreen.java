@@ -60,7 +60,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private PasswordEntryKeyboardHelper mKeyboardHelper;
 
     private int mCreationOrientation;
-    private int mKeyboardHidden;
+    private int mCreationHardKeyboardHidden;
     private CountDownTimer mCountdownTimer;
     private TextView mTitle;
 
@@ -73,7 +73,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             KeyguardScreenCallback callback) {
         super(context);
 
-        mKeyboardHidden = configuration.hardKeyboardHidden;
+        mCreationHardKeyboardHidden = configuration.hardKeyboardHidden;
         mCreationOrientation = configuration.orientation;
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
@@ -102,7 +102,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mKeyboardHelper.setKeyboardMode(isAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
                 : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
 
-        mKeyboardView.setVisibility(mKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
+        mKeyboardView.setVisibility(mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
                 ? View.INVISIBLE : View.VISIBLE);
         mPasswordEntry.requestFocus();
 
@@ -213,8 +213,10 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (getResources().getConfiguration().orientation != mCreationOrientation) {
-            mCallback.recreateMe(getResources().getConfiguration());
+        Configuration config = getResources().getConfiguration();
+        if (config.orientation != mCreationOrientation
+                || config.hardKeyboardHidden != mCreationHardKeyboardHidden) {
+            mCallback.recreateMe(config);
         }
     }
 
@@ -222,7 +224,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation != mCreationOrientation) {
+        if (newConfig.orientation != mCreationOrientation
+                || newConfig.hardKeyboardHidden != mCreationHardKeyboardHidden) {
             mCallback.recreateMe(newConfig);
         }
     }
