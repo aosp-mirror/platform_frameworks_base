@@ -67,6 +67,18 @@ void SharedBufferStack::init(int32_t i)
     identity = i;
 }
 
+status_t SharedBufferStack::setCrop(int buffer, const Rect& crop)
+{
+    if (uint32_t(buffer) >= NUM_BUFFER_MAX)
+        return BAD_INDEX;
+
+    buffers[buffer].crop.l = uint16_t(crop.left);
+    buffers[buffer].crop.t = uint16_t(crop.top);
+    buffers[buffer].crop.r = uint16_t(crop.right);
+    buffers[buffer].crop.b = uint16_t(crop.bottom);
+    return NO_ERROR;
+}
+
 status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
 {
     if (uint32_t(buffer) >= NUM_BUFFER_MAX)
@@ -75,21 +87,21 @@ status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
     // in the current implementation we only send a single rectangle
     size_t count;
     Rect const* r = dirty.getArray(&count);
-    FlatRegion& reg(dirtyRegion[buffer]);
+    FlatRegion& reg(buffers[buffer].dirtyRegion);
     if (count > FlatRegion::NUM_RECT_MAX) {
         const Rect bounds(dirty.getBounds());
         reg.count = 1;
-        reg.rects[0] = uint16_t(bounds.left);
-        reg.rects[1] = uint16_t(bounds.top);
-        reg.rects[2] = uint16_t(bounds.right);
-        reg.rects[3] = uint16_t(bounds.bottom);
+        reg.rects[0].l = uint16_t(bounds.left);
+        reg.rects[0].t = uint16_t(bounds.top);
+        reg.rects[0].r = uint16_t(bounds.right);
+        reg.rects[0].b = uint16_t(bounds.bottom);
     } else {
         reg.count = count;
         for (size_t i=0 ; i<count ; i++) {
-            reg.rects[i*4 + 0] = uint16_t(r[i].left);
-            reg.rects[i*4 + 1] = uint16_t(r[i].top);
-            reg.rects[i*4 + 2] = uint16_t(r[i].right);
-            reg.rects[i*4 + 3] = uint16_t(r[i].bottom);
+            reg.rects[i].l = uint16_t(r[i].left);
+            reg.rects[i].t = uint16_t(r[i].top);
+            reg.rects[i].r = uint16_t(r[i].right);
+            reg.rects[i].b = uint16_t(r[i].bottom);
         }
     }
     return NO_ERROR;
@@ -101,19 +113,24 @@ Region SharedBufferStack::getDirtyRegion(int buffer) const
     if (uint32_t(buffer) >= NUM_BUFFER_MAX)
         return res;
 
-    const FlatRegion& reg(dirtyRegion[buffer]);
+    const FlatRegion& reg(buffers[buffer].dirtyRegion);
     if (reg.count > FlatRegion::NUM_RECT_MAX)
         return res;
 
     if (reg.count == 1) {
-        res.set(Rect(reg.rects[0], reg.rects[1], reg.rects[2], reg.rects[3]));
+        const Rect r(
+                reg.rects[0].l,
+                reg.rects[0].t,
+                reg.rects[0].r,
+                reg.rects[0].b);
+        res.set(r);
     } else {
         for (size_t i=0 ; i<reg.count ; i++) {
             const Rect r(
-                    reg.rects[i*4 + 0],
-                    reg.rects[i*4 + 1],
-                    reg.rects[i*4 + 2],
-                    reg.rects[i*4 + 3]);
+                    reg.rects[i].l,
+                    reg.rects[i].t,
+                    reg.rects[i].r,
+                    reg.rects[i].b);
             res.orSelf(r);
         }
     }
@@ -372,6 +389,12 @@ bool SharedBufferClient::needNewBuffer(int buffer) const
     return (android_atomic_and(~mask, &stack.reallocMask) & mask) != 0;
 }
 
+status_t SharedBufferClient::setCrop(int buffer, const Rect& crop)
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.setCrop(buffer, crop);
+}
+
 status_t SharedBufferClient::setDirtyRegion(int buffer, const Region& reg)
 {
     SharedBufferStack& stack( *mSharedStack );
@@ -389,7 +412,7 @@ SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
     mSharedStack->available = num;
     mSharedStack->queued = 0;
     mSharedStack->reallocMask = 0;
-    memset(mSharedStack->dirtyRegion, 0, sizeof(mSharedStack->dirtyRegion));
+    memset(mSharedStack->buffers, 0, sizeof(mSharedStack->buffers));
 }
 
 ssize_t SharedBufferServer::retireAndLock()

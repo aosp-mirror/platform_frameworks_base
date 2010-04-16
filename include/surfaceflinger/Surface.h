@@ -215,10 +215,12 @@ private:
     void dispatch_setUsage(va_list args);
     int  dispatch_connect(va_list args);
     int  dispatch_disconnect(va_list args);
+    int  dispatch_crop(va_list args);
     
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
     int  disconnect(int api);
+    int  crop(Rect const* rect);
 
     uint32_t getUsage() const;
     int      getConnectedApi() const;
@@ -237,6 +239,7 @@ private:
     Rect                        mSwapRectangle;
     uint32_t                    mUsage;
     int                         mConnected;
+    Rect                        mNextBufferCrop;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
