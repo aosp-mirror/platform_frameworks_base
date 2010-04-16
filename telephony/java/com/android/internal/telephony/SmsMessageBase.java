@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony;
 
-import android.util.Log;
 import com.android.internal.telephony.SmsHeader;
 import java.util.Arrays;
 
@@ -365,13 +364,13 @@ public abstract class SmsMessageBase {
     /**
      * Try to parse this message as an email gateway message
      * There are two ways specified in TS 23.040 Section 3.8 :
-     *  - SMS message "may have its TP-PID set for internet electronic mail - MT
+     *  - SMS message "may have its TP-PID set for Internet electronic mail - MT
      * SMS format: [<from-address><space>]<message> - "Depending on the
      * nature of the gateway, the destination/origination address is either
      * derived from the content of the SMS TP-OA or TP-DA field, or the
      * TP-OA/TP-DA field contains a generic gateway address and the to/from
      * address is added at the beginning as shown above." (which is supported here)
-     * - Multiple addreses separated by commas, no spaces, Subject field delimited
+     * - Multiple addresses separated by commas, no spaces, Subject field delimited
      * by '()' or '##' and '#' Section 9.2.3.24.11 (which are NOT supported here)
      */
     protected void extractEmailAddressFromMessageBody() {

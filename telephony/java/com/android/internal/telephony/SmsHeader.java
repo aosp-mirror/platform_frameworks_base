@@ -30,7 +30,7 @@ import java.util.ArrayList;
  */
 public class SmsHeader {
 
-    // TODO(cleanup): this datastructure is generally referred to as
+    // TODO(cleanup): this data structure is generally referred to as
     // the 'user data header' or UDH, and so the class name should
     // change to reflect this...
 

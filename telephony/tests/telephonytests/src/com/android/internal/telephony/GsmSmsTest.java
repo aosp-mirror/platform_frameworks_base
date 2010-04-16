@@ -24,8 +24,6 @@ import com.android.internal.util.HexDump;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import android.util.Log;
-
 public class GsmSmsTest extends AndroidTestCase {
 
     @SmallTest

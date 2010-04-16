@@ -285,9 +285,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         }
 
 
-        //***** Handler implemementation
-
-        public void
+        //***** Handler implementation
+        @Override public void
         handleMessage(Message msg) {
             RILRequest rr = (RILRequest)(msg.obj);
             RILRequest req = null;
@@ -780,7 +779,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
-    public void
+    @Deprecated public void
     getPDPContextList(Message result) {
         getDataCallList(result);
     }

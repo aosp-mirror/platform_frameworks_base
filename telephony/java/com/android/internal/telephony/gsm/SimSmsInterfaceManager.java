@@ -86,6 +86,7 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
     public void dispose() {
     }
 
+    @Override
     protected void finalize() {
         try {
             super.finalize();
@@ -191,6 +192,7 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
         return mSms;
     }
 
+    @Override
     protected void log(String msg) {
         Log.d(LOG_TAG, "[SimSmsInterfaceManager] " + msg);
     }

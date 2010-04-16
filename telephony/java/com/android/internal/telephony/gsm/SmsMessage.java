@@ -26,7 +26,6 @@ import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
-import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -45,7 +44,7 @@ import static android.telephony.SmsMessage.MessageClass;
  * A Short Message Service message.
  *
  */
-public class SmsMessage extends SmsMessageBase{
+public class SmsMessage extends SmsMessageBase {
     static final String LOG_TAG = "GSM";
 
     private MessageClass messageClass;
@@ -303,7 +302,7 @@ public class SmsMessage extends SmsMessageBase{
             // the receiver's SIM card. You can then send messages to yourself
             // (on a phone with this change) and they'll end up on the SIM card.
             bo.write(0x00);
-        } else { //assume UCS-2
+        } else { // assume UCS-2
             if ((0xff & userData[0]) > MAX_USER_DATA_BYTES) {
                 // Message too long
                 return null;
@@ -369,7 +368,7 @@ public class SmsMessage extends SmsMessageBase{
      * @param destinationAddress the address of the destination for the message
      * @param destinationPort the port to deliver the message to at the
      *        destination
-     * @param data the dat for the message
+     * @param data the data for the message
      * @return a <code>SubmitPdu</code> containing the encoded SC
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
@@ -474,17 +473,13 @@ public class SmsMessage extends SmsMessageBase{
         return bo;
     }
 
-    static class PduParser {
+    private static class PduParser {
         byte pdu[];
         int cur;
         SmsHeader userDataHeader;
         byte[] userData;
         int mUserDataSeptetPadding;
         int mUserDataSize;
-
-        PduParser(String s) {
-            this(IccUtils.hexStringToBytes(s));
-        }
 
         PduParser(byte[] pdu) {
             this.pdu = pdu;
@@ -537,7 +532,7 @@ public class SmsMessage extends SmsMessageBase{
             GsmSmsAddress ret;
 
             // "The Address-Length field is an integer representation of
-            // the number field, i.e. excludes any semi octet containing only
+            // the number field, i.e. excludes any semi-octet containing only
             // fill bits."
             // The TOA field is not included as part of this
             int addressLength = pdu[cur] & 0xff;
@@ -565,7 +560,7 @@ public class SmsMessage extends SmsMessageBase{
             int second = IccUtils.gsmBcdByteToInt(pdu[cur++]);
 
             // For the timezone, the most significant bit of the
-            // least signficant nibble is the sign byte
+            // least significant nibble is the sign byte
             // (meaning the max range of this field is 79 quarter-hours,
             // which is more than enough)
 
@@ -624,7 +619,7 @@ public class SmsMessage extends SmsMessageBase{
                 /*
                  * Here we just create the user data length to be the remainder of
                  * the pdu minus the user data header, since userDataLength means
-                 * the number of uncompressed sepets.
+                 * the number of uncompressed septets.
                  */
                 bufferLen = pdu.length - offset;
             } else {
@@ -663,10 +658,10 @@ public class SmsMessage extends SmsMessageBase{
         }
 
         /**
-         * Returns the number of padding bits at the begining of the user data
+         * Returns the number of padding bits at the beginning of the user data
          * array before the start of the septets.
          *
-         * @return the number of padding bits at the begining of the user data
+         * @return the number of padding bits at the beginning of the user data
          * array before the start of the septets
          */
         int getUserDataSeptetPadding() {
@@ -686,7 +681,7 @@ public class SmsMessage extends SmsMessageBase{
         XXX Not sure what this one is supposed to be doing, and no one is using
         it.
         String getUserDataGSM8bit() {
-            // System.out.println("remainder of pud:" +
+            // System.out.println("remainder of pdu:" +
             // HexDump.dumpHexString(pdu, cur, pdu.length - cur));
             int count = pdu[cur++] & 0xff;
             int size = pdu[cur++];
@@ -817,11 +812,13 @@ public class SmsMessage extends SmsMessageBase{
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getProtocolIdentifier() {
         return protocolIdentifier;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isReplace() {
         return (protocolIdentifier & 0xc0) == 0x40
                 && (protocolIdentifier & 0x3f) > 0
@@ -829,12 +826,14 @@ public class SmsMessage extends SmsMessageBase{
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isCphsMwiMessage() {
         return ((GsmSmsAddress) originatingAddress).isCphsVoiceMessageClear()
                 || ((GsmSmsAddress) originatingAddress).isCphsVoiceMessageSet();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isMWIClearMessage() {
         if (isMwi && (mwiSense == false)) {
             return true;
@@ -845,6 +844,7 @@ public class SmsMessage extends SmsMessageBase{
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isMWISetMessage() {
         if (isMwi && (mwiSense == true)) {
             return true;
@@ -855,6 +855,7 @@ public class SmsMessage extends SmsMessageBase{
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isMwiDontStore() {
         if (isMwi && mwiDontStore) {
             return true;
@@ -874,31 +875,34 @@ public class SmsMessage extends SmsMessageBase{
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getStatus() {
         return status;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isStatusReportMessage() {
         return isStatusReportMessage;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isReplyPathPresent() {
         return replyPathPresent;
     }
 
     /**
-     * TS 27.005 3.1, <pdu> definition "In the case of SMS: 3GPP TS 24.011 [6]
+     * TS 27.005 3.1, &lt;pdu&gt; definition "In the case of SMS: 3GPP TS 24.011 [6]
      * SC address followed by 3GPP TS 23.040 [3] TPDU in hexadecimal format:
      * ME/TA converts each octet of TP data unit into two IRA character long
-     * hexad number (e.g. octet with integer value 42 is presented to TE as two
+     * hex number (e.g. octet with integer value 42 is presented to TE as two
      * characters 2A (IRA 50 and 65))" ...in the case of cell broadcast,
      * something else...
      */
     private void parsePdu(byte[] pdu) {
         mPdu = pdu;
-        // Log.d(LOG_TAG, "raw sms mesage:");
+        // Log.d(LOG_TAG, "raw sms message:");
         // Log.d(LOG_TAG, s);
 
         PduParser p = new PduParser(pdu);
@@ -1150,6 +1154,7 @@ public class SmsMessage extends SmsMessageBase{
     /**
      * {@inheritDoc}
      */
+    @Override
     public MessageClass getMessageClass() {
         return messageClass;
     }
