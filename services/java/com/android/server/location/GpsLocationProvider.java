@@ -160,12 +160,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     // time for last status update
     private long mStatusUpdateTime = SystemClock.elapsedRealtime();
-    
+
     // turn off GPS fix icon if we haven't received a fix in 10 seconds
     private static final long RECENT_FIX_TIMEOUT = 10 * 1000;
-    
-    // number of fixes to receive before disabling GPS
-    private static final int MIN_FIX_COUNT = 10;
 
     // stop trying if we do not receive a fix within 60 seconds
     private static final int NO_FIX_TIMEOUT = 60 * 1000;
@@ -189,9 +186,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
     
     // requested frequency of fixes, in milliseconds
     private int mFixInterval = 1000;
-
-    // number of fixes we have received since we started navigating
-    private int mFixCount;
 
     // true if we started navigation
     private boolean mStarted;
@@ -908,7 +902,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
-            mFixCount = 0;
             mFixRequestTime = System.currentTimeMillis();
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
@@ -938,7 +931,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void hibernate() {
         // stop GPS until our next fix interval arrives
         stopNavigating();
-        mFixCount = 0;
         mAlarmManager.cancel(mTimeoutIntent);
         mAlarmManager.cancel(mWakeupIntent);
         long now = SystemClock.elapsedRealtime();
@@ -1017,7 +1009,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
-            // we still want to time out if we do not receive MIN_FIX_COUNT
+            // we want to time out if we do not receive a fix
             // within the time out and we are requesting infrequent fixes
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval < NO_FIX_TIMEOUT) {
                 mAlarmManager.cancel(mTimeoutIntent);
@@ -1030,9 +1022,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
 
-       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) &&
-                mFixCount++ >= MIN_FIX_COUNT && mFixInterval > 1000) {
-            if (DEBUG) Log.d(TAG, "exceeded MIN_FIX_COUNT");
+       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval > 1000) {
+            if (DEBUG) Log.d(TAG, "got fix, hibernating");
             hibernate();
         }
    }
