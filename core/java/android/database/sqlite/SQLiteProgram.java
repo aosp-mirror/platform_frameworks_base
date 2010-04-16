@@ -286,7 +286,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void close() {
         if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
+            return;
         }
         mDatabase.lock();
         try {
