@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -51,11 +51,14 @@ public class StatusBarIcon {
         switch (data.type) {
             case IconData.TEXT: {
                 TextView t;
-                t = new TextView(context, null, com.android.internal.R.style.TextAppearance_StatusBar_Icon);
+                t = new TextView(context);
                 mTextView = t;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.MATCH_PARENT);
+                t.setTextSize(16);
+                t.setTextColor(0xff000000);
+                t.setTypeface(Typeface.DEFAULT_BOLD);
                 t.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 t.setPadding(6, 0, 0, 0);
                 t.setLayoutParams(layoutParams);
@@ -153,7 +156,7 @@ public class StatusBarIcon {
             try {
                 r = context.getPackageManager().getResourcesForApplication(data.iconPackage);
             } catch (PackageManager.NameNotFoundException ex) {
-                Slog.e(StatusBarManagerService.TAG, "Icon package not found: " + data.iconPackage, ex);
+                Slog.e(PhoneStatusBarService.TAG, "Icon package not found: " + data.iconPackage, ex);
                 return null;
             }
         } else {
@@ -161,14 +164,14 @@ public class StatusBarIcon {
         }
 
         if (data.iconId == 0) {
-            Slog.w(StatusBarManagerService.TAG, "No icon ID for slot " + data.slot);
+            Slog.w(PhoneStatusBarService.TAG, "No icon ID for slot " + data.slot);
             return null;
         }
         
         try {
             return r.getDrawable(data.iconId);
         } catch (RuntimeException e) {
-            Slog.w(StatusBarManagerService.TAG, "Icon not found in "
+            Slog.w(PhoneStatusBarService.TAG, "Icon not found in "
                   + (data.iconPackage != null ? data.iconId : "<system>")
                   + ": " + Integer.toHexString(data.iconId));
         }
