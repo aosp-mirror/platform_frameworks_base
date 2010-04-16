@@ -110,6 +110,7 @@ import java.util.Set;
     // In some cases, vCard is nested. Currently, we only consider the most
     // interior vCard data.
     // See v21_foma_1.vcf in test directory for more information.
+    // TODO: Don't ignore by using count, but read all of information outside vCard.
     private int mNestCount;
 
     // Used only for parsing END:VCARD.
@@ -129,36 +130,12 @@ import java.util.Set;
     private long mTimeHandleQuotedPrintable;
     private long mTimeHandleBase64;
 
-    /**
-     * <p>
-     * Same as {{@link #VCardParserImpl_V21(VCardSourceDetector)} with
-     * {@link VCardConfig#PARSE_TYPE_UNKNOWN}.
-     * </p>
-     */
     public VCardParserImpl_V21() {
-        this(VCardConfig.PARSE_TYPE_UNKNOWN);
+        this(VCardConfig.VCARD_TYPE_DEFAULT);
     }
 
-    /**
-     * <p>
-     * The constructor which uses the estimated type available from a given detector.
-     * </p>
-     */
-    public VCardParserImpl_V21(VCardSourceDetector detector) {
-        this(detector != null ? detector.getEstimatedType() : VCardConfig.PARSE_TYPE_UNKNOWN);
-    }
-
-    /**
-     * <p>
-     * The constructor which uses a given parse type like
-     * {@link VCardConfig#PARSE_TYPE_UNKNOWN}.
-     * </p>
-     * <p>
-     * This should be used only when you already know the exact type to be used.
-     * </p>
-     */
-    public VCardParserImpl_V21(int parseType) {
-        if (parseType == VCardConfig.PARSE_TYPE_FOMA) {
+    public VCardParserImpl_V21(int vcardType) {
+        if ((vcardType & VCardConfig.FLAG_TORELATE_NEST) != 0) {
             mNestCount = 1;
         }
     }
@@ -170,15 +147,15 @@ import java.util.Set;
      */
     // <pre class="prettyprint">vcard_file = [wsls] vcard [wsls]</pre>
     protected void parseVCardFile() throws IOException, VCardException {
-        boolean firstRead = true;
+        boolean readingFirstFile = true;
         while (true) {
             if (mCanceled) {
                 break;
             }
-            if (!parseOneVCard(firstRead)) {
+            if (!parseOneVCard(readingFirstFile)) {
                 break;
             }
-            firstRead = false;
+            readingFirstFile = false;
         }
 
         if (mNestCount > 0) {
@@ -943,16 +920,17 @@ import java.util.Set;
     }
 
 
-    public boolean parse(InputStream is, String inputCharset, VCardInterpreter interpreter)
+    public boolean parse(InputStream is, String charset, VCardInterpreter interpreter)
             throws IOException, VCardException {
         if (is == null) {
             throw new NullPointerException("InputStream must not be null.");
         }
-        if (inputCharset == null) {
-            inputCharset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
+
+        if (charset == null) {
+            charset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
         }
 
-        final InputStreamReader tmpReader = new InputStreamReader(is, inputCharset);
+        final InputStreamReader tmpReader = new InputStreamReader(is, charset);
         if (VCardConfig.showPerformanceLog()) {
             mReader = new CustomBufferedReader(tmpReader);
         } else {
@@ -961,7 +939,7 @@ import java.util.Set;
 
         mInterpreter = interpreter;
 
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         if (mInterpreter != null) {
             mInterpreter.start();
         }
@@ -976,13 +954,6 @@ import java.util.Set;
         }
 
         return true;
-    }
-
-    public boolean parse(InputStream is, String charset,
-            VCardInterpreter builder, boolean canceled)
-            throws IOException, VCardException {
-        mCanceled = canceled;
-        return parse(is, charset, builder);
     }
 
     public final void cancel() {

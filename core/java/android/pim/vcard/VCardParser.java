@@ -57,15 +57,6 @@ public interface VCardParser {
      */
     public boolean parse(InputStream is, String charset, VCardInterpreter interpreter)
             throws IOException, VCardException;
-    
-    /**
-     * The method variants which tells this object the operation is already canceled.
-     * @hide
-     */
-    // TODO: remove this if possible.
-    public boolean parse(InputStream is, String charset,
-            VCardInterpreter builder, boolean canceled)
-        throws IOException, VCardException;
 
     /**
      * <p>

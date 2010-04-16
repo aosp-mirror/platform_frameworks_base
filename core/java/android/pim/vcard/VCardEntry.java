@@ -469,7 +469,7 @@ public class VCardEntry {
     private final Account mAccount;
 
     public VCardEntry() {
-        this(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
+        this(VCardConfig.VCARD_TYPE_V21_GENERIC);
     }
 
     public VCardEntry(int vcardType) {

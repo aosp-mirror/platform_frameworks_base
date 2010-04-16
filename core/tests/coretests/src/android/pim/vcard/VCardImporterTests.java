@@ -410,7 +410,7 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21SimpleCase1_Type_Generic() {
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8, R.raw.v21_simple_1);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_GENERIC, R.raw.v21_simple_1);
         mVerifier.addContentValuesVerifierElem()
                 .addExpected(StructuredName.CONTENT_ITEM_TYPE)
                         .put(StructuredName.FAMILY_NAME, "Ando")
@@ -752,11 +752,11 @@ public class VCardImporterTests extends VCardTestsBase {
 
     /**
      * Verifies vCard with Japanese can be parsed correctly with
-     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_GENERIC_UTF8}.
+     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_GENERIC}.
      */
     public void testV21Japanese1_Type_Generic_Utf8() {
         testV21Japanese1Common(
-                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8, false);
+                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_GENERIC, false);
     }
 
     /**
@@ -770,12 +770,12 @@ public class VCardImporterTests extends VCardTestsBase {
 
     /**
      * Verifies vCard with Japanese can be parsed correctly with
-     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_JAPANESE_UTF8}.
+     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_JAPANESE}.
      * since vCard 2.1 specifies the charset of each line if it contains non-Ascii.
      */
     public void testV21Japanese1_Type_Japanese_Utf8() {
         testV21Japanese1Common(
-                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE_UTF8, true);
+                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE, true);
     }
 
     public void testV21Japanese2_Parsing() {

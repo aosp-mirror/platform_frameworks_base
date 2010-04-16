@@ -43,10 +43,6 @@ import android.util.Log;
         super();
     }
 
-    public VCardParserImpl_V30(VCardSourceDetector detector) {
-        this(detector != null ? detector.getEstimatedType() : VCardConfig.PARSE_TYPE_UNKNOWN);
-    }
-
     public VCardParserImpl_V30(int parseMode) {
         super(parseMode);
     }

@@ -144,7 +144,9 @@ public class VCardBuilder {
         mAppendTypeParamName = VCardConfig.appendTypeParamName(vcardType);
         mNeedsToConvertPhoneticString = VCardConfig.needsToConvertPhoneticString(vcardType);
 
+        // TODO: remove this flag since the bit for it is actually 0.
         final boolean shouldUseUtf8 = VCardConfig.shouldUseUtf8ForExport(vcardType);
+
         final boolean shouldUseShiftJis = VCardConfig.shouldUseShiftJisForExport(vcardType);
 
         // vCard 2.1 requires charset.

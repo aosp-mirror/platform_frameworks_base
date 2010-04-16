@@ -48,11 +48,11 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testNameUtf8V21() {
-        testNameUtf8Common(VCardConfig.VCARD_TYPE_V21_JAPANESE_UTF8);
+        testNameUtf8Common(VCardConfig.VCARD_TYPE_V21_JAPANESE);
     }
 
     public void testNameUtf8V30() {
-        testNameUtf8Common(VCardConfig.VCARD_TYPE_V30_JAPANESE_UTF8);
+        testNameUtf8Common(VCardConfig.VCARD_TYPE_V30_JAPANESE);
     }
 
     public void testNameShiftJis() {
@@ -140,7 +140,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForJapaneseV21Utf8() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_UTF8);
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE);
     }
 
     public void testPhoneticNameForJapaneseV21Sjis() {
@@ -148,7 +148,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForJapaneseV30Utf8() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_UTF8);
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE);
     }
 
     public void testPhoneticNameForJapaneseV30SJis() {
@@ -369,11 +369,11 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testJapanesePhoneNumberV21_1() {
-        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_UTF8);
+        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE);
     }
 
     public void testJapanesePhoneNumberV30() {
-        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_UTF8);
+        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE);
     }
 
     public void testJapanesePhoneNumberDoCoMo() {
@@ -419,7 +419,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testAndroidCustomV21() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_GENERIC);
         mVerifier.addInputEntry().addContentValues(Nickname.CONTENT_ITEM_TYPE)
                 .put(Nickname.NAME, "\u304D\u3083\u30FC\u30A8\u30C3\u30C1\u30FC");
         mVerifier.addPropertyNodesVerifierElemWithEmptyName()

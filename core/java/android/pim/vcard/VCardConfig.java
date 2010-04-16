@@ -38,12 +38,6 @@ public class VCardConfig {
 
     /* package */ static final int LOG_LEVEL = LOG_LEVEL_NONE;
 
-    /* package */ static final int PARSE_TYPE_UNKNOWN = 0;
-    /* package */ static final int PARSE_TYPE_APPLE = 1;
-    /* package */ static final int PARSE_TYPE_MOBILE_PHONE_JP = 2;  // For Japanese mobile phones.
-    /* package */ static final int PARSE_TYPE_FOMA = 3;  // For Japanese FOMA mobile phones.
-    /* package */ static final int PARSE_TYPE_WINDOWS_MOBILE_JP = 4;
-
     /**
      * <P>
      * The charset used during import.
@@ -80,6 +74,8 @@ public class VCardConfig {
 
     /*
      * These flags are ignored when charset is explicitly given by a caller.
+     *
+     * TODO: remove this field. DO NOT USE ANY MORE.
      */
     private static final int FLAG_USE_UTF8_FOR_EXPORT = 0;
     private static final int FLAG_USE_SHIFT_JIS_FOR_EXPORT = 0x100;
@@ -116,7 +112,7 @@ public class VCardConfig {
     private static final int FLAG_USE_DEFACT_PROPERTY = 0x40000000;
 
     /**
-     * The flag indicating some specific dialect seen in vcard of DoCoMo (one of Japanese
+     * The flag indicating some specific dialect seen in vCard of DoCoMo (one of Japanese
      * mobile careers) should be used. This flag does not include any other information like
      * that "the vCard is for Japanese". So it is "possible" that "the vCard should have DoCoMo's
      * dialect but the name order should be European", but it is not recommended.
@@ -228,24 +224,64 @@ public class VCardConfig {
      */
     public static final int FLAG_REFRAIN_PHONE_NUMBER_FORMATTING = 0x02000000;
 
+    /**
+     * <p>
+     * For importer only. Ignored in exporter.
+     * </p>
+     * <p>
+     * The flag indicating the parser should handle a nested vCard, in which vCard clause starts
+     * in another vCard clause. Here's a typical example.
+     * </p>
+     * <pre class="prettyprint">BEGIN:VCARD
+     * BEGIN:VCARD
+     * VERSION:2.1
+     * ...
+     * END:VCARD
+     * END:VCARD</pre>
+     * <p>
+     * The vCard 2.1 specification allows the nest, but also let parsers ignore nested entries,
+     * while some mobile devices emit nested ones as primary data to be imported.
+     * </p>
+     * <p>
+     * This flag forces a vCard parser to torelate such a nest and understand its content.
+     * </p>
+     */
+    public static final int FLAG_TORELATE_NEST = 0x01000000;
+
     //// The followings are VCard types available from importer/exporter. ////
 
     /**
-     * <P>
-     * Generic vCard format with the vCard 2.1. Uses UTF-8 for the charset.
-     * When composing a vCard entry, the US convension will be used toward formatting
-     * some values.
-     * </P>
-     * <P>
+     * <p>
+     * The type indicating nothing. Used by {@link VCardSourceDetector} when it
+     * was not able to guess the exact vCard type.
+     * </p>
+     */
+    public static final int VCARD_TYPE_UNKNOWN = 0;
+
+
+    /**
+     * <p>
+     * Generic vCard format with the vCard 2.1. When composing a vCard entry,
+     * the US convension will be used toward formatting some values.
+     * </p>
+     * <p>
      * e.g. The order of the display name would be "Prefix Given Middle Family Suffix",
      * while it should be "Prefix Family Middle Given Suffix" in Japan for example.
-     * </P>
+     * </p>
+     * <p>
+     * Uses UTF-8 for the charset as a charset for exporting. Note that old vCard importer
+     * outside Android cannot accept it since vCard 2.1 specifically does not allow
+     * that charset, while we need to use it to support various languages around the world.
+     * </p>
+     * <p>
+     * If you want to use alternative charset, you should notify the charset to the other
+     * compontent to be used.
+     * </p>
      */
-    public static final int VCARD_TYPE_V21_GENERIC_UTF8 =
-        (FLAG_V21 | NAME_ORDER_DEFAULT | FLAG_USE_UTF8_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
+    public static final int VCARD_TYPE_V21_GENERIC =
+        (FLAG_V21 | NAME_ORDER_DEFAULT | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
-    /* package */ static String VCARD_TYPE_V21_GENERIC_UTF8_STR = "v21_generic";
+    /* package */ static String VCARD_TYPE_V21_GENERIC_STR = "v21_generic";
     
     /**
      * <P>
@@ -255,11 +291,10 @@ public class VCardConfig {
      * Not fully ready yet. Use with caution when you use this.
      * </P>
      */
-    public static final int VCARD_TYPE_V30_GENERIC_UTF8 =
-        (FLAG_V30 | NAME_ORDER_DEFAULT | FLAG_USE_UTF8_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
+    public static final int VCARD_TYPE_V30_GENERIC =
+        (FLAG_V30 | NAME_ORDER_DEFAULT | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
-    /* package */ static final String VCARD_TYPE_V30_GENERIC_UTF8_STR = "v30_generic";
+    /* package */ static final String VCARD_TYPE_V30_GENERIC_STR = "v30_generic";
     
     /**
      * <P>
@@ -267,11 +302,10 @@ public class VCardConfig {
      * Currently, only name order is considered ("Prefix Middle Given Family Suffix")
      * </P>
      */
-    public static final int VCARD_TYPE_V21_EUROPE_UTF8 =
-        (FLAG_V21 | NAME_ORDER_EUROPE | FLAG_USE_UTF8_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
-    
-    /* package */ static final String VCARD_TYPE_V21_EUROPE_UTF8_STR = "v21_europe";
+    public static final int VCARD_TYPE_V21_EUROPE =
+        (FLAG_V21 | NAME_ORDER_EUROPE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
+
+    /* package */ static final String VCARD_TYPE_V21_EUROPE_STR = "v21_europe";
     
     /**
      * <P>
@@ -281,9 +315,8 @@ public class VCardConfig {
      * Not ready yet. Use with caution when you use this.
      * </P>
      */
-    public static final int VCARD_TYPE_V30_EUROPE_UTF8 =
-        (FLAG_V30 | NAME_ORDER_EUROPE | FLAG_USE_UTF8_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
+    public static final int VCARD_TYPE_V30_EUROPE =
+        (FLAG_V30 | NAME_ORDER_EUROPE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
     
     /* package */ static final String VCARD_TYPE_V30_EUROPE_STR = "v30_europe";
 
@@ -295,11 +328,10 @@ public class VCardConfig {
      * Not ready yet. Use with caution when you use this.
      * </P>
      */
-    public static final int VCARD_TYPE_V21_JAPANESE_UTF8 =
-        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_UTF8_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
+    public static final int VCARD_TYPE_V21_JAPANESE =
+        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
-    /* package */ static final String VCARD_TYPE_V21_JAPANESE_UTF8_STR = "v21_japanese_utf8";
+    /* package */ static final String VCARD_TYPE_V21_JAPANESE_STR = "v21_japanese_utf8";
 
     /**
      * <P>
@@ -339,11 +371,10 @@ public class VCardConfig {
      * Not ready yet. Use with caution when you use this.
      * </P>
      */
-    public static final int VCARD_TYPE_V30_JAPANESE_UTF8 =
-        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_UTF8_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
+    public static final int VCARD_TYPE_V30_JAPANESE =
+        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
 
-    /* package */ static final String VCARD_TYPE_V30_JAPANESE_UTF8_STR = "v30_japanese_utf8";
+    /* package */ static final String VCARD_TYPE_V30_JAPANESE_STR = "v30_japanese_utf8";
 
     /**
      * <P>
@@ -357,14 +388,13 @@ public class VCardConfig {
      */
     public static final int VCARD_TYPE_V21_JAPANESE_MOBILE =
         (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
-                FLAG_CONVERT_PHONETIC_NAME_STRINGS |
-                FLAG_REFRAIN_QP_TO_NAME_PROPERTIES);
+                FLAG_CONVERT_PHONETIC_NAME_STRINGS | FLAG_REFRAIN_QP_TO_NAME_PROPERTIES);
 
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_MOBILE_STR = "v21_japanese_mobile";
 
     /**
      * <P>
-     * VCard format used in DoCoMo, which is one of Japanese mobile phone careers.
+     * The vCard format used in DoCoMo, which is one of Japanese mobile phone careers.
      * </p>
      * <P>
      * Base version is vCard 2.1, but the data has several DoCoMo-specific convensions.
@@ -377,30 +407,30 @@ public class VCardConfig {
 
     /* package */ static final String VCARD_TYPE_DOCOMO_STR = "docomo";
 
-    public static int VCARD_TYPE_DEFAULT = VCARD_TYPE_V21_GENERIC_UTF8;
+    public static int VCARD_TYPE_DEFAULT = VCARD_TYPE_V21_GENERIC;
 
     private static final Map<String, Integer> sVCardTypeMap;
     private static final Set<Integer> sJapaneseMobileTypeSet;
     
     static {
         sVCardTypeMap = new HashMap<String, Integer>();
-        sVCardTypeMap.put(VCARD_TYPE_V21_GENERIC_UTF8_STR, VCARD_TYPE_V21_GENERIC_UTF8);
-        sVCardTypeMap.put(VCARD_TYPE_V30_GENERIC_UTF8_STR, VCARD_TYPE_V30_GENERIC_UTF8);
-        sVCardTypeMap.put(VCARD_TYPE_V21_EUROPE_UTF8_STR, VCARD_TYPE_V21_EUROPE_UTF8);
-        sVCardTypeMap.put(VCARD_TYPE_V30_EUROPE_STR, VCARD_TYPE_V30_EUROPE_UTF8);
+        sVCardTypeMap.put(VCARD_TYPE_V21_GENERIC_STR, VCARD_TYPE_V21_GENERIC);
+        sVCardTypeMap.put(VCARD_TYPE_V30_GENERIC_STR, VCARD_TYPE_V30_GENERIC);
+        sVCardTypeMap.put(VCARD_TYPE_V21_EUROPE_STR, VCARD_TYPE_V21_EUROPE);
+        sVCardTypeMap.put(VCARD_TYPE_V30_EUROPE_STR, VCARD_TYPE_V30_EUROPE);
         sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_SJIS_STR, VCARD_TYPE_V21_JAPANESE_SJIS);
-        sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_UTF8_STR, VCARD_TYPE_V21_JAPANESE_UTF8);
+        sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_STR, VCARD_TYPE_V21_JAPANESE);
         sVCardTypeMap.put(VCARD_TYPE_V30_JAPANESE_SJIS_STR, VCARD_TYPE_V30_JAPANESE_SJIS);
-        sVCardTypeMap.put(VCARD_TYPE_V30_JAPANESE_UTF8_STR, VCARD_TYPE_V30_JAPANESE_UTF8);
+        sVCardTypeMap.put(VCARD_TYPE_V30_JAPANESE_STR, VCARD_TYPE_V30_JAPANESE);
         sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_MOBILE_STR, VCARD_TYPE_V21_JAPANESE_MOBILE);
         sVCardTypeMap.put(VCARD_TYPE_DOCOMO_STR, VCARD_TYPE_DOCOMO);
 
         sJapaneseMobileTypeSet = new HashSet<Integer>();
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_SJIS);
-        sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_UTF8);
+        sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_SJIS);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V30_JAPANESE_SJIS);
-        sJapaneseMobileTypeSet.add(VCARD_TYPE_V30_JAPANESE_UTF8);
+        sJapaneseMobileTypeSet.add(VCARD_TYPE_V30_JAPANESE);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_MOBILE);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_DOCOMO);
     }

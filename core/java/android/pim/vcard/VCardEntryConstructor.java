@@ -62,7 +62,7 @@ public class VCardEntryConstructor implements VCardInterpreter {
     final private List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
 
     public VCardEntryConstructor() {
-        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8, null);
+        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC, null);
     }
 
     public VCardEntryConstructor(final int vcardType) {

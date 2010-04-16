@@ -72,10 +72,6 @@ public class VCardParser_V30 implements VCardParser {
         mVCardParserImpl = new VCardParserImpl_V30();
     }
 
-    public VCardParser_V30(VCardSourceDetector detector) {
-        mVCardParserImpl = new VCardParserImpl_V30(detector);
-    }
-
     public VCardParser_V30(int parseType) {
         mVCardParserImpl = new VCardParserImpl_V30(parseType);
     }
@@ -90,12 +86,6 @@ public class VCardParser_V30 implements VCardParser {
     public boolean parse(InputStream is, String charset, VCardInterpreter interpreter)
             throws IOException, VCardException {
         return mVCardParserImpl.parse(is, charset, interpreter);
-    }
-
-    public boolean parse(InputStream is, String charset,
-            VCardInterpreter interpreter, boolean canceled)
-            throws IOException, VCardException {
-        return mVCardParserImpl.parse(is, charset, interpreter, canceled);
     }
 
     public void cancel() {
