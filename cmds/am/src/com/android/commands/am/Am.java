@@ -88,7 +88,7 @@ public class Am {
 
         if (op.equals("start")) {
             runStart();
-        } else if (op.equals("start-service")) {
+        } else if (op.equals("startservice")) {
             runStartService();
         } else if (op.equals("instrument")) {
             runInstrument();
@@ -181,6 +181,15 @@ public class Am {
         return intent;
     }
 
+    private void runStartService() throws Exception {
+        Intent intent = makeIntent();
+        System.out.println("Starting service: " + intent);
+        ComponentName cn = mAm.startService(null, intent, intent.getType());
+        if (cn == null) {
+            System.err.println("Error: Not found; no service started.");
+        }
+    }
+
     private void runStart() throws Exception {
         Intent intent = makeIntent();
         System.out.println("Starting: " + intent);
@@ -237,19 +246,6 @@ public class Am {
                 System.err.println(
                         "Error: Activity not started, unknown error code " + res);
                 break;
-        }
-    }
-
-    private void runStartService() throws Exception {
-        Intent intent = makeIntent();
-
-        if (intent != null) {
-            System.out.println("Starting: " + intent);
-            try {
-                mAm.startService(null, intent, intent.getType());
-            } catch (Exception e) {
-                System.err.println("Error: " + e);
-            }
         }
     }
 
@@ -506,6 +502,8 @@ public class Am {
                 "\n" +
                 "    start an Activity: am start [-D] <INTENT>\n" +
                 "        -D: enable debugging\n" +
+                "\n" +
+                "    start a Service: am startservice <INTENT>\n" +
                 "\n" +
                 "    send a broadcast Intent: am broadcast <INTENT>\n" +
                 "\n" +
