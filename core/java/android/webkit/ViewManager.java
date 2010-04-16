@@ -31,7 +31,9 @@ class ViewManager {
     private boolean mZoomInProgress = false;
 
     // Threshold at which a surface is prevented from further increasing in size
-    private final int MAX_SURFACE_THRESHOLD;
+    private final int MAX_SURFACE_AREA;
+    // GPU Limit (hard coded for now)
+    private static final int MAX_SURFACE_DIMENSION = 2048;
 
     class ChildView {
         int x;
@@ -105,7 +107,7 @@ class ViewManager {
            percentage is simply an estimation and is not based on anything but
            basic trial-and-error tests run on multiple devices.
          */
-        MAX_SURFACE_THRESHOLD = (int)(pixelArea * 2.75);
+        MAX_SURFACE_AREA = (int)(pixelArea * 2.75);
     }
 
     ChildView createView() {
@@ -113,39 +115,14 @@ class ViewManager {
     }
 
     /**
-     * Shorthand for calling mWebView.contentToViewDimension.  Used when
-     * obtaining a view dimension from a content dimension, whether it be in x
-     * or y.
-     */
-    private int ctvD(int val) {
-        return mWebView.contentToViewDimension(val);
-    }
-
-    /**
-     * Shorthand for calling mWebView.contentToViewX.  Used when obtaining a
-     * view x coordinate from a content x coordinate.
-     */
-    private int ctvX(int val) {
-        return mWebView.contentToViewX(val);
-    }
-
-    /**
-     * Shorthand for calling mWebView.contentToViewY.  Used when obtaining a
-     * view y coordinate from a content y coordinate.
-     */
-    private int ctvY(int val) {
-        return mWebView.contentToViewY(val);
-    }
-
-    /**
      * This should only be called from the UI thread.
      */
     private void requestLayout(ChildView v) {
 
-        int width = ctvD(v.width);
-        int height = ctvD(v.height);
-        int x = ctvX(v.x);
-        int y = ctvY(v.y);
+        int width = mWebView.contentToViewDimension(v.width);
+        int height = mWebView.contentToViewDimension(v.height);
+        int x = mWebView.contentToViewX(v.x);
+        int y = mWebView.contentToViewY(v.y);
 
         AbsoluteLayout.LayoutParams lp;
         ViewGroup.LayoutParams layoutParams = v.mView.getLayoutParams();
@@ -166,19 +143,54 @@ class ViewManager {
         if(v.mView instanceof SurfaceView) {
 
             final SurfaceView sView = (SurfaceView) v.mView;
-            boolean exceedThreshold = (width * height) > MAX_SURFACE_THRESHOLD;
 
-            /* If the surface has exceeded a predefined threshold or the webview
-             * is currently zoom then fix the size of the surface.
+            if (sView.isFixedSize() && mZoomInProgress) {
+                /* If we're already fixed, and we're in a zoom, then do nothing
+                   about the size. Just wait until we get called at the end of
+                   the zoom session (with mZoomInProgress false) and we'll
+                   fixup our size then.
+                 */
+                return;
+            }
+
+            /* Compute proportional fixed width/height if necessary.
              *
              * NOTE: plugins (e.g. Flash) must not explicitly fix the size of
              * their surface. The logic below will result in unexpected behavior
              * for the plugin if they attempt to fix the size of the surface.
              */
-            if (!sView.isFixedSize() && (exceedThreshold || mZoomInProgress)) {
-                sView.getHolder().setFixedSize(width, height);
+            int fixedW = width;
+            int fixedH = height;
+            if (fixedW > MAX_SURFACE_DIMENSION || fixedH > MAX_SURFACE_DIMENSION) {
+                if (v.width > v.height) {
+                    fixedW = MAX_SURFACE_DIMENSION;
+                    fixedH = v.height * MAX_SURFACE_DIMENSION / v.width;
+                } else {
+                    fixedH = MAX_SURFACE_DIMENSION;
+                    fixedW = v.width * MAX_SURFACE_DIMENSION / v.height;
+                }
             }
-            else if (sView.isFixedSize() && !exceedThreshold && !mZoomInProgress) {
+            if (fixedW * fixedH > MAX_SURFACE_AREA) {
+                float area = MAX_SURFACE_AREA;
+                if (v.width > v.height) {
+                    fixedW = (int)Math.sqrt(area * v.width / v.height);
+                    fixedH = v.height * fixedW / v.width;
+                } else {
+                    fixedH = (int)Math.sqrt(area * v.height / v.width);
+                    fixedW = v.width * fixedH / v.height;
+                }
+            }
+
+            if (fixedW != width || fixedH != height) {
+                // if we get here, either our dimensions or area (or both)
+                // exeeded our max, so we had to compute fixedW and fixedH
+                sView.getHolder().setFixedSize(fixedW, fixedH);
+            } else if (!sView.isFixedSize() && mZoomInProgress) {
+                // just freeze where we were (view size) until we're done with
+                // the zoom progress
+                sView.getHolder().setFixedSize(sView.getWidth(),
+                                               sView.getHeight());
+            } else if (sView.isFixedSize() && !mZoomInProgress) {
                 /* The changing of visibility is a hack to get around a bug in
                  * the framework that causes the surface to revert to the size
                  * it was prior to being fixed before it redraws using the
@@ -197,9 +209,6 @@ class ViewManager {
                 } else {
                     sView.getHolder().setSizeFromLayout();
                 }
-            }
-            else if (sView.isFixedSize() && exceedThreshold) {
-                sView.requestLayout();
             }
         }
     }
