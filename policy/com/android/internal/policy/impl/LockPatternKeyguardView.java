@@ -601,6 +601,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 unlockView = new AccountUnlockScreen(
                         mContext,
                         mConfiguration,
+                        mUpdateMonitor,
                         mKeyguardScreenCallback,
                         mLockPatternUtils);
             } catch (IllegalStateException e) {

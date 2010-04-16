@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
@@ -65,6 +64,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     private final KeyguardScreenCallback mCallback;
     private final LockPatternUtils mLockPatternUtils;
+    private KeyguardUpdateMonitor mUpdateMonitor;
 
     private TextView mTopHeader;
     private TextView mInstructions;
@@ -81,9 +81,11 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     /**
      * AccountUnlockScreen constructor.
      * @param configuration
+     * @param updateMonitor
      */
     public AccountUnlockScreen(Context context,Configuration configuration,
-            KeyguardScreenCallback callback, LockPatternUtils lockPatternUtils) {
+            KeyguardUpdateMonitor updateMonitor, KeyguardScreenCallback callback,
+            LockPatternUtils lockPatternUtils) {
         super(context);
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -111,6 +113,9 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         mEmergencyCall = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCall.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
+
+        mUpdateMonitor = updateMonitor;
+        mUpdateMonitor.registerInfoCallback(this);
     }
 
     public void afterTextChanged(Editable s) {
@@ -154,6 +159,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         if (mCheckingDialog != null) {
             mCheckingDialog.hide();
         }
+        mUpdateMonitor.removeCallback(this);
     }
 
     /** {@inheritDoc} */
