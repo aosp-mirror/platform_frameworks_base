@@ -44,6 +44,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.telephony.TelephonyProperties;
@@ -607,10 +608,16 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         ThrottleService mParent;
         Context mContext;
+        String mImsi = null;
+
+        TelephonyManager mTelephonyManager;
 
         DataRecorder(Context context, ThrottleService parent) {
             mContext = context;
             mParent = parent;
+
+            mTelephonyManager = (TelephonyManager)mContext.getSystemService(
+                    Context.TELEPHONY_SERVICE);
 
             synchronized (mParent) {
                 mPeriodCount = 6;
@@ -626,6 +633,8 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         void setNextPeriod(Calendar start, Calendar end) {
+            // TODO - how would we deal with a dual-IMSI device?
+            checkForSubscriberId();
             if (DBG) {
                 Slog.d(TAG, "setting next period to " + start.getTimeInMillis() +
                         " --until-- " + end.getTimeInMillis());
@@ -703,6 +712,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         // if time moves backward accumulate all read/write that's lost into the now
         // otherwise time moved forward.
         void addData(long bytesRead, long bytesWritten) {
+            checkForSubscriberId();
             synchronized (mParent) {
                 mPeriodRxData[mCurrentPeriod] += bytesRead;
                 mPeriodTxData[mCurrentPeriod] += bytesWritten;
@@ -714,9 +724,68 @@ public class ThrottleService extends IThrottleManager.Stub {
             File dataDir = Environment.getDataDirectory();
             File throttleDir = new File(dataDir, "system/throttle");
             throttleDir.mkdirs();
-            File dataFile = new File(throttleDir, "data");
+            String mImsi = mTelephonyManager.getSubscriberId();
+            File dataFile;
+            if (mImsi == null) {
+                dataFile = useMRUFile(throttleDir);
+                Slog.d(TAG, "imsi not available yet, using " + dataFile);
+            } else {
+                String imsiHash = Integer.toString(mImsi.hashCode());
+                dataFile = new File(throttleDir, imsiHash);
+            }
+            // touch the file so it's not LRU
+            dataFile.setLastModified(System.currentTimeMillis());
+            checkAndDeleteLRUDataFile(throttleDir);
             return dataFile;
         }
+
+        // TODO - get broadcast (TelephonyIntents.ACTION_SIM_STATE_CHANGED) instead of polling
+        private void checkForSubscriberId() {
+            if (mImsi != null) return;
+
+            mImsi = mTelephonyManager.getSubscriberId();
+            if (mImsi == null) return;
+
+            Slog.d(TAG, "finally have imsi - retreiving data");
+            retrieve();
+        }
+
+        private final static int MAX_SIMS_SUPPORTED = 3;
+
+        private void checkAndDeleteLRUDataFile(File dir) {
+            File[] files = dir.listFiles();
+
+            if (files.length <= MAX_SIMS_SUPPORTED) return;
+            Slog.d(TAG, "Too many data files");
+            do {
+                File oldest = null;
+                for (File f : files) {
+                    if ((oldest == null) || (oldest.lastModified() > f.lastModified())) {
+                        oldest = f;
+                    }
+                }
+                if (oldest == null) return;
+                Slog.d(TAG, " deleting " + oldest);
+                oldest.delete();
+                files = dir.listFiles();
+            } while (files.length > MAX_SIMS_SUPPORTED);
+        }
+
+        private File useMRUFile(File dir) {
+            File newest = null;
+            File[] files = dir.listFiles();
+
+            for (File f : files) {
+                if ((newest == null) || (newest.lastModified() < f.lastModified())) {
+                    newest = f;
+                }
+            }
+            if (newest == null) {
+                newest = new File(dir, "temp");
+            }
+            return newest;
+        }
+
 
         private static final int DATA_FILE_VERSION = 1;
 
