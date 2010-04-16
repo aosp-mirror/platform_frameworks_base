@@ -96,9 +96,6 @@ import android.util.Log;
     }
 
     /* package */ void releaseSqlStatement() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
         // Note that native_finalize() checks to make sure that nStatement is
         // non-null before destroying it.
         if (nStatement != 0) {
