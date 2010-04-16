@@ -478,24 +478,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
             long timeReference = client.getNtpTimeReference();
             int certainty = (int)(client.getRoundTripTime()/2);
             long now = System.currentTimeMillis();
-            long systemTimeOffset = time - now;
 
             Log.d(TAG, "NTP server returned: "
                     + time + " (" + new Date(time)
                     + ") reference: " + timeReference
                     + " certainty: " + certainty
-                    + " system time offset: " + systemTimeOffset);
+                    + " system time offset: " + (time - now));
 
-            // sanity check NTP time and do not use if it is too far from system time
-            if (systemTimeOffset < 0) {
-                systemTimeOffset = -systemTimeOffset;
-            }
-            if (systemTimeOffset < MAX_NTP_SYSTEM_TIME_OFFSET) {
-                native_inject_time(time, timeReference, certainty);
-            } else {
-                Log.e(TAG, "NTP time differs from system time by " + systemTimeOffset
-                        + "ms.  Ignoring.");
-            }
+            native_inject_time(time, timeReference, certainty);
             delay = NTP_INTERVAL;
         } else {
             if (DEBUG) Log.d(TAG, "requestTime failed");
