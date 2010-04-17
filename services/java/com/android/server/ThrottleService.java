@@ -168,36 +168,37 @@ public class ThrottleService extends IThrottleManager.Stub {
                 "ThrottleService");
     }
 
+    // TODO - fetch for the iface
     public synchronized long getResetTime(String iface) {
         enforceAccessPermission();
-        if ((iface != null) &&
-                iface.equals(mIface) &&
-                (mRecorder != null)) {
+        if (mRecorder != null) {
             mRecorder.getPeriodEnd();
         }
         return 0;
     }
+
+    // TODO - fetch for the iface
     public synchronized long getPeriodStartTime(String iface) {
         enforceAccessPermission();
-        if ((iface != null) &&
-                iface.equals(mIface) &&
-                (mRecorder != null)) {
+        if (mRecorder != null) {
             mRecorder.getPeriodStart();
         }
         return 0;
     }
     //TODO - a better name?  getCliffByteCountThreshold?
+    // TODO - fetch for the iface
     public synchronized long getCliffThreshold(String iface, int cliff) {
         enforceAccessPermission();
-        if ((iface != null) && (cliff == 1) && iface.equals(mIface)) {
+        if (cliff == 1) {
             return mPolicyThreshold;
         }
         return 0;
     }
     // TODO - a better name? getThrottleRate?
+    // TODO - fetch for the iface
     public synchronized int getCliffLevel(String iface, int cliff) {
         enforceAccessPermission();
-        if ((iface != null) && (cliff == 1) && iface.equals(mIface)) {
+        if (cliff == 1) {
             return mPolicyThrottleValue;
         }
         return 0;
@@ -209,11 +210,10 @@ public class ThrottleService extends IThrottleManager.Stub {
                     Settings.Secure.THROTTLE_HELP_URI);
     }
 
+    // TODO - fetch for the iface
     public synchronized long getByteCount(String iface, int dir, int period, int ago) {
         enforceAccessPermission();
-        if ((iface != null) &&
-                iface.equals(mIface) &&
-                (period == ThrottleManager.PERIOD_CYCLE) &&
+        if ((period == ThrottleManager.PERIOD_CYCLE) &&
                 (mRecorder != null)) {
             if (dir == ThrottleManager.DIRECTION_TX) return mRecorder.getPeriodTx(ago);
             if (dir == ThrottleManager.DIRECTION_RX) return mRecorder.getPeriodRx(ago);
@@ -222,9 +222,10 @@ public class ThrottleService extends IThrottleManager.Stub {
     }
 
     // TODO - a better name - getCurrentThrottleRate?
+    // TODO - fetch for the iface
     public synchronized int getThrottle(String iface) {
         enforceAccessPermission();
-        if ((iface != null) && iface.equals(mIface) && (mThrottleIndex == 1)) {
+        if (mThrottleIndex == 1) {
             return mPolicyThrottleValue;
         }
         return 0;
