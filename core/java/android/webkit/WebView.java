@@ -6509,6 +6509,7 @@ public class WebView extends AbsoluteLayout
                                 if (mDeferTouchMode == TOUCH_DRAG_MODE) {
                                     // no fling in defer process
                                     WebViewCore.resumePriority();
+                                    WebViewCore.resumeUpdatePicture(mWebViewCore);
                                 }
                                 mDeferTouchMode = TOUCH_DONE_MODE;
                                 break;
