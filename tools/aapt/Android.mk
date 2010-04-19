@@ -37,16 +37,16 @@ LOCAL_STATIC_LIBRARIES := \
 	libexpat \
 	libpng
 
-LOCAL_LDLIBS := -lz
-
 ifeq ($(HOST_OS),linux)
 LOCAL_LDLIBS += -lrt
 endif
 
-ifeq ($(HOST_OS),windows)
-ifeq ($(strip $(USE_CYGWIN),),)
-LOCAL_LDLIBS += -lws2_32
-endif
+# Statically link libz for MinGW (Win SDK under Linux),
+# and dynamically link for all others.
+ifneq ($(strip $(USE_MINGW)),)
+  LOCAL_STATIC_LIBRARIES += libz
+else
+  LOCAL_LDLIBS += -lz
 endif
 
 LOCAL_MODULE := aapt
