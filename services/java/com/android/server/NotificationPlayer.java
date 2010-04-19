@@ -95,6 +95,7 @@ public class NotificationPlayer implements OnCompletionListener {
                         audioManager.requestAudioFocus(null, mCmd.stream,
                                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
                     }
+                    player.setOnCompletionListener(NotificationPlayer.this);
                     player.start();
                     if (mPlayer != null) {
                         mPlayer.release();
@@ -125,7 +126,6 @@ public class NotificationPlayer implements OnCompletionListener {
                 t.start();
                 t.wait();
             }
-            mPlayer.setOnCompletionListener(this);
             //-----------------------------------
 
             long delay = SystemClock.uptimeMillis() - cmd.requestTime;
