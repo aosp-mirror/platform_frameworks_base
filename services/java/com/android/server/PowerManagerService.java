@@ -1730,7 +1730,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
 
         if (offMask != 0) {
-            //Slog.i(TAG, "Setting brightess off: " + offMask);
+            if (mSpew) Slog.i(TAG, "Setting brightess off: " + offMask);
             setLightBrightness(offMask, Power.BRIGHTNESS_OFF);
         }
         if (dimMask != 0) {
@@ -1739,7 +1739,7 @@ class PowerManagerService extends IPowerManager.Stub
                     brightness > Power.BRIGHTNESS_LOW_BATTERY) {
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
             }
-            //Slog.i(TAG, "Setting brightess dim " + brightness + ": " + offMask);
+            if (mSpew) Slog.i(TAG, "Setting brightess dim " + brightness + ": " + dimMask);
             setLightBrightness(dimMask, brightness);
         }
         if (onMask != 0) {
@@ -1748,7 +1748,7 @@ class PowerManagerService extends IPowerManager.Stub
                     brightness > Power.BRIGHTNESS_LOW_BATTERY) {
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
             }
-            //Slog.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
+            if (mSpew) Slog.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
             setLightBrightness(onMask, brightness);
         }
     }
@@ -1883,6 +1883,10 @@ class PowerManagerService extends IPowerManager.Stub
 
     private int applyButtonState(int state) {
         int brightness = -1;
+        if ((state & BATTERY_LOW_BIT) != 0) {
+            // do not override brightness if the battery is low
+            return state;
+        }
         if (mButtonBrightnessOverride >= 0) {
             brightness = mButtonBrightnessOverride;
         } else if (mLightSensorButtonBrightness >= 0 && mUseSoftwareAutoBrightness) {
@@ -1899,6 +1903,10 @@ class PowerManagerService extends IPowerManager.Stub
 
     private int applyKeyboardState(int state) {
         int brightness = -1;
+        if ((state & BATTERY_LOW_BIT) != 0) {
+            // do not override brightness if the battery is low
+            return state;
+        }
         if (!mKeyboardVisible) {
             brightness = 0;
         } else if (mButtonBrightnessOverride >= 0) {
