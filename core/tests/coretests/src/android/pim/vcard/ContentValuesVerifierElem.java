@@ -62,7 +62,7 @@ import java.io.InputStream;
             vCardParser = new VCardParser_V21();
         }
         VCardEntryConstructor builder =
-                new VCardEntryConstructor(null, null, false, vCardType, null);
+                new VCardEntryConstructor(null, false, vCardType, null);
         builder.addEntryHandler(mHandler);
         try {
             vCardParser.parse(is, builder);

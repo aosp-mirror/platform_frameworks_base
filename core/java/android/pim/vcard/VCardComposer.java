@@ -376,7 +376,7 @@ public class VCardComposer {
                 mCharset = charset;
             }
         }
-        Log.d(LOG_TAG, "use the charset \"" + mCharset + "\""); 
+        Log.d(LOG_TAG, "Use the charset \"" + mCharset + "\"");
     }
 
     /**

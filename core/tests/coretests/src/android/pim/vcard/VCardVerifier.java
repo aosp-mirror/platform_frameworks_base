@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.pim.vcard.exception.VCardException;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
+import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,6 +44,8 @@ import java.util.Arrays;
 }
 
 /* package */ class VCardVerifier {
+    private static final String LOG_TAG = "VCardVerifier";
+
     private class VCardVerifierInternal implements VCardComposer.OneEntryHandler {
         public boolean onInit(Context context) {
             return true;
@@ -180,7 +183,7 @@ import java.util.Arrays;
     }
 
     private void verifyOneVCard(final String vcard) {
-        // Log.d("@@@", vcard);
+        Log.d(LOG_TAG, vcard);
         final VCardInterpreter builder;
         if (mContentValuesVerifier != null) {
             final VNodeBuilder vnodeBuilder = mPropertyNodesVerifier;
@@ -201,13 +204,14 @@ import java.util.Arrays;
             }
         }
 
-        final VCardParser parser = (mIsV30 ? new VCardParser_V30() : new VCardParser_V21());
         InputStream is = null;
         try {
             String charset =
                 (VCardConfig.shouldUseShiftJisForExport(mVCardType) ? "SHIFT_JIS" : "UTF-8");
+            // TODO: Use charset
+            final VCardParser parser = (mIsV30 ? new VCardParser_V30() : new VCardParser_V21());
             is = new ByteArrayInputStream(vcard.getBytes(charset));
-            mTestCase.assertEquals(true, parser.parse(is, null, builder));
+            parser.parse(is, builder);
         } catch (IOException e) {
             mTestCase.fail("Unexpected IOException: " + e.getMessage());
         } catch (VCardException e) {

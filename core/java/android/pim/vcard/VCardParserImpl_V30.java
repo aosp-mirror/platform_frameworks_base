@@ -32,6 +32,7 @@ import android.util.Log;
  * {@link VCardParser_V30} does not inherit {@link VCardParser_V21}, while
  * {@link VCardParserImpl_V30} inherits {@link VCardParserImpl_V21}.
  * </p>
+ * @hide
  */
 /* package */ class VCardParserImpl_V30 extends VCardParserImpl_V21 {
     private static final String LOG_TAG = "VCardParserImpl_V30";
@@ -43,8 +44,12 @@ import android.util.Log;
         super();
     }
 
-    public VCardParserImpl_V30(int parseMode) {
-        super(parseMode);
+    public VCardParserImpl_V30(int vcardType) {
+        super(vcardType, null);
+    }
+
+    public VCardParserImpl_V30(int vcardType, String importCharset) {
+        super(vcardType, importCharset);
     }
 
     @Override

@@ -38,24 +38,9 @@ public interface VCardParser {
      *
      * @param is The source to parse.
      * @param interepreter A {@link VCardInterpreter} object which used to construct data.
-     * @return Returns true for success. Otherwise returns false.
      * @throws IOException, VCardException
      */
-    public boolean parse(InputStream is, VCardInterpreter interepreter)
-            throws IOException, VCardException;
-
-    /**
-     * <p>
-     * The method variants which accept charset.
-     * </p>
-     *
-     * @param is The source to parse.
-     * @param charset Charset to be used.
-     * @param interpreter The VCardBuilderBase object.
-     * @return Returns true when successful. Otherwise returns false.
-     * @throws IOException, VCardException
-     */
-    public boolean parse(InputStream is, String charset, VCardInterpreter interpreter)
+    public void parse(InputStream is, VCardInterpreter interepreter)
             throws IOException, VCardException;
 
     /**

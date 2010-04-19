@@ -21,6 +21,7 @@ import android.pim.vcard.exception.VCardInvalidCommentLineException;
 import android.pim.vcard.exception.VCardInvalidLineException;
 import android.pim.vcard.exception.VCardNestedException;
 import android.pim.vcard.exception.VCardVersionException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -36,6 +37,7 @@ import java.util.Set;
  * <p>
  * Basic implementation achieving vCard parsing. Based on vCard 2.1,
  * </p>
+ * @hide
  */
 /* package */ class VCardParserImpl_V21 {
     private static final String LOG_TAG = "VCardParserImpl_V21";
@@ -65,6 +67,8 @@ import java.util.Set;
 
     protected boolean mCanceled;
     protected VCardInterpreter mInterpreter;
+
+    protected final String mImportCharset;
 
     /**
      * <p>
@@ -131,13 +135,20 @@ import java.util.Set;
     private long mTimeHandleBase64;
 
     public VCardParserImpl_V21() {
-        this(VCardConfig.VCARD_TYPE_DEFAULT);
+        this(VCardConfig.VCARD_TYPE_DEFAULT, null);
     }
 
     public VCardParserImpl_V21(int vcardType) {
+        this(vcardType, null);
+    }
+
+    public VCardParserImpl_V21(int vcardType, String importCharset) {
         if ((vcardType & VCardConfig.FLAG_TORELATE_NEST) != 0) {
             mNestCount = 1;
         }
+
+        mImportCharset = (!TextUtils.isEmpty(importCharset) ? importCharset :
+            VCardConfig.DEFAULT_INTERMEDIATE_CHARSET);
     }
 
     /**
@@ -684,9 +695,9 @@ import java.util.Set;
             try {
                 final String result = getBase64(propertyValue);
                 if (mInterpreter != null) {
-                    ArrayList<String> v = new ArrayList<String>();
-                    v.add(result);
-                    mInterpreter.propertyValues(v);
+                    ArrayList<String> arrayList = new ArrayList<String>();
+                    arrayList.add(result);
+                    mInterpreter.propertyValues(arrayList);
                 }
             } catch (OutOfMemoryError error) {
                 Log.e(LOG_TAG, "OutOfMemoryError happened during parsing BASE64 data!");
@@ -920,17 +931,13 @@ import java.util.Set;
     }
 
 
-    public boolean parse(InputStream is, String charset, VCardInterpreter interpreter)
+    public void parse(InputStream is, VCardInterpreter interpreter)
             throws IOException, VCardException {
         if (is == null) {
             throw new NullPointerException("InputStream must not be null.");
         }
 
-        if (charset == null) {
-            charset = VCardConfig.DEFAULT_TEMPORARY_CHARSET;
-        }
-
-        final InputStreamReader tmpReader = new InputStreamReader(is, charset);
+        final InputStreamReader tmpReader = new InputStreamReader(is, mImportCharset);
         if (VCardConfig.showPerformanceLog()) {
             mReader = new CustomBufferedReader(tmpReader);
         } else {
@@ -952,8 +959,6 @@ import java.util.Set;
         if (VCardConfig.showPerformanceLog()) {
             showPerformanceInfo();
         }
-
-        return true;
     }
 
     public final void cancel() {

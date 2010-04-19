@@ -94,20 +94,17 @@ public final class VCardParser_V21 implements VCardParser {
         mVCardParserImpl = new VCardParserImpl_V21();
     }
 
-    public VCardParser_V21(int parseType) {
-        mVCardParserImpl = new VCardParserImpl_V21(parseType);
+    public VCardParser_V21(int vcardType) {
+        mVCardParserImpl = new VCardParserImpl_V21(vcardType);
     }
 
-    //// Implemented methods 
-
-    public boolean parse(InputStream is, VCardInterpreter interepreter)
-            throws IOException, VCardException {
-        return mVCardParserImpl.parse(is, VCardConfig.DEFAULT_TEMPORARY_CHARSET, interepreter);
+    public VCardParser_V21(int parseType, String inputCharset) {
+        mVCardParserImpl = new VCardParserImpl_V21(parseType, null);
     }
 
-    public boolean parse(InputStream is, String charset, VCardInterpreter interpreter)
+    public void parse(InputStream is, VCardInterpreter interepreter)
             throws IOException, VCardException {
-        return mVCardParserImpl.parse(is, charset, interpreter);
+        mVCardParserImpl.parse(is, interepreter);
     }
 
     public void cancel() {

@@ -42,12 +42,6 @@ import java.util.List;
 public class VNodeBuilder implements VCardInterpreter {
     static private String LOG_TAG = "VNodeBuilder"; 
     
-    /**
-     * If there's no other information available, this class uses this charset for encoding
-     * byte arrays.
-     */
-    static public String TARGET_CHARSET = "UTF-8"; 
-    
     /** type=VNode */
     public List<VNode> vNodeList = new ArrayList<VNode>();
     private int mNodeListPos = 0;
@@ -68,11 +62,11 @@ public class VNodeBuilder implements VCardInterpreter {
     private boolean mStrictLineBreakParsing;
     
     public VNodeBuilder() {
-        this(VCardConfig.DEFAULT_IMPORT_CHARSET, TARGET_CHARSET, false);
+        this(VCardConfig.DEFAULT_INTERMEDIATE_CHARSET, VCardConfig.DEFAULT_IMPORT_CHARSET, false);
     }
 
-    public VNodeBuilder(String charset, boolean strictLineBreakParsing) {
-        this(null, charset, strictLineBreakParsing);
+    public VNodeBuilder(String targetCharset, boolean strictLineBreakParsing) {
+        this(null, targetCharset, strictLineBreakParsing);
     }
     
     /**
@@ -83,12 +77,12 @@ public class VNodeBuilder implements VCardInterpreter {
         if (sourceCharset != null) {
             mSourceCharset = sourceCharset;
         } else {
-            mSourceCharset = VCardConfig.DEFAULT_IMPORT_CHARSET;
+            mSourceCharset = VCardConfig.DEFAULT_INTERMEDIATE_CHARSET;
         }
         if (targetCharset != null) {
             mTargetCharset = targetCharset;
         } else {
-            mTargetCharset = TARGET_CHARSET;
+            mTargetCharset = VCardConfig.DEFAULT_IMPORT_CHARSET;
         }
         mStrictLineBreakParsing = strictLineBreakParsing;
     }

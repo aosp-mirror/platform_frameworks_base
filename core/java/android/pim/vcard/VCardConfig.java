@@ -39,12 +39,12 @@ public class VCardConfig {
     /* package */ static final int LOG_LEVEL = LOG_LEVEL_NONE;
 
     /**
-     * <P>
+     * <p>
      * The charset used during import.
-     * </P>
-     * <P>
-     * We cannot determine which charset should be used to interpret a given vCard file,
-     * while we have to decode sime encoded data (e.g. BASE64) to binary.
+     * </p>
+     * <p>
+     * We cannot determine which charset should be used to interpret a given vCard file
+     * at first, while we have to decode sime encoded data (e.g. BASE64) to binary.
      * In order to avoid "misinterpretation" of charset as much as possible,
      * "ISO-8859-1" (a.k.a Latin-1) is first used for reading a stream.
      * When charset is specified in a property (with "CHARSET=..." parameter),
@@ -52,12 +52,15 @@ public class VCardConfig {
      * assuming "ISO-8859-1" is able to map "all" 8bit characters to some unicode,
      * and it has 1 to 1 mapping in all 8bit characters.
      * If the assumption is not correct, this setting will cause some bug.
-     * </P>
+     * </p>
      */
-    /* package */ static final String DEFAULT_TEMPORARY_CHARSET = "ISO-8859-1";
+    /* package */ static final String DEFAULT_INTERMEDIATE_CHARSET = "ISO-8859-1";
 
-    // TODO: still intermediate procedures uses this charset. Fix it.
-    public static final String DEFAULT_IMPORT_CHARSET = "ISO-8859-1";
+    /**
+     * The charset used when there's no information affbout what charset should be used to
+     * encode the binary given from vCard.
+     */
+    public static final String DEFAULT_IMPORT_CHARSET = "UTF-8";
     public static final String DEFAULT_EXPORT_CHARSET = "UTF-8";
 
     public static final int FLAG_V21 = 0;
@@ -82,130 +85,138 @@ public class VCardConfig {
     private static final int FLAG_CHARSET_MASK_FOR_EKPORT = 0xF00;
 
     /**
+     * <p>
      * The flag indicating the vCard composer will add some "X-" properties used only in Android
      * when the formal vCard specification does not have appropriate fields for that data.
-     * 
+     * </p>
+     * <p>
      * For example, Android accepts nickname information while vCard 2.1 does not.
      * When this flag is on, vCard composer emits alternative "X-" property (like "X-NICKNAME")
      * instead of just dropping it.
-     * 
+     * </p>
+     * <p>
      * vCard parser code automatically parses the field emitted even when this flag is off.
-     * 
-     * Note that this flag does not assure all the information must be hold in the emitted vCard.
+     * </p>
      */
     private static final int FLAG_USE_ANDROID_PROPERTY = 0x80000000;
     
     /**
+     * <p>
      * The flag indicating the vCard composer will add some "X-" properties seen in the
      * vCard data emitted by the other softwares/devices when the formal vCard specification
-     * does not have appropriate field(s) for that data. 
-     * 
+     * does not have appropriate field(s) for that data.
+     * </p> 
+     * <p>
      * One example is X-PHONETIC-FIRST-NAME/X-PHONETIC-MIDDLE-NAME/X-PHONETIC-LAST-NAME, which are
      * for phonetic name (how the name is pronounced), seen in the vCard emitted by some other
      * non-Android devices/softwares. We chose to enable the vCard composer to use those
      * defact properties since they are also useful for Android devices.
-     * 
+     * </p>
+     * <p>
      * Note for developers: only "X-" properties should be added with this flag. vCard 2.1/3.0
      * allows any kind of "X-" properties but does not allow non-"X-" properties (except IANA tokens
      * in vCard 3.0). Some external parsers may get confused with non-valid, non-"X-" properties.
+     * </p>
      */
     private static final int FLAG_USE_DEFACT_PROPERTY = 0x40000000;
 
     /**
+     * <p>
      * The flag indicating some specific dialect seen in vCard of DoCoMo (one of Japanese
      * mobile careers) should be used. This flag does not include any other information like
      * that "the vCard is for Japanese". So it is "possible" that "the vCard should have DoCoMo's
      * dialect but the name order should be European", but it is not recommended.
+     * </p>
      */
     private static final int FLAG_DOCOMO = 0x20000000;
 
     /**
-     * <P>
+     * <p>
      * The flag indicating the vCard composer does "NOT" use Quoted-Printable toward "primary"
      * properties even though it is required by vCard 2.1 (QP is prohibited in vCard 3.0).
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * We actually cannot define what is the "primary" property. Note that this is NOT defined
      * in vCard specification either. Also be aware that it is NOT related to "primary" notion
      * used in {@link android.provider.ContactsContract}.
      * This notion is just for vCard composition in Android.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * We added this Android-specific notion since some (incomplete) vCard exporters for vCard 2.1
      * do NOT use Quoted-Printable encoding toward some properties related names like "N", "FN", etc.
      * even when their values contain non-ascii or/and CR/LF, while they use the encoding in the
      * other properties like "ADR", "ORG", etc.
-     * <P>
+     * <p>
      * We are afraid of the case where some vCard importer also forget handling QP presuming QP is
      * not used in such fields.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * This flag is useful when some target importer you are going to focus on does not accept
      * such properties with Quoted-Printable encoding.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Again, we should not use this flag at all for complying vCard 2.1 spec.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * In vCard 3.0, Quoted-Printable is explicitly "prohibitted", so we don't need to care this
      * kind of problem (hopefully).
-     * </P>
+     * </p>
      */
     public static final int FLAG_REFRAIN_QP_TO_NAME_PROPERTIES = 0x10000000;
 
     /**
-     * <P>
+     * <p>
      * The flag indicating that phonetic name related fields must be converted to
      * appropriate form. Note that "appropriate" is not defined in any vCard specification.
      * This is Android-specific.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * One typical (and currently sole) example where we need this flag is the time when
      * we need to emit Japanese phonetic names into vCard entries. The property values
      * should be encoded into half-width katakana when the target importer is Japanese mobile
      * phones', which are probably not able to parse full-width hiragana/katakana for
      * historical reasons, while the vCard importers embedded to softwares for PC should be
      * able to parse them as we expect.
-     * </P>
+     * </p>
      */
     public static final int FLAG_CONVERT_PHONETIC_NAME_STRINGS = 0x0800000;
 
     /**
-     * <P>
+     * <p>
      * The flag indicating the vCard composer "for 2.1" emits "TYPE=" string toward TYPE params
      * every time possible. The default behavior does not emit it and is valid in the spec.
      * In vCrad 3.0, this flag is unnecessary, since "TYPE=" is MUST in vCard 3.0 specification.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Detail:
      * How more than one TYPE fields are expressed is different between vCard 2.1 and vCard 3.0.
      * </p>
-     * <P>
+     * <p>
      * e.g.<BR />
      * 1) Probably valid in both vCard 2.1 and vCard 3.0: "ADR;TYPE=DOM;TYPE=HOME:..."<BR />
      * 2) Valid in vCard 2.1 but not in vCard 3.0: "ADR;DOM;HOME:..."<BR />
      * 3) Valid in vCard 3.0 but not in vCard 2.1: "ADR;TYPE=DOM,HOME:..."<BR />
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * 2) had been the default of VCard exporter/importer in Android, but it is found that
      * some external exporter is not able to parse the type format like 2) but only 3).
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * If you are targeting to the importer which cannot accept TYPE params without "TYPE="
      * strings (which should be rare though), please use this flag.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Example usage: int vcardType = (VCARD_TYPE_V21_GENERIC | FLAG_APPEND_TYPE_PARAM);
-     * </P>
+     * </p>
      */
     public static final int FLAG_APPEND_TYPE_PARAM = 0x04000000;
 
     /**
-     * <P>
+     * <p>
      * The flag indicating the vCard composer does touch nothing toward phone number Strings
      * but leave it as is.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * The vCard specifications mention nothing toward phone numbers, while some devices
      * do (wrongly, but with innevitable reasons).
      * For example, there's a possibility Japanese mobile phones are expected to have
@@ -216,11 +227,11 @@ public class VCardConfig {
      * becomes "111-222-3333").
      * Unfortunate side effect of that use was some control characters used in the other
      * areas may be badly affected by the formatting.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * This flag disables that formatting, affecting both importer and exporter.
      * If the user is aware of some side effects due to the implicit formatting, use this flag.
-     * </P>
+     * </p>
      */
     public static final int FLAG_REFRAIN_PHONE_NUMBER_FORMATTING = 0x02000000;
 
@@ -284,12 +295,12 @@ public class VCardConfig {
     /* package */ static String VCARD_TYPE_V21_GENERIC_STR = "v21_generic";
     
     /**
-     * <P>
+     * <p>
      * General vCard format with the version 3.0. Uses UTF-8 for the charset.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not fully ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V30_GENERIC =
         (FLAG_V30 | NAME_ORDER_DEFAULT | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
@@ -297,10 +308,10 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V30_GENERIC_STR = "v30_generic";
     
     /**
-     * <P>
+     * <p>
      * General vCard format for the vCard 2.1 with some Europe convension. Uses Utf-8.
      * Currently, only name order is considered ("Prefix Middle Given Family Suffix")
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V21_EUROPE =
         (FLAG_V21 | NAME_ORDER_EUROPE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
@@ -308,12 +319,12 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V21_EUROPE_STR = "v21_europe";
     
     /**
-     * <P>
+     * <p>
      * General vCard format with the version 3.0 with some Europe convension. Uses UTF-8.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V30_EUROPE =
         (FLAG_V30 | NAME_ORDER_EUROPE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
@@ -321,12 +332,12 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V30_EUROPE_STR = "v30_europe";
 
     /**
-     * <P>
+     * <p>
      * The vCard 2.1 format for miscellaneous Japanese devices, using UTF-8 as default charset.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V21_JAPANESE =
         (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
@@ -334,13 +345,13 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_STR = "v21_japanese_utf8";
 
     /**
-     * <P>
+     * <p>
      * vCard 2.1 format for miscellaneous Japanese devices. Shift_Jis is used for
      * parsing/composing the vCard data.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V21_JAPANESE_SJIS =
         (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
@@ -349,13 +360,13 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_SJIS_STR = "v21_japanese_sjis";
     
     /**
-     * <P>
+     * <p>
      * vCard format for miscellaneous Japanese devices, using Shift_Jis for
      * parsing/composing the vCard data.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V30_JAPANESE_SJIS =
         (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
@@ -364,12 +375,12 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V30_JAPANESE_SJIS_STR = "v30_japanese_sjis";
     
     /**
-     * <P>
+     * <p>
      * The vCard 3.0 format for miscellaneous Japanese devices, using UTF-8 as default charset.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V30_JAPANESE =
         (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
@@ -377,14 +388,14 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V30_JAPANESE_STR = "v30_japanese_utf8";
 
     /**
-     * <P>
+     * <p>
      * The vCard 2.1 based format which (partially) considers the convention in Japanese
      * mobile phones, where phonetic names are translated to half-width katakana if
      * possible, etc.
-     * </P>
-     * <P>
+     * </p>
+     * <p>
      * Not ready yet. Use with caution when you use this.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_V21_JAPANESE_MOBILE =
         (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
@@ -393,14 +404,14 @@ public class VCardConfig {
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_MOBILE_STR = "v21_japanese_mobile";
 
     /**
-     * <P>
+     * <p>
      * The vCard format used in DoCoMo, which is one of Japanese mobile phone careers.
      * </p>
-     * <P>
+     * <p>
      * Base version is vCard 2.1, but the data has several DoCoMo-specific convensions.
      * No Android-specific property nor defact property is included. The "Primary" properties
      * are NOT encoded to Quoted-Printable.
-     * </P>
+     * </p>
      */
     public static final int VCARD_TYPE_DOCOMO =
         (VCARD_TYPE_V21_JAPANESE_MOBILE | FLAG_DOCOMO);
