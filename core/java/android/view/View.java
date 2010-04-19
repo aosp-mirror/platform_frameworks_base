@@ -1512,6 +1512,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     static final int CANCEL_NEXT_UP_EVENT = 0x04000000;
+    
+    /**
+     * Indicates that we should awaken scroll bars once attached
+     * 
+     * @hide
+     */
+    private static final int AWAKEN_SCROLL_BARS_ON_ATTACH = 0x08000000;
 
     /**
      * The parent this view is attached to.
@@ -3838,6 +3845,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@link #INVISIBLE} or {@link #GONE}.
      */
     protected void onVisibilityChanged(View changedView, int visibility) {
+        if (visibility == VISIBLE) {
+            if (mAttachInfo != null) {
+                initialAwakenScrollBars();
+            } else {
+                mPrivateFlags |= AWAKEN_SCROLL_BARS_ON_ATTACH;
+            }
+        }
     }
 
     /**
@@ -3888,6 +3902,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param visibility The new visibility of the window.
      */
     protected void onWindowVisibilityChanged(int visibility) {
+        if (visibility == VISIBLE) {
+            initialAwakenScrollBars();
+        }
     }
 
     /**
@@ -4909,6 +4926,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Trigger the scrollbars to draw.
+     * This method differs from awakenScrollBars() only in its default duration.
+     * initialAwakenScrollBars() will show the scroll bars for longer than
+     * usual to give the user more of a chance to notice them.
+     *
+     * @return true if the animation is played, false otherwise.
+     */
+    private boolean initialAwakenScrollBars() {
+        return mScrollCache != null &&
+                awakenScrollBars(mScrollCache.scrollBarDefaultDelayBeforeFade * 4, true);
+    }
+
+    /**
      * <p>
      * Trigger the scrollbars to draw. When invoked this method starts an
      * animation to fade the scrollbars out after a fixed delay. If a subclass
@@ -5899,6 +5929,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected void onAttachedToWindow() {
         if ((mPrivateFlags & REQUEST_TRANSPARENT_REGIONS) != 0) {
             mParent.requestTransparentRegion(this);
+        }
+        if ((mPrivateFlags & AWAKEN_SCROLL_BARS_ON_ATTACH) != 0) {
+            initialAwakenScrollBars();
+            mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
     }
 
