@@ -55,7 +55,7 @@ import android.widget.TextView;
 /**
  * Header used across system for displaying a title bar with contact info. You
  * can bind specific values on the header, or use helper methods like
- * {@link #bindFromContactId(long)} to populate asynchronously.
+ * {@link #bindFromContactLookupUri(Uri)} to populate asynchronously.
  * <p>
  * The parent must request the {@link Manifest.permission#READ_CONTACTS}
  * permission to access contact data.
@@ -257,7 +257,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                         if (photoBitmap == null) {
                             photoBitmap = loadPlaceholderPhoto(null);
                         }
-                        mPhotoView.setImageBitmap(photoBitmap);
+                        setPhoto(photoBitmap);
                         if (cookie != null && cookie instanceof Uri) {
                             mPhotoView.assignContactUri((Uri) cookie);
                         }
@@ -267,21 +267,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                     case TOKEN_CONTACT_INFO: {
                         if (cursor != null && cursor.moveToFirst()) {
                             bindContactInfo(cursor);
-                            Uri lookupUri = Contacts.getLookupUri(cursor.getLong(ContactQuery._ID),
+                            final Uri lookupUri = Contacts.getLookupUri(
+                                    cursor.getLong(ContactQuery._ID),
                                     cursor.getString(ContactQuery.LOOKUP_KEY));
 
                             final long photoId = cursor.getLong(ContactQuery.PHOTO_ID);
 
-                            if (photoId == 0) {
-                                mPhotoView.setImageBitmap(loadPlaceholderPhoto(null));
-                                if (cookie != null && cookie instanceof Uri) {
-                                    mPhotoView.assignContactUri((Uri) cookie);
-                                }
-                                invalidate();
-                            } else {
-                                startPhotoQuery(photoId, lookupUri,
-                                        false /* don't reset query handler */);
-                            }
+                            setPhotoId(photoId, lookupUri);
                         } else {
                             // shouldn't really happen
                             setDisplayName(null, null);
@@ -361,18 +353,40 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
-     * Manually set the contact uri
+     * Manually set the presence. If presence is null, it is hidden.
+     * This doesn't change the underlying {@link Contacts} value, only the UI state.
+     * @hide
+     */
+    public void setPresence(Integer presence) {
+        if (presence == null) {
+            showPresence(false);
+        } else {
+            showPresence(true);
+            setPresence(presence.intValue());
+        }
+    }
+
+    /**
+     * Turn on/off showing the presence.
+     * @hide this is here for consistency with setStared/showStar and should be public
+     */
+    public void showPresence(boolean showPresence) {
+        mPresenceView.setVisibility(showPresence ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Manually set the contact uri without loading any data
      */
     public void setContactUri(Uri uri) {
         setContactUri(uri, true);
     }
 
     /**
-     * Manually set the contact uri
+     * Manually set the contact uri without loading any data
      */
-    public void setContactUri(Uri uri, boolean sendToFastrack) {
+    public void setContactUri(Uri uri, boolean sendToQuickContact) {
         mContactUri = uri;
-        if (sendToFastrack) {
+        if (sendToQuickContact) {
             mPhotoView.assignContactUri(uri);
         }
     }
@@ -383,6 +397,22 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      */
     public void setPhoto(Bitmap bitmap) {
         mPhotoView.setImageBitmap(bitmap);
+    }
+
+    /**
+     * Manually set the photo given its id. If the id is 0, a placeholder picture will
+     * be loaded. For any other Id, an async query is started
+     * @hide
+     */
+    public void setPhotoId(final long photoId, final Uri lookupUri) {
+        if (photoId == 0) {
+            setPhoto(loadPlaceholderPhoto(null));
+            mPhotoView.assignContactUri(lookupUri);
+            invalidate();
+        } else {
+            startPhotoQuery(photoId, lookupUri,
+                    false /* don't reset query handler */);
+        }
     }
 
     /**
@@ -400,7 +430,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
-     * Manually set the social snippet text to display in the header.
+     * Manually set the social snippet text to display in the header. This doesn't change the
+     * underlying {@link Contacts}, only the UI state.
      */
     public void setSocialSnippet(CharSequence snippet) {
         if (snippet == null) {
@@ -413,6 +444,20 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
+     * Manually set the status attribution text to display in the header.
+     * This doesn't change the underlying {@link Contacts}, only the UI state.
+     * @hide
+     */
+    public void setStatusAttribution(CharSequence attribution) {
+        if (attribution != null) {
+            mStatusAttributionView.setText(attribution);
+            mStatusAttributionView.setVisibility(View.VISIBLE);
+        } else {
+            mStatusAttributionView.setVisibility(View.GONE);
+        }
+    }
+
+    /**
      * Set a list of specific MIME-types to exclude and not display. For
      * example, this can be used to hide the {@link Contacts#CONTENT_ITEM_TYPE}
      * profile icon.
@@ -420,6 +465,88 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     public void setExcludeMimes(String[] excludeMimes) {
         mExcludeMimes = excludeMimes;
         mPhotoView.setExcludeMimes(excludeMimes);
+    }
+
+    /**
+     * Manually set all the status values to display in the header.
+     * This doesn't change the underlying {@link Contacts}, only the UI state.
+     * @hide
+     * @param status             The status of the contact. If this is either null or empty,
+     *                           the status is cleared and the other parameters are ignored.
+     * @param statusTimestamp    The timestamp (retrieved via a call to
+     *                           {@link System#currentTimeMillis()}) of the last status update.
+     *                           This value can be null if it is not known.
+     * @param statusLabel        The id of a resource string that specifies the current
+     *                           status. This value can be null if no Label should be used.
+     * @param statusResPackage   The name of the resource package containing the resource string
+     *                           referenced in the parameter statusLabel.
+     */
+    public void setStatus(final String status, final Long statusTimestamp,
+            final Integer statusLabel, final String statusResPackage) {
+        if (TextUtils.isEmpty(status)) {
+            setSocialSnippet(null);
+            return;
+        }
+
+        setSocialSnippet(status);
+
+        final CharSequence timestampDisplayValue;
+
+        if (statusTimestamp != null) {
+            // Set the date/time field by mixing relative and absolute
+            // times.
+            int flags = DateUtils.FORMAT_ABBREV_RELATIVE;
+
+            timestampDisplayValue = DateUtils.getRelativeTimeSpanString(
+                    statusTimestamp.longValue(), System.currentTimeMillis(),
+                    DateUtils.MINUTE_IN_MILLIS, flags);
+        } else {
+            timestampDisplayValue = null;
+        }
+
+
+        String labelDisplayValue = null;
+
+        if (statusLabel != null) {
+            Resources resources;
+            if (TextUtils.isEmpty(statusResPackage)) {
+                resources = getResources();
+            } else {
+                PackageManager pm = getContext().getPackageManager();
+                try {
+                    resources = pm.getResourcesForApplication(statusResPackage);
+                } catch (NameNotFoundException e) {
+                    Log.w(TAG, "Contact status update resource package not found: "
+                            + statusResPackage);
+                    resources = null;
+                }
+            }
+
+            if (resources != null) {
+                try {
+                    labelDisplayValue = resources.getString(statusLabel.intValue());
+                } catch (NotFoundException e) {
+                    Log.w(TAG, "Contact status update resource not found: " + statusResPackage + "@"
+                            + statusLabel.intValue());
+                }
+            }
+        }
+
+        final CharSequence attribution;
+        if (timestampDisplayValue != null && labelDisplayValue != null) {
+            attribution = getContext().getString(
+                    R.string.contact_status_update_attribution_with_date,
+                    timestampDisplayValue, labelDisplayValue);
+        } else if (timestampDisplayValue == null && labelDisplayValue != null) {
+            attribution = getContext().getString(
+                    R.string.contact_status_update_attribution,
+                    labelDisplayValue);
+        } else if (timestampDisplayValue != null) {
+            attribution = timestampDisplayValue;
+        } else {
+            attribution = null;
+        }
+        setStatusAttribution(attribution);
     }
 
     /**
@@ -543,89 +670,28 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         this.setDisplayName(displayName, phoneticName);
 
         final boolean starred = c.getInt(ContactQuery.STARRED) != 0;
-        mStarredView.setChecked(starred);
+        setStared(starred);
 
         //Set the presence status
         if (!c.isNull(ContactQuery.CONTACT_PRESENCE_STATUS)) {
             int presence = c.getInt(ContactQuery.CONTACT_PRESENCE_STATUS);
-            mPresenceView.setImageResource(StatusUpdates.getPresenceIconResourceId(presence));
-            mPresenceView.setVisibility(View.VISIBLE);
+            setPresence(presence);
+            showPresence(true);
         } else {
-            mPresenceView.setVisibility(View.GONE);
+            showPresence(false);
         }
 
         //Set the status update
-        String status = c.getString(ContactQuery.CONTACT_STATUS);
-        if (!TextUtils.isEmpty(status)) {
-            mStatusView.setText(status);
-            mStatusView.setVisibility(View.VISIBLE);
+        final String status = c.getString(ContactQuery.CONTACT_STATUS);
+        final Long statusTimestamp = c.isNull(ContactQuery.CONTACT_STATUS_TIMESTAMP)
+                ? null
+                : c.getLong(ContactQuery.CONTACT_STATUS_TIMESTAMP);
+        final Integer statusLabel = c.isNull(ContactQuery.CONTACT_STATUS_LABEL)
+                ? null
+                : c.getInt(ContactQuery.CONTACT_STATUS_LABEL);
+        final String statusResPackage = c.getString(ContactQuery.CONTACT_STATUS_RES_PACKAGE);
 
-            CharSequence timestamp = null;
-
-            if (!c.isNull(ContactQuery.CONTACT_STATUS_TIMESTAMP)) {
-                long date = c.getLong(ContactQuery.CONTACT_STATUS_TIMESTAMP);
-
-                // Set the date/time field by mixing relative and absolute
-                // times.
-                int flags = DateUtils.FORMAT_ABBREV_RELATIVE;
-
-                timestamp = DateUtils.getRelativeTimeSpanString(date,
-                        System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, flags);
-            }
-
-            String label = null;
-
-            if (!c.isNull(ContactQuery.CONTACT_STATUS_LABEL)) {
-                String resPackage = c.getString(ContactQuery.CONTACT_STATUS_RES_PACKAGE);
-                int labelResource = c.getInt(ContactQuery.CONTACT_STATUS_LABEL);
-                Resources resources;
-                if (TextUtils.isEmpty(resPackage)) {
-                    resources = getResources();
-                } else {
-                    PackageManager pm = getContext().getPackageManager();
-                    try {
-                        resources = pm.getResourcesForApplication(resPackage);
-                    } catch (NameNotFoundException e) {
-                        Log.w(TAG, "Contact status update resource package not found: "
-                                + resPackage);
-                        resources = null;
-                    }
-                }
-
-                if (resources != null) {
-                    try {
-                        label = resources.getString(labelResource);
-                    } catch (NotFoundException e) {
-                        Log.w(TAG, "Contact status update resource not found: " + resPackage + "@"
-                                + labelResource);
-                    }
-                }
-            }
-
-            CharSequence attribution;
-            if (timestamp != null && label != null) {
-                attribution = getContext().getString(
-                        R.string.contact_status_update_attribution_with_date,
-                        timestamp, label);
-            } else if (timestamp == null && label != null) {
-                attribution = getContext().getString(
-                        R.string.contact_status_update_attribution,
-                        label);
-            } else if (timestamp != null) {
-                attribution = timestamp;
-            } else {
-                attribution = null;
-            }
-            if (attribution != null) {
-                mStatusAttributionView.setText(attribution);
-                mStatusAttributionView.setVisibility(View.VISIBLE);
-            } else {
-                mStatusAttributionView.setVisibility(View.GONE);
-            }
-        } else {
-            mStatusView.setVisibility(View.GONE);
-            mStatusAttributionView.setVisibility(View.GONE);
-        }
+        setStatus(status, statusTimestamp, statusLabel, statusResPackage);
     }
 
     public void onClick(View view) {
