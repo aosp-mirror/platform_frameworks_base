@@ -20,7 +20,6 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -79,8 +78,6 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final int TESTING_RESET_PERIOD_SEC = 60 * 10;
     private static final long TESTING_THRESHOLD = 1 * 1024 * 1024;
 
-    private static final int PERIOD_COUNT = 6;
-
     private int mPolicyPollPeriodSec;
     private long mPolicyThreshold;
     private int mPolicyThrottleValue;
@@ -106,7 +103,6 @@ public class ThrottleService extends IThrottleManager.Stub {
     private String mIface;
 
     private static final int NOTIFICATION_WARNING   = 2;
-    private static final int NOTIFICATION_ALL       = 0xFFFFFFFF;
 
     private Notification mThrottlingNotification;
     private boolean mWarningNotificationSent = false;
@@ -177,32 +173,31 @@ public class ThrottleService extends IThrottleManager.Stub {
                 "ThrottleService");
     }
 
+    private long ntpToWallTime(long ntpTime) {
+        long bestNow = getBestTime();
+        long localNow = System.currentTimeMillis();
+        return localNow + (ntpTime - bestNow);
+    }
+
     // TODO - fetch for the iface
     // return time in the local, system wall time, correcting for the use of ntp
+
     public synchronized long getResetTime(String iface) {
         enforceAccessPermission();
         long resetTime = 0;
         if (mRecorder != null) {
-            long bestEnd = mRecorder.getPeriodEnd();
-            long bestNow = getBestTime();
-            long localNow = System.currentTimeMillis();
-
-            resetTime = localNow + (bestEnd - bestNow);
+            resetTime = ntpToWallTime(mRecorder.getPeriodEnd());
         }
         return resetTime;
     }
 
     // TODO - fetch for the iface
-    // return time in the loca, system wall tiem, correcting for the use of ntp
+    // return time in the local, system wall time, correcting for the use of ntp
     public synchronized long getPeriodStartTime(String iface) {
         enforceAccessPermission();
         long startTime = 0;
         if (mRecorder != null) {
-            long bestStart = mRecorder.getPeriodStart();
-            long bestNow = getBestTime();
-            long localNow = System.currentTimeMillis();
-
-            startTime = localNow + (bestStart - bestNow);
+            startTime = ntpToWallTime(mRecorder.getPeriodStart());
         }
         return startTime;
     }
@@ -440,8 +435,8 @@ public class ThrottleService extends IThrottleManager.Stub {
             Intent broadcast = new Intent(ThrottleManager.THROTTLE_POLL_ACTION);
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_READ, periodRx);
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_WRITE, periodTx);
-            broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_START, ThrottleService.this.getPeriodStartTime(mIface));
-            broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_END, ThrottleService.this.getResetTime(mIface));
+            broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_START, getPeriodStartTime(mIface));
+            broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_END, getResetTime(mIface));
             mContext.sendStickyBroadcast(broadcast);
 
             mAlarmManager.cancel(mPendingPollIntent);
@@ -625,6 +620,7 @@ public class ThrottleService extends IThrottleManager.Stub {
 
                 if (mRecorder.setNextPeriod(start, end)) {
                     clearThrottleAndNotification();
+                    onPollAlarm();
                 }
 
                 mAlarmManager.cancel(mPendingResetIntent);
@@ -642,31 +638,40 @@ public class ThrottleService extends IThrottleManager.Stub {
     private void checkForAuthoritativeTime() {
         if (mNtpActive || (mNtpServer == null)) return;
 
-        SntpClient client = new SntpClient();
-        if (client.requestTime(mNtpServer, 10000)) {
-            mNtpActive = true;
-            if (DBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
-            mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
-        }
+        // will try to get the ntp time and switch to it if found.
+        // will also cache the time so we don't fetch it repeatedly.
+        getBestTime();
     }
 
-    private long getBestTime() {
-        SntpClient client = new SntpClient();
+    private static final int MAX_NTP_CACHE_AGE = 30 * 1000;
+    private static final int MAX_NTP_FETCH_WAIT = 10 * 1000;
+    private long cachedNtp;
+    private long cachedNtpTimestamp;
 
-        long time;
-        if ((mNtpServer != null) && client.requestTime(mNtpServer, 10000)) {
-            time = client.getNtpTime() ;
-            if (!mNtpActive) {
-                mNtpActive = true;
-                if (DBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
-                mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
+    private long getBestTime() {
+        if (mNtpServer != null) {
+            if (mNtpActive) {
+                long ntpAge = SystemClock.elapsedRealtime() - cachedNtpTimestamp;
+                if (ntpAge < MAX_NTP_CACHE_AGE) {
+                    return cachedNtp + ntpAge;
+                }
             }
-            if (DBG) Slog.d(TAG, "using Authoritative time: " + time);
-        } else {
-            time = System.currentTimeMillis();
-            if (DBG) Slog.d(TAG, "using User time: " + time);
-            mNtpActive = false;
+            SntpClient client = new SntpClient();
+            if (client.requestTime(mNtpServer, MAX_NTP_FETCH_WAIT)) {
+                cachedNtp = client.getNtpTime();
+                cachedNtpTimestamp = SystemClock.elapsedRealtime();
+                if (!mNtpActive) {
+                    mNtpActive = true;
+                    if (DBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
+                    mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
+                }
+                if (DBG) Slog.d(TAG, "using Authoritative time: " + cachedNtp);
+                return cachedNtp;
+            }
         }
+        long time = System.currentTimeMillis();
+        if (DBG) Slog.d(TAG, "using User time: " + time);
+        mNtpActive = false;
         return time;
     }
 
@@ -705,7 +710,6 @@ public class ThrottleService extends IThrottleManager.Stub {
                 mPeriodStart = Calendar.getInstance();
                 mPeriodEnd = Calendar.getInstance();
 
-                zeroData(0);
                 retrieve();
             }
         }
@@ -915,6 +919,9 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         private void retrieve() {
+            // clean out any old data first.  If we fail to read we don't want old stuff
+            zeroData(0);
+
             File f = getDataFile();
             byte[] buffer;
             FileInputStream s = null;
@@ -952,7 +959,7 @@ public class ThrottleService extends IThrottleManager.Stub {
 
                 mPeriodCount = Integer.parseInt(parsed[parsedUsed++]);
                 if (parsed.length != 5 + (2 * mPeriodCount)) {
-                    Slog.e(TAG, "reading data file with bad length ("+parsed.length+" != "+(4 + (2*mPeriodCount))+") - ignoring");
+                    Slog.e(TAG, "reading data file with bad length ("+parsed.length+" != "+(5 + (2*mPeriodCount))+") - ignoring");
                     return;
                 }
 
