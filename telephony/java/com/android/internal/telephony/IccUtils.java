@@ -265,9 +265,11 @@ public class IccUtils {
 
 
     /**
-     * Converts a byte array into a String hexidecimal characters
+     * Converts a byte array into a String of hexadecimal characters.
      *
-     * null returns null
+     * @param bytes an array of bytes
+     *
+     * @return hex string representation of bytes array
      */
     public static String
     bytesToHexString(byte[] bytes) {

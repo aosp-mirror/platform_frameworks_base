@@ -58,7 +58,7 @@ import static android.telephony.SmsMessage.MessageClass;
 /**
  * TODO(cleanup): internally returning null in many places makes
  * debugging very hard (among many other reasons) and should be made
- * more meaningful (replaced with execptions for example).  Null
+ * more meaningful (replaced with exceptions for example).  Null
  * returns should only occur at the very outside of the module/class
  * scope.
  */
@@ -614,7 +614,7 @@ public class SmsMessage extends SmsMessageBase {
      * incrementing within the range 1..65535 remembering the state
      * via a persistent system property.  (See C.S0015-B, v2.0,
      * 4.3.1.5) Since this routine is expected to be accessed via via
-     * binder-call, and hence should be threadsafe, it has been
+     * binder-call, and hence should be thread-safe, it has been
      * synchronized.
      */
     private synchronized static int getNextMessageId() {
