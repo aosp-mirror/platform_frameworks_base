@@ -54,7 +54,8 @@ class PluginFullScreenHolder extends Dialog {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         // fixed size is only used either during pinch zoom or surface is too
         // big. Make sure it is not fixed size before setting it to the full
-        // screen content view
+        // screen content view. The SurfaceView will be set to the correct mode
+        // by the ViewManager when it is re-attached to the WebView.
         if (contentView instanceof SurfaceView) {
             final SurfaceView sView = (SurfaceView) contentView;
             if (sView.isFixedSize()) {
