@@ -735,6 +735,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                 mRunState = RUN_STATE_RUNNING;
                 noteRunState();
                 checkUseStaticIp();
+                /* Reset notification state on new connection */
+                resetNotificationTimer();
                 /*
                  * DHCP requests are blocking, so run them in a separate thread.
                  */
