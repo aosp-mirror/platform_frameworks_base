@@ -6141,12 +6141,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return null;
         }
-        synchronized(this) {
-            try {
-                PendingIntentRecord res = (PendingIntentRecord)pendingResult;
-                return res.key.packageName;
-            } catch (ClassCastException e) {
-            }
+        try {
+            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
+            return res.key.packageName;
+        } catch (ClassCastException e) {
         }
         return null;
     }
