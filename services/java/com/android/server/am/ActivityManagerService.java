@@ -123,6 +123,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class ActivityManagerService extends ActivityManagerNative implements Watchdog.Monitor {
     static final String TAG = "ActivityManager";
@@ -927,7 +929,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     final ProcessStats mProcessStats = new ProcessStats(
             MONITOR_THREAD_CPU_USAGE);
-    long mLastCpuTime = 0;
+    final AtomicLong mLastCpuTime = new AtomicLong(0);
+    final AtomicBoolean mProcessStatsMutexFree = new AtomicBoolean(true);
+
     long mLastWriteTime = 0;
 
     long mInitialStartTime = 0;
@@ -1430,7 +1434,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         try {
                             synchronized(this) {
                                 final long now = SystemClock.uptimeMillis();
-                                long nextCpuDelay = (mLastCpuTime+MONITOR_CPU_MAX_TIME)-now;
+                                long nextCpuDelay = (mLastCpuTime.get()+MONITOR_CPU_MAX_TIME)-now;
                                 long nextWriteDelay = (mLastWriteTime+BATTERY_STATS_TIME)-now;
                                 //Slog.i(TAG, "Cpu delay=" + nextCpuDelay
                                 //        + ", write delay=" + nextWriteDelay);
@@ -1438,12 +1442,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                     nextCpuDelay = nextWriteDelay;
                                 }
                                 if (nextCpuDelay > 0) {
+                                    mProcessStatsMutexFree.set(true);
                                     this.wait(nextCpuDelay);
                                 }
                             }
                         } catch (InterruptedException e) {
                         }
-                        
                         updateCpuStatsNow();
                     } catch (Exception e) {
                         Slog.e(TAG, "Unexpected exception collecting process stats", e);
@@ -1470,22 +1474,26 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void updateCpuStats() {
-        synchronized (mProcessStatsThread) {
-            final long now = SystemClock.uptimeMillis();
-            if (mLastCpuTime < (now-MONITOR_CPU_MIN_TIME)) {
+        final long now = SystemClock.uptimeMillis();
+        if (mLastCpuTime.get() >= now - MONITOR_CPU_MIN_TIME) {
+            return;
+        }
+        if (mProcessStatsMutexFree.compareAndSet(true, false)) {
+            synchronized (mProcessStatsThread) {
                 mProcessStatsThread.notify();
             }
         }
     }
-    
+
     void updateCpuStatsNow() {
         synchronized (mProcessStatsThread) {
+            mProcessStatsMutexFree.set(false);
             final long now = SystemClock.uptimeMillis();
             boolean haveNewCpuStats = false;
 
             if (MONITOR_CPU_USAGE &&
-                    mLastCpuTime < (now-MONITOR_CPU_MIN_TIME)) {
-                mLastCpuTime = now;
+                    mLastCpuTime.get() < (now-MONITOR_CPU_MIN_TIME)) {
+                mLastCpuTime.set(now);
                 haveNewCpuStats = true;
                 mProcessStats.update();
                 //Slog.i(TAG, mProcessStats.printCurrentState());
@@ -6133,12 +6141,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return null;
         }
-        synchronized(this) {
-            try {
-                PendingIntentRecord res = (PendingIntentRecord)pendingResult;
-                return res.key.packageName;
-            } catch (ClassCastException e) {
-            }
+        try {
+            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
+            return res.key.packageName;
+        } catch (ClassCastException e) {
         }
         return null;
     }

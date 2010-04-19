@@ -4939,6 +4939,11 @@ public class WebView extends AbsoluteLayout
                                 WebViewCore.pauseUpdatePicture(mWebViewCore);
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
+                                // WebKit may consume the touch event and modify
+                                // DOM. drawContentPicture() will be called with
+                                // animateSroll as true for better performance.
+                                // Force redraw in high-quality.
+                                invalidate();
                                 break;
                             }
                         } else {
@@ -6513,6 +6518,7 @@ public class WebView extends AbsoluteLayout
                                 if (mDeferTouchMode == TOUCH_DRAG_MODE) {
                                     // no fling in defer process
                                     WebViewCore.resumePriority();
+                                    WebViewCore.resumeUpdatePicture(mWebViewCore);
                                 }
                                 mDeferTouchMode = TOUCH_DONE_MODE;
                                 break;
