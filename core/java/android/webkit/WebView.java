@@ -4935,6 +4935,11 @@ public class WebView extends AbsoluteLayout
                                 WebViewCore.pauseUpdatePicture(mWebViewCore);
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
+                                // WebKit may consume the touch event and modify
+                                // DOM. drawContentPicture() will be called with
+                                // animateSroll as true for better performance.
+                                // Force redraw in high-quality.
+                                invalidate();
                                 break;
                             }
                         } else {
