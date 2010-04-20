@@ -46,8 +46,7 @@ public:
         sp<MemoryHeapPmem>  mClientHeap;
     };
     
-    MemoryHeapPmem(const sp<MemoryHeapBase>& pmemHeap,
-                uint32_t flags = IMemoryHeap::MAP_ONCE);
+    MemoryHeapPmem(const sp<MemoryHeapBase>& pmemHeap, uint32_t flags = 0);
     ~MemoryHeapPmem();
 
     /* HeapInterface additions */

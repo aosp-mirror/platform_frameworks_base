@@ -46,7 +46,6 @@ public:
     virtual void binderDied(const wp<IBinder>& who);
 
     sp<IMemoryHeap> find_heap(const sp<IBinder>& binder); 
-    void pin_heap(const sp<IBinder>& binder); 
     void free_heap(const sp<IBinder>& binder); 
     sp<IMemoryHeap> get_heap(const sp<IBinder>& binder);
     void dump_heaps();
@@ -100,13 +99,9 @@ private:
     static inline void dump_heaps() {
         gHeapCache->dump_heaps();       
     }
-    void inline pin_heap() const {
-        gHeapCache->pin_heap(const_cast<BpMemoryHeap*>(this)->asBinder());
-    }
 
     void assertMapped() const;
     void assertReallyMapped() const;
-    void pinHeap() const;
 
     mutable volatile int32_t mHeapId;
     mutable void*       mBase;
@@ -320,11 +315,6 @@ void BpMemoryHeap::assertReallyMapped() const
                         asBinder().get(), size, fd, strerror(errno));
                 close(fd);
             } else {
-                if (flags & MAP_ONCE) {
-                    //LOGD("pinning heap (binder=%p, size=%d, fd=%d",
-                    //        asBinder().get(), size, fd);
-                    pin_heap();
-                }
                 mSize = size;
                 mFlags = flags;
                 android_atomic_write(fd, &mHeapId);
@@ -419,19 +409,6 @@ sp<IMemoryHeap> HeapCache::find_heap(const sp<IBinder>& binder)
         mHeapCache.add(binder, info);
         return info.heap;
     }
-}
-
-void HeapCache::pin_heap(const sp<IBinder>& binder) 
-{
-    Mutex::Autolock _l(mHeapCacheLock);
-    ssize_t i = mHeapCache.indexOfKey(binder);
-    if (i>=0) {
-        heap_info_t& info(mHeapCache.editValueAt(i));
-        android_atomic_inc(&info.count);
-        binder->linkToDeath(this);
-    } else {
-        LOGE("pin_heap binder=%p not found!!!", binder.get());
-    }    
 }
 
 void HeapCache::free_heap(const sp<IBinder>& binder)  {
