@@ -278,7 +278,7 @@ protected:
                 bool            mTransformed;
                 bool            mUseLinearFiltering;
                 int32_t         mOrientation;
-                GLfixed         mVertices[4][2];
+                GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;
                 int             mLeft;
                 int             mTop;

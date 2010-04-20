@@ -37,8 +37,6 @@ public:
            explicit Transform(uint32_t orientation);
                     ~Transform();
 
-            typedef int32_t fixed1616;
-
             // FIXME: must match OVERLAY_TRANSFORM_*, pull from hardware.h
             enum orientation_flags {
                 ROT_0   = 0x00000000,
@@ -76,7 +74,7 @@ public:
 
             // transform data
             Rect    makeBounds(int w, int h) const;
-            void    transform(fixed1616* point, int x, int y) const;
+            void    transform(float* point, int x, int y) const;
             Region  transform(const Region& reg) const;
             Transform operator * (const Transform& rhs) const;
 
