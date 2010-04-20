@@ -2004,9 +2004,12 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
                (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
                srcBuffer->range_length());
 
+        int64_t lastBufferTimeUs;
+        CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));
+        CHECK(timestampUs >= 0);
+
         if (offset == 0) {
-            CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &timestampUs));
-            CHECK(timestampUs >= 0);
+            timestampUs = lastBufferTimeUs;
         }
 
         offset += srcBuffer->range_length();
@@ -2017,6 +2020,13 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         ++n;
 
         if (!(mQuirks & kSupportsMultipleFramesPerInputBuffer)) {
+            break;
+        }
+
+        int64_t coalescedDurationUs = lastBufferTimeUs - timestampUs;
+
+        if (coalescedDurationUs > 250000ll) {
+            // Don't coalesce more than 250ms worth of encoded data at once.
             break;
         }
     }
