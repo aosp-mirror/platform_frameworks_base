@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.pim.vcard.VCardConfig;
 import android.text.TextUtils;
@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
 
-class LineVerifierElem {
+public class LineVerifierElem {
     private final TestCase mTestCase;
     private final List<String> mExpectedLineList = new ArrayList<String>();
     private final boolean mIsV30;

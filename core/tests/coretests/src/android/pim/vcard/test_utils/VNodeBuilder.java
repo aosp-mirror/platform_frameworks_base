@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardInterpreter;
 import android.pim.vcard.VCardConfig;
+import android.pim.vcard.VCardInterpreter;
+import android.pim.vcard.VCardUtils;
 import android.util.CharsetUtils;
 import android.util.Log;
 
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -42,7 +41,6 @@ import java.util.List;
 public class VNodeBuilder implements VCardInterpreter {
     static private String LOG_TAG = "VNodeBuilder"; 
     
-    /** type=VNode */
     public List<VNode> vNodeList = new ArrayList<VNode>();
     private int mNodeListPos = 0;
     private VNode mCurrentVNode;
@@ -143,7 +141,6 @@ public class VNodeBuilder implements VCardInterpreter {
         mCurrentPropNode.propName = name;
     }
 
-    // Used only in VCard.
     public void propertyGroup(String group) {
         mCurrentPropNode.propGroupSet.add(group);
     }
@@ -190,67 +187,8 @@ public class VNodeBuilder implements VCardInterpreter {
                     Base64.decodeBase64(value.getBytes());
                 return value;
             } else if (encoding.equals("QUOTED-PRINTABLE")) {
-                String quotedPrintable = value
-                .replaceAll("= ", " ").replaceAll("=\t", "\t");
-                String[] lines;
-                if (mStrictLineBreakParsing) {
-                    lines = quotedPrintable.split("\r\n");
-                } else {
-                    StringBuilder builder = new StringBuilder();
-                    int length = quotedPrintable.length();
-                    ArrayList<String> list = new ArrayList<String>();
-                    for (int i = 0; i < length; i++) {
-                        char ch = quotedPrintable.charAt(i);
-                        if (ch == '\n') {
-                            list.add(builder.toString());
-                            builder = new StringBuilder();
-                        } else if (ch == '\r') {
-                            list.add(builder.toString());
-                            builder = new StringBuilder();
-                            if (i < length - 1) {
-                                char nextCh = quotedPrintable.charAt(i + 1);
-                                if (nextCh == '\n') {
-                                    i++;
-                                }
-                            }
-                        } else {
-                            builder.append(ch);
-                        }
-                    }
-                    String finalLine = builder.toString();
-                    if (finalLine.length() > 0) {
-                        list.add(finalLine);
-                    }
-                    lines = list.toArray(new String[0]);
-                }
-                StringBuilder builder = new StringBuilder();
-                for (String line : lines) {
-                    if (line.endsWith("=")) {
-                        line = line.substring(0, line.length() - 1);
-                    }
-                    builder.append(line);
-                }
-                byte[] bytes;
-                try {
-                    bytes = builder.toString().getBytes(mSourceCharset);
-                } catch (UnsupportedEncodingException e1) {
-                    Log.e(LOG_TAG, "Failed to encode: charset=" + mSourceCharset);
-                    bytes = builder.toString().getBytes();
-                }
-                
-                try {
-                    bytes = QuotedPrintableCodec.decodeQuotedPrintable(bytes);
-                } catch (DecoderException e) {
-                    Log.e(LOG_TAG, "Failed to decode quoted-printable: " + e);
-                    return "";
-                }
-
-                try {
-                    return new String(bytes, targetCharset);
-                } catch (UnsupportedEncodingException e) {
-                    Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
-                    return new String(bytes);
-                }
+                return VCardUtils.parseQuotedPrintable(
+                        value, mStrictLineBreakParsing, mSourceCharset, targetCharset);
             }
             // Unknown encoding. Fall back to default.
         }

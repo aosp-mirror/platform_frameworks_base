@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -34,6 +34,7 @@ import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
@@ -31,7 +31,7 @@ import android.test.AndroidTestCase;
 import java.io.IOException;
 import java.io.InputStream;
 
-/* package */ class ContentValuesVerifierElem {
+public class ContentValuesVerifierElem {
     private final AndroidTestCase mTestCase;
     private final ImportTestResolver mResolver;
     private final VCardEntryHandler mHandler;
