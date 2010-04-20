@@ -302,7 +302,7 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
 
 Error:
     // Simulate audio output timing in case of error
-    usleep(bytes * 1000000 / frameSize() / sampleRate());
+    usleep(((bytes * 1000 )/ frameSize() / sampleRate()) * 1000);
 
     return status;
 }
