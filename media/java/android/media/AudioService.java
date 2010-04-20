@@ -41,6 +41,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
@@ -305,6 +307,11 @@ public class AudioService extends IAudioService.Stub {
         intentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         context.registerReceiver(mMediaButtonReceiver, intentFilter);
+
+        // Register for phone state monitoring
+        TelephonyManager tmgr = (TelephonyManager)
+                context.getSystemService(Context.TELEPHONY_SERVICE);
+        tmgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     private void createAudioSystemThread() {
@@ -707,7 +714,6 @@ public class AudioService extends IAudioService.Stub {
             }
             if (mode != mMode) {
                 if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
-                    checkForUndispatchedAudioFocusChange(mMode, mode);
                     mMode = mode;
 
                     synchronized(mSetModeDeathHandlers) {
@@ -1903,21 +1909,36 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // AudioFocus
     //==========================================================================================
-    /**
-     * Flag to indicate that the top of the audio focus stack needs to recover focus
-     * but hasn't been signaled yet.
-     */
-    private boolean mHasUndispatchedAudioFocus = false;
 
-    private void checkForUndispatchedAudioFocusChange(int prevMode, int newMode) {
-        // when exiting a call
-        if ((prevMode == AudioSystem.MODE_IN_CALL) && (newMode != AudioSystem.MODE_IN_CALL)) {
-            // check for undispatched remote control focus gain
-            if (mHasUndispatchedAudioFocus) {
-                notifyTopOfAudioFocusStack();
+    /* constant to identify focus stack entry that is used to hold the focus while the phone
+     * is ringing or during a call
+     */
+    private final static String IN_VOICE_COMM_FOCUS_ID = "AudioFocus_For_Phone_Ring_And_Calls";
+
+    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            if (state == TelephonyManager.CALL_STATE_RINGING) {
+                //Log.v(TAG, " CALL_STATE_RINGING");
+                int ringVolume = AudioService.this.getStreamVolume(AudioManager.STREAM_RING);
+                if (ringVolume > 0) {
+                    requestAudioFocus(AudioManager.STREAM_RING,
+                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                                null, null /* both allowed to be null only for this clientId */,
+                                IN_VOICE_COMM_FOCUS_ID /*clientId*/);
+                }
+            } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                //Log.v(TAG, " CALL_STATE_OFFHOOK");
+                requestAudioFocus(AudioManager.STREAM_RING,
+                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                        null, null /* both allowed to be null only for this clientId */,
+                        IN_VOICE_COMM_FOCUS_ID /*clientId*/);
+            } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+                //Log.v(TAG, " CALL_STATE_IDLE");
+                abandonAudioFocus(null, IN_VOICE_COMM_FOCUS_ID);
             }
         }
-    }
+    };
 
     private void notifyTopOfAudioFocusStack() {
         // notify the top of the stack it gained focus
@@ -1926,13 +1947,10 @@ public class AudioService extends IAudioService.Stub {
                 try {
                     mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
                             AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
-                    mHasUndispatchedAudioFocus = false;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failure to signal gain of audio control focus due to "+ e);
                     e.printStackTrace();
                 }
-            } else {
-                mHasUndispatchedAudioFocus = true;
             }
         }
     }
@@ -1966,7 +1984,7 @@ public class AudioService extends IAudioService.Stub {
      * Display in the log the current entries in the audio focus stack
      */
     private void dumpFocusStack(PrintWriter pw) {
-        pw.println("Audio Focus stack entries:");
+        pw.println("\nAudio Focus stack entries:");
         synchronized(mFocusStack) {
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
@@ -2038,9 +2056,9 @@ public class AudioService extends IAudioService.Stub {
      * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
      */
     private boolean canReassignAudioFocus() {
-        // focus requests are rejected during a phone call
-        if (getMode() == AudioSystem.MODE_IN_CALL) {
-            Log.i(TAG, " AudioFocus  can't be reassigned during a call, exiting");
+        // focus requests are rejected during a phone call or when the phone is ringing
+        // this is equivalent to IN_VOICE_COMM_FOCUS_ID having the focus
+        if (!mFocusStack.isEmpty() && IN_VOICE_COMM_FOCUS_ID.equals(mFocusStack.peek().mClientId)) {
             return false;
         }
         return true;
@@ -2077,7 +2095,9 @@ public class AudioService extends IAudioService.Stub {
         // the main stream type for the audio focus request is currently not used. It may
         // potentially be used to handle multiple stream type-dependent audio focuses.
 
-        if ((cb == null) || !cb.pingBinder()) {
+        // we need a valid binder callback for clients other than the AudioService's phone
+        // state listener
+        if (!IN_VOICE_COMM_FOCUS_ID.equals(clientId) && ((cb == null) || !cb.pingBinder())) {
             Log.i(TAG, " AudioFocus  DOA client for requestAudioFocus(), exiting");
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
@@ -2119,14 +2139,17 @@ public class AudioService extends IAudioService.Stub {
         }//synchronized(mFocusStack)
 
         // handle the potential premature death of the new holder of the focus
-        // (premature death == death before abandoning focus)
-        // Register for client death notification
-        AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
-        try {
-            cb.linkToDeath(afdh, 0);
-        } catch (RemoteException e) {
-            // client has already died!
-            Log.w(TAG, " AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
+        // (premature death == death before abandoning focus) for a client which is not the
+        // AudioService's phone state listener
+        if (!IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
+            // Register for client death notification
+            AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
+            try {
+                cb.linkToDeath(afdh, 0);
+            } catch (RemoteException e) {
+                // client has already died!
+                Log.w(TAG, "AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
+            }
         }
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
@@ -2212,7 +2235,7 @@ public class AudioService extends IAudioService.Stub {
      * Display in the log the current entries in the remote control focus stack
      */
     private void dumpRCStack(PrintWriter pw) {
-        pw.println("Remote Control stack entries:");
+        pw.println("\nRemote Control stack entries:");
         synchronized(mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
