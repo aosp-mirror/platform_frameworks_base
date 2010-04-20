@@ -68,6 +68,11 @@ status_t HTTPStream::connect(const char *server, int port) {
         return UNKNOWN_ERROR;
     }
 
+    struct timeval tv;
+    tv.tv_usec = 0;
+    tv.tv_sec = 5;
+    CHECK_EQ(0, setsockopt(mSocket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)));
+
     mState = CONNECTING;
 
     int s = mSocket;
@@ -150,30 +155,6 @@ status_t HTTPStream::send(const char *data) {
     return send(data, strlen(data));
 }
 
-static ssize_t recvWithTimeout(
-        int s, void *data, size_t size) {
-    fd_set rs, es;
-    FD_ZERO(&rs);
-    FD_ZERO(&es);
-    FD_SET(s, &rs);
-    FD_SET(s, &es);
-
-    struct timeval tv;
-    tv.tv_sec = 5;  // 5 sec timeout
-    tv.tv_usec = 0;
-
-    int res = select(s + 1, &rs, NULL, &es, &tv);
-
-    if (res < 0) {
-        return -1;
-    } else if (res == 0) {
-        errno = ETIMEDOUT;
-        return -1;
-    }
-
-    return recv(s, data, size, 0);
-}
-
 // A certain application spawns a local webserver that sends invalid responses,
 // specifically it terminates header line with only a newline instead of the
 // CRLF (carriage-return followed by newline) required by the HTTP specs.
@@ -192,7 +173,7 @@ status_t HTTPStream::receive_line(char *line, size_t size) {
 
     for (;;) {
         char c;
-        ssize_t n = recvWithTimeout(mSocket, &c, 1);
+        ssize_t n = recv(mSocket, &c, 1, 0);
         if (n < 0) {
             if (errno == EINTR) {
                 continue;
@@ -310,8 +291,7 @@ status_t HTTPStream::receive_header(int *http_status) {
 ssize_t HTTPStream::receive(void *data, size_t size) {
     size_t total = 0;
     while (total < size) {
-        ssize_t n = recvWithTimeout(
-                mSocket, (char *)data + total, size - total);
+        ssize_t n = recv(mSocket, (char *)data + total, size - total, 0);
 
         if (n < 0) {
             if (errno == EINTR) {
