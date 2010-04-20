@@ -182,6 +182,14 @@ public class VCardConfig {
      */
     public static final int FLAG_APPEND_TYPE_PARAM = 0x04000000;
 
+    /**
+     * <P>
+     * The flag asking exporter to refrain image export.
+     * </P>
+     * @hide will be deleted in the near future.
+     */
+    public static final int FLAG_REFRAIN_IMAGE_EXPORT = 0x02000000;
+
     //// The followings are VCard types available from importer/exporter. ////
 
     /**
