@@ -6375,14 +6375,8 @@ public class WebView extends AbsoluteLayout
                     break;
                 case REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID:
                     displaySoftKeyboard(true);
-                    updateTextSelectionFromMessage(msg.arg1, msg.arg2,
-                            (WebViewCore.TextSelectionData) msg.obj);
-                    break;
+                    // fall through to UPDATE_TEXT_SELECTION_MSG_ID
                 case UPDATE_TEXT_SELECTION_MSG_ID:
-                    // If no textfield was in focus, and the user touched one,
-                    // causing it to send this message, then WebTextView has not
-                    // been set up yet.  Rebuild it so it can set its selection.
-                    rebuildWebTextView();
                     updateTextSelectionFromMessage(msg.arg1, msg.arg2,
                             (WebViewCore.TextSelectionData) msg.obj);
                     break;
