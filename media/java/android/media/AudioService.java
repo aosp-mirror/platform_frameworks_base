@@ -1728,6 +1728,9 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void makeA2dpDeviceUnavailableLater(String address) {
+        // prevent any activity on the A2DP audio output to avoid unwanted
+        // reconnection of the sink.
+        AudioSystem.setParameters("A2dpSuspended=true");
         // the device will be made unavailable later, so consider it disconnected right away
         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         // send the delayed message to make the device unavailable later
