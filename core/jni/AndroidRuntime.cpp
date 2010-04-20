@@ -711,15 +711,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       mOptions.add(opt);
     }
 
-    char lockProfSampleBuf[sizeof("-Xlockprofsample:") + sizeof(propBuf)];
-    property_get("dalvik.vm.lockprof.sample", propBuf, "");
-    if (strlen(propBuf) > 0) {
-      strcpy(lockProfSampleBuf, "-Xlockprofsample:");
-      strcat(lockProfSampleBuf, propBuf);
-      opt.optionString = lockProfSampleBuf;
-      mOptions.add(opt);
-    }
-
 #if defined(WITH_JIT)
     /* Minimal profile threshold to trigger JIT compilation */
     char jitThresholdBuf[sizeof("-Xjitthreshold:") + PROPERTY_VALUE_MAX];
