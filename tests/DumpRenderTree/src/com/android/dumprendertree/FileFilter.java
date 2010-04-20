@@ -135,6 +135,9 @@ public class FileFilter {
         ignoreResultList.add("fast/events/window-events-bubble.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/events/window-events-bubble2.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/events/window-events-capture.html"); // requires eventSender.mouseDown(),mouseUp()
+        ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
+        ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
+        ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
         ignoreResultList.add("fast/forms/drag-into-textarea.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/forms/focus-control-to-page.html"); // http://b/716638
         ignoreResultList.add("fast/forms/focus2.html"); // http://b/735111
