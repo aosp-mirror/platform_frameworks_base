@@ -144,18 +144,13 @@ public class VCardBuilder {
         mAppendTypeParamName = VCardConfig.appendTypeParamName(vcardType);
         mNeedsToConvertPhoneticString = VCardConfig.needsToConvertPhoneticString(vcardType);
 
-        // TODO: remove this flag since the bit for it is actually 0.
-        final boolean shouldUseUtf8 = VCardConfig.shouldUseUtf8ForExport(vcardType);
-
-        final boolean shouldUseShiftJis = VCardConfig.shouldUseShiftJisForExport(vcardType);
-
         // vCard 2.1 requires charset.
         // vCard 3.0 does not allow it but we found some devices use it to determine
         // the exact charset.
         // We currently append it only when charset other than UTF_8 is used.
-        mShouldAppendCharsetParam = !(mIsV30 && shouldUseUtf8);
+        mShouldAppendCharsetParam = !(mIsV30 && "UTF-8".equalsIgnoreCase(charset));
 
-        if (VCardConfig.isDoCoMo(vcardType) || shouldUseShiftJis) {
+        if (VCardConfig.isDoCoMo(vcardType)) {
             if (!SHIFT_JIS.equalsIgnoreCase(charset)) {
                 Log.w(LOG_TAG,
                         "The charset \"" + charset + "\" is used while "

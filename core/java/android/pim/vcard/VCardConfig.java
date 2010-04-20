@@ -76,15 +76,6 @@ public class VCardConfig {
 
     // 0x10 is reserved for safety
 
-    /*
-     * These flags are ignored when charset is explicitly given by a caller.
-     *
-     * TODO: remove this field. DO NOT USE ANY MORE.
-     */
-    private static final int FLAG_USE_UTF8_FOR_EXPORT = 0;
-    private static final int FLAG_USE_SHIFT_JIS_FOR_EXPORT = 0x100;
-    private static final int FLAG_CHARSET_MASK_FOR_EKPORT = 0xF00;
-
     /**
      * <p>
      * The flag indicating the vCard composer will add some "X-" properties used only in Android
@@ -347,36 +338,6 @@ public class VCardConfig {
 
     /**
      * <p>
-     * vCard 2.1 format for miscellaneous Japanese devices. Shift_Jis is used for
-     * parsing/composing the vCard data.
-     * </p>
-     * <p>
-     * Not ready yet. Use with caution when you use this.
-     * </p>
-     */
-    public static final int VCARD_TYPE_V21_JAPANESE_SJIS =
-        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
-
-    /* package */ static final String VCARD_TYPE_V21_JAPANESE_SJIS_STR = "v21_japanese_sjis";
-    
-    /**
-     * <p>
-     * vCard format for miscellaneous Japanese devices, using Shift_Jis for
-     * parsing/composing the vCard data.
-     * </p>
-     * <p>
-     * Not ready yet. Use with caution when you use this.
-     * </p>
-     */
-    public static final int VCARD_TYPE_V30_JAPANESE_SJIS =
-        (FLAG_V30 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
-                FLAG_USE_DEFACT_PROPERTY | FLAG_USE_ANDROID_PROPERTY);
-        
-    /* package */ static final String VCARD_TYPE_V30_JAPANESE_SJIS_STR = "v30_japanese_sjis";
-    
-    /**
-     * <p>
      * The vCard 3.0 format for miscellaneous Japanese devices, using UTF-8 as default charset.
      * </p>
      * <p>
@@ -392,14 +353,13 @@ public class VCardConfig {
      * <p>
      * The vCard 2.1 based format which (partially) considers the convention in Japanese
      * mobile phones, where phonetic names are translated to half-width katakana if
-     * possible, etc.
+     * possible, etc. It would be better to use Shift_JIS as a charset for maximum
+     * compatibility.
      * </p>
-     * <p>
-     * Not ready yet. Use with caution when you use this.
-     * </p>
+     * @hide Should not be available world wide.
      */
     public static final int VCARD_TYPE_V21_JAPANESE_MOBILE =
-        (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_USE_SHIFT_JIS_FOR_EXPORT |
+        (FLAG_V21 | NAME_ORDER_JAPANESE |
                 FLAG_CONVERT_PHONETIC_NAME_STRINGS | FLAG_REFRAIN_QP_TO_NAME_PROPERTIES);
 
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_MOBILE_STR = "v21_japanese_mobile";
@@ -413,6 +373,7 @@ public class VCardConfig {
      * No Android-specific property nor defact property is included. The "Primary" properties
      * are NOT encoded to Quoted-Printable.
      * </p>
+     * @hide Should not be available world wide.
      */
     public static final int VCARD_TYPE_DOCOMO =
         (VCARD_TYPE_V21_JAPANESE_MOBILE | FLAG_DOCOMO);
@@ -430,18 +391,13 @@ public class VCardConfig {
         sVCardTypeMap.put(VCARD_TYPE_V30_GENERIC_STR, VCARD_TYPE_V30_GENERIC);
         sVCardTypeMap.put(VCARD_TYPE_V21_EUROPE_STR, VCARD_TYPE_V21_EUROPE);
         sVCardTypeMap.put(VCARD_TYPE_V30_EUROPE_STR, VCARD_TYPE_V30_EUROPE);
-        sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_SJIS_STR, VCARD_TYPE_V21_JAPANESE_SJIS);
         sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_STR, VCARD_TYPE_V21_JAPANESE);
-        sVCardTypeMap.put(VCARD_TYPE_V30_JAPANESE_SJIS_STR, VCARD_TYPE_V30_JAPANESE_SJIS);
         sVCardTypeMap.put(VCARD_TYPE_V30_JAPANESE_STR, VCARD_TYPE_V30_JAPANESE);
         sVCardTypeMap.put(VCARD_TYPE_V21_JAPANESE_MOBILE_STR, VCARD_TYPE_V21_JAPANESE_MOBILE);
         sVCardTypeMap.put(VCARD_TYPE_DOCOMO_STR, VCARD_TYPE_DOCOMO);
 
         sJapaneseMobileTypeSet = new HashSet<Integer>();
-        sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_SJIS);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE);
-        sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_SJIS);
-        sJapaneseMobileTypeSet.add(VCARD_TYPE_V30_JAPANESE_SJIS);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V30_JAPANESE);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_V21_JAPANESE_MOBILE);
         sJapaneseMobileTypeSet.add(VCARD_TYPE_DOCOMO);
@@ -465,19 +421,6 @@ public class VCardConfig {
 
     public static boolean shouldUseQuotedPrintable(final int vcardType) {
         return !isV30(vcardType);
-    }
-
-    /* package */ static boolean shouldUseUtf8ForExport(final int vcardType) {
-        return ((vcardType & FLAG_CHARSET_MASK_FOR_EKPORT) == FLAG_USE_UTF8_FOR_EXPORT);
-    }
-
-    /**
-     * Shift_JIS (a charset for Japanese text files) needs special handling to select
-     * carrer specific variants.
-     * @hide just for test
-     */
-    public static boolean shouldUseShiftJisForExport(final int vcardType) {
-        return ((vcardType & FLAG_CHARSET_MASK_FOR_EKPORT) == FLAG_USE_SHIFT_JIS_FOR_EXPORT);
     }
 
     public static int getNameOrderType(final int vcardType) {

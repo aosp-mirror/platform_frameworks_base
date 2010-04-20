@@ -290,8 +290,8 @@ public class VCardComposer {
         this(context, vcardType, null, true);
     }
 
-    public VCardComposer(Context context, String vcardTypeStr, boolean careHandlerErrors) {
-        this(context, VCardConfig.getVCardTypeFromString(vcardTypeStr), careHandlerErrors);
+    public VCardComposer(Context context, int vcardType, String charset) {
+        this(context, vcardType, charset, true);
     }
 
     /**
@@ -323,24 +323,12 @@ public class VCardComposer {
         mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
         mHandlerList = new ArrayList<OneEntryHandler>();
 
-        if (mIsDoCoMo || VCardConfig.shouldUseShiftJisForExport(vcardType)) {
-            if (!SHIFT_JIS.equalsIgnoreCase(charset)) {
-                Log.w(LOG_TAG,
-                        "The charset \"" + charset + "\" is used while "
-                        + SHIFT_JIS + " is needed to be used.");
-                if (TextUtils.isEmpty(charset)) {
-                    mCharset = SHIFT_JIS;
-                } else {
-                    try {
-                        charset = CharsetUtils.charsetForVendor(charset).name();
-                    } catch (UnsupportedCharsetException e) {
-                        Log.i(LOG_TAG,
-                                "Career-specific \"" + charset + "\" was not found (as usual). "
-                                + "Use it as is.");
-                    }
-                    mCharset = charset;
-                }
-            } else {
+        charset = (TextUtils.isEmpty(charset) ? VCardConfig.DEFAULT_EXPORT_CHARSET : charset);
+        final boolean shouldAppendCharsetParam = !(
+                VCardConfig.isV30(vcardType) && UTF_8.equalsIgnoreCase(charset));
+
+        if (mIsDoCoMo || shouldAppendCharsetParam) {
+            if (SHIFT_JIS.equalsIgnoreCase(charset)) {
                 if (mIsDoCoMo) {
                     try {
                         charset = CharsetUtils.charsetForVendor(SHIFT_JIS, "docomo").name();
@@ -361,6 +349,22 @@ public class VCardComposer {
                     }
                 }
                 mCharset = charset;
+            } else {
+                Log.w(LOG_TAG,
+                        "The charset \"" + charset + "\" is used while "
+                        + SHIFT_JIS + " is needed to be used.");
+                if (TextUtils.isEmpty(charset)) {
+                    mCharset = SHIFT_JIS;
+                } else {
+                    try {
+                        charset = CharsetUtils.charsetForVendor(charset).name();
+                    } catch (UnsupportedCharsetException e) {
+                        Log.i(LOG_TAG,
+                                "Career-specific \"" + charset + "\" was not found (as usual). "
+                                + "Use it as is.");
+                    }
+                    mCharset = charset;
+                }
             }
         } else {
             if (TextUtils.isEmpty(charset)) {

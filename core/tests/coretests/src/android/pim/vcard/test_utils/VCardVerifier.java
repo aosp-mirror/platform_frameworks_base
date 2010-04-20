@@ -313,7 +313,7 @@ public class VCardVerifier {
 
     private void verifyForExportTest() {
        final VCardComposer composer =
-            new VCardComposer(new CustomMockContext(mExportTestResolver), mVCardType);
+            new VCardComposer(new CustomMockContext(mExportTestResolver), mVCardType, mCharset);
         composer.addHandler(mLineVerifier);
         composer.addHandler(mVCardVerifierInternal);
         if (!composer.init(VCardComposer.CONTACTS_TEST_CONTENT_URI, null, null, null)) {

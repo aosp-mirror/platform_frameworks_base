@@ -420,7 +420,7 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21SimpleCase1_Type_Japanese() {
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, R.raw.v21_simple_1);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE, R.raw.v21_simple_1);
         mVerifier.addContentValuesVerifierElem()
                 .addExpected(StructuredName.CONTENT_ITEM_TYPE)
                         .put(StructuredName.FAMILY_NAME, "Ando")
@@ -432,7 +432,7 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21SimpleCase2() {
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, R.raw.v21_simple_2);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE, R.raw.v21_simple_2);
         mVerifier.addContentValuesVerifierElem()
                 .addExpected(StructuredName.CONTENT_ITEM_TYPE)
                         .put(StructuredName.DISPLAY_NAME, "Ando Roid");
@@ -718,8 +718,7 @@ public class VCardImporterTests extends VCardTestsBase {
         // Though Japanese careers append ";;;;" at the end of the value of "SOUND",
         // vCard 2.1/3.0 specification does not allow multiple values.
         // Do not need to handle it as multiple values.
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS,
-                R.raw.v21_japanese_1);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE, R.raw.v21_japanese_1);
         mVerifier.addPropertyNodesVerifierElem()
                 .addExpectedNodeWithOrder("VERSION", "2.1", null, null, null, null, null)
                 .addExpectedNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9;;;;",
@@ -762,11 +761,11 @@ public class VCardImporterTests extends VCardTestsBase {
 
     /**
      * Verifies vCard with Japanese can be parsed correctly with
-     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_JAPANESE_SJIS}.
+     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_JAPANESE}.
      */
     public void testV21Japanese1_Type_Japanese_Sjis() {
         testV21Japanese1Common(
-                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, true);
+                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE, true);
     }
 
     /**
@@ -780,8 +779,7 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21Japanese2_Parsing() {
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS,
-                R.raw.v21_japanese_2);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE, R.raw.v21_japanese_2);
         mVerifier.addPropertyNodesVerifierElem()
                 .addExpectedNodeWithOrder("VERSION", "2.1")
                 .addExpectedNodeWithOrder("N", "\u5B89\u85E4;\u30ED\u30A4\u30C9\u0031;;;",
@@ -839,8 +837,7 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21MultipleEntryCase_Parse() {
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS,
-                R.raw.v21_multiple_entry);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE, R.raw.v21_multiple_entry);
         mVerifier.addPropertyNodesVerifierElem()
                 .addExpectedNodeWithOrder("VERSION", "2.1")
                 .addExpectedNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033;;;;",
@@ -883,8 +880,7 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21MultipleEntryCase() {
-        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS,
-                R.raw.v21_multiple_entry);
+        mVerifier.initForImportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE, R.raw.v21_multiple_entry);
         ContentValuesVerifierElem elem = mVerifier.addContentValuesVerifierElem();
         elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033")

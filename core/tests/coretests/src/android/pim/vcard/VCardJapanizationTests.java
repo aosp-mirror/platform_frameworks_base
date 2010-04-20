@@ -59,7 +59,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testNameShiftJis() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS, "Shift_JIS");
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V30_JAPANESE, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u3075\u308B\u3069")
@@ -115,7 +115,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
 
         final ContentValues contentValues =
-            (VCardConfig.shouldUseShiftJisForExport(vcardType) ?
+            ("SHIFT_JIS".equalsIgnoreCase(charset) ?
                     (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
                             mContentValuesForQPAndSJis) :
                     (VCardConfig.isV30(vcardType) ? null : mContentValuesForQPAndUtf8));
@@ -147,7 +147,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForJapaneseV21Sjis() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, "Shift_JIS");
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE, "Shift_JIS");
     }
 
     public void testPhoneticNameForJapaneseV30Utf8() {
@@ -155,7 +155,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForJapaneseV30SJis() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS, "Shift_JIS");
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE, "Shift_JIS");
     }
 
     public void testPhoneticNameForMobileV21_1() {
@@ -215,7 +215,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
                 .put(StructuredPostal.LABEL, "\u304A\u3082\u3061\u304B\u3048\u308A");
 
-        ContentValues contentValues = (VCardConfig.shouldUseShiftJisForExport(vcardType) ?
+        ContentValues contentValues = ("UTF-8".equalsIgnoreCase(charset) ?
                 (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
                     mContentValuesForQPAndSJis) :
                 (VCardConfig.isV30(vcardType) ? mContentValuesForUtf8 :
@@ -241,7 +241,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME);
     }
     public void testPostalAddresswithJapaneseV21() {
-        testPostalAddressWithJapaneseCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, "Shift_JIS");
+        testPostalAddressWithJapaneseCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE, "Shift_JIS");
     }
 
     /**
