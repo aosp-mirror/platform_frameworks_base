@@ -41,6 +41,14 @@ extern "C" {
 
 struct android_native_buffer_t;
 
+typedef struct android_native_rect_t
+{
+    int32_t left;
+    int32_t top;
+    int32_t right;
+    int32_t bottom;
+} android_native_rect_t;
+
 // ---------------------------------------------------------------------------
 
 typedef struct android_native_base_t
@@ -63,15 +71,16 @@ typedef struct android_native_base_t
 /* attributes queriable with query() */
 enum {
     NATIVE_WINDOW_WIDTH     = 0,
-    NATIVE_WINDOW_HEIGHT    = 1,
-    NATIVE_WINDOW_FORMAT    = 2,
+    NATIVE_WINDOW_HEIGHT,
+    NATIVE_WINDOW_FORMAT,
 };
 
 /* valid operations for the (*perform)() hook */
 enum {
     NATIVE_WINDOW_SET_USAGE  = 0,
-    NATIVE_WINDOW_CONNECT    = 1,
-    NATIVE_WINDOW_DISCONNECT = 2
+    NATIVE_WINDOW_CONNECT,
+    NATIVE_WINDOW_DISCONNECT,
+    NATIVE_WINDOW_SET_CROP,
 };
 
 /* parameter for NATIVE_WINDOW_[DIS]CONNECT */
@@ -125,7 +134,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*dequeueBuffer)(struct android_native_window_t* window, 
+    int     (*dequeueBuffer)(struct android_native_window_t* window,
                 struct android_native_buffer_t** buffer);
 
     /*
@@ -171,6 +180,7 @@ typedef struct android_native_window_t
      *     NATIVE_WINDOW_SET_USAGE
      *     NATIVE_WINDOW_CONNECT
      *     NATIVE_WINDOW_DISCONNECT
+     *     NATIVE_WINDOW_SET_CROP
      *  
      */
     
@@ -221,6 +231,24 @@ static inline int native_window_disconnect(
     return window->perform(window, NATIVE_WINDOW_DISCONNECT, api);
 }
 
+/*
+ * native_window_set_crop(..., crop) sets which region of the next queued
+ * buffers needs to be considered.
+ * A buffer's crop region is scaled to match the surface's size.
+ *
+ * The specified crop region applies to all buffers queued after it is called.
+ *
+ * if 'crop' is NULL, subsequently queued buffers won't be cropped.
+ *
+ * An error is returned if for instance the crop region is invalid,
+ * out of the buffer's bound or if the window is invalid.
+ */
+static inline int native_window_set_crop(
+        android_native_window_t* window,
+        android_native_rect_t const * crop)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_CROP, crop);
+}
 
 // ---------------------------------------------------------------------------
 

@@ -552,6 +552,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
     }
     
     int32_t bufIdx = GraphicBuffer::getSelf(buffer)->getIndex();
+    mSharedBufferClient->setCrop(bufIdx, mNextBufferCrop);
     mSharedBufferClient->setDirtyRegion(bufIdx, mDirtyRegion);
     err = mSharedBufferClient->queue(bufIdx);
     LOGE_IF(err, "error queuing buffer %d (%s)", bufIdx, strerror(-err));
@@ -581,6 +582,10 @@ int Surface::query(int what, int* value)
 
 int Surface::perform(int operation, va_list args)
 {
+    status_t err = validate();
+    if (err != NO_ERROR)
+        return err;
+
     int res = NO_ERROR;
     switch (operation) {
     case NATIVE_WINDOW_SET_USAGE:
@@ -591,6 +596,9 @@ int Surface::perform(int operation, va_list args)
         break;
     case NATIVE_WINDOW_DISCONNECT:
         res = dispatch_disconnect( args );
+        break;
+    case NATIVE_WINDOW_SET_CROP:
+        res = dispatch_crop( args );
         break;
     default:
         res = NAME_NOT_FOUND;
@@ -610,6 +618,10 @@ int Surface::dispatch_connect(va_list args) {
 int Surface::dispatch_disconnect(va_list args) {
     int api = va_arg(args, int);
     return disconnect( api );
+}
+int Surface::dispatch_crop(va_list args) {
+    android_native_rect_t const* rect = va_arg(args, android_native_rect_t*);
+    return crop( reinterpret_cast<Rect const*>(rect) );
 }
 
 
@@ -667,6 +679,14 @@ int Surface::getConnectedApi() const
 {
     Mutex::Autolock _l(mSurfaceLock);
     return mConnected;
+}
+
+int Surface::crop(Rect const* rect)
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    // TODO: validate rect size
+    mNextBufferCrop = *rect;
+    return NO_ERROR;
 }
 
 

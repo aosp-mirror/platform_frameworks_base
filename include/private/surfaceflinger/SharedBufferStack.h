@@ -70,9 +70,9 @@ class SharedClient;
 // ----------------------------------------------------------------------------
 
 // 4 * (11 + 7 + (1 + 2*NUM_RECT_MAX) * NUM_BUFFER_MAX) * NUM_LAYERS_MAX
-// 4 * (11 + 7 + (1 + 2*6)*16) * 31
-// 904 * 31
-// = ~27 KiB (28024)
+// 4 * (11 + 7 + (1 + 2*7)*16) * 31
+// 1032 * 31
+// = ~27 KiB (31992)
 
 class SharedBufferStack
 {
@@ -82,21 +82,31 @@ class SharedBufferStack
     friend class SharedBufferServer;
 
 public:
-    struct FlatRegion { // 52 bytes = 4 * (1 + 2*N)
-        static const unsigned int NUM_RECT_MAX = 6;
-        uint32_t    count;
-        uint16_t    rects[4*NUM_RECT_MAX];
-    };
-    
     struct Statistics { // 4 longs
         typedef int32_t usecs_t;
         usecs_t  totalTime;
         usecs_t  reserved[3];
     };
+
+    struct SmallRect {
+        uint16_t l, t, r, b;
+    };
+
+    struct FlatRegion { // 52 bytes = 4 * (1 + 2*N)
+        static const unsigned int NUM_RECT_MAX = 6;
+        uint32_t    count;
+        SmallRect   rects[NUM_RECT_MAX];
+    };
+    
+    struct BufferData {
+        FlatRegion dirtyRegion;
+        SmallRect  crop;
+    };
     
     SharedBufferStack();
     void init(int32_t identity);
     status_t setDirtyRegion(int buffer, const Region& reg);
+    status_t setCrop(int buffer, const Rect& reg);
     Region getDirtyRegion(int buffer) const;
 
     // these attributes are part of the conditions/updates
@@ -113,7 +123,7 @@ public:
     int32_t     reserved32[6];
     Statistics  stats;
     int32_t     reserved;
-    FlatRegion  dirtyRegion[NUM_BUFFER_MAX]; // 832 bytes
+    BufferData  buffers[NUM_BUFFER_MAX];     // 960 bytes
 };
 
 // ----------------------------------------------------------------------------
@@ -243,6 +253,7 @@ public:
     status_t queue(int buf);
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
+    status_t setCrop(int buffer, const Rect& reg);
     
 private:
     friend struct Condition;
