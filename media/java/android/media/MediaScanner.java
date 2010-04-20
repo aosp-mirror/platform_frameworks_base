@@ -714,7 +714,12 @@ public class MediaScanner
                     }
                 }
             }
-            if (isAudio) {
+            long rowId = entry.mRowId;
+            if (isAudio && rowId == 0) {
+                // Only set these for new entries. For existing entries, they
+                // may have been modified later, and we want to keep the current
+                // values so that custom ringtones still show up in the ringtone
+                // picker.
                 values.put(Audio.Media.IS_RINGTONE, ringtones);
                 values.put(Audio.Media.IS_NOTIFICATION, notifications);
                 values.put(Audio.Media.IS_ALARM, alarms);
@@ -764,7 +769,6 @@ public class MediaScanner
             }
 
             Uri result = null;
-            long rowId = entry.mRowId;
             if (rowId == 0) {
                 // new file, insert it
                 result = mMediaProvider.insert(tableUri, values);
