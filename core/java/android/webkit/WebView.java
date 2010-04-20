@@ -874,18 +874,18 @@ public class WebView extends AbsoluteLayout
     }
 
     private void updateZoomButtonsEnabled() {
+        if (mZoomButtonsController == null) return;
         boolean canZoomIn = mActualScale < mMaxZoomScale;
         boolean canZoomOut = mActualScale > mMinZoomScale && !mInZoomOverview;
-        ZoomButtonsController controller = getZoomButtonsController();
         if (!canZoomIn && !canZoomOut) {
             // Hide the zoom in and out buttons, as well as the fit to page
             // button, if the page cannot zoom
-            controller.getZoomControls().setVisibility(View.GONE);
+            mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
         } else {
             // Set each one individually, as a page may be able to zoom in
             // or out.
-            controller.setZoomInEnabled(canZoomIn);
-            controller.setZoomOutEnabled(canZoomOut);
+            mZoomButtonsController.setZoomInEnabled(canZoomIn);
+            mZoomButtonsController.setZoomOutEnabled(canZoomOut);
         }
     }
 
@@ -4028,7 +4028,8 @@ public class WebView extends AbsoluteLayout
             }
         } else {
             if (mWebViewCore != null && getSettings().getBuiltInZoomControls()
-                    && !getZoomButtonsController().isVisible()) {
+                    && (mZoomButtonsController == null ||
+                            !mZoomButtonsController.isVisible())) {
                 /*
                  * The zoom controls come in their own window, so our window
                  * loses focus. Our policy is to not draw the cursor ring if
@@ -5844,7 +5845,7 @@ public class WebView extends AbsoluteLayout
         }
         WebSettings settings = getSettings();
         if (settings.getBuiltInZoomControls()) {
-            if (getZoomButtonsController().isVisible()) {
+            if (mZoomButtonsController != null) {
                 mZoomButtonsController.setVisible(false);
             }
         } else {
