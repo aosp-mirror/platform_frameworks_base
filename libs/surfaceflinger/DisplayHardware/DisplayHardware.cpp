@@ -266,9 +266,6 @@ void DisplayHardware::init(uint32_t dpy)
     if (strstr(gl_extensions, "GL_ARB_texture_non_power_of_two")) {
         mFlags |= NPOT_EXTENSION;
     }
-    if (strstr(gl_extensions, "GL_OES_draw_texture")) {
-        mFlags |= DRAW_TEXTURE_EXTENSION;
-    }
 #ifdef EGL_ANDROID_image_native_buffer
     if (strstr( gl_extensions, "GL_OES_EGL_image") &&
         (strstr(egl_extensions, "EGL_KHR_image_base") || 

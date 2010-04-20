@@ -206,8 +206,8 @@ void SurfaceFlinger::init()
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
 
-    LOGI_IF(mDebugRegion,           "showupdates enabled");
-    LOGI_IF(mDebugBackground,       "showbackground enabled");
+    LOGI_IF(mDebugRegion,       "showupdates enabled");
+    LOGI_IF(mDebugBackground,   "showbackground enabled");
 }
 
 SurfaceFlinger::~SurfaceFlinger()
@@ -357,7 +357,6 @@ status_t SurfaceFlinger::readyToRun()
     dcblk->ydpi         = hw.getDpiY();
     dcblk->fps          = hw.getRefreshRate();
     dcblk->density      = hw.getDensity();
-    asm volatile ("":::"memory");
 
     // Initialize OpenGL|ES
     glActiveTexture(GL_TEXTURE0);
