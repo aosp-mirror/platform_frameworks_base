@@ -73,13 +73,25 @@ status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
         return BAD_INDEX;
 
     // in the current implementation we only send a single rectangle
-    const Rect bounds(dirty.getBounds());
+    size_t count;
+    Rect const* r = dirty.getArray(&count);
     FlatRegion& reg(dirtyRegion[buffer]);
-    reg.count = 1;
-    reg.rects[0] = uint16_t(bounds.left);
-    reg.rects[1] = uint16_t(bounds.top);
-    reg.rects[2] = uint16_t(bounds.right);
-    reg.rects[3] = uint16_t(bounds.bottom);
+    if (count > FlatRegion::NUM_RECT_MAX) {
+        const Rect bounds(dirty.getBounds());
+        reg.count = 1;
+        reg.rects[0] = uint16_t(bounds.left);
+        reg.rects[1] = uint16_t(bounds.top);
+        reg.rects[2] = uint16_t(bounds.right);
+        reg.rects[3] = uint16_t(bounds.bottom);
+    } else {
+        reg.count = count;
+        for (size_t i=0 ; i<count ; i++) {
+            reg.rects[i*4 + 0] = uint16_t(r[i].left);
+            reg.rects[i*4 + 1] = uint16_t(r[i].top);
+            reg.rects[i*4 + 2] = uint16_t(r[i].right);
+            reg.rects[i*4 + 3] = uint16_t(r[i].bottom);
+        }
+    }
     return NO_ERROR;
 }
 
@@ -90,7 +102,21 @@ Region SharedBufferStack::getDirtyRegion(int buffer) const
         return res;
 
     const FlatRegion& reg(dirtyRegion[buffer]);
-    res.set(Rect(reg.rects[0], reg.rects[1], reg.rects[2], reg.rects[3]));
+    if (reg.count > FlatRegion::NUM_RECT_MAX)
+        return res;
+
+    if (reg.count == 1) {
+        res.set(Rect(reg.rects[0], reg.rects[1], reg.rects[2], reg.rects[3]));
+    } else {
+        for (size_t i=0 ; i<reg.count ; i++) {
+            const Rect r(
+                    reg.rects[i*4 + 0],
+                    reg.rects[i*4 + 1],
+                    reg.rects[i*4 + 2],
+                    reg.rects[i*4 + 3]);
+            res.orSelf(r);
+        }
+    }
     return res;
 }
 
@@ -280,7 +306,7 @@ ssize_t SharedBufferClient::dequeue()
 {
     SharedBufferStack& stack( *mSharedStack );
 
-    if (stack.head == tail && stack.available == 2) {
+    if (stack.head == tail && stack.available == mNumBuffers) {
         LOGW("dequeue: tail=%d, head=%d, avail=%d, queued=%d",
                 tail, stack.head, stack.available, stack.queued);
     }

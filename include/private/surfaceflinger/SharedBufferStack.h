@@ -58,7 +58,7 @@ namespace android {
 // When changing these values, the COMPILE_TIME_ASSERT at the end of this
 // file need to be updated.
 const unsigned int NUM_LAYERS_MAX  = 31;
-const unsigned int NUM_BUFFER_MAX  = 4;
+const unsigned int NUM_BUFFER_MAX  = 16;
 const unsigned int NUM_DISPLAY_MAX = 4;
 
 // ----------------------------------------------------------------------------
@@ -69,7 +69,11 @@ class SharedClient;
 
 // ----------------------------------------------------------------------------
 
-// should be 128 bytes (32 longs)
+// 4 * (11 + 7 + (1 + 2*NUM_RECT_MAX) * NUM_BUFFER_MAX) * NUM_LAYERS_MAX
+// 4 * (11 + 7 + (1 + 2*6)*16) * 31
+// 904 * 31
+// = ~27 KiB (28024)
+
 class SharedBufferStack
 {
     friend class SharedClient;
@@ -78,8 +82,8 @@ class SharedBufferStack
     friend class SharedBufferServer;
 
 public:
-    struct FlatRegion { // 12 bytes
-        static const unsigned int NUM_RECT_MAX = 1;
+    struct FlatRegion { // 52 bytes = 4 * (1 + 2*N)
+        static const unsigned int NUM_RECT_MAX = 6;
         uint32_t    count;
         uint16_t    rects[4*NUM_RECT_MAX];
     };
@@ -106,9 +110,10 @@ public:
     volatile int32_t reallocMask;
 
     int32_t     identity;       // surface's identity (const)
-    int32_t     reserved32[9];
+    int32_t     reserved32[6];
     Statistics  stats;
-    FlatRegion  dirtyRegion[NUM_BUFFER_MAX];    // 12*4=48 bytes
+    int32_t     reserved;
+    FlatRegion  dirtyRegion[NUM_BUFFER_MAX]; // 832 bytes
 };
 
 // ----------------------------------------------------------------------------
@@ -349,8 +354,7 @@ struct surface_flinger_cblk_t   // 4KB max
 
 // ---------------------------------------------------------------------------
 
-COMPILE_TIME_ASSERT(sizeof(SharedClient) <= 4096)
-COMPILE_TIME_ASSERT(sizeof(SharedBufferStack) == 128)
+COMPILE_TIME_ASSERT(sizeof(SharedClient) <= 32768)
 COMPILE_TIME_ASSERT(sizeof(surface_flinger_cblk_t) <= 4096)
 
 // ---------------------------------------------------------------------------
