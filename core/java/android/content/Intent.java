@@ -1395,7 +1395,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_EXTERNAL_APPLICATIONS_AVAILABLE =
@@ -1420,7 +1419,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE =
@@ -2243,7 +2241,6 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_AVAILABLE},
      * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE}
      * and contains a string array of all of the components that have changed.
-     * @hide
      */
     public static final String EXTRA_CHANGED_PACKAGE_LIST =
             "android.intent.extra.changed_package_list";
@@ -2254,7 +2251,6 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE}
      * and contains an integer array of uids of all of the components
      * that have changed.
-     * @hide
      */
     public static final String EXTRA_CHANGED_UID_LIST =
             "android.intent.extra.changed_uid_list";
