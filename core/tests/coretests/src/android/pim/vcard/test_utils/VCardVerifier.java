@@ -15,7 +15,6 @@
  */
 package android.pim.vcard.test_utils;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.EntityIterator;
@@ -31,6 +30,7 @@ import android.pim.vcard.VCardParser_V30;
 import android.pim.vcard.exception.VCardException;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -39,20 +39,31 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-/* package */ class CustomMockContext extends MockContext {
-    final ContentResolver mResolver;
-    public CustomMockContext(ContentResolver resolver) {
-        mResolver = resolver;
-    }
-
-    @Override
-    public ContentResolver getContentResolver() {
-        return mResolver;
-    }
-}
-
+/**
+ * <p>
+ * The class lets users checks that given expected vCard data are same as given actual vCard data.
+ * Able to verify both vCard importer/exporter.
+ * </p>
+ * <p>
+ * First a user has to initialize the object by calling either
+ * {@link #initForImportTest(int, int)} or {@link #initForExportTest(int)}.
+ * "Round trip test" (import -> export -> import, or export -> import -> export) is not supported.
+ * </p>
+ */
 public class VCardVerifier {
     private static final String LOG_TAG = "VCardVerifier";
+
+    private static class CustomMockContext extends MockContext {
+        final ContentResolver mResolver;
+        public CustomMockContext(ContentResolver resolver) {
+            mResolver = resolver;
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mResolver;
+        }
+    }
 
     private class VCardVerifierInternal implements VCardComposer.OneEntryHandler {
         public boolean onInit(Context context) {
@@ -83,9 +94,11 @@ public class VCardVerifier {
     private ContentValuesVerifier mContentValuesVerifier;
     private boolean mInitialized;
     private boolean mVerified = false;
+    private String mCharset;
 
-    public VCardVerifier(AndroidTestCase androidTestCase) {
-        mTestCase = androidTestCase;
+    // Called by VCardTestsBase
+    public VCardVerifier(AndroidTestCase testCase) {
+        mTestCase = testCase;
         mVCardVerifierInternal = new VCardVerifierInternal();
         mExportTestResolver = null;
         mInputStream = null;
@@ -93,17 +106,7 @@ public class VCardVerifier {
         mVerified = false;
     }
 
-    public void initForExportTest(int vcardType) {
-        if (mInitialized) {
-            mTestCase.fail("Already initialized");
-        }
-        mExportTestResolver = new ExportTestResolver(mTestCase);
-        mVCardType = vcardType;
-        mIsV30 = VCardConfig.isV30(vcardType);
-        mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
-        mInitialized = true;
-    }
-
+    // Called by each import test.
     public void initForImportTest(int vcardType, int resId) {
         if (mInitialized) {
             mTestCase.fail("Already initialized");
@@ -113,6 +116,27 @@ public class VCardVerifier {
         mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
         setInputResourceId(resId);
         mInitialized = true;
+    }
+
+    // Called by each export test.
+    public void initForExportTest(int vcardType) {
+        initForExportTest(vcardType, "UTF-8");
+    }
+
+    public void initForExportTest(int vcardType, String charset) {
+        if (mInitialized) {
+            mTestCase.fail("Already initialized");
+        }
+        mExportTestResolver = new ExportTestResolver(mTestCase);
+        mVCardType = vcardType;
+        mIsV30 = VCardConfig.isV30(vcardType);
+        mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
+        mInitialized = true;
+        if (TextUtils.isEmpty(charset)) {
+            mCharset = "UTF-8";
+        } else {
+            mCharset = charset;
+        }
     }
 
     private void setInputResourceId(int resId) {
@@ -214,11 +238,12 @@ public class VCardVerifier {
 
         InputStream is = null;
         try {
-            String charset =
-                (VCardConfig.shouldUseShiftJisForExport(mVCardType) ? "SHIFT_JIS" : "UTF-8");
-            // TODO: Use charset
-            final VCardParser parser = (mIsV30 ? new VCardParser_V30() : new VCardParser_V21());
-            is = new ByteArrayInputStream(vcard.getBytes(charset));
+            // Note: we must not specify charset toward vCard parsers. This code checks whether
+            // those parsers are able to encode given binary without any extra information for
+            // charset.
+            final VCardParser parser = (mIsV30 ?
+                    new VCardParser_V30(mVCardType) : new VCardParser_V21(mVCardType));
+            is = new ByteArrayInputStream(vcard.getBytes(mCharset));
             parser.parse(is, builder);
         } catch (IOException e) {
             mTestCase.fail("Unexpected IOException: " + e.getMessage());
@@ -229,6 +254,7 @@ public class VCardVerifier {
                 try {
                     is.close();
                 } catch (IOException e) {
+                    mTestCase.fail("Unexpected IOException: " + e.getMessage());
                 }
             }
         }

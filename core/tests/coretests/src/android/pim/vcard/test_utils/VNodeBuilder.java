@@ -31,14 +31,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Store the parse result to custom datastruct: VNode, PropertyNode
+ * <p>
+ * The class storing the parse result to custom datastruct:
+ * {@link VNode}, and {@link PropertyNode}.
  * Maybe several vcard instance, so use vNodeList to store.
- * VNode: standy by a vcard instance.
- * PropertyNode: standy by a property line of a card.
- *
- * Previously used in main vCard handling code but now exists only for testing.
+ * </p>
+ * <p>
+ * This is called VNode, not VCardNode, since it was used for expressing vCalendar (iCal).
+ * </p>
  */
-public class VNodeBuilder implements VCardInterpreter {
+/* package */ class VNodeBuilder implements VCardInterpreter {
     static private String LOG_TAG = "VNodeBuilder"; 
     
     public List<VNode> vNodeList = new ArrayList<VNode>();
@@ -46,12 +48,12 @@ public class VNodeBuilder implements VCardInterpreter {
     private VNode mCurrentVNode;
     private PropertyNode mCurrentPropNode;
     private String mCurrentParamType;
-    
+
     /**
      * The charset using which VParser parses the text.
      */
     private String mSourceCharset;
-    
+
     /**
      * The charset with which byte array is encoded to String.
      */
@@ -241,6 +243,6 @@ public class VNodeBuilder implements VCardInterpreter {
     }
     
     public String getResult(){
-        return null;
+        throw new RuntimeException("Not supported");
     }
 }

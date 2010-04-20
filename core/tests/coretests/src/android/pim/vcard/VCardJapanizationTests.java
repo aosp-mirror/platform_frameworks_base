@@ -59,7 +59,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testNameShiftJis() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u3075\u308B\u3069")
@@ -81,7 +81,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
      * DoCoMo phones require all name elements should be in "family name" field.
      */
     public void testNameDoCoMo() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u3075\u308B\u3069")
@@ -106,8 +106,8 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .addExpectedNode("X-DCM-HMN-MODE", "");
     }
 
-    private void testPhoneticNameCommon(int vcardType) {
-        mVerifier.initForExportTest(vcardType);
+    private void testPhoneticNameCommon(int vcardType, String charset) {
+        mVerifier.initForExportTest(vcardType, charset);
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
@@ -143,23 +143,23 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForJapaneseV21Utf8() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE);
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE, null);
     }
 
     public void testPhoneticNameForJapaneseV21Sjis() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, "Shift_JIS");
     }
 
     public void testPhoneticNameForJapaneseV30Utf8() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE);
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE, null);
     }
 
     public void testPhoneticNameForJapaneseV30SJis() {
-        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS);
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS, "Shift_JIS");
     }
 
     public void testPhoneticNameForMobileV21_1() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
@@ -183,7 +183,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForMobileV21_2() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
@@ -199,8 +199,8 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredName.DISPLAY_NAME, "\uFF94\uFF8F\uFF80\uFF9E \uFF80\uFF9B\uFF73");
     }
 
-    private void testPostalAddressWithJapaneseCommon(int vcardType) {
-        mVerifier.initForExportTest(vcardType);
+    private void testPostalAddressWithJapaneseCommon(int vcardType, String charset) {
+        mVerifier.initForExportTest(vcardType, charset);
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "\u79C1\u66F8\u7BB107")
@@ -241,7 +241,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME);
     }
     public void testPostalAddresswithJapaneseV21() {
-        testPostalAddressWithJapaneseCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+        testPostalAddressWithJapaneseCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS, "Shift_JIS");
     }
 
     /**
@@ -249,7 +249,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
      * Prefered type must (should?) be: HOME > WORK > OTHER > CUSTOM
      */
     public void testPostalAdrressForDoCoMo_1() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
@@ -277,7 +277,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPostalAdrressForDoCoMo_2() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
@@ -302,7 +302,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPostalAdrressForDoCoMo_3() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
@@ -330,7 +330,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
      * Verifies the vCard exporter tolerates null TYPE.
      */
     public void testPostalAdrressForDoCoMo_4() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "1");
@@ -380,7 +380,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testJapanesePhoneNumberDoCoMo() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "0312341234")
@@ -400,7 +400,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testNoteDoCoMo() {
-        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO);
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_DOCOMO, "Shift_JIS");
         ContactEntry entry = mVerifier.addInputEntry();
         entry.addContentValues(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE, "note1");

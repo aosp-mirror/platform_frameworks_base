@@ -529,7 +529,7 @@ public class VCardComposer {
             final String selection = Data.CONTACT_ID + "=?";
             final String[] selectionArgs = new String[] {contactId};
             if (getEntityIteratorMethod != null) {
-                // Please note that this branch is executed by some tests only
+                // Please note that this branch is executed by unit tests only
                 try {
                     entityIterator = (EntityIterator)getEntityIteratorMethod.invoke(null,
                             mContentResolver, uri, selection, selectionArgs, null);

@@ -33,6 +33,7 @@ public class PropertyNodesVerifier extends VNodeBuilder {
     private int mIndex;
 
     public PropertyNodesVerifier(AndroidTestCase testCase) {
+        super();
         mPropertyNodesVerifierElemList = new ArrayList<PropertyNodesVerifierElem>();
         mAndroidTestCase = testCase;
     }

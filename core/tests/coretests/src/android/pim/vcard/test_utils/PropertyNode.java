@@ -25,12 +25,18 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * <p>
+ * The class representing one property (e.g. "N;ENCODING=UTF-8:family:given:middle:prefix:suffix").
+ * </p>
+ * <p>
  * Previously used in main vCard handling code but now exists only for testing.
- *
+ * </p>
+ * <p>
  * Especially useful for testing parser code (VCardParser), since all properties can be
  * checked via this class unlike {@link VCardEntry}, which only emits the result of
  * interpretation of the content of each vCard. We cannot know whether vCard parser or
- * ContactStruct is wrong withouth this class.
+ * {@link VCardEntry} is wrong without this class.
+ * </p>
  */
 public class PropertyNode {
     public String propName;
@@ -42,7 +48,8 @@ public class PropertyNode {
      */
     public byte[] propValue_bytes;
 
-    /** param store: key=paramType, value=paramValue
+    /**
+     * param store: key=paramType, value=paramValue
      * Note that currently PropertyNode class does not support multiple param-values
      * defined in vCard 3.0 (See also RFC 2426). multiple-values are stored as
      * one String value like "A,B", not ["A", "B"]...

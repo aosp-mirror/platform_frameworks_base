@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents one contact, which should contain multiple ContentValues like
+ * <p>
+ * The class representing one contact, which should contain multiple ContentValues like
  * StructuredName, Email, etc.
+ * </p>
  */
-public class ContactEntry {
+public final class ContactEntry {
     private final List<ContentValues> mContentValuesList = new ArrayList<ContentValues>();
 
     public ContentValuesBuilder addContentValues(String mimeType) {
