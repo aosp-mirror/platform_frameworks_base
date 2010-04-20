@@ -19,12 +19,10 @@ package android.text;
 import com.android.internal.util.ArrayUtils;
 
 import android.emoji.EmojiFactory;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.text.method.TextKeyListener;
 import android.text.style.AlignmentSpan;
 import android.text.style.LeadingMarginSpan;
@@ -60,9 +58,7 @@ public abstract class Layout {
             MIN_EMOJI = -1;
             MAX_EMOJI = -1;
         }
-    };
-
-    private RectF mEmojiRect;
+    }
 
     /**
      * Return how wide a layout must be in order to display the
@@ -91,8 +87,8 @@ public abstract class Layout {
                 next = end;
 
             // note, omits trailing paragraph char
-            float w = measureText(paint, workPaint,
-                                  source, i, next, null, true, null);
+            float w = measurePara(paint, workPaint,
+                                  source, i, next, true, null);
 
             if (w > need)
                 need = w;
@@ -121,6 +117,15 @@ public abstract class Layout {
                      float spacingMult, float spacingAdd) {
         if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
+
+        // Ensure paint doesn't have baselineShift set.
+        // While normally we don't modify the paint the user passed in,
+        // we were already doing this in Styled.drawUniformRun with both
+        // baselineShift and bgColor.  We probably should reevaluate bgColor.
+        if (paint != null) {
+            paint.bgColor = 0;
+            paint.baselineShift = 0;
+        }
 
         mText = text;
         mPaint = paint;
@@ -262,6 +267,7 @@ public abstract class Layout {
 
         Alignment align = mAlignment;
 
+        TextLine tl = TextLine.obtain();
         // Next draw the lines, one at a time.
         // the baseline is the top of the following line minus the current
         // line's descent.
@@ -373,11 +379,11 @@ public abstract class Layout {
                 // XXX: assumes there's nothing additional to be done
                 c.drawText(buf, start, end, x, lbaseline, paint);
             } else {
-                drawText(c, buf, start, end, dir, directions,
-                    x, ltop, lbaseline, lbottom, paint, mWorkPaint,
-                    hasTab, spans);
+                tl.set(paint, buf, start, end, dir, directions, hasTab, spans);
+                tl.draw(c, x, ltop, lbaseline, lbottom);
             }
         }
+        TextLine.recycle(tl);
     }
 
     /**
@@ -639,7 +645,7 @@ public abstract class Layout {
 
     private float getHorizontal(int offset, boolean trailing, int line) {
         int start = getLineStart(line);
-        int end = getLineVisibleEnd(line);
+        int end = getLineEnd(line);
         int dir = getParagraphDirection(line);
         boolean tab = getLineContainsTab(line);
         Directions directions = getLineDirections(line);
@@ -649,17 +655,10 @@ public abstract class Layout {
             tabs = ((Spanned) mText).getSpans(start, end, TabStopSpan.class);
         }
 
-        float wid = measureText(mPaint, mWorkPaint, mText, start, offset, end,
-                                dir, directions, trailing, tab, tabs);
-
-        if (offset > end) {
-            if (dir == DIR_RIGHT_TO_LEFT)
-                wid -= measureText(mPaint, mWorkPaint,
-                                   mText, end, offset, null, tab, tabs);
-            else
-                wid += measureText(mPaint, mWorkPaint,
-                                   mText, end, offset, null, tab, tabs);
-        }
+        TextLine tl = TextLine.obtain();
+        tl.set(mPaint, mText, start, end, dir, directions, tab, tabs);
+        float wid = tl.measure(offset - start, trailing, null);
+        TextLine.recycle(tl);
 
         Alignment align = getParagraphAlignment(line);
         int left = getParagraphLeft(line);
@@ -761,21 +760,15 @@ public abstract class Layout {
 
     private float getLineMax(int line, Object[] tabs, boolean full) {
         int start = getLineStart(line);
-        int end;
+        int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
+        boolean hasTabs = getLineContainsTab(line);
+        Directions directions = getLineDirections(line);
 
-        if (full) {
-            end = getLineEnd(line);
-        } else {
-            end = getLineVisibleEnd(line);
-        }
-        boolean tab = getLineContainsTab(line);
-
-        if (tabs == null && tab && mText instanceof Spanned) {
-            tabs = ((Spanned) mText).getSpans(start, end, TabStopSpan.class);
-        }
-
-        return measureText(mPaint, mWorkPaint,
-                           mText, start, end, null, tab, tabs);
+        TextLine tl = TextLine.obtain();
+        tl.set(mPaint, mText, start, end, 1, directions, hasTabs, tabs);
+        float width = tl.metrics(null);
+        TextLine.recycle(tl);
+        return width;
     }
 
     /**
@@ -975,165 +968,49 @@ public abstract class Layout {
         return getOffsetToLeftRightOf(offset, false);
     }
 
-    // 1) The caret marks the leading edge of a character. The character
-    // logically before it might be on a different level, and the active caret
-    // position is on the character at the lower level. If that character
-    // was the previous character, the caret is on its trailing edge.
-    // 2) Take this character/edge and move it in the indicated direction.
-    // This gives you a new character and a new edge.
-    // 3) This position is between two visually adjacent characters.  One of
-    // these might be at a lower level.  The active position is on the
-    // character at the lower level.
-    // 4) If the active position is on the trailing edge of the character,
-    // the new caret position is the following logical character, else it
-    // is the character.
     private int getOffsetToLeftRightOf(int caret, boolean toLeft) {
         int line = getLineForOffset(caret);
         int lineStart = getLineStart(line);
         int lineEnd = getLineEnd(line);
+        int lineDir = getParagraphDirection(line);
 
-        boolean paraIsRtl = getParagraphDirection(line) == -1;
-        int[] runs = getLineDirections(line).mDirections;
-
-        int runIndex, runLevel = 0, runStart = lineStart, runLimit = lineEnd, newCaret = -1;
-        boolean trailing = false;
-
-        if (caret == lineStart) {
-            runIndex = -2;
-        } else if (caret == lineEnd) {
-            runIndex = runs.length;
-        } else {
-          // First, get information about the run containing the character with
-          // the active caret.
-          for (runIndex = 0; runIndex < runs.length; runIndex += 2) {
-            runStart = lineStart + runs[runIndex];
-            if (caret >= runStart) {
-              runLimit = runStart + (runs[runIndex+1] & RUN_LENGTH_MASK);
-              if (runLimit > lineEnd) {
-                  runLimit = lineEnd;
-              }
-              if (caret < runLimit) {
-                runLevel = (runs[runIndex+1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK;
-                if (caret == runStart) {
-                  // The caret is on a run boundary, see if we should
-                  // use the position on the trailing edge of the previous
-                  // logical character instead.
-                  int prevRunIndex, prevRunLevel, prevRunStart, prevRunLimit;
-                  int pos = caret - 1;
-                  for (prevRunIndex = 0; prevRunIndex < runs.length; prevRunIndex += 2) {
-                    prevRunStart = lineStart + runs[prevRunIndex];
-                    if (pos >= prevRunStart) {
-                      prevRunLimit = prevRunStart + (runs[prevRunIndex+1] & RUN_LENGTH_MASK);
-                      if (prevRunLimit > lineEnd) {
-                          prevRunLimit = lineEnd;
-                      }
-                      if (pos < prevRunLimit) {
-                        prevRunLevel = (runs[prevRunIndex+1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK;
-                        if (prevRunLevel < runLevel) {
-                          // Start from logically previous character.
-                          runIndex = prevRunIndex;
-                          runLevel = prevRunLevel;
-                          runStart = prevRunStart;
-                          runLimit = prevRunLimit;
-                          trailing = true;
-                          break;
-                        }
-                      }
-                    }
-                  }
+        boolean advance = toLeft == (lineDir == DIR_RIGHT_TO_LEFT);
+        if (caret == (advance ? lineEnd : lineStart)) {
+            // walking off line, so look at the line we're headed to
+            if (caret == lineStart) {
+                if (line > 0) {
+                    --line;
+                } else {
+                    return caret; // at very start, don't move
                 }
-                break;
-              }
+            } else {
+                if (line < getLineCount() - 1) {
+                    ++line;
+                } else {
+                    return caret; // at very end, don't move
+                }
             }
-          }
 
-          // caret might be = lineEnd.  This is generally a space or paragraph
-          // separator and has an associated run, but might be the end of
-          // text, in which case it doesn't.  If that happens, we ran off the
-          // end of the run list, and runIndex == runs.length.  In this case,
-          // we are at a run boundary so we skip the below test.
-          if (runIndex != runs.length) {
-              boolean rtlRun = (runLevel & 0x1) != 0;
-              boolean advance = toLeft == rtlRun;
-              if (caret != (advance ? runLimit : runStart) || advance != trailing) {
-                  // Moving within or into the run, so we can move logically.
-                  newCaret = getOffsetBeforeAfter(caret, advance);
-                  // If the new position is internal to the run, we're at the strong
-                  // position already so we're finished.
-                  if (newCaret != (advance ? runLimit : runStart)) {
-                      return newCaret;
-                  }
-              }
-          }
+            lineStart = getLineStart(line);
+            lineEnd = getLineEnd(line);
+            int newDir = getParagraphDirection(line);
+            if (newDir != lineDir) {
+                // unusual case.  we want to walk onto the line, but it runs
+                // in a different direction than this one, so we fake movement
+                // in the opposite direction.
+                toLeft = !toLeft;
+                lineDir = newDir;
+            }
         }
 
-        // If newCaret is -1, we're starting at a run boundary and crossing
-        // into another run. Otherwise we've arrived at a run boundary, and
-        // need to figure out which character to attach to.  Note we might
-        // need to run this twice, if we cross a run boundary and end up at
-        // another run boundary.
-        while (true) {
-          boolean advance = toLeft == paraIsRtl;
-          int otherRunIndex = runIndex + (advance ? 2 : -2);
-          if (otherRunIndex >= 0 && otherRunIndex < runs.length) {
-            int otherRunStart = lineStart + runs[otherRunIndex];
-            int otherRunLimit = otherRunStart + (runs[otherRunIndex+1] & RUN_LENGTH_MASK);
-            if (otherRunLimit > lineEnd) {
-                otherRunLimit = lineEnd;
-            }
-            int otherRunLevel = runs[otherRunIndex+1] >>> RUN_LEVEL_SHIFT & RUN_LEVEL_MASK;
-            boolean otherRunIsRtl = (otherRunLevel & 1) != 0;
+        Directions directions = getLineDirections(line);
 
-            advance = toLeft == otherRunIsRtl;
-            if (newCaret == -1) {
-              newCaret = getOffsetBeforeAfter(advance ? otherRunStart : otherRunLimit, advance);
-              if (newCaret == (advance ? otherRunLimit : otherRunStart)) {
-                // Crossed and ended up at a new boundary, repeat a second and final time.
-                runIndex = otherRunIndex;
-                runLevel = otherRunLevel;
-                continue;
-              }
-              break;
-            }
-
-            // The new caret is at a boundary.
-            if (otherRunLevel < runLevel) {
-              // The strong character is in the other run.
-              newCaret = advance ? otherRunStart : otherRunLimit;
-            }
-            break;
-          }
-
-          if (newCaret == -1) {
-              // We're walking off the end of the line.  The paragraph
-              // level is always equal to or lower than any internal level, so
-              // the boundaries get the strong caret.
-              newCaret = getOffsetBeforeAfter(caret, advance);
-              break;
-          }
-          // Else we've arrived at the end of the line.  That's a strong position.
-          // We might have arrived here by crossing over a run with no internal
-          // breaks and dropping out of the above loop before advancing one final
-          // time, so reset the caret.
-          // Note, we use '<=' below to handle a situation where the only run
-          // on the line is a counter-directional run.  If we're not advancing,
-          // we can end up at the 'lineEnd' position but the caret we want is at
-          // the lineStart.
-          if (newCaret <= lineEnd) {
-              newCaret = advance ? lineEnd : lineStart;
-          }
-          break;
-        }
-
-        return newCaret;
-    }
-
-    // utility, maybe just roll into the above.
-    private int getOffsetBeforeAfter(int offset, boolean after) {
-        if (after) {
-            return TextUtils.getOffsetAfter(mText, offset);
-        }
-        return TextUtils.getOffsetBefore(mText, offset);
+        TextLine tl = TextLine.obtain();
+        // XXX: we don't care about tabs
+        tl.set(mPaint, mText, lineStart, lineEnd, lineDir, directions, false, null);
+        caret = lineStart + tl.getOffsetToLeftRightOf(caret - lineStart, toLeft);
+        tl = TextLine.recycle(tl);
+        return caret;
     }
 
     private int getOffsetAtStartOf(int offset) {
@@ -1427,373 +1304,28 @@ public abstract class Layout {
         return right;
     }
 
-    private void drawText(Canvas canvas,
-                                 CharSequence text, int start, int end,
-                                 int dir, Directions directions,
-                                 float x, int top, int y, int bottom,
-                                 TextPaint paint,
-                                 TextPaint workPaint,
-                                 boolean hasTabs, Object[] parspans) {
-        char[] buf;
-        if (!hasTabs) {
-            if (directions == DIRS_ALL_LEFT_TO_RIGHT) {
-                if (DEBUG) {
-                    Assert.assertTrue(DIR_LEFT_TO_RIGHT == dir);
-                }
-                Styled.drawText(canvas, text, start, end, dir, false, x, top, y, bottom, paint, workPaint, false);
-                return;
+    /* package */
+    static float measurePara(TextPaint paint, TextPaint workPaint,
+            CharSequence text, int start, int end, boolean hasTabs,
+            Object[] tabs) {
+
+        MeasuredText mt = MeasuredText.obtain();
+        TextLine tl = TextLine.obtain();
+        try {
+            mt.setPara(text, start, end, DIR_REQUEST_LTR);
+            Directions directions;
+            if (mt.mEasy){
+                directions = DIRS_ALL_LEFT_TO_RIGHT;
+            } else {
+                directions = AndroidBidi.directions(mt.mDir, mt.mLevels,
+                    0, mt.mChars, 0, mt.mLen);
             }
-            buf = null;
-        } else {
-            buf = TextUtils.obtain(end - start);
-            TextUtils.getChars(text, start, end, buf, 0);
+            tl.set(paint, text, start, end, 1, directions, hasTabs, tabs);
+            return tl.metrics(null);
+        } finally {
+            TextLine.recycle(tl);
+            MeasuredText.recycle(mt);
         }
-
-        float h = 0;
-
-        int lastRunIndex = directions.mDirections.length - 2;
-        for (int i = 0; i < directions.mDirections.length; i += 2) {
-            int here = start + directions.mDirections[i];
-            int there = here + (directions.mDirections[i+1] & RUN_LENGTH_MASK);
-            boolean runIsRtl = (directions.mDirections[i+1] & RUN_RTL_FLAG) != 0;
-
-            if (there > end)
-                there = end;
-
-            int segstart = here;
-            for (int j = hasTabs ? here : there; j <= there; j++) {
-                int pj = j - start;
-                if (j == there || buf[pj] == '\t') {
-                    h += Styled.drawText(canvas, text,
-                                         segstart, j,
-                                         dir, runIsRtl, x + h,
-                                         top, y, bottom, paint, workPaint,
-                                         i != lastRunIndex || j != end);
-
-                    if (j != there)
-                        h = dir * nextTab(text, start, end, h * dir, parspans);
-
-                    segstart = j + 1;
-                } else if (hasTabs && buf[pj] >= 0xD800 && buf[pj] <= 0xDFFF && j + 1 < there) {
-                    int emoji = Character.codePointAt(buf, pj);
-
-                    if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
-                        Bitmap bm = EMOJI_FACTORY.
-                            getBitmapFromAndroidPua(emoji);
-
-                        if (bm != null) {
-                            h += Styled.drawText(canvas, text,
-                                                 segstart, j,
-                                                 dir, runIsRtl, x + h,
-                                                 top, y, bottom, paint, workPaint,
-                                                 i != lastRunIndex || j != end);
-
-                            if (mEmojiRect == null) {
-                                mEmojiRect = new RectF();
-                            }
-
-                            workPaint.set(paint);
-                            Styled.measureText(paint, workPaint, text,
-                                               j, j + 1,
-                                               null);
-
-                            float bitmapHeight = bm.getHeight();
-                            float textHeight = -workPaint.ascent();
-                            float scale = textHeight / bitmapHeight;
-                            float width = bm.getWidth() * scale;
-
-                            mEmojiRect.set(x + h, y - textHeight,
-                                           x + h + width, y);
-
-                            canvas.drawBitmap(bm, null, mEmojiRect, paint);
-                            h += width;
-
-                            j++;
-                            segstart = j + 1;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (hasTabs)
-            TextUtils.recycle(buf);
-    }
-
-    /**
-     * Get the distance from the margin to the requested edge of the character
-     * at offset on the line from start to end.  Trailing indicates the edge
-     * should be the trailing edge of the character at offset-1.
-     */
-    /* package */ static float measureText(TextPaint paint,
-                                     TextPaint workPaint,
-                                     CharSequence text,
-                                     int start, int offset, int end,
-                                     int dir, Directions directions,
-                                     boolean trailing, boolean hasTabs,
-                                     Object[] tabs) {
-        char[] buf = null;
-
-        if (hasTabs) {
-            buf = TextUtils.obtain(end - start);
-            TextUtils.getChars(text, start, end, buf, 0);
-        }
-
-        float h = 0;
-
-        int target = trailing ? offset - 1 : offset;
-        if (target < start) {
-            return 0;
-        }
-
-        int[] runs = directions.mDirections;
-        for (int i = 0; i < runs.length; i += 2) {
-            int here = start + runs[i];
-            int there = here + (runs[i+1] & RUN_LENGTH_MASK);
-            if (there > end) {
-                there = end;
-            }
-            boolean runIsRtl = (runs[i+1] & RUN_RTL_FLAG) != 0;
-
-            int segstart = here;
-            for (int j = hasTabs ? here : there; j <= there; j++) {
-                int codept = 0;
-                Bitmap bm = null;
-
-                if (hasTabs && j < there) {
-                    codept = buf[j - start];
-                }
-
-                if (codept >= 0xD800 && codept <= 0xDFFF && j + 1 < there) {
-                    codept = Character.codePointAt(buf, j - start);
-
-                    if (codept >= MIN_EMOJI && codept <= MAX_EMOJI) {
-                        bm = EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
-                    }
-                }
-
-                if (j == there || codept == '\t' || bm != null) {
-                    float segw;
-
-                    boolean inSegment = target >= segstart && target < j;
-
-                    if (inSegment) {
-                        if (dir == DIR_LEFT_TO_RIGHT && !runIsRtl) {
-                            h += Styled.measureText(paint, workPaint, text,
-                                                    segstart, offset,
-                                                    null);
-                            return h;
-                        }
-
-                        if (dir == DIR_RIGHT_TO_LEFT && runIsRtl) {
-                            h -= Styled.measureText(paint, workPaint, text,
-                                                    segstart, offset,
-                                                    null);
-                            return h;
-                        }
-                    }
-
-                    // XXX Style.measureText assumes LTR?
-                    segw = Styled.measureText(paint, workPaint, text,
-                                              segstart, j,
-                                              null);
-
-                    if (inSegment) {
-                        if (dir == DIR_LEFT_TO_RIGHT) {
-                            h += segw - Styled.measureText(paint, workPaint,
-                                                           text,
-                                                           segstart,
-                                                           offset, null);
-                            return h;
-                        }
-
-                        if (dir == DIR_RIGHT_TO_LEFT) {
-                            h -= segw - Styled.measureText(paint, workPaint,
-                                                           text,
-                                                           segstart,
-                                                           offset, null);
-                            return h;
-                        }
-                    }
-
-                    if (dir == DIR_RIGHT_TO_LEFT)
-                        h -= segw;
-                    else
-                        h += segw;
-
-                    if (j != there && buf[j - start] == '\t') {
-                        if (offset == j)
-                            return h;
-
-                        h = dir * nextTab(text, start, end, h * dir, tabs);
-
-                        if (target == j) {
-                            return h;
-                        }
-                    }
-
-                    if (bm != null) {
-                        workPaint.set(paint);
-                        Styled.measureText(paint, workPaint, text,
-                                           j, j + 2, null);
-
-                        float wid = bm.getWidth() *
-                                    -workPaint.ascent() / bm.getHeight();
-
-                        if (dir == DIR_RIGHT_TO_LEFT) {
-                            h -= wid;
-                        } else {
-                            h += wid;
-                        }
-
-                        j++;
-                    }
-
-                    segstart = j + 1;
-                }
-            }
-        }
-
-        if (hasTabs)
-            TextUtils.recycle(buf);
-
-        return h;
-    }
-
-    /**
-     * Measure width of a run of text on a single line that is known to all be
-     * in the same direction as the paragraph base direction. Returns the width,
-     * and the line metrics in fm if fm is not null.
-     *
-     * @param paint the paint for the text; will not be modified
-     * @param workPaint paint available for modification
-     * @param text text
-     * @param start start of the line
-     * @param end limit of the line
-     * @param fm object to return integer metrics in, can be null
-     * @param hasTabs true if it is known that the line has tabs
-     * @param tabs tab position information
-     * @return the width of the text from start to end
-     */
-    /* package */ static float measureText(TextPaint paint,
-                                           TextPaint workPaint,
-                                           CharSequence text,
-                                           int start, int end,
-                                           Paint.FontMetricsInt fm,
-                                           boolean hasTabs, Object[] tabs) {
-        char[] buf = null;
-
-        if (hasTabs) {
-            buf = TextUtils.obtain(end - start);
-            TextUtils.getChars(text, start, end, buf, 0);
-        }
-
-        int len = end - start;
-
-        int lastPos = 0;
-        float width = 0;
-        int ascent = 0, descent = 0, top = 0, bottom = 0;
-
-        if (fm != null) {
-            fm.ascent = 0;
-            fm.descent = 0;
-        }
-
-        for (int pos = hasTabs ? 0 : len; pos <= len; pos++) {
-            int codept = 0;
-            Bitmap bm = null;
-
-            if (hasTabs && pos < len) {
-                codept = buf[pos];
-            }
-
-            if (codept >= 0xD800 && codept <= 0xDFFF && pos < len) {
-                codept = Character.codePointAt(buf, pos);
-
-                if (codept >= MIN_EMOJI && codept <= MAX_EMOJI) {
-                    bm = EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
-                }
-            }
-
-            if (pos == len || codept == '\t' || bm != null) {
-                workPaint.baselineShift = 0;
-
-                // XXX Styled.measureText assumes the run direction is LTR,
-                // but it might not be.  Check this.
-                width += Styled.measureText(paint, workPaint, text,
-                                        start + lastPos, start + pos,
-                                        fm);
-
-                if (fm != null) {
-                    if (workPaint.baselineShift < 0) {
-                        fm.ascent += workPaint.baselineShift;
-                        fm.top += workPaint.baselineShift;
-                    } else {
-                        fm.descent += workPaint.baselineShift;
-                        fm.bottom += workPaint.baselineShift;
-                    }
-                }
-
-                if (pos != len) {
-                    if (bm == null) {
-                        // no emoji, must have hit a tab
-                        width = nextTab(text, start, end, width, tabs);
-                    } else {
-                        // This sets up workPaint with the font on the emoji
-                        // text, so that we can extract the ascent and scale.
-
-                        // We can't use the result of the previous call to
-                        // measureText because the emoji might have its own style.
-                        // We have to initialize workPaint here because if the
-                        // text is unstyled measureText might not use workPaint
-                        // at all.
-                        workPaint.set(paint);
-                        Styled.measureText(paint, workPaint, text,
-                                           start + pos, start + pos + 1, null);
-
-                        width += bm.getWidth() *
-                                    -workPaint.ascent() / bm.getHeight();
-
-                        // Since we had an emoji, we bump past the second half
-                        // of the surrogate pair.
-                        pos++;
-                    }
-                }
-
-                if (fm != null) {
-                    if (fm.ascent < ascent) {
-                        ascent = fm.ascent;
-                    }
-                    if (fm.descent > descent) {
-                        descent = fm.descent;
-                    }
-
-                    if (fm.top < top) {
-                        top = fm.top;
-                    }
-                    if (fm.bottom > bottom) {
-                        bottom = fm.bottom;
-                    }
-
-                    // No need to take bitmap height into account here,
-                    // since it is scaled to match the text height.
-                }
-
-                lastPos = pos + 1;
-            }
-        }
-
-        if (fm != null) {
-            fm.ascent = ascent;
-            fm.descent = descent;
-            fm.top = top;
-            fm.bottom = bottom;
-        }
-
-        if (hasTabs)
-            TextUtils.recycle(buf);
-
-        return width;
     }
 
     /**
@@ -1898,6 +1430,7 @@ public abstract class Layout {
      * line is ellipsized, not getLineStart().)
      */
     public abstract int getEllipsisStart(int line);
+
     /**
      * Returns the number of characters to be ellipsized away, or 0 if
      * no ellipsis is to take place.
