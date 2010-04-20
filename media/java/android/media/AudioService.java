@@ -279,6 +279,12 @@ public class AudioService extends IAudioService.Stub {
         mMode = AudioSystem.MODE_INVALID;
         setMode(AudioSystem.MODE_NORMAL, null);
         mMediaServerOk = true;
+
+        // Call setRingerModeInt() to apply correct mute
+        // state on streams affected by ringer mode.
+        mRingerModeMutedStreams = 0;
+        setRingerModeInt(getRingerMode(), false);
+
         AudioSystem.setErrorCallback(mAudioSystemCallback);
         loadSoundEffects();
 
