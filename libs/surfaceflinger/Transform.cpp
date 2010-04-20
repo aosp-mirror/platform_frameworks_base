@@ -229,14 +229,13 @@ Transform::vec3 Transform::transform(const vec3& v) const {
     return r;
 }
 
-void Transform::transform(fixed1616* point, int x, int y) const
+void Transform::transform(float* point, int x, int y) const
 {
-    const float toFixed = 65536.0f;
     const mat33& M(mMatrix);
     vec2 v(x, y);
     v = transform(v);
-    point[0] = v[0] * toFixed;
-    point[1] = v[1] * toFixed;
+    point[0] = v[0];
+    point[1] = v[1];
 }
 
 Rect Transform::makeBounds(int w, int h) const
