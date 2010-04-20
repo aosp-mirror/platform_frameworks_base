@@ -115,6 +115,8 @@
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Activity</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionBarStyle">@android:style/ActionBar</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
@@ -520,6 +522,10 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.RecentApplications</item>
         <item name="android:textColor">@android:color/secondary_text_nofocus</item>
+    </style>
+
+    <style name="Theme.WithActionBar">
+        <item name="android:windowActionBar">true</item>
     </style>
     
 </resources>

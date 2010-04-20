@@ -21,13 +21,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-
-import com.android.internal.view.menu.ContextMenuBuilder;
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuDialogHelper;
-import com.android.internal.view.menu.MenuView;
-import com.android.internal.view.menu.SubMenuBuilder;
-
 import android.app.KeyguardManager;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -51,6 +44,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ActionBarView;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
@@ -74,6 +68,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.android.internal.view.menu.ContextMenuBuilder;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuDialogHelper;
+import com.android.internal.view.menu.MenuView;
+import com.android.internal.view.menu.SubMenuBuilder;
 
 /**
  * Android-specific Window.
@@ -105,6 +105,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private LayoutInflater mLayoutInflater;
 
     private TextView mTitleView;
+    
+    private ActionBarView mActionBar;
 
     private DrawableFeatureState[] mDrawables;
 
@@ -258,6 +260,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void setTitle(CharSequence title) {
         if (mTitleView != null) {
             mTitleView.setText(title);
+        } else if (mActionBar != null) {
+            mActionBar.setTitle(title);
         }
         mTitle = title;
     }
@@ -2067,6 +2071,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowNoTitle, false)) {
             requestFeature(FEATURE_NO_TITLE);
+        } else if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBar, false)) {
+            // Don't allow an action bar if there is no title.
+            requestFeature(FEATURE_ACTION_BAR);
         }
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowFullscreen, false)) {
@@ -2150,6 +2157,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // If the window is floating, we need a dialog layout
             if (mIsFloating) {
                 layoutResource = com.android.internal.R.layout.dialog_title;
+            } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
+                layoutResource = com.android.internal.R.layout.screen_action_bar;
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }
@@ -2233,6 +2242,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 } else {
                     mTitleView.setText(mTitle);
+                }
+            } else {
+                mActionBar = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
+                if (mActionBar != null) {
+                    if (mActionBar.getTitle() == null) {
+                        mActionBar.setTitle(mTitle);
+                    }
                 }
             }
         }

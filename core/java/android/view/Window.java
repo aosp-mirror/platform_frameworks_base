@@ -61,6 +61,13 @@ public abstract class Window {
         @hide
     */
     public static final int FEATURE_OPENGL = 8;
+    /**
+     * Flag for enabling the Action Bar.
+     * This is enabled by default for some devices. The Action Bar
+     * replaces the title bar and provides an alternate location
+     * for an on-screen menu button on some devices.
+     */
+    public static final int FEATURE_ACTION_BAR = 9;
     /** Flag for setting the progress bar's visibility to VISIBLE */
     public static final int PROGRESS_VISIBILITY_ON = -1;
     /** Flag for setting the progress bar's visibility to GONE */
@@ -980,6 +987,16 @@ public abstract class Window {
     protected final int getFeatures()
     {
         return mFeatures;
+    }
+    
+    /**
+     * Query for the availability of a certain feature.
+     * 
+     * @param feature The feature ID to check
+     * @return true if the feature is enabled, false otherwise.
+     */
+    public boolean hasFeature(int feature) {
+        return (getFeatures() & (1 << feature)) != 0;
     }
 
     /**

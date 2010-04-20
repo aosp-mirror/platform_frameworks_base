@@ -68,4 +68,5 @@
   <item type="id" name="accountPreferences" />
   <item type="id" name="smallIcon" />
   <item type="id" name="custom" />
+  <item type="id" name="home" />
 </resources>

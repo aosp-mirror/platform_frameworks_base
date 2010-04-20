@@ -840,4 +840,10 @@
         <item name="android:paddingBottom">1dip</item>
         <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
+
+    <style name="ActionBar">
+        <item name="android:background">@android:drawable/action_bar_background</item>
+        <item name="android:displayOptions">useLogo</item>
+        <item name="android:divider">@android:drawable/action_bar_divider</item>
+    </style>
 </resources>
