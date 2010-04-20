@@ -666,6 +666,7 @@ import java.util.ArrayList;
         } else {
             Selection.setSelection(text, selection, selection);
         }
+        if (mWebView != null) mWebView.incrementTextGeneration();
     }
 
     /**

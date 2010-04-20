@@ -312,6 +312,8 @@ public class WebView extends AbsoluteLayout
     // more key events.
     private int mTextGeneration;
 
+    /* package */ void incrementTextGeneration() { mTextGeneration++; }
+
     // Used by WebViewCore to create child views.
     /* package */ final ViewManager mViewManager;
 
