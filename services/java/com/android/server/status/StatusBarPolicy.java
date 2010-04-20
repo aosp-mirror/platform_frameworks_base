@@ -1176,7 +1176,7 @@ public class StatusBarPolicy {
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||
                 ringerMode == AudioManager.RINGER_MODE_VIBRATE;
-        final int iconId = audioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)
+        final int iconId = (ringerMode == AudioManager.RINGER_MODE_VIBRATE)
                 ? com.android.internal.R.drawable.stat_sys_ringer_vibrate
                 : com.android.internal.R.drawable.stat_sys_ringer_silent;
 
