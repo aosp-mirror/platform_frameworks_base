@@ -59,6 +59,9 @@ public:
     
     virtual sp<IMemoryHeap> getControlBlock() const = 0;
 
+    /*
+     * Requires ACCESS_SURFACE_FLINGER permission
+     */
     virtual sp<ISurface> createSurface( surface_data_t* data,
                                         int pid, 
                                         const String8& name,
@@ -68,8 +71,14 @@ public:
                                         PixelFormat format,
                                         uint32_t flags) = 0;
                                     
+    /*
+     * Requires ACCESS_SURFACE_FLINGER permission
+     */
     virtual status_t    destroySurface(SurfaceID sid) = 0;
 
+    /*
+     * Requires ACCESS_SURFACE_FLINGER permission
+     */
     virtual status_t    setState(int32_t count, const layer_state_t* states) = 0;
 };
 
