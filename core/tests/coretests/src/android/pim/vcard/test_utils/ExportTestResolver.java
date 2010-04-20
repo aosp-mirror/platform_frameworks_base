@@ -13,17 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.ContentResolver;
+
 import android.content.ContentValues;
 import android.content.Entity;
 import android.content.EntityIterator;
 import android.database.Cursor;
 import android.net.Uri;
+import android.pim.vcard.VCardComposer;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockCursor;
 
@@ -33,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/* package */ public class ExportTestResolver extends MockContentResolver {
+public class ExportTestResolver extends MockContentResolver {
     ExportTestProvider mProvider;
     public ExportTestResolver(TestCase testCase) {
         mProvider = new ExportTestProvider(testCase);
@@ -44,64 +47,49 @@ import java.util.List;
     public ContactEntry addInputContactEntry() {
         return mProvider.buildInputEntry();
     }
-}
 
-/* package */ class MockEntityIterator implements EntityIterator {
-    List<Entity> mEntityList;
-    Iterator<Entity> mIterator;
-
-    public MockEntityIterator(List<ContentValues> contentValuesList) {
-        mEntityList = new ArrayList<Entity>();
-        Entity entity = new Entity(new ContentValues());
-        for (ContentValues contentValues : contentValuesList) {
-                entity.addSubValue(Data.CONTENT_URI, contentValues);
-        }
-        mEntityList.add(entity);
-        mIterator = mEntityList.iterator();
-    }
-
-    public boolean hasNext() {
-        return mIterator.hasNext();
-    }
-
-    public Entity next() {
-        return mIterator.next();
-    }
-
-    public void remove() {
-        throw new UnsupportedOperationException("remove not supported");
-    }
-
-    public void reset() {
-        mIterator = mEntityList.iterator();
-    }
-
-    public void close() {
-    }
-}
-
-/**
- * Represents one contact, which should contain multiple ContentValues like
- * StructuredName, Email, etc.
- */
-/* package */ class ContactEntry {
-    private final List<ContentValues> mContentValuesList = new ArrayList<ContentValues>();
-
-    public ContentValuesBuilder addContentValues(String mimeType) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Data.MIMETYPE, mimeType);
-        mContentValuesList.add(contentValues);
-        return new ContentValuesBuilder(contentValues);
-    }
-
-    public List<ContentValues> getList() {
-        return mContentValuesList;
+    public ExportTestProvider getProvider() {
+        return mProvider;
     }
 }
 
 /* package */ class ExportTestProvider extends MockContentProvider {
     final private TestCase mTestCase;
     final private ArrayList<ContactEntry> mContactEntryList = new ArrayList<ContactEntry>();
+
+    private static class MockEntityIterator implements EntityIterator {
+        List<Entity> mEntityList;
+        Iterator<Entity> mIterator;
+
+        public MockEntityIterator(List<ContentValues> contentValuesList) {
+            mEntityList = new ArrayList<Entity>();
+            Entity entity = new Entity(new ContentValues());
+            for (ContentValues contentValues : contentValuesList) {
+                    entity.addSubValue(Data.CONTENT_URI, contentValues);
+            }
+            mEntityList.add(entity);
+            mIterator = mEntityList.iterator();
+        }
+
+        public boolean hasNext() {
+            return mIterator.hasNext();
+        }
+
+        public Entity next() {
+            return mIterator.next();
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException("remove not supported");
+        }
+
+        public void reset() {
+            mIterator = mEntityList.iterator();
+        }
+
+        public void close() {
+        }
+    }
 
     public ExportTestProvider(TestCase testCase) {
         mTestCase = testCase;

@@ -22,7 +22,12 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +41,8 @@ import java.util.Set;
  * Utilities for VCard handling codes.
  */
 public class VCardUtils {
+    private static final String LOG_TAG = "VCardUtils";
+
     // Note that not all types are included in this map/set, since, for example, TYPE_HOME_FAX is
     // converted to two parameter Strings. These only contain some minor fields valid in both
     // vCard and current (as of 2009-08-07) Contacts structure. 
@@ -538,6 +545,96 @@ public class VCardUtils {
             }
         }
         return true;
+    }
+
+    //// The methods bellow may be used by unit test.
+
+    /**
+     * @hide
+     */
+    public static String parseQuotedPrintable(String value, boolean strictLineBreaking,
+            String sourceCharset, String targetCharset) {
+        // "= " -> " ", "=\t" -> "\t".
+        // Previous code had done this replacement. Keep on the safe side.
+        final String quotedPrintable;
+        {
+            final StringBuilder builder = new StringBuilder();
+            final int length = value.length();
+            for (int i = 0; i < length; i++) {
+                char ch = value.charAt(i);
+                if (ch == '=' && i < length - 1) {
+                    char nextCh = value.charAt(i + 1);
+                    if (nextCh == ' ' || nextCh == '\t') {
+                        builder.append(nextCh);
+                        i++;
+                        continue;
+                    }
+                }
+                builder.append(ch);
+            }
+            quotedPrintable = builder.toString();
+        }
+
+        String[] lines;
+        if (strictLineBreaking) {
+            lines = quotedPrintable.split("\r\n");
+        } else {
+            StringBuilder builder = new StringBuilder();
+            final int length = quotedPrintable.length();
+            ArrayList<String> list = new ArrayList<String>();
+            for (int i = 0; i < length; i++) {
+                char ch = quotedPrintable.charAt(i);
+                if (ch == '\n') {
+                    list.add(builder.toString());
+                    builder = new StringBuilder();
+                } else if (ch == '\r') {
+                    list.add(builder.toString());
+                    builder = new StringBuilder();
+                    if (i < length - 1) {
+                        char nextCh = quotedPrintable.charAt(i + 1);
+                        if (nextCh == '\n') {
+                            i++;
+                        }
+                    }
+                } else {
+                    builder.append(ch);
+                }
+            }
+            final String lastLine = builder.toString();
+            if (lastLine.length() > 0) {
+                list.add(lastLine);
+            }
+            lines = list.toArray(new String[0]);
+        }
+
+        final StringBuilder builder = new StringBuilder();
+        for (String line : lines) {
+            if (line.endsWith("=")) {
+                line = line.substring(0, line.length() - 1);
+            }
+            builder.append(line);
+        }
+        byte[] bytes;
+        try {
+            bytes = builder.toString().getBytes(sourceCharset);
+        } catch (UnsupportedEncodingException e1) {
+            Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+            bytes = builder.toString().getBytes();
+        }
+
+        try {
+            bytes = QuotedPrintableCodec.decodeQuotedPrintable(bytes);
+        } catch (DecoderException e) {
+            Log.e(LOG_TAG, "Failed to decode quoted-printable: " + e);
+            return "";
+        }
+
+        try {
+            return new String(bytes, targetCharset);
+        } catch (UnsupportedEncodingException e) {
+            Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+            return new String(bytes);
+        }
     }
 
     private VCardUtils() {

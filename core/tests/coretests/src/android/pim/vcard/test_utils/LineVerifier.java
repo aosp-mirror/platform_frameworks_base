@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.content.Context;
 import android.pim.vcard.VCardComposer;
@@ -22,7 +22,7 @@ import junit.framework.TestCase;
 
 import java.util.ArrayList;
 
-class LineVerifier implements VCardComposer.OneEntryHandler {
+public class LineVerifier implements VCardComposer.OneEntryHandler {
     private final TestCase mTestCase;
     private final ArrayList<LineVerifierElem> mLineVerifierElemList;
     private int mVCardType;

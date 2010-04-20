@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.pim.vcard;
+package android.pim.vcard.test_utils;
 
 import android.pim.vcard.VCardConfig;
-import android.pim.vcard.VCardEntry;
-import android.pim.vcard.VCardEntryConstructor;
-import android.pim.vcard.VCardEntryHandler;
 import android.pim.vcard.VCardParser;
 import android.pim.vcard.VCardParser_V21;
 import android.pim.vcard.VCardParser_V30;
@@ -30,26 +27,30 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-/* package */ class ContentValuesVerifier implements VCardEntryHandler {
-    private AndroidTestCase mTestCase;
-    private List<ContentValuesVerifierElem> mContentValuesVerifierElemList =
-        new ArrayList<ContentValuesVerifierElem>();
+public class PropertyNodesVerifier extends VNodeBuilder {
+    private final List<PropertyNodesVerifierElem> mPropertyNodesVerifierElemList;
+    private final AndroidTestCase mAndroidTestCase;
     private int mIndex;
 
-    public ContentValuesVerifierElem addElem(AndroidTestCase androidTestCase) {
-        mTestCase = androidTestCase;
-        ContentValuesVerifierElem importVerifier = new ContentValuesVerifierElem(androidTestCase);
-        mContentValuesVerifierElemList.add(importVerifier);
-        return importVerifier;
+    public PropertyNodesVerifier(AndroidTestCase testCase) {
+        mPropertyNodesVerifierElemList = new ArrayList<PropertyNodesVerifierElem>();
+        mAndroidTestCase = testCase;
     }
 
-    public void verify(int resId, int vCardType) throws IOException, VCardException {
-        verify(mTestCase.getContext().getResources().openRawResource(resId), vCardType);
+    public PropertyNodesVerifierElem addPropertyNodesVerifierElem() {
+        PropertyNodesVerifierElem elem = new PropertyNodesVerifierElem(mAndroidTestCase);
+        mPropertyNodesVerifierElemList.add(elem);
+        return elem;
+    }
+
+    public void verify(int resId, int vCardType)
+            throws IOException, VCardException {
+        verify(mAndroidTestCase.getContext().getResources().openRawResource(resId), vCardType);
     }
 
     public void verify(int resId, int vCardType, final VCardParser vCardParser)
             throws IOException, VCardException {
-        verify(mTestCase.getContext().getResources().openRawResource(resId),
+        verify(mAndroidTestCase.getContext().getResources().openRawResource(resId),
                 vCardType, vCardParser);
     }
 
@@ -65,11 +66,8 @@ import java.util.List;
 
     public void verify(InputStream is, int vCardType, final VCardParser vCardParser)
             throws IOException, VCardException {
-        VCardEntryConstructor builder =
-            new VCardEntryConstructor(null, false, vCardType, null);
-        builder.addEntryHandler(this);
         try {
-            vCardParser.parse(is, builder);
+            vCardParser.parse(is, this);
         } finally {
             if (is != null) {
                 try {
@@ -80,22 +78,12 @@ import java.util.List;
         }
     }
 
-    public void onStart() {
-        for (ContentValuesVerifierElem elem : mContentValuesVerifierElemList) {
-            elem.onParsingStart();
-        }
-    }
-
-    public void onEntryCreated(VCardEntry entry) {
-        mTestCase.assertTrue(mIndex < mContentValuesVerifierElemList.size());
-        mContentValuesVerifierElemList.get(mIndex).onEntryCreated(entry);
+    @Override
+    public void endEntry() {
+        super.endEntry();
+        mAndroidTestCase.assertTrue(mIndex < mPropertyNodesVerifierElemList.size());
+        mAndroidTestCase.assertTrue(mIndex < vNodeList.size());
+        mPropertyNodesVerifierElemList.get(mIndex).verify(vNodeList.get(mIndex));
         mIndex++;
-    }
-
-    public void onEnd() {
-        for (ContentValuesVerifierElem elem : mContentValuesVerifierElemList) {
-            elem.onParsingEnd();
-            elem.verifyResolver();
-        }
     }
 }

@@ -17,7 +17,9 @@
 package android.pim.vcard;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardConfig;
+import android.pim.vcard.test_utils.ContactEntry;
+import android.pim.vcard.test_utils.PropertyNodesVerifierElem;
+import android.pim.vcard.test_utils.PropertyNodesVerifierElem.TypeSet;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Im;
@@ -30,8 +32,6 @@ import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
-
-import android.pim.vcard.PropertyNodesVerifierElem.TypeSet;
 
 import java.util.Arrays;
 

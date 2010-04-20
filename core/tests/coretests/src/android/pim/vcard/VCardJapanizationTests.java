@@ -17,7 +17,10 @@
 package android.pim.vcard;
 
 import android.content.ContentValues;
-import android.pim.vcard.PropertyNodesVerifierElem.TypeSet;
+import android.pim.vcard.test_utils.ContactEntry;
+import android.pim.vcard.test_utils.ContentValuesBuilder;
+import android.pim.vcard.test_utils.PropertyNodesVerifierElem;
+import android.pim.vcard.test_utils.PropertyNodesVerifierElem.TypeSet;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Phone;

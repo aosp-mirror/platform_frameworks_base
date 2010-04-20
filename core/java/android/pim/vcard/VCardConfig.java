@@ -53,8 +53,9 @@ public class VCardConfig {
      * and it has 1 to 1 mapping in all 8bit characters.
      * If the assumption is not correct, this setting will cause some bug.
      * </p>
+     * @hide made public just for unit test
      */
-    /* package */ static final String DEFAULT_INTERMEDIATE_CHARSET = "ISO-8859-1";
+    public static final String DEFAULT_INTERMEDIATE_CHARSET = "ISO-8859-1";
 
     /**
      * The charset used when there's no information affbout what charset should be used to
