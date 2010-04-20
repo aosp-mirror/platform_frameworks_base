@@ -39,6 +39,13 @@ status_t HTTPDataSource::connectWithRedirectsAndRange(off_t rangeStart) {
 
     int numRedirectsRemaining = 5;
     while (numRedirectsRemaining-- > 0) {
+        {
+            Mutex::Autolock autoLock(mStateLock);
+            if (mState == DISCONNECTED) {
+                return UNKNOWN_ERROR;
+            }
+        }
+
         status_t err = mHttp->connect(host.c_str(), port);
 
         if (err != OK) {
