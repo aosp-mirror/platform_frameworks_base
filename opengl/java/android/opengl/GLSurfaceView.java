@@ -973,9 +973,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     mEglDisplay, mEglConfig, holder);
 
             if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
-                Log.w("EglHelper", "createWindowSurface failed. mEglDisplay: " + mEglDisplay +
-                        " mEglConfig: " + mEglConfig + " holder: " + holder);
-                throwEglException("createWindowSurface");
+                int error = mEgl.eglGetError();
+                if (error == EGL10.EGL_BAD_NATIVE_WINDOW) {
+                    Log.e("EglHelper", "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
+                    return null;
+                }
+                throwEglException("createWindowSurface", error);
             }
 
             /*
@@ -1019,9 +1022,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                  * get a new surface.
                  */
                 int error = mEgl.eglGetError();
-                if (error == EGL11.EGL_CONTEXT_LOST) {
+                switch(error) {
+                case EGL11.EGL_CONTEXT_LOST:
                     return false;
-                } else {
+                case EGL10.EGL_BAD_NATIVE_WINDOW:
+                    // The native window is bad, probably because the
+                    // window manager has closed it. Ignore this error,
+                    // on the expectation that the application will be closed soon.
+                    Log.e("EglHelper", "eglSwapBuffers returned EGL_BAD_NATIVE_WINDOW. tid=" + Thread.currentThread().getId());
+                    break;
+                default:
                     throwEglException("eglSwapBuffers", error);
                 }
             }
@@ -1292,6 +1302,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             Log.w("GLThread", "egl createSurface");
                         }
                         gl = (GL10) mEglHelper.createSurface(getHolder());
+                        if (gl == null) {
+                            // Couldn't create a surface. Quit quietly.
+                            break;
+                        }
                         sGLThreadManager.checkGLDriver(gl);
                         createEglSurface = false;
                     }
