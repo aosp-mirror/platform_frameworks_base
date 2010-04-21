@@ -874,18 +874,18 @@ public class WebView extends AbsoluteLayout
     }
 
     private void updateZoomButtonsEnabled() {
+        if (mZoomButtonsController == null) return;
         boolean canZoomIn = mActualScale < mMaxZoomScale;
         boolean canZoomOut = mActualScale > mMinZoomScale && !mInZoomOverview;
-        ZoomButtonsController controller = getZoomButtonsController();
         if (!canZoomIn && !canZoomOut) {
             // Hide the zoom in and out buttons, as well as the fit to page
             // button, if the page cannot zoom
-            controller.getZoomControls().setVisibility(View.GONE);
+            mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
         } else {
             // Set each one individually, as a page may be able to zoom in
             // or out.
-            controller.setZoomInEnabled(canZoomIn);
-            controller.setZoomOutEnabled(canZoomOut);
+            mZoomButtonsController.setZoomInEnabled(canZoomIn);
+            mZoomButtonsController.setZoomOutEnabled(canZoomOut);
         }
     }
 
@@ -3219,18 +3219,14 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void drawExtras(Canvas canvas, int extras) {
+    private void drawExtras(Canvas canvas, int extras, boolean animationsRunning) {
         // If mNativeClass is 0, we should not reach here, so we do not
         // need to check it again.
-        // Currently for each draw we compute the animation values;
-        // We may in the future decide to do that independently.
-        if (nativeEvaluateLayersAnimations()) {
-            // If we have unfinished (or unstarted) animations,
-            // we ask for a repaint.
-            invalidate();
+        if (animationsRunning) {
+            canvas.setDrawFilter(mWebViewCore.mZoomFilter);
         }
-
         nativeDrawExtras(canvas, extras);
+        canvas.setDrawFilter(null);
     }
 
     private void drawCoreAndCursorRing(Canvas canvas, int color,
@@ -3315,8 +3311,18 @@ public class WebView extends AbsoluteLayout
             canvas.scale(mActualScale, mActualScale);
         }
 
+        boolean UIAnimationsRunning = false;
+        // Currently for each draw we compute the animation values;
+        // We may in the future decide to do that independently.
+        if (mNativeClass != 0 && nativeEvaluateLayersAnimations()) {
+            UIAnimationsRunning = true;
+            // If we have unfinished (or unstarted) animations,
+            // we ask for a repaint.
+            invalidate();
+        }
         mWebViewCore.drawContentPicture(canvas, color,
-                (animateZoom || mPreviewZoomOnly), animateScroll);
+                (animateZoom || mPreviewZoomOnly || UIAnimationsRunning),
+                animateScroll);
         if (mNativeClass == 0) return;
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
@@ -3337,7 +3343,7 @@ public class WebView extends AbsoluteLayout
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
-        drawExtras(canvas, extras);
+        drawExtras(canvas, extras, UIAnimationsRunning);
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -4013,7 +4019,8 @@ public class WebView extends AbsoluteLayout
             }
         } else {
             if (mWebViewCore != null && getSettings().getBuiltInZoomControls()
-                    && !getZoomButtonsController().isVisible()) {
+                    && (mZoomButtonsController == null ||
+                            !mZoomButtonsController.isVisible())) {
                 /*
                  * The zoom controls come in their own window, so our window
                  * loses focus. Our policy is to not draw the cursor ring if
@@ -5842,7 +5849,7 @@ public class WebView extends AbsoluteLayout
         }
         WebSettings settings = getSettings();
         if (settings.getBuiltInZoomControls()) {
-            if (getZoomButtonsController().isVisible()) {
+            if (mZoomButtonsController != null) {
                 mZoomButtonsController.setVisible(false);
             }
         } else {

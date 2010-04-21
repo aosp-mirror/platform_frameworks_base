@@ -27,6 +27,7 @@ package android.webkit;
 import android.app.Dialog;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,6 +52,16 @@ class PluginFullScreenHolder extends Dialog {
         contentView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
+        // fixed size is only used either during pinch zoom or surface is too
+        // big. Make sure it is not fixed size before setting it to the full
+        // screen content view. The SurfaceView will be set to the correct mode
+        // by the ViewManager when it is re-attached to the WebView.
+        if (contentView instanceof SurfaceView) {
+            final SurfaceView sView = (SurfaceView) contentView;
+            if (sView.isFixedSize()) {
+                sView.getHolder().setSizeFromLayout();
+            }
+        }
         super.setContentView(contentView);
         mContentView = contentView;
     }
