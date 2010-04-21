@@ -1295,7 +1295,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     System.arraycopy(cur, 0, ret, 0, i);
                 }
                 if (i < (N-1)) {
-                    System.arraycopy(cur, i, ret, i+1, N-i-1);
+                    System.arraycopy(cur, i + 1, ret, i, N - i - 1);
                 }
                 return ret;
             }
