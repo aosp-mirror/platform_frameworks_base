@@ -437,64 +437,49 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 
     Region::const_iterator it = clip.begin();
     Region::const_iterator const end = clip.end();
-    if (UNLIKELY(transformed()
-            || !(mFlags & DisplayHardware::DRAW_TEXTURE_EXTENSION) )) 
-    {
-        //StopWatch watch("GL transformed");
-        const GLfixed texCoords[4][2] = {
-                { 0,        0 },
-                { 0,        0x10000 },
-                { 0x10000,  0x10000 },
-                { 0x10000,  0 }
-        };
 
-        glMatrixMode(GL_TEXTURE);
-        glLoadIdentity();
+    //StopWatch watch("GL transformed");
+    const GLfixed texCoords[4][2] = {
+            { 0,        0 },
+            { 0,        0x10000 },
+            { 0x10000,  0x10000 },
+            { 0x10000,  0 }
+    };
 
-        // the texture's source is rotated
-        switch (texture.transform) {
-            case HAL_TRANSFORM_ROT_90:
-                glTranslatef(0, 1, 0);
-                glRotatef(-90, 0, 0, 1);
-                break;
-            case HAL_TRANSFORM_ROT_180:
-                glTranslatef(1, 1, 0);
-                glRotatef(-180, 0, 0, 1);
-                break;
-            case HAL_TRANSFORM_ROT_270:
-                glTranslatef(1, 0, 0);
-                glRotatef(-270, 0, 0, 1);
-                break;
-        }
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
 
-        if (texture.NPOTAdjust) {
-            glScalef(texture.wScale, texture.hScale, 1.0f);
-        }
-
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glVertexPointer(2, GL_FIXED, 0, mVertices);
-        glTexCoordPointer(2, GL_FIXED, 0, texCoords);
-
-        while (it != end) {
-            const Rect& r = *it++;
-            const GLint sy = fbHeight - (r.top + r.height());
-            glScissor(r.left, sy, r.width(), r.height());
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
-        }
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    } else {
-        GLint crop[4] = { 0, height, width, -height };
-        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-        int x = tx();
-        int y = ty();
-        y = fbHeight - (y + height);
-        while (it != end) {
-            const Rect& r = *it++;
-            const GLint sy = fbHeight - (r.top + r.height());
-            glScissor(r.left, sy, r.width(), r.height());
-            glDrawTexiOES(x, y, 0, width, height);
-        }
+    // the texture's source is rotated
+    switch (texture.transform) {
+        case HAL_TRANSFORM_ROT_90:
+            glTranslatef(0, 1, 0);
+            glRotatef(-90, 0, 0, 1);
+            break;
+        case HAL_TRANSFORM_ROT_180:
+            glTranslatef(1, 1, 0);
+            glRotatef(-180, 0, 0, 1);
+            break;
+        case HAL_TRANSFORM_ROT_270:
+            glTranslatef(1, 0, 0);
+            glRotatef(-270, 0, 0, 1);
+            break;
     }
+
+    if (texture.NPOTAdjust) {
+        glScalef(texture.wScale, texture.hScale, 1.0f);
+    }
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glVertexPointer(2, GL_FIXED, 0, mVertices);
+    glTexCoordPointer(2, GL_FIXED, 0, texCoords);
+
+    while (it != end) {
+        const Rect& r = *it++;
+        const GLint sy = fbHeight - (r.top + r.height());
+        glScissor(r.left, sy, r.width(), r.height());
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void LayerBase::validateTexture(GLint textureName) const
