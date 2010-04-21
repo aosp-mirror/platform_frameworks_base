@@ -2173,6 +2173,39 @@ class ContextImpl extends Context {
                 throws NameNotFoundException {
             return getApplicationIcon(getApplicationInfo(packageName, 0));
         }
+        
+        @Override 
+        public Drawable getActivityLogo(ComponentName activityName)
+                throws NameNotFoundException {
+            return getActivityInfo(activityName, 0).loadLogo(this);
+        }
+
+        @Override
+        public Drawable getActivityLogo(Intent intent)
+                throws NameNotFoundException {
+            if (intent.getComponent() != null) {
+                return getActivityLogo(intent.getComponent());
+            }
+
+            ResolveInfo info = resolveActivity(
+                    intent, PackageManager.MATCH_DEFAULT_ONLY);
+            if (info != null) {
+                return info.activityInfo.loadLogo(this);
+            }
+
+            throw new NameNotFoundException(intent.toUri(0));
+        }
+
+        @Override
+        public Drawable getApplicationLogo(ApplicationInfo info) {
+            return info.loadLogo(this);
+        }
+
+        @Override
+        public Drawable getApplicationLogo(String packageName)
+                throws NameNotFoundException {
+            return getApplicationLogo(getApplicationInfo(packageName, 0));
+        }
 
         @Override public Resources getResourcesForActivity(
                 ComponentName activityName) throws NameNotFoundException {

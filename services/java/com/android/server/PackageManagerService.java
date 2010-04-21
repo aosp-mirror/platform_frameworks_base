@@ -1729,6 +1729,7 @@ class PackageManagerService extends IPackageManager.Stub {
     
     static boolean comparePermissionInfos(PermissionInfo pi1, PermissionInfo pi2) {
         if (pi1.icon != pi2.icon) return false;
+        if (pi1.logo != pi2.logo) return false;
         if (pi1.protectionLevel != pi2.protectionLevel) return false;
         if (!compareStrings(pi1.name, pi2.name)) return false;
         if (!compareStrings(pi1.nonLocalizedLabel, pi2.nonLocalizedLabel)) return false;

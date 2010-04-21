@@ -1243,6 +1243,8 @@
      Resources introduced in kraken.
      =============================================================== -->
      
+  <public type="attr" name="logo" id="0x010102be" />
+
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
   <public-padding type="id" name="kraken_resource_pad" end="0x01020040" />
   <public-padding type="anim" name="kraken_resource_pad" end="0x010a0020" />
