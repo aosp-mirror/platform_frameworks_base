@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * <P>
  * The interface which should be implemented by the classes which have to analyze each
- * vCard entry more minutely than {@link VCardEntry} class analysis.
+ * vCard entry minutely.
  * </P>
  * <P>
  * Here, there are several terms specific to vCard (and this library).

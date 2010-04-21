@@ -66,7 +66,7 @@ public class ContentValuesVerifier implements VCardEntryHandler {
     public void verify(InputStream is, int vCardType, final VCardParser vCardParser)
             throws IOException, VCardException {
         VCardEntryConstructor builder =
-            new VCardEntryConstructor(null, false, vCardType, null);
+            new VCardEntryConstructor(vCardType, null, null, false);
         builder.addEntryHandler(this);
         try {
             vCardParser.parse(is, builder);

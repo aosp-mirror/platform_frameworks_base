@@ -106,7 +106,7 @@ public class VCardVerifier {
         mVerified = false;
     }
 
-    // Called by each import test.
+    // Should be called at the beginning of each import test.
     public void initForImportTest(int vcardType, int resId) {
         if (mInitialized) {
             mTestCase.fail("Already initialized");
@@ -118,7 +118,7 @@ public class VCardVerifier {
         mInitialized = true;
     }
 
-    // Called by each export test.
+    // Should be called at the beginning of each export test.
     public void initForExportTest(int vcardType) {
         initForExportTest(vcardType, "UTF-8");
     }

@@ -153,6 +153,7 @@ public class VCardConfig {
      * In vCard 3.0, Quoted-Printable is explicitly "prohibitted", so we don't need to care this
      * kind of problem (hopefully).
      * </p>
+     * @hide
      */
     public static final int FLAG_REFRAIN_QP_TO_NAME_PROPERTIES = 0x10000000;
 
@@ -171,7 +172,7 @@ public class VCardConfig {
      * able to parse them as we expect.
      * </p>
      */
-    public static final int FLAG_CONVERT_PHONETIC_NAME_STRINGS = 0x0800000;
+    public static final int FLAG_CONVERT_PHONETIC_NAME_STRINGS = 0x08000000;
 
     /**
      * <p>
@@ -184,21 +185,20 @@ public class VCardConfig {
      * How more than one TYPE fields are expressed is different between vCard 2.1 and vCard 3.0.
      * </p>
      * <p>
-     * e.g.<BR />
-     * 1) Probably valid in both vCard 2.1 and vCard 3.0: "ADR;TYPE=DOM;TYPE=HOME:..."<BR />
-     * 2) Valid in vCard 2.1 but not in vCard 3.0: "ADR;DOM;HOME:..."<BR />
-     * 3) Valid in vCard 3.0 but not in vCard 2.1: "ADR;TYPE=DOM,HOME:..."<BR />
+     * e.g.
      * </p>
-     * <p>
-     * 2) had been the default of VCard exporter/importer in Android, but it is found that
-     * some external exporter is not able to parse the type format like 2) but only 3).
-     * </p>
+     * <ol>
+     * <li>Probably valid in both vCard 2.1 and vCard 3.0: "ADR;TYPE=DOM;TYPE=HOME:..."</li>
+     * <li>Valid in vCard 2.1 but not in vCard 3.0: "ADR;DOM;HOME:..."</li>
+     * <li>Valid in vCard 3.0 but not in vCard 2.1: "ADR;TYPE=DOM,HOME:..."</li>
+     * </ol>
      * <p>
      * If you are targeting to the importer which cannot accept TYPE params without "TYPE="
      * strings (which should be rare though), please use this flag.
      * </p>
      * <p>
-     * Example usage: int vcardType = (VCARD_TYPE_V21_GENERIC | FLAG_APPEND_TYPE_PARAM);
+     * Example usage:
+     * <pre class="prettyprint">int type = (VCARD_TYPE_V21_GENERIC | FLAG_APPEND_TYPE_PARAM);</pre>
      * </p>
      */
     public static final int FLAG_APPEND_TYPE_PARAM = 0x04000000;
@@ -260,7 +260,6 @@ public class VCardConfig {
      * </p>
      */
     public static final int VCARD_TYPE_UNKNOWN = 0;
-
 
     /**
      * <p>

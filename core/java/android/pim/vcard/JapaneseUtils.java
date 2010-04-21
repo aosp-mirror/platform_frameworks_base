@@ -27,7 +27,6 @@ import java.util.Map;
         new HashMap<Character, String>();
 
     static {
-        // There's no logical mapping rule in Unicode. Sigh.
         sHalfWidthMap.put('\u3001', "\uFF64");
         sHalfWidthMap.put('\u3002', "\uFF61");
         sHalfWidthMap.put('\u300C', "\uFF62");
