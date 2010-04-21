@@ -16,17 +16,15 @@
 
 package android.preference;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.app.AliasActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * The {@link PreferenceInflater} is used to inflate preference hierarchies from
@@ -63,7 +61,7 @@ class PreferenceInflater extends GenericInflater<Preference, PreferenceGroup> {
     }
 
     @Override
-    protected boolean onCreateCustomFromTag(XmlPullParser parser, Preference parentPreference,
+    protected boolean onCreateCustomFromTag(XmlPullParser parser, PreferenceGroup parentPreference,
             AttributeSet attrs) throws XmlPullParserException {
         final String tag = parser.getName();
         
