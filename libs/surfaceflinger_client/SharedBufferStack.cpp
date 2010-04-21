@@ -84,10 +84,14 @@ status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
     if (uint32_t(buffer) >= NUM_BUFFER_MAX)
         return BAD_INDEX;
 
-    // in the current implementation we only send a single rectangle
+    FlatRegion& reg(buffers[buffer].dirtyRegion);
+    if (dirty.isEmpty()) {
+        reg.count = 0;
+        return NO_ERROR;
+    }
+
     size_t count;
     Rect const* r = dirty.getArray(&count);
-    FlatRegion& reg(buffers[buffer].dirtyRegion);
     if (count > FlatRegion::NUM_RECT_MAX) {
         const Rect bounds(dirty.getBounds());
         reg.count = 1;

@@ -54,7 +54,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mOrientation(0),
       mLeft(0), mTop(0),
       mTransactionFlags(0),
-      mPremultipliedAlpha(true), mDebug(false),
+      mPremultipliedAlpha(true), mName("unnamed"), mDebug(false),
       mInvalidate(0)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());

@@ -17,8 +17,6 @@
 #define LOG_TAG "Surface"
 
 #include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -27,8 +25,6 @@
 #include <utils/threads.h>
 #include <utils/CallStack.h>
 #include <utils/Log.h>
-
-#include <pixelflinger/pixelflinger.h>
 
 #include <binder/IPCThreadState.h>
 #include <binder/IMemory.h>
@@ -55,6 +51,8 @@ static status_t copyBlt(
         const sp<GraphicBuffer>& src, 
         const Region& reg)
 {
+    // src and dst with, height and format must be identical. no verification
+    // is done here.
     status_t err;
     uint8_t const * src_bits = NULL;
     err = src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds(), (void**)&src_bits);
@@ -67,7 +65,6 @@ static status_t copyBlt(
     Region::const_iterator head(reg.begin());
     Region::const_iterator tail(reg.end());
     if (head != tail && src_bits && dst_bits) {
-        // NOTE: dst and src must be the same format
         const size_t bpp = bytesPerPixel(src->format);
         const size_t dbpr = dst->stride * bpp;
         const size_t sbpr = src->stride * bpp;
@@ -354,7 +351,6 @@ void Surface::init()
     // be default we request a hardware surface
     mUsage = GRALLOC_USAGE_HW_RENDER;
     mConnected = 0;
-    mNeedFullUpdate = false;
 }
 
 Surface::~Surface()
@@ -734,37 +730,38 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
         LOGE_IF(err, "lockBuffer (idx=%d) failed (%s)",
                 backBuffer->getIndex(), strerror(-err));
         if (err == NO_ERROR) {
-            // we handle copy-back here...
-
             const Rect bounds(backBuffer->width, backBuffer->height);
-            Region scratch(bounds);
+            const Region boundsRegion(bounds);
+            Region scratch(boundsRegion);
             Region& newDirtyRegion(dirtyIn ? *dirtyIn : scratch);
+            newDirtyRegion &= boundsRegion;
 
-            const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
-            if (mNeedFullUpdate) {
-                mNeedFullUpdate = false;
-                Region uninitialized(bounds);
-                uninitialized.subtractSelf(copyback | newDirtyRegion);
-                // reset newDirtyRegion to bounds when a buffer is reallocated
-                // and we have nothing to copy back to it
-                if (!uninitialized.isEmpty())
-                    newDirtyRegion.set(bounds);
-            }
-            newDirtyRegion.andSelf(bounds);
-
+            // figure out if we can copy the frontbuffer back
             const sp<GraphicBuffer>& frontBuffer(mPostedBuffer);
-            if (frontBuffer != 0 &&
-                backBuffer->width  == frontBuffer->width && 
-                backBuffer->height == frontBuffer->height &&
-                !(mFlags & ISurfaceComposer::eDestroyBackbuffer)) 
-            {
-                if (!copyback.isEmpty()) {
-                    // copy front to back
+            const bool canCopyBack = (frontBuffer != 0 &&
+                    backBuffer->width  == frontBuffer->width &&
+                    backBuffer->height == frontBuffer->height &&
+                    backBuffer->format == frontBuffer->format &&
+                    !(mFlags & ISurfaceComposer::eDestroyBackbuffer));
+
+            // the dirty region we report to surfaceflinger is the one
+            // given by the user (as opposed to the one *we* return to the
+            // user).
+            mDirtyRegion = newDirtyRegion;
+
+            if (canCopyBack) {
+                // copy the area that is invalid and not repainted this round
+                const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
+                if (!copyback.isEmpty())
                     copyBlt(backBuffer, frontBuffer, copyback);
-                }
+            } else {
+                // if we can't copy-back anything, modify the user's dirty
+                // region to make sure they redraw the whole buffer
+                newDirtyRegion = boundsRegion;
             }
 
-            mDirtyRegion = newDirtyRegion;
+            // keep track of the are of the buffer that is "clean"
+            // (ie: that will be redrawn)
             mOldDirtyRegion = newDirtyRegion;
 
             void* vaddr;
@@ -843,7 +840,6 @@ status_t Surface::getBufferLocked(int index, int usage)
             if (err == NO_ERROR) {
                 currentBuffer = buffer;
                 currentBuffer->setIndex(index);
-                mNeedFullUpdate = true;
             }
         } else {
             err = err<0 ? err : NO_MEMORY;

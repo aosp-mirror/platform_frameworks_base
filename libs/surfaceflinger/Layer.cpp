@@ -540,9 +540,15 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         mFlinger->signalEvent();
     }
 
-    if (!mPostedDirtyRegion.isEmpty()) {
-        reloadTexture( mPostedDirtyRegion );
-    }
+    /* a buffer was posted, so we need to call reloadTexture(), which
+     * will update our internal data structures (eg: EGLImageKHR or
+     * texture names). we need to do this even if mPostedDirtyRegion is
+     * empty -- it's orthogonal to the fact that a new buffer was posted,
+     * for instance, a degenerate case could be that the user did an empty
+     * update but repainted the buffer with appropriate content (after a
+     * resize for instance).
+     */
+    reloadTexture( mPostedDirtyRegion );
 }
 
 void Layer::unlockPageFlip(
