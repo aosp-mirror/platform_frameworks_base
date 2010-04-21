@@ -279,7 +279,9 @@
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm">Your phone will shut down.</string>
 
-    <!-- Recent Tasks dialog -->
+    <!-- Recent Tasks dialog: title -->
+    <string name="recent_tasks_title">Recent</string>
+    <!-- Recent Tasks dialog: message when there are no recent applications -->
     <string name="no_recent_tasks">No recent applications.</string>
 
     <!-- Title of the Global Actions Dialog -->
