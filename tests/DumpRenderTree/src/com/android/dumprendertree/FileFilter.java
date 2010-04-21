@@ -88,10 +88,8 @@ public class FileFilter {
         ignoreResultList.add("storage/database-lock-after-reload.html"); // Succeeds but DumpRenderTree does not read result correctly
         ignoreResultList.add("storage/hash-change-with-xhr.html"); // Succeeds but DumpRenderTree does not read result correctly
 
-        // Will always fail
-        ignoreResultList.add("dom/svg/level3/xpath"); // XPath not supported
+        // Expected failures due to unsupported features.
         ignoreResultList.add("fast/workers"); // workers not supported
-        ignoreResultList.add("fast/xpath"); // XPath not supported
         ignoreResultList.add("http/tests/eventsource/workers"); // workers not supported
         ignoreResultList.add("http/tests/workers"); // workers not supported
         ignoreResultList.add("http/tests/xmlhttprequest/workers"); // workers not supported
@@ -108,7 +106,6 @@ public class FileFilter {
         ignoreResultList.add("fast/dom/Window/window-screen-properties.html"); // pixel depth
         ignoreResultList.add("fast/dom/Window/window-xy-properties.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/dom/attribute-namespaces-get-set.html"); // http://b/733229
-        ignoreResultList.add("fast/dom/gc-9.html"); // requires xpath support
         ignoreResultList.add("fast/dom/global-constructors.html"); // requires xslt and xpath support
         ignoreResultList.add("fast/dom/object-embed-plugin-scripting.html"); // dynamic plugins not supported
         ignoreResultList.add("fast/dom/tabindex-clamp.html"); // there is extra spacing in the file due to multiple input boxes fitting on one line on Apple, ours are wrapped. Space at line ends are stripped.
