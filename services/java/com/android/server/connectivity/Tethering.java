@@ -35,6 +35,7 @@ import android.net.NetworkUtils;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
@@ -75,7 +76,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private String[] mTetherableWifiRegexs;
     private String[] mUpstreamIfaceRegexs;
 
-    private Looper mLooper; // given to us at construction time..
+    private Looper mLooper;
+    private HandlerThread mThread;
 
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
 
@@ -123,6 +125,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         mIfaces = new HashMap<String, TetherInterfaceSM>();
 
+        // make our own thread so we don't anr the system
+        mThread = new HandlerThread("Tethering");
+        mThread.start();
+        mLooper = mThread.getLooper();
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
