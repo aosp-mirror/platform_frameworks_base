@@ -49,6 +49,8 @@ public:
     void writeFourcc(const char *fourcc);
     void write(const void *data, size_t size);
     void endBox();
+    uint32_t interleaveDuration() const { return mInterleaveDurationUs; }
+    status_t setInterleaveDuration(uint32_t duration);
 
 protected:
     virtual ~MPEG4Writer();
@@ -59,14 +61,19 @@ private:
     FILE *mFile;
     off_t mOffset;
     off_t mMdatOffset;
+    uint32_t mInterleaveDurationUs;
     Mutex mLock;
 
     List<Track *> mTracks;
 
     List<off_t> mBoxes;
 
-    off_t addSample(MediaBuffer *buffer);
-    off_t addLengthPrefixedSample(MediaBuffer *buffer);
+    void lock();
+    void unlock();
+
+    // Acquire lock before calling these methods
+    off_t addSample_l(MediaBuffer *buffer);
+    off_t addLengthPrefixedSample_l(MediaBuffer *buffer);
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);
