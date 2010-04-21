@@ -16,11 +16,10 @@
 
 package android.graphics;
 
-import android.text.TextUtils;
-import android.text.SpannedString;
-import android.text.SpannableString;
 import android.text.GraphicsOperations;
-import android.util.DisplayMetrics;
+import android.text.SpannableString;
+import android.text.SpannedString;
+import android.text.TextUtils;
 
 import javax.microedition.khronos.opengles.GL;
 
@@ -58,6 +57,18 @@ public class Canvas {
     @SuppressWarnings({"UnusedDeclaration"})
     private int         mSurfaceFormat;
 
+    /**
+     * Flag for drawTextRun indicating left-to-right run direction.
+     * @hide
+     */
+    public static final int DIRECTION_LTR = 0;
+    
+    /**
+     * Flag for drawTextRun indicating right-to-left run direction.
+     * @hide
+     */
+    public static final int DIRECTION_RTL = 1;
+    
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
      * draw into.  The initial target density is {@link Bitmap#DENSITY_NONE};
@@ -1246,8 +1257,8 @@ public class Canvas {
             (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, index, count, x, y,
-                        paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, index, count, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1259,7 +1270,10 @@ public class Canvas {
      * @param y     The y-coordinate of the origin of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
-    public native void drawText(String text, float x, float y, Paint paint);
+    public void drawText(String text, float x, float y, Paint paint) {
+        native_drawText(mNativeCanvas, text, 0, text.length(), x, y, paint.mBidiFlags,
+                paint.mNativePaint);
+    }
 
     /**
      * Draw the text, with origin at (x,y), using the specified paint.
@@ -1277,8 +1291,8 @@ public class Canvas {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, start, end, x, y,
-                        paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, start, end, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1299,16 +1313,100 @@ public class Canvas {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
-                            paint.mNativePaint);
-        }
-        else if (text instanceof GraphicsOperations) {
+                            paint.mBidiFlags, paint.mNativePaint);
+        } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                                                      paint);
-        }
-        else {
+        } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
-            drawText(buf, 0, end - start, x, y, paint);
+            native_drawText(mNativeCanvas, buf, 0, end - start, x, y, 
+                    paint.mBidiFlags, paint.mNativePaint);
+            TemporaryBuffer.recycle(buf);
+        }
+    }
+
+    /**
+     * Render a run of all LTR or all RTL text, with shaping. This does not run
+     * bidi on the provided text, but renders it as a uniform right-to-left or
+     * left-to-right run, as indicated by dir. Alignment of the text is as
+     * determined by the Paint's TextAlign value.
+     * 
+     * @param text the text to render
+     * @param index the start of the text to render. Data before this position
+     *            can be used for shaping context.
+     * @param length the length of the text to render. Data at or after this
+     *            position (start + length) can be used for shaping context.
+     * @param x the x position at which to draw the text
+     * @param y the y position at which to draw the text
+     * @param dir the run direction, either {@link DIRECTION_LTR} or 
+     *            {@link DIRECTION_RTL}.
+     * @param paint the paint
+     * @hide
+     */
+    public void drawTextRun(char[] text, int index, int length, float x, float y, int dir,
+            Paint paint) {
+
+        if (text == null) {
+            throw new NullPointerException("text is null");
+        }
+        if (paint == null) {
+            throw new NullPointerException("paint is null");
+        }
+        if ((index | length | text.length - index - length) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (dir != DIRECTION_LTR && dir != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown dir: " + dir);
+        }
+
+        native_drawTextRun(mNativeCanvas, text, index, length, x, y, dir, paint.mNativePaint);
+    }
+
+    /**
+     * Render a run of all LTR or all RTL text, with shaping. This does not run
+     * bidi on the provided text, but renders it as a uniform right-to-left or
+     * left-to-right run, as indicated by dir. Alignment of the text is as
+     * determined by the Paint's TextAlign value.
+     * 
+     * @param text the text to render
+     * @param start the start of the text to render. Data before this position
+     *            can be used for shaping context.
+     * @param end the end of the text to render. Data at or after this
+     *            position can be used for shaping context.
+     * @param x the x position at which to draw the text
+     * @param y the y position at which to draw the text
+     * @param dir the run direction, either 0 for LTR or 1 for RTL.
+     * @param paint the paint
+     * @hide
+     */
+    public void drawTextRun(CharSequence text, int start, int end, float x, 
+            float y, int dir, Paint paint) {
+
+        if (text == null) {
+            throw new NullPointerException("text is null");
+        }
+        if (paint == null) {
+            throw new NullPointerException("paint is null");
+        }
+        if ((start | end | end - start | text.length() - end) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        int flags = dir == 0 ? 0 : 1;
+
+        if (text instanceof String || text instanceof SpannedString ||
+                text instanceof SpannableString) {
+            native_drawTextRun(mNativeCanvas, text.toString(), start, end, x, y,
+                    flags, paint.mNativePaint);
+        } else if (text instanceof GraphicsOperations) {
+            ((GraphicsOperations) text).drawTextRun(this, start, end, x, y, flags,
+                                                         paint);
+        } else {
+            char[] buf = TemporaryBuffer.obtain(end - start);
+            TextUtils.getChars(text, start, end, buf, 0);
+            native_drawTextRun(mNativeCanvas, buf, 0, end - start, x, y, 
+                        flags, paint.mNativePaint);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1555,10 +1653,17 @@ public class Canvas {
     
     private static native void native_drawText(int nativeCanvas, char[] text,
                                                int index, int count, float x,
-                                               float y, int paint);
+                                               float y, int flags, int paint);
     private static native void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
-                                               float y, int paint);
+                                               float y, int flags, int paint);
+
+    private static native void native_drawTextRun(int nativeCanvas, String
+            text, int start, int end, float x, float y, int flags, int paint);
+
+    private static native void native_drawTextRun(int nativeCanvas, char[]
+            text, int start, int len, float x, float y, int flags, int paint);
+
     private static native void native_drawPosText(int nativeCanvas,
                                                   char[] text, int index,
                                                   int count, float[] pos,

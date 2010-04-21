@@ -16,10 +16,10 @@
 
 package android.graphics;
 
-import android.text.TextUtils;
+import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
-import android.text.GraphicsOperations;
+import android.text.TextUtils;
 
 /**
  * The Paint class holds the style and color information about how to draw
@@ -39,6 +39,7 @@ public class Paint {
     private boolean     mHasCompatScaling;
     private float       mCompatScaling;
     private float       mInvCompatScaling;
+    /* package */ int   mBidiFlags = BIDI_DEFAULT_LTR;
     
     private static final Style[] sStyleArray = {
         Style.FILL, Style.STROKE, Style.FILL_AND_STROKE
@@ -76,8 +77,64 @@ public class Paint {
     private static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG;
 
     /**
-     * The Style specifies if the primitive being drawn is filled,
-     * stroked, or both (in the same color). The default is FILL.
+     * Bidi flag to set LTR paragraph direction.
+     * 
+     * @hide
+     */
+    public static final int BIDI_LTR = 0x0;
+
+    /**
+     * Bidi flag to set RTL paragraph direction.
+     * 
+     * @hide
+     */
+    public static final int BIDI_RTL = 0x1;
+
+    /**
+     * Bidi flag to detect paragraph direction via heuristics, defaulting to
+     * LTR.
+     * 
+     * @hide
+     */
+    public static final int BIDI_DEFAULT_LTR = 0x2;
+
+    /**
+     * Bidi flag to detect paragraph direction via heuristics, defaulting to
+     * RTL.
+     * 
+     * @hide
+     */
+    public static final int BIDI_DEFAULT_RTL = 0x3;
+
+    /**
+     * Bidi flag to override direction to all LTR (ignore bidi).
+     * 
+     * @hide
+     */
+    public static final int BIDI_FORCE_LTR = 0x4;
+
+    /**
+     * Bidi flag to override direction to all RTL (ignore bidi).
+     * 
+     * @hide
+     */
+    public static final int BIDI_FORCE_RTL = 0x5;
+
+    /**
+     * Maximum Bidi flag value.
+     * @hide
+     */
+    private static final int BIDI_MAX_FLAG_VALUE = BIDI_FORCE_RTL;
+    
+    /**
+     * Mask for bidi flags.
+     * @hide
+     */
+    private static final int BIDI_FLAG_MASK = 0x7;
+    
+    /**
+     * The Style specifies if the primitive being drawn is filled, stroked, or
+     * both (in the same color). The default is FILL.
      */
     public enum Style {
         /**
@@ -210,6 +267,7 @@ public class Paint {
         mHasCompatScaling = paint.mHasCompatScaling;
         mCompatScaling = paint.mCompatScaling;
         mInvCompatScaling = paint.mInvCompatScaling;
+        mBidiFlags = paint.mBidiFlags;
     }
 
     /** Restores the paint to its default settings. */
@@ -218,6 +276,7 @@ public class Paint {
         setFlags(DEFAULT_PAINT_FLAGS);
         mHasCompatScaling = false;
         mCompatScaling = mInvCompatScaling = 1;
+        mBidiFlags = BIDI_DEFAULT_LTR;
     }
     
     /**
@@ -240,6 +299,7 @@ public class Paint {
             mHasCompatScaling = src.mHasCompatScaling;
             mCompatScaling    = src.mCompatScaling;
             mInvCompatScaling = src.mInvCompatScaling;
+            mBidiFlags      = src.mBidiFlags;
         }
     }
 
@@ -254,10 +314,33 @@ public class Paint {
             mInvCompatScaling = 1.0f/factor;
         }
     }
-    
+
+    /**
+     * Return the bidi flags on the paint.
+     * 
+     * @return the bidi flags on the paint
+     * @hide
+     */
+    public int getBidiFlags() {
+        return mBidiFlags;
+    }
+
+    /**
+     * Set the bidi flags on the paint.
+     * @hide
+     */
+    public void setBidiFlags(int flags) {
+        // only flag value is the 3-bit BIDI control setting
+        flags &= BIDI_FLAG_MASK;
+        if (flags > BIDI_MAX_FLAG_VALUE) {
+            throw new IllegalArgumentException("unknown bidi flag: " + flags);
+        }
+        mBidiFlags = flags;
+    }
+
     /**
      * Return the paint's flags. Use the Flag enum to test flag values.
-     *
+     * 
      * @return the paint's flags (see enums ending in _Flag for bit masks)
      */
     public native int getFlags();

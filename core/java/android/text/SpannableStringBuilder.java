@@ -17,8 +17,9 @@
 package android.text;
 
 import com.android.internal.util.ArrayUtils;
-import android.graphics.Paint;
+
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import java.lang.reflect.Array;
 
@@ -780,7 +781,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         }
 
         if (count == 0) {
-            return (T[]) ArrayUtils.emptyArray(kind);
+            return ArrayUtils.emptyArray(kind);
         }
         if (count == 1) {
             ret = (Object[]) Array.newInstance(kind, 1);
@@ -1055,6 +1056,39 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     /**
+     * Don't call this yourself -- exists for Canvas to use internally.
+     * {@hide}
+     */
+    public void drawTextRun(Canvas c, int start, int end,
+                         float x, float y, int flags, Paint p) {
+        checkRange("drawTextRun", start, end);
+
+        // Assume context requires no more than 8 chars on either side.
+        // This is ample, only decomposed U+FDFA falls into this
+        // category, and no one should put a style break within it 
+        // anyway.
+        int cstart = start - 8;
+        if (cstart < 0) {
+            cstart = 0;
+        }
+        int cend = end + 8;
+        int max = length();
+        if (cend > max) {
+            cend = max;
+        }
+        if (cend <= mGapStart) {
+            c.drawTextRun(mText, start, end - start, x, y, flags, p);
+        } else if (cstart >= mGapStart) {
+            c.drawTextRun(mText, start + mGapLength, end - start, x, y, flags, p);
+        } else {
+            char[] buf = TextUtils.obtain(cend - cstart);
+            getChars(cstart, cend, buf, 0);
+            c.drawTextRun(buf, start - cstart, end - start, x, y, flags, p);
+            TextUtils.recycle(buf);
+        }
+    }
+
+   /**
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
