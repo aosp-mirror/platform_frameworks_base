@@ -20,9 +20,7 @@ import android.text.TextUtils;
 import android.util.CharsetUtils;
 import android.util.Log;
 
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -31,6 +29,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * <p>
+ * The {@link VCardInterpreter} implementation which enables {@link VCardEntryHandler} objects
+ * to easily handle each vCard entry.
+ * </p>
+ * <p>
+ * This class understand details inside vCard and translates it to {@link VCardEntry}.
+ * Then the class throw it to {@link VCardEntryHandler} registered via
+ * {@link #addEntryHandler(VCardEntryHandler)}, so that all those registered objects
+ * are able to handle the {@link VCardEntry} object.
+ * </p>
+ * <p>
+ * If you want to know the detail inside vCard, it would be better to implement
+ * {@link VCardInterpreter} directly, instead of relying on this class and
+ * {@link VCardEntry} created by the object.
+ * </p>
+ */
 public class VCardEntryConstructor implements VCardInterpreter {
     private static String LOG_TAG = "VCardEntryConstructor";
 
@@ -48,27 +63,33 @@ public class VCardEntryConstructor implements VCardInterpreter {
     private final int mVCardType;
     private final Account mAccount;
     
-    /** For measuring performance. */
+    // For measuring performance.
     private long mTimePushIntoContentResolver;
 
-    final private List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
+    private final List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
 
     public VCardEntryConstructor() {
-        this(null, false, VCardConfig.VCARD_TYPE_V21_GENERIC, null);
+        this(VCardConfig.VCARD_TYPE_V21_GENERIC, null, null, false);
     }
 
     public VCardEntryConstructor(final int vcardType) {
-        this(null, false, vcardType, null);
+        this(vcardType, null, null, false);
     }
 
-    public VCardEntryConstructor(final String inputCharset,
-            final int vcardType, final Account account) {
-        this(inputCharset, false, vcardType, account);
+    public VCardEntryConstructor(final int vcardType, final Account account) {
+        this(vcardType, account, null, false);
     }
 
-    public VCardEntryConstructor(final String inputCharset,
-            final boolean strictLineBreakParsing, final int vcardType,
-            final Account account) {
+    public VCardEntryConstructor(final int vcardType, final Account account,
+            final String inputCharset) {
+        this(vcardType, account, inputCharset, false);
+    }
+
+    /**
+     * @hide
+     */
+    public VCardEntryConstructor(final int vcardType, final Account account,
+            final String inputCharset, final boolean strictLineBreakParsing) {
         if (inputCharset != null) {
             mSourceCharset = inputCharset;
         } else {
@@ -95,17 +116,11 @@ public class VCardEntryConstructor implements VCardInterpreter {
         }
     }
 
-    /**
-     * Called when the parse failed between {@link #startEntry()} and {@link #endEntry()}.
-     */
     public void clear() {
         mCurrentVCardEntry = null;
         mCurrentProperty = new VCardEntry.Property();
     }
 
-    /**
-     * Assume that VCard is not nested. In other words, this code does not accept 
-     */
     public void startEntry() {
         if (mCurrentVCardEntry != null) {
             Log.e(LOG_TAG, "Nested VCard code is not supported now.");
@@ -211,6 +226,9 @@ public class VCardEntryConstructor implements VCardInterpreter {
         }
     }
 
+    /**
+     * @hide
+     */
     public void showPerformanceInfo() {
         Log.d(LOG_TAG, "time for insert ContactStruct to database: " + 
                 mTimePushIntoContentResolver + " ms");

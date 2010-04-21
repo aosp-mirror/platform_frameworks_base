@@ -90,14 +90,14 @@ import java.util.Map;
  *     if (composer != null) {
  *         composer.terminate();
  *     }
- * } </pre>
- * <P>
+ * }</pre>
+ * <p>
  * Users have to manually take care of memory efficiency. Even one vCard may contain
  * image of non-trivial size for mobile devices.
- * </P>
- * <P>
- * In default, Default {@link VCardBuilder} class is used to build each vCard.
- * </P>
+ * </p>
+ * <p>
+ * {@link VCardBuilder} is used to build each vCard.
+ * </p>
  */
 public class VCardComposer {
     private static final String LOG_TAG = "VCardComposer";
@@ -161,14 +161,14 @@ public class VCardComposer {
      * Must not close the stream outside this class.
      * </p>
      */
-    public class HandlerForOutputStream implements OneEntryHandler {
+    public final class HandlerForOutputStream implements OneEntryHandler {
         @SuppressWarnings("hiding")
-        private static final String LOG_TAG = "vcard.VCardComposer.HandlerForOutputStream";
+        private static final String LOG_TAG = "VCardComposer.HandlerForOutputStream";
 
         private boolean mOnTerminateIsCalled = false;
 
-        final private OutputStream mOutputStream; // mWriter will close this.
-        protected Writer mWriter;
+        private final OutputStream mOutputStream; // mWriter will close this.
+        private Writer mWriter;
 
         /**
          * Input stream will be closed on the detruction of this object.
@@ -177,7 +177,7 @@ public class VCardComposer {
             mOutputStream = outputStream;
         }
 
-        public final boolean onInit(final Context context) {
+        public boolean onInit(final Context context) {
             try {
                 mWriter = new BufferedWriter(new OutputStreamWriter(
                         mOutputStream, mCharset));
@@ -207,7 +207,7 @@ public class VCardComposer {
             return true;
         }
 
-        public final boolean onEntryCreated(String vcard) {
+        public boolean onEntryCreated(String vcard) {
             try {
                 mWriter.write(vcard);
             } catch (IOException e) {
@@ -220,7 +220,7 @@ public class VCardComposer {
             return true;
         }
 
-        public final void onTerminate() {
+        public void onTerminate() {
             mOnTerminateIsCalled = true;
             if (mWriter != null) {
                 try {
@@ -242,8 +242,6 @@ public class VCardComposer {
             }
         }
 
-        // Users can override this if they want to (e.g. if they don't want to close the stream).
-        // TODO: Should expose bare OutputStream instead?
         public void closeOutputStream() {
             try {
                 mWriter.close();
@@ -312,8 +310,7 @@ public class VCardComposer {
      * a Handler object given via {{@link #addHandler(OneEntryHandler)} returns false.
      * If false, this ignores those errors.
      */
-    public VCardComposer(final Context context, final int vcardType,
-            String charset,
+    public VCardComposer(final Context context, final int vcardType, String charset,
             final boolean careHandlerErrors) {
         mContext = context;
         mVCardType = vcardType;
@@ -380,6 +377,7 @@ public class VCardComposer {
                 mCharset = charset;
             }
         }
+
         Log.d(LOG_TAG, "Use the charset \"" + mCharset + "\"");
     }
 
@@ -602,7 +600,6 @@ public class VCardComposer {
             return "";
         } else {
             final VCardBuilder builder = new VCardBuilder(mVCardType, mCharset);
-            // TODO: Android-specific X attributes?
             builder.appendNameProperties(contentValuesListMap.get(StructuredName.CONTENT_ITEM_TYPE))
                     .appendNickNames(contentValuesListMap.get(Nickname.CONTENT_ITEM_TYPE))
                     .appendPhones(contentValuesListMap.get(Phone.CONTENT_ITEM_TYPE))

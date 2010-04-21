@@ -78,12 +78,12 @@ public class VCardEntry {
                 Im.PROTOCOL_GOOGLE_TALK);
     }
 
-    static public class PhoneData {
+    public static class PhoneData {
         public final int type;
         public final String data;
         public final String label;
-        // isPrimary is changable only when there's no appropriate one existing in
-        // the original VCard.
+        // isPrimary is (not final but) changable, only when there's no appropriate one existing
+        // in the original VCard.
         public boolean isPrimary;
         public PhoneData(int type, String data, String label, boolean isPrimary) {
             this.type = type;
@@ -109,13 +109,11 @@ public class VCardEntry {
         }
     }
 
-    static public class EmailData {
+    public static class EmailData {
         public final int type;
         public final String data;
         // Used only when TYPE is TYPE_CUSTOM.
         public final String label;
-        // isPrimary is changable only when there's no appropriate one existing in
-        // the original VCard.
         public boolean isPrimary;
         public EmailData(int type, String data, String label, boolean isPrimary) {
             this.type = type;
@@ -141,9 +139,9 @@ public class VCardEntry {
         }
     }
 
-    static public class PostalData {
-        // Determined by vCard spec.
-        // PO Box, Extended Addr, Street, Locality, Region, Postal Code, Country Name
+    public static class PostalData {
+        // Determined by vCard specification.
+        // - PO Box, Extended Addr, Street, Locality, Region, Postal Code, Country Name
         public static final int ADDR_MAX_DATA_SIZE = 7;
         private final String[] dataArray;
         public final String pobox;
@@ -248,10 +246,11 @@ public class VCardEntry {
         }
     }
 
-    static public class OrganizationData {
+    public static class OrganizationData {
         public final int type;
         // non-final is Intentional: we may change the values since this info is separated into
-        // two parts in vCard: "ORG" + "TITLE".
+        // two parts in vCard: "ORG" + "TITLE", and we have to cope with each field in
+        // different timing.
         public String companyName;
         public String departmentName;
         public String titleName;
@@ -313,7 +312,7 @@ public class VCardEntry {
         }
     }
 
-    static public class ImData {
+    public static class ImData {
         public final int protocol;
         public final String customProtocol;
         public final int type;
@@ -441,7 +440,7 @@ public class VCardEntry {
     private String mSuffix;
 
     // Used only when no family nor given name is found.
-    private String mFullName;
+    private String mFormattedName;
 
     private String mPhoneticFamilyName;
     private String mPhoneticGivenName;
@@ -499,7 +498,6 @@ public class VCardEntry {
                 }
             }
 
-            // Use NANP in default when there's no information about locale.
             final int formattingType = VCardUtils.getPhoneNumberFormat(mVCardType);
             formattedNumber = PhoneNumberUtils.formatNumber(builder.toString(), formattingType);
         }
@@ -754,11 +752,11 @@ public class VCardEntry {
         if (propName.equals(VCardConstants.PROPERTY_VERSION)) {
             // vCard version. Ignore this.
         } else if (propName.equals(VCardConstants.PROPERTY_FN)) {
-            mFullName = propValue;
-        } else if (propName.equals(VCardConstants.PROPERTY_NAME) && mFullName == null) {
+            mFormattedName = propValue;
+        } else if (propName.equals(VCardConstants.PROPERTY_NAME) && mFormattedName == null) {
             // Only in vCard 3.0. Use this if FN, which must exist in vCard 3.0 but may not
             // actually exist in the real vCard data, does not exist.
-            mFullName = propValue;
+            mFormattedName = propValue;
         } else if (propName.equals(VCardConstants.PROPERTY_N)) {
             handleNProperty(propValueList);
         } else if (propName.equals(VCardConstants.PROPERTY_SORT_STRING)) {
@@ -1016,8 +1014,8 @@ public class VCardEntry {
      */
     private void constructDisplayName() {
         // FullName (created via "FN" or "NAME" field) is prefered.
-        if (!TextUtils.isEmpty(mFullName)) {
-            mDisplayName = mFullName;
+        if (!TextUtils.isEmpty(mFormattedName)) {
+            mDisplayName = mFormattedName;
         } else if (!(TextUtils.isEmpty(mFamilyName) && TextUtils.isEmpty(mGivenName))) {
             mDisplayName = VCardUtils.constructNameFromElements(mVCardType,
                     mFamilyName, mMiddleName, mGivenName, mPrefix, mSuffix);
@@ -1320,7 +1318,7 @@ public class VCardEntry {
                 && TextUtils.isEmpty(mGivenName)
                 && TextUtils.isEmpty(mPrefix)
                 && TextUtils.isEmpty(mSuffix)
-                && TextUtils.isEmpty(mFullName)
+                && TextUtils.isEmpty(mFormattedName)
                 && TextUtils.isEmpty(mPhoneticFamilyName)
                 && TextUtils.isEmpty(mPhoneticMiddleName)
                 && TextUtils.isEmpty(mPhoneticGivenName)
@@ -1379,7 +1377,7 @@ public class VCardEntry {
     }
 
     public String getFullName() {
-        return mFullName;
+        return mFormattedName;
     }
 
     public String getPhoneticFamilyName() {

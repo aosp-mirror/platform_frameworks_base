@@ -39,6 +39,7 @@ import java.util.Set;
 
 /**
  * Utilities for VCard handling codes.
+ * @hide
  */
 public class VCardUtils {
     private static final String LOG_TAG = "VCardUtils";
@@ -247,10 +248,13 @@ public class VCardUtils {
     }
 
     /**
+     * <p>
      * Inserts postal data into the builder object.
-     * 
+     * </p>
+     * <p>
      * Note that the data structure of ContactsContract is different from that defined in vCard.
      * So some conversion may be performed in this method.
+     * </p>
      */
     public static void insertStructuredPostalDataUsingContactsStruct(int vcardType,
             final ContentProviderOperation.Builder builder,
@@ -378,9 +382,13 @@ public class VCardUtils {
     }
 
     /**
+     * <p>
      * This is useful when checking the string should be encoded into quoted-printable
      * or not, which is required by vCard 2.1.
+     * </p>
+     * <p>
      * See the definition of "7bit" in vCard 2.1 spec for more information.
+     * </p>
      */
     public static boolean containsOnlyNonCrLfPrintableAscii(final String...values) {
         if (values == null) {
@@ -414,13 +422,16 @@ public class VCardUtils {
         new HashSet<Character>(Arrays.asList('[', ']', '=', ':', '.', ',', ' '));
 
     /**
+     * <p>
      * This is useful since vCard 3.0 often requires the ("X-") properties and groups
      * should contain only alphabets, digits, and hyphen.
-     * 
+     * </p>
+     * <p> 
      * Note: It is already known some devices (wrongly) outputs properties with characters
      *       which should not be in the field. One example is "X-GOOGLE TALK". We accept
      *       such kind of input but must never output it unless the target is very specific
-     *       to the device which is able to parse the malformed input. 
+     *       to the device which is able to parse the malformed input.
+     * </p>
      */
     public static boolean containsOnlyAlphaDigitHyphen(final String...values) {
         if (values == null) {
@@ -459,13 +470,13 @@ public class VCardUtils {
     }
 
     /**
-     * <P>
+     * <p>
      * Returns true when the given String is categorized as "word" specified in vCard spec 2.1.
-     * </P>
-     * <P>
-     * vCard 2.1 specifies:<BR />
+     * </p>
+     * <p>
+     * vCard 2.1 specifies:<br />
      * word = &lt;any printable 7bit us-ascii except []=:., &gt;
-     * </P>
+     * </p>
      */
     public static boolean isV21Word(final String value) {
         if (TextUtils.isEmpty(value)) {
@@ -550,7 +561,7 @@ public class VCardUtils {
     //// The methods bellow may be used by unit test.
 
     /**
-     * @hide
+     * @hide 
      */
     public static String parseQuotedPrintable(String value, boolean strictLineBreaking,
             String sourceCharset, String targetCharset) {

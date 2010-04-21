@@ -23,7 +23,7 @@ import java.util.List;
  * {@link VCardInterpreter} objects and make a user object treat them as one
  * {@link VCardInterpreter} object.
  */
-public class VCardInterpreterCollection implements VCardInterpreter {
+public final class VCardInterpreterCollection implements VCardInterpreter {
     private final Collection<VCardInterpreter> mInterpreterCollection;
     
     public VCardInterpreterCollection(Collection<VCardInterpreter> interpreterCollection) {
