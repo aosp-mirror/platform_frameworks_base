@@ -30,9 +30,6 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerDim::typeInfo = LayerBaseClient::typeInfo | 0x10;
-const char* const LayerDim::typeID = "LayerDim";
-
 bool LayerDim::sUseTexture;
 GLuint LayerDim::sTexId;
 EGLImageKHR LayerDim::sImage;

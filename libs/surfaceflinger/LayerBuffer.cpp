@@ -39,8 +39,6 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerBuffer::typeInfo = LayerBaseClient::typeInfo | 0x20;
-const char* const LayerBuffer::typeID = "LayerBuffer";
 gralloc_module_t const* LayerBuffer::sGrallocModule = 0;
 
 // ---------------------------------------------------------------------------

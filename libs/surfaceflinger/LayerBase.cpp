@@ -38,14 +38,6 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerBase::typeInfo = 1;
-const char* const LayerBase::typeID = "LayerBase";
-
-const uint32_t LayerBaseClient::typeInfo = LayerBase::typeInfo | 2;
-const char* const LayerBaseClient::typeID = "LayerBaseClient";
-
-// ---------------------------------------------------------------------------
-
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
@@ -681,6 +673,22 @@ status_t LayerBase::initializeEglImage(
     return err;
 }
 
+void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
+{
+    const Layer::State& s(drawingState());
+    snprintf(buffer, SIZE,
+            "+ %s %p\n"
+            "      "
+            "z=%9d, pos=(%4d,%4d), size=(%4d,%4d), "
+            "needsBlending=%1d, needsDithering=%1d, invalidate=%1d, "
+            "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
+            getTypeId(), this, s.z, tx(), ty(), s.w, s.h,
+            needsBlending(), needsDithering(), contentDirty,
+            s.alpha, s.flags,
+            s.transform[0][0], s.transform[0][1],
+            s.transform[1][0], s.transform[1][1]);
+    result.append(buffer);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -713,13 +721,13 @@ LayerBaseClient::~LayerBaseClient()
     delete lcblk;
 }
 
-int32_t LayerBaseClient::serverIndex() const 
+ssize_t LayerBaseClient::serverIndex() const
 {
     sp<Client> client(this->client.promote());
     if (client != 0) {
         return (client->cid<<16)|mIndex;
     }
-    return 0xFFFF0000 | mIndex;
+    return ssize_t(0xFFFF0000 | mIndex);
 }
 
 sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
@@ -746,6 +754,21 @@ void LayerBaseClient::onRemoved()
 {
     // wake up the condition
     lcblk->setStatus(NO_INIT);
+}
+
+void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
+{
+    LayerBase::dump(result, buffer, SIZE);
+
+    sp<Client> client(this->client.promote());
+    snprintf(buffer, SIZE,
+            "      name=%s\n"
+            "      id=0x%08x, client=0x%08x, identity=%u\n",
+            getName().string(),
+            clientIndex(), client.get() ? client->cid : 0,
+            getIdentity());
+
+    result.append(buffer);
 }
 
 // ---------------------------------------------------------------------------

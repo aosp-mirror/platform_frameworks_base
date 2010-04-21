@@ -51,35 +51,9 @@ class SurfaceFlinger;
 
 class LayerBase : public RefBase
 {
-    // poor man's dynamic_cast below
-    template<typename T>
-    struct getTypeInfoOfAnyType {
-        static uint32_t get() { return T::typeInfo; }
-    };
-
-    template<typename T>
-    struct getTypeInfoOfAnyType<T*> {
-        static uint32_t get() { return getTypeInfoOfAnyType<T>::get(); }
-    };
-
 public:
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-    
-    template<typename T>
-    static T dynamicCast(LayerBase* base) {
-        uint32_t mostDerivedInfo = base->getTypeInfo();
-        uint32_t castToInfo = getTypeInfoOfAnyType<T>::get();
-        if ((mostDerivedInfo & castToInfo) == castToInfo)
-            return static_cast<T>(base);
-        return 0;
-    }
+            LayerBase(SurfaceFlinger* flinger, DisplayID display);
 
-    
-    LayerBase(SurfaceFlinger* flinger, DisplayID display);
-    
     DisplayID           dpy;
     mutable bool        contentDirty;
             Region      visibleRegionScreen;
@@ -124,6 +98,9 @@ public:
             void drawRegion(const Region& reg) const;
 
             void invalidate();
+
+    virtual const char* getTypeId() const { return "LayerBase"; }
+    virtual ssize_t serverIndex() const { return -1; }
 
     /**
      * draw - performs some global clipping optimizations
@@ -217,7 +194,10 @@ public:
      *  current list */
     virtual void onRemoved() { };
     
-    
+    /** always call base class first */
+    virtual void dump(String8& result, char* scratch, size_t size) const;
+
+
     enum { // flags for doTransaction()
         eVisibleRegion      = 0x00000002,
     };
@@ -313,10 +293,6 @@ class LayerBaseClient : public LayerBase
 {
 public:
     class Surface;
-   static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
 
     // lcblk is (almost) only accessed from the main SF thread, in the places
     // where it's not, a reference to Client must be held
@@ -331,14 +307,12 @@ public:
 
     inline  uint32_t    getIdentity() const { return mIdentity; }
     inline  int32_t     clientIndex() const { return mIndex; }
-            int32_t     serverIndex() const;
-
    
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
-    
-    virtual void onRemoved();
-
+    virtual ssize_t     serverIndex() const;
+    virtual void        onRemoved();
+    virtual const char* getTypeId() const { return "LayerBaseClient"; }
 
     class Surface : public BnSurface 
     {
@@ -373,8 +347,11 @@ public:
 
     friend class Surface;
 
+protected:
+    virtual void dump(String8& result, char* scratch, size_t size) const;
+
 private:
-                int32_t         mIndex;
+    int32_t         mIndex;
     mutable     Mutex           mLock;
     mutable     wp<Surface>     mClientSurface;
     // only read

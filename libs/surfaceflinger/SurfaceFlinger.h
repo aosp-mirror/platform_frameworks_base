@@ -73,7 +73,6 @@ public:
 
     inline  bool                    isValid(int32_t i) const;
     sp<LayerBaseClient>             getLayerUser(int32_t i) const;
-    void                            dump(const char* what);
     
     const Vector< wp<LayerBaseClient> >& getLayers() const { 
         return mLayers; 
@@ -281,6 +280,7 @@ private:
             void        destroyConnection(ClientID cid);
             sp<LayerBaseClient> getLayerUser_l(SurfaceID index) const;
             status_t    addLayer_l(const sp<LayerBase>& layer);
+            status_t    addClientLayer_l(const sp<LayerBaseClient>& lbc);
             status_t    removeLayer_l(const sp<LayerBase>& layer);
             status_t    purgatorizeLayer_l(const sp<LayerBase>& layer);
             void        free_resources_l();

@@ -52,17 +52,13 @@ class LayerBuffer : public LayerBaseClient
     };
 
 public:
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-
             LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
                     const sp<Client>& client, int32_t i);
         virtual ~LayerBuffer();
 
     virtual void onFirstRef();
     virtual bool needsBlending() const;
+    virtual const char* getTypeId() const { return "LayerBuffer"; }
 
     virtual sp<LayerBaseClient::Surface> createSurface() const;
     virtual status_t ditch();
