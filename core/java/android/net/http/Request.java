@@ -34,6 +34,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 import org.apache.http.ParseException;
 import org.apache.http.ProtocolVersion;
 
@@ -71,6 +72,10 @@ class Request {
     volatile boolean mCancelled = false;
 
     int mFailCount = 0;
+
+    // This will be used to set the Range field if we retry a connection. This
+    // is http/1.1 feature.
+    private int mReceivedBytes = 0;
 
     private InputStream mBodyProvider;
     private int mBodyLength;
@@ -241,7 +246,6 @@ class Request {
 
         StatusLine statusLine = null;
         boolean hasBody = false;
-        boolean reuse = false;
         httpClientConnection.flush();
         int statusCode = 0;
 
@@ -263,6 +267,8 @@ class Request {
 
         if (hasBody)
             entity = httpClientConnection.receiveResponseEntity(header);
+
+        boolean supportPartialContent = v.greaterEquals(HttpVersion.HTTP_1_1);
 
         if (entity != null) {
             InputStream is = entity.getContent();
@@ -306,6 +312,7 @@ class Request {
 
                     if (len != -1) {
                         count += len;
+                        if (supportPartialContent) mReceivedBytes += len;
                     }
                     if (len == -1 || count >= lowWater) {
                         if (HttpLog.LOGV) HttpLog.v("Request.readResponse() " + count);
@@ -324,7 +331,13 @@ class Request {
                 if (HttpLog.LOGV) HttpLog.v( "readResponse() handling " + e);
             } catch(IOException e) {
                 // don't throw if we have a non-OK status code
-                if (statusCode == HttpStatus.SC_OK) {
+                if (statusCode == HttpStatus.SC_OK
+                        || statusCode == HttpStatus.SC_PARTIAL_CONTENT) {
+                    if (supportPartialContent && count > 0) {
+                        // if there is uncommited content, we should commit them
+                        // as we will continue the request
+                        mEventHandler.data(buf, count);
+                    }
                     throw e;
                 }
             } finally {
@@ -410,6 +423,15 @@ class Request {
                         getUri());
             }
             setBodyProvider(mBodyProvider, mBodyLength);
+        }
+
+        if (mReceivedBytes > 0) {
+            // reset the fail count as we continue the request
+            mFailCount = 0;
+            // set the "Range" header to indicate that the retry will continue
+            // instead of restarting the request
+            HttpLog.v("*** Request.reset() to range:" + mReceivedBytes);
+            mHttpRequest.setHeader("Range", "bytes=" + mReceivedBytes + "-");
         }
     }
 
