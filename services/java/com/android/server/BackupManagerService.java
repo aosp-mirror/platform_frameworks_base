@@ -479,10 +479,25 @@ class BackupManagerService extends IBackupManager.Stub {
         // Attach to the Google backup transport.  When this comes up, it will set
         // itself as the current transport because we explicitly reset mCurrentTransport
         // to null.
-        Intent intent = new Intent().setComponent(new ComponentName(
-                "com.google.android.backup",
-                "com.google.android.backup.BackupTransportService"));
-        context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE);
+        ComponentName transportComponent = new ComponentName("com.google.android.backup",
+                "com.google.android.backup.BackupTransportService");
+        try {
+            // If there's something out there that is supposed to be the Google
+            // backup transport, make sure it's legitimately part of the OS build
+            // and not an app lying about its package name.
+            ApplicationInfo info = mPackageManager.getApplicationInfo(
+                    transportComponent.getPackageName(), 0);
+            if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                if (DEBUG) Slog.v(TAG, "Binding to Google transport");
+                Intent intent = new Intent().setComponent(transportComponent);
+                context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE);
+            } else {
+                Slog.w(TAG, "Possible Google transport spoof: ignoring " + info);
+            }
+        } catch (PackageManager.NameNotFoundException nnf) {
+            // No such package?  No binding.
+            if (DEBUG) Slog.v(TAG, "Google transport not present");
+        }
 
         // Now that we know about valid backup participants, parse any
         // leftover journal files into the pending backup set
