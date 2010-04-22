@@ -68,7 +68,8 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final String TESTING_ENABLED_PROPERTY = "persist.throttle.testing";
 
     private static final String TAG = "ThrottleService";
-    private static boolean DBG = true;
+    private static final boolean DBG = true;
+    private static final boolean VDBG = false;
     private Handler mHandler;
     private HandlerThread mThread;
 
@@ -424,7 +425,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             long periodTx = mRecorder.getPeriodTx(0);
             long total = periodRx + periodTx;
             if (DBG) {
-                Slog.d(TAG, "onPollAlarm - now =" + now + ", roaming =" + roaming +
+                Slog.d(TAG, "onPollAlarm - roaming =" + roaming +
                         ", read =" + incRead + ", written =" + incWrite + ", new total =" + total);
             }
             mLastRead += incRead;
@@ -653,6 +654,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             if (mNtpActive) {
                 long ntpAge = SystemClock.elapsedRealtime() - cachedNtpTimestamp;
                 if (ntpAge < MAX_NTP_CACHE_AGE) {
+                    if (VDBG) Slog.v(TAG, "using cached time");
                     return cachedNtp + ntpAge;
                 }
             }
@@ -665,12 +667,12 @@ public class ThrottleService extends IThrottleManager.Stub {
                     if (DBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
                     mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
                 }
-                if (DBG) Slog.d(TAG, "using Authoritative time: " + cachedNtp);
+                if (VDBG) Slog.v(TAG, "using Authoritative time: " + cachedNtp);
                 return cachedNtp;
             }
         }
         long time = System.currentTimeMillis();
-        if (DBG) Slog.d(TAG, "using User time: " + time);
+        if (VDBG) Slog.v(TAG, "using User time: " + time);
         mNtpActive = false;
         return time;
     }
@@ -718,15 +720,14 @@ public class ThrottleService extends IThrottleManager.Stub {
             // TODO - how would we deal with a dual-IMSI device?
             checkForSubscriberId();
             boolean startNewPeriod = true;
-            if (DBG) {
-                Slog.d(TAG, "setting next period to " + start.getTimeInMillis() +
-                        " --until-- " + end.getTimeInMillis());
-            }
+
             // if we rolled back in time, toss out
             // if we rolled foward, advance to the next
             if (end.before(mPeriodStart)) {
                 if (DBG) {
-                    Slog.d(TAG, " old start was " + mPeriodStart.getTimeInMillis() + ", wiping");
+                    Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
+                        end.getTimeInMillis() + ") - old start was " +
+                        mPeriodStart.getTimeInMillis() + ", wiping");
                 }
                 synchronized (mParent) {
                     mPeriodRxData[mCurrentPeriod] = 0;
@@ -734,7 +735,9 @@ public class ThrottleService extends IThrottleManager.Stub {
                 }
             } else if(start.after(mPeriodEnd)) {
                 if (DBG) {
-                    Slog.d(TAG, " old end was " + mPeriodEnd.getTimeInMillis() + ", following");
+                    Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
+                            end.getTimeInMillis() + ") - old end was " +
+                            mPeriodEnd.getTimeInMillis() + ", following");
                 }
                 synchronized (mParent) {
                     ++mCurrentPeriod;
@@ -744,7 +747,10 @@ public class ThrottleService extends IThrottleManager.Stub {
                 }
             } else {
                 startNewPeriod = false;
-                if (DBG) Slog.d(TAG, " we fit - ammending to last period");
+                if (DBG) {
+                    Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
+                            end.getTimeInMillis() + ") - we fit - ammending to last period");
+                }
             }
             setPeriodStart(start);
             setPeriodEnd(end);
@@ -813,7 +819,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             File dataFile;
             if (mImsi == null) {
                 dataFile = useMRUFile(throttleDir);
-                Slog.d(TAG, "imsi not available yet, using " + dataFile);
+                if (VDBG) Slog.v(TAG, "imsi not available yet, using " + dataFile);
             } else {
                 String imsiHash = Integer.toString(mImsi.hashCode());
                 dataFile = new File(throttleDir, imsiHash);
@@ -831,7 +837,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             mImsi = mTelephonyManager.getSubscriberId();
             if (mImsi == null) return;
 
-            Slog.d(TAG, "finally have imsi - retreiving data");
+            if (DBG) Slog.d(TAG, "finally have imsi - retreiving data");
             retrieve();
         }
 
@@ -841,7 +847,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             File[] files = dir.listFiles();
 
             if (files.length <= MAX_SIMS_SUPPORTED) return;
-            Slog.d(TAG, "Too many data files");
+            if (DBG) Slog.d(TAG, "Too many data files");
             do {
                 File oldest = null;
                 for (File f : files) {
@@ -850,7 +856,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                     }
                 }
                 if (oldest == null) return;
-                Slog.d(TAG, " deleting " + oldest);
+                if (DBG) Slog.d(TAG, " deleting " + oldest);
                 oldest.delete();
                 files = dir.listFiles();
             } while (files.length > MAX_SIMS_SUPPORTED);

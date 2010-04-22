@@ -79,7 +79,7 @@ public class SntpClient
             byte[] buffer = new byte[NTP_PACKET_SIZE];
             DatagramPacket request = new DatagramPacket(buffer, buffer.length, address, NTP_PORT);
 
-            // set mode = 3 (client) and version = 3                                                                          
+            // set mode = 3 (client) and version = 3
             // mode is in low 3 bits of first byte
             // version is in bits 3-5 of first byte
             buffer[0] = NTP_MODE_CLIENT | (NTP_VERSION << 3);
@@ -90,7 +90,7 @@ public class SntpClient
             writeTimeStamp(buffer, TRANSMIT_TIME_OFFSET, requestTime);
 
             socket.send(request);
-            
+
             // read the response
             DatagramPacket response = new DatagramPacket(buffer, buffer.length);
             socket.receive(response);
@@ -112,8 +112,8 @@ public class SntpClient
             //             = (transit + skew - transit + skew)/2
             //             = (2 * skew)/2 = skew
             long clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2;
-            if (Config.LOGD) Log.d(TAG, "round trip: " + roundTripTime + " ms");
-            if (Config.LOGD) Log.d(TAG, "clock offset: " + clockOffset + " ms");
+            // if (Config.LOGD) Log.d(TAG, "round trip: " + roundTripTime + " ms");
+            // if (Config.LOGD) Log.d(TAG, "clock offset: " + clockOffset + " ms");
 
             // save our results - use the times on this side of the network latency
             // (response rather than request time)
