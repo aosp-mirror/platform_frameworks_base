@@ -324,7 +324,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
     
     SkRegion clipReg;
     if (dirtyRegion.isRect()) { // very common case
-        const Rect& b(dirtyRegion.getBounds());
+        const Rect b(dirtyRegion.getBounds());
         clipReg.setRect(b.left, b.top, b.right, b.bottom);
     } else {
         size_t count;

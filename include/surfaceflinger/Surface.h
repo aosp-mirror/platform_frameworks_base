@@ -250,7 +250,7 @@ private:
     sp<GraphicBuffer>           mLockedBuffer;
     sp<GraphicBuffer>           mPostedBuffer;
     mutable Region              mOldDirtyRegion;
-    bool                        mNeedFullUpdate;
+    bool                        mReserved;
 
     // query() must be called from dequeueBuffer() thread
     uint32_t                    mWidth;
