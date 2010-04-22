@@ -111,7 +111,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      *                    data is always displayed.
      */
     public CursorAdapter(Context context, Cursor c, boolean autoRequery) {
-        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : 0);
+        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : FLAG_REGISTER_CONTENT_OBSERVER);
     }
 
     /**
@@ -125,7 +125,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
     }
 
     protected void init(Context context, Cursor c, boolean autoRequery) {
-        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : 0);
+        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : FLAG_REGISTER_CONTENT_OBSERVER);
     }
 
     protected void init(Context context, Cursor c, int flags) {
