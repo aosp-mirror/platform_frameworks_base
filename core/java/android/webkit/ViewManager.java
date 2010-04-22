@@ -205,7 +205,14 @@ class ViewManager {
                 if (sView.getVisibility() == View.VISIBLE) {
                     sView.setVisibility(View.INVISIBLE);
                     sView.getHolder().setSizeFromLayout();
-                    sView.setVisibility(View.VISIBLE);
+                    // setLayoutParams() only requests the layout. If we set it
+                    // to VISIBLE now, it will use the old dimension to set the
+                    // size. Post a message to ensure that it shows the new size.
+                    mWebView.mPrivateHandler.post(new Runnable() {
+                        public void run() {
+                            sView.setVisibility(View.VISIBLE);
+                        }
+                    });
                 } else {
                     sView.getHolder().setSizeFromLayout();
                 }
