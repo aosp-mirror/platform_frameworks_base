@@ -416,7 +416,7 @@ public class DefaultContainerService extends IntentService {
                 return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
             }
         }
-        if (checkExt || checkBoth && !mediaAvailable) {
+        if ((checkExt || checkBoth) && !mediaAvailable) {
             return PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE;
         }
         return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
