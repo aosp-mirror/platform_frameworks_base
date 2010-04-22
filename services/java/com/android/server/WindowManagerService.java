@@ -7580,15 +7580,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 while (i > 0) {
                     i--;
                     WindowState c = (WindowState)mChildWindows.get(i);
-                    if (c.mSurface != null && c.mAttachedHidden) {
+                    if (c.mAttachedHidden) {
                         c.mAttachedHidden = false;
-                        c.performShowLocked();
-                        // It hadn't been shown, which means layout not
-                        // performed on it, so now we want to make sure to
-                        // do a layout.  If called from within the transaction
-                        // loop, this will cause it to restart with a new
-                        // layout.
-                        mLayoutNeeded = true;
+                        if (c.mSurface != null) {
+                            c.performShowLocked();
+                            // It hadn't been shown, which means layout not
+                            // performed on it, so now we want to make sure to
+                            // do a layout.  If called from within the transaction
+                            // loop, this will cause it to restart with a new
+                            // layout.
+                            mLayoutNeeded = true;
+                        }
                     }
                 }
 
