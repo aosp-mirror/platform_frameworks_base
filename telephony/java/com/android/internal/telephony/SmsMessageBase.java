@@ -20,6 +20,7 @@ import com.android.internal.telephony.SmsHeader;
 import java.util.Arrays;
 
 import static android.telephony.SmsMessage.MessageClass;
+import android.provider.Telephony;
 
 /**
  * Base class declaring the specific methods and members for SmsMessage.
@@ -385,7 +386,7 @@ public abstract class SmsMessageBase {
          if (parts.length < 2) return;
          emailFrom = parts[0];
          emailBody = parts[1];
-         isEmail = true;
+         isEmail = Telephony.Mms.isEmailAddress(emailFrom);
     }
 
 }
