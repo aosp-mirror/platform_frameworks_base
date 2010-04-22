@@ -315,6 +315,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // without empty apps being able to push them out of memory.
     static final int MIN_HIDDEN_APPS = 2;
     
+    // The maximum number of hidden processes we will keep around before
+    // killing them; this is just a control to not let us go too crazy with
+    // keeping around processes on devices with large amounts of RAM.
+    static final int MAX_HIDDEN_APPS = 15;
+    
     // We put empty content processes after any hidden processes that have
     // been idle for less than 30 seconds.
     static final long CONTENT_APP_IDLE_OFFSET = 30*1000;
@@ -8467,8 +8472,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 int adj = proc.setAdj;
                 if (adj >= worstType) {
-                    Slog.w(TAG, "Killing " + reason + " : " + proc + " (adj "
-                            + adj + ")");
+                    Slog.w(TAG, "Killing " + proc + " (adj " + adj + "): " + reason);
                     EventLog.writeEvent(EventLogTags.AM_KILL, proc.pid,
                             proc.processName, adj, reason);
                     killed = true;
@@ -8883,9 +8887,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (app.pid > 0 && app.pid != MY_PID) {
                 handleAppCrashLocked(app);
-                Slog.i(ActivityManagerService.TAG, "Killing process "
-                        + app.processName
-                        + " (pid=" + app.pid + ") at user's request");
+                Slog.i(ActivityManagerService.TAG, "Killing "
+                        + app.processName + " (pid=" + app.pid + "): user's request");
+                EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                        app.processName, app.setAdj, "user's request after error");
                 Process.killProcess(app.pid);
             }
         }
@@ -10413,10 +10418,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (!capp.persistent && capp.thread != null
                     && capp.pid != 0
                     && capp.pid != MY_PID) {
-                Slog.i(TAG, "Killing app " + capp.processName
-                        + " (pid " + capp.pid
-                        + ") because provider " + cpr.info.name
-                        + " is in dying process " + proc.processName);
+                Slog.i(TAG, "Kill " + capp.processName
+                        + " (pid " + capp.pid + "): provider " + cpr.info.name
+                        + " in dying process " + proc.processName);
+                EventLog.writeEvent(EventLogTags.AM_KILL, capp.pid,
+                        capp.processName, capp.setAdj, "dying provider " + proc.processName);
                 Process.killProcess(capp.pid);
             }
         }
@@ -11501,6 +11507,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (r.isForeground) {
                         r.isForeground = false;
                         if (r.app != null) {
+                            updateLruProcessLocked(r.app, false, true);
                             updateServiceForegroundLocked(r.app, true);
                         }
                     }
@@ -14223,6 +14230,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         int factor = (mLruProcesses.size()-4)/numSlots;
         if (factor < 1) factor = 1;
         int step = 0;
+        int numHidden = 0;
         
         // First try updating the OOM adjustment for each of the
         // application processes based on their current state.
@@ -14239,6 +14247,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (step >= factor) {
                         step = 0;
                         curHiddenAdj++;
+                    }
+                }
+                if (app.curAdj >= HIDDEN_APP_MIN_ADJ) {
+                    numHidden++;
+                    if (numHidden > MAX_HIDDEN_APPS) {
+                        Slog.i(TAG, "Kill " + app.processName
+                                + " (pid " + app.pid + "): hidden #" + numHidden
+                                + " beyond limit " + MAX_HIDDEN_APPS);
+                        EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                                app.processName, app.setAdj, "too many background");
+                        Process.killProcess(app.pid);
                     }
                 }
             } else {
