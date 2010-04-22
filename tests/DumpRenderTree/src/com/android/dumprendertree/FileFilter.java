@@ -102,11 +102,9 @@ public class FileFilter {
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
         ignoreResultList.add("fast/dom/Window/Plug-ins.html"); // need test plugin
-        ignoreResultList.add("fast/dom/Window/window-properties.html"); // xslt and xpath elements missing from property list
         ignoreResultList.add("fast/dom/Window/window-screen-properties.html"); // pixel depth
         ignoreResultList.add("fast/dom/Window/window-xy-properties.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/dom/attribute-namespaces-get-set.html"); // http://b/733229
-        ignoreResultList.add("fast/dom/global-constructors.html"); // requires xslt and xpath support
         ignoreResultList.add("fast/dom/object-embed-plugin-scripting.html"); // dynamic plugins not supported
         ignoreResultList.add("fast/dom/tabindex-clamp.html"); // there is extra spacing in the file due to multiple input boxes fitting on one line on Apple, ours are wrapped. Space at line ends are stripped.
         ignoreResultList.add("fast/events/anchor-image-scrolled-x-y.html"); // requires eventSender.mouseDown(),mouseUp()
