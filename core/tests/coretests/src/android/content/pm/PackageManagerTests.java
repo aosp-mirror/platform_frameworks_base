@@ -33,6 +33,9 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -275,7 +278,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 (long)sdStats.getBlockSize();
         // TODO check for thesholds here
         return pkgLen <= sdSize;
-        
+
     }
     private boolean checkInt(long pkgLen) {
         StatFs intStats = new StatFs(Environment.getDataDirectory().getPath());
@@ -346,7 +349,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         return INSTALL_LOC_ERR;
     }
-    
+
     private void assertInstall(PackageParser.Package pkg, int flags, int expInstallLocation) {
         try {
             String pkgName = pkg.packageName;
@@ -385,7 +388,7 @@ public class PackageManagerTests extends AndroidTestCase {
             failStr("failed with exception : " + e);
         }
     }
-    
+
     private void assertNotInstalled(String pkgName) {
         try {
             ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
@@ -421,7 +424,7 @@ public class PackageManagerTests extends AndroidTestCase {
     static final String PERM_UNDEFINED = "undefined";
     static final String PERM_USED = "used";
     static final String PERM_NOTUSED = "notused";
-    
+
     private void assertPermissions(String[] cmds) {
         final PackageManager pm = getPm();
         String pkg = null;
@@ -572,14 +575,17 @@ public class PackageManagerTests extends AndroidTestCase {
         return ip;
     }
 
+    @MediumTest
     public void testInstallNormalInternal() {
         sampleInstallFromRawResource(0, true);
     }
 
+    @MediumTest
     public void testInstallFwdLockedInternal() {
         sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
     }
 
+    @MediumTest
     public void testInstallSdcard() {
         sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
     }
@@ -669,27 +675,33 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    @MediumTest
     public void testReplaceFailNormalInternal() {
         sampleReplaceFromRawResource(0);
     }
 
+    @MediumTest
     public void testReplaceFailFwdLockedInternal() {
         sampleReplaceFromRawResource(PackageManager.INSTALL_FORWARD_LOCK);
     }
 
+    @MediumTest
     public void testReplaceFailSdcard() {
         sampleReplaceFromRawResource(PackageManager.INSTALL_EXTERNAL);
     }
 
+    @MediumTest
     public void testReplaceNormalInternal() {
         sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
     }
 
+    @MediumTest
     public void testReplaceFwdLockedInternal() {
         sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageManager.INSTALL_FORWARD_LOCK);
     }
 
+    @MediumTest
     public void testReplaceSdcard() {
         sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageManager.INSTALL_EXTERNAL);
@@ -803,26 +815,32 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    @MediumTest
     public void testDeleteNormalInternal() {
         deleteFromRawResource(0, 0);
     }
 
+    @MediumTest
     public void testDeleteFwdLockedInternal() {
         deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, 0);
     }
 
+    @MediumTest
     public void testDeleteSdcard() {
         deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, 0);
     }
 
+    @MediumTest
     public void testDeleteNormalInternalRetainData() {
         deleteFromRawResource(0, PackageManager.DONT_DELETE_DATA);
     }
 
+    @MediumTest
     public void testDeleteFwdLockedInternalRetainData() {
         deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, PackageManager.DONT_DELETE_DATA);
     }
 
+    @MediumTest
     public void testDeleteSdcardRetainData() {
         deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DONT_DELETE_DATA);
     }
@@ -939,7 +957,7 @@ public class PackageManagerTests extends AndroidTestCase {
         } catch (RemoteException e) {
             failStr(e);
         }
-        
+
         StorageListener observer = new StorageListener();
         StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
         sm.registerListener(observer);
@@ -1054,26 +1072,31 @@ public class PackageManagerTests extends AndroidTestCase {
         } catch (NameNotFoundException e) {}
     }
 
+    @MediumTest
     public void testManifestInstallLocationInternal() {
         installFromRawResource("install.apk", R.raw.install_loc_internal,
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
 
+    @MediumTest
     public void testManifestInstallLocationSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
     }
 
+    @MediumTest
     public void testManifestInstallLocationAuto() {
         installFromRawResource("install.apk", R.raw.install_loc_auto,
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
+    @MediumTest
     public void testManifestInstallLocationUnspecified() {
         installFromRawResource("install.apk", R.raw.install_loc_unspecified,
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
+    @MediumTest
     public void testManifestInstallLocationFwdLockedFlagSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_unspecified,
                 PackageManager.INSTALL_FORWARD_LOCK |
@@ -1082,6 +1105,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
+    @MediumTest
     public void testManifestInstallLocationFwdLockedSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                 PackageManager.INSTALL_FORWARD_LOCK, true, false,
@@ -1094,6 +1118,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * the package via flag to install on sdcard. Make sure the new flag overrides
      * the old install location.
      */
+    @MediumTest
     public void testReplaceFlagInternalSdcard() {
         int iFlags = 0;
         int rFlags = PackageManager.INSTALL_EXTERNAL;
@@ -1115,6 +1140,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * the package with no flags or manifest option and make sure the old
      * install location is retained.
      */
+    @MediumTest
     public void testReplaceFlagSdcardInternal() {
         int iFlags = PackageManager.INSTALL_EXTERNAL;
         int rFlags = 0;
@@ -1131,6 +1157,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    @MediumTest
     public void testManifestInstallLocationReplaceInternalSdcard() {
         int iFlags = 0;
         int iApk = R.raw.install_loc_internal;
@@ -1153,6 +1180,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    @MediumTest
     public void testManifestInstallLocationReplaceSdcardInternal() {
         int iFlags = 0;
         int iApk = R.raw.install_loc_sdcard;
@@ -1324,7 +1352,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * PackageManager api to install first and then replace it
      * again.
      */
-    
+
     private void moveFromRawResource(String outFileName,
             int rawResId, int installFlags, int moveFlags, boolean cleanUp,
             boolean fail, int result) {
@@ -1374,6 +1402,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 fail, result);
     }
 
+    @MediumTest
     public void testMoveAppInternalToExternal() {
         int installFlags = PackageManager.INSTALL_INTERNAL;
         int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
@@ -1382,6 +1411,7 @@ public class PackageManagerTests extends AndroidTestCase {
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
 
+    @MediumTest
     public void testMoveAppInternalToInternal() {
         int installFlags = PackageManager.INSTALL_INTERNAL;
         int moveFlags = PackageManager.MOVE_INTERNAL;
@@ -1390,6 +1420,7 @@ public class PackageManagerTests extends AndroidTestCase {
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
 
+    @MediumTest
     public void testMoveAppExternalToExternal() {
         int installFlags = PackageManager.INSTALL_EXTERNAL;
         int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
@@ -1397,6 +1428,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int result = PackageManager.MOVE_FAILED_INVALID_LOCATION;
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
+    @MediumTest
     public void testMoveAppExternalToInternal() {
         int installFlags = PackageManager.INSTALL_EXTERNAL;
         int moveFlags = PackageManager.MOVE_INTERNAL;
@@ -1404,6 +1436,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int result = PackageManager.MOVE_SUCCEEDED;
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
+    @MediumTest
     public void testMoveAppForwardLocked() {
         int installFlags = PackageManager.INSTALL_FORWARD_LOCK;
         int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
@@ -1411,12 +1444,13 @@ public class PackageManagerTests extends AndroidTestCase {
         int result = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
+    //TODO: To be reenabled after investigation
     public void testMoveAppFailInternalToExternalDelete() {
         int installFlags = 0;
         int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
         boolean fail = true;
         final int result = PackageManager.MOVE_FAILED_DOESNT_EXIST;
-        
+
         int rawResId = R.raw.install;
         int origDefaultLoc = getDefaultInstallLoc();
         InstallParams ip = null;
@@ -1443,6 +1477,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an install error code is returned when media is unmounted
      * and package installed on sdcard via package manager flag.
      */
+    @MediumTest
     public void testInstallSdcardUnmount() {
         boolean origState = getMediaState();
         try {
@@ -1464,10 +1499,11 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     /*
-    * Unmount sdcard. Try installing an app with manifest option to install
-    * on sdcard. Make sure it gets installed on internal flash.
-    */
-   public void testInstallManifestSdcardUnmount() {
+     * Unmount sdcard. Try installing an app with manifest option to install
+     * on sdcard. Make sure it gets installed on internal flash.
+     */
+    @MediumTest
+    public void testInstallManifestSdcardUnmount() {
        boolean origState = getMediaState();
        try {
            // Unmount sdcard
@@ -1492,18 +1528,20 @@ public class PackageManagerTests extends AndroidTestCase {
     * I - internal, E - external, F - forward locked, Flag suffix absent if not using any option.
     * Manifest: ManifestI, ManifestE, ManifestA, Manifest suffix absent if not using any option.
     * Existing: Existing suffix absent if not existing.
-    * User: UserI, UserE, UserA, User suffix absent if not existing. 
-    * 
+    * User: UserI, UserE, UserA, User suffix absent if not existing.
+    *
     */
    /*
     * Install an app on internal flash
     */
+   @MediumTest
    public void testFlagI() {
        sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, true);
    }
    /*
     * Install an app on sdcard.
     */
+   @MediumTest
    public void testFlagE() {
        sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
    }
@@ -1511,12 +1549,14 @@ public class PackageManagerTests extends AndroidTestCase {
    /*
     * Install an app on sdcard.
     */
+   @MediumTest
    public void testFlagF() {
        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
    }
    /*
     * Install an app with both internal and external flags set. should fail
     */
+   @MediumTest
    public void testFlagIE() {
        installFromRawResource("install.apk", R.raw.install,
                PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_INTERNAL,
@@ -1528,6 +1568,7 @@ public class PackageManagerTests extends AndroidTestCase {
    /*
     * Install an app with both internal and external flags set. should fail
     */
+   @MediumTest
    public void testFlagIF() {
        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK |
                PackageManager.INSTALL_INTERNAL, true);
@@ -1535,6 +1576,7 @@ public class PackageManagerTests extends AndroidTestCase {
    /*
     * Install an app with both internal and external flags set. should fail
     */
+   @MediumTest
    public void testFlagEF() {
        installFromRawResource("install.apk", R.raw.install,
                PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_EXTERNAL,
@@ -1545,6 +1587,7 @@ public class PackageManagerTests extends AndroidTestCase {
    /*
     * Install an app with both internal and external flags set. should fail
     */
+   @MediumTest
    public void testFlagIEF() {
        installFromRawResource("install.apk", R.raw.install,
                PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_INTERNAL |
@@ -1557,6 +1600,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with both internal and manifest option set.
     * should install on internal.
     */
+   @MediumTest
    public void testFlagIManifestI() {
        installFromRawResource("install.apk", R.raw.install_loc_internal,
                PackageManager.INSTALL_INTERNAL,
@@ -1568,6 +1612,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with both internal and manifest preference for
     * preferExternal. Should install on internal.
     */
+   @MediumTest
    public void testFlagIManifestE() {
        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                PackageManager.INSTALL_INTERNAL,
@@ -1579,6 +1624,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with both internal and manifest preference for
     * auto. should install internal.
     */
+   @MediumTest
    public void testFlagIManifestA() {
        installFromRawResource("install.apk", R.raw.install_loc_auto,
                PackageManager.INSTALL_INTERNAL,
@@ -1590,6 +1636,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with both external and manifest option set.
     * should install externally.
     */
+   @MediumTest
    public void testFlagEManifestI() {
        installFromRawResource("install.apk", R.raw.install_loc_internal,
                PackageManager.INSTALL_EXTERNAL,
@@ -1601,6 +1648,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with both external and manifest preference for
     * preferExternal. Should install externally.
     */
+   @MediumTest
    public void testFlagEManifestE() {
        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                PackageManager.INSTALL_EXTERNAL,
@@ -1612,6 +1660,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with both external and manifest preference for
     * auto. should install on external media.
     */
+   @MediumTest
    public void testFlagEManifestA() {
        installFromRawResource("install.apk", R.raw.install_loc_auto,
                PackageManager.INSTALL_EXTERNAL,
@@ -1623,6 +1672,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with fwd locked flag set and install location set to
     * internal. should install internally.
     */
+   @MediumTest
    public void testFlagFManifestI() {
        installFromRawResource("install.apk", R.raw.install_loc_internal,
                PackageManager.INSTALL_EXTERNAL,
@@ -1634,6 +1684,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with fwd locked flag set and install location set to
     * preferExternal. should install internally.
     */
+   @MediumTest
    public void testFlagFManifestE() {
        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                PackageManager.INSTALL_EXTERNAL,
@@ -1645,6 +1696,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * Install an app with fwd locked flag set and install location set to
     * auto. should install internally.
     */
+   @MediumTest
    public void testFlagFManifestA() {
        installFromRawResource("install.apk", R.raw.install_loc_auto,
                PackageManager.INSTALL_EXTERNAL,
@@ -1657,8 +1709,9 @@ public class PackageManagerTests extends AndroidTestCase {
     * flag is explicitly set it should override current location. If manifest location
     * is set, that should over ride current location too. if not the existing install
     * location should be honoured.
-    * testFlagI/E/F/ExistingI/E - 
+    * testFlagI/E/F/ExistingI/E -
     */
+   @MediumTest
    public void testFlagIExistingI() {
        int iFlags = PackageManager.INSTALL_INTERNAL;
        int rFlags = PackageManager.INSTALL_INTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1675,6 +1728,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                -1);
    }
+   @MediumTest
    public void testFlagIExistingE() {
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        int rFlags = PackageManager.INSTALL_INTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1691,6 +1745,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                -1);
    }
+   @MediumTest
    public void testFlagEExistingI() {
        int iFlags = PackageManager.INSTALL_INTERNAL;
        int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1707,6 +1762,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                -1);
    }
+   @MediumTest
    public void testFlagEExistingE() {
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1723,6 +1779,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                -1);
    }
+   @MediumTest
    public void testFlagFExistingI() {
        int iFlags = PackageManager.INSTALL_INTERNAL;
        int rFlags = PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1739,6 +1796,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                -1);
    }
+   @MediumTest
    public void testFlagFExistingE() {
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        int rFlags = PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1762,6 +1820,7 @@ public class PackageManagerTests extends AndroidTestCase {
     * public void testManifestI/E/A
     * TODO out of memory fall back behaviour.
     */
+   @MediumTest
    public void testManifestI() {
        installFromRawResource("install.apk", R.raw.install_loc_internal,
                0,
@@ -1769,6 +1828,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
+   @MediumTest
    public void testManifestE() {
        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                0,
@@ -1776,6 +1836,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
+   @MediumTest
    public void testManifestA() {
        installFromRawResource("install.apk", R.raw.install_loc_auto,
                0,
@@ -1788,8 +1849,9 @@ public class PackageManagerTests extends AndroidTestCase {
     * with install location attribute set to internalOnly, preferExternal and auto
     * for already existing apps. The manifest option should take precedence.
     * TODO add out of memory fall back behaviour.
-    * testManifestI/E/AExistingI/E 
+    * testManifestI/E/AExistingI/E
     */
+   @MediumTest
    public void testManifestIExistingI() {
        int iFlags = PackageManager.INSTALL_INTERNAL;
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1806,6 +1868,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
+   @MediumTest
    public void testManifestIExistingE() {
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1822,6 +1885,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
+   @MediumTest
    public void testManifestEExistingI() {
        int iFlags = PackageManager.INSTALL_INTERNAL;
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1838,6 +1902,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
+   @MediumTest
    public void testManifestEExistingE() {
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1854,6 +1919,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
+   @MediumTest
    public void testManifestAExistingI() {
        int iFlags = PackageManager.INSTALL_INTERNAL;
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1870,6 +1936,7 @@ public class PackageManagerTests extends AndroidTestCase {
                false, -1,
                PackageInfo.INSTALL_LOCATION_AUTO);
    }
+   @MediumTest
    public void testManifestAExistingE() {
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1926,31 +1993,37 @@ public class PackageManagerTests extends AndroidTestCase {
            setInstallLoc(origSetting);
        }
    }
+   @MediumTest
    public void testExistingIUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
        int iFlags = PackageManager.INSTALL_INTERNAL;
        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
+   @MediumTest
    public void testExistingIUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
        int iFlags = PackageManager.INSTALL_INTERNAL;
        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
+   @MediumTest
    public void testExistingIUserA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        int iFlags = PackageManager.INSTALL_INTERNAL;
        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
+   @MediumTest
    public void testExistingEUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
+   @MediumTest
    public void testExistingEUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
        int iFlags = PackageManager.INSTALL_EXTERNAL;
        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
+   @MediumTest
    public void testExistingEUserA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        int iFlags = PackageManager.INSTALL_EXTERNAL;
@@ -1959,12 +2032,12 @@ public class PackageManagerTests extends AndroidTestCase {
    /*
     * The following set of tests verify that the user setting defines
     * the install location.
-    * 
+    *
     */
    private boolean getUserSettingSetInstallLocation() {
        try {
            return Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
-           
+
        } catch (SettingNotFoundException e1) {
        }
        return false;
@@ -1993,16 +2066,19 @@ public class PackageManagerTests extends AndroidTestCase {
            setInstallLoc(origSetting);
        }
    }
+   @MediumTest
    public void testUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
        int iloc = getExpectedInstallLocation(userSetting);
        setUserX(true, userSetting, iloc);
    }
+   @MediumTest
    public void testUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
        int iloc = getExpectedInstallLocation(userSetting);
        setUserX(true, userSetting, iloc);
    }
+   @MediumTest
    public void testUserA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        int iloc = getExpectedInstallLocation(userSetting);
@@ -2012,22 +2088,25 @@ public class PackageManagerTests extends AndroidTestCase {
     * The following set of tests turn on/off the basic
     * user setting for turning on install location.
     */
+   @MediumTest
    public void testUserPrefOffUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
        int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
        setUserX(false, userSetting, iloc);
    }
+   @MediumTest
    public void testUserPrefOffUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
        int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
        setUserX(false, userSetting, iloc);
    }
+   @MediumTest
    public void testUserPrefOffA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
        setUserX(false, userSetting, iloc);
    }
-   
+
     static final String BASE_PERMISSIONS_DEFINED[] = new String[] {
         PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
         PERM_DEFINED,
@@ -2035,7 +2114,7 @@ public class PackageManagerTests extends AndroidTestCase {
         "com.android.frameworks.coretests.DANGEROUS",
         "com.android.frameworks.coretests.SIGNATURE",
     };
-    
+
     static final String BASE_PERMISSIONS_UNDEFINED[] = new String[] {
         PERM_PACKAGE, "com.android.frameworks.coretests.install_decl_perm",
         PERM_UNDEFINED,
@@ -2043,7 +2122,7 @@ public class PackageManagerTests extends AndroidTestCase {
         "com.android.frameworks.coretests.DANGEROUS",
         "com.android.frameworks.coretests.SIGNATURE",
     };
-    
+
     static final String BASE_PERMISSIONS_USED[] = new String[] {
         PERM_PACKAGE, "com.android.frameworks.coretests.install_use_perm_good",
         PERM_USED,
@@ -2051,7 +2130,7 @@ public class PackageManagerTests extends AndroidTestCase {
         "com.android.frameworks.coretests.DANGEROUS",
         "com.android.frameworks.coretests.SIGNATURE",
     };
-    
+
     static final String BASE_PERMISSIONS_NOTUSED[] = new String[] {
         PERM_PACKAGE, "com.android.frameworks.coretests.install_use_perm_good",
         PERM_NOTUSED,
@@ -2059,7 +2138,7 @@ public class PackageManagerTests extends AndroidTestCase {
         "com.android.frameworks.coretests.DANGEROUS",
         "com.android.frameworks.coretests.SIGNATURE",
     };
-    
+
     static final String BASE_PERMISSIONS_SIGUSED[] = new String[] {
         PERM_PACKAGE, "com.android.frameworks.coretests.install_use_perm_good",
         PERM_USED,
@@ -2068,16 +2147,17 @@ public class PackageManagerTests extends AndroidTestCase {
         "com.android.frameworks.coretests.NORMAL",
         "com.android.frameworks.coretests.DANGEROUS",
     };
-    
+
     /*
      * Ensure that permissions are properly declared.
      */
+    @LargeTest
     public void testInstallDeclaresPermissions() {
         InstallParams ip = null;
         InstallParams ip2 = null;
         try {
             // **: Upon installing a package, are its declared permissions published?
-           
+
             int iFlags = PackageManager.INSTALL_INTERNAL;
             int iApk = R.raw.install_decl_perm;
             ip = installFromRawResource("install.apk", iApk,
@@ -2085,9 +2165,9 @@ public class PackageManagerTests extends AndroidTestCase {
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
             assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
             assertPermissions(BASE_PERMISSIONS_DEFINED);
-           
+
             // **: Upon installing package, are its permissions granted?
-           
+
             int i2Flags = PackageManager.INSTALL_INTERNAL;
             int i2Apk = R.raw.install_use_perm_good;
             ip2 = installFromRawResource("install2.apk", i2Apk,
@@ -2095,11 +2175,11 @@ public class PackageManagerTests extends AndroidTestCase {
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
             assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
             assertPermissions(BASE_PERMISSIONS_USED);
-            
+
             // **: Upon removing but not deleting, are permissions retained?
-           
+
             GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
-           
+
             try {
                 invokeDeletePackage(ip.pkg.packageName, PackageManager.DONT_DELETE_DATA, receiver);
             } catch (Exception e) {
@@ -2107,18 +2187,18 @@ public class PackageManagerTests extends AndroidTestCase {
             }
             assertPermissions(BASE_PERMISSIONS_DEFINED);
             assertPermissions(BASE_PERMISSIONS_USED);
-           
+
             // **: Upon re-installing, are permissions retained?
-           
+
             ip = installFromRawResource("install.apk", iApk,
                     iFlags | PackageManager.INSTALL_REPLACE_EXISTING, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
             assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
             assertPermissions(BASE_PERMISSIONS_DEFINED);
             assertPermissions(BASE_PERMISSIONS_USED);
-           
+
             // **: Upon deleting package, are all permissions removed?
-           
+
             try {
                 invokeDeletePackage(ip.pkg.packageName, 0, receiver);
                 ip = null;
@@ -2127,9 +2207,9 @@ public class PackageManagerTests extends AndroidTestCase {
             }
             assertPermissions(BASE_PERMISSIONS_UNDEFINED);
             assertPermissions(BASE_PERMISSIONS_NOTUSED);
-           
+
             // **: Delete package using permissions; nothing to check here.
-           
+
             GenericReceiver receiver2 = new DeleteReceiver(ip2.pkg.packageName);
             try {
                 invokeDeletePackage(ip2.pkg.packageName, 0, receiver);
@@ -2137,35 +2217,35 @@ public class PackageManagerTests extends AndroidTestCase {
             } catch (Exception e) {
                 failStr(e);
             }
-            
+
             // **: Re-install package using permissions; no permissions can be granted.
-           
+
             ip2 = installFromRawResource("install2.apk", i2Apk,
                     i2Flags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
             assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
             assertPermissions(BASE_PERMISSIONS_NOTUSED);
-           
+
             // **: Upon installing declaring package, are sig permissions granted
             // to other apps (but not other perms)?
-           
+
             ip = installFromRawResource("install.apk", iApk,
                     iFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
             assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
             assertPermissions(BASE_PERMISSIONS_DEFINED);
             assertPermissions(BASE_PERMISSIONS_SIGUSED);
-           
+
             // **: Re-install package using permissions; are all permissions granted?
-            
+
             ip2 = installFromRawResource("install2.apk", i2Apk,
                     i2Flags | PackageManager.INSTALL_REPLACE_EXISTING, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
             assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
             assertPermissions(BASE_PERMISSIONS_NOTUSED);
-           
+
             // **: Upon deleting package, are all permissions removed?
-            
+
             try {
                 invokeDeletePackage(ip.pkg.packageName, 0, receiver);
                 ip = null;
@@ -2174,16 +2254,16 @@ public class PackageManagerTests extends AndroidTestCase {
             }
             assertPermissions(BASE_PERMISSIONS_UNDEFINED);
             assertPermissions(BASE_PERMISSIONS_NOTUSED);
-            
+
             // **: Delete package using permissions; nothing to check here.
-            
+
             try {
                 invokeDeletePackage(ip2.pkg.packageName, 0, receiver);
                 ip2 = null;
             } catch (Exception e) {
                 failStr(e);
             }
-            
+
         } finally {
             if (ip2 != null) {
                 cleanUpInstall(ip2);
@@ -2197,6 +2277,7 @@ public class PackageManagerTests extends AndroidTestCase {
     /*
      * Ensure that permissions are properly declared.
      */
+    @MediumTest
     public void testInstallOnSdPermissionsUnmount() {
         InstallParams ip = null;
         boolean origMediaState = getMediaState();
@@ -2228,6 +2309,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Please note that this test is very closely tied to the framework's
      * naming convention for secure containers.
      */
+    @MediumTest
     public void testInstallSdcardStaleContainer() {
         boolean origMediaState = getMediaState();
         try {
@@ -2253,7 +2335,7 @@ public class PackageManagerTests extends AndroidTestCase {
             installFromRawResource(outFileName, rawResId,
                     PackageManager.INSTALL_EXTERNAL, true,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        } catch (Exception e) { 
+        } catch (Exception e) {
             failStr(e.getMessage());
         } finally {
             if (origMediaState) {
@@ -2266,7 +2348,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
     /*
      * The following series of tests are related to upgrading apps with
-     * different certificates. 
+     * different certificates.
      */
     private int APP1_UNSIGNED = R.raw.install_app1_unsigned;
     private int APP1_CERT1 = R.raw.install_app1_cert1;
@@ -2304,6 +2386,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an app signed with two certificates can be upgraded by the
      * same app signed with two certificates.
      */
+    @MediumTest
     public void testReplaceMatchAllCerts() {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT1_CERT2, true, false, -1);
     }
@@ -2312,6 +2395,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an app signed with two certificates cannot be upgraded
      * by an app signed with a different certificate.
      */
+    @MediumTest
     public void testReplaceMatchNoCerts1() {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT3, true, true,
                 PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
@@ -2320,6 +2404,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an app signed with two certificates cannot be upgraded
      * by an app signed with a different certificate.
      */
+    @MediumTest
     public void testReplaceMatchNoCerts2() {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT3_CERT4, true, true,
                 PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
@@ -2328,6 +2413,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an app signed with two certificates cannot be upgraded by
      * an app signed with a subset of initial certificates.
      */
+    @MediumTest
     public void testReplaceMatchSomeCerts1() {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT1, true, true,
                 PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
@@ -2336,6 +2422,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an app signed with two certificates cannot be upgraded by
      * an app signed with the last certificate.
      */
+    @MediumTest
     public void testReplaceMatchSomeCerts2() {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT2, true, true,
                 PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
@@ -2344,6 +2431,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that an app signed with a certificate can be upgraded by app
      * signed with a superset of certificates.
      */
+    @MediumTest
     public void testReplaceMatchMoreCerts() {
         replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, true, true,
                 PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
@@ -2353,6 +2441,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * signed with a superset of certificates. Then verify that the an app
      * signed with the original set of certs cannot upgrade the new one.
      */
+    @MediumTest
     public void testReplaceMatchMoreCertsReplaceSomeCerts() {
         InstallParams ip = replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, false, true,
                 PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
@@ -2376,31 +2465,37 @@ public class PackageManagerTests extends AndroidTestCase {
     private void checkSignatures(int apk1, int apk2, int expMatchResult) {
         checkSharedSignatures(apk1, apk2, true, false, -1, expMatchResult);
     }
+    @MediumTest
     public void testCheckSignaturesAllMatch() {
         int apk1 = APP1_CERT1_CERT2;
         int apk2 = APP2_CERT1_CERT2;
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
     }
+    @MediumTest
     public void testCheckSignaturesNoMatch() {
         int apk1 = APP1_CERT1;
         int apk2 = APP2_CERT2;
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
     }
+    @MediumTest
     public void testCheckSignaturesSomeMatch1() {
         int apk1 = APP1_CERT1_CERT2;
         int apk2 = APP2_CERT1;
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
     }
+    @MediumTest
     public void testCheckSignaturesSomeMatch2() {
         int apk1 = APP1_CERT1_CERT2;
         int apk2 = APP2_CERT2;
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
     }
+    @MediumTest
     public void testCheckSignaturesMoreMatch() {
         int apk1 = APP1_CERT1;
         int apk2 = APP2_CERT1_CERT2;
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_NO_MATCH);
     }
+    @MediumTest
     public void testCheckSignaturesUnknown() {
         int apk1 = APP1_CERT1_CERT2;
         int apk2 = APP2_CERT1_CERT2;
@@ -2429,6 +2524,7 @@ public class PackageManagerTests extends AndroidTestCase {
             }
         }
     }
+    @MediumTest
     public void testInstallNoCertificates() {
         int apk1 = APP1_UNSIGNED;
         String apk1Name = "install1.apk";
@@ -2481,6 +2577,7 @@ public class PackageManagerTests extends AndroidTestCase {
             }
         }
     }
+    @MediumTest
     public void testCheckSignaturesSharedAllMatch() {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT1_CERT2;
@@ -2489,6 +2586,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int expMatchResult = PackageManager.SIGNATURE_MATCH;
         checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
     }
+    @MediumTest
     public void testCheckSignaturesSharedNoMatch() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT2;
@@ -2500,6 +2598,7 @@ public class PackageManagerTests extends AndroidTestCase {
     /*
      * Test that an app signed with cert1 and cert2 cannot be replaced when signed with cert1 alone.
      */
+    @MediumTest
     public void testCheckSignaturesSharedSomeMatch1() {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT1;
@@ -2511,6 +2610,7 @@ public class PackageManagerTests extends AndroidTestCase {
     /*
      * Test that an app signed with cert1 and cert2 cannot be replaced when signed with cert2 alone.
      */
+    @MediumTest
     public void testCheckSignaturesSharedSomeMatch2() {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT2;
@@ -2519,6 +2619,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int expMatchResult = -1;
         checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
     }
+    @MediumTest
     public void testCheckSignaturesSharedUnknown() {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT1_CERT2;
@@ -2543,7 +2644,8 @@ public class PackageManagerTests extends AndroidTestCase {
             }
         }
     }
-    
+
+    @MediumTest
     public void testReplaceFirstSharedMatchAllCerts() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT1;
@@ -2551,6 +2653,7 @@ public class PackageManagerTests extends AndroidTestCase {
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
         replaceCerts(apk1, rapk1, true, false, -1);
     }
+    @MediumTest
     public void testReplaceSecondSharedMatchAllCerts() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT1;
@@ -2558,6 +2661,7 @@ public class PackageManagerTests extends AndroidTestCase {
         checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
         replaceCerts(apk2, rapk2, true, false, -1);
     }
+    @MediumTest
     public void testReplaceFirstSharedMatchSomeCerts() {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT1_CERT2;
@@ -2568,6 +2672,7 @@ public class PackageManagerTests extends AndroidTestCase {
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
+    @MediumTest
     public void testReplaceSecondSharedMatchSomeCerts() {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT1_CERT2;
@@ -2578,6 +2683,7 @@ public class PackageManagerTests extends AndroidTestCase {
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
+    @MediumTest
     public void testReplaceFirstSharedMatchNoCerts() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT1;
@@ -2588,6 +2694,7 @@ public class PackageManagerTests extends AndroidTestCase {
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
+    @MediumTest
     public void testReplaceSecondSharedMatchNoCerts() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT1;
@@ -2598,6 +2705,7 @@ public class PackageManagerTests extends AndroidTestCase {
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
+    @MediumTest
     public void testReplaceFirstSharedMatchMoreCerts() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT1;
@@ -2608,6 +2716,7 @@ public class PackageManagerTests extends AndroidTestCase {
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
+    @MediumTest
     public void testReplaceSecondSharedMatchMoreCerts() {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT1;
