@@ -64,6 +64,7 @@ class LoadListener extends Handler implements EventHandler {
 
     // Standard HTTP status codes in a more representative format
     private static final int HTTP_OK = 200;
+    private static final int HTTP_PARTIAL_CONTENT = 206;
     private static final int HTTP_MOVED_PERMANENTLY = 301;
     private static final int HTTP_FOUND = 302;
     private static final int HTTP_SEE_OTHER = 303;
@@ -328,6 +329,17 @@ class LoadListener extends Handler implements EventHandler {
     // Does the header parsing work on the WebCore thread.
     private void handleHeaders(Headers headers) {
         if (mCancelled) return;
+
+        // Note: the headers we care in LoadListeners, like
+        // content-type/content-length, should not be updated for partial
+        // content. Just skip here and go ahead with adding data.
+        if (mStatusCode == HTTP_PARTIAL_CONTENT) {
+            // we don't support cache for partial content yet
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_REMOVE_CACHE, this).sendToTarget();
+            return;
+        }
+
         mHeaders = headers;
 
         long contentLength = headers.getContentLength();
