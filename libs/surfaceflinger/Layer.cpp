@@ -47,11 +47,6 @@ template <typename T> inline T min(T a, T b) {
 
 // ---------------------------------------------------------------------------
 
-const uint32_t Layer::typeInfo = LayerBaseClient::typeInfo | 4;
-const char* const Layer::typeID = "Layer";
-
-// ---------------------------------------------------------------------------
-
 Layer::Layer(SurfaceFlinger* flinger, DisplayID display, 
         const sp<Client>& c, int32_t i)
     :   LayerBaseClient(flinger, display, c, i),
@@ -572,7 +567,7 @@ void Layer::unlockPageFlip(
     }
     if (visibleRegionScreen.isEmpty()) {
         // an invisible layer should not hold a freeze-lock
-        // (because it may never be updated and thereore never release it)
+        // (because it may never be updated and therefore never release it)
         mFreezeLock.clear();
     }
 }
@@ -583,6 +578,38 @@ void Layer::finishPageFlip()
     LOGE_IF(err!=NO_ERROR, 
             "layer %p, buffer=%d wasn't locked!",
             this, mFrontBufferIndex);
+}
+
+
+void Layer::dump(String8& result, char* buffer, size_t SIZE) const
+{
+    LayerBaseClient::dump(result, buffer, SIZE);
+
+    SharedBufferStack::Statistics stats = lcblk->getStats();
+    result.append( lcblk->dump("      ") );
+    sp<const GraphicBuffer> buf0(getBuffer(0));
+    sp<const GraphicBuffer> buf1(getBuffer(1));
+    uint32_t w0=0, h0=0, s0=0;
+    uint32_t w1=0, h1=0, s1=0;
+    if (buf0 != 0) {
+        w0 = buf0->getWidth();
+        h0 = buf0->getHeight();
+        s0 = buf0->getStride();
+    }
+    if (buf1 != 0) {
+        w1 = buf1->getWidth();
+        h1 = buf1->getHeight();
+        s1 = buf1->getStride();
+    }
+    snprintf(buffer, SIZE,
+            "      "
+            "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
+            " freezeLock=%p, dq-q-time=%u us\n",
+            pixelFormat(),
+            w0, h0, s0, w1, h1, s1,
+            getFreezeLock().get(), stats.totalTime);
+
+    result.append(buffer);
 }
 
 // ---------------------------------------------------------------------------

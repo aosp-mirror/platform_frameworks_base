@@ -37,11 +37,6 @@ class LayerDim : public LayerBaseClient
     static int32_t sWidth;
     static int32_t sHeight;
 public:    
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-    
                 LayerDim(SurfaceFlinger* flinger, DisplayID display,
                         const sp<Client>& client, int32_t i);
         virtual ~LayerDim();
@@ -49,6 +44,7 @@ public:
     virtual void onDraw(const Region& clip) const;
     virtual bool needsBlending() const  { return true; }
     virtual bool isSecure() const       { return false; }
+    virtual const char* getTypeId() const { return "LayerDim"; }
 
     static void initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h);
 };

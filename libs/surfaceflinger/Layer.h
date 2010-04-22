@@ -46,11 +46,6 @@ const size_t NUM_BUFFERS = 2;
 class Layer : public LayerBaseClient
 {
 public:    
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-    
                  Layer(SurfaceFlinger* flinger, DisplayID display,
                          const sp<Client>& client, int32_t i);
 
@@ -73,13 +68,18 @@ public:
     virtual status_t ditch();
     
     // only for debugging
-    inline sp<GraphicBuffer> getBuffer(int i) { return mBuffers[i]; }
+    inline sp<GraphicBuffer> getBuffer(int i) const { return mBuffers[i]; }
     // only for debugging
     inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
     // only for debugging
     inline PixelFormat pixelFormat() const { return mFormat; }
     // only for debugging
     inline int getFrontBufferIndex() const { return mFrontBufferIndex; }
+
+    virtual const char* getTypeId() const { return "Layer"; }
+
+protected:
+    virtual void dump(String8& result, char* scratch, size_t size) const;
 
 private:
     inline sp<GraphicBuffer> getFrontBufferLocked() {

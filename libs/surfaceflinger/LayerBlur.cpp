@@ -33,11 +33,6 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerBlur::typeInfo = LayerBaseClient::typeInfo | 8;
-const char* const LayerBlur::typeID = "LayerBlur";
-
-// ---------------------------------------------------------------------------
-
 LayerBlur::LayerBlur(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
