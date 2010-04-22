@@ -301,6 +301,23 @@ import java.util.ArrayList;
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        // onDraw should only be called for password fields.  If WebTextView is
+        // still drawing, but is no longer corresponding to a password field,
+        // remove it.
+        if (mWebView == null || !mWebView.nativeFocusCandidateIsPassword()
+                || !isSameTextField(mWebView.nativeFocusCandidatePointer())) {
+            // Although calling remove() would seem to make more sense here,
+            // changing it to not be a password field will make it not draw.
+            // Other code will make sure that it is removed completely, but this
+            // way the user will not see it.
+            setInPassword(false);
+        } else {
+            super.onDraw(canvas);
+        }
+    }
+
+    @Override
     public void onEditorAction(int actionCode) {
         switch (actionCode) {
         case EditorInfo.IME_ACTION_NEXT:
