@@ -62,6 +62,22 @@
          a reference to a Drawable resource containing the image definition. -->
     <attr name="icon" format="reference" />
 
+    <!-- A Drawable resource providing an extended graphical logo for its
+         associated item. Use with the application tag (to supply a default
+         logo for all application components), or with the activity, receiver,
+         service, or instrumentation tag (to supply a specific logo for that
+         component). It may also be used with the intent-filter tag to supply
+         a logo to show to the user when an activity is being selected based
+         on a particular Intent.
+
+         <p>The given logo will be used to display to the user a graphical
+         representation of its associated component; for example as the
+         header in the Action Bar. The primary differences between an icon
+         and a logo are that logos are often wider and more detailed, and are
+         used without an accompanying text caption. This must be a reference
+         to a Drawable resource containing the image definition. -->
+    <attr name="logo" format="reference" />
+
     <!-- Name of the activity to be launched to manage application's space on
          device. The specified activity gets automatically launched when the
          application's space needs to be managed and is usually invoked 
@@ -695,6 +711,7 @@
         <attr name="theme" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="description" />
         <attr name="permission" />
         <attr name="process" />
@@ -742,6 +759,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="permissionGroup" />
         <attr name="description" />
         <attr name="protectionLevel" />
@@ -766,6 +784,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="description" />
     </declare-styleable>
     
@@ -795,6 +814,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="logo" />
     </declare-styleable>
     
     <!-- The <code>uses-permission</code> tag requests a
@@ -997,6 +1017,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="process" />
         <attr name="authorities" />
         <attr name="syncable" />
@@ -1076,6 +1097,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
         <!-- Specify whether the service is enabled or not (that is, can be instantiated by the system).
@@ -1108,6 +1130,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
         <!-- Specify whether the receiver is enabled or not (that is, can be instantiated by the system).
@@ -1140,6 +1163,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="launchMode" />
         <attr name="screenOrientation" />
         <attr name="configChanges" />
@@ -1193,6 +1217,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="permission" />
         <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
@@ -1262,6 +1287,7 @@
          parent="AndroidManifestActivity AndroidManifestReceiver AndroidManifestService">
         <attr name="label" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="priority" />
     </declare-styleable>
     
@@ -1368,6 +1394,7 @@
         <attr name="targetPackage" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="logo" />
         <attr name="handleProfiling" />
         <attr name="functionalTest" />
     </declare-styleable>

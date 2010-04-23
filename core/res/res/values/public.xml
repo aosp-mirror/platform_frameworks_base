@@ -1240,26 +1240,11 @@
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
     
 <!-- ===============================================================
-     Resources proposed for Gingerbread.
-     =============================================================== -->
-  <eat-comment />
-  <public type="attr" name="adapter" id="0x010102be" />
-  <public type="attr" name="selection" id="0x010102bf" />
-  <public type="attr" name="sortOrder" id="0x010102c0" />
-  <public type="attr" name="uri" id="0x010102c1" />
-  <public type="attr" name="from" id="0x010102c2" />
-  <public type="attr" name="to" id="0x010102c3" />
-  <public type="attr" name="as" id="0x010102c4" />
-  <public type="attr" name="fromValue" id="0x010102c5" />
-  <public type="attr" name="toValue" id="0x010102c6" />
-  <public type="attr" name="column" id="0x010102c7" />
-  <public type="attr" name="withExpression" id="0x010102c8" />
-  <public type="attr" name="withClass" id="0x010102c9" />
-
-<!-- ===============================================================
      Resources introduced in kraken.
      =============================================================== -->
      
+  <public type="attr" name="logo" id="0x010102be" />
+
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
   <public-padding type="id" name="kraken_resource_pad" end="0x01020040" />
   <public-padding type="anim" name="kraken_resource_pad" end="0x010a0020" />
@@ -1271,5 +1256,22 @@
   <public-padding type="dimen" name="kraken_resource_pad" end="0x01050010" />
   <public-padding type="color" name="kraken_resource_pad" end="0x01060020" />
   <public-padding type="array" name="kraken_resource_pad" end="0x01070010" />
+
+<!-- ===============================================================
+     Resources proposed for Gingerbread.
+     =============================================================== -->
+  <eat-comment />
+  <public type="attr" name="adapter" />
+  <public type="attr" name="selection" />
+  <public type="attr" name="sortOrder" />
+  <public type="attr" name="uri" />
+  <public type="attr" name="from" />
+  <public type="attr" name="to" />
+  <public type="attr" name="as" />
+  <public type="attr" name="fromValue" />
+  <public type="attr" name="toValue" />
+  <public type="attr" name="column" />
+  <public type="attr" name="withExpression" />
+  <public type="attr" name="withClass" />
 
 </resources>
