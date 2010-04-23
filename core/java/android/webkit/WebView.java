@@ -4763,9 +4763,11 @@ public class WebView extends AbsoluteLayout
                         invalidate();
                         break;
                     }
+
                     if (!mConfirmMove) {
                         break;
                     }
+
                     if (mPreventDefault == PREVENT_DEFAULT_MAYBE_YES
                             || mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
                         // track mLastTouchTime as we may need to do fling at
@@ -4933,9 +4935,17 @@ public class WebView extends AbsoluteLayout
                             if (mPreventDefault != PREVENT_DEFAULT_YES
                                     && (computeMaxScrollX() > 0
                                             || computeMaxScrollY() > 0)) {
-                                // UI takes control back, cancel WebCore touch
-                                cancelWebCoreTouchEvent(contentX, contentY,
-                                        true);
+                                // If the user has performed a very quick touch
+                                // sequence it is possible that we may get here
+                                // before WebCore has had a chance to process the events.
+                                // In this case, any call to preventDefault in the
+                                // JS touch handler will not have been executed yet.
+                                // Hence we will see both the UI (now) and WebCore
+                                // (when context switches) handling the event,
+                                // regardless of whether the web developer actually
+                                // doeses preventDefault in their touch handler. This
+                                // is the nature of our asynchronous touch model.
+
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
