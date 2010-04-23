@@ -79,9 +79,11 @@ public class FileFilter {
     };
 
     static void fillIgnoreResultList() {
-        // This first block of tests are for HTML5 features, for which Android
+        // This first block of tests are for features for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
+        ignoreResultList.add("fast/events/touch/basic-touch-events.html"); // Requires multi-touch
+        ignoreResultList.add("fast/events/touch/send-oncancel-event.html"); // Expected output is incorrect upstream. See WebKit bug 37830.
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
@@ -89,6 +91,7 @@ public class FileFilter {
         ignoreResultList.add("storage/hash-change-with-xhr.html"); // Succeeds but DumpRenderTree does not read result correctly
 
         // Expected failures due to unsupported features.
+        ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
         ignoreResultList.add("fast/workers"); // workers not supported
         ignoreResultList.add("http/tests/eventsource/workers"); // workers not supported
         ignoreResultList.add("http/tests/workers"); // workers not supported
@@ -130,9 +133,6 @@ public class FileFilter {
         ignoreResultList.add("fast/events/window-events-bubble.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/events/window-events-bubble2.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/events/window-events-capture.html"); // requires eventSender.mouseDown(),mouseUp()
-        ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
-        ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
-        ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
         ignoreResultList.add("fast/forms/drag-into-textarea.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/forms/focus-control-to-page.html"); // http://b/716638
         ignoreResultList.add("fast/forms/focus2.html"); // http://b/735111
