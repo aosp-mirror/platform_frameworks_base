@@ -33,6 +33,7 @@ import android.util.Log;
 import junit.framework.Assert;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -519,13 +520,13 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         assertEquals(1, c.getCount());
         assertTrue(c.moveToFirst());
         assertEquals("don't forget to handled 's", c.getString(1));
-        c.close();
+        c.deactivate();
 
         // make sure code should checking null string properly so that
         // it won't crash
         try {
             mDatabase.query("test", new String[]{"_id"},
-                    "_id=?", null, null, null, null);
+                    "_id=?", new String[]{null}, null, null, null);
             fail("expected exception not thrown");
         } catch (IllegalArgumentException e) {
             // expected
@@ -1136,5 +1137,44 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
                 }
             }
         }
-    }    
+    }
+
+    @SmallTest
+    public void testLruCachingOfSqliteCompiledSqlObjs() {
+        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        mDatabase.execSQL("insert into test values(1,1);");
+        // set cache size
+        int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
+        mDatabase.setMaxSqlCacheSize(N);
+
+        // do N+1 queries - and when the 0th entry is removed from LRU cache due to the
+        // insertion of (N+1)th entry, make sure 0th entry is closed
+        ArrayList<SQLiteStatement> stmtObjs = new ArrayList<SQLiteStatement>();
+        for (int i = 0; i < N+1; i++) {
+            SQLiteStatement c = mDatabase.compileStatement("select * from test where i = " + i);
+            c.close();
+            stmtObjs.add(i, c);
+        }
+
+        assertEquals(0, stmtObjs.get(0).getUniqueId());
+        for (int i = 1; i < N+1; i++) {
+            assertTrue(stmtObjs.get(i).getUniqueId() > 0);
+        }
+    }
+
+    @SmallTest
+    public void testSetMaxCahesize() {
+        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        mDatabase.execSQL("insert into test values(1,1);");
+        // set cache size
+        int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
+        mDatabase.setMaxSqlCacheSize(N);
+
+        // try reduce cachesize
+        try {
+            mDatabase.setMaxSqlCacheSize(1);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("cannot set cacheSize to a value less than"));
+        }
+    }
 }

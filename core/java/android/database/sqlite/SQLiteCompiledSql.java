@@ -134,6 +134,10 @@ import android.util.Log;
         mInUse = false;
     }
 
+    /* package */ synchronized boolean isInUse() {
+        return mInUse;
+    }
+
     /**
      * Make sure that the native resource is cleaned up.
      */
