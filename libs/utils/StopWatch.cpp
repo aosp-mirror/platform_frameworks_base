@@ -30,10 +30,9 @@ namespace android {
 
 
 StopWatch::StopWatch(const char *name, int clock, uint32_t flags)
-    :   mName(name), mClock(clock), mFlags(flags),
-        mStartTime(0), mNumLaps(0)
+    :   mName(name), mClock(clock), mFlags(flags)
 {
-    mStartTime = systemTime(mClock);
+    reset();
 }
 
 StopWatch::~StopWatch()
@@ -70,6 +69,12 @@ nsecs_t StopWatch::lap()
 nsecs_t StopWatch::elapsedTime() const
 {
     return systemTime(mClock) - mStartTime;
+}
+
+void StopWatch::reset()
+{
+    mNumLaps = 0;
+    mStartTime = systemTime(mClock);
 }
 
 

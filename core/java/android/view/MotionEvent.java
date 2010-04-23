@@ -248,17 +248,17 @@ public final class MotionEvent implements Parcelable {
     private RuntimeException mRecycledLocation;
     private boolean mRecycled;
 
-    private MotionEvent() {
-        mPointerIdentifiers = new int[BASE_AVAIL_POINTERS];
-        mDataSamples = new float[BASE_AVAIL_POINTERS*BASE_AVAIL_SAMPLES*NUM_SAMPLE_DATA];
-        mTimeSamples = new long[BASE_AVAIL_SAMPLES];
+    private MotionEvent(int pointerCount, int sampleCount) {
+        mPointerIdentifiers = new int[pointerCount];
+        mDataSamples = new float[pointerCount * sampleCount * NUM_SAMPLE_DATA];
+        mTimeSamples = new long[sampleCount];
     }
 
     static private MotionEvent obtain() {
         final MotionEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
-                return new MotionEvent();
+                return new MotionEvent(BASE_AVAIL_POINTERS, BASE_AVAIL_SAMPLES);
             }
             ev = gRecyclerTop;
             gRecyclerTop = ev.mNext;
@@ -267,6 +267,45 @@ public final class MotionEvent implements Parcelable {
         ev.mRecycledLocation = null;
         ev.mRecycled = false;
         ev.mNext = null;
+        return ev;
+    }
+    
+    @SuppressWarnings("unused") // used by native code
+    static private MotionEvent obtain(int pointerCount, int sampleCount) {
+        final MotionEvent ev;
+        synchronized (gRecyclerLock) {
+            if (gRecyclerTop == null) {
+                if (pointerCount < BASE_AVAIL_POINTERS) {
+                    pointerCount = BASE_AVAIL_POINTERS;
+                }
+                if (sampleCount < BASE_AVAIL_SAMPLES) {
+                    sampleCount = BASE_AVAIL_SAMPLES;
+                }
+                return new MotionEvent(pointerCount, sampleCount);
+            }
+            ev = gRecyclerTop;
+            gRecyclerTop = ev.mNext;
+            gRecyclerUsed--;
+        }
+        ev.mRecycledLocation = null;
+        ev.mRecycled = false;
+        ev.mNext = null;
+        
+        if (ev.mPointerIdentifiers.length < pointerCount) {
+            ev.mPointerIdentifiers = new int[pointerCount];
+        }
+        
+        final int timeSamplesLength = ev.mTimeSamples.length;
+        if (timeSamplesLength < sampleCount) {
+            ev.mTimeSamples = new long[sampleCount];
+        }
+        
+        final int dataSamplesLength = ev.mDataSamples.length;
+        final int neededDataSamplesLength = pointerCount * sampleCount * NUM_SAMPLE_DATA;
+        if (dataSamplesLength < neededDataSamplesLength) {
+            ev.mDataSamples = new float[neededDataSamplesLength];
+        }
+        
         return ev;
     }
 
@@ -1022,7 +1061,7 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
-     * Returns a bitfield indicating which edges, if any, where touched by this
+     * Returns a bitfield indicating which edges, if any, were touched by this
      * MotionEvent. For touch events, clients can use this to determine if the
      * user's finger was touching the edge of the display.
      *

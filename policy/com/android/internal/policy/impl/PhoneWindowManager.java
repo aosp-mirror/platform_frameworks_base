@@ -1641,6 +1641,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return false;
     }
+    
+    public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
+        // lid changed state
+        mLidOpen = lidOpen;
+        boolean awakeNow = mKeyguardMediator.doLidChangeTq(mLidOpen);
+        updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
+        if (awakeNow) {
+            // If the lid opening and we don't have to keep the
+            // keyguard up, then we can turn on the screen
+            // immediately.
+            mKeyguardMediator.pokeWakelock();
+        } else if (keyguardIsShowingTq()) {
+            if (mLidOpen) {
+                // If we are opening the lid and not hiding the
+                // keyguard, then we need to have it turn on the
+                // screen once it is shown.
+                mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(
+                        KeyEvent.KEYCODE_POWER);
+            }
+        } else {
+            // Light up the keyboard if we are sliding up.
+            if (mLidOpen) {
+                mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
+                        LocalPowerManager.BUTTON_EVENT);
+            } else {
+                mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
+                        LocalPowerManager.OTHER_EVENT);
+            }
+        }
+    }
 
     
     /** {@inheritDoc} */

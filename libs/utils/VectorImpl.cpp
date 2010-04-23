@@ -108,13 +108,7 @@ size_t VectorImpl::capacity() const
 
 ssize_t VectorImpl::insertVectorAt(const VectorImpl& vector, size_t index)
 {
-    if (index > size())
-        return BAD_INDEX;
-    void* where = _grow(index, vector.size());
-    if (where) {
-        _do_copy(where, vector.arrayImpl(), vector.size());
-    }
-    return where ? index : (ssize_t)NO_MEMORY;
+    return insertAt(vector.arrayImpl(), index, vector.size());
 }
 
 ssize_t VectorImpl::appendVector(const VectorImpl& vector)
@@ -226,9 +220,9 @@ ssize_t VectorImpl::add()
     return add(0);
 }
 
-ssize_t VectorImpl::add(const void* item)
+ssize_t VectorImpl::add(const void* item, size_t numItems)
 {
-    return insertAt(item, size());
+    return insertAt(item, size(), numItems);
 }
 
 ssize_t VectorImpl::replaceAt(size_t index)
