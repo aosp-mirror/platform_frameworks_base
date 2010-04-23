@@ -75,6 +75,7 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     private Context mContext;
 
+    private static final int INITIAL_POLL_DELAY_SEC = 90;
     private static final int TESTING_POLLING_PERIOD_SEC = 60 * 1;
     private static final int TESTING_RESET_PERIOD_SEC = 60 * 10;
     private static final long TESTING_THRESHOLD = 1 * 1024 * 1024;
@@ -331,6 +332,12 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             // get policy
             mHandler.obtainMessage(EVENT_POLICY_CHANGED).sendToTarget();
+
+            // if we poll now we won't have network connectivity or even imsi access
+            // queue up a poll to happen in a little while - after ntp and imsi are avail
+            // TODO - make this callback based (ie, listen for notificaitons)
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_POLL_ALARM),
+                    INITIAL_POLL_DELAY_SEC * 1000);
         }
 
         // check for new policy info (threshold limit/value/etc)
