@@ -14250,14 +14250,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
                 if (app.curAdj >= HIDDEN_APP_MIN_ADJ) {
-                    numHidden++;
-                    if (numHidden > MAX_HIDDEN_APPS) {
-                        Slog.i(TAG, "Kill " + app.processName
-                                + " (pid " + app.pid + "): hidden #" + numHidden
-                                + " beyond limit " + MAX_HIDDEN_APPS);
-                        EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
-                                app.processName, app.setAdj, "too many background");
-                        Process.killProcess(app.pid);
+                    if (!app.killedBackground) {
+                        numHidden++;
+                        if (numHidden > MAX_HIDDEN_APPS) {
+                            Slog.i(TAG, "Kill " + app.processName
+                                    + " (pid " + app.pid + "): hidden #" + numHidden
+                                    + " beyond limit " + MAX_HIDDEN_APPS);
+                            EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                                    app.processName, app.setAdj, "too many background");
+                            app.killedBackground = true;
+                            Process.killProcess(app.pid);
+                        }
                     }
                 }
             } else {
