@@ -1751,9 +1751,16 @@ public class AudioService extends IAudioService.Stub {
 
     }
 
-    private void cancelA2dpDeviceTimeout(String address) {
+    private void cancelA2dpDeviceTimeout() {
         mAudioHandler.removeMessages(MSG_BTA2DP_DOCK_TIMEOUT);
     }
+
+    private boolean hasScheduledA2dpDockTimeout() {
+        return mAudioHandler.hasMessages(MSG_BTA2DP_DOCK_TIMEOUT);
+    }
+
+    /* cache of the address of the last dock the device was connected to */
+    private String mDockAddress;
 
     /**
      * Receiver for misc intent broadcasts the Phone app cares about.
@@ -1805,7 +1812,15 @@ public class AudioService extends IAudioService.Stub {
                               state == BluetoothA2dp.STATE_PLAYING)) {
                     if (btDevice.isBluetoothDock()) {
                         // this could be a reconnection after a transient disconnection
-                        cancelA2dpDeviceTimeout(address);
+                        cancelA2dpDeviceTimeout();
+                        mDockAddress = address;
+                    } else {
+                        // this could be a connection of another A2DP device before the timeout of
+                        // a dock: cancel the dock timeout, and make the dock unavailable now
+                        if(hasScheduledA2dpDockTimeout()) {
+                            cancelA2dpDeviceTimeout();
+                            makeA2dpDeviceUnavailableNow(mDockAddress);
+                        }
                     }
                     makeA2dpDeviceAvailable(address);
                 }
