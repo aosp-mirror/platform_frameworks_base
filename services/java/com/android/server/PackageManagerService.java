@@ -8838,7 +8838,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             }
                             String external = parser.getAttributeValue(null, "external");
                             if (external != null) {
-                                mInternalSdkPlatform = Integer.parseInt(external);
+                                mExternalSdkPlatform = Integer.parseInt(external);
                             }
                         } catch (NumberFormatException e) {
                         }
@@ -9988,4 +9988,3 @@ class PackageManagerService extends IPackageManager.Stub {
                android.provider.Settings.Secure.DEFAULT_INSTALL_LOCATION, PackageHelper.APP_INSTALL_AUTO);
    }
 }
-
