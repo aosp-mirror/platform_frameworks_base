@@ -386,7 +386,7 @@ public class Surface implements Parcelable {
 
     @Override
     public String toString() {
-        return "Surface(native-token=" + mSurfaceControl + ")";
+        return "Surface(native-token=" + mSurface + ")";
     }
 
     private Surface(Parcel source) throws OutOfResourcesException {
