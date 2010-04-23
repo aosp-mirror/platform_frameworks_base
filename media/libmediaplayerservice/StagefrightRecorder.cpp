@@ -36,6 +36,7 @@
 #include <utils/Errors.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ctype.h>
 
 namespace android {
 
@@ -149,9 +150,149 @@ status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t leng
     return OK;
 }
 
-status_t StagefrightRecorder::setParameters(const String8 &params) {
-    mParams = params;
+// Attempt to parse an int64 literal optionally surrounded by whitespace,
+// returns true on success, false otherwise.
+static bool safe_strtoi64(const char *s, int32_t *val) {
+    char *end;
+    *val = static_cast<int32_t>(strtoll(s, &end, 10));
 
+    if (end == s || errno == ERANGE) {
+        return false;
+    }
+
+    // Skip trailing whitespace
+    while (isspace(*end)) {
+        ++end;
+    }
+
+    // For a successful return, the string must contain nothing but a valid
+    // int64 literal optionally surrounded by whitespace.
+
+    return *end == '\0';
+}
+
+// Trim both leading and trailing whitespace from the given string.
+static void TrimString(String8 *s) {
+    size_t num_bytes = s->bytes();
+    const char *data = s->string();
+
+    size_t leading_space = 0;
+    while (leading_space < num_bytes && isspace(data[leading_space])) {
+        ++leading_space;
+    }
+
+    size_t i = num_bytes;
+    while (i > leading_space && isspace(data[i - 1])) {
+        --i;
+    }
+
+    s->setTo(String8(&data[leading_space], i - leading_space));
+}
+
+status_t StagefrightRecorder::setParamAudioSamplingRate(int32_t sampleRate) {
+    LOGV("setParamAudioSamplingRate: %d", sampleRate);
+    mSampleRate = sampleRate;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamAudioNumberOfChannels(int32_t channels) {
+    LOGV("setParamAudioNumberOfChannels: %d", channels);
+    mAudioChannels = channels;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamAudioEncodingBitRate(int32_t bitRate) {
+    LOGV("setParamAudioEncodingBitRate: %d", bitRate);
+    mAudioBitRate = bitRate;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamVideoEncodingBitRate(int32_t bitRate) {
+    LOGV("setParamVideoEncodingBitRate: %d", bitRate);
+    mVideoBitRate = bitRate;
+    return OK;
+}
+
+status_t StagefrightRecorder::setMaxDurationOrFileSize(int32_t limit, bool limit_is_duration) {
+    LOGV("setMaxDurationOrFileSize: limit (%d) for %s",
+            limit, limit_is_duration?"duration":"size");
+    return OK;
+}
+
+status_t StagefrightRecorder::setParameter(
+        const String8 &key, const String8 &value) {
+    LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
+    if (key == "max-duration") {
+        int32_t max_duration_ms;
+        if (safe_strtoi64(value.string(), &max_duration_ms)) {
+            return setMaxDurationOrFileSize(
+                    max_duration_ms, true /* limit_is_duration */);
+        }
+    } else if (key == "max-filesize") {
+        int32_t max_filesize_bytes;
+        if (safe_strtoi64(value.string(), &max_filesize_bytes)) {
+            return setMaxDurationOrFileSize(
+                    max_filesize_bytes, false /* limit is filesize */);
+        }
+    } else if (key == "audio-param-sampling-rate") {
+        int32_t sampling_rate;
+        if (safe_strtoi64(value.string(), &sampling_rate)) {
+            return setParamAudioSamplingRate(sampling_rate);
+        }
+    } else if (key == "audio-param-number-of-channels") {
+        int32_t number_of_channels;
+        if (safe_strtoi64(value.string(), &number_of_channels)) {
+            return setParamAudioNumberOfChannels(number_of_channels);
+        }
+    } else if (key == "audio-param-encoding-bitrate") {
+        int32_t audio_bitrate;
+        if (safe_strtoi64(value.string(), &audio_bitrate)) {
+            return setParamAudioEncodingBitRate(audio_bitrate);
+        }
+    } else if (key == "video-param-encoding-bitrate") {
+        int32_t video_bitrate;
+        if (safe_strtoi64(value.string(), &video_bitrate)) {
+            return setParamVideoEncodingBitRate(video_bitrate);
+        }
+    } else {
+        LOGE("setParameter: failed to find key %s", key.string());
+        return BAD_VALUE;
+    }
+    return OK;
+}
+
+status_t StagefrightRecorder::setParameters(const String8 &params) {
+    LOGV("setParameters: %s", params.string());
+    const char *cparams = params.string();
+    const char *key_start = cparams;
+    for (;;) {
+        const char *equal_pos = strchr(key_start, '=');
+        if (equal_pos == NULL) {
+            LOGE("Parameters %s miss a value", cparams);
+            return BAD_VALUE;
+        }
+        String8 key(key_start, equal_pos - key_start);
+        TrimString(&key);
+        if (key.length() == 0) {
+            LOGE("Parameters %s contains an empty key", cparams);
+            return BAD_VALUE;
+        }
+        const char *value_start = equal_pos + 1;
+        const char *semicolon_pos = strchr(value_start, ';');
+        String8 value;
+        if (semicolon_pos == NULL) {
+            value.setTo(value_start);
+        } else {
+            value.setTo(value_start, semicolon_pos - value_start);
+        }
+        if (setParameter(key, value) != OK) {
+            return BAD_VALUE;
+        }
+        if (semicolon_pos == NULL) {
+            break;  // Reaches the end
+        }
+        key_start = semicolon_pos + 1;
+    }
     return OK;
 }
 
@@ -185,35 +326,46 @@ status_t StagefrightRecorder::start() {
     }
 }
 
-sp<MediaSource> StagefrightRecorder::createAMRAudioSource() {
-    uint32_t sampleRate =
-        mAudioEncoder == AUDIO_ENCODER_AMR_NB ? 8000 : 16000;
-
+sp<MediaSource> StagefrightRecorder::createAudioSource() {
     sp<AudioSource> audioSource =
         new AudioSource(
                 mAudioSource,
-                sampleRate,
+                mSampleRate,
                 AudioSystem::CHANNEL_IN_MONO);
 
     status_t err = audioSource->initCheck();
 
     if (err != OK) {
+        LOGE("audio source is not initialized");
         return NULL;
     }
 
     sp<MetaData> encMeta = new MetaData;
-    encMeta->setCString(
-            kKeyMIMEType,
-            mAudioEncoder == AUDIO_ENCODER_AMR_NB
-                ? MEDIA_MIMETYPE_AUDIO_AMR_NB : MEDIA_MIMETYPE_AUDIO_AMR_WB);
+    const char *mime;
+    switch (mAudioEncoder) {
+        case AUDIO_ENCODER_AMR_NB:
+        case AUDIO_ENCODER_DEFAULT:
+            mime = MEDIA_MIMETYPE_AUDIO_AMR_NB;
+            break;
+        case AUDIO_ENCODER_AMR_WB:
+            mime = MEDIA_MIMETYPE_AUDIO_AMR_WB;
+            break;
+        case AUDIO_ENCODER_AAC:
+            mime = MEDIA_MIMETYPE_AUDIO_AAC;
+            break;
+        default:
+            LOGE("Unknown audio encoder: %d", mAudioEncoder);
+            return NULL;
+    }
+    encMeta->setCString(kKeyMIMEType, mime);
 
     int32_t maxInputSize;
     CHECK(audioSource->getFormat()->findInt32(
                 kKeyMaxInputSize, &maxInputSize));
 
     encMeta->setInt32(kKeyMaxInputSize, maxInputSize);
-    encMeta->setInt32(kKeyChannelCount, 1);
-    encMeta->setInt32(kKeySampleRate, sampleRate);
+    encMeta->setInt32(kKeyChannelCount, mAudioChannels);
+    encMeta->setInt32(kKeySampleRate, mSampleRate);
 
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
@@ -240,7 +392,7 @@ status_t StagefrightRecorder::startAMRRecording() {
         return UNKNOWN_ERROR;
     }
 
-    sp<MediaSource> audioEncoder = createAMRAudioSource();
+    sp<MediaSource> audioEncoder = createAudioSource();
 
     if (audioEncoder == NULL) {
         return UNKNOWN_ERROR;
@@ -257,6 +409,26 @@ status_t StagefrightRecorder::startAMRRecording() {
 status_t StagefrightRecorder::startMPEG4Recording() {
     mWriter = new MPEG4Writer(dup(mOutputFd));
 
+    // Add audio source first if it exists
+    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        sp<MediaSource> audioEncoder;
+        switch(mAudioEncoder) {
+            case AUDIO_ENCODER_AMR_NB:
+            case AUDIO_ENCODER_AMR_WB:
+            case AUDIO_ENCODER_AAC:
+                audioEncoder = createAudioSource();
+                break;
+            default:
+                LOGE("Unsupported audio encoder: %d", mAudioEncoder);
+                return UNKNOWN_ERROR;
+        }
+
+        if (audioEncoder == NULL) {
+            return UNKNOWN_ERROR;
+        }
+
+        mWriter->addSource(audioEncoder);
+    }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
         CHECK(mCamera != NULL);
@@ -308,16 +480,6 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         mWriter->addSource(encoder);
     }
 
-    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
-        sp<MediaSource> audioEncoder = createAMRAudioSource();
-
-        if (audioEncoder == NULL) {
-            return UNKNOWN_ERROR;
-        }
-
-        mWriter->addSource(audioEncoder);
-    }
-
     mWriter->start();
     return OK;
 }
@@ -353,14 +515,22 @@ status_t StagefrightRecorder::close() {
 status_t StagefrightRecorder::reset() {
     stop();
 
+    // No audio or video source by default
     mAudioSource = AUDIO_SOURCE_LIST_END;
     mVideoSource = VIDEO_SOURCE_LIST_END;
-    mOutputFormat = OUTPUT_FORMAT_LIST_END;
-    mAudioEncoder = AUDIO_ENCODER_LIST_END;
-    mVideoEncoder = VIDEO_ENCODER_LIST_END;
-    mVideoWidth = -1;
-    mVideoHeight = -1;
-    mFrameRate = -1;
+
+    // Default parameters
+    mOutputFormat  = OUTPUT_FORMAT_THREE_GPP;
+    mAudioEncoder  = AUDIO_ENCODER_AMR_NB;
+    mVideoEncoder  = VIDEO_ENCODER_H263;
+    mVideoWidth    = 176;
+    mVideoHeight   = 144;
+    mFrameRate     = 20;
+    mVideoBitRate  = 192000;
+    mSampleRate    = 8000;
+    mAudioChannels = 1;
+    mAudioBitRate  = 12200;
+
     mOutputFd = -1;
     mFlags = 0;
 

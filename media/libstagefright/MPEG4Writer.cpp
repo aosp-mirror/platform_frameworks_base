@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "MPEG4Writer"
+#include <utils/Log.h>
+
 #include <arpa/inet.h>
 
 #include <ctype.h>
@@ -57,6 +61,8 @@ private:
         int64_t timestamp;
     };
     List<SampleInfo> mSampleInfos;
+
+    List<int32_t> mStssTableEntries;
 
     void *mCodecSpecificData;
     size_t mCodecSpecificDataSize;
@@ -522,7 +528,8 @@ void MPEG4Writer::Track::threadEntry() {
     sp<MetaData> meta = mSource->getFormat();
     const char *mime;
     meta->findCString(kKeyMIMEType, &mime);
-    bool is_mpeg4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4);
+    bool is_mpeg4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4) ||
+                    !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC);
     bool is_avc = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
     int32_t count = 0;
 
@@ -668,6 +675,9 @@ void MPEG4Writer::Track::threadEntry() {
 
         info.offset = offset;
 
+
+        bool is_audio = !strncasecmp(mime, "audio/", 6);
+
         int64_t timestampUs;
         CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
 
@@ -680,6 +690,12 @@ void MPEG4Writer::Track::threadEntry() {
 
         mSampleInfos.push_back(info);
 
+        int32_t isSync = false;
+        buffer->meta_data()->findInt32(kKeyIsSyncFrame, &isSync);
+        if (isSync) {
+            mStssTableEntries.push_back(mSampleInfos.size());
+        }
+        // Our timestamp is in ms.
         buffer->release();
         buffer = NULL;
     }
@@ -735,8 +751,8 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             success = success && mMeta->findInt32(kKeyHeight, &height);
             CHECK(success);
 
-            mOwner->writeInt32(width);
-            mOwner->writeInt32(height);
+            mOwner->writeInt32(width << 16);   // 32-bit fixed-point value
+            mOwner->writeInt32(height << 16);  // 32-bit fixed-point value
         }
       mOwner->endBox();  // tkhd
 
@@ -754,26 +770,15 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
         mOwner->beginBox("hdlr");
           mOwner->writeInt32(0);             // version=0, flags=0
-          mOwner->writeInt32(0);             // predefined
-          mOwner->writeFourcc(is_audio ? "soun" : "vide");
+          mOwner->writeInt32(0);             // component type: should be mhlr
+          mOwner->writeFourcc(is_audio ? "soun" : "vide");  // component subtype
           mOwner->writeInt32(0);             // reserved
           mOwner->writeInt32(0);             // reserved
           mOwner->writeInt32(0);             // reserved
-          mOwner->writeCString("");          // name
+          mOwner->writeCString("SoundHandler");          // name
         mOwner->endBox();
 
         mOwner->beginBox("minf");
-
-          mOwner->beginBox("dinf");
-            mOwner->beginBox("dref");
-              mOwner->writeInt32(0);  // version=0, flags=0
-              mOwner->writeInt32(1);
-              mOwner->beginBox("url ");
-                mOwner->writeInt32(1);  // version=0, flags=1
-              mOwner->endBox();  // url
-            mOwner->endBox();  // dref
-          mOwner->endBox();  // dinf
-
           if (is_audio) {
               mOwner->beginBox("smhd");
               mOwner->writeInt32(0);           // version=0, flags=0
@@ -789,7 +794,18 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
               mOwner->writeInt16(0);
               mOwner->endBox();
           }
-        mOwner->endBox();  // minf
+
+          mOwner->beginBox("dinf");
+            mOwner->beginBox("dref");
+              mOwner->writeInt32(0);  // version=0, flags=0
+              mOwner->writeInt32(1);
+              mOwner->beginBox("url ");
+                mOwner->writeInt32(1);  // version=0, flags=1
+              mOwner->endBox();  // url
+            mOwner->endBox();  // dref
+          mOwner->endBox();  // dinf
+
+       mOwner->endBox();  // minf
 
         mOwner->beginBox("stbl");
 
@@ -802,6 +818,8 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                     fourcc = "samr";
                 } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
                     fourcc = "sawb";
+                } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
+                    fourcc = "mp4a";
                 } else {
                     LOGE("Unknown mime type '%s'.", mime);
                     CHECK(!"should not be here, unknown mime type.");
@@ -810,10 +828,12 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                 mOwner->beginBox(fourcc);          // audio format
                   mOwner->writeInt32(0);           // reserved
                   mOwner->writeInt16(0);           // reserved
-                  mOwner->writeInt16(0);           // data ref index
+                  mOwner->writeInt16(0x1);         // data ref index
                   mOwner->writeInt32(0);           // reserved
                   mOwner->writeInt32(0);           // reserved
-                  mOwner->writeInt16(2);           // channel count
+                  int32_t nChannels;
+                  CHECK_EQ(true, mMeta->findInt32(kKeyChannelCount, &nChannels));
+                  mOwner->writeInt16(nChannels);   // channel count
                   mOwner->writeInt16(16);          // sample size
                   mOwner->writeInt16(0);           // predefined
                   mOwner->writeInt16(0);           // reserved
@@ -823,6 +843,38 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                   CHECK(success);
 
                   mOwner->writeInt32(samplerate << 16);
+                  if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
+                    mOwner->beginBox("esds");
+
+                        mOwner->writeInt32(0);     // version=0, flags=0
+                        mOwner->writeInt8(0x03);   // ES_DescrTag
+                        mOwner->writeInt8(23 + mCodecSpecificDataSize);
+                        mOwner->writeInt16(0x0000);// ES_ID
+                        mOwner->writeInt8(0x00);
+
+                        mOwner->writeInt8(0x04);   // DecoderConfigDescrTag
+                        mOwner->writeInt8(15 + mCodecSpecificDataSize);
+                        mOwner->writeInt8(0x40);   // objectTypeIndication ISO/IEC 14492-2
+                        mOwner->writeInt8(0x15);   // streamType AudioStream
+
+                        mOwner->writeInt16(0x03);  // XXX
+                        mOwner->writeInt8(0x00);   // buffer size 24-bit
+                        mOwner->writeInt32(96000); // max bit rate
+                        mOwner->writeInt32(96000); // avg bit rate
+
+                        mOwner->writeInt8(0x05);   // DecoderSpecificInfoTag
+                        mOwner->writeInt8(mCodecSpecificDataSize);
+                        mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
+
+                        static const uint8_t kData2[] = {
+                            0x06,  // SLConfigDescriptorTag
+                            0x01,
+                            0x02
+                        };
+                        mOwner->write(kData2, sizeof(kData2));
+
+                    mOwner->endBox();  // esds
+                  }
                 mOwner->endBox();
             } else {
                 if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
@@ -883,7 +935,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                             0x00, 0x03, 0xe8, 0x00
                         };
                         mOwner->write(kData, sizeof(kData));
-                        
+
                         mOwner->writeInt8(0x05);  // DecoderSpecificInfoTag
 
                         mOwner->writeInt8(mCodecSpecificDataSize);
@@ -943,6 +995,17 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
           mOwner->endBox();  // stts
 
+          if (!is_audio) {
+            mOwner->beginBox("stss");
+              mOwner->writeInt32(0);  // version=0, flags=0
+              mOwner->writeInt32(mStssTableEntries.size());  // number of sync frames
+              for (List<int32_t>::iterator it = mStssTableEntries.begin();
+                   it != mStssTableEntries.end(); ++it) {
+                  mOwner->writeInt32(*it);
+              }
+            mOwner->endBox();  // stss
+          }
+
           mOwner->beginBox("stsz");
             mOwner->writeInt32(0);  // version=0, flags=0
             mOwner->writeInt32(0);  // default sample size
@@ -969,7 +1032,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             mOwner->writeInt32(0);  // version=0, flags=0
             mOwner->writeInt32(mSampleInfos.size());
             for (List<SampleInfo>::iterator it = mSampleInfos.begin();
-                 it != mSampleInfos.end(); ++it, ++n) {
+                 it != mSampleInfos.end(); ++it) {
                 mOwner->writeInt64((*it).offset);
             }
           mOwner->endBox();  // co64
