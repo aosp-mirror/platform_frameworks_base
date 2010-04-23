@@ -391,6 +391,9 @@ public class ThrottleService extends IThrottleManager.Stub {
                     ", resetDay=" + mPolicyResetDay + ", noteType=" +
                     mPolicyNotificationsAllowedMask);
 
+            // force updates
+            mThrottleIndex = THROTTLE_INDEX_UNINITIALIZED;
+
             onResetAlarm();
 
             onPollAlarm();
@@ -490,6 +493,7 @@ public class ThrottleService extends IThrottleManager.Stub {
 
                 } // else already up!
             } else {
+                clearThrottleAndNotification();
                 if ((mPolicyNotificationsAllowedMask & NOTIFICATION_WARNING) != 0) {
                     // check if we should warn about throttle
                     // pretend we only have 1/2 the time remaining that we actually do
@@ -566,9 +570,9 @@ public class ThrottleService extends IThrottleManager.Stub {
                 Intent broadcast = new Intent(ThrottleManager.THROTTLE_ACTION);
                 broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL, -1);
                 mContext.sendStickyBroadcast(broadcast);
+                mNotificationManager.cancel(R.drawable.stat_sys_throttled);
+                mWarningNotificationSent = false;
             }
-            mNotificationManager.cancel(R.drawable.stat_sys_throttled);
-            mWarningNotificationSent = false;
         }
 
         private Calendar calculatePeriodEnd(long now) {
@@ -627,7 +631,6 @@ public class ThrottleService extends IThrottleManager.Stub {
                 Calendar start = calculatePeriodStart(end);
 
                 if (mRecorder.setNextPeriod(start, end)) {
-                    clearThrottleAndNotification();
                     onPollAlarm();
                 }
 
