@@ -47,8 +47,8 @@ extern ZipEntryCRO ZipFileCRO_findEntryByName(ZipFileCRO zip,
         const char* fileName);
 
 extern bool ZipFileCRO_getEntryInfo(ZipFileCRO zip, ZipEntryCRO entry,
-        int* pMethod, long* pUncompLen,
-        long* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32);
+        int* pMethod, size_t* pUncompLen,
+        size_t* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32);
 
 extern bool ZipFileCRO_uncompressEntry(ZipFileCRO zip, ZipEntryCRO entry, int fd);
 
