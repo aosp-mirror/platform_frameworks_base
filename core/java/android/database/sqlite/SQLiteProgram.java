@@ -147,7 +147,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @return a unique identifier for this program
      */
     public final int getUniqueId() {
-        return nStatement;
+        return (mCompiledSql != null) ? mCompiledSql.nStatement : 0;
     }
 
     /* package */ String getSqlString() {

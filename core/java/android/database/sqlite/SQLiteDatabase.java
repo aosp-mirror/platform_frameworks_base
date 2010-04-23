@@ -263,7 +263,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * invoked.
      *
      * this cache has an upper limit of mMaxSqlCacheSize (settable by calling the method
-     * (@link setMaxCacheSize(int)}).
+     * (@link setMaxSqlCacheSize(int)}).
      */
     // default statement-cache size per database connection ( = instance of this class)
     private int mMaxSqlCacheSize = 25;
@@ -271,7 +271,24 @@ public class SQLiteDatabase extends SQLiteClosable {
         new LinkedHashMap<String, SQLiteCompiledSql>(mMaxSqlCacheSize + 1, 0.75f, true) {
             @Override
             public boolean removeEldestEntry(Map.Entry<String, SQLiteCompiledSql> eldest) {
-                return this.size() > mMaxSqlCacheSize;
+                // eldest = least-recently used entry
+                // if it needs to be removed to accommodate a new entry,
+                //     close {@link SQLiteCompiledSql} represented by this entry, if not in use
+                //     and then let it be removed from the Map.
+                synchronized(mCompiledQueries) { // probably not necessary, but can't hurt
+                    if (this.size() <= mMaxSqlCacheSize) {
+                        // cache is not full. nothing needs to be removed
+                        return false;
+                    }
+                    // cache is full. eldest will be removed.
+                    SQLiteCompiledSql entry = eldest.getValue();
+                    if (!entry.isInUse()) {
+                        // this {@link SQLiteCompiledSql} is not in use. release it.
+                        entry.releaseSqlStatement();
+                    }
+                    // return true, so that this entry is removed automatically by the caller.
+                    return true;
+                }
             }
         };
     /**
@@ -2006,9 +2023,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                         mCompiledQueries.size() + "|" + sql);
             }
         }
-        return;
     }
-
 
     private void deallocCachedSqlStatements() {
         synchronized (mCompiledQueries) {
@@ -2042,44 +2057,6 @@ public class SQLiteDatabase extends SQLiteClosable {
                     "|" + cacheHit + "|" + sql);
         }
         return compiledStatement;
-    }
-
-    /**
-     * returns true if the given sql is cached in compiled-sql cache.
-     * @hide
-     */
-    public boolean isInCompiledSqlCache(String sql) {
-        synchronized(mCompiledQueries) {
-            return mCompiledQueries.containsKey(sql);
-        }
-    }
-
-    /**
-     * purges the given sql from the compiled-sql cache.
-     * @hide
-     */
-    public void purgeFromCompiledSqlCache(String sql) {
-        synchronized(mCompiledQueries) {
-            mCompiledQueries.remove(sql);
-        }
-    }
-
-    /**
-     * remove everything from the compiled sql cache
-     * @hide
-     */
-    public void resetCompiledSqlCache() {
-        synchronized(mCompiledQueries) {
-            mCompiledQueries.clear();
-        }
-    }
-
-    /**
-     * return the current maxCacheSqlCacheSize
-     * @hide
-     */
-    public synchronized int getMaxSqlCacheSize() {
-        return mMaxSqlCacheSize;
     }
 
     /**
