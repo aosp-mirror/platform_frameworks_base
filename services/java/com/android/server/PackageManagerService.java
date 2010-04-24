@@ -7108,6 +7108,12 @@ class PackageManagerService extends IPackageManager.Stub {
                         pw.print("    supportsScreens=[");
                         boolean first = true;
                         if ((ps.pkg.applicationInfo.flags &
+                                ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("small");
+                        }
+                        if ((ps.pkg.applicationInfo.flags &
                                 ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
                             if (!first) pw.print(", ");
                             first = false;
@@ -7120,10 +7126,10 @@ class PackageManagerService extends IPackageManager.Stub {
                             pw.print("large");
                         }
                         if ((ps.pkg.applicationInfo.flags &
-                                ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
+                                ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
                             if (!first) pw.print(", ");
                             first = false;
-                            pw.print("small");
+                            pw.print("xlarge");
                         }
                         if ((ps.pkg.applicationInfo.flags &
                                 ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {

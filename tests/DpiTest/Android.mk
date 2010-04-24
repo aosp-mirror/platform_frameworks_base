@@ -7,4 +7,6 @@ LOCAL_PACKAGE_NAME := DensityTest
 
 LOCAL_MODULE_TAGS := tests
 
+LOCAL_AAPT_FLAGS = -c 120dpi -c 240dpi -c 160dpi
+
 include $(BUILD_PACKAGE)

@@ -791,6 +791,7 @@ public class PackageParser {
         int supportsSmallScreens = 1;
         int supportsNormalScreens = 1;
         int supportsLargeScreens = 1;
+        int supportsXLargeScreens = 1;
         int resizeable = 1;
         int anyDensity = 1;
         
@@ -998,9 +999,12 @@ public class PackageParser {
                 supportsLargeScreens = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_largeScreens,
                         supportsLargeScreens);
+                supportsXLargeScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_xlargeScreens,
+                        supportsXLargeScreens);
                 resizeable = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_resizeable,
-                        supportsLargeScreens);
+                        resizeable);
                 anyDensity = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_anyDensity,
                         anyDensity);
@@ -1133,6 +1137,11 @@ public class PackageParser {
                 && pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.DONUT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
+        }
+        if (supportsXLargeScreens < 0 || (supportsXLargeScreens > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.GINGERBREAD)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS;
         }
         if (resizeable < 0 || (resizeable > 0
                 && pkg.applicationInfo.targetSdkVersion

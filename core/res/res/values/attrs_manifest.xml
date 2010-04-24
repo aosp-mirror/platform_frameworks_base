@@ -965,6 +965,8 @@
              screen, so that it retains the dimensions it was originally
              designed for. -->
         <attr name="largeScreens" format="boolean" />
+        <!-- Indicates whether the application supports extra large screen form-factors. -->
+        <attr name="xlargeScreens" format="boolean" />
         <!-- Indicates whether the application can resize itself to newer
              screen sizes.  This is mostly used to distinguish between old
              applications that may not be compatible with newly introduced
