@@ -18,11 +18,8 @@ package com.android.internal.telephony.cdma;
 
 import android.os.Parcel;
 import android.os.SystemProperties;
-import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
-import com.android.internal.telephony.EncodeException;
-import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -33,7 +30,6 @@ import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.util.HexDump;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

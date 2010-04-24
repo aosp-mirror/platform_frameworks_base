@@ -958,7 +958,7 @@ public final class BearerData {
     private static String decode7bitGsm(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        // Start reading from the next 7-bit aligned boundry after offset.
+        // Start reading from the next 7-bit aligned boundary after offset.
         int offsetBits = offset * 8;
         int offsetSeptets = (offsetBits + 6) / 7;
         numFields -= offsetSeptets;

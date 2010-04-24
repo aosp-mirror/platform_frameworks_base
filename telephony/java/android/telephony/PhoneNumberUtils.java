@@ -586,7 +586,7 @@ public class PhoneNumberUtils
             }
         } else {
             // In the US, 1-650-555-1234 must be equal to 650-555-1234,
-            // while 090-1234-1234 must not be equalt to 90-1234-1234 in Japan.
+            // while 090-1234-1234 must not be equal to 90-1234-1234 in Japan.
             // This request exists just in US (with 1 trunk (NDD) prefix).
             // In addition, "011 11 7005554141" must not equal to "+17005554141",
             // while "011 1 7005554141" must equal to "+17005554141"

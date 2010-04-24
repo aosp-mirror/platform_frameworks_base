@@ -17,7 +17,7 @@
 package com.android.internal.telephony.cdma.sms;
 
 
-public final class SmsEnvelope{
+public final class SmsEnvelope {
     /**
      * Message Types
      * (See 3GPP2 C.S0015-B 3.4.1)
