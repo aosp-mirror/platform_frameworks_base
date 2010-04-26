@@ -229,6 +229,15 @@ static void Surface_initParcel(JNIEnv* env, jobject clazz, jobject argParcel)
     setSurface(env, clazz, rhs);
 }
 
+static jint Surface_getIdentity(JNIEnv* env, jobject clazz)
+{
+    const sp<SurfaceControl>& control(getSurfaceControl(env, clazz));
+    if (control != 0) return (jint) control->getIdentity();
+    const sp<Surface>& surface(getSurface(env, clazz));
+    if (surface != 0) return (jint) surface->getIdentity();
+    return -1;
+}
+
 static void Surface_destroy(JNIEnv* env, jobject clazz, uintptr_t *ostack)
 {
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
@@ -261,14 +270,14 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
         we can map to SkBitmap::kARGB_8888_Config, and optionally call
         bitmap.setIsOpaque(true) on the resulting SkBitmap (as an accelerator)
     */
-	switch (format) {
-	case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
+    switch (format) {
+    case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
     case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
     case PIXEL_FORMAT_RGBA_4444:    return SkBitmap::kARGB_4444_Config;
-	case PIXEL_FORMAT_RGB_565:		return SkBitmap::kRGB_565_Config;
-	case PIXEL_FORMAT_A_8:          return SkBitmap::kA8_Config;
-	default:                        return SkBitmap::kNo_Config;
-	}
+    case PIXEL_FORMAT_RGB_565:      return SkBitmap::kRGB_565_Config;
+    case PIXEL_FORMAT_A_8:          return SkBitmap::kA8_Config;
+    default:                        return SkBitmap::kNo_Config;
+    }
 }
 
 static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
@@ -347,7 +356,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         env->SetIntField(dirtyRect, ro.b, bounds.bottom);
     }
     
-	return canvas;
+    return canvas;
 }
 
 static void Surface_unlockCanvasAndPost(
@@ -631,8 +640,8 @@ const char* const kSurfaceClassPathName = "android/view/Surface";
 static void nativeClassInit(JNIEnv* env, jclass clazz);
 
 static JNINativeMethod gSurfaceSessionMethods[] = {
-	{"init",     "()V",  (void*)SurfaceSession_init },
-	{"destroy",  "()V",  (void*)SurfaceSession_destroy },
+    {"init",     "()V",  (void*)SurfaceSession_init },
+    {"destroy",  "()V",  (void*)SurfaceSession_destroy },
     {"kill",     "()V",  (void*)SurfaceSession_kill },
 };
 
@@ -640,43 +649,44 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"nativeClassInit",     "()V",  (void*)nativeClassInit },
     {"init",                "(Landroid/view/SurfaceSession;ILjava/lang/String;IIIII)V",  (void*)Surface_init },
     {"init",                "(Landroid/os/Parcel;)V",  (void*)Surface_initParcel },
+    {"getIdentity",         "()I",  (void*)Surface_getIdentity },
     {"destroy",             "()V",  (void*)Surface_destroy },
     {"release",             "()V",  (void*)Surface_release },
-	{"copyFrom",            "(Landroid/view/Surface;)V",  (void*)Surface_copyFrom },
-	{"isValid",             "()Z",  (void*)Surface_isValid },
-	{"lockCanvasNative",    "(Landroid/graphics/Rect;)Landroid/graphics/Canvas;",  (void*)Surface_lockCanvas },
-	{"unlockCanvasAndPost", "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvasAndPost },
-	{"unlockCanvas",        "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvas },
-	{"openTransaction",     "()V",  (void*)Surface_openTransaction },
+    {"copyFrom",            "(Landroid/view/Surface;)V",  (void*)Surface_copyFrom },
+    {"isValid",             "()Z",  (void*)Surface_isValid },
+    {"lockCanvasNative",    "(Landroid/graphics/Rect;)Landroid/graphics/Canvas;",  (void*)Surface_lockCanvas },
+    {"unlockCanvasAndPost", "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvasAndPost },
+    {"unlockCanvas",        "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvas },
+    {"openTransaction",     "()V",  (void*)Surface_openTransaction },
     {"closeTransaction",    "()V",  (void*)Surface_closeTransaction },
     {"setOrientation",      "(III)V", (void*)Surface_setOrientation },
     {"freezeDisplay",       "(I)V", (void*)Surface_freezeDisplay },
     {"unfreezeDisplay",     "(I)V", (void*)Surface_unfreezeDisplay },
     {"setLayer",            "(I)V", (void*)Surface_setLayer },
-	{"setPosition",         "(II)V",(void*)Surface_setPosition },
-	{"setSize",             "(II)V",(void*)Surface_setSize },
-	{"hide",                "()V",  (void*)Surface_hide },
-	{"show",                "()V",  (void*)Surface_show },
-	{"freeze",              "()V",  (void*)Surface_freeze },
-	{"unfreeze",            "()V",  (void*)Surface_unfreeze },
-	{"setFlags",            "(II)V",(void*)Surface_setFlags },
-	{"setTransparentRegionHint","(Landroid/graphics/Region;)V", (void*)Surface_setTransparentRegion },
-	{"setAlpha",            "(F)V", (void*)Surface_setAlpha },
-	{"setMatrix",           "(FFFF)V",  (void*)Surface_setMatrix },
-	{"setFreezeTint",       "(I)V",  (void*)Surface_setFreezeTint },
-	{"readFromParcel",      "(Landroid/os/Parcel;)V", (void*)Surface_readFromParcel },
-	{"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
+    {"setPosition",         "(II)V",(void*)Surface_setPosition },
+    {"setSize",             "(II)V",(void*)Surface_setSize },
+    {"hide",                "()V",  (void*)Surface_hide },
+    {"show",                "()V",  (void*)Surface_show },
+    {"freeze",              "()V",  (void*)Surface_freeze },
+    {"unfreeze",            "()V",  (void*)Surface_unfreeze },
+    {"setFlags",            "(II)V",(void*)Surface_setFlags },
+    {"setTransparentRegionHint","(Landroid/graphics/Region;)V", (void*)Surface_setTransparentRegion },
+    {"setAlpha",            "(F)V", (void*)Surface_setAlpha },
+    {"setMatrix",           "(FFFF)V",  (void*)Surface_setMatrix },
+    {"setFreezeTint",       "(I)V",  (void*)Surface_setFreezeTint },
+    {"readFromParcel",      "(Landroid/os/Parcel;)V", (void*)Surface_readFromParcel },
+    {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
 {
     so.surface = env->GetFieldID(clazz, "mSurface", "I");
     so.surfaceControl = env->GetFieldID(clazz, "mSurfaceControl", "I");
-	so.saveCount = env->GetFieldID(clazz, "mSaveCount", "I");
-	so.canvas    = env->GetFieldID(clazz, "mCanvas", "Landroid/graphics/Canvas;");
+    so.saveCount = env->GetFieldID(clazz, "mSaveCount", "I");
+    so.canvas    = env->GetFieldID(clazz, "mCanvas", "Landroid/graphics/Canvas;");
 
     jclass surfaceSession = env->FindClass("android/view/SurfaceSession");
- 	sso.client = env->GetFieldID(surfaceSession, "mClient", "I");
+    sso.client = env->GetFieldID(surfaceSession, "mClient", "I");
 
     jclass canvas = env->FindClass("android/graphics/Canvas");
     no.native_canvas = env->GetFieldID(canvas, "mNativeCanvas", "I");
