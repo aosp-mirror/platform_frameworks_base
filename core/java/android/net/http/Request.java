@@ -268,7 +268,10 @@ class Request {
         if (hasBody)
             entity = httpClientConnection.receiveResponseEntity(header);
 
-        boolean supportPartialContent = v.greaterEquals(HttpVersion.HTTP_1_1);
+        // restrict the range request to the servers claiming that they are
+        // accepting ranges in bytes
+        boolean supportPartialContent = "bytes".equalsIgnoreCase(header
+                .getAcceptRanges());
 
         if (entity != null) {
             InputStream is = entity.getContent();
