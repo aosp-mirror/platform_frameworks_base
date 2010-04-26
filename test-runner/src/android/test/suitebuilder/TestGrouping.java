@@ -46,6 +46,8 @@ import java.util.TreeSet;
  */
 public class TestGrouping {
 
+    private static final String LOG_TAG = "TestGrouping";
+
     SortedSet<Class<? extends TestCase>> testCaseClasses;
 
     public static final Comparator<Class<? extends TestCase>> SORT_BY_SIMPLE_NAME
@@ -114,7 +116,7 @@ public class TestGrouping {
         for (String packageName : packageNames) {
             List<Class<? extends TestCase>> addedClasses = testCaseClassesInPackage(packageName);
             if (addedClasses.isEmpty()) {
-                Log.w("TestGrouping", "Invalid Package: '" + packageName
+                Log.w(LOG_TAG, "Invalid Package: '" + packageName
                         + "' could not be found or has no tests");
             }
             testCaseClasses.addAll(addedClasses);
@@ -234,6 +236,10 @@ public class TestGrouping {
                     }
                 }
             }
+            Log.i(LOG_TAG, String.format(
+                    "TestCase class %s is missing a public constructor with no parameters " +
+                    "or a single String parameter - skipping",
+                    aClass.getName()));
             return false;
         }
     }
