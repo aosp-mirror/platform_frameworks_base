@@ -64,6 +64,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
     boolean bad;                // True if disabled in the bad process list
+    boolean killedBackground;   // True when proc has been killed due to too many bg
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying repeated trav
     ComponentName instrumentationClass;// class installed to instrument app
@@ -174,6 +175,9 @@ class ProcessRecord implements Watchdog.PssRequestor {
         pw.print(prefix); pw.print("persistent="); pw.print(persistent);
                 pw.print(" removed="); pw.print(removed);
                 pw.print(" persistentActivities="); pw.println(persistentActivities);
+        if (killedBackground) {
+            pw.print(prefix); pw.print("killedBackground="); pw.println(killedBackground);
+        }
         if (debugging || crashing || crashDialog != null || notResponding
                 || anrDialog != null || bad) {
             pw.print(prefix); pw.print("debugging="); pw.print(debugging);

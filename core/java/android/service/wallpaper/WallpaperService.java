@@ -715,6 +715,8 @@ public abstract class WallpaperService extends Service {
             
             if (mCreated) {
                 try {
+                    if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
+                            + mSurfaceHolder.getSurface() + " of: " + this);
                     mSession.remove(mWindow);
                 } catch (RemoteException e) {
                 }
