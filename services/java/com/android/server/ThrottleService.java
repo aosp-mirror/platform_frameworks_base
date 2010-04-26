@@ -457,6 +457,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         private void checkThrottleAndPostNotification(long currentTotal) {
             // is throttling enabled?
             if (mPolicyThreshold == 0) {
+                clearThrottleAndNotification();
                 return;
             }
 
