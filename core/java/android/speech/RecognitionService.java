@@ -53,6 +53,9 @@ public abstract class RecognitionService extends Service {
     /** Debugging flag */
     private static final boolean DBG = false;
 
+    /** Binder of the recognition service */
+    private RecognitionServiceBinder mBinder = new RecognitionServiceBinder(this);
+
     /**
      * The current callback of an application that invoked the
      * {@link RecognitionService#onStartListening(Intent, Callback)} method
@@ -136,31 +139,6 @@ public abstract class RecognitionService extends Service {
         }
     }
 
-    /** Binder of the recognition service */
-    private final IRecognitionService.Stub mBinder = new IRecognitionService.Stub() {
-        public void startListening(Intent recognizerIntent, IRecognitionListener listener) {
-            if (DBG) Log.d(TAG, "startListening called by:" + listener.asBinder());
-            if (checkPermissions(listener)) {
-                mHandler.sendMessage(Message.obtain(mHandler, MSG_START_LISTENING,
-                        new StartListeningArgs(recognizerIntent, listener)));
-            }
-        }
-
-        public void stopListening(IRecognitionListener listener) {
-            if (DBG) Log.d(TAG, "stopListening called by:" + listener.asBinder());
-            if (checkPermissions(listener)) {
-                mHandler.sendMessage(Message.obtain(mHandler, MSG_STOP_LISTENING, listener));
-            }
-        }
-
-        public void cancel(IRecognitionListener listener) {
-            if (DBG) Log.d(TAG, "cancel called by:" + listener.asBinder());
-            if (checkPermissions(listener)) {
-                mHandler.sendMessage(Message.obtain(mHandler, MSG_CANCEL, listener));
-            }
-        }
-    };
-
     /**
      * Checks whether the caller has sufficient permissions
      * 
@@ -208,6 +186,14 @@ public abstract class RecognitionService extends Service {
     public final IBinder onBind(final Intent intent) {
         if (DBG) Log.d(TAG, "onBind, intent=" + intent);
         return mBinder;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (DBG) Log.d(TAG, "onDestroy");
+        mCurrentCallback = null;
+        mBinder.clearReference();
+        super.onDestroy();
     }
 
     /**
@@ -304,6 +290,44 @@ public abstract class RecognitionService extends Service {
          */
         public void rmsChanged(float rmsdB) throws RemoteException {
             mListener.onRmsChanged(rmsdB);
+        }
+    }
+
+    /** Binder of the recognition service */
+    private static class RecognitionServiceBinder extends IRecognitionService.Stub {
+        private RecognitionService mInternalService;
+
+        public RecognitionServiceBinder(RecognitionService service) {
+            mInternalService = service;
+        }
+
+        public void startListening(Intent recognizerIntent, IRecognitionListener listener) {
+            if (DBG) Log.d(TAG, "startListening called by:" + listener.asBinder());
+            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
+                mInternalService.mHandler.sendMessage(Message.obtain(mInternalService.mHandler,
+                        MSG_START_LISTENING, mInternalService.new StartListeningArgs(
+                                recognizerIntent, listener)));
+            }
+        }
+
+        public void stopListening(IRecognitionListener listener) {
+            if (DBG) Log.d(TAG, "stopListening called by:" + listener.asBinder());
+            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
+                mInternalService.mHandler.sendMessage(Message.obtain(mInternalService.mHandler,
+                        MSG_STOP_LISTENING, listener));
+            }
+        }
+
+        public void cancel(IRecognitionListener listener) {
+            if (DBG) Log.d(TAG, "cancel called by:" + listener.asBinder());
+            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
+                mInternalService.mHandler.sendMessage(Message.obtain(mInternalService.mHandler,
+                        MSG_CANCEL, listener));
+            }
+        }
+
+        public void clearReference() {
+            mInternalService = null;
         }
     }
 }
