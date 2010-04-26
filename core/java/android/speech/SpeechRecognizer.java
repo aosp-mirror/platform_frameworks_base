@@ -382,6 +382,7 @@ public class SpeechRecognizer {
         mPendingTasks.clear();
         mService = null;
         mConnection = null;
+        mListener.mInternalListener = null;
     }
 
     /**
