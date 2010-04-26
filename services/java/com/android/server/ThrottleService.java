@@ -732,35 +732,31 @@ public class ThrottleService extends IThrottleManager.Stub {
             checkForSubscriberId();
             boolean startNewPeriod = true;
 
-            // if we rolled back in time, toss out
-            // if we rolled foward, advance to the next
-            if (end.before(mPeriodStart)) {
+            if (start.equals(mPeriodStart) && end.equals(mPeriodEnd)) {
+                // same endpoints - keep collecting
                 if (DBG) {
-                    Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
-                        end.getTimeInMillis() + ") - old start was " +
-                        mPeriodStart.getTimeInMillis() + ", wiping");
+                    Slog.d(TAG, "same period (" + start.getTimeInMillis() + "," +
+                            end.getTimeInMillis() +") - ammending data");
                 }
-                synchronized (mParent) {
-                    mPeriodRxData[mCurrentPeriod] = 0;
-                    mPeriodTxData[mCurrentPeriod] = 0;
-                }
-            } else if(start.after(mPeriodEnd)) {
+                startNewPeriod = false;
+            } else {
                 if (DBG) {
-                    Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
-                            end.getTimeInMillis() + ") - old end was " +
-                            mPeriodEnd.getTimeInMillis() + ", following");
+                    if(start.equals(mPeriodEnd) || start.after(mPeriodEnd)) {
+                        Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
+                                end.getTimeInMillis() + ") - old end was " +
+                                mPeriodEnd.getTimeInMillis() + ", following");
+                    } else {
+                        Slog.d(TAG, "new period (" + start.getTimeInMillis() + "," +
+                                end.getTimeInMillis() + ") replacing old (" +
+                                mPeriodStart.getTimeInMillis() + "," +
+                                mPeriodEnd.getTimeInMillis() + ")");
+                    }
                 }
                 synchronized (mParent) {
                     ++mCurrentPeriod;
                     if (mCurrentPeriod >= mPeriodCount) mCurrentPeriod = 0;
                     mPeriodRxData[mCurrentPeriod] = 0;
                     mPeriodTxData[mCurrentPeriod] = 0;
-                }
-            } else {
-                startNewPeriod = false;
-                if (DBG) {
-                    Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
-                            end.getTimeInMillis() + ") - we fit - ammending to last period");
                 }
             }
             setPeriodStart(start);
