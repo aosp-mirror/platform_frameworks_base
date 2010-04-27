@@ -176,59 +176,20 @@ protected:
         SharedBufferStack& stack;
         inline ConditionBase(SharedBufferBase* sbc) 
             : stack(*sbc->mSharedStack) { }
+        virtual ~ConditionBase() { };
+        virtual bool operator()() const = 0;
+        virtual const char* name() const = 0;
     };
+    status_t waitForCondition(const ConditionBase& condition);
 
     struct UpdateBase {
         SharedBufferStack& stack;
         inline UpdateBase(SharedBufferBase* sbb) 
             : stack(*sbb->mSharedStack) { }
     };
-
-    template <typename T>
-    status_t waitForCondition(T condition);
-
     template <typename T>
     status_t updateCondition(T update);
 };
-
-template <typename T>
-status_t SharedBufferBase::waitForCondition(T condition) 
-{
-    const SharedBufferStack& stack( *mSharedStack );
-    SharedClient& client( *mSharedClient );
-    const nsecs_t TIMEOUT = s2ns(1);
-    Mutex::Autolock _l(client.lock);
-    while ((condition()==false) &&
-            (stack.identity == mIdentity) &&
-            (stack.status == NO_ERROR))
-    {
-        status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
-        
-        // handle errors and timeouts
-        if (CC_UNLIKELY(err != NO_ERROR)) {
-            if (err == TIMED_OUT) {
-                if (condition()) {
-                    LOGE("waitForCondition(%s) timed out (identity=%d), "
-                        "but condition is true! We recovered but it "
-                        "shouldn't happen." , T::name(),
-                        stack.identity);
-                    break;
-                } else {
-                    LOGW("waitForCondition(%s) timed out "
-                        "(identity=%d, status=%d). "
-                        "CPU may be pegged. trying again.", T::name(),
-                        stack.identity, stack.status);
-                }
-            } else {
-                LOGE("waitForCondition(%s) error (%s) ",
-                        T::name(), strerror(-err));
-                return err;
-            }
-        }
-    }
-    return (stack.identity != mIdentity) ? status_t(BAD_INDEX) : stack.status;
-}
-
 
 template <typename T>
 status_t SharedBufferBase::updateCondition(T update) {
@@ -275,15 +236,15 @@ private:
 
     struct DequeueCondition : public ConditionBase {
         inline DequeueCondition(SharedBufferClient* sbc);
-        inline bool operator()();
-        static inline const char* name() { return "DequeueCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "DequeueCondition"; }
     };
 
     struct LockCondition : public ConditionBase {
         int buf;
         inline LockCondition(SharedBufferClient* sbc, int buf);
-        inline bool operator()();
-        static inline const char* name() { return "LockCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "LockCondition"; }
     };
 
     int32_t tail;
@@ -334,8 +295,8 @@ private:
     struct ReallocateCondition : public ConditionBase {
         int buf;
         inline ReallocateCondition(SharedBufferBase* sbb, int buf);
-        inline bool operator()();
-        static inline const char* name() { return "ReallocateCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "ReallocateCondition"; }
     };
 };
 
