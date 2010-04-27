@@ -37,6 +37,64 @@
 
 #include "dumpstate.h"
 
+void for_each_pid(void (*func)(int, const char *), const char *header) {
+    DIR *d;
+    struct dirent *de;
+
+    if (!(d = opendir("/proc"))) {
+        printf("Failed to open /proc (%s)\n", strerror(errno));
+        return;
+    }
+
+    printf("\n------ %s ------\n", header);
+    while ((de = readdir(d))) {
+        int pid;
+        int fd;
+        char cmdpath[255];
+        char cmdline[255];
+
+        if (!(pid = atoi(de->d_name))) {
+            continue;
+        }
+
+        sprintf(cmdpath,"/proc/%d/cmdline", pid);
+        memset(cmdline, 0, sizeof(cmdline));
+        if ((fd = open(cmdpath, O_RDONLY)) < 0) {
+            strcpy(cmdline, "N/A");
+        } else {
+            read(fd, cmdline, sizeof(cmdline));
+            close(fd);
+        }
+        func(pid, cmdline);
+    }
+
+    closedir(d);
+}
+
+void show_wchan(int pid, const char *name) {
+    char path[255];
+    char buffer[255];
+    int fd;
+
+    memset(buffer, 0, sizeof(buffer));
+
+    sprintf(path, "/proc/%d/wchan", pid);
+    if ((fd = open(path, O_RDONLY)) < 0) {
+        printf("Failed to open '%s' (%s)\n", path, strerror(errno));
+        return;
+    }
+
+    if (read(fd, buffer, sizeof(buffer)) < 0) {
+        printf("Failed to read '%s' (%s)\n", path, strerror(errno));
+        goto out_close;
+    }
+
+    printf("%-7d %-32s %s\n", pid, name, buffer);
+
+out_close:
+    close(fd);
+    return;
+}
 
 /* prints the contents of a file */
 int dump_file(const char *title, const char* path) {
