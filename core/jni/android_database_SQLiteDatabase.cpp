@@ -63,8 +63,8 @@ enum {
 
 static jfieldID offset_db_handle;
 
-static char *createStr(const char *path) {
-    int len = strlen(path);
+static char *createStr(const char *path, short extra) {
+    int len = strlen(path) + extra;
     char *str = (char *)malloc(len + 1);
     strncpy(str, path, len);
     str[len] = NULL;
@@ -85,7 +85,7 @@ static void registerLoggingFunc(const char *path) {
     }
 
     LOGV("Registering sqlite logging func \n");
-    int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, (void *)createStr(path));
+    int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, (void *)createStr(path, 0));
     if (err != SQLITE_OK) {
         LOGE("sqlite_config failed error_code = %d. THIS SHOULD NEVER occur.\n", err);
         return;
@@ -176,13 +176,17 @@ done:
     if (handle != NULL) sqlite3_close(handle);
 }
 
-static char *getDatabaseName(JNIEnv* env, sqlite3 * handle, jstring databaseName) {
+static char *getDatabaseName(JNIEnv* env, sqlite3 * handle, jstring databaseName, short connNum) {
     char const *path = env->GetStringUTFChars(databaseName, NULL);
     if (path == NULL) {
         LOGE("Failure in getDatabaseName(). VM ran out of memory?\n");
         return NULL; // VM would have thrown OutOfMemoryError
     }
-    char *dbNameStr = createStr(path);
+    char *dbNameStr = createStr(path, 4);
+    if (connNum > 999) { // TODO: if number of pooled connections > 999, fix this line.
+      connNum = -1;
+    }
+    sprintf(dbNameStr + strlen(path), "|%03d", connNum);
     env->ReleaseStringUTFChars(databaseName, path);
     return dbNameStr;
 }
@@ -192,10 +196,10 @@ static void sqlTrace(void *databaseName, const char *sql) {
 }
 
 /* public native void enableSqlTracing(); */
-static void enableSqlTracing(JNIEnv* env, jobject object, jstring databaseName)
+static void enableSqlTracing(JNIEnv* env, jobject object, jstring databaseName, jshort connType)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-    sqlite3_trace(handle, &sqlTrace, (void *)getDatabaseName(env, handle, databaseName));
+    sqlite3_trace(handle, &sqlTrace, (void *)getDatabaseName(env, handle, databaseName, connType));
 }
 
 static void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
@@ -204,12 +208,12 @@ static void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
 }
 
 /* public native void enableSqlProfiling(); */
-static void enableSqlProfiling(JNIEnv* env, jobject object, jstring databaseName)
+static void enableSqlProfiling(JNIEnv* env, jobject object, jstring databaseName, jshort connType)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-    sqlite3_profile(handle, &sqlProfile, (void *)getDatabaseName(env, handle, databaseName));
+    sqlite3_profile(handle, &sqlProfile, (void *)getDatabaseName(env, handle, databaseName,
+            connType));
 }
-
 
 /* public native void close(); */
 static void dbclose(JNIEnv* env, jobject object)
@@ -251,7 +255,8 @@ static void native_execSQL(JNIEnv* env, jobject object, jstring sqlString)
     jsize sqlLen = env->GetStringLength(sqlString);
 
     if (sql == NULL || sqlLen == 0) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "You must supply an SQL string");
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "You must supply an SQL string");
         return;
     }
 
@@ -261,7 +266,8 @@ static void native_execSQL(JNIEnv* env, jobject object, jstring sqlString)
 
     if (err != SQLITE_OK) {
         char const * sql8 = env->GetStringUTFChars(sqlString, NULL);
-        LOGE("Failure %d (%s) on %p when preparing '%s'.\n", err, sqlite3_errmsg(handle), handle, sql8);
+        LOGE("Failure %d (%s) on %p when preparing '%s'.\n", err, sqlite3_errmsg(handle),
+                handle, sql8);
         throw_sqlite3_exception(env, handle, sql8);
         env->ReleaseStringUTFChars(sqlString, sql8);
         return;
@@ -272,10 +278,12 @@ static void native_execSQL(JNIEnv* env, jobject object, jstring sqlString)
 
     if (stepErr != SQLITE_DONE) {
         if (stepErr == SQLITE_ROW) {
-            throw_sqlite3_exception(env, "Queries cannot be performed using execSQL(), use query() instead.");
+            throw_sqlite3_exception(env,
+                    "Queries cannot be performed using execSQL(), use query() instead.");
         } else {
             char const * sql8 = env->GetStringUTFChars(sqlString, NULL);
-            LOGE("Failure %d (%s) on %p when executing '%s'\n", err, sqlite3_errmsg(handle), handle, sql8);
+            LOGE("Failure %d (%s) on %p when executing '%s'\n", err, sqlite3_errmsg(handle),
+                    handle, sql8);
             throw_sqlite3_exception(env, handle, sql8);
             env->ReleaseStringUTFChars(sqlString, sql8);
 
@@ -455,8 +463,8 @@ static JNINativeMethod sMethods[] =
     /* name, signature, funcPtr */
     {"dbopen", "(Ljava/lang/String;I)V", (void *)dbopen},
     {"dbclose", "()V", (void *)dbclose},
-    {"enableSqlTracing", "(Ljava/lang/String;)V", (void *)enableSqlTracing},
-    {"enableSqlProfiling", "(Ljava/lang/String;)V", (void *)enableSqlProfiling},
+    {"enableSqlTracing", "(Ljava/lang/String;S)V", (void *)enableSqlTracing},
+    {"enableSqlProfiling", "(Ljava/lang/String;S)V", (void *)enableSqlProfiling},
     {"native_execSQL", "(Ljava/lang/String;)V", (void *)native_execSQL},
     {"lastInsertRow", "()J", (void *)lastInsertRow},
     {"lastChangeCount", "()I", (void *)lastChangeCount},
@@ -482,7 +490,8 @@ int register_android_database_SQLiteDatabase(JNIEnv *env)
         return -1;
     }
 
-    return AndroidRuntime::registerNativeMethods(env, "android/database/sqlite/SQLiteDatabase", sMethods, NELEM(sMethods));
+    return AndroidRuntime::registerNativeMethods(env, "android/database/sqlite/SQLiteDatabase",
+            sMethods, NELEM(sMethods));
 }
 
 /* throw a SQLiteException with a message appropriate for the error in handle */

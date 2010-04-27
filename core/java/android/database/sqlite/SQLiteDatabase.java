@@ -330,6 +330,17 @@ public class SQLiteDatabase extends SQLiteClosable {
      * */
     private final DatabaseErrorHandler mErrorHandler;
 
+    /** The Database connection pool {@link DatabaseConnectionPool}.
+     * Visibility is package-private for testing purposes. otherwise, private visibility is enough.
+     */
+    /* package */ volatile DatabaseConnectionPool mConnectionPool = null;
+
+    /** Each database connection handle in the pool is assigned a number 1..N, where N is the
+     * size of the connection pool.
+     * The main connection handle to which the pool is attached is assigned a value of 0.
+     */
+    /* package */ final short mConnectionNum;
+
     /**
      * @param closable
      */
@@ -504,7 +515,31 @@ public class SQLiteDatabase extends SQLiteClosable {
      * </pre>
      */
     public void beginTransaction() {
-        beginTransactionWithListener(null /* transactionStatusCallback */);
+        beginTransaction(null /* transactionStatusCallback */, true);
+    }
+
+    /**
+     * Begins a transaction in IMMEDIATE mode. Transactions can be nested. When
+     * the outer transaction is ended all of the work done in that transaction
+     * and all of the nested transactions will be committed or rolled back. The
+     * changes will be rolled back if any transaction is ended without being
+     * marked as clean (by calling setTransactionSuccessful). Otherwise they
+     * will be committed.
+     * <p>
+     * Here is the standard idiom for transactions:
+     *
+     * <pre>
+     *   db.beginTransactionNonExclusive();
+     *   try {
+     *     ...
+     *     db.setTransactionSuccessful();
+     *   } finally {
+     *     db.endTransaction();
+     *   }
+     * </pre>
+     */
+    public void beginTransactionNonExclusive() {
+        beginTransaction(null /* transactionStatusCallback */, false);
     }
 
     /**
@@ -533,6 +568,40 @@ public class SQLiteDatabase extends SQLiteClosable {
      * {@link #yieldIfContendedSafely}.
      */
     public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
+        beginTransaction(transactionListener, true);
+    }
+
+    /**
+     * Begins a transaction in IMMEDIATE mode. Transactions can be nested. When
+     * the outer transaction is ended all of the work done in that transaction
+     * and all of the nested transactions will be committed or rolled back. The
+     * changes will be rolled back if any transaction is ended without being
+     * marked as clean (by calling setTransactionSuccessful). Otherwise they
+     * will be committed.
+     * <p>
+     * Here is the standard idiom for transactions:
+     *
+     * <pre>
+     *   db.beginTransactionWithListenerNonExclusive(listener);
+     *   try {
+     *     ...
+     *     db.setTransactionSuccessful();
+     *   } finally {
+     *     db.endTransaction();
+     *   }
+     * </pre>
+     *
+     * @param transactionListener listener that should be notified when the
+     *            transaction begins, commits, or is rolled back, either
+     *            explicitly or by a call to {@link #yieldIfContendedSafely}.
+     */
+    public void beginTransactionWithListenerNonExclusive(
+            SQLiteTransactionListener transactionListener) {
+        beginTransaction(transactionListener, false);
+    }
+
+    private void beginTransaction(SQLiteTransactionListener transactionListener,
+            boolean exclusive) {
         verifyDbIsOpen();
         lockForced();
         boolean ok = false;
@@ -552,7 +621,11 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             // This thread didn't already have the lock, so begin a database
             // transaction now.
-            execSQL("BEGIN EXCLUSIVE;");
+            if (exclusive) {
+                execSQL("BEGIN EXCLUSIVE;");
+            } else {
+                execSQL("BEGIN IMMEDIATE;");
+            }
             mTransactionListener = transactionListener;
             mTransactionIsSuccessful = true;
             mInnerTransactionIsSuccessful = false;
@@ -604,6 +677,18 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
             if (mTransactionIsSuccessful) {
                 execSQL(COMMIT_SQL);
+                // if write-ahead logging is used, we have to take care of checkpoint.
+                // TODO: should applications be given the flexibility of choosing when to
+                // trigger checkpoint?
+                // for now, do checkpoint after every COMMIT because that is the fastest
+                // way to guarantee that readers will see latest data.
+                // but this is the slowest way to run sqlite with in write-ahead logging mode.
+                if (this.mConnectionPool != null) {
+                    execSQL("PRAGMA wal_checkpoint;");
+                    if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                        Log.i(TAG, "PRAGMA wal_Checkpoint done");
+                    }
+                }
             } else {
                 try {
                     execSQL("ROLLBACK;");
@@ -859,22 +944,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags,
             DatabaseErrorHandler errorHandler) {
-        SQLiteDatabase sqliteDatabase = new SQLiteDatabase(path, factory, flags, errorHandler);
-
-        try {
-            // Open the database.
-            sqliteDatabase.openDatabase(path, flags);
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                sqliteDatabase.enableSqlTracing(path);
-            }
-            if (SQLiteDebug.DEBUG_SQL_TIME) {
-                sqliteDatabase.enableSqlProfiling(path);
-            }
-        } catch (SQLiteDatabaseCorruptException e) {
-            // Database is not even openable.
-            errorHandler.onCorruption(sqliteDatabase);
-            sqliteDatabase = new SQLiteDatabase(path, factory, flags, errorHandler);
-        }
+        SQLiteDatabase sqliteDatabase = openDatabase(path, factory, flags, errorHandler,
+                (short) 0 /* the main connection handle */);
 
         // set sqlite pagesize to mBlockSize
         if (sBlockSize == 0) {
@@ -896,14 +967,26 @@ public class SQLiteDatabase extends SQLiteClosable {
         return sqliteDatabase;
     }
 
-    private void openDatabase(String path, int flags) {
-        // Open the database.
-        dbopen(path, flags);
+    private static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags,
+            DatabaseErrorHandler errorHandler, short connectionNum) {
+        SQLiteDatabase db = new SQLiteDatabase(path, factory, flags, errorHandler, connectionNum);
         try {
-            setLocale(Locale.getDefault());
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Failed to setLocale(). closing the database", e);
-            dbclose();
+            // Open the database.
+            db.dbopen(path, flags);
+            db.setLocale(Locale.getDefault());
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                db.enableSqlTracing(path, connectionNum);
+            }
+            if (SQLiteDebug.DEBUG_SQL_TIME) {
+                db.enableSqlProfiling(path, connectionNum);
+            }
+            return db;
+        } catch (SQLiteDatabaseCorruptException e) {
+            db.mErrorHandler.onCorruption(db);
+            return SQLiteDatabase.openDatabase(path, factory, flags, errorHandler);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Failed to open the database. closing it.", e);
+            db.close();
             throw e;
         }
     }
@@ -923,10 +1006,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * same as {@link #openOrCreateDatabase(String, CursorFactory)} except for an additional param
-     * errorHandler.
-     * @param errorHandler the {@link DatabaseErrorHandler} obj to be used when database
-     * corruption is detected on the database.
+     * Equivalent to openDatabase(path, factory, CREATE_IF_NECESSARY, errorHandler).
      */
     public static SQLiteDatabase openOrCreateDatabase(String path, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
@@ -963,6 +1043,9 @@ public class SQLiteDatabase extends SQLiteClosable {
             closePendingStatements();
             // close this database instance - regardless of its reference count value
             onAllReferencesReleased();
+            if (mConnectionPool != null) {
+                mConnectionPool.close();
+            }
         } finally {
             unlock();
         }
@@ -1175,11 +1258,18 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
         verifyDbIsOpen();
-        lock();
+        String prefixSql = sql.trim().substring(0, 6);
+        SQLiteDatabase db = this;
+        // get a pooled database connection handle to use, if this is a query
+        if (prefixSql.equalsIgnoreCase("SELECT")) {
+            db = getDbConnection(sql);
+        }
+        db.lock();
         try {
-            return new SQLiteStatement(this, sql);
+            return new SQLiteStatement(db, sql);
         } finally {
-            unlock();
+            releaseDbConnection(db);
+            db.unlock();
         }
     }
 
@@ -1376,7 +1466,8 @@ public class SQLiteDatabase extends SQLiteClosable {
             timeStart = System.currentTimeMillis();
         }
 
-        SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable);
+        SQLiteDatabase db = getDbConnection(sql);
+        SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(db, sql, editTable);
 
         Cursor cursor = null;
         try {
@@ -1402,6 +1493,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                                   : "<null>")  + ", count is " + count);
                 }
             }
+            releaseDbConnection(db);
         }
         return cursor;
     }
@@ -1872,9 +1964,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      *              exists, mFlags will be updated appropriately.
      * @param errorHandler The {@link DatabaseErrorHandler} to be used when sqlite reports database
      * corruption. may be NULL.
+     * @param connectionNum 0 for main database connection handle. 1..N for pooled database
+     * connection handles.
      */
     private SQLiteDatabase(String path, CursorFactory factory, int flags,
-            DatabaseErrorHandler errorHandler) {
+            DatabaseErrorHandler errorHandler, short connectionNum) {
         if (path == null) {
             throw new IllegalArgumentException("path should not be null");
         }
@@ -1887,6 +1981,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         // Set the DatabaseErrorHandler to be used when SQLite reports corruption.
         // If the caller sets errorHandler = null, then use default errorhandler.
         mErrorHandler = (errorHandler == null) ? new DefaultDatabaseErrorHandler() : errorHandler;
+        mConnectionNum = connectionNum;
     }
 
     /**
@@ -2129,6 +2224,12 @@ public class SQLiteDatabase extends SQLiteClosable {
         mMaxSqlCacheSize = cacheSize;
     }
 
+    /* package */ boolean isSqlInStatementCache(String sql) {
+        synchronized (mCompiledQueries) {
+            return mCompiledQueries.containsKey(sql);
+        }
+    }
+
     /* package */ void finalizeStatementLater(int id) {
         if (!isOpen()) {
             // database already closed. this statement will already have been finalized.
@@ -2173,6 +2274,145 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public ArrayList<Integer> getQueuedUpStmtList() {
         return mClosedStatementIds;
+    }
+
+    /**
+     * This method enables parallel execution of queries from multiple threads on the same database.
+     * It does this by opening multiple handles to the database and using a different
+     * database handle for each query.
+     * <p>
+     * If a transaction is in progress on one connection handle and say, a table is updated in the
+     * transaction, then query on the same table on another connection handle will block for the
+     * transaction to complete. But this method enables such queries to execute by having them
+     * return old version of the data from the table. Most often it is the data that existed in the
+     * table prior to the above transaction updates on that table.
+     * <p>
+     * Maximum number of simultaneous handles used to execute queries in parallel is
+     * dependent upon the device memory and possibly other properties.
+     * <p>
+     * After calling this method, execution of queries in parallel is enabled as long as this
+     * database handle is open. To disable execution of queries in parallel, database should
+     * be closed and reopened.
+     * <p>
+     * If a query is part of a transaction, then it is executed on the same database handle the
+     * transaction was begun.
+     *
+     * <p>
+     * If the database has any attached databases, then execution of queries in paralel is NOT
+     * possible. In such cases, {@link IllegalStateException} is thrown.
+     * <p>
+     * A typical way to use this method is the following:
+     * <pre>
+     *     SQLiteDatabase db = SQLiteDatabase.openDatabase("db_filename", cursorFactory,
+     *             CREATE_IF_NECESSARY, myDatabaseErrorHandler);
+     *     db.enableWriteAheadLogging();
+     * </pre>
+     * <p>
+     * Writers should use {@link #beginTransactionNonExclusive()} or
+     * {@link #beginTransactionWithListenerNonExclusive(SQLiteTransactionListener)}
+     * to start a trsnsaction.
+     * Non-exclusive mode allows database file to be in readable by threads executing queries.
+     * </p>
+     *
+     * @throws IllegalStateException thrown if the database has any attached databases.
+     */
+    public synchronized void enableWriteAheadLogging() {
+        if (mConnectionPool != null) {
+            // connection pool already setup.
+            return;
+        }
+
+        // make sure this database has NO attached databases because sqlite's write-ahead-logging
+        // doesn't work for databases with attached databases
+        if (getAttachedDbs().size() > 1) {
+            throw new IllegalStateException("this database: " + mPath +
+                    " has attached databases. can't do execution of of queries in parallel.");
+        }
+        mConnectionPool = new DatabaseConnectionPool(this);
+
+        // set journal_mode to WAL
+        String s = DatabaseUtils.stringForQuery(this, "PRAGMA journal_mode=WAL", null);
+        if (!s.equalsIgnoreCase("WAL")) {
+            Log.e(TAG, "setting journal_mode to WAL failed");
+        }
+    }
+
+    /**
+     * Sets the database connection handle pool size to the given value.
+     * Database connection handle pool is enabled when the app calls
+     * {@link #enableWriteAheadLogging()}.
+     * <p>
+     * The default connection handle pool is set by the system by taking into account various
+     * aspects of the device, such as memory, number of cores etc. It is recommended that
+     * applications use the default pool size set by the system.
+     *
+     * @param size the value the connection handle pool size should be set to.
+     */
+    public synchronized void setConnectionPoolSize(int size) {
+        if (mConnectionPool == null) {
+            throw new IllegalStateException("connection pool not enabled");
+        }
+        int i = mConnectionPool.getMaxPoolSize();
+        if (size < i) {
+            throw new IllegalStateException(
+                    "cannot set max pool size to a value less than the current max value(=" +
+                    i + ")");
+        }
+        mConnectionPool.setMaxPoolSize(size);
+    }
+
+    /* package */ SQLiteDatabase createPoolConnection(short connectionNum) {
+        return openDatabase(mPath, mFactory, mFlags, mErrorHandler, connectionNum);
+    }
+
+    private boolean isPooledConnection() {
+        return this.mConnectionNum > 0;
+    }
+
+    private SQLiteDatabase getDbConnection(String sql) {
+        verifyDbIsOpen();
+
+        // use the current connection handle if
+        // 1. this is a pooled connection handle
+        // 2. OR, if this thread is in a transaction
+        // 3. OR, if there is NO connection handle pool setup
+        SQLiteDatabase db = null;
+        if (isPooledConnection() ||
+                (inTransaction() && mLock.isHeldByCurrentThread()) ||
+                (this.mConnectionPool == null)) {
+            db = this;
+        } else {
+            // get a connection handle from the pool
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                assert mConnectionPool != null;
+            }
+            db = mConnectionPool.get(sql);
+        }
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "getDbConnection threadid = " + Thread.currentThread().getId() +
+                    ", request on # " + mConnectionNum +
+                    ", assigned # " + db.mConnectionNum + ", " + getPath());
+        }
+        return db;
+    }
+
+    private void releaseDbConnection(SQLiteDatabase db) {
+        // ignore this release call if
+        // 1. the database is closed
+        // 2. OR, if db is NOT a pooled connection handle
+        // 3. OR, if the database being released is same as 'this' (this condition means
+        //     that we should always be releasing a pooled connection handle by calling this method
+        //     from the 'main' connection handle
+        if (!isOpen() || !db.isPooledConnection() || (db == this)) {
+            return;
+        }
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            assert isPooledConnection();
+            assert mConnectionPool != null;
+            Log.d(TAG, "releaseDbConnection threadid = " + Thread.currentThread().getId() +
+                    ", releasing # " + db.mConnectionNum + ", " + getPath());
+        }
+        mConnectionPool.release(db);
     }
 
     static class ActiveDatabases {
@@ -2238,6 +2478,14 @@ public class SQLiteDatabase extends SQLiteClosable {
                         dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
                                 lookasideUsed, db.mNumCacheHits, db.mNumCacheMisses,
                                 db.mCompiledQueries.size()));
+                    }
+                }
+                // if there are pooled connections, return the cache stats for them also.
+                if (db.mConnectionPool != null) {
+                    for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
+                        dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
+                                + lastnode, 0, 0, 0, pDb.mNumCacheHits, pDb.mNumCacheMisses,
+                                pDb.mCompiledQueries.size()));
                     }
                 }
             } catch (SQLiteException e) {
@@ -2329,8 +2577,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Native call to setup tracing of all SQL statements
      *
      * @param path the full path to the database
+     * @param connectionNum connection number: 0 - N, where the main database
+     *            connection handle is numbered 0 and the connection handles in the connection
+     *            pool are numbered 1..N.
      */
-    private native void enableSqlTracing(String path);
+    private native void enableSqlTracing(String path, short connectionNum);
 
     /**
      * Native call to setup profiling of all SQL statements.
@@ -2339,8 +2590,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * are executed.
      *
      * @param path the full path to the database
+     * @param connectionNum connection number: 0 - N, where the main database
+     *            connection handle is numbered 0 and the connection handles in the connection
+     *            pool are numbered 1..N.
      */
-    private native void enableSqlProfiling(String path);
+    private native void enableSqlProfiling(String path, short connectionNum);
 
     /**
      * Native call to execute a raw SQL statement. {@link #lock} must be held
