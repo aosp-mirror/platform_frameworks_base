@@ -259,7 +259,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * the application has been uninstalled (its .apk is no longer available)
      * but its persistent data is not removed.
      */
-    public static final int FLAG_EXTERNAL_STORAGE = 1<<19;
+    public static final int FLAG_EXTERNAL_STORAGE = 1<<18;
 
     /**
      * Value for {@link #flags}: Set to true if the application has been
