@@ -138,6 +138,8 @@ static void dumpstate() {
     dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
     dump_file("LAST PANIC THREADS", "/data/dontpanic/apanic_threads");
 
+    for_each_pid(show_wchan, "BLOCKED PROCESS WAIT-CHANNELS");
+
     printf("------ BACKLIGHTS ------\n");
     printf("LCD brightness=");
     dump_file(NULL, "/sys/class/leds/lcd-backlight/brightness");
@@ -160,7 +162,6 @@ static void dumpstate() {
        dumpsys itself... */
     run_command("DUMPSYS", 60, "dumpsys", NULL);
 }
-
 
 static void usage() {
     fprintf(stderr, "usage: dumpstate [-d] [-o file] [-s] [-z]\n"
