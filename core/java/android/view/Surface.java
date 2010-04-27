@@ -147,6 +147,7 @@ public class Surface implements Parcelable {
     private Canvas mCanvas;
     @SuppressWarnings("unused")
     private int mNativeSurface;
+    private String mName;
 
     // The display metrics used to provide the pseudo canvas size for applications
     // running in compatibility mode. This is set to null for non compatibility mode.
@@ -204,6 +205,7 @@ public class Surface implements Parcelable {
         }
         mCanvas = new CompatibleCanvas();
         init(s,pid,name,display,w,h,format,flags);
+        mName = name;
     }
 
     /**
@@ -386,7 +388,7 @@ public class Surface implements Parcelable {
 
     @Override
     public String toString() {
-        return "Surface(native-token=" + mSurfaceControl + ")";
+        return "Surface(name=" + mName + ", identity=" + getIdentity() + ")";
     }
 
     private Surface(Parcel source) throws OutOfResourcesException {
@@ -437,4 +439,6 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private native void init(Parcel source);
+
+    private native int getIdentity();
 }
