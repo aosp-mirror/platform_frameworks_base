@@ -69,9 +69,9 @@ public class NotificationPlayer implements OnCompletionListener {
      * OnCompletionListener, to be called at the end of the playback, the MediaPlayer needs to
      * be created with a looper running so its event handler is not null.
      */
-    private final class PlayerCreationThread extends Thread {
+    private final class CreationAndCompletionThread extends Thread {
         public Command mCmd;
-        public PlayerCreationThread(Command cmd) {
+        public CreationAndCompletionThread(Command cmd) {
             super();
             mCmd = cmd;
         }
@@ -121,10 +121,19 @@ public class NotificationPlayer implements OnCompletionListener {
             //-----------------------------------
             // This is were we deviate from the AsyncPlayer implementation and create the
             // MediaPlayer in a new thread with which we're synchronized
-            PlayerCreationThread t = new PlayerCreationThread(cmd);
-            synchronized(t) {
-                t.start();
-                t.wait();
+            synchronized(mCompletionHandlingLock) {
+                // if another sound was already playing, it doesn't matter we won't get notified
+                // of the completion, since only the completion notification of the last sound
+                // matters
+                if((mLooper != null)
+                        && (mLooper.getThread().getState() != Thread.State.TERMINATED)) {
+                    mLooper.quit();
+                }
+                mCompletionThread = new CreationAndCompletionThread(cmd);
+                synchronized(mCompletionThread) {
+                    mCompletionThread.start();
+                    mCompletionThread.wait();
+                }
             }
             //-----------------------------------
 
@@ -169,7 +178,10 @@ public class NotificationPlayer implements OnCompletionListener {
                         mPlayer = null;
                         mAudioManager.abandonAudioFocus(null);
                         mAudioManager = null;
-                        mLooper.quit();
+                        if((mLooper != null)
+                                && (mLooper.getThread().getState() != Thread.State.TERMINATED)) {
+                            mLooper.quit();
+                        }
                     } else {
                         Log.w(mTag, "STOP command without a player");
                     }
@@ -195,10 +207,23 @@ public class NotificationPlayer implements OnCompletionListener {
         if (mAudioManager != null) {
             mAudioManager.abandonAudioFocus(null);
         }
+        // if there are no more sounds to play, end the Looper to listen for media completion
+        synchronized (mCmdQueue) {
+            if (mCmdQueue.size() == 0) {
+                synchronized(mCompletionHandlingLock) {
+                    if(mLooper != null) {
+                        mLooper.quit();
+                    }
+                    mCompletionThread = null;
+                }
+            }
+        }
     }
 
     private String mTag;
     private CmdThread mThread;
+    private CreationAndCompletionThread mCompletionThread;
+    private final Object mCompletionHandlingLock = new Object();
     private MediaPlayer mPlayer;
     private PowerManager.WakeLock mWakeLock;
     private AudioManager mAudioManager;
