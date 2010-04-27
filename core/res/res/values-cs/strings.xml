@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Vypnout"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Žádné nedávno použité aplikace."</string>
     <string name="global_actions" msgid="2406416831541615258">"Možnosti telefonu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zámek obrazovky"</string>
@@ -853,7 +855,7 @@
     <string name="submit" msgid="1602335572089911941">"Odeslat"</string>
     <string name="description_star" msgid="2654319874908576133">"oblíbené"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Aktivován režim V autě"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Vyberte, chcete-li ukončit režim V autě."</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Vyberte, chcete-li ukončit režim Na cestě."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Sdílení je aktivní"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Dotykem zahájíte konfiguraci"</string>
     <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->

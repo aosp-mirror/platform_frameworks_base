@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Uitschakelen"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Uitschakelen..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Uw telefoon wordt uitgeschakeld."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Geen recente toepassingen."</string>
     <string name="global_actions" msgid="2406416831541615258">"Telefoonopties"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Schermvergrendeling"</string>
@@ -341,7 +343,7 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"alle telefoonnummers rechtstreeks bellen"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Hiermee kan een toepassing elk telefoonnummer, inclusief alarmnummers, bellen zonder uw tussenkomst. Schadelijke toepassingen kunnen onnodige en illegale oproepen uitvoeren naar alarmdiensten."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"meteen starten met CDMA-telefooninstelling"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Hiermee kan de toepassing starten met CDMA-levering. Schadelijke toepassingen kunnen de CDMA-levering onnodig starten"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Hiermee kan de toepassing starten met CDMA-provisioning. Schadelijke applicaties kunnen de CDMA-provisioning onnodig starten"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"meldingen over locatie-updates beheren"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"toegang tot checkin-eigenschappen"</string>
