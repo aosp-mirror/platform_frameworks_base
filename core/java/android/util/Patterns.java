@@ -124,7 +124,7 @@ public class Patterns {
         + "[0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}"
         + "|[1-9][0-9]|[0-9])))"
         + "(?:\\:\\d{1,5})?)" // plus option port number
-        + "(\\/(?:(?:[a-zA-Z0-9\\;\\/\\?\\:\\@\\&\\=\\#\\~"  // plus option query params
+        + "(\\/(?:(?:[" + GOOD_IRI_CHAR + "\\;\\/\\?\\:\\@\\&\\=\\#\\~"  // plus option query params
         + "\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_])|(?:\\%[a-fA-F0-9]{2}))*)?"
         + "(?:\\b|$)"); // and finally, a word boundary or end of
                         // input.  This is to stop foo.sure from
