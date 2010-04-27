@@ -118,8 +118,6 @@ public final class SQLiteDebug {
 
     /**
      * contains statistics about a database
-     * @author vnori@google.com (Your Name Here)
-     *
      */
     public static class DbStats {
         /** name of the database */
