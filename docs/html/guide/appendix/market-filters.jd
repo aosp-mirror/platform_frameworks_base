@@ -1,0 +1,307 @@
+page.title=Market Filters
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2 align="left">Market Filters quickview</h2>
+<ul> <li>Android Market applies filters to control which apps are visible to a
+user.</li> <li>Filtering is determined by elements in an app's manifest file,
+aspects of the device being used, and other factors.</li> </ul>
+
+<h2>In this document</h2>
+
+<ol> <li><a href="#how-filters-work">How Filters Work in Android Market</a></li>
+<li><a href="#manifest-filters">The Manifest File</a>
+  <ol>
+    <li><a href="#affects-filtering">Elements that affect filtering</a></li>
+  </ol>
+</li>
+<li><a href="#other-filters">Other Filters</a></li> 
+</ol>
+
+<h2>See also</h2>
+ <ol> 
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
+</ol>
+
+<div id="qv-extra"> <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
+<div id="qv-sub-rule"> <img src="{@docRoot}assets/images/icon_market.jpg"
+style="float:left;margin:0;padding:0;"> <p style="color:#669999;">Interested in
+publishing your app on Android Market?</p> <a id="publish-link"
+href="http://market.android.com/publish">Go to Android Market &raquo;</a> </div>
+</div>
+
+</div> </div>
+
+<p>When a user searches or browses in Android Market, the results are filtered, and
+some applications might not be visible. For example, if an application requires a
+trackball (as specified in the manifest file), then Android Market will not show
+the app on any device that does not have a trackball.</p> <p>The manifest file and
+the device's hardware and features are only part of how applications are filtered
+&#8212; filtering also depends on the country and carrier, the presence or absence
+of a SIM card, and other factors. </p>
+
+<p>Changes to the Android Market filters are independent of changes 
+to the Android platform itself. This document will be updated periodically to reflect 
+any changes that might occur. </p>
+
+<h2 id="how-filters-work">How Filters Work in Android Market</h2>
+
+<p>If any one of the filter restrictions described in the following sections applies to
+an application, then the application will not appear in search results or category
+browsing on Android Market. </p><p> You can request any combination of the available filters for your
+app &#8212; for example, you could set a <code>minSdkVersion</code> of 4 and set
+<code>smallScreens</code> to false in the app, then when uploading the app to
+Market you could target European countries (carriers) only. Android Market's
+filters would prevent the application from being visible on any device that did not
+match all three of these requirements. </p>
+
+ <p>A filtered app is not visible within Market, even if a user specifically requests 
+the app by clicking a deep link that points directly to the app's ID within Market. 
+All filtering restrictions are associated with an application's version and can
+change between versions. For example:</p> 
+
+<ul> 
+<li>If you publish a new version of
+your app with stricter restrictions, the app will not be visible to users for whom
+it is filtered, even if those users were able see the previous version.</li> <li>If
+a user has installed your application and you publish an upgrade that makes the app
+invisible to the user, the user will not see that an upgrade is available. 
+</li>
+</ul>
+
+<h2 id="manifest-filters">The Manifest File</h2>
+<p>Most Market filters are triggered by elements within an application's manifest file, <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>, 
+although not everything in the manifest file can trigger filtering. </p>
+<h3 id="affects-filtering">Elements that affect filtering</h3>
+<p>The following table lists the manifest elements that can be used to trigger 
+Android Market filtering, and explains how they work.</p>
+<table border="1">
+  <tr>
+    <th>Manifest Element</th>
+    <th>Filter Name</th>
+    <th>How It Works</th>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">Screen Size</td>
+    <td valign="top">
+
+<p>An application indicates the screen sizes that it is capable of supporting by
+setting attributes of the <code>&lt;supports-screens&gt;</code> element. When
+the application is published, Market uses those attributes to determine whether
+to show the application to users, based on the screen sizes of their
+devices. </p>
+
+<p>As a general rule, Market assumes that the platform on the device can adapt
+smaller layouts to larger screens, but cannot adapt larger layouts to smaller
+screens. Thus, if an application declares support for "normal" screen size only,
+Market makes the application available to both normal- and large-screen devices,
+but filters the application so that it is not available to small-screen
+devices.</p>
+
+<p>If an application does not declare attributes for
+<code>&lt;supports-screens&gt;</code>, Market uses the default values for those
+attributes, which vary by API Level. Specifically: </p>
+
+<ul>
+<li><p>In API level 3, the <code>&lt;supports-screens&gt;</code> element itself
+is undefined and no attributes are available. In this case, Market assumes that
+the application is designed for normal-size screens and shows the application to
+devices that have normal or large screens. </p>
+
+<p>This behavior is especially significant for applications that set their
+<code><a
+href="@docRoot}guide/topics/manifest/uses-sdk-element.html">android:
+minSdkVersion</a></code> to 3 or lower, since Market will filter them from
+small-screen devices by default. Such applications can enable support for
+small-screen devices by adding a <code>android:targetSdkVersion="4"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in their manifest
+files. For more information, see <a
+href="{@docRoot}guide/practices/screens_support.html#strategies">Strategies for
+Legacy Applications</a>.</p></li>
+
+<li>In API Level 4, the defaults for all of the attributes is
+<code>"true"</code>. If an application does not declare a
+<code>&lt;supports-screens&gt;</code> element, Market assumes that the
+application is designed for all screen sizes and does not filter it from any
+devices. If the application does not declare one of the attributes, Market uses
+the default value of <code>"true"</code> and does not filter the app for devices
+of corresponding screen size.</li>
+</ul>
+
+    <p><strong>Example 1</strong><br />
+    The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"&gt;</code>
+    and does not does not include a <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Android Market will not show the app to a user of a
+    small-screen device, but will show it to users of normal and large-screen
+    devices,  users, unless  other filters apply. </p>
+    <p><strong>Example 2<br />
+    </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"
+    android:targetSdkVersion="4"&gt;</code> and does not include a
+    <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Android Market will show the app to users on all 
+    devices, unless other filters apply. </p>
+    <p><strong>Example 3<br />
+    </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="4"&gt;</code>
+    and does not include a <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Android Market will show the app to all users,
+    unless  other filters apply. </p>
+    <p>For more information on how to declare support for screen sizes in your
+    application, see <code><a
+    href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+    and <a href="{@docRoot}guide/practices/screens-support.html">Supporting Multiple
+    Screens</a>.</p>
+</td>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>
+      <!-- ##api level 3## --></td>
+    <td valign="top">Device
+    Configuration: <br />
+    keyboard, navigation, touch screen</td>
+    <td valign="top"><p>An application can
+    request certain hardware features, and Android Market will  show the app only on devices that have the required hardware.</p>
+      <p><strong>Example 1<br />
+      </strong>The manifest includes <code>&lt;uses-configuration android:reqFiveWayNav=&quot;true&quot; /&gt;</code>, and a user is searching for apps on a device that does not have a five-way navigational control. <strong>Result</strong>: Android Market will not show the app to the user. </p>
+      <p><strong>Example 2<br />
+      </strong>The manifest does not include a <code>&lt;uses-configuration&gt;</code> element. <strong>Result</strong>: Android Market will show the app to all users, unless other filters apply.</p>
+<p>For more details, see  <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>.</p></td>
+  </tr>
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">Device Features<br />
+      (<code>name</code>)</td>
+    <td valign="top"><p>An
+      application can require certain device features to be present on the device. This functionality
+      was introduced in Android 2.0 (API Level 5).</p>
+      <p><strong>Example 1<br />
+      </strong>The manifest includes <code>&lt;uses-feature android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code>, and a user is searching for apps on a device that does not have a light sensor. <strong>Result</strong>: Android Market will not show the app to the user. </p>
+      <p><strong>Example 2<br />
+      </strong>The manifest does not include a <code>&lt;uses-feature&gt;</code> element. <strong>Result</strong>: Android Market will show the app to all users, unless other filters apply.</p>
+      <p>For more details, see <code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>.</p>
+<p><em>A note about camera:</em> If an
+        application requests the CAMERA permission using the <a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html"> <code>&lt;uses-permission&gt;</code></a> element, Market assumes that the
+        application requires the camera and autofocus features. For applications that require the camera and are designed to run on Android 1.5 (API Level 3), declaring the CAMERA permission is an effective way of ensuring that Market filters your app properly, since <code>uses-feature</code> filtering is not available to applications compiled against the Android 1.5 platform. For more details about requiring or requesting a camera, see the <a href="{@docRoot}guide/topics/manifest/uses-library-element.html#required"> <code>required</code></a> attribute of <code>&lt;uses-feature&gt;</code>. </p></td>
+  </tr>
+  <tr>
+    <td valign="top">OpenGL-ES
+    Version<br />
+(<code>openGlEsVersion</code>)</td>
+    <td valign="top"><p>An application can require that the device support a specific
+      OpenGL-ES version using the <code>&lt;uses-feature
+        android:openGlEsVersion=&quot;int&quot;&gt;</code> attribute.</p>
+      <p><strong>Example 1<br />
+      </strong>An app
+        requests multiple OpenGL-ES versions by specifying <code>openGlEsVersion</code> multiple times in the
+        manifest.  <strong>Result</strong>: Market assumes that the app requires the highest of the indicated versions.</p>
+<p><strong>Example 2<br />
+</strong>An app
+        requests OpenGL-ES version 1.1, and a user is searching for apps on a device that supports OpenGL-ES version 2.0. <strong>Result</strong>: Android Market will show the app to the user, unless other filters apply. If a
+  device reports that it supports OpenGL-ES version <em>X</em>,  Market assumes that it
+  also supports any version earlier than <em>X</em>.
+</p>
+<p><strong>Example 3<br />
+</strong>A user is searching for apps on a device that does not
+        report an OpenGL-ES version (for example, a device running Android 1.5 or earlier). <strong>Result</strong>: Android Market assumes that the device
+  supports only OpenGL-ES 1.0. Market will only show the user apps that do not specify <code>openGlEsVersion</code>, or apps that do not specify an OpenGL-ES version higher than 1.0. </p>
+      <p><strong>Example 4<br />
+      </strong>The manifest does not specify <code>openGlEsVersion</code>. <strong>Result</strong>: Android Market will show the app to all users, unless other filters apply. </p>
+<p>For more details, see <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>.</p></td>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></td>
+    <td valign="top">Software Libraries</td>
+    <td valign="top"><p>An application can require specific
+    shared libraries to be present on the device. </p>
+      <p><strong>Example 1<br />
+      </strong>An app requires the <code>com.google.android.maps</code> library, and a user is searching for apps on a device that does not have the <code>com.google.android.maps</code> library. <strong>Result</strong>: Android Market will not show the app to the user. </p>
+      <p><strong>Example 2</strong><br />
+        The manifest does not include a <code>&lt;uses-library&gt;</code> element. <strong>Result</strong>: Android Market will show the app to all users, unless other filters apply.</p>
+<p>For more details, see <a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>.</p></td>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></td>
+    <td valign="top">&nbsp;</td>
+    <td valign="top"><em>(See the note in the description of <code>&lt;uses-feature&gt;</code>, above.)</em></td>
+  </tr>
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></td>
+    <td valign="top">Minimum Framework Version (<code>minSdkVersion</code>)</td>
+    <td valign="top"><p>An application can require a minimum API level.  </p>
+      <p><strong>Example 1</strong><br />
+        The manifest includes <code>&lt;uses-sdk
+      android:minSdkVersion=&quot;3&quot;&gt;</code>, and the app uses APIs that were introduced in API Level 3. A user is searching for apps on a device that has API Level 2. <strong>Result</strong>: Android Market will not show the app to the user. </p>
+      <p><strong>Example 2</strong><br />
+      The manifest does not include <code>minSdkVersion</code>, and the app uses APIs that were introduced in API Level 3. A user is searching for apps on a device that has API Level 2. <strong>Result</strong>: Android Market assumes that <code>minSdkVersion</code> is &quot;1&quot; and that the app is compatible with all versions of Android. Market  shows the app to the user and allows the user to download the app. The app crashes at runtime. </p>
+    <p>Because you want to avoid this second scenario, we recommend that you always declare a <code>minSdkVersion</code>. For details, see <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min"><code>android:minSdkVersion</code></a>.</p></td>
+  </tr>
+  <tr>
+    <td valign="top">Maximum Framework Version (<code>maxSdkVersion</code>)</td>
+    <td valign="top"><p><em>Deprecated.</em> Android
+    2.1 and later do not check or enforce the <code>maxSdkVersion</code> attribute, and
+    the SDK will not compile if <code>maxSdkVersion</code> is set in an app's manifest. For devices already
+    compiled with <code>maxSdkVersion</code>, Market will respect it and use it for
+    filtering.</p>
+<p> Declaring <code>maxSdkVersion</code> is <em>not</em> recommended. For details, see <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max"><code>android:maxSdkVersion</code></a>.</p></td>
+  </tr>
+</table>
+
+<h2 id="other-filters">Other Filters</h2>
+<p>The following table describes other application characteristics that trigger Android Market filtering. </p>
+
+<table border="1"> <tr>
+    <th>Filter Name</th> <th>How It Works</th> </tr>
+
+  <tr>
+    <td valign="top">Publishing Status</td> <td valign="top"><p>Only published applications will appear in
+      searches and browsing within Android Market.</p> <p>Even if an app is unpublished, it can
+        be installed if users can see it in their Downloads area among their purchased,
+        installed, or recently uninstalled apps.</p> <p>If an application has been
+  suspended, users will not be able to reinstall or update it, even if it appears in their Downloads.</p> </td></tr>
+  <tr>
+  <td valign="top">Priced
+    Status</td> <td valign="top"><p>Not all users can see paid apps. To show paid apps, a device
+must have a SIM card and be running Android 1.1 or later, and it must be in a
+country (as determined by SIM carrier) in which paid apps are available.</p></td>
+</tr> <tr>
+  <td valign="top">Country / Carrier Targeting</td> <td valign="top"> <p>When you upload your app to
+    the Android Market, you can select specific countries to target. The app will only
+    be visible to the countries (carriers) that you select, as follows:</p>
+    <ul><li><p>A device's country is determined based on the carrier, if a carrier is
+      available. If no carrier can be determined, the Market application tries to
+      determine the country based on IP.</p></li> <li><p>Carrier is determined based on
+      the device's SIM (for GSM devices), not the current roaming carrier.</p></li></ul>
+</td> </tr> <tr>
+  <td valign="top">Native Platform</td> <td valign="top"><p>An application that includes native
+    libraries that target a specific platform (ARM EABI v7, for example) will only be
+    visible on devices that support that platform. For details about the NDK and using
+    native libraries, see <a href="{@docRoot}sdk/ndk/index.html#overview">What is the
+      Android NDK?</a></p> </tr> <tr>
+        <td valign="top">Forward-Locked Applications</td> <td valign="top"><p>To
+          forward lock an application, set copy protection to "On" when you upload the
+          application to Market. Market will not show copy-protected applications on
+developer devices or unreleased devices.</p></td> </tr> </table>
+
+
