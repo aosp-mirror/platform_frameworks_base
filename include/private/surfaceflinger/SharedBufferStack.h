@@ -167,6 +167,7 @@ protected:
     SharedBufferStack* const mSharedStack;
     const int mNumBuffers;
     const int mIdentity;
+    int32_t computeTail() const;
 
     friend struct Update;
     friend struct QueueUpdate;
@@ -259,8 +260,6 @@ private:
     friend struct Condition;
     friend struct DequeueCondition;
     friend struct LockCondition;
-    
-    int32_t computeTail() const;
 
     struct QueueUpdate : public UpdateBase {
         inline QueueUpdate(SharedBufferBase* sbb);
@@ -288,6 +287,7 @@ private:
     };
 
     int32_t tail;
+    int32_t undoDequeueTail;
     // statistics...
     nsecs_t mDequeueTime[NUM_BUFFER_MAX];
 };

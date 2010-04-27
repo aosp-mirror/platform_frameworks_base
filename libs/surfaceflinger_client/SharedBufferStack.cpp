@@ -179,7 +179,7 @@ String8 SharedBufferBase::dump(char const* prefix) const
     char buffer[SIZE];
     String8 result;
     SharedBufferStack& stack( *mSharedStack );
-    int tail = (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
+    int tail = computeTail();
     snprintf(buffer, SIZE, 
             "%s[ head=%2d, available=%2d, queued=%2d, tail=%2d ] "
             "reallocMask=%08x, inUse=%2d, identity=%d, status=%d\n",
@@ -187,6 +187,12 @@ String8 SharedBufferBase::dump(char const* prefix) const
             stack.reallocMask, stack.inUse, stack.identity, stack.status);
     result.append(buffer);
     return result;
+}
+
+int32_t SharedBufferBase::computeTail() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
 }
 
 // ============================================================================
@@ -297,30 +303,10 @@ ssize_t SharedBufferServer::StatusUpdate::operator()() {
 
 SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
-    : SharedBufferBase(sharedClient, surface, num, identity), tail(0)
+    : SharedBufferBase(sharedClient, surface, num, identity),
+      tail(0), undoDequeueTail(0)
 {
     tail = computeTail();
-}
-
-int32_t SharedBufferClient::computeTail() const
-{
-    SharedBufferStack& stack( *mSharedStack );
-    // we need to make sure we read available and head coherently,
-    // w.r.t RetireUpdate.
-    int32_t newTail;
-    int32_t avail;
-    int32_t head;
-    do {
-        avail = stack.available;
-        head = stack.head;
-    } while (stack.available != avail);
-    newTail = head - avail + 1;
-    if (newTail < 0) {
-        newTail += mNumBuffers;
-    } else if (newTail >= mNumBuffers) {
-        newTail -= mNumBuffers;
-    }
-    return newTail;
 }
 
 ssize_t SharedBufferClient::dequeue()
@@ -350,6 +336,7 @@ ssize_t SharedBufferClient::dequeue()
 
     int dequeued = tail;
     tail = ((tail+1 >= mNumBuffers) ? 0 : tail+1);
+    undoDequeueTail = dequeued;
     LOGD_IF(DEBUG_ATOMICS, "dequeued=%d, tail=%d, %s",
             dequeued, tail, dump("").string());
 
@@ -363,7 +350,7 @@ status_t SharedBufferClient::undoDequeue(int buf)
     UndoDequeueUpdate update(this);
     status_t err = updateCondition( update );
     if (err == NO_ERROR) {
-        tail = computeTail();
+        tail = undoDequeueTail;
     }
     return err;
 }
