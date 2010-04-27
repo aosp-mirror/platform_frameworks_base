@@ -74,6 +74,10 @@ public class PatternsTest extends TestCase {
         t = Patterns.WEB_URL.matcher("\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
         assertTrue("Valid URL", t);
 
+        t = Patterns.WEB_URL.matcher("http://brainstormtech.blogs.fortune.cnn.com/2010/03/11/" +
+            "top-five-moments-from-eric-schmidt\u2019s-talk-in-abu-dhabi/").matches();
+        assertTrue("Valid URL", t);
+
         t = Patterns.WEB_URL.matcher("ftp://www.example.com").matches();
         assertFalse("Matched invalid protocol", t);
 
