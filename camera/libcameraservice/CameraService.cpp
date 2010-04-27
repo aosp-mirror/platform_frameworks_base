@@ -16,6 +16,7 @@
 ** limitations under the License.
 */
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "CameraService"
 #include <utils/Log.h>
 
@@ -247,7 +248,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 status_t CameraService::Client::checkPid()
 {
     int callingPid = getCallingPid();
-    if (mClientPid == callingPid) return NO_ERROR;
+    if (mClientPid == callingPid || callingPid == getpid()) return NO_ERROR;
     LOGW("Attempt to use locked camera (client %p) from different process "
         " (old pid %d, new pid %d)",
         getCameraClient()->asBinder().get(), mClientPid, callingPid);

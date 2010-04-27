@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <sys/time.h>
+//#define LOG_NDEBUG 0
+#define LOG_TAG "CameraSource"
+#include <utils/Log.h>
 
 #include <OMX_Component.h>
 
-#include <binder/IServiceManager.h>
-#include <cutils/properties.h> // for property_get
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -33,13 +33,6 @@
 #include <utils/String8.h>
 
 namespace android {
-
-static int64_t getNowUs() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    return (int64_t)tv.tv_usec + tv.tv_sec * 1000000;
-}
 
 struct DummySurface : public BnSurface {
     DummySurface() {}
@@ -100,17 +93,15 @@ void CameraSourceListener::notify(int32_t msgType, int32_t ext1, int32_t ext2) {
 void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr) {
     LOGV("postData(%d, ptr:%p, size:%d)",
          msgType, dataPtr->pointer(), dataPtr->size());
-
-    sp<CameraSource> source = mSource.promote();
-    if (source.get() != NULL) {
-        source->dataCallback(msgType, dataPtr);
-    }
 }
 
 void CameraSourceListener::postDataTimestamp(
         nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr) {
-    LOGV("postDataTimestamp(%lld, %d, ptr:%p, size:%d)",
-         timestamp, msgType, dataPtr->pointer(), dataPtr->size());
+
+    sp<CameraSource> source = mSource.promote();
+    if (source.get() != NULL) {
+        source->dataCallbackTimestamp(timestamp/1000, msgType, dataPtr);
+    }
 }
 
 // static
@@ -125,9 +116,7 @@ CameraSource *CameraSource::Create() {
 }
 
 // static
-CameraSource *CameraSource::CreateFromICamera(const sp<ICamera> &icamera) {
-    sp<Camera> camera = Camera::create(icamera);
-
+CameraSource *CameraSource::CreateFromCamera(const sp<Camera> &camera) {
     if (camera.get() == NULL) {
         return NULL;
     }
@@ -140,7 +129,9 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mWidth(0),
       mHeight(0),
       mFirstFrameTimeUs(0),
+      mLastFrameTimestampUs(0),
       mNumFrames(0),
+      mNumFramesReleased(0),
       mStarted(false) {
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
@@ -160,6 +151,7 @@ void CameraSource::setPreviewSurface(const sp<ISurface> &surface) {
 }
 
 status_t CameraSource::start(MetaData *) {
+    LOGV("start");
     CHECK(!mStarted);
 
     mCamera->setListener(new CameraSourceListener(this));
@@ -169,11 +161,7 @@ status_t CameraSource::start(MetaData *) {
                 mPreviewSurface != NULL ? mPreviewSurface : new DummySurface);
     CHECK_EQ(err, OK);
 
-    mCamera->setPreviewCallbackFlags(
-            FRAME_CALLBACK_FLAG_ENABLE_MASK
-            | FRAME_CALLBACK_FLAG_COPY_OUT_MASK);
-
-    err = mCamera->startPreview();
+    err = mCamera->startRecording();
     CHECK_EQ(err, OK);
 
     mStarted = true;
@@ -182,13 +170,28 @@ status_t CameraSource::start(MetaData *) {
 }
 
 status_t CameraSource::stop() {
-    CHECK(mStarted);
-
-    mCamera->stopPreview();
-
+    LOGV("stop");
+    Mutex::Autolock autoLock(mLock);
     mStarted = false;
+    mFrameAvailableCondition.signal();
+    mCamera->setListener(NULL);
+    mCamera->stopRecording();
 
+    releaseQueuedFrames();
+    LOGI("Frames received/released: %d/%d, timestamp (us) last/first: %lld/%lld",
+            mNumFrames, mNumFramesReleased,
+            mLastFrameTimestampUs, mFirstFrameTimeUs);
     return OK;
+}
+
+void CameraSource::releaseQueuedFrames() {
+    List<sp<IMemory> >::iterator it;
+    while (!mFrames.empty()) {
+        it = mFrames.begin();
+        mCamera->releaseRecordingFrame(*it);
+        mFrames.erase(it);
+        ++mNumFramesReleased;
+    }
 }
 
 sp<MetaData> CameraSource::getFormat() {
@@ -203,7 +206,7 @@ sp<MetaData> CameraSource::getFormat() {
 
 status_t CameraSource::read(
         MediaBuffer **buffer, const ReadOptions *options) {
-    CHECK(mStarted);
+    LOGV("read");
 
     *buffer = NULL;
 
@@ -217,20 +220,24 @@ status_t CameraSource::read(
 
     {
         Mutex::Autolock autoLock(mLock);
-        while (mFrames.empty()) {
+        while (mStarted && mFrames.empty()) {
             mFrameAvailableCondition.wait(mLock);
         }
-
+        if (!mStarted) {
+            return OK;
+        }
         frame = *mFrames.begin();
         mFrames.erase(mFrames.begin());
 
         frameTime = *mFrameTimes.begin();
         mFrameTimes.erase(mFrameTimes.begin());
+        ++mNumFramesReleased;
     }
 
     *buffer = new MediaBuffer(frame->size());
     memcpy((*buffer)->data(), frame->pointer(), frame->size());
     (*buffer)->set_range(0, frame->size());
+    mCamera->releaseRecordingFrame(frame);
 
     (*buffer)->meta_data()->clear();
     (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
@@ -238,17 +245,25 @@ status_t CameraSource::read(
     return OK;
 }
 
-void CameraSource::dataCallback(int32_t msgType, const sp<IMemory> &data) {
+void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
+        int32_t msgType, const sp<IMemory> &data) {
+    LOGV("dataCallbackTimestamp: timestamp %lld us", timestampUs);
+    mLastFrameTimestampUs = timestampUs;
     Mutex::Autolock autoLock(mLock);
+    if (!mStarted) {
+        mCamera->releaseRecordingFrame(data);
+        ++mNumFrames;
+        ++mNumFramesReleased;
+        return;
+    }
 
-    int64_t nowUs = getNowUs();
     if (mNumFrames == 0) {
-        mFirstFrameTimeUs = nowUs;
+        mFirstFrameTimeUs = timestampUs;
     }
     ++mNumFrames;
 
     mFrames.push_back(data);
-    mFrameTimes.push_back(nowUs - mFirstFrameTimeUs);
+    mFrameTimes.push_back(timestampUs - mFirstFrameTimeUs);
     mFrameAvailableCondition.signal();
 }
 
