@@ -6,10 +6,11 @@ page.title=Developing In Eclipse, with ADT
   <h2>In this document</h2>
   <ol>
     <li><a href="#CreatingAProject">Creating an Android Project</a></li>
+    <li><a href="#AVD">Creating an AVD</a></li>
     <li><a href="#Running">Running Your Application</a>
       <ol>
-        <li><a href="#CreatingAnAvd">Creating an AVD</a></li>
-        <li><a href="#RunningAnApplication">Running an application</a></li>
+        <li><a href="#RunningOnEmulator">Running on the emulator</a></li>
+        <li><a href="#RunningOnDevice">Running on a device</a></li>
       </ol>
     </li>
     <li><a href="#RunConfig">Creating a Custom Run Configuration</a></li>
@@ -27,7 +28,8 @@ applications:</p>
 <ul>
   <li>It gives you access to other Android development tools from inside the Eclipse IDE. For 
 example, ADT lets you access the many capabilities of the DDMS tool: take screenshots, manage 
-port-forwarding, set breakpoints, and view thread and process information directly from Eclipse.</li>
+port-forwarding, set breakpoints, and view thread and process information directly from
+Eclipse.</li>
   <li>It provides a New Project Wizard, which helps you quickly create and set up all of the 
 basic files you'll need for a new Android application.</li>
   <li>It automates and simplifies the process of building your Android application.</li>
@@ -70,7 +72,7 @@ Android project (or a project from existing code). To create a new project:</p>
         The Build Target
         specifies which Android platform you'd like your application built against.
         <p>Unless you know that you'll be using new APIs introduced in the latest SDK, you should
-        select a target with the lowest platform version possible, such as Android 1.1.</p>
+        select a target with the lowest platform version possible.</p>
         <p class="note"><strong>Note:</strong> You can change your the Build Target for your 
         project at any time: Right-click the project in the Package Explorer, select
         <strong>Properties</strong>, select <strong>Android</strong> and then check 
@@ -89,7 +91,8 @@ Android project (or a project from existing code). To create a new project:</p>
             the minimum API Level required to properly run your application. 
             Entering this here automatically sets the <code>minSdkVersion</code> attribute in the 
             <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a>
-            of your Android Manifest file. If you're unsure of the appropriate API Level to use,
+            of your Android Manifest file. If you're unsure of the appropriate <a
+href="{@docRoot}guide/appendix/api-levels.html">API Level</a> to use,
             copy the API Level listed for the Build Target you selected in the Target tab.</li>
         </ul>
       </li>
@@ -133,87 +136,117 @@ folders and files in your new project:</p>
   </dl>
 
 
-<h2 id="Running">Running Your Application</h2>
+<h2 id="AVD">Creating an AVD</h2>
 
-<p>Before you can run your application on the Android Emulator, 
-you <strong>must</strong> create an Android Virtual Device (AVD). 
-An AVD is a configuration that specifies the Android platform to be used on the emulator.
-You can read more in the <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
-Devices</a> document, but if you just want to get started, follow the simple guide below to
-create an AVD.</p>
+<p>An Android Virtual Device (AVD) is a device configuration for the emulator that
+allows you to model real world devices. In order to run an instance of the emulator, you must create
+an AVD.</p>
 
-<p>If you will be running your applications only on actual device hardware, you do not 
-need an AVD &mdash; see 
-<a href="{@docRoot}guide/developing/device.html">Developing On a Device</a> for information
-on running your application.</p>
-
-<h3 id="CreatingAnAvd">Creating an AVD</h3>
-
-<p>With ADT 0.9.3 and above, the Android SDK and AVD Manager provides a simple graphical interface
-for creating and managing AVDs. (If you're using ADT version 0.9.1 or older, you must 
-use the <code>android</code> tool to create your AVDs&mdash;read the AVD guide to
-<a href="{@docRoot}guide/developing/tools/avd.html#creating">Creating an AVD</a>.)
-
-<p>To create an AVD with the AVD Manager:</p>
+<p>To create an AVD from Eclipse:</p>
 
 <ol>
-  <li>Select <strong>Window > Android SDK and AVD Manager</strong>, or click the Android SDK and AVD Manager icon (a black device)
-    in the Eclipse toolbar.</p>
+  <li>Select <strong>Window > Android SDK and AVD Manager</strong>, or click the Android SDK and
+AVD Manager icon in the Eclipse toolbar.</p>
   </li>
-  <li>In the Virtual Devices panel, you'll see a list of existing AVDs. Click <strong>New</strong>
-  to create a new AVD.</li>
-  <li>Fill in the details for the AVD. 
-    <p>Give it a name, a platform target, an SD card image (optional), and
+  <li>In the <em>Virtual Devices</em> panel, you'll see a list of existing AVDs. Click
+<strong>New</strong> to create a new AVD.</li>
+  <li>Fill in the details for the AVD.
+    <p>Give it a name, a platform target, an SD card size, and
     a skin (HVGA is default).</p>
+    <p class="note"><strong>Note:</strong> Be sure to define
+    a target for your AVD that satisfies your application's Build Target (the AVD
+    platform target must have an API Level equal to or greater than the API Level that your
+application compiles against).</p>
   </li>
   <li>Click <strong>Create AVD</strong>.</li>
 </ol>
 
-<p>Your AVD is now ready and you can close the AVD Manager. 
-In the next section, you'll see how the AVD is used
-when launching your application on an emulator.</p>
+<p>Your AVD is now ready and you can either close the SDK and AVD Manager, create more AVDs, or
+launch an emulator with the AVD by selecting a device and clicking <strong>Start</strong>.</p>
 
-<p>For more information about AVDs, read the 
+<p>For more information about AVDs, read the
 <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>
 documentation.</p>
 
 
-<h3 id="RunningYourApplication">Running your application</h3>
+<h2 id="Running">Running Your Application</h2>
 
-<p class="note"><strong>Note:</strong> Before you can run your application, be sure that
-you have created an AVD with a target that satisfies your application's Build Target. 
-If an AVD cannot be found that meets the requirements of your Build Target, you will see
-a console error telling you so and the launch will be aborted.</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Use the Emulator to Test Different Configurations</h2>
+<p>Create multiple AVDs that each define a different device configuration with which your
+application is compatible, then launch each AVD into a new emulator from the SDK and AVD Manager.
+Set the target mode in your app's run configuration to manual, so that when you run your
+application, you can select from the available virtual devices.</p>
+</div>
+</div>
 
-<p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or 
-<strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse main menu. The ADT plugin
-will automatically create a default launch configuration for the project.</p>
+<p>Running your application from Eclipse will usually require just a couple clicks, whether you're
+running it on the emulator or on an attached device. The information below describes how to get
+set up and run your application from Eclipse.</p>
 
-<p>When you choose to run or debug your application, Eclipse will perform the following:</p>
+<h3 id="RunningOnEmulator">Running on the emulator</h3>
+
+<p>Before you can run your application on the Android Emulator,
+you <strong>must</strong> <a href="#AVD">create an AVD</a>.</p>
+
+<p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or
+<strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse menu bar. The ADT plugin
+will automatically create a default launch configuration for the project. Eclipse will then perform
+the following:</p>
 
 <ol>
   <li>Compile the project (if there have been changes since the last build).</li>
-  <li>Create a default launch configuration (if one does not already exist for the project).</li>
-  <li>Install and start the application on an emulator or device (based on the Deployment Target
-    defined by the run configuration).
-    <p>By default, Android application run configurations use an "automatic target" mode for 
-    selecting a device target. For information on how automatic target mode selects a 
-    deployment target, see <a href="#AutoAndManualTargetModes">Automatic and manual 
+  <li>Create a default launch configuration (if one does not already exist for the
+project).</li>
+  <li>Install and start the application on an emulator (or device), based on the Deployment
+Target
+    defined by the run configuration.
+    <p>By default, Android run configurations use an "automatic target" mode for
+    selecting a device target. For information on how automatic target mode selects a
+    deployment target, see <a href="#AutoAndManualTargetModes">Automatic and manual
     target modes</a> below.</p>
   </li>
 </ol>
 
-<p>If debugging, the application will start in the "Waiting For Debugger" mode. Once the 
+<p>If debugging, the application will start in the "Waiting For Debugger" mode. Once the
 debugger is attached, Eclipse will open the Debug perspective.</p>
 
-<p>To set or change the launch configuration used for your project, use the launch configuration manager. 
+<p>To set or change the launch configuration used for your project, use the launch configuration
+manager.
 See <a href="#launchconfig">Creating a Launch Configuration</a> for information.</p>
+
+<p>Be certain to create multiple AVDs upon which to test your application. You should have one AVD
+for each platform and screen type with which your application is compatible. For
+instance, if your application compiles against the Android 1.5 (API Level 3) platform, you should
+create an AVD for each platform equal to and greater than 1.5 and an AVD for each <a
+href="{@docRoot}guide/practices/screens_support.html">screen type</a> you support, then test
+your application on each one.</p>
+
+
+<h3 id="RunningOnDevice">Running on a device</h3>
+
+<p>Before you can run your application on a device, you must perform some basic setup for your
+device:</p>
+
+<ul>
+  <li>Declare your application as debuggable in your manifest</li>
+  <li>Enable USB Debugging on your device</li>
+  <li>Ensure that your development computer can detect your device when connected via USB</li>
+</ul>
+<p>Read <a href="{@docRoot}guide/developing/device.html#setting-up">Setting up a Device for
+Development</a> for more information.</p>
+
+<p>Once set up and your device is connected via USB, install your application on the device by
+selecting <strong>Run</strong> &gt; <strong>Run</strong> (or
+<strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse menu bar.</p>
+
 
 
 <h2 id="RunConfig">Creating a Run Configuration</h2>
 
 <p>The run configuration specifies the project to run, the Activity 
-to start, the emulator options to use, and so on. When you first run a project
+to start, the emulator or connected device to use, and so on. When you first run a project
 as an <em>Android Application</em>, ADT will automatically create a run configuration.
 The default run configuration will
 launch the default project Activity and use automatic target mode for device selection 
@@ -240,7 +273,8 @@ for your Eclipse version:</p>
     <ul>
       <li>To create a new configuration:
         <ol>
-          <li>Select <strong>Android Application</strong> and click the <em>New launch configuration</em>
+          <li>Select <strong>Android Application</strong> and click the <em>New launch
+configuration</em>
           icon above the list (or, right-click  <strong>Android Application</strong> and click 
           <strong>New</strong>).</li>
           <li>Enter a Name for your configuration.</li>
@@ -268,7 +302,8 @@ document.</p>
 
 <h3 id="AutoAndManualTargetModes">Automatic and manual target modes</h3>
 
-<p>By default, a run configuration uses the <strong>automatic</strong> target mode in order to select
+<p>By default, a run configuration uses the <strong>automatic</strong> target mode in order to
+select
 an AVD. In this mode, ADT will select an AVD for the application in the following manner:</p>
 
 <ol>
@@ -323,8 +358,8 @@ a guide to exporting and signing your application with the ADT's Export Wizard.<
     information about packages and call class methods. You can also invoke arbitrary
     static methods: for example, entering <code>android.os.Debug.startMethodTracing()</code> will
     start dmTrace. </p>
-<p>Open a code execution window, select <strong>Window</strong>&gt;<strong>Show
-        View</strong>&gt;<strong>Display</strong> from the main menu to open the
+<p>Open a code execution window, select <strong>Window</strong> &gt; <strong>Show
+        View</strong> &gt; <strong>Display</strong> from the main menu to open the
         Display window, a simple text editor. Type your expression, highlight the
         text, and click the 'J' icon (or CTRL + SHIFT + D) to run your
         code. The code runs in the context of the selected thread, which must be
