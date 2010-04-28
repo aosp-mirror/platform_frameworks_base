@@ -361,7 +361,7 @@ applications against, each in a separate directory.  </td>
 </tr>
 <tr>
 <td style="width:2em;border-bottom-color:white;"></td>
-<td colspan="2"><code>&lt;platform&gt;/</code></td>
+<td colspan="2"><code><em>&lt;platform&gt;</em>/</code></td>
 <td>Platform version directory, for example "android-1.6". All platform version 
 directories contain a similar set of files and subdirectory structure.</td>
 </tr>
@@ -439,11 +439,11 @@ begin developing applications. Here are a few ways you can get started: </p>
 
 <p><strong>Set up the Hello World application</strong></p>
 <ul>
-  <li>If you have just installed the SDK for the first time, <a 
-  href="{@docRoot}resources/tutorials/hello-world.html">go to the Hello
+  <li>If you have just installed the SDK for the first time, go to the <a
+  href="{@docRoot}resources/tutorials/hello-world.html">Hello
   World tutorial</a>. The tutorial takes you step-by-step through the process
   of setting up your first Android project, including setting up an Android
-  Virtual Device (AVD) on which to run the application. 
+  Virtual Device (AVD) on which to run the application.
 </li>
 </ul>
 
@@ -473,6 +473,8 @@ first step in getting started with Android development. </p>
   href="{@docRoot}guide/developing/eclipse-adt.html">in Eclipse/ADT</a> or
   <a href="{@docRoot}guide/developing/other-ide.html">in other IDEs</a>
   </li>
+  <li>Read <a href="{@docRoot}guide/developing/device.html">Developing on a Device</a> to set up an
+Android-powered device to run and test your application.</li>
 </ul>
 
 <p><strong>Follow the Notepad tutorial</strong></p>
