@@ -56,7 +56,8 @@ public class DpiTestActivity extends Activity {
             ApplicationInfo ai = app.getPackageManager().getApplicationInfo(
                     "com.google.android.test.dpi", 0);
             if (noCompat) {
-                ai.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
+                ai.flags |= ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS
+                    | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
                     | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS

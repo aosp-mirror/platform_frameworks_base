@@ -933,6 +933,7 @@ struct ResTable_config
         SCREENSIZE_SMALL = 0x01,
         SCREENSIZE_NORMAL = 0x02,
         SCREENSIZE_LARGE = 0x03,
+        SCREENSIZE_XLARGE = 0x04,
         
         // screenLayout bits for wide/long screen variation.
         MASK_SCREENLONG = 0x30,
@@ -1208,7 +1209,28 @@ struct ResTable_config
             if (screenLayout || o.screenLayout) {
                 if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0
                         && (requested->screenLayout & MASK_SCREENSIZE)) {
-                    return (screenLayout & MASK_SCREENSIZE);
+                    // A little backwards compatibility here: undefined is
+                    // considered equivalent to normal.  But only if the
+                    // requested size is at least normal; otherwise, small
+                    // is better than the default.
+                    int mySL = (screenLayout & MASK_SCREENSIZE);
+                    int oSL = (o.screenLayout & MASK_SCREENSIZE);
+                    int fixedMySL = mySL;
+                    int fixedOSL = oSL;
+                    if ((requested->screenLayout & MASK_SCREENSIZE) >= SCREENSIZE_NORMAL) {
+                        if (fixedMySL == 0) fixedMySL = SCREENSIZE_NORMAL;
+                        if (fixedOSL == 0) fixedOSL = SCREENSIZE_NORMAL;
+                    }
+                    // For screen size, the best match is the one that is
+                    // closest to the requested screen size, but not over
+                    // (the not over part is dealt with in match() below).
+                    if (fixedMySL == fixedOSL) {
+                        // If the two are the same, but 'this' is actually
+                        // undefined, then the other is really a better match.
+                        if (mySL == 0) return false;
+                        return true;
+                    }
+                    return fixedMySL >= fixedOSL;
                 }
                 if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0
                         && (requested->screenLayout & MASK_SCREENLONG)) {
@@ -1370,8 +1392,11 @@ struct ResTable_config
         if (screenConfig != 0) {
             const int screenSize = screenLayout&MASK_SCREENSIZE;
             const int setScreenSize = settings.screenLayout&MASK_SCREENSIZE;
-            if (setScreenSize != 0 && screenSize != 0
-                    && screenSize != setScreenSize) {
+            // Any screen sizes for larger screens than the setting do not
+            // match.
+            if ((setScreenSize != 0 && screenSize != 0
+                    && screenSize > setScreenSize) ||
+                    (setScreenSize == 0 && screenSize != 0)) {
                 return false;
             }
             

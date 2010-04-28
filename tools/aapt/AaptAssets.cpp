@@ -766,6 +766,11 @@ bool AaptGroupEntry::getScreenLayoutSizeName(const char* name,
                 (out->screenLayout&~ResTable_config::MASK_SCREENSIZE)
                 | ResTable_config::SCREENSIZE_LARGE;
         return true;
+    } else if (strcmp(name, "xlarge") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENSIZE)
+                | ResTable_config::SCREENSIZE_XLARGE;
+        return true;
     }
 
     return false;

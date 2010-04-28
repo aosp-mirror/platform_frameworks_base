@@ -180,6 +180,10 @@ public class Build {
         public static final int ECLAIR_MR1 = 7;
         
         public static final int FROYO = 8;
+        
+        public static final int KRAKEN = CUR_DEVELOPMENT;
+        
+        public static final int GINGERBREAD = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
