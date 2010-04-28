@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Apagar"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando…"</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Tu teléfono se apagará."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"No hay aplicaciones recientes."</string>
     <string name="global_actions" msgid="2406416831541615258">"Opciones de teléfono"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
