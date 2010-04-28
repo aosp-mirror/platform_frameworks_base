@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"電源を切る"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions" msgid="2406416831541615258">"携帯電話オプション"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"画面ロック"</string>
