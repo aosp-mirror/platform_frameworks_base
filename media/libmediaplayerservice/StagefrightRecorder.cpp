@@ -20,6 +20,7 @@
 
 #include "StagefrightRecorder.h"
 
+#include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
@@ -30,8 +31,11 @@
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 #include <camera/ICamera.h>
+#include <camera/Camera.h>
 #include <surfaceflinger/ISurface.h>
 #include <utils/Errors.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace android {
 
@@ -96,7 +100,25 @@ status_t StagefrightRecorder::setVideoFrameRate(int frames_per_second) {
 }
 
 status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
-    mCamera = camera;
+    LOGV("setCamera: pid %d pid %d", IPCThreadState::self()->getCallingPid(), getpid());
+    if (camera == 0) {
+        LOGE("camera is NULL");
+        return UNKNOWN_ERROR;
+    }
+
+    mFlags &= ~ FLAGS_SET_CAMERA | FLAGS_HOT_CAMERA;
+    mCamera = Camera::create(camera);
+    if (mCamera == 0) {
+        LOGE("Unable to connect to camera");
+        return UNKNOWN_ERROR;
+    }
+
+    LOGV("Connected to camera");
+    mFlags |= FLAGS_SET_CAMERA;
+    if (mCamera->previewEnabled()) {
+        LOGV("camera is hot");
+        mFlags |= FLAGS_HOT_CAMERA;
+    }
 
     return OK;
 }
@@ -240,7 +262,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         CHECK(mCamera != NULL);
 
         sp<CameraSource> cameraSource =
-            CameraSource::CreateFromICamera(mCamera);
+            CameraSource::CreateFromCamera(mCamera);
 
         CHECK(cameraSource != NULL);
 
@@ -314,6 +336,17 @@ status_t StagefrightRecorder::stop() {
 status_t StagefrightRecorder::close() {
     stop();
 
+    if (mCamera != 0) {
+        if ((mFlags & FLAGS_HOT_CAMERA) == 0) {
+            LOGV("Camera was cold when we started, stopping preview");
+            mCamera->stopPreview();
+        }
+        if (mFlags & FLAGS_SET_CAMERA) {
+            LOGV("Unlocking camera");
+            mCamera->unlock();
+        }
+        mFlags = 0;
+    }
     return OK;
 }
 
@@ -329,6 +362,7 @@ status_t StagefrightRecorder::reset() {
     mVideoHeight = -1;
     mFrameRate = -1;
     mOutputFd = -1;
+    mFlags = 0;
 
     return OK;
 }

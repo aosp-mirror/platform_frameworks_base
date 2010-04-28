@@ -34,7 +34,7 @@ class Camera;
 class CameraSource : public MediaSource {
 public:
     static CameraSource *Create();
-    static CameraSource *CreateFromICamera(const sp<ICamera> &icamera);
+    static CameraSource *CreateFromCamera(const sp<Camera> &camera);
 
     virtual ~CameraSource();
 
@@ -61,12 +61,17 @@ private:
 
     int mWidth, mHeight;
     int64_t mFirstFrameTimeUs;
+    int64_t mLastFrameTimestampUs;
     int32_t mNumFrames;
+    int32_t mNumFramesReleased;
     bool mStarted;
 
     CameraSource(const sp<Camera> &camera);
 
-    void dataCallback(int32_t msgType, const sp<IMemory> &data);
+    void dataCallbackTimestamp(
+            int64_t timestampUs, int32_t msgType, const sp<IMemory> &data);
+
+    void releaseQueuedFrames();
 
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);
