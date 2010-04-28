@@ -13,7 +13,13 @@ page.title=Developing In Other IDEs
         <li><a href="#ReleaseMode">Building in release mode</a></li>
       </ol>
     </li>
-    <li><a href="#Running">Running Your Application</a></li>
+    <li><a href="#AVD">Creating an AVD</a></li>
+    <li><a href="#Running">Running Your Application</a>
+      <ol>
+        <li><a href="#RunningOnEmulator">Running on the emulator</a></li>
+        <li><a href="#RunningOnDevice">Running on a device</a></li>
+      </ol>
+    </li>
     <li><a href="#AttachingADebugger">Attaching a Debugger to Your Application</a></li>
   </ol>
 
@@ -97,15 +103,20 @@ android create project \
   to an Android platform library (including any add-ons, such as Google APIs) that you would like to
   build your project against. To see a list of available targets and their corresponding IDs, 
   execute: <code>android list targets</code>.</li>
-  <li><code>name</code> is the name for your project. This is optional. If provided, this name will be used
+  <li><code>name</code> is the name for your project. This is optional. If provided, this name will
+be used
   for your .apk filename when you build your application.</li>
   <li><code>path</code> is the location of your project directory. If the directory does not exist,
   it will be created for you.</li>
-  <li><code>activity</code> is the name for your default {@link android.app.Activity} class. This class file
+  <li><code>activity</code> is the name for your default {@link android.app.Activity} class. This
+class file
   will be created for you inside 
-  <code><em>&lt;path_to_your_project&gt;</em>/src/<em>&lt;your_package_namespace_path&gt;</em>/</code>.
+ 
+<code><em>&lt;path_to_your_project&gt;</em>/src/<em>&lt;your_package_namespace_path&gt;</em>/</code>
+.
   This will also be used for your .apk filename unless you provide a the <code>name</code>.</li>
-  <li><code>package</code> is the package namespace for your project, following the same rules as for
+  <li><code>package</code> is the package namespace for your project, following the same rules as
+for
   packages in the Java programming language.</li>
 </ul>
 
@@ -127,13 +138,16 @@ android create project \
   <li><code>build.xml</code> - Build file for Ant.</li>
   <li><code>default.properties</code> - Properties for the build system. <em>Do not modify 
   this file</em>.</li>
-  <li><code>build.properties</code> - Customizable properties for the build system. You can edit this 
-  file to override default build settings used by Ant and provide a pointer to your keystore and key alias
+  <li><code>build.properties</code> - Customizable properties for the build system. You can edit
+this
+  file to override default build settings used by Ant and provide a pointer to your keystore and key
+alias
   so that the build tools can sign your application when built in release mode.</li>
   <li><code>src<em>/your/package/namespace/ActivityName</em>.java</code> - The Activity class 
   you specified during project creation.</li>
   <li><code>bin/</code>  - Output directory for the build script.</li>
-  <li><code>gen/</code>  - Holds <code>Ant</code>-generated files, such as <code>R.java</code>. </li>
+  <li><code>gen/</code>  - Holds <code>Ant</code>-generated files, such as <code>R.java</code>.
+</li>
   <li><code>libs/</code>  - Holds private libraries.</li>
   <li><code>res/</code>  - Holds project resources.</li>
   <li><code>src/</code>  - Holds source code.</li>
@@ -167,13 +181,15 @@ as needed for the Android project.</p>
 <p>To update an existing Android project, open a command-line
 and navigate to the <code>tools/</code> directory of your SDK. Now run:</p>
 <pre>
-android update project --name <em>&lt;project_name&gt;</em> --target <em>&lt;target_ID&gt;</em> --path <em>path/to/your/project/</em>
+android update project --name <em>&lt;project_name&gt;</em> --target <em>&lt;target_ID&gt;</em>
+--path <em>&lt;path_to_your_project&gt;</em>
 </pre>
 
 <ul>
   <li><code>target</code> is the "build target" for your application. It corresponds to 
   an Android platform library (including any add-ons, such as Google APIs) that you would 
-  like to build your project against. To see a list of available targets and their corresponding IDs, 
+  like to build your project against. To see a list of available targets and their corresponding
+IDs,
   execute: <code>android list targets</code>.</li>
   <li><code>path</code> is the location of your project directory.</li>
   <li><code>name</code> is the name for the project. This is optional&mdash;if you're not 
@@ -218,7 +234,8 @@ or device.</p>
 <p>Whether you're building in debug mode or release mode, you
 need to use the Ant tool to compile and build your project. This will create the .apk file
 that is installed onto the emulator or device. When you build in debug mode, the .apk
-file is automatically signed by the SDK tools with a debug key, so it's instantly ready for installation
+file is automatically signed by the SDK tools with a debug key, so it's instantly ready for
+installation
 (but only onto an emulator or attached development device).
 When you build in release mode, the .apk file is <em>unsigned</em>, so you must manually
 sign it with your own private key, using Keytool and Jarsigner.</p>
@@ -239,7 +256,7 @@ environment variable to specify the path to where the JDK is installed.</p>
 <p class="note"><strong>Note:</strong> When installing JDK on Windows, the default is to install 
 in the "Program Files" directory. This location will cause <code>ant</code> to fail, because of 
 the space. To fix the problem, you can specify the JAVA_HOME variable like this: 
-<code>set JAVA_HOME=c:\Progra~1\Java\<jdkdir></code>. The easiest solution, however, is to 
+<code>set JAVA_HOME=c:\Progra~1\Java\&lt;jdkdir&gt;</code>. The easiest solution, however, is to
 install JDK in a non-space directory, for example: <code>c:\java\jdk1.6.0_02</code>.</p>
 
 
@@ -322,8 +339,10 @@ for distribution.</p>
 <p class="caution"><strong>Caution:</strong> Due to the way Ant handles input, the password that
 you enter during the build process <strong>will be visible</strong>. If you are
 concerned about your keystore and alias password being visible on screen, then you
-may prefer to perform the application signing manually, via Jarsigner (or a similar tool). To instead 
-perform the signing procedure manually, <a href="#ManualReleaseMode">buid unsigned</a> and then continue 
+may prefer to perform the application signing manually, via Jarsigner (or a similar tool). To
+instead
+perform the signing procedure manually, <a href="#ManualReleaseMode">build unsigned</a> and then
+continue
 with <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
 
 <p>To specify your keystore and alias, open the project {@code build.properties} file (found in the
@@ -366,87 +385,125 @@ download the application and begin installation.
 (On your device, be sure you have enabled <em>Settings > Applications > Unknown sources</em>.)</p>
 
 
-<h2 id="Running">Running Your Application</h2>
+<h2 id="AVD">Creating an AVD</h2>
 
-<p>Unless you'll be running your application on device hardware, 
-you need to launch an emulator upon which you will install your application.
-An instance of the Android emulator runs a specific Android platform with specific device configuration
-settings. The platform and configuration is defined with an Android Virtual Device (AVD). 
-So before you can launch your emulator, you must define an AVD.</p>
+<p>An Android Virtual Device (AVD) is a device configuration for the emulator that
+allows you to model real world devices. In order to run an instance of the emulator, you must create
+an AVD.</p>
 
-<p>If you'll be running your application on device hardware, please read about
-<a href="{@docRoot}guide/developing/device.html">Developing On a Device</a> instead.</p>
+<p>To create an AVD using the SDK tools:</p>
 
 <ol>
-  <li><strong>Create an AVD</strong>
-    <ol>
-      <li>Open a command-line and navigate to your SDK package's 
-      <code>tools/</code> directory.</li>
-      <li>First, you need to select a "deployment target." To view available targets, execute:
-        <pre>android list targets</pre>
-        <p>This will output a list of available Android targets, such as:</p>
-<pre>
-id:1
-    Name: Android 1.1
-    Type: platform
-    API level: 2
-    Skins: HVGA (default), HVGA-L, HVGA-P, QVGA-L, QVGA-P
-id:2
-    Name: Android 1.5
-    Type: platform
-    API level: 3
-    Skins: HVGA (default), HVGA-L, HVGA-P, QVGA-L, QVGA-P
-</pre>
-        <p>Find the target that matches the Android platform upon which you'd like
-        to run your application. Note the integer value of the <code>id</code> &mdash;
-        you'll use this in the next step.</p>
-      </li>
-      <li>Create a new AVD using your selected deployment target:
-        <pre>android create avd --name <em>&lt;your_avd_name&gt;</em> --target <em>&lt;target_ID&gt;</em></pre>
-      <li>Next, you'll be asked whether you'd like to create a custom hardware profile.
-      If you respond "yes," you'll be presented with a series of prompts to define various aspects of the
-      device hardware (leave entries blank to use default values, which are shown in brackets). Otherwise,
-      press return to use all default values ("no" is the default).</li>
-      </li>
-    </ol>
+  <li>Navigate to your SDK's <code>tools/</code> directory and execute the {@code android}
+tool with no arguments:
+    <pre>android</pre>
+    <p>This will launch the SDK and AVD Manager GUI.</p>
+  </li>
+  <li>In the <em>Virtual Devices</em> panel, you'll see a list of existing AVDs. Click
+<strong>New</strong>
+  to create a new AVD.</li>
+  <li>Fill in the details for the AVD.
+    <p>Give it a name, a platform target, an SD card size, and
+    a skin (HVGA is default).</p>
+    <p class="note"><strong>Note:</strong> Be sure to define
+    a target for your AVD that satisfies your application's build target (the AVD
+    platform target must have an API Level equal to or greater than the API Level that your
+application compiles against).</p>
+  </li>
+  <li>Click <strong>Create AVD</strong>.</li>
+</ol>
+
+<p>Your AVD is now ready and you can either close the AVD Manager, create more AVDs, or
+launch an emulator with the AVD by clicking <strong>Start</strong>.</p>
+
+<p>For more information about AVDs, read the
+<a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>
+documentation.</p>
+
+
+<h2 id="Running">Running Your Application</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Use the Emulator to Test Different Configurations</h2>
+<p>Create multiple AVDs that each define a different device configuration with which your
+application is compatible, then launch each AVD into a new emulator from the SDK and AVD Manager.
+Set the target mode in your app's run configuration to manual, so that when you run your
+application, you can select from the available virtual devices.</p>
+</div>
+</div>
+
+<p>Running your application on a virtual or real device takes just a couple steps. Remember to
+first <a href="#Building">build your application</a>.</p>
+
+<h3 id="RunningOnEmulator">Running on the emulator</h3>
+
+<p>Before you can run your application on the Android Emulator,
+you must <a href="#AVD">create an AVD</a>.</p>
+
+<p>To run your application:</p>
+<ol>
+  <li><strong>Open the SDK and AVD Manager and launch a virtual device</strong></li>
+    <p>From your SDK's <code>tools/</code> directory, execute the {@code android} tool with no
+arguments:
+    <pre>android</pre>
+    <p>In the <em>Virtual Devices</em> view, select an AVD and click <strong>Start</strong>.</p>
   </li>
 
-  <li><strong>Launch an emulator</strong></li>
-    <p>From your SDK's <code>tools/</code> directory, launch an emulator 
-      using an existing AVD (created above):
-    <pre>emulator -avd <em>&lt;your_avd_name&gt;</em></pre>
-    <p>An instance of the emulator will now launch, running the target and configuration 
-      defined by your AVD.</p>
-  </li>
-  
   <li><strong>Install your application</strong>
-    <p>From your SDK's <code>tools/</code> directory, install the .apk on the emulator:
-    <pre>adb install <em>/path/to/your/application</em>.apk</pre>
-    <p>If there is more than one emulator running, you must specify the emulator upon which to install
-    the application, by its serial number, with the <code>-s</code> option. For example:</p>
-    <pre>adb -s emulator-5554 install /my/project/path/myapp.apk</pre>
-  </li>
-  <li><strong>Open your application</strong>
-    <p>In the emulator, open the list of available applications to find 
-    and open your application.</p>
+    <p>From your SDK's <code>tools/</code> directory, install the {@code .apk} on the
+emulator:
+    <pre>adb install <em>&lt;path_to_your_bin&gt;</em>.apk</pre>
+    <p>Your APK file (signed with either a release or debug key) is in your project {@code bin/}
+directory after you <a href="#Building">build your application</a>.</p>
+    <p>If there is more than one emulator running, you must specify the emulator upon which to
+install the application, by its serial number, with the <code>-s</code> option. For example:</p>
+    <pre>adb -s emulator-5554 install <em>/path/to/your/app</em>.apk</pre>
+    <p>To see a list of available device serial numbers, execute {@code adb devices}.</p>
   </li>
 </ol>
 
-<p>If you don't see your application on the emulator. Try restarting the emulator
-(with the same AVD). Sometimes when you install an Activity for the
+<p>If you don't see your application on the emulator. Try closing the emulator and launching the
+virtual device again from the SDK and AVD Manager. Sometimes when you install an Activity for the
 first time, it won't show up in the application launcher or be accessible by other 
 applications. This is because the package manager usually examines manifests 
 completely only on emulator startup.</p>
 
-<p class="note"><strong>Tip:</strong> If you have only one emulator running, 
+<p>Be certain to create multiple AVDs upon which to test your application. You should have one AVD
+for each platform and screen type with which your application is compatible. For
+instance, if your application compiles against the Android 1.5 (API Level 3) platform, you should
+create an AVD for each platform equal to and greater than 1.5 and an AVD for each <a
+href="{@docRoot}guide/practices/screens_support.html">screen type</a> you support, then test
+your application on each one.</p>
+
+<p class="note"><strong>Tip:</strong> If you have <em>only one</em> emulator running,
 you can build your application and install it on the emulator in one simple step. 
 Navigate to the root of your project directory and use Ant to compile the project 
 with <em>install mode</em>:
-<code>ant install</code>. This will build your application, sign it with the debug key, 
-and install it on the currently running emulator.
-If there is more than one emulator currently running
-when using the <code>install</code> command, it will fail &mdash; it can't select between the 
-multiple emulators.</p>
+<code>ant install</code>. This will build your application, sign it with the debug key,
+and install it on the currently running emulator.</p>
+
+
+<h3 id="RunningOnDevice">Running on a device</h3>
+
+<p>Before you can run your application on a device, you must perform some basic setup for your
+device:</p>
+
+<ul>
+  <li>Declare your application as debuggable in your manifest</li>
+  <li>Enable USB Debugging on your device</li>
+  <li>Ensure that your development computer can detect your device when connected via USB</li>
+</ul>
+<p>Read <a href="{@docRoot}guide/developing/device.html#setting-up">Setting up a Device for
+Development</a> for more information.</p>
+
+<p>Once your device is set up and connected via USB, navigate to your
+SDK's <code>tools/</code> directory and install the <code>.apk</code> on the device:
+    <pre>adb -d install <em>/path/to/your/app</em>.apk</pre>
+    <p>The {@code -d} flag specifies that you want to use the attached device (in case you also
+have an emulator running).</p>
+
+
 
 <p>For more information on the tools used above, please see the following documents:</p>
 <ul>

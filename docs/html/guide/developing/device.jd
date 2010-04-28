@@ -5,12 +5,6 @@ page.title=Developing on a Device
 <div id="qv">
   <h2>In this document</h2>
   <ol>
-    <li><a href="#devices">Available Devices</a>
-      <ol>
-        <li><a href="#consumer">Consumer devices</a></li>
-        <li><a href="#dev-phone-1">Android Dev Phone 1</a></li>
-      </ol>
-    </li>
     <li><a href="#setting-up">Setting up a Device for Development</a>
       <ol>
         <li><a href="#VendorIds">USB Vendor IDs</a></li>
@@ -21,101 +15,50 @@ page.title=Developing on a Device
   <ol>
     <li><a
     href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a></li>
+    <li><a
+href="{@docRoot}guide/developing/eclipse-adt.html">Developing in Eclipse, with ADT</a></li>
+    <li><a
+href="{@docRoot}guide/developing/other-ide.html">Developing in other IDEs</a></li>
   </ol>
 </div>
 </div>
 
-<p>When building mobile applications, it's vital to test them on real
-devices prior to releasing them to users. This page covers what you need to know, 
-including the types of devices that you can use, and how to set one up for
-developing and debugging.</p>
+<p>When building a mobile application, it's important that you always test your application on a
+real device before releasing it to users. This page describes how to set up your development
+environment and Android-powered device for testing and debugging on the device.</p>
 
+<p>You can use any Android-powered device as an environment for running,
+debugging, and testing your applications. The tools included in the SDK make it easy to install and
+run your application on the device each time you compile. You can install your application on the
+device <a
+href="{@docRoot}guide/developing/eclipse-adt.html#RunningOnDevice">directly from
+Eclipse</a> or <a href="{@docRoot}guide/developing/other-ide.html#RunningOnDevice">from the
+command line</a>. If
+you don't yet have a device, check with the service providers in your area to determine which
+Android-powered devices are available.</p>
 
-<h2 id="devices">Available Devices</h2>
-<p>Here are some options for obtaining devices capable of testing your applications.</p>
+<p>If you want a SIM-unlocked phone, then you might consider either an Android Dev Phone or the
+Google Nexus One. Both are SIM-unlocked so that you can use them on any GSM network using a SIM
+card. The Android Dev Phones also feature an unlocked bootloader so you can install custom system
+images (great for developing and installing custom versions of the Android platform). To purchase a
+Nexus One, visit <a href="http://www.google.com/phone">google.com/phone</a>. To purchase an Android
+Dev Phone, see the <a href="http://market.android.com/publish">Android Market</a> site
+(requires a developer account).</p>
 
-
-<h3 id="consumer">Consumer devices</h3>
-
-<p>It's likely that one of your local mobile carriers offers an Android-powered device.
-Any Android-powered device (even one bought from your mobile carrier) is a perfectly good
-device for running and testing your own Android applications.
-You can write applications using the Android SDK and then install them 
-directly onto the device for testing.</p>
-
-<p>Check with the service providers in your area to determine which Android-powered 
-devices are available.</p>
-
-<p>Be aware that consumer devices are not designed to allow system image updates by the
-user. If you're interested in manually updating the device with custom system images, then
-you'll need a developer device such as the <a href="#dev-phone-1">Android Dev Phone 1</a>.</p>
-
-
-
-<h3 id="dev-phone-1">Android Dev Phone 1</h3>
-
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<p>Selected specs for Android Dev Phone 1:</p>
-<ul>
-<li>Touch screen</li>
-<li>Trackball</li>
-<li>3.2 megapixel camera with autofocus</li>
-<li>Wi-Fi</li>
-<li>GPS-enabled</li>
-<li>Bluetooth v2.0
-    <ul><li>Handsfree profile v1.5</li>
-        <li>Headset profile v1.0</li></ul></li>
-<li>3G WCDMA (1700/2100 MHz)</li>
-<li>Quad-band GSM (850/900/1800/1900 MHz)</li>
-<li>QWERTY slider keyboard</li>
-<li>Includes 1GB MicroSD card (can be replaced with up to 16GB card)</li>
-</ul>
-</div> 
-</div>
-
-<p>The Android Dev Phone 1 is a SIM-unlocked and hardware-unlocked device that
-is designed for advanced developers. The device ships with a system image that
-is fully compatible with Android 1.0, so you can rely on it when developing your
-applications. You can use any SIM in the device and can flash custom Android
-builds that will work with the unlocked bootloader. Unlike the bootloader on
-retail devices, the bootloader on the Android Dev Phone 1 does not enforce
-signed system images. The Android Dev Phone 1 should also appeal to developers 
-who live in geographies where local mobile carriers do not currently offer Android-powered devices. </p>
-
-<p>To purchase an Android Dev Phone 1 device, you must first register as an
-Android developer on the Android Market site, if you haven't done so already.
-Once you've logged into your developer account on Android Market, you can
-purchase the device by following the link to "Development phones." To accommodate demand,
-there is a limit of 1 device per developer account, for now.</p>
-
-<p>The device currently costs $399 (USD) (including free shipping in the US),
-and is available for purchase in 18 international markets, including the
-US, UK, Germany, Japan, India, Canada, France, Taiwan, Spain, Australia,
-Singapore, Switzerland, Netherlands, Austria, Sweden, Finland, Poland, and
-Hungary.  We will continue to expand this program into new geographies over
-time.  Check this page for updated information.</p>
-
-<p>Android Dev Phone 1 devices are <em>not</em> intended for
-non-developer end-users. Because the device can be configured with system
-software not provided by or supported by Google or any other company, end-users
-operate these devices at their own risk.</p>
-
-<p>Note that your Android Dev Phone 1 will not receive automated 
-over-the-air (OTA) updates for the system image. System updates must be flashed manually.
-See the HTC site for a guide to <a href="http://www.htc.com/www/support/android/adp.html">Flashing 
-your Android Dev Phone with a Factory System Image</a>.</p>
-
-<p>For full device specs and more information about obtaining an Android Dev 
-Phone 1 device, see the <a href="http://market.android.com/publish">Android 
-Market</a> site.</p>
-
+<p class="note"><strong>Note:</strong> When developing on a device, keep in mind that you should
+still use the <a
+href="{@docRoot}guide/developing/tools/emulator.html">Android emulator</a> to test your application
+on configurations that are not equivalent to those of your real device. Although the emulator
+does not allow you to test every device feature (such as the accelerometer), it does
+allow you to verify that your application functions properly on different versions of the Android
+platform, in different screen sizes and orientations, and more.</p>
 
 
 <h2 id="setting-up">Setting up a Device for Development</h2>
 
 <p>With an Android-powered device, you can develop and debug your Android applications just as you
-would on the emulator. There are just a few things to do before you can start.</p>
+would on the emulator. Before you can start, there are just a few things to do:</p>
+
 <ol>
   <li>Declare your application as "debuggable" in your Android Manifest.
     <p>In Eclipse, you can do this from the <b>Application</b> tab when viewing the Manifest
@@ -159,37 +102,70 @@ href="#VendorIds">USB Vendor IDs</a>, below.
     </ul>
   </li>
 </ol>
-<p>You can verify that your device is connected by executing <code>adb devices</code> from your 
-SDK tools/ directory. If connected, you'll see the device name listed as a "device."</p>
-<p>If using Eclipse, select run or debug as usual. You will be presented
-with a <b>Device Chooser</b> dialog that lists the available emulator(s) and connected device(s).
-Select the device to install and run the application there.</p>
 
-<p>If using the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb), 
+<p>You can verify that your device is connected by executing <code>adb devices</code> from your 
+SDK {@code tools/} directory. If connected, you'll see the device name listed as a "device."</p>
+
+<p>If using Eclipse, run or debug as usual. You will be presented
+with a <b>Device Chooser</b> dialog that lists the available emulator(s) and connected device(s).
+Select the device upon which you want to install and run the application.</p>
+
+<p>If using the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb),
 you can issue commands with the <code>-d</code> flag to target your
 connected device.</p>
 
 
 <h3 id="VendorIds">USB Vendor IDs</h3>
 <p>This table provides a reference to the vendor IDs needed in order to add
-device support on Linux. The USB Vendor ID is the value given to the
-<code>SYSFS{idVendor}</code> property in the rules file.</p>
+USB device support on Linux. The USB Vendor ID is the value given to the
+<code>SYSFS{idVendor}</code> property in the rules file, as described in step 3, above.</p>
+
 <table>
   <tr>
     <th>Manufacturer</th><th>USB Vendor ID</th></tr>
   <tr>
-    <td>Acer</td><td>0502</td></tr>
+    <td>Acer</td>
+    <td><code>0502</code></td></tr>
   <tr>
-    <td>HTC</td><td>0bb4</td></tr>
+    <td>Dell</td>
+    <td><code>413c</code></td></tr>
   <tr>
-    <td>Huawei</td><td>12d1</td></tr>
+    <td>Foxconn</td>
+    <td><code>0489</code></td></tr>
   <tr>
-    <td>LG</td><td>1004</td></tr>
+    <td>Garmin-Asus</td>
+    <td><code>091E</code></td></tr>
   <tr>
-    <td>Motorola</td><td>22b8</td></tr>
+    <td>HTC</td>
+    <td><code>0bb4</code></td></tr>
   <tr>
-    <td>Samsung</td><td>04e8</td></tr>
+    <td>Huawei</td>
+    <td><code>12d1</code></td></tr>
   <tr>
-    <td>Sony Ericsson</td><td>0fce</td></tr>
+    <td>Kyocera</td>
+    <td><code>0482</code></td></tr>
+  <tr>
+    <td>LG</td>
+    <td><code>1004</code></td></tr>
+  <tr>
+    <td>Motorola</td>
+    <td><code>22b8</code></td></tr>
+  <tr>
+    <td>Nvidia</td>
+    <td><code>0955</code></td></tr>
+  <tr>
+    <td>Pantech</td>
+    <td><code>10A9</code></td></tr>
+  <tr>
+    <td>Samsung</td>
+    <td><code>04e8</code></td></tr>
+  <tr>
+    <td>Sharp</td>
+    <td><code>04dd</code></td></tr>
+  <tr>
+    <td>Sony Ericsson</td>
+    <td><code>0fce</code></td></tr>
+  <tr>
+    <td>ZTE</td>
+    <td><code>19D2</code></td></tr>
 </table>
-
