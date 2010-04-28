@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Apagar"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"El teléfono se apagará."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"No hay aplicaciones recientes"</string>
     <string name="global_actions" msgid="2406416831541615258">"Opciones del teléfono"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
@@ -326,8 +328,8 @@
     <string name="permdesc_asec_create" msgid="7041802322759014035">"Permite que la aplicación cree un almacenamiento seguro."</string>
     <string name="permlab_asec_destroy" msgid="7787322878955261006">"destruir almacenamiento seguro"</string>
     <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Permite que la aplicación destruya el almacenamiento seguro."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montar/desmontar almacenamiento seguro"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Permite que la aplicación monte o desmonte el almacenamiento seguro."</string>
+    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"activar/desactivar almacenamiento seguro"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Permite que la aplicación active o desactive el almacenamiento seguro."</string>
     <string name="permlab_asec_rename" msgid="5685344390439934495">"cambiar nombre de almacenamiento seguro"</string>
     <string name="permdesc_asec_rename" msgid="1387881770708872470">"Permite que la aplicación cambie el nombre del almacenamiento seguro."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"controlar vibración"</string>

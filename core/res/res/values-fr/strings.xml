@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Éteindre"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Arrêt en cours..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Votre téléphone va s\'éteindre."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Aucune application récente"</string>
     <string name="global_actions" msgid="2406416831541615258">"Options du téléphone"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Verrouillage de l\'écran"</string>
@@ -746,10 +748,10 @@
     <string name="sendText" msgid="5132506121645618310">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume de la sonnerie"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Lecture via Bluetooth"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Lecture via le Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Sonnerie silencieuse sélectionnée"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume des appels entrants"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume d\'appels entrants sur Bluetooth"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume d\'appels entrants sur le Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volume des notifications"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>

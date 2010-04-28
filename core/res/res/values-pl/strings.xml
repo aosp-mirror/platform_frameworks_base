@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Wyłącz"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączanie..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Telefon zostanie wyłączony"</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Brak ostatnio używanych aplikacji."</string>
     <string name="global_actions" msgid="2406416831541615258">"Opcje telefonu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Blokada ekranu"</string>
@@ -524,7 +526,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"Inny"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Niestandardowy"</string>
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"przez <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> za pośrednictwem: <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> przez <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Wprowadź kod PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Wprowadź hasło, aby odblokować"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Błędny kod PIN!"</string>
@@ -822,7 +824,7 @@
     <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Zezwala na wywoływanie domyślnej usługi kontenera w celu skopiowania zawartości. Opcja nie jest przeznaczona dla zwykłych aplikacji."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dotknij dwukrotnie, aby sterować powiększeniem"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Błąd podczas wyodrębniania widżetu"</string>
-    <string name="ime_action_go" msgid="8320845651737369027">"Przejdź"</string>
+    <string name="ime_action_go" msgid="8320845651737369027">"OK"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Szukaj"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Wyślij"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Dalej"</string>

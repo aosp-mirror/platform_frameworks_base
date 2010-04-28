@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Desligar"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Encerrando…"</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"O seu telefone será desligado."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Nenhum aplicativo recente."</string>
     <string name="global_actions" msgid="2406416831541615258">"Opções do telefone"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloquear tela"</string>
@@ -298,7 +300,7 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Acessa comandos extras do provedor de localização. Aplicativos maliciosos podem usar isso para interferir na operação do GPS ou de outras fontes de localização."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autorização para instalar um provedor de localização"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Cria fontes de locais fictícios para teste. Aplicativos maliciosos podem usar isso para substituir o local e/ou o status retornado pelas fontes de locais reais como GPS ou provedores de rede ou para monitorar e informar sua localização para uma fonte externa."</string>
-    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Localização precisa (GPS)"</string>
+    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"localização exata (GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Acessa fontes de localização precisa como o GPS (Global Positioning System) no telefone, onde disponível. Aplicativos maliciosos podem usar isso para determinar onde você está e podem consumir energia adicional da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"local aproximado (com base na rede)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Acessa fontes de localização aproximada como o banco de dados de rede celular para determinar a localização aproximada de um telefone, onde disponível. Aplicativos maliciosos podem usar isso para determinar aproximadamente onde você está."</string>
@@ -358,10 +360,10 @@
     <string name="permdesc_devicePower" msgid="4577331933252444818">"Permite que o aplicativo ative ou desative o telefone."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"executar no modo de teste de fábrica"</string>
     <string name="permdesc_factoryTest" msgid="8136644990319244802">"Executa como um teste do fabricante de nível inferior, permitindo o acesso completo ao hardware do telefone. Disponível apenas quando um telefone está em execução no modo de teste do fabricante."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"definir papel de parede"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Permite que o aplicativo defina o papel de parede do sistema."</string>
-    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"definir dicas de tamanho do papel de parede"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Permite que o aplicativo defina as dicas de tamanho do papel de parede do sistema."</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"definir plano de fundo"</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Permite que o aplicativo defina o plano de fundo do sistema."</string>
+    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"definir sugestões de tamanho do plano de fundo"</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Permite que o aplicativo defina as dimensões do tamanho do plano de fundo do sistema."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"redefinir o sistema para os padrões de fábrica"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Permite que um aplicativo redefina completamente o sistema para as configurações de fábrica, apagando todos os dados, configuração e aplicativos instalados."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"definir hora"</string>
@@ -562,7 +564,7 @@
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome de usuário (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Senha"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Fazer login"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de usuário ou senha inválida."</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de usuário ou senha inválidos."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Verificando..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloquear"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Som ativado"</string>
@@ -842,8 +844,8 @@
     <string name="input_method_binding_label" msgid="1283557179944992649">"Método de entrada"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronizar"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Acessibilidade"</string>
-    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Papel de parede"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar papel de parede"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Plano de fundo"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar plano de fundo"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocolo de encapsulamento ponto a ponto"</string>
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocolo de encapsulamento de camada 2"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec com base em chave pré-compartilhada"</string>

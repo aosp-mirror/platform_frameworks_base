@@ -127,18 +127,20 @@
     <string name="low_memory" msgid="6632412458436461203">"Память телефона заполнена! Удалите файлы, чтобы освободить место."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
     <string name="power_dialog" msgid="1319919075463988638">"Параметры телефона"</string>
-    <string name="silent_mode" msgid="7167703389802618663">"Тихий режим"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Режим без звука"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Включить беспроводную связь"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Отключить беспроводное соединение"</string>
     <string name="screen_lock" msgid="799094655496098153">"Блокировка экрана"</string>
-    <string name="power_off" msgid="4266614107412865048">"Выключить связь"</string>
+    <string name="power_off" msgid="4266614107412865048">"Выключение"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
-    <string name="shutdown_confirm" msgid="649792175242821353">"Телефон будет отключен."</string>
+    <string name="shutdown_confirm" msgid="649792175242821353">"Телефон будет выключен."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Нет последних приложений."</string>
     <string name="global_actions" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
-    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Тихий режим"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Режим без звука"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Звук ВЫКЛ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Звук ВКЛЮЧЕН"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим полета"</string>
@@ -363,7 +365,7 @@
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"давать рекомендации по размеру фоновых рисунков"</string>
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Позволяет данному приложению устанавливать советы по размеру фоновых рисунков."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"восстанавливать параметры системы по умолчанию, установленные на заводе-изготовителе"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"Позволяет приложению восстановить стандартные настройки системы, удалив все данные, конфигурацию и установленные приложения."</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Позволяет приложению восстановить заводские настройки системы, удалив все данные, конфигурацию и установленные приложения."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"установить время"</string>
     <string name="permdesc_setTime" msgid="667294309287080045">"Позволяет программе изменять время на телефоне."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"настраивать часовой пояс"</string>
@@ -414,8 +416,8 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Позволяет приложению изменять синхронизированные каналы. Вредоносные приложения могут использовать эту возможность для изменения синхронизированных каналов."</string>
     <string name="permlab_readDictionary" msgid="432535716804748781">"выполнять чтение из пользовательского словаря"</string>
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
-    <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в пользовательский словарь"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
+    <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в словарь пользователя"</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в словарь пользователя."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"изменять/удалять содержание SD-карты"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"получать доступ к кэшу файловой системы"</string>
@@ -487,11 +489,11 @@
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Основной"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Доп. факс"</string>
-    <string name="phoneTypeRadio" msgid="4093738079908667513">"Радио"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Радиотелефон"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Телетайп"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Рабочий мобильный"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Рабочий пейджер"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Рабочий моб."</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Раб. пейджер"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Секретарь"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"День рождения"</string>
@@ -794,7 +796,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"При включении USB-накопителя некоторые используемые приложения могут прекратить работу и оставаться недоступными до отключения USB-накопителя."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Сбой операции USB-подключения"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"Форматировать карту SD"</string>
+    <string name="extmedia_format_title" msgid="8663247929551095854">"Очистить SD-карту"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
