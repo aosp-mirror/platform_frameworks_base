@@ -989,7 +989,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     + "; regranting permissions for internal storage");
             mSettings.mInternalSdkPlatform = mSdkVersion;
             
-            updatePermissionsLP(null, null, true, regrantPermissions);
+            updatePermissionsLP(null, null, true, regrantPermissions, regrantPermissions);
 
             mSettings.writeLP();
 
@@ -3982,7 +3982,8 @@ class PackageManagerService extends IPackageManager.Stub {
     }
     
     private void updatePermissionsLP(String changingPkg,
-            PackageParser.Package pkgInfo, boolean grantPermissions, boolean replace) {
+            PackageParser.Package pkgInfo, boolean grantPermissions,
+            boolean replace, boolean replaceAll) {
         // Make sure there are no dangling permission trees.
         Iterator<BasePermission> it = mSettings.mPermissionTrees
                 .values().iterator();
@@ -4052,7 +4053,7 @@ class PackageManagerService extends IPackageManager.Stub {
         if (grantPermissions) {
             for (PackageParser.Package pkg : mPackages.values()) {
                 if (pkg != pkgInfo) {
-                    grantPermissionsLP(pkg, false);
+                    grantPermissionsLP(pkg, replaceAll);
                 }
             }
         }
@@ -4668,7 +4669,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         if (p != null) {
                             synchronized (mPackages) {
                                 updatePermissionsLP(p.packageName, p,
-                                        p.permissions.size() > 0, false);
+                                        p.permissions.size() > 0, false, false);
                             }
                             addedPackage = p.applicationInfo.packageName;
                             addedUid = p.applicationInfo.uid;
@@ -5705,7 +5706,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 // Restore of old package succeeded. Update permissions.
                 synchronized (mPackages) {
                     updatePermissionsLP(deletedPackage.packageName, deletedPackage,
-                            true, false);
+                            true, false, false);
                     mSettings.writeLP();
                 }
                 Slog.i(TAG, "Successfully restored package : " + pkgName + " after failed upgrade");
@@ -5822,7 +5823,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             updatePermissionsLP(newPackage.packageName, newPackage,
-                    newPackage.permissions.size() > 0, true);
+                    newPackage.permissions.size() > 0, true, false);
             res.name = pkgName;
             res.uid = newPackage.applicationInfo.uid;
             res.pkg = newPackage;
@@ -6217,7 +6218,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         outInfo.removedUid = mSettings.removePackageLP(packageName);
                     }
                     if (deletedPs != null) {
-                        updatePermissionsLP(deletedPs.name, null, false, false);
+                        updatePermissionsLP(deletedPs.name, null, false, false, false);
                         if (deletedPs.sharedUser != null) {
                             // remove permissions associated with package
                             mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
@@ -6299,7 +6300,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         synchronized (mPackages) {
-            updatePermissionsLP(newPkg.packageName, newPkg, true, true);
+            updatePermissionsLP(newPkg.packageName, newPkg, true, true, false);
             mSettings.writeLP();
         }
         return true;
@@ -9686,7 +9687,7 @@ class PackageManagerService extends IPackageManager.Stub {
            
            // Make sure group IDs have been assigned, and any permission
            // changes in other apps are accounted for
-           updatePermissionsLP(null, null, true, regrantPermissions);
+           updatePermissionsLP(null, null, true, regrantPermissions, regrantPermissions);
            // Persist settings
            mSettings.writeLP();
        }
