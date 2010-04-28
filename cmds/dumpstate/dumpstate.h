@@ -38,4 +38,10 @@ pid_t redirect_to_file(FILE *redirect, char *path, int gzip_level);
 /* dump Dalvik stack traces, return the trace file location (NULL if none) */
 const char *dump_vm_traces();
 
+/* for each process in the system, run the specified function */
+void for_each_pid(void (*func)(int, const char *), const char *header);
+
+/* Displays a blocked processes in-kernel wait channel */
+void show_wchan(int pid, const char *name);
+
 #endif /* _DUMPSTATE_H_ */

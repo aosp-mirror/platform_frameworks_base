@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Ausschalten"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Herunterfahren..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Ihr Telefon wird heruntergefahren."</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Keine neuen Anwendungen."</string>
     <string name="global_actions" msgid="2406416831541615258">"Telefonoptionen"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bildschirmsperre"</string>
@@ -543,8 +545,8 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Aufgeladen"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Bitte Ladegerät anschließen"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Keine SIM-Karte."</string>
-    <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Keine SIM-Karte im Telefon."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Keine SIM-Karte"</string>
+    <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Keine SIM-Karte im Telefon"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Bitte legen Sie eine SIM-Karte ein."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Nur Notrufe"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netzwerk gesperrt"</string>

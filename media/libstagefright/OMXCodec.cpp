@@ -100,7 +100,7 @@ static sp<MediaSource> InstantiateSoftwareCodec(
 
 static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
-    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
+//    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.PV.mp3dec" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
