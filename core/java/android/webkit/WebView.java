@@ -4821,6 +4821,8 @@ public class WebView extends AbsoluteLayout
                 boolean done = false;
                 boolean keepScrollBarsVisible = false;
                 if (Math.abs(fDeltaX) < 1.0f && Math.abs(fDeltaY) < 1.0f) {
+                    mLastTouchX = x;
+                    mLastTouchY = y;
                     keepScrollBarsVisible = done = true;
                 } else {
                     if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
@@ -4872,6 +4874,8 @@ public class WebView extends AbsoluteLayout
                     } else {
                         // keep the scrollbar on the screen even there is no
                         // scroll
+                        mLastTouchX = x;
+                        mLastTouchY = y;
                         keepScrollBarsVisible = true;
                     }
                     mLastTouchTime = eventTime;
