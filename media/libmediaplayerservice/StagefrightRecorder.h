@@ -23,6 +23,7 @@
 
 namespace android {
 
+class Camera;
 struct MediaSource;
 struct MediaWriter;
 
@@ -52,7 +53,12 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual status_t getMaxAmplitude(int *max);
 
 private:
-    sp<ICamera> mCamera;
+    enum CameraFlags {
+        FLAGS_SET_CAMERA = 1L << 0,
+        FLAGS_HOT_CAMERA = 1L << 1,
+    };
+
+    sp<Camera> mCamera;
     sp<ISurface> mPreviewSurface;
     sp<IMediaPlayerClient> mListener;
     sp<MediaWriter> mWriter;
@@ -66,6 +72,7 @@ private:
     int mFrameRate;
     String8 mParams;
     int mOutputFd;
+    int32_t mFlags;
 
     status_t startMPEG4Recording();
     status_t startAMRRecording();

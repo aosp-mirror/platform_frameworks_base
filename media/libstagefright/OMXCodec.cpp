@@ -711,21 +711,46 @@ void OMXCodec::setVideoInputFormat(
         colorFormat = OMX_COLOR_FormatYUV420Planar;
     }
 
+
+
+    status_t err;
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
+
+    //////////////////////// Input port /////////////////////////
     CHECK_EQ(setVideoPortFormatType(
             kPortIndexInput, OMX_VIDEO_CodingUnused,
             colorFormat), OK);
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexInput;
 
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
+
+    def.nBufferSize = getFrameSize(colorFormat, width, height);
+
+    CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
+
+    video_def->nFrameWidth = width;
+    video_def->nFrameHeight = height;
+    video_def->eCompressionFormat = OMX_VIDEO_CodingUnused;
+    video_def->eColorFormat = colorFormat;
+
+    video_def->xFramerate = (24 << 16);  // Q16 format
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
+
+    //////////////////////// Output port /////////////////////////
     CHECK_EQ(setVideoPortFormatType(
             kPortIndexOutput, compressionFormat, OMX_COLOR_FormatUnused),
             OK);
-
-    OMX_PARAM_PORTDEFINITIONTYPE def;
     InitOMXParams(&def);
     def.nPortIndex = kPortIndexOutput;
 
-    OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
-
-    status_t err = mOMX->getParameter(
+    err = mOMX->getParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
 
     CHECK_EQ(err, OK);
@@ -741,39 +766,7 @@ void OMXCodec::setVideoInputFormat(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
 
-    ////////////////////////////////////////////////////////////////////////////
-
-    InitOMXParams(&def);
-    def.nPortIndex = kPortIndexInput;
-
-    err = mOMX->getParameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    CHECK_EQ(err, OK);
-
-    def.nBufferSize = getFrameSize(colorFormat, width, height);
-    CODEC_LOGV("Setting nBufferSize = %ld", def.nBufferSize);
-
-    CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
-
-    video_def->nFrameWidth = width;
-    video_def->nFrameHeight = height;
-    video_def->eCompressionFormat = OMX_VIDEO_CodingUnused;
-    video_def->eColorFormat = colorFormat;
-
-    video_def->xFramerate = 24 << 16;  // XXX crucial!
-
-    err = mOMX->setParameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    CHECK_EQ(err, OK);
-
-    err = mOMX->getParameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    CHECK_EQ(err, OK);
-
-    err = mOMX->setParameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    CHECK_EQ(err, OK);
-
+    /////////////////// Codec-specific ////////////////////////
     switch (compressionFormat) {
         case OMX_VIDEO_CodingMPEG4:
         {
