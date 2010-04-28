@@ -1579,11 +1579,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 synchronized (mSyncQueue) {
                     nextOpAndRunTime = mSyncQueue.nextOperation();
                 }
-                SyncOperation curOp = activeSyncContext.mSyncOperation;
-                if (nextOpAndRunTime != null
-                        && nextOpAndRunTime.second <= now
-                        && !nextOpAndRunTime.first.account.equals(curOp.account)
-                        && !nextOpAndRunTime.first.authority.equals(curOp.authority)) {
+                if (nextOpAndRunTime != null && nextOpAndRunTime.second <= now) {
                     Log.d(TAG, "canceling and rescheduling sync because it ran too long: "
                             + activeSyncContext.mSyncOperation);
                     scheduleSyncOperation(new SyncOperation(activeSyncContext.mSyncOperation));
