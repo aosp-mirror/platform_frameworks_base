@@ -247,6 +247,8 @@ public abstract class ContentResolver {
                 releaseProvider(provider);
                 return null;
             }
+            // force query execution
+            qCursor.getCount();
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
             // Wrap the cursor object into CursorWrapperInner object
