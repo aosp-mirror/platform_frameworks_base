@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"关机"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"您的手机会关机。"</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"没有最近的应用程序。"</string>
     <string name="global_actions" msgid="2406416831541615258">"手机选项"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"屏幕锁定"</string>
@@ -498,7 +500,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"周年纪念"</string>
     <string name="eventTypeOther" msgid="5834288791948564594">"活动"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"自定义"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"住宅"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"家用"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"单位"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"其他"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"手机"</string>

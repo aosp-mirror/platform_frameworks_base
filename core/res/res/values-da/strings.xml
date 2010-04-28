@@ -134,6 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"Sluk"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned ..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"lydstyrke for opkald"</string>
+    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
+    <skip />
     <string name="no_recent_tasks" msgid="279702952298056674">"Der er ingen nye programmer."</string>
     <string name="global_actions" msgid="2406416831541615258">"Indstillinger for telefon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skærmlås"</string>
