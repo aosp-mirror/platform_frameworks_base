@@ -16,16 +16,16 @@
 
 package android.os;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>An asynchronous task is defined by a computation that runs on a background thread and
  * whose result is published on the UI thread. An asynchronous task is defined by 3 generic
  * types, called <code>Params</code>, <code>Progress</code> and <code>Result</code>,
- * and 4 steps, called <code>begin</code>, <code>doInBackground</code>,
- * <code>processProgress</code> and <code>end</code>.</p>
+ * and 4 steps, called <code>onPreExecute</code>, <code>doInBackground</code>,
+ * <code>onProgressUpdate</code> and <code>onPostExecute</code>.</p>
  *
  * <h2>Usage</h2>
  * <p>AsyncTask must be subclassed to be used. The subclass will override at least
