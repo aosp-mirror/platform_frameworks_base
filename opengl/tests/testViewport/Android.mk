@@ -17,6 +17,10 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := TestViewport
 
+# Set a specific SDK version so we can run on Froyo.
+
+LOCAL_SDK_VERSION := 8
+
 include $(BUILD_PACKAGE)
 
 endif # TARGET_SIMULATOR
