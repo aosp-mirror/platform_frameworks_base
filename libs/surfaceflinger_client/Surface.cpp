@@ -463,18 +463,6 @@ int Surface::perform(android_native_window_t* window,
 
 // ----------------------------------------------------------------------------
 
-status_t Surface::dequeueBuffer(sp<GraphicBuffer>* buffer) {
-    android_native_buffer_t* out;
-    status_t err = dequeueBuffer(&out);
-    if (err == NO_ERROR) {
-        *buffer = GraphicBuffer::getSelf(out);
-    }
-    return err;
-}
-
-// ----------------------------------------------------------------------------
-
-
 int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 {
     sp<SurfaceComposerClient> client(getClient());
@@ -530,7 +518,7 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
     if (err != NO_ERROR)
         return err;
 
-    int32_t bufIdx = GraphicBuffer::getSelf(buffer)->getIndex();
+    int32_t bufIdx = getBufferIndex(GraphicBuffer::getSelf(buffer));
     err = mSharedBufferClient->lock(bufIdx);
     LOGE_IF(err, "error locking buffer %d (%s)", bufIdx, strerror(-err));
     return err;
@@ -547,7 +535,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
         mDirtyRegion.set(mSwapRectangle);
     }
     
-    int32_t bufIdx = GraphicBuffer::getSelf(buffer)->getIndex();
+    int32_t bufIdx = getBufferIndex(GraphicBuffer::getSelf(buffer));
     mSharedBufferClient->setCrop(bufIdx, mNextBufferCrop);
     mSharedBufferClient->setDirtyRegion(bufIdx, mDirtyRegion);
     err = mSharedBufferClient->queue(bufIdx);
@@ -722,13 +710,14 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
     // we're intending to do software rendering from this point
     setUsage(GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
 
-    sp<GraphicBuffer> backBuffer;
-    status_t err = dequeueBuffer(&backBuffer);
+    android_native_buffer_t* out;
+    status_t err = dequeueBuffer(&out);
     LOGE_IF(err, "dequeueBuffer failed (%s)", strerror(-err));
     if (err == NO_ERROR) {
+        sp<GraphicBuffer> backBuffer(GraphicBuffer::getSelf(out));
         err = lockBuffer(backBuffer.get());
         LOGE_IF(err, "lockBuffer (idx=%d) failed (%s)",
-                backBuffer->getIndex(), strerror(-err));
+                getBufferIndex(backBuffer), strerror(-err));
         if (err == NO_ERROR) {
             const Rect bounds(backBuffer->width, backBuffer->height);
             const Region boundsRegion(bounds);
@@ -797,7 +786,7 @@ status_t Surface::unlockAndPost()
     
     err = queueBuffer(mLockedBuffer.get());
     LOGE_IF(err, "queueBuffer (idx=%d) failed (%s)",
-            mLockedBuffer->getIndex(), strerror(-err));
+            getBufferIndex(mLockedBuffer), strerror(-err));
 
     mPostedBuffer = mLockedBuffer;
     mLockedBuffer = 0;
@@ -807,6 +796,11 @@ status_t Surface::unlockAndPost()
 void Surface::setSwapRectangle(const Rect& r) {
     Mutex::Autolock _l(mSurfaceLock);
     mSwapRectangle = r;
+}
+
+int Surface::getBufferIndex(const sp<GraphicBuffer>& buffer) const
+{
+    return buffer->getIndex();
 }
 
 status_t Surface::getBufferLocked(int index, int usage)

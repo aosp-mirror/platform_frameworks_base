@@ -195,6 +195,42 @@ int32_t SharedBufferBase::computeTail() const
     return (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
 }
 
+status_t SharedBufferBase::waitForCondition(const ConditionBase& condition)
+{
+    const SharedBufferStack& stack( *mSharedStack );
+    SharedClient& client( *mSharedClient );
+    const nsecs_t TIMEOUT = s2ns(1);
+    const int identity = mIdentity;
+
+    Mutex::Autolock _l(client.lock);
+    while ((condition()==false) &&
+            (stack.identity == identity) &&
+            (stack.status == NO_ERROR))
+    {
+        status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
+        // handle errors and timeouts
+        if (CC_UNLIKELY(err != NO_ERROR)) {
+            if (err == TIMED_OUT) {
+                if (condition()) {
+                    LOGE("waitForCondition(%s) timed out (identity=%d), "
+                        "but condition is true! We recovered but it "
+                        "shouldn't happen." , condition.name(), stack.identity);
+                    break;
+                } else {
+                    LOGW("waitForCondition(%s) timed out "
+                        "(identity=%d, status=%d). "
+                        "CPU may be pegged. trying again.", condition.name(),
+                        stack.identity, stack.status);
+                }
+            } else {
+                LOGE("waitForCondition(%s) error (%s) ",
+                        condition.name(), strerror(-err));
+                return err;
+            }
+        }
+    }
+    return (stack.identity != mIdentity) ? status_t(BAD_INDEX) : stack.status;
+}
 // ============================================================================
 // conditions and updates
 // ============================================================================
@@ -202,14 +238,14 @@ int32_t SharedBufferBase::computeTail() const
 SharedBufferClient::DequeueCondition::DequeueCondition(
         SharedBufferClient* sbc) : ConditionBase(sbc)  { 
 }
-bool SharedBufferClient::DequeueCondition::operator()() {
+bool SharedBufferClient::DequeueCondition::operator()() const {
     return stack.available > 0;
 }
 
 SharedBufferClient::LockCondition::LockCondition(
         SharedBufferClient* sbc, int buf) : ConditionBase(sbc), buf(buf) { 
 }
-bool SharedBufferClient::LockCondition::operator()() {
+bool SharedBufferClient::LockCondition::operator()() const {
     return (buf != stack.head || 
             (stack.queued > 0 && stack.inUse != buf));
 }
@@ -217,7 +253,7 @@ bool SharedBufferClient::LockCondition::operator()() {
 SharedBufferServer::ReallocateCondition::ReallocateCondition(
         SharedBufferBase* sbb, int buf) : ConditionBase(sbb), buf(buf) { 
 }
-bool SharedBufferServer::ReallocateCondition::operator()() {
+bool SharedBufferServer::ReallocateCondition::operator()() const {
     // TODO: we should also check that buf has been dequeued
     return (buf != stack.head);
 }

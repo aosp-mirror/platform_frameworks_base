@@ -165,38 +165,36 @@ public:
     // setSwapRectangle() is intended to be used by GL ES clients
     void        setSwapRectangle(const Rect& r);
 
+
 private:
-    // can't be copied
-    Surface& operator = (Surface& rhs);
-    Surface(const Surface& rhs);
-
-    Surface(const sp<SurfaceControl>& control);
-    void init();
-     ~Surface();
-  
-    friend class SurfaceComposerClient;
-    friend class SurfaceControl;
-
-    
+    /*
+     * Android frameworks friends
+     * (eventually this should go away and be replaced by proper APIs)
+     */
     // camera and camcorder need access to the ISurface binder interface for preview
     friend class Camera;
     friend class MediaRecorder;
-    // mediaplayer needs access to ISurface for display
+    // MediaPlayer needs access to ISurface for display
     friend class MediaPlayer;
     friend class IOMX;
     // this is just to be able to write some unit tests
     friend class Test;
 
-    sp<SurfaceComposerClient> getClient() const;
-    sp<ISurface> getISurface() const;
+private:
+    friend class SurfaceComposerClient;
+    friend class SurfaceControl;
 
-    status_t getBufferLocked(int index, int usage);
-   
-           status_t validate() const;
+    // can't be copied
+    Surface& operator = (Surface& rhs);
+    Surface(const Surface& rhs);
 
-    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
-    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
-    
+    Surface(const sp<SurfaceControl>& control);
+    ~Surface();
+
+
+    /*
+     *  android_native_window_t hooks
+     */
     static int setSwapInterval(android_native_window_t* window, int interval);
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
@@ -210,8 +208,6 @@ private:
     int query(int what, int* value);
     int perform(int operation, va_list args);
 
-    status_t dequeueBuffer(sp<GraphicBuffer>* buffer);
-
     void dispatch_setUsage(va_list args);
     int  dispatch_connect(va_list args);
     int  dispatch_disconnect(va_list args);
@@ -221,6 +217,20 @@ private:
     int  connect(int api);
     int  disconnect(int api);
     int  crop(Rect const* rect);
+
+    /*
+     *  private stuff...
+     */
+    void init();
+    status_t validate() const;
+    sp<SurfaceComposerClient> getClient() const;
+    sp<ISurface> getISurface() const;
+
+    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
+    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
+
+    status_t getBufferLocked(int index, int usage);
+    int getBufferIndex(const sp<GraphicBuffer>& buffer) const;
 
     uint32_t getUsage() const;
     int      getConnectedApi() const;
