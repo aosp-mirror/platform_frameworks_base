@@ -203,9 +203,6 @@ public class Scroller  {
     
                 mCurrX = mStartX + Math.round(x * mDeltaX);
                 mCurrY = mStartY + Math.round(x * mDeltaY);
-                if ((mCurrX == mFinalX) && (mCurrY == mFinalY)) {
-                    mFinished = true;
-                }
                 break;
             case FLING_MODE:
                 float timePassedSeconds = timePassed / 1000.0f;
@@ -221,10 +218,6 @@ public class Scroller  {
                 // Pin to mMinY <= mCurrY <= mMaxY
                 mCurrY = Math.min(mCurrY, mMaxY);
                 mCurrY = Math.max(mCurrY, mMinY);
-
-                if (mCurrX == mFinalX && mCurrY == mFinalY) {
-                    mFinished = true;
-                }
                 
                 break;
             }
