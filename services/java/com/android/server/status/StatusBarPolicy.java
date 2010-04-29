@@ -361,6 +361,9 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
                 mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
+                if (mClockFormat != null) {
+                    mClockFormat.setTimeZone(mCalendar.getTimeZone());
+                }
                 updateClock();
             }
             else if (action.equals(Intent.ACTION_ALARM_CHANGED)) {

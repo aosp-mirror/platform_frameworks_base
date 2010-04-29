@@ -159,7 +159,7 @@ public abstract class WindowOrientationListener {
         // Additional limits on tilt angle to transition to each new orientation.  We ignore all
         // vectors with tilt beyond MAX_TILT, but we can set stricter limits on transition to a
         // particular orientation here.
-        private final int[] MAX_TRANSITION_TILT = new int[] {MAX_TILT, MAX_TILT, 40, MAX_TILT};
+        private final int[] MAX_TRANSITION_TILT = new int[] {MAX_TILT, MAX_TILT, MAX_TILT};
 
         // Between this tilt angle and MAX_TILT, we'll allow orientation changes, but we'll filter
         // with a higher time constant, making us less sensitive to change.  This primarily helps
