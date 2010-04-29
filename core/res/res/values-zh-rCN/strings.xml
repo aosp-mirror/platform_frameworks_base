@@ -134,8 +134,7 @@
     <string name="power_off" msgid="4266614107412865048">"关机"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"您的手机会关机。"</string>
-    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
-    <skip />
+    <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"没有最近的应用程序。"</string>
     <string name="global_actions" msgid="2406416831541615258">"手机选项"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"屏幕锁定"</string>
@@ -858,12 +857,8 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"选择退出车载模式"</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"绑定生效"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"触摸可进行配置"</string>
-    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
-    <skip />
-    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
-    <skip />
-    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
-    <skip />
-    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
-    <skip />
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"手机数据使用过多"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机数据使用的详情"</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"轻触以了解有关手机数据使用的详情"</string>
 </resources>
