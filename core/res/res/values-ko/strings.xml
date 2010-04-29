@@ -134,8 +134,7 @@
     <string name="power_off" msgid="4266614107412865048">"종료"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"종료 중..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"휴대전화가 종료됩니다."</string>
-    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
-    <skip />
+    <string name="recent_tasks_title" msgid="3691764623638127888">"최근 작업"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"최신 응용프로그램이 아닙니다."</string>
     <string name="global_actions" msgid="2406416831541615258">"휴대전화 옵션"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"화면 잠금"</string>
@@ -858,8 +857,8 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"차량 모드를 종료하려면 선택하세요."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"테더링 사용중"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"구성하려면 터치하세요."</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"대용량의 무선 데이터 사용"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"무선 데이터 사용량에 대해 알고 싶으면 터치하세요."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"무선 데이터 제한용량 초과"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"무선 데이터 사용량에 대해 알고 싶으면 터치하세요."</string>
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"높은 모바일 데이터 사용량"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"모바일 데이터 사용에 대해 자세히 알아보려면 터치하세요."</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"모바일 데이터 제한을 초과했습니다."</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"모바일 데이터 사용에 대해 자세히 알아보려면 터치하세요."</string>
 </resources>
