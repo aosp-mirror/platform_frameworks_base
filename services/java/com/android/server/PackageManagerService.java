@@ -9596,8 +9596,7 @@ class PackageManagerService extends IPackageManager.Stub {
                    }
                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Looking for pkg : " + pkgName);
                    PackageSetting ps = mSettings.mPackages.get(pkgName);
-                   if (ps != null && ps.codePathString != null &&
-                           (ps.pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                   if (ps != null && ps.codePathString != null) {
                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid +
                                " corresponds to pkg : " + pkgName +
                                " at code path: " + ps.codePathString);
