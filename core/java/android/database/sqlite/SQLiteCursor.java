@@ -16,12 +16,14 @@
 
 package android.database.sqlite;
 
+import android.app.ActivityThread;
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
 import android.database.DataSetObserver;
+import android.database.RequeryOnUiThreadException;
 import android.database.SQLException;
-
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.text.TextUtils;
@@ -74,6 +76,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private int mCursorState = 0;
     private ReentrantLock mLock = null;
     private boolean mPendingData = false;
+
+    /**
+     * Used by {@link #requery()} to remember for which database we've already shown the warning.
+     */
+    private static final HashMap<String, Boolean> sAlreadyWarned = new HashMap<String, Boolean>();
     
     /**
      *  support for a cursor variant that doesn't always read all results
@@ -503,11 +510,30 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         mDriver.cursorClosed();
     }
 
+    /**
+     * Show a warning against the use of requery() if called on the main thread.
+     * This warning is shown per database per process.
+     */
+    private void warnIfUiThread() {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            String databasePath = mDatabase.getPath();
+            // We show the warning once per database in order not to spam logcat.
+            if (!sAlreadyWarned.containsKey(databasePath)) {
+                sAlreadyWarned.put(databasePath, true);
+                String packageName = ActivityThread.currentPackageName();
+                Log.w(TAG, "should not attempt requery on main (UI) thread: app = " +
+                        packageName == null ? "'unknown'" : packageName,
+                        new RequeryOnUiThreadException(packageName));
+            }
+        }
+    }
+
     @Override
     public boolean requery() {
         if (isClosed()) {
             return false;
         }
+        warnIfUiThread();
         long timeStart = 0;
         if (Config.LOGV) {
             timeStart = System.currentTimeMillis();
