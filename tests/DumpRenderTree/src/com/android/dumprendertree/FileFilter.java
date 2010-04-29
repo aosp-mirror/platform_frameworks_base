@@ -82,8 +82,10 @@ public class FileFilter {
         // This first block of tests are for features for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
-        ignoreResultList.add("fast/events/touch/basic-touch-events.html"); // Requires multi-touch
-        ignoreResultList.add("fast/events/touch/send-oncancel-event.html"); // Expected output is incorrect upstream. See WebKit bug 37830.
+        ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
+        ignoreResultList.add("fast/events/touch/basic-single-touch-events.html"); // Delta of touch move is not great enough for Android. Fixed upstream in WebKit change 58208.
+        ignoreResultList.add("fast/events/touch/send-oncancel-event.html"); // Expected output is incorrect. Fixed upstream in WebKit change 58058.
+        ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
