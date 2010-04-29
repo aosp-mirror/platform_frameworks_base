@@ -134,8 +134,7 @@
     <string name="power_off" msgid="4266614107412865048">"Desligar"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"A encerrar..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"O seu telefone irá encerrar."</string>
-    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
-    <skip />
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Recente"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Nenhuma aplicação recente."</string>
     <string name="global_actions" msgid="2406416831541615258">"Opções do telefone"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueio de ecrã"</string>
@@ -858,12 +857,8 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Seleccionar para sair do modo automóvel."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Associação activa"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocar para configurar"</string>
-    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
-    <skip />
-    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
-    <skip />
-    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
-    <skip />
-    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
-    <skip />
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utilização elevada de dados móveis"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toque para saber mais sobre a utilização de dados móveis"</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"Limite de dados móveis excedido"</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"Toque para saber mais sobre a utilização de dados móveis"</string>
 </resources>
