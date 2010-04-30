@@ -174,7 +174,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Value for {@link #flags}: true when the application's window can be
      * increased in size for larger screens.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_largeScreens
-     * android:smallScreens}.
+     * android:largeScreens}.
      */
     public static final int FLAG_SUPPORTS_LARGE_SCREENS = 1<<11;
     
@@ -268,7 +268,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Value for {@link #flags}: true when the application's window can be
      * increased in size for extra large screens.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_xlargeScreens
-     * android:smallScreens}.
+     * android:xlargeScreens}.
      */
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
