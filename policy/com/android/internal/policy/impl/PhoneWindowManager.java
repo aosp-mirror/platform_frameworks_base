@@ -202,6 +202,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemReady;
     boolean mLidOpen;
     int mUiMode = Configuration.UI_MODE_TYPE_NORMAL;
+    int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
@@ -340,8 +341,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         // We're in a dock that has a rotation affinity, an the app is willing to rotate.
-        if ((mCarDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_CAR)
-                || (mDeskDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_DESK)) {
+        if ((mCarDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_CAR)
+                || (mDeskDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_DESK)) {
             // Note we override the nosensor flag here.
             if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER
                     || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -364,8 +365,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // orientation, then we need to turn the sensor or.
             return true;
         }
-        if ((mCarDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_CAR) ||
-            (mDeskDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_DESK)) {
+        if ((mCarDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_CAR) ||
+                (mDeskDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_DESK)) {
             // enable accelerometer if we are docked in a dock that enables accelerometer
             // orientation management,
             return true;
@@ -526,7 +527,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE);
         filter.addAction(UiModeManager.ACTION_ENTER_DESK_MODE);
         filter.addAction(UiModeManager.ACTION_EXIT_DESK_MODE);
-        context.registerReceiver(mDockReceiver, filter);
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+        Intent intent = context.registerReceiver(mDockReceiver, filter);
+        if (intent != null) {
+            // Retrieve current sticky dock event broadcast.
+            mDockMode = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                    Intent.EXTRA_DOCK_STATE_UNDOCKED);
+        }
         mVibrator = new Vibrator();
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_longPressVibePattern);
@@ -829,59 +836,59 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return null;
         }
         
-    	Context context = mContext;
-    	boolean setTheme = false;
-    	//Log.i(TAG, "addStartingWindow " + packageName + ": nonLocalizedLabel="
-    	//        + nonLocalizedLabel + " theme=" + Integer.toHexString(theme));
-    	if (theme != 0 || labelRes != 0) {
-    	    try {
-    	        context = context.createPackageContext(packageName, 0);
-    	        if (theme != 0) {
-    	            context.setTheme(theme);
-    	            setTheme = true;
-    	        }
-    	    } catch (PackageManager.NameNotFoundException e) {
-                // Ignore
-            }
-    	}
-    	if (!setTheme) {
-    	    context.setTheme(com.android.internal.R.style.Theme);
-    	}
-    	
-        Window win = PolicyManager.makeNewWindow(context);
-        if (win.getWindowStyle().getBoolean(
-                com.android.internal.R.styleable.Window_windowDisablePreview, false)) {
-            return null;
-        }
-        
-        Resources r = context.getResources();
-        win.setTitle(r.getText(labelRes, nonLocalizedLabel));
-
-        win.setType(
-            WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
-        // Force the window flags: this is a fake window, so it is not really
-        // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
-        // flag because we do know that the next window will take input
-        // focus, so we want to get the IME window up on top of us right away.
-        win.setFlags(
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
-            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
-            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-
-        win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                            WindowManager.LayoutParams.MATCH_PARENT);
-
-        final WindowManager.LayoutParams params = win.getAttributes();
-        params.token = appToken;
-        params.packageName = packageName;
-        params.windowAnimations = win.getWindowStyle().getResourceId(
-                com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-        params.setTitle("Starting " + packageName);
-
         try {
+            Context context = mContext;
+            boolean setTheme = false;
+            //Log.i(TAG, "addStartingWindow " + packageName + ": nonLocalizedLabel="
+            //        + nonLocalizedLabel + " theme=" + Integer.toHexString(theme));
+            if (theme != 0 || labelRes != 0) {
+                try {
+                    context = context.createPackageContext(packageName, 0);
+                    if (theme != 0) {
+                        context.setTheme(theme);
+                        setTheme = true;
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Ignore
+                }
+            }
+            if (!setTheme) {
+                context.setTheme(com.android.internal.R.style.Theme);
+            }
+            
+            Window win = PolicyManager.makeNewWindow(context);
+            if (win.getWindowStyle().getBoolean(
+                    com.android.internal.R.styleable.Window_windowDisablePreview, false)) {
+                return null;
+            }
+            
+            Resources r = context.getResources();
+            win.setTitle(r.getText(labelRes, nonLocalizedLabel));
+    
+            win.setType(
+                WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
+            // Force the window flags: this is a fake window, so it is not really
+            // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
+            // flag because we do know that the next window will take input
+            // focus, so we want to get the IME window up on top of us right away.
+            win.setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    
+            win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.MATCH_PARENT);
+    
+            final WindowManager.LayoutParams params = win.getAttributes();
+            params.token = appToken;
+            params.packageName = packageName;
+            params.windowAnimations = win.getWindowStyle().getResourceId(
+                    com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
+            params.setTitle("Starting " + packageName);
+
             WindowManagerImpl wm = (WindowManagerImpl)
                     context.getSystemService(Context.WINDOW_SERVICE);
             View view = win.getDecorView();
@@ -909,6 +916,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (WindowManagerImpl.BadTokenException e) {
             // ignore
             Log.w(TAG, appToken + " already running, starting window not displayed");
+        } catch (RuntimeException e) {
+            // don't crash if something else bad happens, for example a
+            // failure loading resources because we are loading from an app
+            // on external storage that has been unmounted.
+            Log.w(TAG, appToken + " failed creating starting window", e);
         }
 
         return null;
@@ -1973,11 +1985,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            try {
-                IUiModeManager uiModeService = IUiModeManager.Stub.asInterface(
-                        ServiceManager.getService(Context.UI_MODE_SERVICE));
-                mUiMode = uiModeService.getCurrentModeType();
-            } catch (RemoteException e) {
+            if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
+                mDockMode = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            } else {
+                try {
+                    IUiModeManager uiModeService = IUiModeManager.Stub.asInterface(
+                            ServiceManager.getService(Context.UI_MODE_SERVICE));
+                    mUiMode = uiModeService.getCurrentModeType();
+                } catch (RemoteException e) {
+                }
             }
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
             updateOrientationListenerLp();
@@ -2106,9 +2123,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             //or case.unspecified
             if (mLidOpen) {
                 return mLidOpenRotation;
-            } else if (mUiMode == Configuration.UI_MODE_TYPE_CAR && mCarDockRotation >= 0) {
+            } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
                 return mCarDockRotation;
-            } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskDockRotation >= 0) {
+            } else if (mDockMode == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
                 return mDeskDockRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
@@ -2220,9 +2237,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int rotation = Surface.ROTATION_0;
         if (mLidOpen) {
             rotation = mLidOpenRotation;
-        } else if (mUiMode == Configuration.UI_MODE_TYPE_CAR && mCarDockRotation >= 0) {
+        } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
             rotation = mCarDockRotation;
-        } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskDockRotation >= 0) {
+        } else if (mDockMode == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
             rotation = mDeskDockRotation;
         }
         //if lid is closed orientation will be portrait
@@ -2242,6 +2259,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     Intent createHomeDockIntent() {
         Intent intent;
+        
+        // What home does is based on the mode, not the dock state.  That
+        // is, when in car mode you should be taken to car home regardless
+        // of whether we are actually in a car dock.
         if (mUiMode == Configuration.UI_MODE_TYPE_CAR) {
             intent = mCarDockIntent;
         } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK) {
