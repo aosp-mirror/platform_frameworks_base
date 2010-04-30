@@ -118,9 +118,10 @@ public:
 
     // not part of the conditions
     volatile int32_t reallocMask;
+    volatile int8_t index[NUM_BUFFER_MAX];
 
     int32_t     identity;       // surface's identity (const)
-    int32_t     reserved32[6];
+    int32_t     reserved32[2];
     Statistics  stats;
     int32_t     reserved;
     BufferData  buffers[NUM_BUFFER_MAX];     // 960 bytes
@@ -249,6 +250,7 @@ private:
 
     int32_t tail;
     int32_t undoDequeueTail;
+    int32_t queued_head;
     // statistics...
     nsecs_t mDequeueTime[NUM_BUFFER_MAX];
 };
