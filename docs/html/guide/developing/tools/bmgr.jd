@@ -6,15 +6,13 @@ page.title=bmgr
 <div id="qv-wrapper">
 <div id="qv">
   <h2>bmgr quickview</h2>
-<p><code>bmgr</code> lets you inspect and control the backup/restore system on an Android device.
+<p><code>bmgr</code> lets you control the backup/restore system on an Android device.
 
   <h2>In this document</h2>
   <ol>
-<li><a href="#transports">About backup transports</a></li>
-<li><a href="#restoresets">About restore sets</a></li>
-<li><a href="#backup">Forcing a backup operation</a></li>
-<li><a href="#restore">Forcing a restore operation</a></li>
-<li><a href="#other">Other commands</a></li>
+<li><a href="#backup">Forcing a Backup Operation</a></li>
+<li><a href="#restore">Forcing a Restore Operation</a></li>
+<li><a href="#other">Other Commands</a></li>
   </ol>
 
 </div>
@@ -22,144 +20,159 @@ page.title=bmgr
 
 <!-- normal page content here -->
 
-<p><code>bmgr</code> is a shell tool that developers can use to interact with the Backup Manager
-on Android devices supporting API version 8 or later.  It provides commands for inducing backup
-and restore operations on demand so that you do not need to repeatedly wipe data or take similar
-intrusive steps to test the operation of an application's backup agent.  These commands are
+<p><code>bmgr</code> is a shell tool you can use to interact with the Backup Manager
+on Android devices supporting API Level 8 or greater.  It provides commands to induce backup
+and restore operations so that you don't need to repeatedly wipe data or take similar
+intrusive steps in order to test your application's backup agent.  These commands are
 accessed via the <a href="{@docRoot}guide/developing/tools/adb.html">adb</a> shell.
 
-<p>There are a couple of basic concepts used by the Backup Manager that are built into the way
-that <code>bmgr</code> operates.  These are <a href="#transports">backup transports</a> and
-<a href="#restoresets">restore sets</a>.
 
 
-<a name="transports"></a>
-<h2>About backup transports</h2>
+<h2 id="backup">Forcing a Backup Operation</h2>
 
-<p>A <em>backup transport</em> is the code module responsible for moving backup and restore data
+<p>Normally, your application must notify the Backup Manager when its data has changed, via {@link
+android.app.backup.BackupManager#dataChanged()}. The Backup Manager will then invoke your
+backup agent's {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} implementation at some time in the future. However, instead of calling {@link
+android.app.backup.BackupManager#dataChanged()}, you can invoke a backup request from the command
+line by running the <code>bmgr backup</code> command:
+
+    <pre class="no-pretty-print">adb shell bmgr backup <em>&lt;package&gt;</em></pre>
+
+<p><code><em>&lt;package&gt;</em></code> is the formal package name of the application you wish to
+schedule for
+backup. When you execute this backup command, your application's backup agent will be invoked to
+perform a backup operation at some time in the future (via your {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method), though there is no guarantee when it will occur. However, you can force all
+pending backup operations to run immediately by using the <code>bmgr run</code> command:
+
+    <pre class="no-pretty-print">adb shell bmgr run</pre>
+
+<p>This causes a backup pass to execute immediately, invoking the backup agents of all applications
+that had previously called {@link android.app.backup.BackupManager#dataChanged()} since the
+last backup operation, plus any applications which had been manually scheduled for
+backup via <code>bmgr backup</code>.
+
+
+
+<h2 id="restore">Forcing a Restore Operation</h2>
+
+<p>Unlike backup operations, which are batched together and run on an occasional basis, restore
+operations execute immediately.  The Backup Manager currently provides two kinds of restore
+operations.  The first kind restores an entire device with the data that has been backed up.  This
+is typically performed only when a device is first provisioned (to replicate settings and other
+saved state from the user's previous device) and is an operation that only the system can
+perform. The second kind of restore operation restores
+a single application to its "active" data set; that is, the application will abandon its current
+data and revert to the last-known-good data that is held in the current backup image. You can
+invoke this second restore operation with the {@link
+android.app.backup.BackupManager#requestRestore(RestoreObserver) requestRestore()} method. The
+Backup Manager will then invoke your backup agent's {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()} implementation.
+
+<p>While testing your application, you can immediately invoke the restore operation (bypassing the
+{@link android.app.backup.BackupManager#requestRestore(RestoreObserver) requestRestore()} method)
+for your application by using the <code>bmgr restore</code> command:
+
+    <pre class="no-pretty-print">adb shell bmgr restore <em>&lt;package&gt;</em></pre>
+
+<p><code><em>&lt;package&gt;</em></code> is the formal Java-style package name of the application
+participating in the backup/restore mechanism, which you would like to restore. The Backup
+Manager will immediately instantiate the application's backup agent and invoke it for restore. This
+will happen even if your application is not currently running.
+
+
+
+
+
+<h2 id="other">Other Commands</h2>
+
+<p>The data for a single application can be erased from the active data set on demand.  This is
+very useful while you're developing a backup agent, in case bugs lead you to write corrupt data
+or saved state information. You can wipe an application's data with the <code>bmgr wipe</code>
+command:
+
+    <pre class="no-pretty-print">adb shell bmgr wipe <em>&lt;package&gt;</em></pre>
+
+<p><code><em>&lt;package&gt;</em></code> is the formal package name of the application whose data
+you wish to
+erase.  The next backup operation that the application's agent processes will look as
+though the application had never backed anything up before.
+
+<p>You can see whether the Backup Manager is operational at all with the <code>bmgr
+enabled</code> command:
+
+    <pre class="no-pretty-print">adb shell bmgr enabled</pre>
+
+<p>This might be useful if your application's backup agent is never being invoked for backup, to
+verify whether the operating system thinks it should be performing such operations at all.</p>
+
+<p>You can also directly disable or enable the Backup Manager with this command:
+
+    <pre class="no-pretty-print">adb shell bmgr enable <em>&lt;boolean&gt;</em></pre>
+
+<p><code><em>&lt;boolean&gt;</em></code> is either <code>true</code> or <code>false</code>.
+This is equivalent to disabling or enabling backup in the device's main Settings UI.</p>
+
+<p class="warning"><strong>Warning!</strong>  When backup is disabled, the current backup transport
+will explicitly wipe
+the entire active data set from its backend storage.  This is so that when a user says
+they do <em>not</em> want their data backed up, the Backup Manager respects that wish.  No further
+data will be saved from the device, and no restore operations will be possible, unless the Backup
+Manager is re-enabled (either through Settings or through the above <code>bmgr</code> command).
+
+
+
+
+<!-- The following is not useful to applications, but may be some useful information some day...
+
+
+<h2 id="transports">Applying a Backup Transport</h2>
+
+<p>A "backup transport" is the code module responsible for moving backup and restore data
 to and from some storage location.  A device can have multipe transports installed, though only
 one is active at any given time.  Transports are identified by name.  You can see what
 transports are available on your device or emulator by running the
 <code>bmgr list transports</code> command:
 
-    <pre>adb shell bmgr list transports</pre>
+    <pre class="no-pretty-print">adb shell bmgr list transports</pre>
 
 <p>The output of this command is a list of the transports available on the device.  The currently
 active transport is flagged with a <code>*</code> character.  Transport names may look like
-component names -- for example, <code>android/com.android.internal.backup.LocalTransport</code> --
+component names (for example, <code>android/com.android.internal.backup.LocalTransport</code>),
 but they need not be, and the strings are never used as direct class references.  The use of
 a component-like naming scheme is simply for purposes of preventing name collisions.
 
 <p>You can change which transport is currently active from the command line as well:
 
-    <pre>adb shell bmgr transport NAME</pre>
+    <pre class="no-pretty-print">adb shell bmgr transport <em>&lt;name&gt;</em></pre>
 
-<p>where <code>NAME</code> is one of the names as printed by the <code>bmgr list transports</code>
+<p><code><em>&lt;name&gt;</em></code> is one of the names as printed by the <code>bmgr list
+transports</code>
 command.  From this point forward, backup and restore operations will be directed through the
 newly-selected transport.  Backup state tracking is managed separately for each transport, so
 switching back and forth between them will not corrupt the saved state.
 
 
-<a name="restoresets"></a>
-<h2>About restore sets</h2>
-
-<p>All of the application data that a device has written to a given backup transport is tracked
-together, and is collectively sometimes called a <em>restore set,</em> because the typical use
-of the data set is during restore operations.  Each time a device is initially provisioned, a
-new data set is established.  The user can get a listing of all the data sets that can be
-restored through the current transport by running this shell command:
-
-    <pre>adb shell bmgr list sets</pre>
-
-<p>The output is listing of available restore sets, one per line.  The first item on each line is
-a <em>token,</em> a number in hexadecimal that identifies the restore set to the transport.  After
-that is a string that may provide some brief identifying information about the restore set.  Only
-the token is actually used within the backup and restore mechanism.
 
 
-<a name="backup"></a>
-<h2>Forcing a backup operation</h2>
+<h2 id="restoresets">Viewing Restore Sets</h2>
 
-<p>Normally, applications notify the backup manager directly that their data has changed, in
-response to which the backup manager will make sure to invoke that application's agent when the
-next backup operation is run.  You can simulate this manually from the command line if you wish,
-by running this shell command:
+<p>All of the application data that a device has written to its backup transport is tracked
+as a group that is collectively called a "restore set," because each data set is
+most often manipulated during a restore operation. When a device is provisioned for the first
+time, a new restore set is established.  You can get a listing of all the restore sets available to
+the current transport by running the <code>bmgr list sets</code> command:
 
-    <pre>adb shell bmgr backup PACKAGE</pre>
+    <pre class="no-pretty-print">adb shell bmgr list sets</pre>
 
-<p><code>PACKAGE</code> is the formal package name of the application you wish to schedule for
-backup.  At this point you know that the application's agent will be invoked for backup at some
-point in the future, though there is no hard guarantee of when that will occur.  You can force
-all pending backup operations to run immediately by using the following command:
-
-    <pre>adb shell bmgr run</pre>
-
-<p>This causes a backup pass to execute immediately, invoking the agents of all applications that
-had called <code>BackupManager.dataChanged()</code> since the time of the last backup operation,
-plus any applications which had been manually scheduled for backup via
-<code>bmgr backup PACKAGE</code>.
+<p>The output is a listing of available restore sets, one per line.  The first item on each line is
+a token (a hexadecimal value that identifies the restore set to the transport).  Following
+the token is a string that briefly identifies the restore set.
+Only the token is used within the backup and restore mechanism.
 
 
-<a name="restore"></a>
-<h2>Forcing a restore operation</h2>
-
-<p>Unlike backup operations, which are batched together and run on an occasional basis, restore
-operations execute immediately.  The backup manager currently provides two kinds of restore
-operations.  The first restores an entire device with the data from a given restore set.  This
-is typically only performed when a device is first provisioned, to replicate settings and other
-such saved state from the user's previous device.  The second kind of restore operation restores
-a single application from the <em>active</em> data set; that is, from the data set currently
-being written to by backup operations.  This second form is available as part of the public API.
-It allows applications to abandon their current data and revert to the last-known-good data as
-represented in their current backup image.
-
-<p>A full-system restore operation can be initiated with this shell command:
-
-    <pre>adb shell bmgr restore TOKEN</pre>
-
-<p>where <code>TOKEN</code> is the desired restore set's token as printed out by the <code>bmgr
-list sets</code> command.  <strong>Warning!</strong>  This operation will <em>replace</em> the
-data of all backup-enabled applications with the contents of the given restore set.  Be careful,
-and be aware of the potential consequences.
-
-<p>A single-application restore operation does not reference a restore set token; it always uses
-the data from the currently active data set.  You can induce such an operation from the command
-line like this:
-
-    <pre>adb shell bmgr restore PACKAGE</pre>
-
-<p><code>PACKAGE</code> is the formal package name of an application that is participating in the
-backup/restore mechanism.  The backup manager will immediately instantiate the application's
-agent and invoke it for restore.
-
-<a name="other"></a>
-<h2>Other commands</h2>
-
-<p>The data for a single application can be erased from the active data set on demand.  This is
-very useful during development of backup agents, in case bugs lead you to write corrupt data
-or saved state information.  The shell command for wiping an application's data is this:
-
-    <pre>adb shell bmgr wipe PACKAGE</pre>
-
-<p><code>PACKAGE</code> is the formal package name of the application whose data you wish to
-erase.  The next backup operation that the application's agent processes will look as
-though the application had never backed anything up before.
-
-<p>You can see whether the backup manager is operational at all by running this command:
-
-    <pre>adb shell bmgr enabled</pre>
-
-<p>This might be useful if your application's agent is never being invoked for backup, to verify
-whether the operating system thinks it should be performing such operations at all.  You can also
-directly disable or enable the backup manager with this command:
-
-    <pre>adb shell bmgr enable BOOLEAN</pre>
-
-<p>where <code>BOOLEAN</code> is either <code>true</code> or <code>false</code>.  This is
-equivalent to disabling or enabling backup in the device's main Settings UI.
-<strong>Warning!</strong>  When backup is disabled, the current transport will explicitly wipe
-the entire active data set from its backend storage.  This is so that when a user says that no,
-they do not want their data backed up, the backup manager respects that wish.  No further data
-will be saved from the device, and no restore operations will be possible, unless the backup
-manager is re-enabled (either through Settings or through the above <code>bmgr</code> command).
-
+-->
