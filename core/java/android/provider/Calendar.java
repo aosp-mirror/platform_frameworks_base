@@ -638,11 +638,13 @@ public final class Calendar {
             private static final int COLUMN_ATTENDEE_TYPE = 3;
             private static final int COLUMN_ATTENDEE_STATUS = 4;
             private static final String[] EXTENDED_PROJECTION = new String[] {
+                    ExtendedProperties._ID,
                     ExtendedProperties.NAME,
-                    ExtendedProperties.VALUE,
+                    ExtendedProperties.VALUE
             };
-            private static final int COLUMN_NAME = 0;
-            private static final int COLUMN_VALUE = 1;
+            private static final int COLUMN_ID = 0;
+            private static final int COLUMN_NAME = 1;
+            private static final int COLUMN_VALUE = 2;
 
             private static final String WHERE_EVENT_ID = "event_id=?";
 
@@ -772,6 +774,8 @@ public final class Calendar {
                 try {
                     while (subCursor.moveToNext()) {
                         ContentValues extendedValues = new ContentValues();
+                        extendedValues.put(ExtendedProperties._ID,
+                                subCursor.getString(COLUMN_ID));
                         extendedValues.put(ExtendedProperties.NAME,
                                 subCursor.getString(COLUMN_NAME));
                         extendedValues.put(ExtendedProperties.VALUE,
