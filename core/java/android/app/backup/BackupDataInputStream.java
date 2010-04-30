@@ -20,17 +20,17 @@ import java.io.InputStream;
 import java.io.IOException;
 
 /**
- * Used by {@link BackupHelper} classes within the {@link BackupAgentHelper} mechanism,
- * this class provides an {@link java.io.InputStream}-like interface for accessing an
- * entity's data during a restore operation.
+ * Provides an {@link java.io.InputStream}-like interface for accessing an
+ * entity's data during a restore operation. Used by {@link BackupHelper} classes within the {@link
+ * BackupAgentHelper} mechanism.
  * <p>
- * When {@link BackupHelper#restoreEntity(BackupDataInputStream) BackupHelper.restoreEntity(BackupDataInputStream)}
+ * When {@link BackupHelper#restoreEntity(BackupDataInputStream) BackupHelper.restoreEntity()}
  * is called, the current entity's header has already been read from the underlying
  * {@link BackupDataInput}.  The entity's key string and total data size are available
  * through this class's {@link #getKey()} and {@link #size()} methods, respectively.
  * <p class="note">
- * <em>Note:</em> The caller should take care not to seek or close the underlying data
- * source, or to read more than {@link #size()} bytes total from the stream.</p>
+ * <strong>Note:</strong> The caller should take care not to seek or close the underlying data
+ * source, nor read more than {@link #size()} bytes from the stream.</p>
  *
  * @see BackupAgentHelper
  * @see BackupHelper

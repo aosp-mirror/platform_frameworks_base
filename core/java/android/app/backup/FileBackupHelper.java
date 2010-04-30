@@ -23,16 +23,17 @@ import android.util.Log;
 import java.io.File;
 
 /**
- * A helper class which can be used in conjunction with
+ * A helper class that can be used in conjunction with
  * {@link android.app.backup.BackupAgentHelper} to manage the backup of a set of
  * files. Whenever backup is performed, all files changed since the last backup
- * will be saved in their entirety.  During the first time the backup happens,
- * every file in the list will be backed up.  Note that this should only be
- * used with small configuration files, not with large binary files.
+ * will be saved in their entirety. When backup first occurs,
+ * every file in the list provided to {@link #FileBackupHelper} will be backed up.
  * <p>
  * During restore, if the helper encounters data for a file that was not
  * specified when the FileBackupHelper object was constructed, that data
  * will be ignored.
+ * <p class="note"><strong>Note:</strong> This should be
+ * used only with small configuration files, not large binary files.
  */
 public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";

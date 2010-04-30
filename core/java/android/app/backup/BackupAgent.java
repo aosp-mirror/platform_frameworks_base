@@ -29,42 +29,44 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * {@link android.app.backup.BackupAgent} is the central interface between an
+ * Provides the central interface between an
  * application and Android's data backup infrastructure.  An application that wishes
  * to participate in the backup and restore mechanism will declare a subclass of
  * {@link android.app.backup.BackupAgent}, implement the
- * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
- * and {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor)} methods,
- * and provide the name of its agent class in the AndroidManifest.xml file via
- * the &lt;application&gt; tag's android:backupAgent attribute.
- * <p>
- * <b>Basic Operation</b>
+ * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup()}
+ * and {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} methods,
+ * and provide the name of its backup agent class in its {@code AndroidManifest.xml} file via
+ * the <code><a
+ * href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+ * tag's {@code android:backupAgent} attribute.
+ * <h3>Basic Operation</h3>
  * <p>
  * When the application makes changes to data that it wishes to keep backed up,
  * it should call the
  * {@link android.app.backup.BackupManager#dataChanged() BackupManager.dataChanged()} method.
- * This notifies the Android backup manager that the application needs an opportunity
- * to update its backup image.  The backup manager, in turn, will then schedule a
+ * This notifies the Android Backup Manager that the application needs an opportunity
+ * to update its backup image.  The Backup Manager, in turn, schedules a
  * backup pass to be performed at an opportune time.
  * <p>
- * Restore operations are typically only performed when applications are first
+ * Restore operations are typically performed only when applications are first
  * installed on a device.  At that time, the operating system checks to see whether
- * there is a previously-saved data set available for the application, and if so,
- * begins an immediate restore pass to deliver that data as part of the installation
+ * there is a previously-saved data set available for the application being installed, and if so,
+ * begins an immediate restore pass to deliver the backup data as part of the installation
  * process.
  * <p>
- * When a backup or restore pass is run, the application's process will be launched
- * (if not already running), the manifest-declared agent class instantiated within
- * that process, and the agent's {@link #onCreate()} method invoked.  This prepares the
+ * When a backup or restore pass is run, the application's process is launched
+ * (if not already running), the manifest-declared backup agent class (in the {@code
+ * android:backupAgent} attribute) is instantiated within
+ * that process, and the agent's {@link #onCreate()} method is invoked.  This prepares the
  * agent instance to run the actual backup or restore logic.  At this point the
  * agent's
  * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup()} or
  * {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} method will be
  * invoked as appropriate for the operation being performed.
  * <p>
- * A backup data set consists of one or more "entities," flattened binary data records
- * that are each identified with a key string unique within the data set.  Adding a
- * record to the active data set, or updating an existing record, are done by simply
+ * A backup data set consists of one or more "entities," flattened binary data
+ * records that are each identified with a key string unique within the data set.  Adding a
+ * record to the active data set or updating an existing record is done by simply
  * writing new entity data under the desired key.  Deleting an entity from the data set
  * is done by writing an entity under that key with header specifying a negative data
  * size, and no actual entity data.
