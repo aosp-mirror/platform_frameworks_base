@@ -246,6 +246,9 @@ SharedBufferClient::LockCondition::LockCondition(
         SharedBufferClient* sbc, int buf) : ConditionBase(sbc), buf(buf) { 
 }
 bool SharedBufferClient::LockCondition::operator()() const {
+    // NOTE: if stack.head is messed up, we could crash the client
+    // or cause some drawing artifacts. This is okay, as long as it is
+    // limited to the client.
     return (buf != stack.index[stack.head] ||
             (stack.queued > 0 && stack.inUse != buf));
 }
@@ -254,8 +257,15 @@ SharedBufferServer::ReallocateCondition::ReallocateCondition(
         SharedBufferBase* sbb, int buf) : ConditionBase(sbb), buf(buf) { 
 }
 bool SharedBufferServer::ReallocateCondition::operator()() const {
+    int32_t head = stack.head;
+    if (uint32_t(head) >= NUM_BUFFER_MAX) {
+        // if stack.head is messed up, we cannot allow the server to
+        // crash (since stack.head is mapped on the client side)
+        stack.status = BAD_VALUE;
+        return false;
+    }
     // TODO: we should also check that buf has been dequeued
-    return (buf != stack.index[stack.head]);
+    return (buf != stack.index[head]);
 }
 
 // ----------------------------------------------------------------------------
@@ -297,6 +307,8 @@ SharedBufferServer::RetireUpdate::RetireUpdate(
 ssize_t SharedBufferServer::RetireUpdate::operator()() {
     // head is only written in this function, which is single-thread.
     int32_t head = stack.head;
+    if (uint32_t(head) >= NUM_BUFFER_MAX)
+        return BAD_VALUE;
 
     // Preventively lock the current buffer before updating queued.
     android_atomic_write(stack.index[head], &stack.inUse);
@@ -460,6 +472,8 @@ ssize_t SharedBufferServer::retireAndLock()
     RetireUpdate update(this, mNumBuffers);
     ssize_t buf = updateCondition( update );
     if (buf >= 0) {
+        if (uint32_t(buf) >= NUM_BUFFER_MAX)
+            return BAD_VALUE;
         SharedBufferStack& stack( *mSharedStack );
         buf = stack.index[buf];
         LOGD_IF(DEBUG_ATOMICS && buf>=0, "retire=%d, %s",
