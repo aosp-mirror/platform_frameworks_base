@@ -1274,5 +1274,6 @@
   <public type="attr" name="column" />
   <public type="attr" name="withExpression" />
   <public type="attr" name="withClass" />
+  <public type="attr" name="allContactsName" />
 
 </resources>
