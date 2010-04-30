@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.telephonytest.unit;
+package com.android.internal.telephony;
+
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -33,7 +34,7 @@ import android.util.StringBuilderPrinter;
  *
  */
 
-public class CallerInfoUnitTest extends AndroidTestCase {
+public class CallerInfoTest extends AndroidTestCase {
     private CallerInfo mInfo;
     private Context mContext;
 
