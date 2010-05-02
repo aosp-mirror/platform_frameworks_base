@@ -19,7 +19,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<com.android.server.status.StatusBarView xmlns:android="http://schemas.android.com/apk/res/android" 
+<com.android.policy.statusbar.phone.StatusBarView xmlns:android="http://schemas.android.com/apk/res/android" 
     android:background="@drawable/statusbar_background"
     android:orientation="vertical"
     android:focusable="true"
@@ -31,7 +31,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
             
-        <com.android.server.status.IconMerger android:id="@+id/notificationIcons"
+        <com.android.policy.statusbar.phone.IconMerger android:id="@+id/notificationIcons"
             android:layout_width="0dip"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -60,16 +60,16 @@
             android:layout_height="match_parent"
             android:layout_marginRight="8dip"
             >
-            <com.android.server.status.AnimatedImageView
+            <com.android.policy.statusbar.phone.AnimatedImageView
                 android:layout_width="25dip"
                 android:layout_height="25dip"
                 />
-            <com.android.server.status.AnimatedImageView
+            <com.android.policy.statusbar.phone.AnimatedImageView
                 android:layout_width="25dip"
                 android:layout_height="25dip"
                 />
         </ImageSwitcher>
-        <com.android.server.status.TickerView android:id="@+id/tickerText"
+        <com.android.policy.statusbar.phone.TickerView android:id="@+id/tickerText"
             android:layout_width="0dip"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -87,10 +87,10 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 />
-        </com.android.server.status.TickerView>
+        </com.android.policy.statusbar.phone.TickerView>
     </LinearLayout>
 
-    <com.android.server.status.DateView android:id="@+id/date"
+    <com.android.policy.statusbar.phone.DateView android:id="@+id/date"
         android:textAppearance="@style/TextAppearance.StatusBar.Icon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -100,4 +100,4 @@
         android:paddingRight="6px"
         android:background="@drawable/statusbar_background"
         />
-</com.android.server.status.StatusBarView>
+</com.android.policy.statusbar.phone.StatusBarView>

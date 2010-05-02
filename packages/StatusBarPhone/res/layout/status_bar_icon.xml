@@ -25,7 +25,7 @@
     android:layout_height="25dp"
     >
 
-    <com.android.server.status.AnimatedImageView android:id="@+id/image"
+    <com.android.policy.statusbar.phone.AnimatedImageView android:id="@+id/image"
         android:layout_width="match_parent" 
         android:layout_height="match_parent"
         />

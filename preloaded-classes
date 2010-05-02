@@ -31,7 +31,6 @@ android.app.ExpandableListActivity
 android.app.IActivityManager
 android.app.IActivityManager$ContentProviderHolder
 android.app.IAlarmManager$Stub
-android.app.IStatusBar$Stub
 android.app.ITransientNotification$Stub
 android.app.Instrumentation
 android.app.IntentService
@@ -654,6 +653,11 @@ com.android.internal.policy.impl.PhoneWindow$DecorView
 com.android.internal.policy.impl.PhoneWindow$PanelFeatureState$SavedState
 com.android.internal.policy.impl.PhoneWindowManager
 com.android.internal.policy.impl.Policy
+com.android.internal.statusbar.IStatusBar
+com.android.internal.statusbar.IStatusBar$Stub
+com.android.internal.statusbar.IStatusBarService$Stub
+com.android.internal.statusbar.IStatusBarService$Stub
+com.android.internal.statusbar.StatusBarIcon
 com.android.internal.telephony.GsmAlphabet
 com.android.internal.telephony.ITelephony$Stub
 com.android.internal.telephony.ITelephony$Stub$Proxy

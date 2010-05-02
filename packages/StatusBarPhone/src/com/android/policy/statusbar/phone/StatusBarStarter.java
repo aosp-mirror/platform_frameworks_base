@@ -31,7 +31,7 @@ public class StatusBarStarter extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "StatusBarStarter onReceive intent=" + intent);
-        context.startService(new Intent(context, StatusBarService.class));
+        context.startService(new Intent(context, PhoneStatusBarService.class));
     }
 }
 

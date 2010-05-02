@@ -17,8 +17,6 @@
 package com.android.policy.statusbar.phone;
 
 import android.app.Service;
-import android.app.IStatusBar;
-import android.app.IStatusBarService;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -26,7 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.util.Log;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,13 +32,18 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
+import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.StatusBarIconList;
+
 import com.android.server.status.IconData;
 import com.android.server.status.NotificationData;
 
-public abstract class StatusBarService extends Service {
+public abstract class StatusBarService extends Service implements CommandQueue.Callbacks {
     private static final String TAG = "StatusBarService";
 
-    Bar mBar = new Bar();
+    CommandQueue mCommandQueue;
     IStatusBarService mBarService;
 
     /* TODO
@@ -52,17 +55,30 @@ public abstract class StatusBarService extends Service {
 
     @Override
     public void onCreate() {
-        // Put up the view
-        addStatusBarView();
-
         // Connect in to the status bar manager service
+        StatusBarIconList iconList = new StatusBarIconList();
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         try {
-            mBarService.registerStatusBar(mBar);
+            mBarService.registerStatusBar(mCommandQueue, iconList);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
+
+        // Set up the initial icon state
+        mCommandQueue = new CommandQueue(this, iconList);
+        final int N = iconList.size();
+        int viewIndex = 0;
+        for (int i=0; i<N; i++) {
+            StatusBarIcon icon = iconList.getIcon(i);
+            if (icon != null) {
+                addIcon(iconList.getSlot(i), i, viewIndex, icon);
+                viewIndex++;
+            }
+        }
+
+        // Put up the view
+        addStatusBarView();
     }
 
     @Override
@@ -76,9 +92,6 @@ public abstract class StatusBarService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    class Bar extends IStatusBar.Stub {
     }
 
     /**
@@ -96,17 +109,6 @@ public abstract class StatusBarService extends Service {
     }
 
     public void disable(int what, IBinder token, String pkg) {
-    }
-    
-    public IBinder addIcon(IconData data, NotificationData n) {
-        return null;
-    }
-
-    public void updateIcon(IBinder key, IconData data, NotificationData n) {
-    }
-
-    public void setIconVisibility(IBinder key, boolean visible) {
-        //addPendingOp(OP_SET_VISIBLE, key, visible);
     }
 }
 
