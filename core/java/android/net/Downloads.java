@@ -430,11 +430,10 @@ public final class Downloads {
 
             ContentResolver cr = context.getContentResolver();
 
-            Cursor c = cr.query(
-                    downloadUri, DOWNLOADS_PROJECTION, null /* selection */, null /* selection args */,
-                    null /* sort order */);
+            Cursor c = cr.query(downloadUri, DOWNLOADS_PROJECTION, null /* selection */,
+                    null /* selection args */, null /* sort order */);
             try {
-                if (!c.moveToNext()) {
+                if (c == null || !c.moveToNext()) {
                     return result;
                 }
 
