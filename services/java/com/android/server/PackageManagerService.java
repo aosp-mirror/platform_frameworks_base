@@ -2363,7 +2363,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         && (p.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) != 0
                         && (!mSafeMode || (p.applicationInfo.flags
                                 &ApplicationInfo.FLAG_SYSTEM) != 0)) {
-                    finalList.add(p.applicationInfo);
+                    finalList.add(PackageParser.generateApplicationInfo(p, flags));
                 }
             }
         }
