@@ -438,6 +438,18 @@ public final class Calendar {
         public static final String DTEND = "dtend";
 
         /**
+         * The time the event starts with allDay events in a local tz
+         * <P>Type: INTEGER (long; millis since epoch)</P>
+         */
+        public static final String DTSTART2 = "dtstart2";
+
+        /**
+         * The time the event ends with allDay events in a local tz
+         * <P>Type: INTEGER (long; millis since epoch)</P>
+         */
+        public static final String DTEND2 = "dtend2";
+
+        /**
          * The duration of the event
          * <P>Type: TEXT (duration in RFC2445 format)</P>
          */
@@ -448,6 +460,12 @@ public final class Calendar {
          * <P>Type: TEXT
          */
         public static final String EVENT_TIMEZONE = "eventTimezone";
+
+        /**
+         * The timezone for the event, allDay events will have a local tz instead of UTC
+         * <P>Type: TEXT
+         */
+        public static final String EVENT_TIMEZONE2 = "eventTimezone2";
 
         /**
          * Whether the event lasts all day or not
