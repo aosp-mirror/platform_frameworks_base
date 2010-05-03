@@ -16,10 +16,6 @@
 
 package android.preference;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -31,17 +27,21 @@ import android.view.ContextThemeWrapper;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+
 // TODO: fix generics
 /**
  * Generic XML inflater. This has been adapted from {@link LayoutInflater} and
  * quickly passed over to use generics.
  * 
  * @hide
- * @param T The type of the items to inflate
- * @param P The type of parents (that is those items that contain other items).
+ * @param <T> The type of the items to inflate
+ * @param <P> The type of parents (that is those items that contain other items).
  *            Must implement {@link GenericInflater.Parent}
  */
-abstract class GenericInflater<T, P extends GenericInflater.Parent> {
+abstract class GenericInflater<T, P extends GenericInflater.Parent<T>> {
     private final boolean DEBUG = false;
 
     protected final Context mContext;
@@ -52,10 +52,11 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
 
     private final Object[] mConstructorArgs = new Object[2];
 
-    private static final Class[] mConstructorSignature = new Class[] {
+    private static final Class<?>[] mConstructorSignature = new Class[] {
             Context.class, AttributeSet.class};
 
-    private static final HashMap sConstructorMap = new HashMap();
+    private static final HashMap<String, Constructor<?>> sConstructorMap =
+        new HashMap<String, Constructor<?>>();
 
     private String mDefaultPackage;
 
@@ -134,7 +135,7 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
      * @return Returns a brand spanking new inflater object associated with
      * the given Context.
      */
-    public abstract GenericInflater cloneInContext(Context newContext);
+    public abstract GenericInflater<T,P> cloneInContext(Context newContext);
     
     /**
      * Sets the default package that will be searched for classes to construct
@@ -287,22 +288,21 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
      *         attachToRoot is true, this is root; otherwise it is the root of
      *         the inflated XML file.
      */
-    public T inflate(XmlPullParser parser, P root,
-            boolean attachToRoot) {
+    public T inflate(XmlPullParser parser, P root, boolean attachToRoot) {
         synchronized (mConstructorArgs) {
             final AttributeSet attrs = Xml.asAttributeSet(parser);
             mConstructorArgs[0] = mContext;
-            T result = (T) root;
+            P result = root;
 
             try {
                 // Look for the root node.
                 int type;
-                while ((type = parser.next()) != parser.START_TAG
-                        && type != parser.END_DOCUMENT) {
-                    ;
+                while ((type = parser.next()) != XmlPullParser.START_TAG
+                        && type != XmlPullParser.END_DOCUMENT) {
+                    // Do nothing
                 }
 
-                if (type != parser.START_TAG) {
+                if (type != XmlPullParser.START_TAG) {
                     throw new InflateException(parser.getPositionDescription()
                             + ": No start tag found!");
                 }
@@ -317,7 +317,8 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
                 T xmlRoot = createItemFromTag(parser, parser.getName(),
                         attrs);
 
-                result = (T) onMergeRoots(root, attachToRoot, (P) xmlRoot);
+                // Unsafe cast. The current name is not guaranteed to be a P.
+                result = onMergeRoots(root, attachToRoot, (P) xmlRoot);
                 
                 if (DEBUG) {
                     System.out.println("-----> start inflating children");
@@ -343,7 +344,8 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
                 throw ex;
             }
 
-            return result;
+            // Unsafe cast
+            return (T) result;
         }
     }
 
@@ -362,17 +364,17 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
      * @param name The full name of the class to be instantiated.
      * @param attrs The XML attributes supplied for this instance.
      * 
-     * @return The newly instantied item, or null.
+     * @return The newly instantiated item, or null.
      */
     public final T createItem(String name, String prefix, AttributeSet attrs)
             throws ClassNotFoundException, InflateException {
-        Constructor constructor = (Constructor) sConstructorMap.get(name);
+        Constructor<?> constructor = sConstructorMap.get(name);
 
         try {
             if (null == constructor) {
                 // Class not found in the cache, see if it's real,
                 // and try to add it
-                Class clazz = mContext.getClassLoader().loadClass(
+                Class<?> clazz = mContext.getClassLoader().loadClass(
                         prefix != null ? (prefix + name) : name);
                 constructor = clazz.getConstructor(mConstructorSignature);
                 sConstructorMap.put(name, constructor);
@@ -380,6 +382,8 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
 
             Object[] args = mConstructorArgs;
             args[1] = attrs;
+            // This cast is NOT safe. The name class name is not guaranteed to be a
+            // child class of T.
             return (T) constructor.newInstance(args);
 
         } catch (NoSuchMethodException e) {
@@ -457,15 +461,15 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
      * Recursive method used to descend down the xml hierarchy and instantiate
      * items, instantiate their children, and then call onFinishInflate().
      */
-    private void rInflate(XmlPullParser parser, T parent, final AttributeSet attrs)
+    private void rInflate(XmlPullParser parser, P parent, final AttributeSet attrs)
             throws XmlPullParserException, IOException {
         final int depth = parser.getDepth();
 
         int type;
-        while (((type = parser.next()) != parser.END_TAG || 
-                parser.getDepth() > depth) && type != parser.END_DOCUMENT) {
+        while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
 
-            if (type != parser.START_TAG) {
+            if (type != XmlPullParser.START_TAG) {
                 continue;
             }
 
@@ -485,12 +489,13 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
                         .println("Creating params from parent: " + parent);
             }
 
-            ((P) parent).addItemFromInflater(item);
+            parent.addItemFromInflater(item);
 
             if (DEBUG) {
                 System.out.println("-----> start inflating children");
             }
-            rInflate(parser, item, attrs);
+            // Unsafe cast
+            rInflate(parser, (P)item, attrs);
             if (DEBUG) {
                 System.out.println("-----> done inflating children");
             }
@@ -508,8 +513,10 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
      * @param attrs An AttributeSet of attributes to apply to the item.
      * @return Whether you created a custom object (true), or whether this
      *         inflater should proceed to create an item.
+     *
+     * @throws XmlPullParserException In case of parsing error.
      */
-    protected boolean onCreateCustomFromTag(XmlPullParser parser, T parent,
+    protected boolean onCreateCustomFromTag(XmlPullParser parser, P parent,
             final AttributeSet attrs) throws XmlPullParserException {
         return false;
     }
