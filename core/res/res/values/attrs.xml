@@ -3630,6 +3630,9 @@
         <attr name="detailColumn" format="string" />
         <!-- Flag indicating that detail should be built from SocialProvider. -->
         <attr name="detailSocialSummary" format="boolean" />
+        <!-- Resource representing the term "All Contacts" (e.g. "All Friends" or
+        "All connections"). Optional (Default is "All Contacts"). -->
+        <attr name="allContactsName" format="string" />
     </declare-styleable>
 
     <!-- =============================== -->
