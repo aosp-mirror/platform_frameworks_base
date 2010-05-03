@@ -78,20 +78,13 @@ import android.util.Log;
      *  existing compiled SQL program already around
      */
     private void compile(String sql, boolean forceCompilation) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyLockOwner();
         // Only compile if we don't have a valid statement already or the caller has
         // explicitly requested a recompile.
         if (forceCompilation) {
-            mDatabase.lock();
-            try {
-                // Note that the native_compile() takes care of destroying any previously
-                // existing programs before it compiles.
-                native_compile(sql);
-            } finally {
-                mDatabase.unlock();
-            }
+            // Note that the native_compile() takes care of destroying any previously
+            // existing programs before it compiles.
+            native_compile(sql);
         }
     }
 

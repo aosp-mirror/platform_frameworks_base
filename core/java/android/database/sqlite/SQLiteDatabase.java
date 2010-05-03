@@ -275,20 +275,22 @@ public class SQLiteDatabase extends SQLiteClosable {
                 // if it needs to be removed to accommodate a new entry,
                 //     close {@link SQLiteCompiledSql} represented by this entry, if not in use
                 //     and then let it be removed from the Map.
-                synchronized(mCompiledQueries) { // probably not necessary, but can't hurt
-                    if (this.size() <= mMaxSqlCacheSize) {
-                        // cache is not full. nothing needs to be removed
-                        return false;
-                    }
-                    // cache is full. eldest will be removed.
-                    SQLiteCompiledSql entry = eldest.getValue();
-                    if (!entry.isInUse()) {
-                        // this {@link SQLiteCompiledSql} is not in use. release it.
-                        entry.releaseSqlStatement();
-                    }
-                    // return true, so that this entry is removed automatically by the caller.
-                    return true;
+                // when this is called, the caller must be trying to add a just-compiled stmt
+                // to cache; i.e., caller should already have acquired database lock AND
+                // the lock on mCompiledQueries. do as assert of these two 2 facts.
+                verifyLockOwner();
+                if (this.size() <= mMaxSqlCacheSize) {
+                    // cache is not full. nothing needs to be removed
+                    return false;
                 }
+                // cache is full. eldest will be removed.
+                SQLiteCompiledSql entry = eldest.getValue();
+                if (!entry.isInUse()) {
+                    // this {@link SQLiteCompiledSql} is not in use. release it.
+                    entry.releaseSqlStatement();
+                }
+                // return true, so that this entry is removed automatically by the caller.
+                return true;
             }
         };
     /**
@@ -1976,6 +1978,15 @@ public class SQLiteDatabase extends SQLiteClosable {
             native_setLocale(locale.toString(), mFlags);
         } finally {
             unlock();
+        }
+    }
+
+    /* package */ void verifyLockOwner() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database " + getPath() + " already closed");
+        }
+        if (!isDbLockedByCurrentThread() && mLockingEnabled) {
+            throw new IllegalStateException("Don't have database lock!");
         }
     }
 
