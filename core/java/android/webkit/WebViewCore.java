@@ -1573,11 +1573,12 @@ final class WebViewCore {
             if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                     && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
                 if (DebugFlags.WEB_VIEW_CORE) {
-                    Log.v(LOGTAG, "key: arrow unused by plugin: " + keyCode);
+                    Log.v(LOGTAG, "key: arrow unused by page: " + keyCode);
                 }
                 if (mWebView != null && evt.isDown()) {
                     Message.obtain(mWebView.mPrivateHandler,
-                            WebView.MOVE_OUT_OF_PLUGIN, keyCode).sendToTarget();
+                            WebView.UNHANDLED_NAV_KEY, keyCode,
+                            0).sendToTarget();
                 }
                 return;
             }

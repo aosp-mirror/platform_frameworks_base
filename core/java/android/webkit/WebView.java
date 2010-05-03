@@ -522,7 +522,7 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_INITIALIZED_MSG_ID         = 107;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 108;
     static final int UPDATE_ZOOM_RANGE                  = 109;
-    static final int MOVE_OUT_OF_PLUGIN                 = 110;
+    static final int UNHANDLED_NAV_KEY                  = 110;
     static final int CLEAR_TEXT_ENTRY                   = 111;
     static final int UPDATE_TEXT_SELECTION_MSG_ID       = 112;
     static final int SHOW_RECT_MSG_ID                   = 113;
@@ -570,7 +570,7 @@ public class WebView extends AbsoluteLayout
         "WEBCORE_INITIALIZED_MSG_ID", //     = 107;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 108;
         "UPDATE_ZOOM_RANGE", //              = 109;
-        "MOVE_OUT_OF_PLUGIN", //             = 110;
+        "UNHANDLED_NAV_KEY", //              = 110;
         "CLEAR_TEXT_ENTRY", //               = 111;
         "UPDATE_TEXT_SELECTION_MSG_ID", //   = 112;
         "SHOW_RECT_MSG_ID", //               = 113;
@@ -3339,7 +3339,8 @@ public class WebView extends AbsoluteLayout
             if (!animateScroll) {
                 extras = DRAW_EXTRAS_FIND;
             }
-        } else if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+        } else if (mShiftIsPressed
+                && !nativePageShouldHandleShiftAndArrows()) {
             if (!animateZoom && !mPreviewZoomOnly) {
                 extras = DRAW_EXTRAS_SELECTION;
                 nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
@@ -3696,7 +3697,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (nativeFocusIsPlugin()) {
+            if (nativePageShouldHandleShiftAndArrows()) {
                 mShiftIsPressed = true;
             } else if (!nativeCursorWantsKeyEvents() && !mShiftIsPressed) {
                 setUpSelectXY();
@@ -3706,8 +3707,8 @@ public class WebView extends AbsoluteLayout
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
-            if (nativeFocusIsPlugin()) {
-                letPluginHandleNavKey(keyCode, event.getEventTime(), true);
+            if (nativePageShouldHandleShiftAndArrows()) {
+                letPageHandleNavKey(keyCode, event.getEventTime(), true);
                 return true;
             }
             if (mShiftIsPressed) {
@@ -3730,7 +3731,8 @@ public class WebView extends AbsoluteLayout
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             switchOutDrawHistory();
             if (event.getRepeatCount() == 0) {
-                if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+                if (mShiftIsPressed
+                        && !nativePageShouldHandleShiftAndArrows()) {
                     return true; // discard press if copy in progress
                 }
                 mGotCenterDown = true;
@@ -3839,7 +3841,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (nativeFocusIsPlugin()) {
+            if (nativePageShouldHandleShiftAndArrows()) {
                 mShiftIsPressed = false;
             } else if (commitCopy()) {
                 return true;
@@ -3848,8 +3850,8 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-            if (nativeFocusIsPlugin()) {
-                letPluginHandleNavKey(keyCode, event.getEventTime(), false);
+            if (nativePageShouldHandleShiftAndArrows()) {
+                letPageHandleNavKey(keyCode, event.getEventTime(), false);
                 return true;
             }
             // always handle the navigation keys in the UI thread
@@ -3862,7 +3864,7 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mGotCenterDown = false;
 
-            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+            if (mShiftIsPressed && !nativePageShouldHandleShiftAndArrows()) {
                 if (mExtendSelection) {
                     commitCopy();
                 } else {
@@ -4225,9 +4227,11 @@ public class WebView extends AbsoluteLayout
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean dispatch = true;
 
-        // Textfields and plugins need to receive the shift up key even if
-        // another key was released while the shift key was held down.
-        if (!inEditingMode() && (mNativeClass == 0 || !nativeFocusIsPlugin())) {
+        // Textfields, plugins, and contentEditable nodes need to receive the
+        // shift up key even if another key was released while the shift key
+        // was held down.
+        if (!inEditingMode() && (mNativeClass == 0
+                || !nativePageShouldHandleShiftAndArrows())) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
             } else {
@@ -5181,7 +5185,7 @@ public class WebView extends AbsoluteLayout
             return true;
         }
         boolean shiftPressed = mShiftIsPressed && (mNativeClass == 0
-                || !nativeFocusIsPlugin());
+                || !nativePageShouldHandleShiftAndArrows());
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             if (shiftPressed) {
                 return true; // discard press if copy in progress
@@ -5346,7 +5350,8 @@ public class WebView extends AbsoluteLayout
         float yRate = mTrackballRemainsY * 1000 / elapsed;
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeight();
-        if (mShiftIsPressed && (mNativeClass == 0 || !nativeFocusIsPlugin())) {
+        if (mShiftIsPressed && (mNativeClass == 0
+                || !nativePageShouldHandleShiftAndArrows())) {
             moveSelection(scaleTrackballX(xRate, viewWidth),
                     scaleTrackballY(yRate, viewHeight));
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -5384,11 +5389,11 @@ public class WebView extends AbsoluteLayout
                         + " mTrackballRemainsX=" + mTrackballRemainsX
                         + " mTrackballRemainsY=" + mTrackballRemainsY);
             }
-            if (mNativeClass != 0 && nativeFocusIsPlugin()) {
+            if (mNativeClass != 0 && nativePageShouldHandleShiftAndArrows()) {
                 for (int i = 0; i < count; i++) {
-                    letPluginHandleNavKey(selectKeyCode, time, true);
+                    letPageHandleNavKey(selectKeyCode, time, true);
                 }
-                letPluginHandleNavKey(selectKeyCode, time, false);
+                letPageHandleNavKey(selectKeyCode, time, false);
             } else if (navHandledKey(selectKeyCode, count, false, time)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
@@ -6412,7 +6417,7 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     break;
-                case MOVE_OUT_OF_PLUGIN:
+                case UNHANDLED_NAV_KEY:
                     navHandledKey(msg.arg1, 1, false, 0);
                     break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
@@ -7115,10 +7120,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Pass the key to the plugin.  This assumes that nativeFocusIsPlugin()
-     * returned true.
+     * Pass the key directly to the page.  This assumes that
+     * nativePageShouldHandleShiftAndArrows() returned true.
      */
-    private void letPluginHandleNavKey(int keyCode, long time, boolean down) {
+    private void letPageHandleNavKey(int keyCode, long time, boolean down) {
         int keyEventAction;
         int eventHubAction;
         if (down) {
@@ -7299,6 +7304,14 @@ public class WebView extends AbsoluteLayout
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y,
             boolean extendSelection);
+    /**
+     * @return true if the page should get the shift and arrow keys, rather
+     * than select text/navigation.
+     *
+     * If the focus is a plugin, or if the focus and cursor match and are
+     * a contentEditable element, then the page should handle these keys.
+     */
+    private native boolean  nativePageShouldHandleShiftAndArrows();
     private native boolean  nativePointInNavCache(int x, int y, int slop);
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
