@@ -855,7 +855,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                     out.startTag(null, "p");
                     out.attribute(null, "pkg", p.info.provider.getPackageName());
                     out.attribute(null, "cl", p.info.provider.getClassName());
-                    out.endTag(null, "h");
+                    out.endTag(null, "p");
                     p.tag = providerIndex;
                     providerIndex++;
                 }
