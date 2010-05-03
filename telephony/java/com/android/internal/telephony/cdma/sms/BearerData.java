@@ -29,7 +29,6 @@ import android.text.format.Time;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
-import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import com.android.internal.util.BitwiseInputStream;
@@ -49,7 +48,7 @@ public final class BearerData {
      */
     private final static byte SUBPARAM_MESSAGE_IDENTIFIER               = 0x00;
     private final static byte SUBPARAM_USER_DATA                        = 0x01;
-    private final static byte SUBPARAM_USER_REPONSE_CODE                = 0x02;
+    private final static byte SUBPARAM_USER_RESPONSE_CODE               = 0x02;
     private final static byte SUBPARAM_MESSAGE_CENTER_TIME_STAMP        = 0x03;
     private final static byte SUBPARAM_VALIDITY_PERIOD_ABSOLUTE         = 0x04;
     private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
@@ -1551,7 +1550,7 @@ public final class BearerData {
                 case SUBPARAM_USER_DATA:
                     decodeSuccess = decodeUserData(bData, inStream);
                     break;
-                case SUBPARAM_USER_REPONSE_CODE:
+                case SUBPARAM_USER_RESPONSE_CODE:
                     decodeSuccess = decodeUserResponseCode(bData, inStream);
                     break;
                 case SUBPARAM_REPLY_OPTION:
