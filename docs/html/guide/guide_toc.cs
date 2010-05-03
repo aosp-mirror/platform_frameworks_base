@@ -282,7 +282,8 @@
       <!--<li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT Plugin</a></li>-->
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html">AVDs</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a></li>
+      		<li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
+            <span class="new">new!</span></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html">ddms</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>

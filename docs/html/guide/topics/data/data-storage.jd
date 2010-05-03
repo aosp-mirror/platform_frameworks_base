@@ -7,18 +7,19 @@ page.title=Data Storage
 
   <h2>Storage quickview</h2>
   <ul>
-    <li>Fast, lightweight storage through system preferences</li>
-    <li>File storage to device internal or removable flash</li>
-    <li>Arbitrary and structured storage in databases</li>
-    <li>Support for network-based storage</li>
+    <li>Use Shared Preferences for primitive data</li>
+    <li>Use internal device storage for private data</li>
+    <li>Use external storage for large data sets that are not private</li>
+    <li>Use SQLite databases for structured storage</li>
   </ul>
 
   <h2>In this document</h2>
   <ol>
-    <li><a href="#pref">Preferences</a></li>
-    <li><a href="#files">Files</a></li>
-    <li><a href="#db">Databases</a></li>
-    <li><a href="#netw">Network</a></li>
+    <li><a href="#pref">Using Shared Preferences</a></li>
+    <li><a href="#filesInternal">Using the Internal Storage</a></li>
+    <li><a href="#filesExternal">Using the External Storage</a></li>
+    <li><a href="#db">Using Databases</a></li>
+    <li><a href="#netw">Using a Network Connection</a></li>
   </ol>
 
   <h2>See also</h2>
@@ -29,171 +30,428 @@ page.title=Data Storage
 </div>
 </div>
 
-<p>
-A typical desktop operating system provides a common file system that any
-application can use to store files that can be read by other
-applications (perhaps with some access control settings).  Android uses a
-different system:  On Android, all application data (including files) are
-private to that application.  
+<p>Android provides several options for you to save persistent application data. The solution you
+choose depends on your specific needs, such as whether the data should be private to your
+application or accessible to other applications (and the user) and how much space your data
+requires.
 </p>
 
-<p>
-However, Android also provides a standard way for an application to expose 
-its private data to other applications &mdash; through content providers.
-A content provider is an 
-optional component of an application that exposes read/write access to the 
-application's data, subject to whatever restrictions it might impose.  
-Content providers implement a standard syntax for requesting and modifying
-data, and a standard mechanism for reading the returned data.  Android supplies 
-a number of content providers for standard data types, such as image, audio, 
-and video files and personal contact information.  For more information on 
-using content providers, see a separate document,
-<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
-</p>
- 
-<p>
-Whether or not you want to export your application's data to others,
-you need a way to store it.  Android provides the following four mechanisms
-for storing and retrieving data: <a href="#pref">Preferences</a>,
-<a href="#files">Files</a>, <a href="#db">Databases</a>, and <a href="#netw">Network</a>.
-</p>
+<p>Your data storage options are the following:</p>
 
+<dl>
+  <dt><a href="#pref">Shared Preferences</a></dt>
+    <dd>Store private primitive data in key-value pairs.</dd>
+  <dt><a href="#filesInternal">Internal Storage</a></dt>
+    <dd>Store private data on the device memory.</dd>
+  <dt><a href="#filesExternal">External Storage</a></dt>
+    <dd>Store public data on the shared external storage.</dd>
+  <dt><a href="#db">SQLite Databases</a></dt>
+    <dd>Store structured data in a private database.</dd>
+  <dt><a href="#netw">Network Connection</a></dt>
+    <dd>Store data on the web with your own network server.</dd>
+</dl>
 
-<h2 id="pref">Preferences</h2>
-<p>Preferences is a lightweight mechanism to store and retrieve key-value pairs of primitive 
-data types.  It is typically used to store application preferences, such as a 
-default greeting or a text font to be loaded whenever the application is started. Call 
-<code>{@link android.content.Context#getSharedPreferences(java.lang.String,int)
-Context.getSharedPreferences()}</code> to read and write values.  Assign a name to 
-your set of preferences if you want to share them with other components in the same 
-application, or use <code>{@link android.app.Activity#getPreferences(int) 
-Activity.getPreferences()}</code> with no name to keep them private to the calling
-activity.  You cannot share preferences across applications (except by using a 
-content provider).
+<p>Android provides a way for you to expose even your private data to other applications
+&mdash; with a <a href="{@docRoot}guide/topics/providers/content-providers.html">content
+provider</a>. A content provider is an optional component that exposes read/write access to
+your application data, subject to whatever restrictions you want to impose. For more information
+about using content providers, see the
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+documentation.
 </p>
 
+
+
+
+<h2 id="pref">Using Shared Preferences</h2>
+
+<p>The {@link android.content.SharedPreferences} class provides a general framework that allows you
+to save and retrieve persistent key-value pairs of primitive data types. You can use {@link
+android.content.SharedPreferences} to save any primitive data: booleans, floats, ints, longs, and
+strings. This data will persist across user sessions (even if your application is killed).</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h3>User Preferences</h3>
+<p>Shared preferences are not strictly for saving "user preferences," such as what ringtone a
+user has chosen. If you're interested in creating user preferences for your application, see {@link
+android.preference.PreferenceActivity}, which provides an Activity framework for you to create
+user preferences, which will be automatically persisted (using shared preferences).</p>
+</div>
+</div>
+
+<p>To get a {@link android.content.SharedPreferences} object for your application, use one of
+two methods:</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} - Use this if you need multiple preferences files identified by name,
+which you specify with the first parameter.</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} - Use this if you need
+only one preferences file for your Activity. Because this will be the only preferences file
+for your Activity, you don't supply a name.</li>
+</ul>
+
+<p>To write values:</p>
+<ol>
+  <li>Call {@link android.content.SharedPreferences#edit()} to get a {@link
+android.content.SharedPreferences.Editor}.</li>
+  <li>Add values with methods such as {@link
+android.content.SharedPreferences.Editor#putBoolean(String,boolean) putBoolean()} and {@link
+android.content.SharedPreferences.Editor#putString(String,String) putString()}.</li>
+  <li>Commit the new values with {@link android.content.SharedPreferences.Editor#commit()}</li>
+</ol>
+
+<p>To read values, use {@link android.content.SharedPreferences} methods such as {@link
+android.content.SharedPreferences#getBoolean(String,boolean) getBoolean()} and {@link
+android.content.SharedPreferences#getString(String,String) getString()}.</p>
+
 <p>
-Here is an example of setting user preferences for silent keypress mode for a 
+Here is an example that saves a preference for silent keypress mode in a
 calculator:
 </p>
 
 <pre>
-import android.app.Activity;
-import android.content.SharedPreferences;
-
 public class Calc extends Activity {
-public static final String PREFS_NAME = "MyPrefsFile";
-    . . .      
+    public static final String PREFS_NAME = "MyPrefsFile";
 
     &#64;Override
     protected void onCreate(Bundle state){         
        super.onCreate(state);
-    
-    . . .
-    
+       . . .
+
        // Restore preferences
        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
        boolean silent = settings.getBoolean("silentMode", false);
        setSilent(silent);
     }
-    
+
     &#64;Override
     protected void onStop(){
        super.onStop();
-    
-      // Save user preferences. We need an Editor object to
-      // make changes. All objects are from android.context.Context
+
+      // We need an Editor object to make preference changes.
+      // All objects are from android.context.Context
       SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
       SharedPreferences.Editor editor = settings.edit();
       editor.putBoolean("silentMode", mSilentMode);
 
-      // Don't forget to commit your edits!!!
+      // Commit the edits!
       editor.commit();
     }
 }
 </pre>
 
 
-<h2 id="files">Files</h2>
-<p>You can store files directly on the mobile device or on a removable 
-storage medium.  By default, other applications cannot access these files.
+
+
+<a name="files"></a>
+<h2 id="#filesInternal">Using the Internal Storage</h2>
+
+<p>You can save files directly on the device's internal storage. By default, files saved
+to the internal storage are private to your application and other applications cannot access
+them (nor can the user). When the user uninstalls your application, these files are removed.</p>
+
+<p>To create and write a private file to the internal storage:</p>
+
+<ol>
+  <li>Call {@link android.content.Context#openFileOutput(String,int) openFileOutput()} with the
+name of the file and the operating mode. This returns a {@link java.io.FileOutputStream}.</li>
+  <li>Write to the file with {@link java.io.FileOutputStream#write(byte[]) write()}.</li>
+  <li>Close the stream with {@link java.io.FileOutputStream#close()}.</li>
+</ol>
+
+<p>For example:</p>
+
+<pre>
+String FILENAME = "hello_file";
+String string = "hello world!";
+
+FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
+fos.write(string.getBytes());
+fos.close();
+</pre>
+
+<p>{@link android.content.Context#MODE_PRIVATE} will create the file (or replace a file of
+the same name) and make it private to your application. Other modes available are: {@link
+android.content.Context#MODE_APPEND}, {@link
+android.content.Context#MODE_WORLD_READABLE}, and {@link
+android.content.Context#MODE_WORLD_WRITEABLE}.</p>
+
+<p>To read a file from internal storage:</p>
+
+<ol>
+  <li>Call {@link android.content.Context#openFileInput openFileInput()} and pass it the
+name of the file to read. This returns a {@link java.io.FileInputStream}.</li>
+  <li>Read bytes from the file with {@link java.io.FileInputStream#read(byte[],int,int)
+read()}.</li>
+  <li>Then close the stream with  {@link java.io.FileInputStream#close()}.</li>
+</ol>
+
+<p class="note"><strong>Tip:</strong> If you want to save a static file in your application at
+compile time, save the file in your project <code>res/raw/</code> directory. You can open it with
+{@link android.content.res.Resources#openRawResource(int) openRawResource()}, passing the {@code
+R.raw.<em>&lt;filename&gt;</em>} resource ID. This method returns an {@link java.io.InputStream}
+that you can use to read the file (but you cannot write to the original file).
 </p>
 
-<p>
-To read data from a file, call {@link android.content.Context#openFileInput 
-Context.openFileInput()} and pass it the local name and path of the file.  
-It returns a standard Java {@link java.io.FileInputStream} object.  To write 
-to a file, call {@link android.content.Context#openFileOutput 
-Context.openFileOutput()} with the name and path.  It returns a {@link 
-java.io.FileOutputStream} object.  Calling these methods with name and path 
-strings from another application will not work; you can only access local 
-files.
-</p>
 
-<p>
-If you have a static file to package with your application at compile time, 
-you can save the file in your project in <code>res/raw/<em>myDataFile</em></code>, 
-and then open it with {@link
-android.content.res.Resources#openRawResource(int) Resources.openRawResource
-(R.raw.<em>myDataFile</em>)}.  It returns an {@link java.io.InputStream}
-object that you can use to read from the file.
-</p>
+<h3 id="InternalCache">Saving cache files</h3>
 
-<h2 id="db">Databases</h2>
-<p>The Android API contains support for creating and using SQLite databases. 
-Each database is private to the application that creates it.
-</p>
+<p>If you'd like to cache some data, rather than store it persistently, you should use {@link
+android.content.Context#getCacheDir()} to open a {@link
+java.io.File} that represents the internal directory where your application should save
+temporary cache files.</p>
 
-<p>
-The {@link android.database.sqlite.SQLiteDatabase} object represents a database
-and has methods for interacting with it &mdash; making queries and managing the
-data.  To create the database, call <code>{@link 
-android.database.sqlite.SQLiteDatabase#create SQLiteDatabase.create()}</code> 
-and also subclass {@link android.database.sqlite.SQLiteOpenHelper}.  
-</p>
+<p>When the device is
+low on internal storage space, Android may delete these cache files to recover space. However, you
+should not rely on the system to clean up these files for you. You should always maintain the cache
+files yourself and stay within a reasonable limit of space consumed, such as 1MB. When the user
+uninstalls your application, these files are removed.</p>
 
-<p>
-As part of its support for the SQLite database system, Android exposes 
-database management functions that let you store complex collections of data 
-wrapped into useful objects.  For example, Android defines a data type 
-for contact information; it consists of many fields including a first and last 
-name (strings), an address and phone numbers (also strings), a photo (bitmap
-image), and much other information describing a person. 
-</p>
 
-<p>
-Android ships with the sqlite3 database tool, which enables you to browse
-table contents, run SQL commands, and perform other useful functions on SQLite
-databases.  See <a href="{@docRoot}guide/developing/tools/adb.html#sqlite">Examine databases 
-(sqlite3)</a> to learn how to run this program.
-</p>
+<h3 id="InternalMethods">Other useful methods</h3>
 
-<p>
-All databases, SQLite and others, are stored on the device in 
-<code>/data/data/<em>package_name</em>/databases</code>.
-</p>
+<dl>
+  <dt>{@link android.content.Context#getFilesDir()}</dt>
+    <dd>Gets the absolute path to the filesystem directory where your internal files are saved.</dd>
+  <dt>{@link android.content.Context#getDir(String,int) getDir()}</dt>
+    <dd>Creates (or opens an existing) directory within your internal storage space.</dd>
+  <dt>{@link android.content.Context#deleteFile(String) deleteFile()}</dt>
+    <dd>Deletes a file saved on the internal storage.</dd>
+  <dt>{@link android.content.Context#fileList()}</dt>
+    <dd>Returns an array of files currently saved by your application.</dd>
+</dl>
 
-<p>
-Discussion of how many tables to create, what fields they contain, and how
-they are linked, is beyond the scope of this note, but Android does not
-impose any limitations beyond the standard SQLite concepts.  We do recommend
+
+
+
+<h2 id="#filesExternal">Using the External Storage</h2>
+
+<p>Every Android-compatible device supports a shared "external storage" that you can use to
+save files. This can be a removable storage media (such as an SD card) or an internal
+(non-removable) storage. Files saved to the external storage are world-readable and can
+be modified by the user when they enable USB mass storage to transfer files on a computer.</p>
+
+<p class="caution"><strong>Caution:</strong> External files can disappear if the user mounts the
+external storage on a computer or removes the media, and there's no security enforced upon files you
+save to the external storage. All applications can read and write files placed on the external
+storage and the user can remove them.</p>
+
+
+<h3>Checking media availability</h3>
+
+<p>Before you do any work with the external storage, you should always call {@link
+android.os.Environment#getExternalStorageState()} to check whether the media is available. The
+media might be mounted to a computer, missing, read-only, or in some other state. For example,
+here's how you can check the availability:</p>
+
+<pre>
+boolean mExternalStorageAvailable = false;
+boolean mExternalStorageWriteable = false;
+String state = Environment.getExternalStorageState();
+
+if (Environment.MEDIA_MOUNTED.equals(state)) {
+    // We can read and write the media
+    mExternalStorageAvailable = mExternalStorageWriteable = true;
+} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+    // We can only read the media
+    mExternalStorageAvailable = true;
+    mExternalStorageWriteable = false;
+} else {
+    // Something else is wrong. It may be one of many other states, but all we need
+    //  to know is we can neither read nor write
+    mExternalStorageAvailable = mExternalStorageWriteable = false;
+}
+</pre>
+
+<p>This example checks whether the external storage is available to read and write. The
+{@link android.os.Environment#getExternalStorageState()} method returns other states that you
+might want to check, such as whether the media is being shared (connected to a computer), is missing
+entirely, has been removed badly, etc. You can use these to notify the user with more information
+when your application needs to access the media.</p>
+
+
+<h3>Accessing files on external storage</h3>
+
+<p>If you're using API Level 8 or greater, use {@link
+android.content.Context#getExternalFilesDir(String) getExternalFilesDir()} to open a {@link
+java.io.File} that represents the external storage directory where you should save your
+files. This method takes a <code>type</code> parameter that specifies the type of subdirectory you
+want, such as {@link android.os.Environment#DIRECTORY_MUSIC} and
+{@link android.os.Environment#DIRECTORY_RINGTONES} (pass <code>null</code> to receive
+the root of your application's file directory). This method will create the
+appropriate directory if necessary. By specifying the type of directory, you
+ensure that the Android's media scanner will properly categorize your files in the system (for
+example, ringtones are identified as ringtones and not music). If the user uninstalls your
+application, this directory and all its contents will be deleted.</p>
+
+<p>If you're using API Level 7 or lower, use {@link
+android.os.Environment#getExternalStorageDirectory()}, to open a {@link
+java.io.File} representing the root of the external storage. You should then write your data in the
+following directory:</p>
+<pre class="no-pretty-print classic">
+/Android/data/<em>&lt;package_name&gt;</em>/files/
+</pre>
+<p>The {@code <em>&lt;package_name&gt;</em>} is your Java-style package name, such as "{@code
+com.example.android.app}". If the user's device is running API Level 8 or greater and they
+uninstall your application, this directory and all its contents will be deleted.</p>
+
+
+<div class="sidebox-wrapper" style="margin-top:3em">
+<div class="sidebox">
+
+<h4>Hiding your files from the Media Scanner</h4>
+
+<p>Include an empty file named {@code .nomedia} in your external files directory (note the dot
+prefix in the filename). This will prevent Android's media scanner from reading your media
+files and including them in apps like Gallery or Music.</p>
+
+</div>
+</div>
+
+
+<h3>Saving files that should be shared</h3>
+
+<p>If you want to save files that are not specific to your application and that should <em>not</em>
+be deleted when your application is uninstalled, save them to one of the public directories on the
+external storage. These directories lay at the root of the external storage, such as {@code
+Music/}, {@code Pictures/}, {@code Ringtones/}, and others.</p>
+
+<p>In API Level 8 or greater, use {@link
+android.os.Environment#getExternalStoragePublicDirectory(String)
+getExternalStoragePublicDirectory()}, passing it the type of public directory you want, such as
+{@link android.os.Environment#DIRECTORY_MUSIC}, {@link android.os.Environment#DIRECTORY_PICTURES},
+{@link android.os.Environment#DIRECTORY_RINGTONES}, or others. This method will create the
+appropriate directory if necessary.</p>
+
+<p>If you're using API Level 7 or lower, use {@link
+android.os.Environment#getExternalStorageDirectory()} to open a {@link java.io.File} that represents
+the root of the external storage, then save your shared files in one of the following
+directories:</p>
+
+<ul class="nolist"></li>
+  <li><code>Music/</code> - Media scanner classifies all media found here as user music.</li>
+  <li><code>Podcasts/</code> - Media scanner classifies all media found here as a podcast.</li>
+  <li><code>Ringtones/ </code> - Media scanner classifies all media found here as a ringtone.</li>
+  <li><code>Alarms/</code> - Media scanner classifies all media found here as an alarm sound.</li>
+  <li><code>Notifications/</code> - Media scanner classifies all media found here as a notification
+sound.</li>
+  <li><code>Pictures/</code> - All photos (excluding those taken with the camera).</li>
+  <li><code>Movies/</code> - All movies (excluding those taken with the camcorder).</li>
+  <li><code>Download/</code> - Miscellaneous downloads.</li>
+</ul>
+
+
+<h3 id="ExternalCache">Saving cache files</h3>
+
+<p>If you're using API Level 8 or greater, use {@link
+android.content.Context#getExternalCacheDir()} to open a {@link java.io.File} that represents the
+external storage directory where you should save cache files. If the user uninstalls your
+application, these files will be automatically deleted. However, during the life of your
+application, you should manage these cache files and remove those that aren't needed in order to
+preserve file space.</p>
+
+<p>If you're using API Level 7 or lower, use {@link
+android.os.Environment#getExternalStorageDirectory()} to open a {@link java.io.File} that represents
+the root of the external storage, then write your cache data in the following directory:</p>
+<pre class="no-pretty-print classic">
+/Android/data/<em>&lt;package_name&gt;</em>/cache/
+</pre>
+<p>The {@code <em>&lt;package_name&gt;</em>} is your Java-style package name, such as "{@code
+com.example.android.app}".</p>
+
+
+
+<h2 id="db">Using Databases</h2>
+
+<p>Android provides full support for <a href="http://www.sqlite.org/">SQLite</a> databases.
+Any databases you create will be accessible by name to any
+class in the application, but not outside the application.</p>
+
+<p>The recommended method to create a new SQLite database is to create a subclass of {@link
+android.database.sqlite.SQLiteOpenHelper} and override the {@link
+android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase) onCreate()} method, in which you
+can execute a SQLite command to create tables in the database. For example:</p>
+
+<pre>
+public class MyDbOpenHelper extends SQLiteOpenHelper {
+
+    private static final int DATABASE_VERSION = 2;
+    private static final String DICTIONARY_TABLE_NAME = "dictionary";
+    private static final String DICTIONARY_TABLE_CREATE =
+                "CREATE TABLE " + DICTIONARY_TABLE_NAME + " (" +
+                KEY_WORD + " TEXT, " +
+                KEY_DEFINITION + " TEXT);";
+
+    DictionaryOpenHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    &#64;Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(DICTIONARY_TABLE_CREATE);
+    }
+}
+</pre>
+
+<p>You can then get an instance of your {@link android.database.sqlite.SQLiteOpenHelper}
+implementation using the constructor you've defined. To write to and read from the database, call
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase()} and {@link
+android.database.sqlite.SQLiteOpenHelper#getReadableDatabase()}, respectively. These both return a
+{@link android.database.sqlite.SQLiteDatabase} object that represents the database and
+provides methods for SQLite operations.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>Android does not impose any limitations beyond the standard SQLite concepts. We do recommend
 including an autoincrement value key field that can be used as a unique ID to
 quickly find a record.  This is not required for private data, but if you
-implement a content provider, you must include such a unique ID field.  See the
-<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
-document for more information on this field and the NotePadProvider class 
-in the NotePad sample code for an example of creating and populating a 
-new database.  Any databases you create will be accessible by name to any other 
-class in the application, but not outside the application.
+implement a <a href="{@docRoot}guide/topics/providers/content-providers.html">content provider</a>,
+you must include a unique ID using the {@link android.provider.BaseColumns#_ID BaseColumns._ID}
+constant.
+</p>
+</div>
+</div>
+
+<p>You can execute SQLite queries using the {@link android.database.sqlite.SQLiteDatabase}
+{@link
+android.database.sqlite.SQLiteDatabase#query(boolean,String,String[],String,String[],String,String,String,String)
+query()} methods, which accept various query parameters, such as the table to query,
+the projection, selection, columns, grouping, and others. For complex queries, such as
+those that require column aliases, you should use
+{@link android.database.sqlite.SQLiteQueryBuilder}, which provides
+several convienent methods for building queries.</p>
+
+<p>Every SQLite query will return a {@link android.database.Cursor} that points to all the rows
+found by the query. The {@link android.database.Cursor} is always the mechanism with which
+you can navigate results from a database query and read rows and columns.</p>
+
+<p>For sample apps that demonstrate how to use SQLite databases in Android, see the
+<a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> and
+<a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable Dictionary</a>
+applications.</p>
+
+
+<h3 id="dbDebugging">Database debugging</h3>
+
+<p>The Android SDK includes a {@code sqlite3} database tool that allows you to browse
+table contents, run SQL commands, and perform other useful functions on SQLite
+databases.  See <a href="{@docRoot}guide/developing/tools/adb.html#sqlite">Examining sqlite3
+databases from a remote shell</a> to learn how to run this tool.
 </p>
 
 
-<h2 id="netw">Network</h2>
-<p>You can also use the network to store and retrieve data (when it's available).
-To do network operations, use the classes in the following packages:</p>
+
+
+
+<h2 id="netw">Using a Network Connection</h2>
+
+<!-- TODO MAKE THIS USEFUL!! -->
+
+<p>You can use the network (when it's available) to store and retrieve data on your own web-based
+services. To do network operations, use classes in the following packages:</p>
 
 <ul class="no-style">
   <li><code>{@link java.net java.net.*}</code></li>
   <li><code>{@link android.net android.net.*}</code></li>
 </ul>
-

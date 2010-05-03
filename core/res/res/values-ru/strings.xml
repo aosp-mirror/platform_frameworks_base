@@ -134,8 +134,7 @@
     <string name="power_off" msgid="4266614107412865048">"Выключение"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Телефон будет выключен."</string>
-    <!-- no translation found for recent_tasks_title (3691764623638127888) -->
-    <skip />
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Недавние"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Нет последних приложений."</string>
     <string name="global_actions" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
@@ -537,7 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Для разблокировки нажмите \"Меню\"."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Для разблокировки введите графический ключ"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Вызов службы экстренной помощи"</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Экстренный вызов"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вернуться к вызову"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Повторите попытку"</string>
@@ -548,7 +547,7 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставьте SIM-карту."</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Только вызовы экстренных служб"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренный вызов"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
@@ -756,7 +755,7 @@
     <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Мелодия по умолчанию"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Мелодия по умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"По умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Без звука"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Мелодии"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Неизвестная мелодия"</string>
@@ -858,12 +857,8 @@
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Выберите для выхода из режима громкой связи."</string>
     <string name="tethered_notification_title" msgid="8146103971290167718">"Подключение активно"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
-    <!-- no translation found for throttle_warning_notification_title (4890894267454867276) -->
-    <skip />
-    <!-- no translation found for throttle_warning_notification_message (2609734763845705708) -->
-    <skip />
-    <!-- no translation found for throttled_notification_title (6269541897729781332) -->
-    <skip />
-    <!-- no translation found for throttled_notification_message (4712369856601275146) -->
-    <skip />
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Активная передача данных"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"Превышен лимит на мобильные данные"</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
 </resources>
