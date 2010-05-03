@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
@@ -675,15 +676,28 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
 
         @Override
-        public void onConsoleMessage(String message, int lineNumber,
-                String sourceID) {
+        public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+            String msg = "CONSOLE MESSAGE: line " + consoleMessage.lineNumber() + ": "
+                    + consoleMessage.message() + "\n";
             if (mConsoleMessages == null) {
                 mConsoleMessages = new StringBuffer();
             }
-            String consoleMessage = "CONSOLE MESSAGE: line "
-                    + lineNumber +": "+ message +"\n";
-            mConsoleMessages.append(consoleMessage);
-            Log.v(LOGTAG, "LOG: "+consoleMessage);
+            mConsoleMessages.append(msg);
+            Log.v(LOGTAG, "LOG: " + msg);
+            // the rationale here is that if there's an error of either type, and the test was
+            // waiting for "notifyDone" signal to finish, then there's no point in waiting
+            // anymore because the JS execution is already terminated at this point and a
+            // "notifyDone" will never come out so it's just wasting time till timeout kicks in
+            if (msg.contains("Uncaught ReferenceError:") || msg.contains("Uncaught TypeError:")
+                    && mWaitUntilDone) {
+                Log.w(LOGTAG, "Terminating test case on uncaught ReferenceError or TypeError.");
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        notifyDone();
+                    }
+                }, 500);
+            }
+            return true;
         }
 
         @Override

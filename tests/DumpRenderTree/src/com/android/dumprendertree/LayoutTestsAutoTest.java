@@ -18,12 +18,9 @@ package com.android.dumprendertree;
 
 import com.android.dumprendertree.TestShellActivity.DumpDataType;
 import com.android.dumprendertree.forwarder.AdbUtils;
-import com.android.dumprendertree.forwarder.ForwardServer;
 import com.android.dumprendertree.forwarder.ForwardService;
 
-import android.app.Instrumentation;
 import android.content.Intent;
-import android.os.Bundle;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
@@ -158,16 +155,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     private boolean mFinished;
 
     public LayoutTestsAutoTest() {
-      super("com.android.dumprendertree", TestShellActivity.class);
-    }
-
-    // This function writes the result of the layout test to
-    // Am status so that it can be picked up from a script.
-    private void passOrFailCallback(String file, boolean result) {
-      Instrumentation inst = getInstrumentation();
-      Bundle bundle = new Bundle();
-      bundle.putBoolean(file, result);
-      inst.sendStatus(0, bundle);
+      super(TestShellActivity.class);
     }
 
     private void getTestList() {
@@ -391,7 +379,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             resumeTestList();
 
         TestShellActivity activity = getActivity();
-        activity.setDefaultDumpDataType(DumpDataType.DUMP_AS_TEXT);
+        activity.setDefaultDumpDataType(DumpDataType.EXT_REPR);
 
         // Run tests.
         int addr = -1;
