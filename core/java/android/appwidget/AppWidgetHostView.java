@@ -46,6 +46,8 @@ public class AppWidgetHostView extends FrameLayout {
     static final boolean LOGD = false;
     static final boolean CROSSFADE = false;
 
+    static final int UPDATE_FLAGS_RESET = 0x00000001;
+
     static final int VIEW_MODE_NOINIT = 0;
     static final int VIEW_MODE_CONTENT = 1;
     static final int VIEW_MODE_ERROR = 2;
@@ -150,7 +152,16 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
-        if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
+        updateAppWidget(remoteViews, 0);
+    }
+
+    void updateAppWidget(RemoteViews remoteViews, int flags) {
+        if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld + " flags=0x"
+                + Integer.toHexString(flags));
+
+        if ((flags & UPDATE_FLAGS_RESET) != 0) {
+            mViewMode = VIEW_MODE_NOINIT;
+        }
         
         boolean recycled = false;
         View content = null;
@@ -323,6 +334,9 @@ public class AppWidgetHostView extends FrameLayout {
      * Inflate and return the default layout requested by AppWidget provider.
      */
     protected View getDefaultView() {
+        if (LOGD) {
+            Log.d(TAG, "getDefaultView");
+        }
         View defaultView = null;
         Exception exception = null;
         
