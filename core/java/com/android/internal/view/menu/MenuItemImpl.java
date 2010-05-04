@@ -16,10 +16,12 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuView.ItemView;
+import java.lang.ref.WeakReference;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -28,12 +30,14 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 
-import java.lang.ref.WeakReference;
+import com.android.internal.view.menu.MenuView.ItemView;
 
 /**
  * @hide
  */
 public final class MenuItemImpl implements MenuItem {
+    private static final String TAG = "MenuItemImpl";
+    
     private final int mId;
     private final int mGroup;
     private final int mCategoryOrder;
@@ -147,8 +151,12 @@ public final class MenuItemImpl implements MenuItem {
         }
         
         if (mIntent != null) {
-            mMenu.getContext().startActivity(mIntent);
-            return true;
+            try {
+                mMenu.getContext().startActivity(mIntent);
+                return true;
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "Can't find activity to handle intent; ignoring", e);
+            }
         }
         
         return false;
