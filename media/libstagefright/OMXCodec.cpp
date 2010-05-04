@@ -520,6 +520,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 
         setAACFormat(numChannels, sampleRate);
     }
+
     if (!strncasecmp(mMIME, "video/", 6)) {
         int32_t width, height;
         bool success = meta->findInt32(kKeyWidth, &width);
@@ -567,7 +568,8 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
     }
 
     if (!strcmp(mComponentName, "OMX.TI.AMR.encode")
-        || !strcmp(mComponentName, "OMX.TI.WBAMR.encode")) {
+        || !strcmp(mComponentName, "OMX.TI.WBAMR.encode")
+        || !strcmp(mComponentName, "OMX.TI.AAC.encode")) {
         setMinBufferSize(kPortIndexOutput, 8192);  // XXX
     }
 
@@ -708,7 +710,7 @@ void OMXCodec::setVideoInputFormat(
 
     OMX_COLOR_FORMATTYPE colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
     if (!strcasecmp("OMX.TI.Video.encoder", mComponentName)) {
-        colorFormat = OMX_COLOR_FormatYUV420Planar;
+        colorFormat = OMX_COLOR_FormatYCbYCr;
     }
 
 
@@ -2127,11 +2129,24 @@ void OMXCodec::setState(State newState) {
 
 void OMXCodec::setRawAudioFormat(
         OMX_U32 portIndex, int32_t sampleRate, int32_t numChannels) {
+
+    // port definition
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = portIndex;
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
+    def.format.audio.eEncoding = OMX_AUDIO_CodingPCM;
+    CHECK_EQ(mOMX->setParameter(mNode, OMX_IndexParamPortDefinition,
+            &def, sizeof(def)), OK);
+
+    // pcm param
     OMX_AUDIO_PARAM_PCMMODETYPE pcmParams;
     InitOMXParams(&pcmParams);
     pcmParams.nPortIndex = portIndex;
 
-    status_t err = mOMX->getParameter(
+    err = mOMX->getParameter(
             mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
 
     CHECK_EQ(err, OK);
@@ -2171,6 +2186,8 @@ void OMXCodec::setAMRFormat(bool isWAMR) {
     CHECK_EQ(err, OK);
 
     def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
+
+    // XXX: Select bandmode based on bit rate
     def.eAMRBandMode =
         isWAMR ? OMX_AUDIO_AMRBandModeWB0 : OMX_AUDIO_AMRBandModeNB0;
 
@@ -2191,8 +2208,60 @@ void OMXCodec::setAMRFormat(bool isWAMR) {
 }
 
 void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate) {
+    CHECK(numChannels == 1 || numChannels == 2);
     if (mIsEncoder) {
+        //////////////// input port ////////////////////
         setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
+
+        //////////////// output port ////////////////////
+        // format
+        OMX_AUDIO_PARAM_PORTFORMATTYPE format;
+        format.nPortIndex = kPortIndexOutput;
+        format.nIndex = 0;
+        status_t err = OMX_ErrorNone;
+        while (OMX_ErrorNone == err) {
+            CHECK_EQ(mOMX->getParameter(mNode, OMX_IndexParamAudioPortFormat,
+                    &format, sizeof(format)), OK);
+            if (format.eEncoding == OMX_AUDIO_CodingAAC) {
+                break;
+            }
+            format.nIndex++;
+        }
+        CHECK_EQ(OK, err);
+        CHECK_EQ(mOMX->setParameter(mNode, OMX_IndexParamAudioPortFormat,
+                &format, sizeof(format)), OK);
+
+        // port definition
+        OMX_PARAM_PORTDEFINITIONTYPE def;
+        InitOMXParams(&def);
+        def.nPortIndex = kPortIndexOutput;
+        CHECK_EQ(mOMX->getParameter(mNode, OMX_IndexParamPortDefinition,
+                &def, sizeof(def)), OK);
+        def.format.audio.bFlagErrorConcealment = OMX_TRUE;
+        def.format.audio.eEncoding = OMX_AUDIO_CodingAAC;
+        CHECK_EQ(mOMX->setParameter(mNode, OMX_IndexParamPortDefinition,
+                &def, sizeof(def)), OK);
+
+        // profile
+        OMX_AUDIO_PARAM_AACPROFILETYPE profile;
+        InitOMXParams(&profile);
+        profile.nPortIndex = kPortIndexOutput;
+        CHECK_EQ(mOMX->getParameter(mNode, OMX_IndexParamAudioAac,
+                &profile, sizeof(profile)), OK);
+        profile.nChannels = numChannels;
+        profile.eChannelMode = (numChannels == 1?
+                OMX_AUDIO_ChannelModeMono: OMX_AUDIO_ChannelModeStereo);
+        profile.nSampleRate = sampleRate;
+        profile.nBitRate = 96000;   // XXX
+        profile.nAudioBandWidth = 0;
+        profile.nFrameLength = 0;
+        profile.nAACtools = OMX_AUDIO_AACToolAll;
+        profile.nAACERtools = OMX_AUDIO_AACERNone;
+        profile.eAACProfile = OMX_AUDIO_AACObjectLC;
+        profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4FF;
+        CHECK_EQ(mOMX->setParameter(mNode, OMX_IndexParamAudioAac,
+                &profile, sizeof(profile)), OK);
+
     } else {
         OMX_AUDIO_PARAM_AACPROFILETYPE profile;
         InitOMXParams(&profile);
@@ -2961,6 +3030,11 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             } else if (audio_def->eEncoding == OMX_AUDIO_CodingAAC) {
                 mOutputFormat->setCString(
                         kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
+                int32_t numChannels, sampleRate;
+                inputFormat->findInt32(kKeyChannelCount, &numChannels);
+                inputFormat->findInt32(kKeySampleRate, &sampleRate);
+                mOutputFormat->setInt32(kKeyChannelCount, numChannels);
+                mOutputFormat->setInt32(kKeySampleRate, sampleRate);
             } else {
                 CHECK(!"Should not be here. Unknown audio encoding.");
             }
