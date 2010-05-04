@@ -678,6 +678,26 @@ static player_type getDefaultPlayerType() {
     return PV_PLAYER;
 }
 
+// By default we use the VORBIS_PLAYER for vorbis playback (duh!),
+// but if the magic property is set we will use our new experimental
+// stagefright code instead.
+static player_type OverrideStagefrightForVorbis(player_type player) {
+    if (player != VORBIS_PLAYER) {
+        return player;
+    }
+
+#if BUILD_WITH_FULL_STAGEFRIGHT
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-vorbis", value, NULL)
+        && (!strcmp(value, "1") || !strcmp(value, "true"))) {
+        return STAGEFRIGHT_PLAYER;
+    }
+#endif
+
+    return VORBIS_PLAYER;
+}
+
+
 player_type getPlayerType(int fd, int64_t offset, int64_t length)
 {
     char buf[20];
@@ -689,7 +709,7 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
 
     // Ogg vorbis?
     if (ident == 0x5367674f) // 'OggS'
-        return VORBIS_PLAYER;
+        return OverrideStagefrightForVorbis(VORBIS_PLAYER);
 
 #ifndef NO_OPENCORE
     if (ident == 0x75b22630) {
@@ -725,6 +745,13 @@ player_type getPlayerType(const char* url)
         return TEST_PLAYER;
     }
 
+    bool useStagefrightForHTTP = false;
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-http", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        useStagefrightForHTTP = true;
+    }
+
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
     for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
@@ -732,17 +759,18 @@ player_type getPlayerType(const char* url)
         int start = lenURL - len;
         if (start > 0) {
             if (!strncmp(url + start, FILE_EXTS[i].extension, len)) {
-                return FILE_EXTS[i].playertype;
+                if (FILE_EXTS[i].playertype == VORBIS_PLAYER
+                    && !strncasecmp(url, "http://", 7)
+                    && useStagefrightForHTTP) {
+                    return STAGEFRIGHT_PLAYER;
+                }
+                return OverrideStagefrightForVorbis(FILE_EXTS[i].playertype);
             }
         }
     }
 
     if (!strncasecmp(url, "http://", 7)) {
-        char value[PROPERTY_VALUE_MAX];
-        if (!property_get("media.stagefright.enable-http", value, NULL)
-            || (strcmp(value, "1") && strcasecmp(value, "true"))) {
-            // For now, we're going to use PV for http-based playback
-            // by default until we can clear up a few more issues.
+        if (!useStagefrightForHTTP) {
             return PV_PLAYER;
         }
     }
