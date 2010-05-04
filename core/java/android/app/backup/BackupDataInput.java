@@ -20,40 +20,42 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
- * BackupDataInput is the structured interface used for passing the contents of
- * a backup data set to an application's {@link BackupAgent} class in its
- * {@link BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor)}
+ * Provides the structured interface through which a {@link BackupAgent} reads
+ * information from the backup data set, via its
+ * {@link BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
  * method.  The data is presented as a set of "entities," each
  * representing one named record as previously stored by the agent's
- * {@link BackupAgent#onBackup(android.os.ParcelFileDescriptor, BackupDataOutput, android.os.ParcelFileDescriptor)}
- * implementation.  An entity is composed of a descriptive header plus a
- * byte array that holds its raw data.
+ * {@link BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+ * onBackup()} implementation.  An entity is composed of a descriptive header plus a
+ * byte array that holds the raw data saved in the remote backup.
  * <p>
  * The agent must consume every entity in the data stream, otherwise the
  * restored state of the application will be incomplete.
- * <p>
- * <b>Example</b>
+ * <h3>Example</h3>
  * <p>
  * A typical
- * {@link BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) BackupAgent.onRestore(data, appVersionCode, newState)}
- * implementation might be structured something like this:
+ * {@link BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+ * onRestore()} implementation might be structured something like this:
  * <pre>
- * while (data.readNextHeader()) {
- *     String key = data.getKey();
- *     int dataSize = data.getDataSize();
+ * public void onRestore(BackupDataInput data, int appVersionCode,
+ *                       ParcelFileDescriptor newState) {
+ *     while (data.readNextHeader()) {
+ *         String key = data.getKey();
+ *         int dataSize = data.getDataSize();
  *
- *     if (key.equals(MY_BACKUP_KEY_ONE)) {
- *         // process this kind of record here
- *         byte[] buffer = new byte[dataSize];
- *         data.readEntityData(buffer, 0, dataSize); // reads the entire entity at once
+ *         if (key.equals(MY_BACKUP_KEY_ONE)) {
+ *             // process this kind of record here
+ *             byte[] buffer = new byte[dataSize];
+ *             data.readEntityData(buffer, 0, dataSize); // reads the entire entity at once
  *
- *         // now 'buffer' holds the raw data and can be processed however
- *         // the agent wishes
- *         processBackupKeyOne(buffer);
- *     } else if (key.equals(MY_BACKUP_KEY_TO_IGNORE) {
- *         // a key we recognize but wish to discard
- *         data.skipEntityData();
- *     } // ... etc.
+ *             // now 'buffer' holds the raw data and can be processed however
+ *             // the agent wishes
+ *             processBackupKeyOne(buffer);
+ *         } else if (key.equals(MY_BACKUP_KEY_TO_IGNORE) {
+ *             // a key we recognize but wish to discard
+ *             data.skipEntityData();
+ *         } // ... etc.
+ *    }
  * }</pre>
  */
 public class BackupDataInput {
