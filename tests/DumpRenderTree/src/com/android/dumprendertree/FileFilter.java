@@ -172,8 +172,6 @@ public class FileFilter {
         ignoreResultList.add("fast/replaced/image-map.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/text/plain-text-line-breaks.html"); // extra spacing because iFrames rendered next to each other on Apple
         ignoreResultList.add("profiler"); // profiler is not supported
-        ignoreResultList.add("svg"); // svg is not supported
-
     }
 
 }
