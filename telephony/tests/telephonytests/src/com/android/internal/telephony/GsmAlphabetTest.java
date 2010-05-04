@@ -51,7 +51,7 @@ public class GsmAlphabetTest extends TestCase {
         // '@' maps to char 0
         assertEquals(0, GsmAlphabet.charToGsm('@'));
 
-        // `a (a with grave accent) maps to last GSM charater
+        // `a (a with grave accent) maps to last GSM character
         assertEquals(0x7f, GsmAlphabet.charToGsm('\u00e0'));
 
         //

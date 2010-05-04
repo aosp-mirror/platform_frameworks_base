@@ -319,7 +319,7 @@ public class GsmAlphabet {
 
                 gsmVal = (0x7f & (pdu[offset + byteOffset] >> shift));
 
-                // if it crosses a byte boundry
+                // if it crosses a byte boundary
                 if (shift > 1) {
                     // set msb bits to 0
                     gsmVal &= 0x7f >> (shift - 1);

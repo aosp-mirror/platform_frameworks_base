@@ -403,7 +403,7 @@ public final class BearerData {
     /**
      * Calculate the message text encoding length, fragmentation, and other details.
      *
-     * @param force ignore (but still count) illegal characters if true
+     * @param force7BitEncoding ignore (but still count) illegal characters if true
      * @return septet count, or -1 on failure
      */
     public static TextEncodingDetails calcTextEncodingDetails(CharSequence msg,
@@ -693,7 +693,7 @@ public final class BearerData {
     /*
      * TODO(cleanup): CdmaSmsAddress encoding should make use of
      * CdmaSmsAddress.parse provided that DTMF encoding is unified,
-     * and the difference in 4bit vs 8bit is resolved.
+     * and the difference in 4-bit vs. 8-bit is resolved.
      */
 
     private static void encodeCdmaSmsAddress(CdmaSmsAddress addr) throws CodingException {
@@ -912,7 +912,7 @@ public final class BearerData {
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        // Start reading from the next 16-bit aligned boundry after offset.
+        // Start reading from the next 16-bit aligned boundary after offset.
         int padding = offset % 2;
         numFields -= (offset + padding) / 2;
         try {
