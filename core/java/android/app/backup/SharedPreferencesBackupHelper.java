@@ -24,18 +24,18 @@ import android.util.Log;
 import java.io.File;
 
 /**
- * A helper class which can be used in conjunction with
+ * A helper class that can be used in conjunction with
  * {@link android.app.backup.BackupAgentHelper} to manage the backup of
- * {@link android.content.SharedPreferences}. Whenever a backup is performed it
- * will back up all named shared preferences which have changed since the last
+ * {@link android.content.SharedPreferences}. Whenever a backup is performed, it
+ * will back up all named shared preferences that have changed since the last
  * backup operation.
  * <p>
- * To use this class, the application's agent class should extend
+ * To use this class, the application's backup agent class should extend
  * {@link android.app.backup.BackupAgentHelper}.  Then, in the agent's
  * {@link BackupAgent#onCreate()} method, an instance of this class should be
  * allocated and installed as a backup/restore handler within the BackupAgentHelper
- * framework.  An implementation of an agent supporting backup and restore for
- * an application that wishes to back up two groups of {@link android.content.SharedPreferences}
+ * framework.  For example, an agent supporting backup and restore for
+ * an application with two groups of {@link android.content.SharedPreferences}
  * data might look something like this:
  * <pre>
  * import android.app.backup.BackupAgentHelper;
@@ -59,12 +59,12 @@ import java.io.File;
  *     }
  * }</pre>
  * <p>
- * No further implementation is needed; the BackupAgentHelper mechanism automatically
+ * No further implementation is needed; the {@link BackupAgentHelper} mechanism automatically
  * dispatches the
  * {@link BackupAgent#onBackup(android.os.ParcelFileDescriptor, BackupDataOutput, android.os.ParcelFileDescriptor) BackupAgent.onBackup()}
  * and
  * {@link BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) BackupAgent.onRestore()}
- * callbacks to the SharedPreferencesBackupHelper as appropriate.  
+ * callbacks to the SharedPreferencesBackupHelper as appropriate.
  */
 public class SharedPreferencesBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "SharedPreferencesBackupHelper";
@@ -77,8 +77,9 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
      * Construct a helper for backing up and restoring the
      * {@link android.content.SharedPreferences} under the given names.
      *
-     * @param context
-     * @param prefGroups
+     * @param context The application {@link android.content.Context}
+     * @param prefGroups The names of each {@link android.content.SharedPreferences} file to
+     * back up
      */
     public SharedPreferencesBackupHelper(Context context, String... prefGroups) {
         super(context);
@@ -88,7 +89,7 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
     }
 
     /**
-     * Backs up the configured SharedPreferences groups
+     * Backs up the configured {@link android.content.SharedPreferences} groups.
      */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) {

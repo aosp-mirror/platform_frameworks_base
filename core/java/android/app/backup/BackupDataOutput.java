@@ -22,27 +22,28 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
- * This class is the structured conduit through which a {@link BackupAgent} commits
- * information to the current backup data set.  Data written for backup is presented
+ * Provides the structured interface through which a {@link BackupAgent} commits
+ * information to the backup data set, via its {@link
+ * BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+ * onBackup()} method.  Data written for backup is presented
  * as a set of "entities," key/value pairs in which each binary data record "value" is
  * named with a string "key."
  * <p>
  * To commit a data record to the backup transport, the agent's
- * {@link BackupAgent#onBackup(android.os.ParcelFileDescriptor, BackupDataOutput, android.os.ParcelFileDescriptor)}
- * method first writes an "entity header" that supplies the key string for the record
+ * {@link BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+ * onBackup()} method first writes an "entity header" that supplies the key string for the record
  * and the total size of the binary value for the record.  After the header has been
- * written the agent then writes the binary entity value itself.  The entity value can
+ * written, the agent then writes the binary entity value itself.  The entity value can
  * be written in multiple chunks if desired, as long as the total count of bytes written
- * matches what was supplied to {@link #writeEntityHeader(String, int)}.
+ * matches what was supplied to {@link #writeEntityHeader(String, int) writeEntityHeader()}.
  * <p>
  * Entity key strings are considered to be unique within a given application's backup
- * data set.  If a new entity is written under an existing key string, its value will
- * replace any previous value in the transport's remote data store.  A record can be
- * removed entirely from the remote data set by writing a new entity header using the
+ * data set. If a backup agent writes a new entity under an existing key string, its value will
+ * replace any previous value in the transport's remote data store.  You can remove a record
+ * entirely from the remote data set by writing a new entity header using the
  * existing record's key, but supplying a negative <code>dataSize</code> parameter.
- * When doing this the agent does not need to call {@link #writeEntityData(byte[], int)}.
- * <p>
- * <b>Example</b>
+ * When you do so, the agent does not need to call {@link #writeEntityData(byte[], int)}.
+ * <h3>Example</h3>
  * <p>
  * Here is an example illustrating a way to back up the value of a String variable
  * called <code>mStringToBackUp</code>:
@@ -73,9 +74,9 @@ public class BackupDataOutput {
     }
 
     /**
-     * Mark the beginning of one record in the backup data stream.
-     *
-     * @param key
+     * Mark the beginning of one record in the backup data stream. This must be called before
+     * {@link #writeEntityData}.
+     * @param key A string key that uniquely identifies the data record within the application
      * @param dataSize The size in bytes of this record's data.  Passing a dataSize
      *    of -1 indicates that the record under this key should be deleted.
      * @return The number of bytes written to the backup stream
