@@ -65,7 +65,6 @@ static Properties adapter_properties[] = {
     {"PairableTimeout", DBUS_TYPE_UINT32},
     {"Discovering", DBUS_TYPE_BOOLEAN},
     {"Devices", DBUS_TYPE_ARRAY},
-    {"UUIDs", DBUS_TYPE_ARRAY},
 };
 
 typedef union {
