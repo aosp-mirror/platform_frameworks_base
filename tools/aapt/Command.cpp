@@ -523,10 +523,48 @@ int doDump(Bundle* bundle)
             bool actWidgetReceivers = false;
             bool actImeService = false;
             bool actWallpaperService = false;
-            bool specCameraFeature = false;
+
+            // This next group of variables is used to implement a group of
+            // backward-compatibility heuristics necessitated by the addition of
+            // some new uses-feature constants in 2.1 and 2.2. In most cases, the
+            // heuristic is "if an app requests a permission but doesn't explicitly
+            // request the corresponding <uses-feature>, presume it's there anyway".
+            bool specCameraFeature = false; // camera-related
+            bool specCameraAutofocusFeature = false;
+            bool reqCameraAutofocusFeature = false;
+            bool reqCameraFlashFeature = false;
             bool hasCameraPermission = false;
+            bool specLocationFeature = false; // location-related
+            bool specNetworkLocFeature = false;
+            bool reqNetworkLocFeature = false;
             bool specGpsFeature = false;
+            bool reqGpsFeature = false;
+            bool hasMockLocPermission = false;
+            bool hasCoarseLocPermission = false;
             bool hasGpsPermission = false;
+            bool hasGeneralLocPermission = false;
+            bool specBluetoothFeature = false; // Bluetooth API-related
+            bool hasBluetoothPermission = false;
+            bool specMicrophoneFeature = false; // microphone-related
+            bool hasRecordAudioPermission = false;
+            bool specWiFiFeature = false;
+            bool hasWiFiPermission = false;
+            bool specTelephonyFeature = false; // telephony-related
+            bool reqTelephonySubFeature = false;
+            bool hasTelephonyPermission = false;
+            bool specTouchscreenFeature = false; // touchscreen-related
+            bool specMultitouchFeature = false;
+            bool reqDistinctMultitouchFeature = false;
+            // 2.2 also added some other features that apps can request, but that
+            // have no corresponding permission, so we cannot implement any
+            // back-compatibility heuristic for them. The below are thus unnecessary
+            // (but are retained here for documentary purposes.)
+            //bool specCompassFeature = false;
+            //bool specAccelerometerFeature = false;
+            //bool specProximityFeature = false;
+            //bool specAmbientLightFeature = false;
+            //bool specLiveWallpaperFeature = false;
+
             int targetSdk = 0;
             int smallScreen = 1;
             int normalScreen = 1;
@@ -719,10 +757,45 @@ int doDump(Bundle* bundle)
                         if (name != "" && error == "") {
                             int req = getIntegerAttribute(tree,
                                     REQUIRED_ATTR, NULL, 1);
+
                             if (name == "android.hardware.camera") {
                                 specCameraFeature = true;
+                            } else if (name == "android.hardware.camera.autofocus") {
+                                // these have no corresponding permission to check for,
+                                // but should imply the foundational camera permission
+                                reqCameraAutofocusFeature = reqCameraAutofocusFeature || req;
+                                specCameraAutofocusFeature = true;
+                            } else if (req && (name == "android.hardware.camera.flash")) {
+                                // these have no corresponding permission to check for,
+                                // but should imply the foundational camera permission
+                                reqCameraFlashFeature = true;
+                            } else if (name == "android.hardware.location") {
+                                specLocationFeature = true;
+                            } else if (name == "android.hardware.location.network") {
+                                specNetworkLocFeature = true;
+                                reqNetworkLocFeature = reqNetworkLocFeature || req;
                             } else if (name == "android.hardware.location.gps") {
                                 specGpsFeature = true;
+                                reqGpsFeature = reqGpsFeature || req;
+                            } else if (name == "android.hardware.bluetooth") {
+                                specBluetoothFeature = true;
+                            } else if (name == "android.hardware.touchscreen") {
+                                specTouchscreenFeature = true;
+                            } else if (name == "android.hardware.touchscreen.multitouch") {
+                                specMultitouchFeature = true;
+                            } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
+                                reqDistinctMultitouchFeature = reqDistinctMultitouchFeature || req;
+                            } else if (name == "android.hardware.microphone") {
+                                specMicrophoneFeature = true;
+                            } else if (name == "android.hardware.wifi") {
+                                specWiFiFeature = true;
+                            } else if (name == "android.hardware.telephony") {
+                                specTelephonyFeature = true;
+                            } else if (req && (name == "android.hardware.telephony.gsm" ||
+                                               name == "android.hardware.telephony.cdma")) {
+                                // these have no corresponding permission to check for,
+                                // but should imply the foundational telephony permission
+                                reqTelephonySubFeature = true;
                             }
                             printf("uses-feature%s:'%s'\n",
                                     req ? "" : "-not-required", name.string());
@@ -740,6 +813,34 @@ int doDump(Bundle* bundle)
                                 hasCameraPermission = true;
                             } else if (name == "android.permission.ACCESS_FINE_LOCATION") {
                                 hasGpsPermission = true;
+                            } else if (name == "android.permission.ACCESS_MOCK_LOCATION") {
+                                hasMockLocPermission = true;
+                            } else if (name == "android.permission.ACCESS_COARSE_LOCATION") {
+                                hasCoarseLocPermission = true;
+                            } else if (name == "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" ||
+                                       name == "android.permission.INSTALL_LOCATION_PROVIDER") {
+                                hasGeneralLocPermission = true;
+                            } else if (name == "android.permission.BLUETOOTH" ||
+                                       name == "android.permission.BLUETOOTH_ADMIN") {
+                                hasBluetoothPermission = true;
+                            } else if (name == "android.permission.RECORD_AUDIO") {
+                                hasRecordAudioPermission = true;
+                            } else if (name == "android.permission.ACCESS_WIFI_STATE" ||
+                                       name == "android.permission.CHANGE_WIFI_STATE" ||
+                                       name == "android.permission.CHANGE_WIFI_MULTICAST_STATE") {
+                                hasWiFiPermission = true;
+                            } else if (name == "android.permission.CALL_PHONE" ||
+                                       name == "android.permission.CALL_PRIVILEGED" ||
+                                       name == "android.permission.MODIFY_PHONE_STATE" ||
+                                       name == "android.permission.PROCESS_OUTGOING_CALLS" ||
+                                       name == "android.permission.READ_SMS" ||
+                                       name == "android.permission.RECEIVE_SMS" ||
+                                       name == "android.permission.RECEIVE_MMS" ||
+                                       name == "android.permission.RECEIVE_WAP_PUSH" ||
+                                       name == "android.permission.SEND_SMS" ||
+                                       name == "android.permission.WRITE_APN_SETTINGS" ||
+                                       name == "android.permission.WRITE_SMS") {
+                                hasTelephonyPermission = true;
                             }
                             printf("uses-permission:'%s'\n", name.string());
                         } else {
@@ -856,21 +957,88 @@ int doDump(Bundle* bundle)
                 }
             }
 
-            if (!specCameraFeature && hasCameraPermission) {
-                // For applications that have not explicitly stated their
-                // camera feature requirements, but have requested the camera
-                // permission, we are going to give them compatibility treatment
-                // of requiring the equivalent to original android devices.
-                printf("uses-feature:'android.hardware.camera'\n");
-                printf("uses-feature:'android.hardware.camera.autofocus'\n");
+            /* The following blocks handle printing "inferred" uses-features, based
+             * on whether related features or permissions are used by the app.
+             * Note that the various spec*Feature variables denote whether the
+             * relevant tag was *present* in the AndroidManfest, not that it was
+             * present and set to true.
+             */
+            // Camera-related back-compatibility logic
+            if (!specCameraFeature) {
+                if (reqCameraFlashFeature || reqCameraAutofocusFeature) {
+                    // if app requested a sub-feature (autofocus or flash) and didn't
+                    // request the base camera feature, we infer that it meant to
+                    printf("uses-feature:'android.hardware.camera'\n");
+                } else if (hasCameraPermission) {
+                    // if app wants to use camera but didn't request the feature, we infer 
+                    // that it meant to, and further that it wants autofocus
+                    // (which was the 1.0 - 1.5 behavior)
+                    printf("uses-feature:'android.hardware.camera'\n");
+                    if (!specCameraAutofocusFeature) {
+                        printf("uses-feature:'android.hardware.camera.autofocus'\n");
+                    }
+                }
             }
 
+            // Location-related back-compatibility logic
+            if (!specLocationFeature &&
+                (hasMockLocPermission || hasCoarseLocPermission || hasGpsPermission ||
+                 hasGeneralLocPermission || reqNetworkLocFeature || reqGpsFeature)) {
+                // if app either takes a location-related permission or requests one of the
+                // sub-features, we infer that it also meant to request the base location feature
+                printf("uses-feature:'android.hardware.location'\n");
+            }
             if (!specGpsFeature && hasGpsPermission) {
-                // For applications that have not explicitly stated their
-                // GPS feature requirements, but have requested the "fine" (GPS)
-                // permission, we are going to give them compatibility treatment
-                // of requiring the equivalent to original android devices.
+                // if app takes GPS (FINE location) perm but does not request the GPS
+                // feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.location.gps'\n");
+            }
+            if (!specNetworkLocFeature && hasCoarseLocPermission) {
+                // if app takes Network location (COARSE location) perm but does not request the
+                // network location feature, we infer that it meant to
+                printf("uses-feature:'android.hardware.location.network'\n");
+            }
+
+            // Bluetooth-related compatibility logic
+            if (!specBluetoothFeature && hasBluetoothPermission) {
+                // if app takes a Bluetooth permission but does not request the Bluetooth
+                // feature, we infer that it meant to
+                printf("uses-feature:'android.hardware.bluetooth'\n");
+            }
+
+            // Microphone-related compatibility logic
+            if (!specMicrophoneFeature && hasRecordAudioPermission) {
+                // if app takes the record-audio permission but does not request the microphone
+                // feature, we infer that it meant to
+                printf("uses-feature:'android.hardware.microphone'\n");
+            }
+
+            // WiFi-related compatibility logic
+            if (!specWiFiFeature && hasWiFiPermission) {
+                // if app takes one of the WiFi permissions but does not request the WiFi
+                // feature, we infer that it meant to
+                printf("uses-feature:'android.hardware.wifi'\n");
+            }
+
+            // Telephony-related compatibility logic
+            if (!specTelephonyFeature && (hasTelephonyPermission || reqTelephonySubFeature)) {
+                // if app takes one of the telephony permissions or requests a sub-feature but
+                // does not request the base telephony feature, we infer that it meant to
+                printf("uses-feature:'android.hardware.telephony'\n");
+            }
+
+            // Touchscreen-related back-compatibility logic
+            if (!specTouchscreenFeature) { // not a typo!
+                // all apps are presumed to require a touchscreen, unless they explicitly say
+                // <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+                // Note that specTouchscreenFeature is true if the tag is present, regardless
+                // of whether its value is true or false, so this is safe
+                printf("uses-feature:'android.hardware.touchscreen'\n");
+            }
+            if (!specMultitouchFeature && reqDistinctMultitouchFeature) {
+                // if app takes one of the telephony permissions or requests a sub-feature but
+                // does not request the base telephony feature, we infer that it meant to
+                printf("uses-feature:'android.hardware.touchscreen.multitouch'\n");
             }
 
             if (hasMainActivity) {
