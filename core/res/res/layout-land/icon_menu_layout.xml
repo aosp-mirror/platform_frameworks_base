@@ -18,7 +18,7 @@
     android:id="@+android:id/icon_menu" 
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:rowHeight="65dip"
+    android:rowHeight="66dip"
     android:maxItems="6"
     android:maxRows="2"
     android:maxItemsPerRow="6" />
