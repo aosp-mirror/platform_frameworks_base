@@ -39,6 +39,7 @@ LOCAL_SRC_FILES +=                \
         StagefrightMetadataRetriever.cpp \
         TimeSource.cpp            \
         TimedEventQueue.cpp       \
+        VorbisExtractor.cpp       \
         WAVExtractor.cpp          \
         string.cpp
 
