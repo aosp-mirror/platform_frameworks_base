@@ -554,7 +554,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (!result) {
             if (deviceObjectPath != null) {
                 String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
-                if (address == null) return;
                 BluetoothDevice device = mAdapter.getRemoteDevice(address);
                 int state = getSinkState(device);
                 handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTED);
