@@ -57,10 +57,24 @@ private:
 
     struct SampleInfo {
         size_t size;
-        off_t offset;
         int64_t timestamp;
     };
-    List<SampleInfo> mSampleInfos;
+    List<SampleInfo>    mSampleInfos;
+    List<MediaBuffer *> mChunkSamples;
+    List<off_t>         mChunkOffsets;
+
+    struct StscTableEntry {
+
+        StscTableEntry(uint32_t chunk, uint32_t samples, uint32_t id)
+            : firstChunk(chunk),
+              samplesPerChunk(samples),
+              sampleDescriptionId(id) {}
+
+        uint32_t firstChunk;
+        uint32_t samplesPerChunk;
+        uint32_t sampleDescriptionId;
+    };
+    List<StscTableEntry> mStscTableEntries;
 
     List<int32_t> mStssTableEntries;
 
@@ -75,6 +89,7 @@ private:
 
     status_t makeAVCCodecSpecificData(
             const uint8_t *data, size_t size);
+    void writeOneChunk(bool isAvc);
 
     Track(const Track &);
     Track &operator=(const Track &);
@@ -85,14 +100,16 @@ private:
 MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
       mOffset(0),
-      mMdatOffset(0) {
+      mMdatOffset(0),
+      mInterleaveDurationUs(500000) {
     CHECK(mFile != NULL);
 }
 
 MPEG4Writer::MPEG4Writer(int fd)
     : mFile(fdopen(fd, "wb")),
       mOffset(0),
-      mMdatOffset(0) {
+      mMdatOffset(0),
+      mInterleaveDurationUs(500000) {
     CHECK(mFile != NULL);
 }
 
@@ -213,9 +230,20 @@ void MPEG4Writer::stop() {
     mFile = NULL;
 }
 
-off_t MPEG4Writer::addSample(MediaBuffer *buffer) {
-    Mutex::Autolock autoLock(mLock);
+status_t MPEG4Writer::setInterleaveDuration(uint32_t durationUs) {
+    mInterleaveDurationUs = durationUs;
+    return OK;
+}
 
+void MPEG4Writer::lock() {
+    mLock.lock();
+}
+
+void MPEG4Writer::unlock() {
+    mLock.unlock();
+}
+
+off_t MPEG4Writer::addSample_l(MediaBuffer *buffer) {
     off_t old_offset = mOffset;
 
     fwrite((const uint8_t *)buffer->data() + buffer->range_offset(),
@@ -240,9 +268,7 @@ static void StripStartcode(MediaBuffer *buffer) {
     }
 }
 
-off_t MPEG4Writer::addLengthPrefixedSample(MediaBuffer *buffer) {
-    Mutex::Autolock autoLock(mLock);
-
+off_t MPEG4Writer::addLengthPrefixedSample_l(MediaBuffer *buffer) {
     StripStartcode(buffer);
 
     off_t old_offset = mOffset;
@@ -532,13 +558,17 @@ void MPEG4Writer::Track::threadEntry() {
                     !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC);
     bool is_avc = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
     int32_t count = 0;
+    const int64_t interleaveDurationUs = mOwner->interleaveDuration();
+    int64_t chunkTimestampUs = 0;
+    int32_t nChunks = 0;
+    int32_t nZeroLengthFrames = 0;
 
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
         if (buffer->range_length() == 0) {
             buffer->release();
             buffer = NULL;
-
+            ++nZeroLengthFrames;
             continue;
         }
 
@@ -661,20 +691,14 @@ void MPEG4Writer::Track::threadEntry() {
             continue;
         }
 
-        off_t offset = is_avc ? mOwner->addLengthPrefixedSample(buffer)
-                              : mOwner->addSample(buffer);
-
         SampleInfo info;
         info.size = is_avc
 #if USE_NALLEN_FOUR
-            ? buffer->range_length() + 4
+                ? buffer->range_length() + 4
 #else
-            ? buffer->range_length() + 2
+                ? buffer->range_length() + 2
 #endif
-            : buffer->range_length();
-
-        info.offset = offset;
-
+                : buffer->range_length();
 
         bool is_audio = !strncasecmp(mime, "audio/", 6);
 
@@ -687,12 +711,42 @@ void MPEG4Writer::Track::threadEntry() {
 
         // Our timestamp is in ms.
         info.timestamp = (timestampUs + 500) / 1000;
-
         mSampleInfos.push_back(info);
 
+////////////////////////////////////////////////////////////////////////////////
+        // Make a deep copy of the MediaBuffer less Metadata
+        MediaBuffer *copy = new MediaBuffer(buffer->range_length());
+        memcpy(copy->data(), (uint8_t *)buffer->data() + buffer->range_offset(),
+                buffer->range_length());
+        copy->set_range(0, buffer->range_length());
+
+        mChunkSamples.push_back(copy);
+        if (interleaveDurationUs == 0) {
+            StscTableEntry stscEntry(++nChunks, 1, 1);
+            mStscTableEntries.push_back(stscEntry);
+            writeOneChunk(is_avc);
+        } else {
+            if (chunkTimestampUs == 0) {
+                chunkTimestampUs = timestampUs;
+            } else {
+                if (timestampUs - chunkTimestampUs > interleaveDurationUs) {
+                    ++nChunks;
+                    if (nChunks == 1 ||  // First chunk
+                        (--(mStscTableEntries.end()))->samplesPerChunk !=
+                         mChunkSamples.size()) {
+                        StscTableEntry stscEntry(nChunks,
+                                mChunkSamples.size(), 1);
+                        mStscTableEntries.push_back(stscEntry);
+                    }
+                    writeOneChunk(is_avc);
+                    chunkTimestampUs = timestampUs;
+                }
+            }
+        }
+
         int32_t isSync = false;
-        buffer->meta_data()->findInt32(kKeyIsSyncFrame, &isSync);
-        if (isSync) {
+        if (buffer->meta_data()->findInt32(kKeyIsSyncFrame, &isSync) &&
+            isSync != 0) {
             mStssTableEntries.push_back(mSampleInfos.size());
         }
         // Our timestamp is in ms.
@@ -700,7 +754,37 @@ void MPEG4Writer::Track::threadEntry() {
         buffer = NULL;
     }
 
+    // Last chunk
+    if (!mChunkSamples.empty()) {
+        ++nChunks;
+        StscTableEntry stscEntry(nChunks, mChunkSamples.size(), 1);
+        mStscTableEntries.push_back(stscEntry);
+        writeOneChunk(is_avc);
+    }
+
     mReachedEOS = true;
+    LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames",
+            count, nZeroLengthFrames, mSampleInfos.size());
+}
+
+void MPEG4Writer::Track::writeOneChunk(bool isAvc) {
+    mOwner->lock();
+    for (List<MediaBuffer *>::iterator it = mChunkSamples.begin();
+         it != mChunkSamples.end(); ++it) {
+        off_t offset = isAvc? mOwner->addLengthPrefixedSample_l(*it)
+                            : mOwner->addSample_l(*it);
+        if (it == mChunkSamples.begin()) {
+            mChunkOffsets.push_back(offset);
+        }
+    }
+    mOwner->unlock();
+    while (!mChunkSamples.empty()) {
+        List<MediaBuffer *>::iterator it = mChunkSamples.begin();
+        (*it)->release();
+        (*it) = NULL;
+        mChunkSamples.erase(it);
+    }
+    mChunkSamples.clear();
 }
 
 int64_t MPEG4Writer::Track::getDurationUs() const {
@@ -1018,22 +1102,21 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
           mOwner->beginBox("stsc");
             mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mSampleInfos.size());
-            int32_t n = 1;
-            for (List<SampleInfo>::iterator it = mSampleInfos.begin();
-                 it != mSampleInfos.end(); ++it, ++n) {
-                mOwner->writeInt32(n);
-                mOwner->writeInt32(1);
-                mOwner->writeInt32(1);
+            mOwner->writeInt32(mStscTableEntries.size());
+            for (List<StscTableEntry>::iterator it = mStscTableEntries.begin();
+                 it != mStscTableEntries.end(); ++it) {
+                mOwner->writeInt32(it->firstChunk);
+                mOwner->writeInt32(it->samplesPerChunk);
+                mOwner->writeInt32(it->sampleDescriptionId);
             }
           mOwner->endBox();  // stsc
 
           mOwner->beginBox("co64");
             mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mSampleInfos.size());
-            for (List<SampleInfo>::iterator it = mSampleInfos.begin();
-                 it != mSampleInfos.end(); ++it) {
-                mOwner->writeInt64((*it).offset);
+            mOwner->writeInt32(mChunkOffsets.size());
+            for (List<off_t>::iterator it = mChunkOffsets.begin();
+                 it != mChunkOffsets.end(); ++it) {
+                mOwner->writeInt64((*it));
             }
           mOwner->endBox();  // co64
 
