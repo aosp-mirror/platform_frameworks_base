@@ -17,8 +17,6 @@ LOCAL_SHARED_LIBRARIES :=       \
         libsurfaceflinger_client\
         libcamera_client
 
-LOCAL_PRELINK_MODULE:= false
-
 LOCAL_MODULE:= libstagefright_color_conversion
 
 include $(BUILD_SHARED_LIBRARY)
