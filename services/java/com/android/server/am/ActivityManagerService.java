@@ -12269,6 +12269,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
+    private final void sendPackageBroadcastLocked(int cmd, String[] packages) {
+        for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+            ProcessRecord r = mLruProcesses.get(i);
+            if (r.thread != null) {
+                try {
+                    r.thread.dispatchPackageBroadcast(cmd, packages);
+                } catch (RemoteException ex) {
+                }
+            }
+        }
+    }
+    
     private final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
@@ -12315,6 +12327,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             for (String pkg : list) {
                                 forceStopPackageLocked(pkg, -1, false, true, true);
                             }
+                            sendPackageBroadcastLocked(
+                                    IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list);
                         }
                     } else {
                         Uri data = intent.getData();
@@ -12323,6 +12337,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                                 forceStopPackageLocked(ssp,
                                         intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true);
+                            }
+                            if (intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                                sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
+                                        new String[] {ssp});
                             }
                         }
                     }
