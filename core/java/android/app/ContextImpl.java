@@ -2277,33 +2277,7 @@ class ContextImpl extends Context {
             return null;
         }
 
-        private void establishPackageRemovedReceiver() {
-            // mContext.registerReceiverInternal() winds up acquiring the
-            // main ActivityManagerService.this lock.  If we hold our usual
-            // sSync global lock at the same time, we impose a required ordering
-            // on those two locks, which is not good for deadlock prevention.
-            // Use a dedicated lock around initialization of
-            // sPackageRemovedReceiver to avoid this.
-            synchronized (sPackageRemovedSync) {
-                if (sPackageRemovedReceiver == null) {
-                    sPackageRemovedReceiver = new PackageRemovedReceiver();
-                    IntentFilter filter = new IntentFilter(
-                            Intent.ACTION_PACKAGE_REMOVED);
-                    filter.addDataScheme("package");
-                    mContext.registerReceiverInternal(sPackageRemovedReceiver,
-                            filter, null, null, null);
-                    // Register for events related to sdcard installation.
-                    IntentFilter sdFilter = new IntentFilter();
-                    sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-                    mContext.registerReceiverInternal(sPackageRemovedReceiver,
-                            sdFilter, null, null, null);
-                }
-            }
-        }
-        
         private void putCachedIcon(ResourceName name, Drawable dr) {
-            establishPackageRemovedReceiver();
-
             synchronized (sSync) {
                 sIconCache.put(name, new WeakReference<Drawable>(dr));
                 if (DEBUG_ICONS) Log.v(TAG, "Added cached drawable for "
@@ -2311,29 +2285,17 @@ class ContextImpl extends Context {
             }
         }
 
-        private static final class PackageRemovedReceiver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String pkgList[] = null;
-                String action = intent.getAction();
-                boolean immediateGc = false;
-                if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                    immediateGc = true;
-                } else {
-                    Uri data = intent.getData();
-                    if (data != null) {
-                        String ssp = data.getSchemeSpecificPart();
-                        if (ssp != null) {
-                            pkgList = new String[] { ssp };
-                        }
-                    }
-                }
-                if (pkgList != null && (pkgList.length > 0)) {
-                    boolean needCleanup = false;
-                    boolean hasPkgInfo = false;
-                    for (String ssp : pkgList) {
-                        synchronized (sSync) {
+        static final void handlePackageBroadcast(int cmd, String[] pkgList,
+                boolean hasPkgInfo) {
+            boolean immediateGc = false;
+            if (cmd == IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE) {
+                immediateGc = true;
+            }
+            if (pkgList != null && (pkgList.length > 0)) {
+                boolean needCleanup = false;
+                for (String ssp : pkgList) {
+                    synchronized (sSync) {
+                        if (sIconCache.size() > 0) {
                             Iterator<ResourceName> it = sIconCache.keySet().iterator();
                             while (it.hasNext()) {
                                 ResourceName nm = it.next();
@@ -2343,7 +2305,9 @@ class ContextImpl extends Context {
                                     needCleanup = true;
                                 }
                             }
-                            it = sStringCache.keySet().iterator();
+                        }
+                        if (sStringCache.size() > 0) {
+                            Iterator<ResourceName> it = sStringCache.keySet().iterator();
                             while (it.hasNext()) {
                                 ResourceName nm = it.next();
                                 if (nm.packageName.equals(ssp)) {
@@ -2353,22 +2317,19 @@ class ContextImpl extends Context {
                                 }
                             }
                         }
-                        if (!hasPkgInfo) {
-                            hasPkgInfo = ActivityThread.currentActivityThread().hasPackageInfo(ssp);
-                        }
                     }
-                    if (needCleanup || hasPkgInfo) {
-                        if (immediateGc) {
-                            // Schedule an immediate gc.
-                            Runtime.getRuntime().gc();
-                        } else {
-                            ActivityThread.currentActivityThread().scheduleGcIdler();
-                        }
+                }
+                if (needCleanup || hasPkgInfo) {
+                    if (immediateGc) {
+                        // Schedule an immediate gc.
+                        Runtime.getRuntime().gc();
+                    } else {
+                        ActivityThread.currentActivityThread().scheduleGcIdler();
                     }
                 }
             }
         }
-
+        
         private static final class ResourceName {
             final String packageName;
             final int iconId;
@@ -2433,8 +2394,6 @@ class ContextImpl extends Context {
         }
 
         private void putCachedString(ResourceName name, CharSequence cs) {
-            establishPackageRemovedReceiver();
-
             synchronized (sSync) {
                 sStringCache.put(name, new WeakReference<CharSequence>(cs));
             }
@@ -2698,8 +2657,6 @@ class ContextImpl extends Context {
         private final IPackageManager mPM;
 
         private static final Object sSync = new Object();
-        private static final Object sPackageRemovedSync = new Object();
-        private static BroadcastReceiver sPackageRemovedReceiver;
         private static HashMap<ResourceName, WeakReference<Drawable> > sIconCache
                 = new HashMap<ResourceName, WeakReference<Drawable> >();
         private static HashMap<ResourceName, WeakReference<CharSequence> > sStringCache
