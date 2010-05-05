@@ -130,8 +130,9 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mHeight(0),
       mFirstFrameTimeUs(0),
       mLastFrameTimestampUs(0),
-      mNumFrames(0),
-      mNumFramesReleased(0),
+      mNumFramesReceived(0),
+      mNumFramesEncoded(0),
+      mNumFramesDropped(0),
       mStarted(false) {
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
@@ -178,9 +179,11 @@ status_t CameraSource::stop() {
     mCamera->stopRecording();
 
     releaseQueuedFrames();
-    LOGI("Frames received/released: %d/%d, timestamp (us) last/first: %lld/%lld",
-            mNumFrames, mNumFramesReleased,
+    LOGI("Frames received/encoded/dropped: %d/%d/%d, timestamp (us) last/first: %lld/%lld",
+            mNumFramesReceived, mNumFramesEncoded, mNumFramesDropped,
             mLastFrameTimestampUs, mFirstFrameTimeUs);
+
+    CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
     return OK;
 }
 
@@ -190,7 +193,7 @@ void CameraSource::releaseQueuedFrames() {
         it = mFrames.begin();
         mCamera->releaseRecordingFrame(*it);
         mFrames.erase(it);
-        ++mNumFramesReleased;
+        ++mNumFramesDropped;
     }
 }
 
@@ -231,7 +234,7 @@ status_t CameraSource::read(
 
         frameTime = *mFrameTimes.begin();
         mFrameTimes.erase(mFrameTimes.begin());
-        ++mNumFramesReleased;
+        ++mNumFramesEncoded;
     }
 
     *buffer = new MediaBuffer(frame->size());
@@ -252,15 +255,15 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
         mCamera->releaseRecordingFrame(data);
-        ++mNumFrames;
-        ++mNumFramesReleased;
+        ++mNumFramesReceived;
+        ++mNumFramesDropped;
         return;
     }
 
-    if (mNumFrames == 0) {
+    if (mNumFramesReceived == 0) {
         mFirstFrameTimeUs = timestampUs;
     }
-    ++mNumFrames;
+    ++mNumFramesReceived;
 
     mFrames.push_back(data);
     mFrameTimes.push_back(timestampUs - mFirstFrameTimeUs);

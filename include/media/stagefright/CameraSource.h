@@ -62,8 +62,9 @@ private:
     int mWidth, mHeight;
     int64_t mFirstFrameTimeUs;
     int64_t mLastFrameTimestampUs;
-    int32_t mNumFrames;
-    int32_t mNumFramesReleased;
+    int32_t mNumFramesReceived;
+    int32_t mNumFramesEncoded;
+    int32_t mNumFramesDropped;
     bool mStarted;
 
     CameraSource(const sp<Camera> &camera);
