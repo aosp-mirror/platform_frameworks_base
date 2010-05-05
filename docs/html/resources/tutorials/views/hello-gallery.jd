@@ -101,9 +101,9 @@ public class ImageAdapter extends BaseAdapter {
 
     public ImageAdapter(Context c) {
         mContext = c;
-        TypedArray a = obtainStyledAttributes(android.R.styleable.Theme);
+        TypedArray a = obtainStyledAttributes(R.styleable.HelloGallery);
         mGalleryItemBackground = a.getResourceId(
-                android.R.styleable.Theme_galleryItemBackground, 0);
+                R.styleable.HelloGallery_android_galleryItemBackground, 0);
         a.recycle();
     }
 
