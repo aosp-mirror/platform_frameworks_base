@@ -393,6 +393,15 @@ public abstract class ApplicationThreadNative extends Binder
             mi.writeToParcel(reply, 0);
             return true;
         }
+
+        case DISPATCH_PACKAGE_BROADCAST_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            int cmd = data.readInt();
+            String[] packages = data.readStringArray();
+            dispatchPackageBroadcast(cmd, packages);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -805,6 +814,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         outInfo.readFromParcel(reply);
         data.recycle();
         reply.recycle();
+    }
+    
+    public void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeInt(cmd);
+        data.writeStringArray(packages);
+        mRemote.transact(DISPATCH_PACKAGE_BROADCAST_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+        
     }
 }
 
