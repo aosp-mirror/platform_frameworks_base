@@ -68,15 +68,26 @@ private:
     output_format mOutputFormat;
     audio_encoder mAudioEncoder;
     video_encoder mVideoEncoder;
-    int mVideoWidth, mVideoHeight;
-    int mFrameRate;
+    int32_t mVideoWidth, mVideoHeight;
+    int32_t mFrameRate;
+    int32_t mVideoBitRate;
+    int32_t mAudioBitRate;
+    int32_t mAudioChannels;
+    int32_t mSampleRate;
+
     String8 mParams;
     int mOutputFd;
     int32_t mFlags;
 
     status_t startMPEG4Recording();
     status_t startAMRRecording();
-    sp<MediaSource> createAMRAudioSource();
+    sp<MediaSource> createAudioSource();
+    status_t setParameter(const String8 &key, const String8 &value);
+    status_t setParamVideoEncodingBitRate(int32_t bitRate);
+    status_t setParamAudioEncodingBitRate(int32_t bitRate);
+    status_t setParamAudioNumberOfChannels(int32_t channles);
+    status_t setParamAudioSamplingRate(int32_t sampleRate);
+    status_t setMaxDurationOrFileSize(int32_t limit, bool limit_is_duration);
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);
