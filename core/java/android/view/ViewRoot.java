@@ -2580,27 +2580,33 @@ public final class ViewRoot extends Handler implements ViewParent,
     public void playSoundEffect(int effectId) {
         checkThread();
 
-        final AudioManager audioManager = getAudioManager();
+        try {
+            final AudioManager audioManager = getAudioManager();
 
-        switch (effectId) {
-            case SoundEffectConstants.CLICK:
-                audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK);
-                return;
-            case SoundEffectConstants.NAVIGATION_DOWN:
-                audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_DOWN);
-                return;
-            case SoundEffectConstants.NAVIGATION_LEFT:
-                audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_LEFT);
-                return;
-            case SoundEffectConstants.NAVIGATION_RIGHT:
-                audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_RIGHT);
-                return;
-            case SoundEffectConstants.NAVIGATION_UP:
-                audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_UP);
-                return;
-            default:
-                throw new IllegalArgumentException("unknown effect id " + effectId +
-                        " not defined in " + SoundEffectConstants.class.getCanonicalName());
+            switch (effectId) {
+                case SoundEffectConstants.CLICK:
+                    audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK);
+                    return;
+                case SoundEffectConstants.NAVIGATION_DOWN:
+                    audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_DOWN);
+                    return;
+                case SoundEffectConstants.NAVIGATION_LEFT:
+                    audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_LEFT);
+                    return;
+                case SoundEffectConstants.NAVIGATION_RIGHT:
+                    audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_RIGHT);
+                    return;
+                case SoundEffectConstants.NAVIGATION_UP:
+                    audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_UP);
+                    return;
+                default:
+                    throw new IllegalArgumentException("unknown effect id " + effectId +
+                            " not defined in " + SoundEffectConstants.class.getCanonicalName());
+            }
+        } catch (IllegalStateException e) {
+            // Exception thrown by getAudioManager() when mView is null
+            Log.e(TAG, "FATAL EXCEPTION when attempting to play sound effect: " + e);
+            e.printStackTrace();
         }
     }
 
