@@ -328,6 +328,7 @@ public class DatePicker extends FrameLayout {
         mYear = ss.getYear();
         mMonth = ss.getMonth();
         mDay = ss.getDay();
+        updateSpinners();
     }
 
     /**
