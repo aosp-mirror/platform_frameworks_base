@@ -21,9 +21,12 @@ import com.android.internal.content.PackageMonitor;
 import android.app.ISearchManager;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Process;
 import android.util.Log;
 
 import java.util.List;
@@ -51,15 +54,35 @@ public class SearchManagerService extends ISearchManager.Stub {
      */
     public SearchManagerService(Context context)  {
         mContext = context;
+        mContext.registerReceiver(new BootCompletedReceiver(),
+                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
     private synchronized Searchables getSearchables() {
         if (mSearchables == null) {
+            Log.i(TAG, "Building list of searchable activities");
+            new MyPackageMonitor().register(mContext, true);
             mSearchables = new Searchables(mContext);
             mSearchables.buildSearchableList();
-            new MyPackageMonitor().register(mContext, true);
         }
         return mSearchables;
+    }
+
+    /**
+     * Creates the initial searchables list after boot.
+     */
+    private final class BootCompletedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            new Thread() {
+                @Override
+                public void run() {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    mContext.unregisterReceiver(BootCompletedReceiver.this);
+                    getSearchables();
+                }
+            }.start();
+        }
     }
 
     /**
