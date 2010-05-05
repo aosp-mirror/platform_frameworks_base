@@ -213,25 +213,31 @@ status_t StagefrightRecorder::setParamVideoEncodingBitRate(int32_t bitRate) {
     return OK;
 }
 
-status_t StagefrightRecorder::setMaxDurationOrFileSize(int32_t limit, bool limit_is_duration) {
-    LOGV("setMaxDurationOrFileSize: limit (%d) for %s",
+status_t StagefrightRecorder::setParamMaxDurationOrFileSize(int32_t limit,
+        bool limit_is_duration) {
+    LOGV("setParamMaxDurationOrFileSize: limit (%d) for %s",
             limit, limit_is_duration?"duration":"size");
     return OK;
 }
 
+status_t StagefrightRecorder::setParamInterleaveDuration(int32_t durationUs) {
+    LOGV("setParamInterleaveDuration: %d", durationUs);
+    mInterleaveDurationUs = durationUs;
+    return OK;
+}
 status_t StagefrightRecorder::setParameter(
         const String8 &key, const String8 &value) {
     LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
     if (key == "max-duration") {
         int32_t max_duration_ms;
         if (safe_strtoi64(value.string(), &max_duration_ms)) {
-            return setMaxDurationOrFileSize(
+            return setParamMaxDurationOrFileSize(
                     max_duration_ms, true /* limit_is_duration */);
         }
     } else if (key == "max-filesize") {
         int32_t max_filesize_bytes;
         if (safe_strtoi64(value.string(), &max_filesize_bytes)) {
-            return setMaxDurationOrFileSize(
+            return setParamMaxDurationOrFileSize(
                     max_filesize_bytes, false /* limit is filesize */);
         }
     } else if (key == "audio-param-sampling-rate") {
@@ -253,6 +259,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t video_bitrate;
         if (safe_strtoi64(value.string(), &video_bitrate)) {
             return setParamVideoEncodingBitRate(video_bitrate);
+        }
+    } else if (key == "param-interleave-duration-us") {
+        int32_t durationUs;
+        if (safe_strtoi64(value.string(), &durationUs)) {
+            return setParamInterleaveDuration(durationUs);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -480,6 +491,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         mWriter->addSource(encoder);
     }
 
+    ((MPEG4Writer *)mWriter.get())->setInterleaveDuration(mInterleaveDurationUs);
     mWriter->start();
     return OK;
 }
