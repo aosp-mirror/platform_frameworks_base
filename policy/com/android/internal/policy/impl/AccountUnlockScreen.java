@@ -174,28 +174,33 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         }
     }
 
-    private void onCheckPasswordResult(boolean success) {
-        if (success) {
-            // clear out forgotten password
-            mLockPatternUtils.setPermanentlyLocked(false);
-            mLockPatternUtils.setLockPatternEnabled(false);
-            mLockPatternUtils.saveLockPattern(null);
+    private void postOnCheckPasswordResult(final boolean success) {
+        // ensure this runs on UI thread
+        mLogin.post(new Runnable() {
+            public void run() {
+                if (success) {
+                    // clear out forgotten password
+                    mLockPatternUtils.setPermanentlyLocked(false);
+                    mLockPatternUtils.setLockPatternEnabled(false);
+                    mLockPatternUtils.saveLockPattern(null);
 
-            // launch the 'choose lock pattern' activity so
-            // the user can pick a new one if they want to
-            Intent intent = new Intent();
-            intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
-            mCallback.reportSuccessfulUnlockAttempt();
+                    // launch the 'choose lock pattern' activity so
+                    // the user can pick a new one if they want to
+                    Intent intent = new Intent();
+                    intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                    mCallback.reportSuccessfulUnlockAttempt();
 
-            // close the keyguard
-            mCallback.keyguardDone(true);
-        } else {
-            mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
-            mPassword.setText("");
-            mCallback.reportFailedUnlockAttempt();
-        }
+                    // close the keyguard
+                    mCallback.keyguardDone(true);
+                } else {
+                    mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
+                    mPassword.setText("");
+                    mCallback.reportFailedUnlockAttempt();
+                }
+            }
+        });
     }
 
     @Override
@@ -270,7 +275,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         final String password = mPassword.getText().toString();
         Account account = findIntendedAccount(login);
         if (account == null) {
-            onCheckPasswordResult(false);
+            postOnCheckPasswordResult(false);
             return;
         }
         getProgressDialog().show();
@@ -283,18 +288,13 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
                     mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
                     final Bundle result = future.getResult();
                     final boolean verified = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
-                    // ensure on UI thread
-                    mLogin.post(new Runnable() {
-                        public void run() {
-                            onCheckPasswordResult(verified);
-                        }
-                    });
+                    postOnCheckPasswordResult(verified);
                 } catch (OperationCanceledException e) {
-                    onCheckPasswordResult(false);
+                    postOnCheckPasswordResult(false);
                 } catch (IOException e) {
-                    onCheckPasswordResult(false);
+                    postOnCheckPasswordResult(false);
                 } catch (AuthenticatorException e) {
-                    onCheckPasswordResult(false);
+                    postOnCheckPasswordResult(false);
                 } finally {
                     mLogin.post(new Runnable() {
                         public void run() {
