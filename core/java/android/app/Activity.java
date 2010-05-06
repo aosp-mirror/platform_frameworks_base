@@ -665,19 +665,19 @@ public class Activity extends ContextThemeWrapper
             Runnable, BackStackState {
         ArrayList<Fragment> mAdded;
         ArrayList<Fragment> mRemoved;
+        int mTransition;
+        int mTransitionStyle;
         boolean mAddToBackStack;
+        String mName;
         boolean mCommitted;
         
-        public FragmentTransaction add(Fragment fragment, int containerViewId) {
-            return add(fragment, null, containerViewId);
+        public FragmentTransaction add(Fragment fragment) {
+            return add(fragment, 0);
         }
 
-        public FragmentTransaction add(Fragment fragment, String name, int containerViewId) {
+        public FragmentTransaction add(Fragment fragment, int containerViewId) {
             if (fragment.mActivity != null) {
                 throw new IllegalStateException("Fragment already added: " + fragment);
-            }
-            if (name != null) {
-                fragment.mName = name;
             }
             if (mRemoved != null) {
                 mRemoved.remove(fragment);
@@ -690,6 +690,21 @@ public class Activity extends ContextThemeWrapper
             return this;
         }
 
+        public FragmentTransaction replace(Fragment fragment, int containerViewId) {
+            if (containerViewId == 0) {
+                throw new IllegalArgumentException("Must use non-zero containerViewId");
+            }
+            if (mFragments.mFragments != null) {
+                for (int i=0; i<mFragments.mFragments.size(); i++) {
+                    Fragment old = mFragments.mFragments.get(i);
+                    if (old.mContainerId == containerViewId) {
+                        remove(old);
+                    }
+                }
+            }
+            return add(fragment, containerViewId);
+        }
+        
         public FragmentTransaction remove(Fragment fragment) {
             if (fragment.mActivity == null) {
                 throw new IllegalStateException("Fragment not added: " + fragment);
@@ -704,8 +719,19 @@ public class Activity extends ContextThemeWrapper
             return this;
         }
 
-        public FragmentTransaction addToBackStack() {
+        public FragmentTransaction setTransition(int transition) {
+            mTransition = transition;
+            return this;
+        }
+        
+        public FragmentTransaction setTransitionStyle(int styleRes) {
+            mTransitionStyle = styleRes;
+            return this;
+        }
+        
+        public FragmentTransaction addToBackStack(String name) {
             mAddToBackStack = true;
+            mName = name;
             return this;
         }
 
@@ -718,15 +744,21 @@ public class Activity extends ContextThemeWrapper
         public void run() {
             if (mRemoved != null) {
                 for (int i=mRemoved.size()-1; i>=0; i--) {
-                    mFragments.removeFragment(mRemoved.get(i));
+                    mFragments.removeFragment(mRemoved.get(i), mTransition,
+                            mTransitionStyle);
                 }
             }
             if (mAdded != null) {
                 for (int i=mAdded.size()-1; i>=0; i--) {
-                    mFragments.addFragment(mAdded.get(i), false);
+                    Fragment f = mAdded.get(i);
+                    mFragments.addFragment(f, false);
+                    if (mAddToBackStack) {
+                        f.mBackStackNesting++;
+                    }
                 }
             }
-            mFragments.moveToState(mFragments.mCurState, true);
+            mFragments.moveToState(mFragments.mCurState, mTransition,
+                    mTransitionStyle, true);
             if (mAddToBackStack) {
                 mFragments.addBackStackState(this);
             }
@@ -735,7 +767,13 @@ public class Activity extends ContextThemeWrapper
         public void popFromBackStack() {
             if (mAdded != null) {
                 for (int i=mAdded.size()-1; i>=0; i--) {
-                    mFragments.removeFragment(mAdded.get(i));
+                    Fragment f = mAdded.get(i);
+                    if (mAddToBackStack) {
+                        f.mBackStackNesting--;
+                    }
+                    mFragments.removeFragment(f,
+                            FragmentManager.reverseTransit(mTransition),
+                            mTransitionStyle);
                 }
             }
             if (mRemoved != null) {
@@ -743,7 +781,18 @@ public class Activity extends ContextThemeWrapper
                     mFragments.addFragment(mRemoved.get(i), false);
                 }
             }
-            mFragments.moveToState(mFragments.mCurState, true);
+        }
+        
+        public String getName() {
+            return mName;
+        }
+        
+        public int getTransition() {
+            return mTransition;
+        }
+        
+        public int getTransitionStyle() {
+            return mTransitionStyle;
         }
     }
     
@@ -1744,6 +1793,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Finds a fragment that was identified by the given id either when inflated
+     * from XML or as the container ID when added in a transaction.  This only
+     * returns fragments that are currently added to the activity's content.
+     * @return The fragment if found or null otherwise.
+     */
+    public Fragment findFragmentById(int id) {
+        return mFragments.findFragmentById(id);
+    }
+    
+    /**
      * Set the activity content from a layout resource.  The resource will be
      * inflated, adding all top-level views to the activity.
      * 
@@ -2010,9 +2069,12 @@ public class Activity extends ContextThemeWrapper
     /**
      * Pop the last fragment transition from the local activity's fragment
      * back stack.  If there is nothing to pop, false is returned.
+     * @param name If non-null, this is the name of a previous back state
+     * to look for; if found, all states up to (but not including) that
+     * state will be popped.  If null, only the top state is popped.
      */
-    public boolean popBackStack() {
-        return mFragments.popBackStackState(mHandler);
+    public boolean popBackStack(String name) {
+        return mFragments.popBackStackState(mHandler, name);
     }
     
     /**
@@ -2021,7 +2083,7 @@ public class Activity extends ContextThemeWrapper
      * but you can override this to do whatever you want.
      */
     public void onBackPressed() {
-        if (!popBackStack()) {
+        if (!popBackStack(null)) {
             finish();
         }
     }

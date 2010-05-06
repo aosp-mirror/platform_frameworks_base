@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 
 /**
  * A Fragment is a piece of an application's user interface or behavior
@@ -35,9 +36,8 @@ public class Fragment implements ComponentCallbacks {
     static final int STARTED = 2;       // Created and started, not resumed.
     static final int RESUMED = 3;       // Created started and resumed.
     
-    String mName;
-    
     int mState = INITIALIZING;
+    int mBackStackNesting;
     Activity mActivity;
     
     boolean mCalled;
@@ -47,14 +47,6 @@ public class Fragment implements ComponentCallbacks {
     View mView;
     
     public Fragment() {
-    }
-    
-    public Fragment(String name) {
-        mName = name;
-    }
-    
-    public String getName() {
-        return mName;
     }
     
     public Activity getActivity() {
@@ -67,6 +59,10 @@ public class Fragment implements ComponentCallbacks {
     
     public void onAttach(Activity activity) {
         mCalled = true;
+    }
+    
+    public Animation onCreateAnimation(int transit, boolean enter) {
+        return null;
     }
     
     public void onCreate(Bundle savedInstanceState) {

@@ -16,27 +16,69 @@
 
 package android.app;
 
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
 
 interface BackStackState {
     public void popFromBackStack();
+    public String getName();
+    public int getTransition();
+    public int getTransitionStyle();
 }
 
 /**
+ * @hide
  * Container for fragments associated with an activity.
  */
-class FragmentManager {
+public class FragmentManager {
     ArrayList<Fragment> mFragments;
     ArrayList<BackStackState> mBackStack;
     
     int mCurState = Fragment.INITIALIZING;
     Activity mActivity;
     
-    void moveToState(Fragment f, int newState) {
+    Animation loadAnimation(Fragment fragment, int transit, boolean enter,
+            int transitionStyle) {
+        Animation animObj = fragment.onCreateAnimation(transitionStyle, enter);
+        if (animObj != null) {
+            return animObj;
+        }
+        
+        if (transit == 0) {
+            return null;
+        }
+        
+        int styleIndex = transitToStyleIndex(transit, enter);
+        if (styleIndex < 0) {
+            return null;
+        }
+        
+        if (transitionStyle == 0 && mActivity.getWindow() != null) {
+            transitionStyle = mActivity.getWindow().getAttributes().windowAnimations;
+        }
+        if (transitionStyle == 0) {
+            return null;
+        }
+        
+        TypedArray attrs = mActivity.obtainStyledAttributes(transitionStyle,
+                com.android.internal.R.styleable.WindowAnimation);
+        int anim = attrs.getResourceId(styleIndex, 0);
+        attrs.recycle();
+        
+        if (anim == 0) {
+            return null;
+        }
+        
+        return AnimationUtils.loadAnimation(mActivity, anim);
+    }
+    
+    void moveToState(Fragment f, int newState, int transit, int transitionStyle) {
         if (f.mState < newState) {
             switch (f.mState) {
                 case Fragment.INITIALIZING:
@@ -66,6 +108,10 @@ class FragmentManager {
                     f.mContainer = container;
                     f.mView = f.onCreateView(mActivity.getLayoutInflater(), container);
                     if (container != null && f.mView != null) {
+                        Animation anim = loadAnimation(f, transit, true, transitionStyle);
+                        if (anim != null) {
+                            f.mView.setAnimation(anim);
+                        }
                         container.addView(f.mView);
                     }
                     
@@ -110,7 +156,11 @@ class FragmentManager {
                     }
                 case Fragment.CREATED:
                     if (newState < Fragment.CREATED) {
-                        if (f.mContainer != null && f.mView != null) {
+                        if (f.mContainer != null) {
+                            Animation anim = loadAnimation(f, transit, false, transitionStyle);
+                            if (anim != null) {
+                                f.mView.setAnimation(anim);
+                            }
                             f.mContainer.removeView(f.mView);
                         }
                         f.mContainer = null;
@@ -137,6 +187,10 @@ class FragmentManager {
     }
     
     void moveToState(int newState, boolean always) {
+        moveToState(newState, 0, 0, always);
+    }
+    
+    void moveToState(int newState, int transit, int transitStyle, boolean always) {
         if (mActivity == null && newState != Fragment.INITIALIZING) {
             throw new IllegalStateException("No activity");
         }
@@ -149,7 +203,7 @@ class FragmentManager {
         if (mFragments != null) {
             for (int i=0; i<mFragments.size(); i++) {
                 Fragment f = mFragments.get(i);
-                moveToState(f, newState);
+                moveToState(f, newState, transit, transitStyle);
             }
         }
     }
@@ -160,13 +214,25 @@ class FragmentManager {
         }
         mFragments.add(fragment);
         if (moveToStateNow) {
-            moveToState(fragment, mCurState);
+            moveToState(fragment, mCurState, 0, 0);
         }
     }
     
-    public void removeFragment(Fragment fragment) {
+    public void removeFragment(Fragment fragment, int transition, int transitionStyle) {
         mFragments.remove(fragment);
-        moveToState(fragment, Fragment.INITIALIZING);
+        moveToState(fragment, Fragment.INITIALIZING, transition, transitionStyle);
+    }
+    
+    public Fragment findFragmentById(int id) {
+        if (mFragments != null) {
+            for (int i=mFragments.size()-1; i>=0; i--) {
+                Fragment f = mFragments.get(i);
+                if (f.mContainerId == id) {
+                    return f;
+                }
+            }
+        }
+        return null;
     }
     
     public void addBackStackState(BackStackState state) {
@@ -176,20 +242,47 @@ class FragmentManager {
         mBackStack.add(state);
     }
     
-    public boolean popBackStackState(Handler handler) {
+    public boolean popBackStackState(Handler handler, String name) {
         if (mBackStack == null) {
             return false;
         }
-        int last = mBackStack.size()-1;
-        if (last < 0) {
-            return false;
-        }
-        final BackStackState bss = mBackStack.remove(last);
-        handler.post(new Runnable() {
-            public void run() {
-                bss.popFromBackStack();
+        if (name == null) {
+            int last = mBackStack.size()-1;
+            if (last < 0) {
+                return false;
             }
-        });
+            final BackStackState bss = mBackStack.remove(last);
+            handler.post(new Runnable() {
+                public void run() {
+                    bss.popFromBackStack();
+                    moveToState(mCurState, reverseTransit(bss.getTransition()),
+                            bss.getTransitionStyle(), true);
+                }
+            });
+        } else {
+            int index = mBackStack.size()-1;
+            while (index >= 0) {
+                BackStackState bss = mBackStack.get(index);
+                if (name.equals(bss.getName())) {
+                    break;
+                }
+            }
+            if (index < 0 || index == mBackStack.size()-1) {
+                return false;
+            }
+            final ArrayList<BackStackState> states = new ArrayList<BackStackState>();
+            for (int i=mBackStack.size()-1; i>index; i--) {
+                states.add(mBackStack.remove(i));
+            }
+            handler.post(new Runnable() {
+                public void run() {
+                    for (int i=0; i<states.size(); i++) {
+                        states.get(i).popFromBackStack();
+                    }
+                    moveToState(mCurState, true);
+                }
+            });
+        }
         return true;
     }
     
@@ -221,5 +314,124 @@ class FragmentManager {
     public void dispatchDestroy() {
         moveToState(Fragment.INITIALIZING, false);
         mActivity = null;
+    }
+    
+    public static int reverseTransit(int transit) {
+        int rev = 0;
+        switch (transit) {
+            case FragmentTransaction.TRANSIT_ENTER:
+                rev = FragmentTransaction.TRANSIT_EXIT;
+                break;
+            case FragmentTransaction.TRANSIT_EXIT:
+                rev = FragmentTransaction.TRANSIT_ENTER;
+                break;
+            case FragmentTransaction.TRANSIT_SHOW:
+                rev = FragmentTransaction.TRANSIT_HIDE;
+                break;
+            case FragmentTransaction.TRANSIT_HIDE:
+                rev = FragmentTransaction.TRANSIT_SHOW;
+                break;
+            case FragmentTransaction.TRANSIT_ACTIVITY_OPEN:
+                rev = FragmentTransaction.TRANSIT_ACTIVITY_CLOSE;
+                break;
+            case FragmentTransaction.TRANSIT_ACTIVITY_CLOSE:
+                rev = FragmentTransaction.TRANSIT_ACTIVITY_OPEN;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_OPEN:
+                rev = FragmentTransaction.TRANSIT_TASK_CLOSE;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_CLOSE:
+                rev = FragmentTransaction.TRANSIT_TASK_OPEN;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_TO_FRONT:
+                rev = FragmentTransaction.TRANSIT_TASK_TO_BACK;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_TO_BACK:
+                rev = FragmentTransaction.TRANSIT_TASK_TO_FRONT;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_OPEN:
+                rev = FragmentTransaction.TRANSIT_WALLPAPER_CLOSE;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_CLOSE:
+                rev = FragmentTransaction.TRANSIT_WALLPAPER_OPEN;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_OPEN:
+                rev = FragmentTransaction.TRANSIT_WALLPAPER_INTRA_CLOSE;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_CLOSE:
+                rev = FragmentTransaction.TRANSIT_WALLPAPER_INTRA_OPEN;
+                break;
+        }
+        return rev;
+        
+    }
+    
+    public static int transitToStyleIndex(int transit, boolean enter) {
+        int animAttr = -1;
+        switch (transit) {
+            case FragmentTransaction.TRANSIT_ENTER:
+                animAttr = com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_EXIT:
+                animAttr = com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_SHOW:
+                animAttr = com.android.internal.R.styleable.WindowAnimation_windowShowAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_HIDE:
+                animAttr = com.android.internal.R.styleable.WindowAnimation_windowHideAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_ACTIVITY_OPEN:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_ACTIVITY_CLOSE:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_OPEN:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_CLOSE:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_TO_FRONT:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_TASK_TO_BACK:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_OPEN:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_CLOSE:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_OPEN:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_WALLPAPER_INTRA_CLOSE:
+                animAttr = enter
+                        ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
+                        : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
+                break;
+        }
+        return animAttr;
     }
 }
