@@ -410,6 +410,9 @@
       <li><a href="<?cs var:toroot ?>guide/appendix/api-levels.html">
             <span class="en">Android API Levels</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
+            <span class="en">Market Filters </span>
+          </a><span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
           </a></li>
