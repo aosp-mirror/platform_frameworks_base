@@ -425,5 +425,16 @@ void HTTPDataSource::initHeaders(
     }
 }
 
+uint32_t HTTPDataSource::flags() {
+    uint32_t f = kWantsPrefetching;
+
+    if (!strcasecmp(mStartingHost.string(), "localhost")
+            || !strcmp(mStartingHost.string(), "127.0.0.1")) {
+        f |= kStreamedFromLocalHost;
+    }
+
+    return f;
+}
+
 }  // namespace android
 
