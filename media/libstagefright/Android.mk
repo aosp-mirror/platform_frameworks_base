@@ -102,8 +102,6 @@ endif
 
 LOCAL_CFLAGS += -Wno-multichar
 
-LOCAL_PRELINK_MODULE:= false
-
 LOCAL_MODULE:= libstagefright
 
 include $(BUILD_SHARED_LIBRARY)
