@@ -5780,6 +5780,18 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 mSettings.writeLP();
             }
+        } else {
+            // If this is an update to an existing update, setup 
+            // to remove the existing update.
+            synchronized (mPackages) {
+                PackageSetting ps = mSettings.getDisabledSystemPkg(packageName);
+                if (ps != null && ps.codePathString != null &&
+                        !ps.codePathString.equals(oldPkgSetting.codePathString)) {
+                    int installFlags = 0;
+                    res.removedInfo.args = createInstallArgs(0, oldPkgSetting.codePathString,
+                            oldPkgSetting.resourcePathString);
+                }
+            }
         }
     }
 
