@@ -100,6 +100,9 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
     void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException;
+    static final int PACKAGE_REMOVED = 0;
+    static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
+    void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
     
     String descriptor = "android.app.IApplicationThread";
 
@@ -135,4 +138,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
     int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
     int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
+    int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
 }

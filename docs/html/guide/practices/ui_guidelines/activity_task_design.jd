@@ -600,7 +600,7 @@ page.title=Activity and Task Design Guidelines
   Every application must have at least one entry point &mdash; a way
   for the user or system to access activities inside the
   application. Each icon in the application launcher at home
-  represents an entry point. Applications can also from another
+  represents an entry point. Applications can also be launched from another
   application. Each activity is a potential entry point into the
   application.&nbsp;
 </p>

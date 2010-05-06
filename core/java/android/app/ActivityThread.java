@@ -194,6 +194,7 @@ public final class ActivityThread {
             }
             WeakReference<Resources> wr = mActiveResources.get(key);
             r = wr != null ? wr.get() : null;
+            //if (r != null) Slog.i(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
             if (r != null && r.getAssets().isUpToDate()) {
                 if (false) {
                     Slog.w(TAG, "Returning cached resources " + r + " " + resDir
@@ -1752,6 +1753,10 @@ public final class ActivityThread {
             Debug.getMemoryInfo(outInfo);
         }
 
+        public void dispatchPackageBroadcast(int cmd, String[] packages) {
+            queueOrSendMessage(H.DISPATCH_PACKAGE_BROADCAST, packages, cmd);
+        }
+        
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
@@ -1976,6 +1981,7 @@ public final class ActivityThread {
         public static final int SUICIDE                 = 130;
         public static final int REMOVE_PROVIDER         = 131;
         public static final int ENABLE_JIT              = 132;
+        public static final int DISPATCH_PACKAGE_BROADCAST = 133;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -2012,6 +2018,7 @@ public final class ActivityThread {
                     case SUICIDE: return "SUICIDE";
                     case REMOVE_PROVIDER: return "REMOVE_PROVIDER";
                     case ENABLE_JIT: return "ENABLE_JIT";
+                    case DISPATCH_PACKAGE_BROADCAST: return "DISPATCH_PACKAGE_BROADCAST";
                 }
             }
             return "(unknown)";
@@ -2132,6 +2139,9 @@ public final class ActivityThread {
                 case ENABLE_JIT:
                     ensureJitEnabled();
                     break;
+                case DISPATCH_PACKAGE_BROADCAST:
+                    handleDispatchPackageBroadcast(msg.arg1, (String[])msg.obj);
+                    break;
             }
         }
 
@@ -2239,16 +2249,16 @@ public final class ActivityThread {
     // XXX For now we keep around information about all packages we have
     // seen, not removing entries from this map.
     final HashMap<String, WeakReference<PackageInfo>> mPackages
-        = new HashMap<String, WeakReference<PackageInfo>>();
+            = new HashMap<String, WeakReference<PackageInfo>>();
     final HashMap<String, WeakReference<PackageInfo>> mResourcePackages
-        = new HashMap<String, WeakReference<PackageInfo>>();
+            = new HashMap<String, WeakReference<PackageInfo>>();
     Display mDisplay = null;
     DisplayMetrics mDisplayMetrics = null;
-    HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
-        = new HashMap<ResourcesKey, WeakReference<Resources> >();
+    final HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
+            = new HashMap<ResourcesKey, WeakReference<Resources> >();
     final ArrayList<ActivityRecord> mRelaunchingActivities
             = new ArrayList<ActivityRecord>();
-        Configuration mPendingConfiguration = null;
+    Configuration mPendingConfiguration = null;
 
     // The lock of mProviderMap protects the following variables.
     final HashMap<String, ProviderRecord> mProviderMap
@@ -2271,6 +2281,8 @@ public final class ActivityThread {
             }
             PackageInfo packageInfo = ref != null ? ref.get() : null;
             //Slog.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
+            //if (packageInfo != null) Slog.i(TAG, "isUptoDate " + packageInfo.mResDir
+            //        + ": " + packageInfo.mResources.getAssets().isUpToDate());
             if (packageInfo != null && (packageInfo.mResources == null
                     || packageInfo.mResources.getAssets().isUpToDate())) {
                 if (packageInfo.isSecurityViolation()
@@ -2355,21 +2367,6 @@ public final class ActivityThread {
                 }
             }
             return packageInfo;
-        }
-    }
-
-    public final boolean hasPackageInfo(String packageName) {
-        synchronized (mPackages) {
-            WeakReference<PackageInfo> ref;
-            ref = mPackages.get(packageName);
-            if (ref != null && ref.get() != null) {
-                return true;
-            }
-            ref = mResourcePackages.get(packageName);
-            if (ref != null && ref.get() != null) {
-                return true;
-            }
-            return false;
         }
     }
 
@@ -4054,6 +4051,31 @@ public final class ActivityThread {
         }
     }
 
+    final void handleDispatchPackageBroadcast(int cmd, String[] packages) {
+        boolean hasPkgInfo = false;
+        if (packages != null) {
+            for (int i=packages.length-1; i>=0; i--) {
+                //Slog.i(TAG, "Cleaning old package: " + packages[i]);
+                if (!hasPkgInfo) {
+                    WeakReference<PackageInfo> ref;
+                    ref = mPackages.get(packages[i]);
+                    if (ref != null && ref.get() != null) {
+                        hasPkgInfo = true;
+                    } else {
+                        ref = mResourcePackages.get(packages[i]);
+                        if (ref != null && ref.get() != null) {
+                            hasPkgInfo = true;
+                        }
+                    }
+                }
+                mPackages.remove(packages[i]);
+                mResourcePackages.remove(packages[i]);
+            }
+        }
+        ContextImpl.ApplicationPackageManager.handlePackageBroadcast(cmd, packages,
+                hasPkgInfo);
+    }
+        
     final void handleLowMemory() {
         ArrayList<ComponentCallbacks> callbacks
                 = new ArrayList<ComponentCallbacks>();

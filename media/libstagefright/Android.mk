@@ -39,6 +39,7 @@ LOCAL_SRC_FILES +=                \
         StagefrightMetadataRetriever.cpp \
         TimeSource.cpp            \
         TimedEventQueue.cpp       \
+        VorbisExtractor.cpp       \
         WAVExtractor.cpp          \
         string.cpp
 
@@ -100,8 +101,6 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 endif
 
 LOCAL_CFLAGS += -Wno-multichar
-
-LOCAL_PRELINK_MODULE:= false
 
 LOCAL_MODULE:= libstagefright
 

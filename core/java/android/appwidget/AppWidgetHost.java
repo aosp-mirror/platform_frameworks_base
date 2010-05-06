@@ -231,8 +231,14 @@ public class AppWidgetHost {
     /**
      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+        AppWidgetHostView v;
+        synchronized (mViews) {
+            v = mViews.get(appWidgetId);
+        }
+        if (v != null) {
+            v.updateAppWidget(null, AppWidgetHostView.UPDATE_FLAGS_RESET);
+        }
     }
 
     void updateAppWidgetView(int appWidgetId, RemoteViews views) {
@@ -241,7 +247,7 @@ public class AppWidgetHost {
             v = mViews.get(appWidgetId);
         }
         if (v != null) {
-            v.updateAppWidget(views);
+            v.updateAppWidget(views, 0);
         }
     }
 }
