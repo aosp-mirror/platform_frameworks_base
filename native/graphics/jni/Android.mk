@@ -3,8 +3,6 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_PRELINK_MODULE := false
-
 # setup for skia optimizations
 #
 ifneq ($(ARCH_ARM_HAVE_VFP),true)
