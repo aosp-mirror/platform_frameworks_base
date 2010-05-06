@@ -17,8 +17,10 @@
 package android.app;
 
 import android.content.ComponentCallbacks;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +61,10 @@ public class Fragment implements ComponentCallbacks {
         return mActivity;
     }
     
+    public void onInflate(Activity activity, AttributeSet attrs) {
+        mCalled = true;
+    }
+    
     public void onAttach(Activity activity) {
         mCalled = true;
     }
@@ -75,10 +81,6 @@ public class Fragment implements ComponentCallbacks {
     }
     
     public void onStart() {
-        mCalled = true;
-    }
-    
-    public void onRestart() {
         mCalled = true;
     }
     

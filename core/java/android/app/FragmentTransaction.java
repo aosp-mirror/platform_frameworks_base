@@ -7,5 +7,6 @@ public interface FragmentTransaction {
     public FragmentTransaction add(Fragment fragment, int containerViewId);
     public FragmentTransaction add(Fragment fragment, String name, int containerViewId);
     public FragmentTransaction remove(Fragment fragment);
+    public FragmentTransaction addToBackStack();
     public void commit();
 }
