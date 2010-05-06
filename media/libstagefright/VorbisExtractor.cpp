@@ -20,6 +20,7 @@
 
 #include "include/VorbisExtractor.h"
 
+#include <cutils/properties.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
@@ -37,7 +38,22 @@ namespace android {
 struct VorbisDataSource {
     sp<DataSource> mDataSource;
     off_t mOffset;
+    bool mSeekDisabled;
 };
+
+static bool ShouldDisableSeek(const sp<DataSource> &source) {
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.vorbis.always-allow-seek", value, NULL)
+            && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        return false;
+    }
+
+    // This is a workaround for an application streaming data through
+    // a local HTTP proxy that doesn't really conform to the HTTP/1.1
+    // specs. We have to disable seek functionality in this case.
+
+    return source->flags() & DataSource::kStreamedFromLocalHost;
+}
 
 static size_t VorbisRead(
         void *ptr, size_t size, size_t nmemb, void *datasource) {
@@ -57,6 +73,11 @@ static size_t VorbisRead(
 static int VorbisSeek(
         void *datasource, ogg_int64_t offset, int whence) {
     VorbisDataSource *vds = (VorbisDataSource *)datasource;
+
+    if (vds->mSeekDisabled) {
+        errno = ESPIPE;
+        return -1;
+    }
 
     switch (whence) {
         case SEEK_SET:
@@ -218,6 +239,7 @@ VorbisExtractor::VorbisExtractor(const sp<DataSource> &source)
       mInitCheck(NO_INIT) {
     mVorbisDataSource->mDataSource = mDataSource;
     mVorbisDataSource->mOffset = 0;
+    mVorbisDataSource->mSeekDisabled = ShouldDisableSeek(mDataSource);
 
     int res = ov_open_callbacks(
             mVorbisDataSource, mFile, NULL, 0, gVorbisCallbacks);
@@ -291,6 +313,7 @@ bool SniffVorbis(
     VorbisDataSource vds;
     vds.mDataSource = source;
     vds.mOffset = 0;
+    vds.mSeekDisabled = ShouldDisableSeek(source);
 
     int res = ov_test_callbacks(&vds, &file, NULL, 0, gVorbisCallbacks);
 
@@ -306,6 +329,15 @@ bool SniffVorbis(
     LOGV("This looks like an Ogg file.");
 
     return true;
+}
+
+uint32_t VorbisExtractor::flags() const {
+    if (ShouldDisableSeek(mDataSource)) {
+        LOGI("This is streamed from local host, seek disabled");
+        return CAN_PAUSE;
+    } else {
+        return CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_PAUSE;
+    }
 }
 
 }  // namespace android

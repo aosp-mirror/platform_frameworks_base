@@ -53,6 +53,9 @@ public:
     virtual status_t suspend();
     virtual status_t resume();
 
+    virtual status_t getMetadata(
+            const media::Metadata::Filter& ids, Parcel *records);
+
 private:
     AwesomePlayer *mPlayer;
 

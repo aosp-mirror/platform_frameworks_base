@@ -45,9 +45,7 @@ public:
 
     virtual status_t getSize(off_t *size);
 
-    virtual uint32_t flags() {
-        return kWantsPrefetching;
-    }
+    virtual uint32_t flags();
 
 protected:
     virtual ~HTTPDataSource();

@@ -38,6 +38,8 @@ struct VorbisExtractor : public MediaExtractor {
 
     virtual sp<MetaData> getMetaData();
 
+    uint32_t flags() const;
+
 protected:
     virtual ~VorbisExtractor();
 
