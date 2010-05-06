@@ -27,7 +27,8 @@ devices. One of the ways Market filters applications is by feature compatibility
 <code>&lt;uses-feature&gt;</code> elements in each application's manifest, to
 establish the app's feature needs. Market then shows or hides the application to
 each user, based on a comparison with the features available on the user's
-device. </p>
+device. For more information, see <a
+href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.</p>
 
 <p style="margin-top:1em;">By specifying the features your application requires,
 you enable Android Market to present your application only to users whose
