@@ -6,6 +6,9 @@
 
 #include "AwesomePlayer.h"
 
+#include <media/Metadata.h>
+#include <media/stagefright/MediaExtractor.h>
+
 namespace android {
 
 StagefrightPlayer::StagefrightPlayer()
@@ -109,7 +112,8 @@ status_t StagefrightPlayer::getDuration(int *msec) {
     status_t err = mPlayer->getDuration(&durationUs);
 
     if (err != OK) {
-        return err;
+        *msec = 0;
+        return OK;
     }
 
     *msec = (durationUs + 500) / 1000;
@@ -154,6 +158,29 @@ void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {
     MediaPlayerInterface::setAudioSink(audioSink);
 
     mPlayer->setAudioSink(audioSink);
+}
+
+status_t StagefrightPlayer::getMetadata(
+        const media::Metadata::Filter& ids, Parcel *records) {
+    using media::Metadata;
+
+    uint32_t flags = mPlayer->flags();
+
+    Metadata metadata(records);
+
+    metadata.appendBool(
+            Metadata::kPauseAvailable,
+            flags & MediaExtractor::CAN_PAUSE);
+
+    metadata.appendBool(
+            Metadata::kSeekBackwardAvailable,
+            flags & MediaExtractor::CAN_SEEK_BACKWARD);
+
+    metadata.appendBool(
+            Metadata::kSeekForwardAvailable,
+            flags & MediaExtractor::CAN_SEEK_FORWARD);
+
+    return OK;
 }
 
 }  // namespace android

@@ -33,7 +33,8 @@ class String8;
 class DataSource : public RefBase {
 public:
     enum Flags {
-        kWantsPrefetching = 1,
+        kWantsPrefetching      = 1,
+        kStreamedFromLocalHost = 2,
     };
 
     static sp<DataSource> CreateFromURI(

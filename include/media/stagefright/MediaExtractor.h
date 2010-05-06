@@ -44,6 +44,16 @@ public:
     // returns an empty metadata object.
     virtual sp<MetaData> getMetaData();
 
+    enum Flags {
+        CAN_SEEK_BACKWARD  = 1,
+        CAN_SEEK_FORWARD   = 2,
+        CAN_PAUSE          = 4,
+    };
+
+    // If subclasses do _not_ override this, the default is
+    // CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_PAUSE
+    virtual uint32_t flags() const;
+
 protected:
     MediaExtractor() {}
     virtual ~MediaExtractor() {}
