@@ -11314,6 +11314,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             "DimSurface",
                             -1, 16, 16, PixelFormat.OPAQUE,
                             Surface.FX_SURFACE_DIM);
+                    mDimSurface.setAlpha(0.0f);
                 } catch (Exception e) {
                     Slog.e(TAG, "Exception creating Dim surface", e);
                 }
