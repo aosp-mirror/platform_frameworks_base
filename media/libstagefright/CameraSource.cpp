@@ -106,7 +106,7 @@ void CameraSourceListener::postDataTimestamp(
 
 // static
 CameraSource *CameraSource::Create() {
-    sp<Camera> camera = Camera::connect();
+    sp<Camera> camera = Camera::connect(0);
 
     if (camera.get() == NULL) {
         return NULL;

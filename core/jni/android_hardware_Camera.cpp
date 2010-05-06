@@ -288,10 +288,16 @@ void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env)
     }
 }
 
-// connect to camera service
-static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+static jint android_hardware_Camera_getNumberOfCameras(JNIEnv *env, jobject thiz)
 {
-    sp<Camera> camera = Camera::connect();
+    return Camera::getNumberOfCameras();
+}
+
+// connect to camera service
+static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
+    jobject weak_this, jint cameraId)
+{
+    sp<Camera> camera = Camera::connect(cameraId);
 
     if (camera == NULL) {
         jniThrowException(env, "java/lang/RuntimeException",
@@ -566,8 +572,11 @@ static void android_hardware_Camera_setDisplayOrientation(JNIEnv *env, jobject t
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
+  { "getNumberOfCameras",
+    "()I",
+    (void *)android_hardware_Camera_getNumberOfCameras },
   { "native_setup",
-    "(Ljava/lang/Object;)V",
+    "(Ljava/lang/Object;I)V",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",

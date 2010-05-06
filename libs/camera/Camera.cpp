@@ -95,13 +95,20 @@ Camera::~Camera()
     disconnect();
 }
 
-sp<Camera> Camera::connect()
+int32_t Camera::getNumberOfCameras()
+{
+    const sp<ICameraService>& cs = getCameraService();
+    if (cs == 0) return 0;
+    return cs->getNumberOfCameras();
+}
+
+sp<Camera> Camera::connect(int cameraId)
 {
     LOGV("connect");
     sp<Camera> c = new Camera();
     const sp<ICameraService>& cs = getCameraService();
     if (cs != 0) {
-        c->mCamera = cs->connect(c);
+        c->mCamera = cs->connect(c, cameraId);
     }
     if (c->mCamera != 0) {
         c->mCamera->asBinder()->linkToDeath(c);
