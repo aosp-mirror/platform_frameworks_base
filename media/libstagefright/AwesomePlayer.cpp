@@ -184,6 +184,7 @@ AwesomePlayer::AwesomePlayer()
       mVideoRendererIsPreview(false),
       mAudioPlayer(NULL),
       mFlags(0),
+      mExtractorFlags(0),
       mLastVideoBuffer(NULL),
       mVideoBuffer(NULL),
       mSuspensionState(NULL) {
@@ -310,7 +311,13 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         }
     }
 
-    return !haveAudio && !haveVideo ? UNKNOWN_ERROR : OK;
+    if (!haveAudio && !haveVideo) {
+        return UNKNOWN_ERROR;
+    }
+
+    mExtractorFlags = extractor->flags();
+
+    return OK;
 }
 
 void AwesomePlayer::reset() {
@@ -390,6 +397,7 @@ void AwesomePlayer::reset_l() {
 
     mDurationUs = -1;
     mFlags = 0;
+    mExtractorFlags = 0;
     mVideoWidth = mVideoHeight = -1;
     mTimeSourceDeltaUs = 0;
     mVideoTimeUs = 0;
@@ -683,8 +691,14 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
 }
 
 status_t AwesomePlayer::seekTo(int64_t timeUs) {
-    Mutex::Autolock autoLock(mLock);
-    return seekTo_l(timeUs);
+    if (mExtractorFlags
+            & (MediaExtractor::CAN_SEEK_FORWARD
+                | MediaExtractor::CAN_SEEK_BACKWARD)) {
+        Mutex::Autolock autoLock(mLock);
+        return seekTo_l(timeUs);
+    }
+
+    return OK;
 }
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
@@ -1360,6 +1374,10 @@ status_t AwesomePlayer::resume() {
     state = NULL;
 
     return OK;
+}
+
+uint32_t AwesomePlayer::flags() const {
+    return mExtractorFlags;
 }
 
 }  // namespace android
