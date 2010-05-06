@@ -2557,6 +2557,14 @@ public class WebView extends AbsoluteLayout
     /**
      * @hide
      */
+    public int findIndex() {
+        if (0 == mNativeClass) return -1;
+        return nativeFindIndex();
+    }
+
+    /**
+     * @hide
+     */
     public boolean getFindIsUp() { return mFindIsUp; }
 
     // Used to know whether the find dialog is open.  Affects whether
@@ -7305,6 +7313,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeRecordButtons(boolean focused,
             boolean pressed, boolean invalidate);
     private native void     nativeSelectBestAt(Rect rect);
+    private native int      nativeFindIndex();
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetFollowedLink(boolean followed);
