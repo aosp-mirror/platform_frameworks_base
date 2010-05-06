@@ -159,6 +159,7 @@ extern int register_android_backup_BackupDataInput(JNIEnv *env);
 extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
 extern int register_android_backup_BackupHelperDispatcher(JNIEnv *env);
+extern int register_android_app_NativeActivity(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -1281,6 +1282,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelperBase),
     REG_JNI(register_android_backup_BackupHelperDispatcher),
+    
+    REG_JNI(register_android_app_NativeActivity),
 };
 
 /*
