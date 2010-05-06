@@ -39,7 +39,8 @@ devices. One of the ways Market filters applications is by Android
 version-compatibility. To do this, Market checks the <code>&lt;uses-sdk&gt;</code>
 attributes in each application's manifest to establish its version-compatibility
 range, then shows or hides the application based on a comparison with the API
-Level of the user's Android system version. </p>
+Level of the user's Android system version. For more information, see <a
+href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.</p>
   </div>
 </div>
 
