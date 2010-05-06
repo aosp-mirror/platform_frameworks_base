@@ -124,7 +124,11 @@ public class PackageManagerHostTestUtils extends Assert {
         RemoteAndroidTestRunner testRunner = new RemoteAndroidTestRunner(
                 pkgName, mDevice);
         CollectingTestRunListener listener = new CollectingTestRunListener();
-        testRunner.run(listener);
+        try {
+            testRunner.run(listener);
+        } catch (IOException ioe) {
+            Log.w(LOG_TAG, "encountered IOException " + ioe);
+        }
         return listener;
     }
 
