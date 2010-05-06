@@ -26,12 +26,12 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.*;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.EventLog;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -50,6 +50,7 @@ import android.Manifest;
 import android.media.AudioManager;
 
 import java.lang.ref.WeakReference;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     /** @noinspection PointlessBooleanExpression*/
     private static final boolean DEBUG_DRAW = false || LOCAL_LOGV;
     private static final boolean DEBUG_LAYOUT = false || LOCAL_LOGV;
+    private static final boolean DEBUG_INPUT = true || LOCAL_LOGV;
     private static final boolean DEBUG_INPUT_RESIZE = false || LOCAL_LOGV;
     private static final boolean DEBUG_ORIENTATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_TRACKBALL = false || LOCAL_LOGV;
@@ -425,6 +427,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
+    // fd [0] is the receiver, [1] is the sender
+    private native int[] makeInputChannel();
+
     /**
      * We have one child
      */
@@ -468,6 +473,14 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 mAdded = true;
                 int res; /* = WindowManagerImpl.ADD_OKAY; */
+
+                // Set up the input event channel
+                if (false) {
+                int[] fds = makeInputChannel();
+                if (DEBUG_INPUT) {
+                    Log.v(TAG, "makeInputChannel() returned " + fds);
+                }
+                }
 
                 // Schedule the first layout -before- adding to the window
                 // manager, to make sure we do the relayout before receiving
