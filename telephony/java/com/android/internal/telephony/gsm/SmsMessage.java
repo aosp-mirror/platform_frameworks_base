@@ -111,6 +111,14 @@ public class SmsMessage extends SmsMessageBase{
     }
 
     /**
+     * 3GPP TS 23.040 9.2.3.9 specifies that Type Zero messages are indicated
+     * by TP_PID field set to value 0x40
+     */
+    public boolean isTypeZero() {
+        return (protocolIdentifier == 0x40);
+    }
+
+    /**
      * TS 27.005 3.4.1 lines[0] and lines[1] are the two lines read from the
      * +CMT unsolicited response (PDU mode, of course)
      *  +CMT: [&lt;alpha>],<length><CR><LF><pdu>

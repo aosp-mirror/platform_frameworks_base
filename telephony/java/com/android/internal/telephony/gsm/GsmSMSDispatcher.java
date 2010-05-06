@@ -94,6 +94,13 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         SmsMessage sms = (SmsMessage) smsb;
         boolean handled = false;
 
+        if (sms.isTypeZero()) {
+            // As per 3GPP TS 23.040 9.2.3.9, Type Zero messages should not be
+            // Displayed/Stored/Notified. They should only be acknowledged.
+            Log.d(TAG, "Received short message type 0, Dont display or store it. Send Ack");
+            return Intents.RESULT_SMS_HANDLED;
+        }
+
         // Special case the message waiting indicator messages
         if (sms.isMWISetMessage()) {
             mGsmPhone.updateMessageWaitingIndicator(true);
