@@ -3530,6 +3530,39 @@
     <!-- =============================== -->
     <eat-comment />
     
+    <!-- ============================= -->
+    <!-- View package class attributes -->
+    <!-- ============================= -->
+    <eat-comment />
+
+    <!-- Attributes that can be used with <code>&lt;fragment&gt;</code>
+         tags inside of the layout of an Activity.  This instantiates
+         the given {@link android.app.Fragment} and inserts its content
+         view into the current location in the layout. -->
+    <declare-styleable name="Fragment">
+        <!-- Supply the name of the fragment class to instantiate. -->
+        <attr name="name" />
+        
+        <!-- Supply an identifier name for the top-level view, to later retrieve it
+             with {@link android.view.View#findViewById View.findViewById()} or
+             {@link android.app.Activity#findViewById Activity.findViewById()}.
+             This must be a
+             resource reference; typically you set this using the
+             <code>@+</code> syntax to create a new ID resources.
+             For example: <code>android:id="@+id/my_id"</code> which
+             allows you to later retrieve the view
+             with <code>findViewById(R.id.my_id)</code>. -->
+        <attr name="id" />
+
+        <!-- Supply a tag for the top-level view containing a String, to be retrieved
+             later with {@link android.view.View#getTag View.getTag()} or
+             searched for with {@link android.view.View#findViewWithTag
+             View.findViewWithTag()}.  It is generally preferable to use
+             IDs (through the android:id attribute) instead of tags because
+             they are faster and allow for compile-time type checking. -->
+        <attr name="tag" />
+    </declare-styleable>
+
     <!-- Use <code>device-admin</code> as the root tag of the XML resource that
          describes a
          {@link android.app.admin.DeviceAdminReceiver}, which is

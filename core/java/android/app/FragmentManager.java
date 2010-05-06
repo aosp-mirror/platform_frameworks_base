@@ -17,15 +17,21 @@
 package android.app;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+
+interface BackStackState {
+    public void popFromBackStack();
+}
 
 /**
  * Container for fragments associated with an activity.
  */
 class FragmentManager {
-    final ArrayList<Fragment> mFragments = new ArrayList<Fragment>();
+    ArrayList<Fragment> mFragments;
+    ArrayList<BackStackState> mBackStack;
     
     int mCurState = Fragment.INITIALIZING;
     Activity mActivity;
@@ -130,25 +136,61 @@ class FragmentManager {
         f.mState = newState;
     }
     
-    void moveToState(int newState) {
+    void moveToState(int newState, boolean always) {
         if (mActivity == null && newState != Fragment.INITIALIZING) {
             throw new IllegalStateException("No activity");
         }
         
+        if (!always && mCurState == newState) {
+            return;
+        }
+        
         mCurState = newState;
-        for (int i=0; i<mFragments.size(); i++) {
-            Fragment f = mFragments.get(i);
-            moveToState(f, newState);
+        if (mFragments != null) {
+            for (int i=0; i<mFragments.size(); i++) {
+                Fragment f = mFragments.get(i);
+                moveToState(f, newState);
+            }
         }
     }
     
-    public void addFragment(Fragment fragment) {
+    public void addFragment(Fragment fragment, boolean moveToStateNow) {
+        if (mFragments == null) {
+            mFragments = new ArrayList<Fragment>();
+        }
         mFragments.add(fragment);
+        if (moveToStateNow) {
+            moveToState(fragment, mCurState);
+        }
     }
     
     public void removeFragment(Fragment fragment) {
         mFragments.remove(fragment);
         moveToState(fragment, Fragment.INITIALIZING);
+    }
+    
+    public void addBackStackState(BackStackState state) {
+        if (mBackStack == null) {
+            mBackStack = new ArrayList<BackStackState>();
+        }
+        mBackStack.add(state);
+    }
+    
+    public boolean popBackStackState(Handler handler) {
+        if (mBackStack == null) {
+            return false;
+        }
+        int last = mBackStack.size()-1;
+        if (last < 0) {
+            return false;
+        }
+        final BackStackState bss = mBackStack.remove(last);
+        handler.post(new Runnable() {
+            public void run() {
+                bss.popFromBackStack();
+            }
+        });
+        return true;
     }
     
     public void attachActivity(Activity activity) {
@@ -157,27 +199,27 @@ class FragmentManager {
     }
     
     public void dispatchCreate(Bundle state) {
-        moveToState(Fragment.CREATED);
+        moveToState(Fragment.CREATED, false);
     }
     
     public void dispatchStart() {
-        moveToState(Fragment.STARTED);
+        moveToState(Fragment.STARTED, false);
     }
     
     public void dispatchResume() {
-        moveToState(Fragment.RESUMED);
+        moveToState(Fragment.RESUMED, false);
     }
     
     public void dispatchPause() {
-        moveToState(Fragment.STARTED);
+        moveToState(Fragment.STARTED, false);
     }
     
     public void dispatchStop() {
-        moveToState(Fragment.CREATED);
+        moveToState(Fragment.CREATED, false);
     }
     
     public void dispatchDestroy() {
-        moveToState(Fragment.INITIALIZING);
+        moveToState(Fragment.INITIALIZING, false);
         mActivity = null;
     }
 }

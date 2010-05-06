@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -39,7 +40,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -52,6 +52,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
+import android.view.InflateException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -69,6 +70,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -652,9 +654,19 @@ public class Activity extends ContextThemeWrapper
 
     final FragmentManager mFragments = new FragmentManager();
     
-    private final class FragmentTransactionImpl implements FragmentTransaction {
+    private final Object[] sConstructorArgs = new Object[0];
+
+    private static final Class[] sConstructorSignature = new Class[] { };
+
+    private static final HashMap<String, Constructor> sConstructorMap =
+            new HashMap<String, Constructor>();
+    
+    private final class FragmentTransactionImpl implements FragmentTransaction,
+            Runnable, BackStackState {
         ArrayList<Fragment> mAdded;
         ArrayList<Fragment> mRemoved;
+        boolean mAddToBackStack;
+        boolean mCommitted;
         
         public FragmentTransaction add(Fragment fragment, int containerViewId) {
             return add(fragment, null, containerViewId);
@@ -692,7 +704,18 @@ public class Activity extends ContextThemeWrapper
             return this;
         }
 
+        public FragmentTransaction addToBackStack() {
+            mAddToBackStack = true;
+            return this;
+        }
+
         public void commit() {
+            if (mCommitted) throw new IllegalStateException("commit already called");
+            mCommitted = true;
+            mHandler.post(this);
+        }
+        
+        public void run() {
             if (mRemoved != null) {
                 for (int i=mRemoved.size()-1; i>=0; i--) {
                     mFragments.removeFragment(mRemoved.get(i));
@@ -700,12 +723,27 @@ public class Activity extends ContextThemeWrapper
             }
             if (mAdded != null) {
                 for (int i=mAdded.size()-1; i>=0; i--) {
-                    mFragments.addFragment(mAdded.get(i));
+                    mFragments.addFragment(mAdded.get(i), false);
                 }
             }
-            if (mFragments != null) {
-                mFragments.moveToState(mFragments.mCurState);
+            mFragments.moveToState(mFragments.mCurState, true);
+            if (mAddToBackStack) {
+                mFragments.addBackStackState(this);
             }
+        }
+        
+        public void popFromBackStack() {
+            if (mAdded != null) {
+                for (int i=mAdded.size()-1; i>=0; i--) {
+                    mFragments.removeFragment(mAdded.get(i));
+                }
+            }
+            if (mRemoved != null) {
+                for (int i=mRemoved.size()-1; i>=0; i--) {
+                    mFragments.addFragment(mRemoved.get(i), false);
+                }
+            }
+            mFragments.moveToState(mFragments.mCurState, true);
         }
     }
     
@@ -859,6 +897,7 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(Bundle savedInstanceState) {
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
+        mFragments.dispatchCreate(savedInstanceState);
         mCalled = true;
     }
 
@@ -1969,12 +2008,22 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
+     * Pop the last fragment transition from the local activity's fragment
+     * back stack.  If there is nothing to pop, false is returned.
+     */
+    public boolean popBackStack() {
+        return mFragments.popBackStackState(mHandler);
+    }
+    
+    /**
      * Called when the activity has detected the user's press of the back
      * key.  The default implementation simply finishes the current activity,
      * but you can override this to do whatever you want.
      */
     public void onBackPressed() {
-        finish();
+        if (!popBackStack()) {
+            finish();
+        }
     }
     
     /**
@@ -3776,15 +3825,62 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Stub implementation of {@link android.view.LayoutInflater.Factory#onCreateView} used when
-     * inflating with the LayoutInflater returned by {@link #getSystemService}.  This
-     * implementation simply returns null for all view names.
+     * Standard implementation of
+     * {@link android.view.LayoutInflater.Factory#onCreateView} used when
+     * inflating with the LayoutInflater returned by {@link #getSystemService}.
+     * This implementation handles <fragment> tags to embed fragments inside
+     * of the activity.
      *
      * @see android.view.LayoutInflater#createView
      * @see android.view.Window#getLayoutInflater
      */
     public View onCreateView(String name, Context context, AttributeSet attrs) {
-        return null;
+        if (!"fragment".equals(name)) {
+            return null;
+        }
+        
+        TypedArray a = 
+            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
+        String fname = a.getString(com.android.internal.R.styleable.Fragment_name);
+        int id = a.getInt(com.android.internal.R.styleable.Fragment_id, 0);
+        String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
+        a.recycle();
+        
+        Constructor constructor = sConstructorMap.get(fname);
+        Class clazz = null;
+
+        try {
+            if (constructor == null) {
+                // Class not found in the cache, see if it's real, and try to add it
+                clazz = getClassLoader().loadClass(fname);
+                constructor = clazz.getConstructor(sConstructorSignature);
+                sConstructorMap.put(fname, constructor);
+            }
+            Fragment fragment = (Fragment)constructor.newInstance(sConstructorArgs);
+            fragment.onInflate(this, attrs);
+            mFragments.addFragment(fragment, true);
+            if (fragment.mView == null) {
+                throw new IllegalStateException("Fragment " + fname
+                        + " did not create a view.");
+            }
+            return fragment.mView;
+
+        } catch (NoSuchMethodException e) {
+            InflateException ie = new InflateException(attrs.getPositionDescription()
+                    + ": Error inflating class " + fname);
+            ie.initCause(e);
+            throw ie;
+
+        } catch (ClassNotFoundException e) {
+            // If loadClass fails, we should propagate the exception.
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            InflateException ie = new InflateException(attrs.getPositionDescription()
+                    + ": Error inflating class "
+                    + (clazz == null ? "<unknown>" : clazz.getName()));
+            ie.initCause(e);
+            throw new RuntimeException(ie);
+        }
     }
 
     // ------------------ Internal API ------------------
@@ -3814,6 +3910,7 @@ public class Activity extends ContextThemeWrapper
         
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
+        mWindow.getLayoutInflater().setFactory(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
             mWindow.setSoftInputMode(info.softInputMode);
         }
@@ -3847,7 +3944,6 @@ public class Activity extends ContextThemeWrapper
 
     final void performCreate(Bundle icicle) {
         onCreate(icicle);
-        mFragments.dispatchCreate(icicle);
     }
     
     final void performStart() {
