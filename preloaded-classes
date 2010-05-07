@@ -1186,7 +1186,6 @@ org.apache.harmony.xnet.provider.jsse.NativeCrypto
 org.apache.harmony.xnet.provider.jsse.OpenSSLServerSocketImpl
 org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl
 org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl
-org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$Finalizer
 org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$LoggerHolder
 org.apache.harmony.xnet.provider.jsse.ProtocolVersion
 org.apache.harmony.xnet.provider.jsse.SSLContextImpl
