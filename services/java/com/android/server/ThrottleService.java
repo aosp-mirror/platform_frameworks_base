@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.net.INetworkManagementEventObserver;
 import android.net.IThrottleManager;
 import android.net.SntpClient;
 import android.net.ThrottleManager;
@@ -45,6 +46,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -109,6 +111,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     private Notification mThrottlingNotification;
     private boolean mWarningNotificationSent = false;
 
+    private InterfaceObserver mInterfaceObserver;
     private SettingsObserver mSettingsObserver;
 
     private int mThrottleIndex; // 0 for none, 1 for first throttle val, 2 for next, etc
@@ -125,6 +128,7 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         mNtpActive = false;
 
+        mIface = mContext.getResources().getString(R.string.config_datause_iface);
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent pollIntent = new Intent(ACTION_POLL, null);
         mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent, 0);
@@ -137,6 +141,38 @@ public class ThrottleService extends IThrottleManager.Stub {
         mNotificationManager = (NotificationManager)mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
     }
+
+    private static class InterfaceObserver extends INetworkManagementEventObserver.Stub {
+        private int mMsg;
+        private Handler mHandler;
+        private String mIface;
+
+        InterfaceObserver(Handler handler, int msg, String iface) {
+            super();
+            mHandler = handler;
+            mMsg = msg;
+            mIface = iface;
+        }
+
+        public void interfaceLinkStatusChanged(String iface, boolean link) {
+            if (link) {
+                if (TextUtils.equals(iface, mIface)) {
+                    mHandler.obtainMessage(mMsg).sendToTarget();
+                }
+            }
+        }
+
+        public void interfaceAdded(String iface) {
+            // TODO - an interface added in the UP state should also trigger a StatusChanged
+            // notification..
+            if (TextUtils.equals(iface, mIface)) {
+                mHandler.obtainMessage(mMsg).sendToTarget();
+            }
+        }
+
+        public void interfaceRemoved(String iface) {}
+    }
+
 
     private static class SettingsObserver extends ContentObserver {
         private int mMsg;
@@ -273,6 +309,13 @@ public class ThrottleService extends IThrottleManager.Stub {
         mHandler = new MyHandler(mThread.getLooper());
         mHandler.obtainMessage(EVENT_REBOOT_RECOVERY).sendToTarget();
 
+        mInterfaceObserver = new InterfaceObserver(mHandler, EVENT_IFACE_UP, mIface);
+        try {
+            mNMService.registerObserver(mInterfaceObserver);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not register InterfaceObserver " + e);
+        }
+
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_POLICY_CHANGED);
         mSettingsObserver.observe(mContext);
 
@@ -299,6 +342,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final int EVENT_POLICY_CHANGED  = 1;
     private static final int EVENT_POLL_ALARM      = 2;
     private static final int EVENT_RESET_ALARM     = 3;
+    private static final int EVENT_IFACE_UP        = 4;
     private class MyHandler extends Handler {
         public MyHandler(Looper l) {
             super(l);
@@ -318,6 +362,9 @@ public class ThrottleService extends IThrottleManager.Stub {
                 break;
             case EVENT_RESET_ALARM:
                 onResetAlarm();
+                break;
+            case EVENT_IFACE_UP:
+                onIfaceUp();
             }
         }
 
@@ -374,7 +421,6 @@ public class ThrottleService extends IThrottleManager.Stub {
                 Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.THROTTLE_RESET_DAY, mPolicyResetDay);
             }
-            mIface = mContext.getResources().getString(R.string.config_datause_iface);
             synchronized (ThrottleService.this) {
                 if (mIface == null) {
                     mPolicyThreshold = 0;
@@ -452,6 +498,20 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             mAlarmManager.cancel(mPendingPollIntent);
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, next, mPendingPollIntent);
+        }
+
+        private void onIfaceUp() {
+            // if we were throttled before, be sure and set it again - the iface went down
+            // (and may have disappeared all together) and these settings were lost
+            if (mThrottleIndex == 1) {
+                try {
+                    mNMService.setInterfaceThrottle(mIface, -1, -1);
+                    mNMService.setInterfaceThrottle(mIface,
+                            mPolicyThrottleValue, mPolicyThrottleValue);
+                } catch (Exception e) {
+                    Slog.e(TAG, "error setting Throttle: " + e);
+                }
+            }
         }
 
         private void checkThrottleAndPostNotification(long currentTotal) {
