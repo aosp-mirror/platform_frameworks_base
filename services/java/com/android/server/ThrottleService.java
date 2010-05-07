@@ -60,6 +60,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Random;
@@ -83,8 +85,8 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final long TESTING_THRESHOLD = 1 * 1024 * 1024;
 
     private int mPolicyPollPeriodSec;
-    private long mPolicyThreshold;
-    private int mPolicyThrottleValue;
+    private AtomicLong mPolicyThreshold;
+    private AtomicInteger mPolicyThrottleValue;
     private int mPolicyResetDay; // 1-28
     private int mPolicyNotificationsAllowedMask;
 
@@ -114,7 +116,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     private InterfaceObserver mInterfaceObserver;
     private SettingsObserver mSettingsObserver;
 
-    private int mThrottleIndex; // 0 for none, 1 for first throttle val, 2 for next, etc
+    private AtomicInteger mThrottleIndex; // 0 for none, 1 for first throttle val, 2 for next, etc
     private static final int THROTTLE_INDEX_UNINITIALIZED = -1;
     private static final int THROTTLE_INDEX_UNTHROTTLED   =  0;
 
@@ -212,7 +214,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     }
 
     private long ntpToWallTime(long ntpTime) {
-        long bestNow = getBestTime();
+        long bestNow = getBestTime(true); // do it quickly
         long localNow = System.currentTimeMillis();
         return localNow + (ntpTime - bestNow);
     }
@@ -220,40 +222,42 @@ public class ThrottleService extends IThrottleManager.Stub {
     // TODO - fetch for the iface
     // return time in the local, system wall time, correcting for the use of ntp
 
-    public synchronized long getResetTime(String iface) {
+    public long getResetTime(String iface) {
         enforceAccessPermission();
         long resetTime = 0;
         if (mRecorder != null) {
-            resetTime = ntpToWallTime(mRecorder.getPeriodEnd());
+            resetTime = mRecorder.getPeriodEnd();
         }
+        resetTime = ntpToWallTime(resetTime);
         return resetTime;
     }
 
     // TODO - fetch for the iface
     // return time in the local, system wall time, correcting for the use of ntp
-    public synchronized long getPeriodStartTime(String iface) {
-        enforceAccessPermission();
+    public long getPeriodStartTime(String iface) {
         long startTime = 0;
+        enforceAccessPermission();
         if (mRecorder != null) {
-            startTime = ntpToWallTime(mRecorder.getPeriodStart());
+            startTime = mRecorder.getPeriodStart();
         }
+        startTime = ntpToWallTime(startTime);
         return startTime;
     }
     //TODO - a better name?  getCliffByteCountThreshold?
     // TODO - fetch for the iface
-    public synchronized long getCliffThreshold(String iface, int cliff) {
+    public long getCliffThreshold(String iface, int cliff) {
         enforceAccessPermission();
         if (cliff == 1) {
-            return mPolicyThreshold;
+           return mPolicyThreshold.get();
         }
         return 0;
     }
     // TODO - a better name? getThrottleRate?
     // TODO - fetch for the iface
-    public synchronized int getCliffLevel(String iface, int cliff) {
+    public int getCliffLevel(String iface, int cliff) {
         enforceAccessPermission();
         if (cliff == 1) {
-            return mPolicyThrottleValue;
+            return mPolicyThrottleValue.get();
         }
         return 0;
     }
@@ -265,10 +269,9 @@ public class ThrottleService extends IThrottleManager.Stub {
     }
 
     // TODO - fetch for the iface
-    public synchronized long getByteCount(String iface, int dir, int period, int ago) {
+    public long getByteCount(String iface, int dir, int period, int ago) {
         enforceAccessPermission();
-        if ((period == ThrottleManager.PERIOD_CYCLE) &&
-                (mRecorder != null)) {
+        if ((period == ThrottleManager.PERIOD_CYCLE) && (mRecorder != null)) {
             if (dir == ThrottleManager.DIRECTION_TX) return mRecorder.getPeriodTx(ago);
             if (dir == ThrottleManager.DIRECTION_RX) return mRecorder.getPeriodRx(ago);
         }
@@ -277,10 +280,10 @@ public class ThrottleService extends IThrottleManager.Stub {
 
     // TODO - a better name - getCurrentThrottleRate?
     // TODO - fetch for the iface
-    public synchronized int getThrottle(String iface) {
+    public int getThrottle(String iface) {
         enforceAccessPermission();
-        if (mThrottleIndex == 1) {
-            return mPolicyThrottleValue;
+        if (mThrottleIndex.get() == 1) {
+            return mPolicyThrottleValue.get();
         }
         return 0;
     }
@@ -373,7 +376,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             // check for sim change TODO
             // reregister for notification of policy change
 
-            mThrottleIndex = THROTTLE_INDEX_UNINITIALIZED;
+            mThrottleIndex.set(THROTTLE_INDEX_UNINITIALIZED);
 
             mRecorder = new DataRecorder(mContext, ThrottleService.this);
 
@@ -401,15 +404,16 @@ public class ThrottleService extends IThrottleManager.Stub {
                     R.integer.config_datause_threshold_bytes);
             int defaultValue = mContext.getResources().getInteger(
                     R.integer.config_datause_throttle_kbitsps);
-            synchronized (ThrottleService.this) {
-                mPolicyThreshold = Settings.Secure.getLong(mContext.getContentResolver(),
-                        Settings.Secure.THROTTLE_THRESHOLD_BYTES, defaultThreshold);
-                mPolicyThrottleValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.THROTTLE_VALUE_KBITSPS, defaultValue);
-                if (testing) {
-                    mPolicyPollPeriodSec = TESTING_POLLING_PERIOD_SEC;
-                    mPolicyThreshold = TESTING_THRESHOLD;
-                }
+            long threshold = Settings.Secure.getLong(mContext.getContentResolver(),
+                    Settings.Secure.THROTTLE_THRESHOLD_BYTES, defaultThreshold);
+            int value = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.THROTTLE_VALUE_KBITSPS, defaultValue);
+
+            mPolicyThreshold.set(threshold);
+            mPolicyThrottleValue.set(value);
+            if (testing) {
+                mPolicyPollPeriodSec = TESTING_POLLING_PERIOD_SEC;
+                mPolicyThreshold.set(TESTING_THRESHOLD);
             }
 
             mPolicyResetDay = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -421,10 +425,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                 Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.THROTTLE_RESET_DAY, mPolicyResetDay);
             }
-            synchronized (ThrottleService.this) {
-                if (mIface == null) {
-                    mPolicyThreshold = 0;
-                }
+            if (mIface == null) {
+                mPolicyThreshold.set(0);
             }
 
             int defaultNotificationType = mContext.getResources().getInteger(
@@ -433,12 +435,12 @@ public class ThrottleService extends IThrottleManager.Stub {
                     Settings.Secure.THROTTLE_NOTIFICATION_TYPE, defaultNotificationType);
 
             Slog.d(TAG, "onPolicyChanged testing=" + testing +", period=" + mPolicyPollPeriodSec +
-                    ", threshold=" + mPolicyThreshold + ", value=" + mPolicyThrottleValue +
-                    ", resetDay=" + mPolicyResetDay + ", noteType=" +
+                    ", threshold=" + mPolicyThreshold.get() + ", value=" +
+                    mPolicyThrottleValue.get() + ", resetDay=" + mPolicyResetDay + ", noteType=" +
                     mPolicyNotificationsAllowedMask);
 
             // force updates
-            mThrottleIndex = THROTTLE_INDEX_UNINITIALIZED;
+            mThrottleIndex.set(THROTTLE_INDEX_UNINITIALIZED);
 
             onResetAlarm();
 
@@ -503,11 +505,11 @@ public class ThrottleService extends IThrottleManager.Stub {
         private void onIfaceUp() {
             // if we were throttled before, be sure and set it again - the iface went down
             // (and may have disappeared all together) and these settings were lost
-            if (mThrottleIndex == 1) {
+            if (mThrottleIndex.get() == 1) {
                 try {
                     mNMService.setInterfaceThrottle(mIface, -1, -1);
                     mNMService.setInterfaceThrottle(mIface,
-                            mPolicyThrottleValue, mPolicyThrottleValue);
+                            mPolicyThrottleValue.get(), mPolicyThrottleValue.get());
                 } catch (Exception e) {
                     Slog.e(TAG, "error setting Throttle: " + e);
                 }
@@ -516,7 +518,8 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         private void checkThrottleAndPostNotification(long currentTotal) {
             // is throttling enabled?
-            if (mPolicyThreshold == 0) {
+            long threshold = mPolicyThreshold.get();
+            if (threshold == 0) {
                 clearThrottleAndNotification();
                 return;
             }
@@ -528,15 +531,13 @@ public class ThrottleService extends IThrottleManager.Stub {
             }
 
             // check if we need to throttle
-            if (currentTotal > mPolicyThreshold) {
-                if (mThrottleIndex != 1) {
-                    synchronized (ThrottleService.this) {
-                        mThrottleIndex = 1;
-                    }
-                    if (DBG) Slog.d(TAG, "Threshold " + mPolicyThreshold + " exceeded!");
+            if (currentTotal > threshold) {
+                if (mThrottleIndex.get() != 1) {
+                    mThrottleIndex.set(1);
+                    if (DBG) Slog.d(TAG, "Threshold " + threshold + " exceeded!");
                     try {
                         mNMService.setInterfaceThrottle(mIface,
-                                mPolicyThrottleValue, mPolicyThrottleValue);
+                                mPolicyThrottleValue.get(), mPolicyThrottleValue.get());
                     } catch (Exception e) {
                         Slog.e(TAG, "error setting Throttle: " + e);
                     }
@@ -549,7 +550,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                             Notification.FLAG_ONGOING_EVENT);
 
                     Intent broadcast = new Intent(ThrottleManager.THROTTLE_ACTION);
-                    broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL, mPolicyThrottleValue);
+                    broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL,
+                            mPolicyThrottleValue.get());
                     mContext.sendStickyBroadcast(broadcast);
 
                 } // else already up!
@@ -572,8 +574,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                     long periodLength = end - start;
                     long now = System.currentTimeMillis();
                     long timeUsed = now - start;
-                    long warningThreshold = 2*mPolicyThreshold*timeUsed/(timeUsed+periodLength);
-                    if ((currentTotal > warningThreshold) && (currentTotal > mPolicyThreshold/4)) {
+                    long warningThreshold = 2*threshold*timeUsed/(timeUsed+periodLength);
+                    if ((currentTotal > warningThreshold) && (currentTotal > threshold/4)) {
                         if (mWarningNotificationSent == false) {
                             mWarningNotificationSent = true;
                             mNotificationManager.cancel(R.drawable.stat_sys_throttled);
@@ -618,11 +620,9 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
 
-        private synchronized void clearThrottleAndNotification() {
-            if (mThrottleIndex != THROTTLE_INDEX_UNTHROTTLED) {
-                synchronized (ThrottleService.this) {
-                    mThrottleIndex = THROTTLE_INDEX_UNTHROTTLED;
-                }
+        private void clearThrottleAndNotification() {
+            if (mThrottleIndex.get() != THROTTLE_INDEX_UNTHROTTLED) {
+                mThrottleIndex.set(THROTTLE_INDEX_UNTHROTTLED);
                 try {
                     mNMService.setInterfaceThrottle(mIface, -1, -1);
                 } catch (Exception e) {
@@ -685,7 +685,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                         " bytes read and " + mRecorder.getPeriodTx(0) + " written");
             }
 
-            long now = getBestTime();
+            long now = getBestTime(false);
 
             if (mNtpActive || (mNtpServer == null)) {
                 Calendar end = calculatePeriodEnd(now);
@@ -712,19 +712,22 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         // will try to get the ntp time and switch to it if found.
         // will also cache the time so we don't fetch it repeatedly.
-        getBestTime();
+        getBestTime(false);
     }
 
-    private static final int MAX_NTP_CACHE_AGE = 30 * 1000;
-    private static final int MAX_NTP_FETCH_WAIT = 10 * 1000;
+    private static final int MAX_NTP_CACHE_AGE = 60 * 1000;
+    private static final int MAX_NTP_FETCH_WAIT = 20 * 1000;
     private long cachedNtp;
     private long cachedNtpTimestamp;
 
-    private long getBestTime() {
+    // if the request is tied to UI and ANR's are a danger, request a fast result
+    // the regular polling should have updated the cached time recently using the
+    // slower method (!fast)
+    private long getBestTime(boolean fast) {
         if (mNtpServer != null) {
             if (mNtpActive) {
                 long ntpAge = SystemClock.elapsedRealtime() - cachedNtpTimestamp;
-                if (ntpAge < MAX_NTP_CACHE_AGE) {
+                if (ntpAge < MAX_NTP_CACHE_AGE || fast) {
                     if (VDBG) Slog.v(TAG, "using cached time");
                     return cachedNtp + ntpAge;
                 }
@@ -1017,38 +1020,44 @@ public class ThrottleService extends IThrottleManager.Stub {
                 if (DBG) Slog.d(TAG, "data file empty");
                 return;
             }
+            String[] parsed = data.split(":");
+            int parsedUsed = 0;
+            if (parsed.length < 6) {
+                Slog.e(TAG, "reading data file with insufficient length - ignoring");
+                return;
+            }
+
+            if (Integer.parseInt(parsed[parsedUsed++]) != DATA_FILE_VERSION) {
+                Slog.e(TAG, "reading data file with bad version - ignoring");
+                return;
+            }
+
+            int periodCount = Integer.parseInt(parsed[parsedUsed++]);
+            if (parsed.length != 5 + (2 * periodCount)) {
+                Slog.e(TAG, "reading data file with bad length (" + parsed.length +
+                        " != " + (5 + (2 * periodCount)) + ") - ignoring");
+                return;
+            }
+            long[] periodRxData = new long[periodCount];
+            for (int i = 0; i < periodCount; i++) {
+                periodRxData[i] = Long.parseLong(parsed[parsedUsed++]);
+            }
+            long[] periodTxData = new long[periodCount];
+            for (int i = 0; i < periodCount; i++) {
+                periodTxData[i] = Long.parseLong(parsed[parsedUsed++]);
+            }
+
+            Calendar periodStart = new GregorianCalendar();
+            periodStart.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
+            Calendar periodEnd = new GregorianCalendar();
+            periodEnd.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
             synchronized (mParent) {
-                String[] parsed = data.split(":");
-                int parsedUsed = 0;
-                if (parsed.length < 6) {
-                    Slog.e(TAG, "reading data file with insufficient length - ignoring");
-                    return;
-                }
-
-                if (Integer.parseInt(parsed[parsedUsed++]) != DATA_FILE_VERSION) {
-                    Slog.e(TAG, "reading data file with bad version - ignoring");
-                    return;
-                }
-
-                mPeriodCount = Integer.parseInt(parsed[parsedUsed++]);
-                if (parsed.length != 5 + (2 * mPeriodCount)) {
-                    Slog.e(TAG, "reading data file with bad length ("+parsed.length+" != "+(5 + (2*mPeriodCount))+") - ignoring");
-                    return;
-                }
-
-                mPeriodRxData = new long[mPeriodCount];
-                for(int i = 0; i < mPeriodCount; i++) {
-                    mPeriodRxData[i] = Long.parseLong(parsed[parsedUsed++]);
-                }
-                mPeriodTxData = new long[mPeriodCount];
-                for(int i = 0; i < mPeriodCount; i++) {
-                    mPeriodTxData[i] = Long.parseLong(parsed[parsedUsed++]);
-                }
+                mPeriodCount = periodCount;
+                mPeriodRxData = periodRxData;
+                mPeriodTxData = periodTxData;
                 mCurrentPeriod = Integer.parseInt(parsed[parsedUsed++]);
-                mPeriodStart = new GregorianCalendar();
-                mPeriodStart.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
-                mPeriodEnd = new GregorianCalendar();
-                mPeriodEnd.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
+                mPeriodStart = periodStart;
+                mPeriodEnd = periodEnd;
             }
         }
 
@@ -1082,15 +1091,15 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
         pw.println();
 
-        pw.println("The threshold is " + mPolicyThreshold +
+        pw.println("The threshold is " + mPolicyThreshold.get() +
                 ", after which you experince throttling to " +
-                mPolicyThrottleValue + "kbps");
+                mPolicyThrottleValue.get() + "kbps");
         pw.println("Current period is " +
                 (mRecorder.getPeriodEnd() - mRecorder.getPeriodStart())/1000 + " seconds long " +
                 "and ends in " + (getResetTime(mIface) - System.currentTimeMillis()) / 1000 +
                 " seconds.");
         pw.println("Polling every " + mPolicyPollPeriodSec + " seconds");
-        pw.println("Current Throttle Index is " + mThrottleIndex);
+        pw.println("Current Throttle Index is " + mThrottleIndex.get());
 
         for (int i = 0; i < mRecorder.getPeriodCount(); i++) {
             pw.println(" Period[" + i + "] - read:" + mRecorder.getPeriodRx(i) + ", written:" +
