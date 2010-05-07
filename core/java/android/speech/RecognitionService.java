@@ -118,7 +118,7 @@ public abstract class RecognitionService extends Service {
 
     private void dispatchCancel(IRecognitionListener listener) {
         if (mCurrentCallback == null) {
-            Log.w(TAG, "cancel called with no preceding startListening - ignoring");
+            if (DBG) Log.d(TAG, "cancel called with no preceding startListening - ignoring");
         } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
             Log.w(TAG, "cancel called by client who did not call startListening - ignoring");
         } else { // the correct state
