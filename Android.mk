@@ -474,7 +474,8 @@ LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
-$(full_target): $(framework_built)
+# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
+$(full_target): $(framework_built) $(gen)
 $(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
