@@ -12,34 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-LOCAL_PATH:= $(call my-dir)
-include $(CLEAR_VARS)
-
 # we have the common sources, plus some device-specific stuff
-LOCAL_SRC_FILES:= \
-	Binder.cpp \
-	BpBinder.cpp \
-	IInterface.cpp \
-	IMemory.cpp \
-	IPCThreadState.cpp \
-	IPermissionController.cpp \
-	IServiceManager.cpp \
-	MemoryDealer.cpp \
+sources := \
+    Binder.cpp \
+    BpBinder.cpp \
+    IInterface.cpp \
+    IMemory.cpp \
+    IPCThreadState.cpp \
+    IPermissionController.cpp \
+    IServiceManager.cpp \
+    MemoryDealer.cpp \
     MemoryBase.cpp \
     MemoryHeapBase.cpp \
     MemoryHeapPmem.cpp \
-	Parcel.cpp \
-	Permission.cpp \
-	ProcessState.cpp \
-	Static.cpp
+    Parcel.cpp \
+    Permission.cpp \
+    ProcessState.cpp \
+    Static.cpp
 
+LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
 LOCAL_LDLIBS += -lpthread
-
-LOCAL_SHARED_LIBRARIES := \
-	liblog \
-	libcutils \
-	libutils
-
-LOCAL_MODULE:= libbinder
-
+LOCAL_MODULE := libbinder
+LOCAL_SHARED_LIBRARIES := liblog libcutils libutils
+LOCAL_SRC_FILES := $(sources)
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_LDLIBS += -lpthread
+LOCAL_MODULE := libbinder
+LOCAL_SRC_FILES := $(sources)
+include $(BUILD_STATIC_LIBRARY)
