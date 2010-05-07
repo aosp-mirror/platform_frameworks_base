@@ -406,7 +406,7 @@ web_docs_sample_code_flags := \
                 -samplecode $(sample_dir)/SampleSyncAdapter \
                             resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/SearchableDictionary \
-		            resources/samples/SearchableDictionary "Searchable Dictionary" \
+		            resources/samples/SearchableDictionary "Searchable Dictionary v2" \
 		-samplecode $(sample_dir)/Snake \
 		            resources/samples/Snake "Snake" \
 		-samplecode $(sample_dir)/SoftKeyboard \
