@@ -150,6 +150,15 @@ public class ConnectivityManagerMobileTest
     // Test case 1: Test enabling Wifi without associating with any AP
     @LargeTest
     public void test3GToWifiNotification() {
+        // To avoid UNKNOWN state when device boots up
+        cmActivity.enableWifi();
+        try {
+            Thread.sleep(2 * STATE_TRANSITION_SHORT_TIMEOUT);
+        } catch (Exception e) {
+            Log.v(LOG_TAG, "exception: " + e.toString());
+        }
+
+        cmActivity.disableWifi();
         // As Wifi stays in DISCONNECTED, the connectivity manager will not broadcast
         // any network connectivity event for Wifi
         NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);

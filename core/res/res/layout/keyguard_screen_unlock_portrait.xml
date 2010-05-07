@@ -55,7 +55,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="15dip"
             android:layout_marginLeft="20dip"
-            android:layout_marginBottom="8dip"
+            android:paddingBottom="8dip"
             >
 
             <TextView android:id="@+id/timeDisplay"

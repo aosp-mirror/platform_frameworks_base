@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.IShellOutputReceiver;
 import com.android.ddmlib.Log;
@@ -23,11 +24,21 @@ import com.android.ddmlib.MultiLineReceiver;
 import com.android.ddmlib.SyncService;
 import com.android.ddmlib.SyncService.ISyncProgressMonitor;
 import com.android.ddmlib.SyncService.SyncResult;
+import com.android.ddmlib.testrunner.ITestRunListener;
+import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
+import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.hosttest.DeviceTestCase;
 import com.android.hosttest.DeviceTestSuite;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.StringReader;
+import java.lang.Runtime;
+import java.lang.Process;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 import com.android.hosttest.DeviceTestCase;
@@ -47,6 +58,21 @@ public class PackageManagerHostTestUtils extends Assert {
 
     private static final int MAX_WAIT_FOR_DEVICE_TIME = 120 * 1000;
     private static final int WAIT_FOR_DEVICE_POLL_TIME = 10 * 1000;
+    private static final int MAX_WAIT_FOR_APP_LAUNCH_TIME = 60 * 1000;
+    private static final int WAIT_FOR_APP_LAUNCH_POLL_TIME = 5 * 1000;
+
+    // Install preference on the device-side
+    public static enum InstallLocPreference {
+        AUTO,
+        INTERNAL,
+        EXTERNAL
+    }
+
+    // Actual install location
+    public static enum InstallLocation {
+        DEVICE,
+        SDCARD
+    }
 
     /**
      * Constructor takes the device to use
@@ -90,6 +116,30 @@ public class PackageManagerHostTestUtils extends Assert {
     }
 
     /**
+     * Helper method to run tests and return the listener that collected the results.
+     * @param pkgName Android application package for tests
+     * @return the {@link CollectingTestRunListener}
+     */
+    private CollectingTestRunListener doRunTests(String pkgName) throws IOException {
+        RemoteAndroidTestRunner testRunner = new RemoteAndroidTestRunner(
+                pkgName, mDevice);
+        CollectingTestRunListener listener = new CollectingTestRunListener();
+        testRunner.run(listener);
+        return listener;
+    }
+
+    /**
+     * Runs the specified packages tests, and returns whether all tests passed or not.
+     *
+     * @param pkgName Android application package for tests
+     * @return true if every test passed, false otherwise.
+     */
+    public boolean runDeviceTestsDidAllTestsPass(String pkgName) throws IOException {
+        CollectingTestRunListener listener = doRunTests(pkgName);
+        return listener.didAllTestsPass();
+    }
+
+    /**
      * Helper method to push a file to device
      * @param apkAppPrivatePath
      * @throws IOException
@@ -102,15 +152,45 @@ public class PackageManagerHostTestUtils extends Assert {
     }
 
     /**
-     * Helper method to install a file to device
+     * Helper method to install a file
      * @param localFilePath the absolute file system path to file on local host to install
      * @param reinstall set to <code>true</code> if re-install of app should be performed
      * @throws IOException
      */
-    public void installFile(final String localFilePath, final boolean replace)
-            throws IOException {
+    public void installFile(final String localFilePath, final boolean replace) throws IOException {
         String result = mDevice.installPackage(localFilePath, replace);
         assertEquals(null, result);
+    }
+
+    /**
+     * Helper method to install a file that should not be install-able
+     * @param localFilePath the absolute file system path to file on local host to install
+     * @param reinstall set to <code>true</code> if re-install of app should be performed
+     * @return the string output of the failed install attempt
+     * @throws IOException
+     */
+    public String installFileFail(final String localFilePath, final boolean replace)
+            throws IOException {
+        String result = mDevice.installPackage(localFilePath, replace);
+        assertNotNull(result);
+        return result;
+    }
+
+    /**
+     * Helper method to install a file to device as forward locked
+     * @param localFilePath the absolute file system path to file on local host to install
+     * @param reinstall set to <code>true</code> if re-install of app should be performed
+     * @throws IOException
+     */
+    public String installFileForwardLocked(final String localFilePath, final boolean replace)
+            throws IOException {
+        String remoteFilePath = mDevice.syncPackageToDevice(localFilePath);
+        InstallReceiver receiver = new InstallReceiver();
+        String cmd = String.format(replace ? "pm install -r -l \"%1$s\"" :
+                "pm install -l \"%1$s\"", remoteFilePath);
+        mDevice.executeShellCommand(cmd, receiver);
+        mDevice.removeRemotePackage(remoteFilePath);
+        return receiver.getErrorMessage();
     }
 
     /**
@@ -128,7 +208,7 @@ public class PackageManagerHostTestUtils extends Assert {
     /**
      * Helper method to determine if file exists on the device containing a given string.
      *
-     * @param destPath the
+     * @param destPath the absolute path of the file
      * @return <code>true</code> if file exists containing given string,
      *         <code>false</code> otherwise.
      * @throws IOException if adb shell command failed
@@ -152,18 +232,18 @@ public class PackageManagerHostTestUtils extends Assert {
     }
 
     /**
-     * Helper method to determine if app was installed on device.
+     * Determines if app was installed on device.
      *
      * @param packageName package name to check for
      * @return <code>true</code> if file exists, <code>false</code> otherwise.
      * @throws IOException if adb shell command failed
      */
-    private boolean doesAppExistOnDevice(String packageName) throws IOException {
+    public boolean doesAppExistOnDevice(String packageName) throws IOException {
         return doesRemoteFileExistContainingString(DEVICE_APP_PATH, packageName);
     }
 
     /**
-     * Helper method to determine if app was installed on SD card.
+     * Determines if app was installed on SD card.
      *
      * @param packageName package name to check for
      * @return <code>true</code> if file exists, <code>false</code> otherwise.
@@ -174,12 +254,23 @@ public class PackageManagerHostTestUtils extends Assert {
     }
 
     /**
+     * Helper method to determine if app was installed on SD card.
+     *
+     * @param packageName package name to check for
+     * @return <code>true</code> if file exists, <code>false</code> otherwise.
+     * @throws IOException if adb shell command failed
+     */
+    public boolean doesAppExistAsForwardLocked(String packageName) throws IOException {
+        return doesRemoteFileExistContainingString(APP_PRIVATE_PATH, packageName);
+    }
+
+    /**
      * Waits for device's package manager to respond.
      *
      * @throws InterruptedException
      * @throws IOException
      */
-    public void waitForDevice() throws InterruptedException, IOException {
+    public void waitForPackageManager() throws InterruptedException, IOException {
         Log.i(LOG_TAG, "waiting for device");
         int currentWaitTime = 0;
         // poll the package manager until it returns something for android
@@ -194,17 +285,122 @@ public class PackageManagerHostTestUtils extends Assert {
     }
 
     /**
+     * Helper to determine if the device is currently online and visible via ADB.
+     *
+     * @return true iff the device is currently available to ADB and online, false otherwise.
+     */
+    private boolean deviceIsOnline() {
+        AndroidDebugBridge bridge = AndroidDebugBridge.getBridge();
+        IDevice[] devices = bridge.getDevices();
+
+        for (IDevice device : devices) {
+            // only online if the device appears in the devices list, and its state is online
+            if ((mDevice != null) &&
+                    mDevice.getSerialNumber().equals(device.getSerialNumber()) &&
+                    device.isOnline()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Waits for device to be online (visible to ADB) before returning, or times out if we've
+     * waited too long. Note that this only means the device is visible via ADB, not that
+     * PackageManager is fully up and running yet.
+     *
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public void waitForDeviceToComeOnline() throws InterruptedException, IOException {
+        Log.i(LOG_TAG, "waiting for device to be online");
+        int currentWaitTime = 0;
+
+        // poll ADB until we see the device is online
+        while (!deviceIsOnline()) {
+            Thread.sleep(WAIT_FOR_DEVICE_POLL_TIME);
+            currentWaitTime += WAIT_FOR_DEVICE_POLL_TIME;
+            if (currentWaitTime > MAX_WAIT_FOR_DEVICE_TIME) {
+                Log.e(LOG_TAG, "time out waiting for device");
+                throw new InterruptedException();
+            }
+        }
+        // Note: if we try to access the device too quickly after it is "officially" online,
+        // there are sometimes strange issues where it's actually not quite ready yet,
+        // so we pause for a bit once more before actually returning.
+        Thread.sleep(WAIT_FOR_DEVICE_POLL_TIME);
+    }
+
+    /**
+     * Queries package manager and waits until a package is launched (or times out)
+     *
+     * @param packageName The name of the package to wait to load
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public void waitForApp(String packageName) throws InterruptedException, IOException {
+        Log.i(LOG_TAG, "waiting for app to launch");
+        int currentWaitTime = 0;
+        // poll the package manager until it returns something for the package we're looking for
+        while (!doesPackageExist(packageName)) {
+            Thread.sleep(WAIT_FOR_APP_LAUNCH_POLL_TIME);
+            currentWaitTime += WAIT_FOR_APP_LAUNCH_POLL_TIME;
+            if (currentWaitTime > MAX_WAIT_FOR_APP_LAUNCH_TIME) {
+                Log.e(LOG_TAG, "time out waiting for app to launch: " + packageName);
+                throw new InterruptedException();
+            }
+        }
+    }
+
+    /**
      * Helper method which executes a adb shell command and returns output as a {@link String}
      * @return the output of the command
      * @throws IOException
      */
     public String executeShellCommand(String command) throws IOException {
-        Log.d(LOG_TAG, String.format("adb shell %s", command));
+        Log.i(LOG_TAG, String.format("adb shell %s", command));
         CollectingOutputReceiver receiver = new CollectingOutputReceiver();
         mDevice.executeShellCommand(command, receiver);
         String output = receiver.getOutput();
-        Log.d(LOG_TAG, String.format("Result: %s", output));
+        Log.i(LOG_TAG, String.format("Result: %s", output));
         return output;
+    }
+
+    /**
+     * Helper method ensures we are in root mode on the host side. It returns only after
+     * PackageManager is actually up and running.
+     * @throws IOException
+     */
+    public void runAdbRoot() throws IOException, InterruptedException {
+        Log.i(LOG_TAG, "adb root");
+        Runtime runtime = Runtime.getRuntime();
+        Process process = runtime.exec("adb root"); // adb should be in the path
+        BufferedReader output = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        String nextLine = null;
+        while (null != (nextLine = output.readLine())) {
+            Log.i(LOG_TAG, nextLine);
+        }
+        process.waitFor();
+        waitForDeviceToComeOnline();
+        waitForPackageManager(); // now wait for package manager to actually load
+    }
+
+    /**
+     * Helper method which reboots the device and returns once the device is online again
+     * and package manager is up and running (note this function is synchronous to callers).
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void rebootDevice() throws IOException, InterruptedException {
+        String command = "reboot"; // no need for -s since mDevice is already tied to a device
+        Log.i(LOG_TAG, command);
+        CollectingOutputReceiver receiver = new CollectingOutputReceiver();
+        mDevice.executeShellCommand(command, receiver);
+        String output = receiver.getOutput();
+        Log.i(LOG_TAG, String.format("Result: %s", output));
+        waitForDeviceToComeOnline(); // wait for device to come online
+        runAdbRoot();
     }
 
     /**
@@ -255,6 +451,97 @@ public class PackageManagerHostTestUtils extends Assert {
         }
     }
 
+    // For collecting results from running device tests
+    private static class CollectingTestRunListener implements ITestRunListener {
+
+        private boolean mAllTestsPassed = true;
+        private String mTestRunErrorMessage = null;
+
+        public void testEnded(TestIdentifier test) {
+            // ignore
+        }
+
+        public void testFailed(TestFailure status, TestIdentifier test,
+                String trace) {
+            Log.w(LOG_TAG, String.format("%s#%s failed: %s", test.getClassName(),
+                    test.getTestName(), trace));
+            mAllTestsPassed = false;
+        }
+
+        public void testRunEnded(long elapsedTime) {
+            // ignore
+        }
+
+        public void testRunFailed(String errorMessage) {
+            Log.w(LOG_TAG, String.format("test run failed: %s", errorMessage));
+            mAllTestsPassed = false;
+            mTestRunErrorMessage = errorMessage;
+        }
+
+        public void testRunStarted(int testCount) {
+            // ignore
+        }
+
+        public void testRunStopped(long elapsedTime) {
+            // ignore
+        }
+
+        public void testStarted(TestIdentifier test) {
+            // ignore
+        }
+
+        boolean didAllTestsPass() {
+            return mAllTestsPassed;
+        }
+
+        /**
+         * Get the test run failure error message.
+         * @return the test run failure error message or <code>null</code> if test run completed.
+         */
+        String getTestRunErrorMessage() {
+            return mTestRunErrorMessage;
+        }
+    }
+
+    /**
+     * Output receiver for "pm install package.apk" command line.
+     *
+     */
+    private static final class InstallReceiver extends MultiLineReceiver {
+
+        private static final String SUCCESS_OUTPUT = "Success"; //$NON-NLS-1$
+        private static final Pattern FAILURE_PATTERN = Pattern.compile("Failure\\s+\\[(.*)\\]"); //$NON-NLS-1$
+
+        private String mErrorMessage = null;
+
+        public InstallReceiver() {
+        }
+
+        @Override
+        public void processNewLines(String[] lines) {
+            for (String line : lines) {
+                if (line.length() > 0) {
+                    if (line.startsWith(SUCCESS_OUTPUT)) {
+                        mErrorMessage = null;
+                    } else {
+                        Matcher m = FAILURE_PATTERN.matcher(line);
+                        if (m.matches()) {
+                            mErrorMessage = m.group(1);
+                        }
+                    }
+                }
+            }
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public String getErrorMessage() {
+            return mErrorMessage;
+        }
+    }
+
     /**
      * Helper method for installing an app to wherever is specified in its manifest, and
      * then verifying the app was installed onto SD Card.
@@ -280,7 +567,7 @@ public class PackageManagerHostTestUtils extends Assert {
         installFile(apkPath, overwrite);
         assertTrue(doesAppExistOnSDCard(pkgName));
         assertFalse(doesAppExistOnDevice(pkgName));
-        waitForDevice();
+        waitForPackageManager();
 
         // grep for package to make sure it is installed
         assertTrue(doesPackageExist(pkgName));
@@ -311,7 +598,39 @@ public class PackageManagerHostTestUtils extends Assert {
         installFile(apkPath, overwrite);
         assertFalse(doesAppExistOnSDCard(pkgName));
         assertTrue(doesAppExistOnDevice(pkgName));
-        waitForDevice();
+        waitForPackageManager();
+
+        // grep for package to make sure it is installed
+        assertTrue(doesPackageExist(pkgName));
+    }
+
+    /**
+     * Helper method for installing an app as forward-locked, and
+     * then verifying the app was installed in the proper forward-locked location.
+     *
+     * @param the path of the apk to install
+     * @param the name of the package
+     * @param <code>true</code> if the app should be overwritten, <code>false</code> otherwise
+     * @throws IOException if adb shell command failed
+     * @throws InterruptedException if the thread was interrupted
+     * <p/>
+     * Assumes adb is running as root in device under test.
+     */
+    public void installFwdLockedAppAndVerifyExists(String apkPath,
+            String pkgName, boolean overwrite) throws IOException, InterruptedException {
+        // Start with a clean slate if we're not overwriting
+        if (!overwrite) {
+            // cleanup test app just in case it already exists
+            mDevice.uninstallPackage(pkgName);
+            // grep for package to make sure its not installed
+            assertFalse(doesPackageExist(pkgName));
+        }
+
+        String result = installFileForwardLocked(apkPath, overwrite);
+        assertEquals(null, result);
+        assertTrue(doesAppExistAsForwardLocked(pkgName));
+        assertFalse(doesAppExistOnSDCard(pkgName));
+        waitForPackageManager();
 
         // grep for package to make sure it is installed
         assertTrue(doesPackageExist(pkgName));
@@ -332,4 +651,74 @@ public class PackageManagerHostTestUtils extends Assert {
         assertFalse(doesPackageExist(pkgName));
     }
 
+    /**
+     * Helper method for clearing any installed non-system apps.
+     * Useful ensuring no non-system apps are installed, and for cleaning up stale files that
+     * may be lingering on the system for whatever reason.
+     *
+     * @throws IOException if adb shell command failed
+     * <p/>
+     * Assumes adb is running as root in device under test.
+     */
+    public void wipeNonSystemApps() throws IOException {
+      String allInstalledPackages = executeShellCommand("pm list packages -f");
+      BufferedReader outputReader = new BufferedReader(new StringReader(allInstalledPackages));
+
+      // First use Package Manager to uninstall all non-system apps
+      String currentLine = null;
+      while ((currentLine = outputReader.readLine()) != null) {
+          // Skip over any system apps...
+          if (currentLine.contains("/system/")) {
+              continue;
+          }
+          String packageName = currentLine.substring(currentLine.indexOf('=') + 1);
+          mDevice.uninstallPackage(packageName);
+      }
+      // Make sure there are no stale app files under these directories
+      executeShellCommand(String.format("rm %s*", SDCARD_APP_PATH, "*"));
+      executeShellCommand(String.format("rm %s*", DEVICE_APP_PATH, "*"));
+      executeShellCommand(String.format("rm %s*", APP_PRIVATE_PATH, "*"));
+    }
+
+    /**
+     * Sets the device's install location preference.
+     *
+     * <p/>
+     * Assumes adb is running as root in device under test.
+     */
+    public void setDevicePreferredInstallLocation(InstallLocPreference pref) throws IOException {
+        String command = "pm setInstallLocation %d";
+        int locValue = 0;
+        switch (pref) {
+            case INTERNAL:
+                locValue = 1;
+                break;
+            case EXTERNAL:
+                locValue = 2;
+                break;
+            default: // AUTO
+                locValue = 0;
+                break;
+        }
+        executeShellCommand(String.format(command, locValue));
+    }
+
+    /**
+     * Gets the device's install location preference.
+     *
+     * <p/>
+     * Assumes adb is running as root in device under test.
+     */
+    public InstallLocPreference getDevicePreferredInstallLocation() throws IOException {
+        String result = executeShellCommand("pm getInstallLocation");
+        if (result.indexOf('0') != -1) {
+            return InstallLocPreference.AUTO;
+        }
+        else if (result.indexOf('1') != -1) {
+            return InstallLocPreference.INTERNAL;
+        }
+        else {
+            return InstallLocPreference.EXTERNAL;
+        }
+    }
 }

@@ -84,10 +84,13 @@ struct AwesomePlayer {
     status_t suspend();
     status_t resume();
 
+    // This is a mask of MediaExtractor::Flags.
+    uint32_t flags() const;
+
 private:
     friend struct AwesomeEvent;
 
-    enum Flags {
+    enum {
         PLAYING             = 1,
         LOOPING             = 2,
         FIRST_FRAME         = 4,
@@ -126,6 +129,7 @@ private:
     int64_t mDurationUs;
 
     uint32_t mFlags;
+    uint32_t mExtractorFlags;
 
     int32_t mVideoWidth, mVideoHeight;
     int64_t mTimeSourceDeltaUs;

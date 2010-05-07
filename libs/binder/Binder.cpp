@@ -69,8 +69,6 @@ public:
 
 // ---------------------------------------------------------------------------
 
-String16 BBinder::sEmptyDescriptor;
-
 BBinder::BBinder()
     : mExtras(NULL)
 {
@@ -88,6 +86,9 @@ status_t BBinder::pingBinder()
 
 const String16& BBinder::getInterfaceDescriptor() const
 {
+    // This is a local static rather than a global static,
+    // to avoid static initializer ordering issues.
+    static String16 sEmptyDescriptor;
     LOGW("reached BBinder::getInterfaceDescriptor (this=%p)", this);
     return sEmptyDescriptor;
 }
