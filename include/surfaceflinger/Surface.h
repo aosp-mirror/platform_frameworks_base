@@ -217,6 +217,7 @@ private:
     int  connect(int api);
     int  disconnect(int api);
     int  crop(Rect const* rect);
+    int  setBufferCount(int bufferCount);
 
     /*
      *  private stuff...

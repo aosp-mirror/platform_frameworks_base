@@ -89,6 +89,7 @@ private:
     uint32_t getEffectiveUsage(uint32_t usage) const;
 
     sp<GraphicBuffer> requestBuffer(int index, int usage);
+    status_t setBufferCount(int bufferCount);
     void destroy();
 
     class SurfaceLayer : public LayerBaseClient::Surface {
@@ -98,6 +99,7 @@ private:
         ~SurfaceLayer();
     private:
         virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual status_t setBufferCount(int bufferCount);
         sp<Layer> getOwner() const {
             return static_cast<Layer*>(Surface::getOwner().get());
         }

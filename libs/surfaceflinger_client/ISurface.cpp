@@ -83,6 +83,16 @@ public:
         return buffer;
     }
 
+    virtual status_t setBufferCount(int bufferCount)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
+        data.writeInt32(bufferCount);
+        remote()->transact(SET_BUFFER_COUNT, data, &reply);
+        status_t err = reply.readInt32();
+        return err;
+    }
+
     virtual status_t registerBuffers(const BufferHeap& buffers)
     {
         Parcel data, reply;
@@ -145,6 +155,13 @@ status_t BnSurface::onTransact(
             if (buffer == NULL)
                 return BAD_VALUE;
             return reply->write(*buffer);
+        }
+        case SET_BUFFER_COUNT: {
+            CHECK_INTERFACE(ISurface, data, reply);
+            int bufferCount = data.readInt32();
+            status_t err = setBufferCount(bufferCount);
+            reply->writeInt32(err);
+            return NO_ERROR;
         }
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);

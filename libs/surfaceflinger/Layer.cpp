@@ -208,6 +208,30 @@ void Layer::onDraw(const Region& clip) const
     drawWithOpenGL(clip, tex);
 }
 
+
+status_t Layer::setBufferCount(int bufferCount)
+{
+    // this ensures our client doesn't go away while we're accessing
+    // the shared area.
+    sp<Client> ourClient(client.promote());
+    if (ourClient == 0) {
+        // oops, the client is already gone
+        return DEAD_OBJECT;
+    }
+
+    status_t err;
+
+    // FIXME: resize() below is NOT thread-safe, we need to synchronize
+    // the users of lcblk in our process (ie: retire), and we assume the
+    // client is not mucking with the SharedStack, which is only enforced
+    // by construction, therefore we need to protect ourselves against
+    // buggy and malicious client (as always)
+
+    err = lcblk->resize(bufferCount);
+
+    return err;
+}
+
 sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
 {
     sp<GraphicBuffer> buffer;
@@ -640,6 +664,16 @@ sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
         buffer = owner->requestBuffer(index, usage);
     }
     return buffer;
+}
+
+status_t Layer::SurfaceLayer::setBufferCount(int bufferCount)
+{
+    status_t err = DEAD_OBJECT;
+    sp<Layer> owner(getOwner());
+    if (owner != 0) {
+        err = owner->setBufferCount(bufferCount);
+    }
+    return err;
 }
 
 // ---------------------------------------------------------------------------
