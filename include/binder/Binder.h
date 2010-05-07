@@ -71,7 +71,6 @@ private:
 
             Extras*     mExtras;
             void*       mReserved0;
-    static  String16    sEmptyDescriptor;
 };
 
 // ---------------------------------------------------------------------------

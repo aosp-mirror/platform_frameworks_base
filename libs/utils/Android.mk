@@ -104,3 +104,13 @@ endif # sim
 LOCAL_MODULE:= libutils
 include $(BUILD_SHARED_LIBRARY)
 
+ifneq ($(TARGET_SIMULATOR),true)
+ifeq ($(TARGET_OS),linux)
+include $(CLEAR_VARS)
+LOCAL_C_INCLUDES += external/zlib external/icu4c/common
+LOCAL_LDLIBS := -lrt -ldl -lpthread
+LOCAL_MODULE := libutils
+LOCAL_SRC_FILES := $(commonSources) BackupData.cpp BackupHelpers.cpp
+include $(BUILD_STATIC_LIBRARY)
+endif
+endif
