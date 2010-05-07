@@ -120,7 +120,7 @@ public class PackageManagerHostTestUtils extends Assert {
      * @param pkgName Android application package for tests
      * @return the {@link CollectingTestRunListener}
      */
-    private CollectingTestRunListener doRunTests(String pkgName) {
+    private CollectingTestRunListener doRunTests(String pkgName) throws IOException {
         RemoteAndroidTestRunner testRunner = new RemoteAndroidTestRunner(
                 pkgName, mDevice);
         CollectingTestRunListener listener = new CollectingTestRunListener();
@@ -138,7 +138,7 @@ public class PackageManagerHostTestUtils extends Assert {
      * @param pkgName Android application package for tests
      * @return true if every test passed, false otherwise.
      */
-    public boolean runDeviceTestsDidAllTestsPass(String pkgName) {
+    public boolean runDeviceTestsDidAllTestsPass(String pkgName) throws IOException {
         CollectingTestRunListener listener = doRunTests(pkgName);
         return listener.didAllTestsPass();
     }
