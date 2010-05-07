@@ -110,7 +110,6 @@ the significant version number used internally.
 
 <dt><a name="install"></a>{@code android:installLocation}</dt>
 <dd>The default install location for the application.
-<p>This attribute was introduced in API Level 8.</p>
 
 <p>The following keyword strings are accepted:</p>
 
@@ -119,22 +118,30 @@ the significant version number used internally.
    <th>Value</th>
    <th>Description</th>
 </tr><tr>
-   <td>"{@code auto}"</td>
-   <td>Let the system decide the ideal install location. This will usually be based on the user's
-saved preference.</td>
-</tr><tr>
    <td>"{@code internalOnly}"</td>
-   <td>The application requests to be installed on the internal device storage only. If this is set,
-then the application will never be installed on the external storage (SD card). If the internal
-storage is full, then the system will not install the application.</td>
+   <td>The application must be installed on the internal device storage only. If this is set,
+the application will never be installed on the external storage. If the internal
+storage is full, then the system will not install the application. This is also the default behavior
+if you do not define {@code android:installLocation}.</td>
+</tr><tr>
+   <td>"{@code auto}"</td>
+   <td>The application may be installed on the external storage, but the system will install the
+application on the internal storage by default. If the internal storage is full, then the system
+will install it on the external storage. Once installed, the user can move the application
+to either internal or external storage through the system settings.</td>
 </tr><tr>
    <td>"{@code preferExternal}"</td>
    <td>The application prefers to be installed on the external storage (SD card). There is no
 guarantee that the system will honor this request. The application might be installed on internal
 storage if the external media is unavailable or full, or if the application uses the forward-locking
-mechanism (not supported on external storage).</td>
+mechanism (not supported on external storage). Once installed, the user can move the application to
+either internal or external storage through the system settings.</td>
 </tr>
 </table>
+
+<p class="note"><strong>Note:</strong> By default, your application will be installed on the
+internal storage and cannot be installed on the external storage unless you define this attribute
+to be either "{@code auto}" or "{@code preferExternal}".</p>
 
 <p>When an application is installed on the external storage:</p>
 <ul>
@@ -150,8 +157,9 @@ multiple SD cards can be used with the same device.</li>
 
 <p>The user may also request to move an application from the internal storage to the external
 storage. However, the system will not allow the user to move the application to external storage if
-this attribute is set to {@code internalOnly}.
-</p>
+this attribute is set to {@code internalOnly}, which is the default setting.</p>
+
+<p>Introduced in: API Level 8.</p>
 
 </dd>
 
@@ -164,6 +172,7 @@ this attribute is set to {@code internalOnly}.
 
 <p>
 <dt>see also:</dt>
-<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+<dd><a href="{@docRoot}guide/appendix/install-location.html">App Install Location</a><br/>
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
 
 </dl>
