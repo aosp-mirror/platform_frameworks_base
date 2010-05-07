@@ -281,9 +281,28 @@ void Layer::onDraw(const Region& clip) const
     GLuint textureName = mTextures[index].name;
     if (UNLIKELY(textureName == -1LU)) {
         // the texture has not been created yet, this Layer has
-        // in fact never been drawn into. this happens frequently with
-        // SurfaceView.
-        clearWithOpenGL(clip);
+        // in fact never been drawn into. This happens frequently with
+        // SurfaceView because the WindowManager can't know when the client
+        // has drawn the first time.
+
+        // If there is nothing under us, we paint the screen in black, otherwise
+        // we just skip this update.
+
+        // figure out if there is something below us
+        Region under;
+        const SurfaceFlinger::LayerVector& drawingLayers(mFlinger->mDrawingState.layersSortedByZ);
+        const size_t count = drawingLayers.size();
+        for (size_t i=0 ; i<count ; ++i) {
+            const sp<LayerBase>& layer(drawingLayers[i]);
+            if (layer.get() == static_cast<LayerBase const*>(this))
+                break;
+            under.orSelf(layer->visibleRegionScreen);
+        }
+        // if not everything below us is covered, we plug the holes!
+        Region holes(clip.subtract(under));
+        if (!holes.isEmpty()) {
+            clearWithOpenGL(holes);
+        }
         return;
     }
     drawWithOpenGL(clip, mTextures[index]);
