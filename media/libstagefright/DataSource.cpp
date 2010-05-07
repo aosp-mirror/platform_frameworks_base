@@ -18,7 +18,7 @@
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
-#include "include/VorbisExtractor.h"
+#include "include/OggExtractor.h"
 
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
@@ -93,7 +93,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffMPEG4);
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffWAV);
-    RegisterSniffer(SniffVorbis);
+    RegisterSniffer(SniffOgg);
 }
 
 // static
