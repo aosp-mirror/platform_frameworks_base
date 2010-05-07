@@ -136,10 +136,11 @@ static inline char* getEmptyString()
 
 void initialize_string8()
 {
-#ifdef LIBUTILS_NATIVE
-	  // Bite me, Darwin!
-		gDarwinIsReallyAnnoying = gDarwinCantLoadAllObjects;
-#endif
+    // HACK: This dummy dependency forces linking libutils Static.cpp,
+    // which is needed to initialize String8/String16 classes.
+    // These variables are named for Darwin, but are needed elsewhere too,
+    // including static linking on any platform.
+    gDarwinIsReallyAnnoying = gDarwinCantLoadAllObjects;
 
     SharedBuffer* buf = SharedBuffer::alloc(1);
     char* str = (char*)buf->data();
