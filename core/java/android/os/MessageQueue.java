@@ -36,8 +36,9 @@ public class MessageQueue {
     Message mMessages;
     private final ArrayList mIdleHandlers = new ArrayList();
     private boolean mQuiting = false;
+    private int mObject = 0;    // used by native code
     boolean mQuitAllowed = true;
-    
+
     /**
      * Callback interface for discovering when a thread is going to block
      * waiting for more messages.
@@ -85,16 +86,49 @@ public class MessageQueue {
         }
     }
 
-    MessageQueue() {
+    // Add an input pipe to the set being selected over.  If token is
+    // negative, remove 'handler's entry from the current set and forget
+    // about it.
+    void setInputToken(int token, int region, Handler handler) {
+        if (token >= 0) nativeRegisterInputStream(token, region, handler);
+        else nativeUnregisterInputStream(token);
     }
+
+    MessageQueue() {
+        nativeInit();
+    }
+    private native void nativeInit();
+
+    /**
+     * @param token fd of the readable end of the input stream
+     * @param region fd of the ashmem region used for data transport alongside the 'token' fd
+     * @param handler Handler from which to make input messages based on data read from the fd
+     */
+    private native void nativeRegisterInputStream(int token, int region, Handler handler);
+    private native void nativeUnregisterInputStream(int token);
+    private native void nativeSignal();
+
+    /**
+     * Wait until the designated time for new messages to arrive.
+     *
+     * @param when Timestamp in SystemClock.uptimeMillis() base of the next message in the queue.
+     *    If 'when' is zero, the method will check for incoming messages without blocking.  If
+     *    'when' is negative, the method will block forever waiting for the next message.
+     * @return
+     */
+    private native int nativeWaitForNext(long when);
 
     final Message next() {
         boolean tryIdle = true;
+        // when we start out, we'll just touch the input pipes and then go from there
+        long timeToNextEventMillis = 0;
 
         while (true) {
             long now;
             Object[] idlers = null;
-    
+
+            nativeWaitForNext(timeToNextEventMillis);
+
             // Try to retrieve the next message, returning if found.
             synchronized (this) {
                 now = SystemClock.uptimeMillis();
@@ -135,20 +169,17 @@ public class MessageQueue {
 
             synchronized (this) {
                 // No messages, nobody to tell about it...  time to wait!
-                try {
-                    if (mMessages != null) {
-                        if (mMessages.when-now > 0) {
-                            Binder.flushPendingCommands();
-                            this.wait(mMessages.when-now);
-                        }
-                    } else {
+                if (mMessages != null) {
+                    if (mMessages.when - now > 0) {
                         Binder.flushPendingCommands();
-                        this.wait();
+                        timeToNextEventMillis = mMessages.when - now;
                     }
-                }
-                catch (InterruptedException e) {
+                } else {
+                    Binder.flushPendingCommands();
+                    timeToNextEventMillis = -1;
                 }
             }
+            // loop to the while(true) and do the appropriate nativeWait(when)
         }
     }
 
@@ -190,7 +221,6 @@ public class MessageQueue {
             if (p == null || when == 0 || when < p.when) {
                 msg.next = p;
                 mMessages = msg;
-                this.notify();
             } else {
                 Message prev = null;
                 while (p != null && p.when <= when) {
@@ -199,8 +229,8 @@ public class MessageQueue {
                 }
                 msg.next = prev.next;
                 prev.next = msg;
-                this.notify();
             }
+            nativeSignal();
         }
         return true;
     }
@@ -321,7 +351,7 @@ public class MessageQueue {
     void poke()
     {
         synchronized (this) {
-            this.notify();
+            nativeSignal();
         }
     }
 }
