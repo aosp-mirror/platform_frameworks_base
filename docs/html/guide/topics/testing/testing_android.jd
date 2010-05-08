@@ -72,10 +72,10 @@ page.title=Testing and Instrumentation
   <h2>See Also</h2>
       <ol>
         <li>
-          <a href="{@docRoot}guide/developing/testing_eclipse.html">Testing in Eclipse, with ADT</a>
+          <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>
         </li>
         <li>
-          <a href="{@docRoot}guide/developing/testing_otheride.html">Testing in Other IDEs</a>
+          <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>
         </li>
       </ol>
   </div>
@@ -112,7 +112,6 @@ examine the application's state during its execution. The instrumentation framew
 The following diagram summarizes the Android testing environment:
 </p>
 <img src="{@docRoot}images/testing/android_test_framework.png"/>
-<!--  Something about test tools in Eclipse and in other IDEs -->
 <p>
   In Android, test applications are themselves Android applications, so you write them in much the same way as the application you are testing. The SDK tools
   help you create a main application project and its test project at the same time. You can run Android tests within Eclipse with ADT or from the command line.
@@ -120,8 +119,8 @@ The following diagram summarizes the Android testing environment:
   run tests, or use a built-in Ant target.
 </p>
 <p>
-  To learn how to set up and run tests in Eclipse, please refer to <a href="{@docRoot}guide/developing/testing_eclipse.html">Testing in Eclipse, with ADT</a>.
-  If you're not working in Eclipse, refer to <a href="{@docRoot}guide/developing/testing_otheride.html">Testing in Other IDEs</a>.
+  To learn how to set up and run tests in Eclipse, please refer to <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>.
+  If you're not working in Eclipse, refer to <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>.
 </p>
 <p>
     If you want a step-by-step introduction to Android testing, try one of the testing tutorials:
@@ -277,15 +276,15 @@ The following diagram summarizes the Android testing environment:
 </p>
 <p>
     The tools and procedures you use with testing depend on the development environment you are using. If you use Eclipse, then the ADT plug in for Eclipse provides tools that
-    allow you to develop and run tests entirely within Eclipse. This is documented in the topic <a href="{@docRoot}guide/developing/testing_eclipse.html">Testing in Eclipse, with ADT</a>.
-    If you use another development environment, then you use Android's command-line tools, as documented in the topic <a href="{@docRoot}guide/developing/testing_otheride.html">Testing in Other IDEs</a>.
+    allow you to develop and run tests entirely within Eclipse. This is documented in the topic <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>.
+    If you use another development environment, then you use Android's command-line tools, as documented in the topic <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>.
 </p>
 <h3 id="TestProjects">Working with test projects</h3>
 <p>
     To start testing an Android application, you create a test project for it using Android tools. The tools create the project directory and the files and subdirectories needed.
     The tools also create a manifest file that links the application in the test project to the application under test. The procedure for creating a test project in Eclipse with
-    ADT is documented in <a href="{@docRoot}guide/developing/testing_eclipse.html">Testing in Eclipse, with ADT</a>. The procedure for creating a test project for use with development
-    tools other than Eclipse is documented in <a href="{@docRoot}guide/developing/testing_otheride.html">Testing in Other IDEs</a>.
+    ADT is documented in <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>. The procedure for creating a test project for use with development
+    tools other than Eclipse is documented in <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>.
 </p>
 <h3 id="TestClasses">Working with test case classes</h3>
 <p>
