@@ -244,6 +244,12 @@
           <li><a href="<?cs var:toroot ?>resources/samples/SpinnerTest/index.html">
                 <span class="en">SpinnerTest</span>
                 </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/TicTacToeLib/index.html">
+                <span class="en">TicTacToeLib</span>
+                </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/TicTacToeMain/index.html">
+                <span class="en">TicTacToeMain</span>
+                </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Wiktionary/index.html">
                 <span class="en">Wiktionary</span>
               </a></li>
