@@ -7,9 +7,9 @@ LOCAL_MODULE_TAGS := tests
 # Include all test java files.
 LOCAL_SRC_FILES := \
 	$(call all-java-files-under, src) \
+	$(call all-Iaidl-files-under, src) \
 	$(call all-java-files-under, DisabledTestApp/src) \
-	$(call all-java-files-under, EnabledTestApp/src) \
-	src/android/os/IAidlTest.aidl
+	$(call all-java-files-under, EnabledTestApp/src)
 
 LOCAL_STATIC_JAVA_LIBRARIES += android-common
 
