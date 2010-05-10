@@ -7,13 +7,15 @@ parent.link=index.html
 <div id="qv">
   <h2>Quickview</h2>
   <ul>
-    <li>Different types of resources belong in different sub-directories of {@code res/}</li>
+    <li>Different types of resources belong in different subdirectories of {@code res/}</li>
     <li>Alternative resources provide configuration-specific resource files</li>
   </ul>
   <h2>In this document</h2>
   <ol>
+    <li><a href="#ResourceTypes">Grouping Resource Types</a></li>
     <li><a href="#AlternativeResources">Providing Alternative Resources</a>
       <ol>
+        <li><a href="#QualifierRules">Qualifier name rules</a></li>
         <li><a href="#AliasResources">Creating alias resources</a></li>
       </ol>
     </li>
@@ -24,17 +26,30 @@ parent.link=index.html
   <ol>
     <li><a href="accessing-resources.html">Accessing Resources</a></li>
     <li><a href="available-resources.html">Resource Types</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
   </ol>
 </div>
 </div>
 
-<p>There are several types of resource files you can
-include in your application and each type belongs in a specific sub-directory of your project's
-{@code res/} directory. Absolutely no files should be saved directly inside {@code res/}.</p>
+<p>You should always externalize application resources such as images and strings from your
+code, so that you can maintain them independently. You can also provide alternative resources for
+specific device configurations, by grouping them in specially-named resource directories. Android
+will then automatically apply the appropriate resource based on the current configuration. For
+instance, you might want to provide a different UI layout depending on the screen size.</p>
 
-<p>For example, here's the file hierarchy for a simple project:</p>
+<p>Once you save your resources external to your application code, you can access them
+using resource IDs that are generated in your project's {@code R} class. How to use
+resources in your application is discussed in <a href="accessing-resources.html">Accessing
+Resources</a>.</p>
 
-<pre class="no-pretty-print">
+
+<h2 id="ResourceTypes">Grouping Resource Types</h2>
+
+<p>You should place each type of resource in a specific subdirectory of your project's
+{@code res/} directory. For example, here's the file hierarchy for a simple project:</p>
+
+<pre class="classic no-pretty-print">
 MyProject/
     src/  <span style="color:black">
         MyActivity.java  </span>
@@ -42,23 +57,23 @@ MyProject/
         drawable/  <span style="color:black">
             icon.png  </span>
         layout/  <span style="color:black">
-            main_layout.xml  </span>
+            main.xml
+            info.xml</span>
         values/  <span style="color:black">
             strings.xml  </span>
 </pre>
 
-<p>This project includes an image resource, a layout resource, and string resource file.</p>
+<p>The {@code res/} directory contains all the resources (in subdirectories): an image resource, two
+layout resources, and a string resource file. The resource directory names are important and are
+described in table 1.</p>
 
-<p>Table 1 lists the different {@code res/} sub-directories supported
-and describes the types of resource files that belong in each one.</p>
-
-<p class="table-caption" id="table1"><strong>Table 1.</strong> Resource directories. Each directory
-belongs inside the project {@code res/} directory.</p>
+<p class="table-caption" id="table1"><strong>Table 1.</strong> Resource directories
+supported inside project {@code res/} directory.</p>
 
 <table>
   <tr>
     <th scope="col">Directory</th>
-    <th scope="col">Resource Types</th>
+    <th scope="col">Resource Type</th>
   </tr>
 
   <tr>
@@ -70,13 +85,13 @@ href="animation-resource.html">Animation Resources</a>.</td>
   <tr>
     <td><code>color/</code></td>
     <td>XML files that define a state list of colors. See <a href="color-list-resource.html">Color
-State List Resources</a></td>
+State List Resource</a></td>
   </tr>
 
   <tr>
     <td><code>drawable/</code></td>
     <td><p>Bitmap files ({@code .png}, {@code .9.png}, {@code .jpg}, {@code .gif}) or XML files that
-are compiled into the following Drawable resource subtypes:</p>
+are compiled into the following drawable resource subtypes:</p>
       <ul>
         <li>Bitmap files</li>
         <li>Nine-Patches (re-sizable bitmaps)</li>
@@ -107,37 +122,35 @@ Menu. See <a href="menu-resource.html">Menu Resource</a>.</td>
 system. To open these resources with a raw {@link java.io.InputStream}, call {@link
 android.content.res.Resources#openRawResource(int)
 Resources.openRawResource()} with the resource ID, which is {@code R.raw.<em>filename</em>}.</p>
-      <p>However, if you require direct access to original file names and file hierarchy, instead of
-using a resource ID to access your files, you might consider saving some resources in the {@code
-assets/} directory, instead of {@code res/raw/}. You can query data in the {@code assets/} directory
-like an ordinary file system, search through the directory and read raw data using {@link
-android.content.res.AssetManager}.</p></td>
+      <p>However, if you need access to original file names and file hierarchy, you might consider
+saving some resources in the {@code
+assets/} directory (instead of {@code res/raw/}). Files in {@code assets/} are not given a
+resource ID, so you can read them only using {@link android.content.res.AssetManager}.</p></td>
   </tr>
 
   <tr>
     <td><code>values/</code></td>
     <td><p>XML files that contain simple values, such as strings, integers, and colors.</p>
-      <p>Unlike the other {@code res/} subdirectories, this one
-      can hold files that contain descriptions of more than one resource, rather than
-just one resource for the file. The XML element types of an XML file in {@code values/} control
-how these resources are defined in the {@code R} class. For example, a {@code &lt;string&gt;}
-element will create an
-{@code R.string} resource, and a  {@code &lt;color&gt;} element will create an {@code R.color}
+      <p>Whereas XML resource files in other {@code res/} subdirectories define a single resource
+based on the XML filename, files in the {@code values/} directory describe multiple resources.
+For a file in this directory, each child of the {@code &lt;resources&gt;} element defines a single
+resource. For example, a {@code &lt;string&gt;} element creates an
+{@code R.string} resource and a  {@code &lt;color&gt;} element creates an {@code R.color}
 resource.</p>
-      <p>While the name of a file in this directory is arbitrary and not related to the name given
-to a resource produced, you might want to separate different types of resources into different
-files for easier maintenance. Here are some filename conventions for some of the different types
-of resources you can save here:</p>
+      <p>Because each resource is defined with its own XML element, you can name the file
+whatever you want and place different resource types in one file. However, for clarity, you might
+want to place unique resource types in different files. For example, here are some filename
+conventions for resources you can create in this directory:</p>
       <ul>
-        <li>arrays.xml to define resource arrays (<a
+        <li>arrays.xml for resource arrays (<a
 href="more-resources.html#TypedArray">typed arrays</a>).</li>
-        <li>colors.xml to define <a
+        <li>colors.xml for <a
 href="more-resources.html#Color">color values</a></li>
-        <li>dimens.xml to define <a
+        <li>dimens.xml for <a
 href="more-resources.html#Dimension">dimension values</a>.</li>
-        <li>strings.xml to define <a href="string-resource.html">string
+        <li>strings.xml for <a href="string-resource.html">string
 values</a>.</li>
-        <li>styles.xml to define <a href="style-resource.html">styles</a>.</li>
+        <li>styles.xml for <a href="style-resource.html">styles</a>.</li>
       </ul>
       <p>See <a href="string-resource.html">String Resources</a>,
         <a href="style-resource.html">Style Resource</a>, and
@@ -147,38 +160,42 @@ values</a>.</li>
 
   <tr>
     <td><code>xml/</code></td>
-    <td>Arbitrary XML files that are compiled and can be read at runtime by calling {@link
+    <td>Arbitrary XML files that can be read at runtime by calling {@link
 android.content.res.Resources#getXml(int) Resources.getXML()}. Various XML configuration files
-must also be saved here, such as a <a
+must be saved here, such as a <a
 href="{@docRoot}guide/topics/search/searchable-config.html">searchable configuration</a>.
 <!-- or preferences configuration. --></td>
   </tr>
 </table>
 
+<p class="note"><strong>Note:</strong> You should never save resource files directly inside the
+{@code res/} directory.</p>
+
 <p>For more information about certain types of resources, see the <a
 href="available-resources.html">Resource Types</a> documentation.</p>
 
-
-
+<p>How to access resources in the {@code res/} subdirectories is discussed in <a
+href="accessing-resources.html">Accessing Resources</a>.
+</p>
 
 
 
 <h2 id="AlternativeResources">Providing Alternative Resources</h2>
 
 
-<div class="figure" style="width:441px">
+<div class="figure" style="width:421px">
 <img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="137" alt="" />
 <p class="img-caption">
 <strong>Figure 1.</strong> Two device configurations, one using alternative resources.</p>
 </div>
 
 <p>Almost every application should provide alternative resources to support specific device
-configurations. For instance, you should include different drawable resources for different
-screen densities and different string resources for different languages. At runtime, Android
-will automatically detect the current device configuration and then load the appropriate
+configurations. For instance, you should include alternative drawable resources for different
+screen densities and alternative string resources for different languages. At runtime, Android
+automatically detects the current device configuration and loads the appropriate
 resources.</p>
 
-<p>For each set of resources for which you want to provide configuration-specific alternatives:</p>
+<p>To specify configuration-specific alternatives for a set of resources:</p>
 <ol>
   <li>Create a new directory in {@code res/} named in the form {@code
 <em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}.
@@ -191,13 +208,13 @@ for which these resources are to be used.</li>
     <p>You can append more than one <em>{@code &lt;config_qualifier&gt;}</em>. Separate each
 one with a dash.</p>
   </li>
-  <li>Save your alternative resources in this directory, named exactly the same as the default
-resource files.</li>
+  <li>Save your alternative resources in this new directory. The resource files must be named
+exactly the same as the default resource files.</li>
 </ol>
 
 <p>For example, here are some default and alternative resources:</p>
 
-<pre class="no-pretty-print">
+<pre class="classic no-pretty-print">
 res/
     drawable/   <span style="color:black">
         icon.png
@@ -207,22 +224,23 @@ res/
         background.png  </span>
 </pre>
 
-<p>The {@code hdpi} qualifier indicates that the resources are for devices with a high-density
-screen. While the images in each directory are different, the filenames are
-identical. This way, the resource ID that you use to reference the {@code icon.png} image is
-always the same. When you request the {@code icon} drawable, Android will select the
+<p>The {@code hdpi} qualifier indicates that the resources in that directory are for devices with a
+high-density screen. While the images in each drawable directory are sized for a specific screen
+density, the filenames are
+the same. This way, the resource ID that you use to reference the {@code icon.png} or {@code
+background.png} image is always the same, but Android selects the
 version of that drawable that best matches the current device configuration.</p>
 
 <p>Android supports several configuration qualifiers and you can
-add multiple qualifiers to one directory name in order to further specify the configuration, by
-separating the qualifiers with dashes. Table 2 lists the valid configuration qualifiers, in order
-of precedence&mdash;they must be specified in the directory name in the order that they are listed
-in the table.</p>
+add multiple qualifiers to one directory name, by separating each qualifier with a dash. Table 2
+lists the valid configuration qualifiers, in order of precedence&mdash;if you use multiple
+qualifiers, they must be added to the directory name in the order they are listed in the
+table.</p>
 
 
 <p class="table-caption" id="table2"><strong>Table 2.</strong> Alternative resource qualifier
 names.</p>
-<table border="1">
+<table>
     <tr>
         <th>Qualifier</th>
         <th>Values</th>
@@ -237,18 +255,22 @@ names.</p>
         etc.
       </td>
       <td>
-        <p>Specifies resources based on the mobile country code (MCC), optionally followed by mobile
-network code (MNC)
-        from the SIM in the device. For example, <code>mcc310</code> is U.S. on any carrier,
+        <p>The mobile country code (MCC), optionally followed by mobile network code (MNC)
+        from the SIM card in the device. For example, <code>mcc310</code> is U.S. on any carrier,
         <code>mcc310-mnc004</code> is U.S. on Verizon, and <code>mcc208-mnc00</code> is France on
         Orange.</p>
-        <p>If the device uses a radio connection (GSM phone), the MCC will come
-        from the SIM, and the MNC will come from the  network to which the
-        device is attached.</p>
-        <p>You might sometimes use the MCC alone, for example to include country-specific legal
-resources in your application, but if you only need to specify based on language, then use the
-language and region qualifier below. If you decide to use the MCC and MNC qualifier, you
-should do so with great care and completely test that it works as expected.</p></td>
+        <p>If the device uses a radio connection (GSM phone), the MCC comes
+        from the SIM, and the MNC comes from the network to which the
+        device is connected.</p>
+        <p>You can also use the MCC alone (for example, to include country-specific legal
+resources in your application). If you need to specify based on the language only, then use the
+<em>language and region</em> qualifier instead (discussed next). If you decide to use the MCC and
+MNC qualifier, you should do so with care and test that it works as expected.</p>
+        <p>Also see the configuration fields {@link
+android.content.res.Configuration#mcc}, and {@link
+android.content.res.Configuration#mnc}, which indicate the current mobile country code
+and mobile network code, respectively.</p>
+      </td>
     </tr>
     <tr>
       <td>Language and region</td>
@@ -260,22 +282,24 @@ should do so with great care and completely test that it works as expected.</p><
         <code>fr-rCA</code><br/>
         etc.
       </td>
-      <td><p>This is defined by a two-letter <a
+      <td><p>The language is defined by a two-letter <a
 href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
               639-1</a> language code, optionally followed by a two letter
               <a
 href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
-              3166-1-alpha-2</a> region code (preceded by lowercase &quot;r&quot;).
+              3166-1-alpha-2</a> region code (preceded by lowercase &quot;{@code r}&quot;).
         </p><p>
         The codes are <em>not</em> case-sensitive; the {@code r} prefix is used to
         distinguish the region portion.
         You cannot specify a region alone.</p>
         <p>This can change during the life
-of your application if the user changes their language in the system settings. See <a
+of your application if the user changes his or her language in the system settings. See <a
 href="runtime-changes.html">Handling Runtime Changes</a> for information about
 how this can affect your application during runtime.</p>
         <p>See <a href="localization.html">Localization</a> for a complete guide to localizing
 your application for other langauges.</p>
+        <p>Also see the {@link android.content.res.Configuration#locale} configuration field, which
+indicates the current locale.</p>
       </td>
     </tr>
     <tr>
@@ -286,24 +310,27 @@ your application for other langauges.</p>
         <code>large</code>
       </td>
       <td>
-        <ul>
-        <li> <b>Small screens</b> are based on the space available on a
-        QVGA low density screen.  Considering a portrait HVGA display, this has
-        the same available width but less height -- it is 3:4 vs. HVGA's
+        <ul class="nolist">
+        <li>{@code small}: Screens based on the space available on a
+        low-density QVGA screen.  Considering a portrait HVGA display, this has
+        the same available width but less height&mdash;it is 3:4 vs. HVGA's
         2:3 aspect ratio.  Examples are QVGA low density and VGA high
         density.</li>
-        <li> <b>Normal screens</b> are based on the traditional Android HVGA
-        medium density screen.  A screen is considered to be normal if it is
+        <li>{@code normal}: Screens based on the traditional
+        medium-density HVGA screen.  A screen is considered to be normal if it is
         at least this size (independent of density) and not larger.  Examples
         of such screens a WQVGA low density, HVGA medium density, WVGA
         high density.</li>
-        <li> <b>Large screens</b> are based on the space available on a
-        VGA medium density screen.  Such a screen has significantly more
+        <li>{@code large}: Screens based on the space available on a
+        medium-density VGA screen.  Such a screen has significantly more
         available space in both width and height than an HVGA display.
         Examples are VGA and WVGA medium density screens.</li>
         </ul>
         <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a> for more information.</p>
+        <p>Also see the {@link android.content.res.Configuration#screenLayout} configuration field,
+which indicates whether the screen is small, normal,
+or large.</p>
       </td>
     </tr>
     <tr>
@@ -313,12 +340,14 @@ Screens</a> for more information.</p>
         <code>notlong</code>
       </td>
       <td>
-        <p>This is based purely on the aspect ratio of the screen (a "long" screen is wider):
-        <ul>
-          <li><strong>Long</strong>: WQVGA, WVGA, FWVGA</li>
-          <li><strong>Not long</strong>: QVGA, HVGA, and VGA</li>
+        <ul class="nolist">
+          <li>{@code long}: Long screens, such as WQVGA, WVGA, FWVGA</li>
+          <li>{@code notlong}: Not long screens, such as QVGA, HVGA, and VGA</li>
         </ul>
-        <p>This is not related to the screen orientation.</p>
+        <p>This is based purely on the aspect ratio of the screen (a "long" screen is wider). This
+is not related to the screen orientation.</p>
+        <p>Also see the {@link android.content.res.Configuration#screenLayout} configuration field,
+which indicates whether the screen is long.</p>
       </td>
     </tr>
     <tr>
@@ -329,11 +358,16 @@ Screens</a> for more information.</p>
         <code>square</code>  -->
       </td>
       <td>
-        <p>Portrait orientation ({@code port}) is vertical and landscape orientation
-({@code land}) is horizontal. <!-- Square mode is currently not used. --> </p>
+        <ul class="nolist">
+          <li>{@code port}: Device is in portrait orientation (vertical)</li>
+          <li>{@code land}: Device is in landscape orientation (horizontal)</li>
+          <!-- Square mode is currently not used. -->
+        </ul>
         <p>This can change during the life of your application if the user rotates the
 screen. See <a href="runtime-changes.html">Handling Runtime Changes</a> for information about
 how this affects your application during runtime.</p>
+        <p>Also see the {@link android.content.res.Configuration#orientation} configuration field,
+which indicates the current device orientation.</p>
       </td>
     </tr>
     <tr>
@@ -343,12 +377,15 @@ how this affects your application during runtime.</p>
         <code>desk</code>
       </td>
       <td>
-        <p>These configurations can be initiated when the device is placed in a dock.</p>
+        <ul class="nolist">
+          <li>{@code car}: Device is in a car dock</li>
+          <li>{@code desk}: Device is in a desk dock</li>
+        </ul>
         <p><em>Added in API Level 8.</em></p>
         <p>This can change during the life of your application if the user places the device in a
-dock. See <a href="runtime-changes.html">Handling Runtime Changes</a> for
-information about how this affects your application during runtime. Also see {@link
-android.app.UiModeManager}.</p>
+dock. You can eneable or disable this mode using {@link
+android.app.UiModeManager}. See <a href="runtime-changes.html">Handling Runtime Changes</a> for
+information about how this affects your application during runtime.</p>
       </td>
     </tr>
     <tr>
@@ -358,13 +395,16 @@ android.app.UiModeManager}.</p>
         <code>notnight</code>
       </td>
       <td>
-        <p>
-        These configurations can be initiated by the device light sensor (if available).</p>
+        <ul class="nolist">
+          <li>{@code night}: Night time</li>
+          <li>{@code notnight}: Day time</li>
+        </ul>
         <p><em>Added in API Level 8.</em></p>
-        <p>This can change during the life of your application if the device determines that the
-user environment is a "night" (dark) setting. See <a href="runtime-changes.html">Handling Runtime
-Changes</a> for information about how this affects your application during runtime. You can
-also explicitly set this mode using {@link android.app.UiModeManager}.</p>
+        <p>This can change during the life of your application if night mode is left in
+auto mode (default), in which case the mode changes based on the time of day.  You can eneable
+or disable this mode using {@link android.app.UiModeManager}. See <a
+href="runtime-changes.html">Handling Runtime Changes</a> for information about how this affects your
+application during runtime.</p>
       </td>
     </tr>
     <tr>
@@ -376,24 +416,27 @@ also explicitly set this mode using {@link android.app.UiModeManager}.</p>
         <code>nodpi</code>
       </td>
       <td>
-        <p>The medium
-         density of traditional HVGA screens (mdpi) is defined to be approximately
-         160dpi; low density (ldpi) is 120, and high density (hdpi) is 240.  There
-         is thus a 4:3 scaling factor between each density, so a 9x9 bitmap
-         in ldpi would be 12x12 in mdpi and 16x16 in hdpi.  The special
-         <code>nodpi</code> density can be used with bitmap resources to prevent
-         them from being scaled at load time to match the device density.
-        </p><p>
-         When Android selects which resource files to use,
-         it handles screen density  differently than the other qualifiers.
+        <ul class="nolist">
+          <li>{@code ldpi}: Low-density screens; approximately 120dpi.</li>
+          <li>{@code mdpi}: Medium-density (on traditional HVGA) screens; approximately
+160dpi.</li>
+          <li>{@code hdpi}: High-density screens; approximately 240dpi.</li>
+          <li>{@code nodpi}: This can be used for bitmap resources that you do not want to be scaled
+to match the device density.</li>
+        </ul>
+        <p>There is thus a 4:3 scaling factor between each density, so a 9x9 bitmap
+         in ldpi is 12x12 in mdpi and 16x16 in hdpi.</p>
+        <p>When Android selects which resource files to use,
+         it handles screen density differently than the other qualifiers.
          In step 1 of <a href="#BestMatch">How Android finds the best
          matching directory</a> (below), screen density is always considered to
          be a match. In step 4, if the qualifier being considered is screen
-         density, Android will select the best final match at that point,
+         density, Android selects the best final match at that point,
          without any need to move on to step 5.
          </p>
         <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
-Screens</a> for more information.</p>
+Screens</a> for more information about how to handle screen sizes and how Android might scale
+your bitmaps.</p>
        </td>
     </tr>
     <tr>
@@ -403,25 +446,45 @@ Screens</a> for more information.</p>
         <code>stylus</code><br/>
         <code>finger</code>
       </td>
-      <td><p>If the device has a resistive touch screen that's suited for use with a stylus,
-then it may use the {@code stylus} resources.</p>
+      <td>
+        <ul class="nolist">
+          <li>{@code notouch}: Device does not have a touchscreen.</li>
+          <li>{@code stylus}: Device has a resistive touchscreen that's suited for use with a
+stylus.</li>
+          <li>{@code finger}: Device has a touchscreen.</li>
+        </ul>
+        <p>Also see the {@link android.content.res.Configuration#touchscreen} configuration field,
+which indicates the type of touchscreen on the device.</p>
       </td>
     </tr>
     <tr>
       <td>Keyboard availability</td>
       <td>
         <code>keysexposed</code><br/>
-        <code>keyshidden</code><br/>
         <code>keyssoft</code>
       </td>
       <td>
-        <p>If your application has specific resources that should only be used with a soft keyboard,
-use the <code>keyssoft</code> value. If you do not provide <code>keyssoft</code> resources, but do
-provide <code>keysexposed</code> and <code>keyshidden</code>, and the device shows a soft keyboard,
-the system will use <code>keysexposed</code> resources.</p>
-        <p>This can change during the life of your application if the user opens a keyboard. See <a
-href="runtime-changes.html">Handling Runtime Changes</a> for information about how this affects your
-application during runtime.</p>
+        <ul class="nolist">
+          <li>{@code keysexposed}: Device has a keyboard available. If the device has a
+software keyboard enabled (which is likely), this may be used even when the hardware keyboard is
+<em>not</em> exposed to the user, even if the device has no hardware keyboard. If no software
+keyboard is provided or it's disabled, then this is only used when a hardware keyboard is
+exposed.</li>
+          <li>{@code keyshidden}: Device has a hardware keyboard available but it is
+hidden <em>and</em> the device does <em>not</em> have a software keyboard enabled.</li>
+          <li>{@code keyssoft}: Device has a software keyboard enabled, whether it's
+visible or not.</li>
+        </ul>
+        <p>If you provide <code>keysexposed</code> resources, but not <code>keyssoft</code>
+resources, the system uses the <code>keysexposed</code> resources regardless of whether a
+keyboard is visible, as long as the system has a software keyboard enabled.</p>
+        <p>This can change during the life of your application if the user opens a hardware
+keyboard. See <a href="runtime-changes.html">Handling Runtime Changes</a> for information about how
+this affects your application during runtime.</p>
+        <p>Also see the configuration fields {@link
+android.content.res.Configuration#hardKeyboardHidden} and {@link
+android.content.res.Configuration#keyboardHidden}, which indicate the visibility of a hardware
+keyboard and and the visibility of any kind of keyboard (including software), respectively.</p>
       </td>
     </tr>
     <tr>
@@ -431,9 +494,17 @@ application during runtime.</p>
         <code>qwerty</code><br/>
         <code>12key</code>
       </td>
-      <td><p>If the device has no hardware keys for text input, then it may use the {@code
-nokeys} resources. Even if the device has a QWERTY keyboard but it is currently hidden, it may use
-the {@code qwerty} resources.</td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nokeys}: Device has no hardware keys for text input.</li>
+          <li>{@code qwert}: Device has a hardware qwerty keyboard, whether it's visible to the user
+or not.</li>
+          <li>{@code 12key}: Device has a hardware 12-key keyboard, whether it's visible to the user
+or not.</li>
+        </ul>
+        <p>Also see the {@link android.content.res.Configuration#keyboard} configuration field,
+which indicates the primary text input method available.</p>
+      </td>
     </tr>
     <tr>
       <td>Navigation key availability</td>
@@ -442,13 +513,16 @@ the {@code qwerty} resources.</td>
         <code>navhidden</code>
       </td>
       <td>
-        <p>
-        If the device's navigation keys are currently available to
-        the user, it may use the {@code navexposed} resources; if they are not
-        available (such as behind a closed lid), it may use the {@code navhidden} resources.</p>
+        <ul class="nolist">
+          <li>{@code navexposed}: Navigation keys are available to the user.</li>
+          <li>{@code navhidden}: Navigation keys are not available (such as behind a closed
+lid).</li>
+        </ul>
         <p>This can change during the life of your application if the user reveals the navigation
 keys. See <a href="runtime-changes.html">Handling Runtime Changes</a> for
 information about how this affects your application during runtime.</p>
+        <p>Also see the {@link android.content.res.Configuration#navigationHidden} configuration
+field, which indicates whether navigation keys are hidden.</p>
       </td>
     </tr>
     <tr>
@@ -459,8 +533,16 @@ information about how this affects your application during runtime.</p>
         <code>trackball</code><br/>
         <code>wheel</code>
       </td>
-      <td><p>If the device has no navigation facility other than using the touchscreen, then it
-may use the {@code nonav} resources.</p>
+      <td>
+        <ul class="nolist">
+          <li>{@code nonav}: Device has no navigation facility other than using the
+touchscreen.</li>
+          <li>{@code dpad}: Device has a directional-pad (d-pad) for navigation.</li>
+          <li>{@code trackball}: Device has a trackball for navigation.</li>
+          <li>{@code wheel}: Device has a directional wheel(s) for navigation (uncommon).</li>
+        </ul>
+        <p>Also see the {@link android.content.res.Configuration#navigation} configuration field,
+which indicates the type of navigation method available.</p>
       </td>
     </tr>
 <!-- DEPRECATED
@@ -495,20 +577,23 @@ about these values.</p>
     </tr>
 </table>
 
-<p>Here are some important rules about using resource qualifier names:</p>
+
+<h3 id="QualifierRules">Qualifier name rules</h3>
+
+<p>Here are some rules about using resource qualifier names:</p>
 
 <ul>
     <li>You can specify multiple qualifiers for a single set of resources, separated by dashes. For
 example, <code>drawable-en-rUS-land</code> applies to US-English devices in landscape
 orientation.</li>
-    <li>The qualifiers must be in the order listed in <a href="#table2">Table 2</a> above. For
+    <li>The qualifiers must be in the order listed in <a href="#table2">table 2</a>. For
 example:
       <ul>
         <li>Wrong: <code>drawable-hdpi-port/</code></li>
         <li>Correct: <code>drawable-port-hdpi/</code></li>
       </ul>
     </li>
-    <li>Qualified directories cannot be nested. For example, you cannot have
+    <li>Alternative resource directories cannot be nested. For example, you cannot have
 <code>res/drawable/drawable-en/</code>.</li>
     <li>Values are case-insensitive.  The resource compiler converts directory names
     to lower case before processing to avoid problems on case-insensitive
@@ -517,35 +602,40 @@ example:
 the same drawable files for Spain and France, you <em>cannot</em> have a directory named
 <code>drawable-rES-rFR/</code>. Instead you need two resource directories, such as
 <code>drawable-rES/</code> and <code>drawable-rFR/</code>, which contain the appropriate files.
-However, you are not required to actually duplicate the same files in both locations (which
-could multiply the size of your package if the files are large). Instead, you can create a
-reference to one instance of the resources. See <a href="#AliasResources">Creating
-alias resources</a>, below.</li>
+However, you are not required to actually duplicate the same files in both locations. Instead, you
+can create an alias to a resource. See <a href="#AliasResources">Creating
+alias resources</a> below.</li>
 </ul>
+
+<p>After you save alternative resources into directories named with
+these qualifiers, Android automatically applies the resources in your application based on the
+current device configuration. Each time a resource is requested, Android checks for alternative
+resource directories that contain the requested resource file, then <a href="#BestMatch">finds the
+best-matching resource</a> (discussed below).</p>
 
 
 
 <h3 id="AliasResources">Creating alias resources</h3>
 
 <p>When you have a resource that you'd like to use for more than one device
-configuration (but not for all configurations), you <em>don't</em> have to put the same resource in
-each of the alternative resource directories. Instead, you can (in some cases) create an alternative
+configuration (but not for all configurations), you do not need to put the same resource in
+each alternative resource directory. Instead, you can (in some cases) create an alternative
 resource that acts as an alias for a resource saved in your default resource directory.</p>
 
-<p>For example, imagine you have an image, {@code icon.png}, and you have different versions of it
-for different locales, but two locales, English-Canadian and French-Canadian, need to
-use the same version. You might assume that you need to copy the Canadian version of the
-icon into the alternative resource directory for both English-Canadian and French-Canadian, but it's
-not true. What you can do instead is save the Canadian version as {@code icon_ca.png} (any name
-other than {@code icon.png}) and put
+<p class="note"><strong>Note:</strong> Not all resources offer a mechanism by which you can
+create an alias to another resource. In particular, animation, menu, raw, and other unspecified
+resources in the {@code xml/} directory do not offer this feature.</p>
+
+<p>For example, imagine you have an application icon, {@code icon.png}, and need unique version of
+it for different locales. However, two locales, English-Canadian and French-Canadian, need to
+use the same version. You might assume that you need to copy the same image
+into the resource directory for both English-Canadian and French-Canadian, but it's
+not true. Instead, you can save the image that's used for both as {@code icon_ca.png} (any
+name other than {@code icon.png}) and put
 it in the default {@code res/drawable/} directory. Then create an {@code icon.xml} file in {@code
 res/drawable-en-rCA/} and {@code res/drawable-fr-rCA/} that refers to the {@code icon_ca.png}
 resource using the {@code &lt;bitmap&gt;} element. This allows you to store just one version of the
 PNG file and two small XML files that point to it. (An example XML file is shown below.)</p>
-
-<p class="note"><strong>Note:</strong> Not all resources offer a mechanism by which you can
-create an alias to another resource. In particular, animation, menu, raw, and other unspecified
-resources in the {@code xml/} directory don't provide this kind of feature.</p>
 
 
 <h4>Drawable</h4>
@@ -559,9 +649,10 @@ For example:</p>
     android:src="@drawable/icon_ca" />
 </pre>
 
-<p>If you save this file as {@code icon.xml}, it will be compiled into a resource that you
+<p>If you save this file as {@code icon.xml} (in an alternative resource directory, such as
+{@code res/drawable-en-rCA/}), it is compiled into a resource that you
 can reference as {@code R.drawable.icon}, but is actually an alias for the {@code
-R.drawable.icon_ca} resource.</p>
+R.drawable.icon_ca} resource (which is saved in {@code res/drawable/}).</p>
 
 
 <h4>Layout</h4>
@@ -576,7 +667,7 @@ element, wrapped in a {@code &lt;merge&gt;}. For example:</p>
 &lt;/merge>
 </pre>
 
-<p>If you save this file as {@code main.xml}, it will be compiled into a resource you can reference
+<p>If you save this file as {@code main.xml}, it is compiled into a resource you can reference
 as {@code R.layout.main}, but is actually an alias for the {@code R.layout.main_ltr}
 resource.</p>
 
@@ -614,24 +705,24 @@ same way. For example, a color:</p>
 
 <h2 id="BestMatch">How Android Finds the Best-matching Resource</h2>
 
-<p>Once you have saved alternative resources for your application, Android will pick which of the
-various underlying resource files should be used at runtime for each resource
-requested, depending on the current device configuration. To demonstrate how Android will select the
-resource to use, assume the following drawables are available:</p>
+<p>When you request a resource for which you provide alternatives, Android selects which
+alternative resource to use at runtime, depending on the current device configuration. To
+demonstrate how Android selects an alternative resource, assume the following drawable directories
+each contain different versions of the same images:</p>
 
-<pre class="no-pretty-print">
-res/drawable/
-res/drawable-en/
-res/drawable-fr-rCA/
-res/drawable-en-port/
-res/drawable-en-notouch-12key/
-res/drawable-port-ldpi/
-res/drawable-port-notouch-12key
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+drawable-fr-rCA/
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
 </pre>
 
 <p>And assume the following is the device configuration:</p>
 
-<p style="margin-left:2em;">
+<p style="margin-left:1em;">
 Locale = <code>en-GB</code> <br/>
 Screen orientation = <code>port</code> <br/>
 Screen pixel density = <code>hdpi</code> <br/>
@@ -639,85 +730,93 @@ Touchscreen type = <code>notouch</code> <br/>
 Primary text input method = <code>12key</code>
 </p>
 
+<p>By comparing the device configuration to the available alternative resources, Android selects
+drawables from {@code drawable-en-port}. It arrives at this decision using the following logic:</p>
 
-<p>Here is how Android makes the drawable selection and how a drawable will be selected from the
-configuration above: </p>
+
+<div class="figure" style="width:280px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="590" />
+<p class="img-caption"><strong>Figure 2.</strong> Flowchart of how Android finds the
+best-matching resource.</p>
+</div>
+
 
 <ol>
   <li>Eliminate resource files that contradict the device configuration.
-    <p>The <code>drawable-fr-rCA/</code> directory will be eliminated, because it
-contradicts the locale of the device.</p>
-<pre class="no-pretty-print">
+    <p>The <code>drawable-fr-rCA/</code> directory is eliminated, because it
+contradicts the <code>en-GB</code> locale.</p>
+<pre class="classic no-pretty-print">
 drawable/
 drawable-en/
 <strike>drawable-fr-rCA/</strike>
 drawable-en-port/
 drawable-en-notouch-12key/
 drawable-port-ldpi/
-drawable-port-notouch-12key
+drawable-port-notouch-12key/
 </pre>
-<p class="note"><strong>Exception: </strong>Screen pixel density is the one qualifier that is not
-used to eliminate files. Even though the screen density of the device is mdpi,
+<p class="note"><strong>Exception:</strong> Screen pixel density is the one qualifier that is not
+eliminated due to a contradiction. Even though the screen density of the device is mdpi,
 <code>drawable-port-ldpi/</code> is not eliminated because every screen density is
-considered to be a match at this point.</p></li>
+considered to be a match at this point. More information is available in the <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a> document.</p></li>
 
-  <li>From <a href="#table2">Table 2</a>, pick the (next) highest-precedence qualifier in
-the list. (Start with MCC, then move down through the list.) </li>
-  <li>Do any of the available resource directories include this qualifier?  </li>
+  <li>Pick the (next) highest-precedence qualifier in the list (<a href="#table2">table 2</a>).
+(Start with MCC, then move down.) </li>
+  <li>Do any of the resource directories include this qualifier?  </li>
     <ul>
-      <li>If No, return to step 2 and look at the next qualifier. In the example,
-  the answer is &quot;no&quot; until the language qualifier is reached.</li>
-      <li>If Yes, move on to step 4.</li>
+      <li>If No, return to step 2 and look at the next qualifier. (In the example,
+  the answer is &quot;no&quot; until the language qualifier is reached.)</li>
+      <li>If Yes, continue to step 4.</li>
     </ul>
   </li>
 
   <li>Eliminate resource directories that do not include this qualifier. In the example, the system
 eliminates all the directories that do not include a language qualifier:</li>
-<pre class="no-pretty-print">
+<pre class="classic no-pretty-print">
 <strike>drawable/</strike>
 drawable-en/
 drawable-en-port/
 drawable-en-notouch-12key/
 <strike>drawable-port-ldpi/</strike>
-<strike>drawable-port-notouch-12key</strike>
+<strike>drawable-port-notouch-12key/</strike>
 </pre>
 <p class="note"><strong>Exception:</strong> If the qualifier in question is screen pixel density,
-Android will
-select the option that most closely matches the device, and the selection process will be complete.
-In general, Android will prefer scaling down a larger original image to scaling  up a smaller
-original image.</p>
+Android
+selects the option that most closely matches the device, and the selection process is complete.
+In general, Android prefers scaling down a larger original image to scaling  up a smaller
+original image. See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
   </li>
 
-  <li>Go back and repeat steps 2, 3, and 4 until only one choice remains. In the example, screen
+  <li>Go back and repeat steps 2, 3, and 4 until only one directory remains. In the example, screen
 orientation is the next qualifier for which there are any matches.
 So, resources that do not specify a screen orientation are eliminated:
-<pre class="no-pretty-print">
+<pre class="classic no-pretty-print">
 <strike>drawable-en/</strike>
 drawable-en-port/
 <strike>drawable-en-notouch-12key/</strike>
 </pre>
-<p>Only one choice remains, so the drawable will be taken from the {@code drawable-en-port}
-directory.</p>
+<p>The remaining directory is {@code drawable-en-port}.</p>
   </li>
 </ol>
 
-<p>Though this procedure is executed for each resource requested, the system will further optimize
+<p>Though this procedure is executed for each resource requested, the system further optimizes
 some aspects. One such optimization is that once the device configuration is known, it might
-completely eliminate alternative resources that can never match. For example, if the configuration
+eliminate alternative resources that can never match. For example, if the configuration
 language is English ("en"), then any resource directory that has a language qualifier set to
-something other than English will never be included in the pool of resources checked (though a
+something other than English is never included in the pool of resources checked (though a
 resource directory <em>without</em> the language qualifier is still included).</p>
 
 <p class="note"><strong>Note:</strong> The <em>precedence</em> of the qualifier (in <a
-href="#table2">Table 2</a>) is more important
+href="#table2">table 2</a>) is more important
 than the number of qualifiers that exactly match the device. For example, in step 4 above, the last
 choice on the list includes three qualifiers that exactly match the device (orientation, touchscreen
 type, and input method), while <code>drawable-en</code> has only one parameter that matches
 (language). However, language has a higher precedence than these other qualifiers, so
-<code>drawable-port-notouch-12key</code>
-is out.</p>
+<code>drawable-port-notouch-12key</code> is out.</p>
 
-<p>The following flowchart summarizes how Android selects the resource directory to use.</p>
-<p><img src="{@docRoot}images/resources/res-selection-flowchart.png" alt=""
-height="471" /></p>
+<p>To learn more about how to use resources in your application, continue to <a
+href="accessing-resources.html">Accessing Resources</a>.</p>
+
 

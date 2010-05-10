@@ -27,14 +27,14 @@ important as more Android-powered devices become available with different config
 to provide this functionality, you must organize resources in your project's {@code res/}
 directory, using various sub-directories that group resources by type and configuration.</p>
 
-<div class="figure" style="width:441px">
+<div class="figure" style="width:421px">
 <img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="137" alt="" />
 <p class="img-caption">
 <strong>Figure 1.</strong> Two device configurations, both using default
 resources.</p>
 </div>
 
-<div class="figure" style="width:441px">
+<div class="figure" style="width:421px">
 <img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="137" alt="" />
 <p class="img-caption">
 <strong>Figure 2.</strong> Two device configurations, one using alternative
