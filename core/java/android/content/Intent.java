@@ -1866,7 +1866,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String ACTION_REMOTE_INTENT =
-            "com.google.android.pushmessaging.intent.RECEIVE";
+            "com.google.android.datamessaging.intent.RECEIVE";
 
     /**
      * Broadcast Action: hook for permforming cleanup after a system update.
