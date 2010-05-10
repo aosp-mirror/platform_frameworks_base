@@ -37,16 +37,16 @@
 #include <utils/String16.h>
 
 #include "CameraService.h"
-#ifdef USE_CAMERA_STUB
+#ifdef INCLUDE_CAMERA_STUB
 #include "CameraHardwareStub.h"
 #endif
 
 namespace android {
 
 /* This determines the number of cameras available */
-#if defined(USE_CAMERA_HARDWARE) && defined(USE_CAMERA_STUB)
+#if defined(INCLUDE_CAMERA_HARDWARE) && defined(INCLUDE_CAMERA_STUB)
   #define NUM_CAMERAS 2
-#elif defined(USE_CAMERA_HARDWARE) || defined(USE_CAMERA_STUB)
+#elif defined(INCLUDE_CAMERA_HARDWARE) || defined(INCLUDE_CAMERA_STUB)
   #define NUM_CAMERAS 1
 #else
   #error "Should have at least one camera"
@@ -60,10 +60,10 @@ namespace android {
 /* This defines the "open" function for each camera */
 extern "C" typedef sp<CameraHardwareInterface> (*OpenCameraHardwareFunction)();
 static OpenCameraHardwareFunction sOpenCameraTable[] = {
-#ifdef USE_CAMERA_HARDWARE
+#ifdef INCLUDE_CAMERA_HARDWARE
     &openCameraHardware,
 #endif
-#ifdef USE_CAMERA_STUB
+#ifdef INCLUDE_CAMERA_STUB
     &openCameraHardwareStub,
 #endif
 };
