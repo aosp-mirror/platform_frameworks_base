@@ -3,8 +3,7 @@ page.title=&lt;application&gt;
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;application android:<a href="#backup">allowBackup</a>=["true" | "false"]
-             android:<a href="#clear">allowClearUserData</a>=["true" | "false"]
+<dd><pre class="stx">&lt;application android:<a href="#clear">allowClearUserData</a>=["true" | "false"]
              android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
              android:<a href="#agent">backupAgent</a>="<i>string</i>"
              android:<a href="#debug">debuggable</a>=["true" | "false"]
@@ -49,15 +48,6 @@ cannot be overridden by the components.</dd>
 
 <dt>attributes</dt>
 <dd><dl class="attr">
-<dt><a name="backup"></a>{@code android:allowBackup}</dt>
-<dd>Whether the application allows its data to be backed up through the Android
-Backup Manager &mdash; "{@code true}" if it does, "{@code false}" if not.  By
-default this attribute is "{@code true}".  If an application declares this
-attribute to be "{@code false}" the Backup Manager will never attempt to
-perform any backup or restore operation, even if the application declares a
-valid <a href="#agent">{@code android:backupAgent}</a> attribute in its
-manifest.
-</dd>
 
 <dt><a name="clear"></a>{@code android:allowClearUserData}</dt>
 <dd>Whether or not users are given the option to remove user data &mdash; 
