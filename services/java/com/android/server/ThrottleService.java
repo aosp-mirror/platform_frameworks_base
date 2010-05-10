@@ -128,6 +128,10 @@ public class ThrottleService extends IThrottleManager.Stub {
         if (DBG) Slog.d(TAG, "Starting ThrottleService");
         mContext = context;
 
+        mPolicyThreshold = new AtomicLong();
+        mPolicyThrottleValue = new AtomicInteger();
+        mThrottleIndex = new AtomicInteger();
+
         mNtpActive = false;
 
         mIface = mContext.getResources().getString(R.string.config_datause_iface);
