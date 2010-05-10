@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef VORBIS_EXTRACTOR_H_
+#ifndef OGG_EXTRACTOR_H_
 
-#define VORBIS_EXTRACTOR_H_
+#define OGG_EXTRACTOR_H_
 
 #include <media/stagefright/MediaExtractor.h>
-
-struct OggVorbis_File;
 
 namespace android {
 
 class DataSource;
 class String8;
 
-struct VorbisDataSource;
+struct MyVorbisExtractor;
+struct OggSource;
 
-struct VorbisExtractor : public MediaExtractor {
-    VorbisExtractor(const sp<DataSource> &source);
+struct OggExtractor : public MediaExtractor {
+    OggExtractor(const sp<DataSource> &source);
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
@@ -38,25 +37,24 @@ struct VorbisExtractor : public MediaExtractor {
 
     virtual sp<MetaData> getMetaData();
 
-    uint32_t flags() const;
-
 protected:
-    virtual ~VorbisExtractor();
+    virtual ~OggExtractor();
 
 private:
-    sp<DataSource> mDataSource;
-    struct OggVorbis_File *mFile;
-    struct VorbisDataSource *mVorbisDataSource;
-    status_t mInitCheck;
-    sp<MetaData> mMeta;
+    friend struct OggSource;
 
-    VorbisExtractor(const VorbisExtractor &);
-    VorbisExtractor &operator=(const VorbisExtractor &);
+    sp<DataSource> mDataSource;
+    status_t mInitCheck;
+
+    MyVorbisExtractor *mImpl;
+
+    OggExtractor(const OggExtractor &);
+    OggExtractor &operator=(const OggExtractor &);
 };
 
-bool SniffVorbis(
+bool SniffOgg(
         const sp<DataSource> &source, String8 *mimeType, float *confidence);
 
 }  // namespace android
 
-#endif  // VORBIS_EXTRACTOR_H_
+#endif  // OGG_EXTRACTOR_H_

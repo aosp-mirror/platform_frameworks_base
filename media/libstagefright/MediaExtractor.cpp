@@ -22,7 +22,7 @@
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
-#include "include/VorbisExtractor.h"
+#include "include/OggExtractor.h"
 
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaDefs.h>
@@ -67,8 +67,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new AMRExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WAV)) {
         return new WAVExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_VORBIS)) {
-        return new VorbisExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
+        return new OggExtractor(source);
     }
 
     return NULL;
