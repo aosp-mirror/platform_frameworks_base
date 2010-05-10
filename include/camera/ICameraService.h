@@ -30,13 +30,16 @@ class ICameraService : public IInterface
 {
 public:
     enum {
-        CONNECT = IBinder::FIRST_CALL_TRANSACTION,
+        GET_NUMBER_OF_CAMERAS = IBinder::FIRST_CALL_TRANSACTION,
+        CONNECT
     };
 
 public:
     DECLARE_META_INTERFACE(CameraService);
 
-    virtual sp<ICamera>     connect(const sp<ICameraClient>& cameraClient) = 0;
+    virtual int32_t         getNumberOfCameras() = 0;
+    virtual sp<ICamera>     connect(const sp<ICameraClient>& cameraClient,
+                                    int cameraId) = 0;
 };
 
 // ----------------------------------------------------------------------------

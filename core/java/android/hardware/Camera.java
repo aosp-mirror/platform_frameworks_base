@@ -84,13 +84,29 @@ public class Camera {
     private boolean mWithBuffer;
 
     /**
-     * Returns a new Camera object.
+     * Returns the number of Cameras available.
+     * @hide
      */
-    public static Camera open() {
-        return new Camera();
+    public native static int getNumberOfCameras();
+
+    /**
+     * Returns a new Camera object.
+     * If {@link #getNumberOfCameras()} returns N, the valid is is 0 to N-1.
+     * The id 0 is the default camera.
+     * @hide
+     */
+    public static Camera open(int cameraId) {
+        return new Camera(cameraId);
     }
 
-    Camera() {
+    /**
+     * Returns a new Camera object. This returns the default camera.
+     */
+    public static Camera open() {
+        return new Camera(0);
+    }
+
+    Camera(int cameraId) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -107,14 +123,14 @@ public class Camera {
             mEventHandler = null;
         }
 
-        native_setup(new WeakReference<Camera>(this));
+        native_setup(new WeakReference<Camera>(this), cameraId);
     }
 
     protected void finalize() {
         native_release();
     }
 
-    private native final void native_setup(Object camera_this);
+    private native final void native_setup(Object camera_this, int cameraId);
     private native final void native_release();
 
 

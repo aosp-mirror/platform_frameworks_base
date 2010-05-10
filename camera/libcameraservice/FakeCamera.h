@@ -40,7 +40,7 @@ public:
     ~FakeCamera();
 
     void setSize(int width, int height);
-    void getNextFrameAsYuv422(uint8_t *buffer);
+    void getNextFrameAsYuv420(uint8_t *buffer);
     // Write to the fd a string representing the current state.
     void dump(int fd) const;
 
