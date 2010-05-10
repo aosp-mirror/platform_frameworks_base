@@ -60,6 +60,8 @@ private:
         int64_t timestamp;
     };
     List<SampleInfo>    mSampleInfos;
+    bool                mSamplesHaveSameSize;
+
     List<MediaBuffer *> mChunkSamples;
     List<off_t>         mChunkOffsets;
 
@@ -77,6 +79,16 @@ private:
     List<StscTableEntry> mStscTableEntries;
 
     List<int32_t> mStssTableEntries;
+
+    struct SttsTableEntry {
+
+        SttsTableEntry(uint32_t count, uint32_t duration)
+            : sampleCount(count), sampleDuration(duration) {}
+
+        uint32_t sampleCount;
+        uint32_t sampleDuration;
+    };
+    List<SttsTableEntry> mSttsTableEntries;
 
     void *mCodecSpecificData;
     size_t mCodecSpecificDataSize;
@@ -389,6 +401,7 @@ MPEG4Writer::Track::Track(
       mSource(source),
       mDone(false),
       mMaxTimeStampUs(0),
+      mSamplesHaveSameSize(true),
       mCodecSpecificData(NULL),
       mCodecSpecificDataSize(0),
       mGotAllCodecSpecificData(false),
@@ -562,6 +575,10 @@ void MPEG4Writer::Track::threadEntry() {
     int64_t chunkTimestampUs = 0;
     int32_t nChunks = 0;
     int32_t nZeroLengthFrames = 0;
+    int64_t lastTimestamp = 0;  // Timestamp of the previous sample
+    int64_t lastDuration = 0;   // Time spacing between the previous two samples
+    int32_t sampleCount = 1;    // Sample count in the current stts table entry
+    uint32_t previousSampleSize = 0;  // Size of the previous sample
 
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
@@ -584,11 +601,7 @@ void MPEG4Writer::Track::threadEntry() {
                         (const uint8_t *)buffer->data()
                             + buffer->range_offset(),
                         buffer->range_length());
-
-                if (err != OK) {
-                    LOGE("failed to parse avc codec specific data.");
-                    break;
-                }
+                CHECK_EQ(OK, err);
             } else if (is_mpeg4) {
                 mCodecSpecificDataSize = buffer->range_length();
                 mCodecSpecificData = malloc(mCodecSpecificDataSize);
@@ -676,14 +689,9 @@ void MPEG4Writer::Track::threadEntry() {
 
                 status_t err = makeAVCCodecSpecificData(
                         (const uint8_t *)tmp, size);
-
                 free(tmp);
                 tmp = NULL;
-
-                if (err != OK) {
-                    LOGE("failed to parse avc codec specific data.");
-                    break;
-                }
+                CHECK_EQ(OK, err);
 
                 mGotAllCodecSpecificData = true;
             }
@@ -712,6 +720,23 @@ void MPEG4Writer::Track::threadEntry() {
         // Our timestamp is in ms.
         info.timestamp = (timestampUs + 500) / 1000;
         mSampleInfos.push_back(info);
+        if (mSampleInfos.size() > 2) {
+            if (lastDuration != info.timestamp - lastTimestamp) {
+                SttsTableEntry sttsEntry(sampleCount, lastDuration);
+                mSttsTableEntries.push_back(sttsEntry);
+                sampleCount = 1;
+            } else {
+                ++sampleCount;
+            }
+        }
+        if (mSamplesHaveSameSize) {
+            if (mSampleInfos.size() >= 2 && previousSampleSize != info.size) {
+                mSamplesHaveSameSize = false;
+            }
+            previousSampleSize = info.size;
+        }
+        lastDuration = info.timestamp - lastTimestamp;
+        lastTimestamp = info.timestamp;
 
 ////////////////////////////////////////////////////////////////////////////////
         // Make a deep copy of the MediaBuffer less Metadata
@@ -749,10 +774,12 @@ void MPEG4Writer::Track::threadEntry() {
             isSync != 0) {
             mStssTableEntries.push_back(mSampleInfos.size());
         }
-        // Our timestamp is in ms.
+
         buffer->release();
         buffer = NULL;
     }
+
+    CHECK(!mSampleInfos.empty());
 
     // Last chunk
     if (!mChunkSamples.empty()) {
@@ -762,6 +789,16 @@ void MPEG4Writer::Track::threadEntry() {
         writeOneChunk(is_avc);
     }
 
+    // We don't really know how long the last frame lasts, since
+    // there is no frame time after it, just repeat the previous
+    // frame's duration.
+    if (mSampleInfos.size() == 1) {
+        lastDuration = 0;  // A single sample's duration
+    } else {
+        ++sampleCount;  // Count for the last sample
+    }
+    SttsTableEntry sttsEntry(sampleCount, lastDuration);
+    mSttsTableEntries.push_back(sttsEntry);
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames",
             count, nZeroLengthFrames, mSampleInfos.size());
@@ -1054,29 +1091,12 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
           mOwner->beginBox("stts");
             mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mSampleInfos.size());
-
-            List<SampleInfo>::iterator it = mSampleInfos.begin();
-            int64_t last = (*it).timestamp;
-            int64_t lastDuration = 1;
-
-            ++it;
-            while (it != mSampleInfos.end()) {
-                mOwner->writeInt32(1);
-                lastDuration = (*it).timestamp - last;
-                mOwner->writeInt32(lastDuration);
-
-                last = (*it).timestamp;
-
-                ++it;
+            mOwner->writeInt32(mSttsTableEntries.size());
+            for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
+                 it != mSttsTableEntries.end(); ++it) {
+                mOwner->writeInt32(it->sampleCount);
+                mOwner->writeInt32(it->sampleDuration);
             }
-
-            // We don't really know how long the last frame lasts, since
-            // there is no frame time after it, just repeat the previous
-            // frame's duration.
-            mOwner->writeInt32(1);
-            mOwner->writeInt32(lastDuration);
-
           mOwner->endBox();  // stts
 
           if (!is_audio) {
@@ -1092,11 +1112,18 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
           mOwner->beginBox("stsz");
             mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(0);  // default sample size
+            if (mSamplesHaveSameSize) {
+                List<SampleInfo>::iterator it = mSampleInfos.begin();
+                mOwner->writeInt32(it->size);  // default sample size
+            } else {
+                mOwner->writeInt32(0);
+            }
             mOwner->writeInt32(mSampleInfos.size());
-            for (List<SampleInfo>::iterator it = mSampleInfos.begin();
-                 it != mSampleInfos.end(); ++it) {
-                mOwner->writeInt32((*it).size);
+            if (!mSamplesHaveSameSize) {
+                for (List<SampleInfo>::iterator it = mSampleInfos.begin();
+                     it != mSampleInfos.end(); ++it) {
+                    mOwner->writeInt32((*it).size);
+                }
             }
           mOwner->endBox();  // stsz
 
