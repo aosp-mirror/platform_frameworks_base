@@ -91,7 +91,7 @@ extends CharSequence
     public static final int SPAN_EXCLUSIVE_EXCLUSIVE = SPAN_POINT_MARK;
 
     /**
-     * Non-0-length spans of type SPAN_INCLUSIVE_EXCLUSIVE expand
+     * Non-0-length spans of type SPAN_EXCLUSIVE_INCLUSIVE expand
      * to include text inserted at their ending point but not at their
      * starting point.  When 0-length, they behave like points.
      */
