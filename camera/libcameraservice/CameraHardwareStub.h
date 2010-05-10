@@ -67,8 +67,6 @@ private:
                         CameraHardwareStub();
     virtual             ~CameraHardwareStub();
 
-    static wp<CameraHardwareInterface> singleton;
-
     static const int kBufferCount = 4;
 
     class PreviewThread : public Thread {
@@ -129,6 +127,8 @@ private:
     // only used from PreviewThread
     int                 mCurrentPreviewFrame;
 };
+
+extern "C" sp<CameraHardwareInterface> openCameraHardwareStub();
 
 }; // namespace android
 
