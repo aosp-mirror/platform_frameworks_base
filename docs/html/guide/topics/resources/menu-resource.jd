@@ -35,12 +35,12 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;<a href="#menu-element">menu</a> xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;<a href="#item-element">item</a> android:id="<em>resource ID</em>"
+    &lt;<a href="#item-element">item</a> android:id="@+id/<em>id_name</em>"
           android:menuCategory=["container" | "system" | "secondary" | "alternative"]
           android:orderInCategory="<em>integer</em>"
           android:title="<em>string</em>"
           android:titleCondensed="<em>string</em>"
-          android:icon="<em>drawable resource</em>"
+          android:icon="@[package:]drawable/<em>drawable_resource_name</em>"
           android:alphabeticShortcut="<em>string</em>"
           android:numericShortcut="<em>string</em>"
           android:checkable=["true" | "false"]
@@ -172,22 +172,22 @@ too long.</dd>
 <dd>XML file saved at <code>res/menu/example_menu.xml</code>:
 <pre>
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;item android:id="@+id/example_item"
-          android:title="Example Item"
-          android:icon="@drawable/example_item_icon" />
-    &lt;group android:id="@+id/example_group">
+    &lt;item android:id="@+id/item1"
+          android:title="@string/item1"
+          android:icon="@drawable/group_item1_icon" />
+    &lt;group android:id="@+id/group">
         &lt;item android:id="@+id/group_item1"
-              android:title="Group Item 1"
-              android:icon="@drawable/example_item1_icon" />
+              android:title="@string/group_item1"
+              android:icon="@drawable/group_item1_icon" />
         &lt;item android:id="@+id/group_item2"
-              android:title="Group Item 2"
-              android:icon="@drawable/example_item2_icon" />
+              android:title="G@string/group_item2"
+              android:icon="@drawable/group_item2_icon" />
     &lt;/group>
     &lt;item android:id="@+id/submenu"
-          android:title="Sub Menu" >
+          android:title="@string/submenu_title" >
         &lt;menu>
-            &lt;item android:id="@+id/submenu_item"
-                  android:title="Sub Menu Item" />
+            &lt;item android:id="@+id/submenu_item1"
+                  android:title="@string/submenu_item1" />
         &lt;/menu>
     &lt;/item>
 &lt;/menu>

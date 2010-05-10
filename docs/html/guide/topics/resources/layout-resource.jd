@@ -36,14 +36,14 @@ In XML: <code>@[<em>package</em>:]layout/<em>filename</em></code>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/<em>name</em>"
-    android:layout_height="@+id/<em>string_name</em>"
-    android:layout_width="@+id/<em>string_name</em>"
-    [<em>other attributes</em>] &gt;
+    android:layout_height=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
+    android:layout_width=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
+    [<em>ViewGroup-specific attributes</em>] &gt;
     &lt;<a href="#view-element"><em>View</em></a>
         android:id="@+id/<em>name</em>"
-        android:layout_height="@+id/<em>string_name</em>"
-        android:layout_width="@+id/<em>string_name</em>"
-        [<em>other attributes</em>] &gt;
+        android:layout_height=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
+        android:layout_width=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
+        [<em>View-specific attributes</em>] &gt;
         &lt;<a href="#requestfocus-element">requestFocus</a>/&gt;
     &lt;/<em>View</em>&gt;
     &lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> &gt;
