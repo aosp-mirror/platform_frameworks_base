@@ -463,11 +463,11 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:centerX="<em>integer</em>"
         android:centerY="<em>integer</em>"
         android:centerColor="<em>integer</em>"
+        android:endColor="<em>color</em>"
         android:gradientRadius="<em>integer</em>"
-        android:type=""
-        android:usesLevel=""
         android:startColor="<em>color</em>"
-        android:endColor="<em>color</em>" />
+        android:type=["linear" | "radial" | "sweep"]
+        android:usesLevel=["true" | "false"] />
     &lt;<a href="#solid-element">solid</a>
         android:color="<em>color</em>" />
     &lt;<a href="#stroke-element">stroke</a>
@@ -544,18 +544,6 @@ a {@link android.graphics.drawable.LevelListDrawable}. This should normally be "
     <dd>Specifies a gradient color for the shape.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
-        <dt><code>android:type</code></dt>
-        <dd><em>Keyword</em>. The type of gradient pattern to apply. Valid values are:
-          <table>
-            <tr><th>Value</th><th>Description</th></tr>
-            <tr><td>{@code "linear"}</td>
-                <td>A linear gradient. This is the default.</td></tr>
-            <tr><td>{@code "radial"}</td>
-                <td>A radial gradient. The start color is the center color.</td></tr>
-            <tr><td>{@code "sweep"}</td>
-                <td>A sweeping line gradient. </td></tr>
-          </table>
-        </dd>
         <dt><code>android:angle</code></dt>
         <dd><em>Integer</em>. The angle for the gradient, in degrees. 0 is left to right, 90 is
 bottom to top. It must be a multiple of 45. Default is 0.</dd>
@@ -568,18 +556,30 @@ Does not apply when {@code android:type="linear"}.</dd>
         <dt><code>android:centerColor</code></dt>
         <dd><em>Color</em>. Optional color that comes between the start and end colors, as a
 hexadecimal value or <a href="more-resources.html#Color">color resource</a>.</dd>
-        <dt><code>android:gradientRadius</code></dt>
-        <dd><em>Float</em>. The radius for the gradient. Only applied when {@code
-android:type="radial"}.</dd>
-        <dt><code>android:useLevel</code></dt>
-        <dd><em>Boolean</em>. "true" if this is used as a {@link
-android.graphics.drawable.LevelListDrawable}.</dd>
-        <dt><code>android:startColor</code></dt>
-        <dd><em>Color</em>. The starting color, as a hexadecimal
-value or <a href="more-resources.html#Color">color resource</a>.</dd>
         <dt><code>android:endColor</code></dt>
         <dd><em>Color</em>. The ending color, as a hexadecimal
 value or <a href="more-resources.html#Color">color resource</a>.</dd>
+        <dt><code>android:gradientRadius</code></dt>
+        <dd><em>Float</em>. The radius for the gradient. Only applied when {@code
+android:type="radial"}.</dd>
+        <dt><code>android:startColor</code></dt>
+        <dd><em>Color</em>. The starting color, as a hexadecimal
+value or <a href="more-resources.html#Color">color resource</a>.</dd>
+        <dt><code>android:type</code></dt>
+        <dd><em>Keyword</em>. The type of gradient pattern to apply. Valid values are:
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td>{@code "linear"}</td>
+                <td>A linear gradient. This is the default.</td></tr>
+            <tr><td>{@code "radial"}</td>
+                <td>A radial gradient. The start color is the center color.</td></tr>
+            <tr><td>{@code "sweep"}</td>
+                <td>A sweeping line gradient. </td></tr>
+          </table>
+        </dd>
+        <dt><code>android:useLevel</code></dt>
+        <dd><em>Boolean</em>. "true" if this is used as a {@link
+android.graphics.drawable.LevelListDrawable}.</dd>
       </dl>
     </dd>
   <dt id="solid-element"><code>&lt;solid&gt;</code></dt>
