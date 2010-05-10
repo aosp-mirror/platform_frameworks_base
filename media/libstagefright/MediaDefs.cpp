@@ -30,10 +30,11 @@ const char *MEDIA_MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";
 const char *MEDIA_MIMETYPE_AUDIO_MPEG = "audio/mpeg";
 const char *MEDIA_MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
 const char *MEDIA_MIMETYPE_AUDIO_QCELP = "audio/qcelp";
+const char *MEDIA_MIMETYPE_AUDIO_VORBIS = "audio/vorbis";
 const char *MEDIA_MIMETYPE_AUDIO_RAW = "audio/raw";
 
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG4 = "video/mpeg4";
 const char *MEDIA_MIMETYPE_CONTAINER_WAV = "audio/wav";
-const char *MEDIA_MIMETYPE_CONTAINER_VORBIS = "application/ogg";
+const char *MEDIA_MIMETYPE_CONTAINER_OGG = "application/ogg";
 
 }  // namespace android

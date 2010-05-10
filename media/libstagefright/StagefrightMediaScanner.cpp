@@ -27,8 +27,8 @@
 #include <libsonivox/eas.h>
 
 // Ogg Vorbis includes
-#include "ivorbiscodec.h"
-#include "ivorbisfile.h"
+#include <Tremolo/ivorbiscodec.h>
+#include <Tremolo/ivorbisfile.h>
 
 namespace android {
 
