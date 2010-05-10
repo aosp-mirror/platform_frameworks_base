@@ -1,27 +1,16 @@
 LOCAL_PATH:= $(call my-dir)
 
-# Set USE_CAMERA_STUB if you want to use the fake camera.
-# Set USE_CAMERA_HARDWARE if you want to use the hardware camera.
-# For emulator or simulator builds, we use the fake camera only by default.
-
-ifneq ($(filter sooner generic sim,$(TARGET_DEVICE)),)
-    ifeq ($(USE_CAMERA_STUB),)
-        USE_CAMERA_STUB:=true
-    endif
-    ifeq ($(USE_CAMERA_HARDWARE),)
-        USE_CAMERA_HARDWARE:=false
-    endif
-else
-# force USE_CAMERA_STUB for testing temporarily
-#    ifeq ($(USE_CAMERA_STUB),)
-        USE_CAMERA_STUB:=true
-#    endif
-    ifeq ($(USE_CAMERA_HARDWARE),)
-        USE_CAMERA_HARDWARE:=true
-    endif
-endif
+# Set USE_CAMERA_STUB if you don't want to use the hardware camera.
 
 ifeq ($(USE_CAMERA_STUB),true)
+  INCLUDE_CAMERA_STUB:=true
+  INCLUDE_CAMERA_HARDWARE:=false
+else
+  INCLUDE_CAMERA_STUB:=true  # set this to true temporarily for testing
+  INCLUDE_CAMERA_HARDWARE:=true
+endif
+
+ifeq ($(INCLUDE_CAMERA_STUB),true)
 #
 # libcamerastub
 #
@@ -41,7 +30,7 @@ endif
 LOCAL_SHARED_LIBRARIES:= libui
 
 include $(BUILD_STATIC_LIBRARY)
-endif # USE_CAMERA_STUB
+endif # INCLUDE_CAMERA_STUB
 
 #
 # libcameraservice
@@ -67,13 +56,13 @@ ifeq ($(TARGET_SIMULATOR),true)
 LOCAL_CFLAGS += -DSINGLE_PROCESS
 endif
 
-ifeq ($(USE_CAMERA_STUB), true)
+ifeq ($(INCLUDE_CAMERA_STUB), true)
 LOCAL_STATIC_LIBRARIES += libcamerastub
-LOCAL_CFLAGS += -DUSE_CAMERA_STUB
+LOCAL_CFLAGS += -DINCLUDE_CAMERA_STUB
 endif
 
-ifeq ($(USE_CAMERA_HARDWARE),true)
-LOCAL_CFLAGS += -DUSE_CAMERA_HARDWARE
+ifeq ($(INCLUDE_CAMERA_HARDWARE),true)
+LOCAL_CFLAGS += -DINCLUDE_CAMERA_HARDWARE
 LOCAL_SHARED_LIBRARIES += libcamera 
 endif
 
