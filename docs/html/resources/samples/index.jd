@@ -79,6 +79,19 @@ adapter).</dd>
  <dt><a href="SoftKeyboard/index.html">Soft Keyboard</a></dt>
   <dd>An example of writing an input method for a software keyboard.</dd>
 
+ <dt><a href="Spinner/index.html">Spinner</a></dt>
+ <dd>
+    A simple application that serves as an application-under-test for the 
+    SpinnerTest sample application. 
+ </dd>
+ <dt><a href="SpinnerTest/index.html">SpinnerTest</a></dt>
+ <dd>
+    An example test application that contains test cases run against the 
+    Spinner sample application. 
+    To learn more about the application and how to run it, 
+    please read the 
+    <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a> tutorial.
+ </dd>
  <dt><a href="Wiktionary/index.html">Wiktionary</a></dt>
   <dd>An example of creating interactive widgets for display on the Android
   home screen.</dd>
