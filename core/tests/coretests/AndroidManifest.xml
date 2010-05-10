@@ -1179,8 +1179,11 @@
         <!-- Application components used for os tests -->
 
         <service android:name="android.os.MessengerService"
-                android:process=":messengerService">
-        </service>
+                android:process=":messengerService" />
+
+        <!-- Used by BinderThreadPriorityTest -->
+        <service android:name="android.os.BinderThreadPriorityService"
+                android:process=":BinderThreadPriorityService" />
 
         <!-- Application components used for search manager tests -->
 
@@ -1198,13 +1201,6 @@
                 android:authorities="android.app.SuggestionProvider">
         </provider>
 
-        <!-- Used to test IPC. -->
-        <service android:name="com.android.frameworks.coretests.binder.BinderTestService"
-                 android:process="binder.BinderTestService" />
-        <service android:name="com.android.frameworks.coretests.binder.BinderPerformanceService"
-                 android:process="binder.BinderPerformanceService" />
-        <service android:name="com.android.frameworks.coretests.binder.BinderVsMessagingService"
-                 android:process="binder.BinderVsMessagingService" />
     </application>
 
     <instrumentation
