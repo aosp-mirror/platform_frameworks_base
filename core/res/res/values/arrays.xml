@@ -71,6 +71,20 @@
         <item>@drawable/indicator_code_lock_point_area_default</item>
         <item>@drawable/indicator_code_lock_point_area_green</item>
         <item>@drawable/indicator_code_lock_point_area_red</item>
+        <!-- SlidingTab drawables shared by InCallScreen and LockScreen -->
+        <item>@drawable/jog_tab_bar_left_end_confirm_gray</item>
+        <item>@drawable/jog_tab_bar_left_end_normal</item>
+        <item>@drawable/jog_tab_bar_left_end_pressed</item>
+        <item>@drawable/jog_tab_bar_right_end_confirm_gray</item>
+        <item>@drawable/jog_tab_bar_right_end_normal</item>
+        <item>@drawable/jog_tab_bar_right_end_pressed</item>
+        <item>@drawable/jog_tab_left_confirm_gray</item>
+        <item>@drawable/jog_tab_left_normal</item>
+        <item>@drawable/jog_tab_left_pressed</item>
+        <item>@drawable/jog_tab_right_confirm_gray</item>
+        <item>@drawable/jog_tab_right_normal</item>
+        <item>@drawable/jog_tab_right_pressed</item>
+        <item>@drawable/jog_tab_target_gray</item>
     </array>
 
     <!-- Do not translate. These are all of the color state list resources that should be
