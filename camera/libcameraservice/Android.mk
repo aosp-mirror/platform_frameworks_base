@@ -2,6 +2,11 @@ LOCAL_PATH:= $(call my-dir)
 
 # Set USE_CAMERA_STUB if you don't want to use the hardware camera.
 
+# force these builds to use camera stub only
+ifneq ($(filter sooner generic sim,$(TARGET_DEVICE)),)
+  USE_CAMERA_STUB:=true
+endif
+
 ifeq ($(USE_CAMERA_STUB),true)
   INCLUDE_CAMERA_STUB:=true
   INCLUDE_CAMERA_HARDWARE:=false
