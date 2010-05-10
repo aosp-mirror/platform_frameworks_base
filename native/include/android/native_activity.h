@@ -55,11 +55,6 @@ typedef void android_activity_create_t(android_activity_t* activity,
 
 extern android_activity_create_t android_onCreateActivity;
 
-#if 0
-extern android_onCreateActivity(android_activity_t activity,
-        void* savedState, size_t savedStateSize);
-#endif
-
 #ifdef __cplusplus
 };
 #endif
