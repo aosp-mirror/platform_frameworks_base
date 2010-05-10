@@ -1,6 +1,6 @@
-<?cs # Table of contents for Dev Guide. 
+<?cs # Table of contents for Dev Guide.
 
-       For each document available in translation, add an localized title to this TOC. 
+       For each document available in translation, add an localized title to this TOC.
        Do not add localized title for docs not available in translation.
        Below are template spans for adding localized doc titles. Please ensure that
        localized titles are added in the language order specified below.
@@ -34,7 +34,7 @@
       <!-- quick overview of what it's like to develop on Android -->
     </ul>
   </li>
-  
+
   <li>
     <h2>
       <span class="en">Framework Topics</span>
@@ -66,34 +66,34 @@
              </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">
-               <span class="en">Declaring Layout</span> 
+               <span class="en">Declaring Layout</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">
-               <span class="en">Creating Menus</span> 
+               <span class="en">Creating Menus</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
-                <span class="en">Creating Dialogs</span> 
+                <span class="en">Creating Dialogs</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/ui-events.html">
-                <span class="en">Handling UI Events</span> 
+                <span class="en">Handling UI Events</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">
-                <span class="en">Notifying the User</span> 
+                <span class="en">Notifying the User</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
-                <span class="en">Applying Styles and Themes</span> 
+                <span class="en">Applying Styles and Themes</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/custom-components.html">
-                <span class="en">Building Custom Components</span> 
+                <span class="en">Building Custom Components</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">
-                <span class="en">Binding to Data with AdapterView</span> 
+                <span class="en">Binding to Data with AdapterView</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/layout-objects.html">
-                <span class="en">Common Layout Objects</span> 
+                <span class="en">Common Layout Objects</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/how-android-draws.html">
-                <span class="en">How Android Draws Views</span> 
+                <span class="en">How Android Draws Views</span>
               </a></li>
         </ul>
       </li>
@@ -229,9 +229,12 @@
             <li><a href="<?cs var:toroot?>guide/topics/search/searchable-config.html">Searchable Configuration</a></li>
           </ul>
       </li>
+      <li><a href="<?cs var:toroot?>guide/topics/testing/testing_android.html">
+            <span class="en">Testing and Instrumentation</span></a>
+            <span class="new">new!</span></li>
     </ul>
   </li>
-  
+
   <li>
     <h2><span class="en">Developing</span>
                <span class="de" style="display:none">Entwicklung</span>
@@ -246,7 +249,7 @@
   <!--<li><a href="">Developing for Android</a></li>
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
       <li><a href="<?cs var:toroot ?>guide/developing/eclipse-adt.html">
-            <span class="en">In Eclipse, with ADT</span> 
+            <span class="en">In Eclipse, with ADT</span>
             <span class="de" style="display:none">In Eclipse, mit ADT</span>
             <span class="es" style="display:none">En Eclipse, con ADT</span>
             <span class="fr" style="display:none">Sous Eclipse, à l'aide du plugin ADT</span>
@@ -276,32 +279,30 @@
             <span class="en">Tools</span>
           </a></div>
         <ul>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/aapt.html">aapt</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#android">android</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/aapt.html">aapt</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#android">android</a></li>
       <!--<li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT Plugin</a></li>-->
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html">AVDs</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html">AVDs</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
             <span class="new">new!</span></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html">ddms</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#mksdcard">mksdcard</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
-      		<li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
-    	  </ul>
-  	  </li>
-  <!--<li><a href="<?cs var:toroot ?>guide/developing/instrumentation/index.html">Instrumentation</a></li>
-      <li><a style="color:gray;">JUnit</a></li> -->
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html">ddms</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#mksdcard">mksdcard</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
+          </ul>
+        </li>
     </ul>
   </li>
-  
+
   <li>
     <h2><span class="en">Publishing</span>
         <span class="de" style="display:none">Veröffentlichung</span>
@@ -348,7 +349,7 @@
           </a></li>
     </ul>
   </li>
-  
+
   <li>
     <h2><span class="en">Best Practices</span>
                <span class="de" style="display:none">Bewährte Verfahren</span>
@@ -412,7 +413,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
             <span class="en">Market Filters </span>
-          </a><span class="new">new!</span></li>
+           </a><span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
           </a></li>
