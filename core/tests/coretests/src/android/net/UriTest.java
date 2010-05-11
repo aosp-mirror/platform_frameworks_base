@@ -582,5 +582,25 @@ public class UriTest extends TestCase {
             .appendQueryParameter("bkey", "e f")
             .build();
         assertNull(uri.getQueryParameter("key"));
+
+        // key is a prefix or suffix of the query
+        uri = Uri.parse("http://test/?qq=foo");
+        assertNull(uri.getQueryParameter("q"));
+        assertNull(uri.getQueryParameter("oo"));
+
+        // escaped keys
+        uri = Uri.parse("http://www.google.com/?a%20b=foo&c%20d=");
+        assertEquals("foo", uri.getQueryParameter("a b"));
+        assertEquals("", uri.getQueryParameter("c d"));
+        assertNull(uri.getQueryParameter("e f"));
+        assertNull(uri.getQueryParameter("b"));
+        assertNull(uri.getQueryParameter("c"));
+        assertNull(uri.getQueryParameter(" d"));
+
+        // empty values
+        uri = Uri.parse("http://www.google.com/?a=&b=&&c=");
+        assertEquals("", uri.getQueryParameter("a"));
+        assertEquals("", uri.getQueryParameter("b"));
+        assertEquals("", uri.getQueryParameter("c"));
     }
 }
