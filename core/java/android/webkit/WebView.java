@@ -30,10 +30,12 @@ import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Interpolator;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
@@ -1994,6 +1996,23 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Given a x coordinate in view space, convert it to content space.
+     * Returns the result as a float.
+     */
+    private float viewToContentXf(int x) {
+        return x * mInvActualScale;
+    }
+
+    /**
+     * Given a y coordinate in view space, convert it to content space.
+     * Takes into account the height of the title bar if there is one
+     * embedded into the WebView. Returns the result as a float.
+     */
+    private float viewToContentYf(int y) {
+        return (y - getTitleHeight()) * mInvActualScale;
+    }
+
+    /**
      * Given a distance in content space, convert it to view space. Note: this
      * does not reflect translation, just scaling, so this should not be called
      * with coordinates, but should be called for dimensions like width or
@@ -2228,6 +2247,24 @@ public class WebView extends AbsoluteLayout
         r.top = Math.max(viewToContentY(r.top + getVisibleTitleHeight()), 0);
         r.right = Math.min(viewToContentX(r.right), mContentWidth);
         r.bottom = Math.min(viewToContentY(r.bottom), mContentHeight);
+    }
+
+    // Sets r to be our visible rectangle in content coordinates. We use this
+    // method on the native side to compute the position of the fixed layers.
+    // Uses floating coordinates (necessary to correctly place elements when
+    // the scale factor is not 1)
+    private void calcOurContentVisibleRectF(RectF r) {
+        Rect ri = new Rect(0,0,0,0);
+        calcOurVisibleRect(ri);
+        // pin the rect to the bounds of the content
+        r.left = Math.max(viewToContentXf(ri.left), 0.0f);
+        // viewToContentY will remove the total height of the title bar.  Add
+        // the visible height back in to account for the fact that if the title
+        // bar is partially visible, the part of the visible rect which is
+        // displaying our content is displaced by that amount.
+        r.top = Math.max(viewToContentYf(ri.top + getVisibleTitleHeight()), 0.0f);
+        r.right = Math.min(viewToContentXf(ri.right), (float)mContentWidth);
+        r.bottom = Math.min(viewToContentYf(ri.bottom), (float)mContentHeight);
     }
 
     static class ViewSizeData {
