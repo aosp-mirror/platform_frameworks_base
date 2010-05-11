@@ -321,12 +321,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int MAX_HIDDEN_APPS = 15;
     
     // We put empty content processes after any hidden processes that have
-    // been idle for less than 30 seconds.
-    static final long CONTENT_APP_IDLE_OFFSET = 30*1000;
+    // been idle for less than 15 seconds.
+    static final long CONTENT_APP_IDLE_OFFSET = 15*1000;
     
     // We put empty content processes after any hidden processes that have
-    // been idle for less than 60 seconds.
-    static final long EMPTY_APP_IDLE_OFFSET = 60*1000;
+    // been idle for less than 120 seconds.
+    static final long EMPTY_APP_IDLE_OFFSET = 120*1000;
     
     static {
         // These values are set in system/rootdir/init.rc on startup.
@@ -879,6 +879,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     int mAdjSeq = 0;
 
+    /**
+     * Current sequence id for process LRU updating.
+     */
+    int mLruSeq = 0;
+    
     /**
      * Set to true if the ANDROID_SIMPLE_PROCESS_MANAGEMENT envvar
      * is set, indicating the user wants processes started in such a way
@@ -1588,14 +1593,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void updateLruProcessLocked(ProcessRecord app,
-            boolean oomAdj, boolean updateActivityTime) {
+    private final void updateLruProcessInternalLocked(ProcessRecord app,
+            boolean oomAdj, boolean updateActivityTime, int bestPos) {
         // put it on the LRU to keep track of when it should be exited.
         int lrui = mLruProcesses.indexOf(app);
         if (lrui >= 0) mLruProcesses.remove(lrui);
         
         int i = mLruProcesses.size()-1;
         int skipTop = 0;
+        
+        app.lruSeq = mLruSeq;
         
         // compute the new weight for this process.
         if (updateActivityTime) {
@@ -1619,6 +1626,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Also don't let it kick out the first few "real" hidden processes.
             skipTop = MIN_HIDDEN_APPS;
         }
+        
         while (i >= 0) {
             ProcessRecord p = mLruProcesses.get(i);
             // If this app shouldn't be in front of the first N background
@@ -1626,7 +1634,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (skipTop > 0 && p.setAdj >= HIDDEN_APP_MIN_ADJ) {
                 skipTop--;
             }
-            if (p.lruWeight <= app.lruWeight){
+            if (p.lruWeight <= app.lruWeight || i < bestPos) {
                 mLruProcesses.add(i+1, app);
                 break;
             }
@@ -1636,12 +1644,39 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mLruProcesses.add(0, app);
         }
         
+        // If the app is currently using a content provider or service,
+        // bump those processes as well.
+        if (app.connections.size() > 0) {
+            for (ConnectionRecord cr : app.connections) {
+                if (cr.binding != null && cr.binding.service != null
+                        && cr.binding.service.app != null
+                        && cr.binding.service.app.lruSeq != mLruSeq) {
+                    updateLruProcessInternalLocked(cr.binding.service.app, oomAdj,
+                            updateActivityTime, i+1);
+                }
+            }
+        }
+        if (app.conProviders.size() > 0) {
+            for (ContentProviderRecord cpr : app.conProviders.keySet()) {
+                if (cpr.app != null && cpr.app.lruSeq != mLruSeq) {
+                    updateLruProcessInternalLocked(cpr.app, oomAdj,
+                            updateActivityTime, i+1);
+                }
+            }
+        }
+        
         //Slog.i(TAG, "Putting proc to front: " + app.processName);
         if (oomAdj) {
             updateOomAdjLocked();
         }
     }
 
+    private final void updateLruProcessLocked(ProcessRecord app,
+            boolean oomAdj, boolean updateActivityTime) {
+        mLruSeq++;
+        updateLruProcessInternalLocked(app, oomAdj, updateActivityTime, 0);
+    }
+    
     private final boolean updateLRUListLocked(HistoryRecord r) {
         final boolean hadit = mLRUActivities.remove(r);
         mLRUActivities.add(r);
@@ -4677,8 +4712,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
                 app.thread.asBinder() == thread.asBinder()) {
-            Slog.i(TAG, "Process " + app.processName + " (pid " + pid
-                    + ") has died.");
+            if (!app.killedBackground) {
+                Slog.i(TAG, "Process " + app.processName + " (pid " + pid
+                        + ") has died.");
+            }
             EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.pid, app.processName);
             if (localLOGV) Slog.v(
                 TAG, "Dying app: " + app + ", pid: " + pid
@@ -7826,6 +7863,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
 
                 if (cpr.app != null) {
+                    if (r.setAdj >= VISIBLE_APP_ADJ) {
+                        // If this is a visible app accessing the provider,
+                        // make sure to count it as being accessed and thus
+                        // back up on the LRU list.  This is good because
+                        // content providers are often expensive to start.
+                        updateLruProcessLocked(cpr.app, false, true);
+                    }
                     updateOomAdjLocked(cpr.app);
                 }
 
@@ -8492,12 +8536,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     continue;
                 }
                 int adj = proc.setAdj;
-                if (adj >= worstType) {
+                if (adj >= worstType && !proc.killedBackground) {
                     Slog.w(TAG, "Killing " + proc + " (adj " + adj + "): " + reason);
                     EventLog.writeEvent(EventLogTags.AM_KILL, proc.pid,
                             proc.processName, adj, reason);
                     killed = true;
-                    Process.killProcess(pids[i]);
+                    proc.killedBackground = true;
+                    Process.killProcessQuiet(pids[i]);
                 }
             }
         }
@@ -9829,6 +9874,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     + " mFactoryTest=" + mFactoryTest);
             pw.println("  mGoingToSleep=" + mGoingToSleep);
             pw.println("  mLaunchingActivity=" + mLaunchingActivity);
+            pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
         }
         
         return true;
@@ -14292,13 +14338,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (!app.killedBackground) {
                         numHidden++;
                         if (numHidden > MAX_HIDDEN_APPS) {
-                            Slog.i(TAG, "Kill " + app.processName
-                                    + " (pid " + app.pid + "): hidden #" + numHidden
-                                    + " beyond limit " + MAX_HIDDEN_APPS);
+                            Slog.i(TAG, "No longer want " + app.processName
+                                    + " (pid " + app.pid + "): hidden #" + numHidden);
                             EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
                                     app.processName, app.setAdj, "too many background");
                             app.killedBackground = true;
-                            Process.killProcess(app.pid);
+                            Process.killProcessQuiet(app.pid);
                         }
                     }
                 }
