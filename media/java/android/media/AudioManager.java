@@ -1382,6 +1382,7 @@ public class AudioManager {
     }
 
     /**
+     * @hide
      * Registers a listener to be called when audio focus changes. Calling this method is optional
      * before calling {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, as it
      * will register the listener as well if it wasn't registered already.
@@ -1397,6 +1398,7 @@ public class AudioManager {
     }
 
     /**
+     * @hide
      * Causes the specified listener to not be called anymore when focus is gained or lost.
      * @param l the listener to unregister.
      */
