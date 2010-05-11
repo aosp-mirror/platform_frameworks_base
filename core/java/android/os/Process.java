@@ -747,6 +747,24 @@ public class Process {
      */
     public static final native void sendSignal(int pid, int signal);
     
+    /**
+     * @hide
+     * Private impl for avoiding a log message...  DO NOT USE without doing
+     * your own log, or the Android Illuminati will find you some night and
+     * beat you up.
+     */
+    public static final void killProcessQuiet(int pid) {
+        sendSignalQuiet(pid, SIGNAL_KILL);
+    }
+
+    /**
+     * @hide
+     * Private impl for avoiding a log message...  DO NOT USE without doing
+     * your own log, or the Android Illuminati will find you some night and
+     * beat you up.
+     */
+    public static final native void sendSignalQuiet(int pid, int signal);
+    
     /** @hide */
     public static final native long getFreeMemory();
     
