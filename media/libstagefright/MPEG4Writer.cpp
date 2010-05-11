@@ -113,6 +113,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
       mOffset(0),
       mMdatOffset(0),
+      mEstimatedMoovBoxSize(0),
       mInterleaveDurationUs(500000) {
     CHECK(mFile != NULL);
 }
@@ -121,6 +122,7 @@ MPEG4Writer::MPEG4Writer(int fd)
     : mFile(fdopen(fd, "wb")),
       mOffset(0),
       mMdatOffset(0),
+      mEstimatedMoovBoxSize(0),
       mInterleaveDurationUs(500000) {
     CHECK(mFile != NULL);
 }
@@ -147,15 +149,33 @@ status_t MPEG4Writer::start() {
         return UNKNOWN_ERROR;
     }
 
+    mStreamableFile = true;
+    mWriteMoovBoxToMemory = false;
+    mMoovBoxBuffer = NULL;
+    mMoovBoxBufferOffset = 0;
+
     beginBox("ftyp");
       writeFourcc("isom");
       writeInt32(0);
       writeFourcc("isom");
     endBox();
 
-    mMdatOffset = mOffset;
-    write("\x00\x00\x00\x01mdat????????", 16);
+    mFreeBoxOffset = mOffset;
 
+    if (mEstimatedMoovBoxSize == 0) {
+        // XXX: Estimate the moov box size
+        //      based on max file size or duration limit
+        mEstimatedMoovBoxSize = 0x0F00;
+    }
+    CHECK(mEstimatedMoovBoxSize >= 8);
+    fseeko(mFile, mFreeBoxOffset, SEEK_SET);
+    writeInt32(mEstimatedMoovBoxSize);
+    write("free", 4);
+
+    mMdatOffset = mFreeBoxOffset + mEstimatedMoovBoxSize;
+    mOffset = mMdatOffset;
+    fseeko(mFile, mMdatOffset, SEEK_SET);
+    write("\x00\x00\x00\x01mdat????????", 16);
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
         status_t err = (*it)->start();
@@ -189,14 +209,20 @@ void MPEG4Writer::stop() {
         }
     }
 
+
     // Fix up the size of the 'mdat' chunk.
-    fseek(mFile, mMdatOffset + 8, SEEK_SET);
+    fseeko(mFile, mMdatOffset + 8, SEEK_SET);
     int64_t size = mOffset - mMdatOffset;
     size = hton64(size);
     fwrite(&size, 1, 8, mFile);
-    fseek(mFile, mOffset, SEEK_SET);
+    fseeko(mFile, mOffset, SEEK_SET);
 
     time_t now = time(NULL);
+    const off_t moovOffset = mOffset;
+    mWriteMoovBoxToMemory = true;
+    mMoovBoxBuffer = (uint8_t *) malloc(mEstimatedMoovBoxSize);
+    mMoovBoxBufferOffset = 0;
+    CHECK(mMoovBoxBuffer != NULL);
 
     beginBox("moov");
 
@@ -236,8 +262,30 @@ void MPEG4Writer::stop() {
       }
     endBox();  // moov
 
+    mWriteMoovBoxToMemory = false;
+    if (mStreamableFile) {
+        CHECK(mMoovBoxBufferOffset + 8 <= mEstimatedMoovBoxSize);
+
+        // Moov box
+        fseeko(mFile, mFreeBoxOffset, SEEK_SET);
+        mOffset = mFreeBoxOffset;
+        write(mMoovBoxBuffer, 1, mMoovBoxBufferOffset, mFile);
+
+        // Free box
+        mFreeBoxOffset = mStreamableFile? mOffset: mFreeBoxOffset;
+        fseeko(mFile, mFreeBoxOffset, SEEK_SET);
+        writeInt32(mEstimatedMoovBoxSize - mMoovBoxBufferOffset);
+        write("free", 4);
+
+        // Free temp memory
+        free(mMoovBoxBuffer);
+        mMoovBoxBuffer = NULL;
+        mMoovBoxBufferOffset = 0;
+    }
+
     CHECK(mBoxes.empty());
 
+    fflush(mFile);
     fclose(mFile);
     mFile = NULL;
 }
@@ -317,10 +365,41 @@ off_t MPEG4Writer::addLengthPrefixedSample_l(MediaBuffer *buffer) {
     return old_offset;
 }
 
+size_t MPEG4Writer::write(
+        const void *ptr, size_t size, size_t nmemb, FILE *stream) {
+
+    const size_t bytes = size * nmemb;
+    if (mWriteMoovBoxToMemory) {
+        if (8 + mMoovBoxBufferOffset + bytes > mEstimatedMoovBoxSize) {
+            for (List<off_t>::iterator it = mBoxes.begin();
+                 it != mBoxes.end(); ++it) {
+                (*it) += mOffset;
+            }
+            fseeko(mFile, mOffset, SEEK_SET);
+            fwrite(mMoovBoxBuffer, 1, mMoovBoxBufferOffset, stream);
+            fwrite(ptr, size, nmemb, stream);
+            mOffset += (bytes + mMoovBoxBufferOffset);
+            free(mMoovBoxBuffer);
+            mMoovBoxBuffer = NULL;
+            mMoovBoxBufferOffset = 0;
+            mWriteMoovBoxToMemory = false;
+            mStreamableFile = false;
+        } else {
+            memcpy(mMoovBoxBuffer + mMoovBoxBufferOffset, ptr, bytes);
+            mMoovBoxBufferOffset += bytes;
+        }
+    } else {
+        fwrite(ptr, size, nmemb, stream);
+        mOffset += bytes;
+    }
+    return bytes;
+}
+
 void MPEG4Writer::beginBox(const char *fourcc) {
     CHECK_EQ(strlen(fourcc), 4);
 
-    mBoxes.push_back(mOffset);
+    mBoxes.push_back(mWriteMoovBoxToMemory?
+            mMoovBoxBufferOffset: mOffset);
 
     writeInt32(0);
     writeFourcc(fourcc);
@@ -332,51 +411,48 @@ void MPEG4Writer::endBox() {
     off_t offset = *--mBoxes.end();
     mBoxes.erase(--mBoxes.end());
 
-    fseek(mFile, offset, SEEK_SET);
-    writeInt32(mOffset - offset);
-    mOffset -= 4;
-    fseek(mFile, mOffset, SEEK_SET);
+    if (mWriteMoovBoxToMemory) {
+       int32_t x = htonl(mMoovBoxBufferOffset - offset);
+       memcpy(mMoovBoxBuffer + offset, &x, 4);
+    } else {
+        fseeko(mFile, offset, SEEK_SET);
+        writeInt32(mOffset - offset);
+        mOffset -= 4;
+        fseeko(mFile, mOffset, SEEK_SET);
+    }
 }
 
 void MPEG4Writer::writeInt8(int8_t x) {
-    fwrite(&x, 1, 1, mFile);
-    ++mOffset;
+    write(&x, 1, 1, mFile);
 }
 
 void MPEG4Writer::writeInt16(int16_t x) {
     x = htons(x);
-    fwrite(&x, 1, 2, mFile);
-    mOffset += 2;
+    write(&x, 1, 2, mFile);
 }
 
 void MPEG4Writer::writeInt32(int32_t x) {
     x = htonl(x);
-    fwrite(&x, 1, 4, mFile);
-    mOffset += 4;
+    write(&x, 1, 4, mFile);
 }
 
 void MPEG4Writer::writeInt64(int64_t x) {
     x = hton64(x);
-    fwrite(&x, 1, 8, mFile);
-    mOffset += 8;
+    write(&x, 1, 8, mFile);
 }
 
 void MPEG4Writer::writeCString(const char *s) {
     size_t n = strlen(s);
-
-    fwrite(s, 1, n + 1, mFile);
-    mOffset += n + 1;
+    write(s, 1, n + 1, mFile);
 }
 
 void MPEG4Writer::writeFourcc(const char *s) {
     CHECK_EQ(strlen(s), 4);
-    fwrite(s, 1, 4, mFile);
-    mOffset += 4;
+    write(s, 1, 4, mFile);
 }
 
 void MPEG4Writer::write(const void *data, size_t size) {
-    fwrite(data, 1, size, mFile);
-    mOffset += size;
+    write(data, 1, size, mFile);
 }
 
 bool MPEG4Writer::reachedEOS() {
