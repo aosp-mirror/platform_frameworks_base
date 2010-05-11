@@ -98,6 +98,15 @@ typedef struct android_native_window_t
         common.version = sizeof(android_native_window_t);
         memset(common.reserved, 0, sizeof(common.reserved));
     }
+
+    // Implement the methods that sp<android_native_window_t> expects so that it
+    // can be used to automatically refcount android_native_window_t's.
+    void incStrong(const void* id) const {
+        common.incRef(const_cast<android_native_base_t*>(&common));
+    }
+    void decStrong(const void* id) const {
+        common.decRef(const_cast<android_native_base_t*>(&common));
+    }
 #endif
     
     struct android_native_base_t common;
@@ -291,6 +300,15 @@ namespace android {
 template <typename NATIVE_TYPE, typename TYPE, typename REF>
 class EGLNativeBase : public NATIVE_TYPE, public REF
 {
+public:
+    // Disambiguate between the incStrong in REF and NATIVE_TYPE
+    void incStrong(const void* id) const {
+        REF::incStrong(id);
+    }
+    void decStrong(const void* id) const {
+        REF::decStrong(id);
+    }
+
 protected:
     typedef EGLNativeBase<NATIVE_TYPE, TYPE, REF> BASE;
     EGLNativeBase() : NATIVE_TYPE(), REF() {
