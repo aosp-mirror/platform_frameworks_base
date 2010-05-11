@@ -418,6 +418,10 @@ web_docs_sample_code_flags := \
 		            resources/samples/Spinner "Spinner" \
 		-samplecode $(sample_dir)/SpinnerTest \
 		            resources/samples/SpinnerTest "SpinnerTest" \
+		-samplecode $(sample_dir)/TicTacToeLib  \
+		            resources/samples/TicTacToeLib "TicTacToeLib" \
+		-samplecode $(sample_dir)/TicTacToeMain \
+		            resources/samples/TicTacToeMain "TicTacToeMain" \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \
