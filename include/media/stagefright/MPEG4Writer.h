@@ -61,6 +61,12 @@ private:
     FILE *mFile;
     off_t mOffset;
     off_t mMdatOffset;
+    uint8_t *mMoovBoxBuffer;
+    off_t mMoovBoxBufferOffset;
+    bool  mWriteMoovBoxToMemory;
+    off_t mFreeBoxOffset;
+    bool mStreamableFile;
+    off_t mEstimatedMoovBoxSize;
     uint32_t mInterleaveDurationUs;
     Mutex mLock;
 
@@ -74,6 +80,8 @@ private:
     // Acquire lock before calling these methods
     off_t addSample_l(MediaBuffer *buffer);
     off_t addLengthPrefixedSample_l(MediaBuffer *buffer);
+
+    inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);
