@@ -92,6 +92,22 @@ adapter).</dd>
     please read the 
     <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a> tutorial.
  </dd>
+ <dt><a href="TicTacToeLib/index.html">TicTacToeLib</a></dt>
+ <dd>
+    An example of an Android library project that provides a game-play
+    Activity to any dependent application project. For an example of
+    how an application can use the code and resources in an Android
+    library project, see the <a
+    href="{@docRoot}resources/samples/TicTacToeMain/index.html">TicTacToeMain</a>
+    sample application.
+ </dd>
+ <dt><a href="TicTacToeMain/index.html">TicTacToeMain</a></dt>
+ <dd>
+    An example of an Android application that makes use of code and
+    resources provided in an Android library project. Specifically, this
+    application uses code and resources provided in the <a
+    href="{@docRoot}resources/samples/TicTacToeLib/index.html">TicTacToeLib</a> library project.
+ </dd>
  <dt><a href="Wiktionary/index.html">Wiktionary</a></dt>
   <dd>An example of creating interactive widgets for display on the Android
   home screen.</dd>
