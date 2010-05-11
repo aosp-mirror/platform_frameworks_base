@@ -94,6 +94,8 @@ private:
     size_t mCurrentPageSize;
     size_t mNextLaceIndex;
 
+    off_t mFirstDataOffset;
+
     vorbis_info mVi;
     vorbis_comment mVc;
 
@@ -183,7 +185,8 @@ MyVorbisExtractor::MyVorbisExtractor(const sp<DataSource> &source)
     : mSource(source),
       mOffset(0),
       mCurrentPageSize(0),
-      mNextLaceIndex(0) {
+      mNextLaceIndex(0),
+      mFirstDataOffset(-1) {
     mCurrentPage.mNumSegments = 0;
 }
 
@@ -222,6 +225,12 @@ status_t MyVorbisExtractor::findNextPage(
 }
 
 status_t MyVorbisExtractor::seekToOffset(off_t offset) {
+    if (mFirstDataOffset >= 0 && offset < mFirstDataOffset) {
+        // Once we know where the actual audio data starts (past the headers)
+        // don't ever seek to anywhere before that.
+        offset = mFirstDataOffset;
+    }
+
     off_t pageOffset;
     status_t err = findNextPage(offset, &pageOffset);
 
@@ -438,6 +447,8 @@ void MyVorbisExtractor::init() {
     verifyHeader(packet, 5);
     packet->release();
     packet = NULL;
+
+    mFirstDataOffset = mOffset + mCurrentPageSize;
 }
 
 void MyVorbisExtractor::verifyHeader(
