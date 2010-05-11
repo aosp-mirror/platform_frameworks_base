@@ -37,6 +37,10 @@ ifeq ($(TARGET_ARCH),arm)
 	LOCAL_CFLAGS += -fstrict-aliasing
 endif
 
+ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
+    LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
+endif
+
 ifneq ($(TARGET_SIMULATOR),true)
     # we need to access the private Bionic header <bionic_tls.h>
     LOCAL_C_INCLUDES += bionic/libc/private
