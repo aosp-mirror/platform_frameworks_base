@@ -1382,7 +1382,7 @@ public class AudioManager {
     }
 
     /**
-     * Register a listener for audio focus updates.
+     * TODO hide
      */
     public void registerAudioFocusListener(OnAudioFocusChangeListener l) {
         synchronized(mFocusListenerLock) {
@@ -1394,16 +1394,10 @@ public class AudioManager {
     }
 
     /**
-     * TODO document for SDK
+     * TODO hide
      */
     public void unregisterAudioFocusListener(OnAudioFocusChangeListener l) {
-        // notify service to remove it from audio focus stack
-        IAudioService service = getService();
-        try {
-            service.unregisterAudioFocusClient(getIdForAudioFocusListener(l));
-        } catch (RemoteException e) {
-            Log.e(TAG, "Can't call unregisterFocusClient() from AudioService due to "+e);
-        }
+
         // remove locally
         synchronized(mFocusListenerLock) {
             mAudioFocusIdListenerMap.remove(getIdForAudioFocusListener(l));
@@ -1462,7 +1456,7 @@ public class AudioManager {
      */
     public int abandonAudioFocus(OnAudioFocusChangeListener l) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
-        registerAudioFocusListener(l);
+        unregisterAudioFocusListener(l);
         IAudioService service = getService();
         try {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
