@@ -62,18 +62,18 @@ In XML: <code>@[<em>package</em>:]anim/<em>filename</em></code>
         android:toXScale="<em>float</em>"
         android:fromYScale="<em>float</em>"
         android:toYScale="<em>float</em>"
-        android:pivotX="<em>string</em>"
-        android:pivotY="<em>string</em>" /&gt;
+        android:pivotX="<em>float</em>"
+        android:pivotY="<em>float</em>" /&gt;
     &lt;<a href="#translate-element">translate</a>
-        android:fromX="<em>string</em>"
-        android:toX="<em>string</em>"
-        android:fromY="<em>string</em>"
-        android:toY="<em>string</em>" /&gt;
+        android:fromX="<em>float</em>"
+        android:toX="<em>float</em>"
+        android:fromY="<em>float</em>"
+        android:toY="<em>float</em>" /&gt;
     &lt;<a href="#rotate-element">rotate</a>
         android:fromDegrees="<em>float</em>"
         android:toDegrees="<em>float</em>"
-        android:pivotX="<em>string</em>"
-        android:pivotY="<em>string</em>" /&gt;
+        android:pivotX="<em>float</em>"
+        android:pivotY="<em>float</em>" /&gt;
     &lt;<a href="#set-element">set</a>&gt;
         ...
     &lt;/set&gt;
@@ -158,21 +158,21 @@ android.view.animation.TranslateAnimation}.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:fromXDelta</code></dt>
-          <dd><em>Float or percentage</em>. Starting X offset. Either in: pixels relative to the
-normal position, in percentage relative to the element width (%), or relative to the parent width
-(%p).</dd>
+          <dd><em>Float or percentage</em>. Starting X offset. Expressed either: in pixels relative
+to the normal position (such as {@code "5"}), in percentage relative to the element width (such as
+{@code "5%"}), or in percentage relative to the parent width (such as {@code "5%p"}).</dd>
         <dt><code>android:toXDelta</code></dt>
-          <dd><em>Float or percentage</em>. Ending X offset. Either in: pixels relative to the
-normal position, in percentage relative to the element width (%), or relative to the parent width
-(%p).</dd>
+          <dd><em>Float or percentage</em>. Ending X offset. Expressed either: in pixels relative
+to the normal position (such as {@code "5"}), in percentage relative to the element width (such as
+{@code "5%"}), or in percentage relative to the parent width (such as {@code "5%p"}).</dd>
         <dt><code>android:fromYDelta</code></dt>
-          <dd><em>Float or percentage</em>. Starting Y offset. Either in: pixels relative to the
-normal position, in percentage relative to the element height (%), or relative to the parent height
-(%p).</dd>
+          <dd><em>Float or percentage</em>. Starting Y offset. Expressed either: in pixels relative
+to the normal position (such as {@code "5"}), in percentage relative to the element height (such as
+{@code "5%"}), or in percentage relative to the parent height (such as {@code "5%p"}).</dd>
         <dt><code>android:toYDelta</code></dt>
-          <dd><em>Float or percentage</em>. Ending Y offset. Either in: pixels relative to the
-normal position, in percentage relative to the element height (%), or relative to the parent height
-(%p).</dd>
+          <dd><em>Float or percentage</em>. Ending Y offset. Expressed either: in pixels relative
+to the normal position (such as {@code "5"}), in percentage relative to the element height (such as
+{@code "5%"}), or in percentage relative to the parent height (such as {@code "5%p"}).</dd>
       </dl>
       <p>For more attributes supported by <code>&lt;translate&gt;</code>, see the
 {@link android.view.animation.Animation} class reference (of which, all XML attributes are
@@ -183,15 +183,19 @@ inherrited by this element).</p>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:fromDegrees</code></dt>
-          <dd><em>Integer</em>. Starting angular position, in degrees.</dd>
+          <dd><em>Float</em>. Starting angular position, in degrees.</dd>
         <dt><code>android:toDegrees</code></dt>
-          <dd><em>Integer</em>. Ending angular position, in degrees.</dd>
+          <dd><em>Float</em>. Ending angular position, in degrees.</dd>
         <dt><code>android:pivotX</code></dt>
-          <dd><em>Integer or percentage</em>. The X coordinate of the center of rotation, in total
-pixels (where 0 is the left edge) or percentage of the screen width.</dd>
+          <dd><em>Float or percentage</em>. The X coordinate of the center of rotation. Expressed
+either: in pixels relative to the object's left edge (such as {@code "5"}), in percentage relative
+to the object's left edge (such as {@code "5%"}), or in percentage relative to the parent
+container's left edge (such as {@code "5%p"}).</dd>
         <dt><code>android:pivotY</code></dt>
-          <dd><em>Integer or percentage</em>. The Y coordinate of the center of rotation, in total
-pixels (where 0 is the top edge) or percentage of the screen height.</dd>
+          <dd><em>Float or percentage</em>. The Y coordinate of the center of rotation. Expressed
+either: in pixels relative to the object's top edge (such as {@code "5"}), in percentage relative
+to the object's top edge (such as {@code "5%"}), or in percentage relative to the parent
+container's top edge (such as {@code "5%p"}).</dd>
         </dl>
       <p>For more attributes supported by <code>&lt;rotate&gt;</code>, see the
 {@link android.view.animation.Animation} class reference (of which, all XML attributes are

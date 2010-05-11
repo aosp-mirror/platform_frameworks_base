@@ -66,7 +66,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     boolean bad;                // True if disabled in the bad process list
     boolean killedBackground;   // True when proc has been killed due to too many bg
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
-    int adjSeq;                 // Sequence id for identifying repeated trav
+    int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
+    int lruSeq;                 // Sequence id for identifying LRU update cycles
     ComponentName instrumentationClass;// class installed to instrument app
     ApplicationInfo instrumentationInfo; // the application being instrumented
     String instrumentationProfileFile; // where to save profiling
@@ -175,6 +176,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
         pw.print(prefix); pw.print("persistent="); pw.print(persistent);
                 pw.print(" removed="); pw.print(removed);
                 pw.print(" persistentActivities="); pw.println(persistentActivities);
+        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
+                pw.print(" lruSeq="); pw.println(lruSeq);
         if (killedBackground) {
             pw.print(prefix); pw.print("killedBackground="); pw.println(killedBackground);
         }

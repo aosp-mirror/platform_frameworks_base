@@ -25,7 +25,7 @@
     <ul>
       <li><a href="<?cs var:toroot ?>resources/dashboard/platform-versions.html">
             <span class="en">Platform Versions</span>
-          </a>  <span class="new">new!</span></li>
+          </a></li>
     </ul>
   </li>
 
@@ -36,7 +36,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>resources/articles/index.html">
                <span class="en">List of Articles</span>
-             </a> <span class="new">new!</span></div>
+             </a></div>
         <ul>
         <li><a href="<?cs var:toroot ?>resources/articles/avoiding-memory-leaks.html">
                 <span class="en">Avoiding Memory Leaks</span>
@@ -85,7 +85,7 @@
                 </a></li>
         <li><a href="<?cs var:toroot ?>resources/articles/live-wallpapers.html">
                 <span class="en">Live Wallpapers</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
         <li><a href="<?cs var:toroot ?>resources/articles/on-screen-inputs.html">
                 <span class="en">Onscreen Input Methods</span>
                 </a></li>
@@ -118,7 +118,7 @@
                 </a></li>
         <li><a href="<?cs var:toroot ?>resources/articles/contacts.html">
                 <span class="en">Using the Contacts API</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
         <li><a href="<?cs var:toroot ?>resources/articles/using-webviews.html">
                 <span class="en">Using WebViews</span>
                 </a></li>
@@ -159,9 +159,17 @@
       <li><a href="<?cs var:toroot ?>resources/tutorials/localization/index.html">
             <span class="en">Hello Localization</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>resources/tutorials/testing/helloandroid_test.html">
+            <span class="en">Hello Testing</span></a>
+            <span class="new">new!</span>
+      </li>
       <li><a href="<?cs var:toroot ?>resources/tutorials/notepad/index.html">
             <span class="en">Notepad Tutorial</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>resources/tutorials/testing/activity_test.html">
+            <span class="en">Activity Testing</span></a>
+            <span class="new">new!</span>
+      </li>
     </ul>
   </li>
 
@@ -183,7 +191,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>resources/samples/index.html">
                <span class="en">List of Samples</span>
-             </a> <span class="new">new!</span></div>
+             </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>resources/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
@@ -208,7 +216,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/CubeLiveWallpaper/index.html">
                 <span class="en">Live Wallpaper</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/LunarLander/index.html">
                 <span class="en">Lunar Lander</span>
               </a></li>
@@ -220,16 +228,28 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/SampleSyncAdapter/index.html">
                 <span class="en">Sample Sync Adapter</span>
-              </a> <span class="new">new!</span></li>
-          <li><a href="<?cs var:toroot ?>resources/samples/SearchableDictionary/index.html">
-                <span class="en">Searchable Dictionary</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/SearchableDictionary/index.html">
+                <span class="en">Searchable Dictionary v2</span>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Snake/index.html">
                 <span class="en">Snake</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/SoftKeyboard/index.html">
                 <span class="en">Soft Keyboard</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/Spinner/index.html">
+                <span class="en">Spinner</span>
+                </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/SpinnerTest/index.html">
+                <span class="en">SpinnerTest</span>
+                </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/TicTacToeLib/index.html">
+                <span class="en">TicTacToeLib</span>
+                </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/TicTacToeMain/index.html">
+                <span class="en">TicTacToeMain</span>
+                </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Wiktionary/index.html">
                 <span class="en">Wiktionary</span>
               </a></li>

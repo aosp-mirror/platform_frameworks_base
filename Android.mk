@@ -406,11 +406,19 @@ web_docs_sample_code_flags := \
                 -samplecode $(sample_dir)/SampleSyncAdapter \
                             resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/SearchableDictionary \
-		            resources/samples/SearchableDictionary "Searchable Dictionary" \
+		            resources/samples/SearchableDictionary "Searchable Dictionary v2" \
 		-samplecode $(sample_dir)/Snake \
 		            resources/samples/Snake "Snake" \
 		-samplecode $(sample_dir)/SoftKeyboard \
 		            resources/samples/SoftKeyboard "Soft Keyboard" \
+		-samplecode $(sample_dir)/Spinner  \
+		            resources/samples/Spinner "Spinner" \
+		-samplecode $(sample_dir)/SpinnerTest \
+		            resources/samples/SpinnerTest "SpinnerTest" \
+		-samplecode $(sample_dir)/TicTacToeLib  \
+		            resources/samples/TicTacToeLib "TicTacToeLib" \
+		-samplecode $(sample_dir)/TicTacToeMain \
+		            resources/samples/TicTacToeMain "TicTacToeMain" \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \

@@ -25,6 +25,7 @@
 #include "include/AVCDecoder.h"
 #include "include/M4vH263Decoder.h"
 #include "include/MP3Decoder.h"
+#include "include/VorbisDecoder.h"
 
 #include "include/ESDS.h"
 
@@ -67,6 +68,7 @@ FACTORY_CREATE(AMRWBDecoder)
 FACTORY_CREATE(AACDecoder)
 FACTORY_CREATE(AVCDecoder)
 FACTORY_CREATE(M4vH263Decoder)
+FACTORY_CREATE(VorbisDecoder)
 FACTORY_CREATE(AMRNBEncoder)
 
 static sp<MediaSource> InstantiateSoftwareCodec(
@@ -83,6 +85,7 @@ static sp<MediaSource> InstantiateSoftwareCodec(
         FACTORY_REF(AACDecoder)
         FACTORY_REF(AVCDecoder)
         FACTORY_REF(M4vH263Decoder)
+        FACTORY_REF(VorbisDecoder)
         FACTORY_REF(AMRNBEncoder)
     };
     for (size_t i = 0;
@@ -123,6 +126,7 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder" },
 //    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcdec" },
+    { MEDIA_MIMETYPE_AUDIO_VORBIS, "VorbisDecoder" },
 };
 
 static const CodecInfo kEncoderInfo[] = {
