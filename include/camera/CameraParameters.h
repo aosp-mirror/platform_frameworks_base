@@ -316,6 +316,12 @@ public:
     // continuously. Applications should not call
     // CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_EDOF[];
+    // Continuous focus mode. The camera continuously tries to focus. This is
+    // ideal for shooting video or shooting photo of moving object. Continuous
+    // focus starts when CameraHardwareInterface.autoFocus is called. Focus
+    // callback will be only called once as soon as the picture is in focus.
+    static const char FOCUS_MODE_CONTINUOUS[];
+
 
 private:
     DefaultKeyedVector<String8,String8>    mMap;
