@@ -874,6 +874,16 @@ public class Camera {
          */
         public static final String FOCUS_MODE_EDOF = "edof";
 
+        /**
+         * Continuous focus mode. The camera continuously tries to focus. This
+         * is ideal for shooting video or shooting photo of moving object.
+         * Continuous focus starts when {@link #autoFocus(AutoFocusCallback)} is
+         * called. AutoFocusCallback will be only called once as soon as the
+         * picture is in focus.
+         */
+        public static final String FOCUS_MODE_CONTINUOUS = "continuous";
+
+
         // Formats for setPreviewFormat and setPictureFormat.
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
         private static final String PIXEL_FORMAT_YUV420SP = "yuv420sp";
