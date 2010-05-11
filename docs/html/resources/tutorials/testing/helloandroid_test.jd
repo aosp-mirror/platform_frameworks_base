@@ -86,7 +86,7 @@ page.title=Hello, Testing
     </p>
     <p>
         If you aren't developing in Eclipse with ADT or you would like to run tests directly from the
-        command line, please see the topic <a href="{@docRoot}guide/developing/testing_otheride.html">Testing in Other IDEs</a>
+        command line, please see the topic <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>
         for instructions.
     </p>
 <h2 id="CreateTestProject">Creating the Test Project</h2>
