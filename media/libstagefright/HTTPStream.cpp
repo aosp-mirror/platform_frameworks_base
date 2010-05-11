@@ -68,10 +68,7 @@ status_t HTTPStream::connect(const char *server, int port) {
         return UNKNOWN_ERROR;
     }
 
-    struct timeval tv;
-    tv.tv_usec = 0;
-    tv.tv_sec = 5;
-    CHECK_EQ(0, setsockopt(mSocket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)));
+    setReceiveTimeout(5);  // Time out reads after 5 secs by default
 
     mState = CONNECTING;
 
@@ -327,6 +324,18 @@ bool HTTPStream::find_header_value(const string &key, string *value) const {
     *value = mHeaders.valueAt(index);
 
     return true;
+}
+
+void HTTPStream::setReceiveTimeout(int seconds) {
+    if (seconds < 0) {
+        // Disable the timeout.
+        seconds = 0;
+    }
+
+    struct timeval tv;
+    tv.tv_usec = 0;
+    tv.tv_sec = seconds;
+    CHECK_EQ(0, setsockopt(mSocket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)));
 }
 
 }  // namespace android

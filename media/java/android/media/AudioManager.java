@@ -1382,7 +1382,11 @@ public class AudioManager {
     }
 
     /**
-     * Register a listener for audio focus updates.
+     * @hide
+     * Registers a listener to be called when audio focus changes. Calling this method is optional
+     * before calling {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, as it
+     * will register the listener as well if it wasn't registered already.
+     * @param l the listener to be notified of audio focus changes.
      */
     public void registerAudioFocusListener(OnAudioFocusChangeListener l) {
         synchronized(mFocusListenerLock) {
@@ -1394,16 +1398,12 @@ public class AudioManager {
     }
 
     /**
-     * TODO document for SDK
+     * @hide
+     * Causes the specified listener to not be called anymore when focus is gained or lost.
+     * @param l the listener to unregister.
      */
     public void unregisterAudioFocusListener(OnAudioFocusChangeListener l) {
-        // notify service to remove it from audio focus stack
-        IAudioService service = getService();
-        try {
-            service.unregisterAudioFocusClient(getIdForAudioFocusListener(l));
-        } catch (RemoteException e) {
-            Log.e(TAG, "Can't call unregisterFocusClient() from AudioService due to "+e);
-        }
+
         // remove locally
         synchronized(mFocusListenerLock) {
             mAudioFocusIdListenerMap.remove(getIdForAudioFocusListener(l));
@@ -1412,18 +1412,18 @@ public class AudioManager {
 
 
     /**
-     * TODO document for SDK
+     * A failed focus change request.
      */
     public static final int AUDIOFOCUS_REQUEST_FAILED = 0;
     /**
-     * TODO document for SDK
+     * A successful focus change request.
      */
     public static final int AUDIOFOCUS_REQUEST_GRANTED = 1;
 
 
     /**
      *  Request audio focus.
-     *  Send a request to obtain the audio focus for a specific stream type
+     *  Send a request to obtain the audio focus
      *  @param l the listener to be notified of audio focus changes
      *  @param streamType the main audio stream type affected by the focus request
      *  @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
@@ -1456,13 +1456,13 @@ public class AudioManager {
 
 
     /**
-     *  TODO document for SDK
-     *  Abandon audio focus.
+     *  Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
+     *  @param l the listener with which focus was requested.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
      */
     public int abandonAudioFocus(OnAudioFocusChangeListener l) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
-        registerAudioFocusListener(l);
+        unregisterAudioFocusListener(l);
         IAudioService service = getService();
         try {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
@@ -1477,7 +1477,7 @@ public class AudioManager {
     //====================================================================
     // Remote Control
     /**
-     * TODO document for SDK
+     * Register a component to be the sole receiver of MEDIA_BUTTON intents.
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that will receive the media button intent. This broadcast receiver must be declared
      *      in the application manifest.
@@ -1493,7 +1493,9 @@ public class AudioManager {
     }
 
     /**
-     * TODO document for SDK
+     * Unregister the receiver of MEDIA_BUTTON intents.
+     * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
+     *      that was registered with {@link #registerMediaButtonEventReceiver(ComponentName)}.
      */
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
         IAudioService service = getService();

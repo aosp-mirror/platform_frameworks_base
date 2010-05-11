@@ -110,7 +110,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
                 <span class="en">Handling Runtime Changes</span>
-              </a></li>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
                 <span class="en">Localization</span>
               </a></li>
@@ -275,6 +275,25 @@
             <span class="en">Debugging Tasks</span>
           </a></li>
       <li class="toggle-list">
+           <div>
+                <a href="<?cs var:toroot ?>guide/developing/testing/index.html">
+                   <span class="en">Testing</span>
+               </a> <span class="new">new!</span>
+           </div>
+           <ul>
+              <li>
+                <a href="<?cs var:toroot ?>guide/developing/testing/testing_eclipse.html">
+                  <span class="en">Testing in Eclipse, with ADT</span>
+                </a> <span class="new">new!</span>
+              </li>
+              <li>
+                <a href="<?cs var:toroot ?>guide/developing/testing/testing_otheride.html">
+                  <span class="en">Testing in Other IDEs</span>
+                </a> <span class="new">new!</span>
+              </li>
+           </ul>
+         </li>
+      <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/developing/tools/index.html">
             <span class="en">Tools</span>
           </a></div>
@@ -412,8 +431,11 @@
             <span class="en">Android API Levels</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
-            <span class="en">Market Filters </span>
-           </a><span class="new">new!</span></li>
+            <span class="en">Market Filters</span>
+           </a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>guide/appendix/install-location.html">
+            <span class="en">App Install Location</span>
+          </a> <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
           </a></li>

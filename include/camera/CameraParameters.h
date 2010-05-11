@@ -39,23 +39,16 @@ public:
     int getInt(const char *key) const;
     float getFloat(const char *key) const;
 
-    /* preview-size=176x144 */
+    void remove(const char *key);
+
     void setPreviewSize(int width, int height);
     void getPreviewSize(int *width, int *height) const;
-
-    /* preview-fps=15 */
     void setPreviewFrameRate(int fps);
     int getPreviewFrameRate() const;
-
-    /* preview-format=rgb565|yuv422 */
     void setPreviewFormat(const char *format);
     const char *getPreviewFormat() const;
-
-    /* picture-size=1024x768 */
     void setPictureSize(int width, int height);
     void getPictureSize(int *width, int *height) const;
-
-    /* picture-format=yuv422|jpeg */
     void setPictureFormat(const char *format);
     const char *getPictureFormat() const;
 
