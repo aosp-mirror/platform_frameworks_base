@@ -110,6 +110,11 @@ public class LoggingEvents {
         public static final int START = 14;
         public static final String EXTRA_START_LOCALE = "locale";  // value should be String
         public static final String EXTRA_START_SWIPE = "swipe";  // value should be boolean
+        // EXTRA_START_SWIPE is deprecated; switch to EXTRA_START_METHOD instead
+        public static final String EXTRA_START_METHOD = "method";  // value should be int below
+        public static final int START_METHOD_BUTTON = 1;
+        public static final int START_METHOD_SWIPE = 2;
+        public static final int START_METHOD_MOTION = 3;
 
         public static final int VOICE_INPUT_DELIVERED = 15;
 
