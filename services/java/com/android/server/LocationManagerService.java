@@ -1644,7 +1644,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 synchronized (mLock) {
                     for (int i = mProviders.size() - 1; i >= 0; i--) {
                         LocationProviderInterface provider = mProviders.get(i);
-                        if (provider.isEnabled() && provider.requiresNetwork()) {
+                        if (provider.requiresNetwork()) {
                             provider.updateNetworkState(mNetworkState, info);
                         }
                     }
