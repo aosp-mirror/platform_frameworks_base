@@ -17,8 +17,7 @@
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix.h"
-
-#include "acc/acc.h"
+#include "../../../external/llvm/libbcc/include/bcc/bcc.h"
 #include "utils/Timers.h"
 
 #include <GLES/gl.h>
@@ -37,14 +36,14 @@ ScriptC::ScriptC(Context *rsc) : Script(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    mAccScript = NULL;
+    mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
 
 ScriptC::~ScriptC()
 {
-    if (mAccScript) {
-        accDeleteScript(mAccScript);
+    if (mBccScript) {
+        bccDeleteScript(mBccScript);
     }
     free(mEnviroment.mScriptText);
     mEnviroment.mScriptText = NULL;
@@ -52,9 +51,22 @@ ScriptC::~ScriptC()
 
 void ScriptC::setupScript()
 {
-    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        if (mProgram.mSlotPointers[ct]) {
-            *mProgram.mSlotPointers[ct] = mSlots[ct]->getPtr();
+    for (uint32_t ct=0; ct < mEnviroment.mFieldCount; ct++) {
+        if (!mSlots[ct].get())
+            continue;
+        void *ptr = mSlots[ct]->getPtr();
+        void **dest = ((void ***)mEnviroment.mFieldAddress)[ct];
+        //LOGE("setupScript %i %p = %p    %p %i", ct, dest, ptr, mSlots[ct]->getType(), mSlots[ct]->getType()->getDimX());
+
+        //const uint32_t *p32 = (const uint32_t *)ptr;
+        //for (uint32_t ct2=0; ct2 < mSlots[ct]->getType()->getDimX(); ct2++) {
+            //LOGE("  %i = 0x%08x ", ct2, p32[ct2]);
+        //}
+
+        if (dest) {
+            *dest = ptr;
+        } else {
+            LOGE("ScriptC::setupScript, NULL var binding address.");
         }
     }
 }
@@ -62,7 +74,7 @@ void ScriptC::setupScript()
 
 uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
-    if (mProgram.mScript == NULL) {
+    if (mProgram.mRoot == NULL) {
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
         return 0;
     }
@@ -92,8 +104,10 @@ uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
 
     uint32_t ret = 0;
     tls->mScript = this;
-    ret = mProgram.mScript(launchIndex);
+    //LOGE("ScriptC::run %p", mProgram.mRoot);
+    ret = mProgram.mRoot();
     tls->mScript = NULL;
+    //LOGE("ScriptC::run ret %i", ret);
     return ret;
 }
 
@@ -113,19 +127,14 @@ void ScriptCState::clear()
 {
     for (uint32_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         mConstantBufferTypes[ct].clear();
-        mSlotNames[ct].setTo("");
-        mInvokableNames[ct].setTo("");
         mSlotWritable[ct] = false;
     }
 
     delete mScript;
     mScript = new ScriptC(NULL);
-
-    mInt32Defines.clear();
-    mFloatDefines.clear();
 }
 
-static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name)
+static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 {
     const ScriptCState::SymbolTable_t *sym = ScriptCState::lookupSymbol(name);
     if (sym) {
@@ -137,51 +146,39 @@ static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name)
 
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
-    s->mAccScript = accCreateScript();
-    String8 tmp;
+    LOGE("ScriptCState::runCompiler ");
 
-    rsc->appendNameDefines(&tmp);
-    appendDecls(&tmp);
-    appendVarDefines(rsc, &tmp);
-    appendTypes(rsc, &tmp);
-    tmp.append("#line 1\n");
-
-    const char* scriptSource[] = {tmp.string(), s->mEnviroment.mScriptText};
-    int scriptLength[] = {tmp.length(), s->mEnviroment.mScriptTextLength} ;
-    accScriptSource(s->mAccScript, sizeof(scriptLength) / sizeof(int), scriptSource, scriptLength);
-    accRegisterSymbolCallback(s->mAccScript, symbolLookup, NULL);
-    accCompileScript(s->mAccScript);
-    accGetScriptLabel(s->mAccScript, "main", (ACCvoid**) &s->mProgram.mScript);
-    accGetScriptLabel(s->mAccScript, "init", (ACCvoid**) &s->mProgram.mInit);
-    rsAssert(s->mProgram.mScript);
-
-    if (!s->mProgram.mScript) {
-        ACCchar buf[4096];
-        ACCsizei len;
-        accGetScriptInfoLog(s->mAccScript, sizeof(buf), &len, buf);
-        LOGE(buf);
-        rsc->setError(RS_ERROR_BAD_SCRIPT, "Error compiling user script.");
-        return;
-    }
+    s->mBccScript = bccCreateScript();
+    bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
+    bccRegisterSymbolCallback(s->mBccScript, symbolLookup, NULL);
+    LOGE("ScriptCState::runCompiler 3");
+    bccCompileScript(s->mBccScript);
+    LOGE("ScriptCState::runCompiler 4");
+    bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
+    bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
+    LOGE("root %p,  init %p", s->mProgram.mRoot, s->mProgram.mInit);
 
     if (s->mProgram.mInit) {
         s->mProgram.mInit();
     }
 
-    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        if (mSlotNames[ct].length() > 0) {
-            accGetScriptLabel(s->mAccScript,
-                              mSlotNames[ct].string(),
-                              (ACCvoid**) &s->mProgram.mSlotPointers[ct]);
-        }
+    s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t *)calloc(100, sizeof(void *));
+    BCCchar **labels = new char*[100];
+    bccGetFunctions(s->mBccScript, (BCCsizei *)&s->mEnviroment.mInvokeFunctionCount,
+                    100, (BCCchar **)labels);
+    //LOGE("func count %i", s->mEnviroment.mInvokeFunctionCount);
+    for (uint32_t i=0; i < s->mEnviroment.mInvokeFunctionCount; i++) {
+        BCCsizei length;
+        bccGetFunctionBinary(s->mBccScript, labels[i], (BCCvoid **)&(s->mEnviroment.mInvokeFunctions[i]), &length);
+        //LOGE("func %i %p", i, s->mEnviroment.mInvokeFunctions[i]);
     }
 
-    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        if (mInvokableNames[ct].length() > 0) {
-            accGetScriptLabel(s->mAccScript,
-                              mInvokableNames[ct].string(),
-                              (ACCvoid**) &s->mEnviroment.mInvokables[ct]);
-        }
+    s->mEnviroment.mFieldAddress = (void **)calloc(100, sizeof(void *));
+    bccGetExportVars(s->mBccScript, (BCCsizei *)&s->mEnviroment.mFieldCount,
+                     100, s->mEnviroment.mFieldAddress);
+    //LOGE("var count %i", s->mEnviroment.mFieldCount);
+    for (uint32_t i=0; i < s->mEnviroment.mFieldCount; i++) {
+        //LOGE("var %i %p", i, s->mEnviroment.mFieldAddress[i]);
     }
 
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
@@ -189,11 +186,11 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     s->mEnviroment.mFragmentStore.set(rsc->getDefaultProgramFragmentStore());
     s->mEnviroment.mRaster.set(rsc->getDefaultProgramRaster());
 
-    if (s->mProgram.mScript) {
+    if (s->mProgram.mRoot) {
         const static int pragmaMax = 16;
-        ACCsizei pragmaCount;
-        ACCchar * str[pragmaMax];
-        accGetPragmas(s->mAccScript, &pragmaCount, pragmaMax, &str[0]);
+        BCCsizei pragmaCount;
+        BCCchar * str[pragmaMax];
+        bccGetPragmas(s->mBccScript, &pragmaCount, pragmaMax, &str[0]);
 
         for (int ct=0; ct < pragmaCount; ct+=2) {
             if (!strcmp(str[ct], "version")) {
@@ -208,11 +205,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
                     s->mEnviroment.mVertex.clear();
                     continue;
                 }
-                ProgramVertex * pv = (ProgramVertex *)rsc->lookupName(str[ct+1]);
-                if (pv != NULL) {
-                    s->mEnviroment.mVertex.set(pv);
-                    continue;
-                }
                 LOGE("Unreconized value %s passed to stateVertex", str[ct+1]);
             }
 
@@ -222,11 +214,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
                 }
                 if (!strcmp(str[ct+1], "parent")) {
                     s->mEnviroment.mRaster.clear();
-                    continue;
-                }
-                ProgramRaster * pr = (ProgramRaster *)rsc->lookupName(str[ct+1]);
-                if (pr != NULL) {
-                    s->mEnviroment.mRaster.set(pr);
                     continue;
                 }
                 LOGE("Unreconized value %s passed to stateRaster", str[ct+1]);
@@ -240,11 +227,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
                     s->mEnviroment.mFragment.clear();
                     continue;
                 }
-                ProgramFragment * pf = (ProgramFragment *)rsc->lookupName(str[ct+1]);
-                if (pf != NULL) {
-                    s->mEnviroment.mFragment.set(pf);
-                    continue;
-                }
                 LOGE("Unreconized value %s passed to stateFragment", str[ct+1]);
             }
 
@@ -254,12 +236,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
                 }
                 if (!strcmp(str[ct+1], "parent")) {
                     s->mEnviroment.mFragmentStore.clear();
-                    continue;
-                }
-                ProgramFragmentStore * pfs =
-                    (ProgramFragmentStore *)rsc->lookupName(str[ct+1]);
-                if (pfs != NULL) {
-                    s->mEnviroment.mFragmentStore.set(pfs);
                     continue;
                 }
                 LOGE("Unreconized value %s passed to stateStore", str[ct+1]);
@@ -273,111 +249,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     }
 }
 
-static void appendElementBody(String8 *s, const Element *e)
-{
-    s->append(" {\n");
-    for (size_t ct2=0; ct2 < e->getFieldCount(); ct2++) {
-        const Element *c = e->getField(ct2);
-        s->append("    ");
-        s->append(c->getCType());
-        s->append(" ");
-        s->append(e->getFieldName(ct2));
-        s->append(";\n");
-    }
-    s->append("}");
-}
-
-void ScriptCState::appendVarDefines(const Context *rsc, String8 *str)
-{
-    char buf[256];
-    if (rsc->props.mLogScripts) {
-        LOGD("appendVarDefines mInt32Defines.size()=%d mFloatDefines.size()=%d\n",
-                mInt32Defines.size(), mFloatDefines.size());
-    }
-    for (size_t ct=0; ct < mInt32Defines.size(); ct++) {
-        str->append("#define ");
-        str->append(mInt32Defines.keyAt(ct));
-        str->append(" ");
-        sprintf(buf, "%i\n", (int)mInt32Defines.valueAt(ct));
-        str->append(buf);
-    }
-    for (size_t ct=0; ct < mFloatDefines.size(); ct++) {
-        str->append("#define ");
-        str->append(mFloatDefines.keyAt(ct));
-        str->append(" ");
-        sprintf(buf, "%ff\n", mFloatDefines.valueAt(ct));
-        str->append(buf);
-    }
-}
-
-
-
-void ScriptCState::appendTypes(const Context *rsc, String8 *str)
-{
-    char buf[256];
-    String8 tmp;
-
-    str->append("struct vecF32_2_s {float x; float y;};\n");
-    str->append("struct vecF32_3_s {float x; float y; float z;};\n");
-    str->append("struct vecF32_4_s {float x; float y; float z; float w;};\n");
-    str->append("struct vecU8_4_s {char r; char g; char b; char a;};\n");
-    str->append("#define vecF32_2_t struct vecF32_2_s\n");
-    str->append("#define vecF32_3_t struct vecF32_3_s\n");
-    str->append("#define vecF32_4_t struct vecF32_4_s\n");
-    str->append("#define vecU8_4_t struct vecU8_4_s\n");
-    str->append("#define vecI8_4_t struct vecU8_4_s\n");
-
-    for (size_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        const Type *t = mConstantBufferTypes[ct].get();
-        if (!t) {
-            continue;
-        }
-        const Element *e = t->getElement();
-        if (e->getName() && (e->getFieldCount() > 1)) {
-            String8 s("struct struct_");
-            s.append(e->getName());
-            s.append(e->getCStructBody());
-            s.append(";\n");
-
-            s.append("#define ");
-            s.append(e->getName());
-            s.append("_t struct struct_");
-            s.append(e->getName());
-            s.append("\n\n");
-            if (rsc->props.mLogScripts) {
-                LOGV(s);
-            }
-            str->append(s);
-        }
-
-        if (mSlotNames[ct].length() > 0) {
-            String8 s;
-            if (e->getName()) {
-                // Use the named struct
-                s.setTo(e->getName());
-            } else {
-                // create an struct named from the slot.
-                s.setTo("struct ");
-                s.append(mSlotNames[ct]);
-                s.append("_s");
-                s.append(e->getCStructBody());
-                //appendElementBody(&s, e);
-                s.append(";\n");
-                s.append("struct ");
-                s.append(mSlotNames[ct]);
-                s.append("_s");
-            }
-
-            s.append(" * ");
-            s.append(mSlotNames[ct]);
-            s.append(";\n");
-            if (rsc->props.mLogScripts) {
-                LOGV(s);
-            }
-            str->append(s);
-        }
-    }
-}
 
 
 namespace android {
@@ -420,7 +291,6 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     s->setContext(rsc);
     for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         s->mTypes[ct].set(ss->mConstantBufferTypes[ct].get());
-        s->mSlotNames[ct] = ss->mSlotNames[ct];
         s->mSlotWritable[ct] = ss->mSlotWritable[ct];
     }
 
@@ -430,14 +300,12 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 
 void rsi_ScriptCSetDefineF(Context *rsc, const char* name, float value)
 {
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mFloatDefines.add(String8(name), value);
+    LOGE("Error rsi_ScriptCSetDefineF");
 }
 
 void rsi_ScriptCSetDefineI32(Context *rsc, const char* name, int32_t value)
 {
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mInt32Defines.add(String8(name), value);
+    LOGE("Error rsi_ScriptCSetDefineI");
 }
 
 }

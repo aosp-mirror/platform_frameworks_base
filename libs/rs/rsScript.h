@@ -29,7 +29,7 @@ class ProgramFragment;
 class ProgramRaster;
 class ProgramFragmentStore;
 
-#define MAX_SCRIPT_BANKS 16
+#define MAX_SCRIPT_BANKS 32
 
 class Script : public ObjectBase
 {
@@ -39,9 +39,7 @@ public:
     Script(Context *);
     virtual ~Script();
 
-
     struct Enviroment_t {
-        bool mIsRoot;
         float mClearColor[4];
         float mClearDepth;
         uint32_t mClearStencil;
@@ -53,21 +51,22 @@ public:
         ObjectBaseRef<ProgramFragment> mFragment;
         ObjectBaseRef<ProgramRaster> mRaster;
         ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
-        InvokeFunc_t mInvokables[MAX_SCRIPT_BANKS];
+
+        uint32_t mInvokeFunctionCount;
+        InvokeFunc_t *mInvokeFunctions;
+        uint32_t mFieldCount;
+        void ** mFieldAddress;
+
         char * mScriptText;
         uint32_t mScriptTextLength;
     };
     Enviroment_t mEnviroment;
 
-    uint32_t mCounstantBufferCount;
-
-
     ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
     ObjectBaseRef<const Type> mTypes[MAX_SCRIPT_BANKS];
-    String8 mSlotNames[MAX_SCRIPT_BANKS];
     bool mSlotWritable[MAX_SCRIPT_BANKS];
 
-
+    void setVar(uint32_t slot, const void *val, uint32_t len);
 
     virtual void setupScript() = 0;
     virtual uint32_t run(Context *, uint32_t launchID) = 0;

@@ -46,6 +46,15 @@ public class Script extends BaseObj {
         mRS.nScriptInvoke(mID, slot);
     }
 
+    protected void invokeData(int slot) {
+        mRS.nScriptInvokeData(mID, slot);
+    }
+
+    protected void invokeV(int slot, FieldPacker v) {
+        mRS.nScriptInvokeV(mID, slot, v.getData());
+    }
+
+
     Script(int id, RenderScript rs) {
         super(rs);
         mID = id;
@@ -53,7 +62,23 @@ public class Script extends BaseObj {
 
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
-        mRS.nScriptBindAllocation(mID, va.mID, slot);
+        if (va != null) {
+            mRS.nScriptBindAllocation(mID, va.mID, slot);
+        } else {
+            mRS.nScriptBindAllocation(mID, 0, slot);
+        }
+    }
+
+    public void setVar(int index, float v) {
+        mRS.nScriptSetVarF(mID, index, v);
+    }
+
+    public void setVar(int index, int v) {
+        mRS.nScriptSetVarI(mID, index, v);
+    }
+
+    public void setVar(int index, FieldPacker v) {
+        mRS.nScriptSetVarV(mID, index, v.getData());
     }
 
     public void setClearColor(float r, float g, float b, float a) {
@@ -82,71 +107,10 @@ public class Script extends BaseObj {
 
     public static class Builder {
         RenderScript mRS;
-        boolean mIsRoot = false;
-        Type[] mTypes;
-        String[] mNames;
-        boolean[] mWritable;
-        int mInvokableCount = 0;
-        Invokable[] mInvokables;
 
         Builder(RenderScript rs) {
             mRS = rs;
-            mTypes = new Type[MAX_SLOT];
-            mNames = new String[MAX_SLOT];
-            mWritable = new boolean[MAX_SLOT];
-            mInvokables = new Invokable[MAX_SLOT];
         }
-
-        public void setType(Type t, int slot) {
-            mTypes[slot] = t;
-            mNames[slot] = null;
-        }
-
-        public void setType(Type t, String name, int slot) {
-            mTypes[slot] = t;
-            mNames[slot] = name;
-        }
-
-        public Invokable addInvokable(String func) {
-            Invokable i = new Invokable();
-            i.mName = func;
-            i.mRS = mRS;
-            i.mSlot = mInvokableCount;
-            mInvokables[mInvokableCount++] = i;
-            return i;
-        }
-
-        public void setType(boolean writable, int slot) {
-            mWritable[slot] = writable;
-        }
-
-        void transferCreate() {
-            mRS.nScriptSetRoot(mIsRoot);
-            for(int ct=0; ct < mTypes.length; ct++) {
-                if(mTypes[ct] != null) {
-                    mRS.nScriptSetType(mTypes[ct].mID, mWritable[ct], mNames[ct], ct);
-                }
-            }
-            for(int ct=0; ct < mInvokableCount; ct++) {
-                mRS.nScriptSetInvokable(mInvokables[ct].mName, ct);
-            }
-        }
-
-        void transferObject(Script s) {
-            s.mIsRoot = mIsRoot;
-            s.mTypes = mTypes;
-            s.mInvokables = new Invokable[mInvokableCount];
-            for(int ct=0; ct < mInvokableCount; ct++) {
-                s.mInvokables[ct] = mInvokables[ct];
-                s.mInvokables[ct].mScript = s;
-            }
-            s.mInvokables = null;
-        }
-
-        public void setRoot(boolean r) {
-            mIsRoot = r;
-        }
-
     }
 
 

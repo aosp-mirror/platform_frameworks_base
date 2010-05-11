@@ -154,7 +154,6 @@ void Context::checkError(const char *msg) const
 uint32_t Context::runRootScript()
 {
     timerSet(RS_TIMER_CLEAR_SWAP);
-    rsAssert(mRootScript->mEnviroment.mIsRoot);
 
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
@@ -637,28 +636,6 @@ void Context::removeName(ObjectBase *obj)
             mNames.removeAt(ct);
             return;
         }
-    }
-}
-
-ObjectBase * Context::lookupName(const char *name) const
-{
-    for(size_t ct=0; ct < mNames.size(); ct++) {
-        if (!strcmp(name, mNames[ct]->getName())) {
-            return mNames[ct];
-        }
-    }
-    return NULL;
-}
-
-void Context::appendNameDefines(String8 *str) const
-{
-    char buf[256];
-    for (size_t ct=0; ct < mNames.size(); ct++) {
-        str->append("#define NAMED_");
-        str->append(mNames[ct]->getName());
-        str->append(" ");
-        sprintf(buf, "%i\n", (int)mNames[ct]);
-        str->append(buf);
     }
 }
 

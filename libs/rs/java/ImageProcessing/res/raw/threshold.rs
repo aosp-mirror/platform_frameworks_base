@@ -1,62 +1,49 @@
-/*
-// block of defines matching what RS will insert at runtime.
-struct Params_s{
-    int inHeight;
-    int inWidth;
-    int outHeight;
-    int outWidth;
-    float threshold;
-};
-struct Params_s * Params;
-struct InPixel_s{
-    char a;
-    char b;
-    char g;
-    char r;
-};
-struct InPixel_s * InPixel;
-struct OutPixel_s{
-    char a;
-    char b;
-    char g;
-    char r;
-};
-struct OutPixel_s * OutPixel;
-*/
+#pragma version(1)
 
-struct color_s {
-    char b;
-    char g;
-    char r;
-    char a;
-};
+#include "../../../../scriptc/rs_types.rsh"
+#include "../../../../scriptc/rs_math.rsh"
+#include "../../../../scriptc/rs_graphics.rsh"
 
-void main() {
-    int t = uptimeMillis();
+int height;
+int width;
+float threshold;
 
-    struct color_s *in = (struct color_s *) InPixel;
-    struct color_s *out = (struct color_s *) OutPixel;
+typedef struct c4u_s {
+    char r, g, b, a;
+} c4u_t;
 
-    int count = Params->inWidth * Params->inHeight;
-    int i;
-    float threshold = (Params->threshold * 255.f);
+//rs_color4u * InPixel;
+//rs_color4u * OutPixel;
+c4u_t * InPixel;
+c4u_t * OutPixel;
 
-    for (i = 0; i < count; i++) {
-        float luminance = 0.2125f * in->r +
-                          0.7154f * in->g +
-                          0.0721f * in->b;
-        if (luminance > threshold) {
-            *out = *in;
-        } else {
-            *((int *)out) = *((int *)in) & 0xff000000;
-        }
+#pragma rs export_var(height, width, threshold, InPixel, OutPixel)
 
+void filter() {
+    debugP(0, (void *)height);
+    debugP(0, (void *)width);
+    debugP(0, (void *)((int)threshold));
+    debugP(0, (void *)InPixel);
+    debugP(0, (void *)OutPixel);
+
+    rs_color4u *in = (rs_color4u *)InPixel;
+    rs_color4u *out = (rs_color4u *)OutPixel;
+    //const rs_color4u mask = {0,0,0,0xff};
+
+    int count = width * height;
+    int tf = threshold * 255 * 255;
+    int masks[2] = {0xffffffff, 0xff000000};
+
+    while (count--) {
+        int luminance = 54 * in->x +
+                        182 * in->y +
+                        18 * in->z;
+        int idx = ((uint32_t)(luminance - tf)) >> 31;
+        *((int *)out) = *((int *)in) & masks[idx];
         in++;
         out++;
     }
 
-    t= uptimeMillis() - t;
-    debugI32("Filter time", t);
-
     sendToClient(&count, 1, 4, 0);
 }
+

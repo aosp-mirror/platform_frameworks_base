@@ -138,16 +138,17 @@ public class RenderScript {
     native void nScriptSetClearDepth(int script, float depth);
     native void nScriptSetClearStencil(int script, int stencil);
     native void nScriptSetTimeZone(int script, byte[] timeZone);
-    native void nScriptSetType(int type, boolean writable, String name, int slot);
     native void nScriptSetRoot(boolean isRoot);
-    native void nScriptSetInvokable(String name, int slot);
     native void nScriptInvoke(int id, int slot);
+    native void nScriptInvokeData(int id, int slot);
+    native void nScriptInvokeV(int id, int slot, byte[] params);
+    native void nScriptSetVarI(int id, int slot, int val);
+    native void nScriptSetVarF(int id, int slot, float val);
+    native void nScriptSetVarV(int id, int slot, byte[] val);
 
     native void nScriptCBegin();
     native void nScriptCSetScript(byte[] script, int offset, int length);
     native int  nScriptCCreate();
-    native void nScriptCAddDefineI32(String name, int value);
-    native void nScriptCAddDefineF(String name, float value);
 
     native void nSamplerBegin();
     native void nSamplerSet(int param, int value);
@@ -229,6 +230,13 @@ public class RenderScript {
     Element mElement_COLOR_U8_4;
     Element mElement_COLOR_F32_4;
 
+    Sampler mSampler_CLAMP_NEAREST;
+    Sampler mSampler_CLAMP_LINEAR;
+    Sampler mSampler_CLAMP_LINEAR_MIP_LINEAR;
+    Sampler mSampler_WRAP_NEAREST;
+    Sampler mSampler_WRAP_LINEAR;
+    Sampler mSampler_WRAP_LINEAR_MIP_LINEAR;
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
@@ -293,7 +301,6 @@ public class RenderScript {
                     mRS.mMessageCallback.mID = msg;
                     mRS.mMessageCallback.run();
                 }
-                //Log.d(LOG_TAG, "MessageThread msg " + msg + " v1 " + rbuf[0] + " v2 " + rbuf[1] + " v3 " +rbuf[2]);
             }
             Log.d(LOG_TAG, "MessageThread exiting.");
         }
