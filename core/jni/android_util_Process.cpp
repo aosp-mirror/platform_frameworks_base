@@ -311,8 +311,8 @@ jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
             sprintf(text, "%d", adj);
             write(fd, text, strlen(text));
             close(fd);
-            return true;
         }
+        return true;
     }
 #endif
     return false;
@@ -797,6 +797,13 @@ void android_os_Process_sendSignal(JNIEnv* env, jobject clazz, jint pid, jint si
     }
 }
 
+void android_os_Process_sendSignalQuiet(JNIEnv* env, jobject clazz, jint pid, jint sig)
+{
+    if (pid > 0) {
+        kill(pid, sig);
+    }
+}
+
 static jlong android_os_Process_getElapsedCpuTime(JNIEnv* env, jobject clazz)
 {
     struct timespec ts;
@@ -854,6 +861,7 @@ static const JNINativeMethod methods[] = {
     {"setUid", "(I)I", (void*)android_os_Process_setUid},
     {"setGid", "(I)I", (void*)android_os_Process_setGid},
     {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
+    {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
     {"supportsProcesses", "()Z", (void*)android_os_Process_supportsProcesses},
     {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
