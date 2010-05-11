@@ -75,6 +75,8 @@ private:
     int32_t mAudioChannels;
     int32_t mSampleRate;
     int32_t mInterleaveDurationUs;
+    int64_t mMaxFileSizeBytes;
+    int64_t mMaxFileDurationUs;
 
     String8 mParams;
     int mOutputFd;
@@ -82,6 +84,7 @@ private:
 
     status_t startMPEG4Recording();
     status_t startAMRRecording();
+    status_t startAACRecording();
     sp<MediaSource> createAudioSource();
     status_t setParameter(const String8 &key, const String8 &value);
     status_t setParamVideoEncodingBitRate(int32_t bitRate);
@@ -89,7 +92,7 @@ private:
     status_t setParamAudioNumberOfChannels(int32_t channles);
     status_t setParamAudioSamplingRate(int32_t sampleRate);
     status_t setParamInterleaveDuration(int32_t durationUs);
-    status_t setParamMaxDurationOrFileSize(int32_t limit, bool limit_is_duration);
+    status_t setParamMaxDurationOrFileSize(int64_t limit, bool limit_is_duration);
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);
