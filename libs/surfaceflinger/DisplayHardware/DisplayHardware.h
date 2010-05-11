@@ -50,7 +50,6 @@ public:
         PARTIAL_UPDATES         = 0x00020000,   // video driver feature
         SLOW_CONFIG             = 0x00040000,   // software
         SWAP_RECTANGLE          = 0x00080000,
-        CACHED_BUFFERS          = 0x00100000
     };
 
     DisplayHardware(

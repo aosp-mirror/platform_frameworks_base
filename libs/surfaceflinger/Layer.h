@@ -109,7 +109,6 @@ private:
     sp<Surface>             mSurface;
 
             bool            mSecure;
-            bool            mNoEGLImageForSwBuffers;
             int32_t         mFrontBufferIndex;
             bool            mNeedsBlending;
             bool            mNeedsDithering;
@@ -120,7 +119,6 @@ private:
             // protected by mLock
             sp<GraphicBuffer> mBuffers[NUM_BUFFERS];
             Texture         mTextures[NUM_BUFFERS];
-            sp<GraphicBuffer> mHybridBuffer;
             uint32_t        mWidth;
             uint32_t        mHeight;
             
