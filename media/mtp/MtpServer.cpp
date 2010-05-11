@@ -1,0 +1,516 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include "MtpDebug.h"
+#include "MtpServer.h"
+#include "MtpStorage.h"
+#include "MtpStringBuffer.h"
+#include "MtpDatabase.h"
+
+#include "f_mtp.h"
+
+static const MtpOperationCode kSupportedOperationCodes[] = {
+    MTP_OPERATION_GET_DEVICE_INFO,
+    MTP_OPERATION_OPEN_SESSION,
+    MTP_OPERATION_CLOSE_SESSION,
+    MTP_OPERATION_GET_STORAGE_IDS,
+    MTP_OPERATION_GET_STORAGE_INFO,
+    MTP_OPERATION_GET_NUM_OBJECTS,
+    MTP_OPERATION_GET_OBJECT_HANDLES,
+    MTP_OPERATION_GET_OBJECT_INFO,
+    MTP_OPERATION_GET_OBJECT,
+//    MTP_OPERATION_GET_THUMB,
+    MTP_OPERATION_DELETE_OBJECT,
+    MTP_OPERATION_SEND_OBJECT_INFO,
+    MTP_OPERATION_SEND_OBJECT,
+//    MTP_OPERATION_INITIATE_CAPTURE,
+//    MTP_OPERATION_FORMAT_STORE,
+//    MTP_OPERATION_RESET_DEVICE,
+//    MTP_OPERATION_SELF_TEST,
+//    MTP_OPERATION_SET_OBJECT_PROTECTION,
+//    MTP_OPERATION_POWER_DOWN,
+    MTP_OPERATION_GET_DEVICE_PROP_DESC,
+    MTP_OPERATION_GET_DEVICE_PROP_VALUE,
+    MTP_OPERATION_SET_DEVICE_PROP_VALUE,
+    MTP_OPERATION_RESET_DEVICE_PROP_VALUE,
+//    MTP_OPERATION_TERMINATE_OPEN_CAPTURE,
+//    MTP_OPERATION_MOVE_OBJECT,
+//    MTP_OPERATION_COPY_OBJECT,
+//    MTP_OPERATION_GET_PARTIAL_OBJECT,
+//    MTP_OPERATION_INITIATE_OPEN_CAPTURE,
+    MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED,
+//    MTP_OPERATION_GET_OBJECT_PROP_DESC,
+    MTP_OPERATION_GET_OBJECT_PROP_VALUE,
+    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
+//    MTP_OPERATION_GET_OBJECT_REFERENCES,
+//    MTP_OPERATION_SET_OBJECT_REFERENCES,
+//    MTP_OPERATION_SKIP,
+};
+
+static const MtpObjectProperty kSupportedObjectProperties[] = {
+    MTP_PROPERTY_STORAGE_ID,
+    MTP_PROPERTY_OBJECT_FORMAT,
+    MTP_PROPERTY_OBJECT_SIZE,
+    MTP_PROPERTY_OBJECT_FILE_NAME,
+    MTP_PROPERTY_PARENT_OBJECT,
+};
+
+static const MtpObjectFormat kSupportedPlaybackFormats[] = {
+    // FIXME - fill this out later
+    MTP_FORMAT_ASSOCIATION,
+    MTP_FORMAT_MP3,
+};
+
+MtpServer::MtpServer(int fd, const char* databasePath)
+    :   mFD(fd),
+        mDatabasePath(databasePath),
+        mDatabase(NULL),
+        mSessionID(0),
+        mSessionOpen(false),
+        mSendObjectHandle(kInvalidObjectHandle),
+        mSendObjectFileSize(0)
+{
+    mDatabase = new MtpDatabase();
+    mDatabase->open(databasePath, true);
+}
+
+MtpServer::~MtpServer() {
+}
+
+void MtpServer::addStorage(const char* filePath) {
+    int index = mStorages.size() + 1;
+    index |= index << 16;   // set high and low part to our index
+    MtpStorage* storage = new MtpStorage(index, filePath, mDatabase);
+    addStorage(storage);
+}
+
+MtpStorage* MtpServer::getStorage(MtpStorageID id) {
+    for (int i = 0; i < mStorages.size(); i++) {
+        MtpStorage* storage =  mStorages[i];
+        if (storage->getStorageID() == id)
+            return storage;
+    }
+    return NULL;
+}
+
+void MtpServer::scanStorage() {
+    for (int i = 0; i < mStorages.size(); i++) {
+        MtpStorage* storage =  mStorages[i];
+        storage->scanFiles();
+    }
+}
+
+void MtpServer::run() {
+    int fd = mFD;
+
+    printf("MtpServer::run fd: %d\n", fd);
+
+    while (1) {
+        int ret = mRequest.read(fd);
+        if (ret < 0) {
+            fprintf(stderr, "request read returned %d, errno: %d\n", ret, errno);
+            break;
+        }
+        MtpOperationCode operation = mRequest.getOperationCode();
+        MtpTransactionID transaction = mRequest.getTransactionID();
+
+        printf("operation: %s\n", MtpDebug::getOperationCodeName(operation));
+        mRequest.dump();
+
+        // FIXME need to generalize this
+        bool dataIn = (operation == MTP_OPERATION_SEND_OBJECT_INFO);
+        if (dataIn) {
+            int ret = mData.read(fd);
+            if (ret < 0) {
+                fprintf(stderr, "data read returned %d, errno: %d\n", ret, errno);
+                break;
+            }
+            printf("received data:\n");
+            mData.dump();
+        } else {
+            mData.reset();
+        }
+
+        handleRequest();
+
+        if (!dataIn && mData.hasData()) {
+            mData.setOperationCode(operation);
+            mData.setTransactionID(transaction);
+            printf("sending data:\n");
+            mData.dump();
+            ret = mData.write(fd);
+            if (ret < 0) {
+                fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
+                break;
+            }
+        }
+
+        mResponse.setTransactionID(transaction);
+        ret = mResponse.write(fd);
+        if (ret < 0) {
+            fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
+            break;
+        }
+    }
+}
+
+void MtpServer::handleRequest() {
+    MtpOperationCode operation = mRequest.getOperationCode();
+    MtpResponseCode response;
+
+    mResponse.reset();
+
+    if (mSendObjectHandle != kInvalidObjectHandle && operation != MTP_OPERATION_SEND_OBJECT) {
+        // FIXME - need to delete mSendObjectHandle from the database
+        fprintf(stderr, "expected SendObject after SendObjectInfo\n");
+        mSendObjectHandle = kInvalidObjectHandle;
+    }
+
+    switch (operation) {
+        case MTP_OPERATION_GET_DEVICE_INFO:
+            response = doGetDeviceInfo();
+            break;
+        case MTP_OPERATION_OPEN_SESSION:
+            response = doOpenSession();
+            break;
+        case MTP_OPERATION_CLOSE_SESSION:
+            response = doCloseSession();
+            break;
+        case MTP_OPERATION_GET_STORAGE_IDS:
+            response = doGetStorageIDs();
+            break;
+         case MTP_OPERATION_GET_STORAGE_INFO:
+            response = doGetStorageInfo();
+            break;
+        case MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED:
+            response = doGetObjectPropsSupported();
+            break;
+        case MTP_OPERATION_GET_OBJECT_HANDLES:
+            response = doGetObjectHandles();
+            break;
+        case MTP_OPERATION_GET_OBJECT_PROP_VALUE:
+            response = doGetObjectPropValue();
+            break;
+        case MTP_OPERATION_GET_OBJECT_INFO:
+            response = doGetObjectInfo();
+            break;
+        case MTP_OPERATION_GET_OBJECT:
+            response = doGetObject();
+            break;
+        case MTP_OPERATION_SEND_OBJECT_INFO:
+            response = doSendObjectInfo();
+            break;
+        case MTP_OPERATION_SEND_OBJECT:
+            response = doSendObject();
+            break;
+        case MTP_OPERATION_DELETE_OBJECT:
+            response = doDeleteObject();
+            break;
+        case MTP_OPERATION_GET_OBJECT_PROP_DESC:
+        default:
+            response = MTP_RESPONSE_OPERATION_NOT_SUPPORTED;
+            break;
+    }
+
+    mResponse.setResponseCode(response);
+}
+
+MtpResponseCode MtpServer::doGetDeviceInfo() {
+    MtpStringBuffer   string;
+
+    // fill in device info
+    mData.putUInt16(MTP_STANDARD_VERSION);
+    mData.putUInt32(6); // MTP Vendor Extension ID
+    mData.putUInt16(MTP_STANDARD_VERSION);
+    string.set("microsoft.com: 1.0;");
+    mData.putString(string); // MTP Extensions
+    mData.putUInt16(0); //Functional Mode
+    mData.putAUInt16(kSupportedOperationCodes,
+            sizeof(kSupportedOperationCodes) / sizeof(uint16_t)); // Operations Supported
+    mData.putEmptyArray(); // Events Supported
+    mData.putEmptyArray(); // Device Properties Supported
+    mData.putEmptyArray(); // Capture Formats
+    mData.putAUInt16(kSupportedPlaybackFormats,
+            sizeof(kSupportedPlaybackFormats) / sizeof(uint16_t)); // Playback Formats
+    // FIXME
+    string.set("Google, Inc.");
+    mData.putString(string);   // Manufacturer
+    string.set("Just an Ordinary MTP Device");
+    mData.putString(string);   // Model
+    string.set("1.0");
+    mData.putString(string);   // Device Version
+    string.set("123456789012345678AA");
+    mData.putString(string);   // Serial Number
+
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doOpenSession() {
+    if (mSessionOpen) {
+        mResponse.setParameter(1, mSessionID);
+        return MTP_RESPONSE_SESSION_ALREADY_OPEN;
+    }
+    mSessionID = mRequest.getParameter(1);
+    mSessionOpen = true;
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doCloseSession() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    mSessionID = 0;
+    mSessionOpen = false;
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetStorageIDs() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+
+    int count = mStorages.size();
+    mData.putUInt32(count);
+    for (int i = 0; i < count; i++)
+        mData.putUInt32(mStorages[i]->getStorageID());
+
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetStorageInfo() {
+    MtpStringBuffer   string;
+
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpStorageID id = mRequest.getParameter(1);
+    MtpStorage* storage = getStorage(id);
+    if (!storage)
+        return MTP_RESPONSE_INVALID_STORAGE_ID;
+
+    mData.putUInt16(storage->getType());
+    mData.putUInt16(storage->getFileSystemType());
+    mData.putUInt16(storage->getAccessCapability());
+    mData.putUInt64(storage->getMaxCapacity());
+    mData.putUInt64(storage->getFreeSpace());
+    mData.putUInt32(1024*1024*1024); // Free Space in Objects
+    string.set(storage->getDescription());
+    mData.putString(string);
+    mData.putEmptyString();   // Volume Identifier
+
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetObjectPropsSupported() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpObjectFormat format = mRequest.getParameter(1);
+    mData.putAUInt16(kSupportedObjectProperties,
+            sizeof(kSupportedObjectProperties) / sizeof(uint16_t));
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetObjectHandles() {
+    if (!mSessionOpen)
+        return MTP_RESPONSE_SESSION_NOT_OPEN;
+    MtpStorageID storageID = mRequest.getParameter(1);      // 0xFFFFFFFF for all storage
+    MtpObjectFormat format = mRequest.getParameter(2);      // 0x00000000 for all formats
+    MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
+                                                            // 0x00000000 for all objects?
+
+    MtpObjectHandleList* handles = mDatabase->getObjectList(storageID, format, parent);
+    mData.putAUInt32(handles);
+    delete handles;
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetObjectPropValue() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    MtpObjectProperty property = mRequest.getParameter(2);
+
+    return mDatabase->getObjectProperty(handle, property, mData);
+}
+
+MtpResponseCode MtpServer::doGetObjectInfo() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    return mDatabase->getObjectInfo(handle, mData);
+}
+
+MtpResponseCode MtpServer::doGetObject() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    MtpString filePath;
+    int64_t fileLength;
+    if (!mDatabase->getObjectFilePath(handle, filePath, fileLength))
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+
+    mtp_file_range  mfr;
+    mfr.path = filePath;
+    mfr.path_length = strlen(mfr.path);
+    mfr.offset = 0;
+    mfr.length = fileLength;
+
+    // send data header
+    mData.setOperationCode(mRequest.getOperationCode());
+    mData.setTransactionID(mRequest.getTransactionID());
+    mData.writeDataHeader(mFD, fileLength);
+
+    // then transfer the file
+    int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
+    // FIXME - check for errors here
+    printf("MTP_SEND_FILE returned %d\n", ret);
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doSendObjectInfo() {
+    MtpString path;
+    MtpStorageID storageID = mRequest.getParameter(1);
+    MtpStorage* storage = getStorage(storageID);
+    MtpObjectHandle parent = mRequest.getParameter(2);
+    if (!storage)
+        return MTP_RESPONSE_INVALID_STORAGE_ID;
+
+    // special case the root
+    if (parent == MTP_PARENT_ROOT)
+        path = storage->getPath();
+    else {
+        int64_t dummy;
+        if (!mDatabase->getObjectFilePath(parent, path, dummy))
+            return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    }
+
+    // read only the fields we need
+    mData.getUInt32();  // storage ID
+    MtpObjectFormat format = mData.getUInt16();
+    mData.getUInt16();  // protection status
+    mSendObjectFileSize = mData.getUInt32();
+    mData.getUInt16();  // thumb format
+    mData.getUInt32();  // thumb compressed size
+    mData.getUInt32();  // thumb pix width
+    mData.getUInt32();  // thumb pix height
+    mData.getUInt32();  // image pix width
+    mData.getUInt32();  // image pix height
+    mData.getUInt32();  // image bit depth
+    mData.getUInt32();  // parent
+    uint16_t associationType = mData.getUInt16();
+    uint32_t associationDesc = mData.getUInt32();   // association desc
+    mData.getUInt32();  // sequence number
+    MtpStringBuffer name, created, modified;
+    mData.getString(name);    // file name
+    mData.getString(created);      // date created
+    mData.getString(modified);     // date modified
+    // keywords follow
+
+    time_t createdTime, modifiedTime;
+    if (!parseDateTime(created, createdTime))
+        createdTime = 0;
+    if (!parseDateTime(modified, modifiedTime))
+        modifiedTime = 0;
+printf("SendObjectInfo format: %04X size: %d name: %s, created: %s, modified: %s\n",
+format, mSendObjectFileSize, (const char*)name, (const char*)created, (const char*)modified);
+
+    if (path[path.size() - 1] != '/')
+        path += "/";
+    path += (const char *)name;
+
+    MtpObjectHandle handle = mDatabase->addFile((const char*)path,
+                                    format, parent, storageID, mSendObjectFileSize,
+                                    createdTime, modifiedTime);
+    if (handle == kInvalidObjectHandle)
+        return MTP_RESPONSE_GENERAL_ERROR;
+
+  if (format == MTP_FORMAT_ASSOCIATION) {
+        mode_t mask = umask(0);
+        int ret = mkdir((const char *)path, S_IRWXU | S_IRWXG | S_IRWXO);
+        umask(mask);
+        if (ret && ret != -EEXIST)
+            return MTP_RESPONSE_GENERAL_ERROR;
+    } else {
+        mSendObjectFilePath = path;
+        // save the handle for the SendObject call, which should follow
+        mSendObjectHandle = handle;
+    }
+
+    mResponse.setParameter(1, storageID);
+    mResponse.setParameter(2, parent);
+    mResponse.setParameter(3, handle);
+
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doSendObject() {
+    if (mSendObjectHandle == kInvalidObjectHandle) {
+        fprintf(stderr, "Expected SendObjectInfo before SendObject\n");
+        return MTP_RESPONSE_NO_VALID_OBJECT_INFO;
+    }
+
+    // read the header
+    int ret = mData.readDataHeader(mFD);
+    // FIXME - check for errors here.
+
+    // reset so we don't attempt to send this back
+    mData.reset();
+
+    mtp_file_range  mfr;
+    mfr.path = (const char*)mSendObjectFilePath;
+    mfr.path_length = strlen(mfr.path);
+    mfr.offset = 0;
+    mfr.length = mSendObjectFileSize;
+
+    // transfer the file
+    ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
+    // FIXME - check for errors here.
+    // we need to return a reasonable response and delete
+    // mSendObjectHandle from the database if this fails.
+    printf("MTP_RECEIVE_FILE returned %d\n", ret);
+
+    mSendObjectHandle = kInvalidObjectHandle;
+
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doDeleteObject() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    MtpObjectFormat format = mRequest.getParameter(1);
+    // FIXME - support deleting all objects if handle is 0xFFFFFFFF
+    // FIXME - implement deleting objects by format
+    // FIXME - handle non-empty directories
+
+    MtpString filePath;
+    int64_t fileLength;
+    if (!mDatabase->getObjectFilePath(handle, filePath, fileLength))
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+
+printf("deleting %s\n", (const char *)filePath);
+    // one of these should work
+    rmdir((const char *)filePath);
+    unlink((const char *)filePath);
+
+    mDatabase->deleteFile(handle);
+
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetObjectPropDesc() {
+    MtpObjectProperty property = mRequest.getParameter(1);
+    MtpObjectFormat format = mRequest.getParameter(2);
+
+    return -1;
+}
