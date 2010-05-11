@@ -2256,12 +2256,12 @@ public class WebView extends AbsoluteLayout
         Rect ri = new Rect(0,0,0,0);
         calcOurVisibleRect(ri);
         // pin the rect to the bounds of the content
-        r.left = Math.max(viewToContentXf(ri.left), 0f);
+        r.left = Math.max(viewToContentXf(ri.left), 0.0f);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = Math.max(viewToContentYf(ri.top + getVisibleTitleHeight()), 0f);
+        r.top = Math.max(viewToContentYf(ri.top + getVisibleTitleHeight()), 0.0f);
         r.right = Math.min(viewToContentXf(ri.right), (float)mContentWidth);
         r.bottom = Math.min(viewToContentYf(ri.bottom), (float)mContentHeight);
     }
