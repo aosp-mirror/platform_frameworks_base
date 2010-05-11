@@ -3208,6 +3208,8 @@ public class WebView extends AbsoluteLayout
             // Send the click so that the textfield is in focus
             centerKeyPressOnTextField();
             rebuildWebTextView();
+        } else {
+            clearTextEntry(true);
         }
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
