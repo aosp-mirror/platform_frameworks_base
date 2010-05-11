@@ -82,6 +82,8 @@ private:
     off_t addLengthPrefixedSample_l(MediaBuffer *buffer);
 
     inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
+    bool exceedsFileSizeLimit();
+    bool exceedsFileDurationLimit();
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);

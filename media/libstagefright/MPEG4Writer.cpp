@@ -31,6 +31,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/Utils.h>
+#include <media/mediarecorder.h>
 
 namespace android {
 
@@ -44,6 +45,7 @@ public:
     bool reachedEOS();
 
     int64_t getDurationUs() const;
+    int64_t getEstimatedTrackSizeBytes() const;
     void writeTrackHeader(int32_t trackID);
 
 private:
@@ -52,6 +54,7 @@ private:
     sp<MediaSource> mSource;
     volatile bool mDone;
     int64_t mMaxTimeStampUs;
+    int64_t mEstimatedTrackSizeBytes;
 
     pthread_t mThread;
 
@@ -455,6 +458,35 @@ void MPEG4Writer::write(const void *data, size_t size) {
     write(data, 1, size, mFile);
 }
 
+bool MPEG4Writer::exceedsFileSizeLimit() {
+    // No limit
+    if (mMaxFileSizeLimitBytes == 0) {
+        return false;
+    }
+
+    int64_t nTotalBytesEstimate = mEstimatedMoovBoxSize;
+    for (List<Track *>::iterator it = mTracks.begin();
+         it != mTracks.end(); ++it) {
+        nTotalBytesEstimate += (*it)->getEstimatedTrackSizeBytes();
+    }
+    return (nTotalBytesEstimate >= mMaxFileSizeLimitBytes);
+}
+
+bool MPEG4Writer::exceedsFileDurationLimit() {
+    // No limit
+    if (mMaxFileDurationLimitUs == 0) {
+        return false;
+    }
+
+    for (List<Track *>::iterator it = mTracks.begin();
+         it != mTracks.end(); ++it) {
+        if ((*it)->getDurationUs() >= mMaxFileDurationLimitUs) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool MPEG4Writer::reachedEOS() {
     bool allDone = true;
     for (List<Track *>::iterator it = mTracks.begin();
@@ -656,6 +688,7 @@ void MPEG4Writer::Track::threadEntry() {
     int32_t sampleCount = 1;    // Sample count in the current stts table entry
     uint32_t previousSampleSize = 0;  // Size of the previous sample
 
+    mEstimatedTrackSizeBytes = 0;
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
         if (buffer->range_length() == 0) {
@@ -784,6 +817,21 @@ void MPEG4Writer::Track::threadEntry() {
 #endif
                 : buffer->range_length();
 
+        // Max file size or duration handling
+        mEstimatedTrackSizeBytes += info.size;
+        if (mOwner->exceedsFileSizeLimit()) {
+            buffer->release();
+            buffer = NULL;
+            mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED, 0);
+            break;
+        }
+        if (mOwner->exceedsFileDurationLimit()) {
+            buffer->release();
+            buffer = NULL;
+            mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_DURATION_REACHED, 0);
+            break;
+        }
+
         bool is_audio = !strncasecmp(mime, "audio/", 6);
 
         int64_t timestampUs;
@@ -902,6 +950,10 @@ void MPEG4Writer::Track::writeOneChunk(bool isAvc) {
 
 int64_t MPEG4Writer::Track::getDurationUs() const {
     return mMaxTimeStampUs;
+}
+
+int64_t MPEG4Writer::Track::getEstimatedTrackSizeBytes() const {
+    return mEstimatedTrackSizeBytes;
 }
 
 void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
