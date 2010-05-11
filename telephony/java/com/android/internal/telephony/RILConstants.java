@@ -45,6 +45,11 @@ public interface RILConstants {
     int OP_NOT_ALLOWED_BEFORE_REG_NW = 9;     /* request is not allowed before device registers to
                                                  network */
     int SMS_SEND_FAIL_RETRY = 10;             /* send sms fail and need retry */
+    int SIM_ABSENT = 11;                      /* ICC card is absent */
+    int SUBSCRIPTION_NOT_AVAILABLE = 12;      /* fail to find CDMA subscription from specified
+                                                 location */
+    int MODE_NOT_SUPPORTED = 13;              /* HW does not support preferred network type */
+    int FDN_CHECK_FAILURE = 14;               /* send operation barred error when FDN is enabled */
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
     int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */
