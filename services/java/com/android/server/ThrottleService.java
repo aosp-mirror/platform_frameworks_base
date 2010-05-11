@@ -1031,35 +1031,48 @@ public class ThrottleService extends IThrottleManager.Stub {
                 return;
             }
 
-            if (Integer.parseInt(parsed[parsedUsed++]) != DATA_FILE_VERSION) {
-                Slog.e(TAG, "reading data file with bad version - ignoring");
+            int periodCount;
+            long[] periodRxData;
+            long[] periodTxData;
+            int currentPeriod;
+            Calendar periodStart;
+            Calendar periodEnd;
+            try {
+                if (Integer.parseInt(parsed[parsedUsed++]) != DATA_FILE_VERSION) {
+                    Slog.e(TAG, "reading data file with bad version - ignoring");
+                    return;
+                }
+
+                periodCount = Integer.parseInt(parsed[parsedUsed++]);
+                if (parsed.length != 5 + (2 * periodCount)) {
+                    Slog.e(TAG, "reading data file with bad length (" + parsed.length +
+                            " != " + (5 + (2 * periodCount)) + ") - ignoring");
+                    return;
+                }
+                periodRxData = new long[periodCount];
+                for (int i = 0; i < periodCount; i++) {
+                    periodRxData[i] = Long.parseLong(parsed[parsedUsed++]);
+                }
+                periodTxData = new long[periodCount];
+                for (int i = 0; i < periodCount; i++) {
+                    periodTxData[i] = Long.parseLong(parsed[parsedUsed++]);
+                }
+
+                currentPeriod = Integer.parseInt(parsed[parsedUsed++]);
+
+                periodStart = new GregorianCalendar();
+                periodStart.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
+                periodEnd = new GregorianCalendar();
+                periodEnd.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
+            } catch (Exception e) {
+                Slog.e(TAG, "Error parsing data file - ignoring");
                 return;
             }
-
-            int periodCount = Integer.parseInt(parsed[parsedUsed++]);
-            if (parsed.length != 5 + (2 * periodCount)) {
-                Slog.e(TAG, "reading data file with bad length (" + parsed.length +
-                        " != " + (5 + (2 * periodCount)) + ") - ignoring");
-                return;
-            }
-            long[] periodRxData = new long[periodCount];
-            for (int i = 0; i < periodCount; i++) {
-                periodRxData[i] = Long.parseLong(parsed[parsedUsed++]);
-            }
-            long[] periodTxData = new long[periodCount];
-            for (int i = 0; i < periodCount; i++) {
-                periodTxData[i] = Long.parseLong(parsed[parsedUsed++]);
-            }
-
-            Calendar periodStart = new GregorianCalendar();
-            periodStart.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
-            Calendar periodEnd = new GregorianCalendar();
-            periodEnd.setTimeInMillis(Long.parseLong(parsed[parsedUsed++]));
             synchronized (mParent) {
                 mPeriodCount = periodCount;
                 mPeriodRxData = periodRxData;
                 mPeriodTxData = periodTxData;
-                mCurrentPeriod = Integer.parseInt(parsed[parsedUsed++]);
+                mCurrentPeriod = currentPeriod;
                 mPeriodStart = periodStart;
                 mPeriodEnd = periodEnd;
             }
