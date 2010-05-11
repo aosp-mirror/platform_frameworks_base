@@ -1930,6 +1930,8 @@ public class AudioService extends IAudioService.Stub {
      */
     private final static String IN_VOICE_COMM_FOCUS_ID = "AudioFocus_For_Phone_Ring_And_Calls";
 
+    private final static Object mAudioFocusLock = new Object();
+
     private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
@@ -2000,7 +2002,7 @@ public class AudioService extends IAudioService.Stub {
      */
     private void dumpFocusStack(PrintWriter pw) {
         pw.println("\nAudio Focus stack entries:");
-        synchronized(mFocusStack) {
+        synchronized(mAudioFocusLock) {
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
@@ -2091,7 +2093,7 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public void binderDied() {
-            synchronized(mFocusStack) {
+            synchronized(mAudioFocusLock) {
                 Log.w(TAG, "  AudioFocus   audio focus client died");
                 removeFocusStackEntryForClient(mCb);
             }
@@ -2117,11 +2119,11 @@ public class AudioService extends IAudioService.Stub {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
-        if (!canReassignAudioFocus()) {
-            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
-        }
+        synchronized(mAudioFocusLock) {
+            if (!canReassignAudioFocus()) {
+                return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+            }
 
-        synchronized(mFocusStack) {
             if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientId)) {
                 // if focus is already owned by this client and the reason for acquiring the focus
                 // hasn't changed, don't do anything
@@ -2151,7 +2153,7 @@ public class AudioService extends IAudioService.Stub {
             // push focus requester at the top of the audio focus stack
             mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, false, fd, cb,
                     clientId));
-        }//synchronized(mFocusStack)
+        }//synchronized(mAudioFocusLock)
 
         // handle the potential premature death of the new holder of the focus
         // (premature death == death before abandoning focus) for a client which is not the
@@ -2173,10 +2175,17 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#abandonAudioFocus(IAudioFocusDispatcher) */
     public int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId) {
         Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
-
-        // this will take care of notifying the new focus owner if needed
-        synchronized(mFocusStack) {
-            removeFocusStackEntry(clientId, true);
+        try {
+            // this will take care of notifying the new focus owner if needed
+            synchronized(mAudioFocusLock) {
+                removeFocusStackEntry(clientId, true);
+            }
+        } catch (java.util.ConcurrentModificationException cme) {
+            // Catching this exception here is temporary. It is here just to prevent
+            // a crash seen when the "Silent" notification is played. This is believed to be fixed
+            // but this try catch block is left just to be safe.
+            Log.e(TAG, "FATAL EXCEPTION AudioFocus  abandonAudioFocus() caused " + cme);
+            cme.printStackTrace();
         }
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
@@ -2184,7 +2193,7 @@ public class AudioService extends IAudioService.Stub {
 
 
     public void unregisterAudioFocusClient(String clientId) {
-        synchronized(mFocusStack) {
+        synchronized(mAudioFocusLock) {
             removeFocusStackEntry(clientId, false);
         }
     }
