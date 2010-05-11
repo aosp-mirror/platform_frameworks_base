@@ -1588,6 +1588,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 break;
             }
             final int equalsIndex = keyIndex + encodedKeyLength;
+            if (equalsIndex >= query.length()) {
+                break;
+            }
             if (query.charAt(equalsIndex) != '=') {
                 encodedKeySearchIndex = equalsIndex + 1;
                 continue;
