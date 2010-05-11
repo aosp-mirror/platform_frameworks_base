@@ -51,6 +51,86 @@ public class Sampler extends BaseObj {
         mID = id;
     }
 
+    Sampler mSampler_CLAMP_NEAREST;
+    Sampler mSampler_CLAMP_LINEAR;
+    Sampler mSampler_CLAMP_LINEAR_MIP;
+    Sampler mSampler_WRAP_NEAREST;
+    Sampler mSampler_WRAP_LINEAR;
+    Sampler mSampler_WRAP_LINEAR_MIP;
+
+    public static Sampler CLAMP_NEAREST(RenderScript rs) {
+        if(rs.mSampler_CLAMP_NEAREST == null) {
+            Builder b = new Builder(rs);
+            b.setMin(Value.NEAREST);
+            b.setMag(Value.NEAREST);
+            b.setWrapS(Value.CLAMP);
+            b.setWrapT(Value.CLAMP);
+            rs.mSampler_CLAMP_NEAREST = b.create();
+        }
+        return rs.mSampler_CLAMP_NEAREST;
+    }
+
+    public static Sampler CLAMP_LINEAR(RenderScript rs) {
+        if(rs.mSampler_CLAMP_LINEAR == null) {
+            Builder b = new Builder(rs);
+            b.setMin(Value.LINEAR);
+            b.setMag(Value.LINEAR);
+            b.setWrapS(Value.CLAMP);
+            b.setWrapT(Value.CLAMP);
+            rs.mSampler_CLAMP_LINEAR = b.create();
+        }
+        return rs.mSampler_CLAMP_LINEAR;
+    }
+
+    public static Sampler CLAMP_LINEAR_MIP_LINEAR(RenderScript rs) {
+        if(rs.mSampler_CLAMP_LINEAR_MIP_LINEAR == null) {
+            Builder b = new Builder(rs);
+            b.setMin(Value.LINEAR_MIP_LINEAR);
+            b.setMag(Value.LINEAR_MIP_LINEAR);
+            b.setWrapS(Value.CLAMP);
+            b.setWrapT(Value.CLAMP);
+            rs.mSampler_CLAMP_LINEAR_MIP_LINEAR = b.create();
+        }
+        return rs.mSampler_CLAMP_LINEAR_MIP_LINEAR;
+    }
+
+    public static Sampler WRAP_NEAREST(RenderScript rs) {
+        if(rs.mSampler_WRAP_NEAREST == null) {
+            Builder b = new Builder(rs);
+            b.setMin(Value.NEAREST);
+            b.setMag(Value.NEAREST);
+            b.setWrapS(Value.WRAP);
+            b.setWrapT(Value.WRAP);
+            rs.mSampler_WRAP_NEAREST = b.create();
+        }
+        return rs.mSampler_WRAP_NEAREST;
+    }
+
+    public static Sampler WRAP_LINEAR(RenderScript rs) {
+        if(rs.mSampler_WRAP_LINEAR == null) {
+            Builder b = new Builder(rs);
+            b.setMin(Value.LINEAR);
+            b.setMag(Value.LINEAR);
+            b.setWrapS(Value.WRAP);
+            b.setWrapT(Value.WRAP);
+            rs.mSampler_WRAP_LINEAR = b.create();
+        }
+        return rs.mSampler_WRAP_LINEAR;
+    }
+
+    public static Sampler WRAP_LINEAR_MIP_LINEAR(RenderScript rs) {
+        if(rs.mSampler_WRAP_LINEAR_MIP_LINEAR == null) {
+            Builder b = new Builder(rs);
+            b.setMin(Value.LINEAR_MIP_LINEAR);
+            b.setMag(Value.LINEAR_MIP_LINEAR);
+            b.setWrapS(Value.WRAP);
+            b.setWrapT(Value.WRAP);
+            rs.mSampler_WRAP_LINEAR_MIP_LINEAR = b.create();
+        }
+        return rs.mSampler_WRAP_LINEAR_MIP_LINEAR;
+    }
+
+
     public static class Builder {
         RenderScript mRS;
         Value mMin;

@@ -272,27 +272,51 @@ ScriptSetClearStencil {
 	param uint32_t stencil
 	}
 
-ScriptSetType {
-	param RsType type
-	param uint32_t slot
-	param bool isWritable
-	param const char * name
-	}
-
-ScriptSetInvoke {
-	param const char * name
-	param uint32_t slot
-	}
 
 ScriptInvoke {
 	param RsScript s
 	param uint32_t slot
 	}
 
+ScriptInvokeData {
+	param RsScript s
+	param uint32_t slot
+	param void * data
+	}
+
+ScriptInvokeV {
+	param RsScript s
+	param uint32_t slot
+	param const void * data
+	param uint32_t dataLen
+	handcodeApi
+	togglePlay
+	}
+
 ScriptSetRoot {
 	param bool isRoot
 	}
 
+ScriptSetVarI {
+	param RsScript s
+	param uint32_t slot
+	param int value
+	}
+
+ScriptSetVarF {
+	param RsScript s
+	param uint32_t slot
+	param float value
+	}
+
+ScriptSetVarV {
+	param RsScript s
+	param uint32_t slot
+	param const void * data
+	param uint32_t dataLen
+	handcodeApi
+	togglePlay
+	}
 
 
 ScriptCSetScript {

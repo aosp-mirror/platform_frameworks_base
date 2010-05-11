@@ -1,6 +1,49 @@
 
 #define DATA_SYNC_SIZE 1024
 
+static inline void rsHCAPI_ScriptInvokeV (RsContext rsc, RsScript va, uint32_t slot, const void * data, uint32_t sizeBytes)
+{
+    ThreadIO *io = &((Context *)rsc)->mIO;
+    uint32_t size = sizeof(RS_CMD_ScriptInvokeV);
+    if (sizeBytes < DATA_SYNC_SIZE) {
+        size += (sizeBytes + 3) & ~3;
+    }
+    RS_CMD_ScriptInvokeV *cmd = static_cast<RS_CMD_ScriptInvokeV *>(io->mToCore.reserve(size));
+    cmd->s = va;
+    cmd->slot = slot;
+    cmd->dataLen = sizeBytes;
+    cmd->data = data;
+    if (sizeBytes < DATA_SYNC_SIZE) {
+        cmd->data = (void *)(cmd+1);
+        memcpy(cmd+1, data, sizeBytes);
+        io->mToCore.commit(RS_CMD_ID_ScriptInvokeV, size);
+    } else {
+        io->mToCore.commitSync(RS_CMD_ID_ScriptInvokeV, size);
+    }
+}
+
+
+static inline void rsHCAPI_ScriptSetVarV (RsContext rsc, RsScript va, uint32_t slot, const void * data, uint32_t sizeBytes)
+{
+    ThreadIO *io = &((Context *)rsc)->mIO;
+    uint32_t size = sizeof(RS_CMD_ScriptSetVarV);
+    if (sizeBytes < DATA_SYNC_SIZE) {
+        size += (sizeBytes + 3) & ~3;
+    }
+    RS_CMD_ScriptSetVarV *cmd = static_cast<RS_CMD_ScriptSetVarV *>(io->mToCore.reserve(size));
+    cmd->s = va;
+    cmd->slot = slot;
+    cmd->dataLen = sizeBytes;
+    cmd->data = data;
+    if (sizeBytes < DATA_SYNC_SIZE) {
+        cmd->data = (void *)(cmd+1);
+        memcpy(cmd+1, data, sizeBytes);
+        io->mToCore.commit(RS_CMD_ID_ScriptSetVarV, size);
+    } else {
+        io->mToCore.commitSync(RS_CMD_ID_ScriptSetVarV, size);
+    }
+}
+
 static inline void rsHCAPI_AllocationData (RsContext rsc, RsAllocation va, const void * data, uint32_t sizeBytes)
 {
     ThreadIO *io = &((Context *)rsc)->mIO;

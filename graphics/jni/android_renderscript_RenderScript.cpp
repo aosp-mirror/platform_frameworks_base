@@ -854,6 +854,33 @@ nScriptBindAllocation(JNIEnv *_env, jobject _this, jint script, jint alloc, jint
 }
 
 static void
+nScriptSetVarI(JNIEnv *_env, jobject _this, jint script, jint slot, jint val)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i), b(%f), a(%f)", con, (void *)script, slot, val);
+    rsScriptSetVarI(con, (RsScript)script, slot, val);
+}
+
+static void
+nScriptSetVarF(JNIEnv *_env, jobject _this, jint script, jint slot, float val)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i), b(%f), a(%f)", con, (void *)script, slot, val);
+    rsScriptSetVarF(con, (RsScript)script, slot, val);
+}
+
+static void
+nScriptSetVarV(JNIEnv *_env, jobject _this, jint script, jint slot, jbyteArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptSetVarV, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jint len = _env->GetArrayLength(data);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsScriptSetVarV(con, (RsScript)script, slot, ptr, len);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
 nScriptSetClearColor(JNIEnv *_env, jobject _this, jint script, jfloat r, jfloat g, jfloat b, jfloat a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -895,41 +922,31 @@ nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone
 }
 
 static void
-nScriptSetType(JNIEnv *_env, jobject _this, jint type, jboolean writable, jstring _str, jint slot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCAddType, con(%p), type(%p), writable(%i), slot(%i)", con, (RsType)type, writable, slot);
-    const char* n = NULL;
-    if (_str) {
-        n = _env->GetStringUTFChars(_str, NULL);
-    }
-    rsScriptSetType(con, (RsType)type, slot, writable, n);
-    if (n) {
-        _env->ReleaseStringUTFChars(_str, n);
-    }
-}
-
-static void
-nScriptSetInvoke(JNIEnv *_env, jobject _this, jstring _str, jint slot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptSetInvoke, con(%p)", con);
-    const char* n = NULL;
-    if (_str) {
-        n = _env->GetStringUTFChars(_str, NULL);
-    }
-    rsScriptSetInvoke(con, n, slot);
-    if (n) {
-        _env->ReleaseStringUTFChars(_str, n);
-    }
-}
-
-static void
 nScriptInvoke(JNIEnv *_env, jobject _this, jint obj, jint slot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptInvoke, con(%p), script(%p)", con, (void *)obj);
     rsScriptInvoke(con, (RsScript)obj, slot);
+}
+
+static void
+nScriptInvokeData(JNIEnv *_env, jobject _this, jint obj, jint slot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptInvokeData, con(%p), script(%p)", con, (void *)obj);
+    rsScriptInvokeData(con, (RsScript)obj, slot, 0);
+}
+
+
+static void
+nScriptInvokeV(JNIEnv *_env, jobject _this, jint script, jint slot, jbyteArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptInvokeV, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jint len = _env->GetArrayLength(data);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsScriptInvokeV(con, (RsScript)script, slot, ptr, len);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
@@ -1424,16 +1441,17 @@ static JNINativeMethod methods[] = {
 {"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
 {"nScriptSetClearStencil",         "(II)V",                                (void*)nScriptSetClearStencil },
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
-{"nScriptSetType",                 "(IZLjava/lang/String;I)V",             (void*)nScriptSetType },
 {"nScriptSetRoot",                 "(Z)V",                                 (void*)nScriptSetRoot },
-{"nScriptSetInvokable",            "(Ljava/lang/String;I)V",               (void*)nScriptSetInvoke },
 {"nScriptInvoke",                  "(II)V",                                (void*)nScriptInvoke },
+{"nScriptInvokeData",              "(II)V",                                (void*)nScriptInvokeData },
+{"nScriptInvokeV",                 "(II[B)V",                              (void*)nScriptInvokeV },
+{"nScriptSetVarI",                 "(III)V",                               (void*)nScriptSetVarI },
+{"nScriptSetVarF",                 "(IIF)V",                               (void*)nScriptSetVarF },
+{"nScriptSetVarV",                 "(II[B)V",                              (void*)nScriptSetVarV },
 
 {"nScriptCBegin",                  "()V",                                  (void*)nScriptCBegin },
 {"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },
 {"nScriptCCreate",                 "()I",                                  (void*)nScriptCCreate },
-{"nScriptCAddDefineI32",           "(Ljava/lang/String;I)V",               (void*)nScriptCAddDefineI32 },
-{"nScriptCAddDefineF",             "(Ljava/lang/String;F)V",               (void*)nScriptCAddDefineF },
 
 {"nProgramFragmentStoreBegin",     "(II)V",                                (void*)nProgramFragmentStoreBegin },
 {"nProgramFragmentStoreDepthFunc", "(I)V",                                 (void*)nProgramFragmentStoreDepthFunc },

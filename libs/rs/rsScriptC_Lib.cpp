@@ -39,6 +39,160 @@ using namespace android::renderscript;
     Context * rsc = tls->mContext; \
     ScriptC * sc = (ScriptC *) tls->mScript
 
+
+static float SC_acospi(float v) {
+    return acosf(v)/ M_PI;
+}
+
+static float SC_asinpi(float v) {
+    return asinf(v) / M_PI;
+}
+
+static float SC_atanpi(float v) {
+    return atanf(v) / M_PI;
+}
+
+static float SC_atan2pi(float y, float x) {
+    return atan2f(y, x) / M_PI;
+}
+
+static float SC_cospi(float v) {
+    return cosf(v * M_PI);
+}
+
+static float SC_exp10(float v) {
+    return pow(10.f, v);
+
+}
+
+static float SC_fract(float v, int *iptr) {
+    int i = (int)floor(v);
+    iptr[0] = i;
+    return fmin(v - i, 0x1.fffffep-1f);
+}
+
+static float SC_log2(float v) {
+    return log10(v) / log10(2.f);
+}
+
+static float SC_pown(float v, int p) {
+    return powf(v, (float)p);
+}
+
+static float SC_powr(float v, float p) {
+    return powf(v, p);
+}
+
+float SC_rootn(float v, int r) {
+    return pow(v, 1.f / r);
+}
+
+float SC_rsqrt(float v) {
+    return 1.f / sqrtf(v);
+}
+
+float SC_sincos(float v, float *cosptr) {
+    *cosptr = cosf(v);
+    return sinf(v);
+}
+
+static float SC_sinpi(float v) {
+    return sinf(v * M_PI);
+}
+
+static float SC_tanpi(float v) {
+    return tanf(v * M_PI);
+}
+
+    //{ "logb", (void *)& },
+    //{ "mad", (void *)& },
+    //{ "nan", (void *)& },
+    //{ "tgamma", (void *)& },
+
+//////////////////////////////////////////////////////////////////////////////
+// Integer
+//////////////////////////////////////////////////////////////////////////////
+
+
+static uint32_t SC_abs_i32(int32_t v) {return abs(v);}
+static uint16_t SC_abs_i16(int16_t v) {return (uint16_t)abs(v);}
+static uint8_t SC_abs_i8(int8_t v) {return (uint8_t)abs(v);}
+
+static uint32_t SC_clz_u32(uint32_t v) {return __builtin_clz(v);}
+static uint16_t SC_clz_u16(uint16_t v) {return (uint16_t)__builtin_clz(v);}
+static uint8_t SC_clz_u8(uint8_t v) {return (uint8_t)__builtin_clz(v);}
+static int32_t SC_clz_i32(int32_t v) {return (int32_t)__builtin_clz((uint32_t)v);}
+static int16_t SC_clz_i16(int16_t v) {return (int16_t)__builtin_clz(v);}
+static int8_t SC_clz_i8(int8_t v) {return (int8_t)__builtin_clz(v);}
+
+static uint32_t SC_max_u32(uint32_t v, uint32_t v2) {return rsMax(v, v2);}
+static uint16_t SC_max_u16(uint16_t v, uint16_t v2) {return rsMax(v, v2);}
+static uint8_t SC_max_u8(uint8_t v, uint8_t v2) {return rsMax(v, v2);}
+static int32_t SC_max_i32(int32_t v, int32_t v2) {return rsMax(v, v2);}
+static int16_t SC_max_i16(int16_t v, int16_t v2) {return rsMax(v, v2);}
+static int8_t SC_max_i8(int8_t v, int8_t v2) {return rsMax(v, v2);}
+
+static uint32_t SC_min_u32(uint32_t v, uint32_t v2) {return rsMin(v, v2);}
+static uint16_t SC_min_u16(uint16_t v, uint16_t v2) {return rsMin(v, v2);}
+static uint8_t SC_min_u8(uint8_t v, uint8_t v2) {return rsMin(v, v2);}
+static int32_t SC_min_i32(int32_t v, int32_t v2) {return rsMin(v, v2);}
+static int16_t SC_min_i16(int16_t v, int16_t v2) {return rsMin(v, v2);}
+static int8_t SC_min_i8(int8_t v, int8_t v2) {return rsMin(v, v2);}
+
+//////////////////////////////////////////////////////////////////////////////
+// Float util
+//////////////////////////////////////////////////////////////////////////////
+
+static float SC_clamp_f32(float amount, float low, float high)
+{
+    return amount < low ? low : (amount > high ? high : amount);
+}
+
+static float SC_degrees(float radians)
+{
+    return radians * (180.f / M_PI);
+}
+
+static float SC_max_f32(float v, float v2)
+{
+    return rsMax(v, v2);
+}
+
+static float SC_min_f32(float v, float v2)
+{
+    return rsMin(v, v2);
+}
+
+static float SC_mix_f32(float start, float stop, float amount)
+{
+    //LOGE("lerpf %f  %f  %f", start, stop, amount);
+    return start + (stop - start) * amount;
+}
+
+static float SC_radians(float degrees)
+{
+    return degrees * (M_PI / 180.f);
+}
+
+static float SC_step_f32(float edge, float v)
+{
+    if (v < edge) return 0.f;
+    return 1.f;
+}
+
+static float SC_sign_f32(float value)
+{
+    if (value > 0) return 1.f;
+    if (value < 0) return -1.f;
+    return value;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Non-Updated code below
+//////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
     float x;
     float y;
@@ -61,40 +215,6 @@ typedef struct {
 // IO routines
 //////////////////////////////////////////////////////////////////////////////
 
-static float SC_loadF(uint32_t bank, uint32_t offset)
-{
-    GET_TLS();
-    const void *vp = sc->mSlots[bank]->getPtr();
-    const float *f = static_cast<const float *>(vp);
-    //LOGE("loadF %i %i = %f %x", bank, offset, f, ((int *)&f)[0]);
-    return f[offset];
-}
-
-static int32_t SC_loadI32(uint32_t bank, uint32_t offset)
-{
-    GET_TLS();
-    const void *vp = sc->mSlots[bank]->getPtr();
-    const int32_t *i = static_cast<const int32_t *>(vp);
-    //LOGE("loadI32 %i %i = %i", bank, offset, t);
-    return i[offset];
-}
-
-static float* SC_loadArrayF(uint32_t bank, uint32_t offset)
-{
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    float *f = static_cast<float *>(vp);
-    return f + offset;
-}
-
-static int32_t* SC_loadArrayI32(uint32_t bank, uint32_t offset)
-{
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    int32_t *i = static_cast<int32_t *>(vp);
-    return i + offset;
-}
-
 static float* SC_loadSimpleMeshVerticesF(RsSimpleMesh mesh, uint32_t idx)
 {
     SimpleMesh *tm = static_cast<SimpleMesh *>(mesh);
@@ -107,72 +227,6 @@ static void SC_updateSimpleMesh(RsSimpleMesh mesh)
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(mesh);
     sm->uploadAll(rsc);
-}
-
-static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
-{
-    GET_TLS();
-    const void *vp = sc->mSlots[bank]->getPtr();
-    const uint32_t *i = static_cast<const uint32_t *>(vp);
-    return i[offset];
-}
-
-static void SC_loadVec4(uint32_t bank, uint32_t offset, rsc_Vector4 *v)
-{
-    GET_TLS();
-    const void *vp = sc->mSlots[bank]->getPtr();
-    const float *f = static_cast<const float *>(vp);
-    memcpy(v, &f[offset], sizeof(rsc_Vector4));
-}
-
-static void SC_loadMatrix(uint32_t bank, uint32_t offset, rsc_Matrix *m)
-{
-    GET_TLS();
-    const void *vp = sc->mSlots[bank]->getPtr();
-    const float *f = static_cast<const float *>(vp);
-    memcpy(m, &f[offset], sizeof(rsc_Matrix));
-}
-
-
-static void SC_storeF(uint32_t bank, uint32_t offset, float v)
-{
-    //LOGE("storeF %i %i %f", bank, offset, v);
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    float *f = static_cast<float *>(vp);
-    f[offset] = v;
-}
-
-static void SC_storeI32(uint32_t bank, uint32_t offset, int32_t v)
-{
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    int32_t *f = static_cast<int32_t *>(vp);
-    static_cast<int32_t *>(sc->mSlots[bank]->getPtr())[offset] = v;
-}
-
-static void SC_storeU32(uint32_t bank, uint32_t offset, uint32_t v)
-{
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    uint32_t *f = static_cast<uint32_t *>(vp);
-    static_cast<uint32_t *>(sc->mSlots[bank]->getPtr())[offset] = v;
-}
-
-static void SC_storeVec4(uint32_t bank, uint32_t offset, const rsc_Vector4 *v)
-{
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    float *f = static_cast<float *>(vp);
-    memcpy(&f[offset], v, sizeof(rsc_Vector4));
-}
-
-static void SC_storeMatrix(uint32_t bank, uint32_t offset, const rsc_Matrix *m)
-{
-    GET_TLS();
-    void *vp = sc->mSlots[bank]->getPtr();
-    float *f = static_cast<float *>(vp);
-    memcpy(&f[offset], m, sizeof(rsc_Matrix));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -281,10 +335,6 @@ static void SC_vec4Scale(vec4_t *lhs, float scale)
 // Math routines
 //////////////////////////////////////////////////////////////////////////////
 
-#define PI 3.1415926f
-#define DEG_TO_RAD PI / 180.0f
-#define RAD_TO_DEG 180.0f / PI
-
 static float SC_sinf_fast(float x)
 {
     const float A =   1.0f / (2.0f * M_PI);
@@ -325,6 +375,7 @@ static float SC_cosf_fast(float x)
 
 static float SC_randf(float max)
 {
+    //LOGE("max %f", max);
     float r = (float)rand();
     return r / RAND_MAX * max;
 }
@@ -340,44 +391,9 @@ static int SC_sign(int value)
     return (value > 0) - (value < 0);
 }
 
-static float SC_signf(float value)
-{
-    return (value > 0) - (value < 0);
-}
-
-static float SC_clampf(float amount, float low, float high)
-{
-    return amount < low ? low : (amount > high ? high : amount);
-}
-
 static int SC_clamp(int amount, int low, int high)
 {
     return amount < low ? low : (amount > high ? high : amount);
-}
-
-static float SC_maxf(float a, float b)
-{
-    return a > b ? a : b;
-}
-
-static float SC_minf(float a, float b)
-{
-    return a < b ? a : b;
-}
-
-static float SC_sqrf(float v)
-{
-    return v * v;
-}
-
-static int SC_sqr(int v)
-{
-    return v * v;
-}
-
-static float SC_fracf(float v)
-{
-    return v - floorf(v);
 }
 
 static float SC_roundf(float v)
@@ -410,21 +426,6 @@ static float SC_magf3(float a, float b, float c)
     return sqrtf(a * a + b * b + c * c);
 }
 
-static float SC_radf(float degrees)
-{
-    return degrees * DEG_TO_RAD;
-}
-
-static float SC_degf(float radians)
-{
-    return radians * RAD_TO_DEG;
-}
-
-static float SC_lerpf(float start, float stop, float amount)
-{
-    return start + (stop - start) * amount;
-}
-
 static float SC_normf(float start, float stop, float value)
 {
     return (value - start) / (stop - start);
@@ -433,6 +434,12 @@ static float SC_normf(float start, float stop, float value)
 static float SC_mapf(float minStart, float minStop, float maxStart, float maxStop, float value)
 {
     return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
+}
+
+static float SC_frac(float v)
+{
+    int i = (int)floor(v);
+    return fmin(v - i, 0x1.fffffep-1f);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -602,12 +609,14 @@ static void SC_matrixTranslate(rsc_Matrix *mat, float x, float y, float z)
 }
 
 
-static void SC_vec2Rand(float *vec, float maxLen)
+static rsvF_2 SC_vec2Rand(float maxLen)
 {
-    float angle = SC_randf(PI * 2);
+    float2 t;
+    float angle = SC_randf(M_PI * 2);
     float len = SC_randf(maxLen);
-    vec[0] = len * sinf(angle);
-    vec[1] = len * cosf(angle);
+    t.f[0] = len * sinf(angle);
+    t.f[1] = len * cosf(angle);
+    return t.v;
 }
 
 
@@ -829,6 +838,7 @@ static void SC_drawSprite(float x, float y, float z, float w, float h)
 static void SC_drawRect(float x1, float y1,
                         float x2, float y2, float z)
 {
+    //LOGE("SC_drawRect %f,%f  %f,%f  %f", x1, y1, x2, y2, z);
     SC_drawQuad(x1, y2, z,
                 x2, y2, z,
                 x2, y1, z,
@@ -860,6 +870,44 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
 //
 //////////////////////////////////////////////////////////////////////////////
 
+static uint32_t SC_allocGetDimX(RsAllocation va)
+{
+    GET_TLS();
+    const Allocation *a = static_cast<const Allocation *>(va);
+    //LOGE("SC_allocGetDimX a=%p", a);
+    //LOGE(" type=%p", a->getType());
+    return a->getType()->getDimX();
+}
+
+static uint32_t SC_allocGetDimY(RsAllocation va)
+{
+    GET_TLS();
+    const Allocation *a = static_cast<const Allocation *>(va);
+    return a->getType()->getDimY();
+}
+
+static uint32_t SC_allocGetDimZ(RsAllocation va)
+{
+    GET_TLS();
+    const Allocation *a = static_cast<const Allocation *>(va);
+    return a->getType()->getDimZ();
+}
+
+static uint32_t SC_allocGetDimLOD(RsAllocation va)
+{
+    GET_TLS();
+    const Allocation *a = static_cast<const Allocation *>(va);
+    return a->getType()->getDimLOD();
+}
+
+static uint32_t SC_allocGetDimFaces(RsAllocation va)
+{
+    GET_TLS();
+    const Allocation *a = static_cast<const Allocation *>(va);
+    return a->getType()->getDimFaces();
+}
+
+
 static void SC_color(float r, float g, float b, float a)
 {
     GET_TLS();
@@ -870,35 +918,6 @@ static void SC_color(float r, float g, float b, float a)
     if (!rsc->checkVersion2_0()) {
         glColor4f(r, g, b, a);
     }
-}
-
-static void SC_ambient(float r, float g, float b, float a)
-{
-    GLfloat params[] = { r, g, b, a };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, params);
-}
-
-static void SC_diffuse(float r, float g, float b, float a)
-{
-    GLfloat params[] = { r, g, b, a };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, params);
-}
-
-static void SC_specular(float r, float g, float b, float a)
-{
-    GLfloat params[] = { r, g, b, a };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, params);
-}
-
-static void SC_emission(float r, float g, float b, float a)
-{
-    GLfloat params[] = { r, g, b, a };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, params);
-}
-
-static void SC_shininess(float s)
-{
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, s);
 }
 
 static void SC_pointAttenuation(float a, float b, float c)
@@ -964,8 +983,10 @@ static void SC_hsbToRgb(float h, float s, float b, float* rgb)
 
 static int SC_hsbToAbgr(float h, float s, float b, float a)
 {
+    //LOGE("hsb a %f, %f, %f    %f", h, s, b, a);
     float rgb[3];
     SC_hsbToRgb(h, s, b, rgb);
+    //LOGE("rgb  %f, %f, %f ", rgb[0], rgb[1], rgb[2]);
     return int(a      * 255.0f) << 24 |
            int(rgb[2] * 255.0f) << 16 |
            int(rgb[1] * 255.0f) <<  8 |
@@ -1045,27 +1066,28 @@ static uint32_t SC_getHeight()
     return rsc->getHeight();
 }
 
-static uint32_t SC_colorFloatRGBAtoUNorm8(float r, float g, float b, float a)
-{
-    uint32_t c = 0;
-    c |= (uint32_t)(r * 255.f + 0.5f);
-    c |= ((uint32_t)(g * 255.f + 0.5f)) << 8;
-    c |= ((uint32_t)(b * 255.f + 0.5f)) << 16;
-    c |= ((uint32_t)(a * 255.f + 0.5f)) << 24;
-    return c;
+static uchar4 SC_convertColorTo8888_f3(float r, float g, float b) {
+    uchar4 t;
+    t.f[0] = (uint8_t)(r * 255.f);
+    t.f[1] = (uint8_t)(g * 255.f);
+    t.f[2] = (uint8_t)(b * 255.f);
+    t.f[3] = 0xff;
+    return t;
 }
 
-static uint32_t SC_colorFloatRGBAto565(float r, float g, float b)
-{
-    uint32_t ir = (uint32_t)(r * 255.f + 0.5f);
-    uint32_t ig = (uint32_t)(g * 255.f + 0.5f);
-    uint32_t ib = (uint32_t)(b * 255.f + 0.5f);
-    return rs888to565(ir, ig, ib);
+static uchar4 SC_convertColorTo8888_f4(float r, float g, float b, float a) {
+    uchar4 t;
+    t.f[0] = (uint8_t)(r * 255.f);
+    t.f[1] = (uint8_t)(g * 255.f);
+    t.f[2] = (uint8_t)(b * 255.f);
+    t.f[3] = (uint8_t)(a * 255.f);
+    return t;
 }
 
 static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
 {
     GET_TLS();
+    //LOGE("SC_toClient %i %i %i", cmdID, len, waitForSpace);
     return rsc->sendMessageToClient(data, cmdID, len, waitForSpace != 0);
 }
 
@@ -1075,316 +1097,284 @@ static void SC_scriptCall(int scriptID)
     rsc->runScript((Script *)scriptID, 0);
 }
 
+static void SC_debugP(int i, void *p)
+{
+    LOGE("debug P  %i  %p, %i", i, p, (int)p);
+}
+
+static void SC_debugPi(int i, int p)
+{
+    LOGE("debug Pi %i  0x%08x, %i", i, p, (int)p);
+}
+
+static void SC_debugPf(int i, float p)
+{
+    LOGE("debug Pf  %i  %f,   0x%08x", i, p, reinterpret_cast<uint32_t *>(&p)[0]);
+}
+
+int SC_divsi3(int a, int b)
+{
+    return a / b;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
 
-ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
-    // IO
-    { "loadI32", (void *)&SC_loadI32,
-        "int", "(int, int)" },
-    //{ "loadU32", (void *)&SC_loadU32, "unsigned int", "(int, int)" },
-    { "loadF", (void *)&SC_loadF,
-        "float", "(int, int)" },
-    { "loadArrayF", (void *)&SC_loadArrayF,
-        "float*", "(int, int)" },
-    { "loadArrayI32", (void *)&SC_loadArrayI32,
-        "int*", "(int, int)" },
-    { "loadVec4", (void *)&SC_loadVec4,
-        "void", "(int, int, float *)" },
-    { "loadMatrix", (void *)&SC_loadMatrix,
-        "void", "(int, int, float *)" },
-    { "storeI32", (void *)&SC_storeI32,
-        "void", "(int, int, int)" },
-    //{ "storeU32", (void *)&SC_storeU32, "void", "(int, int, unsigned int)" },
-    { "storeF", (void *)&SC_storeF,
-        "void", "(int, int, float)" },
-    { "storeVec4", (void *)&SC_storeVec4,
-        "void", "(int, int, float *)" },
-    { "storeMatrix", (void *)&SC_storeMatrix,
-        "void", "(int, int, float *)" },
-    { "loadSimpleMeshVerticesF", (void *)&SC_loadSimpleMeshVerticesF,
-        "float*", "(int, int)" },
-    { "updateSimpleMesh", (void *)&SC_updateSimpleMesh,
-        "void", "(int)" },
+// llvm name mangling ref
+//  <builtin-type> ::= v  # void
+//                 ::= b  # bool
+//                 ::= c  # char
+//                 ::= a  # signed char
+//                 ::= h  # unsigned char
+//                 ::= s  # short
+//                 ::= t  # unsigned short
+//                 ::= i  # int
+//                 ::= j  # unsigned int
+//                 ::= l  # long
+//                 ::= m  # unsigned long
+//                 ::= x  # long long, __int64
+//                 ::= y  # unsigned long long, __int64
+//                 ::= f  # float
+//                 ::= d  # double
 
-    // math
-    { "modf", (void *)&fmod,
-        "float", "(float, float)" },
-    { "abs", (void *)&abs,
-        "int", "(int)" },
-    { "absf", (void *)&fabsf,
-        "float", "(float)" },
-    { "sinf_fast", (void *)&SC_sinf_fast,
-        "float", "(float)" },
-    { "cosf_fast", (void *)&SC_cosf_fast,
-        "float", "(float)" },
-    { "sinf", (void *)&sinf,
-        "float", "(float)" },
-    { "cosf", (void *)&cosf,
-        "float", "(float)" },
-    { "asinf", (void *)&asinf,
-        "float", "(float)" },
-    { "acosf", (void *)&acosf,
-        "float", "(float)" },
-    { "atanf", (void *)&atanf,
-        "float", "(float)" },
-    { "atan2f", (void *)&atan2f,
-        "float", "(float, float)" },
-    { "fabsf", (void *)&fabsf,
-        "float", "(float)" },
-    { "randf", (void *)&SC_randf,
-        "float", "(float)" },
-    { "randf2", (void *)&SC_randf2,
-        "float", "(float, float)" },
-    { "floorf", (void *)&floorf,
-        "float", "(float)" },
-    { "fracf", (void *)&SC_fracf,
-        "float", "(float)" },
-    { "ceilf", (void *)&ceilf,
-        "float", "(float)" },
-    { "roundf", (void *)&SC_roundf,
-        "float", "(float)" },
-    { "expf", (void *)&expf,
-        "float", "(float)" },
-    { "logf", (void *)&logf,
-        "float", "(float)" },
-    { "powf", (void *)&powf,
-        "float", "(float, float)" },
-    { "maxf", (void *)&SC_maxf,
-        "float", "(float, float)" },
-    { "minf", (void *)&SC_minf,
-        "float", "(float, float)" },
-    { "sqrt", (void *)&sqrt,
-        "int", "(int)" },
-    { "sqrtf", (void *)&sqrtf,
-        "float", "(float)" },
-    { "sqr", (void *)&SC_sqr,
-        "int", "(int)" },
-    { "sqrf", (void *)&SC_sqrf,
-        "float", "(float)" },
-    { "sign", (void *)&SC_sign,
-        "int", "(int)" },
-    { "signf", (void *)&SC_signf,
-        "float", "(float)" },
-    { "clamp", (void *)&SC_clamp,
-        "int", "(int, int, int)" },
-    { "clampf", (void *)&SC_clampf,
-        "float", "(float, float, float)" },
-    { "distf2", (void *)&SC_distf2,
-        "float", "(float, float, float, float)" },
-    { "distf3", (void *)&SC_distf3,
-        "float", "(float, float, float, float, float, float)" },
-    { "magf2", (void *)&SC_magf2,
-        "float", "(float, float)" },
-    { "magf3", (void *)&SC_magf3,
-        "float", "(float, float, float)" },
-    { "radf", (void *)&SC_radf,
-        "float", "(float)" },
-    { "degf", (void *)&SC_degf,
-        "float", "(float)" },
-    { "lerpf", (void *)&SC_lerpf,
-        "float", "(float, float, float)" },
-    { "normf", (void *)&SC_normf,
-        "float", "(float, float, float)" },
-    { "mapf", (void *)&SC_mapf,
-        "float", "(float, float, float, float, float)" },
-    { "noisef", (void *)&SC_noisef,
-        "float", "(float)" },
-    { "noisef2", (void *)&SC_noisef2,
-        "float", "(float, float)" },
-    { "noisef3", (void *)&SC_noisef3,
-        "float", "(float, float, float)" },
-    { "turbulencef2", (void *)&SC_turbulencef2,
-        "float", "(float, float, float)" },
-    { "turbulencef3", (void *)&SC_turbulencef3,
-        "float", "(float, float, float, float)" },
+ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
+    { "__divsi3", (void *)&SC_divsi3 },
+
+    // IO
+    { "loadSimpleMeshVerticesF", (void *)&SC_loadSimpleMeshVerticesF },
+    { "updateSimpleMesh", (void *)&SC_updateSimpleMesh },
+
+    // OpenCL math
+    { "_Z4acosf", (void *)&acosf },
+    { "_Z5acoshf", (void *)&acoshf },
+    { "_Z6acospif", (void *)&SC_acospi },
+    { "_Z4asinf", (void *)&asinf },
+    { "_Z5asinhf", (void *)&asinhf },
+    { "_Z6asinpif", (void *)&SC_asinpi },
+    { "_Z4atanf", (void *)&atanf },
+    { "_Z5atan2f", (void *)&atan2f },
+    { "_Z6atanpif", (void *)&SC_atanpi },
+    { "_Z7atan2pif", (void *)&SC_atan2pi },
+    { "_Z4cbrtf", (void *)&cbrtf },
+    { "_Z4ceilf", (void *)&ceilf },
+    { "_Z8copysignff", (void *)&copysignf },
+    { "_Z3cosf", (void *)&cosf },
+    { "_Z4coshf", (void *)&coshf },
+    { "_Z5cospif", (void *)&SC_cospi },
+    { "_Z4erfcf", (void *)&erfcf },
+    { "_Z3erff", (void *)&erff },
+    { "_Z3expf", (void *)&expf },
+    { "_Z4exp2f", (void *)&exp2f },
+    { "_Z5exp10f", (void *)&SC_exp10 },
+    { "_Z5expm1f", (void *)&expm1f },
+    { "_Z4fabsf", (void *)&fabsf },
+    { "_Z4fdimff", (void *)&fdimf },
+    { "_Z5floorf", (void *)&floorf },
+    { "_Z3fmafff", (void *)&fmaf },
+    { "_Z4fmaxff", (void *)&fmaxf },
+    { "_Z4fminff", (void *)&fminf },  // float fmin(float, float)
+    { "_Z4fmodff", (void *)&fmodf },
+    { "_Z5fractfPf", (void *)&SC_fract },
+    { "_Z5frexpfPi", (void *)&frexpf },
+    { "_Z5hypotff", (void *)&hypotf },
+    { "_Z5ilogbf", (void *)&ilogbf },
+    { "_Z5ldexpfi", (void *)&ldexpf },
+    { "_Z6lgammaf", (void *)&lgammaf },
+    { "_Z3logf", (void *)&logf },
+    { "_Z4log2f", (void *)&SC_log2 },
+    { "_Z5log10f", (void *)&log10f },
+    { "_Z5log1pf", (void *)&log1pf },
+    //{ "logb", (void *)& },
+    //{ "mad", (void *)& },
+    { "modf", (void *)&modff },
+    //{ "nan", (void *)& },
+    { "_Z9nextafterff", (void *)&nextafterf },
+    { "_Z3powff", (void *)&powf },
+    { "_Z4pownfi", (void *)&SC_pown },
+    { "_Z4powrff", (void *)&SC_powr },
+    { "_Z9remainderff", (void *)&remainderf },
+    { "remquo", (void *)&remquof },
+    { "_Z4rintf", (void *)&rintf },
+    { "_Z5rootnfi", (void *)&SC_rootn },
+    { "_Z5roundf", (void *)&roundf },
+    { "_Z5rsqrtf", (void *)&SC_rsqrt },
+    { "_Z3sinf", (void *)&sinf },
+    { "sincos", (void *)&SC_sincos },
+    { "_Z4sinhf", (void *)&sinhf },
+    { "_Z5sinpif", (void *)&SC_sinpi },
+    { "_Z4sqrtf", (void *)&sqrtf },
+    { "_Z3tanf", (void *)&tanf },
+    { "_Z4tanhf", (void *)&tanhf },
+    { "_Z5tanpif", (void *)&SC_tanpi },
+    //{ "tgamma", (void *)& },
+    { "_Z5truncf", (void *)&truncf },
+
+    // OpenCL Int
+    { "_Z3absi", (void *)&SC_abs_i32 },
+    { "_Z3abss", (void *)&SC_abs_i16 },
+    { "_Z3absc", (void *)&SC_abs_i8 },
+    { "_Z3clzj", (void *)&SC_clz_u32 },
+    { "_Z3clzt", (void *)&SC_clz_u16 },
+    { "_Z3clzh", (void *)&SC_clz_u8 },
+    { "_Z3clzi", (void *)&SC_clz_i32 },
+    { "_Z3clzs", (void *)&SC_clz_i16 },
+    { "_Z3clzc", (void *)&SC_clz_i8 },
+    { "_Z3maxjj", (void *)&SC_max_u32 },
+    { "_Z3maxtt", (void *)&SC_max_u16 },
+    { "_Z3maxhh", (void *)&SC_max_u8 },
+    { "_Z3maxii", (void *)&SC_max_i32 },
+    { "_Z3maxss", (void *)&SC_max_i16 },
+    { "_Z3maxcc", (void *)&SC_max_i8 },
+    { "_Z3minjj", (void *)&SC_min_u32 },
+    { "_Z3mintt", (void *)&SC_min_u16 },
+    { "_Z3minhh", (void *)&SC_min_u8 },
+    { "_Z3minii", (void *)&SC_min_i32 },
+    { "_Z3minss", (void *)&SC_min_i16 },
+    { "_Z3mincc", (void *)&SC_min_i8 },
+
+    // OpenCL 6.11.4
+    { "_Z5clampfff", (void *)&SC_clamp_f32 },
+    { "_Z7degreesf", (void *)&SC_degrees },
+    { "_Z3maxff", (void *)&SC_max_f32 },
+    { "_Z3minff", (void *)&SC_min_f32 },
+    { "_Z3mixfff", (void *)&SC_mix_f32 },
+    { "_Z7radiansf", (void *)&SC_radians },
+    { "_Z4stepff", (void *)&SC_step_f32 },
+    //{ "smoothstep", (void *)& },
+    { "_Z4signf", (void *)&SC_sign_f32 },
+
+
+
+
+    { "modf", (void *)&fmod },
+    { "_Z4fracf", (void *)&SC_frac },
+    //{ "sinf_fast", (void *)&SC_sinf_fast },
+    //{ "cosf_fast", (void *)&SC_cosf_fast },
+    { "randf", (void *)&SC_randf },
+    { "randf2", (void *)&SC_randf2 },
+    { "sign", (void *)&SC_sign },
+    { "clamp", (void *)&SC_clamp },
+    { "distf2", (void *)&SC_distf2 },
+    { "distf3", (void *)&SC_distf3 },
+    { "magf2", (void *)&SC_magf2 },
+    { "magf3", (void *)&SC_magf3 },
+    { "normf", (void *)&SC_normf },
+    { "mapf", (void *)&SC_mapf },
+    { "noisef", (void *)&SC_noisef },
+    { "noisef2", (void *)&SC_noisef2 },
+    { "noisef3", (void *)&SC_noisef3 },
+    { "turbulencef2", (void *)&SC_turbulencef2 },
+    { "turbulencef3", (void *)&SC_turbulencef3 },
 
     // time
-    { "second", (void *)&SC_second,
-        "int", "()" },
-    { "minute", (void *)&SC_minute,
-        "int", "()" },
-    { "hour", (void *)&SC_hour,
-        "int", "()" },
-    { "day", (void *)&SC_day,
-        "int", "()" },
-    { "month", (void *)&SC_month,
-        "int", "()" },
-    { "year", (void *)&SC_year,
-        "int", "()" },
-    { "uptimeMillis", (void*)&SC_uptimeMillis,
-        "int", "()" },      // TODO: use long instead
-    { "startTimeMillis", (void*)&SC_startTimeMillis,
-        "int", "()" },      // TODO: use long instead
-    { "elapsedTimeMillis", (void*)&SC_elapsedTimeMillis,
-        "int", "()" },      // TODO: use long instead
+    { "second", (void *)&SC_second },
+    { "minute", (void *)&SC_minute },
+    { "hour", (void *)&SC_hour },
+    { "day", (void *)&SC_day },
+    { "month", (void *)&SC_month },
+    { "year", (void *)&SC_year },
+    { "uptimeMillis", (void*)&SC_uptimeMillis },      // TODO: use long instead
+    { "startTimeMillis", (void*)&SC_startTimeMillis },      // TODO: use long instead
+    { "elapsedTimeMillis", (void*)&SC_elapsedTimeMillis },      // TODO: use long instead
 
     // matrix
-    { "matrixLoadIdentity", (void *)&SC_matrixLoadIdentity,
-        "void", "(float *mat)" },
-    { "matrixLoadFloat", (void *)&SC_matrixLoadFloat,
-        "void", "(float *mat, float *f)" },
-    { "matrixLoadMat", (void *)&SC_matrixLoadMat,
-        "void", "(float *mat, float *newmat)" },
-    { "matrixLoadRotate", (void *)&SC_matrixLoadRotate,
-        "void", "(float *mat, float rot, float x, float y, float z)" },
-    { "matrixLoadScale", (void *)&SC_matrixLoadScale,
-        "void", "(float *mat, float x, float y, float z)" },
-    { "matrixLoadTranslate", (void *)&SC_matrixLoadTranslate,
-        "void", "(float *mat, float x, float y, float z)" },
-    { "matrixLoadMultiply", (void *)&SC_matrixLoadMultiply,
-        "void", "(float *mat, float *lhs, float *rhs)" },
-    { "matrixMultiply", (void *)&SC_matrixMultiply,
-        "void", "(float *mat, float *rhs)" },
-    { "matrixRotate", (void *)&SC_matrixRotate,
-        "void", "(float *mat, float rot, float x, float y, float z)" },
-    { "matrixScale", (void *)&SC_matrixScale,
-        "void", "(float *mat, float x, float y, float z)" },
-    { "matrixTranslate", (void *)&SC_matrixTranslate,
-        "void", "(float *mat, float x, float y, float z)" },
+    { "matrixLoadIdentity", (void *)&SC_matrixLoadIdentity },
+    { "matrixLoadFloat", (void *)&SC_matrixLoadFloat },
+    { "matrixLoadMat", (void *)&SC_matrixLoadMat },
+    { "matrixLoadRotate", (void *)&SC_matrixLoadRotate },
+    { "matrixLoadScale", (void *)&SC_matrixLoadScale },
+    { "matrixLoadTranslate", (void *)&SC_matrixLoadTranslate },
+    { "matrixLoadMultiply", (void *)&SC_matrixLoadMultiply },
+    { "matrixMultiply", (void *)&SC_matrixMultiply },
+    { "matrixRotate", (void *)&SC_matrixRotate },
+    { "matrixScale", (void *)&SC_matrixScale },
+    { "matrixTranslate", (void *)&SC_matrixTranslate },
 
     // vector
-    { "vec2Rand", (void *)&SC_vec2Rand,
-        "void", "(float *vec, float maxLen)" },
+    { "vec2Rand", (void *)&SC_vec2Rand },
 
     // vec3
-    { "vec3Norm", (void *)&SC_vec3Norm,
-        "void", "(struct vecF32_3_s *)" },
-    { "vec3Length", (void *)&SC_vec3Length,
-        "float", "(struct vecF32_3_s *)" },
-    { "vec3Add", (void *)&SC_vec3Add,
-        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
-    { "vec3Sub", (void *)&SC_vec3Sub,
-        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
-    { "vec3Cross", (void *)&SC_vec3Cross,
-        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
-    { "vec3Dot", (void *)&SC_vec3Dot,
-        "float", "(struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
-    { "vec3Scale", (void *)&SC_vec3Scale,
-        "void", "(struct vecF32_3_s *lhs, float scale)" },
+    { "vec3Norm", (void *)&SC_vec3Norm },
+    { "vec3Length", (void *)&SC_vec3Length },
+    { "vec3Add", (void *)&SC_vec3Add },
+    { "vec3Sub", (void *)&SC_vec3Sub },
+    { "vec3Cross", (void *)&SC_vec3Cross },
+    { "vec3Dot", (void *)&SC_vec3Dot },
+    { "vec3Scale", (void *)&SC_vec3Scale },
 
     // vec4
-    { "vec4Norm", (void *)&SC_vec4Norm,
-        "void", "(struct vecF32_4_s *)" },
-    { "vec4Length", (void *)&SC_vec4Length,
-        "float", "(struct vecF32_4_s *)" },
-    { "vec4Add", (void *)&SC_vec4Add,
-        "void", "(struct vecF32_4_s *dest, struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
-    { "vec4Sub", (void *)&SC_vec4Sub,
-        "void", "(struct vecF32_4_s *dest, struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
-    { "vec4Dot", (void *)&SC_vec4Dot,
-        "float", "(struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
-    { "vec4Scale", (void *)&SC_vec4Scale,
-        "void", "(struct vecF32_4_s *lhs, float scale)" },
+    { "vec4Norm", (void *)&SC_vec4Norm },
+    { "vec4Length", (void *)&SC_vec4Length },
+    { "vec4Add", (void *)&SC_vec4Add },
+    { "vec4Sub", (void *)&SC_vec4Sub },
+    { "vec4Dot", (void *)&SC_vec4Dot },
+    { "vec4Scale", (void *)&SC_vec4Scale },
 
     // context
-    { "bindProgramFragment", (void *)&SC_bindProgramFragment,
-        "void", "(int)" },
-    { "bindProgramFragmentStore", (void *)&SC_bindProgramFragmentStore,
-        "void", "(int)" },
-    { "bindProgramStore", (void *)&SC_bindProgramFragmentStore,
-        "void", "(int)" },
-    { "bindProgramVertex", (void *)&SC_bindProgramVertex,
-        "void", "(int)" },
-    { "bindSampler", (void *)&SC_bindSampler,
-        "void", "(int, int, int)" },
-    { "bindTexture", (void *)&SC_bindTexture,
-        "void", "(int, int, int)" },
+    { "bindProgramFragment", (void *)&SC_bindProgramFragment },
+    { "bindProgramFragmentStore", (void *)&SC_bindProgramFragmentStore },
+    { "bindProgramStore", (void *)&SC_bindProgramFragmentStore },
+    { "bindProgramVertex", (void *)&SC_bindProgramVertex },
+    { "bindSampler", (void *)&SC_bindSampler },
+    { "bindTexture", (void *)&SC_bindTexture },
 
     // vp
-    { "vpLoadModelMatrix", (void *)&SC_vpLoadModelMatrix,
-        "void", "(void *)" },
-    { "vpLoadTextureMatrix", (void *)&SC_vpLoadTextureMatrix,
-        "void", "(void *)" },
+    { "vpLoadModelMatrix", (void *)&SC_vpLoadModelMatrix },
+    { "vpLoadTextureMatrix", (void *)&SC_vpLoadTextureMatrix },
 
-
+    // allocation
+    { "allocGetDimX", (void *)&SC_allocGetDimX },
+    { "allocGetDimY", (void *)&SC_allocGetDimY },
+    { "allocGetDimZ", (void *)&SC_allocGetDimZ },
+    { "allocGetDimLOD", (void *)&SC_allocGetDimLOD },
+    { "allocGetDimFaces", (void *)&SC_allocGetDimFaces },
 
     // drawing
-    { "drawRect", (void *)&SC_drawRect,
-        "void", "(float x1, float y1, float x2, float y2, float z)" },
-    { "drawQuad", (void *)&SC_drawQuad,
-        "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
-    { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords,
-        "void", "(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4)" },
-    { "drawSprite", (void *)&SC_drawSprite,
-        "void", "(float x, float y, float z, float w, float h)" },
-    { "drawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace,
-        "void", "(float x, float y, float z, float w, float h)" },
-    { "drawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped,
-        "void", "(float x, float y, float z, float w, float h, float cx0, float cy0, float cx1, float cy1)" },
-    { "drawLine", (void *)&SC_drawLine,
-        "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
-    { "drawPoint", (void *)&SC_drawPoint,
-        "void", "(float x1, float y1, float z1)" },
-    { "drawSimpleMesh", (void *)&SC_drawSimpleMesh,
-        "void", "(int ism)" },
-    { "drawSimpleMeshRange", (void *)&SC_drawSimpleMeshRange,
-        "void", "(int ism, int start, int len)" },
+    { "drawRect", (void *)&SC_drawRect },
+    { "drawQuad", (void *)&SC_drawQuad },
+    { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords },
+    { "drawSprite", (void *)&SC_drawSprite },
+    { "drawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
+    { "drawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped },
+    { "drawLine", (void *)&SC_drawLine },
+    { "drawPoint", (void *)&SC_drawPoint },
+    { "drawSimpleMesh", (void *)&SC_drawSimpleMesh },
+    { "drawSimpleMeshRange", (void *)&SC_drawSimpleMeshRange },
 
 
     // misc
-    { "pfClearColor", (void *)&SC_ClearColor,
-        "void", "(float, float, float, float)" },
-    { "color", (void *)&SC_color,
-        "void", "(float, float, float, float)" },
-    { "hsb", (void *)&SC_hsb,
-        "void", "(float, float, float, float)" },
-    { "hsbToRgb", (void *)&SC_hsbToRgb,
-        "void", "(float, float, float, float*)" },
-    { "hsbToAbgr", (void *)&SC_hsbToAbgr,
-        "int", "(float, float, float, float)" },
-    { "ambient", (void *)&SC_ambient,
-        "void", "(float, float, float, float)" },
-    { "diffuse", (void *)&SC_diffuse,
-        "void", "(float, float, float, float)" },
-    { "specular", (void *)&SC_specular,
-        "void", "(float, float, float, float)" },
-    { "emission", (void *)&SC_emission,
-        "void", "(float, float, float, float)" },
-    { "shininess", (void *)&SC_shininess,
-        "void", "(float)" },
-    { "pointAttenuation", (void *)&SC_pointAttenuation,
-        "void", "(float, float, float)" },
+    { "pfClearColor", (void *)&SC_ClearColor },
+    { "color", (void *)&SC_color },
+    { "hsb", (void *)&SC_hsb },
+    { "hsbToRgb", (void *)&SC_hsbToRgb },
+    { "hsbToAbgr", (void *)&SC_hsbToAbgr },
+    { "pointAttenuation", (void *)&SC_pointAttenuation },
 
-    { "uploadToTexture", (void *)&SC_uploadToTexture,
-        "void", "(int, int)" },
-    { "uploadToBufferObject", (void *)&SC_uploadToBufferObject,
-        "void", "(int)" },
+    { "uploadToTexture", (void *)&SC_uploadToTexture },
+    { "uploadToBufferObject", (void *)&SC_uploadToBufferObject },
 
-    { "syncToGL", (void *)&SC_syncToGL,
-        "void", "(int)" },
+    { "syncToGL", (void *)&SC_syncToGL },
 
-    { "colorFloatRGBAtoUNorm8", (void *)&SC_colorFloatRGBAtoUNorm8,
-        "int", "(float, float, float, float)" },
-    { "colorFloatRGBto565", (void *)&SC_colorFloatRGBAto565,
-        "int", "(float, float, float)" },
+    { "getWidth", (void *)&SC_getWidth },
+    { "getHeight", (void *)&SC_getHeight },
 
+    { "sendToClient", (void *)&SC_toClient },
 
-    { "getWidth", (void *)&SC_getWidth,
-        "int", "()" },
-    { "getHeight", (void *)&SC_getHeight,
-        "int", "()" },
+    { "_Z18convertColorTo8888fff", (void *)&SC_convertColorTo8888_f3 },
+    { "_Z18convertColorTo8888ffff", (void *)&SC_convertColorTo8888_f4 },
 
-    { "sendToClient", (void *)&SC_toClient,
-        "int", "(void *data, int cmdID, int len, int waitForSpace)" },
+    { "debugF", (void *)&SC_debugF },
+    { "debugI32", (void *)&SC_debugI32 },
+    { "debugHexF", (void *)&SC_debugHexF },
+    { "debugHexI32", (void *)&SC_debugHexI32 },
+    { "debugP", (void *)&SC_debugP },
+    { "debugPf", (void *)&SC_debugPf },
+    { "debugPi", (void *)&SC_debugPi },
 
+    { "scriptCall", (void *)&SC_scriptCall },
 
-    { "debugF", (void *)&SC_debugF,
-        "void", "(void *, float)" },
-    { "debugI32", (void *)&SC_debugI32,
-        "void", "(void *, int)" },
-    { "debugHexF", (void *)&SC_debugHexF,
-        "void", "(void *, float)" },
-    { "debugHexI32", (void *)&SC_debugHexI32,
-        "void", "(void *, int)" },
-
-    { "scriptCall", (void *)&SC_scriptCall,
-        "void", "(int)" },
-
-
-    { NULL, NULL, NULL, NULL }
+    { NULL, NULL }
 };
 
 const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym)
@@ -1399,18 +1389,4 @@ const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym)
     }
     return NULL;
 }
-
-void ScriptCState::appendDecls(String8 *str)
-{
-    ScriptCState::SymbolTable_t *syms = gSyms;
-    while (syms->mPtr) {
-        str->append(syms->mRet);
-        str->append(" ");
-        str->append(syms->mName);
-        str->append(syms->mParam);
-        str->append(";\n");
-        syms++;
-    }
-}
-
 

@@ -41,6 +41,38 @@ namespace renderscript {
 #define rsAssert(v) while(0)
 #endif
 
+typedef float rsvF_2 __attribute__ ((vector_size (8)));
+typedef float rsvF_4 __attribute__ ((vector_size (16)));
+typedef float rsvF_8 __attribute__ ((vector_size (32)));
+typedef float rsvF_16 __attribute__ ((vector_size (64)));
+typedef uint8_t rsvU8_4 __attribute__ ((vector_size (4)));
+
+union float2 {
+    rsvF_2 v;
+    float f[2];
+};
+
+union float4 {
+    rsvF_4 v;
+    float f[4];
+};
+
+union float8 {
+    rsvF_8 v;
+    float f[8];
+};
+
+union float16 {
+    rsvF_16 v;
+    float f[16];
+};
+
+union uchar4 {
+    rsvU8_4 v;
+    uint8_t f[4];
+    uint32_t packed;
+};
+
 template<typename T>
 T rsMin(T in1, T in2)
 {

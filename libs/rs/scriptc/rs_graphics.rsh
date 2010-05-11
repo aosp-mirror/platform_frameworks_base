@@ -2,6 +2,7 @@
 
 extern float rand(float max);
 
+//extern void vec2Rand(float *, float len);
 extern float2 vec2Rand(float len);
 
 extern float3 float3Norm(float3);
@@ -59,9 +60,21 @@ extern int getHeight();
 
 extern int sendToClient(void *data, int cmdID, int len, int waitForSpace);
 
-extern void debugF(const char *, float);
-extern void debugI32(const char *, int);
-extern void debugHexI32(const char *, int);
+extern uint32_t allocGetDimX(rs_allocation);
+extern uint32_t allocGetDimY(rs_allocation);
+extern uint32_t allocGetDimZ(rs_allocation);
+extern uint32_t allocGetDimLOD(rs_allocation);
+extern uint32_t allocGetDimFaces(rs_allocation);
 
+//
+extern float normf(float start, float stop, float value);
+extern float clampf(float amount, float low, float high);
+extern float turbulencef2(float x, float y, float octaves);
+extern float turbulencef3(float x, float y, float z, float octaves);
+
+extern uchar4 __attribute__((overloadable)) convertColorTo8888(float r, float g, float b);
+extern uchar4 __attribute__((overloadable)) convertColorTo8888(float r, float g, float b, float a);
+extern uchar4 __attribute__((overloadable)) convertColorTo8888(float3);
+extern uchar4 __attribute__((overloadable)) convertColorTo8888(float4);
 
 

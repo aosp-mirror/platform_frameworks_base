@@ -328,6 +328,7 @@ RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc,
 {
     ProgramFragment *pf = new ProgramFragment(rsc, params, paramLength);
     pf->incUserRef();
+    LOGE("rsi_ProgramFragmentCreate %p", pf);
     return pf;
 }
 
@@ -337,6 +338,7 @@ RsProgramFragment rsi_ProgramFragmentCreate2(Context *rsc, const char * shaderTe
 {
     ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
     pf->incUserRef();
+    LOGE("rsi_ProgramFragmentCreate2 %p", pf);
     return pf;
 }
 

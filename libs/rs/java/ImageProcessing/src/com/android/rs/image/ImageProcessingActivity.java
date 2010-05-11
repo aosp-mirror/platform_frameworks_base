@@ -34,18 +34,13 @@ import android.widget.SeekBar;
 import java.lang.Math;
 
 public class ImageProcessingActivity extends Activity implements SurfaceHolder.Callback {
-    private Bitmap mBitmap;
-    private Params mParams;
-    private Script.Invokable mInvokable;
-    private int[] mInData;
-    private int[] mOutData;
+    private Bitmap mBitmapIn;
+    private Bitmap mBitmapOut;
+    private ScriptC_Threshold mScript;
+    private float mThreshold = 0.5f;
 
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript mRS;
-    @SuppressWarnings({"FieldCanBeLocal"})
-    private Type mParamsType;
-    @SuppressWarnings({"FieldCanBeLocal"})
-    private Allocation mParamsAllocation;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Type mPixelType;
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -56,28 +51,9 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
     private SurfaceView mSurfaceView;
     private ImageView mDisplayView;
 
-    static class Params {
-        public int inWidth;
-        public int outWidth;
-        public int inHeight;
-        public int outHeight;
-
-        public float threshold;
-    }
-
-    static class Pixel {
-        public byte a;
-        public byte r;
-        public byte g;
-        public byte b;
-    }
-
     class FilterCallback extends RenderScript.RSMessage {
         private Runnable mAction = new Runnable() {
             public void run() {
-                mOutPixelsAllocation.readData(mOutData);
-                mBitmap.setPixels(mOutData, 0, mParams.outWidth, 0, 0,
-                        mParams.outWidth, mParams.outHeight);
                 mDisplayView.invalidate();
             }
         };
@@ -89,29 +65,35 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         }
     }
 
+    int in[];
+    int out[];
     private void javaFilter() {
-        long t = java.lang.System.currentTimeMillis();
-        int count = mParams.inWidth * mParams.inHeight;
-        float threshold = mParams.threshold * 255.f;
+        final int w = mBitmapIn.getWidth();
+        final int h = mBitmapIn.getHeight();
+        final int count = w * h;
 
-        for (int i = 0; i < count; i++) {
-            final float r = (float)((mInData[i] >> 0) & 0xff);
-            final float g = (float)((mInData[i] >> 8) & 0xff);
-            final float b = (float)((mInData[i] >> 16) & 0xff);
-
-            final float luminance = 0.2125f * r +
-                              0.7154f * g +
-                              0.0721f * b;
-            if (luminance > threshold) {
-                mOutData[i] = mInData[i];
-            } else {
-                mOutData[i] = mInData[i] & 0xff000000;
-            }
+        if (in == null) {
+            in = new int[count];
+            out = new int[count];
+            mBitmapIn.getPixels(in, 0, w, 0, 0, w, h);
         }
 
-        t = java.lang.System.currentTimeMillis() - t;
+        int threshold = (int)(mThreshold * 255.f) * 255;
+        //long t = java.lang.System.currentTimeMillis();
 
-        android.util.Log.v("Img", "frame time ms " + t);
+        for (int i = 0; i < count; i++) {
+            final int luminance = 54 * ((in[i] >> 0) & 0xff) +
+                                  182* ((in[i] >> 8) & 0xff) +
+                                  18 * ((in[i] >> 16) & 0xff);
+            if (luminance > threshold) {
+                out[i] = in[i];
+            } else {
+                out[i] = in[i] & 0xff000000;
+            }
+        }
+        //t = java.lang.System.currentTimeMillis() - t;
+        //android.util.Log.v("Img", "frame time ms " + t);
+        mBitmapOut.setPixels(out, 0, w, 0, 0, w, h);
     }
 
     @Override
@@ -119,29 +101,31 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mBitmap = loadBitmap(R.drawable.data);
+        mBitmapIn = loadBitmap(R.drawable.data);
+        mBitmapOut = loadBitmap(R.drawable.data);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
         mSurfaceView.getHolder().addCallback(this);
 
         mDisplayView = (ImageView) findViewById(R.id.display);
-        mDisplayView.setImageBitmap(mBitmap);
+        mDisplayView.setImageBitmap(mBitmapOut);
 
         ((SeekBar) findViewById(R.id.threshold)).setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    mParams.threshold = progress / 100.0f;
-                    mParamsAllocation.data(mParams);
+                    mThreshold = progress / 100.0f;
+                    mScript.set_threshold(mThreshold);
 
+                    long t = java.lang.System.currentTimeMillis();
                     if (true) {
-                        mInvokable.execute();
+                        mScript.invokable_Filter();
                     } else {
                         javaFilter();
-                        mBitmap.setPixels(mOutData, 0, mParams.outWidth, 0, 0,
-                                mParams.outWidth, mParams.outHeight);
                         mDisplayView.invalidate();
                     }
+                    t = java.lang.System.currentTimeMillis() - t;
+                    android.util.Log.v("Img", "frame time core ms " + t);
                 }
             }
 
@@ -154,10 +138,8 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
-        mParams = createParams();
-        mInvokable = createScript();
-
-        mInvokable.execute();
+        createScript();
+        mScript.invokable_Filter();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -166,54 +148,19 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    private Script.Invokable createScript() {
+    private void createScript() {
         mRS = RenderScript.create();
         mRS.mMessageCallback = new FilterCallback();
 
-        mParamsType = Type.createFromClass(mRS, Params.class, 1, "Parameters");
-        mParamsAllocation = Allocation.createTyped(mRS, mParamsType);
-        mParamsAllocation.data(mParams);
+        mInPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapIn);
+        mOutPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapOut);
 
-        final int pixelCount = mParams.inWidth * mParams.inHeight;
-
-        mPixelType = Type.createFromClass(mRS, Pixel.class, 1, "Pixel");
-        mInPixelsAllocation = Allocation.createSized(mRS,
-                Element.createUser(mRS, Element.DataType.SIGNED_32),
-                pixelCount);
-        mOutPixelsAllocation = Allocation.createSized(mRS,
-                Element.createUser(mRS, Element.DataType.SIGNED_32),
-                pixelCount);
-
-        mInData = new int[pixelCount];
-        mBitmap.getPixels(mInData, 0, mParams.inWidth, 0, 0, mParams.inWidth, mParams.inHeight);
-        mInPixelsAllocation.data(mInData);
-
-        mOutData = new int[pixelCount];
-        mOutPixelsAllocation.data(mOutData);
-
-        ScriptC.Builder sb = new ScriptC.Builder(mRS);
-        sb.setType(mParamsType, "Params", 0);
-        sb.setType(mPixelType, "InPixel", 1);
-        sb.setType(mPixelType, "OutPixel", 2);
-        sb.setType(true, 2);
-        Script.Invokable invokable = sb.addInvokable("main");
-        sb.setScript(getResources(), R.raw.threshold);
-        //sb.setRoot(true);
-
-        ScriptC script = sb.create();
-        script.bindAllocation(mParamsAllocation, 0);
-        script.bindAllocation(mInPixelsAllocation, 1);
-        script.bindAllocation(mOutPixelsAllocation, 2);
-
-        return invokable;
-    }
-
-    private Params createParams() {
-        final Params params = new Params();
-        params.inWidth = params.outWidth = mBitmap.getWidth();
-        params.inHeight = params.outHeight = mBitmap.getHeight();
-        params.threshold = 0.5f;
-        return params;
+        mScript = new ScriptC_Threshold(mRS, getResources(), false);
+        mScript.set_width(mBitmapIn.getWidth());
+        mScript.set_height(mBitmapIn.getHeight());
+        mScript.set_threshold(mThreshold);
+        mScript.bind_InPixel(mInPixelsAllocation);
+        mScript.bind_OutPixel(mOutPixelsAllocation);
     }
 
     private Bitmap loadBitmap(int resource) {

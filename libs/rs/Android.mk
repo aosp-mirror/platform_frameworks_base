@@ -106,7 +106,7 @@ LOCAL_SRC_FILES:= \
 	rsVertexArray.cpp
 
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libacc
+LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libRS
 LOCAL_MODULE_TAGS := optional
