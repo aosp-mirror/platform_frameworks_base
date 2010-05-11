@@ -7858,18 +7858,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         r.conProviders.put(cpr, new Integer(cnt.intValue()+1));
                     }
                     cpr.clients.add(r);
-                } else {
-                    cpr.externals++;
-                }
-
-                if (cpr.app != null) {
-                    if (r.setAdj >= VISIBLE_APP_ADJ) {
+                    if (cpr.app != null && r.setAdj >= VISIBLE_APP_ADJ) {
                         // If this is a visible app accessing the provider,
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
                         // content providers are often expensive to start.
                         updateLruProcessLocked(cpr.app, false, true);
                     }
+                } else {
+                    cpr.externals++;
+                }
+
+                if (cpr.app != null) {
                     updateOomAdjLocked(cpr.app);
                 }
 
