@@ -22,7 +22,6 @@ import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandException;
-import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataLink;
 import com.android.internal.telephony.Phone;
@@ -40,7 +39,7 @@ public class PdpConnection extends DataConnection {
     /** Fail cause of last PDP activate, from RIL_LastPDPActivateFailCause */
     private static final int PDP_FAIL_OPERATOR_BARRED = 0x08;
     private static final int PDP_FAIL_INSUFFICIENT_RESOURCES = 0x1A;
-    private static final int PDP_FAIL_MISSING_UKNOWN_APN = 0x1B;
+    private static final int PDP_FAIL_MISSING_UNKNOWN_APN = 0x1B;
     private static final int PDP_FAIL_UNKNOWN_PDP_ADDRESS_TYPE = 0x1C;
     private static final int PDP_FAIL_USER_AUTHENTICATION = 0x1D;
     private static final int PDP_FAIL_ACTIVATION_REJECT_GGSN = 0x1E;
@@ -192,8 +191,8 @@ public class PdpConnection extends DataConnection {
             case PDP_FAIL_INSUFFICIENT_RESOURCES:
                 cause = FailCause.INSUFFICIENT_RESOURCES;
                 break;
-            case PDP_FAIL_MISSING_UKNOWN_APN:
-                cause = FailCause.MISSING_UKNOWN_APN;
+            case PDP_FAIL_MISSING_UNKNOWN_APN:
+                cause = FailCause.MISSING_UNKNOWN_APN;
                 break;
             case PDP_FAIL_UNKNOWN_PDP_ADDRESS_TYPE:
                 cause = FailCause.UNKNOWN_PDP_ADDRESS;
