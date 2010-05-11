@@ -112,6 +112,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         } else {
             mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
+            mTitle.setText(R.string.keyguard_password_enter_pin_password_code);
         }
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?

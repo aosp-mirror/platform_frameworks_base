@@ -1417,9 +1417,13 @@
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
 
-    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
+    <!-- Instructions telling the user to enter their text password to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_password_code">Enter password to unlock</string>
+
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_pin_password_code">Enter PIN to unlock</string>
 
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->
