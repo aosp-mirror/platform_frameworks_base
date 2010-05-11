@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r3-windows.zip
-ndk.win_bytes=36473391
-ndk.win_checksum=4ce5c93a15f261b6dcade1b69da00902
+ndk.win_download=android-ndk-r4-windows.zip
+ndk.win_bytes=
+ndk.win_checksum=
 
-ndk.mac_download=android-ndk-r3-darwin-x86.zip
-ndk.mac_bytes=38258228
-ndk.mac_checksum=a083ccc36aa9a3a35404861e7d51d1ae
+ndk.mac_download=android-ndk-r4-darwin-x86.zip
+ndk.mac_bytes=
+ndk.mac_checksum=
 
-ndk.linux_download=android-ndk-r3-linux-x86.zip
-ndk.linux_bytes=37403241
-ndk.linux_checksum=f3b1700a195aae3a6e9b5637e5c49359
+ndk.linux_download=android-ndk-r4-linux-x86.zip
+ndk.linux_bytes=
+ndk.linux_checksum=
 
 page.title=Android NDK
 @jd:body
@@ -38,19 +38,18 @@ function toggleDiv(link) {
 }
 </script>
 <style>
-
 .toggleable {
 padding: .25em 1em;
-xfont-size:.95em;
 }
-
 .toggleme {
-  xmargin:1em;
   padding: 1em 1em 0 2em;
-line-height:1em;
+  line-height:1em;
 }
 .toggleable a {
   text-decoration:none;
+}
+.toggleme a {
+  text-decoration:underline;
 }
 .toggleable.closed .toggleme {
   display:none;
@@ -61,6 +60,58 @@ line-height:1em;
 </style>
 
 <div class="toggleable open">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+Android NDK, Revision 4</a> <em>(May 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt>General notes:</dt>
+
+<dd>
+<ul>
+<li>Provides a simplified build system through the new <code>ndk-build</code> build
+command. </li>
+<li>Adds support for easy native debugging of generated machine code through the new
+<code>ndk-gdb</code> command.</li>
+<li>Adds a new Android-specific ABI for ARM-based CPU architectures,
+<code>armeabi-v7a</code>. The new ABI extends the existing <code>armeabi</code>
+ABI to include these CPU instruction set extensions:
+<ul>
+<li>Thumb-2 instructions</li>
+<li>VFP hardware FPU instructions (VFPv3-D16)</li>
+<li>Optional support for ARM Advanced SIMD (NEON) GCC intrinsics and VFPv3-D32.
+Supported by devices such as Verizon Droid, Google Nexus One, and others.</li>
+</ul>
+<li>Adds a new <code>cpufeatures</code> static library (with sources) that lets
+your app detect the host device's CPU features at runtime. Specifically,
+applications can check for ARMv7-A support, as well as VFPv3-D32 and NEON
+support, then provide separate code paths as needed.</li>
+<li>Adds a sample application, <code>hello-neon</code>, that illustrates how to 
+use the <code>cpufeatures</code> library to check CPU features and then provide
+an optimized code path using NEON instrinsics, if 
+supported by the CPU.</li>
+<li>Lets you generate machine code for either or both of the instruction sets
+supported by the NDK. For example, you can build for both ARMv5 and ARMv7-A
+architectures at the same time and have everything stored to your application's
+final <code>.apk</code>.</li>
+<li>To ensure that your applications are available to users only if their
+devices are capable of running them, Android Market now filters applications
+based on the instruction set information included in your application &mdash; no
+action is needed on your part to enable the filtering. Additionally, the Android
+system itself also checks your application at install time and allows the
+installation to continue only if the application provides a library that is
+compiled for the device's CPU architecture.</li>
+<li>Adds support for Android 2.2, including a new stable API for accessing
+the pixel buffers of {@link android.graphics.Bitmap} objects from native
+code.</li>
+</ul>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
 Android NDK, Revision 3</a> <em>(March 2010)</em>
@@ -142,17 +193,34 @@ in the form of reuse of existing code and in some cases increased speed.</p>
 <ul>
 <li>A set of tools and build files used to generate native code libraries from C
 and C++ sources</li>
-<li>A way to embed the corresponding native libraries into application package
-files (.apks) that can be deployed on Android devices</li>
+<li>A way to embed the corresponding native libraries into an application package
+file (<code>.apk</code>) that can be deployed on Android devices</li>
 <li>A set of native system headers and libraries that will be supported in all
 future versions of the Android platform, starting from Android 1.5 </li>
 <li>Documentation, samples, and tutorials</li>
 </ul>
 
-<p>This release of the NDK supports the ARMv5TE machine instruction set and
-provides stable headers for libc (the C library), libm (the Math library),
-OpenGL ES (3D graphics library), the JNI interface, and other libraries, as
-listed in the section below.</p>
+<p>The latest release of the NDK supports these ARM instruction sets:</p>
+<ul>
+<li>ARMv5TE (including Thumb-1 instructions)</li>
+<li>ARMv7-A (including Thumb-2 and VFPv3-D16 instructions, with 
+optional support for NEON/VFPv3-D32 instructions)</li>
+</ul>
+
+<p>ARMv5TE machine code will run on all ARM-based Android devices. ARMv7-A will
+run only on devices such as the Verizon Droid or Google Nexus One that have a
+compatible CPU. The main difference between the two instruction sets is that
+ARMv7-A supports hardware FPU, Thumb-2, and NEON instructions. You can target
+either or both of the instruction sets &mdash; ARMv5TE is the default, but
+switching to ARMv7-A is as easy as adding a single line to the application's
+Application.mk file, without needing to change anything else in the file. You
+can also build for both architectures at the same time and have everything
+stored in the final <code>.apk</code>. Complete information is provided in the
+CPU-ARCH-ABIS.TXT in the NDK package. </p>
+
+<p>The NDK provides stable headers for libc (the C library), libm (the Math
+library), OpenGL ES (3D graphics library), the JNI interface, and other
+libraries, as listed in the section below.</p>
 
 <p>The NDK will not benefit most applications. As a developer, you will need 
 to balance its benefits against its drawbacks; notably, using native code does 
@@ -184,6 +252,7 @@ guaranteed to be supported in all later releases of the platform:</p>
 <li>libz (Zlib compression) headers</li>
 <li>liblog (Android logging) header</li>
 <li>OpenGL ES 1.1 and OpenGL ES 2.0 (3D graphics libraries) headers</li>
+<li>libjnigraphics (Pixel buffer access) header (for Android 2.2 and above).</li> 
 <li>A Minimal set of headers for C++ support</li>
 </ul>
 
@@ -224,6 +293,11 @@ that you should be aware of, if you are developing using the NDK. </li>
 by headers in the NDK.</li>
 <li>CPU-ARCH-ABIS.TXT &mdash; a description of supported CPU architectures 
 and how to target them. </li>
+<li>CPU-FEATURES.TXT &mdash; a description of the <code>cpufeatures</code>
+static library that lets your application code detect the target device's 
+CPU family and the optional features at runtime. 	</li>
+<li>CPU-ARM-NEON.TXT &mdash; a description of how to build with optional
+ARM NEON / VFPv3-D32 instructions. </li>
 <li>CHANGES.TXT &mdash; a complete list of changes to the NDK across all 
 releases.</li>
 </ul>
@@ -268,8 +342,10 @@ required.</li>
 <ul>
   <li>For all development platforms, GNU Make 3.81 or later is required. Earlier
 versions of GNU Make might work but have not been tested.</li>
-  <li>For Windows, a recent release of <a
-href="http://www.cygwin.com">Cygwin</a> is required. </li>
+  <li>A recent version of awk (either GNU Awk or Nawk) is also required.</li>
+  <li>For Windows, <a
+href="http://www.cygwin.com">Cygwin</a> 1.7 or higher is required. The NDK 
+will <em>not</em> work with Cygwin 1.5 installations.</li>
 </ul>
 
 <h4>Android platform compatibility</h4>
@@ -294,7 +370,7 @@ value of "3" or higher. For example:
 &lt;/manifest&gt;</pre>
 </li>
 
-<li>Additionally, if you use this NDK to create a native library that uses the
+<li>If you use this NDK to create a native library that uses the
 OpenGL ES APIs, the application containing the library can be deployed only to
 devices running the minimum platform versions described in the table below.
 To ensure compatibility, make sure that your application declares the proper
@@ -310,16 +386,42 @@ To ensure compatibility, make sure that your application declares the proper
 <tr><td>OpenGL ES 2.0</td><td>Android 2.0 and higher</td><td><code>android:minSdkVersion="5"</code></td></tr>
 </table>
 
-<p>For more information about API Level and its relationship to Android 
+<p>For more information about API Level and its relationship to Android
 platform versions, see <a href="{@docRoot}guide/appendix/api-levels.html">
 Android API Levels</a>.</p></li>
+
+<li>Additionally, an application using the OpenGL ES APIs should declare a
+<code>&lt;uses-feature&gt;</code> element in its manifest, with an
+<code>android:glEsVersion</code> attribute that specifies the minimum OpenGl ES
+version required by the application. This ensures that Android Market will show
+your application only to users whose devices are capable of supporting your
+application. For example: 
+
+<pre style="margin:1em;">&lt;manifest&gt;
+  ...
+<!-- Declare that the application uses the OpenGL ES 2.0 API and is designed
+     to run only on devices that support OpenGL ES 2.0 or higher. -->
+  &lt;uses-feature android:glEsVersion="0x00020000" /&gt;
+  ...
+&lt;/manifest&gt;</pre>
+
+<p>For more information, see the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+documentation.</p></li>
+
+<li>If you use this NDK to create a native library that uses the API to access
+Android {@link android.graphics.Bitmap} pixel buffers, the application
+containing the library can be deployed only to devices running Android 2.2 (API
+level 8) or higher. To ensure compatibility, make sure that your application
+declares <code>&lt;uses-sdk android:minSdkVersion="8" /&gt;</code>attribute
+value in its manifest.</li>
 </ul>
 
 <h2 id="installing">Installing the NDK</h2>
 
 <p>Installing the NDK on your development computer is straightforward and
-involves extracting the NDK from its download package and running a host-setup
-script. </p>
+involves extracting the NDK from its download package. Unlike previous releases,
+there is no need to run a host-setup script.</p>
 
 <p>Before you get started make sure that you have downloaded the latest <a
 href="{@docRoot}sdk/index.html">Android SDK</a> and upgraded your applications
@@ -337,21 +439,9 @@ When uncompressed, the NDK files are contained in a directory called
 <code>android-ndk-&lt;version&gt;</code>. You can rename the NDK directory if
 necessary and you can move it to any location on your computer. This
 documentation refers to the NDK directory as <code>&lt;ndk&gt;</code>.  </li>
-<li>Open a terminal, change to the NDK directory, and run the host-setup script.
-The script sets up your environment and generates a host configuration file used
-later, when building your shared libraries. The path to the host-setup script
-is:
-
-<p><code>&lt;ndk&gt;/build/host-setup.sh</code></p>
-
-<p>If the script completes successfully, it prints a "Host setup complete."
-message. If it fails, it prints instructions that you can follow to correct any
-problems. </p>
-</li>
 </ol>
 
-<p>Once you have run the host-setup script, you are ready start working with the
-NDK. </p>
+<p>You are now ready start working with the NDK. </p>
 
 <h2 id="gettingstarted">Getting Started with the NDK</h2>
 
@@ -371,17 +461,14 @@ list of NDK changes in the CHANGES.TXT document. </p>
 <code>&lt;project&gt;/jni/...</code></li>
 <li>Create <code>&lt;project&gt;/jni/Android.mk</code> to
 describe your native sources to the NDK build system</li>
-<li>Create <code>&lt;ndk&gt;/apps/&lt;my_app&gt;/Application.mk</code> to
-describe your Android application and native sources it needs to the NDK build
-system. This file sets up the link between an Android SDK application project
-and any number of shared libraries defined in the
-<code>&lt;project&gt;/jni/</code> folder and it specifies the path to the
-application project that will receive the shared library built from the
-sources.</li>
-<li>Build your native code by running this make command from the top-level NDK
-directory:
+<li>Optional: Create <code>&lt;project&gt;/jni/Application.mk</code>.</li>
+<li>Build your native code by running the 'ndk-build' script from your projet's directory.
+It is located in the top-level NDK directory:
 
-<p><code>$ make APP=&lt;my_app&gt;</code></p>
+<p><pre>
+$ cd &lt;project&gt;
+$ &lt;ndk&gt;/ndk-build
+</pre></p>
 
 <p>The build tools copy the stripped, shared libraries needed by your
 application to the proper location in the application's project directory.</p>
@@ -389,7 +476,7 @@ application to the proper location in the application's project directory.</p>
 
 <li>Finally, compile your application using the SDK tools in the usual way. The
 SDK build tools will package the shared libraries in the application's
-deployable .apk file. </p></li>
+deployable <code>.apk</code> file. </p></li>
 
 </ol>
 
@@ -399,7 +486,7 @@ documentation included with the NDK package. </p>
 
 <h2 id="samples">Using the Sample Applications</h2>
 
-<p>The NDK includes four sample applications that illustrate how to use native
+<p>The NDK includes sample applications that illustrate how to use native
 code in your Android applications:</p>
 
 <ul>
@@ -415,36 +502,27 @@ graphics through the native OpenGL ES APIs, while managing activity lifecycle
 with a {@link android.opengl.GLSurfaceView} object. </li>
 <li><code>hello-gl2</code> &mdash; a simple application that renders a triangle
 using OpenGL ES 2.0 vertex and fragment shaders.</li>
+<li><code>hello-neon</code> &mdash; a simple application that shows how to use
+the <code>cpufeatures</code> library to check CPU capabilities at runtime,
+then use NEON intrinsics if supported by the CPU. Specifically, the 
+application implements two versions of a tiny benchmark for a FIR filter 
+loop, a C version and a NEON-optimized version for devices that support it.</li>
+<li><code>bitmap-plasma</code> &mdash; a simple application that demonstrates
+how to access the pixel buffers of Android {@link android.graphics.Bitmap}
+objects from native code, and uses this to generate an old-school "plasma"
+effect. </li>
 </ul>
 
-<p>For each sample, the NDK includes an Android application project, as well as
-the corresponding C source code and the necessary Android.mk and Application.mk
-files. The application projects are provided in
-<code>&lt;ndk&gt;/apps/&lt;app_name&gt;/project/</code> and the C source for
-each application is provided in
-<code>&lt;ndk&gt;/apps/&lt;app_name&gt;/project/jni/</code>.</p>
+<p>For each sample, the NDK includes the corresponding C source code and the
+necessary Android.mk and Application.mk files. There are  located under 
+<code>&lt;ndk&gt;/samples/&lt;name&gt;/</code> and their source code can be found under
+<code>&lt;ndk&gt;/samples/&lt;name&gt;/jni/</code>. </p>
 
-<p>Once you have installed the NDK and run <code>$ build/host-setup.sh</code> from
-the root of the NDK directory, you can build the shared libraries for the
-sample apps by using these commands:</p>
-<ul>
-<li><code>$ make APP=hello-jni</code> &mdash; compiles
-<code>hello-jni.c</code> and outputs a shared library to
-<code>&lt;ndk&gt;/apps/hello-jni/project/libs/armeabi/libhello-jni.so</code>.
-</li>
-<li><code>$ make APP=two-libs</code> &mdash; compiles
-<code>first.c</code> and <code>second.c</code> and outputs a shared library to
-<code>&lt;ndk&gt;/apps/two-libs/project/libs/armeabi/libtwolib-second.so</code>.
-</li>
-<li><code>$ make APP=san-angeles</code> &mdash; compiles
-<code>importgl.c</code>, <code>demo.c</code>,and <code>app-android.c</code> and 
-outputs a shared library to <code>&lt;ndk&gt;/apps/san-angeles/project/libs/armeabi/libsangeles.so</code>.
-</li>
-<li><code>$ make APP=hello-gl2</code> &mdash; compiles
-<code>gl_code.cpp</code> and outputs a shared library to 
-<code>&lt;ndk&gt;/apps/hello-gl2/project/libs/armeabi/libgl2jni.so</code>.
-</li>
-</ul>
+<p>You can build the shared libraries for the sample apps by going into <code>&lt;ndk&gt;/samples/&lt;name&gt;/</code>
+then calling the <code>ndk-build</code> command. The generated shared libraries will be located under
+<code>&lt;ndk&gt;/samples/&lt;name&gt;/libs/armeabi/</code> for (ARMv5TE machine code) and/or
+<code>&lt;ndk&gt;/samples/&lt;name&gt;/libs/armeabi-v7a/</code> for (ARMv7 machine code).
+</p>
 
 <p>Next, build the sample Android applications that use the shared
 libraries:</p>
@@ -473,5 +551,6 @@ IDEs</a>.</li>
 discussions about it, please visit the <a
 href="http://groups.google.com/group/android-ndk">android-ndk</a> group and 
 mailing list.</p>
+
 
 
