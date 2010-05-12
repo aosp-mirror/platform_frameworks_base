@@ -1,6 +1,19 @@
 page.title=Faster Screen Orientation Change
 @jd:body
 
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
+Changes</a></li>
+  </ol>
+
+</div>
+</div>
+
 <p>Android is designed to run efficiently on a wide
 array of devices, with very different hardware configurations. Some
 devices, like the T-Mobile G1, can change their hardware configuration
