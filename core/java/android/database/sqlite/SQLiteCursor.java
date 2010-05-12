@@ -36,6 +36,9 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A Cursor implementation that exposes results from a query on a
  * {@link SQLiteDatabase}.
+ *
+ * SQLiteCursor is not internally synchronized so code using a SQLiteCursor from multiple
+ * threads should perform its own synchronization when using the SQLiteCursor.
  */
 public class SQLiteCursor extends AbstractWindowedCursor {
     static final String TAG = "Cursor";
