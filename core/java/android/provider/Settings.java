@@ -3532,20 +3532,8 @@ public final class Settings {
             // If a shortcut is supplied, and it is already defined for
             // another bookmark, then remove the old definition.
             if (shortcut != 0) {
-                Cursor c = cr.query(CONTENT_URI,
-                        sShortcutProjection, sShortcutSelection,
-                        new String[] { String.valueOf((int) shortcut) }, null);
-                try {
-                    if (c.moveToFirst()) {
-                        while (c.getCount() > 0) {
-                            if (!c.deleteRow()) {
-                                Log.w(TAG, "Could not delete existing shortcut row");
-                            }
-                        }
-                    }
-                } finally {
-                    if (c != null) c.close();
-                }
+                cr.delete(CONTENT_URI, sShortcutSelection,
+                        new String[] { String.valueOf((int) shortcut) });
             }
 
             ContentValues values = new ContentValues();

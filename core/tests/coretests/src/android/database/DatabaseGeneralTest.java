@@ -468,45 +468,6 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
     }
 
     @MediumTest
-    public void testNotificationTest1() throws Exception {
-        /*
-        Cursor c = mContentResolver.query(Notes.CONTENT_URI,
-                new String[] {Notes._ID, Notes.NOTE},
-                null, null);
-        c.registerContentObserver(new MyContentObserver(true));
-        int count = c.count();
-
-        MyContentObserver observer = new MyContentObserver(false);
-        mContentResolver.registerContentObserver(Notes.CONTENT_URI, true, observer);
-
-        Uri uri;
-
-        HashMap<String, String> values = new HashMap<String, String>();
-        values.put(Notes.NOTE, "test note1");
-        uri = mContentResolver.insert(Notes.CONTENT_URI, values);
-        assertEquals(1, mCursorNotificationCount);
-        assertEquals(1, mNotificationCount);
-
-        c.requery();
-        assertEquals(count + 1, c.count());
-        c.first();
-        assertEquals("test note1", c.getString(c.getColumnIndex(Notes.NOTE)));
-        c.updateString(c.getColumnIndex(Notes.NOTE), "test note2");
-        c.commitUpdates();
-
-        assertEquals(2, mCursorNotificationCount);
-        assertEquals(2, mNotificationCount);
-
-        mContentResolver.delete(uri, null);
-
-        assertEquals(3, mCursorNotificationCount);
-        assertEquals(3, mNotificationCount);
-
-        mContentResolver.unregisterContentObserver(observer);
-        */
-    }
-
-    @MediumTest
     public void testSelectionArgs() throws Exception {
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data TEXT);");
         ContentValues values = new ContentValues(1);

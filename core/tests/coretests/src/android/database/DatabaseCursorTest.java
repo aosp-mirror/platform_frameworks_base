@@ -92,43 +92,6 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
     }
 
     @MediumTest
-    public void testCursorUpdate() {
-        mDatabase.execSQL(
-            "CREATE TABLE test (_id INTEGER PRIMARY KEY, d INTEGER, s INTEGER);");
-        for(int i = 0; i < 20; i++) {
-            mDatabase.execSQL("INSERT INTO test (d, s) VALUES (" + i + 
-                "," + i%2 + ");");
-        }
-        
-        Cursor c = mDatabase.query("test", null, "s = 0", null, null, null, null);
-        int dCol = c.getColumnIndexOrThrow("d");
-        int sCol = c.getColumnIndexOrThrow("s");
-        
-        int count = 0;
-        while (c.moveToNext()) {
-            assertTrue(c.updateInt(dCol, 3));
-            count++;
-        }
-        assertEquals(10, count);
-        
-        assertTrue(c.commitUpdates());
-        
-        assertTrue(c.requery());
-        
-        count = 0;
-        while (c.moveToNext()) {
-            assertEquals(3, c.getInt(dCol));
-            count++;
-        }
-        
-        assertEquals(10, count);
-        assertTrue(c.moveToFirst());
-        assertTrue(c.deleteRow());
-        assertEquals(9, c.getCount());
-        c.close();
-    }
-    
-    @MediumTest
     public void testBlob() throws Exception {
         // create table
         mDatabase.execSQL(
@@ -164,24 +127,7 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
         assertTrue(Arrays.equals(blob, cBlob));
         assertEquals(s, c.getString(sCol));
         assertEquals((double)d, c.getDouble(dCol));
-        assertEquals((long)l, c.getLong(lCol));
-        
-        // new byte[]
-        byte[] newblob = new byte[1000];
-        value = 98;
-        Arrays.fill(blob, value);        
-        
-        c.updateBlob(bCol, newblob);
-        cBlob =  c.getBlob(bCol);
-        assertTrue(Arrays.equals(newblob, cBlob));
-        
-        // commit
-        assertTrue(c.commitUpdates());
-        assertTrue(c.requery());
-        c.moveToNext();
-        cBlob =  c.getBlob(bCol);
-        assertTrue(Arrays.equals(newblob, cBlob));        
-        c.close();
+        assertEquals((long)l, c.getLong(lCol));        
     }
     
     @MediumTest

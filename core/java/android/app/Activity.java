@@ -1580,40 +1580,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Wrapper around {@link Cursor#commitUpdates()} that takes care of noting
-     * that the Cursor needs to be requeried.  You can call this method in
-     * {@link #onPause} or {@link #onStop} to have the system call
-     * {@link Cursor#requery} for you if the activity is later resumed.  This
-     * allows you to avoid determing when to do the requery yourself (which is
-     * required for the Cursor to see any data changes that were committed with
-     * it).
-     * 
-     * @param c The Cursor whose changes are to be committed.
-     * 
-     * @see #managedQuery(android.net.Uri , String[], String, String[], String)
-     * @see #startManagingCursor
-     * @see Cursor#commitUpdates()
-     * @see Cursor#requery
-     * @hide
-     */
-    @Deprecated
-    public void managedCommitUpdates(Cursor c) {
-        synchronized (mManagedCursors) {
-            final int N = mManagedCursors.size();
-            for (int i=0; i<N; i++) {
-                ManagedCursor mc = mManagedCursors.get(i);
-                if (mc.mCursor == c) {
-                    c.commitUpdates();
-                    mc.mUpdated = true;
-                    return;
-                }
-            }
-            throw new RuntimeException(
-                "Cursor " + c + " is not currently managed");
-        }
-    }
-
-    /**
      * This method allows the activity to take care of managing the given
      * {@link Cursor}'s lifecycle for you based on the activity's lifecycle.
      * That is, when the activity is stopped it will automatically call

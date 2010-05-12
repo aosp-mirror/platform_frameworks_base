@@ -32,14 +32,6 @@ public class CursorWrapper implements Cursor {
     public CursorWrapper(Cursor cursor) {
         mCursor = cursor;
     }
-    
-    /**
-     * @hide
-     * @deprecated
-     */
-    public void abortUpdates() {
-        mCursor.abortUpdates();
-    }
 
     public void close() {
         mCursor.close(); 
@@ -49,37 +41,12 @@ public class CursorWrapper implements Cursor {
         return mCursor.isClosed();
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean commitUpdates() {
-        return mCursor.commitUpdates();
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean commitUpdates(
-            Map<? extends Long, ? extends Map<String, Object>> values) {
-        return mCursor.commitUpdates(values);
-    }
-
     public int getCount() {
         return mCursor.getCount();
     }
 
     public void deactivate() {
         mCursor.deactivate();
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean deleteRow() {
-        return mCursor.deleteRow();
     }
 
     public boolean moveToFirst() {
@@ -147,14 +114,6 @@ public class CursorWrapper implements Cursor {
         return mCursor.getWantsAllOnMoveCalls();
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean hasUpdates() {
-        return mCursor.hasUpdates();
-    }
-
     public boolean isAfterLast() {
         return mCursor.isAfterLast();
     }
@@ -219,14 +178,6 @@ public class CursorWrapper implements Cursor {
         mCursor.setNotificationUri(cr, uri);        
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean supportsUpdates() {
-        return mCursor.supportsUpdates();
-    }
-
     public void unregisterContentObserver(ContentObserver observer) {
         mCursor.unregisterContentObserver(observer);        
     }
@@ -235,71 +186,6 @@ public class CursorWrapper implements Cursor {
         mCursor.unregisterDataSetObserver(observer);
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateDouble(int columnIndex, double value) {
-        return mCursor.updateDouble(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateFloat(int columnIndex, float value) {
-        return mCursor.updateFloat(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateInt(int columnIndex, int value) {
-        return mCursor.updateInt(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateLong(int columnIndex, long value) {
-        return mCursor.updateLong(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateShort(int columnIndex, short value) {
-        return mCursor.updateShort(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateString(int columnIndex, String value) {
-        return mCursor.updateString(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateBlob(int columnIndex, byte[] value) {
-        return mCursor.updateBlob(columnIndex, value);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public boolean updateToNull(int columnIndex) {
-        return mCursor.updateToNull(columnIndex);
-    }
-    
-    private Cursor mCursor;
-    
+    private Cursor mCursor;    
 }
 

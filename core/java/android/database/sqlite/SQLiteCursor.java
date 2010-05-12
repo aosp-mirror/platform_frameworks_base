@@ -21,17 +21,14 @@ import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
 import android.database.DataSetObserver;
 import android.database.RequeryOnUiThreadException;
-import android.database.SQLException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -328,164 +325,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         }
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean deleteRow() {
-        checkPosition();
-
-        // Only allow deletes if there is an ID column, and the ID has been read from it
-        if (mRowIdColumnIndex == -1 || mCurrentRowID == null) {
-            Log.e(TAG,
-                    "Could not delete row because either the row ID column is not available or it" +
-                    "has not been read.");
-            return false;
-        }
-
-        boolean success;
-
-        /*
-         * Ensure we don't change the state of the database when another
-         * thread is holding the database lock. requery() and moveTo() are also
-         * synchronized here to make sure they get the state of the database
-         * immediately following the DELETE.
-         */
-        mDatabase.lock();
-        try {
-            try {
-                mDatabase.delete(mEditTable, mColumns[mRowIdColumnIndex] + "=?",
-                        new String[] {mCurrentRowID.toString()});
-                success = true;
-            } catch (SQLException e) {
-                success = false;
-            }
-
-            int pos = mPos;
-            requery();
-
-            /*
-             * Ensure proper cursor state. Note that mCurrentRowID changes
-             * in this call.
-             */
-            moveToPosition(pos);
-        } finally {
-            mDatabase.unlock();
-        }
-
-        if (success) {
-            onChange(true);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Override
     public String[] getColumnNames() {
         return mColumns;
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean supportsUpdates() {
-        return super.supportsUpdates() && !TextUtils.isEmpty(mEditTable);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean commitUpdates(Map<? extends Long,
-            ? extends Map<String, Object>> additionalValues) {
-        if (!supportsUpdates()) {
-            Log.e(TAG, "commitUpdates not supported on this cursor, did you "
-                    + "include the _id column?");
-            return false;
-        }
-
-        /*
-         * Prevent other threads from changing the updated rows while they're
-         * being processed here.
-         */
-        synchronized (mUpdatedRows) {
-            if (additionalValues != null) {
-                mUpdatedRows.putAll(additionalValues);
-            }
-
-            if (mUpdatedRows.size() == 0) {
-                return true;
-            }
-
-            /*
-             * Prevent other threads from changing the database state while
-             * we process the updated rows, and prevents us from changing the
-             * database behind the back of another thread.
-             */
-            mDatabase.beginTransaction();
-            try {
-                StringBuilder sql = new StringBuilder(128);
-
-                // For each row that has been updated
-                for (Map.Entry<Long, Map<String, Object>> rowEntry :
-                        mUpdatedRows.entrySet()) {
-                    Map<String, Object> values = rowEntry.getValue();
-                    Long rowIdObj = rowEntry.getKey();
-
-                    if (rowIdObj == null || values == null) {
-                        throw new IllegalStateException("null rowId or values found! rowId = "
-                                + rowIdObj + ", values = " + values);
-                    }
-
-                    if (values.size() == 0) {
-                        continue;
-                    }
-
-                    long rowId = rowIdObj.longValue();
-
-                    Iterator<Map.Entry<String, Object>> valuesIter =
-                            values.entrySet().iterator();
-
-                    sql.setLength(0);
-                    sql.append("UPDATE " + mEditTable + " SET ");
-
-                    // For each column value that has been updated
-                    Object[] bindings = new Object[values.size()];
-                    int i = 0;
-                    while (valuesIter.hasNext()) {
-                        Map.Entry<String, Object> entry = valuesIter.next();
-                        sql.append(entry.getKey());
-                        sql.append("=?");
-                        bindings[i] = entry.getValue();
-                        if (valuesIter.hasNext()) {
-                            sql.append(", ");
-                        }
-                        i++;
-                    }
-
-                    sql.append(" WHERE " + mColumns[mRowIdColumnIndex]
-                            + '=' + rowId);
-                    sql.append(';');
-                    mDatabase.execSQL(sql.toString(), bindings);
-                    mDatabase.rowUpdated(mEditTable, rowId);
-                }
-                mDatabase.setTransactionSuccessful();
-            } finally {
-                mDatabase.endTransaction();
-            }
-
-            mUpdatedRows.clear();
-        }
-
-        // Let any change observers know about the update
-        onChange(true);
-
-        return true;
     }
 
     private void deactivateCommon() {

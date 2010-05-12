@@ -182,24 +182,6 @@ public class SortCursor extends AbstractCursor
     }
 
     @Override
-    public boolean deleteRow()
-    {
-        return mCursor.deleteRow();
-    }
-
-    @Override
-    public boolean commitUpdates() {
-        int length = mCursors.length;
-        for (int i = 0 ; i < length ; i++) {
-            if (mCursors[i] != null) {
-                mCursors[i].commitUpdates();
-            }
-        }
-        onChange(true);
-        return true;
-    }
-
-    @Override
     public String getString(int column)
     {
         return mCursor.getString(column);

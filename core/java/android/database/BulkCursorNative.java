@@ -17,13 +17,10 @@
 package android.database;
 
 import android.os.Binder;
-import android.os.RemoteException;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.Bundle;
-
-import java.util.HashMap;
-import java.util.Map;
+import android.os.RemoteException;
 
 /**
  * Native implementation of the bulk cursor. This is only for use in implementing
@@ -117,26 +114,6 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
                     reply.writeNoException();
                     reply.writeInt(count);
                     reply.writeBundle(getExtras());
-                    return true;
-                }
-
-                case UPDATE_ROWS_TRANSACTION: {
-                    data.enforceInterface(IBulkCursor.descriptor);
-                    // TODO - what ClassLoader should be passed to readHashMap?
-                    // TODO - switch to Bundle
-                    HashMap<Long, Map<String, Object>> values = data.readHashMap(null);
-                    boolean result = updateRows(values);
-                    reply.writeNoException();
-                    reply.writeInt((result == true ? 1 : 0));
-                    return true;
-                }
-
-                case DELETE_ROW_TRANSACTION: {
-                    data.enforceInterface(IBulkCursor.descriptor);
-                    int position = data.readInt();
-                    boolean result = deleteRow(position);
-                    reply.writeNoException();
-                    reply.writeInt((result == true ? 1 : 0));
                     return true;
                 }
 
@@ -341,48 +318,6 @@ final class BulkCursorProxy implements IBulkCursor {
         reply.recycle();
 
         return count;
-    }
-
-    public boolean updateRows(Map values) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-
-        data.writeInterfaceToken(IBulkCursor.descriptor);
-
-        data.writeMap(values);
-
-        mRemote.transact(UPDATE_ROWS_TRANSACTION, data, reply, 0);
-
-        DatabaseUtils.readExceptionFromParcel(reply);
-        
-        boolean result = (reply.readInt() == 1 ? true : false);
-
-        data.recycle();
-        reply.recycle();
-
-        return result;
-    }
-
-    public boolean deleteRow(int position) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-
-        data.writeInterfaceToken(IBulkCursor.descriptor);
-
-        data.writeInt(position);
-
-        mRemote.transact(DELETE_ROW_TRANSACTION, data, reply, 0);
-
-        DatabaseUtils.readExceptionFromParcel(reply);
-        
-        boolean result = (reply.readInt() == 1 ? true : false);
-
-        data.recycle();
-        reply.recycle();
-
-        return result;
     }
 
     public boolean getWantsAllOnMoveCalls() throws RemoteException {

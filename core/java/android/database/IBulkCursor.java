@@ -16,16 +16,14 @@
 
 package android.database;
 
-import android.os.RemoteException;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.os.Bundle;
-
-import java.util.Map;
+import android.os.RemoteException;
 
 /**
  * This interface provides a low-level way to pass bulk cursor data across
- * both process and language boundries. Application code should use the Cursor
+ * both process and language boundaries. Application code should use the Cursor
  * interface directly.
  *
  * {@hide}
@@ -54,10 +52,6 @@ public interface IBulkCursor extends IInterface  {
      */
     public String[] getColumnNames() throws RemoteException;
 
-    public boolean updateRows(Map<? extends Long, ? extends Map<String, Object>> values) throws RemoteException;
-
-    public boolean deleteRow(int position) throws RemoteException;
-
     public void deactivate() throws RemoteException;
 
     public void close() throws RemoteException;
@@ -76,8 +70,6 @@ public interface IBulkCursor extends IInterface  {
     static final int GET_CURSOR_WINDOW_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
     static final int COUNT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 1;
     static final int GET_COLUMN_NAMES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;
-    static final int UPDATE_ROWS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 3;
-    static final int DELETE_ROW_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 4;
     static final int DEACTIVATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 5;
     static final int REQUERY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 6;
     static final int ON_MOVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 7;
