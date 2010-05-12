@@ -110,7 +110,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
                 <span class="en">Handling Runtime Changes</span>
-              </a></li>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
                 <span class="en">Localization</span>
               </a></li>
@@ -431,8 +431,11 @@
             <span class="en">Android API Levels</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
-            <span class="en">Market Filters </span>
-           </a><span class="new">new!</span></li>
+            <span class="en">Market Filters</span>
+           </a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>guide/appendix/install-location.html">
+            <span class="en">App Install Location</span>
+          </a> <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
           </a></li>
