@@ -1,0 +1,104 @@
+page.title=&lt;path-permission&gt;
+@jd:body
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">
+&lt;path-permission android:<a href="#path">path</a>="<i>string</i>"
+                 android:<a href="#pathPrefix">pathPrefix</a>="<i>string</i>"
+                 android:<a href="#pathPattern">pathPattern</a>="<i>string</i>"
+                 android:<a href="#permission">permission</a>="<i>string</i>"
+                 android:<a href="#readPermission">readPermission</a>="<i>string</i>"
+                 android:<a href="#writePermission">writePermission</a>="<i>string</i>" /&gt;
+</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code></dd>
+
+<!--
+<dt>can contain:</dt>
+</dd>
+-->
+
+<dt>description:</dt>
+<dd>Defines the path and required permissions for a specific subset of data
+within a content provider. This element can be
+specified multiple times to supply multiple paths.
+
+</dd>
+
+<dt>attributes:</dt>
+
+<dd><dl class="attr">
+<dt><a name="path"></a>{@code android:path}</dt>
+<dd>A complete URI path for a subset of content provider data. 
+Permission can be granted only to the particular data identified by this path. 
+When used to provide search suggestion content, it must be appended 
+with "/search_suggest_query".
+</dd>
+
+<dt><a name="pathPrefix"></a>{@code android:pathPrefix}</dt>
+<dd>The initial part of a URI path for a subset of content provider data.
+Permission can be granted to all data subsets with paths that share this initial part.
+</dd>
+
+<dt><a name="pathPattern"></a>{@code android:pathPattern}</dt>
+<dd>A complete URI path for a subset of content provider data,
+but one that can use the following wildcards:
+ 
+<ul> 
+<li>An asterisk ('<code class="Code prettyprint">*</code>'). This matches a sequence of 0 to many occurrences of
+the immediately preceding character.</li> 
+ 
+<li>A period followed by an asterisk ("<code class="Code prettyprint">.*</code>"). This matches any sequence of 
+0 or more characters.</li> 
+</ul> 
+ 
+<p> 
+Because '<code class="Code prettyprint">\</code>' is used as an escape character when the string is read 
+from XML (before it is parsed as a pattern), you will need to double-escape.
+For example, a literal '<code class="Code prettyprint">*</code>' would be written as "<code class="Code prettyprint">\\*</code>" and a 
+literal '<code class="Code prettyprint">\</code>' would be written as "<code class="Code prettyprint">\\</code>".  This is basically 
+the same as what you would need to write if constructing the string in Java code.
+</p> 
+<p> 
+For more information on these types of patterns, see the descriptions of 
+<a href="/reference/android/os/PatternMatcher.html#PATTERN_LITERAL">PATTERN_LITERAL</a>,
+<a href="/reference/android/os/PatternMatcher.html#PATTERN_PREFIX">PATTERN_PREFIX</a>, and
+<a href="/reference/android/os/PatternMatcher.html#PATTERN_SIMPLE_GLOB">PATTERN_SIMPLE_GLOB</a> in the
+<a href="/reference/android/os/PatternMatcher.html">PatternMatcher</a> class.
+</p>
+</dd>
+
+<dt><a name="permission"></a>{@code android:permission}</dt>
+<dd>The name of a permission that clients must have in order to read or write the
+content provider's data.  This attribute is a convenient way of setting a 
+single permission for both reading and writing.  However, the 
+<code>readPermission</code> and 
+<code>writePermission</code> attributes take precedence
+over this one.
+</dd> 
+
+<dt><a name="readPermission"></a>{@code android:readPermission}</dt>
+<dd>A permission that clients must have in order to query the content provider.
+</dd> 
+
+<dt><a name="writePermission"></a>{@code android:writePermission}</dt>
+<dd>A permission that clients must have in order to make changes to the data controlled by the content provider.
+</dd> 
+
+
+
+</dl></dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 4</dd>
+
+<dt>see also:</dt>
+<dd>{@link android.app.SearchManager}</dd>
+<dd>{@link android.Manifest.permission}</dd>
+<dd><a href="/guide/topics/security/security.html">Security and
+Permissions</a></dd>
+
+</dl>
