@@ -317,11 +317,11 @@ will prefer an MCC match over a language match. </p>
 
 <p>The selection process is not always as straightforward as these examples
 suggest. Please read  <a
-href="{@docRoot}guide/topics/resources/creating-resources.html#BestMatch">How Android Finds
+href="{@docRoot}guide/topics/resources/providing-resources.html#BestMatch">How Android Finds
 the Best-matching Resource</a> for a more nuanced description of the
 process. All the qualifiers are described and listed in order of
 precedence in <a
-href="{@docRoot}guide/topics/resources/creating-resources.html#table2">Table 2 of Providing
+href="{@docRoot}guide/topics/resources/providing-resources.html#table2">Table 2 of Providing
 Alternative Resources</a>.</p>
 
 <h3 id="referring-to-resources">Referring to Resources in Java</h3>
@@ -330,7 +330,7 @@ Alternative Resources</a>.</p>
 <code>R.<em>resource_type</em>.<em>resource_name</em></code> or
 <code>android.R.<em>resource_type</em>.<em>resource_name</em></code><em>.</em>
 For more about this, see <a
-href="{@docRoot}guide/topics/resources/using-resources.html">Accessing Resources</a>.</p>
+href="{@docRoot}guide/topics/resources/accessing-resources.html">Accessing Resources</a>.</p>
 
 <h2 id="strategies">Localization Strategies</h2>
 
