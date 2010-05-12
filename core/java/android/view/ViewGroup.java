@@ -2869,7 +2869,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @ViewDebug.ExportedProperty(mapping = {
         @ViewDebug.IntToString(from = PERSISTENT_NO_CACHE,        to = "NONE"),
-        @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ANIMATION"),
+        @ViewDebug.IntToString(from = PERSISTENT_ANIMATION_CACHE, to = "ANIMATION"),
         @ViewDebug.IntToString(from = PERSISTENT_SCROLLING_CACHE, to = "SCROLLING"),
         @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ALL")
     })
