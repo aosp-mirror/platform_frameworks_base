@@ -19,9 +19,8 @@ package com.android.internal.telephony;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.PhoneNumberUtils;
+import android.text.TextUtils;
 import android.util.Log;
-
-import com.android.internal.telephony.GsmAlphabet;
 
 import java.util.Arrays;
 
@@ -38,8 +37,8 @@ public class AdnRecord implements Parcelable {
 
     //***** Instance Variables
 
-    String alphaTag = "";
-    String number = "";
+    String alphaTag = null;
+    String number = null;
     String[] emails;
     int extRecord = 0xff;
     int efid;                   // or 0 if none
@@ -63,8 +62,8 @@ public class AdnRecord implements Parcelable {
     // ADN offset
     static final int ADN_BCD_NUMBER_LENGTH = 0;
     static final int ADN_TON_AND_NPI = 1;
-    static final int ADN_DAILING_NUMBER_START = 2;
-    static final int ADN_DAILING_NUMBER_END = 11;
+    static final int ADN_DIALING_NUMBER_START = 2;
+    static final int ADN_DIALING_NUMBER_END = 11;
     static final int ADN_CAPABILITY_ID = 12;
     static final int ADN_EXTENSION_ID = 13;
 
@@ -152,17 +151,31 @@ public class AdnRecord implements Parcelable {
     }
 
     public boolean isEmpty() {
-        return alphaTag.equals("") && number.equals("") && emails == null;
+        return TextUtils.isEmpty(alphaTag) && TextUtils.isEmpty(number) && emails == null;
     }
 
     public boolean hasExtendedRecord() {
         return extRecord != 0 && extRecord != 0xff;
     }
 
+    /** Helper function for {@link #isEqual}. */
+    private static boolean stringCompareNullEqualsEmpty(String s1, String s2) {
+        if (s1 == s2) {
+            return true;
+        }
+        if (s1 == null) {
+            s1 = "";
+        }
+        if (s2 == null) {
+            s2 = "";
+        }
+        return (s1.equals(s2));
+    }
+
     public boolean isEqual(AdnRecord adn) {
-        return ( alphaTag.equals(adn.getAlphaTag()) &&
-                number.equals(adn.getNumber()) &&
-                Arrays.equals(emails, adn.getEmails()));
+        return ( stringCompareNullEqualsEmpty(alphaTag, adn.alphaTag) &&
+                stringCompareNullEqualsEmpty(number, adn.number) &&
+                Arrays.equals(emails, adn.emails));
     }
     //***** Parcelable Implementation
 
@@ -184,36 +197,33 @@ public class AdnRecord implements Parcelable {
      *
      * @param recordSize is the size X of EF record
      * @return hex byte[recordSize] to be written to EF record
-     *          return nulll for wrong format of dialing nubmer or tag
+     *          return null for wrong format of dialing number or tag
      */
     public byte[] buildAdnString(int recordSize) {
         byte[] bcdNumber;
         byte[] byteTag;
-        byte[] adnString = null;
+        byte[] adnString;
         int footerOffset = recordSize - FOOTER_SIZE_BYTES;
 
-        if (number == null || number.equals("") ||
-                alphaTag == null || alphaTag.equals("")) {
+        // create an empty record
+        adnString = new byte[recordSize];
+        for (int i = 0; i < recordSize; i++) {
+            adnString[i] = (byte) 0xFF;
+        }
 
-            Log.w(LOG_TAG, "[buildAdnString] Empty alpha tag or number");
-            adnString = new byte[recordSize];
-            for (int i = 0; i < recordSize; i++) {
-                adnString[i] = (byte) 0xFF;
-            }
+        if (TextUtils.isEmpty(number)) {
+            Log.w(LOG_TAG, "[buildAdnString] Empty dialing number");
+            return adnString;   // return the empty record (for delete)
         } else if (number.length()
-                > (ADN_DAILING_NUMBER_END - ADN_DAILING_NUMBER_START + 1) * 2) {
+                > (ADN_DIALING_NUMBER_END - ADN_DIALING_NUMBER_START + 1) * 2) {
             Log.w(LOG_TAG,
-                    "[buildAdnString] Max length of dailing number is 20");
-        } else if (alphaTag.length() > footerOffset) {
+                    "[buildAdnString] Max length of dialing number is 20");
+            return null;
+        } else if (alphaTag != null && alphaTag.length() > footerOffset) {
             Log.w(LOG_TAG,
                     "[buildAdnString] Max length of tag is " + footerOffset);
+            return null;
         } else {
-
-            adnString = new byte[recordSize];
-            for (int i = 0; i < recordSize; i++) {
-                adnString[i] = (byte) 0xFF;
-            }
-
             bcdNumber = PhoneNumberUtils.numberToCalledPartyBCD(number);
 
             System.arraycopy(bcdNumber, 0, adnString,
@@ -222,16 +232,17 @@ public class AdnRecord implements Parcelable {
             adnString[footerOffset + ADN_BCD_NUMBER_LENGTH]
                     = (byte) (bcdNumber.length);
             adnString[footerOffset + ADN_CAPABILITY_ID]
-                    = (byte) 0xFF; // Capacility Id
+                    = (byte) 0xFF; // Capability Id
             adnString[footerOffset + ADN_EXTENSION_ID]
                     = (byte) 0xFF; // Extension Record Id
 
-            byteTag = GsmAlphabet.stringToGsm8BitPacked(alphaTag);
-            System.arraycopy(byteTag, 0, adnString, 0, byteTag.length);
+            if (!TextUtils.isEmpty(alphaTag)) {
+                byteTag = GsmAlphabet.stringToGsm8BitPacked(alphaTag);
+                System.arraycopy(byteTag, 0, adnString, 0, byteTag.length);
+            }
 
+            return adnString;
         }
-
-        return adnString;
     }
 
     /**
