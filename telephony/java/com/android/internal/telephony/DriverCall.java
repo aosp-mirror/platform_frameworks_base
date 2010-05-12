@@ -49,6 +49,7 @@ public class DriverCall implements Comparable {
     public int numberPresentation;
     public String name;
     public int namePresentation;
+    public UUSInfo uusInfo;
 
     /** returns null on error */
     static DriverCall
