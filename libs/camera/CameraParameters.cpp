@@ -254,6 +254,11 @@ float CameraParameters::getFloat(const char *key) const
     return strtof(v, 0);
 }
 
+void CameraParameters::remove(const char *key)
+{
+    mMap.removeItem(String8(key));
+}
+
 static int parse_size(const char *str, int &width, int &height)
 {
     // Find the width.
