@@ -681,7 +681,7 @@ effects, which are shown below, are used to create depth.</p>
 <table style="margin:0px;padding:0px;">
 <tr>
 <td class="image-caption-i"><img src="{@docRoot}images/icon_design/menu_palette_white.png" alt="Color palette, white" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">White<br>r 0 | g 0 | b 0<br>Used for outer glow and bevel highlight.</td>
+<td class="image-caption-c" style="padding-top:.5em;">White<br>r 255 | g 255 | b 255<br>Used for outer glow and bevel highlight.</td>
 </tr>
 
 <tr>
@@ -691,7 +691,7 @@ effects, which are shown below, are used to create depth.</p>
 
 <tr>
 <td class="image-caption-i"><img src="{@docRoot}images/icon_design/menu_palette_black.png" alt="Color palette, black" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">Black<br>r 255 | g 255 | b 255<br>Used for inner shadow and bevel shadow.</td>
+<td class="image-caption-c" style="padding-top:.5em;">Black<br>r 0 | g 0 | b 0<br>Used for inner shadow and bevel shadow.</td>
 </tr>
 
 </table>
@@ -809,22 +809,22 @@ light, effects, and shadows for status bar icons."/>
 <table style="margin:0px;padding:0px;">
 <tr>
 <td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_white.png" alt="Color palette, white" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">White<br>r 0 | g 0 | b 0<br>Used for details within the icons and bevel highlight.</td>
+<td class="image-caption-c" style="padding-top:.5em;">White<br>r 255 | g 255 | b 255<br>Used for details within the icons and bevel highlight.</td>
 </tr>
 
 <tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_fill.png" alt="Color palette, grey gradient" style="margin:.5em 0 0 0;" /></td>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_grey.png" alt="Color palette, grey gradient" style="margin:.5em 0 0 0;" /></td>
 <td class="image-caption-c" style="padding-top:.5em;">Grey gradient<br><em>1:&nbsp;&nbsp;</em>r 169 | g 169 | b 169<br><em>2:&nbsp;&nbsp;</em>r 126 | g 126 | b 126<br>Used for disabled details within the icon.</td>
 </tr>
 
 <tr>
-<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_grey.png" alt="Color palette, fill gradient" style="margin:.5em 0 0 0;" /></td>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_fill.png" alt="Color palette, fill gradient" style="margin:.5em 0 0 0;" /></td>
 <td class="image-caption-c" style="padding-top:.5em;">Fill gradient<br><em>1:&nbsp;&nbsp;</em>1 r 105 | g 105 | b 105<br><em>2:&nbsp;&nbsp;</em>r 10   | g 10   | b 10<br>Used as color fill.</td>
 </tr>
 
 <tr>
 <td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_black.png" alt="Color palette, black" style="margin:.5em 0 0 0;" /></td>
-<td class="image-caption-c" style="padding-top:.5em;">Black<br>r 255 | g 255 | b 255<br>Used for bevel shadow.</td>
+<td class="image-caption-c" style="padding-top:.5em;">Black<br>r 0 | g 0 | b 0<br>Used for bevel shadow.</td>
 </tr>
 
 </table>

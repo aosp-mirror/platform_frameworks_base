@@ -40,7 +40,7 @@ SDK Components</a> document. </p>
 computer in this location:</p>
 
 <p style="margin-left:2em">
-<code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform-version&gt;</em>/</code>
+<code><em>&lt;sdk&gt;</em>/samples/android-&lt;<em>level</em>&gt;/</code>
 </p>
 
 <p>You can easily create new Android projects with the downloaded samples, modify them
@@ -49,7 +49,7 @@ if you'd like, and then run them on an emulator or device. </p>
 <p>For example, if you are developing in Eclipse with the ADT Plugin, you can
 create a project for the "API Demos" sample app by starting a new Android
 Project, selecting "Create project from existing source", and then browsing to
-the <code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/ApiDemos</code>
+the <code><em>&lt;sdk&gt;</em>/samples/android-&lt;<em>level</em>&gt;/ApiDemos</code>
 directory (the <code>samples</code> directory for the platform version you are
 using).</p>
 
@@ -57,7 +57,7 @@ using).</p>
 sample using the <code>android</code> tool, by executing this command:</p>
 
 <pre class="no-pretty-print">
-android update project -s -n API Demos -t <em>&lt;target_ID></em> -p <em>&lt;path&gt;</em>samples/<em>&lt;platforms&gt;</em>/ApiDemos/
+android update project -s -n API Demos -t <em>&lt;target_ID></em> -p &lt;<em>path</em>&gt;</em>samples/android-&lt;<em>level</em>&gt;/ApiDemos/
 </pre>
 
 <h3 id="browsing">Browsing the Sample Code</h3>
