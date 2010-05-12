@@ -1225,12 +1225,12 @@
         android:description="@string/permlab_copyProtectedData"
         android:protectionLevel="signature" />
 
-    <!-- Data messaging permission. 
+    <!-- C2DM permission. 
          @hide Used internally.
      -->
-    <permission android:name="android.intent.category.MASTER_CLEAR.permission.DATA_MESSAGE"
+    <permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"
           android:protectionLevel="signature" />
-    <uses-permission android:name="android.intent.category.MASTER_CLEAR.permission.DATA_MESSAGE"/>
+    <uses-permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"/>
 
     <application android:process="system"
                  android:persistent="true"
@@ -1314,7 +1314,7 @@
                 <action android:name="android.intent.action.MASTER_CLEAR" />
 
                 <!-- MCS always uses REMOTE_INTENT: category=MASTER_CLEAR -->
-                <action android:name="com.google.android.datamessaging.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <category android:name="android.intent.category.MASTER_CLEAR" />
             </intent-filter>
         </receiver>
