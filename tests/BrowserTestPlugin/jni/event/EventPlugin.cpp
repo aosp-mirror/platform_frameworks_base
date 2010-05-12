@@ -138,7 +138,7 @@ void EventPlugin::printToDiv(const char* text, int length) {
     browser->memfree(beginMem);
 }
 
-int16 EventPlugin::handleEvent(const ANPEvent* evt) {
+int16_t EventPlugin::handleEvent(const ANPEvent* evt) {
     switch (evt->eventType) {
 
         case kDraw_ANPEventType: {
