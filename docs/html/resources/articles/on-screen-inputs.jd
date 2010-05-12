@@ -2,6 +2,20 @@ page.title=Onscreen Input Methods
 @jd:body
 
 
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/articles/creating-input-method.html">Creating an Input
+Method</a></li>
+    <li><a href="{@docRoot}resources/samples/SoftKeyboard/index.html">Soft Keyboard sample</a></li>
+  </ol>
+
+</div>
+</div>
+
+
 <p>Starting from Android 1.5, the Android platform offers an Input Method
 Framework (IMF) that lets you create on-screen input methods such as software
 keyboards. This article provide an overview of what Android input method editors
