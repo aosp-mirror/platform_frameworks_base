@@ -69,7 +69,7 @@ private:
     uint32_t mDevice;                   // current device this output is routed to
     size_t  mBufferSize;
     AudioStreamOut      *mFinalStream;
-    FILE                *mOutFile;      // output file
+    FILE                *mFile;      // output file
     int                 mFileCount;
 };
 
@@ -109,7 +109,8 @@ private:
     uint32_t mDevice;                   // current device this output is routed to
     size_t  mBufferSize;
     AudioStreamIn      *mFinalStream;
-    FILE                *mInFile;      // output file
+    FILE                *mFile;      // output file
+    int                 mFileCount;
 };
 
 class AudioDumpInterface : public AudioHardwareBase
@@ -134,6 +135,8 @@ public:
     virtual status_t    setMasterVolume(float volume)
                             {return mFinalInterface->setMasterVolume(volume);}
 
+    virtual status_t    setMode(int mode);
+
     // mic mute
     virtual status_t    setMicMute(bool state)
                             {return mFinalInterface->setMicMute(state);}
@@ -142,6 +145,8 @@ public:
 
     virtual status_t    setParameters(const String8& keyValuePairs);
     virtual String8     getParameters(const String8& keys);
+
+    virtual size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
 
     virtual AudioStreamIn* openInputStream(uint32_t devices, int *format, uint32_t *channels,
             uint32_t *sampleRate, status_t *status, AudioSystem::audio_in_acoustics acoustics);
@@ -153,8 +158,7 @@ public:
 protected:
 
     AudioHardwareInterface          *mFinalInterface;
-    SortedVector<AudioStreamOutDump *>    mOutputs;
-    bool                            mFirstHwOutput;
+    SortedVector<AudioStreamOutDump *>   mOutputs;
     SortedVector<AudioStreamInDump *>    mInputs;
     Mutex                           mLock;
     String8                         mPolicyCommands;

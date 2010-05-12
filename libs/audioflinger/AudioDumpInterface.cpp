@@ -32,7 +32,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 AudioDumpInterface::AudioDumpInterface(AudioHardwareInterface* hw)
-    : mFirstHwOutput(true), mPolicyCommands(String8("")), mFileName(String8(""))
+    : mPolicyCommands(String8("")), mFileName(String8(""))
 {
     if(hw == 0) {
         LOGE("Dump construct hw = 0");
@@ -47,6 +47,11 @@ AudioDumpInterface::~AudioDumpInterface()
     for (size_t i = 0; i < mOutputs.size(); i++) {
         closeOutputStream((AudioStreamOut *)mOutputs[i]);
     }
+
+    for (size_t i = 0; i < mInputs.size(); i++) {
+        closeInputStream((AudioStreamIn *)mInputs[i]);
+    }
+
     if(mFinalInterface) delete mFinalInterface;
 }
 
@@ -60,31 +65,32 @@ AudioStreamOut* AudioDumpInterface::openOutputStream(
     uint32_t lRate = 44100;
 
 
-    if (AudioSystem::isA2dpDevice((AudioSystem::audio_devices)devices) || mFirstHwOutput) {
-        outFinal = mFinalInterface->openOutputStream(devices, format, channels, sampleRate, status);
-        if (outFinal != 0) {
-            lFormat = outFinal->format();
-            lChannels = outFinal->channels();
-            lRate = outFinal->sampleRate();
-            if (!AudioSystem::isA2dpDevice((AudioSystem::audio_devices)devices)) {
-                mFirstHwOutput = false;
+    outFinal = mFinalInterface->openOutputStream(devices, format, channels, sampleRate, status);
+    if (outFinal != 0) {
+        lFormat = outFinal->format();
+        lChannels = outFinal->channels();
+        lRate = outFinal->sampleRate();
+    } else {
+        if (format != 0) {
+            if (*format != 0) {
+                lFormat = *format;
+            } else {
+                *format = lFormat;
             }
         }
-    } else {
-        if (format != 0 && *format != 0) {
-            lFormat = *format;
-        } else {
-            lFormat = AudioSystem::PCM_16_BIT;
+        if (channels != 0) {
+            if (*channels != 0) {
+                lChannels = *channels;
+            } else {
+                *channels = lChannels;
+            }
         }
-        if (channels != 0 && *channels != 0) {
-            lChannels = *channels;
-        } else {
-            lChannels = AudioSystem::CHANNEL_OUT_STEREO;
-        }
-        if (sampleRate != 0 && *sampleRate != 0) {
-            lRate = *sampleRate;
-        } else {
-            lRate = 44100;
+        if (sampleRate != 0) {
+            if (*sampleRate != 0) {
+                lRate = *sampleRate;
+            } else {
+                *sampleRate = lRate;
+            }
         }
         if (status) *status = NO_ERROR;
     }
@@ -111,7 +117,6 @@ void AudioDumpInterface::closeOutputStream(AudioStreamOut* out)
     dumpOut->standby();
     if (dumpOut->finalStream() != NULL) {
         mFinalInterface->closeOutputStream(dumpOut->finalStream());
-        mFirstHwOutput = true;
     }
 
     mOutputs.remove(dumpOut);
@@ -126,18 +131,33 @@ AudioStreamIn* AudioDumpInterface::openInputStream(uint32_t devices, int *format
     uint32_t lChannels = AudioSystem::CHANNEL_IN_MONO;
     uint32_t lRate = 8000;
 
-
-    if (mInputs.size() == 0) {
-        inFinal = mFinalInterface->openInputStream(devices, format, channels, sampleRate, status, acoustics);
-        if (inFinal == 0) return 0;
-
+    inFinal = mFinalInterface->openInputStream(devices, format, channels, sampleRate, status, acoustics);
+    if (inFinal != 0) {
         lFormat = inFinal->format();
         lChannels = inFinal->channels();
         lRate = inFinal->sampleRate();
     } else {
-        if (format != 0 && *format != 0) lFormat = *format;
-        if (channels != 0 && *channels != 0) lChannels = *channels;
-        if (sampleRate != 0 && *sampleRate != 0) lRate = *sampleRate;
+        if (format != 0) {
+            if (*format != 0) {
+                lFormat = *format;
+            } else {
+                *format = lFormat;
+            }
+        }
+        if (channels != 0) {
+            if (*channels != 0) {
+                lChannels = *channels;
+            } else {
+                *channels = lChannels;
+            }
+        }
+        if (sampleRate != 0) {
+            if (*sampleRate != 0) {
+                lRate = *sampleRate;
+            } else {
+                *sampleRate = lRate;
+            }
+        }
         if (status) *status = NO_ERROR;
     }
     LOGV("openInputStream(), inFinal %p", inFinal);
@@ -223,6 +243,15 @@ String8 AudioDumpInterface::getParameters(const String8& keys)
     return keyValuePairs;
 }
 
+status_t AudioDumpInterface::setMode(int mode)
+{
+    return mFinalInterface->setMode(mode);
+}
+
+size_t AudioDumpInterface::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+{
+    return mFinalInterface->getInputBufferSize(sampleRate, format, channelCount);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -235,7 +264,7 @@ AudioStreamOutDump::AudioStreamOutDump(AudioDumpInterface *interface,
                                         uint32_t sampleRate)
     : mInterface(interface), mId(id),
       mSampleRate(sampleRate), mFormat(format), mChannels(channels), mLatency(0), mDevice(devices),
-      mBufferSize(1024), mFinalStream(finalStream), mOutFile(0), mFileCount(0)
+      mBufferSize(1024), mFinalStream(finalStream), mFile(0), mFileCount(0)
 {
     LOGV("AudioStreamOutDump Constructor %p, mInterface %p, mFinalStream %p", this, mInterface, mFinalStream);
 }
@@ -254,26 +283,26 @@ ssize_t AudioStreamOutDump::write(const void* buffer, size_t bytes)
     if (mFinalStream) {
         ret = mFinalStream->write(buffer, bytes);
     } else {
-        usleep((bytes * 1000000) / frameSize() / sampleRate());
+        usleep((((bytes * 1000) / frameSize()) / sampleRate()) * 1000);
         ret = bytes;
     }
-    if(!mOutFile) {
+    if(!mFile) {
         if (mInterface->fileName() != "") {
             char name[255];
-            sprintf(name, "%s_%d_%d.pcm", mInterface->fileName().string(), mId, ++mFileCount);
-            mOutFile = fopen(name, "wb");
-            LOGV("Opening dump file %s, fh %p", name, mOutFile);
+            sprintf(name, "%s_out_%d_%d.pcm", mInterface->fileName().string(), mId, ++mFileCount);
+            mFile = fopen(name, "wb");
+            LOGV("Opening dump file %s, fh %p", name, mFile);
         }
     }
-    if (mOutFile) {
-        fwrite(buffer, bytes, 1, mOutFile);
+    if (mFile) {
+        fwrite(buffer, bytes, 1, mFile);
     }
     return ret;
 }
 
 status_t AudioStreamOutDump::standby()
 {
-    LOGV("AudioStreamOutDump standby(), mOutFile %p, mFinalStream %p", mOutFile, mFinalStream);
+    LOGV("AudioStreamOutDump standby(), mFile %p, mFinalStream %p", mFile, mFinalStream);
 
     Close();
     if (mFinalStream != 0 ) return mFinalStream->standby();
@@ -330,7 +359,7 @@ status_t AudioStreamOutDump::setParameters(const String8& keyValuePairs)
     }
 
     if (param.getInt(String8("format"), valueInt) == NO_ERROR) {
-        if (mOutFile == 0) {
+        if (mFile == 0) {
             mFormat = valueInt;
         } else {
             status = INVALID_OPERATION;
@@ -345,7 +374,7 @@ status_t AudioStreamOutDump::setParameters(const String8& keyValuePairs)
     }
     if (param.getInt(String8("sampling_rate"), valueInt) == NO_ERROR) {
         if (valueInt > 0 && valueInt <= 48000) {
-            if (mOutFile == 0) {
+            if (mFile == 0) {
                 mSampleRate = valueInt;
             } else {
                 status = INVALID_OPERATION;
@@ -373,9 +402,9 @@ status_t AudioStreamOutDump::dump(int fd, const Vector<String16>& args)
 
 void AudioStreamOutDump::Close()
 {
-    if(mOutFile) {
-        fclose(mOutFile);
-        mOutFile = 0;
+    if(mFile) {
+        fclose(mFile);
+        mFile = 0;
     }
 }
 
@@ -396,7 +425,7 @@ AudioStreamInDump::AudioStreamInDump(AudioDumpInterface *interface,
                                         uint32_t sampleRate)
     : mInterface(interface), mId(id),
       mSampleRate(sampleRate), mFormat(format), mChannels(channels), mDevice(devices),
-      mBufferSize(1024), mFinalStream(finalStream), mInFile(0)
+      mBufferSize(1024), mFinalStream(finalStream), mFile(0), mFileCount(0)
 {
     LOGV("AudioStreamInDump Constructor %p, mInterface %p, mFinalStream %p", this, mInterface, mFinalStream);
 }
@@ -409,55 +438,68 @@ AudioStreamInDump::~AudioStreamInDump()
 
 ssize_t AudioStreamInDump::read(void* buffer, ssize_t bytes)
 {
+    ssize_t ret;
+
     if (mFinalStream) {
-        return mFinalStream->read(buffer, bytes);
+        ret = mFinalStream->read(buffer, bytes);
+        if(!mFile) {
+            if (mInterface->fileName() != "") {
+                char name[255];
+                sprintf(name, "%s_in_%d_%d.pcm", mInterface->fileName().string(), mId, ++mFileCount);
+                mFile = fopen(name, "wb");
+                LOGV("Opening input dump file %s, fh %p", name, mFile);
+            }
+        }
+        if (mFile) {
+            fwrite(buffer, bytes, 1, mFile);
+        }
+    } else {
+        usleep((((bytes * 1000) / frameSize()) / sampleRate()) * 1000);
+        ret = bytes;
+        if(!mFile) {
+            char name[255];
+            strcpy(name, "/sdcard/music/sine440");
+            if (channels() == AudioSystem::CHANNEL_IN_MONO) {
+                strcat(name, "_mo");
+            } else {
+                strcat(name, "_st");
+            }
+            if (format() == AudioSystem::PCM_16_BIT) {
+                strcat(name, "_16b");
+            } else {
+                strcat(name, "_8b");
+            }
+            if (sampleRate() < 16000) {
+                strcat(name, "_8k");
+            } else if (sampleRate() < 32000) {
+                strcat(name, "_22k");
+            } else if (sampleRate() < 48000) {
+                strcat(name, "_44k");
+            } else {
+                strcat(name, "_48k");
+            }
+            strcat(name, ".wav");
+            mFile = fopen(name, "rb");
+            LOGV("Opening input read file %s, fh %p", name, mFile);
+            if (mFile) {
+                fseek(mFile, AUDIO_DUMP_WAVE_HDR_SIZE, SEEK_SET);
+            }
+        }
+        if (mFile) {
+            ssize_t bytesRead = fread(buffer, bytes, 1, mFile);
+            if (bytesRead >=0 && bytesRead < bytes) {
+                fseek(mFile, AUDIO_DUMP_WAVE_HDR_SIZE, SEEK_SET);
+                fread((uint8_t *)buffer+bytesRead, bytes-bytesRead, 1, mFile);
+            }
+        }
     }
 
-    usleep((bytes * 1000000) / frameSize() / sampleRate());
-
-    if(!mInFile) {
-        char name[255];
-        strcpy(name, "/sdcard/music/sine440");
-        if (channels() == AudioSystem::CHANNEL_IN_MONO) {
-            strcat(name, "_mo");
-        } else {
-            strcat(name, "_st");
-        }
-        if (format() == AudioSystem::PCM_16_BIT) {
-            strcat(name, "_16b");
-        } else {
-            strcat(name, "_8b");
-        }
-        if (sampleRate() < 16000) {
-            strcat(name, "_8k");
-        } else if (sampleRate() < 32000) {
-            strcat(name, "_22k");
-        } else if (sampleRate() < 48000) {
-            strcat(name, "_44k");
-        } else {
-            strcat(name, "_48k");
-        }
-        strcat(name, ".wav");
-        mInFile = fopen(name, "rb");
-        LOGV("Opening dump file %s, fh %p", name, mInFile);
-        if (mInFile) {
-            fseek(mInFile, AUDIO_DUMP_WAVE_HDR_SIZE, SEEK_SET);
-        }
-
-    }
-    if (mInFile) {
-        ssize_t bytesRead = fread(buffer, bytes, 1, mInFile);
-        if (bytesRead != bytes) {
-            fseek(mInFile, AUDIO_DUMP_WAVE_HDR_SIZE, SEEK_SET);
-            fread((uint8_t *)buffer+bytesRead, bytes-bytesRead, 1, mInFile);
-        }
-    }
-    return bytes;
+    return ret;
 }
 
 status_t AudioStreamInDump::standby()
 {
-    LOGV("AudioStreamInDump standby(), mInFile %p, mFinalStream %p", mInFile, mFinalStream);
+    LOGV("AudioStreamInDump standby(), mFile %p, mFinalStream %p", mFile, mFinalStream);
 
     Close();
     if (mFinalStream != 0 ) return mFinalStream->standby();
@@ -523,9 +565,9 @@ status_t AudioStreamInDump::dump(int fd, const Vector<String16>& args)
 
 void AudioStreamInDump::Close()
 {
-    if(mInFile) {
-        fclose(mInFile);
-        mInFile = 0;
+    if(mFile) {
+        fclose(mFile);
+        mFile = 0;
     }
 }
 }; // namespace android
