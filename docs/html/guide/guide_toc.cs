@@ -110,7 +110,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
                <span class="en">Application Resources</span>
-             </a></div>
+             </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
                 <span class="en">Providing Resources</span>
@@ -127,7 +127,7 @@
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
               <span class="en">Resource Types</span>
-            </a></div>
+            </a> <span class="new">new!</span></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/resources/animation-resource.html">Animation</a></li>
               <li><a href="<?cs var:toroot ?>guide/topics/resources/color-list-resource.html">Color State List</a></li>

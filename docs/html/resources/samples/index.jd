@@ -23,7 +23,7 @@ href="{@docRoot}resources/samples/get.html">Getting the Samples</a>.</p>
   framework topics.</dd>
 
  <dt><a href="BackupRestore/index.html">Backup and Restore</a></dt>
-  <dd>An simple example that illustrates a few different ways for an application to
+  <dd>A simple example that illustrates a few different ways for an application to
   implement support for the Android data backup and restore mechanism.</dd>
 
  <dt><a href="BluetoothChat/index.html">Bluetooth Chat</a></dt>

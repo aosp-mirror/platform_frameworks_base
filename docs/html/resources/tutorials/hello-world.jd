@@ -260,14 +260,16 @@ to see it running.</p>
 <div class="sidebox-wrapper">
   <div class="sidebox">
     <p>To learn more about creating and editing run configurations in Eclipse, refer to
-    <a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">Developing In Eclipse, 
+    <a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">Developing In Eclipse,
     with ADT</a>.</p>
   </div>
 </div>
 
-<p>The Eclipse ADT will automatically create a new run configuration for your project
-and the Android Emulator will automatically launch. Once the emulator is booted up,
-your application will appear after a moment. You should now see something like this:</p>
+<p>The Eclipse plugin automatically creates a new run configuration for your project
+and then launches the Android Emulator. Depending on your environment, the Android
+emulator might take several minutes to boot fully, so please be patient. When the
+emulator is booted, the Eclipse plugin installs your application
+and launches the default Activity. You should now see something like this:</p>
 
   <a href="images/hello_world_5.png"><img src="images/hello_world_5.png" style="height:230px" alt="" /></a>
 
