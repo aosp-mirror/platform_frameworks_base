@@ -36,8 +36,8 @@ href="../samples/CubeLiveWallpaper/index.html">CubeLiveWallpaper sample code</a>
 <p>In terms of implementation, a live wallpaper is very similar to a regular
 Android <a href="../../../reference/android/app/Service.html">service</a>. The
 only difference is the addition of a new method, <a
-href="../../../reference/android/service/wallpaper/WallpaperService.
-html#onCreateEngine()"><code>onCreateEngine()</code></a>, whose goal is to create a <a
+href="../../../reference/android/service/wallpaper/WallpaperService.html#onCreateEngine()">{@code
+onCreateEngine()}</a>, whose goal is to create a <a
 href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html">
 <code>WallpaperService.Engine</code></a>. The engine is responsible for
 handling the lifecycle and drawing of a wallpaper. The system provides a surface
