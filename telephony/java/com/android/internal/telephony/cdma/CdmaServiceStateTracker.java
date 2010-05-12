@@ -945,6 +945,9 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         case DATA_ACCESS_CDMA_EvDo_A:
             ret = "CDMA - EvDo rev. A";
             break;
+        case DATA_ACCESS_CDMA_EvDo_B:
+            ret = "CDMA - EvDo rev. B";
+            break;
         default:
             if (DBG) {
                 Log.e(LOG_TAG, "Wrong network. Can not return a string.");
@@ -1237,6 +1240,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         case 6: // RADIO_TECHNOLOGY_1xRTT
         case 7: // RADIO_TECHNOLOGY_EVDO_0
         case 8: // RADIO_TECHNOLOGY_EVDO_A
+        case 12: // RADIO_TECHNOLOGY_EVDO_B
             retVal = ServiceState.STATE_IN_SERVICE;
             break;
         default:
