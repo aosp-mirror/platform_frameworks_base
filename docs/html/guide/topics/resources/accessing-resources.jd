@@ -136,7 +136,7 @@ required when referencing resources from your own package).</li>
 without the extension or the {@code android:name} attribute value in the XML element (for simple
 values).</li>
 </ul>
-<p>See <a href="resource-types.html">Resource Types</a> for
+<p>See <a href="available-resources.html">Resource Types</a> for
 more information about each resource type and how to reference them.</p>
 
 
@@ -219,7 +219,7 @@ without the extension or the {@code android:name} attribute value in the XML ele
 values).</li>
 </ul>
 
-<p>See <a href="resource-types.html">Resource Types</a> for
+<p>See <a href="available-resources.html">Resource Types</a> for
 more information about each resource type and how to reference them.</p>
 
 

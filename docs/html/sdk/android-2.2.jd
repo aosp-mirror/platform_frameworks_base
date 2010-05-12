@@ -351,7 +351,7 @@ and {@link android.app.backup.BackupAgent#onRestore(android.app.backup.BackupDat
 A simple implementation of a BackupAgent useful for backing up preferences 
 and files is available by using {@link android.app.backup.BackupAgentHelper}.
 For more information, see <a
-href="{@docRoot}guide/topics/topics/data/data-backup.html">Data Backup</a>.</p>
+href="{@docRoot}guide/topics/topics/data/backup.html">Data Backup</a>.</p>
 
 <h4>Graphics</h4>
 

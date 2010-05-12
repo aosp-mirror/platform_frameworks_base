@@ -97,7 +97,8 @@ or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> bel
       {@link android.view.ViewGroup}. For a reference of all available attributes,
       see the corresponding reference documentation for the {@link android.view.ViewGroup} class
 (for example, the <a
-      href="{@docRoot}reference/android/widget/LinearLayout#lattrs">LinearLayout XML attributes</a>).</p>
+      href="{@docRoot}reference/android/widget/LinearLayout.html#lattrs">LinearLayout XML
+attributes</a>).</p>
     </dd>
   <dt id="view-element"><code>&lt;View&gt;</code></dt>
     <dd>An individual UI component, generally referred to as a "widget". Different
