@@ -19,6 +19,7 @@ package com.android.imftest.samples;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
@@ -38,7 +39,7 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
     public final long WAIT_FOR_IME = 5000;
 
     /*
-     * Unfortunately there is now way for us to know how tall the IME is, 
+     * Unfortunately there is now way for us to know how tall the IME is,
      * so we have to hard code a minimum and maximum value.
      */
     public final int IME_MIN_HEIGHT = 150;
@@ -48,20 +49,23 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
     protected T mTargetActivity;
     protected boolean mExpectAutoPop;
     private Class<T> mTargetActivityClass;
-    
+
     public ImfBaseTestCase(Class<T> activityClass) {
         mTargetActivityClass = activityClass;
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         final String packageName = getInstrumentation().getTargetContext().getPackageName();
-        mTargetActivity = launchActivity(packageName, mTargetActivityClass, null);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        mTargetActivity = launchActivityWithIntent(packageName, mTargetActivityClass, intent);
         // expect ime to auto pop up if device has no hard keyboard
-        mExpectAutoPop = mTargetActivity.getResources().getConfiguration().hardKeyboardHidden == 
-            Configuration.HARDKEYBOARDHIDDEN_YES;
-        
+        int keyboardType = mTargetActivity.getResources().getConfiguration().keyboard;
+        mExpectAutoPop = (keyboardType  == Configuration.KEYBOARD_NOKEYS ||
+                keyboardType == Configuration.KEYBOARD_UNDEFINED);
+
         mImm = InputMethodManager.getInstance(mTargetActivity);
 
         KeyguardManager keyguardManager =
@@ -115,26 +119,26 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
             assertFalse(destructiveCheckImeUp(rootView, servedView));
         }
     }
-    
+
     public boolean destructiveCheckImeUp(View rootView, View servedView) {
         int origHeight;
         int newHeight;
-        
+
         origHeight = rootView.getHeight();
-        
+
         // Tell the keyboard to go away.
         mImm.hideSoftInputFromWindow(servedView.getWindowToken(), 0);
-        
+
         // Give it five seconds to adjust
         newHeight = rootView.getHeight();
         long timeoutTime = SystemClock.uptimeMillis() + WAIT_FOR_IME;
         while (Math.abs(newHeight - origHeight) < IME_MIN_HEIGHT && SystemClock.uptimeMillis() < timeoutTime) {
             newHeight = rootView.getHeight();
         }
-        
+
         return (Math.abs(origHeight - newHeight) >= IME_MIN_HEIGHT);
     }
-    
+
     void pause(int millis) {
         try {
             Thread.sleep(millis);
