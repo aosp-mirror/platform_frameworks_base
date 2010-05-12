@@ -52,6 +52,9 @@ public:
     bool find_header_value(
             const string &key, string *value) const;
 
+    // Pass a negative value to disable the timeout.
+    void setReceiveTimeout(int seconds);
+
 private:
     enum State {
         READY,
