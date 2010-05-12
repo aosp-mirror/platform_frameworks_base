@@ -173,18 +173,19 @@ int VorbisDecoder::decodePacket(MediaBuffer *packet, MediaBuffer *out) {
     pack.granulepos = 0;
     pack.packetno = 0;
 
+    int numFrames = 0;
+
     int err = vorbis_dsp_synthesis(mState, &pack, 1);
     if (err != 0) {
         LOGW("vorbis_dsp_synthesis returned %d", err);
-        return 0;
-    }
+    } else {
+        numFrames = vorbis_dsp_pcmout(
+                mState, (int16_t *)out->data(), kMaxNumSamplesPerBuffer);
 
-    int numFrames = vorbis_dsp_pcmout(
-            mState, (int16_t *)out->data(), kMaxNumSamplesPerBuffer);
-
-    if (numFrames < 0) {
-        LOGE("vorbis_dsp_pcmout returned %d", numFrames);
-        return 0;
+        if (numFrames < 0) {
+            LOGE("vorbis_dsp_pcmout returned %d", numFrames);
+            numFrames = 0;
+        }
     }
 
     out->set_range(0, numFrames * sizeof(int16_t) * mNumChannels);
@@ -203,6 +204,7 @@ status_t VorbisDecoder::read(
         CHECK(seekTimeUs >= 0);
 
         mNumFramesOutput = 0;
+        vorbis_dsp_restart(mState);
     } else {
         seekTimeUs = -1;
     }
