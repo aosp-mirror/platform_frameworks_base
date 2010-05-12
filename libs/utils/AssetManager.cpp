@@ -824,7 +824,7 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
 
     // TODO: look for previously-created shared memory slice?
     int method;
-    long uncompressedLen;
+    size_t uncompressedLen;
 
     //printf("USING Zip '%s'\n", pEntry->getFileName());
 
