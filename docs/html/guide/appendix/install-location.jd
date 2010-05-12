@@ -94,7 +94,7 @@ Level 8:</p>
 <ol>
   <li>Include the {@code android:installLocation} attribute with a value of "{@code auto}" or
 "{@code preferExternal}" in the <code><a
-href="{@docRoog}guide/topics/manifest/uses-sdk-element.html">&lt;manifest&gt;</a></code>
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;manifest&gt;</a></code>
 element.</li>
   <li>Leave your {@code android:minSdkVersion} attribute as is (something <em>less
 than</em> "8") and be certain that your application code uses only APIs compatible with that

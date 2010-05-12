@@ -29,9 +29,8 @@ Handcent SMS:</p>
 
 <p> The Android SDK makes it easy to integrate speech input directly into your
 own application. Just copy and paste from this <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/
-VoiceRecognition.html">
-sample application</a> to get
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/VoiceRecognition.html">sample
+application</a> to get
 started. The sample application first verifies that the target device is able
 to recognize speech input:</p> 
 <pre>
