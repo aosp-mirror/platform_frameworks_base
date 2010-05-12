@@ -954,7 +954,9 @@ public class StatusBarPolicy {
                  && ((mServiceState.getRadioTechnology()
                         == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
                      || (mServiceState.getRadioTechnology()
-                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)));
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
+                     || (mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_B)));
     }
 
     private boolean hasService() {
@@ -1070,7 +1072,6 @@ public class StatusBarPolicy {
     }
 
     private final void updateDataNetType(int net) {
-
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
             mDataIconList = sDataNetType_e;
@@ -1096,6 +1097,7 @@ public class StatusBarPolicy {
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
+        case TelephonyManager.NETWORK_TYPE_EVDO_B:
             mDataIconList = sDataNetType_3g;
             break;
         default:
