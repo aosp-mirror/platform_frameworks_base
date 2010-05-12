@@ -637,6 +637,8 @@ public class Activity extends ContextThemeWrapper
     private boolean mStopped;
     boolean mFinished;
     boolean mStartedActivity;
+    /** true if the activity is being destroyed in order to recreate it with a new configuration */
+    /*package*/ boolean mChangingConfigurations = false;
     /*package*/ int mConfigChangeFlags;
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
@@ -3399,6 +3401,19 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isFinishing() {
         return mFinished;
+    }
+
+    /**
+     * Check to see whether this activity is in the process of being destroyed in order to be
+     * recreated with a new configuration. This is often used in
+     * {@link #onStop} to determine whether the state needs to be cleaned up or will be passed
+     * on to the next instance of the activity via {@link #onRetainNonConfigurationInstance()}.
+     * 
+     * @return If the activity is being torn down in order to be recreated with a new configuration,
+     * returns true; else returns false.
+     */
+    public boolean isChangingConfigurations() {
+        return mChangingConfigurations;
     }
 
     /**
