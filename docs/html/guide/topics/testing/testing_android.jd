@@ -1,5 +1,6 @@
 page.title=Testing and Instrumentation
 @jd:body
+
 <div id="qv-wrapper">
   <div id="qv">
   <h2>In this document</h2>
@@ -80,61 +81,84 @@ page.title=Testing and Instrumentation
       </ol>
   </div>
 </div>
-<p>
-Android includes a powerful set of testing tools that extend the industry-standard JUnit test framework with features specific to the Android environment. Although you can
-test an Android application with JUnit, the Android tools allow you to write much more sophisticated tests for every aspect of your application, both at the unit and at the framework level.
-</p>
-<p>
-Key features of the Android testing environment include:
-</p>
+
+<p>Android includes a powerful set of testing tools that extend the
+industry-standard JUnit test framework with features specific to the Android
+environment. Although you can test an Android application with JUnit, the
+Android tools allow you to write much more sophisticated tests for every aspect
+of your application, both at the unit and framework levels.</p>
+
+<p>Key features of the Android testing environment include:</p>
+
 <ul>
-  <li>Android extensions to the JUnit framework that provide access to Android system objects.</li>
-  <li>An instrumentation framework that lets tests control and examine the application.</li>
+  <li>Android extensions to the JUnit framework that provide access to Android
+system objects.</li>
+  <li>An instrumentation framework that lets tests control and examine the
+application.</li>
   <li>Mock versions of commonly-used Android system objects.</li>
-  <li>Tools for running single tests or test suites, with or without instrumentation.</li>
-  <li>Support for managing tests and test projects in the ADT Plugin for Eclipse and at the command line.</li>
+  <li>Tools for running single tests or test suites, with or without
+instrumentation.</li>
+  <li>Support for managing tests and test projects in the ADT Plugin for Eclipse
+and at the command line.</li>
 </ul>
-<p>
-This document is an overview of the Android testing environment and the way you use it. The document assumes you have a basic knowledge of
-Android application programming and JUnit testing methodology.
-</p>
+
+<p>This document is an overview of the Android testing environment and the way
+you use it. The document assumes you have a basic knowledge of Android
+application programming and JUnit testing methodology.</p>
+
 <h2 id="Overview">Overview</h2>
-<p>
-At the heart of the Android testing environment is an instrumentation framework that your test application uses to precisely control the application under test. With instrumentation, you can
-set up mock system objects such as Contexts before the main application starts, control your application at various points of its lifecycle, send UI events to the application, and
-examine the application's state during its execution. The instrumentation framework accomplishes this by running both the main application and the test application in the same process.
-</p>
-<p>
-    Your test application's manifest file links it to the application under test. The the &lt;instrumentation&gt; attribute in the manifest file points to the application under test
-    and also tells Android how to run the test application. This is described in more detail in the section <a href="#InstrumentationTestRunner">Instrumentation Test Runner</a>.
-</p>
-<p>
-The following diagram summarizes the Android testing environment:
-</p>
+
+<p> At the heart of the Android testing environment is an instrumentation
+framework that your test application uses to precisely control the application
+under test. With instrumentation, you can set up mock system objects such as
+Contexts before the main application starts, control your application at various
+points of its lifecycle, send UI events to the application, and examine the
+application's state during its execution. The instrumentation framework
+accomplishes this by running both the main application and the test application
+in the same process. </p>
+
+<p>Your test application is linked to the application under test by means of an
+<a
+href="{@docRoot}guide/topics/manifest/instrumentation-element.html"><code>&lt;instrumentation&gt;</code></a>
+element in the test application's manifest file. The attributes of the element
+specify the package name of the application under test and also tell Android how
+to run the test application. Instrumentation is described in more detail in the
+section <a href="#InstrumentationTestRunner">Instrumentation Test
+Runner</a>.</p>
+
+<p>The following diagram summarizes the Android testing environment:</p>
+
 <img src="{@docRoot}images/testing/android_test_framework.png"/>
-<p>
-  In Android, test applications are themselves Android applications, so you write them in much the same way as the application you are testing. The SDK tools
-  help you create a main application project and its test project at the same time. You can run Android tests within Eclipse with ADT or from the command line.
-  Eclipse with ADT provides an extensive set of tools for creating tests, running them, and viewing their results. You can also use the <code>adb</code> tool to
-  run tests, or use a built-in Ant target.
-</p>
-<p>
-  To learn how to set up and run tests in Eclipse, please refer to <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>.
-  If you're not working in Eclipse, refer to <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>.
-</p>
-<p>
-    If you want a step-by-step introduction to Android testing, try one of the testing tutorials:
-</p>
-    <ul>
-        <li>
-            The <a href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello, Testing</a> tutorial introduces basic testing concepts and procedures in the
-            context of the Hello, World application.
-        </li>
-        <li>
-            The <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a> tutorial is an excellent follow-up to the Hello, Testing tutorial.
-            It guides you through a more complex testing scenario that you develop against a more realistic application.
-        </li>
-    </ul>
+
+<p>In Android, test applications are themselves Android applications, so you
+write them in much the same way as the application you are testing. The SDK
+tools help you create a main application project and its test project at the same
+time. You can run Android tests within Eclipse with ADT or from the command
+line. Eclipse with ADT provides an extensive set of tools for creating tests,
+running them, and viewing their results. You can also use the <code>adb</code>
+tool to run tests, or use a built-in Ant target.</p>
+
+<p>To learn how to set up and run tests in Eclipse, please refer to <a
+href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in
+Eclipse, with ADT</a>. If you're not working in Eclipse, refer to <a
+href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other
+IDEs</a>.</p>
+
+<p>If you want a step-by-step introduction to Android testing, try one of the
+testing tutorials:</p>
+
+<ul>
+  <li>The <a
+href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello,
+Testing</a> tutorial introduces basic testing concepts and procedures in the
+context of the Hello, World application.</li>
+  <li>The <a
+href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity
+Testing</a> tutorial is an excellent follow-up to the Hello, Testing tutorial.
+It guides you through a more complex testing scenario that you develop against a
+more realistic application.</li>
+</ul>
+
 <h2 id="TestAPI">The Testing API</h2>
 <p>
     For writing tests and test applications in the Java programming language, Android provides a

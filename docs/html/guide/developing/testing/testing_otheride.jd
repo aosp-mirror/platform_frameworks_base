@@ -68,9 +68,9 @@ page.title=Testing In Other IDEs
   which provides an overview of Android testing.
 </p>
 <p>
-  If you are using Eclipse with ADT, the best way to test the application is to use Eclipse with ADT
-  as well. To learn about this, please read the document <a
-  href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>.
+  If you are developing in Eclipse with ADT, you can set up and run your tests
+directly in Eclipse. For more information, please read <a
+  href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing&nbsp;in&nbsp;Eclipse,&nbsp;with&nbsp;ADT</a>.
 </p>
 <h2 id="CreateTestProjectCommand">Working with Test Projects</h2>
 <p>
