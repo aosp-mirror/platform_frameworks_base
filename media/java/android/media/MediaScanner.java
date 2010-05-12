@@ -869,11 +869,14 @@ public class MediaScanner
             values.put(MediaStore.Images.ImageColumns.DATA, "");
             String [] pathSpec = new String[] {path + '%'};
             try {
+                // These tables have DELETE_FILE triggers that delete the file from the
+                // sd card when deleting the database entry. We don't want to do this in
+                // this case, since it would cause those files to be removed if a .nomedia
+                // file was added after the fact, when in that case we only want the database
+                // entries to be removed.
                 mMediaProvider.update(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values,
                         MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
                 mMediaProvider.update(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values,
-                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
-                mMediaProvider.update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values,
                         MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
             } catch (RemoteException e) {
                 throw new RuntimeException();
