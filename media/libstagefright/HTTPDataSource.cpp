@@ -84,6 +84,7 @@ status_t HTTPDataSource::connectWithRedirectsAndRange(off_t rangeStart) {
         }
 
         if (httpStatus >= 200 && httpStatus < 300) {
+            applyTimeoutResponse();
             return OK;
         }
 
@@ -131,6 +132,22 @@ status_t HTTPDataSource::connectWithRedirectsAndRange(off_t rangeStart) {
     }
 
     return ERROR_IO;
+}
+
+void HTTPDataSource::applyTimeoutResponse() {
+    string timeout;
+    if (mHttp->find_header_value("X-SocketTimeout", &timeout)) {
+        const char *s = timeout.c_str();
+        char *end;
+        long tmp = strtol(s, &end, 10);
+        if (end == s || *end != '\0') {
+            LOGW("Illegal X-SocketTimeout value given.");
+            return;
+        }
+
+        LOGI("overriding default timeout, new timeout is %ld seconds", tmp);
+        mHttp->setReceiveTimeout(tmp);
+    }
 }
 
 HTTPDataSource::HTTPDataSource(

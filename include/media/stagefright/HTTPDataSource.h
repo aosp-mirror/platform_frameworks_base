@@ -91,6 +91,7 @@ private:
     void initHeaders(const KeyedVector<String8, String8> *overrides);
 
     status_t connectWithRedirectsAndRange(off_t rangeStart);
+    void applyTimeoutResponse();
 
     HTTPDataSource(const HTTPDataSource &);
     HTTPDataSource &operator=(const HTTPDataSource &);
