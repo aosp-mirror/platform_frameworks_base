@@ -2,6 +2,19 @@ page.title=Creating an Input Method
 @jd:body
 
 
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/articles/on-screen-inputs.html">Onscreen Input Methods</a></li>
+    <li><a href="{@docRoot}resources/samples/SoftKeyboard/index.html">Soft Keyboard sample</a></li>
+  </ol>
+
+</div>
+</div>
+
+
 <p>To create an input method (IME) for entering text into text fields 
 and other Views, you need to extend the {@link android.inputmethodservice.InputMethodService}.
 class. This class provides much of the basic implementation for an input 
