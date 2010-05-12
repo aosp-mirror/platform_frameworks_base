@@ -177,15 +177,6 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
       'img':"maps-large.png",
       'title':"Maps API Key",
       'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>Learn more &raquo;</a></p>"
-    },
-
-    'io': {
-      'layout':"imgLeft",
-      'icon':"io-small.png",
-      'name':"Google I/O '09'",
-      'img':"io-large.png",
-      'title':"2009 Google I/O Developer Conference",
-      'desc': "<p>The 2009 Google I/O developer conference took place May 27-28, 2009, in San Francisco. If you missed the conference, you can experience the Android sessions by viewing YouTube videos.</p><p><a href='{@docRoot}videos/index.html'>See the sessions from Google I/O &raquo;</a></p>"
     }
 
   }
