@@ -169,8 +169,12 @@ device screen. At run time, the platform handles the loading of the correct size
 or density resources, based on the generalized size or density of the current
 device screen, and adapts them to the actual pixel map of the screen.</p>
 
-<p>The range of screens supported by Android and the generalized screen
-configurations that the platform maps them to are shown in the table below. </p>
+<p>The table below lists some of the more common screens supported
+by Android and illustrates how the platform maps them to generalized screen
+configurations.</p>
+
+<p class="table-caption" id="screens-table"><strong>Table 1.</strong> Examples of
+device screens supported by Android.</p> 
 
   <table id="screens-table" width="80%" style="margin-top:2em;">
     <tbody>
@@ -236,15 +240,13 @@ configurations that the platform maps them to are shown in the table below. </p>
     </tbody>
   </table>
 
-<p class="caption" style="margin-top:1em;margin-bottom:1.5em;"><strong>Table
-1.</strong> Summary of device screens supported by Android. </p>
+<p class="caption" style="margin-top:1em;margin-bottom:1.5em;"> </p>
 
 <p>As shown above, the various screen configurations are arranged around a
-baseline screen &mdash; HVGA (320x480) resolution on a 3.2" screen &mdash; which
-is assigned a size of "normal" and a density of "medium". The HVGA screen is
-used as the baseline because all applications written against Android 1.5 or
-earlier are (by definition) written for the HVGA screen used on the T-Mobile G1
-and similar devices.</p>
+<em>baseline screen</em> that is assigned a size of "normal" and a density of
+"medium". The HVGA screen is used as the baseline because all applications
+written against Android 1.5 or earlier are (by definition) written for the HVGA
+screen used on the T-Mobile G1 and similar devices.</p>
 
 <!-- <p>Note that each screen configuration spans a range of actual resolutions
 and physical screen sizes. For example, the The baseline configuration spans a
@@ -267,6 +269,11 @@ rendering your application on the current device screen, provided that the UI is
 properly implemented. For more information, see  <a
 href="#screen-independence">Best Practices for Screen Independence</a>.</p>
 
+<!--
+<p>For an overview of the relative numbers of high (hdpi), medium (mdpi), and 
+low (ldpi) density screens, see the <a 
+href="{@docRoot}guide/resources/dashboard/screen-densities.html">Screen Densities dashboard</a>.</p> 
+-->
 
 <h3 id="support">How Android supports multiple screens</h3>
 
@@ -401,7 +408,7 @@ including those written against Android 1.5 and earlier platform versions, can
 display properly on most devices, especially when the device's screen is at the
 baseline "normal" size or larger. </p>
 
-<p>However, note that applications written for the baseline HVGA screen may need
+<p>However, note that applications written for the baseline screen may need
 minor adjustments before they display properly on smaller screens such as QVGA.
 With the reduced screen area of small screens, there may be tradeoffs in design,
 content, and function that you, as the application developer, need to consider.
@@ -557,7 +564,7 @@ support:</p>
     <li>If you declare <code>largeScreens="false"</code>, your application can
 still be installed by users of devices with large screens. When run on a device
 with a large screen, this attribute value causes the platform to run the
-application in compatibility mode, rendering it in a baseline HVGA screen area
+application in compatibility mode, rendering it in a baseline screen area
 (normal size, medium density) reserved on the larger screen. See 
 <a href="#compatibility-examples">Screen-Compatibility Examples</a> for an
 illustration of what an application looks like when displayed in compatibility
@@ -803,7 +810,7 @@ that you use in your code. The sections below provide more information. </p>
 <p>In some cases, you will need to express dimensions in <code>dip</code> and
 then convert them to pixels. Imagine an application in which a scroll gesture is
 recognized after the user's finger has moved by at least 16 pixels. On a
-baseline HVGA screen, the user will have to move his finger by 16 pixels / 160
+baseline screen, the user will have to move his finger by 16 pixels / 160
 dpi = 1/10th of an inch (or 2.5 mm) before the gesture is recognized. On a
 device with a high (240) density display, the user will move his finger by only
 16 pixels / 240 dpi = 1/15th of an inch (or 1.7 mm.) The distance is much

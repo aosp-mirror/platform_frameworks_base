@@ -81,6 +81,9 @@ padding: .25em 1em;
 .toggleable a {
   text-decoration:none;
 }
+.toggleme a {
+  text-decoration:underline;
+}
 .toggleable.closed .toggleme {
   display:none;
 }
@@ -88,6 +91,31 @@ padding: .25em 1em;
   margin:0;
 }
 </style>
+
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.6</a> <em>(March 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt>Library projects:</dt>
+<dd>
+<p>The ADT Plugin now supports the use of <em>library projects</em> during
+development, a capability that lets you store shared Android application
+code and resources in a separate development project. You can then reference the
+library project from other Android projects and, at build time, the tools
+compile the shared code and resources as part of the dependent applications.
+More information about this feature is available in the <a
+href="{@docRoot}guide/developing/eclipse-adt.html#libraryProject">Developing 
+in Eclipse with ADT</a> document. </p>
+<p>If you are not developing in Eclipse, <a 
+href="tools-notes.html">SDK Tools r6</a> provides the equivalent library 
+project support through the Ant build system.</p>
+</dd>
+</dl>
+ </div>
+</div>
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">

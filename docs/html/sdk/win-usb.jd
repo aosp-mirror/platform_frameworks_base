@@ -69,6 +69,9 @@ padding: .25em 1em;
 .toggleable a {
   text-decoration:none;
 }
+.toggleme a {
+  text-decoration:underline;
+}
 .toggleable.closed .toggleme {
   display:none;
 }
