@@ -18,7 +18,8 @@
           </a></li>
     </ul>
   </li>
-
+<?cs
+  if:android.whichdoc == "online" ?>
   <li>
     <h2><span class="en">Device Dashboard</span>
     </h2>
@@ -27,7 +28,9 @@
             <span class="en">Platform Versions</span>
           </a></li>
     </ul>
-  </li>
+  </li><?cs
+  /if
+?>
 
   <li>
     <h2><span class="en">Technical Articles</span>
