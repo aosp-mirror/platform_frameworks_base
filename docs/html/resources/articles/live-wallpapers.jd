@@ -1,6 +1,19 @@
 page.title=Live Wallpapers
 @jd:body
 
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/samples/CubeLiveWallpaper/index.html">Live Wallpaper
+sample</a></li>
+  </ol>
+
+</div>
+</div>
+
 <p>Starting with Android 2.1 (API Level 7), users can now enjoy <em>live
 wallpapers</em> &mdash; richer, animated, interactive backgrounds &mdash; on
 their home screens. A live wallpaper is very similar to a normal Android
