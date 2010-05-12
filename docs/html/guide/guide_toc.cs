@@ -77,9 +77,19 @@
           <li><a href="<?cs var:toroot ?>guide/topics/ui/ui-events.html">
                 <span class="en">Handling UI Events</span>
               </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">
+          <li class="toggle-list">
+            <div><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">
                 <span class="en">Notifying the User</span>
+            </a></div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/toasts.html">
+                <span class="en">Creating Toast Notifications</span>
               </a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/notifications.html">
+                <span class="en">Creating Status Bar Notifications</span>
+              </a></li>
+            </ul>
+          </li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
                 <span class="en">Applying Styles and Themes</span>
               </a></li>
