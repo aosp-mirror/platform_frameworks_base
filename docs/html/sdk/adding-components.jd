@@ -127,10 +127,12 @@ your computer.</p>
 </ol>
 
 <p>New platforms are automatically saved into the 
-<code><em>&lt;sdk>/</em>platforms/</code> directory of your SDK;
-new add-ons are saved in the <code><em>&lt;sdk>/</em>add-ons/</code>
-directory; and new documentation is saved in the existing
-<code><em>&lt;sdk>/</em>docs/</code> directory (old docs are replaced).</p>
+<code>&lt;<em>sdk</em>&gt;/platforms/</code> directory of your SDK;
+new add-ons are saved in the <code>&lt;<em>sdk</em>&gt;/add-ons/</code>
+directory; samples are saved in the 
+<code>&lt;<em>sdk</em>&gt;/samples/android-&lt;<em>level</em>&gt;/</code>; 
+and new documentation is saved in the existing
+<code>&lt;<em>sdk</em>&gt;/docs/</code> directory (old docs are replaced).</p>
 
 
 <h2 id="UpdatingComponents">Updating SDK Components</h2>
