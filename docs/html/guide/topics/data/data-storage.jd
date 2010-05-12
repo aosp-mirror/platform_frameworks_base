@@ -145,7 +145,7 @@ public class Calc extends Activity {
 
 
 <a name="files"></a>
-<h2 id="#filesInternal">Using the Internal Storage</h2>
+<h2 id="filesInternal">Using the Internal Storage</h2>
 
 <p>You can save files directly on the device's internal storage. By default, files saved
 to the internal storage are private to your application and other applications cannot access
@@ -225,7 +225,7 @@ uninstalls your application, these files are removed.</p>
 
 
 
-<h2 id="#filesExternal">Using the External Storage</h2>
+<h2 id="filesExternal">Using the External Storage</h2>
 
 <p>Every Android-compatible device supports a shared "external storage" that you can use to
 save files. This can be a removable storage media (such as an SD card) or an internal
