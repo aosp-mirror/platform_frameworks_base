@@ -126,7 +126,7 @@ devices that have normal or large screens. </p>
 
 <p>This behavior is especially significant for applications that set their
 <code><a
-href="@docRoot}guide/topics/manifest/uses-sdk-element.html">android:
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">android:
 minSdkVersion</a></code> to 3 or lower, since Market will filter them from
 small-screen devices by default. Such applications can enable support for
 small-screen devices by adding a <code>android:targetSdkVersion="4"</code>
@@ -164,7 +164,7 @@ of corresponding screen size.</li>
     <p>For more information on how to declare support for screen sizes in your
     application, see <code><a
     href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
-    and <a href="{@docRoot}guide/practices/screens-support.html">Supporting Multiple
+    and <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
     Screens</a>.</p>
 </td>
   </tr>
