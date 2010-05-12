@@ -142,6 +142,7 @@ AudioFlinger::AudioFlinger()
     }
 #ifdef LVMX
     LifeVibes::init();
+    mLifeVibesClientPid = -1;
 #endif
 }
 
@@ -596,8 +597,10 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
     int musicEnabled = -1;
     if (NO_ERROR == param.get(key, value)) {
         if (value == LifevibesEnable) {
+            mLifeVibesClientPid = IPCThreadState::self()->getCallingPid();
             musicEnabled = 1;
         } else if (value == LifevibesDisable) {
+            mLifeVibesClientPid = -1;
             musicEnabled = 0;
         }
     }
@@ -609,7 +612,7 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         mHardwareStatus = AUDIO_SET_PARAMETER;
         result = mAudioHardware->setParameters(keyValuePairs);
 #ifdef LVMX
-        if ((NO_ERROR == result) && (musicEnabled != -1)) {
+        if (musicEnabled != -1) {
             LifeVibes::enableMusic((bool) musicEnabled);
         }
 #endif
@@ -713,51 +716,57 @@ status_t AudioFlinger::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrame
 void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
 {
 
-    LOGV("registerClient() %p, tid %d, calling tid %d", client.get(), gettid(), IPCThreadState::self()->getCallingPid());
     Mutex::Autolock _l(mLock);
 
-    sp<IBinder> binder = client->asBinder();
-    if (mNotificationClients.indexOf(binder) < 0) {
-        LOGV("Adding notification client %p", binder.get());
-        binder->linkToDeath(this);
-        mNotificationClients.add(binder);
-    }
+    int pid = IPCThreadState::self()->getCallingPid();
+    if (mNotificationClients.indexOfKey(pid) < 0) {
+        sp<NotificationClient> notificationClient = new NotificationClient(this,
+                                                                            client,
+                                                                            pid);
+        LOGV("registerClient() client %p, pid %d", notificationClient.get(), pid);
 
-    // the config change is always sent from playback or record threads to avoid deadlock
-    // with AudioSystem::gLock
-    for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
-        mPlaybackThreads.valueAt(i)->sendConfigEvent(AudioSystem::OUTPUT_OPENED);
-    }
+        mNotificationClients.add(pid, notificationClient);
 
-    for (size_t i = 0; i < mRecordThreads.size(); i++) {
-        mRecordThreads.valueAt(i)->sendConfigEvent(AudioSystem::INPUT_OPENED);
-    }
-}
+        sp<IBinder> binder = client->asBinder();
+        binder->linkToDeath(notificationClient);
 
-void AudioFlinger::binderDied(const wp<IBinder>& who) {
+        // the config change is always sent from playback or record threads to avoid deadlock
+        // with AudioSystem::gLock
+        for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
+            mPlaybackThreads.valueAt(i)->sendConfigEvent(AudioSystem::OUTPUT_OPENED);
+        }
 
-    LOGV("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(), IPCThreadState::self()->getCallingPid());
-    Mutex::Autolock _l(mLock);
-
-    IBinder *binder = who.unsafe_get();
-
-    if (binder != NULL) {
-        int index = mNotificationClients.indexOf(binder);
-        if (index >= 0) {
-            LOGV("Removing notification client %p", binder);
-            mNotificationClients.removeAt(index);
+        for (size_t i = 0; i < mRecordThreads.size(); i++) {
+            mRecordThreads.valueAt(i)->sendConfigEvent(AudioSystem::INPUT_OPENED);
         }
     }
 }
 
+void AudioFlinger::removeNotificationClient(pid_t pid)
+{
+    Mutex::Autolock _l(mLock);
+
+    int index = mNotificationClients.indexOfKey(pid);
+    if (index >= 0) {
+        sp <NotificationClient> client = mNotificationClients.valueFor(pid);
+        LOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
+#ifdef LVMX
+        if (pid == mLifeVibesClientPid) {
+            LOGV("Disabling lifevibes");
+            LifeVibes::enableMusic(false);
+            mLifeVibesClientPid = -1;
+        }
+#endif
+        mNotificationClients.removeItem(pid);
+    }
+}
+
 // audioConfigChanged_l() must be called with AudioFlinger::mLock held
-void AudioFlinger::audioConfigChanged_l(int event, int ioHandle, void *param2) {
+void AudioFlinger::audioConfigChanged_l(int event, int ioHandle, void *param2)
+{
     size_t size = mNotificationClients.size();
     for (size_t i = 0; i < size; i++) {
-        sp<IBinder> binder = mNotificationClients.itemAt(i);
-        LOGV("audioConfigChanged_l() Notifying change to client %p", binder.get());
-        sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient> (binder);
-        client->ioConfigChanged(event, ioHandle, param2);
+        mNotificationClients.valueAt(i)->client()->ioConfigChanged(event, ioHandle, param2);
     }
 }
 
@@ -767,6 +776,7 @@ void AudioFlinger::removeClient_l(pid_t pid)
     LOGV("removeClient_l() pid %d, tid %d, calling tid %d", pid, gettid(), IPCThreadState::self()->getCallingPid());
     mClients.removeItem(pid);
 }
+
 
 // ----------------------------------------------------------------------------
 
@@ -3082,6 +3092,28 @@ AudioFlinger::Client::~Client()
 const sp<MemoryDealer>& AudioFlinger::Client::heap() const
 {
     return mMemoryDealer;
+}
+
+// ----------------------------------------------------------------------------
+
+AudioFlinger::NotificationClient::NotificationClient(const sp<AudioFlinger>& audioFlinger,
+                                                     const sp<IAudioFlingerClient>& client,
+                                                     pid_t pid)
+    : mAudioFlinger(audioFlinger), mPid(pid), mClient(client)
+{
+}
+
+AudioFlinger::NotificationClient::~NotificationClient()
+{
+    mClient.clear();
+}
+
+void AudioFlinger::NotificationClient::binderDied(const wp<IBinder>& who)
+{
+    sp<NotificationClient> keep(this);
+    {
+        mAudioFlinger->removeNotificationClient(mPid);
+    }
 }
 
 // ----------------------------------------------------------------------------
