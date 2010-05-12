@@ -542,6 +542,13 @@ class CallbackProxy extends Handler {
                                                     int which) {
                                                 res.cancel();
                                             }})
+                                .setOnCancelListener(
+                                        new DialogInterface.OnCancelListener() {
+                                            public void onCancel(
+                                                    DialogInterface dialog) {
+                                                res.cancel();
+                                            }
+                                        })
                                 .show();
                     }
                     // Tell the JsResult that it is ready for client
