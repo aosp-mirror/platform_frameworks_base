@@ -37,6 +37,10 @@ public class CommandException extends RuntimeException {
         OP_NOT_ALLOWED_DURING_VOICE_CALL,
         OP_NOT_ALLOWED_BEFORE_REG_NW,
         SMS_FAIL_RETRY,
+        SIM_ABSENT,
+        SUBSCRIPTION_NOT_AVAILABLE,
+        MODE_NOT_SUPPORTED,
+        FDN_CHECK_FAILURE,
         ILLEGAL_SIM_OR_ME,
     }
 
@@ -69,6 +73,14 @@ public class CommandException extends RuntimeException {
                 return new CommandException(Error.OP_NOT_ALLOWED_BEFORE_REG_NW);
             case RILConstants.SMS_SEND_FAIL_RETRY:
                 return new CommandException(Error.SMS_FAIL_RETRY);
+            case RILConstants.SIM_ABSENT:
+                return new CommandException(Error.SIM_ABSENT);
+            case RILConstants.SUBSCRIPTION_NOT_AVAILABLE:
+                return new CommandException(Error.SUBSCRIPTION_NOT_AVAILABLE);
+            case RILConstants.MODE_NOT_SUPPORTED:
+                return new CommandException(Error.MODE_NOT_SUPPORTED);
+            case RILConstants.FDN_CHECK_FAILURE:
+                return new CommandException(Error.FDN_CHECK_FAILURE);
             case RILConstants.ILLEGAL_SIM_OR_ME:
                 return new CommandException(Error.ILLEGAL_SIM_OR_ME);
             default:
