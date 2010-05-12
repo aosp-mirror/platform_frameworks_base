@@ -88,12 +88,15 @@ public class NotificationPlayer implements OnCompletionListener {
                     player.setDataSource(mCmd.context, mCmd.uri);
                     player.setLooping(mCmd.looping);
                     player.prepare();
-                    if (mCmd.looping) {
-                        audioManager.requestAudioFocus(null, mCmd.stream,
-                                AudioManager.AUDIOFOCUS_GAIN);
-                    } else {
-                        audioManager.requestAudioFocus(null, mCmd.stream,
-                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+                    if ((mCmd.uri != null) && (mCmd.uri.getEncodedPath() != null)
+                            && (mCmd.uri.getEncodedPath().length() > 0)) {
+                        if (mCmd.looping) {
+                            audioManager.requestAudioFocus(null, mCmd.stream,
+                                    AudioManager.AUDIOFOCUS_GAIN);
+                        } else {
+                            audioManager.requestAudioFocus(null, mCmd.stream,
+                                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+                        }
                     }
                     player.setOnCompletionListener(NotificationPlayer.this);
                     player.start();
