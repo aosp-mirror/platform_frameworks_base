@@ -1058,19 +1058,21 @@ public class Instrumentation {
     }
     
     public void callActivityOnDestroy(Activity activity) {
-      if (mWaitingActivities != null) {
-          synchronized (mSync) {
-              final int N = mWaitingActivities.size();
-              for (int i=0; i<N; i++) {
-                  final ActivityWaiter aw = mWaitingActivities.get(i);
-                  final Intent intent = aw.intent;
-                  if (intent.filterEquals(activity.getIntent())) {
-                      aw.activity = activity;
-                      mMessageQueue.addIdleHandler(new ActivityGoing(aw));
-                  }
-              }
-          }
-      }
+      // TODO: the following block causes intermittent hangs when using startActivity
+      // temporarily comment out until root cause is fixed (bug 2630683)
+//      if (mWaitingActivities != null) {
+//          synchronized (mSync) {
+//              final int N = mWaitingActivities.size();
+//              for (int i=0; i<N; i++) {
+//                  final ActivityWaiter aw = mWaitingActivities.get(i);
+//                  final Intent intent = aw.intent;
+//                  if (intent.filterEquals(activity.getIntent())) {
+//                      aw.activity = activity;
+//                      mMessageQueue.addIdleHandler(new ActivityGoing(aw));
+//                  }
+//              }
+//          }
+//      }
       
       activity.performDestroy();
       
