@@ -1444,12 +1444,6 @@
   </text>
 </comment>
 <comment>
-  <identifier id="android.media.AudioManager.registerAudioFocusListener_added(android.media.AudioManager.OnAudioFocusChangeListener)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
   <identifier id="android.media.AudioManager.registerMediaButtonEventReceiver_added(android.content.ComponentName)"/>
   <text>
     InsertCommentsHere
@@ -1469,12 +1463,6 @@
 </comment>
 <comment>
   <identifier id="android.media.AudioManager.stopBluetoothSco_added()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.media.AudioManager.unregisterAudioFocusListener_added(android.media.AudioManager.OnAudioFocusChangeListener)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -4437,5 +4425,21 @@
     InsertCommentsHere
   </text>
 </comment>
+<!-- This comment is no longer used 
+<comment>
+  <identifier id="android.media.AudioManager.registerAudioFocusListener_added(android.media.AudioManager.OnAudioFocusChangeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+-->
+<!-- This comment is no longer used 
+<comment>
+  <identifier id="android.media.AudioManager.unregisterAudioFocusListener_added(android.media.AudioManager.OnAudioFocusChangeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+-->
 
 </comments>
