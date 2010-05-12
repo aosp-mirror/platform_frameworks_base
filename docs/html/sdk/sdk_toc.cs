@@ -123,7 +123,7 @@
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r3</a>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r4</a>
       <span class="new">new!</span></li>
     </ul>
   </li>
