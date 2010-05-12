@@ -58,14 +58,19 @@ typedef void* ZipEntryRO;
 class ZipFileRO {
 public:
     ZipFileRO()
-        : mFd(-1), mFileMap(NULL), mHashTableSize(-1), mHashTable(NULL)
+        : mFd(-1), mFileName(NULL), mFileLength(-1),
+          mDirectoryMap(NULL),
+          mNumEntries(-1), mDirectoryOffset(-1),
+          mHashTableSize(-1), mHashTable(NULL)
         {}
     ~ZipFileRO() {
         free(mHashTable);
-        if (mFileMap)
-            mFileMap->release();
+        if (mDirectoryMap)
+            mDirectoryMap->release();
         if (mFd >= 0)
             close(mFd);
+        if (mFileName)
+            free(mFileName);
     }
 
     /*
@@ -118,8 +123,8 @@ public:
      * Returns "false" if "entry" is bogus or if the data in the Zip file
      * appears to be bad.
      */
-    bool getEntryInfo(ZipEntryRO entry, int* pMethod, long* pUncompLen,
-        long* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32) const;
+    bool getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
+        size_t* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32) const;
 
     /*
      * Create a new FileMap object that maps a subset of the archive.  For
@@ -155,13 +160,13 @@ public:
      * Utility function: uncompress deflated data, buffer to buffer.
      */
     static bool inflateBuffer(void* outBuf, const void* inBuf,
-        long uncompLen, long compLen);
+        size_t uncompLen, size_t compLen);
 
     /*
      * Utility function: uncompress deflated data, buffer to fd.
      */
     static bool inflateBuffer(int fd, const void* inBuf,
-        long uncompLen, long compLen);
+        size_t uncompLen, size_t compLen);
 
     /*
      * Some basic functions for raw data manipulation.  "LE" means
@@ -178,6 +183,9 @@ private:
     /* these are private and not defined */ 
     ZipFileRO(const ZipFileRO& src);
     ZipFileRO& operator=(const ZipFileRO& src);
+
+    /* locate and parse the central directory */
+    bool mapCentralDirectory(void);
 
     /* parse the archive, prepping internal structures */
     bool parseZipArchive(void);
@@ -203,11 +211,20 @@ private:
     /* open Zip archive */
     int         mFd;
 
+    /* zip file name */
+    char*       mFileName;
+
+    /* length of file */
+    size_t      mFileLength;
+
     /* mapped file */
-    FileMap*    mFileMap;
+    FileMap*    mDirectoryMap;
 
     /* number of entries in the Zip archive */
     int         mNumEntries;
+
+    /* CD directory offset in the Zip archive */
+    off_t       mDirectoryOffset;
 
     /*
      * We know how many entries are in the Zip archive, so we have a
