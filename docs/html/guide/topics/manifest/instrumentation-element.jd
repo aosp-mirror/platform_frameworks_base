@@ -51,15 +51,15 @@ name specified in the <code><a href="{@docRoot}guide/topics/manifest/manifest-el
 There is no default.  The name must be specified.
 </p></dd>
 
-<!-- ##api level indication## -->
-<dt>introduced in:</dt>
-<dd>API Level 1</dd>
-
 <dt><a name="trgt"></a>{@code android:targetPackage}</dt>
 <dd>The application that the Instrumentation object will run against.
 An application is identified by the package name assigned in its manifest
 file by the <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.</dd>
 
 </dl></dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
 
 </dl>
