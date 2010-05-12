@@ -1,0 +1,37 @@
+page.title=Testing Overview
+@jd:body
+
+<p>
+    Android includes powerful tools for setting up and running test applications.
+    Whether you are working in Eclipse with ADT or working from the command line, these tools
+    help you set up and run your tests within an emulator or the device you are targeting.
+    The documents listed below explain how to work with the tools in your development environment.
+</p>
+<p>
+    If you aren't yet familiar with the Android testing framework, please read the topic
+    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing and Instrumentation</a>
+    before you get started.
+    For a step-by-step introduction to Android testing, try the <a
+    href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello, Testing</a>
+    tutorial, which introduces basic testing concepts and procedures.
+    For a more advanced tutorial, try <a
+    href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>,
+    which guides you through a more complex testing scenario.
+</p>
+<dl>
+  <dt><a href="testing_eclipse.html">Testing in Eclipse, with ADT</a></dt>
+          <dd>
+            The ADT plugin lets you quickly set up and manage test projects directly in
+            the Eclipse UI. Once you have written your tests, you can build and run them and
+            then see the results in the Eclipse JUnit view. You can also use the SDK command-line
+            tools to execute your tests if needed.
+          </dd>
+  <dt><a href="testing_otheride.html">Testing in Other IDEs</a></dt>
+    <dd>
+        The SDK command-line tools provide the same capabilities as the ADT plugin. You can
+        use them to set up and manage test projects, build your test application,
+        run your tests, and see the results. You use
+        the <code>android</code> tool to create and manage test projects, the Ant build system
+        to compile them, and the <code>adb</code> tool to install and run them.
+    </dd>
+</dl>

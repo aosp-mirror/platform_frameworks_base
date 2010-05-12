@@ -275,6 +275,25 @@
             <span class="en">Debugging Tasks</span>
           </a></li>
       <li class="toggle-list">
+           <div>
+                <a href="<?cs var:toroot ?>guide/developing/testing/index.html">
+                   <span class="en">Testing</span>
+               </a> <span class="new">new!</span>
+           </div>
+           <ul>
+              <li>
+                <a href="<?cs var:toroot ?>guide/developing/testing/testing_eclipse.html">
+                  <span class="en">Testing in Eclipse, with ADT</span>
+                </a> <span class="new">new!</span>
+              </li>
+              <li>
+                <a href="<?cs var:toroot ?>guide/developing/testing/testing_otheride.html">
+                  <span class="en">Testing in Other IDEs</span>
+                </a> <span class="new">new!</span>
+              </li>
+           </ul>
+         </li>
+      <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/developing/tools/index.html">
             <span class="en">Tools</span>
           </a></div>
