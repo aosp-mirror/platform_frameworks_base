@@ -35,6 +35,7 @@ extends CharSequence
 
     /**
      * Just like {@link Canvas#drawTextRun}.
+     * {@hide}
      */
     void drawTextRun(Canvas c, int start, int end,
                          float x, float y, int flags, Paint p);
