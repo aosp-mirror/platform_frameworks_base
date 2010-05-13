@@ -90,8 +90,10 @@ status_t AACDecoder::start(MetaData *params) {
         mConfig->pOutputBuffer_plus = NULL;
         mConfig->repositionFlag = false;
 
-        CHECK_EQ(PVMP4AudioDecoderConfig(mConfig, mDecoderBuf),
-                 MP4AUDEC_SUCCESS);
+        if (PVMP4AudioDecoderConfig(mConfig, mDecoderBuf)
+                != MP4AUDEC_SUCCESS) {
+            return ERROR_UNSUPPORTED;
+        }
     }
 
     mSource->start();
