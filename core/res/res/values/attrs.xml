@@ -244,6 +244,13 @@
              {@link android.R.styleable#WindowAnimation}. -->
         <attr name="windowAnimationStyle" format="reference" />
 
+        <!-- Flag indicating whether this window should have an Action Bar
+             in place of the usual title bar. -->
+        <attr name="windowActionBar" format="boolean" />
+
+        <!-- Reference to a style for the Action Bar -->
+        <attr name="windowActionBarStyle" format="reference" />
+
         <!-- Defines the default soft input state that this window would
              like when it is displayed. -->
         <attr name="windowSoftInputMode">
@@ -948,6 +955,8 @@
         <attr name="textColor" />
         <attr name="backgroundDimEnabled" />
         <attr name="backgroundDimAmount" />
+        <attr name="windowActionBar" />
+        <attr name="windowActionBarStyle" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -3243,6 +3252,10 @@
         <!-- Whether the item is enabled. -->
         <attr name="enabled" />
 
+        <!-- Name of a method on the Context used to inflate the menu that will be
+             called when the item is clicked. -->
+        <attr name="onClick" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -3760,6 +3773,44 @@
              android.widget.Adapters.CursorTransformation. Mandatory if "withExpression"
              is not specified. -->
         <attr name="withClass" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes used to style the Action Bar. -->
+    <declare-styleable name="ActionBar">
+        <!-- The type of navigation to use. -->
+        <attr name="navigationMode">
+            <!-- Normal static title text -->
+            <enum name="normal" value="0" />
+            <!-- The action bar will use a drop-down selection in place of title text. -->
+            <enum name="dropdownList" value="1" />
+            <!-- The action bar will use a series of horizontal tabs in place of title text. -->
+            <enum name="tabBar" value="2" />
+        </attr>
+        <!-- Options affecting how the action bar is displayed. -->
+        <attr name="displayOptions">
+            <flag name="useLogo" value="1" />
+            <flag name="hideHome" value="2" />
+        </attr>
+        <!-- Specifies the color used to style the action bar. -->
+        <attr name="colorFilter" format="color" />
+        <!-- Specifies title text used for navigationMode="normal" -->
+        <attr name="title" />
+        <!-- Specifies subtitle text used for navigationMode="normal" -->
+        <attr name="subtitle" format="string" />
+        <!-- Specifies a style to use for title text. -->
+        <attr name="titleTextStyle" format="reference" />
+        <!-- Specifies a style to use for subtitle text. -->
+        <attr name="subtitleTextStyle" format="reference" />
+        <!-- Specifies the drawable used for the application icon. -->
+        <attr name="icon" />
+        <!-- Specifies the drawable used for the application logo. -->
+        <attr name="logo" />
+        <!-- Specifies the drawable used for item dividers. -->
+        <attr name="divider" />
+        <!-- Specifies a background drawable for the action bar. -->
+        <attr name="background" />
+        <!-- Specifies a layout for custom navigation. Overrides navigationMode. -->
+        <attr name="customNavigationLayout" format="reference" />
     </declare-styleable>
 
 </resources>

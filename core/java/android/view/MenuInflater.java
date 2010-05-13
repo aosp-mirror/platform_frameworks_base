@@ -16,9 +16,8 @@
 
 package android.view;
 
-import com.android.internal.view.menu.MenuItemImpl;
-
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -29,6 +28,8 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
+
+import com.android.internal.view.menu.MenuItemImpl;
 
 /**
  * This class is used to instantiate menu XML files into Menu objects.
@@ -166,6 +167,41 @@ public class MenuInflater {
         }
     }
     
+    private static class InflatedOnMenuItemClickListener
+            implements MenuItem.OnMenuItemClickListener {
+        private static final Class[] PARAM_TYPES = new Class[] { MenuItem.class };
+        
+        private Context mContext;
+        private Method mMethod;
+        
+        public InflatedOnMenuItemClickListener(Context context, String methodName) {
+            mContext = context;
+            Class c = context.getClass();
+            try {
+                mMethod = c.getMethod(methodName, PARAM_TYPES);
+            } catch (Exception e) {
+                InflateException ex = new InflateException(
+                        "Couldn't resolve menu item onClick handler " + methodName +
+                        " in class " + c.getName());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
+        
+        public boolean onMenuItemClick(MenuItem item) {
+            try {
+                if (mMethod.getReturnType() == Boolean.TYPE) {
+                    return (Boolean) mMethod.invoke(mContext, item);
+                } else {
+                    mMethod.invoke(mContext, item);
+                    return true;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    
     /**
      * State for the current menu.
      * <p>
@@ -204,6 +240,8 @@ public class MenuInflater {
         private boolean itemChecked;
         private boolean itemVisible;
         private boolean itemEnabled;
+        
+        private String itemListenerMethodName;
         
         private static final int defaultGroupId = NO_ID;
         private static final int defaultItemId = NO_ID;
@@ -276,6 +314,7 @@ public class MenuInflater {
             itemChecked = a.getBoolean(com.android.internal.R.styleable.MenuItem_checked, defaultItemChecked);
             itemVisible = a.getBoolean(com.android.internal.R.styleable.MenuItem_visible, groupVisible);
             itemEnabled = a.getBoolean(com.android.internal.R.styleable.MenuItem_enabled, groupEnabled);
+            itemListenerMethodName = a.getString(com.android.internal.R.styleable.MenuItem_onClick);
             
             a.recycle();
             
@@ -299,8 +338,13 @@ public class MenuInflater {
                 .setIcon(itemIconResId)
                 .setAlphabeticShortcut(itemAlphabeticShortcut)
                 .setNumericShortcut(itemNumericShortcut);
+            
+            if (itemListenerMethodName != null) {
+                item.setOnMenuItemClickListener(
+                        new InflatedOnMenuItemClickListener(mContext, itemListenerMethodName));
+            }
 
-            if (itemCheckable >= 2) {
+            if (itemCheckable >= 2 && item instanceof MenuItemImpl) {
                 ((MenuItemImpl) item).setExclusiveCheckable(true);
             }
         }

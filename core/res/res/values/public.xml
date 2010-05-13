@@ -1275,5 +1275,15 @@
   <public type="attr" name="withExpression" />
   <public type="attr" name="withClass" />
   <public type="attr" name="allContactsName" />
+  <public type="attr" name="windowActionBar" />
+  <public type="attr" name="windowActionBarStyle" />
+  <public type="attr" name="navigationMode" />
+  <public type="attr" name="displayOptions" />
+  <public type="attr" name="subtitle" />
+  <public type="attr" name="customNavigationLayout" />
+
+  <public type="id" name="home" />
+
+  <public type="style" name="Theme.WithActionBar" />
 
 </resources>
