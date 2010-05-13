@@ -951,48 +951,11 @@ class TextLine {
     private void drawTextRun(Canvas c, TextPaint wp, int start, int limit,
             boolean runIsRtl, float x, int y) {
 
-        // Since currently skia only renders text left-to-right, we need to
-        // put the shaped characters into visual order before rendering.
-        // Since we might want to re-render the line again, we swap them
-        // back when we're done.  If we left them swapped, measurement
-        // would be broken since it expects the characters in logical order.
-        if (runIsRtl) {
-            swapRun(start, limit);
-        }
+        int flags = runIsRtl ? Canvas.DIRECTION_RTL : Canvas.DIRECTION_LTR;
         if (mCharsValid) {
-            c.drawText(mChars, start, limit - start, x, y, wp);
+            c.drawTextRun(mChars, start, limit - start, x, y, flags, wp);
         } else {
-            c.drawText(mText, mStart + start, mStart + limit, x, y, wp);
-        }
-        if (runIsRtl) {
-            swapRun(start, limit);
-        }
-    }
-
-    /**
-     * Reverses the order of characters in the chars array between start and
-     * limit, used by drawTextRun.
-     * @param start the start of the run to reverse
-     * @param limit the limit of the run to reverse
-     */
-    private void swapRun(int start, int limit) {
-        // First we swap all the characters one for one, then we
-        // do another pass looking for surrogate pairs and swapping them
-        // back into their logical order.
-        char[] chars = mChars;
-        for (int s = start, e = limit - 1; s < e; ++s, --e) {
-            char ch = chars[s]; chars[s] = chars[e]; chars[e] = ch;
-        }
-
-        for (int s = start, e = limit - 1; s < e; ++s) {
-            char c1 = chars[s];
-            if (c1 >= 0xdc00 && c1 < 0xe000) {
-                char c2 = chars[s+1];
-                if (c2 >= 0xd800 && c2 < 0xdc00) {
-                    chars[s++] = c2;
-                    chars[s] = c1;
-                }
-            }
+            c.drawTextRun(mText, mStart + start, mStart + limit, x, y, flags, wp);
         }
     }
 

@@ -30,6 +30,8 @@
 #include "SkBoundaryPatch.h"
 #include "SkMeshUtils.h"
 
+#include "unicode/ubidi.h"
+
 #define TIME_DRAWx
 
 static uint32_t get_thread_msec() {
@@ -51,6 +53,24 @@ namespace android {
 
 class SkCanvasGlue {
 public:
+
+    enum {
+      kDirection_LTR = 0,
+      kDirection_RTL = 1
+    };
+
+    enum {
+      kDirection_Mask = 0x1
+    };
+
+    enum {
+      kBidi_LTR = 0,
+      kBidi_RTL = 1,
+      kBidi_Default_LTR = 2,
+      kBidi_Default_RTL = 3,
+      kBidi_Force_LTR = 4,
+      kBidi_Force_RTL = 5
+    };
 
     static void finalizer(JNIEnv* env, jobject clazz, SkCanvas* canvas) {
         canvas->unref();
@@ -743,45 +763,206 @@ public:
         canvas->drawVertices(mode, ptCount, verts, texs, colors, NULL,
                              indices, indexCount, *paint);
     }
-    
-    static void drawText___CIIFFPaint(JNIEnv* env, jobject, SkCanvas* canvas,
-                                      jcharArray text, int index, int count,
-                                      jfloat x, jfloat y, SkPaint* paint) {
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jsize textCount = env->GetArrayLength(text);
+
+    static void shapeRtlText__(const jchar* text, jsize len, jsize start, jsize count, jchar* shaped) {
+        // fake shaping, just reverse the text
+        for (int i = 0; i < count; ++i) {
+            shaped[i] = text[start + count - 1 - i];
+        }
+        // fix surrogate pairs, if any
+        for (int i = 1; i < count; ++i) {
+            if (shaped[i] >= 0xd800 && shaped[i] < 0xdc00 && 
+                    shaped[i-1] >= 0xdc00 && shaped[i-1] < 0xe000) {
+                jchar c = shaped[i]; shaped[i] = shaped[i-1]; shaped[i-1] = c;
+                i += 1;
+            }
+        }
+    }
+
+    static void drawText__(JNIEnv* env, SkCanvas* canvas, const jchar* text, jsize len,
+                           jfloat x, jfloat y, int flags, SkPaint* paint) {
         SkScalar x_ = SkFloatToScalar(x);
         SkScalar y_ = SkFloatToScalar(y);
-        canvas->drawText(textArray + index, count << 1, x_, y_, *paint);
-        env->ReleaseCharArrayElements(text, textArray, 0);
+
+	SkPaint::Align horiz = paint->getTextAlign();
+
+        bool needBidi = (flags == kBidi_RTL) || (flags == kBidi_Default_RTL);
+        if (!needBidi && flags < kBidi_Force_LTR) {
+            for (int i = 0; i < len; ++i) {
+                if (text[i] >= 0x0590) {
+                    needBidi = TRUE;
+                    break;
+                }
+            }
+        }
+
+        int dir = (flags == kBidi_Force_RTL) ? kDirection_RTL : kDirection_LTR; // will be reset if we run bidi
+        UErrorCode status = U_ZERO_ERROR;
+        jchar *shaped = NULL;
+        int32_t slen = 0;
+        if (needBidi || (flags == kBidi_Force_RTL)) {
+            shaped = (jchar *)malloc(len * sizeof(jchar));
+            if (!shaped) {
+                status = U_MEMORY_ALLOCATION_ERROR;
+            } else {
+                if (needBidi) {
+                    static int RTL_OPTS = UBIDI_DO_MIRRORING | UBIDI_KEEP_BASE_COMBINING |
+                            UBIDI_REMOVE_BIDI_CONTROLS | UBIDI_OUTPUT_REVERSE;
+                    jint lineDir = 0;
+                    switch (flags) {
+                    case kBidi_LTR: lineDir = 0; break; // no ICU constant, canonical LTR level
+                    case kBidi_RTL: lineDir = 1; break; // no ICU constant, canonical RTL level
+                    case kBidi_Default_LTR: lineDir = UBIDI_DEFAULT_LTR; break;
+                    case kBidi_Default_RTL: lineDir = UBIDI_DEFAULT_RTL; break;
+                    }
+                      
+                    UBiDi* bidi = ubidi_open();
+                    ubidi_setPara(bidi, text, len, lineDir, NULL, &status);
+                    if (U_SUCCESS(status)) {
+                        dir = ubidi_getParaLevel(bidi) & 0x1;
+
+                        int rc = ubidi_countRuns(bidi, &status);
+                        if (U_SUCCESS(status)) {
+                            int32_t start;
+                            int32_t length;
+                            UBiDiDirection dir;
+                            jchar *buffer = NULL;
+                            for (int i = 0; i < rc; ++i) {
+                                dir = ubidi_getVisualRun(bidi, i, &start, &length);
+                                // fake shaping, except it doesn't shape, just mirrors and reverses
+                                // use harfbuzz when available
+                                if (dir == UBIDI_RTL) {
+                                    slen += ubidi_writeReverse(text + start, length, shaped + slen,
+                                                               length, RTL_OPTS, &status);
+                                } else {
+                                    for (int i = 0; i < length; ++i) {
+                                        shaped[slen + i] = text[start + i];
+                                    }
+                                    slen += length;
+                                }
+                            }
+                        }
+                        ubidi_close(bidi);
+                    } 
+                } else {
+                    shapeRtlText__(text, len, 0, len, shaped);
+                }
+            }
+        }
+
+        if (!U_SUCCESS(status)) {
+            char buffer[35];
+            sprintf(buffer, "DrawText bidi error %d", status);
+            doThrowIAE(env, buffer);
+        } else {
+            bool trimLeft = false;
+            bool trimRight = false;
+
+            switch (horiz) {
+            case SkPaint::kLeft_Align: trimLeft = dir & kDirection_Mask; break;
+            case SkPaint::kCenter_Align: trimLeft = trimRight = true; break;
+            case SkPaint::kRight_Align: trimRight = !(dir & kDirection_Mask);
+            default: break;
+            }
+            const jchar* workText = shaped ? shaped : text;
+            const jchar* workLimit = workText + len;
+
+            if (trimLeft) {
+                while (workText < workLimit && *workText == ' ') {
+                    ++workText;
+                }
+            }
+            if (trimRight) {
+                while (workLimit > workText && *(workLimit - 1) == ' ') {
+                    --workLimit;
+                }
+            }
+            int32_t workBytes = (workLimit - workText) << 1;
+
+            canvas->drawText(workText, workBytes, x_, y_, *paint);
+        }
+
+        if (shaped) {
+            free(shaped);
+        }
+    }
+    
+    static void drawText___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
+                                      jcharArray text, int index, int count,
+                                      jfloat x, jfloat y, int flags, SkPaint* paint) {
+        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        drawText__(env, canvas, textArray + index, count, x, y, flags, paint);
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     }
  
-    static void drawText__StringIIFFPaint(JNIEnv* env, jobject,
-                            SkCanvas* canvas, jstring text, int start, int end,
-                                          jfloat x, jfloat y, SkPaint* paint) {
-        const void* text_ = env->GetStringChars(text, NULL);
+    static void drawText__StringIIFFIPaint(JNIEnv* env, jobject,
+                                          SkCanvas* canvas, jstring text, 
+                                          int start, int end,
+                                          jfloat x, jfloat y, int flags, SkPaint* paint) {
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        drawText__(env, canvas, textArray + start, end - start, x, y, flags, paint);
+        env->ReleaseStringChars(text, textArray);
+    }
+    
+    // Draws a unidirectional run of text.  Does not run bidi, but does reorder the
+    // text and run shaping (or will, when we have harfbuzz support).
+    static void drawTextRun__(JNIEnv* env, SkCanvas* canvas, const jchar* chars, int len, 
+                              int start, int count,
+                              jfloat x, jfloat y, int flags, SkPaint* paint) {
+
         SkScalar x_ = SkFloatToScalar(x);
         SkScalar y_ = SkFloatToScalar(y);
-        canvas->drawText((const uint16_t*)text_ + start, (end - start) << 1,
-                         x_, y_, *paint);
-        env->ReleaseStringChars(text, (const jchar*) text_);
-    }
-    
-    static void drawString(JNIEnv* env, jobject canvas, jstring text,
-                           jfloat x, jfloat y, jobject paint) {
-        NPE_CHECK_RETURN_VOID(env, canvas);
-        NPE_CHECK_RETURN_VOID(env, paint);
-        NPE_CHECK_RETURN_VOID(env, text);
-        size_t count = env->GetStringLength(text);
-        if (0 == count) {
-            return;
+
+        uint8_t rtl = flags & 0x1;
+
+        UErrorCode status = U_ZERO_ERROR;
+        jchar *shaped = NULL;
+        if (rtl) {
+            shaped = (jchar *)malloc(count * sizeof(jchar));
+            if (!shaped) {
+                status = U_MEMORY_ALLOCATION_ERROR;
+            } else {
+                shapeRtlText__(chars, len, start, count, shaped);
+            }
         }
-        const jchar* text_ = env->GetStringChars(text, NULL);
-        SkCanvas* c = GraphicsJNI::getNativeCanvas(env, canvas);
-        c->drawText(text_, count << 1, SkFloatToScalar(x), SkFloatToScalar(y),
-                    *GraphicsJNI::getNativePaint(env, paint));
-        env->ReleaseStringChars(text, text_);
+
+        if (!U_SUCCESS(status)) {
+            char buffer[30];
+            sprintf(buffer, "DrawTextRun error %d", status);
+            doThrowIAE(env, buffer);
+        } else {
+            if (shaped) {
+                canvas->drawText(shaped, count << 1, x_, y_, *paint);
+            } else {
+                canvas->drawText(chars + start, count << 1, x_, y_, *paint);
+            }
+        }
+
+        if (shaped) {
+            free(shaped);
+        }
     }
-    
+
+    static void drawTextRun___CIIFFIPaint(
+        JNIEnv* env, jobject, SkCanvas* canvas, jcharArray text, int index,
+        int count, jfloat x, jfloat y, int flags, SkPaint* paint) {
+
+        jint len = env->GetArrayLength(text);
+        jchar* chars = env->GetCharArrayElements(text, NULL);
+        drawTextRun__(env, canvas, chars, len, index, count, x, y, flags, paint);
+        env->ReleaseCharArrayElements(text, chars, JNI_ABORT);
+    }
+
+    static void drawTextRun__StringIIFFIPaint(
+        JNIEnv* env, jobject obj, SkCanvas* canvas, jstring text, int start,
+        int end, jfloat x, jfloat y, int flags, SkPaint* paint) {
+
+        jint len = env->GetStringLength(text);
+        const jchar* chars = env->GetStringChars(text, NULL);
+        drawTextRun__(env, canvas, chars, len, start, end - start, x, y, flags, paint);
+        env->ReleaseStringChars(text, chars);
+    }
+
     static void drawPosText___CII_FPaint(JNIEnv* env, jobject, SkCanvas* canvas,
                                          jcharArray text, int index, int count,
                                          jfloatArray pos, SkPaint* paint) {
@@ -947,12 +1128,14 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*)SkCanvasGlue::drawBitmapMesh},
     {"nativeDrawVertices", "(III[FI[FI[II[SIII)V",
         (void*)SkCanvasGlue::drawVertices},
-    {"native_drawText","(I[CIIFFI)V",
-        (void*) SkCanvasGlue::drawText___CIIFFPaint},
-    {"native_drawText","(ILjava/lang/String;IIFFI)V",
-        (void*) SkCanvasGlue::drawText__StringIIFFPaint},
-    {"drawText","(Ljava/lang/String;FFLandroid/graphics/Paint;)V",
-        (void*) SkCanvasGlue::drawString},
+    {"native_drawText","(I[CIIFFII)V",
+        (void*) SkCanvasGlue::drawText___CIIFFIPaint},
+    {"native_drawText","(ILjava/lang/String;IIFFII)V",
+        (void*) SkCanvasGlue::drawText__StringIIFFIPaint},
+    {"native_drawTextRun","(I[CIIFFII)V",
+        (void*) SkCanvasGlue::drawTextRun___CIIFFIPaint},
+    {"native_drawTextRun","(ILjava/lang/String;IIFFII)V",
+        (void*) SkCanvasGlue::drawTextRun__StringIIFFIPaint},
     {"native_drawPosText","(I[CII[FI)V",
         (void*) SkCanvasGlue::drawPosText___CII_FPaint},
     {"native_drawPosText","(ILjava/lang/String;[FI)V",

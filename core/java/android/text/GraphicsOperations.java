@@ -34,6 +34,12 @@ extends CharSequence
                          float x, float y, Paint p);
 
     /**
+     * Just like {@link Canvas#drawTextRun}.
+     */
+    void drawTextRun(Canvas c, int start, int end,
+                         float x, float y, int flags, Paint p);
+
+   /**
      * Just like {@link Paint#measureText}.
      */
     float measureText(int start, int end, Paint p);
