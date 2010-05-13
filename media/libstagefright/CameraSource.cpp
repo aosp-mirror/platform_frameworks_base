@@ -27,41 +27,9 @@
 #include <media/stagefright/MetaData.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
-#include <ui/GraphicBuffer.h>
-#include <ui/Overlay.h>
-#include <surfaceflinger/ISurface.h>
 #include <utils/String8.h>
 
 namespace android {
-
-struct DummySurface : public BnSurface {
-    DummySurface() {}
-
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) {
-        return NULL;
-    }
-    virtual status_t setBufferCount(int bufferCount) {
-        return INVALID_OPERATION;
-    }
-
-    virtual status_t registerBuffers(const BufferHeap &buffers) {
-        return OK;
-    }
-
-    virtual void postBuffer(ssize_t offset) {}
-    virtual void unregisterBuffers() {}
-
-    virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format, int32_t orientation) {
-        return NULL;
-    }
-
-protected:
-    virtual ~DummySurface() {}
-
-    DummySurface(const DummySurface &);
-    DummySurface &operator=(const DummySurface &);
-};
 
 struct CameraSourceListener : public CameraListener {
     CameraSourceListener(const sp<CameraSource> &source);
@@ -150,23 +118,12 @@ CameraSource::~CameraSource() {
     }
 }
 
-void CameraSource::setPreviewSurface(const sp<ISurface> &surface) {
-    mPreviewSurface = surface;
-}
-
 status_t CameraSource::start(MetaData *) {
     LOGV("start");
     CHECK(!mStarted);
 
     mCamera->setListener(new CameraSourceListener(this));
-
-    status_t err =
-        mCamera->setPreviewDisplay(
-                mPreviewSurface != NULL ? mPreviewSurface : new DummySurface);
-    CHECK_EQ(err, OK);
-
-    err = mCamera->startRecording();
-    CHECK_EQ(err, OK);
+    CHECK_EQ(OK, mCamera->startRecording());
 
     mStarted = true;
 
