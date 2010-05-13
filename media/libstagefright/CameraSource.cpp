@@ -40,6 +40,9 @@ struct DummySurface : public BnSurface {
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) {
         return NULL;
     }
+    virtual status_t setBufferCount(int bufferCount) {
+        return INVALID_OPERATION;
+    }
 
     virtual status_t registerBuffers(const BufferHeap &buffers) {
         return OK;
