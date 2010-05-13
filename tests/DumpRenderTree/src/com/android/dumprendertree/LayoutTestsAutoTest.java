@@ -361,8 +361,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         // Read settings
         mTestPathPrefix = (new File(LAYOUT_TESTS_ROOT + runner.mTestPath)).getAbsolutePath();
         mRebaselineResults = runner.mRebaseline;
-        // JSC is the default JavaScript engine.
-        mJsEngine = runner.mJsEngine == null ? "jsc" : runner.mJsEngine;
+        // V8 is the default JavaScript engine.
+        mJsEngine = runner.mJsEngine == null ? "v8" : runner.mJsEngine;
 
         int timeout = runner.mTimeoutInMillis;
         if (timeout <= 0) {
