@@ -642,22 +642,18 @@ public class VCardBuilder {
                 if (TextUtils.isEmpty(phoneNumber)) {
                     continue;
                 }
-                int type = (typeAsObject != null ? typeAsObject : DEFAULT_PHONE_TYPE);
-                if (type == Phone.TYPE_PAGER) {
+
+                // PAGER number needs unformatted "phone number".
+                final int type = (typeAsObject != null ? typeAsObject : DEFAULT_PHONE_TYPE);
+                if (type == Phone.TYPE_PAGER ||
+                        VCardConfig.refrainPhoneNumberFormatting(mVCardType)) {
                     phoneLineExists = true;
                     if (!phoneSet.contains(phoneNumber)) {
                         phoneSet.add(phoneNumber);
                         appendTelLine(type, label, phoneNumber, isPrimary);
                     }
                 } else {
-                    // The entry "may" have several phone numbers when the contact entry is
-                    // corrupted because of its original source.
-                    //
-                    // e.g. I encountered the entry like the following.
-                    // "111-222-3333 (Miami)\n444-555-6666 (Broward; 305-653-6796 (Miami); ..."
-                    // This kind of entry is not able to be inserted via Android devices, but
-                    // possible if the source of the data is already corrupted.
-                    List<String> phoneNumberList = splitIfSeveralPhoneNumbersExist(phoneNumber);
+                    final List<String> phoneNumberList = splitAndTrimPhoneNumbers(phoneNumber);
                     if (phoneNumberList.isEmpty()) {
                         continue;
                     }
@@ -670,7 +666,7 @@ public class VCardBuilder {
                             phoneSet.add(actualPhoneNumber);
                             appendTelLine(type, label, formattedPhoneNumber, isPrimary);
                         }
-                    }
+                    }  // for (String actualPhoneNumber : phoneNumberList) {
                 }
             }
         }
@@ -682,15 +678,38 @@ public class VCardBuilder {
         return this;
     }
 
-    private List<String> splitIfSeveralPhoneNumbersExist(final String phoneNumber) {
-        List<String> phoneList = new ArrayList<String>();
+    /**
+     * <p>
+     * Splits a given string expressing phone numbers into several strings, and remove
+     * unnecessary characters inside them. The size of a returned list becomes 1 when
+     * no split is needed.
+     * </p>
+     * <p>
+     * The given number "may" have several phone numbers when the contact entry is corrupted
+     * because of its original source.
+     * e.g. "111-222-3333 (Miami)\n444-555-6666 (Broward; 305-653-6796 (Miami)"
+     * </p>
+     * <p>
+     * This kind of "phone numbers" will not be created with Android vCard implementation,
+     * but we may encounter them if the source of the input data has already corrupted
+     * implementation.
+     * </p>
+     * <p>
+     * To handle this case, this method first splits its input into multiple parts
+     * (e.g. "111-222-3333 (Miami)", "444-555-6666 (Broward", and 305653-6796 (Miami)") and
+     * removes unnecessary strings like "(Miami)".
+     * </p>
+     * <p>
+     * Do not call this method when trimming is inappropriate for its receivers.
+     * </p>
+     */
+    private List<String> splitAndTrimPhoneNumbers(final String phoneNumber) {
+        final List<String> phoneList = new ArrayList<String>();
 
         StringBuilder builder = new StringBuilder();
         final int length = phoneNumber.length();
         for (int i = 0; i < length; i++) {
             final char ch = phoneNumber.charAt(i);
-            // TODO: add a test case for string with '+', and care the other possible issues
-            // which may happen by ignoring non-digits other than '+'.
             if (Character.isDigit(ch) || ch == '+') {
                 builder.append(ch);
             } else if ((ch == ';' || ch == '\n') && builder.length() > 0) {
