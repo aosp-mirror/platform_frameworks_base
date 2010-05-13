@@ -51,7 +51,6 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& c, int32_t i)
     :   LayerBaseClient(flinger, display, c, i),
         mSecure(false),
-        mNoEGLImageForSwBuffers(false),
         mNeedsBlending(true),
         mNeedsDithering(false)
 {
@@ -126,7 +125,6 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     mHeight = h;
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
-    mNoEGLImageForSwBuffers = !(hwFlags & DisplayHardware::CACHED_BUFFERS);
 
     // we use the red index
     int displayRedSize = displayInfo.getSize(PixelFormatInfo::INDEX_RED);
@@ -162,92 +160,11 @@ void Layer::reloadTexture(const Region& dirty)
 
 #ifdef EGL_ANDROID_image_native_buffer
     if (mFlags & DisplayHardware::DIRECT_TEXTURE) {
-        if (buffer->usage & GraphicBuffer::USAGE_HW_TEXTURE) {
-            if (mTextures[index].dirty) {
-                if (initializeEglImage(buffer, &mTextures[index]) != NO_ERROR) {
-                    // not sure what we can do here...
-                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
-                    goto slowpath;
-                }
-            }
-        } else {
-            if (mHybridBuffer==0 || (mHybridBuffer->width != buffer->width ||
-                    mHybridBuffer->height != buffer->height)) {
-                mHybridBuffer.clear();
-                mHybridBuffer = new GraphicBuffer(
-                        buffer->width, buffer->height, buffer->format,
-                        GraphicBuffer::USAGE_SW_WRITE_OFTEN |
-                        GraphicBuffer::USAGE_HW_TEXTURE);
-                if (initializeEglImage(
-                        mHybridBuffer, &mTextures[0]) != NO_ERROR) {
-                    // not sure what we can do here...
-                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
-                    mHybridBuffer.clear();
-                    goto slowpath;
-                }
-            }
-
-            GGLSurface t;
-            status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
-            LOGE_IF(res, "error %d (%s) locking buffer %p",
-                    res, strerror(res), buffer.get());
-            if (res == NO_ERROR) {
-                Texture* const texture(&mTextures[0]);
-
-                glBindTexture(GL_TEXTURE_2D, texture->name);
-
-                sp<GraphicBuffer> buf(mHybridBuffer);
-                void* vaddr;
-                res = buf->lock(GraphicBuffer::USAGE_SW_WRITE_OFTEN, &vaddr);
-                if (res == NO_ERROR) {
-                    int bpp = 0;
-                    switch (t.format) {
-                    case HAL_PIXEL_FORMAT_RGB_565:
-                    case HAL_PIXEL_FORMAT_RGBA_4444:
-                        bpp = 2;
-                        break;
-                    case HAL_PIXEL_FORMAT_RGBA_8888:
-                    case HAL_PIXEL_FORMAT_RGBX_8888:
-                        bpp = 4;
-                        break;
-                    default:
-                        if (isSupportedYuvFormat(t.format)) {
-                            // just show the Y plane of YUV buffers
-                            bpp = 1;
-                            break;
-                        }
-                        // oops, we don't handle this format!
-                        LOGE("layer %p, texture=%d, using format %d, which is not "
-                                "supported by the GL", this, texture->name, t.format);
-                    }
-                    if (bpp) {
-                        const Rect bounds(dirty.getBounds());
-                        size_t src_stride = t.stride;
-                        size_t dst_stride = buf->stride;
-                        if (src_stride == dst_stride &&
-                            bounds.width() == t.width &&
-                            bounds.height() == t.height)
-                        {
-                            memcpy(vaddr, t.data, t.height * t.stride * bpp);
-                        } else {
-                            GLubyte const * src = t.data +
-                                (bounds.left + bounds.top * src_stride) * bpp;
-                            GLubyte * dst = (GLubyte *)vaddr +
-                                (bounds.left + bounds.top * dst_stride) * bpp;
-                            const size_t length = bounds.width() * bpp;
-                            size_t h = bounds.height();
-                            src_stride *= bpp;
-                            dst_stride *= bpp;
-                            while (h--) {
-                                memcpy(dst, src, length);
-                                dst += dst_stride;
-                                src += src_stride;
-                            }
-                        }
-                    }
-                    buf->unlock();
-                }
-                buffer->unlock();
+        if (mTextures[index].dirty) {
+            if (initializeEglImage(buffer, &mTextures[index]) != NO_ERROR) {
+                // not sure what we can do here...
+                mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
+                goto slowpath;
             }
         }
     } else
@@ -406,15 +323,8 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
     } else {
         // it's allowed to modify the usage flags here, but generally
         // the requested flags should be honored.
-        if (mNoEGLImageForSwBuffers) {
-            if (usage & GraphicBuffer::USAGE_HW_MASK) {
-                // request EGLImage for h/w buffers only
-                usage |= GraphicBuffer::USAGE_HW_TEXTURE;
-            }
-        } else {
-            // request EGLImage for all buffers
-            usage |= GraphicBuffer::USAGE_HW_TEXTURE;
-        }
+        // request EGLImage for all buffers
+        usage |= GraphicBuffer::USAGE_HW_TEXTURE;
     }
     return usage;
 }
