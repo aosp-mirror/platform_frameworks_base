@@ -20,6 +20,9 @@ import android.util.Log;
 
 /**
  * A base class for compiled SQLite programs.
+ *
+ * SQLiteProgram is not internally synchronized so code using a SQLiteProgram from multiple
+ * threads should perform its own synchronization when using the SQLiteProgram.
  */
 public abstract class SQLiteProgram extends SQLiteClosable {
 

@@ -23,6 +23,9 @@ import android.os.SystemClock;
  * The statement cannot return multiple rows, but 1x1 result sets are allowed.
  * Don't use SQLiteStatement constructor directly, please use
  * {@link SQLiteDatabase#compileStatement(String)}
+ *
+ * SQLiteStatement is not internally synchronized so code using a SQLiteStatement from multiple
+ * threads should perform its own synchronization when using the SQLiteStatement.
  */
 public class SQLiteStatement extends SQLiteProgram
 {
