@@ -1585,6 +1585,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 treeObserver.addOnGlobalLayoutListener(this);
             }
         }
+        
+        if (mAdapter != null && mDataSetObserver == null) {
+            mDataSetObserver = new AdapterDataSetObserver();
+            mAdapter.registerDataSetObserver(mDataSetObserver);
+        }
     }
 
     @Override
@@ -1604,6 +1609,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 treeObserver.removeGlobalOnLayoutListener(this);
                 mGlobalLayoutListenerAddedFilter = false;
             }
+        }
+
+        if (mAdapter != null) {
+            mAdapter.unregisterDataSetObserver(mDataSetObserver);
+            mDataSetObserver = null;
         }
     }
 

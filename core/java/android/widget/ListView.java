@@ -415,7 +415,7 @@ public class ListView extends AbsListView {
      */
     @Override
     public void setAdapter(ListAdapter adapter) {
-        if (null != mAdapter) {
+        if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
         }
 
