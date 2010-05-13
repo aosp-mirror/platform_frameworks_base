@@ -778,7 +778,12 @@ status_t AwesomePlayer::initAudioDecoder() {
             }
         }
 
-        mAudioSource->start();
+        status_t err = mAudioSource->start();
+
+        if (err != OK) {
+            mAudioSource.clear();
+            return err;
+        }
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_QCELP)) {
         // For legacy reasons we're simply going to ignore the absence
         // of an audio decoder for QCELP instead of aborting playback
