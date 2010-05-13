@@ -1181,7 +1181,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
-            children[i].dispatchSaveInstanceState(container);
+            View c = children[i];
+            if ((c.mViewFlags & PARENT_SAVE_DISABLED_MASK) != PARENT_SAVE_DISABLED) {
+                c.dispatchSaveInstanceState(container);
+            }
         }
     }
 
@@ -1206,7 +1209,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
-            children[i].dispatchRestoreInstanceState(container);
+            View c = children[i];
+            if ((c.mViewFlags & PARENT_SAVE_DISABLED_MASK) != PARENT_SAVE_DISABLED) {
+                c.dispatchRestoreInstanceState(container);
+            }
         }
     }
 

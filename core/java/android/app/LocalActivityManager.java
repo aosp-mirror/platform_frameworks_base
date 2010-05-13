@@ -112,11 +112,16 @@ public class LocalActivityManager {
         
         if (r.curState == INITIALIZING) {
             // Get the lastNonConfigurationInstance for the activity
-            HashMap<String,Object> lastNonConfigurationInstances =
-                mParent.getLastNonConfigurationChildInstances();
-            Object instance = null;
+            HashMap<String, Object> lastNonConfigurationInstances =
+                    mParent.getLastNonConfigurationChildInstances();
+            Object instanceObj = null;
             if (lastNonConfigurationInstances != null) {
-                instance = lastNonConfigurationInstances.get(r.id);
+                instanceObj = lastNonConfigurationInstances.get(r.id);
+            }
+            Activity.NonConfigurationInstances instance = null;
+            if (instanceObj != null) {
+                instance = new Activity.NonConfigurationInstances();
+                instance.activity = instanceObj;
             }
             
             // We need to have always created the activity.

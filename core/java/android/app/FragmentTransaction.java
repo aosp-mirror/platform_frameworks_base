@@ -4,7 +4,7 @@ package android.app;
  * API for performing a set of Fragment operations.
  */
 public interface FragmentTransaction {
-    public FragmentTransaction add(Fragment fragment);
+    public FragmentTransaction add(Fragment fragment, String tag);
     public FragmentTransaction add(Fragment fragment, int containerViewId);
     public FragmentTransaction replace(Fragment fragment, int containerViewId);
     public FragmentTransaction remove(Fragment fragment);
