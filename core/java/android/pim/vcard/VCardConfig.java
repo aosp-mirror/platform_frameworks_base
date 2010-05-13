@@ -251,30 +251,6 @@ public class VCardConfig {
      */
     public static final int FLAG_TORELATE_NEST = 0x01000000;
 
-    /**
-     * <P>
-     * The flag indicating the vCard composer does touch nothing toward phone number Strings
-     * but leave it as is.
-     * </P>
-     * <P>
-     * The vCard specifications mention nothing toward phone numbers, while some devices
-     * do (wrongly, but with innevitable reasons).
-     * For example, there's a possibility Japanese mobile phones are expected to have
-     * just numbers, hypens, plus, etc. but not usual alphabets, while US mobile phones
-     * should get such characters. To make exported vCard simple for external parsers,
-     * we have used {@link PhoneNumberUtils#formatNumber(String)} during export, and
-     * removed unnecessary characters inside the number (e.g. "111-222-3333 (Miami)"
-     * becomes "111-222-3333").
-     * Unfortunate side effect of that use was some control characters used in the other
-     * areas may be badly affected by the formatting.
-     * </P>
-     * <P>
-     * This flag disables that formatting, affecting both importer and exporter.
-     * If the user is aware of some side effects due to the implicit formatting, use this flag.
-     * </P>
-     */
-    public static final int FLAG_REFRAIN_PHONE_NUMBER_FORMATTING = 0x02000000;
-
     //// The followings are VCard types available from importer/exporter. ////
 
     /**
