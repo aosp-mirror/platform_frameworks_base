@@ -15,6 +15,8 @@
 #
 LOCAL_PATH:= $(call my-dir)
 
+ifneq ($(TARGET_SIMULATOR),true)
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
@@ -41,6 +43,8 @@ LOCAL_CFLAGS := -DMTP_DEVICE
 LOCAL_SHARED_LIBRARIES := libutils libsqlite
 
 include $(BUILD_EXECUTABLE)
+
+endif
 
 ifeq ($(HOST_OS),linux)
 
