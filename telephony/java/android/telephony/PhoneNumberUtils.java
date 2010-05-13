@@ -732,7 +732,8 @@ public class PhoneNumberUtils
             return "";
         }
 
-        if ((bytes[offset] & 0xff) == TOA_International) {
+        //Only TON field should be taken in consideration
+        if ((bytes[offset] & 0xf0) == (TOA_International & 0xf0)) {
             prependPlus = true;
         }
 

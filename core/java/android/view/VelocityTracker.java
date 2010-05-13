@@ -206,7 +206,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             final long oldestTime = pastTime[oldestTouch];
             float accumX = 0;
             float accumY = 0;
-            float N = (lastTouch - oldestTouch + NUM_PAST) % NUM_PAST + 1;
+            int N = (lastTouch - oldestTouch + NUM_PAST) % NUM_PAST + 1;
             // Skip the last received event, since it is probably pretty noisy.
             if (N > 3) N--;
 
