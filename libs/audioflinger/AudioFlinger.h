@@ -57,7 +57,7 @@ class AudioResampler;
 
 static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 
-class AudioFlinger : public BnAudioFlinger, public IBinder::DeathRecipient
+class AudioFlinger : public BnAudioFlinger
 {
 public:
     static void instantiate();
@@ -139,9 +139,6 @@ public:
 
     virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output);
 
-    // IBinder::DeathRecipient
-    virtual     void        binderDied(const wp<IBinder>& who);
-
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
         AUDIO_HW_INIT,
@@ -205,6 +202,27 @@ private:
         pid_t               mPid;
     };
 
+    // --- Notification Client ---
+    class NotificationClient : public IBinder::DeathRecipient {
+    public:
+                            NotificationClient(const sp<AudioFlinger>& audioFlinger,
+                                                const sp<IAudioFlingerClient>& client,
+                                                pid_t pid);
+        virtual             ~NotificationClient();
+
+                sp<IAudioFlingerClient>    client() { return mClient; }
+
+                // IBinder::DeathRecipient
+                virtual     void        binderDied(const wp<IBinder>& who);
+
+    private:
+                            NotificationClient(const NotificationClient&);
+                            NotificationClient& operator = (const NotificationClient&);
+
+        sp<AudioFlinger>        mAudioFlinger;
+        pid_t                   mPid;
+        sp<IAudioFlingerClient> mClient;
+    };
 
     class TrackHandle;
     class RecordHandle;
@@ -685,6 +703,7 @@ private:
 
 
                 void        removeClient_l(pid_t pid);
+                void        removeNotificationClient(pid_t pid);
 
 
     // record thread
@@ -796,8 +815,11 @@ private:
 
                 DefaultKeyedVector< int, sp<RecordThread> >    mRecordThreads;
 
-                SortedVector< sp<IBinder> >         mNotificationClients;
+                DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 int                                 mNextThreadId;
+#ifdef LVMX
+                int mLifeVibesClientPid;
+#endif
 };
 
 // ----------------------------------------------------------------------------
