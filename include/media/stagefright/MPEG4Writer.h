@@ -68,11 +68,15 @@ private:
     bool mStreamableFile;
     off_t mEstimatedMoovBoxSize;
     uint32_t mInterleaveDurationUs;
+    int64_t mStartTimestampUs;
     Mutex mLock;
 
     List<Track *> mTracks;
 
     List<off_t> mBoxes;
+
+    void setStartTimestamp(int64_t timeUs);
+    int64_t getStartTimestamp();  // Not const
 
     void lock();
     void unlock();
