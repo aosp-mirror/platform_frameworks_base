@@ -17,7 +17,6 @@
 package android.webkit;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Canvas;
@@ -33,12 +32,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.provider.Browser;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
@@ -576,7 +573,18 @@ final class WebViewCore {
     /**
      * Provide WebCore with the previously visted links from the history database
      */
-    private native void  nativeProvideVisitedHistory(String[] history);
+    private native void nativeProvideVisitedHistory(String[] history);
+
+    /**
+     * Modifies the current selection.
+     *
+     * @param alter Specifies how to alter the selection.
+     * @param direction The direction in which to alter the selection.
+     * @param granularity The granularity of the selection modification.
+     *
+     * @return The selection string.
+     */
+    private native String nativeModifySelection(String alter, String direction, String granularity);
 
     // EventHub for processing messages
     private final EventHub mEventHub;
@@ -716,7 +724,11 @@ final class WebViewCore {
         boolean mRemember;
     }
 
-
+    static class ModifySelectionData {
+        String mAlter;
+        String mDirection;
+        String mGranularity;
+    }
 
         static final String[] HandlerDebugString = {
             "REQUEST_LABEL", // 97
@@ -862,6 +874,9 @@ final class WebViewCore {
         static final int ADD_PACKAGE_NAMES = 184;
         static final int ADD_PACKAGE_NAME = 185;
         static final int REMOVE_PACKAGE_NAME = 186;
+
+        // accessibility support
+        static final int MODIFY_SELECTION = 190;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1234,6 +1249,19 @@ final class WebViewCore {
 
                         case SET_SELECTION:
                             nativeSetSelection(msg.arg1, msg.arg2);
+                            break;
+
+                        case MODIFY_SELECTION:
+                            ModifySelectionData modifySelectionData =
+                                (ModifySelectionData) msg.obj;
+                            String selectionString = nativeModifySelection(
+                                    modifySelectionData.mAlter,
+                                    modifySelectionData.mDirection,
+                                    modifySelectionData.mGranularity);
+
+                            mWebView.mPrivateHandler.obtainMessage(
+                                    WebView.SELECTION_STRING_CHANGED, selectionString)
+                                    .sendToTarget();
                             break;
 
                         case LISTBOX_CHOICES:
