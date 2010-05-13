@@ -585,12 +585,12 @@ status_t StagefrightRecorder::startMPEG4Recording() {
             return UNKNOWN_ERROR;
         }
 
+        CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
+
         sp<CameraSource> cameraSource =
             CameraSource::CreateFromCamera(mCamera);
 
         CHECK(cameraSource != NULL);
-
-        cameraSource->setPreviewSurface(mPreviewSurface);
 
         sp<MetaData> enc_meta = new MetaData;
         enc_meta->setInt32(kKeyBitRate, mVideoBitRate);
