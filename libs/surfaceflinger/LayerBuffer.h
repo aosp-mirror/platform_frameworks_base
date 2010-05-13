@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include "LayerBase.h"
+#include "TextureManager.h"
 
 struct copybit_device_t;
 
@@ -139,9 +140,9 @@ private:
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
         size_t                          mBufferSize;
-        mutable LayerBase::Texture      mTexture;
+        mutable Texture                 mTexture;
         mutable NativeBuffer            mTempBuffer;
-        mutable bool                    mUseEGLImageDirectly;
+        mutable TextureManager          mTextureManager;
     };
     
     class OverlaySource : public Source {
