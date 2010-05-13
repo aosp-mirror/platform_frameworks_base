@@ -1208,8 +1208,8 @@ import android.widget.SpinnerAdapter;
         Close Eclipse with ADT.
     </li>
     <li>
-        Copy the file <code>&lt;SDK_path&gt;/samples/android-8/SpinnerTest/src/com/android/examples/spinner/test/SpinnerActivityTest.java</code>
-        to the directory <code>workspace/SpinnerActivityTest/src/com/android/examples/spinner/test/</code>.
+        Copy the file <code>&lt;SDK_path&gt;/samples/android-8/SpinnerTest/src/com/android/example/spinner/test/SpinnerActivityTest.java</code>
+        to the directory <code>workspace/SpinnerActivityTest/src/com/android/example/spinner/test/</code>.
     </li>
     <li>
         Restart Eclipse with ADT.

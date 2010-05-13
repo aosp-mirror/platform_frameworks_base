@@ -275,8 +275,8 @@ application to see a complete SQLite implementation that performs searches with 
     <li>If your data is stored online, then the perceived search performance may be
 inhibited by the user's data connection. You may want to display a spinning progress wheel until
 your search returns. See {@link android.net} for a reference of network APIs and <a
-href="guide/topics/ui/dialogs.html#ProgressDialog">Creating a Progress Dialog</a> to see how
-you can display a progress wheel.</li>
+href="{@docRoot}guide/topics/ui/dialogs.html#ProgressDialog">Creating a Progress Dialog</a> to see
+how you can display a progress wheel.</li>
   </ul>
 
 

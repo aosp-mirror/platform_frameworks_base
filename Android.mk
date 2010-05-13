@@ -428,7 +428,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=2.1
+framework_docs_SDK_VERSION:=2.2
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
   # name of current SDK directory (full releases only)
@@ -437,10 +437,10 @@ framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_
 framework_docs_SDK_PREVIEW:=0
 
 ## Latest ADT version identifiers, for reference from published docs
-framework_docs_ADT_VERSION:=0.9.6
-framework_docs_ADT_DOWNLOAD:=ADT-0.9.6.zip
-framework_docs_ADT_BYTES:=7456339
-framework_docs_ADT_CHECKSUM:=ea45d271be52b87b5dd1c9fb17536223
+framework_docs_ADT_VERSION:=0.9.7
+framework_docs_ADT_DOWNLOAD:=ADT-0.9.7.zip
+framework_docs_ADT_BYTES:=na
+framework_docs_ADT_CHECKSUM:=na
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \

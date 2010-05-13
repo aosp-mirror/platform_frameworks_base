@@ -99,6 +99,9 @@ padding: .25em 1em;
 .toggleable a {
   text-decoration:none;
 }
+.toggleme a {
+  text-decoration:underline;
+}
 .toggleable.closed .toggleme {
   display:none;
 }
@@ -108,6 +111,29 @@ padding: .25em 1em;
 </style>
 
 <div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android 2.1, Revision 2</a> <em>(May 2010)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>Tools:</dt>
+<dd>
+<ul> 
+<li>Adds support for library projects in the Ant build system.</li>
+<li>Adds improved layout rendering in ADT’s visual layout editor.</li>
+</ul> 
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
         Android 2.1, Revision 1</a> <em>(January 2010)</em></a>

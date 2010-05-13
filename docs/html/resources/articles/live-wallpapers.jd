@@ -1,6 +1,19 @@
 page.title=Live Wallpapers
 @jd:body
 
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/samples/CubeLiveWallpaper/index.html">Live Wallpaper
+sample</a></li>
+  </ol>
+
+</div>
+</div>
+
 <p>Starting with Android 2.1 (API Level 7), users can now enjoy <em>live
 wallpapers</em> &mdash; richer, animated, interactive backgrounds &mdash; on
 their home screens. A live wallpaper is very similar to a normal Android
@@ -23,8 +36,8 @@ href="../samples/CubeLiveWallpaper/index.html">CubeLiveWallpaper sample code</a>
 <p>In terms of implementation, a live wallpaper is very similar to a regular
 Android <a href="../../../reference/android/app/Service.html">service</a>. The
 only difference is the addition of a new method, <a
-href="../../../reference/android/service/wallpaper/WallpaperService.
-html#onCreateEngine()"><code>onCreateEngine()</code></a>, whose goal is to create a <a
+href="../../../reference/android/service/wallpaper/WallpaperService.html#onCreateEngine()">{@code
+onCreateEngine()}</a>, whose goal is to create a <a
 href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html">
 <code>WallpaperService.Engine</code></a>. The engine is responsible for
 handling the lifecycle and drawing of a wallpaper. The system provides a surface

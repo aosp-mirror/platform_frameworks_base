@@ -1,7 +1,23 @@
 page.title=Quick Search Box
 @jd:body
 
-<img src="images/qsb_002.png" style="float: right; margin-left: 2em; margin-bottom: 1em; width: 233px; height: 349.5px;"></p>
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/search/index.html">Search</a></li>
+    <li><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable Dictionary
+sample</a></li>
+  </ol>
+
+</div>
+</div>
+
+<div class="figure" style="width:233px">
+<img src="images/qsb_002.png" alt="" height="350" />
+</div>
 
 <p>Starting with Android 1.6, the platform includes support for Quick Search
 Box (QSB), a powerful, system-wide search framework. Quick Search Box makes it
