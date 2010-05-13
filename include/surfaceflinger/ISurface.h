@@ -47,12 +47,14 @@ protected:
         POST_BUFFER, // one-way transaction
         CREATE_OVERLAY,
         REQUEST_BUFFER,
+        SET_BUFFER_COUNT,
     };
 
 public: 
     DECLARE_META_INTERFACE(Surface);
 
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
+    virtual status_t setBufferCount(int bufferCount) = 0;
     
     class BufferHeap {
     public:

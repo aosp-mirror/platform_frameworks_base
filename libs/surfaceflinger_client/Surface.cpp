@@ -673,6 +673,27 @@ int Surface::crop(Rect const* rect)
     return NO_ERROR;
 }
 
+int Surface::setBufferCount(int bufferCount)
+{
+    sp<ISurface> s(mSurface);
+    if (s == 0) return NO_INIT;
+
+    // FIXME: this needs to be synchronized dequeue/queue
+
+    status_t err = s->setBufferCount(bufferCount);
+    LOGE_IF(err, "ISurface::setBufferCount(%d) returned %s",
+            bufferCount, strerror(-err));
+    if (err == NO_ERROR) {
+        err = mSharedBufferClient->getStatus();
+        LOGE_IF(err,  "Surface (identity=%d) state = %d", mIdentity, err);
+        if (!err) {
+            // update our local copy of the buffer count
+            mSharedBufferClient->setBufferCount(bufferCount);
+        }
+    }
+    return err;
+}
+
 
 // ----------------------------------------------------------------------------
 

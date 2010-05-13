@@ -621,6 +621,11 @@ sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int index, int usage)
     return NULL; 
 }
 
+status_t LayerBaseClient::Surface::setBufferCount(int bufferCount)
+{
+    return INVALID_OPERATION;
+}
+
 status_t LayerBaseClient::Surface::registerBuffers(
         const ISurface::BufferHeap& buffers) 
 { 
