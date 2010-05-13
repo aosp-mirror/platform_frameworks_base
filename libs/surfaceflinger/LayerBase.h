@@ -46,6 +46,7 @@ class Client;
 class GraphicBuffer;
 class GraphicPlane;
 class SurfaceFlinger;
+class Texture;
 
 // ---------------------------------------------------------------------------
 
@@ -221,35 +222,10 @@ protected:
     const GraphicPlane& graphicPlane(int dpy) const;
           GraphicPlane& graphicPlane(int dpy);
 
-          GLuint createTexture() const;
-    
-          struct Texture {
-              Texture() : name(-1U), width(0), height(0),
-                  image(EGL_NO_IMAGE_KHR), transform(0), 
-                  NPOTAdjust(false), dirty(true) { }
-              GLuint        name;
-              GLuint        width;
-              GLuint        height;
-              GLuint        potWidth;
-              GLuint        potHeight;
-              GLfloat       wScale;
-              GLfloat       hScale;
-              EGLImageKHR   image;
-              uint32_t      transform;
-              bool          NPOTAdjust;
-              bool          dirty;
-          };
-
           void clearWithOpenGL(const Region& clip, GLclampx r, GLclampx g,
                                GLclampx b, GLclampx alpha) const;
           void clearWithOpenGL(const Region& clip) const;
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
-          void loadTexture(Texture* texture, 
-                  const Region& dirty, const GGLSurface& t) const;
-          status_t initializeEglImage(
-                  const sp<GraphicBuffer>& buffer, Texture* texture);
-
-          bool isSupportedYuvFormat(int format) const;
           
                 sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
@@ -294,10 +270,6 @@ class LayerBaseClient : public LayerBase
 public:
     class Surface;
 
-    // lcblk is (almost) only accessed from the main SF thread, in the places
-    // where it's not, a reference to Client must be held
-    SharedBufferServer*     lcblk;
-
     LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
             const sp<Client>& client, int32_t i);
     virtual ~LayerBaseClient();
@@ -311,7 +283,6 @@ public:
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
     virtual ssize_t     serverIndex() const;
-    virtual void        onRemoved();
     virtual const char* getTypeId() const { return "LayerBaseClient"; }
 
     class Surface : public BnSurface 

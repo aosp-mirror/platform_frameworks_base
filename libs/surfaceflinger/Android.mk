@@ -13,6 +13,7 @@ LOCAL_SRC_FILES:= \
     LayerDim.cpp \
     MessageQueue.cpp \
     SurfaceFlinger.cpp \
+    TextureManager.cpp \
     Tokenizer.cpp \
     Transform.cpp
 
