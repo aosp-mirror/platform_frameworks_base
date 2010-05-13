@@ -513,6 +513,7 @@ int32_t SharedBufferServer::getQueuedCount() const
 
 status_t SharedBufferServer::assertReallocate(int buf)
 {
+    // TODO: need to validate "buf"
     ReallocateCondition condition(this, buf);
     status_t err = waitForCondition(condition);
     return err;
