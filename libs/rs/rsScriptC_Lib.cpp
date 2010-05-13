@@ -649,21 +649,24 @@ static void SC_bindProgramFragmentStore(RsProgramFragmentStore pfs)
 {
     GET_TLS();
     rsi_ContextBindProgramFragmentStore(rsc, pfs);
-
 }
 
 static void SC_bindProgramFragment(RsProgramFragment pf)
 {
     GET_TLS();
     rsi_ContextBindProgramFragment(rsc, pf);
-
 }
 
 static void SC_bindProgramVertex(RsProgramVertex pv)
 {
     GET_TLS();
     rsi_ContextBindProgramVertex(rsc, pv);
+}
 
+static void SC_bindProgramRaster(RsProgramRaster pv)
+{
+    GET_TLS();
+    rsi_ContextBindProgramRaster(rsc, pv);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1316,6 +1319,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "bindProgramFragmentStore", (void *)&SC_bindProgramFragmentStore },
     { "bindProgramStore", (void *)&SC_bindProgramFragmentStore },
     { "bindProgramVertex", (void *)&SC_bindProgramVertex },
+    { "bindProgramRaster", (void *)&SC_bindProgramRaster },
     { "bindSampler", (void *)&SC_bindSampler },
     { "bindTexture", (void *)&SC_bindTexture },
 
