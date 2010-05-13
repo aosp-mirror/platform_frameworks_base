@@ -298,6 +298,7 @@ public:
     virtual sp<OverlayRef> createOverlay(
             uint32_t w, uint32_t h, int32_t format, int32_t orientation);
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage);
+    virtual status_t setBufferCount(int bufferCount);
 
     // new functions
     void clearStat();
@@ -335,6 +336,11 @@ void MSurface::unregisterBuffers() {
 }
 
 sp<GraphicBuffer> MSurface::requestBuffer(int bufferIdx, int usage) {
+    INFO(__func__);
+    return NULL;
+}
+
+status_t MSurface::setBufferCount(int bufferCount) {
     INFO(__func__);
     return NULL;
 }
