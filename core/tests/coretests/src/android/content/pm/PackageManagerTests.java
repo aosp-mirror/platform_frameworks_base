@@ -2346,6 +2346,49 @@ public class PackageManagerTests extends AndroidTestCase {
 
         }
     }
+
+    /* This test installs an application on sdcard and unmounts media.
+     * The app is then re-installed on internal storage. The sdcard is mounted
+     * and verified that the re-installation on internal storage takes precedence.
+     */
+    @MediumTest
+    public void testInstallSdcardStaleContainerReinstall() {
+        boolean origMediaState = getMediaState();
+        try {
+            // Mount media first
+            mountMedia();
+            String outFileName = "install.apk";
+            int rawResId = R.raw.install;
+            PackageManager pm = mContext.getPackageManager();
+            File filesDir = mContext.getFilesDir();
+            File outFile = new File(filesDir, outFileName);
+            Uri packageURI = getInstallablePackage(rawResId, outFile);
+            PackageParser.Package pkg = parsePackage(packageURI);
+            assertNotNull(pkg);
+            // Install an app on sdcard.
+            installFromRawResource(outFileName, rawResId,
+                    PackageManager.INSTALL_EXTERNAL, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            // Unmount sdcard
+            unmountMedia();
+            // Reinstall the app and make sure it gets installed on internal storage.
+            installFromRawResource(outFileName, rawResId,
+                    PackageManager.INSTALL_REPLACE_EXISTING, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            mountMedia();
+            // Verify that the app installed is on internal storage.
+            assertInstall(pkg, 0, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);            
+        } catch (Exception e) {
+            failStr(e.getMessage());
+        } finally {
+            if (origMediaState) {
+                mountMedia();
+            } else {
+                unmountMedia();
+            }
+
+        }
+    }
     /*
      * The following series of tests are related to upgrading apps with
      * different certificates.
