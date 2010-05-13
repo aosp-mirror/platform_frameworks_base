@@ -61,6 +61,11 @@ public class SplitActionBar extends ActionBar {
     public void setDisplayOptions(int options) {
         mActionView.setDisplayOptions(options);
     }
+    
+    public void setDisplayOptions(int options, int mask) {
+        final int current = mActionView.getDisplayOptions(); 
+        mActionView.setDisplayOptions((options & mask) | (current & ~mask));
+    }
 
     public void setBackgroundDrawable(Drawable d) {
         mActionView.setBackgroundDrawable(d);

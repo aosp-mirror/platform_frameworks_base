@@ -58,7 +58,9 @@ public class ActionBarView extends ViewGroup {
     /**
      * Display options that require re-layout as opposed to a simple invalidate
      */
-    private static final int DISPLAY_RELAYOUT_MASK = ActionBar.DISPLAY_USE_LOGO;
+    private static final int DISPLAY_RELAYOUT_MASK =
+            ActionBar.DISPLAY_HIDE_HOME |
+            ActionBar.DISPLAY_USE_LOGO;
     
     private final int mContentHeight;
 
@@ -203,7 +205,6 @@ public class ActionBarView extends ViewGroup {
         if (view != null) {
             setNavigationMode(ActionBar.NAVIGATION_MODE_CUSTOM);
         }
-        requestLayout();
     }
     
     public void setDividerDrawable(Drawable d) {
@@ -236,9 +237,17 @@ public class ActionBarView extends ViewGroup {
     }
     
     public void setDisplayOptions(int options) {
-        final int flagsChanged = options & mDisplayOptions;
+        final int flagsChanged = options ^ mDisplayOptions;
         mDisplayOptions = options;
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
+            final int vis = (options & ActionBar.DISPLAY_HIDE_HOME) != 0 ? GONE : VISIBLE;
+            if (mLogoView != null) {
+                mLogoView.setVisibility(vis);
+            }
+            if (mIconView != null) {
+                mIconView.setVisibility(vis);
+            }
+            
             requestLayout();
         } else {
             invalidate();
@@ -246,7 +255,30 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void setNavigationMode(int mode) {
-        if (mode != mNavigationMode) {
+        final int oldMode = mNavigationMode;
+        if (mode != oldMode) {
+            switch (oldMode) {
+            case ActionBar.NAVIGATION_MODE_NORMAL:
+                if (mTitleView != null) {
+                    removeView(mTitleView);
+                    mTitleView = null;
+                }
+                break;
+            case ActionBar.NAVIGATION_MODE_CUSTOM:
+                if (mNavigationView != null) {
+                    removeView(mNavigationView);
+                    mNavigationView = null;
+                }
+            }
+            
+            switch (mode) {
+            case ActionBar.NAVIGATION_MODE_NORMAL:
+                initTitle();
+                break;
+            case ActionBar.NAVIGATION_MODE_CUSTOM:
+                addView(mNavigationView);
+                break;
+            }
             mNavigationMode = mode;
             requestLayout();
         }
@@ -347,6 +379,7 @@ public class ActionBarView extends ViewGroup {
             actionView.actionLabel = item.getTitle();
             actionView.setAdjustViewBounds(true);
             actionView.setImageDrawable(item.getIcon());
+            actionView.setFocusable(true);
             actionView.setOnClickListener(mActionClickHandler);
             
             LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -401,6 +434,7 @@ public class ActionBarView extends ViewGroup {
                         LayoutParams.MATCH_PARENT, LayoutParams.ITEM_TYPE_ICON));
                 mLogoView.setImageDrawable(mLogo);
                 mLogoView.setClickable(true);
+                mLogoView.setFocusable(true);
                 mLogoView.setOnClickListener(mHomeClickListener);
                 addView(mLogoView);
             } else if (mIcon != null) {
@@ -410,6 +444,7 @@ public class ActionBarView extends ViewGroup {
                         LayoutParams.MATCH_PARENT, LayoutParams.ITEM_TYPE_ICON));
                 mIconView.setImageDrawable(mIcon);
                 mIconView.setClickable(true);
+                mIconView.setFocusable(true);
                 mIconView.setOnClickListener(mHomeClickListener);
                 addView(mIconView);
             }
@@ -418,16 +453,7 @@ public class ActionBarView extends ViewGroup {
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_NORMAL:
             if (mLogoView == null) {
-                LayoutInflater inflater = LayoutInflater.from(getContext());
-                mTitleView = (TextView) inflater.inflate(R.layout.action_bar_title_item, null);
-                mTitleView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT, LayoutParams.ITEM_TYPE_TITLE));
-                if (mTitle != null) {
-                    mTitleView.setText(mTitle);
-                }
-                mTitleView.setClickable(true);
-                mTitleView.setOnClickListener(mHomeClickListener);
-                addView(mTitleView);
+                initTitle();
             }
             break;
             
@@ -441,12 +467,21 @@ public class ActionBarView extends ViewGroup {
             
         case ActionBar.NAVIGATION_MODE_CUSTOM:
             if (mNavigationView != null) {
-                mNavigationView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT, LayoutParams.ITEM_TYPE_CUSTOM_NAV));
                 addView(mNavigationView);
             }
             break;
         }
+    }
+    
+    private void initTitle() {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        mTitleView = (TextView) inflater.inflate(R.layout.action_bar_title_item, null);
+        mTitleView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT, LayoutParams.ITEM_TYPE_TITLE));
+        if (mTitle != null) {
+            mTitleView.setText(mTitle);
+        }
+        addView(mTitleView);
     }
 
     @Override
@@ -466,13 +501,13 @@ public class ActionBarView extends ViewGroup {
         int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
         
         int availableWidth = contentWidth - getPaddingLeft() - getPaddingRight();
-        int childSpecHeight = MeasureSpec.makeMeasureSpec(mContentHeight - getPaddingTop() -
-                getPaddingBottom(), MeasureSpec.AT_MOST);
+        final int height = mContentHeight - getPaddingTop() - getPaddingBottom();
+        final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
 
-        if (mLogoView != null) {
+        if (mLogoView != null && mLogoView.getVisibility() != GONE) {
             availableWidth = measureChildView(mLogoView, availableWidth, childSpecHeight, mSpacing);
         }
-        if (mIconView != null) {
+        if (mIconView != null && mIconView.getVisibility() != GONE) {
             availableWidth = measureChildView(mIconView, availableWidth, childSpecHeight, mSpacing);
         }
 
@@ -487,14 +522,14 @@ public class ActionBarView extends ViewGroup {
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_NORMAL:
             if (mTitleView != null) {
-                availableWidth = measureChildView(mTitleView, availableWidth,
-                        childSpecHeight, mSpacing);
+                measureChildView(mTitleView, availableWidth, childSpecHeight, mSpacing);
             }
             break;
         case ActionBar.NAVIGATION_MODE_CUSTOM:
             if (mNavigationView != null) {
-                availableWidth = measureChildView(mNavigationView, availableWidth,
-                        childSpecHeight, mSpacing);
+                mNavigationView.measure(
+                        MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             }
             break;
         }
@@ -503,8 +538,7 @@ public class ActionBarView extends ViewGroup {
     }
 
     private int measureChildView(View child, int availableWidth, int childSpecHeight, int spacing) {
-        measureChild(child,
-                MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
+        child.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                 childSpecHeight);
 
         availableWidth -= child.getMeasuredWidth();
@@ -519,10 +553,10 @@ public class ActionBarView extends ViewGroup {
         final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
 
-        if (mLogoView != null) {
+        if (mLogoView != null && mLogoView.getVisibility() != GONE) {
             x += positionChild(mLogoView, x, y, contentHeight) + mSpacing;
         }
-        if (mIconView != null) {
+        if (mIconView != null && mIconView.getVisibility() != GONE) {
             x += positionChild(mIconView, x, y, contentHeight) + mSpacing;
         }
         
