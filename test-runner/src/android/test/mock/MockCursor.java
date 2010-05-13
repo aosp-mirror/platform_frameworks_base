@@ -178,32 +178,7 @@ public class MockCursor implements Cursor {
     }
 
     @SuppressWarnings("deprecation")
-    public boolean commitUpdates() {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean commitUpdates(Map<? extends Long, ? extends Map<String, Object>> values) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean hasUpdates() {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
     public void setNotificationUri(ContentResolver cr, Uri uri) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean supportsUpdates() {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean deleteRow() {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -214,51 +189,6 @@ public class MockCursor implements Cursor {
 
     @SuppressWarnings("deprecation")
     public void unregisterDataSetObserver(DataSetObserver observer) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateBlob(int columnIndex, byte[] value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateDouble(int columnIndex, double value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateFloat(int columnIndex, float value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateInt(int columnIndex, int value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateLong(int columnIndex, long value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateShort(int columnIndex, short value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateString(int columnIndex, String value) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean updateToNull(int columnIndex) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("deprecation")
-    public void abortUpdates() {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 }
