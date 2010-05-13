@@ -887,6 +887,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int HAPTIC_FEEDBACK_ENABLED = 0x10000000;
 
     /**
+     * <p>Indicates that the view hierarchy should stop saving state when
+     * it reaches this view.  If state saving is initiated immediately at
+     * the view, it will be allowed.
+     * {@hide}
+     */
+    static final int PARENT_SAVE_DISABLED = 0x20000000;
+
+    /**
+     * <p>Mask for use with setFlags indicating bits used for PARENT_SAVE_DISABLED.</p>
+     * {@hide}
+     */
+    static final int PARENT_SAVE_DISABLED_MASK = 0x20000000;
+
+    /**
      * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
      * should add all focusable Views regardless if they are focusable in touch mode.
      */
@@ -3338,6 +3352,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setSaveEnabled(boolean enabled) {
         setFlags(enabled ? 0 : SAVE_DISABLED, SAVE_DISABLED_MASK);
+    }
+
+
+    /**
+     * Indicates whether the entire hierarchy under this view will save its
+     * state when a state saving traversal occurs from its parent.  The default
+     * is true; if false, these views will not be saved unless
+     * {@link #saveHierarchyState(SparseArray)} is called directly on this view.
+     *
+     * @return Returns true if the view state saving from parent is enabled, else false.
+     *
+     * @see #setSaveFromParentEnabled(boolean)
+     */
+    public boolean isSaveFromParentEnabled() {
+        return (mViewFlags & PARENT_SAVE_DISABLED_MASK) != PARENT_SAVE_DISABLED;
+    }
+
+    /**
+     * Controls whether the entire hierarchy under this view will save its
+     * state when a state saving traversal occurs from its parent.  The default
+     * is true; if false, these views will not be saved unless
+     * {@link #saveHierarchyState(SparseArray)} is called directly on this view.
+     *
+     * @param enabled Set to false to <em>disable</em> state saving, or true
+     * (the default) to allow it.
+     *
+     * @see #isSaveFromParentEnabled()
+     * @see #setId(int)
+     * @see #onSaveInstanceState()
+     */
+    public void setSaveFromParentEnabled(boolean enabled) {
+        setFlags(enabled ? 0 : PARENT_SAVE_DISABLED, PARENT_SAVE_DISABLED_MASK);
     }
 
 

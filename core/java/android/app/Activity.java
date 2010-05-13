@@ -42,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -76,6 +77,9 @@ import android.widget.LinearLayout;
 
 import com.android.internal.app.SplitActionBar;
 import com.android.internal.policy.PolicyManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -611,6 +615,7 @@ public class Activity extends ContextThemeWrapper
     private static long sInstanceCount = 0;
 
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
+    private static final String FRAGMENTS_TAG = "android:fragments";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
@@ -632,8 +637,6 @@ public class Activity extends ContextThemeWrapper
     private ComponentName mComponent;
     /*package*/ ActivityInfo mActivityInfo;
     /*package*/ ActivityThread mMainThread;
-    /*package*/ Object mLastNonConfigurationInstance;
-    /*package*/ HashMap<String,Object> mLastNonConfigurationChildInstances;
     Activity mParent;
     boolean mCalled;
     private boolean mResumed;
@@ -646,6 +649,13 @@ public class Activity extends ContextThemeWrapper
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
 
+    static final class NonConfigurationInstances {
+        Object activity;
+        HashMap<String, Object> children;
+        ArrayList<Fragment> fragments;
+    }
+    /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
+    
     private Window mWindow;
 
     private WindowManager mWindowManager;
@@ -659,148 +669,6 @@ public class Activity extends ContextThemeWrapper
     private int mTitleColor = 0;
 
     final FragmentManager mFragments = new FragmentManager();
-    
-    private final Object[] sConstructorArgs = new Object[0];
-
-    private static final Class[] sConstructorSignature = new Class[] { };
-
-    private static final HashMap<String, Constructor> sConstructorMap =
-            new HashMap<String, Constructor>();
-    
-    private final class FragmentTransactionImpl implements FragmentTransaction,
-            Runnable, BackStackState {
-        ArrayList<Fragment> mAdded;
-        ArrayList<Fragment> mRemoved;
-        int mTransition;
-        int mTransitionStyle;
-        boolean mAddToBackStack;
-        String mName;
-        boolean mCommitted;
-        
-        public FragmentTransaction add(Fragment fragment) {
-            return add(fragment, 0);
-        }
-
-        public FragmentTransaction add(Fragment fragment, int containerViewId) {
-            if (fragment.mActivity != null) {
-                throw new IllegalStateException("Fragment already added: " + fragment);
-            }
-            if (mRemoved != null) {
-                mRemoved.remove(fragment);
-            }
-            if (mAdded == null) {
-                mAdded = new ArrayList<Fragment>();
-            }
-            fragment.mContainerId = containerViewId;
-            mAdded.add(fragment);
-            return this;
-        }
-
-        public FragmentTransaction replace(Fragment fragment, int containerViewId) {
-            if (containerViewId == 0) {
-                throw new IllegalArgumentException("Must use non-zero containerViewId");
-            }
-            if (mFragments.mFragments != null) {
-                for (int i=0; i<mFragments.mFragments.size(); i++) {
-                    Fragment old = mFragments.mFragments.get(i);
-                    if (old.mContainerId == containerViewId) {
-                        remove(old);
-                    }
-                }
-            }
-            return add(fragment, containerViewId);
-        }
-        
-        public FragmentTransaction remove(Fragment fragment) {
-            if (fragment.mActivity == null) {
-                throw new IllegalStateException("Fragment not added: " + fragment);
-            }
-            if (mAdded != null) {
-                mAdded.remove(fragment);
-            }
-            if (mRemoved == null) {
-                mRemoved = new ArrayList<Fragment>();
-            }
-            mRemoved.add(fragment);
-            return this;
-        }
-
-        public FragmentTransaction setTransition(int transition) {
-            mTransition = transition;
-            return this;
-        }
-        
-        public FragmentTransaction setTransitionStyle(int styleRes) {
-            mTransitionStyle = styleRes;
-            return this;
-        }
-        
-        public FragmentTransaction addToBackStack(String name) {
-            mAddToBackStack = true;
-            mName = name;
-            return this;
-        }
-
-        public void commit() {
-            if (mCommitted) throw new IllegalStateException("commit already called");
-            mCommitted = true;
-            mHandler.post(this);
-        }
-        
-        public void run() {
-            if (mRemoved != null) {
-                for (int i=mRemoved.size()-1; i>=0; i--) {
-                    mFragments.removeFragment(mRemoved.get(i), mTransition,
-                            mTransitionStyle);
-                }
-            }
-            if (mAdded != null) {
-                for (int i=mAdded.size()-1; i>=0; i--) {
-                    Fragment f = mAdded.get(i);
-                    mFragments.addFragment(f, false);
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting++;
-                    }
-                }
-            }
-            mFragments.moveToState(mFragments.mCurState, mTransition,
-                    mTransitionStyle, true);
-            if (mAddToBackStack) {
-                mFragments.addBackStackState(this);
-            }
-        }
-        
-        public void popFromBackStack() {
-            if (mAdded != null) {
-                for (int i=mAdded.size()-1; i>=0; i--) {
-                    Fragment f = mAdded.get(i);
-                    if (mAddToBackStack) {
-                        f.mBackStackNesting--;
-                    }
-                    mFragments.removeFragment(f,
-                            FragmentManager.reverseTransit(mTransition),
-                            mTransitionStyle);
-                }
-            }
-            if (mRemoved != null) {
-                for (int i=mRemoved.size()-1; i>=0; i--) {
-                    mFragments.addFragment(mRemoved.get(i), false);
-                }
-            }
-        }
-        
-        public String getName() {
-            return mName;
-        }
-        
-        public int getTransition() {
-            return mTransition;
-        }
-        
-        public int getTransitionStyle() {
-            return mTransitionStyle;
-        }
-    }
     
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
@@ -828,7 +696,7 @@ public class Activity extends ContextThemeWrapper
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
     private Thread mUiThread;
-    private final Handler mHandler = new Handler();
+    final Handler mHandler = new Handler();
 
     // Used for debug only
     /*
@@ -952,7 +820,12 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(Bundle savedInstanceState) {
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
-        mFragments.dispatchCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
+            mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
+                    ? mLastNonConfigurationInstances.fragments : null);
+        }
+        mFragments.dispatchCreate();
         mCalled = true;
     }
 
@@ -1237,6 +1110,10 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBundle(WINDOW_HIERARCHY_TAG, mWindow.saveHierarchyState());
+        Parcelable p = mFragments.saveAllState();
+        if (p != null) {
+            outState.putParcelable(FRAGMENTS_TAG, p);
+        }
     }
 
     /**
@@ -1541,7 +1418,8 @@ public class Activity extends ContextThemeWrapper
      * {@link #onRetainNonConfigurationInstance()}.
      */
     public Object getLastNonConfigurationInstance() {
-        return mLastNonConfigurationInstance;
+        return mLastNonConfigurationInstances != null
+                ? mLastNonConfigurationInstances.activity : null;
     }
     
     /**
@@ -1597,8 +1475,9 @@ public class Activity extends ContextThemeWrapper
      * @return Returns the object previously returned by
      * {@link #onRetainNonConfigurationChildInstances()}
      */
-    HashMap<String,Object> getLastNonConfigurationChildInstances() {
-        return mLastNonConfigurationChildInstances;
+    HashMap<String, Object> getLastNonConfigurationChildInstances() {
+        return mLastNonConfigurationInstances != null
+                ? mLastNonConfigurationInstances.children : null;
     }
     
     /**
@@ -1612,6 +1491,21 @@ public class Activity extends ContextThemeWrapper
         return null;
     }
     
+    NonConfigurationInstances retainNonConfigurationInstances() {
+        Object activity = onRetainNonConfigurationInstance();
+        HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
+        ArrayList<Fragment> fragments = mFragments.retainNonConfig();
+        if (activity == null && children == null && fragments == null) {
+            return null;
+        }
+        
+        NonConfigurationInstances nci = new NonConfigurationInstances();
+        nci.activity = activity;
+        nci.children = children;
+        nci.fragments = fragments;
+        return nci;
+    }
+    
     public void onLowMemory() {
         mCalled = true;
     }
@@ -1621,7 +1515,7 @@ public class Activity extends ContextThemeWrapper
      * this activity.
      */
     public FragmentTransaction openFragmentTransaction() {
-        return new FragmentTransactionImpl();
+        return new BackStackEntry(mFragments);
     }
     
     /**
@@ -1811,16 +1705,6 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
-     * Finds a fragment that was identified by the given id either when inflated
-     * from XML or as the container ID when added in a transaction.  This only
-     * returns fragments that are currently added to the activity's content.
-     * @return The fragment if found or null otherwise.
-     */
-    public Fragment findFragmentById(int id) {
-        return mFragments.findFragmentById(id);
-    }
-    
-    /**
      * Creates a new ActionBar, locates the inflated ActionBarView,
      * initializes the ActionBar with the view, and sets mActionBar.
      */
@@ -1839,6 +1723,26 @@ public class Activity extends ContextThemeWrapper
         } else {
             Log.e(TAG, "Could not create action bar; view not found in window decor.");
         }
+    }
+    
+    /**
+     * Finds a fragment that was identified by the given id either when inflated
+     * from XML or as the container ID when added in a transaction.  This only
+     * returns fragments that are currently added to the activity's content.
+     * @return The fragment if found or null otherwise.
+     */
+    public Fragment findFragmentById(int id) {
+        return mFragments.findFragmentById(id);
+    }
+    
+    /**
+     * Finds a fragment that was identified by the given tag either when inflated
+     * from XML or as supplied when added in a transaction.  This only
+     * returns fragments that are currently added to the activity's content.
+     * @return The fragment if found or null otherwise.
+     */
+    public Fragment findFragmentByTag(String tag) {
+        return mFragments.findFragmentByTag(tag);
     }
     
     /**
@@ -2198,6 +2102,11 @@ public class Activity extends ContextThemeWrapper
     }
 
     public void onContentChanged() {
+        // First time content is available, let the fragment manager
+        // attach all of the fragments to it.
+        if (mFragments.mCurState < Fragment.CONTENT) {
+            mFragments.moveToState(Fragment.CONTENT, false);
+        }
     }
 
     /**
@@ -3960,44 +3869,42 @@ public class Activity extends ContextThemeWrapper
         TypedArray a = 
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
         String fname = a.getString(com.android.internal.R.styleable.Fragment_name);
-        int id = a.getInt(com.android.internal.R.styleable.Fragment_id, 0);
+        int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, 0);
         String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
         a.recycle();
         
-        Constructor constructor = sConstructorMap.get(fname);
-        Class clazz = null;
-
+        if (id == 0) {
+            throw new IllegalArgumentException(attrs.getPositionDescription()
+                    + ": Must specify unique android:id for " + fname);
+        }
+        
         try {
-            if (constructor == null) {
-                // Class not found in the cache, see if it's real, and try to add it
-                clazz = getClassLoader().loadClass(fname);
-                constructor = clazz.getConstructor(sConstructorSignature);
-                sConstructorMap.put(fname, constructor);
+            // If we restored from a previous state, we may already have
+            // instantiated this fragment from the state and should use
+            // that instance instead of making a new one.
+            Fragment fragment = mFragments.findFragmentById(id);
+            if (fragment == null) {
+                fragment = Fragment.instantiate(this, fname);
+                fragment.mFromLayout = true;
+                fragment.mFragmentId = id;
+                fragment.mTag = tag;
+                fragment.onInflate(this, attrs);
+                mFragments.addFragment(fragment, true);
             }
-            Fragment fragment = (Fragment)constructor.newInstance(sConstructorArgs);
-            fragment.onInflate(this, attrs);
-            mFragments.addFragment(fragment, true);
             if (fragment.mView == null) {
                 throw new IllegalStateException("Fragment " + fname
                         + " did not create a view.");
             }
+            fragment.mView.setId(id);
+            if (fragment.mView.getTag() == null) {
+                fragment.mView.setTag(tag);
+            }
             return fragment.mView;
-
-        } catch (NoSuchMethodException e) {
-            InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating class " + fname);
-            ie.initCause(e);
-            throw ie;
-
-        } catch (ClassNotFoundException e) {
-            // If loadClass fails, we should propagate the exception.
-            throw new RuntimeException(e);
         } catch (Exception e) {
             InflateException ie = new InflateException(attrs.getPositionDescription()
-                    + ": Error inflating class "
-                    + (clazz == null ? "<unknown>" : clazz.getName()));
+                    + ": Error inflating fragment " + fname);
             ie.initCause(e);
-            throw new RuntimeException(ie);
+            throw ie;
         }
     }
 
@@ -4009,18 +3916,17 @@ public class Activity extends ContextThemeWrapper
 
     final void attach(Context context, ActivityThread aThread, Instrumentation instr, IBinder token,
             Application application, Intent intent, ActivityInfo info, CharSequence title, 
-            Activity parent, String id, Object lastNonConfigurationInstance,
+            Activity parent, String id, NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config) {
         attach(context, aThread, instr, token, 0, application, intent, info, title, parent, id,
-            lastNonConfigurationInstance, null, config);
+            lastNonConfigurationInstances, config);
     }
     
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
-            Object lastNonConfigurationInstance,
-            HashMap<String,Object> lastNonConfigurationChildInstances,
+            NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config) {
         attachBaseContext(context);
 
@@ -4045,8 +3951,7 @@ public class Activity extends ContextThemeWrapper
         mTitle = title;
         mParent = parent;
         mEmbeddedID = id;
-        mLastNonConfigurationInstance = lastNonConfigurationInstance;
-        mLastNonConfigurationChildInstances = lastNonConfigurationChildInstances;
+        mLastNonConfigurationInstances = lastNonConfigurationInstances;
 
         mWindow.setWindowManager(null, mToken, mComponent.flattenToString());
         if (mParent != null) {
@@ -4104,7 +4009,7 @@ public class Activity extends ContextThemeWrapper
     final void performResume() {
         performRestart();
         
-        mLastNonConfigurationInstance = null;
+        mLastNonConfigurationInstances = null;
         
         // First call onResume() -before- setting mResumed, so we don't
         // send out any status bar / menu notifications the client makes.
