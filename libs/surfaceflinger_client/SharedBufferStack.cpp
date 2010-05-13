@@ -305,7 +305,6 @@ SharedBufferServer::RetireUpdate::RetireUpdate(
     : UpdateBase(sbb), numBuffers(numBuffers) {
 }
 ssize_t SharedBufferServer::RetireUpdate::operator()() {
-    // head is only written in this function, which is single-thread.
     int32_t head = stack.head;
     if (uint32_t(head) >= NUM_BUFFER_MAX)
         return BAD_VALUE;
@@ -322,16 +321,14 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
         }
     } while (android_atomic_cmpxchg(queued, queued-1, &stack.queued));
     
-    // update the head pointer
-    head = ((head+1 >= numBuffers) ? 0 : head+1);
-
     // lock the buffer before advancing head, which automatically unlocks
     // the buffer we preventively locked upon entering this function
+    head = (head + 1) % numBuffers;
     android_atomic_write(stack.index[head], &stack.inUse);
 
-    // advance head
+    // head is only modified here, so we don't need to use cmpxchg
     android_atomic_write(head, &stack.head);
-    
+
     // now that head has moved, we can increment the number of available buffers
     android_atomic_inc(&stack.available);
     return head;
@@ -450,6 +447,14 @@ status_t SharedBufferClient::setDirtyRegion(int buf, const Region& reg)
     return stack.setDirtyRegion(buf, reg);
 }
 
+status_t SharedBufferClient::setBufferCount(int bufferCount)
+{
+    if (uint32_t(bufferCount) >= NUM_BUFFER_MAX)
+        return BAD_VALUE;
+    mNumBuffers = bufferCount;
+    return NO_ERROR;
+}
+
 // ----------------------------------------------------------------------------
 
 SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
@@ -463,6 +468,7 @@ SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
     mSharedStack->reallocMask = 0;
     memset(mSharedStack->buffers, 0, sizeof(mSharedStack->buffers));
     for (int i=0 ; i<num ; i++) {
+        mBufferList.add(i);
         mSharedStack->index[i] = i;
     }
 }
@@ -525,10 +531,83 @@ Region SharedBufferServer::getDirtyRegion(int buf) const
     return stack.getDirtyRegion(buf);
 }
 
+
+/*
+ *
+ * NOTE: this is not thread-safe on the server-side, meaning
+ * 'head' cannot move during this operation. The client-side
+ * can safely operate an usual.
+ *
+ */
+status_t SharedBufferServer::resize(int newNumBuffers)
+{
+    if (uint32_t(newNumBuffers) >= NUM_BUFFER_MAX)
+        return BAD_VALUE;
+
+    // for now we're not supporting shrinking
+    const int numBuffers = mNumBuffers;
+    if (newNumBuffers < numBuffers)
+        return BAD_VALUE;
+
+    SharedBufferStack& stack( *mSharedStack );
+    const int extra = newNumBuffers - numBuffers;
+
+    // read the head, make sure it's valid
+    int32_t head = stack.head;
+    if (uint32_t(head) >= NUM_BUFFER_MAX)
+        return BAD_VALUE;
+
+    int base = numBuffers;
+    int32_t avail = stack.available;
+    int tail = head - avail + 1;
+    if (tail >= 0) {
+        int8_t* const index = const_cast<int8_t*>(stack.index);
+        const int nb = numBuffers - head;
+        memmove(&index[head + extra], &index[head], nb);
+        base = head;
+        // move head 'extra' ahead, this doesn't impact stack.index[head];
+        stack.head = head + extra;
+    }
+    stack.available += extra;
+
+    // fill the new free space with unused buffers
+    BufferList::const_iterator curr(mBufferList.free_begin());
+    for (int i=0 ; i<extra ; i++) {
+        stack.index[base+i] = *curr++;
+        mBufferList.add(stack.index[base+i]);
+    }
+
+    mNumBuffers = newNumBuffers;
+    return NO_ERROR;
+}
+
 SharedBufferStack::Statistics SharedBufferServer::getStats() const
 {
     SharedBufferStack& stack( *mSharedStack );
     return stack.stats;
+}
+
+// ---------------------------------------------------------------------------
+status_t SharedBufferServer::BufferList::add(int value)
+{
+    if (uint32_t(value) >= mCapacity)
+        return BAD_VALUE;
+    uint32_t mask = 1<<(31-value);
+    if (mList & mask)
+        return ALREADY_EXISTS;
+    mList |= mask;
+    return NO_ERROR;
+}
+
+status_t SharedBufferServer::BufferList::remove(int value)
+{
+    if (uint32_t(value) >= mCapacity)
+        return BAD_VALUE;
+    uint32_t mask = 1<<(31-value);
+    if (!(mList & mask))
+        return NAME_NOT_FOUND;
+    mList &= ~mask;
+    return NO_ERROR;
 }
 
 

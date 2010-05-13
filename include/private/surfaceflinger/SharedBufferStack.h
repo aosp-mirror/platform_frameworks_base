@@ -129,7 +129,7 @@ public:
 
 // ----------------------------------------------------------------------------
 
-// 4 KB max
+// 32 KB max
 class SharedClient
 {
 public:
@@ -166,7 +166,7 @@ public:
 protected:
     SharedClient* const mSharedClient;
     SharedBufferStack* const mSharedStack;
-    const int mNumBuffers;
+    int mNumBuffers;
     const int mIdentity;
     int32_t computeTail() const;
 
@@ -217,6 +217,7 @@ public:
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
     status_t setCrop(int buffer, const Rect& reg);
+    status_t setBufferCount(int bufferCount);
     
 private:
     friend struct Condition;
@@ -269,13 +270,61 @@ public:
     status_t reallocate();
     status_t assertReallocate(int buffer);
     int32_t getQueuedCount() const;
-    
     Region getDirtyRegion(int buffer) const;
+
+    status_t resize(int newNumBuffers);
 
     SharedBufferStack::Statistics getStats() const;
     
 
 private:
+    /*
+     * BufferList is basically a fixed-capacity sorted-vector of
+     * unsigned 5-bits ints using a 32-bits int as storage.
+     * it has efficient iterators to find items in the list and not in the list.
+     */
+    class BufferList {
+        size_t mCapacity;
+        uint32_t mList;
+    public:
+        BufferList(size_t c = NUM_BUFFER_MAX) : mCapacity(c), mList(0) { }
+        status_t add(int value);
+        status_t remove(int value);
+
+        class const_iterator {
+            friend class BufferList;
+            uint32_t mask, curr;
+            const_iterator(uint32_t mask) :
+                mask(mask), curr(31 - __builtin_clz(mask)) { }
+        public:
+            inline bool operator == (const const_iterator& rhs) const {
+                return mask == rhs.mask;
+            }
+            inline bool operator != (const const_iterator& rhs) const {
+                return mask != rhs.mask;
+            }
+            inline int operator *() const { return curr; }
+            inline const const_iterator& operator ++(int) {
+                mask &= ~curr;
+                curr = 31 - __builtin_clz(mask);
+                return *this;
+            }
+        };
+
+        inline const_iterator begin() const {
+            return const_iterator(mList);
+        }
+        inline const_iterator end() const   {
+            return const_iterator(0);
+        }
+        inline const_iterator free_begin() const {
+            uint32_t mask = (1 << (32-mCapacity)) - 1;
+            return const_iterator( ~(mList | mask) );
+        }
+    };
+
+    BufferList mBufferList;
+
     struct UnlockUpdate : public UpdateBase {
         const int lockedBuffer;
         inline UnlockUpdate(SharedBufferBase* sbb, int lockedBuffer);

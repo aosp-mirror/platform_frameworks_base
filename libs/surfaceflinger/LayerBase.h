@@ -302,6 +302,8 @@ public:
 
     private:
         virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual status_t setBufferCount(int bufferCount);
+
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
