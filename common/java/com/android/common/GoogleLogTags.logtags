@@ -80,7 +80,7 @@ option java_package com.android.common
 204004 gtalk_heartbeat_reset (interval_and_nt|1),(ip|3)
 
 # This event is logged when an Rmq v2 packet is sent or received.
-204005 data_messaging (packet_type|1),(persistent_id|3),(stream_id|1),(last_stream_id|1)
+204005 c2dm (packet_type|1),(persistent_id|3),(stream_id|1),(last_stream_id|1)
 
 #####
 # Google Login Service and Setup Wizard
