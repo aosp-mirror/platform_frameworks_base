@@ -86,11 +86,19 @@ public class LockPatternUtils {
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = 3;
 
+    /**
+     * The number of previous password hashes to store. This is used to prevent
+     * the user from setting the same password as any of the stored ones.
+     */
+    public static final int MAX_PASSWORD_HISTORY_LENGTH = 5;
+
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     private final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
+
+    private final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -202,8 +210,22 @@ public class LockPatternUtils {
     }
 
     /**
-     * Checks to see if the given file exists and contains any data. Returns true if it does,
-     * false otherwise.
+     * Check to see if a password matches any of the passwords stored in the
+     * password history.
+     *
+     * @param password The password to check.
+     * @return Whether the password matches any in the history.
+     */
+    public boolean checkPasswordHistory(String password) {
+        String passwordHashString = new String(passwordToHash(password));
+        String passwordHistory = getString(PASSWORD_HISTORY_KEY);
+        return passwordHistory != null && passwordHistory.contains(passwordHashString);
+    }
+
+    /**
+     * Checks to see if the given file exists and contains any data. Returns
+     * true if it does, false otherwise.
+     *
      * @param filename
      * @return true if file exists and is non-empty.
      */
@@ -384,6 +406,20 @@ public class LockPatternUtils {
                     dpm.setActivePasswordState(
                             DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
                 }
+                // Add the password to the password history. We assume all
+                // password
+                // hashes have the same length for simplicity of implementation.
+                String passwordHistory = getString(PASSWORD_HISTORY_KEY);
+                if (passwordHistory == null) {
+                    passwordHistory = new String();
+                }
+                passwordHistory = new String(hash) + "," + passwordHistory;
+                // Cut it to contain MAX_PASSWORD_HISTORY_LENGTH hashes
+                // and MAX_PASSWORD_HISTORY_LENGTH -1 commas.
+                passwordHistory = passwordHistory.substring(0, Math.min(hash.length
+                        * MAX_PASSWORD_HISTORY_LENGTH + MAX_PASSWORD_HISTORY_LENGTH - 1,
+                        passwordHistory.length()));
+                setString(PASSWORD_HISTORY_KEY, passwordHistory);
             } else {
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
@@ -648,6 +684,14 @@ public class LockPatternUtils {
 
     private void setLong(String secureSettingKey, long value) {
         android.provider.Settings.Secure.putLong(mContentResolver, secureSettingKey, value);
+    }
+
+    private String getString(String secureSettingKey) {
+        return android.provider.Settings.Secure.getString(mContentResolver, secureSettingKey);
+    }
+
+    private void setString(String secureSettingKey, String value) {
+        android.provider.Settings.Secure.putString(mContentResolver, secureSettingKey, value);
     }
 
     public boolean isSecure() {
