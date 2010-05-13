@@ -762,6 +762,8 @@ public class Camera {
         private static final String KEY_ZOOM_RATIOS = "zoom-ratios";
         private static final String KEY_ZOOM_SUPPORTED = "zoom-supported";
         private static final String KEY_SMOOTH_ZOOM_SUPPORTED = "smooth-zoom-supported";
+        private static final String KEY_FOCUS_DISTANCES = "focus-distances";
+
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
@@ -874,10 +876,30 @@ public class Camera {
          */
         public static final String FOCUS_MODE_EDOF = "edof";
 
+        // Indices for focus distance array.
+        /**
+         * The array index of near focus distance for use with
+         * {@link #getFocusDistances(float[])}.
+         */
+        public static final int FOCUS_DISTANCE_NEAR_INDEX = 0;
+
+        /**
+         * The array index of optimal focus distance for use with
+         * {@link #getFocusDistances(float[])}.
+         */
+        public static final int FOCUS_DISTANCE_OPTIMAL_INDEX = 1;
+
+        /**
+         * The array index of far focus distance for use with
+         * {@link #getFocusDistances(float[])}.
+         */
+        public static final int FOCUS_DISTANCE_FAR_INDEX = 2;
+
         /**
          * Continuous focus mode. The camera continuously tries to focus. This
          * is ideal for shooting video or shooting photo of moving object.
          * Continuous focus starts when {@link #autoFocus(AutoFocusCallback)} is
+         * called. Continuous focus stops when {@link #cancelAutoFocus()} is
          * called. AutoFocusCallback will be only called once as soon as the
          * picture is in focus.
          */
@@ -1814,6 +1836,42 @@ public class Camera {
             return TRUE.equals(str);
         }
 
+        /**
+         * Gets the distances from the camera to where an object appears to be
+         * in focus. The object is sharpest at the optimal focus distance. The
+         * depth of field is the far focus distance minus near focus distance.
+         *
+         * Focus distances may change after calling {@link
+         * #autoFocus(AutoFocusCallback)}, {@link #cancelAutoFocus}, or {@link
+         * #startPreview()}. Applications can call {@link #getParameters()}
+         * and this method anytime to get the latest focus distances. If the
+         * focus mode is FOCUS_MODE_EDOF, the values may be all 0, which means
+         * focus distance is not applicable. If the focus mode is
+         * FOCUS_MODE_CONTINUOUS and autofocus has started, focus distances may
+         * change from time to time.
+         *
+         * Far focus distance > optimal focus distance > near focus distance. If
+         * the far focus distance is infinity, the value will be
+         * Float.POSITIVE_INFINITY.
+         *
+         * @param output focus distances in meters. output must be a float
+         *        array with three elements. Near focus distance, optimal focus
+         *        distance, and far focus distance will be filled in the array.
+         * @see #NEAR_FOCUS_DISTANCE_INDEX
+         * @see #OPTIMAL_FOCUS_DISTANCE_INDEX
+         * @see #FAR_FOCUS_DISTANCE_INDEX
+         */
+        public void getFocusDistances(float[] output) {
+            if (output == null || output.length != 3) {
+                throw new IllegalArgumentException(
+                        "output must be an float array with three elements.");
+            }
+            List<Float> distances = splitFloat(get(KEY_FOCUS_DISTANCES));
+            output[0] = distances.get(0);
+            output[1] = distances.get(1);
+            output[2] = distances.get(2);
+        }
+
         // Splits a comma delimited string to an ArrayList of String.
         // Return null if the passing string is null or the size is 0.
         private ArrayList<String> split(String str) {
@@ -1838,6 +1896,21 @@ public class Camera {
             while (tokenizer.hasMoreElements()) {
                 String token = tokenizer.nextToken();
                 substrings.add(Integer.parseInt(token));
+            }
+            if (substrings.size() == 0) return null;
+            return substrings;
+        }
+
+        // Splits a comma delimited string to an ArrayList of Float.
+        // Return null if the passing string is null or the size is 0.
+        private ArrayList<Float> splitFloat(String str) {
+            if (str == null) return null;
+
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
+            ArrayList<Float> substrings = new ArrayList<Float>();
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                substrings.add(Float.parseFloat(token));
             }
             if (substrings.size() == 0) return null;
             return substrings;
