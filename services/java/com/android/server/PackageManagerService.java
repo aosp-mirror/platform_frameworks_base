@@ -5340,13 +5340,13 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         SdInstallArgs(String cid) {
-            super(null, null, PackageManager.INSTALL_EXTERNAL, null);
-            this.cid = cid;
+            this((Uri)null, cid);
         }
 
         SdInstallArgs(Uri packageURI, String cid) {
             super(packageURI, null, PackageManager.INSTALL_EXTERNAL, null);
             this.cid = cid;
+            cachePath = PackageHelper.getSdDir(cid);
         }
 
         void createCopyFile() {
@@ -9608,7 +9608,10 @@ class PackageManagerService extends IPackageManager.Stub {
                    }
                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Looking for pkg : " + pkgName);
                    PackageSetting ps = mSettings.mPackages.get(pkgName);
-                   if (ps != null && ps.codePathString != null) {
+                   // The package status is changed only if the code path
+                   // matches between settings and the container id.
+                   if (ps != null && ps.codePathString != null &&
+                           ps.codePathString.equals(args.getCodePath())) {
                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid +
                                " corresponds to pkg : " + pkgName +
                                " at code path: " + ps.codePathString);
