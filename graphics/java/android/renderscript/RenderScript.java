@@ -71,7 +71,7 @@ public class RenderScript {
 
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
-    native void nContextBindProgramFragmentStore(int pfs);
+    native void nContextBindProgramStore(int pfs);
     native void nContextBindProgramFragment(int pf);
     native void nContextBindProgramVertex(int pf);
     native void nContextBindProgramRaster(int pr);
@@ -154,13 +154,13 @@ public class RenderScript {
     native void nSamplerSet(int param, int value);
     native int  nSamplerCreate();
 
-    native void nProgramFragmentStoreBegin(int in, int out);
-    native void nProgramFragmentStoreDepthFunc(int func);
-    native void nProgramFragmentStoreDepthMask(boolean enable);
-    native void nProgramFragmentStoreColorMask(boolean r, boolean g, boolean b, boolean a);
-    native void nProgramFragmentStoreBlendFunc(int src, int dst);
-    native void nProgramFragmentStoreDither(boolean enable);
-    native int  nProgramFragmentStoreCreate();
+    native void nProgramStoreBegin(int in, int out);
+    native void nProgramStoreDepthFunc(int func);
+    native void nProgramStoreDepthMask(boolean enable);
+    native void nProgramStoreColorMask(boolean r, boolean g, boolean b, boolean a);
+    native void nProgramStoreBlendFunc(int src, int dst);
+    native void nProgramStoreDither(boolean enable);
+    native int  nProgramStoreCreate();
 
     native int  nProgramRasterCreate(int in, int out, boolean pointSmooth, boolean lineSmooth, boolean pointSprite);
     native void nProgramRasterSetLineWidth(int pr, float v);

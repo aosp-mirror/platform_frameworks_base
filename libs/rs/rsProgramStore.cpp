@@ -15,7 +15,7 @@
  */
 
 #include "rsContext.h"
-#include "rsProgramFragmentStore.h"
+#include "rsProgramStore.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -24,7 +24,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramFragmentStore::ProgramFragmentStore(Context *rsc) :
+ProgramStore::ProgramStore(Context *rsc) :
     Program(rsc)
 {
     mAllocFile = __FILE__;
@@ -46,46 +46,11 @@ ProgramFragmentStore::ProgramFragmentStore(Context *rsc) :
 
 }
 
-ProgramFragmentStore::~ProgramFragmentStore()
+ProgramStore::~ProgramStore()
 {
 }
 
-void ProgramFragmentStore::setupGL(const Context *rsc, ProgramFragmentStoreState *state)
-{
-    if (state->mLast.get() == this) {
-        return;
-    }
-    state->mLast.set(this);
-
-    glColorMask(mColorRWriteEnable,
-                mColorGWriteEnable,
-                mColorBWriteEnable,
-                mColorAWriteEnable);
-    if (mBlendEnable) {
-        glEnable(GL_BLEND);
-        glBlendFunc(mBlendSrc, mBlendDst);
-    } else {
-        glDisable(GL_BLEND);
-    }
-
-    //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
-
-    glDepthMask(mDepthWriteEnable);
-    if(mDepthTestEnable || mDepthWriteEnable) {
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(mDepthFunc);
-    } else {
-        glDisable(GL_DEPTH_TEST);
-    }
-
-    if (mDitherEnable) {
-        glEnable(GL_DITHER);
-    } else {
-        glDisable(GL_DITHER);
-    }
-}
-
-void ProgramFragmentStore::setupGL2(const Context *rsc, ProgramFragmentStoreState *state)
+void ProgramStore::setupGL(const Context *rsc, ProgramStoreState *state)
 {
     if (state->mLast.get() == this) {
         return;
@@ -120,13 +85,48 @@ void ProgramFragmentStore::setupGL2(const Context *rsc, ProgramFragmentStoreStat
     }
 }
 
+void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state)
+{
+    if (state->mLast.get() == this) {
+        return;
+    }
+    state->mLast.set(this);
 
-void ProgramFragmentStore::setDitherEnable(bool enable)
+    glColorMask(mColorRWriteEnable,
+                mColorGWriteEnable,
+                mColorBWriteEnable,
+                mColorAWriteEnable);
+    if (mBlendEnable) {
+        glEnable(GL_BLEND);
+        glBlendFunc(mBlendSrc, mBlendDst);
+    } else {
+        glDisable(GL_BLEND);
+    }
+
+    //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
+
+    glDepthMask(mDepthWriteEnable);
+    if(mDepthTestEnable || mDepthWriteEnable) {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(mDepthFunc);
+    } else {
+        glDisable(GL_DEPTH_TEST);
+    }
+
+    if (mDitherEnable) {
+        glEnable(GL_DITHER);
+    } else {
+        glDisable(GL_DITHER);
+    }
+}
+
+
+void ProgramStore::setDitherEnable(bool enable)
 {
     mDitherEnable = enable;
 }
 
-void ProgramFragmentStore::setDepthFunc(RsDepthFunc func)
+void ProgramStore::setDepthFunc(RsDepthFunc func)
 {
     mDepthTestEnable = true;
 
@@ -156,12 +156,12 @@ void ProgramFragmentStore::setDepthFunc(RsDepthFunc func)
     }
 }
 
-void ProgramFragmentStore::setDepthMask(bool mask)
+void ProgramStore::setDepthMask(bool mask)
 {
     mDepthWriteEnable = mask;
 }
 
-void ProgramFragmentStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
+void ProgramStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
 {
     mBlendEnable = true;
     if ((src == RS_BLEND_SRC_ONE) &&
@@ -227,7 +227,7 @@ void ProgramFragmentStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
     }
 }
 
-void ProgramFragmentStore::setColorMask(bool r, bool g, bool b, bool a)
+void ProgramStore::setColorMask(bool r, bool g, bool b, bool a)
 {
     mColorRWriteEnable = r;
     mColorGWriteEnable = g;
@@ -236,24 +236,24 @@ void ProgramFragmentStore::setColorMask(bool r, bool g, bool b, bool a)
 }
 
 
-ProgramFragmentStoreState::ProgramFragmentStoreState()
+ProgramStoreState::ProgramStoreState()
 {
     mPFS = NULL;
 }
 
-ProgramFragmentStoreState::~ProgramFragmentStoreState()
+ProgramStoreState::~ProgramStoreState()
 {
     delete mPFS;
 
 }
 
-void ProgramFragmentStoreState::init(Context *rsc, int32_t w, int32_t h)
+void ProgramStoreState::init(Context *rsc, int32_t w, int32_t h)
 {
-    ProgramFragmentStore *pfs = new ProgramFragmentStore(rsc);
+    ProgramStore *pfs = new ProgramStore(rsc);
     mDefault.set(pfs);
 }
 
-void ProgramFragmentStoreState::deinit(Context *rsc)
+void ProgramStoreState::deinit(Context *rsc)
 {
     mDefault.clear();
     mLast.clear();
@@ -263,42 +263,42 @@ void ProgramFragmentStoreState::deinit(Context *rsc)
 namespace android {
 namespace renderscript {
 
-void rsi_ProgramFragmentStoreBegin(Context * rsc, RsElement in, RsElement out)
+void rsi_ProgramStoreBegin(Context * rsc, RsElement in, RsElement out)
 {
     delete rsc->mStateFragmentStore.mPFS;
-    rsc->mStateFragmentStore.mPFS = new ProgramFragmentStore(rsc);
+    rsc->mStateFragmentStore.mPFS = new ProgramStore(rsc);
 
 }
 
-void rsi_ProgramFragmentStoreDepthFunc(Context *rsc, RsDepthFunc func)
+void rsi_ProgramStoreDepthFunc(Context *rsc, RsDepthFunc func)
 {
     rsc->mStateFragmentStore.mPFS->setDepthFunc(func);
 }
 
-void rsi_ProgramFragmentStoreDepthMask(Context *rsc, bool mask)
+void rsi_ProgramStoreDepthMask(Context *rsc, bool mask)
 {
     rsc->mStateFragmentStore.mPFS->setDepthMask(mask);
 }
 
-void rsi_ProgramFragmentStoreColorMask(Context *rsc, bool r, bool g, bool b, bool a)
+void rsi_ProgramStoreColorMask(Context *rsc, bool r, bool g, bool b, bool a)
 {
     rsc->mStateFragmentStore.mPFS->setColorMask(r, g, b, a);
 }
 
-void rsi_ProgramFragmentStoreBlendFunc(Context *rsc, RsBlendSrcFunc src, RsBlendDstFunc dst)
+void rsi_ProgramStoreBlendFunc(Context *rsc, RsBlendSrcFunc src, RsBlendDstFunc dst)
 {
     rsc->mStateFragmentStore.mPFS->setBlendFunc(src, dst);
 }
 
-RsProgramFragmentStore rsi_ProgramFragmentStoreCreate(Context *rsc)
+RsProgramStore rsi_ProgramStoreCreate(Context *rsc)
 {
-    ProgramFragmentStore *pfs = rsc->mStateFragmentStore.mPFS;
+    ProgramStore *pfs = rsc->mStateFragmentStore.mPFS;
     pfs->incUserRef();
     rsc->mStateFragmentStore.mPFS = 0;
     return pfs;
 }
 
-void rsi_ProgramFragmentStoreDither(Context *rsc, bool enable)
+void rsi_ProgramStoreDither(Context *rsc, bool enable)
 {
     rsc->mStateFragmentStore.mPFS->setDitherEnable(enable);
 }

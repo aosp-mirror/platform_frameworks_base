@@ -183,7 +183,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     s->mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
-    s->mEnviroment.mFragmentStore.set(rsc->getDefaultProgramFragmentStore());
+    s->mEnviroment.mFragmentStore.set(rsc->getDefaultProgramStore());
     s->mEnviroment.mRaster.set(rsc->getDefaultProgramRaster());
 
     if (s->mProgram.mRoot) {

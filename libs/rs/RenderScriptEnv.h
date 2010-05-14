@@ -12,7 +12,7 @@ typedef void * RsScript;
 typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsProgramFragment;
-typedef void * RsProgramFragmentStore;
+typedef void * RsProgramStore;
 typedef void * RsLight;
 
 

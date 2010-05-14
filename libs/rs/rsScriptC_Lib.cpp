@@ -215,13 +215,6 @@ typedef struct {
 // IO routines
 //////////////////////////////////////////////////////////////////////////////
 
-static float* SC_loadSimpleMeshVerticesF(RsSimpleMesh mesh, uint32_t idx)
-{
-    SimpleMesh *tm = static_cast<SimpleMesh *>(mesh);
-    void *vp = tm->mVertexBuffers[idx]->getPtr();;
-    return static_cast<float *>(vp);
-}
-
 static void SC_updateSimpleMesh(RsSimpleMesh mesh)
 {
     GET_TLS();
@@ -645,10 +638,10 @@ static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
 
 }
 
-static void SC_bindProgramFragmentStore(RsProgramFragmentStore pfs)
+static void SC_bindProgramStore(RsProgramStore pfs)
 {
     GET_TLS();
-    rsi_ContextBindProgramFragmentStore(rsc, pfs);
+    rsi_ContextBindProgramStore(rsc, pfs);
 }
 
 static void SC_bindProgramFragment(RsProgramFragment pf)
@@ -1145,7 +1138,6 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "__divsi3", (void *)&SC_divsi3 },
 
     // IO
-    { "loadSimpleMeshVerticesF", (void *)&SC_loadSimpleMeshVerticesF },
     { "updateSimpleMesh", (void *)&SC_updateSimpleMesh },
 
     // OpenCL math
@@ -1316,8 +1308,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
 
     // context
     { "bindProgramFragment", (void *)&SC_bindProgramFragment },
-    { "bindProgramFragmentStore", (void *)&SC_bindProgramFragmentStore },
-    { "bindProgramStore", (void *)&SC_bindProgramFragmentStore },
+    { "bindProgramStore", (void *)&SC_bindProgramStore },
     { "bindProgramVertex", (void *)&SC_bindProgramVertex },
     { "bindProgramRaster", (void *)&SC_bindProgramRaster },
     { "bindSampler", (void *)&SC_bindSampler },

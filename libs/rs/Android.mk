@@ -91,7 +91,7 @@ LOCAL_SRC_FILES:= \
 	rsNoise.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
-	rsProgramFragmentStore.cpp \
+	rsProgramStore.cpp \
 	rsProgramRaster.cpp \
 	rsProgramVertex.cpp \
 	rsSampler.cpp \

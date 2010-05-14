@@ -1042,60 +1042,60 @@ nScriptCAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
 // ---------------------------------------------------------------------------
 
 static void
-nProgramFragmentStoreBegin(JNIEnv *_env, jobject _this, jint in, jint out)
+nProgramStoreBegin(JNIEnv *_env, jobject _this, jint in, jint out)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramFragmentStoreBegin(con, (RsElement)in, (RsElement)out);
+    LOG_API("nProgramStoreBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
+    rsProgramStoreBegin(con, (RsElement)in, (RsElement)out);
 }
 
 static void
-nProgramFragmentStoreDepthFunc(JNIEnv *_env, jobject _this, jint func)
+nProgramStoreDepthFunc(JNIEnv *_env, jobject _this, jint func)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreDepthFunc, con(%p), func(%i)", con, func);
-    rsProgramFragmentStoreDepthFunc(con, (RsDepthFunc)func);
+    LOG_API("nProgramStoreDepthFunc, con(%p), func(%i)", con, func);
+    rsProgramStoreDepthFunc(con, (RsDepthFunc)func);
 }
 
 static void
-nProgramFragmentStoreDepthMask(JNIEnv *_env, jobject _this, jboolean enable)
+nProgramStoreDepthMask(JNIEnv *_env, jobject _this, jboolean enable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreDepthMask, con(%p), enable(%i)", con, enable);
-    rsProgramFragmentStoreDepthMask(con, enable);
+    LOG_API("nProgramStoreDepthMask, con(%p), enable(%i)", con, enable);
+    rsProgramStoreDepthMask(con, enable);
 }
 
 static void
-nProgramFragmentStoreColorMask(JNIEnv *_env, jobject _this, jboolean r, jboolean g, jboolean b, jboolean a)
+nProgramStoreColorMask(JNIEnv *_env, jobject _this, jboolean r, jboolean g, jboolean b, jboolean a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreColorMask, con(%p), r(%i), g(%i), b(%i), a(%i)", con, r, g, b, a);
-    rsProgramFragmentStoreColorMask(con, r, g, b, a);
+    LOG_API("nProgramStoreColorMask, con(%p), r(%i), g(%i), b(%i), a(%i)", con, r, g, b, a);
+    rsProgramStoreColorMask(con, r, g, b, a);
 }
 
 static void
-nProgramFragmentStoreBlendFunc(JNIEnv *_env, jobject _this, int src, int dst)
+nProgramStoreBlendFunc(JNIEnv *_env, jobject _this, int src, int dst)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreBlendFunc, con(%p), src(%i), dst(%i)", con, src, dst);
-    rsProgramFragmentStoreBlendFunc(con, (RsBlendSrcFunc)src, (RsBlendDstFunc)dst);
+    LOG_API("nProgramStoreBlendFunc, con(%p), src(%i), dst(%i)", con, src, dst);
+    rsProgramStoreBlendFunc(con, (RsBlendSrcFunc)src, (RsBlendDstFunc)dst);
 }
 
 static void
-nProgramFragmentStoreDither(JNIEnv *_env, jobject _this, jboolean enable)
+nProgramStoreDither(JNIEnv *_env, jobject _this, jboolean enable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreDither, con(%p), enable(%i)", con, enable);
-    rsProgramFragmentStoreDither(con, enable);
+    LOG_API("nProgramStoreDither, con(%p), enable(%i)", con, enable);
+    rsProgramStoreDither(con, enable);
 }
 
 static jint
-nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
+nProgramStoreCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreCreate, con(%p)", con);
+    LOG_API("nProgramStoreCreate, con(%p)", con);
 
-    return (jint)rsProgramFragmentStoreCreate(con);
+    return (jint)rsProgramStoreCreate(con);
 }
 
 // ---------------------------------------------------------------------------
@@ -1225,11 +1225,11 @@ nContextBindRootScript(JNIEnv *_env, jobject _this, jint script)
 }
 
 static void
-nContextBindProgramFragmentStore(JNIEnv *_env, jobject _this, jint pfs)
+nContextBindProgramStore(JNIEnv *_env, jobject _this, jint pfs)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nContextBindProgramFragmentStore, con(%p), pfs(%p)", con, (RsProgramFragmentStore)pfs);
-    rsContextBindProgramFragmentStore(con, (RsProgramFragmentStore)pfs);
+    LOG_API("nContextBindProgramStore, con(%p), pfs(%p)", con, (RsProgramStore)pfs);
+    rsContextBindProgramStore(con, (RsProgramStore)pfs);
 }
 
 static void
@@ -1453,13 +1453,13 @@ static JNINativeMethod methods[] = {
 {"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },
 {"nScriptCCreate",                 "()I",                                  (void*)nScriptCCreate },
 
-{"nProgramFragmentStoreBegin",     "(II)V",                                (void*)nProgramFragmentStoreBegin },
-{"nProgramFragmentStoreDepthFunc", "(I)V",                                 (void*)nProgramFragmentStoreDepthFunc },
-{"nProgramFragmentStoreDepthMask", "(Z)V",                                 (void*)nProgramFragmentStoreDepthMask },
-{"nProgramFragmentStoreColorMask", "(ZZZZ)V",                              (void*)nProgramFragmentStoreColorMask },
-{"nProgramFragmentStoreBlendFunc", "(II)V",                                (void*)nProgramFragmentStoreBlendFunc },
-{"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
-{"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
+{"nProgramStoreBegin",             "(II)V",                                (void*)nProgramStoreBegin },
+{"nProgramStoreDepthFunc",         "(I)V",                                 (void*)nProgramStoreDepthFunc },
+{"nProgramStoreDepthMask",         "(Z)V",                                 (void*)nProgramStoreDepthMask },
+{"nProgramStoreColorMask",         "(ZZZZ)V",                              (void*)nProgramStoreColorMask },
+{"nProgramStoreBlendFunc",         "(II)V",                                (void*)nProgramStoreBlendFunc },
+{"nProgramStoreDither",            "(Z)V",                                 (void*)nProgramStoreDither },
+{"nProgramStoreCreate",            "()I",                                  (void*)nProgramStoreCreate },
 
 {"nProgramBindConstants",          "(III)V",                               (void*)nProgramBindConstants },
 {"nProgramBindTexture",            "(III)V",                               (void*)nProgramBindTexture },
@@ -1483,7 +1483,7 @@ static JNINativeMethod methods[] = {
 {"nLightSetPosition",              "(IFFF)V",                              (void*)nLightSetPosition },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
-{"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },
+{"nContextBindProgramStore",       "(I)V",                                (void*)nContextBindProgramStore },
 {"nContextBindProgramFragment",    "(I)V",                                 (void*)nContextBindProgramFragment },
 {"nContextBindProgramVertex",      "(I)V",                                 (void*)nContextBindProgramVertex },
 {"nContextBindProgramRaster",      "(I)V",                                 (void*)nContextBindProgramRaster },

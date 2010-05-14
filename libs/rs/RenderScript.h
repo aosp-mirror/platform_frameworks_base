@@ -44,7 +44,7 @@ typedef void * RsLight;
 typedef void * RsProgram;
 typedef void * RsProgramVertex;
 typedef void * RsProgramFragment;
-typedef void * RsProgramFragmentStore;
+typedef void * RsProgramStore;
 typedef void * RsProgramRaster;
 
 typedef void (* RsBitmapCallback_t)(void *);

@@ -23,16 +23,16 @@
 namespace android {
 namespace renderscript {
 
-class ProgramFragmentStoreState;
+class ProgramStoreState;
 
-class ProgramFragmentStore : public Program
+class ProgramStore : public Program
 {
 public:
-    ProgramFragmentStore(Context *);
-    virtual ~ProgramFragmentStore();
+    ProgramStore(Context *);
+    virtual ~ProgramStore();
 
-    virtual void setupGL(const Context *, ProgramFragmentStoreState *);
-    virtual void setupGL2(const Context *, ProgramFragmentStoreState *);
+    virtual void setupGL(const Context *, ProgramStoreState *);
+    virtual void setupGL2(const Context *, ProgramStoreState *);
 
     void setDepthFunc(RsDepthFunc);
     void setDepthMask(bool);
@@ -60,19 +60,19 @@ protected:
     bool mStencilTestEnable;
 };
 
-class ProgramFragmentStoreState
+class ProgramStoreState
 {
 public:
-    ProgramFragmentStoreState();
-    ~ProgramFragmentStoreState();
+    ProgramStoreState();
+    ~ProgramStoreState();
     void init(Context *rsc, int32_t w, int32_t h);
     void deinit(Context *rsc);
 
-    ObjectBaseRef<ProgramFragmentStore> mDefault;
-    ObjectBaseRef<ProgramFragmentStore> mLast;
+    ObjectBaseRef<ProgramStore> mDefault;
+    ObjectBaseRef<ProgramStore> mLast;
 
 
-    ProgramFragmentStore *mPFS;
+    ProgramStore *mPFS;
 };
 
 
