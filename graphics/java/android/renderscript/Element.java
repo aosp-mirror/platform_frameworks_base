@@ -315,29 +315,6 @@ public class Element extends BaseObj {
         super.destroy();
     }
 
-    public static Element createFromClass(RenderScript rs, Class c) {
-        rs.validate();
-        Field[] fields = c.getFields();
-        Builder b = new Builder(rs);
-
-        for(Field f: fields) {
-            Class fc = f.getType();
-            if(fc == int.class) {
-                b.add(createUser(rs, DataType.SIGNED_32), f.getName());
-            } else if(fc == short.class) {
-                b.add(createUser(rs, DataType.SIGNED_16), f.getName());
-            } else if(fc == byte.class) {
-                b.add(createUser(rs, DataType.SIGNED_8), f.getName());
-            } else if(fc == float.class) {
-                b.add(createUser(rs, DataType.FLOAT_32), f.getName());
-            } else {
-                throw new IllegalArgumentException("Unkown field type");
-            }
-        }
-        return b.create();
-    }
-
-
     /////////////////////////////////////////
     public static Element createUser(RenderScript rs, DataType dt) {
         return new Element(rs, dt, DataKind.USER, false, 1);

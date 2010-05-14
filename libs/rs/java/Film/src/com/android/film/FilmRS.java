@@ -213,7 +213,7 @@ public class FilmRS {
 
         Log.e("rs", "Done loading named");
 
-        mStripPositionType = Type.createFromClass(mRS, StripPosition.class, 1);
+        //mStripPositionType = Type.createFromClass(mRS, StripPosition.class, 1);
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.filmstrip);
