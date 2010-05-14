@@ -24,6 +24,7 @@ LOCAL_SRC_FILES:=                                       \
                   MtpDatabase.cpp                       \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
+                  MtpMediaScanner.cpp                   \
                   MtpPacket.cpp                         \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
@@ -40,7 +41,7 @@ LOCAL_C_INCLUDES := external/sqlite/dist
 
 LOCAL_CFLAGS := -DMTP_DEVICE
 
-LOCAL_SHARED_LIBRARIES := libutils libsqlite
+LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright
 
 include $(BUILD_EXECUTABLE)
 
@@ -69,5 +70,32 @@ LOCAL_CFLAGS := -g -DMTP_HOST
 LOCAL_LDFLAGS := -g
 
 include $(BUILD_HOST_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := scantest
+LOCAL_SRC_FILES:=                                       \
+                  scantest.cpp                          \
+                  MtpMediaScanner.cpp                   \
+                  MtpDatabase.cpp                       \
+                  MtpDataPacket.cpp                     \
+                  MtpPacket.cpp                         \
+                  MtpStringBuffer.cpp                   \
+                  MtpUtils.cpp                          \
+                  SqliteDatabase.cpp                    \
+                  SqliteStatement.cpp                   \
+
+
+#LOCAL_STATIC_LIBRARIES := libusbhost
+#LOCAL_LDLIBS := -lpthread
+
+LOCAL_C_INCLUDES := external/sqlite/dist
+LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright
+
+
+LOCAL_CFLAGS := -g
+LOCAL_LDFLAGS := -g
+
+include $(BUILD_EXECUTABLE)
 
 endif

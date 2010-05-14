@@ -33,19 +33,37 @@ private:
     SqliteStatement*        mObjectInfoQuery;
     SqliteStatement*        mFileInserter;
     SqliteStatement*        mFileDeleter;
+    SqliteStatement*        mAudioInserter;
+    SqliteStatement*        mAudioDeleter;
 
 public:
                             MtpDatabase();
     virtual                 ~MtpDatabase();
 
+    static uint32_t         getTableForFile(MtpObjectFormat format);
+
     bool                    open(const char* path, bool create);
+    MtpObjectHandle         getObjectHandle(const char* path);
     MtpObjectHandle         addFile(const char* path,
                                     MtpObjectFormat format,
                                     MtpObjectHandle parent,
                                     MtpStorageID storage,
                                     uint64_t size,
-                                    time_t created,
                                     time_t modified);
+
+    MtpObjectHandle         addAudioFile(MtpObjectHandle id);
+
+    MtpObjectHandle         addAudioFile(MtpObjectHandle id,
+                                    const char* title,
+                                    const char* artist,
+                                    const char* album,
+                                    const char* albumArtist,
+                                    const char* genre,
+                                    const char* composer,
+                                    const char* mimeType,
+                                    int track,
+                                    int year,
+                                    int duration);
 
     MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
                                     MtpObjectFormat format,
@@ -62,6 +80,9 @@ public:
                                     MtpString& filePath,
                                     int64_t& fileLength);
     bool                    deleteFile(MtpObjectHandle handle);
+
+    // helper for media scanner
+    MtpObjectHandle*        getFileList(int& outCount);
 };
 
 }; // namespace android
