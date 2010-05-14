@@ -873,11 +873,12 @@ void AudioFlinger::ThreadBase::processConfigEvents()
         LOGV("processConfigEvents() remaining events %d", mConfigEvents.size());
         ConfigEvent *configEvent = mConfigEvents[0];
         mConfigEvents.removeAt(0);
-        // release mLock because audioConfigChanged() will lock AudioFlinger mLock
-        // before calling Audioflinger::audioConfigChanged_l() thus creating
-        // potential cross deadlock between AudioFlinger::mLock and mLock
+        // release mLock before locking AudioFlinger mLock: lock order is always
+        // AudioFlinger then ThreadBase to avoid cross deadlock
         mLock.unlock();
-        audioConfigChanged(configEvent->mEvent, configEvent->mParam);
+        mAudioFlinger->mLock.lock();
+        audioConfigChanged_l(configEvent->mEvent, configEvent->mParam);
+        mAudioFlinger->mLock.unlock();
         delete configEvent;
         mLock.lock();
     }
@@ -953,8 +954,6 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
         mStreamTypes[stream].volume = mAudioFlinger->streamVolumeInternal(stream);
         mStreamTypes[stream].mute = mAudioFlinger->streamMute(stream);
     }
-    // notify client processes that a new input has been opened
-    sendConfigEvent(AudioSystem::OUTPUT_OPENED);
 }
 
 AudioFlinger::PlaybackThread::~PlaybackThread()
@@ -1234,11 +1233,12 @@ String8 AudioFlinger::PlaybackThread::getParameters(const String8& keys)
     return mOutput->getParameters(keys);
 }
 
-void AudioFlinger::PlaybackThread::audioConfigChanged(int event, int param) {
+// destroyTrack_l() must be called with AudioFlinger::mLock held
+void AudioFlinger::PlaybackThread::audioConfigChanged_l(int event, int param) {
     AudioSystem::OutputDescriptor desc;
     void *param2 = 0;
 
-    LOGV("PlaybackThread::audioConfigChanged, thread %p, event %d, param %d", this, event, param);
+    LOGV("PlaybackThread::audioConfigChanged_l, thread %p, event %d, param %d", this, event, param);
 
     switch (event) {
     case AudioSystem::OUTPUT_OPENED:
@@ -1257,7 +1257,6 @@ void AudioFlinger::PlaybackThread::audioConfigChanged(int event, int param) {
     default:
         break;
     }
-    Mutex::Autolock _l(mAudioFlinger->mLock);
     mAudioFlinger->audioConfigChanged_l(event, mId, param2);
 }
 
@@ -1614,66 +1613,22 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     return mixerStatus;
 }
 
-void AudioFlinger::MixerThread::getTracks(
-        SortedVector < sp<Track> >& tracks,
-        SortedVector < wp<Track> >& activeTracks,
-        int streamType)
+void AudioFlinger::MixerThread::invalidateTracks(int streamType)
 {
-    LOGV ("MixerThread::getTracks() mixer %p, mTracks.size %d, mActiveTracks.size %d", this,  mTracks.size(), mActiveTracks.size());
+    LOGV ("MixerThread::invalidateTracks() mixer %p, streamType %d, mTracks.size %d", this,  streamType, mTracks.size());
     Mutex::Autolock _l(mLock);
     size_t size = mTracks.size();
     for (size_t i = 0; i < size; i++) {
         sp<Track> t = mTracks[i];
         if (t->type() == streamType) {
-            tracks.add(t);
-            int j = mActiveTracks.indexOf(t);
-            if (j >= 0) {
-                t = mActiveTracks[j].promote();
-                if (t != NULL) {
-                    activeTracks.add(t);
+            t->mCblk->lock.lock();
+            t->mCblk->flags |= CBLK_INVALID_ON;
+            t->mCblk->cv.signal();
+            t->mCblk->lock.unlock();
                 }
             }
         }
-    }
 
-    size = activeTracks.size();
-    for (size_t i = 0; i < size; i++) {
-        mActiveTracks.remove(activeTracks[i]);
-    }
-
-    size = tracks.size();
-    for (size_t i = 0; i < size; i++) {
-        sp<Track> t = tracks[i];
-        mTracks.remove(t);
-        deleteTrackName_l(t->name());
-    }
-}
-
-void AudioFlinger::MixerThread::putTracks(
-        SortedVector < sp<Track> >& tracks,
-        SortedVector < wp<Track> >& activeTracks)
-{
-    LOGV ("MixerThread::putTracks() mixer %p, tracks.size %d, activeTracks.size %d", this,  tracks.size(), activeTracks.size());
-    Mutex::Autolock _l(mLock);
-    size_t size = tracks.size();
-    for (size_t i = 0; i < size ; i++) {
-        sp<Track> t = tracks[i];
-        int name = getTrackName_l();
-
-        if (name < 0) return;
-
-        t->mName = name;
-        t->mThread = this;
-        mTracks.add(t);
-
-        int j = activeTracks.indexOf(t);
-        if (j >= 0) {
-            mActiveTracks.add(t);
-            // force buffer refilling and no ramp volume when the track is mixed for the first time
-            t->mFillingUpStatus = Track::FS_FILLING;
-        }
-    }
-}
 
 // getTrackName_l() must be called with ThreadBase::mLock held
 int AudioFlinger::MixerThread::getTrackName_l()
@@ -2348,7 +2303,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
                     memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
                     // Force underrun condition to avoid false underrun callback until first data is
                     // written to buffer
-                    mCblk->flowControlFlag = 1;
+                    mCblk->flags = CBLK_UNDERRUN_ON;
                 } else {
                     mBuffer = sharedBuffer->pointer();
                 }
@@ -2371,7 +2326,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
            // Force underrun condition to avoid false underrun callback until first data is
            // written to buffer
-           mCblk->flowControlFlag = 1;
+           mCblk->flags = CBLK_UNDERRUN_ON;
            mBufferEnd = (uint8_t *)mBuffer + bufferSize;
        }
    }
@@ -2589,9 +2544,9 @@ bool AudioFlinger::PlaybackThread::Track::isReady() const {
     if (mFillingUpStatus != FS_FILLING) return true;
 
     if (mCblk->framesReady() >= mCblk->frameCount ||
-        mCblk->forceReady) {
+            (mCblk->flags & CBLK_FORCEREADY_MSK)) {
         mFillingUpStatus = FS_FILLED;
-        mCblk->forceReady = 0;
+        mCblk->flags &= ~CBLK_FORCEREADY_MSK;
         return true;
     }
     return false;
@@ -2706,8 +2661,8 @@ void AudioFlinger::PlaybackThread::Track::reset()
         TrackBase::reset();
         // Force underrun condition to avoid false underrun callback until first data is
         // written to buffer
-        mCblk->flowControlFlag = 1;
-        mCblk->forceReady = 0;
+        mCblk->flags |= CBLK_UNDERRUN_ON;
+        mCblk->flags &= ~CBLK_FORCEREADY_MSK;
         mFillingUpStatus = FS_FILLING;
         mResetDone = true;
     }
@@ -2818,7 +2773,7 @@ void AudioFlinger::RecordThread::RecordTrack::stop()
         TrackBase::reset();
         // Force overerrun condition to avoid false overrun callback until first data is
         // read from buffer
-        mCblk->flowControlFlag = 1;
+        mCblk->flags |= CBLK_UNDERRUN_ON;
     }
 }
 
@@ -2851,7 +2806,7 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
 
     PlaybackThread *playbackThread = (PlaybackThread *)thread.unsafe_get();
     if (mCblk != NULL) {
-        mCblk->out = 1;
+        mCblk->flags |= CBLK_DIRECTION_OUT;
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
         mCblk->volume[0] = mCblk->volume[1] = 0x1000;
         mOutBuffer.frameCount = 0;
@@ -3274,7 +3229,6 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger, A
     mReqChannelCount = AudioSystem::popCount(channels);
     mReqSampleRate = sampleRate;
     readInputParameters();
-    sendConfigEvent(AudioSystem::INPUT_OPENED);
 }
 
 
@@ -3689,7 +3643,7 @@ String8 AudioFlinger::RecordThread::getParameters(const String8& keys)
     return mInput->getParameters(keys);
 }
 
-void AudioFlinger::RecordThread::audioConfigChanged(int event, int param) {
+void AudioFlinger::RecordThread::audioConfigChanged_l(int event, int param) {
     AudioSystem::OutputDescriptor desc;
     void *param2 = 0;
 
@@ -3708,7 +3662,6 @@ void AudioFlinger::RecordThread::audioConfigChanged(int event, int param) {
     default:
         break;
     }
-    Mutex::Autolock _l(mAudioFlinger->mLock);
     mAudioFlinger->audioConfigChanged_l(event, mId, param2);
 }
 
@@ -3828,6 +3781,8 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
         if (pChannels) *pChannels = channels;
         if (pLatencyMs) *pLatencyMs = thread->latency();
 
+        // notify client processes of the new output creation
+        thread->audioConfigChanged_l(AudioSystem::OUTPUT_OPENED);
         return mNextThreadId;
     }
 
@@ -3849,6 +3804,8 @@ int AudioFlinger::openDuplicateOutput(int output1, int output2)
     DuplicatingThread *thread = new DuplicatingThread(this, thread1, ++mNextThreadId);
     thread->addOutputTrack(thread2);
     mPlaybackThreads.add(mNextThreadId, thread);
+    // notify client processes of the new output creation
+    thread->audioConfigChanged_l(AudioSystem::OUTPUT_OPENED);
     return mNextThreadId;
 }
 
@@ -3978,6 +3935,8 @@ int AudioFlinger::openInput(uint32_t *pDevices,
 
         input->standby();
 
+        // notify client processes of the new input creation
+        thread->audioConfigChanged_l(AudioSystem::INPUT_OPENED);
         return mNextThreadId;
     }
 
@@ -4018,22 +3977,16 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
     }
 
     LOGV("setStreamOutput() stream %d to output %d", stream, output);
+    audioConfigChanged_l(AudioSystem::STREAM_CONFIG_CHANGED, output, &stream);
 
     for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
         PlaybackThread *thread = mPlaybackThreads.valueAt(i).get();
         if (thread != dstThread &&
             thread->type() != PlaybackThread::DIRECT) {
             MixerThread *srcThread = (MixerThread *)thread;
-            SortedVector < sp<MixerThread::Track> > tracks;
-            SortedVector < wp<MixerThread::Track> > activeTracks;
-            srcThread->getTracks(tracks, activeTracks, stream);
-            if (tracks.size()) {
-                dstThread->putTracks(tracks, activeTracks);
+            srcThread->invalidateTracks(stream);
             }
         }
-    }
-
-    dstThread->sendConfigEvent(AudioSystem::STREAM_CONFIG_CHANGED, stream);
 
     return NO_ERROR;
 }
