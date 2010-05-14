@@ -4,25 +4,24 @@ page.title=Market Filters
 <div id="qv-wrapper">
 <div id="qv">
 
-<h2 align="left">Market Filters quickview</h2>
-<ul> <li>Android Market applies filters to control which apps are visible to a
-user.</li> <li>Filtering is determined by elements in an app's manifest file,
+<h2 align="left">Market filters quickview</h2>
+<ul> <li>Android Market applies filters to that let you control whether your app is shown to a
+user who is browing or searching for apps.</li> 
+<li>Filtering is determined by elements in an app's manifest file,
 aspects of the device being used, and other factors.</li> </ul>
 
 <h2>In this document</h2>
 
 <ol> <li><a href="#how-filters-work">How Filters Work in Android Market</a></li>
-<li><a href="#manifest-filters">The Manifest File</a>
-  <ol>
-    <li><a href="#affects-filtering">Elements that affect filtering</a></li>
-  </ol>
-</li>
+<li><a href="#manifest-filters">Filtering based on Manifest File Elements</a></li>
 <li><a href="#other-filters">Other Filters</a></li> 
 </ol>
 
 <h2>See also</h2>
  <ol> 
-<li><code><a
+<li><a
+href="{@docRoot}guide/practices/compatibility.html">Compatibility</a></li>
+<li style="margin-top:2px;"><code><a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
 <li><code><a
 href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
@@ -55,18 +54,29 @@ of a SIM card, and other factors. </p>
 
 <p>Changes to the Android Market filters are independent of changes 
 to the Android platform itself. This document will be updated periodically to reflect 
-any changes that might occur. </p>
+any changes that occur. </p>
 
 <h2 id="how-filters-work">How Filters Work in Android Market</h2>
 
-<p>If any one of the filter restrictions described in the following sections applies to
-an application, then the application will not appear in search results or category
-browsing on Android Market. </p><p> You can request any combination of the available filters for your
-app &#8212; for example, you could set a <code>minSdkVersion</code> of 4 and set
-<code>smallScreens</code> to false in the app, then when uploading the app to
+<p>Android Market uses the filter restrictions described below to determine
+whether to show your application to a user who is browsing or searching for
+applications on a given device. When determining whether to display your app,
+Market checks the device's hardware and software capabilities, as well as it's
+carrier, location, and other characteristics. It then compares those against the
+restrictions and dependencies expressed by the application itself, in its
+manifest, <code>.apk</code>, and publishing details. If the application is
+compatible with the device according to the filter rules, Market displays the
+application to the user. Otherwise, Market hides your application from search
+results and category browsing. </p>
+
+<p> You can use the filters described below to control whether Market shows or
+hides your application to users. You can request any combination of the
+available filters for your app &#8212; for example, you could set a
+<code>minSdkVersion</code> requirement of <code>"4"</code> and set
+<code>smallScreens="false"</code> in the app, then when uploading the app to
 Market you could target European countries (carriers) only. Android Market's
-filters would prevent the application from being visible on any device that did not
-match all three of these requirements. </p>
+filters would prevent the application from being visible on any device that did
+not match all three of these requirements. </p>
 
  <p>A filtered app is not visible within Market, even if a user specifically requests 
 the app by clicking a deep link that points directly to the app's ID within Market. 
@@ -74,22 +84,26 @@ All filtering restrictions are associated with an application's version and can
 change between versions. For example:</p> 
 
 <ul> 
-<li>If you publish a new version of
-your app with stricter restrictions, the app will not be visible to users for whom
-it is filtered, even if those users were able see the previous version.</li> <li>If
-a user has installed your application and you publish an upgrade that makes the app
-invisible to the user, the user will not see that an upgrade is available. 
-</li>
+<li>If you publish a new version of your app with stricter restrictions, the app
+will not be visible to users for whom it is filtered, even if those users were
+able see the previous version.</li>
+<li>If a user has installed your application and you publish an upgrade that
+makes the app invisible to the user, the user will not see that an upgrade is
+available. </li>
 </ul>
 
-<h2 id="manifest-filters">The Manifest File</h2>
-<p>Most Market filters are triggered by elements within an application's manifest file, <a
-href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>, 
-although not everything in the manifest file can trigger filtering. </p>
-<h3 id="affects-filtering">Elements that affect filtering</h3>
-<p>The following table lists the manifest elements that can be used to trigger 
-Android Market filtering, and explains how they work.</p>
-<table border="1">
+<h2 id="manifest-filters">Filtering based on Manifest Elements</h2>
+
+<p>Most Market filters are triggered by elements within an application's
+manifest file, <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>,
+although not everything in the manifest file can trigger filtering. The
+table below lists the manifest elements that you can use to trigger Android
+Market filtering, and explains how the filtering works.</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Manifest elements that
+trigger filtering on Market.</p>
+<table>
   <tr>
     <th>Manifest Element</th>
     <th>Filter Name</th>
@@ -199,7 +213,7 @@ href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt
 <p><em>A note about camera:</em> If an
         application requests the CAMERA permission using the <a
 href="{@docRoot}guide/topics/manifest/uses-permission-element.html"> <code>&lt;uses-permission&gt;</code></a> element, Market assumes that the
-        application requires the camera and autofocus features. For applications that require the camera and are designed to run on Android 1.5 (API Level 3), declaring the CAMERA permission is an effective way of ensuring that Market filters your app properly, since <code>uses-feature</code> filtering is not available to applications compiled against the Android 1.5 platform. For more details about requiring or requesting a camera, see the <a href="{@docRoot}guide/topics/manifest/uses-library-element.html#required"> <code>required</code></a> attribute of <code>&lt;uses-feature&gt;</code>. </p></td>
+        application requires the camera and all camera features (such as autofocus). For applications that require the camera and are designed to run on Android 1.5 (API Level 3), declaring the CAMERA permission is an effective way of ensuring that Market filters your app properly, since <code>uses-feature</code> filtering is not available to applications compiled against the Android 1.5 platform. For more details about requiring or requesting a camera, see the <a href="{@docRoot}guide/topics/manifest/uses-library-element.html#required"> <code>required</code></a> attribute of <code>&lt;uses-feature&gt;</code>. </p></td>
   </tr>
   <tr>
     <td valign="top">OpenGL-ES
@@ -269,9 +283,10 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max"><code>android:m
 </table>
 
 <h2 id="other-filters">Other Filters</h2>
-<p>The following table describes other application characteristics that trigger Android Market filtering. </p>
+<p>Android Market uses other application characteristics to determine whether to show or hide an application for a particular user on a given device, as described in the table below. </p>
 
-<table border="1"> <tr>
+<p class="table-caption"><strong>Table 2.</strong> Application and publishing characteristics that affect filtering on Market.</p>
+<table> <tr>
     <th>Filter Name</th> <th>How It Works</th> </tr>
 
   <tr>

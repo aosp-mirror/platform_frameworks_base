@@ -390,6 +390,9 @@
                <span class="zh-TW" style="display:none">最佳實務</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>guide/practices/compatibility.html">
+            <span class="en">Compatibility</span>
+          </a><span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
             <span class="en">Supporting Multiple Screens</span>
           </a></li>

@@ -1,0 +1,242 @@
+page.title=Android Compatibility
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>See also</h2>
+ <ol>
+<li><a
+href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a></li>
+<li><a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing Alternative Resources</a></li>
+<li><a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+<li style="margin-top:3px;"><code><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
+</ol>
+
+
+</div> </div>
+
+<p>Android is designed to run on many different types of devices. For
+developers, the range and number of devices means a huge potential audience: the
+more devices that run Android apps, the more users who can access your app. In
+exchange, however, it also means that your apps will have to cope with that same
+variety of hardware.</p>
+
+<p>Fortunately, Android has built-in tools and support that make it easy for
+your apps to do that, while at the same time maintaining control of what types
+of devices your app is available to. If you do your work properly, users
+whose devices can’t run your app will never see it in the Android Market, and
+will not get in trouble by downloading it. This page explains how you can
+control which devices have access to your apps, and how to prepare your apps to
+make sure they reach the right audience.</p>
+
+
+<h3 id="defined">What does “Compatibility” mean?</h3>
+
+<p>A device is “Android compatible” if it can run apps written for the
+<em>Android execution environment</em>. The exact details of the Android
+execution environment are defined by the Android Compatibility Definition
+Document, but the single most to the ability to install and correctly run an
+Android <code>.apk</code> file.</p>
+
+<p>There is exactly one Android API for each <a
+href="{@docRoot}guide/appendix/api-levels.html">API level</a>, and it’s the same
+API no matter what kind of device it’s installed on. No parts of the API are
+optional, and you never have to worry about parts of the API missing on some
+devices. Every compatible Android device your app will land on will include
+every class and every API for that API level.</p>
+
+<p>Of course, some APIs won’t work correctly if a particular device lacks the
+corresponding hardware or feature. But that’s not a problem: we also designed
+Android to prevent apps from being visible to devices which don’t have features
+the apps require. We’ve built support for this right into the SDK tools, and
+it’s part of the Android platform itself, as well as Android Market.</p>
+
+<p>As a developer, you have complete control of how and where your apps are
+available. Android provides tools as a first-class part of the platform that let
+you manage this. You control the availability of your apps, so that they reach
+only the devices capable of running them.</p>
+
+<h3 id="how">How does it work?</h3>
+
+<p>You manage your app’s availability through a simple three-step process:</p>
+
+<ol>
+<li>You state the features your app requires by declaring <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+elements its manifest file.</li>
+<li>Devices are required to declare the features they include to Android
+Market.</li>
+<li>Android Market uses your app’s stated requirements to filter it from devices
+that don’t meet those requirements.</li>
+</ol>
+
+<p>This way, users never even see apps that won’t work properly on their
+devices. As long as you accurately describe your app’s requirements, you don’t
+need to worry about users blaming you for compatibility problems.</p>
+
+<p>If you’re familiar with web development, you may recognize this model as
+“capability detection”. Web developers typically prefer this approach to
+“browser detection”, because it’s very difficult to keep up as new browsers and
+new versions of current browsers are released. By checking for support for
+specific required capabilities instead of the current browser, web developers
+get better fine-grained control. That’s the same approach Android uses: since
+it’s impossible to keep up with all the Android devices being released, you
+instead use the fine-grained controls Android provides.</p>
+
+<h3>Filtering for technical reasons</h3>
+
+ <div class="sidebox-wrapper"> 
+  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
+  <div id="qv-sub-rule"> 
+    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;">Filtering on Android Market</p>
+
+    <p>Android Market filters the applications that are visible to users, so
+that users can see and download only those applications that are compatible with
+their devices.</p>
+
+    <p style="margin-top:1em;">One of the ways Market filters applications is by
+feature compatibility. To do this, Market checks the
+<code>&lt;uses-feature&gt;</code> elements in each application's manifest, to
+establish the app's feature needs. Market then shows or hides the application to
+each user, based on a comparison with the features available on the user's
+device. 
+
+<p style="margin-top:1em;">For information about other filters that you can
+use to control the availability of your apps, see the 
+<a href="{@docRoot}guide/appendix/market-filters.html">Market
+Filters</a> document.</p>
+  </div> 
+</div>
+
+<p>Android includes support for a lot of features, some hardware and some
+software. Examples include compass and accelerometer sensors, cameras, and Live
+Wallpapers. However, not every device will support every feature. For instance,
+some devices don’t have the hardware horsepower to display Live Wallpapers
+well.</p>
+
+<p>To manage this, Android defines <em>feature IDs</em>. Every capability has a
+corresponding feature ID defined by the Android platform. For instance, the
+feature ID for compass is <code>“android.hardware.sensor.compass”</code>, 
+while the feature
+ID for Live Wallpapers is <code>“android.software.live_wallpapers”</code>. Each of these IDs
+also has a corresponding Java-language constant on the
+{@link android.content.pm.PackageManager} class that you can use to query whether
+feature is supported at runtime. As Android adds support for new features in
+future versions, new feature IDs will be added as well.</p>
+
+<p>When you write your application, you specify which features your app requires
+by listing their feature IDs in <code>&lt;uses-feature&gt;</code> elements in
+the <code>AndroidManifest.xml</code> file.  This is the information that Android
+Market uses to match your app to devices that can run it. For instance, if you
+state that your app requires android.software.live_wallpapers, it won’t be shown
+to devices that don’t support Live Wallpapers.</p>
+
+<p>This puts you in total control of your app &mdash; because you don’t have to
+declare these features. Consider an example involving cameras.</p>
+
+<p>If you’re building a really impressive next-generation augmented-reality app,
+your app won’t function at all without a camera. However, if you’re building a
+shopping app that only uses the camera for barcode scanning, users without
+cameras might still find it useful even if they can’t scan barcodes. While both
+apps need to acquire the permission to access the camera, only the first app
+needs to state that it requires a camera.  (The shopping app can simply check at
+runtime and disable the camera-related features if there’s no camera
+present.)</p>
+
+<p>Since only you can say what the best approach is for your app, Android
+provides the tools and lets you make your own tradeoff between maximizing
+audience size and minimizing development costs.</p>
+
+
+<h3 id="filtering">Filtering for business reasons</h3>
+
+<p>It’s possible that you may need to restrict your app’s availability for
+business or legal reasons. For instance, an app that displays train schedules
+for the London Underground is unlikely to be useful to users outside the United
+Kingdom. Other apps might not be permitted in certain countries for business or
+legal reasons. For cases such as these, Android Market itself provides
+developers with filtering options that allow them control their app’s
+availability for non-technical reasons.</p>
+
+<p>The help information for Android Market provides full details, but in a
+nutshell, developers can use the Market publisher UI to:</p>
+
+<ul>
+<li>List the countries an app is available in.</li>
+<li>Select which carrier’s users are able to access the app.</li>
+</ul>
+
+<p>Filtering for technical compatibility (such as required hardware components)
+is always based on information contained within your <code>.apk</code> file. But
+filtering for non-technical reasons (such as geographic restrictions) is always
+handled in the Market user interface.</p>
+
+<h3 id="futureproofing">Future-proofing</h3>
+
+<p>There’s one additional quirk that we haven’t yet addressed: protecting apps
+from changes made to future versions of Android.  If the Android platform
+introduces a new feature or changes how existing features are handled, what
+happens to existing apps that were written without any knowledge of the new
+behavior?</p>
+
+<p>Simply put, Android commits to not making existing apps available to devices
+where they won’t work properly, even when the platform changes. The best way to
+explain this is through examples, so here are two:</p>
+
+<ul>
+<li>Android 1.0 through 1.5 required a 2 megapixel camera with auto-focus.
+However, with version 1.6, Android devices were permitted to omit the auto-focus
+capability, though a (fixed-focus) camera was still required. Some apps such as
+barcode scanners do not function as well with cameras that do not auto-focus. To
+prevent users from having a bad experience with those apps, existing apps that
+obtain permission to use the Camera were assumed by default to require
+auto-focus. This allowed Android Market to filter those apps from devices that
+lack auto-focus.</li>
+
+<li>Android 2.2, meanwhile, allowed the microphone to be optional on some
+devices, such as set-top boxes. Android 2.2 included a new feature ID for the
+microphone which allows developers to filter their apps if necessary, but
+&mdash; as with camera &mdash; apps that obtain permission to record audio are
+assumed to require the microphone feature by default. If your app can use a
+microphone but doesn’t strictly need it, you can explicitly state that you don’t
+require it; but unless you do that, your app won’t be shown to devices without
+microphones.</li>
+</ul>
+
+<p>In other words, whenever Android introduces new features or changes existing
+ones, we will always take steps to protect existing applications so that they
+don’t end up being available to devices where they won’t work.</p>
+
+<p>This is implemented using the <code>aapt</code> tool in the SDK. To see which
+features your app explicitly requires or is implicitly assumed to require, you
+can use the command <code>aapt dump badging</code>.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>The goal of Android is to create a huge installed base for developers to take
+advantage of. One of the ways we will achieve this is through different kinds of
+hardware running the same software environment. But we also recognize that only
+developers know which kinds of devices their apps make sense on. We’ve built in
+tools to the SDK and set up policies and requirements to ensure that developers
+remain in control of their apps, today and in the future. With the information
+you just read, and the resources listed in the sidebar of this document, you 
+can publish your app with the confidence that only users who can run it will
+see it.</p>
+
+
+ 
