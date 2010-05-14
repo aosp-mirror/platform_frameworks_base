@@ -523,6 +523,14 @@ status_t StagefrightRecorder::startAMRRecording() {
     CHECK(mOutputFd >= 0);
     mWriter = new AMRWriter(dup(mOutputFd));
     mWriter->addSource(audioEncoder);
+
+    if (mMaxFileDurationUs != 0) {
+        mWriter->setMaxFileDuration(mMaxFileDurationUs);
+    }
+    if (mMaxFileSizeBytes != 0) {
+        mWriter->setMaxFileSize(mMaxFileSizeBytes);
+    }
+    mWriter->setListener(mListener);
     mWriter->start();
 
     return OK;
@@ -641,6 +649,13 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         writer->setInterleaveDuration(mInterleaveDurationUs);
     }
 
+    if (mMaxFileDurationUs != 0) {
+        mWriter->setMaxFileDuration(mMaxFileDurationUs);
+    }
+    if (mMaxFileSizeBytes != 0) {
+        mWriter->setMaxFileSize(mMaxFileSizeBytes);
+    }
+    mWriter->setListener(mListener);
     mWriter->start();
     return OK;
 }

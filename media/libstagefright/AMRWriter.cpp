@@ -22,6 +22,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
+#include <media/mediarecorder.h>
 
 namespace android {
 
@@ -137,6 +138,20 @@ void AMRWriter::stop() {
     mStarted = false;
 }
 
+bool AMRWriter::exceedsFileSizeLimit() {
+    if (mMaxFileSizeLimitBytes == 0) {
+        return false;
+    }
+    return mEstimatedSizeBytes >= mMaxFileSizeLimitBytes;
+}
+
+bool AMRWriter::exceedsFileDurationLimit() {
+    if (mMaxFileDurationLimitUs == 0) {
+        return false;
+    }
+    return mEstimatedDurationUs >= mMaxFileDurationLimitUs;
+}
+
 // static
 void *AMRWriter::ThreadWrapper(void *me) {
     static_cast<AMRWriter *>(me)->threadFunc();
@@ -145,6 +160,8 @@ void *AMRWriter::ThreadWrapper(void *me) {
 }
 
 void AMRWriter::threadFunc() {
+    mEstimatedDurationUs = 0;
+    mEstimatedSizeBytes = 0;
     while (!mDone) {
         MediaBuffer *buffer;
         status_t err = mSource->read(&buffer);
@@ -153,6 +170,25 @@ void AMRWriter::threadFunc() {
             break;
         }
 
+        mEstimatedSizeBytes += buffer->range_length();
+        if (exceedsFileSizeLimit()) {
+            buffer->release();
+            buffer = NULL;
+            notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED, 0);
+            break;
+        }
+
+        int64_t timestampUs;
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
+        if (timestampUs > mEstimatedDurationUs) {
+            mEstimatedDurationUs = timestampUs;
+        }
+        if (exceedsFileDurationLimit()) {
+            buffer->release();
+            buffer = NULL;
+            notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_DURATION_REACHED, 0);
+            break;
+        }
         ssize_t n = fwrite(
                 (const uint8_t *)buffer->data() + buffer->range_offset(),
                 1,
