@@ -59,7 +59,7 @@ struct audio_track_cblk_t
                 // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
                 // 16 bit because data is converted to 16 bit before being stored in buffer
                 uint32_t    frameSize;
-                uint8_t     channels;
+                uint8_t     channelCount;
                 uint8_t     flowControlFlag; // underrun (out) or overrrun (in) indication
                 uint8_t     out;        // out equals 1 for AudioTrack and 0 for AudioRecord
                 uint8_t     forceReady;
