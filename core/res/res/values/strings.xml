@@ -1513,9 +1513,24 @@
          progress dialog in the meantime.  this is the emssage. -->
     <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
 
-    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts -->
+    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
+         drawing the unlock pattern -->
     <string name="lockscreen_too_many_failed_attempts_dialog_message">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
+        \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+
+    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
+         entering the password -->
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message">
+        You have incorrectly entered your password <xliff:g id="number">%d</xliff:g> times.
+        \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+
+    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
+         entering the PIN -->
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message">
+        You have incorrectly entered your PIN <xliff:g id="number">%d</xliff:g> times.
         \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
 
