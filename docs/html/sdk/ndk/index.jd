@@ -72,8 +72,8 @@ Android NDK, Revision 4</a> <em>(May 2010)</em>
 <ul>
 <li>Provides a simplified build system through the new <code>ndk-build</code> build
 command. </li>
-<li>Adds support for easy native debugging of generated machine code through the new
-<code>ndk-gdb</code> command.</li>
+<li>Adds support for easy native debugging of generated machine code on production
+devices through the new <code>ndk-gdb</code> command.</li>
 <li>Adds a new Android-specific ABI for ARM-based CPU architectures,
 <code>armeabi-v7a</code>. The new ABI extends the existing <code>armeabi</code>
 ABI to include these CPU instruction set extensions:
@@ -81,7 +81,8 @@ ABI to include these CPU instruction set extensions:
 <li>Thumb-2 instructions</li>
 <li>VFP hardware FPU instructions (VFPv3-D16)</li>
 <li>Optional support for ARM Advanced SIMD (NEON) GCC intrinsics and VFPv3-D32.
-Supported by devices such as Verizon Droid, Google Nexus One, and others.</li>
+Supported by devices such as Verizon Droid by Motorola, Google Nexus One, and 
+others.</li>
 </ul>
 <li>Adds a new <code>cpufeatures</code> static library (with sources) that lets
 your app detect the host device's CPU features at runtime. Specifically,

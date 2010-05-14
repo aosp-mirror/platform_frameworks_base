@@ -199,10 +199,10 @@ public final class ShutdownThread extends Thread {
         mContext.sendOrderedBroadcast(new Intent(Intent.ACTION_SHUTDOWN), null,
                 br, mHandler, 0, null, null);
         
-        final long endTime = System.currentTimeMillis() + MAX_BROADCAST_TIME;
+        final long endTime = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
         synchronized (mActionDoneSync) {
             while (!mActionDone) {
-                long delay = endTime - System.currentTimeMillis();
+                long delay = endTime - SystemClock.elapsedRealtime();
                 if (delay <= 0) {
                     Log.w(TAG, "Shutdown broadcast timed out");
                     break;
@@ -297,7 +297,7 @@ public final class ShutdownThread extends Thread {
         Log.i(TAG, "Shutting down MountService");
         // Set initial variables and time out time.
         mActionDone = false;
-        final long endShutTime = System.currentTimeMillis() + MAX_SHUTDOWN_WAIT_TIME;
+        final long endShutTime = SystemClock.elapsedRealtime() + MAX_SHUTDOWN_WAIT_TIME;
         synchronized (mActionDoneSync) {
             try {
                 if (mount != null) {
@@ -309,7 +309,7 @@ public final class ShutdownThread extends Thread {
                 Log.e(TAG, "Exception during MountService shutdown", e);
             }
             while (!mActionDone) {
-                long delay = endShutTime - System.currentTimeMillis();
+                long delay = endShutTime - SystemClock.elapsedRealtime();
                 if (delay <= 0) {
                     Log.w(TAG, "Shutdown wait timed out");
                     break;
