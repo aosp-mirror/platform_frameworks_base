@@ -298,16 +298,6 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     return s;
 }
 
-void rsi_ScriptCSetDefineF(Context *rsc, const char* name, float value)
-{
-    LOGE("Error rsi_ScriptCSetDefineF");
-}
-
-void rsi_ScriptCSetDefineI32(Context *rsc, const char* name, int32_t value)
-{
-    LOGE("Error rsi_ScriptCSetDefineI");
-}
-
 }
 }
 
