@@ -92,7 +92,12 @@ void Camera::init()
 
 Camera::~Camera()
 {
-    disconnect();
+    // We don't need to call disconnect() here because if the CameraService
+    // thinks we are the owner of the hardware, it will hold a (strong)
+    // reference to us, and we can't possibly be here. We also don't want to
+    // call disconnect() here if we are in the same process as mediaserver,
+    // because we may be invoked by CameraService::Client::connect() and will
+    // deadlock if we call any method of ICamera here.
 }
 
 int32_t Camera::getNumberOfCameras()
