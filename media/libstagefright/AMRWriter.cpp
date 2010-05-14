@@ -162,6 +162,7 @@ void *AMRWriter::ThreadWrapper(void *me) {
 void AMRWriter::threadFunc() {
     mEstimatedDurationUs = 0;
     mEstimatedSizeBytes = 0;
+    bool stoppedPrematurely = true;
     while (!mDone) {
         MediaBuffer *buffer;
         status_t err = mSource->read(&buffer);
@@ -202,10 +203,22 @@ void AMRWriter::threadFunc() {
             break;
         }
 
+        // XXX: How to tell it is stopped prematurely?
+        if (stoppedPrematurely) {
+            stoppedPrematurely = false;
+        }
+
         buffer->release();
         buffer = NULL;
     }
 
+    if (stoppedPrematurely) {
+        notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_STOP_PREMATURELY, 0);
+    }
+
+    fflush(mFile);
+    fclose(mFile);
+    mFile = NULL;
     mReachedEOS = true;
 }
 
