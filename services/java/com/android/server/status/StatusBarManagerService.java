@@ -184,7 +184,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     public void setIcon(String slot, CharSequence text) {
-
     }
 
     public void setIcon(String slot, String iconPackage, int iconId, int iconLevel) {
@@ -212,6 +211,29 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     public void setIconVisibility(String slot, boolean visible) {
         enforceStatusBar();
 
+        synchronized (mIcons) {
+            int index = mIcons.getSlotIndex(slot);
+            if (index < 0) {
+                throw new SecurityException("invalid status bar icon slot: " + slot);
+            }
+
+            StatusBarIcon icon = mIcons.getIcon(index);
+            if (icon == null) {
+                return;
+            }
+
+            if (icon.visible != visible) {
+                icon.visible = visible;
+
+                // Tell the client.  If it fails, it'll restart soon and we'll sync up.
+                if (mBar != null) {
+                    try {
+                        mBar.setIcon(index, icon);
+                    } catch (RemoteException ex) {
+                    }
+                }
+            }
+        }
     }
 
     public void removeIcon(String slot) {
@@ -379,9 +401,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-
-        Slog.d(TAG, "dump!!!");
-        pw.println("status!");
 
         synchronized (mIcons) {
             mIcons.dump(pw);
