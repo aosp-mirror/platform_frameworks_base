@@ -27,7 +27,7 @@ namespace renderscript {
 class ProgramVertex;
 class ProgramFragment;
 class ProgramRaster;
-class ProgramFragmentStore;
+class ProgramStore;
 
 #define MAX_SCRIPT_BANKS 32
 
@@ -50,7 +50,7 @@ public:
         ObjectBaseRef<ProgramVertex> mVertex;
         ObjectBaseRef<ProgramFragment> mFragment;
         ObjectBaseRef<ProgramRaster> mRaster;
-        ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
+        ObjectBaseRef<ProgramStore> mFragmentStore;
 
         uint32_t mInvokeFunctionCount;
         InvokeFunc_t *mInvokeFunctions;

@@ -74,9 +74,9 @@ public class RenderScriptGL extends RenderScript {
         nContextBindRootScript(safeID(s));
     }
 
-    public void contextBindProgramFragmentStore(ProgramStore p) {
+    public void contextBindProgramStore(ProgramStore p) {
         validate();
-        nContextBindProgramFragmentStore(safeID(p));
+        nContextBindProgramStore(safeID(p));
     }
 
     public void contextBindProgramFragment(ProgramFragment p) {

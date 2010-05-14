@@ -33,7 +33,7 @@
 #include "rsSampler.h"
 #include "rsLight.h"
 #include "rsProgramFragment.h"
-#include "rsProgramFragmentStore.h"
+#include "rsProgramStore.h"
 #include "rsProgramRaster.h"
 #include "rsProgramVertex.h"
 #include "rsShaderCache.h"
@@ -71,7 +71,7 @@ public:
     TypeState mStateType;
     SamplerState mStateSampler;
     ProgramFragmentState mStateFragment;
-    ProgramFragmentStoreState mStateFragmentStore;
+    ProgramStoreState mStateFragmentStore;
     ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
     LightState mStateLight;
@@ -85,12 +85,12 @@ public:
     void setRaster(ProgramRaster *);
     void setVertex(ProgramVertex *);
     void setFragment(ProgramFragment *);
-    void setFragmentStore(ProgramFragmentStore *);
+    void setFragmentStore(ProgramStore *);
 
     void updateSurface(void *sur);
 
     const ProgramFragment * getFragment() {return mFragment.get();}
-    const ProgramFragmentStore * getFragmentStore() {return mFragmentStore.get();}
+    const ProgramStore * getFragmentStore() {return mFragmentStore.get();}
     const ProgramRaster * getRaster() {return mRaster.get();}
     const ProgramVertex * getVertex() {return mVertex.get();}
 
@@ -118,7 +118,7 @@ public:
     ProgramVertex * getDefaultProgramVertex() const {
         return mStateVertex.mDefault.get();
     }
-    ProgramFragmentStore * getDefaultProgramFragmentStore() const {
+    ProgramStore * getDefaultProgramStore() const {
         return mStateFragmentStore.mDefault.get();
     }
     ProgramRaster * getDefaultProgramRaster() const {
@@ -221,7 +221,7 @@ protected:
     ObjectBaseRef<Script> mRootScript;
     ObjectBaseRef<ProgramFragment> mFragment;
     ObjectBaseRef<ProgramVertex> mVertex;
-    ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
+    ObjectBaseRef<ProgramStore> mFragmentStore;
     ObjectBaseRef<ProgramRaster> mRaster;
 
 

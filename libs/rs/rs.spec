@@ -4,8 +4,8 @@ ContextBindRootScript {
 	param RsScript sampler
 	}
 
-ContextBindProgramFragmentStore {
-	param RsProgramFragmentStore pgm
+ContextBindProgramStore {
+	param RsProgramStore pgm
 	}
 
 ContextBindProgramFragment {
@@ -342,37 +342,37 @@ ScriptCSetDefineI32 {
     param int32_t value
     }
 
-ProgramFragmentStoreBegin {
+ProgramStoreBegin {
 	param RsElement in
 	param RsElement out
 	}
 
-ProgramFragmentStoreColorMask {
+ProgramStoreColorMask {
 	param bool r
 	param bool g
 	param bool b
 	param bool a
 	}
 
-ProgramFragmentStoreBlendFunc {
+ProgramStoreBlendFunc {
 	param RsBlendSrcFunc srcFunc
 	param RsBlendDstFunc destFunc
 	}
 
-ProgramFragmentStoreDepthMask {
+ProgramStoreDepthMask {
 	param bool enable
 }
 
-ProgramFragmentStoreDither {
+ProgramStoreDither {
 	param bool enable
 }
 
-ProgramFragmentStoreDepthFunc {
+ProgramStoreDepthFunc {
 	param RsDepthFunc func
 }
 
-ProgramFragmentStoreCreate {
-	ret RsProgramFragmentStore
+ProgramStoreCreate {
+	ret RsProgramStore
 	}
 
 ProgramRasterCreate {

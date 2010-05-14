@@ -131,7 +131,7 @@ uint32_t Context::runScript(Script *s, uint32_t launchID)
 {
     ObjectBaseRef<ProgramFragment> frag(mFragment);
     ObjectBaseRef<ProgramVertex> vtx(mVertex);
-    ObjectBaseRef<ProgramFragmentStore> store(mFragmentStore);
+    ObjectBaseRef<ProgramStore> store(mFragmentStore);
     ObjectBaseRef<ProgramRaster> raster(mRaster);
 
     uint32_t ret = s->run(this, launchID);
@@ -582,7 +582,7 @@ void Context::setRootScript(Script *s)
     mRootScript.set(s);
 }
 
-void Context::setFragmentStore(ProgramFragmentStore *pfs)
+void Context::setFragmentStore(ProgramStore *pfs)
 {
     rsAssert(mIsGraphicsContext);
     if (pfs == NULL) {
@@ -806,9 +806,9 @@ void rsi_ContextBindSampler(Context *rsc, uint32_t slot, RsSampler vs)
     s->bindToContext(&rsc->mStateSampler, slot);
 }
 
-void rsi_ContextBindProgramFragmentStore(Context *rsc, RsProgramFragmentStore vpfs)
+void rsi_ContextBindProgramStore(Context *rsc, RsProgramStore vpfs)
 {
-    ProgramFragmentStore *pfs = static_cast<ProgramFragmentStore *>(vpfs);
+    ProgramStore *pfs = static_cast<ProgramStore *>(vpfs);
     rsc->setFragmentStore(pfs);
 }
 

@@ -147,17 +147,17 @@ public class ProgramStore extends BaseObj {
             if (b.mOut != null) {
                 outID = b.mOut.mID;
             }
-            rs.nProgramFragmentStoreBegin(inID, outID);
-            rs.nProgramFragmentStoreDepthFunc(b.mDepthFunc.mID);
-            rs.nProgramFragmentStoreDepthMask(b.mDepthMask);
-            rs.nProgramFragmentStoreColorMask(b.mColorMaskR,
+            rs.nProgramStoreBegin(inID, outID);
+            rs.nProgramStoreDepthFunc(b.mDepthFunc.mID);
+            rs.nProgramStoreDepthMask(b.mDepthMask);
+            rs.nProgramStoreColorMask(b.mColorMaskR,
                                               b.mColorMaskG,
                                               b.mColorMaskB,
                                               b.mColorMaskA);
-            rs.nProgramFragmentStoreBlendFunc(b.mBlendSrc.mID, b.mBlendDst.mID);
-            rs.nProgramFragmentStoreDither(b.mDither);
+            rs.nProgramStoreBlendFunc(b.mBlendSrc.mID, b.mBlendDst.mID);
+            rs.nProgramStoreDither(b.mDither);
 
-            int id = rs.nProgramFragmentStoreCreate();
+            int id = rs.nProgramStoreCreate();
             return new ProgramStore(id, rs);
         }
 
