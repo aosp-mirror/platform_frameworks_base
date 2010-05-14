@@ -499,6 +499,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                         mDataSource = cachedSource;
                     }
                 }
+
+                mLastTrack->sampleTable = new SampleTable(mDataSource);
             }
 
             bool isTrack = false;
@@ -518,7 +520,6 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 track->includes_expensive_metadata = false;
                 track->skipTrack = false;
                 track->timescale = 0;
-                track->sampleTable = new SampleTable(mDataSource);
                 track->meta->setCString(kKeyMIMEType, "application/octet-stream");
             }
 
