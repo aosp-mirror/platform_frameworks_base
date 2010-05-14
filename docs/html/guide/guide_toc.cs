@@ -144,9 +144,17 @@
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
             <span class="en">Intents and Intent Filters</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">
             <span class="en">Data Storage</span>
-          </a></li>
+          </a> <span class="new">new!</span></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>guide/topics/data/backup.html">
+                <span class="en">Data Backup</span>
+              </a> <span class="new">new!</span>
+            </li>
+          </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
             <span class="en">Content Providers</span>
           </a></li>
