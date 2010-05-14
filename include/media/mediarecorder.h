@@ -135,7 +135,8 @@ enum media_recorder_error_type {
 enum media_recorder_info_type {
     MEDIA_RECORDER_INFO_UNKNOWN                   = 1,
     MEDIA_RECORDER_INFO_MAX_DURATION_REACHED      = 800,
-    MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED      = 801
+    MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED      = 801,
+    MEDIA_RECORDER_INFO_STOP_PREMATURELY          = 802
 };
 
 // ----------------------------------------------------------------------------

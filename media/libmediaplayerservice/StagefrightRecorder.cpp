@@ -269,7 +269,7 @@ status_t StagefrightRecorder::setParamVideoEncodingBitRate(int32_t bitRate) {
 
 status_t StagefrightRecorder::setParamMaxDurationOrFileSize(int64_t limit,
         bool limit_is_duration) {
-    LOGV("setParamMaxDurationOrFileSize: limit (%d) for %s",
+    LOGV("setParamMaxDurationOrFileSize: limit (%lld) for %s",
             limit, limit_is_duration?"duration":"size");
     if (limit_is_duration) {  // limit is in ms
         if (limit <= 1000) {  // XXX: 1 second
@@ -561,11 +561,6 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
-        CHECK(mCamera != NULL);
-
-        if (mCamera == 0) {
-            mCamera = Camera::connect(0);
-        }
         CHECK(mCamera != NULL);
 
         // Set the actual video recording frame size

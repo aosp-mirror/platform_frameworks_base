@@ -924,7 +924,9 @@ void MPEG4Writer::Track::threadEntry() {
         buffer = NULL;
     }
 
-    CHECK(!mSampleInfos.empty());
+    if (mSampleInfos.empty()) {
+        mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_STOP_PREMATURELY, 0);
+    }
 
     // Last chunk
     if (!mChunkSamples.empty()) {
