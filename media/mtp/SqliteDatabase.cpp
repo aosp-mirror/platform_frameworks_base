@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
+namespace android {
+
 SqliteDatabase::SqliteDatabase()
     :   mDatabaseHandle(NULL)
 {
@@ -79,3 +81,5 @@ void SqliteDatabase::setVersion(int version) {
     snprintf(buffer, sizeof(buffer), "PRAGMA user_version = %d", version);
     exec(buffer);
 }
+
+}  // namespace android

@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
+namespace android {
+
 #define ID_COLUMN       1
 #define PATH_COLUMN     2
 #define FORMAT_COLUMN   3
@@ -50,7 +52,6 @@
 #define GET_OBJECT_INFO_QUERY   "SELECT storage,format,parent,path,size,date_created,date_modified FROM files WHERE _id = ?;"
 #define FILE_INSERT     "INSERT INTO files VALUES(?,?,?,?,?,?,?,?);"
 #define FILE_DELETE     "DELETE FROM files WHERE path = ?;"
-
 
 struct PropertyTableEntry {
     MtpObjectProperty   property;
@@ -384,3 +385,5 @@ printf("deleteFile %d\n", handle);
     packet.putUInt8(formFlag);
     // form, variable
 */
+
+}  // namespace android

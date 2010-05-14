@@ -19,6 +19,8 @@
 #include <cutils/tztime.h>
 #include "MtpUtils.h"
 
+namespace android {
+
 /*
 DateTime strings follow a compatible subset of the definition found in ISO 8601, and
 take the form of a Unicode string formatted as: "YYYYMMDDThhmmss.s". In this
@@ -70,4 +72,4 @@ void formatDateTime(time_t seconds, char* buffer, int bufferLength) {
         tm.tm_year + 1900, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 }
 
-
+}  // namespace android

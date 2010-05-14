@@ -20,6 +20,8 @@
 #include "MtpPacket.h"
 #include "mtp.h"
 
+namespace android {
+
 class MtpResponsePacket : public MtpPacket {
 
 public:
@@ -40,5 +42,7 @@ public:
     inline void                 setResponseCode(MtpResponseCode code)
                                                      { return setContainerCode(code); }
 };
+
+}; // namespace android
 
 #endif // _MTP_RESPONSE_PACKET_H

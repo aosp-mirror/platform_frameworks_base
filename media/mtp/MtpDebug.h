@@ -19,9 +19,13 @@
 
 #include "mtp.h"
 
+namespace android {
+
 class MtpDebug {
 public:
     static const char* getOperationCodeName(MtpOperationCode code);
 };
+
+}; // namespace android
 
 #endif // _MTP_DEBUG_H

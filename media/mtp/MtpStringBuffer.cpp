@@ -19,6 +19,7 @@
 #include "MtpDataPacket.h"
 #include "MtpStringBuffer.h"
 
+namespace android {
 
 MtpStringBuffer::MtpStringBuffer()
     :   mCharCount(0),
@@ -131,3 +132,5 @@ void MtpStringBuffer::writeToPacket(MtpDataPacket* packet) const {
         packet->putUInt16(ch);
     }
 }
+
+}  // namespace android

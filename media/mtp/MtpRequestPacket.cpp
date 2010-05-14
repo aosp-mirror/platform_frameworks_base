@@ -20,6 +20,8 @@
 
 #include "MtpRequestPacket.h"
 
+namespace android {
+
 MtpRequestPacket::MtpRequestPacket()
     :   MtpPacket(512)
 {
@@ -48,3 +50,5 @@ int MtpRequestPacket::write(struct usb_endpoint *ep)
     return transfer(ep, mBuffer, mPacketSize);
 }
 #endif
+
+}  // namespace android

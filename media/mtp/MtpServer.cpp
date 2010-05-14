@@ -30,6 +30,8 @@
 
 #include "f_mtp.h"
 
+namespace android {
+
 static const MtpOperationCode kSupportedOperationCodes[] = {
     MTP_OPERATION_GET_DEVICE_INFO,
     MTP_OPERATION_OPEN_SESSION,
@@ -514,3 +516,5 @@ MtpResponseCode MtpServer::doGetObjectPropDesc() {
 
     return -1;
 }
+
+}  // namespace android

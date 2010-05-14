@@ -20,6 +20,8 @@
 #include "MtpPacket.h"
 #include "mtp.h"
 
+namespace android {
+
 class MtpDataPacket : public MtpPacket {
 private:
     // current offset for get/put methods
@@ -85,5 +87,7 @@ public:
 
     inline bool         hasData() const { return mPacketSize > MTP_CONTAINER_HEADER_SIZE; }
 };
+
+}; // namespace android
 
 #endif // _MTP_DATA_PACKET_H

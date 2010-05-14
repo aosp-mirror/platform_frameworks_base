@@ -28,6 +28,8 @@
 #include "MtpDebug.h"
 #include "MtpStringBuffer.h"
 
+namespace android {
+
 MtpClient::MtpClient(struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
             struct usb_endpoint *ep_intr)
     :   mEndpointIn(ep_in),
@@ -134,3 +136,4 @@ MtpResponseCode MtpClient::readResponse() {
     }
 }
 
+}  // namespace android

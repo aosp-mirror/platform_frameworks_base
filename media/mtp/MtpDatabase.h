@@ -21,6 +21,8 @@
 #include "SqliteDatabase.h"
 #include "mtp.h"
 
+namespace android {
+
 class MtpDataPacket;
 class SqliteStatement;
 
@@ -61,5 +63,7 @@ public:
                                     int64_t& fileLength);
     bool                    deleteFile(MtpObjectHandle handle);
 };
+
+}; // namespace android
 
 #endif // _MTP_DATABASE_H

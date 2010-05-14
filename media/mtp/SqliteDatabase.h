@@ -19,6 +19,8 @@
 
 typedef struct sqlite3 sqlite3;
 
+namespace android {
+
 class SqliteDatabase {
 private:
     sqlite3*        mDatabaseHandle;
@@ -41,7 +43,8 @@ public:
     void            setVersion(int version);
 
     inline sqlite3* getDatabaseHandle() const { return mDatabaseHandle; }
-
 };
+
+}; // namespace android
 
 #endif // _SQLITE_DATABASE_H

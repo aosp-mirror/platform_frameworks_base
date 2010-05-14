@@ -24,6 +24,8 @@
 
 #include "MtpUtils.h"
 
+namespace android {
+
 class MtpClient {
 private:
     struct usb_endpoint *mEndpointIn;
@@ -55,5 +57,7 @@ private:
     MtpResponseCode     readResponse();
 
 };
+
+}; // namespace android
 
 #endif // _MTP_CLIENT_H

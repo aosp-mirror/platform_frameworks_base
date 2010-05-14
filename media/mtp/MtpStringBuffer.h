@@ -19,6 +19,8 @@
 
 #include <stdint.h>
 
+namespace android {
+
 class MtpDataPacket;
 
 // Represents a utf8 string, with a maximum of 255 characters
@@ -46,5 +48,7 @@ public:
 
 	inline operator const char*() const { return (const char *)mBuffer; }
 };
+
+}; // namespace android
 
 #endif // _MTP_STRING_BUFFER_H

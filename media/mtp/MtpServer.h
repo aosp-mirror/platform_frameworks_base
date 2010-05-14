@@ -24,6 +24,8 @@
 
 #include "MtpUtils.h"
 
+namespace android {
+
 class MtpStorage;
 class MtpDatabase;
 
@@ -82,5 +84,7 @@ private:
     MtpResponseCode     doDeleteObject();
     MtpResponseCode     doGetObjectPropDesc();
 };
+
+}; // namespace android
 
 #endif // _MTP_SERVER_H

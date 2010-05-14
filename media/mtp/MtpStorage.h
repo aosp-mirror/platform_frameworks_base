@@ -19,6 +19,8 @@
 
 #include "mtp.h"
 
+namespace android {
+
 class MtpDatabase;
 class SqliteStatement;
 
@@ -48,5 +50,7 @@ public:
 private:
     int                     scanDirectory(const char* path, MtpObjectHandle parent);
 };
+
+}; // namespace android
 
 #endif // _MTP_STORAGE_H

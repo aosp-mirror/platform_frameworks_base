@@ -21,6 +21,8 @@
 #include "MtpDataPacket.h"
 #include "MtpStringBuffer.h"
 
+namespace android {
+
 MtpDataPacket::MtpDataPacket()
     :   MtpPacket(512),
         mOffset(MTP_CONTAINER_HEADER_SIZE)
@@ -294,3 +296,5 @@ int MtpDataPacket::write(struct usb_endpoint *ep) {
 }
 
 #endif // MTP_HOST
+
+}  // namespace android

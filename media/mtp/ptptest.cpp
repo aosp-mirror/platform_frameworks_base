@@ -23,6 +23,8 @@
 
 #include "MtpClient.h"
 
+using namespace android;
+
 static struct usb_device *sCameraDevice = NULL;
 static int sCameraInterface = 0;
 static MtpClient *sClient = NULL;

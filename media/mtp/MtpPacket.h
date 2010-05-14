@@ -17,12 +17,16 @@
 #ifndef _MTP_PACKET_H
 #define _MTP_PACKET_H
 
-class MtpStringBuffer;
-
 #include "mtp.h"
 #include "MtpUtils.h"
 
 #include <stdint.h>
+
+struct usb_endpoint;
+
+namespace android {
+
+class MtpStringBuffer;
 
 class MtpPacket {
 
@@ -64,5 +68,7 @@ protected:
     void                putUInt16(int offset, uint16_t value);
     void                putUInt32(int offset, uint32_t value);
 };
+
+}; // namespace android
 
 #endif // _MTP_PACKET_H

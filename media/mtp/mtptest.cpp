@@ -25,6 +25,7 @@
 #include "MtpServer.h"
 #include "MtpStorage.h"
 
+using namespace android;
 
 static void enable_usb_function(const char* name, bool enable) {
     char    path[PATH_MAX];

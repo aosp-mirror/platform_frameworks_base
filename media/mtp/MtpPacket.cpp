@@ -22,6 +22,8 @@
 
 #include "MtpPacket.h"
 
+namespace android {
+
 MtpPacket::MtpPacket(int bufferSize)
     :   mBuffer(NULL),
         mBufferSize(bufferSize),
@@ -134,3 +136,5 @@ int MtpPacket::transfer(struct usb_endpoint *ep, void* buffer, int length) {
     return usb_endpoint_wait(usb_endpoint_get_device(ep), &ep_num);
 }
 #endif
+
+}  // namespace android

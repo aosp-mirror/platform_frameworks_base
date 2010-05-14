@@ -17,11 +17,14 @@
 #ifndef _SQLITE_STATEMENT_H
 #define _SQLITE_STATEMENT_H
 
+#include <stdint.h>
+
 typedef struct sqlite3 sqlite3;
 typedef struct sqlite3_stmt sqlite3_stmt;
-class SqliteDatabase;
 
-#include <stdint.h>
+namespace android {
+
+class SqliteDatabase;
 
 class SqliteStatement {
 private:
@@ -47,5 +50,7 @@ public:
 
     inline bool     isDone() const { return mDone; }
 };
+
+}; // namespace android
 
 #endif // _SQLITE_STATEMENT_H

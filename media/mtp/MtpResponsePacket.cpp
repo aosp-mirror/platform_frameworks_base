@@ -20,6 +20,8 @@
 
 #include "MtpResponsePacket.h"
 
+namespace android {
+
 MtpResponsePacket::MtpResponsePacket()
     :   MtpPacket(512)
 {
@@ -49,4 +51,5 @@ int MtpResponsePacket::read(struct usb_endpoint *ep) {
 }
 #endif
 
+}  // namespace android
 

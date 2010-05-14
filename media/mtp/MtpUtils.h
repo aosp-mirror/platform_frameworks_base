@@ -20,6 +20,8 @@
 #include "utils/String8.h"
 #include "utils/Vector.h"
 
+namespace android {
+
 class MtpStorage;
 
 typedef android::Vector<MtpStorage *> MtpStorageList;
@@ -30,5 +32,7 @@ typedef android::String8    MtpString;
 
 bool parseDateTime(const char* dateTime, time_t& outSeconds);
 void formatDateTime(time_t seconds, char* buffer, int bufferLength);
+
+}; // namespace android
 
 #endif // _MTP_UTILS_H

@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <limits.h>
 
+namespace android {
 
 MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, MtpDatabase* db)
     :   mStorageID(id),
@@ -133,3 +134,5 @@ int MtpStorage::scanDirectory(const char* path, MtpObjectHandle parent)
     closedir(dir);
     return 0;
 }
+
+}  // namespace android

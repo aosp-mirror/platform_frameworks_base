@@ -16,6 +16,7 @@
 
 #include "MtpDebug.h"
 
+namespace android {
 
 struct OperationCodeEntry {
     const char* name;
@@ -71,3 +72,5 @@ const char* MtpDebug::getOperationCodeName(MtpOperationCode code) {
     }
     return "*** UNKNOWN OPERATION ***";
 }
+
+}  // namespace android

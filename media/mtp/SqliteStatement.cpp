@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
+namespace android {
+
 SqliteStatement::SqliteStatement(SqliteDatabase* db)
     :   mDatabaseHandle(db->getDatabaseHandle()),
         mStatement(NULL),
@@ -75,3 +77,5 @@ int64_t SqliteStatement::getColumnInt64(int column) {
 const char* SqliteStatement::getColumnString(int column) {
     return (const char *)sqlite3_column_text(mStatement, column);
 }
+
+}  // namespace android
