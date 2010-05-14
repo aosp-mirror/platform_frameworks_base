@@ -196,6 +196,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             }
 
             StatusBarIcon icon = new StatusBarIcon(iconPackage, iconId, iconLevel);
+            //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.setIcon(index, icon);
 
             // Tell the client.  If it fails, it'll restart soon and we'll sync up.
@@ -287,9 +288,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // Can be called from any thread
     // ================================================================================
-    public void setIconVisibility(IBinder key, boolean visible) {
-        addPendingOp(OP_SET_VISIBLE, key, visible);
-    }
 
     private void addPendingOp(int code, IBinder key, IconData data, NotificationData n, int i) {
         synchronized (mQueueLock) {

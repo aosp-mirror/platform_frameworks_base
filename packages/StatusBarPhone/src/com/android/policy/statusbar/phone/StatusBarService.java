@@ -57,6 +57,7 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
     public void onCreate() {
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
+        mCommandQueue = new CommandQueue(this, iconList);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         try {
@@ -66,7 +67,6 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
         }
 
         // Set up the initial icon state
-        mCommandQueue = new CommandQueue(this, iconList);
         final int N = iconList.size();
         int viewIndex = 0;
         for (int i=0; i<N; i++) {
