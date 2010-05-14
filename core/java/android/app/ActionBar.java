@@ -17,7 +17,6 @@
 package android.app;
 
 import android.graphics.drawable.Drawable;
-import android.view.ActionBarView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,12 +28,12 @@ import android.view.View;
  * methods of navigating around an application. 
  */
 public abstract class ActionBar {
-	/**
-	 * Normal/standard navigation mode. Consists of either a logo or icon
-	 * and title text with an optional subtitle. Clicking any of these elements
-	 * will dispatch onActionItemSelected to the registered Callback with
-	 * a MenuItem with item ID android.R.id.home.
-	 */
+    /**
+     * Normal/standard navigation mode. Consists of either a logo or icon
+     * and title text with an optional subtitle. Clicking any of these elements
+     * will dispatch onActionItemSelected to the registered Callback with
+     * a MenuItem with item ID android.R.id.home.
+     */
     public static final int NAVIGATION_MODE_NORMAL = 0;
     
     /**
@@ -119,12 +118,28 @@ public abstract class ActionBar {
     public abstract void setNavigationMode(int mode);
     
     /**
-     * Set display options.
+     * Set display options. This changes all display option bits at once. To change
+     * a limited subset of display options, see {@link #setDisplayOptions(int, int)}.
      * 
      * @param options A combination of the bits defined by the DISPLAY_ constants
      *                defined in ActionBar.
      */
     public abstract void setDisplayOptions(int options);
+    
+    /**
+     * Set selected display options. Only the options specified by mask will be changed.
+     * To change all display option bits at once, see {@link #setDisplayOptions(int)}.
+     * 
+     * <p>Example: setDisplayOptions(0, DISPLAY_HIDE_HOME) will disable the
+     * {@link #DISPLAY_HIDE_HOME} option.
+     * setDisplayOptions(DISPLAY_HIDE_HOME, DISPLAY_HIDE_HOME | DISPLAY_USE_LOGO)
+     * will enable {@link #DISPLAY_HIDE_HOME} and disable {@link #DISPLAY_USE_LOGO}.
+     * 
+     * @param options A combination of the bits defined by the DISPLAY_ constants
+     *                defined in ActionBar.
+     * @param mask A bit mask declaring which display options should be changed.
+     */
+    public abstract void setDisplayOptions(int options, int mask);
     
     /**
      * Set the ActionBar's background.
