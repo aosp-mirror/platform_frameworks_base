@@ -111,6 +111,9 @@ void Context::initEGL(bool useGL2)
         LOGE("eglCreateContext returned EGL_NO_CONTEXT");
     }
     gGLContextCount++;
+
+    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
+    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
 }
 
 void Context::deinitEGL()
@@ -155,11 +158,8 @@ uint32_t Context::runRootScript()
 {
     timerSet(RS_TIMER_CLEAR_SWAP);
 
-    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
-    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
-    glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
+    glViewport(0, 0, mWidth, mHeight);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
     glClearColor(mRootScript->mEnviroment.mClearColor[0],
                  mRootScript->mEnviroment.mClearColor[1],
                  mRootScript->mEnviroment.mClearColor[2],
@@ -299,13 +299,13 @@ void * Context::threadProc(void *vrsc)
      }
 
      if (rsc->mIsGraphicsContext) {
-         rsc->mStateRaster.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->mStateRaster.init(rsc);
          rsc->setRaster(NULL);
-         rsc->mStateVertex.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->mStateVertex.init(rsc);
          rsc->setVertex(NULL);
-         rsc->mStateFragment.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->mStateFragment.init(rsc);
          rsc->setFragment(NULL);
-         rsc->mStateFragmentStore.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->mStateFragmentStore.init(rsc);
          rsc->setFragmentStore(NULL);
          rsc->mStateVertexArray.init(rsc);
      }
@@ -493,6 +493,8 @@ void Context::setSurface(uint32_t w, uint32_t h, android_native_window_t *sur)
 
     mWndSurface = sur;
     if (mWndSurface != NULL) {
+        mWidth = w;
+        mHeight = h;
         bool first = false;
         if (!mEGL.mContext) {
             first = true;
@@ -510,11 +512,7 @@ void Context::setSurface(uint32_t w, uint32_t h, android_native_window_t *sur)
         ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
         checkEglError("eglMakeCurrent", ret);
 
-        eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
-        eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
-        mWidth = w;
-        mHeight = h;
-        mStateVertex.updateSize(this, w, h);
+        mStateVertex.updateSize(this);
 
         if ((int)mWidth != mEGL.mWidth || (int)mHeight != mEGL.mHeight) {
             LOGE("EGL/Surface mismatch  EGL (%i x %i)  SF (%i x %i)", mEGL.mWidth, mEGL.mHeight, mWidth, mHeight);

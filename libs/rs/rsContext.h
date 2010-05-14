@@ -125,8 +125,8 @@ public:
         return mStateRaster.mDefault.get();
     }
 
-    uint32_t getWidth() const {return mEGL.mWidth;}
-    uint32_t getHeight() const {return mEGL.mHeight;}
+    uint32_t getWidth() const {return mWidth;}
+    uint32_t getHeight() const {return mHeight;}
 
 
     ThreadIO mIO;

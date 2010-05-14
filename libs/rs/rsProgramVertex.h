@@ -71,9 +71,9 @@ public:
     ProgramVertexState();
     ~ProgramVertexState();
 
-    void init(Context *rsc, int32_t w, int32_t h);
+    void init(Context *rsc);
     void deinit(Context *rsc);
-    void updateSize(Context *rsc, int32_t w, int32_t h);
+    void updateSize(Context *rsc);
 
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<ProgramVertex> mLast;

@@ -102,7 +102,7 @@ ProgramRasterState::~ProgramRasterState()
 {
 }
 
-void ProgramRasterState::init(Context *rsc, int32_t w, int32_t h)
+void ProgramRasterState::init(Context *rsc)
 {
     ProgramRaster *pr = new ProgramRaster(rsc, false, false, false);
     mDefault.set(pr);

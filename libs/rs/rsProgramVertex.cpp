@@ -362,7 +362,7 @@ ProgramVertexState::~ProgramVertexState()
 {
 }
 
-void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
+void ProgramVertexState::init(Context *rsc)
 {
     RsElement e = (RsElement) Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
 
@@ -382,13 +382,13 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
     color[2] = 1.f;
     color[3] = 1.f;
 
-    updateSize(rsc, w, h);
+    updateSize(rsc);
 }
 
-void ProgramVertexState::updateSize(Context *rsc, int32_t w, int32_t h)
+void ProgramVertexState::updateSize(Context *rsc)
 {
     Matrix m;
-    m.loadOrtho(0,w, h,0, -1,1);
+    m.loadOrtho(0,rsc->getWidth(), rsc->getHeight(),0, -1,1);
     mDefaultAlloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0], 16*4);
 
     m.loadIdentity();
