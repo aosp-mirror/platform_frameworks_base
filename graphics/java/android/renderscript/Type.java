@@ -108,48 +108,9 @@ public class Type extends BaseObj {
         super.finalize();
     }
 
-    public static Type createFromClass(RenderScript rs, Class c, int size) {
-        Element e = Element.createFromClass(rs, c);
-        Builder b = new Builder(rs, e);
-        b.add(Dimension.X, size);
-        Type t = b.create();
-        e.destroy();
-
-        // native fields
-        {
-            Field[] fields = c.getFields();
-            int[] arTypes = new int[fields.length];
-            int[] arBits = new int[fields.length];
-
-            for(int ct=0; ct < fields.length; ct++) {
-                Field f = fields[ct];
-                Class fc = f.getType();
-                if(fc == int.class) {
-                    arTypes[ct] = Element.DataType.SIGNED_32.mID;
-                    arBits[ct] = 32;
-                } else if(fc == short.class) {
-                    arTypes[ct] = Element.DataType.SIGNED_16.mID;
-                    arBits[ct] = 16;
-                } else if(fc == byte.class) {
-                    arTypes[ct] = Element.DataType.SIGNED_8.mID;
-                    arBits[ct] = 8;
-                } else if(fc == float.class) {
-                    arTypes[ct] = Element.DataType.FLOAT_32.mID;
-                    arBits[ct] = 32;
-                } else {
-                    throw new IllegalArgumentException("Unkown field type");
-                }
-            }
-            rs.nTypeSetupFields(t, arTypes, arBits, fields);
-        }
-        t.mJavaClass = c;
-        return t;
-    }
-
     public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {
-        Type t = createFromClass(rs, c, size);
-        t.setName(scriptName);
-        return t;
+        android.util.Log.e("RenderScript", "Calling depricated createFromClass");
+        return null;
     }
 
 
