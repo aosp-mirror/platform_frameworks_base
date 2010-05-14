@@ -332,15 +332,6 @@ ScriptCCreate {
 	ret RsScript
 	}
 
-ScriptCSetDefineF {
-    param const char* name
-    param float value
-    }
-
-ScriptCSetDefineI32 {
-    param const char* name
-    param int32_t value
-    }
 
 ProgramStoreBegin {
 	param RsElement in
