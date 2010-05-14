@@ -195,7 +195,7 @@ bool Program::loadShader(Context *rsc, uint32_t type)
 
     if (rsc->props.mLogShaders) {
         LOGV("Loading shader type %x, ID %i", type, mShaderID);
-        LOGV(mShader.string());
+        LOGV("%s", mShader.string());
     }
 
     if (mShaderID) {
