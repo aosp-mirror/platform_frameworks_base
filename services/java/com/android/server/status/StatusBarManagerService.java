@@ -179,7 +179,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 net = gatherDisableActionsLocked();
                 mNotificationCallbacks.onSetDisabled(net);
             }
-            addPendingOp(OP_DISABLE, net);
+            //addPendingOp(OP_DISABLE, net);
         }
     }
 
@@ -285,46 +285,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // Can be called from any thread
     // ================================================================================
-
-    private void addPendingOp(int code, IBinder key, IconData data, NotificationData n, int i) {
-        synchronized (mQueueLock) {
-            PendingOp op = new PendingOp();
-            op.key = key;
-            op.code = code;
-            op.iconData = data == null ? null : data.clone();
-            op.notificationData = n;
-            op.integer = i;
-            mQueue.add(op);
-            if (mQueue.size() == 1) {
-                //mHandler.sendEmptyMessage(2);
-            }
-        }
-    }
-
-    private void addPendingOp(int code, IBinder key, boolean visible) {
-        synchronized (mQueueLock) {
-            PendingOp op = new PendingOp();
-            op.key = key;
-            op.code = code;
-            op.visible = visible;
-            mQueue.add(op);
-            if (mQueue.size() == 1) {
-                //mHandler.sendEmptyMessage(1);
-            }
-        }
-    }
-
-    private void addPendingOp(int code, int integer) {
-        synchronized (mQueueLock) {
-            PendingOp op = new PendingOp();
-            op.code = code;
-            op.integer = integer;
-            mQueue.add(op);
-            if (mQueue.size() == 1) {
-                //mHandler.sendEmptyMessage(1);
-            }
-        }
-    }
 
     // lock on mDisableRecords
     void manageDisableListLocked(int what, IBinder token, String pkg) {
