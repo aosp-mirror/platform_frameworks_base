@@ -320,26 +320,14 @@ document. </p>
 
 <h4 id="backup-manager">Backup manager</h4>
 
-<p>The platform now provides a generalized backup manager facility that
+<p>The platform now provides a generalized backup service that
 applications can use to backup and restore user data, to ensure that users can
 maintain their data when switching devices or reinstalling the application. The
-backup manager handles the work of transporting the application data to and from
-the backup storage area in the cloud. The backup manager can store any type of
+Backup Manager handles the work of transporting the application data to and from
+the backup storage area in the cloud. The Backup Manager can store any type of
 data, from arbitrary data to files, and manages backup and restore operations
-in an atomic manner. </p>
-
-<p>Any application can use the backup manager to save and restore data. To do
-so, the application instantiates a {@link android.app.backup.BackupManager} and
-uses its methods to trigger a new backup or restore operation. The application
-must also create a subclass of {@link android.app.backup.BackupAgent} and
-implement its methods to handle calls from the backup manager to get data for
-backup and provide data to restore
-({@link android.app.backup.BackupAgent#onBackup(android.os.ParcelFileDescriptor, android.app.backup.BackupDataOutput, android.os.ParcelFileDescriptor) onBackup()}
-and {@link android.app.backup.BackupAgent#onRestore(android.app.backup.BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}).
-A simple implementation of a BackupAgent useful for backing up preferences 
-and files is available by using {@link android.app.backup.BackupAgentHelper}.
-For more information, see <a
-href="{@docRoot}guide/topics/topics/data/backup.html">Data Backup</a>.</p>
+in an atomic manner. For more information, see <a
+href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>.</p>
 
 <h4>Graphics</h4>
 
