@@ -20,6 +20,15 @@ page.title=Developing In Other IDEs
         <li><a href="#RunningOnDevice">Running on a device</a></li>
       </ol>
     </li>
+    <li><a href="#libraryProject">Working with Library Projects</a>
+      <ol>
+        <li><a href="#libraryReqts">Development requirements</a></li>
+        <li><a href="#librarySetup">Setting up a library project</a></li>
+        <li><a href="#libraryReference">Referencing a library project</a></li>
+        <li><a href="#depAppBuild">Building a dependent application project</a></li>
+        <li><a href="#considerations">Development considerations</a></li>
+      </ol>
+    </li>
     <li><a href="#AttachingADebugger">Attaching a Debugger to Your Application</a></li>
   </ol>
 
@@ -93,7 +102,7 @@ navigate to the <code>tools/</code> directory of your SDK and run:</p>
 android create project \
 --target <em>&lt;target_ID&gt;</em> \
 --name <em>&lt;your_project_name&gt;</em> \
---path <em>/path/to/your/project</em> \
+--path <em>path/to/your/project</em> \
 --activity <em>&lt;your_activity_name&gt;</em> \
 --package <em>&lt;your_package_namespace&gt;</em>
 </pre>
@@ -350,7 +359,7 @@ root of the project directory) and add entries for {@code key.store} and {@code 
 For example:</p>
 
 <pre>
-key.store=/path/to/my.keystore
+key.store=path/to/my.keystore
 key.alias=mykeystore
 </pre>
 
@@ -458,7 +467,7 @@ emulator:
 directory after you <a href="#Building">build your application</a>.</p>
     <p>If there is more than one emulator running, you must specify the emulator upon which to
 install the application, by its serial number, with the <code>-s</code> option. For example:</p>
-    <pre>adb -s emulator-5554 install <em>/path/to/your/app</em>.apk</pre>
+    <pre>adb -s emulator-5554 install <em>path/to/your/app</em>.apk</pre>
     <p>To see a list of available device serial numbers, execute {@code adb devices}.</p>
   </li>
 </ol>
@@ -499,11 +508,9 @@ Development</a> for more information.</p>
 
 <p>Once your device is set up and connected via USB, navigate to your
 SDK's <code>tools/</code> directory and install the <code>.apk</code> on the device:
-    <pre>adb -d install <em>/path/to/your/app</em>.apk</pre>
+    <pre>adb -d install <em>path/to/your/app</em>.apk</pre>
     <p>The {@code -d} flag specifies that you want to use the attached device (in case you also
 have an emulator running).</p>
-
-
 
 <p>For more information on the tools used above, please see the following documents:</p>
 <ul>
@@ -512,6 +519,409 @@ have an emulator running).</p>
   <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (ADB)</li>
 </ul>
 
+<h2 id="libraryProject">Working with Library Projects</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Library project example code</h2>
+
+<p>The SDK includes an example application called TicTacToeMain that shows how a
+dependent application can use code and resources from an Android Library
+project. The TicTacToeMain application uses code and resources from an example
+library project called TicTacToeLib. 
+
+<p style="margin-top:1em;">To download the sample applications and run them as
+projects in your environment, use the <em>Android SDK and AVD Manager</em> to
+download the "Samples for SDK API 8" component into your SDK. </p>
+
+<p style="margin-top:1em;">For more information and to browse the code of the
+samples, see the <a
+href="{@docRoot}resources/samples/TicTacToeMain/index.html">TicTacToeMain
+application</a>.</p>
+</div>
+</div>
+
+<p>An Android <em>library project</em> is a development project that holds
+shared Android source code and resources. Other Android application projects can
+reference the library project and, at build time, include its compiled sources
+in their <code>.apk</code> files. Multiple application projects can reference
+the same library project and any single application project can reference
+multiple library projects. </p>
+
+<p>If you have source code and resources that are common to multiple application
+projects, you can move them to a library project so that it is easier to
+maintain across applications and versions. Here are some common scenarios in
+which you could make use of library projects: </p>
+
+<ul>
+<li>If you are developing multiple related applications that use some of the
+same components, you move the redundant components out of their respective
+application projects and create a single, reuseable set of the same components
+in a library project. </li>
+<li>If you are creating an application that exists in both free and paid
+versions. You move the part of the application that is common to both versions
+into a library project. The two dependent projects, with their different package
+names, will reference the library project and provide only the difference
+between the two application versions.</li>
+</ul>
+
+<p>Structurally, a library project is similar to a standard Android application
+project. For example, it includes a manifest file at the project root, as well
+as <code>src/</code>, <code>res/</code> and similar directories. The project can
+contain the same types of source code and resources as a standard
+Android project, stored in the same way. For example, source code in the library
+project can access its own resources through its <code>R</code> class. </p>
+
+<p>However, a library project differs from an standard Android application
+project in that you cannot compile it directly to its own <code>.apk</code> or
+run it on the Android platform. Similarly, you cannot export the library project
+to a self-contained JAR file, as you would do for a true library. Instead, you
+must compile the library indirectly, by referencing the library from a dependent
+application's build path, then building that application. </p>
+
+<p>When you build an application that depends on a library project, the SDK
+tools compile the library and merge its sources with those in the main project,
+then use the result to generate the <code>.apk</code>. In cases where a resource
+ID is defined in both the application and the library, the tools ensure that the
+resource declared in the application gets priority and that the resource in the
+library project is not compiled into the application <code>.apk</code>. This
+gives your application the flexibility to either use or redefine any resource
+behaviors or values that are defined in any library.</p>
+
+<p>To organize your code further, your application can add references to
+multiple library projects, then specify the relative priority of the resources
+in each library. This lets you build up the resources actually used in your
+application in a cumulative manner. When two libraries referenced from an
+application define the same resource ID, the tools select the resource from the
+library with higher priority and discard the other. 
+
+<p>Once you've have added references, the tools let you set their relative
+priority by editing the application project's build properties. At build time,
+the tools merge the libraries with the application one at a time, starting from
+the lowest priority to the highest. </p>
+
+<p>Note that a library project cannot itself reference another library project
+and that, at build time, library projects are <em>not</em> merged with each
+other before being merged with the application. However, note that a library can
+import an external library (JAR) in the normal way.</p>
+
+<p>The sections below describe how to use ADT to set up and manage library your
+projects. Once you've set up your library projects and moved code into them, you
+can import library classes and resources to your application in the normal way.
+</p>
+
+
+<h3 id="libraryReqts">Development requirements</h3>
+
+<p>Android library projects are a build-time construct, so you can use them to
+build a final application <code>.apk</code> that targets any API level and is
+compiled against any version of the Android library. </p>
+
+<p>However, to use library projects, you need to update your development
+environment to use the latest tools and platforms, since older releases of the
+tools and platforms do not support building with library projects. Specifically,
+you need to download and install the versions listed below:</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Minimum versions of SDK tools
+and plaforms on which you can develop library projects.</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Minimum Version</th>
+</tr>
+<tr>
+<td>SDK Tools</td>
+<td>r6 (or higher)</td>
+</tr>
+<tr><td>Android 2.2 platform</td><td>r1 (or higher)</td></tr>
+<tr><td>Android 2.1 platform</td><td>r2 (or higher)</td></tr>
+<tr><td style="color:gray">Android 2.0.1 platform</td><td style="color:gray"><em>not supported</em></td></tr>
+<tr><td style="color:gray">Android 2.0 platform</td><td style="color:gray"><em>not supported</em></td></tr>
+<tr><td>Android 1.6 platform</td><td>r3 (or higher)</td></tr>
+<tr><td>Android 1.5 platform</td><td>r4 (or higher)</td></tr>
+<tr><td>ADT Plugin</td><td>0.9.7 (or higher)</td></tr>
+</table>
+
+<p>You can download the tools and platforms using the <em>Android SDK and AVD
+Manager</em>, as described in <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>.</p>
+
+
+<h3 id="librarySetup">Setting up a new library project</h3>
+
+<p>A library project is a standard Android project, so you can create a new one in the
+same way as you would a new application project. Specifically, you can use
+the <code>android</code> tool to generate a new library project with all of the
+necessary files and folders. </p>
+
+<h4>Creating a library project</h4>
+
+<p>To create a new library project, navigate to the <code>&lt;sdk&gt;/tools/</code> directory
+and use this command:</p>
+
+<pre class="no-pretty-print" style="color:black">
+android create lib-project --name <em>&lt;your_project_name&gt;</em> \
+--target <em>&lt;target_ID&gt;</em> \
+--path <em>path/to/your/project</em> \
+--package <em>&lt;your_library_package_namespace&gt;</em>
+</pre>
+
+<p>The <code>create lib-project</code> command creates a standard project
+structure that includes preset property that indicates to the build system that
+the project is a library. It does this by adding this line to the project's
+<code>default.properties</code> file: </p>
+
+<pre class="no-pretty-print" style="color:black">android.library=true</pre>
+
+<p>Once the command completes, the library project is created and you can begin moving
+source code and resources into it, as described in the sections below.</p>
+
+<p>If you want to convert an existing application project to a library project,
+so that other applications can use it, you can do so by adding a the 
+<code>android.library=true</code> property to the application's 
+<code>default.properties</code> file. </p>
+
+<h4>Creating the manifest file</h4>
+
+<p>A library project's manifest file must declare all of the shared components
+that it includes, just as would a standard Android application. For more
+information, see the documentation for <a
+href="{@docRoot}guide/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
+
+<p>For example, the <a
+href="{@docRoot}resources/samples/TicTacToeLib/AndroidManifest.html">TicTacToeLib</a>
+example library project declares the Activity <code>GameActivity</code>: </p>
+
+<pre>&lt;manifest&gt;
+  ...
+  &lt;application&gt;
+    ...
+    &lt;activity android:name="GameActivity" /&gt;
+    ...
+  &lt;/application&gt;
+  ...
+&lt;/manifest&gt;</pre>
+
+<h4>Updating a library project</h4>
+
+<p>If you want to update the build properties (build target, location) of the
+library project, use this command: </p>
+
+<pre>
+android update lib-project \
+--target <em>&lt;target_ID&gt;</em> \
+--path <em>path/to/your/project</em>
+</pre>
+
+
+<h3 id="libraryReference">Referencing a library project from an application</h3>
+
+<p>If you are developing an application and want to include the shared code or
+resources from a library project, you can do so easily by adding a reference to
+the library project in the application project's build properties.</p>
+
+<p>To add a reference to a library project, navigate to the <code>&lt;sdk&gt;/tools/</code> directory
+and use this command:</p>
+
+<pre>
+android update lib-project \
+--target <em>&lt;target_ID&gt;</em> \
+--path <em>path/to/your/project</em>
+--library <em>path/to/library_projectA</em>
+</pre>
+
+<p>This command updates the application project's build properties to include a
+reference to the library project. Specifically, it adds an
+<code>android.library.reference.<em>n</em></code> property to the project's
+<code>default.properties</code> file. For example: </p>
+
+<pre class="no-pretty-print" style="color:black">
+android.library.reference.1=path/to/library_projectA
+</pre>
+
+<p>If you are adding references to multiple libraries, note that you can set
+their relative priority (and merge order) by manually editing the
+<code>default.properties</code> file and adjusting the each reference's
+<code>.<em>n</em></code> index as appropriate. For example, assume these
+references: </p>
+
+<pre class="no-pretty-print" style="color:black">
+android.library.reference.1=path/to/library_projectA
+android.library.reference.2=path/to/library_projectB
+android.library.reference.3=path/to/library_projectC
+</pre>
+
+<p>You can reorder the references to give highest priority to
+<code>library_projectC</code> in this way:</p>
+
+<pre class="no-pretty-print" style="color:black">
+android.library.reference.2=path/to/library_projectA
+android.library.reference.3=path/to/library_projectB
+android.library.reference.1=path/to/library_projectC
+</pre>
+
+<p>Note that the <code>.<em>n</em></code> index in the references
+must begin at "1" and increase uniformly without "holes". References
+appearing in the index after a hole are ignored. </p>
+
+<p>At build time, the libraries are merged with the application one at a time,
+starting from the lowest priority to the highest. Note that a library cannot
+itself reference another library and that, at build time, libraries are not
+merged with each other before being merged with the application.</p>
+
+
+<h4>Declaring library components in the the manifest file</h4>
+
+<p>In the manifest file of the application project, you must add declarations
+of all components that the application will use that are imported from a library
+project. For example, you must declare any <code>&lt;activity&gt;</code>,
+<code>&lt;service&gt;</code>, <code>&lt;receiver&gt;</code>,
+<code>&lt;provider&gt;</code>, and so on, as well as
+<code>&lt;permission&gt;</code>, <code>&lt;uses-library&gt;</code>, and similar
+elements.</p>
+
+<p>Declarations should reference the library components by their fully-qualified
+package names, where appropriate. </p>
+
+<p>For example, the 
+<a href="{@docRoot}resources/samples/TicTacToeMain/AndroidManifest.html">TicTacToeMain</a>
+example application declares the library Activity <code>GameActivity</code>
+like this: </p>
+
+<pre>&lt;manifest&gt;
+  ...
+  &lt;application&gt;
+    ...
+    &lt;activity android:name="com.example.android.tictactoe.library.GameActivity" /&gt;
+    ...
+  &lt;/application&gt;
+  ...
+&lt;/manifest&gt;</pre>
+
+<p>For more information about the manifest file, see the documentation for <a href="{@docRoot}guide/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
+
+<h3 id="depAppBuild">Building a dependent application</h3>
+
+<p>To build an application project that depends on one or more library projects,
+you can use the standard Ant build commands and compile modes, as described in
+<a href=#Building">Building Your Application</a>, earlier in this document. The
+tools compile and merge all libraries referenced by the application as part
+of compiling the dependent application project. No additional commands or steps
+are necessary. </p>
+
+<h3 id="considerations">Development considerations</h3>
+
+<p>As you develop your library project and dependent applications, keep the 
+points listed below in mind.</p>
+
+<p><strong>Resource conflicts</strong></p>
+
+<p>Since the tools merge the resources of a library project with those of a
+dependent application project, a given resource ID might be defined in both
+projects. In this case, the tools select the resource from the application, or
+the library with highest priority, and discard the other resource. As you
+develop your applications, be aware that common resource IDs are likely to be
+defined in more than one project and will be merged, with the resource from the
+application or highest-priority library taking precedence.</p>
+
+<p><strong>Using prefixes to avoid resource conflicts</strong></p>
+
+<p>To avoid resource conflicts for common resource IDs, consider using a prefix
+or other consistent naming scheme that is unique to the project (or is  unique
+across all projects). </p>
+
+<p><strong>No export of library project to JAR</strong></p>
+
+<p>A library cannot be distributed as a binary file (such as a jar file). This
+is because the library project is compiled by the main project to use the
+correct resource IDs.</p>
+
+<p><strong>One library project cannot reference another</strong></p>
+
+<p>A library cannot depend on another library.</p>
+
+<p><strong>A library project can include a JAR library</strong></p>
+
+<p>You can develop a library project that itself includes a JAR library. When
+you build the dependent application project, the tools automatically locate and
+include the library in the application <code>.apk</code>. </p>
+
+<p><strong>A library project can depend on an external JAR library</strong></p>
+
+<p>You can develop a library project that depends on an external library (for
+example, the Maps external library). In this case, the dependent application
+must build against a target that includes the external library (for example, the
+Google APIs Add-On). Note also that both the library project and the dependent
+application must declare the external library their manifest files, in a <a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>
+element. </p>
+
+<p><strong>Library project cannot include AIDL files</strong></p>
+
+<p>The tools do not support the use of <a
+href="{@docRoot}guide/developing/tools/aidl.html">AIDL</a> files in a library project.
+Any AIDL files used by an application must be stored in the application project
+itself.</p>
+
+<p><strong>Library project cannot include raw assets</strong></p>
+
+<p>The tools do not support the use of raw asset files in a library project.
+Any asset resources used by an application must be stored in the 
+<code>assets/</code> directory of the application project
+itself.</p>
+
+<p><strong>Targeting different Android platform versions in library project and
+application project</strong></p>
+
+<p>A library is compiled as part of the dependent application project, so the
+API used in the library project must be compatible with the version of the
+Android library used to compile the application project. In general, the library
+project should use an <a href="{@docRoot}guide/appendix/api-levels.html">API level</a>
+that is the same as &mdash; or lower than &mdash; that used by the application.
+If the library project uses an API level that is higher than that of the
+application, the application project will fail to compile. It is perfectly
+acceptable to have a library that uses the Android 1.5 API (API level 3) and
+that is used in an Android 1.6 (API level 4) or Android 2.1 (API level 7)
+project, for instance.</p>
+
+<p><strong>No restriction on library package name</strong></p>
+
+<p>There is no requirement for the package name of a library to be the same as
+that of applications that use it.</p>
+
+<p><strong>Multiple R classes in gen/ folder of application project</strong></p>
+
+<p>When you build the dependent application project, the code of any libraries
+is compiled and merged to the application project. Each library has its own
+<code>R</code> class, named according to the library's package name. The
+<code>R</code> class generated from the resources of the main project and of the
+library is created in all the packages that are needed including the main
+project’s package and the libraries’ packages.</p>
+
+<p><strong>Testing a library project</strong></p>
+
+<p>There are two recommended ways of setting up testing on code and resources in
+a library project: </p>
+
+<ul>
+<li>You can set up a <a
+href="{@docRoot}guide/developing/testing/testing_otheride.html">test project</a>
+that instruments an application project that depends on the library project. You
+can then add tests to the project for library-specific features.</li>
+<li>You can set up a set up a standard application project that depends on the
+library and put the instrumentation in that project. This lets you create a
+self-contained project that contains both the tests/instrumentations and the
+code to test.</li>
+</ul>
+
+<p><strong>Library project storage location</strong></p>
+
+<p>There are no specific requirements on where you should store a library
+project, relative to a dependent application project, as long as the application
+project can reference the library project by a relative link. You can place the
+library project What is important is that the main project can reference the
+library project through a relative link.</p>
 
 <h2 id="AttachingADebugger">Attaching a Debugger to Your Application</h2>
 
