@@ -783,7 +783,7 @@ void AudioFlinger::removeClient_l(pid_t pid)
 AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id)
     :   Thread(false),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFormat(0), mFrameSize(1), mStandby(false), mId(id), mExiting(false)
+        mFrameSize(1), mFormat(0), mStandby(false), mId(id), mExiting(false)
 {
 }
 
@@ -816,7 +816,7 @@ uint32_t AudioFlinger::ThreadBase::sampleRate() const
 
 int AudioFlinger::ThreadBase::channelCount() const
 {
-    return mChannelCount;
+    return (int)mChannelCount;
 }
 
 int AudioFlinger::ThreadBase::format() const
@@ -1064,7 +1064,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
     status_t lStatus;
 
     if (mType == DIRECT) {
-        if (sampleRate != mSampleRate || format != mFormat || channelCount != mChannelCount) {
+        if (sampleRate != mSampleRate || format != mFormat || channelCount != (int)mChannelCount) {
             LOGE("createTrack_l() Bad parameter:  sampleRate %d format %d, channelCount %d for output %p",
                  sampleRate, format, channelCount, mOutput);
             lStatus = BAD_VALUE;
@@ -1243,7 +1243,7 @@ void AudioFlinger::PlaybackThread::audioConfigChanged(int event, int param) {
     switch (event) {
     case AudioSystem::OUTPUT_OPENED:
     case AudioSystem::OUTPUT_CONFIG_CHANGED:
-        desc.channels = mChannelCount;
+        desc.channels = mChannels;
         desc.samplingRate = mSampleRate;
         desc.format = mFormat;
         desc.frameCount = mFrameCount;
@@ -1264,10 +1264,10 @@ void AudioFlinger::PlaybackThread::audioConfigChanged(int event, int param) {
 void AudioFlinger::PlaybackThread::readOutputParameters()
 {
     mSampleRate = mOutput->sampleRate();
-    mChannelCount = AudioSystem::popCount(mOutput->channels());
-
+    mChannels = mOutput->channels();
+    mChannelCount = (uint16_t)AudioSystem::popCount(mChannels);
     mFormat = mOutput->format();
-    mFrameSize = mOutput->frameSize();
+    mFrameSize = (uint16_t)mOutput->frameSize();
     mFrameCount = mOutput->bufferSize() / mFrameSize;
 
     // FIXME - Current mixer implementation only supports stereo output: Always
@@ -2342,7 +2342,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
                 // clear all buffers
                 mCblk->frameCount = frameCount;
                 mCblk->sampleRate = sampleRate;
-                mCblk->channels = (uint8_t)channelCount;
+                mCblk->channelCount = (uint8_t)channelCount;
                 if (sharedBuffer == 0) {
                     mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
                     memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
@@ -2366,7 +2366,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
            // clear all buffers
            mCblk->frameCount = frameCount;
            mCblk->sampleRate = sampleRate;
-           mCblk->channels = (uint8_t)channelCount;
+           mCblk->channelCount = (uint8_t)channelCount;
            mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
            // Force underrun condition to avoid false underrun callback until first data is
@@ -2433,7 +2433,7 @@ int AudioFlinger::ThreadBase::TrackBase::sampleRate() const {
 }
 
 int AudioFlinger::ThreadBase::TrackBase::channelCount() const {
-    return (int)mCblk->channels;
+    return (int)mCblk->channelCount;
 }
 
 void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
@@ -2445,9 +2445,9 @@ void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t f
     if (bufferStart < mBuffer || bufferStart > bufferEnd || bufferEnd > mBufferEnd ||
         ((unsigned long)bufferStart & (unsigned long)(cblk->frameSize - 1))) {
         LOGE("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
-                server %d, serverBase %d, user %d, userBase %d, channels %d",
+                server %d, serverBase %d, user %d, userBase %d, channelCount %d",
                 bufferStart, bufferEnd, mBuffer, mBufferEnd,
-                cblk->server, cblk->serverBase, cblk->user, cblk->userBase, cblk->channels);
+                cblk->server, cblk->serverBase, cblk->user, cblk->userBase, cblk->channelCount);
         return 0;
     }
 
@@ -2532,7 +2532,7 @@ void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
             (mClient == NULL) ? getpid() : mClient->pid(),
             mStreamType,
             mFormat,
-            mCblk->channels,
+            mCblk->channelCount,
             mFrameCount,
             mState,
             mMute,
@@ -2827,7 +2827,7 @@ void AudioFlinger::RecordThread::RecordTrack::dump(char* buffer, size_t size)
     snprintf(buffer, size, "   %05d %03u %03u %04u %01d %05u  %08x %08x\n",
             (mClient == NULL) ? getpid() : mClient->pid(),
             mFormat,
-            mCblk->channels,
+            mCblk->channelCount,
             mFrameCount,
             mState,
             mCblk->sampleRate,
@@ -2856,8 +2856,8 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
         mCblk->volume[0] = mCblk->volume[1] = 0x1000;
         mOutBuffer.frameCount = 0;
         playbackThread->mTracks.add(this);
-        LOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, mCblk->frameCount %d, mCblk->sampleRate %d, mCblk->channels %d mBufferEnd %p",
-                mCblk, mBuffer, mCblk->buffers, mCblk->frameCount, mCblk->sampleRate, mCblk->channels, mBufferEnd);
+        LOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, mCblk->frameCount %d, mCblk->sampleRate %d, mCblk->channelCount %d mBufferEnd %p",
+                mCblk, mBuffer, mCblk->buffers, mCblk->frameCount, mCblk->sampleRate, mCblk->channelCount, mBufferEnd);
     } else {
         LOGW("Error creating output track on thread %p", playbackThread);
     }
@@ -2892,7 +2892,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
 {
     Buffer *pInBuffer;
     Buffer inBuffer;
-    uint32_t channels = mCblk->channels;
+    uint32_t channelCount = mCblk->channelCount;
     bool outputBufferFull = false;
     inBuffer.frameCount = frames;
     inBuffer.i16 = data;
@@ -2908,10 +2908,10 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
                 if (mBufferQueue.size() < kMaxOverFlowBuffers) {
                     uint32_t startFrames = (mCblk->frameCount - frames);
                     pInBuffer = new Buffer;
-                    pInBuffer->mBuffer = new int16_t[startFrames * channels];
+                    pInBuffer->mBuffer = new int16_t[startFrames * channelCount];
                     pInBuffer->frameCount = startFrames;
                     pInBuffer->i16 = pInBuffer->mBuffer;
-                    memset(pInBuffer->raw, 0, startFrames * channels * sizeof(int16_t));
+                    memset(pInBuffer->raw, 0, startFrames * channelCount * sizeof(int16_t));
                     mBufferQueue.add(pInBuffer);
                 } else {
                     LOGW ("OutputTrack::write() %p no more buffers in queue", this);
@@ -2949,12 +2949,12 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
         }
 
         uint32_t outFrames = pInBuffer->frameCount > mOutBuffer.frameCount ? mOutBuffer.frameCount : pInBuffer->frameCount;
-        memcpy(mOutBuffer.raw, pInBuffer->raw, outFrames * channels * sizeof(int16_t));
+        memcpy(mOutBuffer.raw, pInBuffer->raw, outFrames * channelCount * sizeof(int16_t));
         mCblk->stepUser(outFrames);
         pInBuffer->frameCount -= outFrames;
-        pInBuffer->i16 += outFrames * channels;
+        pInBuffer->i16 += outFrames * channelCount;
         mOutBuffer.frameCount -= outFrames;
-        mOutBuffer.i16 += outFrames * channels;
+        mOutBuffer.i16 += outFrames * channelCount;
 
         if (pInBuffer->frameCount == 0) {
             if (mBufferQueue.size()) {
@@ -2974,10 +2974,10 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
         if (thread != 0 && !thread->standby()) {
             if (mBufferQueue.size() < kMaxOverFlowBuffers) {
                 pInBuffer = new Buffer;
-                pInBuffer->mBuffer = new int16_t[inBuffer.frameCount * channels];
+                pInBuffer->mBuffer = new int16_t[inBuffer.frameCount * channelCount];
                 pInBuffer->frameCount = inBuffer.frameCount;
                 pInBuffer->i16 = pInBuffer->mBuffer;
-                memcpy(pInBuffer->raw, inBuffer.raw, inBuffer.frameCount * channels * sizeof(int16_t));
+                memcpy(pInBuffer->raw, inBuffer.raw, inBuffer.frameCount * channelCount * sizeof(int16_t));
                 mBufferQueue.add(pInBuffer);
                 LOGV("OutputTrack::write() %p thread %p adding overflow buffer %d", this, mThread.unsafe_get(), mBufferQueue.size());
             } else {
@@ -2993,10 +2993,10 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
         if (mCblk->user < mCblk->frameCount) {
             frames = mCblk->frameCount - mCblk->user;
             pInBuffer = new Buffer;
-            pInBuffer->mBuffer = new int16_t[frames * channels];
+            pInBuffer->mBuffer = new int16_t[frames * channelCount];
             pInBuffer->frameCount = frames;
             pInBuffer->i16 = pInBuffer->mBuffer;
-            memset(pInBuffer->raw, 0, frames * channels * sizeof(int16_t));
+            memset(pInBuffer->raw, 0, frames * channelCount * sizeof(int16_t));
             mBufferQueue.add(pInBuffer);
         } else if (mActive) {
             stop();
@@ -3371,7 +3371,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                                 framesIn = framesOut;
                             mRsmpInIndex += framesIn;
                             framesOut -= framesIn;
-                            if (mChannelCount == mReqChannelCount ||
+                            if ((int)mChannelCount == mReqChannelCount ||
                                 mFormat != AudioSystem::PCM_16_BIT) {
                                 memcpy(dst, src, framesIn * mFrameSize);
                             } else {
@@ -3392,7 +3392,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                         }
                         if (framesOut && mFrameCount == mRsmpInIndex) {
                             if (framesOut == mFrameCount &&
-                                (mChannelCount == mReqChannelCount || mFormat != AudioSystem::PCM_16_BIT)) {
+                                ((int)mChannelCount == mReqChannelCount || mFormat != AudioSystem::PCM_16_BIT)) {
                                 mBytesRead = mInput->read(buffer.raw, mInputBytes);
                                 framesOut = 0;
                             } else {
@@ -3696,7 +3696,7 @@ void AudioFlinger::RecordThread::audioConfigChanged(int event, int param) {
     switch (event) {
     case AudioSystem::INPUT_OPENED:
     case AudioSystem::INPUT_CONFIG_CHANGED:
-        desc.channels = mChannelCount;
+        desc.channels = mChannels;
         desc.samplingRate = mSampleRate;
         desc.format = mFormat;
         desc.frameCount = mFrameCount;
@@ -3720,9 +3720,10 @@ void AudioFlinger::RecordThread::readInputParameters()
     mResampler = 0;
 
     mSampleRate = mInput->sampleRate();
-    mChannelCount = AudioSystem::popCount(mInput->channels());
+    mChannels = mInput->channels();
+    mChannelCount = (uint16_t)AudioSystem::popCount(mChannels);
     mFormat = mInput->format();
-    mFrameSize = mInput->frameSize();
+    mFrameSize = (uint16_t)mInput->frameSize();
     mInputBytes = mInput->bufferSize();
     mFrameCount = mInputBytes / mFrameSize;
     mRsmpInBuffer = new int16_t[mFrameCount * mChannelCount];
