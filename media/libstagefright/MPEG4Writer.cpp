@@ -466,7 +466,7 @@ bool MPEG4Writer::exceedsFileSizeLimit() {
         return false;
     }
 
-    int64_t nTotalBytesEstimate = mEstimatedMoovBoxSize;
+    int64_t nTotalBytesEstimate = static_cast<int64_t>(mEstimatedMoovBoxSize);
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
         nTotalBytesEstimate += (*it)->getEstimatedTrackSizeBytes();
@@ -526,6 +526,7 @@ MPEG4Writer::Track::Track(
       mSource(source),
       mDone(false),
       mMaxTimeStampUs(0),
+      mEstimatedTrackSizeBytes(0),
       mSamplesHaveSameSize(true),
       mCodecSpecificData(NULL),
       mCodecSpecificDataSize(0),
@@ -557,6 +558,7 @@ status_t MPEG4Writer::Track::start() {
     mDone = false;
     mMaxTimeStampUs = 0;
     mReachedEOS = false;
+    mEstimatedTrackSizeBytes = 0;
 
     pthread_create(&mThread, &attr, ThreadWrapper, this);
     pthread_attr_destroy(&attr);
@@ -695,6 +697,7 @@ void MPEG4Writer::Track::threadEntry() {
     bool is_mpeg4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4) ||
                     !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC);
     bool is_avc = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
+    bool is_audio = !strncasecmp(mime, "audio/", 6);
     int32_t count = 0;
     const int64_t interleaveDurationUs = mOwner->interleaveDuration();
     int64_t chunkTimestampUs = 0;
@@ -705,7 +708,6 @@ void MPEG4Writer::Track::threadEntry() {
     int32_t sampleCount = 1;    // Sample count in the current stts table entry
     uint32_t previousSampleSize = 0;  // Size of the previous sample
 
-    mEstimatedTrackSizeBytes = 0;
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
         if (buffer->range_length() == 0) {
@@ -849,7 +851,6 @@ void MPEG4Writer::Track::threadEntry() {
             break;
         }
 
-        bool is_audio = !strncasecmp(mime, "audio/", 6);
 
         int64_t timestampUs;
         CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
@@ -947,8 +948,8 @@ void MPEG4Writer::Track::threadEntry() {
     SttsTableEntry sttsEntry(sampleCount, lastDuration);
     mSttsTableEntries.push_back(sttsEntry);
     mReachedEOS = true;
-    LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames",
-            count, nZeroLengthFrames, mSampleInfos.size());
+    LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames - %s",
+            count, nZeroLengthFrames, mSampleInfos.size(), is_audio? "audio": "video");
 }
 
 void MPEG4Writer::Track::writeOneChunk(bool isAvc) {
@@ -1035,7 +1036,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             mOwner->writeInt32(0);           // version=0, flags=0
             mOwner->writeInt32(1);           // a single entry
             mOwner->writeInt32(mStartTimestampUs / 1000);  // edit duration
-            mOwner->writeInt32(0);           // edit media starting time
+            mOwner->writeInt32(-1);          // empty edit box to signal starting time offset
             mOwner->writeInt32(1);           // x1 rate
           mOwner->endBox();
         mOwner->endBox();
@@ -1060,7 +1061,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
           mOwner->writeInt32(0);             // reserved
           mOwner->writeInt32(0);             // reserved
           mOwner->writeInt32(0);             // reserved
-          mOwner->writeCString("SoundHandler");          // name
+          mOwner->writeCString(is_audio ? "SoundHandler": "");  // name
         mOwner->endBox();
 
         mOwner->beginBox("minf");
