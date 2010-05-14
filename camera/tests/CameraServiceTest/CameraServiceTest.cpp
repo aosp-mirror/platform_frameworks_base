@@ -226,7 +226,7 @@ void MCameraClient::assertDataSize(int32_t msgType, OP op, int dataSize) {
 }
 
 void MCameraClient::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) {
-    INFO(__func__);
+    INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ssize_t i = mNotifyCount.indexOfKey(msgType);
     if (i < 0) {
@@ -238,7 +238,7 @@ void MCameraClient::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) 
 }
 
 void MCameraClient::dataCallback(int32_t msgType, const sp<IMemory>& data) {
-    INFO(__func__);
+    INFO("%s", __func__);
     int dataSize = data->size();
     INFO("data type = %d, size = %d", msgType, dataSize);
     Mutex::Autolock _l(mLock);
@@ -314,7 +314,7 @@ private:
 };
 
 status_t MSurface::registerBuffers(const BufferHeap& buffers) {
-    INFO(__func__);
+    INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ++registerBuffersCount;
     mCond.signal();
@@ -322,21 +322,21 @@ status_t MSurface::registerBuffers(const BufferHeap& buffers) {
 }
 
 void MSurface::postBuffer(ssize_t offset) {
-    // INFO(__func__);
+    // INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ++postBufferCount;
     mCond.signal();
 }
 
 void MSurface::unregisterBuffers() {
-    INFO(__func__);
+    INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ++unregisterBuffersCount;
     mCond.signal();
 }
 
 sp<GraphicBuffer> MSurface::requestBuffer(int bufferIdx, int usage) {
-    INFO(__func__);
+    INFO("%s", __func__);
     return NULL;
 }
 
@@ -386,17 +386,17 @@ sp<IHolder> getHolder() {
 }
 
 void putTempObject(sp<IBinder> obj) {
-    INFO(__func__);
+    INFO("%s", __func__);
     getHolder()->put(obj);
 }
 
 sp<IBinder> getTempObject() {
-    INFO(__func__);
+    INFO("%s", __func__);
     return getHolder()->get();
 }
 
 void clearTempObject() {
-    INFO(__func__);
+    INFO("%s", __func__);
     getHolder()->clear();
 }
 
@@ -422,7 +422,7 @@ int getNumberOfCameras() {
 // Various Connect Tests
 //
 void testConnect(int cameraId) {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
     sp<ICamera> c = cs->connect(cc, cameraId);
@@ -431,7 +431,7 @@ void testConnect(int cameraId) {
 }
 
 void testAllowConnectOnceOnly(int cameraId) {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICameraService> cs = getCameraService();
     // Connect the first client.
     sp<MCameraClient> cc = new MCameraClient();
@@ -446,14 +446,14 @@ void testAllowConnectOnceOnly(int cameraId) {
 }
 
 void testReconnectFailed() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     sp<MCameraClient> cc = new MCameraClient();
     ASSERT(c->connect(cc) != NO_ERROR);
 }
 
 void testReconnectSuccess() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     sp<MCameraClient> cc = new MCameraClient();
     ASSERT(c->connect(cc) == NO_ERROR);
@@ -461,20 +461,20 @@ void testReconnectSuccess() {
 }
 
 void testLockFailed() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     ASSERT(c->lock() != NO_ERROR);
 }
 
 void testLockUnlockSuccess() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     ASSERT(c->lock() == NO_ERROR);
     ASSERT(c->unlock() == NO_ERROR);
 }
 
 void testLockSuccess() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     ASSERT(c->lock() == NO_ERROR);
     c->disconnect();
@@ -525,7 +525,7 @@ void runInAnotherProcess(const char *tag) {
 }
 
 void testReconnect(int cameraId) {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
     sp<ICamera> c = cs->connect(cc, cameraId);
@@ -559,7 +559,7 @@ void testLockUnlock(int cameraId) {
 }
 
 void testReconnectFromAnotherProcess(int cameraId) {
-    INFO(__func__);
+    INFO("%s", __func__);
 
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
@@ -729,7 +729,7 @@ class TestGetParameters: public AfterStartPreview {
 public:
     void run() {
         String8 param_str = c->getParameters();
-        INFO(param_str);
+        INFO("%s", static_cast<const char*>(param_str));
     }
 };
 
