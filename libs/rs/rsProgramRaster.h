@@ -56,7 +56,7 @@ class ProgramRasterState
 public:
     ProgramRasterState();
     ~ProgramRasterState();
-    void init(Context *rsc, int32_t w, int32_t h);
+    void init(Context *rsc);
     void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramRaster> mDefault;

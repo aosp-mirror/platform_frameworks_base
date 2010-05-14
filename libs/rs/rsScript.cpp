@@ -145,7 +145,7 @@ void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *dat
     }
     s->setupScript();
 
-    LOGE("rsi_ScriptInvokeV, len=%i", len);
+    //LOGE("rsi_ScriptInvokeV, len=%i", len);
     const uint32_t * dPtr = (const uint32_t *)data;
     switch(len) {
     case 0:

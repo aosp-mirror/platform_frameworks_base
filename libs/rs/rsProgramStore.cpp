@@ -247,7 +247,7 @@ ProgramStoreState::~ProgramStoreState()
 
 }
 
-void ProgramStoreState::init(Context *rsc, int32_t w, int32_t h)
+void ProgramStoreState::init(Context *rsc)
 {
     ProgramStore *pfs = new ProgramStore(rsc);
     mDefault.set(pfs);

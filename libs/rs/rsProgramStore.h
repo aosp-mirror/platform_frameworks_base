@@ -65,7 +65,7 @@ class ProgramStoreState
 public:
     ProgramStoreState();
     ~ProgramStoreState();
-    void init(Context *rsc, int32_t w, int32_t h);
+    void init(Context *rsc);
     void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramStore> mDefault;

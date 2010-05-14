@@ -300,7 +300,7 @@ ProgramFragmentState::~ProgramFragmentState()
 
 }
 
-void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
+void ProgramFragmentState::init(Context *rsc)
 {
     uint32_t tmp[5] = {
         RS_TEX_ENV_MODE_NONE, 0,
