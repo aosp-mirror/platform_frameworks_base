@@ -341,7 +341,7 @@ sp<GraphicBuffer> MSurface::requestBuffer(int bufferIdx, int usage) {
 }
 
 status_t MSurface::setBufferCount(int bufferCount) {
-    INFO(__func__);
+    INFO("%s", __func__);
     return NULL;
 }
 
