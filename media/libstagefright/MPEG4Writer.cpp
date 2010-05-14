@@ -98,6 +98,7 @@ private:
     bool mGotAllCodecSpecificData;
 
     bool mReachedEOS;
+    int64_t mStartTimestampUs;
 
     static void *ThreadWrapper(void *me);
     void threadEntry();
@@ -152,6 +153,7 @@ status_t MPEG4Writer::start() {
         return UNKNOWN_ERROR;
     }
 
+    mStartTimestampUs = 0;
     mStreamableFile = true;
     mWriteMoovBoxToMemory = false;
     mMoovBoxBuffer = NULL;
@@ -500,6 +502,21 @@ bool MPEG4Writer::reachedEOS() {
     return allDone;
 }
 
+void MPEG4Writer::setStartTimestamp(int64_t timeUs) {
+    LOGI("setStartTimestamp: %lld", timeUs);
+    Mutex::Autolock autoLock(mLock);
+    if (mStartTimestampUs != 0) {
+        return;  // Sorry, too late
+    }
+    mStartTimestampUs = timeUs;
+}
+
+int64_t MPEG4Writer::getStartTimestamp() {
+    LOGI("getStartTimestamp: %lld", mStartTimestampUs);
+    Mutex::Autolock autoLock(mLock);
+    return mStartTimestampUs;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG4Writer::Track::Track(
@@ -836,6 +853,10 @@ void MPEG4Writer::Track::threadEntry() {
 
         int64_t timestampUs;
         CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
+        if (mSampleInfos.empty()) {
+            mOwner->setStartTimestamp(timestampUs);
+            mStartTimestampUs = (timestampUs - mOwner->getStartTimestamp());
+        }
 
         if (timestampUs > mMaxTimeStampUs) {
             mMaxTimeStampUs = timestampUs;
@@ -1004,6 +1025,19 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             mOwner->writeInt32(height << 16);  // 32-bit fixed-point value
         }
       mOwner->endBox();  // tkhd
+
+      if (mStartTimestampUs != 0) {
+        mOwner->beginBox("edts");
+          mOwner->writeInt32(0);             // version=0, flags=0
+          mOwner->beginBox("elst");
+            mOwner->writeInt32(0);           // version=0, flags=0
+            mOwner->writeInt32(1);           // a single entry
+            mOwner->writeInt32(mStartTimestampUs / 1000);  // edit duration
+            mOwner->writeInt32(0);           // edit media starting time
+            mOwner->writeInt32(1);           // x1 rate
+          mOwner->endBox();
+        mOwner->endBox();
+      }
 
       mOwner->beginBox("mdia");
 
