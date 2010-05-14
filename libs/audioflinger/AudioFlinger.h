@@ -366,9 +366,10 @@ private:
                     sp<AudioFlinger>        mAudioFlinger;
                     uint32_t                mSampleRate;
                     size_t                  mFrameCount;
-                    int                     mChannelCount;
+                    uint32_t                mChannels;
+                    uint16_t                mChannelCount;
+                    uint16_t                mFrameSize;
                     int                     mFormat;
-                    uint32_t                mFrameSize;
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
