@@ -687,8 +687,17 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private void showTimeoutDialog() {
         int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        int messageId = R.string.lockscreen_too_many_failed_attempts_dialog_message;;
+        if(getUnlockMode() == UnlockMode.Password) {
+            if(mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
+                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC) {
+                messageId = R.string.lockscreen_too_many_failed_pin_attempts_dialog_message;
+            } else {
+                messageId = R.string.lockscreen_too_many_failed_password_attempts_dialog_message;
+            }
+        }
         String message = mContext.getString(
-                R.string.lockscreen_too_many_failed_attempts_dialog_message,
+                messageId,
                 mUpdateMonitor.getFailedAttempts(),
                 timeoutInSeconds);
         final AlertDialog dialog = new AlertDialog.Builder(mContext)

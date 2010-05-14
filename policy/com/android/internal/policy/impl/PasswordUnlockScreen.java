@@ -198,7 +198,14 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             @Override
             public void onFinish() {
                 mPasswordEntry.setEnabled(true);
-                mTitle.setText(R.string.keyguard_password_enter_password_code);
+                final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
+                final boolean isAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
+                        || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality;
+                if(isAlpha) {
+                    mTitle.setText(R.string.keyguard_password_enter_password_code);
+                } else {
+                    mTitle.setText(R.string.keyguard_password_enter_pin_password_code);
+                }
                 mKeyboardView.setEnabled(true);
             }
         }.start();
