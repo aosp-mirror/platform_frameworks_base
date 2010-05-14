@@ -3689,7 +3689,7 @@ public class WebView extends AbsoluteLayout
                 return;
             }
         }
-        // Used by plugins.
+        // Used by plugins and contentEditable.
         // Also used if the navigation cache is out of date, and
         // does not recognize that a textfield is in focus.  In that
         // case, use WebView as the targeted view.
@@ -3779,6 +3779,15 @@ public class WebView extends AbsoluteLayout
             }
         }
         mWebTextView.requestFocus();
+    }
+
+    /**
+     * Tell webkit to put the cursor on screen.
+     */
+    /* package */ void revealSelection() {
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessage(EventHub.REVEAL_SELECTION);
+        }
     }
 
     /**

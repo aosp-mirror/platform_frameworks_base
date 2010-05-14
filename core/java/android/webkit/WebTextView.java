@@ -635,10 +635,23 @@ import java.util.ArrayList;
         mWebView.requestFocus();
     }
 
+    /**
+     * Move the caret/selection into view.
+     */
     /* package */ void bringIntoView() {
-        if (getLayout() != null) {
-            bringPointIntoView(Selection.getSelectionEnd(getText()));
+        bringPointIntoView(Selection.getSelectionEnd(getText()));
+    }
+
+    @Override
+    public boolean bringPointIntoView(int offset) {
+        if (mWebView == null) return false;
+        if (mWebView.nativeFocusCandidateIsPassword()) {
+            return getLayout() != null && super.bringPointIntoView(offset);
         }
+        // For non password text input, tell webkit to move the caret/selection
+        // on screen, since webkit draws them.
+        mWebView.revealSelection();
+        return true;
     }
 
     /**
