@@ -211,7 +211,7 @@ public abstract class Layout {
         int textLength = 0;
 
         // First, draw LineBackgroundSpans.
-        // LineBackgroundSpans know nothing about the alignment, margins, or 
+        // LineBackgroundSpans know nothing about the alignment, margins, or
         // direction of the layout or line.  XXX: Should they?
         // They are evaluated at each line.
         if (spannedText) {
@@ -230,7 +230,7 @@ public abstract class Layout {
                 if (start >= spanEnd) {
                     // These should be infrequent, so we'll use this so that
                     // we don't have to check as often.
-                    spanEnd = sp.nextSpanTransition(start, textLength, 
+                    spanEnd = sp.nextSpanTransition(start, textLength,
                             LineBackgroundSpan.class);
                     // All LineBackgroundSpans on a line contribute to its
                     // background.
@@ -295,7 +295,7 @@ public abstract class Layout {
                 Spanned sp = (Spanned) buf;
                 boolean isFirstParaLine = (start == 0 ||
                         buf.charAt(start - 1) == '\n');
-                
+
                 // New batch of paragraph styles, collect into spans array.
                 // Compute the alignment, last alignment style wins.
                 // Reset tabStops, we'll rebuild if we encounter a line with
@@ -318,7 +318,7 @@ public abstract class Layout {
                             break;
                         }
                     }
-                    
+
                     tabStopsIsInitialized = false;
                 }
 
@@ -399,7 +399,7 @@ public abstract class Layout {
     /**
      * Return the start position of the line, given the left and right bounds
      * of the margins.
-     * 
+     *
      * @param line the line index
      * @param left the left bounds (0, or leading margin if ltr para)
      * @param right the right bounds (width, minus leading margin if rtl para)
@@ -785,7 +785,7 @@ public abstract class Layout {
     }
 
     /**
-     * Gets the unsigned horizontal extent of the specified line, including 
+     * Gets the unsigned horizontal extent of the specified line, including
      * leading margin indent, but excluding trailing whitespace.
      */
     public float getLineMax(int line) {
@@ -1356,22 +1356,22 @@ public abstract class Layout {
             return 0;
         }
         Spanned spanned = (Spanned) mText;
-        
+
         int lineStart = getLineStart(line);
         int lineEnd = getLineEnd(line);
-        int spanEnd = spanned.nextSpanTransition(lineStart, lineEnd, 
+        int spanEnd = spanned.nextSpanTransition(lineStart, lineEnd,
                 LeadingMarginSpan.class);
         LeadingMarginSpan[] spans = spanned.getSpans(lineStart, spanEnd,
                                                 LeadingMarginSpan.class);
         if (spans.length == 0) {
             return 0; // no leading margin span;
         }
-        
+
         int margin = 0;
-        
-        boolean isFirstParaLine = lineStart == 0 || 
+
+        boolean isFirstParaLine = lineStart == 0 ||
             spanned.charAt(lineStart - 1) == '\n';
-        
+
         for (int i = 0; i < spans.length; i++) {
             LeadingMarginSpan span = spans[i];
             boolean useFirstLineMargin = isFirstParaLine;
@@ -1379,7 +1379,7 @@ public abstract class Layout {
                 int spStart = spanned.getSpanStart(span);
                 int spanLine = getLineForOffset(spStart);
                 int count = ((LeadingMarginSpan2)span).getLeadingMarginLineCount();
-                useFirstLineMargin = line < spanLine + count; 
+                useFirstLineMargin = line < spanLine + count;
             }
             margin += span.getLeadingMargin(useFirstLineMargin);
         }
@@ -1414,9 +1414,9 @@ public abstract class Layout {
                     hasTabs = true;
                     if (text instanceof Spanned) {
                         Spanned spanned = (Spanned) text;
-                        int spanEnd = spanned.nextSpanTransition(start, end, 
+                        int spanEnd = spanned.nextSpanTransition(start, end,
                                 TabStopSpan.class);
-                        TabStopSpan[] spans = spanned.getSpans(start, spanEnd, 
+                        TabStopSpan[] spans = spanned.getSpans(start, spanEnd,
                                 TabStopSpan.class);
                         if (spans.length > 0) {
                             tabStops = new TabStops(TAB_INCREMENT, spans);
@@ -1440,11 +1440,11 @@ public abstract class Layout {
         private int[] mStops;
         private int mNumStops;
         private int mIncrement;
-        
+
         TabStops(int increment, Object[] spans) {
             reset(increment, spans);
         }
-        
+
         void reset(int increment, Object[] spans) {
             this.mIncrement = increment;
 
@@ -1474,7 +1474,7 @@ public abstract class Layout {
             }
             this.mNumStops = ns;
         }
-        
+
         float nextTab(float h) {
             int ns = this.mNumStops;
             if (ns > 0) {
@@ -1493,7 +1493,7 @@ public abstract class Layout {
             return ((int) ((h + inc) / inc)) * inc;
         }
     }
-    
+
     /**
      * Returns the position of the next tab stop after h on the line.
      *
@@ -1728,4 +1728,3 @@ public abstract class Layout {
     /* package */ static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
 }
-
