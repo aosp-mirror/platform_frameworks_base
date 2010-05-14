@@ -543,7 +543,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     private void setPropertiesByCarrier() {
         String carrier = SystemProperties.get("ro.carrier");
 
-        if (null == carrier || 0 == carrier.length()) {
+        if (null == carrier || 0 == carrier.length() || "unknown".equals(carrier)) {
             return;
         }
 
