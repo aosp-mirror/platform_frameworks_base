@@ -162,9 +162,10 @@ public abstract class BackupAgent extends ContextWrapper {
      *            file descriptor pointing to a full snapshot of the
      *            application's data.  The application should consume every
      *            entity represented in this data stream.
-     * @param appVersionCode The
-     *            {@link android.R.styleable#AndroidManifest_versionCode android:versionCode}
-     *            value of the application that backed up this particular data set. This
+     * @param appVersionCode The value of the <a
+     * href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
+     *            android:versionCode}</a> manifest attribute,
+     *            from the application that backed up this particular data set. This
      *            makes it possible for an application's agent to distinguish among any
      *            possible older data versions when asked to perform the restore
      *            operation.
