@@ -19,6 +19,7 @@
 #define MEDIA_WRITER_H_
 
 #include <utils/RefBase.h>
+#include <media/IMediaPlayerClient.h>
 
 namespace android {
 
@@ -31,10 +32,23 @@ struct MediaWriter : public RefBase {
     virtual bool reachedEOS() = 0;
     virtual status_t start() = 0;
     virtual void stop() = 0;
+    virtual void setMaxFileSize(int64_t bytes) { mMaxFileSizeLimitBytes = bytes; }
+    virtual void setMaxFileDuration(int64_t durationUs) { mMaxFileDurationLimitUs = durationUs; }
+    virtual void setListener(const sp<IMediaPlayerClient>& listener) {
+        mListener = listener;
+    }
 
 protected:
     virtual ~MediaWriter() {}
+    int64_t mMaxFileSizeLimitBytes;
+    int64_t mMaxFileDurationLimitUs;
+    sp<IMediaPlayerClient> mListener;
 
+    void notify(int msg, int ext1, int ext2) {
+        if (mListener != NULL) {
+            mListener->notify(msg, ext1, ext2);
+        }
+    }
 private:
     MediaWriter(const MediaWriter &);
     MediaWriter &operator=(const MediaWriter &);
