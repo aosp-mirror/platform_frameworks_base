@@ -620,7 +620,8 @@ class ContextImpl extends Context {
                     + " Is this really what you want?");
         }
         mMainThread.getInstrumentation().execStartActivity(
-            getOuterContext(), mMainThread.getApplicationThread(), null, null, intent, -1);
+            getOuterContext(), mMainThread.getApplicationThread(), null,
+            (Activity)null, intent, -1);
     }
 
     @Override

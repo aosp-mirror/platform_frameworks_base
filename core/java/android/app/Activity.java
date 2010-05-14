@@ -16,7 +16,6 @@
 
 package android.app;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -3162,6 +3161,36 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * This is called when a Fragment in this activity calls its 
+     * {@link Fragment#startActivity} or {@link Fragment#startActivityForResult}
+     * method.
+     * 
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     * 
+     * @param fragment The fragment making the call.
+     * @param intent The intent to start.
+     * @param requestCode Reply request code.  < 0 if reply is not requested. 
+     * 
+     * @throws android.content.ActivityNotFoundException
+     * 
+     * @see Fragment#startActivity 
+     * @see Fragment#startActivityForResult 
+     */
+    public void startActivityFromFragment(Fragment fragment, Intent intent, 
+            int requestCode) {
+        Instrumentation.ActivityResult ar =
+            mInstrumentation.execStartActivity(
+                this, mMainThread.getApplicationThread(), mToken, fragment,
+                intent, requestCode);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, fragment.mWho, requestCode,
+                ar.getResultCode(), ar.getResultData());
+        }
+    }
+
+    /**
      * Like {@link #startActivityFromChild(Activity, Intent, int)}, but
      * taking a IntentSender; see
      * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
@@ -3433,8 +3462,7 @@ public class Activity extends ContextThemeWrapper
      * @see #createPendingResult
      * @see #setResult(int)
      */
-    protected void onActivityResult(int requestCode, int resultCode,
-            Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     }
 
     /**
@@ -3854,8 +3882,13 @@ public class Activity extends ContextThemeWrapper
                 fragment.mFromLayout = true;
                 fragment.mFragmentId = id;
                 fragment.mTag = tag;
-                fragment.onInflate(this, attrs);
                 mFragments.addFragment(fragment, true);
+            }
+            // If this fragment is newly instantiated (either right now, or
+            // from last saved state), then give it the attributes to
+            // initialize itself.
+            if (!fragment.mRetaining) {
+                fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
             }
             if (fragment.mView == null) {
                 throw new IllegalStateException("Fragment " + fname
@@ -4059,6 +4092,11 @@ public class Activity extends ContextThemeWrapper
             + ", resCode=" + resultCode + ", data=" + data);
         if (who == null) {
             onActivityResult(requestCode, resultCode, data);
+        } else {
+            Fragment frag = mFragments.findFragmentByWho(who);
+            if (frag != null) {
+                frag.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 }

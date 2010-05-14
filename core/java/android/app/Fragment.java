@@ -17,6 +17,7 @@
 package android.app;
 
 import android.content.ComponentCallbacks;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -36,8 +37,8 @@ final class FragmentState implements Parcelable {
     static final String VIEW_STATE_TAG = "android:view_state";
     
     final String mClassName;
+    final int mIndex;
     final boolean mFromLayout;
-    final int mSavedStateId;
     final int mFragmentId;
     final int mContainerId;
     final String mTag;
@@ -49,8 +50,8 @@ final class FragmentState implements Parcelable {
     
     public FragmentState(Fragment frag) {
         mClassName = frag.getClass().getName();
+        mIndex = frag.mIndex;
         mFromLayout = frag.mFromLayout;
-        mSavedStateId = frag.mSavedStateId;
         mFragmentId = frag.mFragmentId;
         mContainerId = frag.mContainerId;
         mTag = frag.mTag;
@@ -59,8 +60,8 @@ final class FragmentState implements Parcelable {
     
     public FragmentState(Parcel in) {
         mClassName = in.readString();
+        mIndex = in.readInt();
         mFromLayout = in.readInt() != 0;
-        mSavedStateId = in.readInt();
         mFragmentId = in.readInt();
         mContainerId = in.readInt();
         mTag = in.readString();
@@ -69,10 +70,6 @@ final class FragmentState implements Parcelable {
     }
     
     public Fragment instantiate(Activity activity) {
-        if (mFromLayout) {
-            return null;
-        }
-        
         if (mInstance != null) {
             return mInstance;
         }
@@ -89,7 +86,8 @@ final class FragmentState implements Parcelable {
             mInstance.mSavedViewState
                     = mSavedFragmentState.getSparseParcelableArray(VIEW_STATE_TAG);
         }
-        mInstance.mSavedStateId = mSavedStateId;
+        mInstance.setIndex(mIndex);
+        mInstance.mFromLayout = mFromLayout;
         mInstance.mFragmentId = mFragmentId;
         mInstance.mContainerId = mContainerId;
         mInstance.mTag = mTag;
@@ -104,8 +102,8 @@ final class FragmentState implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mClassName);
+        dest.writeInt(mIndex);
         dest.writeInt(mFromLayout ? 1 : 0);
-        dest.writeInt(mSavedStateId);
         dest.writeInt(mFragmentId);
         dest.writeInt(mContainerId);
         dest.writeString(mTag);
@@ -149,6 +147,15 @@ public class Fragment implements ComponentCallbacks {
     Bundle mSavedFragmentState;
     SparseArray<Parcelable> mSavedViewState;
     
+    // Index into active fragment array.
+    int mIndex = -1;
+    
+    // Internal unique name for this fragment;
+    String mWho;
+    
+    // True if the fragment is in the list of added fragments.
+    boolean mAdded;
+    
     // Set to true if this fragment was instantiated from a layout file.
     boolean mFromLayout;
     
@@ -187,10 +194,6 @@ public class Fragment implements ComponentCallbacks {
     // The View generated for this fragment.
     View mView;
     
-    // Used for performing save state of fragments.
-    int mSavedStateSeq = 0;
-    int mSavedStateId;
-    
     public Fragment() {
     }
 
@@ -215,6 +218,16 @@ public class Fragment implements ComponentCallbacks {
             mView.restoreHierarchyState(mSavedViewState);
             mSavedViewState = null;
         }
+    }
+    
+    void setIndex(int index) {
+        mIndex = index;
+        mWho = "android:fragment:" + mIndex;
+   }
+    
+    void clearIndex() {
+        mIndex = -1;
+        mWho = null;
     }
     
     /**
@@ -277,14 +290,56 @@ public class Fragment implements ComponentCallbacks {
     }
     
     /**
+     * Call {@link Activity#startActivity(Intent)} on the fragment's
+     * containing Activity.
+     */
+    public void startActivity(Intent intent) {
+        mActivity.startActivityFromFragment(this, intent, -1);
+    }
+    
+    /**
+     * Call {@link Activity#startActivityForResult(Intent, int)} on the fragment's
+     * containing Activity.
+     */
+    public void startActivityForResult(Intent intent, int requestCode) {
+        mActivity.startActivityFromFragment(this, intent, requestCode);
+    }
+    
+    /**
+     * Receive the result from a previous call to
+     * {@link #startActivityForResult(Intent, int)}.  This follows the
+     * related Activity API as described there in
+     * {@link Activity#onActivityResult(int, int, Intent)}.
+     * 
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }
+    
+    /**
      * Called when a fragment is being created as part of a view layout
-     * inflation, typically from setting the content view of an activity.
+     * inflation, typically from setting the content view of an activity.  This
+     * will be called both the first time the fragment is created, as well
+     * later when it is being re-created from its saved state (which is also
+     * given here).
+     * 
+     * XXX This is kind-of yucky...  maybe we could just supply the
+     * AttributeSet to onCreate()?
      * 
      * @param activity The Activity that is inflating the fragment.
      * @param attrs The attributes at the tag where the fragment is
      * being created.
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
      */
-    public void onInflate(Activity activity, AttributeSet attrs) {
+    public void onInflate(Activity activity, AttributeSet attrs,
+            Bundle savedInstanceState) {
         mCalled = true;
     }
     
