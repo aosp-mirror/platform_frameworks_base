@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.SoundEffectConstants;
 import android.view.animation.GridLayoutAnimationController;
@@ -1773,6 +1774,19 @@ public class GridView extends AbsListView {
             mRequestedNumColumns = numColumns;
             requestLayoutIfNecessary();
         }
+    }
+    
+    /**
+     * Get the number of columns in the grid. 
+     * Returns {@link #AUTO_FIT} if the Grid has never been laid out.
+     *
+     * @attr ref android.R.styleable#GridView_numColumns
+     * 
+     * @see #setNumColumns(int)
+     */
+    @ViewDebug.ExportedProperty
+    public int getNumColumns() {  
+        return mNumColumns;
     }
 
     /**
