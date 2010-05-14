@@ -1335,7 +1335,7 @@ public class Instrumentation {
      *                      is being started.
      * @param token Internal token identifying to the system who is starting 
      *              the activity; may be null.
-     * @param target Which activity is perform the start (and thus receiving 
+     * @param target Which activity is performing the start (and thus receiving 
      *               any result); may be null if this call is not being made
      *               from an activity.
      * @param intent The actual Intent to start.
@@ -1378,6 +1378,64 @@ public class Instrumentation {
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         null, 0, token, target != null ? target.mEmbeddedID : null,
+                        requestCode, false, false);
+            checkStartActivityResult(result, intent);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
+     * but for calls from a {#link Fragment}.
+     * 
+     * @param who The Context from which the activity is being started.
+     * @param contextThread The main thread of the Context from which the activity
+     *                      is being started.
+     * @param token Internal token identifying to the system who is starting 
+     *              the activity; may be null.
+     * @param target Which fragment is performing the start (and thus receiving 
+     *               any result).
+     * @param intent The actual Intent to start.
+     * @param requestCode Identifier for this request's result; less than zero 
+     *                    if the caller is not expecting a result.
+     * 
+     * @return To force the return of a particular result, return an 
+     *         ActivityResult object containing the desired data; otherwise
+     *         return null.  The default implementation always returns null.
+     *  
+     * @throws android.content.ActivityNotFoundException
+     * 
+     * @see Activity#startActivity(Intent)
+     * @see Activity#startActivityForResult(Intent, int)
+     * @see Activity#startActivityFromChild
+     * 
+     * {@hide}
+     */
+    public ActivityResult execStartActivity(
+        Context who, IBinder contextThread, IBinder token, Fragment target,
+        Intent intent, int requestCode) {
+        IApplicationThread whoThread = (IApplicationThread) contextThread;
+        if (mActivityMonitors != null) {
+            synchronized (mSync) {
+                final int N = mActivityMonitors.size();
+                for (int i=0; i<N; i++) {
+                    final ActivityMonitor am = mActivityMonitors.get(i);
+                    if (am.match(who, null, intent)) {
+                        am.mHits++;
+                        if (am.isBlocking()) {
+                            return requestCode >= 0 ? am.getResult() : null;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        try {
+            int result = ActivityManagerNative.getDefault()
+                .startActivity(whoThread, intent,
+                        intent.resolveTypeIfNeeded(who.getContentResolver()),
+                        null, 0, token, target != null ? target.mWho : null,
                         requestCode, false, false);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
