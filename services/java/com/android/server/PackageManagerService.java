@@ -5315,13 +5315,13 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         SdInstallArgs(String cid) {
-            this((Uri)null, cid);
+            super(null, null, PackageManager.INSTALL_EXTERNAL, null);
+            this.cid = cid;
         }
 
         SdInstallArgs(Uri packageURI, String cid) {
             super(packageURI, null, PackageManager.INSTALL_EXTERNAL, null);
             this.cid = cid;
-            cachePath = PackageHelper.getSdDir(cid);
         }
 
         void createCopyFile() {
