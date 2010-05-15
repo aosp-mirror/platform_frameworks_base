@@ -221,8 +221,29 @@ public:
     // Example value: "true". Read only.
     static const char KEY_SMOOTH_ZOOM_SUPPORTED[];
 
+    // The distances (in meters) from the camera to where an object appears to
+    // be in focus. The object is sharpest at the optimal focus distance. The
+    // depth of field is the far focus distance minus near focus distance.
+    //
+    // Applications can read this parameter anytime to get the latest focus
+    // distances. If the focus mode is FOCUS_MODE_EDOF, the values may be all
+    // 0, which means focus distance is not applicable. If the focus mode is
+    // FOCUS_MODE_CONTINUOUS and autofocus has started, focus distances may
+    // change from time to time.
+    //
+    // Far focus distance > optimal focus distance > near focus distance. If
+    // the far focus distance is infinity, the value should be "Infinity" (case
+    // sensitive). The format is three float values separated by commas. The
+    // first is near focus distance. The second is optimal focus distance. The
+    // third is far focus distance.
+    // Example value: "0.95,1.9,Infinity" or "0.049,0.05,0.051". Read only.
+    static const char KEY_FOCUS_DISTANCES[];
+
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
+
+    // Value for KEY_FOCUS_DISTANCES.
+    static const char INFINITY[];
 
     // Values for white balance settings.
     static const char WHITE_BALANCE_AUTO[];
