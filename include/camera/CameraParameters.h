@@ -243,7 +243,7 @@ public:
     static const char TRUE[];
 
     // Value for KEY_FOCUS_DISTANCES.
-    static const char INFINITY[];
+    static const char FOCUS_DISTANCE_INFINITY[];
 
     // Values for white balance settings.
     static const char WHITE_BALANCE_AUTO[];
