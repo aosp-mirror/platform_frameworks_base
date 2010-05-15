@@ -872,7 +872,7 @@ public class WifiService extends IWifiManager.Stub {
 
         value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.ssidVarName);
         if (!TextUtils.isEmpty(value)) {
-            config.SSID = removeDoubleQuotes(value);
+            config.SSID = value;
         } else {
             config.SSID = null;
         }
@@ -1062,7 +1062,7 @@ public class WifiService extends IWifiManager.Stub {
                     !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.ssidVarName,
-                        convertToQuotedString(config.SSID))) {
+                        config.SSID)) {
                 if (DBG) {
                     Slog.d(TAG, "failed to set SSID: "+config.SSID);
                 }
