@@ -73,7 +73,7 @@ void checkEGLErrors(const char* token)
 DisplayHardware::DisplayHardware(
         const sp<SurfaceFlinger>& flinger,
         uint32_t dpy)
-    : DisplayHardwareBase(flinger, dpy)
+    : DisplayHardwareBase(flinger, dpy), mFlags(0)
 {
     init(dpy);
 }
