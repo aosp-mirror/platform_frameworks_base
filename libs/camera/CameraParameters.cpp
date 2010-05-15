@@ -72,7 +72,7 @@ const char CameraParameters::KEY_SMOOTH_ZOOM_SUPPORTED[] = "smooth-zoom-supporte
 const char CameraParameters::KEY_FOCUS_DISTANCES[] = "focus-distances";
 
 const char CameraParameters::TRUE[] = "true";
-const char CameraParameters::INFINITY[] = "Infinity";
+const char CameraParameters::FOCUS_DISTANCE_INFINITY[] = "Infinity";
 
 // Values for white balance settings.
 const char CameraParameters::WHITE_BALANCE_AUTO[] = "auto";
