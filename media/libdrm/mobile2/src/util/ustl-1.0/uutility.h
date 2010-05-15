@@ -370,7 +370,7 @@ namespace simd {
 /// implicit casts to pointer from an integral type. Ironically, such an
 /// implicit cast is already detected by gcc.
 ///
-#if defined(USTL_ANDROID_X86)
+#if defined(USTL_ANDROID_X86) || defined(USTL_ANDROID_SH)
 #define OVERLOAD_POINTER_AND_SIZE_T_V2(name, arg1type)
 #else
 #define OVERLOAD_POINTER_AND_SIZE_T_V2(name, arg1type)						\
