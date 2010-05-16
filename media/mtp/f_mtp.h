@@ -18,6 +18,11 @@
 #ifndef __LINUX_USB_F_MTP_H
 #define __LINUX_USB_F_MTP_H
 
+/* Constants for MTP_SET_INTERFACE_MODE */
+#define MTP_INTERFACE_MODE_MTP  0
+#define MTP_INTERFACE_MODE_PTP  1
+
+
 struct mtp_file_range {
 	/* path for file to transfer */
 	const char	*path;
@@ -35,5 +40,7 @@ struct mtp_file_range {
  * The file is created if it does not exist.
  */
 #define MTP_RECEIVE_FILE           _IOW('M', 1, struct mtp_file_range)
+/* Sets the driver mode to either MTP or PTP */
+#define MTP_SET_INTERFACE_MODE     _IOW('M', 2, int)
 
 #endif /* __LINUX_USB_F_MTP_H */
