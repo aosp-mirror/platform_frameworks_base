@@ -71,6 +71,22 @@ void ScriptC::setupScript()
     }
 }
 
+const Allocation *ScriptC::ptrToAllocation(const void *ptr) const
+{
+    if (!ptr) {
+        return NULL;
+    }
+    for (uint32_t ct=0; ct < mEnviroment.mFieldCount; ct++) {
+        if (!mSlots[ct].get())
+            continue;
+        if (mSlots[ct]->getPtr() == ptr) {
+            return mSlots[ct].get();
+        }
+    }
+    LOGE("ScriptC::ptrToAllocation, failed to find %p", ptr);
+    return NULL;
+}
+
 
 uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
 {

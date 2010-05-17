@@ -52,6 +52,8 @@ public:
 
     BCCscript*    mBccScript;
 
+    const Allocation *ptrToAllocation(const void *) const;
+
     virtual void setupScript();
     virtual uint32_t run(Context *, uint32_t launchID);
 };

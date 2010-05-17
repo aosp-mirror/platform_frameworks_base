@@ -293,10 +293,6 @@ ScriptInvokeV {
 	togglePlay
 	}
 
-ScriptSetRoot {
-	param bool isRoot
-	}
-
 ScriptSetVarI {
 	param RsScript s
 	param uint32_t slot

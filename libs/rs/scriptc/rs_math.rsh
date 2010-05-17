@@ -650,4 +650,5 @@ extern void matrixRotate(void *mat, float rot, float x, float y, float z);
 extern void matrixScale(void *mat, float x, float y, float z);
 extern void matrixTranslate(void *mat, float x, float y, float z);
 
+extern rs_allocation rsGetAllocation(const void *);
 
