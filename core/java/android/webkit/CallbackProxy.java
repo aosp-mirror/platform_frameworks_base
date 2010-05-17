@@ -1087,10 +1087,15 @@ class CallbackProxy extends Handler {
     public void onProgressChanged(int newProgress) {
         // Synchronize so that mLatestProgress is up-to-date.
         synchronized (this) {
-            if (mWebChromeClient == null || mLatestProgress == newProgress) {
+            // update mLatestProgress even mWebChromeClient is null as
+            // WebView.getProgress() needs it
+            if (mLatestProgress == newProgress) {
                 return;
             }
             mLatestProgress = newProgress;
+            if (mWebChromeClient == null) {
+                return;
+            }
             if (!mProgressUpdatePending) {
                 sendEmptyMessage(PROGRESS);
                 mProgressUpdatePending = true;
