@@ -725,7 +725,7 @@
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="yes" msgid="5362982303337969312">"确定"</string>
     <string name="no" msgid="5141531044935541497">"取消"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"注意事项"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="capital_on" msgid="1544682755514494298">"打开"</string>
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"使用以下方式发送"</string>
@@ -734,8 +734,8 @@
     <string name="chooseActivity" msgid="1009246475582238425">"选择一项操作"</string>
     <string name="noApplications" msgid="1691104391758345586">"没有应用程序可执行此操作。"</string>
     <string name="aerr_title" msgid="653922989522758100">"很抱歉！"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用程序（在“<xliff:g id="PROCESS">%2$s</xliff:g>”进程中）意外停止，请重试。"</string>
-    <string name="aerr_process" msgid="1551785535966089511">"“<xliff:g id="PROCESS">%1$s</xliff:g>”进程意外停止，请重试。"</string>
+    <string name="aerr_application" msgid="4683614104336409186">"应用程序 <xliff:g id="APPLICATION">%1$s</xliff:g>（进程：<xliff:g id="PROCESS">%2$s</xliff:g>）意外停止，请重试。"</string>
+    <string name="aerr_process" msgid="1551785535966089511">"<xliff:g id="PROCESS">%1$s</xliff:g> 进程意外停止，请重试。"</string>
     <string name="anr_title" msgid="3100070910664756057">"很抱歉！"</string>
     <string name="anr_activity_application" msgid="3538242413112507636">"“<xliff:g id="ACTIVITY">%1$s</xliff:g>”活动（在“<xliff:g id="APPLICATION">%2$s</xliff:g>”应用程序中）无响应。"</string>
     <string name="anr_activity_process" msgid="5420826626009561014">"“<xliff:g id="ACTIVITY">%1$s</xliff:g>”活动（在“<xliff:g id="PROCESS">%2$s</xliff:g>”进程中）无响应。"</string>
@@ -855,10 +855,10 @@
     <string name="description_star" msgid="2654319874908576133">"收藏"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已启用车载模式"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"选择退出车载模式"</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"绑定生效"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"USB 绑定或热点已启用"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"触摸可进行配置"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"手机数据使用过多"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机数据使用的详情"</string>
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"手机流量过多"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机流量详情"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"轻触以了解有关手机数据使用的详情"</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"轻触以了解有关手机流量详情"</string>
 </resources>

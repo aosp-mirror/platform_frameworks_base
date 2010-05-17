@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favorito"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo de carro ativado"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecione para sair do modo de carro."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Vínculo ativo"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Vínculo ou ponto de acesso ativo"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Toque para configurar"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Alto uso de dados do celular"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toque para saber mais sobre uso de dados do celular"</string>

@@ -75,7 +75,7 @@
     <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"已封鎖語音/資料服務。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
     <string name="RestrictedOnAll" msgid="2714924667937117304">"已封鎖所有語音/資料/SMS 服務。"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"語音"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"語音服務"</string>
     <string name="serviceClassData" msgid="872456782077937893">"資料"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"傳真"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -598,10 +598,10 @@
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"允許應用程式修改儲存在電話上的瀏覽記錄或書籤。請注意：惡意應用程式可能會使用此選項來清除或修改您瀏覽器的資料。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允許應用程式修改瀏覽器的地理位置權限，惡意應用程式可能會透過此方式允許將您的位置資訊任意傳送給某些網站。"</string>
-    <string name="save_password_message" msgid="767344687139195790">"是否記憶此密碼？"</string>
+    <string name="save_password_message" msgid="767344687139195790">"是否記住此密碼？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"現在不要"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"記住"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"從不"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"永不"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"您沒有開啟此頁的權限。"</string>
     <string name="text_copied" msgid="4985729524670131385">"文字已複製到剪貼簿。"</string>
     <string name="more_item_label" msgid="4650918923083320495">"更多"</string>
@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"我的最愛"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已啟用車用模式"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"選取結束車用模式。"</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"啟用數據連線"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"數據連線或無線基地台已啟用"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"輕觸以設定"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"高行動資料用量"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
