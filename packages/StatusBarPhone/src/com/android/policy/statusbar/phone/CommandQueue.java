@@ -28,7 +28,8 @@ import com.android.internal.statusbar.StatusBarIconList;
  * This class takes the functions from IStatusBar that come in on
  * binder pool threads and posts messages to get them onto the main
  * thread, and calls onto Callbacks.  It also takes care of
- * coalescing these calls so they don't stack up.
+ * coalescing these calls so they don't stack up.  For the calls
+ * are coalesced, note that they are all idempotent.
  */
 class CommandQueue extends IStatusBar.Stub {
     private static final String TAG = "StatusBar.CommandQueue";
@@ -41,6 +42,10 @@ class CommandQueue extends IStatusBar.Stub {
     private static final int OP_REMOVE_ICON = 2;
 
     private static final int MSG_DISABLE = 0x00020000;
+
+    private static final int MSG_SET_VISIBILITY = 0x00030000;
+    private static final int OP_EXPAND = 1;
+    private static final int OP_COLLAPSE = 2;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -55,6 +60,8 @@ class CommandQueue extends IStatusBar.Stub {
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
         public void disable(int state);
+        public void animateExpand();
+        public void animateCollapse();
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -85,9 +92,24 @@ class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void animateExpand() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SET_VISIBILITY);
+            mHandler.obtainMessage(MSG_SET_VISIBILITY, OP_EXPAND, 0, null).sendToTarget();
+        }
+    }
+
+    public void animateCollapse() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SET_VISIBILITY);
+            mHandler.obtainMessage(MSG_SET_VISIBILITY, OP_COLLAPSE, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
+            Slog.d(TAG, "handleMessage what=0x" + Integer.toHexString(what) + " arg1=" + msg.arg1);
             switch (what) {
                 case MSG_ICON: {
                     final int index = msg.what & INDEX_MASK;
@@ -116,6 +138,12 @@ class CommandQueue extends IStatusBar.Stub {
                 case MSG_DISABLE:
                     mCallbacks.disable(msg.arg1);
                     break;
+                case MSG_SET_VISIBILITY:
+                    if (msg.arg1 == OP_EXPAND) {
+                        mCallbacks.animateExpand();
+                    } else {
+                        mCallbacks.animateCollapse();
+                    }
             }
         }
     }

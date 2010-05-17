@@ -49,7 +49,7 @@ import java.util.HashMap;
  */
 public class StatusBarManagerService extends IStatusBarService.Stub
 {
-    static final String TAG = "StatusBar";
+    static final String TAG = "StatusBarManagerService";
     static final boolean SPEW = true;
 
     public static final String ACTION_STATUSBAR_START
@@ -58,7 +58,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     final Context mContext;
     Handler mHandler = new Handler();
     NotificationCallbacks mNotificationCallbacks;
-    IStatusBar mBar;
+    volatile IStatusBar mBar;
     StatusBarIconList mIcons = new StatusBarIconList();
     private UninstallReceiver mUninstallReceiver;
 
@@ -115,20 +115,30 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         Intent intent = new Intent(ACTION_STATUSBAR_START);
         mContext.sendBroadcast(intent /** permission  **/);
     }
-    
+
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
     public void expand() {
         enforceExpandStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.animateExpand();
+            } catch (RemoteException ex) {
+            }
+        }
     }
 
     public void collapse() {
         enforceExpandStatusBar();
-    }
 
-    public void toggle() {
-        enforceExpandStatusBar();
+        if (mBar != null) {
+            try {
+                mBar.animateCollapse();
+            } catch (RemoteException ex) {
+            }
+        }
     }
 
     public void disable(int what, IBinder token, String pkg) {
@@ -238,12 +248,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 "StatusBarManagerService");
     }
 
+
+    // ================================================================================
+    // Callbacks from the status bar service.
+    // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList) {
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         iconList.copyFrom(mIcons);
     }
     
+    /**
+     * The status bar service should call this when the user changes whether
+     * the status bar is visible or not.
+     */
+    public void visibilityChanged(boolean visible) {
+        Slog.d(TAG, "visibilityChanged visible=" + visible);
+    }
+
     public IBinder addNotification(IconData iconData, NotificationData notificationData) {
         return new Binder();
     }

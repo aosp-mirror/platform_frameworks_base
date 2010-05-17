@@ -105,18 +105,6 @@ public class StatusBarManager {
             throw new RuntimeException(ex);
         }
     }
-    
-    /**
-     * Toggle the status bar.
-     */
-    public void toggle() {
-        try {
-            mService.toggle();
-        } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
-        }
-    }
 
     public void setIcon(String slot, int iconId, int iconLevel) {
         try {
