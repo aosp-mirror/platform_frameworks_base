@@ -1,16 +1,16 @@
 ndk=true
 
 ndk.win_download=android-ndk-r4-windows.zip
-ndk.win_bytes=
-ndk.win_checksum=
+ndk.win_bytes=45778965
+ndk.win_checksum=1eded98a7f5cd5e71f8ac74565f73f11
 
 ndk.mac_download=android-ndk-r4-darwin-x86.zip
-ndk.mac_bytes=
-ndk.mac_checksum=
+ndk.mac_bytes=50572163
+ndk.mac_checksum=b7d5f149fecf951c05a79b045f00419f
 
 ndk.linux_download=android-ndk-r4-linux-x86.zip
-ndk.linux_bytes=
-ndk.linux_checksum=
+ndk.linux_bytes=49450682
+ndk.linux_checksum=0892b0637d45d145e045cc68e163dee3
 
 page.title=Android NDK
 @jd:body
@@ -27,7 +27,7 @@ function toggleDiv(link) {
     //$(".toggleme", toggleable).slideDown("fast");
     toggleable.removeClass("closed");
     toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", "/assets/images/triangle-opened.png");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", "{@docRoot}assets/images/triangle-opened.png");
   } else {
     //$(".toggleme", toggleable).slideUp("fast");
     toggleable.removeClass("open");
@@ -208,6 +208,12 @@ future versions of the Android platform, starting from Android 1.5 </li>
 optional support for NEON/VFPv3-D32 instructions)</li>
 </ul>
 
+<p>Future releases of the NDK will also support:</p>
+
+<ul>
+<li>x86 instructions (see CPU-ARCH-ABIS.TXT for more information)</li>
+</ul>
+
 <p>ARMv5TE machine code will run on all ARM-based Android devices. ARMv7-A will
 run only on devices such as the Verizon Droid or Google Nexus One that have a
 compatible CPU. The main difference between the two instruction sets is that
@@ -216,7 +222,7 @@ either or both of the instruction sets &mdash; ARMv5TE is the default, but
 switching to ARMv7-A is as easy as adding a single line to the application's
 Application.mk file, without needing to change anything else in the file. You
 can also build for both architectures at the same time and have everything
-stored in the final <code>.apk</code>. Complete information is provided in the
+stored in the final <code>.apk</code>. For complete information is provided in the
 CPU-ARCH-ABIS.TXT in the NDK package. </p>
 
 <p>The NDK provides stable headers for libc (the C library), libm (the Math

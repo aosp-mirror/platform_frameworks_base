@@ -117,7 +117,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ISensorService.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
-        core/java/android/net/IThrottleManager.aidl \
+	core/java/android/net/IThrottleManager.aidl \
+	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/storage/IMountService.aidl \
 	core/java/android/os/storage/IMountServiceListener.aidl \
@@ -439,8 +440,8 @@ framework_docs_SDK_PREVIEW:=0
 ## Latest ADT version identifiers, for reference from published docs
 framework_docs_ADT_VERSION:=0.9.7
 framework_docs_ADT_DOWNLOAD:=ADT-0.9.7.zip
-framework_docs_ADT_BYTES:=na
-framework_docs_ADT_CHECKSUM:=na
+framework_docs_ADT_BYTES:=8033750
+framework_docs_ADT_CHECKSUM:=de2431c8d4786d127ae5bfc95b4605df
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \

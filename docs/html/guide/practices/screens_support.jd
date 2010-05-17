@@ -35,7 +35,7 @@ page.title=Supporting Multiple Screens
   <ol>
     <li><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
     <li><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></li>
-    <li><a href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">Alternate Resources</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Alternative Resources</a></li>
     <li><a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a></li>
   </ol>
 
@@ -279,16 +279,16 @@ href="{@docRoot}guide/resources/dashboard/screen-densities.html">Screen Densitie
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2>Using the alternate resources framework</h2>
+<h2>Using the alternative resources framework</h2>
 
 <p>The platform's support for loading screen size- and density-specific
-resources at run time is based on the alternate resources framework.
+resources at run time is based on the alternative resources framework.
 
 <p> If you want to use size- or density-specific layouts or drawables in your
 application and you are not familiar with resource qualifiers or how the
 platform uses them, please read 
-<a href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">
-Alternate Resources</a>.
+<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+Alternative Resources</a>.
 </div>
 </div>
 
@@ -738,8 +738,8 @@ res/drawable-nodpi/composite.xml    // density independent resource
 
 <p>For more information about how to use resource qualifiers or how the platform
 selects them, please read 
-<a href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">
-Alternate Resources</a>.</p>
+<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+Alternative Resources</a>.</p>
 
 
 <h2 id="screen-independence">Best practices for Screen Independence</h2>
@@ -1023,8 +1023,8 @@ scaling.</li>
     <li>Creating any size- or density-specific resources you need and placing
 them in directories tagged with the <a href="#qualifiers">correct
 qualifiers</a>. Qualifiers must be arranged in a proscribed order. See 
-<a href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">
-Alternate Resources</a> for more information. </li>
+<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+Alternative Resources</a> for more information. </li>
     <li>Note that if you add size- or density-specific resource directories
 tagged with any of the resource qualifiers listed in this document, you should
 make sure to also tag those directories with the <code>v&lt;api-level&gt;</code>

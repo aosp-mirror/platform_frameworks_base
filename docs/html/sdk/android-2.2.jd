@@ -125,19 +125,7 @@ padding: .25em 1em;
 
 <dt>Tools:</dt>
 <dd>
-<ul>
-<li>Adds support for building with Android library projects, a capability that
-lets you store shared Android application code and resources in a separate
-development project. You can then reference the library project from other
-Android projects and, at build time, the tools compile the shared code and
-resources as part of the dependent applications. More information about this
-feature is available in the <a
-href="{@docRoot}guide/developing/eclipse-adt.html#libraryProject">Developing in
-Eclipse, with ADT</a> and <a
-href="{@docRoot}guide/developing/other-ide.html#libraryProject">Developing in
-Other IDEs</a> documents. </li>
-</li>
-</ul>
+<p>Adds support for building with Android library projects. See <a href="tools-notes.html">SDK Tools, r6</a> for information.</p>
 </dd>
 
 </dl>
@@ -332,26 +320,14 @@ document. </p>
 
 <h4 id="backup-manager">Backup manager</h4>
 
-<p>The platform now provides a generalized backup manager facility that
+<p>The platform now provides a generalized backup service that
 applications can use to backup and restore user data, to ensure that users can
 maintain their data when switching devices or reinstalling the application. The
-backup manager handles the work of transporting the application data to and from
-the backup storage area in the cloud. The backup manager can store any type of
+Backup Manager handles the work of transporting the application data to and from
+the backup storage area in the cloud. The Backup Manager can store any type of
 data, from arbitrary data to files, and manages backup and restore operations
-in an atomic manner. </p>
-
-<p>Any application can use the backup manager to save and restore data. To do
-so, the application instantiates a {@link android.app.backup.BackupManager} and
-uses its methods to trigger a new backup or restore operation. The application
-must also create a subclass of {@link android.app.backup.BackupAgent} and
-implement its methods to handle calls from the backup manager to get data for
-backup and provide data to restore
-({@link android.app.backup.BackupAgent#onBackup(android.os.ParcelFileDescriptor, android.app.backup.BackupDataOutput, android.os.ParcelFileDescriptor) onBackup()}
-and {@link android.app.backup.BackupAgent#onRestore(android.app.backup.BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}).
-A simple implementation of a BackupAgent useful for backing up preferences 
-and files is available by using {@link android.app.backup.BackupAgentHelper}.
-For more information, see <a
-href="{@docRoot}guide/topics/topics/data/backup.html">Data Backup</a>.</p>
+in an atomic manner. For more information, see <a
+href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>.</p>
 
 <h4>Graphics</h4>
 
@@ -373,10 +349,11 @@ href="{@docRoot}guide/topics/topics/data/backup.html">Data Backup</a>.</p>
 <li>New APIs for adding files to the media database, so that they are automatically scanned. See {@link android.media.MediaScannerConnection#scanFile(Context, String[], String[], OnScanCompletedListener) MediaScannerConnection.scanFile} and {@link android.media.MediaScannerConnection.OnScanCompletedListener MediaScannerConnection.OnScanCompletedListener}.</li>
 </ul>
 
-<h4>Third-party voice recognition engines</h4>
+<h4>Speech recognition and third-party recognition engines</h4>
 
 <ul>
-<li>The platform now provides a {@link android.speech.RecognitionService} base class that lets third-party developers create plug-in recognition engines. </li>
+<li>The platform provides new speech-recognition APIs that allow applications to have a richer interaction with the available voice recognizer. For example, the APIs are sufficient to integrate voice recognition deeply into an IME.</li>
+<li>The platform also provides a {@link android.speech.RecognitionService} base class that lets third-party developers create plug-in recognition engines. </li>
 <li>New {@link android.speech.RecognitionListener} interface to receive callbacks.</li>
 <li>New {@link android.speech.RecognizerIntent} extras that let a requester app specify details as preferred language, minimum length in milliseconds, and so on.</li>
 </ul>
@@ -395,7 +372,13 @@ href="{@docRoot}guide/topics/topics/data/backup.html">Data Backup</a>.</p>
 
 <h4>Device policy manager</h4>
 
-<p>New device policy management APIs allow developers to write "device administrator" applications that can control security features of the device, such as the minimum password strength, data wipe, and so on. Users can select the administrators that are enabled on their devices. For more information, see the {@link android.app.admin android.app.admin} classees.</p>
+<p>New device policy management APIs allow developers to write "device
+administrator" applications that can control security features of the device,
+such as the minimum password strength, data wipe, and so on. Users can select
+the administrators that are enabled on their devices. For more information, see
+the {@link android.app.admin android.app.admin} classees or the example
+application code in <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">DeviceAdminSample.java</a>.</p>
 
 <h4>UI Framework</h4>
 
@@ -405,7 +388,7 @@ href="{@docRoot}guide/topics/topics/data/backup.html">Data Backup</a>.</p>
 <li>Improvements in the way that multitouch events are reported in {@link android.view.MotionEvent} objects.</li>
 <li>The layout attribute <code>fill_parent</code> is renamed to <code>match_parent</code>. This affects both XML and Java code (see {@link android.view.ViewGroup.LayoutParams}). Note that the platform will continue to honor uses of <code>fill_parent</code> in legacy applications. </li>
 <li>New layout attributes {@link android.R.attr#tabStripEnabled}, {@link android.R.attr#tabStripRight}, and {@link android.R.attr#tabStripLeft} let developers customize the bottom strip of TabWidgets.</li>
-<li>Better support for managed dialogs in Activity.</li> application data (and applications)
+<li>Better support for managed dialogs in Activity.</li>
 </ul>
 
 <h4>Accounts and Sync</h4>

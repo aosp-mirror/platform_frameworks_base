@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"preferiti"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modalità automobile attivata"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Seleziona per uscire dalla modalità automobile."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering attivo"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering oppure hotspot attivo"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocca per configurare"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utilizzo dati cell. elevato"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tocca per informazioni sull\'utilizzo dati cell."</string>
