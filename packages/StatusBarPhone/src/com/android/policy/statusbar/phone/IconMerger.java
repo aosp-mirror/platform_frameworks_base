@@ -24,7 +24,6 @@ import android.widget.LinearLayout;
 
 public class IconMerger extends LinearLayout {
     PhoneStatusBarService service;
-    StatusBarIconData moreIcon;
 
     public IconMerger(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -117,7 +116,7 @@ public class IconMerger extends LinearLayout {
         // and provide the value later.  We're the only one changing this value show it
         // should be ordered correctly.
         if (false) {
-            this.moreIcon.update(number);
+            // TODO this.moreIcon.update(number);
         } else {
             mBugWorkaroundNumber = number;
             mBugWorkaroundHandler.post(mBugWorkaroundRunnable);
@@ -128,8 +127,10 @@ public class IconMerger extends LinearLayout {
     private Handler mBugWorkaroundHandler = new Handler();
     private Runnable mBugWorkaroundRunnable = new Runnable() {
         public void run() {
+            /* TODO
             IconMerger.this.moreIcon.update(mBugWorkaroundNumber);
             IconMerger.this.moreIcon.view.invalidate();
+            */
         }
     };
 }

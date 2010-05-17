@@ -37,7 +37,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 
-import com.android.server.status.IconData;
 import com.android.server.status.NotificationData;
 
 public abstract class StatusBarService extends Service implements CommandQueue.Callbacks {
@@ -49,7 +48,6 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
     /* TODO
     H mHandler = new H();
     Object mQueueLock = new Object();
-    ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
     NotificationCallbacks mNotificationCallbacks;
     */
 
