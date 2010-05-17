@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favorit"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Billäge aktiverat"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Välj om du vill avsluta billäge."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Aktiv sammanlänkning"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfpunkt aktiverad"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tryck om du vill konfigurera"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Hög mobildataanvändning"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tryck om du vill veta mer om mobildataanvändning"</string>

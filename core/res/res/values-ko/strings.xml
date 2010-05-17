@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"즐겨찾기"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"차량 모드 사용"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"차량 모드를 종료하려면 선택하세요."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"테더링 사용중"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"테더링 또는 핫스팟 사용"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"구성하려면 터치하세요."</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"높은 모바일 데이터 사용량"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"모바일 데이터 사용에 대해 자세히 알아보려면 터치하세요."</string>

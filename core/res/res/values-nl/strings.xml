@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favoriet"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Automodus ingeschakeld"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecteer dit om de automodus af te sluiten."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering actief"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering of hotspot actief"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Aanraken om te configureren"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Hoog mobiel gegevensgebruik"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Raak aan voor meer informatie over mobiel gegevensgebruik"</string>
