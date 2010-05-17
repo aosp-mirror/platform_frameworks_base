@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favorit"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Biltilstand er aktiveret"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Vælg for at afslutte biltilstand."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering aktiveret"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering eller hotspot er aktivt"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tryk for at konfigurere"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Højt mobildataforbrug"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tryk for oplysninger om brug af mobildata"</string>

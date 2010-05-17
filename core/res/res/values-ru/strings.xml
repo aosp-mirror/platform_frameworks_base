@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"избранное"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим громкой связи включен"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Выберите для выхода из режима громкой связи."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Подключение активно"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем или точка доступа Wi-Fi активны"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Активная передача данных"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
