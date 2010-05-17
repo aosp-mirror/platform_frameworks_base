@@ -17,9 +17,16 @@
 package com.android.server;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.IHardwareService;
+import android.os.ServiceManager;
 import android.os.Message;
 import android.util.Slog;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public class LightsService {
     private static final String TAG = "LightsService";
@@ -124,10 +131,52 @@ public class LightsService {
         private boolean mFlashing;
     }
 
+    /* This class implements an obsolete API that was removed after eclair and re-added during the
+     * final moments of the froyo release to support flashlight apps that had been using the private
+     * IHardwareService API. This is expected to go away in the next release.
+     */
+    private final IHardwareService.Stub mLegacyFlashlightHack = new IHardwareService.Stub() {
+
+        private static final String FLASHLIGHT_FILE = "/sys/class/leds/spotlight/brightness";
+
+        public boolean getFlashlightEnabled() {
+            try {
+                FileInputStream fis = new FileInputStream(FLASHLIGHT_FILE);
+                int result = fis.read();
+                fis.close();
+                return (result != '0');
+            } catch (Exception e) {
+                Slog.e(TAG, "getFlashlightEnabled failed", e);
+                return false;
+            }
+        }
+
+        public void setFlashlightEnabled(boolean on) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT)
+                    != PackageManager.PERMISSION_GRANTED &&
+                    mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires FLASHLIGHT or HARDWARE_TEST permission");
+            }
+            try {
+                FileOutputStream fos = new FileOutputStream(FLASHLIGHT_FILE);
+                byte[] bytes = new byte[2];
+                bytes[0] = (byte)(on ? '1' : '0');
+                bytes[1] = '\n';
+                fos.write(bytes);
+                fos.close();
+            } catch (Exception e) {
+                Slog.e(TAG, "setFlashlightEnabled failed", e);
+            }
+        }
+    };
+
     LightsService(Context context) {
 
         mNativePointer = init_native();
         mContext = context;
+
+        ServiceManager.addService("hardware", mLegacyFlashlightHack);
 
         for (int i = 0; i < LIGHT_ID_COUNT; i++) {
             mLights[i] = new Light(i);
