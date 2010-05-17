@@ -130,14 +130,14 @@
     <string name="silent_mode" msgid="7167703389802618663">"Lautlos-Modus"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Funk einschalten"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Funk ausschalten"</string>
-    <string name="screen_lock" msgid="799094655496098153">"Bildschirmsperre"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Display-Sperre"</string>
     <string name="power_off" msgid="4266614107412865048">"Ausschalten"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"Herunterfahren..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Fährt herunter..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Ihr Telefon wird heruntergefahren."</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"Neueste"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Keine neuen Anwendungen."</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Zuletzt verwendet"</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Keine zuletzt verwendeten Anwendungen"</string>
     <string name="global_actions" msgid="2406416831541615258">"Telefonoptionen"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"Bildschirmsperre"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Display-Sperre"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Ausschalten"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lautlos"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist AUS"</string>
@@ -751,7 +751,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Lautlos-Modus ausgewählt"</string>
     <string name="volume_call" msgid="3941680041282788711">"Hörerlautstärke"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Lautstärke bei eingehendem Bluetooth-Anruf"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Lautstärke für Alarm"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Lautstärke für Wecker"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Benachrichtigungslautstärke"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Lautstärke"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standard-Klingelton"</string>
@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"Favorit"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Automodus aktiviert"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Zum Beenden des Automodus auswählen"</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering aktiv"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering oder Hotspot aktiv"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Zum Konfigurieren berühren"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Hohe Mobildatennutzung"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>

@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favorito"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo auto habilitado"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Seleccionar para salir del modo auto"</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Conexión de anclaje a red activa"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red o zona activa conectados"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocar para configurar"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Amplia utilización de datos móviles"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toca para obtener más información acerca de la utilización de datos móviles."</string>
