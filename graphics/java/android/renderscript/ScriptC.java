@@ -39,11 +39,11 @@ public class ScriptC extends Script {
 
     protected ScriptC(RenderScript rs, Resources resources, int resourceID, boolean isRoot) {
         super(0, rs);
-        mID = internalCreate(rs, resources, resourceID, isRoot);
+        mID = internalCreate(rs, resources, resourceID);
     }
 
 
-    private static synchronized int internalCreate(RenderScript rs, Resources resources, int resourceID, boolean isRoot) {
+    private static synchronized int internalCreate(RenderScript rs, Resources resources, int resourceID) {
         byte[] pgm;
         int pgmLength;
         InputStream is = resources.openRawResource(resourceID);
@@ -74,7 +74,6 @@ public class ScriptC extends Script {
 
         rs.nScriptCBegin();
         rs.nScriptCSetScript(pgm, 0, pgmLength);
-        rs.nScriptSetRoot(isRoot);
         return rs.nScriptCCreate();
     }
 

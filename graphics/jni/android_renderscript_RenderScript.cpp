@@ -949,13 +949,6 @@ nScriptInvokeV(JNIEnv *_env, jobject _this, jint script, jint slot, jbyteArray d
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
-static void
-nScriptSetRoot(JNIEnv *_env, jobject _this, jboolean isRoot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetRoot, con(%p), isRoot(%i)", con, isRoot);
-    rsScriptSetRoot(con, isRoot);
-}
 
 // -----------------------------------
 
@@ -1421,7 +1414,6 @@ static JNINativeMethod methods[] = {
 {"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
 {"nScriptSetClearStencil",         "(II)V",                                (void*)nScriptSetClearStencil },
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
-{"nScriptSetRoot",                 "(Z)V",                                 (void*)nScriptSetRoot },
 {"nScriptInvoke",                  "(II)V",                                (void*)nScriptInvoke },
 {"nScriptInvokeData",              "(II)V",                                (void*)nScriptInvokeData },
 {"nScriptInvokeV",                 "(II[B)V",                              (void*)nScriptInvokeV },

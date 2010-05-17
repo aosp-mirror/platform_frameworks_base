@@ -1113,6 +1113,14 @@ int SC_divsi3(int a, int b)
     return a / b;
 }
 
+int SC_getAllocation(const void *ptr)
+{
+    GET_TLS();
+    const Allocation *alloc = sc->ptrToAllocation(ptr);
+    return (int)alloc;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -1368,6 +1376,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "debugPi", (void *)&SC_debugPi },
 
     { "scriptCall", (void *)&SC_scriptCall },
+    { "rsGetAllocation", (void *)&SC_getAllocation },
+
 
     { NULL, NULL }
 };

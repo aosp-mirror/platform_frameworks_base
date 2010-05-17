@@ -217,7 +217,6 @@ public class FilmRS {
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.filmstrip);
-        //sb.setRoot(true);
         //sb.setType(mStripPositionType, "Pos", 1);
         mScriptStrip = sb.create();
         mScriptStrip.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);

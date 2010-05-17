@@ -97,12 +97,6 @@ void rsi_ScriptSetType(Context * rsc, RsType vt, uint32_t slot, bool writable, c
     LOGE("rsi_ScriptSetType");
 }
 
-void rsi_ScriptSetInvoke(Context *rsc, const char *name, uint32_t slot)
-{
-    LOGE("rsi_ScriptSetInvoke");
-}
-
-
 void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot)
 {
     //LOGE("rsi_ScriptInvoke %i", slot);
@@ -175,11 +169,6 @@ void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *dat
 
     }
 
-}
-
-void rsi_ScriptSetRoot(Context * rsc, bool isRoot)
-{
-    LOGE("rsi_ScriptSetRoot");
 }
 
 void rsi_ScriptSetVarI(Context *rsc, RsScript vs, uint32_t slot, int value)
