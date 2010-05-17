@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favoritt"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Bilmodus er aktivert"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Velg for å avslutte bilmodus"</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Tilknytning er aktiv"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tilknytning eller trådløs sone er aktiv"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Trykk for å konfigurere"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Høy mobildatabruk"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Berør for å lese mer om bruk av mobildata"</string>

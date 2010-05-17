@@ -855,10 +855,10 @@
     <string name="description_star" msgid="2654319874908576133">"favoritos"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche."</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecciona esta opción para salir del modo coche."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Anclaje a red activo"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red activo o zona Wi-Fi"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Toca para iniciar la configuración."</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Uso elevado datos móv"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toca para más inform sobre uso de datos móv"</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Límite datos móv superado"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"Toca para más inform sobre uso de datos móv"</string>
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Uso elevado datos móviles"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Más información sobre uso de datos"</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"Límite datos superado"</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"Más información sobre uso de datos"</string>
 </resources>

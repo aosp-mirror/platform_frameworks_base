@@ -855,7 +855,7 @@
     <string name="description_star" msgid="2654319874908576133">"favori"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Araba modu etkin"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Araba modundan çıkmak için seçin."</string>
-    <string name="tethered_notification_title" msgid="8146103971290167718">"Bağlantı etkin"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Doğrudan bağlantı veya ortak erişim noktası etkin"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Yapılandırmak için dokunun"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Yüksek düzeyde mobil veri kullanımı"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Mobil veri kullanımı hakkında daha fazla bilgi edinmek için dokunun"</string>
