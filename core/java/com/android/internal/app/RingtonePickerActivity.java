@@ -223,7 +223,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
      * On click of Ok/Cancel buttons
      */
     public void onClick(DialogInterface dialog, int which) {
-        boolean positiveResult = which == BUTTON1;
+        boolean positiveResult = which == DialogInterface.BUTTON_POSITIVE;
         
         // Stop playing the previous ringtone
         mRingtoneManager.stopPreviousRingtone();
