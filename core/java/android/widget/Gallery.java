@@ -1087,7 +1087,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         // Gallery steals all key events
-        return event.dispatch(this);
+        return event.dispatch(this, null, null);
     }
 
     /**
