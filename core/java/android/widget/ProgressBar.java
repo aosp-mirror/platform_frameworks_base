@@ -947,4 +947,20 @@ public class ProgressBar extends View {
         setProgress(ss.progress);
         setSecondaryProgress(ss.secondaryProgress);
     }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mIndeterminate) {
+            startAnimation();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mIndeterminate) {
+            stopAnimation();
+        }
+    }
 }

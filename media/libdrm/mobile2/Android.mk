@@ -74,6 +74,10 @@ LOCAL_MODULE := libdrm2
 
 ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
 LOCAL_CFLAGS += -DUSTL_ANDROID_X86
+else
+  ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-sh)
+  LOCAL_CFLAGS += -DUSTL_ANDROID_SH
+  endif
 endif
 
 include $(BUILD_STATIC_LIBRARY)
