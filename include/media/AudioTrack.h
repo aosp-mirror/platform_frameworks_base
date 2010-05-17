@@ -398,7 +398,8 @@ private:
                                  int frameCount,
                                  uint32_t flags,
                                  const sp<IMemory>& sharedBuffer,
-                                 audio_io_handle_t output);
+                                 audio_io_handle_t output,
+                                 bool enforceFrameCount);
 
     sp<IAudioTrack>         mAudioTrack;
     sp<IMemory>             mCblkMemory;
@@ -420,7 +421,8 @@ private:
 
     callback_t              mCbf;
     void*                   mUserData;
-    uint32_t                mNotificationFrames;
+    uint32_t                mNotificationFramesReq; // requested number of frames between each notification callback
+    uint32_t                mNotificationFramesAct; // actual number of frames between each notification callback
     sp<IMemory>             mSharedBuffer;
     int                     mLoopCount;
     uint32_t                mRemainingFrames;

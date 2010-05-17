@@ -342,7 +342,7 @@ private:
         virtual     bool        checkForNewParameters_l() = 0;
         virtual     status_t    setParameters(const String8& keyValuePairs);
         virtual     String8     getParameters(const String8& keys) = 0;
-        virtual     void        audioConfigChanged(int event, int param = 0) = 0;
+        virtual     void        audioConfigChanged_l(int event, int param = 0) = 0;
                     void        sendConfigEvent(int event, int param = 0);
                     void        sendConfigEvent_l(int event, int param = 0);
                     void        processConfigEvents();
@@ -547,7 +547,7 @@ private:
                     void        restore() { if (mSuspended) mSuspended--; }
                     bool        isSuspended() { return (mSuspended != 0); }
         virtual     String8     getParameters(const String8& keys);
-        virtual     void        audioConfigChanged(int event, int param = 0);
+        virtual     void        audioConfigChanged_l(int event, int param = 0);
         virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
 
         struct  stream_type_t {
@@ -613,11 +613,7 @@ private:
         // Thread virtuals
         virtual     bool        threadLoop();
 
-                    void        getTracks(SortedVector < sp<Track> >& tracks,
-                                      SortedVector < wp<Track> >& activeTracks,
-                                      int streamType);
-                    void        putTracks(SortedVector < sp<Track> >& tracks,
-                                      SortedVector < wp<Track> >& activeTracks);
+                    void        invalidateTracks(int streamType);
         virtual     bool        checkForNewParameters_l();
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
@@ -764,7 +760,7 @@ private:
         virtual void        releaseBuffer(AudioBufferProvider::Buffer* buffer);
         virtual bool        checkForNewParameters_l();
         virtual String8     getParameters(const String8& keys);
-        virtual void        audioConfigChanged(int event, int param = 0);
+        virtual void        audioConfigChanged_l(int event, int param = 0);
                 void        readInputParameters();
         virtual unsigned int  getInputFramesLost();
 

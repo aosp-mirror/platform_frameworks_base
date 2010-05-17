@@ -430,7 +430,7 @@ status_t AudioRecord::openRecord(
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
     mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-    mCblk->out = 0;
+    mCblk->flags &= ~CBLK_DIRECTION_MSK;
     mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
     mCblk->waitTimeMs = 0;
     return NO_ERROR;
@@ -644,10 +644,10 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
     // Manage overrun callback
     if (mActive && (mCblk->framesAvailable_l() == 0)) {
-        LOGV("Overrun user: %x, server: %x, flowControlFlag %d", mCblk->user, mCblk->server, mCblk->flowControlFlag);
-        if (mCblk->flowControlFlag == 0) {
+        LOGV("Overrun user: %x, server: %x, flags %04x", mCblk->user, mCblk->server, mCblk->flags);
+        if ((mCblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
             mCbf(EVENT_OVERRUN, mUserData, 0);
-            mCblk->flowControlFlag = 1;
+            mCblk->flags |= CBLK_UNDERRUN_ON;
         }
     }
 
