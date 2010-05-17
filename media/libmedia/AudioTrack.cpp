@@ -124,10 +124,6 @@ status_t AudioTrack::set(
     if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
         return NO_INIT;
     }
-    int afFrameCount;
-    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
-        return NO_INIT;
-    }
     uint32_t afLatency;
     if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
         return NO_INIT;
@@ -173,48 +169,13 @@ status_t AudioTrack::set(
         return BAD_VALUE;
     }
 
-    if (!AudioSystem::isLinearPCM(format)) {
-        if (sharedBuffer != 0) {
-            frameCount = sharedBuffer->size();
-        }
-    } else {
-        // Ensure that buffer depth covers at least audio hardware latency
-        uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
-        if (minBufCount < 2) minBufCount = 2;
-
-        int minFrameCount = (afFrameCount*sampleRate*minBufCount)/afSampleRate;
-
-        if (sharedBuffer == 0) {
-            if (frameCount == 0) {
-                frameCount = minFrameCount;
-            }
-            if (notificationFrames == 0) {
-                notificationFrames = frameCount/2;
-            }
-            // Make sure that application is notified with sufficient margin
-            // before underrun
-            if (notificationFrames > frameCount/2) {
-                notificationFrames = frameCount/2;
-            }
-            if (frameCount < minFrameCount) {
-              LOGE("Invalid buffer size: minFrameCount %d, frameCount %d", minFrameCount, frameCount);
-              return BAD_VALUE;
-            }
-        } else {
-            // Ensure that buffer alignment matches channelcount
-            if (((uint32_t)sharedBuffer->pointer() & (channelCount | 1)) != 0) {
-                LOGE("Invalid buffer alignement: address %p, channelCount %d", sharedBuffer->pointer(), channelCount);
-                return BAD_VALUE;
-            }
-            frameCount = sharedBuffer->size()/channelCount/sizeof(int16_t);
-        }
-    }
-
     mVolume[LEFT] = 1.0f;
     mVolume[RIGHT] = 1.0f;
+    mFrameCount = frameCount;
+    mNotificationFramesReq = notificationFrames;
     // create the IAudioTrack
     status_t status = createTrack(streamType, sampleRate, format, channelCount,
-                                  frameCount, flags, sharedBuffer, output);
+                                  frameCount, flags, sharedBuffer, output, true);
 
     if (status != NO_ERROR) {
         return status;
@@ -238,10 +199,7 @@ status_t AudioTrack::set(
     mMuted = false;
     mActive = 0;
     mCbf = cbf;
-    mNotificationFrames = notificationFrames;
-    mRemainingFrames = notificationFrames;
     mUserData = user;
-    mLatency = afLatency + (1000*mFrameCount) / sampleRate;
     mLoopCount = 0;
     mMarkerPosition = 0;
     mMarkerReached = false;
@@ -281,7 +239,7 @@ int AudioTrack::channelCount() const
 
 uint32_t AudioTrack::frameCount() const
 {
-    return mFrameCount;
+    return mCblk->frameCount;
 }
 
 int AudioTrack::frameSize() const
@@ -303,6 +261,7 @@ sp<IMemory>& AudioTrack::sharedBuffer()
 void AudioTrack::start()
 {
     sp<AudioTrackThread> t = mAudioTrackThread;
+    status_t status;
 
     LOGV("start %p", this);
     if (t != 0) {
@@ -325,11 +284,18 @@ void AudioTrack::start()
             setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
         }
 
-        status_t status = mAudioTrack->start();
+        if (mCblk->flags & CBLK_INVALID_MSK) {
+            LOGW("start() track %p invalidated, creating a new one", this);
+            // no need to clear the invalid flag as this cblk will not be used anymore
+            // force new track creation
+            status = DEAD_OBJECT;
+        } else {
+            status = mAudioTrack->start();
+        }
         if (status == DEAD_OBJECT) {
             LOGV("start() dead IAudioTrack: creating a new one");
             status = createTrack(mStreamType, mCblk->sampleRate, mFormat, mChannelCount,
-                                 mFrameCount, mFlags, mSharedBuffer, getOutput());
+                                 mFrameCount, mFlags, mSharedBuffer, getOutput(), false);
             if (status == NO_ERROR) {
                 status = mAudioTrack->start();
                 if (status == NO_ERROR) {
@@ -479,14 +445,14 @@ status_t AudioTrack::setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount
     }
 
     if (loopStart >= loopEnd ||
-        loopEnd - loopStart > mFrameCount) {
-        LOGE("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, mFrameCount, cblk->user);
+        loopEnd - loopStart > cblk->frameCount) {
+        LOGE("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, cblk->frameCount, cblk->user);
         return BAD_VALUE;
     }
 
-    if ((mSharedBuffer != 0) && (loopEnd   > mFrameCount)) {
+    if ((mSharedBuffer != 0) && (loopEnd   > cblk->frameCount)) {
         LOGE("setLoop invalid value: loop markers beyond data: loopStart %d, loopEnd %d, framecount %d",
-            loopStart, loopEnd, mFrameCount);
+            loopStart, loopEnd, cblk->frameCount);
         return BAD_VALUE;
     }
 
@@ -566,7 +532,7 @@ status_t AudioTrack::setPosition(uint32_t position)
     if (position > mCblk->user) return BAD_VALUE;
 
     mCblk->server = position;
-    mCblk->forceReady = 1;
+    mCblk->flags |= CBLK_FORCEREADY_ON;
 
     return NO_ERROR;
 }
@@ -586,7 +552,7 @@ status_t AudioTrack::reload()
 
     flush();
 
-    mCblk->stepUser(mFrameCount);
+    mCblk->stepUser(mCblk->frameCount);
 
     return NO_ERROR;
 }
@@ -607,13 +573,69 @@ status_t AudioTrack::createTrack(
         int frameCount,
         uint32_t flags,
         const sp<IMemory>& sharedBuffer,
-        audio_io_handle_t output)
+        audio_io_handle_t output,
+        bool enforceFrameCount)
 {
     status_t status;
     const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
     if (audioFlinger == 0) {
        LOGE("Could not get audioflinger");
        return NO_INIT;
+    }
+
+    int afSampleRate;
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+        return NO_INIT;
+    }
+    int afFrameCount;
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+        return NO_INIT;
+    }
+    uint32_t afLatency;
+    if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
+        return NO_INIT;
+    }
+
+    mNotificationFramesAct = mNotificationFramesReq;
+    if (!AudioSystem::isLinearPCM(format)) {
+        if (sharedBuffer != 0) {
+            frameCount = sharedBuffer->size();
+        }
+    } else {
+        // Ensure that buffer depth covers at least audio hardware latency
+        uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
+        if (minBufCount < 2) minBufCount = 2;
+
+        int minFrameCount = (afFrameCount*sampleRate*minBufCount)/afSampleRate;
+
+        if (sharedBuffer == 0) {
+            if (frameCount == 0) {
+                frameCount = minFrameCount;
+            }
+            if (mNotificationFramesAct == 0) {
+                mNotificationFramesAct = frameCount/2;
+            }
+            // Make sure that application is notified with sufficient margin
+            // before underrun
+            if (mNotificationFramesAct > (uint32_t)frameCount/2) {
+                mNotificationFramesAct = frameCount/2;
+            }
+            if (frameCount < minFrameCount) {
+                if (enforceFrameCount) {
+                    LOGE("Invalid buffer size: minFrameCount %d, frameCount %d", minFrameCount, frameCount);
+                    return BAD_VALUE;
+                } else {
+                    frameCount = minFrameCount;
+                }
+            }
+        } else {
+            // Ensure that buffer alignment matches channelcount
+            if (((uint32_t)sharedBuffer->pointer() & (channelCount | 1)) != 0) {
+                LOGE("Invalid buffer alignement: address %p, channelCount %d", sharedBuffer->pointer(), channelCount);
+                return BAD_VALUE;
+            }
+            frameCount = sharedBuffer->size()/channelCount/sizeof(int16_t);
+        }
     }
 
     sp<IAudioTrack> track = audioFlinger->createTrack(getpid(),
@@ -641,20 +663,20 @@ status_t AudioTrack::createTrack(
     mCblkMemory.clear();
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
-    mCblk->out = 1;
-    // Update buffer size in case it has been limited by AudioFlinger during track creation
-    mFrameCount = mCblk->frameCount;
+    mCblk->flags |= CBLK_DIRECTION_OUT;
     if (sharedBuffer == 0) {
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
     } else {
         mCblk->buffers = sharedBuffer->pointer();
          // Force buffer full condition as data is already present in shared memory
-        mCblk->stepUser(mFrameCount);
+        mCblk->stepUser(mCblk->frameCount);
     }
 
     mCblk->volumeLR = (int32_t(int16_t(mVolume[LEFT] * 0x1000)) << 16) | int16_t(mVolume[RIGHT] * 0x1000);
     mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
     mCblk->waitTimeMs = 0;
+    mRemainingFrames = mNotificationFramesAct;
+    mLatency = afLatency + (1000*mCblk->frameCount) / sampleRate;
     return NO_ERROR;
 }
 
@@ -685,8 +707,15 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                 cblk->lock.unlock();
                 return WOULD_BLOCK;
             }
-
-            result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
+            if (!(cblk->flags & CBLK_INVALID_MSK)) {
+                result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
+            }
+            if (cblk->flags & CBLK_INVALID_MSK) {
+                LOGW("obtainBuffer() track %p invalidated, creating a new one", this);
+                // no need to clear the invalid flag as this cblk will not be used anymore
+                cblk->lock.unlock();
+                goto create_new_track;
+            }
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
@@ -700,8 +729,9 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                         result = mAudioTrack->start();
                         if (result == DEAD_OBJECT) {
                             LOGW("obtainBuffer() dead IAudioTrack: creating a new one");
+create_new_track:
                             result = createTrack(mStreamType, cblk->sampleRate, mFormat, mChannelCount,
-                                                 mFrameCount, mFlags, mSharedBuffer, getOutput());
+                                                 mFrameCount, mFlags, mSharedBuffer, getOutput(), false);
                             if (result == NO_ERROR) {
                                 cblk = mCblk;
                                 cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
@@ -826,13 +856,13 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 
     // Manage underrun callback
     if (mActive && (mCblk->framesReady() == 0)) {
-        LOGV("Underrun user: %x, server: %x, flowControlFlag %d", mCblk->user, mCblk->server, mCblk->flowControlFlag);
-        if (mCblk->flowControlFlag == 0) {
+        LOGV("Underrun user: %x, server: %x, flags %04x", mCblk->user, mCblk->server, mCblk->flags);
+        if ((mCblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
             mCbf(EVENT_UNDERRUN, mUserData, 0);
             if (mCblk->server == mCblk->frameCount) {
                 mCbf(EVENT_BUFFER_END, mUserData, 0);
             }
-            mCblk->flowControlFlag = 1;
+            mCblk->flags |= CBLK_UNDERRUN_ON;
             if (mSharedBuffer != 0) return false;
         }
     }
@@ -932,7 +962,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     while (frames);
 
     if (frames == 0) {
-        mRemainingFrames = mNotificationFrames;
+        mRemainingFrames = mNotificationFramesAct;
     } else {
         mRemainingFrames = frames;
     }
@@ -949,7 +979,7 @@ status_t AudioTrack::dump(int fd, const Vector<String16>& args) const
     result.append(" AudioTrack::dump\n");
     snprintf(buffer, 255, "  stream type(%d), left - right volume(%f, %f)\n", mStreamType, mVolume[0], mVolume[1]);
     result.append(buffer);
-    snprintf(buffer, 255, "  format(%d), channel count(%d), frame count(%d)\n", mFormat, mChannelCount, mFrameCount);
+    snprintf(buffer, 255, "  format(%d), channel count(%d), frame count(%d)\n", mFormat, mChannelCount, mCblk->frameCount);
     result.append(buffer);
     snprintf(buffer, 255, "  sample rate(%d), status(%d), muted(%d)\n", (mCblk == 0) ? 0 : mCblk->sampleRate, mStatus, mMuted);
     result.append(buffer);
@@ -986,7 +1016,7 @@ audio_track_cblk_t::audio_track_cblk_t()
     : lock(Mutex::SHARED), cv(Condition::SHARED), user(0), server(0),
     userBase(0), serverBase(0), buffers(0), frameCount(0),
     loopStart(UINT_MAX), loopEnd(UINT_MAX), loopCount(0), volumeLR(0),
-    flowControlFlag(1), forceReady(0)
+    flags(0)
 {
 }
 
@@ -996,7 +1026,7 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
 
     u += frameCount;
     // Ensure that user is never ahead of server for AudioRecord
-    if (out) {
+    if (flags & CBLK_DIRECTION_MSK) {
         // If stepServer() has been called once, switch to normal obtainBuffer() timeout period
         if (bufferTimeoutMs == MAX_STARTUP_TIMEOUT_MS-1) {
             bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
@@ -1013,7 +1043,7 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
     this->user = u;
 
     // Clear flow control error condition as new data has been written/read to/from buffer.
-    flowControlFlag = 0;
+    flags &= ~CBLK_UNDERRUN_MSK;
 
     return u;
 }
@@ -1038,7 +1068,7 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
     uint32_t s = this->server;
 
     s += frameCount;
-    if (out) {
+    if (flags & CBLK_DIRECTION_MSK) {
         // Mark that we have read the first buffer so that next time stepUser() is called
         // we switch to normal obtainBuffer() timeout period
         if (bufferTimeoutMs == MAX_STARTUP_TIMEOUT_MS) {
@@ -1089,7 +1119,7 @@ uint32_t audio_track_cblk_t::framesAvailable_l()
     uint32_t u = this->user;
     uint32_t s = this->server;
 
-    if (out) {
+    if (flags & CBLK_DIRECTION_MSK) {
         uint32_t limit = (s < loopStart) ? s : loopStart;
         return limit + frameCount - u;
     } else {
@@ -1102,7 +1132,7 @@ uint32_t audio_track_cblk_t::framesReady()
     uint32_t u = this->user;
     uint32_t s = this->server;
 
-    if (out) {
+    if (flags & CBLK_DIRECTION_MSK) {
         if (u < loopEnd) {
             return u - s;
         } else {

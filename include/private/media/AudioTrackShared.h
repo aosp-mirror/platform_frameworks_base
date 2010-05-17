@@ -32,6 +32,18 @@ namespace android {
 #define MAX_RUN_TIMEOUT_MS      1000
 #define WAIT_PERIOD_MS          10
 
+#define CBLK_UNDERRUN_MSK       0x0001
+#define CBLK_UNDERRUN_ON        0x0001  // underrun (out) or overrrun (in) indication
+#define CBLK_UNDERRUN_OFF       0x0000  // no underrun
+#define CBLK_DIRECTION_MSK      0x0002
+#define CBLK_DIRECTION_OUT      0x0002  // this cblk is for an AudioTrack
+#define CBLK_DIRECTION_IN       0x0000  // this cblk is for an AudioRecord
+#define CBLK_FORCEREADY_MSK     0x0004
+#define CBLK_FORCEREADY_ON      0x0004  // track is considered ready immediately by AudioFlinger
+#define CBLK_FORCEREADY_OFF     0x0000  // track is ready when buffer full
+#define CBLK_INVALID_MSK        0x0008
+#define CBLK_INVALID_ON         0x0008  // track buffer is invalidated by AudioFlinger: must be re-created
+#define CBLK_INVALID_OFF        0x0000
 
 struct audio_track_cblk_t
 {
@@ -44,12 +56,12 @@ struct audio_track_cblk_t
     volatile    uint32_t    server;
                 uint32_t    userBase;
                 uint32_t    serverBase;
-    void*       buffers;
-    uint32_t    frameCount;
-    // Cache line boundary
-    uint32_t    loopStart;
-    uint32_t    loopEnd;
-    int         loopCount;
+                void*       buffers;
+                uint32_t    frameCount;
+                // Cache line boundary
+                uint32_t    loopStart;
+                uint32_t    loopEnd;
+                int         loopCount;
     volatile    union {
                     uint16_t    volume[2];
                     uint32_t    volumeLR;
@@ -58,15 +70,16 @@ struct audio_track_cblk_t
                 // NOTE: audio_track_cblk_t::frameSize is not equal to AudioTrack::frameSize() for
                 // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
                 // 16 bit because data is converted to 16 bit before being stored in buffer
-                uint32_t    frameSize;
+
+                uint8_t     frameSize;
                 uint8_t     channelCount;
-                uint8_t     flowControlFlag; // underrun (out) or overrrun (in) indication
-                uint8_t     out;        // out equals 1 for AudioTrack and 0 for AudioRecord
-                uint8_t     forceReady;
+                uint16_t    flags;
+
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
                 uint16_t    waitTimeMs;      // Cumulated wait time
-                // Cache line boundary (32 bytes)
 
+                uint32_t    reserved;
+                // Cache line boundary (32 bytes)
                             audio_track_cblk_t();
                 uint32_t    stepUser(uint32_t frameCount);
                 bool        stepServer(uint32_t frameCount);
