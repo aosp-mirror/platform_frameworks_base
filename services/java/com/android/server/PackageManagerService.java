@@ -5082,7 +5082,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private InstallArgs createInstallArgs(Uri packageURI, int flags, String pkgName) {
+    private InstallArgs createInstallArgs(Uri packageURI, int flags,
+            String pkgName) {
         if (installOnSd(flags)) {
             String cid = getNextCodePath(null, pkgName, "/" + SdInstallArgs.RES_FILE_NAME);
             return new SdInstallArgs(packageURI, cid);
@@ -5342,6 +5343,7 @@ class PackageManagerService extends IPackageManager.Stub {
         SdInstallArgs(String cid) {
             super(null, null, PackageManager.INSTALL_EXTERNAL, null);
             this.cid = cid;
+            cachePath = PackageHelper.getSdDir(cid);
         }
 
         SdInstallArgs(Uri packageURI, String cid) {
