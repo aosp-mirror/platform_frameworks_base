@@ -24,6 +24,33 @@
 
 using namespace android;
 
+void log(const char* prefix, int *b, size_t num);
+void test0(SharedBufferServer& s, SharedBufferClient& c, size_t num, int* list);
+
+// ----------------------------------------------------------------------------
+
+int main(int argc, char** argv)
+{
+    SharedClient client;
+    SharedBufferServer s(&client, 0, 4, 0);
+    SharedBufferClient c(&client, 0, 4, 0);
+
+    printf("basic test 0\n");
+    int list0[4] = {0, 1, 2, 3};
+    test0(s, c, 4, list0);
+
+    printf("basic test 1\n");
+    int list1[4] = {2, 1, 0, 3};
+    test0(s, c, 4, list1);
+
+    printf("resize test\n");
+    s.resize(5);
+    c.setBufferCount(5);
+    int list2[5] = {0, 1, 2, 4, 3};
+    test0(s, c, 5, list2);
+
+    return 0;
+}
 
 void log(const char* prefix, int *b, size_t num)
 {
@@ -34,18 +61,20 @@ void log(const char* prefix, int *b, size_t num)
     printf("\n");
 }
 
-int main(int argc, char** argv)
+// ----------------------------------------------------------------------------
+
+void test0(
+        SharedBufferServer& s,
+        SharedBufferClient& c,
+        size_t num,
+        int* list)
 {
     status_t err;
-    const size_t num = 4;
-    SharedClient client;
-    SharedBufferServer s(&client, 0, num, 0);
-    SharedBufferClient c(&client, 0, num, 0);
     int b[num], u[num], r[num];
 
     for (size_t i=0 ; i<num ; i++) {
         b[i] = c.dequeue();
-        assert(b[i]==i);
+        assert(b[i]==list[i]);
     }
     log("DQ", b, num);
 
@@ -64,7 +93,7 @@ int main(int argc, char** argv)
 
     for (size_t i=0 ; i<num-1 ; i++) {
         r[i] = s.retireAndLock();
-        assert(r[i]==i);
+        assert(r[i]==list[i]);
         err = s.unlock(r[i]);
         assert(err == 0);
     }
@@ -79,7 +108,7 @@ int main(int argc, char** argv)
     log(" Q", b+num-1, 1);
 
     r[num-1] = s.retireAndLock();
-    assert(r[num-1]==num-1);
+    assert(r[num-1]==list[num-1]);
     err = s.unlock(r[num-1]);
     assert(err == 0);
     log("RT", r+num-1, 1);
@@ -89,7 +118,7 @@ int main(int argc, char** argv)
 
     for (size_t i=0 ; i<num ; i++) {
         b[i] = c.dequeue();
-        assert(b[i]==i);
+        assert(b[i]==list[i]);
     }
     log("DQ", b, num);
 
@@ -102,7 +131,7 @@ int main(int argc, char** argv)
     for (size_t i=0 ; i<num-1 ; i++) {
         u[i] = b[num-2-i];
     }
-    u[num-1] = num-1;
+    u[num-1] = b[num-1];
 
     for (size_t i=0 ; i<num-1 ; i++) {
         err = c.queue(u[i]);
@@ -127,7 +156,7 @@ int main(int argc, char** argv)
     log(" Q", b+num-1, 1);
 
     r[num-1] = s.retireAndLock();
-    assert(r[num-1]==num-1);
+    assert(r[num-1]==list[num-1]);
     err = s.unlock(r[num-1]);
     assert(err == 0);
     log("RT", r+num-1, 1);
@@ -170,7 +199,7 @@ int main(int argc, char** argv)
     log(" Q", u+num-1, 1);
 
     r[num-1] = s.retireAndLock();
-    assert(r[num-1]==num-1);
+    assert(r[num-1]==u[num-1]);
     err = s.unlock(r[num-1]);
     assert(err == 0);
     log("RT", r+num-1, 1);
@@ -224,10 +253,9 @@ int main(int argc, char** argv)
     log(" Q", u+num-1, 1);
 
     r[num-1] = s.retireAndLock();
-    assert(r[num-1]==num-1);
+    assert(r[num-1]==u[num-1]);
     err = s.unlock(r[num-1]);
     assert(err == 0);
     log("RT", r+num-1, 1);
-
-    return 0;
+    printf("\n");
 }
