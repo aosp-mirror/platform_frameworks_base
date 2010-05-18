@@ -44,7 +44,6 @@ import android.speech.tts.TextToSpeech;
 import android.text.IClipboard;
 import android.text.Selection;
 import android.text.Spannable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -61,7 +60,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -77,7 +75,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Scroller;
 import android.widget.Toast;
-import android.widget.ZoomButtonsController;
 import android.widget.AdapterView.OnItemClickListener;
 
 import java.io.File;
@@ -649,32 +646,6 @@ public class WebView extends AbsoluteLayout
     // initial scale in percent. 0 means using default.
     private int mInitialScaleInPercent = 0;
 
-    // ideally mZoomOverviewWidth should be mContentWidth. But sites like espn,
-    // engadget always have wider mContentWidth no matter what viewport size is.
-    int mZoomOverviewWidth = DEFAULT_VIEWPORT_WIDTH;
-    float mTextWrapScale;
-
-    // default scale. Depending on the display density.
-    static int DEFAULT_SCALE_PERCENT;
-    private float mDefaultScale;
-
-    private static float MINIMUM_SCALE_INCREMENT = 0.01f;
-
-    // set to true temporarily during ScaleGesture triggered zoom
-    private boolean mPreviewZoomOnly = false;
-
-    // computed scale and inverse, from mZoomWidth.
-    private float mActualScale;
-    private float mInvActualScale;
-    // if this is non-zero, it is used on drawing rather than mActualScale
-    private float mZoomScale;
-    private float mInvInitialZoomScale;
-    private float mInvFinalZoomScale;
-    private int mInitialScrollX;
-    private int mInitialScrollY;
-    private long mZoomStart;
-    private static final int ZOOM_ANIMATION_LENGTH = 500;
-
     private boolean mUserScroll = false;
 
     private int mSnapScrollMode = SNAP_NONE;
@@ -815,11 +786,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // These keep track of the center point of the zoom.  They are used to
-    // determine the point around which we should zoom.
-    private float mZoomCenterX;
-    private float mZoomCenterY;
-
     /**
      * Construct a new WebView with a Context object.
      * @param context A Context object used to access application assets.
@@ -875,7 +841,7 @@ public class WebView extends AbsoluteLayout
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
-        mZoomManager = new ZoomManager(this);
+        mZoomManager = new ZoomManager(this, mCallbackProxy);
 
         /* The init method must follow the creation of certain member variables,
          * such as the mZoomManager.
@@ -914,12 +880,6 @@ public class WebView extends AbsoluteLayout
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
         mNavSlop = (int) (16 * density);
-        // density adjusted scale factors
-        DEFAULT_SCALE_PERCENT = (int) (100 * density);
-        mDefaultScale = density;
-        mActualScale = density;
-        mInvActualScale = 1 / density;
-        mTextWrapScale = density;
         mZoomManager.init(density);
         mMaximumFling = configuration.getScaledMaximumFlingVelocity();
     }
@@ -945,20 +905,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /* package */void updateDefaultZoomDensity(int zoomDensity) {
-        final float density = getContext().getResources().getDisplayMetrics().density
+        final float density = mContext.getResources().getDisplayMetrics().density
                 * 100 / zoomDensity;
-        if (Math.abs(density - mDefaultScale) > 0.01) {
-            float scaleFactor = density / mDefaultScale;
-            // adjust the limits
-            mNavSlop = (int) (16 * density);
-            DEFAULT_SCALE_PERCENT = (int) (100 * density);
-            mZoomManager.DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
-            mZoomManager.DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
-            mDefaultScale = density;
-            mZoomManager.mMaxZoomScale *= scaleFactor;
-            mZoomManager.mMinZoomScale *= scaleFactor;
-            setNewZoomScale(mActualScale * scaleFactor, true, false);
-        }
+        mNavSlop = (int) (16 * density);
+        mZoomManager.updateDefaultZoomDensity(density);
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -1075,7 +1025,7 @@ public class WebView extends AbsoluteLayout
      * returns the height of the titlebarview (if any). Does not care about
      * scrolling
      */
-    private int getTitleHeight() {
+    int getTitleHeight() {
         return mTitleBar != null ? mTitleBar.getHeight() : 0;
     }
 
@@ -1336,8 +1286,8 @@ public class WebView extends AbsoluteLayout
         // now update the bundle
         b.putInt("scrollX", mScrollX);
         b.putInt("scrollY", mScrollY);
-        b.putFloat("scale", mActualScale);
-        b.putFloat("textwrapScale", mTextWrapScale);
+        b.putFloat("scale", mZoomManager.mActualScale);
+        b.putFloat("textwrapScale", mZoomManager.mTextWrapScale);
         b.putBoolean("overview", mZoomManager.mInZoomOverview);
         return true;
     }
@@ -1355,9 +1305,9 @@ public class WebView extends AbsoluteLayout
         // as getWidth() / getHeight() of the view are not available yet, set up
         // mActualScale, so that when onSizeChanged() is called, the rest will
         // be set correctly
-        mActualScale = scale;
-        mInvActualScale = 1 / scale;
-        mTextWrapScale = b.getFloat("textwrapScale", scale);
+        mZoomManager.mActualScale = scale;
+        mZoomManager.mInvActualScale = 1 / scale;
+        mZoomManager.mTextWrapScale = b.getFloat("textwrapScale", scale);
         mZoomManager.mInZoomOverview = b.getBoolean("overview");
         invalidate();
     }
@@ -1778,7 +1728,7 @@ public class WebView extends AbsoluteLayout
      * @return The current scale.
      */
     public float getScale() {
-        return mActualScale;
+        return mZoomManager.mActualScale;
     }
 
     /**
@@ -1936,12 +1886,12 @@ public class WebView extends AbsoluteLayout
     }
 
     // Expects x in view coordinates
-    private int pinLocX(int x) {
+    int pinLocX(int x) {
         return pinLoc(x, getViewWidth(), computeHorizontalScrollRange());
     }
 
     // Expects y in view coordinates
-    private int pinLocY(int y) {
+    int pinLocY(int y) {
         return pinLoc(y, getViewHeightWithTitle(),
                       computeVerticalScrollRange() + getTitleHeight());
     }
@@ -1991,7 +1941,7 @@ public class WebView extends AbsoluteLayout
      * height.
      */
     private int viewToContentDimension(int d) {
-        return Math.round(d * mInvActualScale);
+        return Math.round(d * mZoomManager.mInvActualScale);
     }
 
     /**
@@ -2017,7 +1967,7 @@ public class WebView extends AbsoluteLayout
      * Returns the result as a float.
      */
     private float viewToContentXf(int x) {
-        return x * mInvActualScale;
+        return x * mZoomManager.mInvActualScale;
     }
 
     /**
@@ -2026,7 +1976,7 @@ public class WebView extends AbsoluteLayout
      * embedded into the WebView. Returns the result as a float.
      */
     private float viewToContentYf(int y) {
-        return (y - getTitleHeight()) * mInvActualScale;
+        return (y - getTitleHeight()) * mZoomManager.mInvActualScale;
     }
 
     /**
@@ -2036,7 +1986,7 @@ public class WebView extends AbsoluteLayout
      * height.
      */
     /*package*/ int contentToViewDimension(int d) {
-        return Math.round(d * mActualScale);
+        return Math.round(d * mZoomManager.mActualScale);
     }
 
     /**
@@ -2077,7 +2027,7 @@ public class WebView extends AbsoluteLayout
     // Called by JNI to invalidate the View, given rectangle coordinates in
     // content space
     private void viewInvalidate(int l, int t, int r, int b) {
-        final float scale = mActualScale;
+        final float scale = mZoomManager.mActualScale;
         final int dy = getTitleHeight();
         invalidate((int)Math.floor(l * scale),
                    (int)Math.floor(t * scale) + dy,
@@ -2088,7 +2038,7 @@ public class WebView extends AbsoluteLayout
     // Called by JNI to invalidate the View after a delay, given rectangle
     // coordinates in content space
     private void viewInvalidateDelayed(long delay, int l, int t, int r, int b) {
-        final float scale = mActualScale;
+        final float scale = mZoomManager.mActualScale;
         final int dy = getTitleHeight();
         postInvalidateDelayed(delay,
                               (int)Math.floor(l * scale),
@@ -2126,13 +2076,7 @@ public class WebView extends AbsoluteLayout
             // updated when we get out of that mode.
             if (!mDrawHistory) {
                 // repin our scroll, taking into account the new content size
-                int oldX = mScrollX;
-                int oldY = mScrollY;
-                mScrollX = pinLocX(mScrollX);
-                mScrollY = pinLocY(mScrollY);
-                if (oldX != mScrollX || oldY != mScrollY) {
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-                }
+                updateScrollCoordinates(pinLocX(mScrollX), pinLocY(mScrollY));
                 if (!mScroller.isFinished()) {
                     // We are in the middle of a scroll.  Repin the final scroll
                     // position.
@@ -2144,79 +2088,12 @@ public class WebView extends AbsoluteLayout
         contentSizeChanged(updateLayout);
     }
 
-    private void setNewZoomScale(float scale, boolean updateTextWrapScale,
-            boolean force) {
-        if (scale < mZoomManager.mMinZoomScale) {
-            scale = mZoomManager.mMinZoomScale;
-            // set mInZoomOverview for non mobile sites
-            if (scale < mDefaultScale) {
-                mZoomManager.mInZoomOverview = true;
-            }
-        } else if (scale > mZoomManager.mMaxZoomScale) {
-            scale = mZoomManager.mMaxZoomScale;
-        }
-        if (updateTextWrapScale) {
-            mTextWrapScale = scale;
-            // reset mLastHeightSent to force VIEW_SIZE_CHANGED sent to WebKit
-            mLastHeightSent = 0;
-        }
-        if (scale != mActualScale || force) {
-            if (mDrawHistory) {
-                // If history Picture is drawn, don't update scroll. They will
-                // be updated when we get out of that mode.
-                if (scale != mActualScale && !mPreviewZoomOnly) {
-                    mCallbackProxy.onScaleChanged(mActualScale, scale);
-                }
-                mActualScale = scale;
-                mInvActualScale = 1 / scale;
-                sendViewSizeZoom();
-            } else {
-                // update our scroll so we don't appear to jump
-                // i.e. keep the center of the doc in the center of the view
-
-                int oldX = mScrollX;
-                int oldY = mScrollY;
-                float ratio = scale * mInvActualScale;   // old inverse
-                float sx = ratio * oldX + (ratio - 1) * mZoomCenterX;
-                float sy = ratio * oldY + (ratio - 1)
-                        * (mZoomCenterY - getTitleHeight());
-
-                // now update our new scale and inverse
-                if (scale != mActualScale && !mPreviewZoomOnly) {
-                    mCallbackProxy.onScaleChanged(mActualScale, scale);
-                }
-                mActualScale = scale;
-                mInvActualScale = 1 / scale;
-
-                // Scale all the child views
-                mViewManager.scaleAll();
-
-                // as we don't have animation for scaling, don't do animation
-                // for scrolling, as it causes weird intermediate state
-                //        pinScrollTo(Math.round(sx), Math.round(sy));
-                mScrollX = pinLocX(Math.round(sx));
-                mScrollY = pinLocY(Math.round(sy));
-
-                // update webkit
-                if (oldX != mScrollX || oldY != mScrollY) {
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-                } else {
-                    // the scroll position is adjusted at the beginning of the
-                    // zoom animation. But we want to update the WebKit at the
-                    // end of the zoom animation. See comments in onScaleEnd().
-                    sendOurVisibleRect();
-                }
-                sendViewSizeZoom();
-            }
-        }
-    }
-
     // Used to avoid sending many visible rect messages.
     private Rect mLastVisibleRectSent;
     private Rect mLastGlobalRect;
 
-    private Rect sendOurVisibleRect() {
-        if (mPreviewZoomOnly) return mLastVisibleRectSent;
+    Rect sendOurVisibleRect() {
+        if (mZoomManager.mPreviewZoomOnly) return mLastVisibleRectSent;
 
         Rect rect = new Rect();
         calcOurContentVisibleRect(rect);
@@ -2283,6 +2160,11 @@ public class WebView extends AbsoluteLayout
         r.bottom = Math.min(viewToContentYf(ri.bottom), (float)mContentHeight);
     }
 
+    void setViewSizeAnchor(int x, int y) {
+        mAnchorX = x;
+        mAnchorY = y;
+    }
+
     static class ViewSizeData {
         int mWidth;
         int mHeight;
@@ -2295,16 +2177,19 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Compute unzoomed width and height, and if they differ from the last
-     * values we sent, send them to webkit (to be used has new viewport)
+     * values we sent, send them to webkit (to be used as new viewport)
+     *
+     * @param force ensures that the message is sent to webkit even if the width
+     * or height has not changed since the last message
      *
      * @return true if new values were sent
      */
-    private boolean sendViewSizeZoom() {
-        if (mPreviewZoomOnly) return false;
+    boolean sendViewSizeZoom(boolean force) {
+        if (mZoomManager.mPreviewZoomOnly) return false;
 
         int viewWidth = getViewWidth();
-        int newWidth = Math.round(viewWidth * mInvActualScale);
-        int newHeight = Math.round(getViewHeight() * mInvActualScale);
+        int newWidth = Math.round(viewWidth * mZoomManager.mInvActualScale);
+        int newHeight = Math.round(getViewHeight() * mZoomManager.mInvActualScale);
         /*
          * Because the native side may have already done a layout before the
          * View system was able to measure us, we have to send a height of 0 to
@@ -2317,13 +2202,13 @@ public class WebView extends AbsoluteLayout
             newHeight = 0;
         }
         // Avoid sending another message if the dimensions have not changed.
-        if (newWidth != mLastWidthSent || newHeight != mLastHeightSent) {
+        if (newWidth != mLastWidthSent || newHeight != mLastHeightSent || force) {
             ViewSizeData data = new ViewSizeData();
             data.mWidth = newWidth;
             data.mHeight = newHeight;
-            data.mTextWrapWidth = Math.round(viewWidth / mTextWrapScale);;
-            data.mScale = mActualScale;
-            data.mIgnoreHeight = mZoomScale != 0 && !mHeightCanMeasure;
+            data.mTextWrapWidth = Math.round(viewWidth / mZoomManager.mTextWrapScale);
+            data.mScale = mZoomManager.mActualScale;
+            data.mIgnoreHeight = mZoomManager.isZoomAnimating() && !mHeightCanMeasure;
             data.mAnchorX = mAnchorX;
             data.mAnchorY = mAnchorY;
             mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED, data);
@@ -2340,12 +2225,12 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryWidth;
         } else if (mHorizontalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && (mActualScale - mZoomManager.mMinZoomScale <= MINIMUM_SCALE_INCREMENT)) {
+                && mZoomManager.isZoomedOut()) {
             // only honor the scrollbar mode when it is at minimum zoom level
             return computeHorizontalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
-            return (int) Math.floor(mContentWidth * mActualScale);
+            return (int) Math.floor(mContentWidth * mZoomManager.mActualScale);
         }
     }
 
@@ -2354,12 +2239,12 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryHeight;
         } else if (mVerticalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && (mActualScale - mZoomManager.mMinZoomScale <= MINIMUM_SCALE_INCREMENT)) {
+                && mZoomManager.isZoomedOut()) {
             // only honor the scrollbar mode when it is at minimum zoom level
             return computeVerticalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
-            return (int) Math.floor(mContentHeight * mActualScale);
+            return (int) Math.floor(mContentHeight * mZoomManager.mActualScale);
         }
     }
 
@@ -2960,7 +2845,7 @@ public class WebView extends AbsoluteLayout
         } else {
             // If we don't request a layout, try to send our view size to the
             // native side to ensure that WebCore has the correct dimensions.
-            sendViewSizeZoom();
+            sendViewSizeZoom(false);
         }
     }
 
@@ -3263,10 +3148,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    boolean inAnimateZoom() {
-        return mZoomScale != 0;
-    }
-
     /**
      * Need to adjust the WebTextView after a change in zoom, since mActualScale
      * has changed.  This is especially important for password fields, which are
@@ -3316,12 +3197,12 @@ public class WebView extends AbsoluteLayout
     private void drawCoreAndCursorRing(Canvas canvas, int color,
         boolean drawCursorRing) {
         if (mDrawHistory) {
-            canvas.scale(mActualScale, mActualScale);
+            canvas.scale(mZoomManager.mActualScale, mZoomManager.mActualScale);
             canvas.drawPicture(mHistoryPicture);
             return;
         }
 
-        boolean animateZoom = mZoomScale != 0;
+        boolean animateZoom = mZoomManager.isZoomAnimating();
         boolean animateScroll = ((!mScroller.isFinished()
                 || mVelocityTracker != null)
                 && (mTouchMode != TOUCH_DRAG_MODE ||
@@ -3341,16 +3222,16 @@ public class WebView extends AbsoluteLayout
         }
         if (animateZoom) {
             float zoomScale;
-            int interval = (int) (SystemClock.uptimeMillis() - mZoomStart);
-            if (interval < ZOOM_ANIMATION_LENGTH) {
-                float ratio = (float) interval / ZOOM_ANIMATION_LENGTH;
-                zoomScale = 1.0f / (mInvInitialZoomScale
-                        + (mInvFinalZoomScale - mInvInitialZoomScale) * ratio);
+            int interval = (int) (SystemClock.uptimeMillis() - mZoomManager.mZoomStart);
+            if (interval < mZoomManager.ZOOM_ANIMATION_LENGTH) {
+                float ratio = (float) interval / mZoomManager.ZOOM_ANIMATION_LENGTH;
+                zoomScale = 1.0f / (mZoomManager.mInvInitialZoomScale
+                        + (mZoomManager.mInvFinalZoomScale - mZoomManager.mInvInitialZoomScale) * ratio);
                 invalidate();
             } else {
-                zoomScale = mZoomScale;
+                zoomScale = mZoomManager.mZoomScale;
                 // set mZoomScale to be 0 as we have done animation
-                mZoomScale = 0;
+                mZoomManager.mZoomScale = 0;
                 WebViewCore.resumeUpdatePicture(mWebViewCore);
                 // call invalidate() again to draw with the final filters
                 invalidate();
@@ -3366,22 +3247,22 @@ public class WebView extends AbsoluteLayout
             }
             // calculate the intermediate scroll position. As we need to use
             // zoomScale, we can't use pinLocX/Y directly. Copy the logic here.
-            float scale = zoomScale * mInvInitialZoomScale;
-            int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX)
-                    - mZoomCenterX);
+            float scale = zoomScale * mZoomManager.mInvInitialZoomScale;
+            int tx = Math.round(scale * (mZoomManager.mInitialScrollX + mZoomManager.mZoomCenterX)
+                    - mZoomManager.mZoomCenterX);
             tx = -pinLoc(tx, getViewWidth(), Math.round(mContentWidth
                     * zoomScale)) + mScrollX;
             int titleHeight = getTitleHeight();
             int ty = Math.round(scale
-                    * (mInitialScrollY + mZoomCenterY - titleHeight)
-                    - (mZoomCenterY - titleHeight));
+                    * (mZoomManager.mInitialScrollY + mZoomManager.mZoomCenterY - titleHeight)
+                    - (mZoomManager.mZoomCenterY - titleHeight));
             ty = -(ty <= titleHeight ? Math.max(ty, 0) : pinLoc(ty
                     - titleHeight, getViewHeight(), Math.round(mContentHeight
                     * zoomScale)) + titleHeight) + mScrollY;
             canvas.translate(tx, ty);
             canvas.scale(zoomScale, zoomScale);
             if (inEditingMode() && !mNeedToAdjustWebTextView
-                    && mZoomScale != 0) {
+                    && mZoomManager.isZoomAnimating()) {
                 // The WebTextView is up.  Keep track of this so we can adjust
                 // its size and placement when we finish zooming
                 mNeedToAdjustWebTextView = true;
@@ -3392,7 +3273,7 @@ public class WebView extends AbsoluteLayout
                 }
             }
         } else {
-            canvas.scale(mActualScale, mActualScale);
+            canvas.scale(mZoomManager.mActualScale, mZoomManager.mActualScale);
         }
 
         boolean UIAnimationsRunning = false;
@@ -3405,7 +3286,7 @@ public class WebView extends AbsoluteLayout
             invalidate();
         }
         mWebViewCore.drawContentPicture(canvas, color,
-                (animateZoom || mPreviewZoomOnly || UIAnimationsRunning),
+                (animateZoom || mZoomManager.mPreviewZoomOnly || UIAnimationsRunning),
                 animateScroll);
         if (mNativeClass == 0) return;
         // decide which adornments to draw
@@ -3418,10 +3299,10 @@ public class WebView extends AbsoluteLayout
             }
         } else if (mShiftIsPressed
                 && !nativePageShouldHandleShiftAndArrows()) {
-            if (!animateZoom && !mPreviewZoomOnly) {
+            if (!animateZoom && !mZoomManager.mPreviewZoomOnly) {
                 extras = DRAW_EXTRAS_SELECTION;
                 nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
-                nativeSetSelectionPointer(!mTouchSelection, mInvActualScale,
+                nativeSetSelectionPointer(!mTouchSelection, mZoomManager.mInvActualScale,
                         mSelectX, mSelectY - getTitleHeight(),
                         mExtendSelection);
             }
@@ -3535,13 +3416,11 @@ public class WebView extends AbsoluteLayout
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         // bring it back to the default scale so that user can enter text
-        boolean zoom = mActualScale < mDefaultScale;
+        boolean zoom = mZoomManager.mActualScale < mZoomManager.mDefaultScale;
         if (zoom) {
+            mZoomManager.setZoomCenter(mLastTouchX, mLastTouchY);
             mZoomManager.mInZoomOverview = false;
-            mZoomCenterX = mLastTouchX;
-            mZoomCenterY = mLastTouchY;
-            // do not change text wrap scale so that there is no reflow
-            setNewZoomScale(mDefaultScale, false, false);
+            mZoomManager.setZoomScale(mZoomManager.mDefaultScale, false);
         }
         if (isTextView) {
             rebuildWebTextView();
@@ -4213,7 +4092,7 @@ public class WebView extends AbsoluteLayout
             // system won't call onSizeChanged if the dimension is not changed.
             // In this case, we need to call sendViewSizeZoom() explicitly to
             // notify the WebKit about the new dimensions.
-            sendViewSizeZoom();
+            sendViewSizeZoom(false);
         }
         return changed;
     }
@@ -4231,8 +4110,7 @@ public class WebView extends AbsoluteLayout
             if (mWebView.mWebViewCore != null) {
                 // we always force, in case our height changed, in which case we
                 // still want to send the notification over to webkit.
-                mWebView.setNewZoomScale(mWebView.mActualScale,
-                        mUpdateTextWrap, true);
+                mWebView.mZoomManager.refreshZoomScale(mUpdateTextWrap);
                 // update the zoom buttons as the scale can be changed
                 mWebView.mZoomManager.updateZoomPicker();
             }
@@ -4242,13 +4120,13 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
         super.onSizeChanged(w, h, ow, oh);
-        // Center zooming to the center of the screen.
-        if (mZoomScale == 0) { // unless we're already zooming
-            // To anchor at top left corner.
-            mZoomCenterX = 0;
-            mZoomCenterY = getVisibleTitleHeight();
-            mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-            mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
+        // reset zoom and anchor to the top left corner of the screen
+        // unless we are already zooming
+        if (!mZoomManager.isZoomAnimating()) {
+            int visibleTitleHeight = getVisibleTitleHeight();
+            mZoomManager.setZoomCenter(0, visibleTitleHeight);
+            mAnchorX = viewToContentX(mScrollX);
+            mAnchorY = viewToContentY(visibleTitleHeight + mScrollY);
         }
 
         // adjust the max viewport width depending on the view dimensions. This
@@ -4267,7 +4145,7 @@ public class WebView extends AbsoluteLayout
             // the new picture shows up.
             mZoomManager.mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
                     / (mDrawHistory ? mHistoryPicture.getWidth()
-                            : mZoomOverviewWidth));
+                            : mZoomManager.mZoomOverviewWidth));
             if (mInitialScaleInPercent > 0) {
                 // limit the minZoomScale to the initialScale if it is set
                 float initialScale = mInitialScaleInPercent / 100.0f;
@@ -4296,7 +4174,7 @@ public class WebView extends AbsoluteLayout
         // as getVisibleTitleHeight.
         int titleHeight = getTitleHeight();
         if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
-            sendViewSizeZoom();
+            sendViewSizeZoom(false);
         }
     }
 
@@ -4563,18 +4441,17 @@ public class WebView extends AbsoluteLayout
         }
 
         public void onScaleEnd(ScaleGestureDetector detector) {
-            if (mPreviewZoomOnly) {
-                mPreviewZoomOnly = false;
-                mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-                mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
+            if (mZoomManager.mPreviewZoomOnly) {
+                mZoomManager.mPreviewZoomOnly = false;
+                mAnchorX = viewToContentX((int) mZoomManager.mZoomCenterX + mScrollX);
+                mAnchorY = viewToContentY((int) mZoomManager.mZoomCenterY + mScrollY);
                 // don't reflow when zoom in; when zoom out, do reflow if the
                 // new scale is almost minimum scale;
-                boolean reflowNow = (mActualScale - mZoomManager.mMinZoomScale
-                        <= MINIMUM_SCALE_INCREMENT)
-                        || ((mActualScale <= 0.8 * mTextWrapScale));
+                boolean reflowNow = mZoomManager.isZoomedOut()
+                        || (mZoomManager.mActualScale <= 0.8 * mZoomManager.mTextWrapScale);
                 // force zoom after mPreviewZoomOnly is set to false so that the
                 // new view size will be passed to the WebKit
-                setNewZoomScale(mActualScale, reflowNow, true);
+                mZoomManager.refreshZoomScale(reflowNow);
                 // call invalidate() to draw without zoom filter
                 invalidate();
             }
@@ -4598,18 +4475,17 @@ public class WebView extends AbsoluteLayout
 
         public boolean onScale(ScaleGestureDetector detector) {
             float scale = (float) (Math.round(detector.getScaleFactor()
-                    * mActualScale * 100) / 100.0);
-            if (Math.abs(scale - mActualScale) >= MINIMUM_SCALE_INCREMENT) {
-                mPreviewZoomOnly = true;
+                    * mZoomManager.mActualScale * 100) / 100.0);
+            if (mZoomManager.willScaleTriggerZoom(scale)) {
+                mZoomManager.mPreviewZoomOnly = true;
                 // limit the scale change per step
-                if (scale > mActualScale) {
-                    scale = Math.min(scale, mActualScale * 1.25f);
+                if (scale > mZoomManager.mActualScale) {
+                    scale = Math.min(scale, mZoomManager.mActualScale * 1.25f);
                 } else {
-                    scale = Math.max(scale, mActualScale * 0.8f);
+                    scale = Math.max(scale, mZoomManager.mActualScale * 0.8f);
                 }
-                mZoomCenterX = detector.getFocusX();
-                mZoomCenterY = detector.getFocusY();
-                setNewZoomScale(scale, false, false);
+                mZoomManager.setZoomCenter(detector.getFocusX(), detector.getFocusY());
+                mZoomManager.setZoomScale(scale, false);
                 invalidate();
                 return true;
             }
@@ -4741,7 +4617,7 @@ public class WebView extends AbsoluteLayout
                                 contentX, contentY) : false;
                     }
                 } else { // the normal case
-                    mPreviewZoomOnly = false;
+                    mZoomManager.mPreviewZoomOnly = false;
                     mTouchMode = TOUCH_INIT_MODE;
                     mDeferTouchProcess = (!inFullScreenMode()
                             && mForwardTouchEvents) ? hitFocusedPlugin(
@@ -5487,6 +5363,19 @@ public class WebView extends AbsoluteLayout
                 - getViewHeightWithTitle(), 0);
     }
 
+    boolean updateScrollCoordinates(int x, int y) {
+        int oldX = mScrollX;
+        int oldY = mScrollY;
+        mScrollX = x;
+        mScrollY = y;
+        if (oldX != mScrollX || oldY != mScrollY) {
+            onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void flingScroll(int vx, int vy) {
         mScroller.fling(mScrollX, mScrollY, vx, vy, 0, computeMaxScrollX(), 0,
                 computeMaxScrollY());
@@ -5560,32 +5449,6 @@ public class WebView extends AbsoluteLayout
         invalidate();
     }
 
-    private boolean zoomWithPreview(float scale, boolean updateTextWrapScale) {
-        float oldScale = mActualScale;
-        mInitialScrollX = mScrollX;
-        mInitialScrollY = mScrollY;
-
-        // snap to DEFAULT_SCALE if it is close
-        if (Math.abs(scale - mDefaultScale) < MINIMUM_SCALE_INCREMENT) {
-            scale = mDefaultScale;
-        }
-
-        setNewZoomScale(scale, updateTextWrapScale, false);
-
-        if (oldScale != mActualScale) {
-            // use mZoomPickerScale to see zoom preview first
-            mZoomStart = SystemClock.uptimeMillis();
-            mInvInitialZoomScale = 1.0f / oldScale;
-            mInvFinalZoomScale = 1.0f / mActualScale;
-            mZoomScale = mActualScale;
-            WebViewCore.pauseUpdatePicture(mWebViewCore);
-            invalidate();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     /**
      * Returns a view containing zoom controls i.e. +/- buttons. The caller is
      * in charge of installing this view to the view hierarchy. This view will
@@ -5612,20 +5475,16 @@ public class WebView extends AbsoluteLayout
         mZoomManager.dismissZoomPicker();
     }
 
+    float getDefaultZoomScale() {
+        return mZoomManager.mDefaultScale;
+    }
+
     /**
      * Perform zoom in in the webview
      * @return TRUE if zoom in succeeds. FALSE if no zoom changes.
      */
     public boolean zoomIn() {
-        // TODO: alternatively we can disallow this during draw history mode
-        switchOutDrawHistory();
-        mZoomManager.mInZoomOverview = false;
-        // Center zooming to the center of the screen.
-        mZoomCenterX = getViewWidth() * .5f;
-        mZoomCenterY = getViewHeight() * .5f;
-        mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-        mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        return zoomWithPreview(mActualScale * 1.25f, true);
+        return mZoomManager.zoomIn();
     }
 
     /**
@@ -5633,14 +5492,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if zoom out succeeds. FALSE if no zoom changes.
      */
     public boolean zoomOut() {
-        // TODO: alternatively we can disallow this during draw history mode
-        switchOutDrawHistory();
-        // Center zooming to the center of the screen.
-        mZoomCenterX = getViewWidth() * .5f;
-        mZoomCenterY = getViewHeight() * .5f;
-        mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-        mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        return zoomWithPreview(mActualScale * 0.8f, true);
+        return mZoomManager.zoomOut();
     }
 
     private void updateSelection() {
@@ -5779,7 +5631,7 @@ public class WebView extends AbsoluteLayout
         } else if (scale > mZoomManager.mMaxZoomScale) {
             scale = mZoomManager.mMaxZoomScale;
         }
-        if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
+        if (!mZoomManager.willScaleTriggerZoom(scale)) {
             if (contentToViewX(view.x) >= mScrollX
                     && contentToViewX(view.x + view.width) <= mScrollX
                             + viewWidth
@@ -5808,12 +5660,13 @@ public class WebView extends AbsoluteLayout
         } else if (scale > mZoomManager.mMaxZoomScale) {
             scale = mZoomManager.mMaxZoomScale;
         }
-        if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
+        if (!mZoomManager.willScaleTriggerZoom(scale)) {
             pinScrollTo(contentToViewX(docX + docWidth / 2) - viewWidth / 2,
                     contentToViewY(docY + docHeight / 2) - viewHeight / 2,
                     true, 0);
         } else {
-            float oldScreenX = docX * mActualScale - mScrollX;
+            float actualScale = mZoomManager.mActualScale;
+            float oldScreenX = docX * actualScale - mScrollX;
             float rectViewX = docX * scale;
             float rectViewWidth = docWidth * scale;
             float newMaxWidth = mContentWidth * scale;
@@ -5824,9 +5677,9 @@ public class WebView extends AbsoluteLayout
             } else if (newScreenX > (newMaxWidth - rectViewX - rectViewWidth)) {
                 newScreenX = viewWidth - (newMaxWidth - rectViewX);
             }
-            mZoomCenterX = (oldScreenX * scale - newScreenX * mActualScale)
-                    / (scale - mActualScale);
-            float oldScreenY = docY * mActualScale + getTitleHeight()
+            float zoomCenterX = (oldScreenX * scale - newScreenX * actualScale)
+                    / (scale - actualScale);
+            float oldScreenY = docY * actualScale + getTitleHeight()
                     - mScrollY;
             float rectViewY = docY * scale + getTitleHeight();
             float rectViewHeight = docHeight * scale;
@@ -5838,9 +5691,10 @@ public class WebView extends AbsoluteLayout
             } else if (newScreenY > (newMaxHeight - rectViewY - rectViewHeight)) {
                 newScreenY = viewHeight - (newMaxHeight - rectViewY);
             }
-            mZoomCenterY = (oldScreenY * scale - newScreenY * mActualScale)
-                    / (scale - mActualScale);
-            zoomWithPreview(scale, false);
+            float zoomCenterY = (oldScreenY * scale - newScreenY * actualScale)
+                    / (scale - actualScale);
+            mZoomManager.setZoomCenter(zoomCenterX, zoomCenterY);
+            mZoomManager.animateZoom(scale, false);
         }
     }
 
@@ -5853,10 +5707,9 @@ public class WebView extends AbsoluteLayout
         if (mWebViewCore.getSettings().getUseWideViewPort() == false) {
             return;
         }
-        mZoomCenterX = mLastTouchX;
-        mZoomCenterY = mLastTouchY;
-        mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-        mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
+        mZoomManager.setZoomCenter(mLastTouchX, mLastTouchY);
+        mAnchorX = viewToContentX((int) mLastTouchX + mScrollX);
+        mAnchorY = viewToContentY((int) mLastTouchX + mScrollY);
         WebSettings settings = getSettings();
         settings.setDoubleTapToastCount(0);
         // remove the zoom control after double tap
@@ -5864,11 +5717,7 @@ public class WebView extends AbsoluteLayout
         ViewManager.ChildView plugin = mViewManager.hitTest(mAnchorX, mAnchorY);
         if (plugin != null) {
             if (isPluginFitOnScreen(plugin)) {
-                mZoomManager.mInZoomOverview = true;
-                // Force the titlebar fully reveal in overview mode
-                if (mScrollY < getTitleHeight()) mScrollY = 0;
-                zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth,
-                        true);
+                mZoomManager.zoomToOverview();
             } else {
                 mZoomManager.mInZoomOverview = false;
                 centerFitRect(plugin.x, plugin.y, plugin.width, plugin.height);
@@ -5877,28 +5726,24 @@ public class WebView extends AbsoluteLayout
         }
         boolean zoomToDefault = false;
         if ((settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS)
-                && (Math.abs(mActualScale - mTextWrapScale) >= MINIMUM_SCALE_INCREMENT)) {
-            setNewZoomScale(mActualScale, true, true);
-            float overviewScale = (float) getViewWidth() / mZoomOverviewWidth;
-            if (Math.abs(mActualScale - overviewScale) < MINIMUM_SCALE_INCREMENT) {
+                && mZoomManager.willScaleTriggerZoom(mZoomManager.mTextWrapScale)) {
+            mZoomManager.refreshZoomScale(true);
+            float overviewScale = (float) getViewWidth() / mZoomManager.mZoomOverviewWidth;
+            if (!mZoomManager.willScaleTriggerZoom(overviewScale)) {
                 mZoomManager.mInZoomOverview = true;
             }
         } else if (!mZoomManager.mInZoomOverview) {
-            float newScale = (float) getViewWidth() / mZoomOverviewWidth;
-            if (Math.abs(mActualScale - newScale) >= MINIMUM_SCALE_INCREMENT) {
-                mZoomManager.mInZoomOverview = true;
-                // Force the titlebar fully reveal in overview mode
-                if (mScrollY < getTitleHeight()) mScrollY = 0;
-                zoomWithPreview(newScale, true);
-            } else if (Math.abs(mActualScale - mDefaultScale) >= MINIMUM_SCALE_INCREMENT) {
+            float newScale = (float) getViewWidth() / mZoomManager.mZoomOverviewWidth;
+            if (mZoomManager.willScaleTriggerZoom(newScale)) {
+                mZoomManager.zoomToOverview();
+            } else if (mZoomManager.willScaleTriggerZoom(mZoomManager.mDefaultScale)) {
                 zoomToDefault = true;
             }
         } else {
             zoomToDefault = true;
         }
         if (zoomToDefault) {
-            mZoomManager.mInZoomOverview = false;
-            int left = nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
+            int left = nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mZoomManager.mActualScale);
             if (left != NO_LEFTEDGE) {
                 // add a 5pt padding to the left edge.
                 int viewLeft = contentToViewX(left < 5 ? 0 : (left - 5))
@@ -5906,14 +5751,14 @@ public class WebView extends AbsoluteLayout
                 // Re-calculate the zoom center so that the new scroll x will be
                 // on the left edge.
                 if (viewLeft > 0) {
-                    mZoomCenterX = viewLeft * mDefaultScale
-                            / (mDefaultScale - mActualScale);
+                    mZoomManager.mZoomCenterX = viewLeft * mZoomManager.mDefaultScale
+                            / (mZoomManager.mDefaultScale - mZoomManager.mActualScale);
                 } else {
                     scrollBy(viewLeft, 0);
-                    mZoomCenterX = 0;
+                    mZoomManager.mZoomCenterX = 0;
                 }
             }
-            zoomWithPreview(mDefaultScale, true);
+            mZoomManager.zoomToDefaultLevel(true);
         }
     }
 
@@ -6015,6 +5860,12 @@ public class WebView extends AbsoluteLayout
     public boolean requestChildRectangleOnScreen(View child,
                                                  Rect rect,
                                                  boolean immediate) {
+        // don't scroll while in zoom animation. When it is done, we will adjust
+        // the necessary components (e.g., WebTextView if it is in editing mode)
+        if(mZoomManager.isZoomAnimating()) {
+            return false;
+        }
+
         rect.offset(child.getLeft() - child.getScrollX(),
                 child.getTop() - child.getScrollY());
 
@@ -6248,13 +6099,13 @@ public class WebView extends AbsoluteLayout
                             mZoomManager.mInZoomOverview = false;
 
                             if (mInitialScaleInPercent > 0) {
-                                setNewZoomScale(mInitialScaleInPercent / 100.0f,
-                                    mInitialScaleInPercent != mTextWrapScale * 100,
-                                    false);
+                                final float initialScale = mInitialScaleInPercent / 100.0f;
+                                final boolean reflowText =
+                                    mInitialScaleInPercent != mZoomManager.mTextWrapScale * 100;
+                                mZoomManager.setZoomScale(initialScale, reflowText);
                             } else if (restoreState.mViewScale > 0) {
-                                mTextWrapScale = restoreState.mTextWrapScale;
-                                setNewZoomScale(restoreState.mViewScale, false,
-                                    false);
+                                mZoomManager.mTextWrapScale = restoreState.mTextWrapScale;
+                                mZoomManager.setZoomScale(restoreState.mViewScale, false);
                             } else {
                                 mZoomManager.mInZoomOverview = useWideViewport
                                     && settings.getLoadWithOverviewMode();
@@ -6265,9 +6116,9 @@ public class WebView extends AbsoluteLayout
                                 } else {
                                     scale = restoreState.mTextWrapScale;
                                 }
-                                setNewZoomScale(scale, Math.abs(scale
-                                    - mTextWrapScale) >= MINIMUM_SCALE_INCREMENT,
-                                    false);
+                                mZoomManager.setZoomScale(scale,
+                                        ZoomManager.exceedsMinScaleIncrement(
+                                        mZoomManager.mTextWrapScale, scale));
                             }
                             setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
@@ -6302,23 +6153,23 @@ public class WebView extends AbsoluteLayout
                         // sMaxViewportWidth so that if the page doesn't behave
                         // well, the WebView won't go insane. limit the lower
                         // bound to match the default scale for mobile sites.
-                        mZoomOverviewWidth = Math.min(sMaxViewportWidth, Math
-                                .max((int) (viewWidth / mDefaultScale), Math
-                                        .max(draw.mMinPrefWidth,
+                        mZoomManager.mZoomOverviewWidth = Math.min(sMaxViewportWidth, Math
+                                .max((int) (viewWidth / mZoomManager.mDefaultScale),
+                                        Math.max(draw.mMinPrefWidth,
                                                 draw.mViewPoint.x)));
                     }
                     if (!mZoomManager.mMinZoomScaleFixed) {
-                        mZoomManager.mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
+                        mZoomManager.mMinZoomScale = (float) viewWidth / 
+                            mZoomManager.mZoomOverviewWidth;
                     }
                     if (!mDrawHistory && mZoomManager.mInZoomOverview) {
                         // fit the content width to the current view. Ignore
                         // the rounding error case.
-                        if (Math.abs((viewWidth * mInvActualScale)
-                                - mZoomOverviewWidth) > 1) {
-                            setNewZoomScale((float) viewWidth
-                                    / mZoomOverviewWidth, Math.abs(mActualScale
-                                    - mTextWrapScale) < MINIMUM_SCALE_INCREMENT,
-                                    false);
+                        if (Math.abs((viewWidth * mZoomManager.mInvActualScale)
+                                - mZoomManager.mZoomOverviewWidth) > 1) {
+                            mZoomManager.setZoomScale(
+                                    (float) viewWidth / mZoomManager.mZoomOverviewWidth,
+                                    !mZoomManager.willScaleTriggerZoom(mZoomManager.mTextWrapScale));
                         }
                     }
                     if (draw.mFocusSizeChanged && inEditingMode()) {
@@ -7075,7 +6926,7 @@ public class WebView extends AbsoluteLayout
         // FIXME the divisor should be retrieved from somewhere
         // the closest thing today is hard-coded into ScrollView.java
         // (from ScrollView.java, line 363)   int maxJump = height/2;
-        return Math.round(height * mInvActualScale);
+        return Math.round(height * mZoomManager.mInvActualScale);
     }
 
     /**

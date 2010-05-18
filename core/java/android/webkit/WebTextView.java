@@ -938,14 +938,4 @@ import java.util.ArrayList;
     /* package */ void updateCachedTextfield() {
         mWebView.updateCachedTextfield(getText().toString());
     }
-
-    @Override
-    public boolean requestRectangleOnScreen(Rect rectangle) {
-        // don't scroll while in zoom animation. When it is done, we will adjust
-        // the WebTextView if it is in editing mode.
-        if (!mWebView.inAnimateZoom()) {
-            return super.requestRectangleOnScreen(rectangle);
-        }
-        return false;
-    }
 }
