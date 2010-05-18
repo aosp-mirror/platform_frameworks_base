@@ -16,10 +16,12 @@
 
 package android.webkit;
 
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.Set;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -49,12 +51,15 @@ final class JWebCoreJavaBridge extends Handler {
     /* package */
     static final int REFRESH_PLUGINS = 100;
 
+    private HashMap<String, String> mContentUriToFileNameMap;
+
     /**
      * Construct a new JWebCoreJavaBridge to interface with
      * WebCore timers and cookies.
      */
     public JWebCoreJavaBridge() {
         nativeConstructor();
+
     }
 
     @Override
@@ -265,6 +270,28 @@ final class JWebCoreJavaBridge extends Handler {
             Log.e(LOGTAG, "There is no active WebView for getSignedPublicKey");
             return "";
         }
+    }
+
+    // Called on the WebCore thread through JNI.
+    private String resolveFileNameForContentUri(String uri) {
+        if (mContentUriToFileNameMap != null) {
+            String fileName = mContentUriToFileNameMap.get(uri);
+            if (fileName != null) {
+                return fileName;
+            }
+        }
+
+        // Failsafe fallback to just use the last path segment.
+        // (See OpenableColumns documentation in the SDK)
+        Uri jUri = Uri.parse(uri);
+        return jUri.getLastPathSegment();
+    }
+
+    public void storeFileNameForContentUri(String fileName, String contentUri) {
+        if (mContentUriToFileNameMap == null) {
+            mContentUriToFileNameMap = new HashMap<String, String>();
+        }
+        mContentUriToFileNameMap.put(contentUri, fileName);
     }
 
     private native void nativeConstructor();
