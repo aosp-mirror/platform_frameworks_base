@@ -307,10 +307,11 @@ public class ServiceState implements Parcelable {
      * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
      * network code.
      *
+     * @return numeric format of operator, null if unregistered or unknown
+     */
+    /*
      * The country code can be decoded using
      * {@link com.android.internal.telephony.MccTable#countryCodeForMcc(int)}.
-     *
-     * @return numeric format of operator, null if unregistered or unknown
      */
     public String getOperatorNumeric() {
         return mOperatorNumeric;
