@@ -522,20 +522,14 @@ public abstract class WallpaperService extends Service {
                     }
                     
                     try {
-                        SurfaceHolder.Callback callbacks[] = null;
-                        synchronized (mSurfaceHolder.mCallbacks) {
-                            final int N = mSurfaceHolder.mCallbacks.size();
-                            if (N > 0) {
-                                callbacks = new SurfaceHolder.Callback[N];
-                                mSurfaceHolder.mCallbacks.toArray(callbacks);
-                            }
-                        }
+                        mSurfaceHolder.ungetCallbacks();
 
                         if (surfaceCreating) {
                             mIsCreating = true;
                             if (DEBUG) Log.v(TAG, "onSurfaceCreated("
                                     + mSurfaceHolder + "): " + this);
                             onSurfaceCreated(mSurfaceHolder);
+                            SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
                             if (callbacks != null) {
                                 for (SurfaceHolder.Callback c : callbacks) {
                                     c.surfaceCreated(mSurfaceHolder);
@@ -557,6 +551,7 @@ public abstract class WallpaperService extends Service {
                                     + "): " + this);
                             onSurfaceChanged(mSurfaceHolder, mFormat,
                                     mCurWidth, mCurHeight);
+                            SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
                             if (callbacks != null) {
                                 for (SurfaceHolder.Callback c : callbacks) {
                                     c.surfaceChanged(mSurfaceHolder, mFormat,
@@ -698,14 +693,12 @@ public abstract class WallpaperService extends Service {
         void reportSurfaceDestroyed() {
             if (mSurfaceCreated) {
                 mSurfaceCreated = false;
-                SurfaceHolder.Callback callbacks[];
-                synchronized (mSurfaceHolder.mCallbacks) {
-                    callbacks = new SurfaceHolder.Callback[
-                            mSurfaceHolder.mCallbacks.size()];
-                    mSurfaceHolder.mCallbacks.toArray(callbacks);
-                }
-                for (SurfaceHolder.Callback c : callbacks) {
-                    c.surfaceDestroyed(mSurfaceHolder);
+                mSurfaceHolder.ungetCallbacks();
+                SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                if (callbacks != null) {
+                    for (SurfaceHolder.Callback c : callbacks) {
+                        c.surfaceDestroyed(mSurfaceHolder);
+                    }
                 }
                 if (DEBUG) Log.v(TAG, "onSurfaceDestroyed("
                         + mSurfaceHolder + "): " + this);

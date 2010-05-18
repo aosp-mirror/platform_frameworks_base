@@ -22,6 +22,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
+import com.android.internal.view.BaseSurfaceHolder;
+import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
@@ -42,6 +44,7 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -59,6 +62,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
@@ -100,6 +105,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // mDecor itself, or a child of mDecor where the contents go.
     private ViewGroup mContentParent;
 
+    SurfaceHolder.Callback mTakeSurfaceCallback;
+    BaseSurfaceHolder mSurfaceHolder;
+    
     private boolean mIsFloating;
 
     private LayoutInflater mLayoutInflater;
@@ -238,6 +246,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return mDecor != null ? mDecor.findFocus() : null;
     }
 
+    @Override
+    public void takeSurface(SurfaceHolder.Callback callback) {
+        mTakeSurfaceCallback = callback;
+    }
+    
     @Override
     public boolean isFloating() {
         return mIsFloating;
@@ -1554,7 +1567,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    private final class DecorView extends FrameLayout {
+    private final class DecorView extends FrameLayout implements RootViewSurfaceTaker {
         /* package */int mDefaultOpacity = PixelFormat.OPAQUE;
 
         /** The feature ID of the panel, or -1 if this is the application's DecorView */
@@ -2018,6 +2031,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mFeatureId >= 0) {
                 closeAllPanels();
             }
+        }
+
+        public android.view.SurfaceHolder.Callback willYouTakeTheSurface() {
+            return mFeatureId < 0 ? mTakeSurfaceCallback : null;
+        }
+        
+        public void setSurfaceType(int type) {
+            PhoneWindow.this.setType(type);
+        }
+        
+        public void setSurfaceFormat(int format) {
+            PhoneWindow.this.setFormat(format);
+        }
+        
+        public void setSurfaceKeepScreenOn(boolean keepOn) {
+            if (keepOn) PhoneWindow.this.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else PhoneWindow.this.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 

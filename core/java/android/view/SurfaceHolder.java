@@ -182,7 +182,6 @@ public interface SurfaceHolder {
     /**
      * Enable or disable option to keep the screen turned on while this
      * surface is displayed.  The default is false, allowing it to turn off.
-     * Enabling the option effectivelty.
      * This is safe to call from any thread.
      * 
      * @param screenOn Supply to true to force the screen to stay on, false
