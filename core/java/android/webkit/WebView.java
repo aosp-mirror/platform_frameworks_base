@@ -2727,6 +2727,11 @@ public class WebView extends AbsoluteLayout
             postInvalidate();  // So we draw again
             if (oldX != mScrollX || oldY != mScrollY) {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+            } else {
+                abortAnimation();
+                mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
+                WebViewCore.resumePriority();
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
             }
         } else {
             super.computeScroll();
