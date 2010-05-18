@@ -2267,6 +2267,8 @@
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
     <string name="upload_file">Choose file</string>
+    <!-- Label for the file upload control when no file has been chosen yet -->
+    <string name="no_file_chosen">No file chosen</string>
     <!-- Label for <input type="reset"> button in html -->
     <string name="reset">Reset</string>
     <!-- Label for <input type="submit"> button in html -->

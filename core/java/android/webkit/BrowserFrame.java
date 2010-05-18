@@ -846,6 +846,7 @@ class BrowserFrame extends Handler {
     private static final int FILE_UPLOAD_LABEL = 4;
     private static final int RESET_LABEL = 5;
     private static final int SUBMIT_LABEL = 6;
+    private static final int FILE_UPLOAD_NO_FILE_CHOSEN = 7;
 
     String getRawResFilename(int id) {
         int resid;
@@ -874,6 +875,10 @@ class BrowserFrame extends Handler {
             case SUBMIT_LABEL:
                 return mContext.getResources().getString(
                         com.android.internal.R.string.submit);
+
+            case FILE_UPLOAD_NO_FILE_CHOSEN:
+                return mContext.getResources().getString(
+                        com.android.internal.R.string.no_file_chosen);
 
             default:
                 Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
