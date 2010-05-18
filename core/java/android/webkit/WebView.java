@@ -398,6 +398,10 @@ public class WebView extends AbsoluteLayout
     private float mLastVelX;
     private float mLastVelY;
 
+    // only trigger accelerated fling if the new velocity is at least
+    // MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION times of the previous velocity
+    private static final float MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION = 0.2f;
+
     /**
      * Touch mode
      */
@@ -5512,13 +5516,16 @@ public class WebView extends AbsoluteLayout
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
-        if (mLastVelocity > 0 && currentVelocity > 0) {
+        float velocity = (float) Math.hypot(vx, vy);
+        if (mLastVelocity > 0 && currentVelocity > 0 && velocity
+                > mLastVelocity * MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION) {
             float deltaR = (float) (Math.abs(Math.atan2(mLastVelY, mLastVelX)
                     - Math.atan2(vy, vx)));
             final float circle = (float) (Math.PI) * 2.0f;
             if (deltaR > circle * 0.9f || deltaR < circle * 0.1f) {
                 vx += currentVelocity * mLastVelX / mLastVelocity;
                 vy += currentVelocity * mLastVelY / mLastVelocity;
+                velocity = (float) Math.hypot(vx, vy);
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "doFling vx= " + vx + " vy=" + vy);
                 }
@@ -5534,7 +5541,7 @@ public class WebView extends AbsoluteLayout
         }
         mLastVelX = vx;
         mLastVelY = vy;
-        mLastVelocity = (float) Math.hypot(vx, vy);
+        mLastVelocity = velocity;
 
         mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY);
         // TODO: duration is calculated based on velocity, if the range is
