@@ -106,7 +106,7 @@ public class AdnRecordLoader extends Handler {
      * It will get the record size of EF record and compose hex adn array
      * then write the hex array to EF record
      *
-     * @param adn is set with alphaTag and phoneNubmer
+     * @param adn is set with alphaTag and phone number
      * @param ef EF fileid
      * @param extensionEF extension EF fileid
      * @param recordNumber 1-based record index
@@ -159,7 +159,7 @@ public class AdnRecordLoader extends Handler {
                     data = adn.buildAdnString(recordSize[0]);
 
                     if(data == null) {
-                        throw new RuntimeException("worong ADN format",
+                        throw new RuntimeException("wrong ADN format",
                                 ar.exception);
                     }
 
@@ -218,7 +218,7 @@ public class AdnRecordLoader extends Handler {
                         throw new RuntimeException("load failed", ar.exception);
                     }
 
-                    Log.d(LOG_TAG,"ADN extention EF: 0x"
+                    Log.d(LOG_TAG,"ADN extension EF: 0x"
                         + Integer.toHexString(extensionEF)
                         + ":" + adn.extRecord
                         + "\n" + IccUtils.bytesToHexString(data));

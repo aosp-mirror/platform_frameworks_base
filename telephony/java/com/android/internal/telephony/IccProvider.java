@@ -417,11 +417,11 @@ public class IccProvider extends ContentProvider {
             }
         }
 
-        if (TextUtils.isEmpty(tag)) {
+        if (TextUtils.isEmpty(number)) {
             return 0;
         }
 
-        if (efType == FDN && TextUtils.isEmpty(pin2)) {
+        if (efType == IccConstants.EF_FDN && TextUtils.isEmpty(pin2)) {
             return 0;
         }
 
