@@ -57,7 +57,7 @@ public abstract class DataConnection extends Handler {
         NONE,
         OPERATOR_BARRED,
         INSUFFICIENT_RESOURCES,
-        MISSING_UKNOWN_APN,
+        MISSING_UNKNOWN_APN,
         UNKNOWN_PDP_ADDRESS,
         USER_AUTHENTICATION,
         ACTIVATION_REJECT_GGSN,
@@ -75,7 +75,7 @@ public abstract class DataConnection extends Handler {
         RADIO_ERROR_RETRY;
 
         public boolean isPermanentFail() {
-            return (this == OPERATOR_BARRED) || (this == MISSING_UKNOWN_APN) ||
+            return (this == OPERATOR_BARRED) || (this == MISSING_UNKNOWN_APN) ||
                    (this == UNKNOWN_PDP_ADDRESS) || (this == USER_AUTHENTICATION) ||
                    (this == ACTIVATION_REJECT_GGSN) || (this == ACTIVATION_REJECT_UNSPECIFIED) ||
                    (this == SERVICE_OPTION_NOT_SUPPORTED) ||
@@ -102,12 +102,12 @@ public abstract class DataConnection extends Handler {
                 return "Operator Barred";
             case INSUFFICIENT_RESOURCES:
                 return "Insufficient Resources";
-            case MISSING_UKNOWN_APN:
+            case MISSING_UNKNOWN_APN:
                 return "Missing / Unknown APN";
             case UNKNOWN_PDP_ADDRESS:
                 return "Unknown PDP Address";
             case USER_AUTHENTICATION:
-                return "Error User Autentication";
+                return "Error User Authentication";
             case ACTIVATION_REJECT_GGSN:
                 return "Activation Reject GGSN";
             case ACTIVATION_REJECT_UNSPECIFIED:

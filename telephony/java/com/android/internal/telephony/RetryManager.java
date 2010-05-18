@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 /**
  * Retry manager allows a simple way to declare a series of
- * retires timeouts. After creating a RetryManager the configure
+ * retry timeouts. After creating a RetryManager the configure
  * method is used to define the sequence. A simple linear series
  * may be initialized using configure with three integer parameters
  * The other configure method allows a series to be declared using
@@ -54,18 +54,18 @@ import java.util.ArrayList;
  *<p>
  * Examples:
  * <ul>
- * <li>3 retires with no randomization value which means its 0:
+ * <li>3 retries with no randomization value which means its 0:
  * <ul><li><code>"1000, 2000, 3000"</code></ul>
  *
- * <li>10 retires with a 500 default randomization value for each and
+ * <li>10 retries with a 500 default randomization value for each and
  * the 4..10 retries all using 3000 as the delay:
  * <ul><li><code>"max_retries=10, default_randomization=500, 1000, 2000, 3000"</code></ul>
  *
- * <li>4 retires with a 100 as the default randomization value for the first 2 values and
+ * <li>4 retries with a 100 as the default randomization value for the first 2 values and
  * the other two having specified values of 500:
  * <ul><li><code>"default_randomization=100, 1000, 2000, 4000:500, 5000:500"</code></ul>
  *
- * <li>Infinite number of retires with the first one at 1000, the second at 2000 all
+ * <li>Infinite number of retries with the first one at 1000, the second at 2000 all
  * others will be at 3000.
  * <ul><li><code>"max_retries=infinite,1000,2000,3000</code></ul>
  * </ul>
@@ -75,9 +75,6 @@ import java.util.ArrayList;
 public class RetryManager {
     static public final String LOG_TAG = "RetryManager";
     static public final boolean DBG = false;
-    static public final int RETRYIES_NOT_STARTED = 0;
-    static public final int RETRYIES_ON_GOING = 1;
-    static public final int RETRYIES_COMPLETED = 2;
 
     /**
      * Retry record with times in milli-seconds
@@ -104,7 +101,7 @@ public class RetryManager {
      */
     private int mMaxRetryCount;
 
-    /** The current number of retires */
+    /** The current number of retries */
     private int mRetryCount;
 
     /** Random number generator */
@@ -125,7 +122,7 @@ public class RetryManager {
      * @param randomizationTime a random value between 0 and
      *        randomizationTime will be added to retryTime. this
      *        parameter may be 0.
-     * @return true if successfull
+     * @return true if successful
      */
     public boolean configure(int maxRetryCount, int retryTime, int randomizationTime) {
         Pair<Boolean, Integer> value;
@@ -238,7 +235,7 @@ public class RetryManager {
     /**
      * Report whether data reconnection should be retried
      *
-     * @return {@code true} if the max retires has not been reached. {@code
+     * @return {@code true} if the max retries has not been reached. {@code
      *         false} otherwise.
      */
     public boolean isRetryNeeded() {
@@ -285,7 +282,7 @@ public class RetryManager {
         if (mRetryCount > mMaxRetryCount) {
             mRetryCount = mMaxRetryCount;
         }
-        if (DBG) log("increseRetryCount: " + mRetryCount);
+        if (DBG) log("increaseRetryCount: " + mRetryCount);
     }
 
     /**

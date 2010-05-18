@@ -67,7 +67,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     CdmaCellLocation cellLoc;
     CdmaCellLocation newCellLoc;
 
-     /** if time between NTIZ updates is less than mNitzUpdateSpacing the update may be ignored. */
+     /** if time between NITZ updates is less than mNitzUpdateSpacing the update may be ignored. */
     private static final int NITZ_UPDATE_SPACING_DEFAULT = 1000 * 60 * 10;
     private int mNitzUpdateSpacing = SystemProperties.getInt("ro.nitz_update_spacing",
             NITZ_UPDATE_SPACING_DEFAULT);
@@ -391,7 +391,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             }
 
             // Release any temporary cell lock, which could have been
-            // aquired to allow a single-shot location update.
+            // acquired to allow a single-shot location update.
             disableSingleLocationUpdate();
             break;
 
@@ -579,7 +579,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         boolean showPlmn = false;
         int rule = 0;
         if (cm.getRadioState().isRUIMReady()) {
-            // TODO RUIM SPN is not implemnted, EF_SPN has to be read and Display Condition
+            // TODO RUIM SPN is not implemented, EF_SPN has to be read and Display Condition
             //   Character Encoding, Language Indicator and SPN has to be set
             // rule = phone.mRuimRecords.getDisplayRule(ss.getOperatorNumeric());
             // spn = phone.mSIMRecords.getServiceProvideName();
@@ -846,7 +846,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
      * and start over again if the radio notifies us that some
      * event has changed
      */
-
     private void
     pollState() {
         pollingContext = new int[1];
@@ -1227,7 +1226,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             return ServiceState.STATE_IN_SERVICE;
         case 2: // 2 is "searching", fall through
         case 3: // 3 is "registration denied", fall through
-        case 4: // 4 is "unknown" no vaild in current baseband
+        case 4: // 4 is "unknown", not valid in current baseband
             return ServiceState.STATE_OUT_OF_SERVICE;
         case 5:// 5 is "Registered, roaming"
             return ServiceState.STATE_IN_SERVICE;
@@ -1266,12 +1265,12 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
      */
     private boolean isRoamIndForHomeSystem(String roamInd) {
         // retrieve the carrier-specified list of ERIs for home system
-        String homeRoamIndcators = SystemProperties.get("ro.cdma.homesystem");
+        String homeRoamIndicators = SystemProperties.get("ro.cdma.homesystem");
 
-        if (!TextUtils.isEmpty(homeRoamIndcators)) {
+        if (!TextUtils.isEmpty(homeRoamIndicators)) {
             // searches through the comma-separated list for a match,
             // return true if one is found.
-            for (String homeRoamInd : homeRoamIndcators.split(",")) {
+            for (String homeRoamInd : homeRoamIndicators.split(",")) {
                 if (homeRoamInd.equals(roamInd)) {
                     return true;
                 }

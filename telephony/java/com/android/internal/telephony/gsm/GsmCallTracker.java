@@ -61,7 +61,7 @@ public final class GsmCallTracker extends CallTracker {
     RegistrantList voiceCallStartedRegistrants = new RegistrantList();
 
 
-    // connections dropped durin last poll
+    // connections dropped during last poll
     ArrayList<GsmConnection> droppedDuringPoll
         = new ArrayList<GsmConnection>(MAX_CONNECTIONS);
 
