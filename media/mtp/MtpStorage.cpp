@@ -16,6 +16,7 @@
 
 #include "MtpDatabase.h"
 #include "MtpStorage.h"
+#include "MtpMediaScanner.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -74,65 +75,8 @@ const char* MtpStorage::getDescription() const {
 }
 
 bool MtpStorage::scanFiles() {
-    mDatabase->beginTransaction();
-    int ret = scanDirectory(mFilePath, MTP_PARENT_ROOT);
-    mDatabase->commitTransaction();
-    return (ret == 0);
-}
-
-int MtpStorage::scanDirectory(const char* path, MtpObjectHandle parent)
-{
-    char buffer[PATH_MAX];
-    struct dirent* entry;
-
-    int length = strlen(path);
-    if (length > sizeof(buffer) + 2) {
-        fprintf(stderr, "path too long: %s\n", path);
-    }
-
-    DIR* dir = opendir(path);
-    if (!dir) {
-        fprintf(stderr, "opendir %s failed, errno: %d", path, errno);
-        return -1;
-    }
-
-    strncpy(buffer, path, sizeof(buffer));
-    char* fileStart = buffer + length;
-    // make sure we have a trailing slash
-    if (fileStart[-1] != '/') {
-        *(fileStart++) = '/';
-    }
-    int fileNameLength = sizeof(buffer) + fileStart - buffer;
-
-    while ((entry = readdir(dir))) {
-        const char* name = entry->d_name;
-
-        // ignore "." and "..", as well as any files or directories staring with dot
-        if (name[0] == '.') {
-            continue;
-        }
-        if (strlen(name) + 1 > fileNameLength) {
-            fprintf(stderr, "path too long for %s\n", name);
-            continue;
-        }
-        strcpy(fileStart, name);
-
-        struct stat statbuf;
-        memset(&statbuf, 0, sizeof(statbuf));
-        stat(buffer, &statbuf);
-
-        if (entry->d_type == DT_DIR) {
-            MtpObjectHandle handle = mDatabase->addFile(buffer, MTP_FORMAT_ASSOCIATION,
-                    parent, mStorageID, 0, 0, statbuf.st_mtime);
-            scanDirectory(buffer, handle);
-        } else if (entry->d_type == DT_REG) {
-            mDatabase->addFile(buffer, MTP_FORMAT_UNDEFINED, parent, mStorageID,
-                    statbuf.st_size, 0, statbuf.st_mtime);
-        }
-    }
-
-    closedir(dir);
-    return 0;
+    MtpMediaScanner scanner(mStorageID, mFilePath, mDatabase);
+    return scanner.scanFiles();
 }
 
 }  // namespace android

@@ -79,9 +79,35 @@ static const MtpObjectProperty kSupportedObjectProperties[] = {
 };
 
 static const MtpObjectFormat kSupportedPlaybackFormats[] = {
-    // FIXME - fill this out later
+    // MTP_FORMAT_UNDEFINED,
     MTP_FORMAT_ASSOCIATION,
+    // MTP_FORMAT_TEXT,
+    // MTP_FORMAT_HTML,
     MTP_FORMAT_MP3,
+    //MTP_FORMAT_AVI,
+    MTP_FORMAT_MPEG,
+    // MTP_FORMAT_ASF,
+    MTP_FORMAT_EXIF_JPEG,
+    MTP_FORMAT_TIFF_EP,
+    // MTP_FORMAT_BMP,
+    MTP_FORMAT_GIF,
+    MTP_FORMAT_JFIF,
+    MTP_FORMAT_PNG,
+    MTP_FORMAT_TIFF,
+    MTP_FORMAT_WMA,
+    MTP_FORMAT_OGG,
+    MTP_FORMAT_AAC,
+    // MTP_FORMAT_FLAC,
+    // MTP_FORMAT_WMV,
+    MTP_FORMAT_MP4_CONTAINER,
+    MTP_FORMAT_MP2,
+    MTP_FORMAT_3GP_CONTAINER,
+    // MTP_FORMAT_ABSTRACT_AUDIO_ALBUM,
+    // MTP_FORMAT_ABSTRACT_AV_PLAYLIST,
+    // MTP_FORMAT_WPL_PLAYLIST,
+    // MTP_FORMAT_M3U_PLAYLIST,
+    // MTP_FORMAT_MPL_PLAYLIST,
+    // MTP_FORMAT_PLS_PLAYLIST,
 };
 
 MtpServer::MtpServer(int fd, const char* databasePath)
@@ -420,9 +446,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     mData.getString(modified);     // date modified
     // keywords follow
 
-    time_t createdTime, modifiedTime;
-    if (!parseDateTime(created, createdTime))
-        createdTime = 0;
+    time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
 printf("SendObjectInfo format: %04X size: %d name: %s, created: %s, modified: %s\n",
@@ -432,11 +456,17 @@ format, mSendObjectFileSize, (const char*)name, (const char*)created, (const cha
         path += "/";
     path += (const char *)name;
 
-    MtpObjectHandle handle = mDatabase->addFile((const char*)path,
-                                    format, parent, storageID, mSendObjectFileSize,
-                                    createdTime, modifiedTime);
-    if (handle == kInvalidObjectHandle)
+    mDatabase->beginTransaction();
+    MtpObjectHandle handle = mDatabase->addFile((const char*)path, format, parent, storageID, 
+                                    mSendObjectFileSize, modifiedTime);
+    if (handle == kInvalidObjectHandle) {
+        mDatabase->rollbackTransaction();
         return MTP_RESPONSE_GENERAL_ERROR;
+    }
+    uint32_t table = MtpDatabase::getTableForFile(format);
+    if (table == kObjectHandleTableAudio)
+        handle = mDatabase->addAudioFile(handle);
+    mDatabase->commitTransaction();
 
   if (format == MTP_FORMAT_ASSOCIATION) {
         mode_t mask = umask(0);

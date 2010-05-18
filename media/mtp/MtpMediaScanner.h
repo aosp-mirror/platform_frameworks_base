@@ -14,40 +14,43 @@
  * limitations under the License.
  */
 
-#ifndef _MTP_STORAGE_H
-#define _MTP_STORAGE_H
+#ifndef _MTP_MEDIA_SCANNER_H
+#define _MTP_MEDIA_SCANNER_H
 
-#include "mtp.h"
+struct stat;
 
 namespace android {
 
 class MtpDatabase;
 class SqliteStatement;
+class MediaScanner;
+class MtpMediaScannerClient;
 
-class MtpStorage {
-
+class MtpMediaScanner {
 private:
     MtpStorageID            mStorageID;
     const char*             mFilePath;
     MtpDatabase*            mDatabase;
-    uint64_t                mMaxCapacity;
+    MediaScanner*           mMediaScanner;
+    MtpMediaScannerClient*  mMediaScannerClient;
+
+    // for garbage collecting missing files
+    MtpObjectHandle*        mFileList;
+    int                     mFileCount;
 
 public:
-                            MtpStorage(MtpStorageID id, const char* filePath, MtpDatabase* db);
-    virtual                 ~MtpStorage();
-
-    inline MtpStorageID     getStorageID() const { return mStorageID; }
-    int                     getType() const;
-    int                     getFileSystemType() const;
-    int                     getAccessCapability() const;
-    uint64_t                getMaxCapacity();
-    uint64_t                getFreeSpace();
-    const char*             getDescription() const;
-    inline const char*      getPath() const { return mFilePath; }
+                            MtpMediaScanner(MtpStorageID id, const char* filePath, MtpDatabase* db);
+    virtual                 ~MtpMediaScanner();
 
     bool                    scanFiles();
+
+private:
+    MtpObjectFormat         getFileFormat(const char* path, uint32_t& table);
+    int                     scanDirectory(const char* path, MtpObjectHandle parent);
+    void                    scanFile(const char* path, MtpObjectHandle parent, struct stat& statbuf);
+    void                    markFile(MtpObjectHandle handle);
 };
 
 }; // namespace android
 
-#endif // _MTP_STORAGE_H
+#endif // _MTP_MEDIA_SCANNER_H
