@@ -313,7 +313,7 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+     * Get an SMS-SUBMIT PDU for a data message to a destination address and port.
      *
      * @param scAddr Service Centre address. null == use default
      * @param destAddr the address of the destination for the message

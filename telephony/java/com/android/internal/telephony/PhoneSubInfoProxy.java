@@ -47,7 +47,7 @@ public class PhoneSubInfoProxy extends IPhoneSubInfo.Stub {
     }
 
     /**
-     * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
+     * Retrieves the unique subscriber ID, e.g., IMSI for GSM phones.
      */
     public String getSubscriberId() {
         return mPhoneSubInfo.getSubscriberId();

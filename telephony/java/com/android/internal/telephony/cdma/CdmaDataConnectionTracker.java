@@ -114,7 +114,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     // if we have no active Apn this is null
     protected ApnSetting mActiveApn;
 
-    // Possibly promoate to base class, the only difference is
+    // Possibly promote to base class, the only difference is
     // the INTENT_RECONNECT_ALARM action is a different string.
     // Do consider technology changes if it is promoted.
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
@@ -420,7 +420,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         CdmaDataConnection conn = findFreeDataConnection();
 
         if (conn == null) {
-            if (DBG) log("setupData: No free CdmaDataConnectionfound!");
+            if (DBG) log("setupData: No free CdmaDataConnection found!");
             return false;
         }
 
@@ -646,7 +646,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * @override com.android.intenral.telephony.DataConnectionTracker
+     * @override com.android.internal.telephony.DataConnectionTracker
      */
     @Override
     protected void onEnableNewApn() {

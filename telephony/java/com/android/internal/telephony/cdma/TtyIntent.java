@@ -56,10 +56,10 @@ public class TtyIntent {
     /**
      * The lookup key for an int that indicates preferred TTY mode.
      * Valid modes are:
-     * - {@link Phone.TTY_MODE_OFF}
-     * - {@link Phone.TTY_MODE_FULL}
-     * - {@link Phone.TTY_MODE_HCO}
-     * - {@link Phone.TTY_MODE_VCO}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_OFF}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_FULL}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_HCO}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      *
      * {@hide}
      */

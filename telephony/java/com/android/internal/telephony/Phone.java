@@ -243,15 +243,14 @@ public interface Phone {
     /**
      * Get the current DataState. No change notification exists at this
      * interface -- use
-     * {@link com.android.telephony.PhoneStateListener PhoneStateListener}
-     * instead.
+     * {@link android.telephony.PhoneStateListener} instead.
      */
     DataState getDataConnectionState();
 
     /**
      * Get the current DataActivityState. No change notification exists at this
      * interface -- use
-     * {@link TelephonyManager} instead.
+     * {@link android.telephony.TelephonyManager} instead.
      */
     DataActivityState getDataActivityState();
 
@@ -853,7 +852,7 @@ public interface Phone {
      * @param dtmfString is string representing the dialing digit(s) in the active call
      * @param on the DTMF ON length in milliseconds, or 0 for default
      * @param off the DTMF OFF length in milliseconds, or 0 for default
-     * @param onCompelte is the callback message when the action is processed by BP
+     * @param onComplete is the callback message when the action is processed by BP
      *
      */
     void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete);
@@ -993,7 +992,7 @@ public interface Phone {
      * ((AsyncResult)onComplete.obj) is an array of int, with a length of 2.
      *
      * @param onComplete a callback message when the action is completed.
-     *        @see com.android.internal.telephony.CommandsInterface.getCLIR for details.
+     *        @see com.android.internal.telephony.CommandsInterface#getCLIR for details.
      */
     void getOutgoingCallerIdDisplay(Message onComplete);
 
@@ -1015,7 +1014,7 @@ public interface Phone {
      * ((AsyncResult)onComplete.obj) is an array of int, with a length of 1.
      *
      * @param onComplete a callback message when the action is completed.
-     *        @see com.android.internal.telephony.CommandsInterface.queryCallWaiting for details.
+     *        @see com.android.internal.telephony.CommandsInterface#queryCallWaiting for details.
      */
     void getCallWaiting(Message onComplete);
 
@@ -1458,7 +1457,7 @@ public interface Phone {
      * setTTYMode
      * sets a TTY mode option.
      *
-     * @param enable is a boolean representing the state that you are
+     * @param ttyMode is a boolean representing the state that you are
      *        requesting, true for enabled, false for disabled.
      * @param onComplete a callback message when the action is completed
      */
