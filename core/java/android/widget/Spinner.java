@@ -24,6 +24,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -37,10 +38,20 @@ import android.view.ViewGroup;
  */
 @Widget
 public class Spinner extends AbsSpinner implements OnClickListener {
+    private static final String TAG = "Spinner";
     
-    private CharSequence mPrompt;
-    private AlertDialog mPopup;
-
+    /**
+     * Use a dialog window for selecting spinner options.
+     */
+    public static final int MODE_DIALOG = 0;
+    
+    /**
+     * Use a dropdown anchored to the Spinner for selecting spinner options.
+     */
+    public static final int MODE_DROPDOWN = 1;
+    
+    private SpinnerPopup mPopup;
+    
     public Spinner(Context context) {
         this(context, null);
     }
@@ -55,9 +66,42 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Spinner, defStyle, 0);
         
-        mPrompt = a.getString(com.android.internal.R.styleable.Spinner_prompt);
+        final int mode = a.getInt(com.android.internal.R.styleable.Spinner_spinnerMode,
+                MODE_DIALOG);
+        
+        switch (mode) {
+        case MODE_DIALOG: {
+            mPopup = new DialogPopup();
+            break;
+        }
+        
+        case MODE_DROPDOWN: {
+            final int hintResource = a.getResourceId(
+                    com.android.internal.R.styleable.Spinner_popupPromptView, 0);
+
+            DropdownPopup popup = new DropdownPopup(context, attrs, defStyle, hintResource);
+
+            popup.setBackgroundDrawable(a.getDrawable(
+                    com.android.internal.R.styleable.Spinner_popupBackground));
+            popup.setVerticalOffset(a.getDimensionPixelOffset(
+                    com.android.internal.R.styleable.Spinner_dropDownVerticalOffset, 0));
+            popup.setHorizontalOffset(a.getDimensionPixelOffset(
+                    com.android.internal.R.styleable.Spinner_dropDownHorizontalOffset, 0));
+
+            mPopup = popup;
+            break;
+        }
+        }
+        
+        mPopup.setPromptText(a.getString(com.android.internal.R.styleable.Spinner_prompt));
 
         a.recycle();
+    }
+    
+    @Override
+    public void setAdapter(SpinnerAdapter adapter) {
+        super.setAdapter(adapter);
+        mPopup.setAdapter(new DropDownAdapter(adapter));
     }
 
     @Override
@@ -246,15 +290,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         
         if (!handled) {
             handled = true;
-            Context context = getContext();
-            
-            final DropDownAdapter adapter = new DropDownAdapter(getAdapter());
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            if (mPrompt != null) {
-                builder.setTitle(mPrompt);
+            if (!mPopup.isShowing()) {
+                mPopup.show();
             }
-            mPopup = builder.setSingleChoiceItems(adapter, getSelectedItemPosition(), this).show();
         }
 
         return handled;
@@ -271,7 +310,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * @param prompt the prompt to set
      */
     public void setPrompt(CharSequence prompt) {
-        mPrompt = prompt;
+        mPopup.setPromptText(prompt);
     }
 
     /**
@@ -279,15 +318,41 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * @param promptId the resource ID of the prompt to display when the dialog is shown
      */
     public void setPromptId(int promptId) {
-        mPrompt = getContext().getText(promptId);
+        setPrompt(getContext().getText(promptId));
     }
 
     /**
      * @return The prompt to display when the dialog is shown
      */
     public CharSequence getPrompt() {
-        return mPrompt;
+        return mPopup.getHintText();
     }
+    
+    /*
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mPopup.onKeyDown(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+    
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mPopup.onKeyUp(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+    
+    @Override
+    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        if (mPopup.onKeyPreIme(keyCode, event)) {
+            return true;
+        }
+        return super.onKeyPreIme(keyCode, event);
+    }
+    */
     
     /**
      * <p>Wrapper class for an Adapter. Transforms the embedded Adapter instance
@@ -382,6 +447,125 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         
         public boolean isEmpty() {
             return getCount() == 0;
+        }
+    }
+    
+    /**
+     * Implements some sort of popup selection interface for selecting a spinner option.
+     * Allows for different spinner modes.
+     */
+    private interface SpinnerPopup {
+        public void setAdapter(ListAdapter adapter);
+        
+        /**
+         * Show the popup
+         */
+        public void show();
+        
+        /**
+         * Dismiss the popup
+         */
+        public void dismiss();
+        
+        /**
+         * @return true if the popup is showing, false otherwise.
+         */
+        public boolean isShowing();
+        
+        /**
+         * Set hint text to be displayed to the user. This should provide
+         * a description of the choice being made.
+         * @param hintText Hint text to set.
+         */
+        public void setPromptText(CharSequence hintText);
+        public CharSequence getHintText();
+    }
+    
+    private class DialogPopup implements SpinnerPopup, DialogInterface.OnClickListener {
+        private AlertDialog mPopup;
+        private ListAdapter mListAdapter;
+        private CharSequence mPrompt;
+
+        public void dismiss() {
+            mPopup.dismiss();
+            mPopup = null;
+        }
+
+        public boolean isShowing() {
+            return mPopup != null ? mPopup.isShowing() : false;
+        }
+
+        public void setAdapter(ListAdapter adapter) {
+            mListAdapter = adapter;
+        }
+
+        public void setPromptText(CharSequence hintText) {
+            mPrompt = hintText;
+        }
+        
+        public CharSequence getHintText() {
+            return mPrompt;
+        }
+
+        public void show() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            if (mPrompt != null) {
+                builder.setTitle(mPrompt);
+            }
+            mPopup = builder.setSingleChoiceItems(mListAdapter,
+                    getSelectedItemPosition(), this).show();
+        }
+        
+        public void onClick(DialogInterface dialog, int which) {
+            setSelection(which);
+            dismiss();
+        }
+    }
+    
+    private class DropdownPopup extends ListPopupWindow implements SpinnerPopup {
+        private CharSequence mHintText;
+        private TextView mHintView;
+        private int mHintResource;
+        
+        public DropdownPopup(Context context, AttributeSet attrs,
+                int defStyleRes, int hintResource) {
+            super(context, attrs, 0, defStyleRes);
+            
+            mHintResource = hintResource;
+            
+            setAnchorView(Spinner.this);
+            setModal(true);
+            setPromptPosition(POSITION_PROMPT_BELOW);
+            setOnItemClickListener(new OnItemClickListener() {
+                public void onItemClick(AdapterView parent, View v, int position, long id) {
+                    Spinner.this.setSelection(position);
+                    dismiss();
+                }
+            });
+        }
+        
+        public CharSequence getHintText() {
+            return mHintText;
+        }
+        
+        public void setPromptText(CharSequence hintText) {
+            mHintText = hintText;
+            if (mHintView != null) {
+                mHintView.setText(hintText);
+            }
+        }
+        
+        public void show() {
+            if (mHintView == null) {
+                final TextView textView = (TextView) LayoutInflater.from(getContext()).inflate(
+                        mHintResource, null).findViewById(com.android.internal.R.id.text1);
+                textView.setText(mHintText);
+                setPromptView(textView);
+                mHintView = textView;
+            }
+            super.show();
+            getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            setSelection(Spinner.this.getSelectedItemPosition());
         }
     }
 }

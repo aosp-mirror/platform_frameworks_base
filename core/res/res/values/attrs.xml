@@ -2207,6 +2207,30 @@
     <declare-styleable name="Spinner">
         <!-- The prompt to display when the spinner's dialog is shown. -->
         <attr name="prompt" format="reference" />
+        <!-- Display mode for spinner options. -->
+        <attr name="spinnerMode" format="enum">
+            <!-- Spinner options will be presented to the user as a dialog window. -->
+            <enum name="dialog" value="0" />
+            <!-- Spinner options will be presented to the user as an inline dropdown
+                 anchored to the spinner widget itself. -->
+            <enum name="dropdown" value="1" />
+        </attr>
+        <!-- List selector to use for spinnerMode="dropdown" display. -->
+        <attr name="dropDownSelector" />
+        <!-- Background drawable to use for the dropdown in spinnerMode="dropdown". -->
+        <attr name="popupBackground" />
+        <!-- Vertical offset from the spinner widget for positioning the dropdown in
+             spinnerMode="dropdown". -->
+        <attr name="dropDownVerticalOffset" />
+        <!-- Horizontal offset from the spinner widget for positioning the dropdown
+             in spinnerMode="dropdown". -->
+        <attr name="dropDownHorizontalOffset" />
+        <!-- Width of the dropdown in spinnerMode="dropdown". -->
+        <attr name="dropDownWidth" />
+        <!-- Reference to a layout to use for displaying a prompt in the dropdown for
+             spinnerMode="dropdown". This layout must contain a TextView with the id
+             @android:id/text1 to be populated with the prompt text. -->
+        <attr name="popupPromptView" format="reference" />
     </declare-styleable>
     <declare-styleable name="DatePicker">
         <!-- The first year (inclusive), for example "1940". -->

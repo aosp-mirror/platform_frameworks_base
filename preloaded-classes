@@ -563,8 +563,6 @@ android.widget.AbsoluteLayout
 android.widget.AdapterView
 android.widget.ArrayAdapter
 android.widget.AutoCompleteTextView
-android.widget.AutoCompleteTextView$DropDownItemClickListener
-android.widget.AutoCompleteTextView$DropDownListView
 android.widget.BaseAdapter
 android.widget.BaseExpandableListAdapter
 android.widget.CheckBox
@@ -582,6 +580,7 @@ android.widget.HeaderViewListAdapter
 android.widget.ImageView
 android.widget.ImageView$ScaleType
 android.widget.LinearLayout
+android.widget.ListPopupWindow
 android.widget.ListView
 android.widget.ListView$SavedState
 android.widget.MediaController
