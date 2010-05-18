@@ -43,11 +43,21 @@ int main(int argc, char** argv)
     int list1[4] = {2, 1, 0, 3};
     test0(s, c, 4, list1);
 
+    int b = c.dequeue();
+    c.lock(b);
+    c.queue(b);
+    s.retireAndLock();
+
+    printf("basic test 2\n");
+    int list2[4] = {1, 2, 3, 0};
+    test0(s, c, 4, list2);
+
+
     printf("resize test\n");
-    s.resize(5);
-    c.setBufferCount(5);
-    int list2[5] = {0, 1, 2, 4, 3};
-    test0(s, c, 5, list2);
+    s.resize(6);
+    c.setBufferCount(6);
+    int list3[6] = {3, 2, 1, 4, 5, 0};
+    test0(s, c, 6, list3);
 
     return 0;
 }
