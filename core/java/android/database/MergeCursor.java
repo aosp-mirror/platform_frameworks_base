@@ -129,6 +129,11 @@ public class MergeCursor extends AbstractCursor
     }
 
     @Override
+    public int getType(int column) {
+        return mCursor.getType(column);
+    }
+
+    @Override
     public boolean isNull(int column)
     {
         return mCursor.isNull(column);

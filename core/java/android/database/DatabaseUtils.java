@@ -193,6 +193,37 @@ public class DatabaseUtils {
     }
 
     /**
+     * Returns data type of the given object's value.
+     *<p>
+     * Returned values are
+     * <ul>
+     *   <li>{@link Cursor#FIELD_TYPE_NULL}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_INTEGER}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_FLOAT}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_STRING}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_BLOB}</li>
+     *</ul>
+     *</p>
+     *
+     * @param obj the object whose value type is to be returned
+     * @return object value type
+     * @hide
+     */
+    public static int getTypeOfObject(Object obj) {
+        if (obj == null) {
+            return Cursor.FIELD_TYPE_NULL;
+        } else if (obj instanceof byte[]) {
+            return Cursor.FIELD_TYPE_BLOB;
+        } else if (obj instanceof Float || obj instanceof Double) {
+            return Cursor.FIELD_TYPE_FLOAT;
+        } else if (obj instanceof Long || obj instanceof Integer) {
+            return Cursor.FIELD_TYPE_INTEGER;
+        } else {
+            return Cursor.FIELD_TYPE_STRING;
+        }
+    }
+
+    /**
      * Appends an SQL string to the given StringBuilder, including the opening
      * and closing single quotes. Any single quotes internal to sqlString will
      * be escaped.

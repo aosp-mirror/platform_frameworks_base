@@ -51,6 +51,10 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     abstract public double getDouble(int column);
     abstract public boolean isNull(int column);
 
+    public int getType(int column) {
+        throw new UnsupportedOperationException();
+    }
+
     // TODO implement getBlob in all cursor types
     public byte[] getBlob(int column) {
         throw new UnsupportedOperationException("getBlob is not supported");
