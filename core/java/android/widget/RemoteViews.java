@@ -100,6 +100,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Base class for all actions that can be performed on an 
      * inflated view.
      *
+     *  SUBCLASSES MUST BE IMMUTABLE SO CLONE WORKS!!!!!
      */
     private abstract static class Action implements Parcelable {
         public abstract void apply(View root) throws ActionException;
@@ -566,6 +567,14 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
         }
+    }
+
+    public RemoteViews clone() {
+        final RemoteViews that = new RemoteViews(mPackage, mLayoutId);
+        if (mActions != null) {
+            that.mActions = (ArrayList<Action>)mActions.clone();
+        }
+        return that;
     }
 
     public String getPackage() {

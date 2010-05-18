@@ -27,6 +27,7 @@ public class StatusBarIcon implements Parcelable {
     public int iconId;
     public int iconLevel;
     public boolean visible = true;
+    public int number;
 
     private StatusBarIcon() {
     }
@@ -39,12 +40,14 @@ public class StatusBarIcon implements Parcelable {
 
     public String toString() {
         return "StatusBarIcon(pkg=" + this.iconPackage + " id=0x" + Integer.toHexString(this.iconId)
-                + " level=" + this.iconLevel + " visible=" + visible + ")";
+                + " level=" + this.iconLevel + " visible=" + visible
+                + " num=" + this.number + " )";
     }
 
     public StatusBarIcon clone() {
         StatusBarIcon that = new StatusBarIcon(this.iconPackage, this.iconId, this.iconLevel);
         that.visible = this.visible;
+        that.number = this.number;
         return that;
     }
 
@@ -60,13 +63,14 @@ public class StatusBarIcon implements Parcelable {
         this.iconId = in.readInt();
         this.iconLevel = in.readInt();
         this.visible = in.readInt() != 0;
+        this.number = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(this.iconPackage);
         out.writeInt(this.iconId);
         out.writeInt(this.iconLevel);
-        out.writeInt(this.visible ? 1 : 0);
+        out.writeInt(this.number);
     }
 
     public int describeContents() {

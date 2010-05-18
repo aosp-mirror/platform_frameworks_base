@@ -426,6 +426,11 @@ public class PhoneStatusBarService extends StatusBarService {
         return row;
     }
 
+    /*
+                StatusBarIcon icon = new StatusBarIcon(pkg, notification.icon,
+                        notification.iconLevel);
+                icon.number = notification.number;
+    */     
     void addNotificationView(StatusBarNotification notification) {
         if (notification.view != null) {
             throw new RuntimeException("Assertion failed: notification.view="

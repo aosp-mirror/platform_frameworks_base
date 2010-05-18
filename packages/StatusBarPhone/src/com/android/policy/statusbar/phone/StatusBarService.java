@@ -37,8 +37,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 
-import com.android.server.status.NotificationData;
-
 public abstract class StatusBarService extends Service implements CommandQueue.Callbacks {
     private static final String TAG = "StatusBarService";
 
