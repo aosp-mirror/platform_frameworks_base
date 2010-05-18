@@ -560,6 +560,7 @@ status_t SharedBufferServer::resize(int newNumBuffers)
     int base = numBuffers;
     int32_t avail = stack.available;
     int tail = head - avail + 1;
+
     if (tail >= 0) {
         int8_t* const index = const_cast<int8_t*>(stack.index);
         const int nb = numBuffers - head;
@@ -573,8 +574,9 @@ status_t SharedBufferServer::resize(int newNumBuffers)
     // fill the new free space with unused buffers
     BufferList::const_iterator curr(mBufferList.free_begin());
     for (int i=0 ; i<extra ; i++) {
-        stack.index[base+i] = *curr++;
-        mBufferList.add(stack.index[base+i]);
+        stack.index[base+i] = *curr;
+        mBufferList.add(*curr);
+        ++curr;
     }
 
     mNumBuffers = newNumBuffers;
