@@ -78,8 +78,8 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     /**
      * Called on a worker thread to perform the actual load. Implementations should not deliver the
      * results directly, but should return them from this method, which will eventually end up
-     * calling {@link #deliverResult(Object)} on the UI thread. If implementations need to process 
-     * the results on the UI thread they may override {@link #deliverResult(Object)} and do so
+     * calling deliverResult on the UI thread. If implementations need to process 
+     * the results on the UI thread they may override deliverResult and do so
      * there.
      *
      * @return the result of the load
