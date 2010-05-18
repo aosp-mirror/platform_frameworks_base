@@ -737,8 +737,13 @@ public abstract class PhoneBase extends Handler implements Phone {
         mNotifier.notifyMessageWaitingChanged(this);
     }
 
-    public void notifyDataConnection(String reason) {
-        mNotifier.notifyDataConnection(this, reason);
+    public void notifyDataConnection(String reason, String apnType,
+            Phone.DataState state) {
+        mNotifier.notifyDataConnection(this, reason, apnType, state);
+    }
+
+    public void notifyDataConnection(String reason, String apnType) {
+        mNotifier.notifyDataConnection(this, reason, apnType);
     }
 
     public abstract String getPhoneName();
@@ -962,6 +967,10 @@ public abstract class PhoneBase extends Handler implements Phone {
         return mDataConnection.disableApnType(type);
     }
 
+    public boolean isDataConnectivityPossible() {
+        return ((mDataConnection != null) && (mDataConnection.isDataPossible()));
+    }
+
     /**
      * simulateDataConnection
      *
@@ -990,7 +999,7 @@ public abstract class PhoneBase extends Handler implements Phone {
         }
 
         mDataConnection.setState(dcState);
-        notifyDataConnection(null);
+        notifyDataConnection(null, Phone.APN_TYPE_DEFAULT);
     }
 
     /**
@@ -1035,5 +1044,9 @@ public abstract class PhoneBase extends Handler implements Phone {
     {
         Log.e(LOG_TAG, "Error! " + name + "() in PhoneBase should not be " +
                 "called, CDMAPhone inactive.");
+    }
+
+    public DataState getDataConnectionState() {
+        return getDataConnectionState(APN_TYPE_DEFAULT);
     }
 }

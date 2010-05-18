@@ -92,14 +92,27 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         }
     }
 
-    public void notifyDataConnection(Phone sender, String reason) {
+    public void notifyDataConnection(Phone sender, String reason, String apnType) {
+        doNotifyDataConnection(sender, reason, apnType, sender.getDataConnectionState(apnType));
+    }
+
+    public void notifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+        doNotifyDataConnection(sender, reason, apnType, state);
+    }
+
+    private void doNotifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+        // TODO
+        // use apnType as the key to which connection we're talking about.
+        // pass apnType back up to fetch particular for this one.
         TelephonyManager telephony = TelephonyManager.getDefault();
         try {
             mRegistry.notifyDataConnection(
-                    convertDataState(sender.getDataConnectionState()),
+                    convertDataState(state),
                     sender.isDataConnectivityPossible(), reason,
                     sender.getActiveApn(),
-                    sender.getActiveApnTypes(),
+                    apnType,
                     sender.getInterfaceName(null),
                     ((telephony!=null) ? telephony.getNetworkType() :
                     TelephonyManager.NETWORK_TYPE_UNKNOWN));
@@ -108,9 +121,9 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         }
     }
 
-    public void notifyDataConnectionFailed(Phone sender, String reason) {
+    public void notifyDataConnectionFailed(Phone sender, String reason, String apnType) {
         try {
-            mRegistry.notifyDataConnectionFailed(reason);
+            mRegistry.notifyDataConnectionFailed(reason, apnType);
         } catch (RemoteException ex) {
             // system process is dead
         }

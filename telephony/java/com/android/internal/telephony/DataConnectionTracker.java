@@ -188,7 +188,10 @@ public abstract class DataConnectionTracker extends Handler {
     /** CID of active data connection */
     protected int cidActive;
 
-   /**
+    /** indication of our availability (preconditions to trysetupData are met) **/
+    protected boolean mAvailability = false;
+
+    /**
      * Default constructor
      */
     protected DataConnectionTracker(PhoneBase phone) {
@@ -421,7 +424,84 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected abstract void setState(State s);
 
-    protected synchronized boolean isEnabled(int id) {
+    // tell all active apns of the current condition
+    protected void notifyDataConnection(String reason) {
+        for (int id = 0; id < APN_NUM_TYPES; id++) {
+            if (dataEnabled[id]) {
+                phone.notifyDataConnection(reason, apnIdToType(id));
+            }
+        }
+        notifyDataAvailability(reason);
+    }
+
+    // a new APN has gone active and needs to send events to catch up with the current condition
+    private void notifyApnIdUpToCurrent(String reason, int apnId) {
+        switch (state) {
+            case IDLE:
+            case INITING:
+                break;
+            case CONNECTING:
+            case SCANNING:
+                phone.notifyDataConnection(reason, apnIdToType(apnId), Phone.DataState.CONNECTING);
+                break;
+            case CONNECTED:
+            case DISCONNECTING:
+                phone.notifyDataConnection(reason, apnIdToType(apnId), Phone.DataState.CONNECTING);
+                phone.notifyDataConnection(reason, apnIdToType(apnId), Phone.DataState.CONNECTED);
+                break;
+        }
+    }
+
+    // since we normally don't send info to a disconnected APN, we need to do this specially
+    private void notifyApnIdDisconnected(String reason, int apnId) {
+        phone.notifyDataConnection(reason, apnIdToType(apnId), Phone.DataState.DISCONNECTED);
+    }
+
+    // disabled apn's still need avail/unavail notificiations - send them out
+    protected void notifyOffApnsOfAvailability(String reason, boolean availability) {
+        if (mAvailability == availability) return;
+        mAvailability = availability;
+        for (int id = 0; id < APN_NUM_TYPES; id++) {
+            if (!isApnIdEnabled(id)) {
+                notifyApnIdDisconnected(reason, id);
+            }
+        }
+    }
+
+    // we had an availability change - tell the listeners
+    protected void notifyDataAvailability(String reason) {
+        // note that we either just turned all off because we lost availability
+        // or all were off and could now go on, so only have off apns to worry about
+        notifyOffApnsOfAvailability(reason, isDataPossible());
+    }
+
+    /**
+     * The only circumstances under which we report that data connectivity is not
+     * possible are
+     * <ul>
+     * <li>Data is disallowed (roaming, power state, voice call, etc).</li>
+     * <li>The current data state is {@code DISCONNECTED} for a reason other than
+     * having explicitly disabled connectivity. In other words, data is not available
+     * because the phone is out of coverage or some like reason.</li>
+     * </ul>
+     * @return {@code true} if data connectivity is possible, {@code false} otherwise.
+     */
+    protected boolean isDataPossible() {
+        boolean possible = (isDataAllowed() &&
+            !(getDataEnabled() && (state == State.FAILED || state == State.IDLE)));
+        if (!possible && DBG && isDataAllowed()) {
+            log("Data not possible.  No coverage: dataState = " + state);
+        }
+        return possible;
+    }
+
+    protected abstract boolean isDataAllowed();
+
+    public boolean isApnTypeEnabled(String apnType) {
+        return isApnIdEnabled(apnTypeToId(apnType));
+    }
+
+    protected synchronized boolean isApnIdEnabled(int id) {
         if (id != APN_INVALID_ID) {
             return dataEnabled[id];
         }
@@ -444,22 +524,21 @@ public abstract class DataConnectionTracker extends Handler {
             return Phone.APN_REQUEST_FAILED;
         }
 
-        if (DBG) Log.d(LOG_TAG, "enableApnType("+type+"), isApnTypeActive = "
-                + isApnTypeActive(type) + " and state = " + state);
+        if (DBG) {
+            Log.d(LOG_TAG, "enableApnType(" + type + "), isApnTypeActive = "
+                    + isApnTypeActive(type) + ", isApnIdEnabled =" + isApnIdEnabled(id) +
+                    " and state = " + state);
+        }
 
         if (!isApnTypeAvailable(type)) {
             if (DBG) Log.d(LOG_TAG, "type not available");
             return Phone.APN_TYPE_NOT_AVAILABLE;
         }
 
-        // just because it's active doesn't mean we had it explicitly requested before
-        // (a broad default may handle many types).  make sure we mark it enabled
-        // so if the default is disabled we keep the connection for others
-        setEnabled(id, true);
-
-        if (isApnTypeActive(type)) {
-            if (state == State.INITING) return Phone.APN_REQUEST_STARTED;
-            else if (state == State.CONNECTED) return Phone.APN_ALREADY_ACTIVE;
+        if (isApnIdEnabled(id)) {
+            return Phone.APN_ALREADY_ACTIVE;
+        } else {
+            setEnabled(id, true);
         }
         return Phone.APN_REQUEST_STARTED;
     }
@@ -478,7 +557,7 @@ public abstract class DataConnectionTracker extends Handler {
         if (id == APN_INVALID_ID) {
             return Phone.APN_REQUEST_FAILED;
         }
-        if (isEnabled(id)) {
+        if (isApnIdEnabled(id)) {
             setEnabled(id, false);
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
                 if (dataEnabled[APN_DEFAULT_ID]) {
@@ -495,9 +574,10 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     private void setEnabled(int id, boolean enable) {
-        if (DBG) Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ") with old state = " +
-                dataEnabled[id] + " and enabledCount = " + enabledCount);
-
+        if (DBG) {
+            Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ") with old state = "
+                    + dataEnabled[id] + " and enabledCount = " + enabledCount);
+        }
         Message msg = obtainMessage(EVENT_ENABLE_NEW_APN);
         msg.arg1 = id;
         msg.arg2 = (enable ? ENABLED : DISABLED);
@@ -507,9 +587,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected synchronized void onEnableApn(int apnId, int enabled) {
         if (DBG) {
             Log.d(LOG_TAG, "EVENT_APN_ENABLE_REQUEST " + apnId + ", " + enabled);
-            Log.d(LOG_TAG, " dataEnabled = " + dataEnabled[apnId] +
-                    ", enabledCount = " + enabledCount +
-                    ", isApnTypeActive = " + isApnTypeActive(apnIdToType(apnId)));
+            Log.d(LOG_TAG, " dataEnabled = " + dataEnabled[apnId] + ", enabledCount = "
+                    + enabledCount + ", isApnTypeActive = " + isApnTypeActive(apnIdToType(apnId)));
         }
         if (enabled == ENABLED) {
             if (!dataEnabled[apnId]) {
@@ -520,6 +599,8 @@ public abstract class DataConnectionTracker extends Handler {
             if (!isApnTypeActive(type)) {
                 mRequestedApnType = type;
                 onEnableNewApn();
+            } else {
+                notifyApnIdUpToCurrent(Phone.REASON_APN_SWITCHED, apnId);
             }
         } else {
             // disable
@@ -528,8 +609,17 @@ public abstract class DataConnectionTracker extends Handler {
                 enabledCount--;
                 if (enabledCount == 0) {
                     onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-                } else if (dataEnabled[APN_DEFAULT_ID] == true &&
-                        !isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
+                }
+
+                // send the disconnect msg manually, since the normal route wont send
+                // it (it's not enabled)
+                notifyApnIdDisconnected(Phone.REASON_DATA_DISABLED, apnId);
+                if (dataEnabled[APN_DEFAULT_ID] == true
+                        && !isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
+                    // TODO - this is an ugly way to restore the default conn - should be done
+                    // by a real contention manager and policy that disconnects the lower pri
+                    // stuff as enable requests come in and pops them back on as we disable back
+                    // down to the lower pri stuff
                     mRequestedApnType = Phone.APN_TYPE_DEFAULT;
                     onEnableNewApn();
                 }
@@ -574,7 +664,7 @@ public abstract class DataConnectionTracker extends Handler {
                 onTrySetupData(Phone.REASON_DATA_ENABLED);
             } else {
                 onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-           }
+            }
         }
     }
 

@@ -88,7 +88,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private String mDataConnectionApn = "";
 
-    private String[] mDataConnectionApnTypes = null;
+    private ArrayList<String> mConnectedApns;
 
     private String mDataConnectionInterfaceName = "";
 
@@ -120,6 +120,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
+        mConnectedApns = new ArrayList<String>();
     }
 
     public void listen(String pkgForDebug, IPhoneStateListener callback, int events,
@@ -235,8 +236,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             mCallState = state;
             mCallIncomingNumber = incomingNumber;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_CALL_STATE) != 0) {
                     try {
                         r.callback.onCallStateChanged(state, incomingNumber);
@@ -255,8 +255,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             mServiceState = state;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
                     sendServiceState(r, state);
                 }
@@ -271,8 +270,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             mSignalStrength = signalStrength;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
                     sendSignalStrength(r, signalStrength);
                 }
@@ -296,8 +294,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             mMessageWaiting = mwi;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR) != 0) {
                     try {
                         r.callback.onMessageWaitingIndicatorChanged(mwi);
@@ -315,8 +312,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             mCallForwarding = cfi;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR) != 0) {
                     try {
                         r.callback.onCallForwardingIndicatorChanged(cfi);
@@ -334,8 +330,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             mDataActivity = state;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_DATA_ACTIVITY) != 0) {
                     try {
                         r.callback.onDataActivity(state);
@@ -348,40 +343,61 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String reason, String apn, String[] apnTypes, String interfaceName, int networkType) {
+            String reason, String apn, String apnType, String interfaceName, int networkType) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
         synchronized (mRecords) {
-            mDataConnectionState = state;
+            boolean modified = false;
+            if (state == TelephonyManager.DATA_CONNECTED) {
+                if (!mConnectedApns.contains(apnType)) {
+                    mConnectedApns.add(apnType);
+                    if (mDataConnectionState != state) {
+                        mDataConnectionState = state;
+                        modified = true;
+                    }
+                }
+            } else {
+                mConnectedApns.remove(apnType);
+                if (mConnectedApns.isEmpty()) {
+                    mDataConnectionState = state;
+                    modified = true;
+                } else {
+                    // we're still connected, so send that out if we send anything.
+                    state = mDataConnectionState;
+                }
+            }
             mDataConnectionPossible = isDataConnectivityPossible;
             mDataConnectionReason = reason;
             mDataConnectionApn = apn;
-            mDataConnectionApnTypes = apnTypes;
             mDataConnectionInterfaceName = interfaceName;
-            mDataConnectionNetworkType = networkType;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
-                if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
-                    try {
-                        r.callback.onDataConnectionStateChanged(state, networkType);
-                    } catch (RemoteException ex) {
-                        remove(r.binder);
+            if (mDataConnectionNetworkType != networkType) {
+                mDataConnectionNetworkType = networkType;
+                modified = true;
+            }
+            if (modified) {
+                for (Record r : mRecords) {
+                    if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
+                        try {
+                            r.callback.onDataConnectionStateChanged(state, networkType);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
                     }
                 }
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                apnTypes, interfaceName);
+                apnType, interfaceName);
     }
 
-    public void notifyDataConnectionFailed(String reason) {
+    public void notifyDataConnectionFailed(String reason, String apnType) {
         if (!checkNotifyPermission("notifyDataConnectionFailed()")) {
             return;
         }
         /*
-         * This is commented out because there is on onDataConnectionFailed callback
-         * on PhoneStateListener. There should be
+         * This is commented out because there is no onDataConnectionFailed callback
+         * in PhoneStateListener. There should be.
         synchronized (mRecords) {
             mDataConnectionFailedReason = reason;
             final int N = mRecords.size();
@@ -393,7 +409,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         */
-        broadcastDataConnectionFailed(reason);
+        broadcastDataConnectionFailed(reason, apnType);
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
@@ -402,8 +418,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             mCellLocation = cellLocation;
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
                     sendCellLocation(r, cellLocation);
                 }
@@ -463,8 +478,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionInterfaceName=" + mDataConnectionInterfaceName);
             pw.println("  mCellLocation=" + mCellLocation);
             pw.println("registrations: count=" + recordCount);
-            for (int i = 0; i < recordCount; i++) {
-                Record r = mRecords.get(i);
+            for (Record r : mRecords) {
                 pw.println("  " + r.pkgForDebug + " 0x" + Integer.toHexString(r.events));
             }
         }
@@ -535,7 +549,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastDataConnectionStateChanged(int state,
             boolean isDataConnectivityPossible,
-            String reason, String apn, String[] apnTypes, String interfaceName) {
+            String reason, String apn, String apnType, String interfaceName) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -549,22 +563,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, reason);
         }
         intent.putExtra(Phone.DATA_APN_KEY, apn);
-        String types = new String("");
-        if (apnTypes.length > 0) {
-            types = apnTypes[0];
-            for (int i = 1; i < apnTypes.length; i++) {
-                types = types+","+apnTypes[i];
-            }
-        }
-        intent.putExtra(Phone.DATA_APN_TYPES_KEY, types);
+        intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);
         intent.putExtra(Phone.DATA_IFACE_NAME_KEY, interfaceName);
         mContext.sendStickyBroadcast(intent);
     }
 
-    private void broadcastDataConnectionFailed(String reason) {
+    private void broadcastDataConnectionFailed(String reason, String apnType) {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(Phone.FAILURE_REASON_KEY, reason);
+        intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);
         mContext.sendStickyBroadcast(intent);
     }
 

@@ -1119,7 +1119,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasCdmaDataConnectionChanged || hasNetworkTypeChanged) {
-            phone.notifyDataConnection(null);
+            phone.notifyDataConnection(null, null);
         }
 
         if (hasRoamingOn) {
