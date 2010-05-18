@@ -143,12 +143,13 @@ import junit.framework.Assert;
  * </pre>
  *
  * <p>Then load the desired web page:</p>
+ * <pre>
  * // Simplest usage: note that an exception will NOT be thrown
  * // if there is an error loading this page (see below).
  * webview.loadUrl("http://slashdot.org/");
  *
  * // OR, you can also load from an HTML string:
- * String summary = "&lt;html>&lt;body>You scored &lt;b>192</b> points.&lt;/body>&lt;/html>";
+ * String summary = "&lt;html>&lt;body>You scored &lt;b>192&lt;/b> points.&lt;/body>&lt;/html>";
  * webview.loadData(summary, "text/html", "utf-8");
  * // ... although note that there are restrictions on what this HTML can do.
  * // See the JavaDocs for {@link #loadData(String,String,String) loadData()} and {@link
