@@ -62,9 +62,10 @@ final class GeolocationService implements LocationListener {
     /**
      * Start listening for location updates.
      */
-    public void start() {
+    public boolean start() {
         registerForLocationUpdates();
         mIsRunning = true;
+        return mIsNetworkProviderAvailable || mIsGpsProviderAvailable;
     }
 
     /**
@@ -87,6 +88,8 @@ final class GeolocationService implements LocationListener {
                 // only unregister from all, then reregister with all but the GPS.
                 unregisterFromLocationUpdates();
                 registerForLocationUpdates();
+                // Check that the providers are still available after we re-register.
+                maybeReportError("The last location provider is no longer available");
             }
         }
     }
@@ -156,11 +159,16 @@ final class GeolocationService implements LocationListener {
      */
     private void registerForLocationUpdates() {
         try {
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            mIsNetworkProviderAvailable = true;
+            // Registration may fail if providers are not present on the device.
+            try {
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                mIsNetworkProviderAvailable = true;
+            } catch(IllegalArgumentException e) { }
             if (mIsGpsEnabled) {
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-                mIsGpsProviderAvailable = true;
+                try {
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                    mIsGpsProviderAvailable = true;
+                } catch(IllegalArgumentException e) { }
             }
         } catch(SecurityException e) {
             Log.e(TAG, "Caught security exception registering for location updates from system. " +
@@ -173,6 +181,8 @@ final class GeolocationService implements LocationListener {
      */
     private void unregisterFromLocationUpdates() {
         mLocationManager.removeUpdates(this);
+        mIsNetworkProviderAvailable = false;
+        mIsGpsProviderAvailable = false;
     }
 
     /**
