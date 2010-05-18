@@ -182,10 +182,22 @@ String8 SharedBufferBase::dump(char const* prefix) const
     int tail = computeTail();
     snprintf(buffer, SIZE, 
             "%s[ head=%2d, available=%2d, queued=%2d, tail=%2d ] "
-            "reallocMask=%08x, inUse=%2d, identity=%d, status=%d\n",
+            "reallocMask=%08x, inUse=%2d, identity=%d, status=%d",
             prefix, stack.head, stack.available, stack.queued, tail,
             stack.reallocMask, stack.inUse, stack.identity, stack.status);
     result.append(buffer);
+
+    snprintf(buffer, SIZE, " { ");
+    result.append(buffer);
+
+    for (int i=0 ; i<mNumBuffers ; i++) {
+        snprintf(buffer, SIZE, "%d ", stack.index[i]);
+        result.append(buffer);
+    }
+
+    snprintf(buffer, SIZE, " }\n");
+    result.append(buffer);
+
     return result;
 }
 
@@ -323,6 +335,7 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
     
     // lock the buffer before advancing head, which automatically unlocks
     // the buffer we preventively locked upon entering this function
+
     head = (head + 1) % numBuffers;
     android_atomic_write(stack.index[head], &stack.inUse);
 
@@ -416,7 +429,7 @@ status_t SharedBufferClient::queue(int buf)
 {
     SharedBufferStack& stack( *mSharedStack );
 
-    queued_head = ((queued_head+1 >= mNumBuffers) ? 0 : queued_head+1);
+    queued_head = (queued_head + 1) % mNumBuffers;
     stack.index[queued_head] = buf;
 
     QueueUpdate update(this);
@@ -449,9 +462,11 @@ status_t SharedBufferClient::setDirtyRegion(int buf, const Region& reg)
 
 status_t SharedBufferClient::setBufferCount(int bufferCount)
 {
+    SharedBufferStack& stack( *mSharedStack );
     if (uint32_t(bufferCount) >= NUM_BUFFER_MAX)
         return BAD_VALUE;
     mNumBuffers = bufferCount;
+    queued_head = (stack.head + stack.queued) % mNumBuffers;
     return NO_ERROR;
 }
 
