@@ -98,6 +98,8 @@ LOCAL_SRC_FILES:= \
 	rsScript.cpp \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
+	rsScriptC_LibCL.cpp \
+	rsScriptC_LibGL.cpp \
     rsShaderCache.cpp \
 	rsSignal.cpp \
 	rsSimpleMesh.cpp \
