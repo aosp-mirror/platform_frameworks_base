@@ -295,7 +295,8 @@ private:
             friend class BufferList;
             uint32_t mask, curr;
             const_iterator(uint32_t mask) :
-                mask(mask), curr(31 - __builtin_clz(mask)) { }
+                mask(mask), curr(__builtin_clz(mask)) {
+            }
         public:
             inline bool operator == (const const_iterator& rhs) const {
                 return mask == rhs.mask;
@@ -304,9 +305,9 @@ private:
                 return mask != rhs.mask;
             }
             inline int operator *() const { return curr; }
-            inline const const_iterator& operator ++(int) {
-                mask &= ~curr;
-                curr = 31 - __builtin_clz(mask);
+            inline const const_iterator& operator ++() {
+                mask &= ~(1<<(31-curr));
+                curr = __builtin_clz(mask);
                 return *this;
             }
         };
