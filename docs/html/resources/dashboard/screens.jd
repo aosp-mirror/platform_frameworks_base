@@ -1,4 +1,4 @@
-page.title=Platform Versions
+page.title=Screen Sizes and Densities
 @jd:body
 
 <style type="text/css">
@@ -37,35 +37,45 @@ div.dashboard-panel th {
 </style>
 
 <p>This page provides data about the relative number of active devices
-running a given version of the Android platform. This can help you
-understand the landscape of device distribution and decide how to prioritize
-the development of your application features for the devices currently in
-the hands of users. For information about how to target your application to devices based on
-platform version, see <a href="{@docRoot}guide/appendix/api-levels.html">API Levels</a>.</p>
+using a particular type of screen, including the screen size and density. For information about how
+your application can support multiple screen types, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
 <p class="note"><strong>Note:</strong> This data is based on the number
 of Android devices that have accessed Android Market within a 14-day period
 ending on the data collection date noted below.</p>
 
+
 <div class="dashboard-panel">
 
 <img alt="" width="460" height="250"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.1,35.6,28.1,0.2,0.4,35.6&chl=
-Android%201.1|Android%201.5|Android%201.6|Android%202.0|Android%202.0.1|Android%202.1&chco=c4df9b,
-6fad0c" />
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:1.0,63.9,35.1&chl=Small%20/%20ldpi|
+Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
 
 <table>
 <tr>
-  <th>Android Platform</th>
-  <th>Percent of Devices</th>
+<th></th>
+<th scope="col">Low Density</th>
+<th scope="col">Medium Density</th>
+<th scope="col">High Density</th>
 </tr>
-<tr><td>Android 1.1</td><td>0.1%</td></tr>
-<tr><td>Android 1.5</td><td>34.1%</td></tr>
-<tr><td>Android 1.6</td><td>28.0%</td></tr>
-<tr><td>Android 2.0</td><td>0.2%</td></tr>
-<tr><td>Android 2.0.1</td><td>0.4%</td></tr>
-<tr><td>Android 2.1</td><td>37.2%</td></tr>
+<tr><th scope="row">Small</th> 
+<td class='cent '>1.0%</td> 
+<td></td> 
+<td></td> 
+</tr> 
+<tr><th scope="row">Normal</th> 
+<td></td> 
+<td class='cent hi'>63.7%</td> 
+<td class='cent hi'>35.3%</td> 
+</tr> 
+<tr><th scope="row">Large</th> 
+<td></td> 
+<td></td> 
+<td></td> 
+</tr> 
 </table>
+
 <p><em>Data collected during two weeks ending on May 17, 2010</em></p>
 </div>
 
