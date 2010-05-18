@@ -167,9 +167,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     s->mBccScript = bccCreateScript();
     bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
     bccRegisterSymbolCallback(s->mBccScript, symbolLookup, NULL);
-    LOGE("ScriptCState::runCompiler 3");
     bccCompileScript(s->mBccScript);
-    LOGE("ScriptCState::runCompiler 4");
     bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
     bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
     LOGE("root %p,  init %p", s->mProgram.mRoot, s->mProgram.mInit);
