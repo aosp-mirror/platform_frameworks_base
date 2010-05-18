@@ -348,6 +348,10 @@ framework_docs_LOCAL_SRC_FILES := \
 	$(call find-other-java-files, $(dirs_to_document)) \
 	$(call find-other-html-files, $(html_dirs))
 
+# This is used by ide.mk as the list of source files that are
+# always included.
+INTERNAL_SDK_SOURCE_DIRS := $(addprefix $(LOCAL_PATH)/,$(dirs_to_document))
+
 framework_docs_LOCAL_DROIDDOC_SOURCE_PATH := \
 	$(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
 
