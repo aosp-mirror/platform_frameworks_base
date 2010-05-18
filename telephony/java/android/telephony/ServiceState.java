@@ -57,7 +57,7 @@ public class ServiceState implements Parcelable {
     public static final int STATE_EMERGENCY_ONLY = 2;
 
     /**
-     * Radio of telephony is explictly powered off.
+     * Radio of telephony is explicitly powered off.
      */
     public static final int STATE_POWER_OFF = 3;
 
@@ -220,7 +220,8 @@ public class ServiceState implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ServiceState> CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<ServiceState> CREATOR =
+            new Parcelable.Creator<ServiceState>() {
         public ServiceState createFromParcel(Parcel in) {
             return new ServiceState(in);
         }
@@ -231,7 +232,7 @@ public class ServiceState implements Parcelable {
     };
 
     /**
-     * Get current servcie state of phone
+     * Get current service state of phone
      *
      * @see #STATE_IN_SERVICE
      * @see #STATE_OUT_OF_SERVICE
@@ -290,10 +291,10 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current registered operator name in long alphanumeric format
+     * Get current registered operator name in long alphanumeric format.
      *
-     * In GSM/UMTS, long format can be upto 16 characters long
-     * In CDMA, returns the ERI text, if set, otherwise the ONS
+     * In GSM/UMTS, long format can be up to 16 characters long.
+     * In CDMA, returns the ERI text, if set. Otherwise, returns the ONS.
      *
      * @return long name of operator, null if unregistered or unknown
      */
@@ -302,9 +303,9 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current registered operator name in short lphanumeric format
+     * Get current registered operator name in short alphanumeric format.
      *
-     * In GSM/UMST, short format can be upto 8 characters long
+     * In GSM/UMTS, short format can be up to 8 characters long.
      *
      * @return short name of operator, null if unregistered or unknown
      */
@@ -313,21 +314,23 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current registered operator numeric id
+     * Get current registered operator numeric id.
      *
      * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
-     * network code
-     *
-     * The country code can be decoded using MccTable.countryCodeForMcc()
+     * network code.
      *
      * @return numeric format of operator, null if unregistered or unknown
+     */
+    /*
+     * The country code can be decoded using
+     * {@link com.android.internal.telephony.MccTable#countryCodeForMcc(int)}.
      */
     public String getOperatorNumeric() {
         return mOperatorNumeric;
     }
 
     /**
-     * Get current network selection mode
+     * Get current network selection mode.
      *
      * @return true if manual mode, false if automatic mode
      */
@@ -458,7 +461,7 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = false;
     }
 
-    // TODO - can't this be combined with the above func..
+    // TODO - can't this be combined with the above method?
     public void setStateOff() {
         mState = STATE_POWER_OFF;
         mRoaming = false;
@@ -528,8 +531,8 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * In CDMA mOperatorAlphaLong can be set from the ERI
-     * text, this is done from the CDMAPhone and not from the CdmaServiceStateTracker
+     * In CDMA, mOperatorAlphaLong can be set from the ERI text.
+     * This is done from the CDMAPhone and not from the CdmaServiceStateTracker.
      *
      * @hide
      */
@@ -542,7 +545,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Test whether two objects hold the same data values or both are null
+     * Test whether two objects hold the same data values or both are null.
      *
      * @param a first obj
      * @param b second obj
@@ -553,7 +556,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Set ServiceState based on intent notifier map
+     * Set ServiceState based on intent notifier map.
      *
      * @param m intent notifier map
      * @hide
@@ -575,7 +578,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Set intent notifier Bundle based on service state
+     * Set intent notifier Bundle based on service state.
      *
      * @param m intent notifier Bundle
      * @hide

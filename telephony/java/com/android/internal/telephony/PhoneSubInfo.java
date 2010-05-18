@@ -65,7 +65,7 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     }
 
     /**
-     * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
+     * Retrieves the unique subscriber ID, e.g., IMSI for GSM phones.
      */
     public String getSubscriberId() {
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
