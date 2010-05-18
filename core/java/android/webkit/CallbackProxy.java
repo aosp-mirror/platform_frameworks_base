@@ -41,6 +41,7 @@ import com.android.internal.R;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is a proxy class for handling WebCore -> UI thread messaging. All
@@ -725,7 +726,8 @@ class CallbackProxy extends Handler {
 
             case OPEN_FILE_CHOOSER:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.openFileChooser((UploadFile) msg.obj);
+                    UploadFileMessageData data = (UploadFileMessageData)msg.obj;
+                    mWebChromeClient.openFileChooser(data.getUploadFile(), data.getAcceptType());
                 }
                 break;
 
@@ -1431,6 +1433,24 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
+    private static class UploadFileMessageData {
+        private UploadFile mCallback;
+        private String mAcceptType;
+
+        public UploadFileMessageData(UploadFile uploadFile, String acceptType) {
+            mCallback = uploadFile;
+            mAcceptType = acceptType;
+        }
+
+        public UploadFile getUploadFile() {
+            return mCallback;
+        }
+
+        public String getAcceptType() {
+            return mAcceptType;
+        }
+    }
+
     private class UploadFile implements ValueCallback<Uri> {
         private Uri mValue;
         public void onReceiveValue(Uri value) {
@@ -1447,13 +1467,14 @@ class CallbackProxy extends Handler {
     /**
      * Called by WebViewCore to open a file chooser.
      */
-    /* package */ Uri openFileChooser() {
+    /* package */ Uri openFileChooser(String acceptType) {
         if (mWebChromeClient == null) {
             return null;
         }
         Message myMessage = obtainMessage(OPEN_FILE_CHOOSER);
         UploadFile uploadFile = new UploadFile();
-        myMessage.obj = uploadFile;
+        UploadFileMessageData data = new UploadFileMessageData(uploadFile, acceptType);
+        myMessage.obj = data;
         synchronized (this) {
             sendMessage(myMessage);
             try {

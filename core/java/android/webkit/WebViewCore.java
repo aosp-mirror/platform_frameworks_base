@@ -276,10 +276,12 @@ final class WebViewCore {
 
     /**
      * Called by JNI.  Open a file chooser to upload a file.
+     * @param acceptType The value of the 'accept' attribute of the
+     *         input tag associated with this file picker.
      * @return String version of the URI.
      */
-    private String openFileChooser() {
-        Uri uri = mCallbackProxy.openFileChooser();
+    private String openFileChooser(String acceptType) {
+        Uri uri = mCallbackProxy.openFileChooser(acceptType);
         if (uri != null) {
             String fileName = "";
             Cursor cursor = mContext.getContentResolver().query(

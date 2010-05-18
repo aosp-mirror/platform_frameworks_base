@@ -314,10 +314,12 @@ public class WebChromeClient {
     /**
      * Tell the client to open a file chooser.
      * @param uploadFile A ValueCallback to set the URI of the file to upload.
-     *      onReceiveValue must be called to wake up the thread.
+     *      onReceiveValue must be called to wake up the thread.a
+     * @param acceptType The value of the 'accept' attribute of the input tag
+     *         associated with this file picker.
      * @hide
      */
-    public void openFileChooser(ValueCallback<Uri> uploadFile) {
+    public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType) {
         uploadFile.onReceiveValue(null);
     }
 }
