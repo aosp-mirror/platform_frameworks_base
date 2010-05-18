@@ -78,8 +78,10 @@ public:
         const char * mName;
         void * mPtr;
     };
-    static SymbolTable_t gSyms[];
+    //static SymbolTable_t gSyms[];
     static const SymbolTable_t * lookupSymbol(const char *);
+    static const SymbolTable_t * lookupSymbolCL(const char *);
+    static const SymbolTable_t * lookupSymbolGL(const char *);
 };
 
 

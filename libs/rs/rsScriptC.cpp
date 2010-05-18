@@ -152,7 +152,16 @@ void ScriptCState::clear()
 
 static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 {
-    const ScriptCState::SymbolTable_t *sym = ScriptCState::lookupSymbol(name);
+    const ScriptCState::SymbolTable_t *sym;
+    sym = ScriptCState::lookupSymbol(name);
+    if (sym) {
+        return sym->mPtr;
+    }
+    sym = ScriptCState::lookupSymbolCL(name);
+    if (sym) {
+        return sym->mPtr;
+    }
+    sym = ScriptCState::lookupSymbolGL(name);
     if (sym) {
         return sym->mPtr;
     }
@@ -207,6 +216,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         bccGetPragmas(s->mBccScript, &pragmaCount, pragmaMax, &str[0]);
 
         for (int ct=0; ct < pragmaCount; ct+=2) {
+            //LOGE("pragme %s %s", str[ct], str[ct+1]);
             if (!strcmp(str[ct], "version")) {
                 continue;
             }
