@@ -47,7 +47,10 @@ make sure they reach the right audience.</p>
 <h3 id="defined">What does “Compatibility” mean?</h3>
 
 <p>A device is “Android compatible” if it can correctly run apps written for the
-<em>Android execution environment</em>.</p>
+<em>Android execution environment</em>. The exact details of the Android execution
+environment</em> are defined by the Android Compatibility Definition Document,
+but the single most important characteristic of a compatible device is the 
+ability to install and correctly run an Android <code>.apk</code> file.</p>
 
 <p>There is exactly one Android API for each <a
 href="{@docRoot}guide/appendix/api-levels.html">API level</a>, and it’s the same
@@ -219,6 +222,10 @@ microphones.</li>
 ones, we will always take steps to protect existing applications so that they
 don’t end up being available to devices where they won’t work.</p>
 
+<p>This is implemented, in part, using the <code>aapt</code> tool in the SDK. 
+To see which features your app explicitly requires or is implicitly assumed to
+require, you can use the command <code>aapt dump badging</code>.</p>
+
 <h3 id="conclusion">Conclusion</h3>
 
 <p>The goal of Android is to create a huge installed base for developers to take
@@ -230,6 +237,10 @@ remain in control of their apps, today and in the future. With the information
 you just read, and the resources listed in the sidebar of this document, you 
 can publish your app with the confidence that only users who can run it will
 see it.</p>
+
+<p>For more information about Android device compatibility, please visit:</p>
+
+<p style="margin-left:2em;"><a href="http://source.android.com/compatibility/index.html">http://source.android.com/compatibility/index.html</a></p>
 
 
  
