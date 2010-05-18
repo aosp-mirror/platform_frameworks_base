@@ -16,8 +16,10 @@
 
 package android.view;
 
+import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.RootViewSurfaceTaker;
 
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -135,6 +137,11 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mViewVisibility;
     boolean mAppVisible = true;
 
+    SurfaceHolder.Callback mSurfaceHolderCallback;
+    BaseSurfaceHolder mSurfaceHolder;
+    boolean mIsCreating;
+    boolean mDrawingAllowed;
+    
     final Region mTransparentRegion;
     final Region mPreviousTransparentRegion;
 
@@ -440,6 +447,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
+                if (view instanceof RootViewSurfaceTaker) {
+                    mSurfaceHolderCallback =
+                            ((RootViewSurfaceTaker)view).willYouTakeTheSurface();
+                    if (mSurfaceHolderCallback != null) {
+                        mSurfaceHolder = new TakenSurfaceHolder();
+                    }
+                }
                 Resources resources = mView.getContext().getResources();
                 CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
@@ -695,6 +709,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean windowResizesToFitContent = false;
         boolean fullRedrawNeeded = mFullRedrawNeeded;
         boolean newSurface = false;
+        boolean surfaceChanged = false;
         WindowManager.LayoutParams lp = mWindowAttributes;
 
         int desiredWindowWidth;
@@ -713,6 +728,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         WindowManager.LayoutParams params = null;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
+            surfaceChanged = true;
             params = lp;
         }
         Rect frame = mWinFrame;
@@ -899,11 +915,18 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
 
+            if (mSurfaceHolder != null) {
+                mSurfaceHolder.mSurfaceLock.lock();
+                mDrawingAllowed = true;
+                lp.format = mSurfaceHolder.getRequestedFormat();
+                lp.type = mSurfaceHolder.getRequestedType();
+            }
+            
             boolean initialized = false;
             boolean contentInsetsChanged = false;
             boolean visibleInsetsChanged;
+            boolean hadSurface = mSurface.isValid();
             try {
-                boolean hadSurface = mSurface.isValid();
                 int fl = 0;
                 if (params != null) {
                     fl = params.flags;
@@ -978,6 +1001,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             } catch (RemoteException e) {
             }
+            
             if (DEBUG_ORIENTATION) Log.v(
                     "ViewRoot", "Relayout returned: frame=" + frame + ", surface=" + mSurface);
 
@@ -990,6 +1014,57 @@ public final class ViewRoot extends Handler implements ViewParent,
             mWidth = frame.width();
             mHeight = frame.height();
 
+            if (mSurfaceHolder != null) {
+                // The app owns the surface; tell it about what is going on.
+                if (mSurface.isValid()) {
+                    // XXX .copyFrom() doesn't work!
+                    //mSurfaceHolder.mSurface.copyFrom(mSurface);
+                    mSurfaceHolder.mSurface = mSurface;
+                }
+                mSurfaceHolder.mSurfaceLock.unlock();
+                if (mSurface.isValid()) {
+                    if (!hadSurface) {
+                        mSurfaceHolder.ungetCallbacks();
+
+                        mIsCreating = true;
+                        mSurfaceHolderCallback.surfaceCreated(mSurfaceHolder);
+                        SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                        if (callbacks != null) {
+                            for (SurfaceHolder.Callback c : callbacks) {
+                                c.surfaceCreated(mSurfaceHolder);
+                            }
+                        }
+                        surfaceChanged = true;
+                    }
+                    if (surfaceChanged) {
+                        mSurfaceHolderCallback.surfaceChanged(mSurfaceHolder,
+                                lp.format, mWidth, mHeight);
+                        SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                        if (callbacks != null) {
+                            for (SurfaceHolder.Callback c : callbacks) {
+                                c.surfaceChanged(mSurfaceHolder, lp.format,
+                                        mWidth, mHeight);
+                            }
+                        }
+                    }
+                    mIsCreating = false;
+                } else if (hadSurface) {
+                    mSurfaceHolder.ungetCallbacks();
+                    SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                    mSurfaceHolderCallback.surfaceDestroyed(mSurfaceHolder);
+                    if (callbacks != null) {
+                        for (SurfaceHolder.Callback c : callbacks) {
+                            c.surfaceDestroyed(mSurfaceHolder);
+                        }
+                    }
+                    mSurfaceHolder.mSurfaceLock.lock();
+                    // Make surface invalid.
+                    //mSurfaceHolder.mSurface.copyFrom(mSurface);
+                    mSurfaceHolder.mSurface = new Surface();
+                    mSurfaceHolder.mSurfaceLock.unlock();
+                }
+            }
+            
             if (initialized) {
                 mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
                         (int) (mHeight * appScale + 0.5f));
@@ -1281,6 +1356,12 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean scalingRequired = mAttachInfo.mScalingRequired;
 
         Rect dirty = mDirty;
+        if (mSurfaceHolder != null) {
+            // The app owns the surface, we won't draw.
+            dirty.setEmpty();
+            return;
+        }
+        
         if (mUseGL) {
             if (!dirty.isEmpty()) {
                 Canvas canvas = mGlCanvas;
@@ -2828,6 +2909,46 @@ public final class ViewRoot extends Handler implements ViewParent,
         return scrollToRectOrFocus(rectangle, immediate);
     }
 
+    class TakenSurfaceHolder extends BaseSurfaceHolder {
+        @Override
+        public boolean onAllowLockCanvas() {
+            return mDrawingAllowed;
+        }
+
+        @Override
+        public void onRelayoutContainer() {
+            // Not currently interesting -- from changing between fixed and layout size.
+        }
+
+        public void setFormat(int format) {
+            ((RootViewSurfaceTaker)mView).setSurfaceFormat(format);
+        }
+
+        public void setType(int type) {
+            ((RootViewSurfaceTaker)mView).setSurfaceType(type);
+        }
+        
+        @Override
+        public void onUpdateSurface() {
+            // We take care of format and type changes on our own.
+            throw new IllegalStateException("Shouldn't be here");
+        }
+
+        public boolean isCreating() {
+            return mIsCreating;
+        }
+
+        @Override
+        public void setFixedSize(int width, int height) {
+            throw new UnsupportedOperationException(
+                    "Currently only support sizing from layout");
+        }
+        
+        public void setKeepScreenOn(boolean screenOn) {
+            ((RootViewSurfaceTaker)mView).setSurfaceKeepScreenOn(screenOn);
+        }
+    }
+    
     static class InputMethodCallback extends IInputMethodCallback.Stub {
         private WeakReference<ViewRoot> mViewRoot;
 
