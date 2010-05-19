@@ -38,9 +38,8 @@ differences report &raquo;</a> </li>
 <p>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
-deployable to Android-powered handsets starting in {@sdkPlatformDeployableDate}.
-This release includes user features, developer features, API changes, and bug
+<p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release including user
+features, developer features, API changes, and bug
 fixes. For  information on developer features and API changes, see the 
 <a href="#api">Framework API</a> section.</p>
 
