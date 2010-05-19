@@ -58,11 +58,13 @@ LOCAL_SRC_FILES:=                                       \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
                   MtpDeviceInfo.cpp                     \
+                  MtpObjectInfo.cpp                     \
                   MtpPacket.cpp                         \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
                   MtpStorageInfo.cpp                    \
                   MtpStringBuffer.cpp                   \
+                  MtpUtils.cpp                          \
                   ../../libs/utils/VectorImpl.cpp       \
                   ../../libs/utils/SharedBuffer.cpp     \
 

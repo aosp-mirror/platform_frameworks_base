@@ -23,6 +23,7 @@
 
 #include "MtpClient.h"
 #include "MtpDeviceInfo.h"
+#include "MtpObjectInfo.h"
 #include "MtpStorageInfo.h"
 
 using namespace android;
@@ -47,10 +48,23 @@ static void start_session(struct usb_endpoint *ep_in, struct usb_endpoint *ep_ou
     MtpStorageIDList* storageIDs = sClient->getStorageIDs();
     if (storageIDs) {
         for (int i = 0; i < storageIDs->size(); i++) {
-            MtpStorageInfo* info = sClient->getStorageInfo((*storageIDs)[i]);
+            MtpStorageID storageID = (*storageIDs)[i];
+            MtpStorageInfo* info = sClient->getStorageInfo(storageID);
             if (info) {
                 info->print();
                 delete info;
+            }
+            MtpObjectHandleList* objects = sClient->getObjectHandles(storageID, 0, MTP_PARENT_ROOT);
+            if (objects) {
+                for (int j = 0; j < objects->size(); j++) {
+                    MtpObjectHandle handle = (*objects)[j];
+                    MtpObjectInfo* info = sClient->getObjectInfo(handle);
+                    if (info) {
+                        info->print();
+                        delete info;
+                    }
+                }
+                delete objects;
             }
         }
     }

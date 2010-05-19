@@ -360,7 +360,7 @@ MtpResponseCode MtpServer::doGetObjectHandles() {
     if (!mSessionOpen)
         return MTP_RESPONSE_SESSION_NOT_OPEN;
     MtpStorageID storageID = mRequest.getParameter(1);      // 0xFFFFFFFF for all storage
-    MtpObjectFormat format = mRequest.getParameter(2);      // 0x00000000 for all formats
+    MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
     MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
                                                             // 0x00000000 for all objects?
 
