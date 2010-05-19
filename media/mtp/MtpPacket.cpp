@@ -128,7 +128,6 @@ void MtpPacket::setParameter(int index, uint32_t value) {
 
 #ifdef MTP_HOST
 int MtpPacket::transfer(struct usb_endpoint *ep, void* buffer, int length) {
-    printf("MtpPacket::transfer length: %d\n", length);
     if (usb_endpoint_queue(ep, buffer, length)) {
         printf("usb_endpoint_queue failed, errno: %d\n", errno);
         return -1;

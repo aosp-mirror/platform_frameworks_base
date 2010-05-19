@@ -36,9 +36,6 @@
 #define MTP_CONTAINER_PARAMETER_OFFSET          12
 #define MTP_CONTAINER_HEADER_SIZE               12
 
-// Special values
-#define MTP_PARENT_ROOT         0xFFFFFFFF       // parent is root of the storage
-
 // MTP Types
 #define MTP_TYPE_UNDEFINED      0x0000          // Undefined
 #define MTP_TYPE_INT8           0x0001          // Signed 8-bit integer

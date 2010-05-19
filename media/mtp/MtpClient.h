@@ -25,40 +25,43 @@
 namespace android {
 
 class MtpDeviceInfo;
+class MtpObjectInfo;
 class MtpStorageInfo;
 
 class MtpClient {
 private:
-    struct usb_endpoint *mEndpointIn;
-    struct usb_endpoint *mEndpointOut;
-    struct usb_endpoint *mEndpointIntr;
+    struct usb_endpoint*    mEndpointIn;
+    struct usb_endpoint*    mEndpointOut;
+    struct usb_endpoint*    mEndpointIntr;
 
     // current session ID
-    MtpSessionID        mSessionID;
+    MtpSessionID            mSessionID;
     // current transaction ID
-    MtpTransactionID    mTransactionID;
+    MtpTransactionID        mTransactionID;
 
-    MtpRequestPacket    mRequest;
-    MtpDataPacket       mData;
-    MtpResponsePacket   mResponse;
+    MtpRequestPacket        mRequest;
+    MtpDataPacket           mData;
+    MtpResponsePacket       mResponse;
 
 public:
-                        MtpClient(struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
+                            MtpClient(struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
                                     struct usb_endpoint *ep_intr);
-    virtual             ~MtpClient();
+    virtual                 ~MtpClient();
 
-    bool                openSession();
-    bool                closeSession();
+    bool                    openSession();
+    bool                    closeSession();
 
-    MtpDeviceInfo*      getDeviceInfo();
-    MtpStorageIDList*   getStorageIDs();
-    MtpStorageInfo*     getStorageInfo(MtpStorageID storageID);
+    MtpDeviceInfo*          getDeviceInfo();
+    MtpStorageIDList*       getStorageIDs();
+    MtpStorageInfo*         getStorageInfo(MtpStorageID storageID);
+    MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format, MtpObjectHandle parent);
+    MtpObjectInfo*          getObjectInfo(MtpObjectHandle handle);
 
 private:
-    bool                sendRequest(MtpOperationCode operation);
-    bool                sendData(MtpOperationCode operation);
-    bool                readData();
-    MtpResponseCode     readResponse();
+    bool                    sendRequest(MtpOperationCode operation);
+    bool                    sendData(MtpOperationCode operation);
+    bool                    readData();
+    MtpResponseCode         readResponse();
 
 };
 

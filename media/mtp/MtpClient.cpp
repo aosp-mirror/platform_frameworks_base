@@ -27,6 +27,7 @@
 #include "MtpClient.h"
 #include "MtpDebug.h"
 #include "MtpDeviceInfo.h"
+#include "MtpObjectInfo.h"
 #include "MtpStorageInfo.h"
 #include "MtpStringBuffer.h"
 
@@ -45,7 +46,6 @@ MtpClient::MtpClient(struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
 
 MtpClient::~MtpClient() {
 }
-
 
 bool MtpClient::openSession() {
 printf("openSession\n");
@@ -112,6 +112,41 @@ MtpStorageInfo* MtpClient::getStorageInfo(MtpStorageID storageID) {
 printf("getStorageInfo returned %04X\n", ret);
     if (ret == MTP_RESPONSE_OK) {
         MtpStorageInfo* info = new MtpStorageInfo(storageID);
+        info->read(mData);
+        return info;
+    }
+    return NULL;
+}
+
+MtpObjectHandleList* MtpClient::getObjectHandles(MtpStorageID storageID,
+            MtpObjectFormat format, MtpObjectHandle parent) {
+    mRequest.reset();
+    mRequest.setParameter(1, storageID);
+    mRequest.setParameter(2, format);
+    mRequest.setParameter(3, parent);
+    if (!sendRequest(MTP_OPERATION_GET_OBJECT_HANDLES))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+printf("getObjectHandles returned %04X\n", ret);
+    if (ret == MTP_RESPONSE_OK) {
+        return mData.getAUInt32();
+    }
+    return NULL;
+}
+
+MtpObjectInfo* MtpClient::getObjectInfo(MtpObjectHandle handle) {
+    mRequest.reset();
+    mRequest.setParameter(1, handle);
+    if (!sendRequest(MTP_OPERATION_GET_OBJECT_INFO))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+printf("getObjectInfo returned %04X\n", ret);
+    if (ret == MTP_RESPONSE_OK) {
+        MtpObjectInfo* info = new MtpObjectInfo(handle);
         info->read(mData);
         return info;
     }

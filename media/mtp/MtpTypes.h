@@ -37,6 +37,8 @@ typedef uint16_t MtpObjectProperty;
 // values 0x00000000 and 0xFFFFFFFF are reserved for special purposes.
 typedef uint32_t MtpObjectHandle;
 
+// Special values
+#define MTP_PARENT_ROOT         0xFFFFFFFF       // parent is root of the storage
 #define kInvalidObjectHandle    0xFFFFFFFF
 
 // MtpObjectHandle bits and masks
