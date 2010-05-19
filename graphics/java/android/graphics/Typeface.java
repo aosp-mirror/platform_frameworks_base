@@ -143,6 +143,9 @@ public class Typeface {
 
     // don't allow clients to call this directly
     private Typeface(int ni) {
+        if (ni == 0) {
+            throw new IllegalStateException();
+        }
         native_instance = ni;
     }
     
