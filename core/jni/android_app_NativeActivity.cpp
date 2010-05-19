@@ -27,13 +27,41 @@ namespace android
 {
 
 struct NativeCode {
+    NativeCode(void* _dlhandle, android_activity_create_t* _createFunc) {
+        memset(&activity, sizeof(activity), 0);
+        memset(&callbacks, sizeof(callbacks), 0);
+        dlhandle = _dlhandle;
+        createActivityFunc = _createFunc;
+        surface = NULL;
+    }
+    
+    ~NativeCode() {
+        if (callbacks.onDestroy != NULL) {
+            callbacks.onDestroy(&activity);
+        }
+        if (dlhandle != NULL) {
+            dlclose(dlhandle);
+        }
+    }
+    
+    void setSurface(jobject _surface) {
+        if (surface != NULL) {
+            activity.env->DeleteGlobalRef(surface);
+        }
+        if (_surface != NULL) {
+            surface = activity.env->NewGlobalRef(_surface);
+        } else {
+            surface = NULL;
+        }
+    }
+    
     android_activity_t activity;
     android_activity_callbacks_t callbacks;
     
     void* dlhandle;
-    
     android_activity_create_t* createActivityFunc;
-    void* clientContext;
+    
+    jobject surface;
 };
 
 static jint
@@ -47,18 +75,13 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path)
     env->ReleaseStringUTFChars(path, pathStr);
     
     if (handle != NULL) {
-        code = new NativeCode();
-        code->dlhandle = handle;
-        code->createActivityFunc = (android_activity_create_t*)
-                dlsym(handle, "android_onCreateActivity");
+        code = new NativeCode(handle, (android_activity_create_t*)
+                dlsym(handle, "android_onCreateActivity"));
         if (code->createActivityFunc == NULL) {
             LOGW("android_onCreateActivity not found");
             delete code;
-            dlclose(handle);
             return 0;
         }
-        memset(&code->activity, sizeof(code->activity), 0);
-        memset(&code->callbacks, sizeof(code->callbacks), 0);
         code->activity.callbacks = &code->callbacks;
         code->activity.env = env;
         code->activity.clazz = clazz;
@@ -73,10 +96,6 @@ unloadNativeCode_native(JNIEnv* env, jobject clazz, jint handle)
 {
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
-        if (code->callbacks.onDestroy != NULL) {
-            code->callbacks.onDestroy(&code->activity);
-        }
-        dlclose(code->dlhandle);
         delete code;
     }
 }
@@ -159,6 +178,45 @@ onWindowFocusChanged_native(JNIEnv* env, jobject clazz, jint handle, jboolean fo
     }
 }
 
+static void
+onSurfaceCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject surface)
+{
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        code->setSurface(surface);
+        if (code->callbacks.onSurfaceCreated != NULL) {
+            code->callbacks.onSurfaceCreated(&code->activity,
+                    (android_surface_t*)code->surface);
+        }
+    }
+}
+
+static void
+onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface,
+        jint format, jint width, jint height)
+{
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        if (code->surface != NULL && code->callbacks.onSurfaceChanged != NULL) {
+            code->callbacks.onSurfaceChanged(&code->activity,
+                    (android_surface_t*)code->surface, format, width, height);
+        }
+    }
+}
+
+static void
+onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surface)
+{
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        if (code->surface != NULL && code->callbacks.onSurfaceDestroyed != NULL) {
+            code->callbacks.onSurfaceDestroyed(&code->activity,
+                    (android_surface_t*)code->surface);
+        }
+        code->setSurface(NULL);
+    }
+}
+
 static const JNINativeMethod g_methods[] = {
     { "loadNativeCode", "(Ljava/lang/String;)I", (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
@@ -169,6 +227,9 @@ static const JNINativeMethod g_methods[] = {
     { "onStopNative", "(I)V", (void*)onStop_native },
     { "onLowMemoryNative", "(I)V", (void*)onLowMemory_native },
     { "onWindowFocusChangedNative", "(IZ)V", (void*)onWindowFocusChanged_native },
+    { "onSurfaceCreatedNative", "(ILandroid/view/SurfaceHolder;)V", (void*)onSurfaceCreated_native },
+    { "onSurfaceChangedNative", "(ILandroid/view/SurfaceHolder;III)V", (void*)onSurfaceChanged_native },
+    { "onSurfaceDestroyedNative", "(ILandroid/view/SurfaceHolder;)V", (void*)onSurfaceDestroyed_native },
 };
 
 static const char* const kNativeActivityPathName = "android/app/NativeActivity";
