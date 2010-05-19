@@ -160,7 +160,7 @@ public class Am {
         String uri = nextArg();
         if (uri != null) {
             Intent oldIntent = intent;
-            intent = Intent.getIntent(uri);
+            intent = Intent.parseUri(uri, 0);
             if (oldIntent.getAction() != null) {
                 intent.setAction(oldIntent.getAction());
             }
