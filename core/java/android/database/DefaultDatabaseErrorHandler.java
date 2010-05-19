@@ -16,6 +16,7 @@
 package android.database;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -46,7 +47,7 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             // make the application crash on database open operation. To avoid this problem,
             // the application should provide its own {@link DatabaseErrorHandler} impl class
             // to delete ALL files of the database (including the attached databases).
-            if (!dbObj.getPath().equalsIgnoreCase(":memory")) {
+            if (!dbObj.getPath().equalsIgnoreCase(":memory:")) {
                 // not memory database.
                 try {
                     new File(dbObj.getPath()).delete();
@@ -57,8 +58,11 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             return;
         }
 
+        ArrayList<Pair<String, String>> attachedDbs = null;
         try {
             // Close the database, which will cause subsequent operations to fail.
+            // before that, get the attached database list first.
+            attachedDbs = dbObj.getAttachedDbs();
             try {
                 dbObj.close();
             } catch (SQLiteException e) {
@@ -66,10 +70,13 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             }
         } finally {
             // Delete all files of this corrupt database and/or attached databases
-            for (Pair<String, String> p : dbObj.getAttachedDbs()) {
-                Log.e(TAG, "deleting the database file: " + p.second);
-                if (!p.second.equalsIgnoreCase(":memory:")) {
+            if (attachedDbs != null) {
+                for (Pair<String, String> p : attachedDbs) {
                     // delete file if it is a non-memory database file
+                    if (p.second.equalsIgnoreCase(":memory:") || p.second.trim().length() == 0) {
+                        continue;
+                    }
+                    Log.e(TAG, "deleting the database file: " + p.second);
                     try {
                         new File(p.second).delete();
                     } catch (Exception e) {

@@ -26,9 +26,11 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+import android.util.Pair;
 
 import junit.framework.Assert;
 
@@ -1136,6 +1138,98 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
             mDatabase.setMaxSqlCacheSize(1);
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("cannot set cacheSize to a value less than"));
+        }
+    }
+
+    @LargeTest
+    public void testDefaultDatabaseErrorHandler() {
+        DefaultDatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
+
+        // close the database. and call corruption handler.
+        // it should delete the database file.
+        File dbfile = new File(mDatabase.getPath());
+        mDatabase.close();
+        assertFalse(mDatabase.isOpen());
+        assertTrue(dbfile.exists());
+        try {
+            errorHandler.onCorruption(mDatabase);
+            assertFalse(dbfile.exists());
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // create an in-memory database. and corruption handler shouldn't try to delete it
+        SQLiteDatabase memoryDb = SQLiteDatabase.openOrCreateDatabase(":memory:", null);
+        assertNotNull(memoryDb);
+        memoryDb.close();
+        assertFalse(memoryDb.isOpen());
+        try {
+            errorHandler.onCorruption(memoryDb);
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // create a database, keep it open, call corruption handler. database file should be deleted
+        SQLiteDatabase dbObj = SQLiteDatabase.openOrCreateDatabase(mDatabase.getPath(), null);
+        assertTrue(dbfile.exists());
+        assertNotNull(dbObj);
+        assertTrue(dbObj.isOpen());
+        try {
+            errorHandler.onCorruption(dbObj);
+            assertFalse(dbfile.exists());
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // create a database, attach 2 more databases to it
+        //    attached database # 1: ":memory:"
+        //    attached database # 2: mDatabase.getPath() + "1";
+        // call corruption handler. database files including the one for attached database # 2
+        // should be deleted
+        String attachedDb1File = mDatabase.getPath() + "1";
+        dbObj = SQLiteDatabase.openOrCreateDatabase(mDatabase.getPath(), null);
+        dbObj.execSQL("ATTACH DATABASE ':memory:' as memoryDb");
+        dbObj.execSQL("ATTACH DATABASE '" +  attachedDb1File + "' as attachedDb1");
+        assertTrue(dbfile.exists());
+        assertTrue(new File(attachedDb1File).exists());
+        assertNotNull(dbObj);
+        assertTrue(dbObj.isOpen());
+        ArrayList<Pair<String, String>> attachedDbs = dbObj.getAttachedDbs();
+        try {
+            errorHandler.onCorruption(dbObj);
+            assertFalse(dbfile.exists());
+            assertFalse(new File(attachedDb1File).exists());
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // same as above, except this is a bit of stress testing. attach 5 database files
+        // and make sure they are all removed.
+        int N = 5;
+        ArrayList<String> attachedDbFiles = new ArrayList<String>(N);
+        for (int i = 0; i < N; i++) {
+            attachedDbFiles.add(mDatabase.getPath() + i);
+        }
+        dbObj = SQLiteDatabase.openOrCreateDatabase(mDatabase.getPath(), null);
+        dbObj.execSQL("ATTACH DATABASE ':memory:' as memoryDb");
+        for (int i = 0; i < N; i++) {
+            dbObj.execSQL("ATTACH DATABASE '" +  attachedDbFiles.get(i) + "' as attachedDb" + i);
+        }
+        assertTrue(dbfile.exists());
+        for (int i = 0; i < N; i++) {
+            assertTrue(new File(attachedDbFiles.get(i)).exists());
+        }
+        assertNotNull(dbObj);
+        assertTrue(dbObj.isOpen());
+        attachedDbs = dbObj.getAttachedDbs();
+        try {
+            errorHandler.onCorruption(dbObj);
+            assertFalse(dbfile.exists());
+            for (int i = 0; i < N; i++) {
+                assertFalse(new File(attachedDbFiles.get(i)).exists());
+            }
+        } catch (Exception e) {
+            fail("unexpected");
         }
     }
 }
