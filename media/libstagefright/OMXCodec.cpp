@@ -19,9 +19,11 @@
 #include <utils/Log.h>
 
 #include "include/AACDecoder.h"
+#include "include/AACEncoder.h"
 #include "include/AMRNBDecoder.h"
 #include "include/AMRNBEncoder.h"
 #include "include/AMRWBDecoder.h"
+#include "include/AMRWBEncoder.h"
 #include "include/AVCDecoder.h"
 #include "include/M4vH263Decoder.h"
 #include "include/MP3Decoder.h"
@@ -60,6 +62,11 @@ static sp<MediaSource> Make##name(const sp<MediaSource> &source) { \
     return new name(source); \
 }
 
+#define FACTORY_CREATE_ENCODER(name) \
+static sp<MediaSource> Make##name(const sp<MediaSource> &source, const sp<MetaData> &meta) { \
+    return new name(source, meta); \
+}
+
 #define FACTORY_REF(name) { #name, Make##name },
 
 FACTORY_CREATE(MP3Decoder)
@@ -69,7 +76,32 @@ FACTORY_CREATE(AACDecoder)
 FACTORY_CREATE(AVCDecoder)
 FACTORY_CREATE(M4vH263Decoder)
 FACTORY_CREATE(VorbisDecoder)
-FACTORY_CREATE(AMRNBEncoder)
+FACTORY_CREATE_ENCODER(AMRNBEncoder)
+FACTORY_CREATE_ENCODER(AMRWBEncoder)
+FACTORY_CREATE_ENCODER(AACEncoder)
+
+static sp<MediaSource> InstantiateSoftwareEncoder(
+        const char *name, const sp<MediaSource> &source,
+        const sp<MetaData> &meta) {
+    struct FactoryInfo {
+        const char *name;
+        sp<MediaSource> (*CreateFunc)(const sp<MediaSource> &, const sp<MetaData> &);
+    };
+
+    static const FactoryInfo kFactoryInfo[] = {
+        FACTORY_REF(AMRNBEncoder)
+        FACTORY_REF(AMRWBEncoder)
+        FACTORY_REF(AACEncoder)
+    };
+    for (size_t i = 0;
+         i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
+        if (!strcmp(name, kFactoryInfo[i].name)) {
+            return (*kFactoryInfo[i].CreateFunc)(source, meta);
+        }
+    }
+
+    return NULL;
+}
 
 static sp<MediaSource> InstantiateSoftwareCodec(
         const char *name, const sp<MediaSource> &source) {
@@ -86,7 +118,6 @@ static sp<MediaSource> InstantiateSoftwareCodec(
         FACTORY_REF(AVCDecoder)
         FACTORY_REF(M4vH263Decoder)
         FACTORY_REF(VorbisDecoder)
-        FACTORY_REF(AMRNBEncoder)
     };
     for (size_t i = 0;
          i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
@@ -133,7 +164,9 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.encode" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBEncoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.encode" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBEncoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "AACEncoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacenc" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.encoder" },
@@ -386,7 +419,8 @@ sp<MediaSource> OMXCodec::Create(
         componentName = matchingCodecs[i].string();
 
 #if BUILD_WITH_FULL_STAGEFRIGHT
-        sp<MediaSource> softwareCodec =
+        sp<MediaSource> softwareCodec = createEncoder?
+            InstantiateSoftwareEncoder(componentName, source, meta):
             InstantiateSoftwareCodec(componentName, source);
 
         if (softwareCodec != NULL) {
@@ -511,18 +545,22 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         }
     }
 
+    int32_t bitRate = 0;
+    if (mIsEncoder) {
+        CHECK(meta->findInt32(kKeyBitRate, &bitRate));
+    }
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mMIME)) {
-        setAMRFormat(false /* isWAMR */);
+        setAMRFormat(false /* isWAMR */, bitRate);
     }
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mMIME)) {
-        setAMRFormat(true /* isWAMR */);
+        setAMRFormat(true /* isWAMR */, bitRate);
     }
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mMIME)) {
         int32_t numChannels, sampleRate;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
 
-        setAACFormat(numChannels, sampleRate);
+        setAACFormat(numChannels, sampleRate, bitRate);
     }
 
     if (!strncasecmp(mMIME, "video/", 6)) {
@@ -2177,7 +2215,51 @@ void OMXCodec::setRawAudioFormat(
     CHECK_EQ(err, OK);
 }
 
-void OMXCodec::setAMRFormat(bool isWAMR) {
+static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(bool isAMRWB, int32_t bps) {
+    if (isAMRWB) {
+        if (bps <= 6600) {
+            return OMX_AUDIO_AMRBandModeWB0;
+        } else if (bps <= 8850) {
+            return OMX_AUDIO_AMRBandModeWB1;
+        } else if (bps <= 12650) {
+            return OMX_AUDIO_AMRBandModeWB2;
+        } else if (bps <= 14250) {
+            return OMX_AUDIO_AMRBandModeWB3;
+        } else if (bps <= 15850) {
+            return OMX_AUDIO_AMRBandModeWB4;
+        } else if (bps <= 18250) {
+            return OMX_AUDIO_AMRBandModeWB5;
+        } else if (bps <= 19850) {
+            return OMX_AUDIO_AMRBandModeWB6;
+        } else if (bps <= 23050) {
+            return OMX_AUDIO_AMRBandModeWB7;
+        }
+
+        // 23850 bps
+        return OMX_AUDIO_AMRBandModeWB8;
+    } else {  // AMRNB
+        if (bps <= 4750) {
+            return OMX_AUDIO_AMRBandModeNB0;
+        } else if (bps <= 5150) {
+            return OMX_AUDIO_AMRBandModeNB1;
+        } else if (bps <= 5900) {
+            return OMX_AUDIO_AMRBandModeNB2;
+        } else if (bps <= 6700) {
+            return OMX_AUDIO_AMRBandModeNB3;
+        } else if (bps <= 7400) {
+            return OMX_AUDIO_AMRBandModeNB4;
+        } else if (bps <= 7950) {
+            return OMX_AUDIO_AMRBandModeNB5;
+        } else if (bps <= 10200) {
+            return OMX_AUDIO_AMRBandModeNB6;
+        }
+
+        // 12200 bps
+        return OMX_AUDIO_AMRBandModeNB7;
+    }
+}
+
+void OMXCodec::setAMRFormat(bool isWAMR, int32_t bitRate) {
     OMX_U32 portIndex = mIsEncoder ? kPortIndexOutput : kPortIndexInput;
 
     OMX_AUDIO_PARAM_AMRTYPE def;
@@ -2191,10 +2273,7 @@ void OMXCodec::setAMRFormat(bool isWAMR) {
 
     def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
 
-    // XXX: Select bandmode based on bit rate
-    def.eAMRBandMode =
-        isWAMR ? OMX_AUDIO_AMRBandModeWB0 : OMX_AUDIO_AMRBandModeNB0;
-
+    def.eAMRBandMode = pickModeFromBitRate(isWAMR, bitRate);
     err = mOMX->setParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
     CHECK_EQ(err, OK);
 
@@ -2211,7 +2290,7 @@ void OMXCodec::setAMRFormat(bool isWAMR) {
     }
 }
 
-void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate) {
+void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate) {
     CHECK(numChannels == 1 || numChannels == 2);
     if (mIsEncoder) {
         //////////////// input port ////////////////////
@@ -2256,7 +2335,7 @@ void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate) {
         profile.eChannelMode = (numChannels == 1?
                 OMX_AUDIO_ChannelModeMono: OMX_AUDIO_ChannelModeStereo);
         profile.nSampleRate = sampleRate;
-        profile.nBitRate = 96000;   // XXX
+        profile.nBitRate = bitRate;
         profile.nAudioBandWidth = 0;
         profile.nFrameLength = 0;
         profile.nAACtools = OMX_AUDIO_AACToolAll;
@@ -3034,11 +3113,13 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             } else if (audio_def->eEncoding == OMX_AUDIO_CodingAAC) {
                 mOutputFormat->setCString(
                         kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
-                int32_t numChannels, sampleRate;
+                int32_t numChannels, sampleRate, bitRate;
                 inputFormat->findInt32(kKeyChannelCount, &numChannels);
                 inputFormat->findInt32(kKeySampleRate, &sampleRate);
+                inputFormat->findInt32(kKeyBitRate, &bitRate);
                 mOutputFormat->setInt32(kKeyChannelCount, numChannels);
                 mOutputFormat->setInt32(kKeySampleRate, sampleRate);
+                mOutputFormat->setInt32(kKeyBitRate, bitRate);
             } else {
                 CHECK(!"Should not be here. Unknown audio encoding.");
             }

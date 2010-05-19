@@ -19,13 +19,14 @@
 #define AMR_NB_ENCODER_H_
 
 #include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MetaData.h>
 
 namespace android {
 
 struct MediaBufferGroup;
 
 struct AMRNBEncoder : public MediaSource {
-    AMRNBEncoder(const sp<MediaSource> &source);
+    AMRNBEncoder(const sp<MediaSource> &source, const sp<MetaData> &meta);
 
     virtual status_t start(MetaData *params);
     virtual status_t stop();
@@ -40,6 +41,7 @@ protected:
 
 private:
     sp<MediaSource> mSource;
+    sp<MetaData>    mMeta;
     bool mStarted;
 
     MediaBufferGroup *mBufferGroup;
