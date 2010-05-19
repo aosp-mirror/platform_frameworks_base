@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.SurfaceHolder;
 
 import java.io.File;
 
@@ -13,7 +14,7 @@ import java.io.File;
  * Convenience for implementing an activity that will be implemented
  * purely in native code.  That is, a game (or game-like thing).
  */
-public class NativeActivity extends Activity {
+public class NativeActivity extends Activity implements SurfaceHolder.Callback {
     public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     
     private int mNativeHandle;
@@ -28,11 +29,17 @@ public class NativeActivity extends Activity {
     private native void onStopNative(int handle);
     private native void onLowMemoryNative(int handle);
     private native void onWindowFocusChangedNative(int handle, boolean focused);
+    private native void onSurfaceCreatedNative(int handle, SurfaceHolder holder);
+    private native void onSurfaceChangedNative(int handle, SurfaceHolder holder,
+            int format, int width, int height);
+    private native void onSurfaceDestroyedNative(int handle, SurfaceHolder holder);
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         String libname = "main";
         ActivityInfo ai;
+        
+        getWindow().takeSurface(this);
         
         try {
             ai = getPackageManager().getActivityInfo(
@@ -79,12 +86,6 @@ public class NativeActivity extends Activity {
     }
 
     @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        onLowMemoryNative(mNativeHandle);
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         onPauseNative(mNativeHandle);
@@ -115,8 +116,26 @@ public class NativeActivity extends Activity {
     }
 
     @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        onLowMemoryNative(mNativeHandle);
+    }
+
+    @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         onWindowFocusChangedNative(mNativeHandle, hasFocus);
+    }
+    
+    public void surfaceCreated(SurfaceHolder holder) {
+        onSurfaceCreatedNative(mNativeHandle, holder);
+    }
+    
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        onSurfaceChangedNative(mNativeHandle, holder, format, width, height);
+    }
+    
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        onSurfaceDestroyedNative(mNativeHandle, holder);
     }
 }
