@@ -54,8 +54,16 @@ int main(int argc, char** argv)
 
 
     printf("resize test\n");
-    s.resize(6);
-    c.setBufferCount(6);
+    class SetBufferCountIPC : public SharedBufferClient::SetBufferCountCallback {
+        SharedBufferServer& s;
+        virtual status_t operator()(int bufferCount) const {
+            return s.resize(bufferCount);
+        }
+    public:
+        SetBufferCountIPC(SharedBufferServer& s) : s(s) { }
+    } resize(s);
+
+    c.setBufferCount(6, resize);
     int list3[6] = {3, 2, 1, 4, 5, 0};
     test0(s, c, 6, list3);
 

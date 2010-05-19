@@ -250,7 +250,7 @@ void SurfaceComposerClient::dispose()
 status_t SurfaceComposerClient::getDisplayInfo(
         DisplayID dpy, DisplayInfo* info)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
 
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
@@ -268,7 +268,7 @@ status_t SurfaceComposerClient::getDisplayInfo(
 
 ssize_t SurfaceComposerClient::getDisplayWidth(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -277,7 +277,7 @@ ssize_t SurfaceComposerClient::getDisplayWidth(DisplayID dpy)
 
 ssize_t SurfaceComposerClient::getDisplayHeight(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -286,7 +286,7 @@ ssize_t SurfaceComposerClient::getDisplayHeight(DisplayID dpy)
 
 ssize_t SurfaceComposerClient::getDisplayOrientation(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -345,7 +345,7 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
         sp<ISurface> surface = mClient->createSurface(&data, pid, name,
                 display, w, h, format, flags);
         if (surface != 0) {
-            if (uint32_t(data.token) < NUM_LAYERS_MAX) {
+            if (uint32_t(data.token) < SharedBufferStack::NUM_LAYERS_MAX) {
                 result = new SurfaceControl(this, surface, data, w, h, format, flags);
             }
         }

@@ -29,10 +29,6 @@ public:
     inline Barrier() : state(CLOSED) { }
     inline ~Barrier() { }
     void open() {
-        // gcc memory barrier, this makes sure all memory writes
-        // have been issued by gcc. On an SMP system we'd need a real
-        // h/w barrier.
-        asm volatile ("":::"memory");
         Mutex::Autolock _l(lock);
         state = OPENED;
         cv.broadcast();

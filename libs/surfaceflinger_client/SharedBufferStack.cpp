@@ -44,7 +44,7 @@ SharedClient::~SharedClient() {
 
 // these functions are used by the clients
 status_t SharedClient::validate(size_t i) const {
-    if (uint32_t(i) >= uint32_t(NUM_LAYERS_MAX))
+    if (uint32_t(i) >= uint32_t(SharedBufferStack::NUM_LAYERS_MAX))
         return BAD_INDEX;
     return surfaces[i].status;
 }
@@ -144,10 +144,10 @@ Region SharedBufferStack::getDirtyRegion(int buffer) const
 // ----------------------------------------------------------------------------
 
 SharedBufferBase::SharedBufferBase(SharedClient* sharedClient,
-        int surface, int num, int32_t identity)
+        int surface, int32_t identity)
     : mSharedClient(sharedClient), 
       mSharedStack(sharedClient->surfaces + surface),
-      mNumBuffers(num), mIdentity(identity)
+      mIdentity(identity)
 {
 }
 
@@ -179,32 +179,14 @@ String8 SharedBufferBase::dump(char const* prefix) const
     char buffer[SIZE];
     String8 result;
     SharedBufferStack& stack( *mSharedStack );
-    int tail = computeTail();
     snprintf(buffer, SIZE, 
-            "%s[ head=%2d, available=%2d, queued=%2d, tail=%2d ] "
+            "%s[ head=%2d, available=%2d, queued=%2d ] "
             "reallocMask=%08x, inUse=%2d, identity=%d, status=%d",
-            prefix, stack.head, stack.available, stack.queued, tail,
+            prefix, stack.head, stack.available, stack.queued,
             stack.reallocMask, stack.inUse, stack.identity, stack.status);
     result.append(buffer);
-
-    snprintf(buffer, SIZE, " { ");
-    result.append(buffer);
-
-    for (int i=0 ; i<mNumBuffers ; i++) {
-        snprintf(buffer, SIZE, "%d ", stack.index[i]);
-        result.append(buffer);
-    }
-
-    snprintf(buffer, SIZE, " }\n");
-    result.append(buffer);
-
+    result.append("\n");
     return result;
-}
-
-int32_t SharedBufferBase::computeTail() const
-{
-    SharedBufferStack& stack( *mSharedStack );
-    return (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
 }
 
 status_t SharedBufferBase::waitForCondition(const ConditionBase& condition)
@@ -270,7 +252,7 @@ SharedBufferServer::ReallocateCondition::ReallocateCondition(
 }
 bool SharedBufferServer::ReallocateCondition::operator()() const {
     int32_t head = stack.head;
-    if (uint32_t(head) >= NUM_BUFFER_MAX) {
+    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX) {
         // if stack.head is messed up, we cannot allow the server to
         // crash (since stack.head is mapped on the client side)
         stack.status = BAD_VALUE;
@@ -318,7 +300,7 @@ SharedBufferServer::RetireUpdate::RetireUpdate(
 }
 ssize_t SharedBufferServer::RetireUpdate::operator()() {
     int32_t head = stack.head;
-    if (uint32_t(head) >= NUM_BUFFER_MAX)
+    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX)
         return BAD_VALUE;
 
     // Preventively lock the current buffer before updating queued.
@@ -361,12 +343,18 @@ ssize_t SharedBufferServer::StatusUpdate::operator()() {
 
 SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
-    : SharedBufferBase(sharedClient, surface, num, identity),
-      tail(0), undoDequeueTail(0)
+    : SharedBufferBase(sharedClient, surface, identity),
+      mNumBuffers(num), tail(0), undoDequeueTail(0)
 {
     SharedBufferStack& stack( *mSharedStack );
     tail = computeTail();
     queued_head = stack.head;
+}
+
+int32_t SharedBufferClient::computeTail() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
 }
 
 ssize_t SharedBufferClient::dequeue()
@@ -377,7 +365,9 @@ ssize_t SharedBufferClient::dequeue()
         LOGW("dequeue: tail=%d, head=%d, avail=%d, queued=%d",
                 tail, stack.head, stack.available, stack.queued);
     }
-        
+
+    RWLock::AutoRLock _rd(mLock);
+
     const nsecs_t dequeueTime = systemTime(SYSTEM_TIME_THREAD);
 
     //LOGD("[%d] about to dequeue a buffer",
@@ -407,6 +397,8 @@ ssize_t SharedBufferClient::dequeue()
 
 status_t SharedBufferClient::undoDequeue(int buf)
 {
+    RWLock::AutoRLock _rd(mLock);
+
     // TODO: we can only undo the previous dequeue, we should
     // enforce that in the api
     UndoDequeueUpdate update(this);
@@ -419,6 +411,8 @@ status_t SharedBufferClient::undoDequeue(int buf)
 
 status_t SharedBufferClient::lock(int buf)
 {
+    RWLock::AutoRLock _rd(mLock);
+
     SharedBufferStack& stack( *mSharedStack );
     LockCondition condition(this, buf);
     status_t err = waitForCondition(condition);
@@ -427,6 +421,8 @@ status_t SharedBufferClient::lock(int buf)
 
 status_t SharedBufferClient::queue(int buf)
 {
+    RWLock::AutoRLock _rd(mLock);
+
     SharedBufferStack& stack( *mSharedStack );
 
     queued_head = (queued_head + 1) % mNumBuffers;
@@ -460,21 +456,29 @@ status_t SharedBufferClient::setDirtyRegion(int buf, const Region& reg)
     return stack.setDirtyRegion(buf, reg);
 }
 
-status_t SharedBufferClient::setBufferCount(int bufferCount)
+status_t SharedBufferClient::setBufferCount(
+        int bufferCount, const SetBufferCountCallback& ipc)
 {
     SharedBufferStack& stack( *mSharedStack );
-    if (uint32_t(bufferCount) >= NUM_BUFFER_MAX)
+    if (uint32_t(bufferCount) >= SharedBufferStack::NUM_BUFFER_MAX)
         return BAD_VALUE;
-    mNumBuffers = bufferCount;
-    queued_head = (stack.head + stack.queued) % mNumBuffers;
-    return NO_ERROR;
+
+    RWLock::AutoWLock _wr(mLock);
+
+    status_t err = ipc(bufferCount);
+    if (err == NO_ERROR) {
+        mNumBuffers = bufferCount;
+        queued_head = (stack.head + stack.queued) % mNumBuffers;
+    }
+    return err;
 }
 
 // ----------------------------------------------------------------------------
 
 SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
-    : SharedBufferBase(sharedClient, surface, num, identity)
+    : SharedBufferBase(sharedClient, surface, identity),
+      mNumBuffers(num)
 {
     mSharedStack->init(identity);
     mSharedStack->head = num-1;
@@ -490,10 +494,12 @@ SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
 
 ssize_t SharedBufferServer::retireAndLock()
 {
+    RWLock::AutoRLock _l(mLock);
+
     RetireUpdate update(this, mNumBuffers);
     ssize_t buf = updateCondition( update );
     if (buf >= 0) {
-        if (uint32_t(buf) >= NUM_BUFFER_MAX)
+        if (uint32_t(buf) >= SharedBufferStack::NUM_BUFFER_MAX)
             return BAD_VALUE;
         SharedBufferStack& stack( *mSharedStack );
         buf = stack.index[buf];
@@ -520,6 +526,8 @@ void SharedBufferServer::setStatus(status_t status)
 
 status_t SharedBufferServer::reallocate()
 {
+    RWLock::AutoRLock _l(mLock);
+
     SharedBufferStack& stack( *mSharedStack );
     uint32_t mask = (1<<mNumBuffers)-1;
     android_atomic_or(mask, &stack.reallocMask); 
@@ -534,6 +542,13 @@ int32_t SharedBufferServer::getQueuedCount() const
 
 status_t SharedBufferServer::assertReallocate(int buf)
 {
+    /*
+     * NOTE: it's safe to hold mLock for read while waiting for
+     * the ReallocateCondition because that condition is not updated
+     * by the thread that holds mLock for write.
+     */
+    RWLock::AutoRLock _l(mLock);
+
     // TODO: need to validate "buf"
     ReallocateCondition condition(this, buf);
     status_t err = waitForCondition(condition);
@@ -546,9 +561,7 @@ Region SharedBufferServer::getDirtyRegion(int buf) const
     return stack.getDirtyRegion(buf);
 }
 
-
 /*
- *
  * NOTE: this is not thread-safe on the server-side, meaning
  * 'head' cannot move during this operation. The client-side
  * can safely operate an usual.
@@ -556,8 +569,10 @@ Region SharedBufferServer::getDirtyRegion(int buf) const
  */
 status_t SharedBufferServer::resize(int newNumBuffers)
 {
-    if (uint32_t(newNumBuffers) >= NUM_BUFFER_MAX)
+    if (uint32_t(newNumBuffers) >= SharedBufferStack::NUM_BUFFER_MAX)
         return BAD_VALUE;
+
+    RWLock::AutoWLock _l(mLock);
 
     // for now we're not supporting shrinking
     const int numBuffers = mNumBuffers;
@@ -569,7 +584,7 @@ status_t SharedBufferServer::resize(int newNumBuffers)
 
     // read the head, make sure it's valid
     int32_t head = stack.head;
-    if (uint32_t(head) >= NUM_BUFFER_MAX)
+    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX)
         return BAD_VALUE;
 
     int base = numBuffers;

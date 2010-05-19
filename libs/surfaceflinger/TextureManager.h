@@ -36,21 +36,24 @@ class GraphicBuffer;
 
 // ---------------------------------------------------------------------------
 
-struct Texture {
-    Texture() : name(-1U), width(0), height(0),
-        image(EGL_NO_IMAGE_KHR), transform(0),
-        NPOTAdjust(false), dirty(true) { }
+struct Image {
+    Image() : name(-1U), image(EGL_NO_IMAGE_KHR), width(0), height(0),
+        transform(0), dirty(true) { }
     GLuint        name;
+    EGLImageKHR   image;
     GLuint        width;
     GLuint        height;
+    uint32_t      transform;
+    bool          dirty;
+};
+
+struct Texture : public Image {
+    Texture() : Image(), NPOTAdjust(false)  { }
     GLuint        potWidth;
     GLuint        potHeight;
     GLfloat       wScale;
     GLfloat       hScale;
-    EGLImageKHR   image;
-    uint32_t      transform;
     bool          NPOTAdjust;
-    bool          dirty;
 };
 
 // ---------------------------------------------------------------------------
@@ -68,7 +71,7 @@ public:
             const Region& dirty, const GGLSurface& t);
 
     // make active buffer an EGLImage if needed
-    status_t initEglImage(Texture* texture,
+    status_t initEglImage(Image* texture,
             EGLDisplay dpy, const sp<GraphicBuffer>& buffer);
 };
 
