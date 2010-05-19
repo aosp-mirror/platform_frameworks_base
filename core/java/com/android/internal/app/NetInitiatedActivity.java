@@ -23,10 +23,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.widget.Toast;
 import android.util.Log;
 import android.location.LocationManager;
@@ -43,8 +39,8 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
     private static final boolean DEBUG = true;
     private static final boolean VERBOSE = false;
 
-    private static final int POSITIVE_BUTTON = AlertDialog.BUTTON1;
-    private static final int NEGATIVE_BUTTON = AlertDialog.BUTTON2;
+    private static final int POSITIVE_BUTTON = AlertDialog.BUTTON_POSITIVE;
+    private static final int NEGATIVE_BUTTON = AlertDialog.BUTTON_NEGATIVE;
 
     // Dialog button text
     public static final String BUTTON_TEXT_ACCEPT = "Accept";
