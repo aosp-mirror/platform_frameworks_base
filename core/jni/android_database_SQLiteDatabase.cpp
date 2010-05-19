@@ -215,6 +215,7 @@ static void enableSqlProfiling(JNIEnv* env, jobject object, jstring databaseName
 static void dbclose(JNIEnv* env, jobject object)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
+    sqlite3_stmt * pStmt;
 
     if (handle != NULL) {
         // release the memory associated with the traceFuncArg in enableSqlTracing function
@@ -226,6 +227,10 @@ static void dbclose(JNIEnv* env, jobject object)
         traceFuncArg = sqlite3_profile(handle, &sqlProfile, NULL);
         if (traceFuncArg != NULL) {
             free(traceFuncArg);
+        }
+        // finalize all statements on this handle
+        while ((pStmt = sqlite3_next_stmt(handle, 0)) != 0 ) {
+            sqlite3_finalize(pStmt);
         }
         LOGV("Closing database: handle=%p\n", handle);
         int result = sqlite3_close(handle);
@@ -443,6 +448,13 @@ static jint native_releaseMemory(JNIEnv *env, jobject clazz)
     return sqlite3_release_memory(SQLITE_SOFT_HEAP_LIMIT);
 }
 
+static void native_finalize(JNIEnv* env, jobject object, jint statementId)
+{
+    if (statementId > 0) {
+        sqlite3_finalize((sqlite3_stmt *)statementId);
+    }
+}
+
 static JNINativeMethod sMethods[] =
 {
     /* name, signature, funcPtr */
@@ -456,6 +468,7 @@ static JNINativeMethod sMethods[] =
     {"native_setLocale", "(Ljava/lang/String;I)V", (void *)native_setLocale},
     {"native_getDbLookaside", "()I", (void *)native_getDbLookaside},
     {"releaseMemory", "()I", (void *)native_releaseMemory},
+    {"native_finalize", "(I)V", (void *)native_finalize},
 };
 
 int register_android_database_SQLiteDatabase(JNIEnv *env)

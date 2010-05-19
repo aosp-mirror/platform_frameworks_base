@@ -291,12 +291,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (!mDatabase.isOpen()) {
             return;
         }
-        mDatabase.lock();
-        try {
-            releaseReference();
-        } finally {
-            mDatabase.unlock();
-        }
+        releaseReference();
     }
 
     /**

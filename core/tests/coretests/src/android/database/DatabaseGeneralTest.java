@@ -1232,4 +1232,190 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
             fail("unexpected");
         }
     }
+
+    /**
+     * test to make sure the statement finalizations are not done right away but
+     * piggybacked onto the next sql statement execution on the same database.
+     */
+    @SmallTest
+    public void testStatementClose() {
+        mDatabase.execSQL("CREATE TABLE test (i int);");
+        // fill up statement cache in mDatabase\
+        int N = 26;
+        mDatabase.setMaxSqlCacheSize(N);
+        SQLiteStatement stmt;
+        int stmt0Id = 0;
+        for (int i = 0; i < N; i ++) {
+            stmt = mDatabase.compileStatement("insert into test values(" + i + ");");
+            stmt.executeInsert();
+            // keep track of 0th entry
+            if (i == 0) {
+                stmt0Id = stmt.getUniqueId();
+            }
+            stmt.close();
+        }
+
+        // add one more to the cache - and the above 'stmt0Id' should fall out of cache
+        SQLiteStatement stmt1 = mDatabase.compileStatement("select * from test where i = 1;");
+        stmt1.close();
+
+        // the above close() should have queuedUp the statement for finalization
+        ArrayList<Integer> statementIds = mDatabase.getQueuedUpStmtList();
+        assertTrue(statementIds.contains(stmt0Id));
+
+        // execute something to see if this statement gets finalized
+        mDatabase.execSQL("delete from test where i = 10;");
+        statementIds = mDatabase.getQueuedUpStmtList();
+        assertEquals(0, statementIds.size());
+    }
+
+    /**
+     * same as above - except that the statement to be finalized is from Thread # 1.
+     * and it is eventually finalized in Thread # 2 when it executes a sql statement.
+     * @throws InterruptedException
+     */
+    @LargeTest
+    public void testStatementCloseDiffThread() throws InterruptedException {
+        mDatabase.execSQL("CREATE TABLE test (i int);");
+        // fill up statement cache in mDatabase in a thread
+        Thread t1 = new Thread() {
+            @Override public void run() {
+                int N = 26;
+                mDatabase.setMaxSqlCacheSize(N);
+                SQLiteStatement stmt;
+                for (int i = 0; i < N; i ++) {
+                    stmt = mDatabase.compileStatement("insert into test values(" + i + ");");
+                    stmt.executeInsert();
+                    // keep track of 0th entry
+                    if (i == 0) {
+                        setStmt0Id(stmt.getUniqueId());
+                    }
+                    stmt.close();
+                }
+            }
+        };
+        t1.start();
+        // wait for the thread to finish
+        t1.join();
+
+        // add one more to the cache - and the above 'stmt0Id' should fall out of cache
+        // just for the heck of it, do it in a separate thread
+        Thread t2 = new Thread() {
+            @Override public void run() {
+                SQLiteStatement stmt1 = mDatabase.compileStatement(
+                        "select * from test where i = 1;");
+                stmt1.close();
+            }
+        };
+        t2.start();
+        t2.join();
+
+        // close() in the above thread should have queuedUp the statement for finalization
+        ArrayList<Integer> statementIds = mDatabase.getQueuedUpStmtList();
+        assertTrue(getStmt0Id() > 0);
+        assertTrue(statementIds.contains(stmt0Id));
+        assertEquals(1, statementIds.size());
+
+        // execute something to see if this statement gets finalized
+        // again do it in a separate thread
+        Thread t3 = new Thread() {
+            @Override public void run() {
+                mDatabase.execSQL("delete from test where i = 10;");
+            }
+        };
+        t3.start();
+        t3.join();
+
+        // is the statement finalized?
+        statementIds = mDatabase.getQueuedUpStmtList();
+        assertEquals(0, statementIds.size());
+    }
+
+    private volatile int stmt0Id = 0;
+    private synchronized void setStmt0Id(int stmt0Id) {
+        this.stmt0Id = stmt0Id;
+    }
+    private synchronized int getStmt0Id() {
+        return this.stmt0Id;
+    }
+
+    /**
+     * same as above - except that the queue of statements to be finalized are finalized
+     * by database close() operation.
+     */
+    @LargeTest
+    public void testStatementCloseByDbClose() throws InterruptedException {
+        mDatabase.execSQL("CREATE TABLE test (i int);");
+        // fill up statement cache in mDatabase in a thread
+        Thread t1 = new Thread() {
+            @Override public void run() {
+                int N = 26;
+                mDatabase.setMaxSqlCacheSize(N);
+                SQLiteStatement stmt;
+                for (int i = 0; i < N; i ++) {
+                    stmt = mDatabase.compileStatement("insert into test values(" + i + ");");
+                    stmt.executeInsert();
+                    // keep track of 0th entry
+                    if (i == 0) {
+                        setStmt0Id(stmt.getUniqueId());
+                    }
+                    stmt.close();
+                }
+            }
+        };
+        t1.start();
+        // wait for the thread to finish
+        t1.join();
+
+        // add one more to the cache - and the above 'stmt0Id' should fall out of cache
+        // just for the heck of it, do it in a separate thread
+        Thread t2 = new Thread() {
+            @Override public void run() {
+                SQLiteStatement stmt1 = mDatabase.compileStatement(
+                        "select * from test where i = 1;");
+                stmt1.close();
+            }
+        };
+        t2.start();
+        t2.join();
+
+        // close() in the above thread should have queuedUp the statement for finalization
+        ArrayList<Integer> statementIds = mDatabase.getQueuedUpStmtList();
+        assertTrue(getStmt0Id() > 0);
+        assertTrue(statementIds.contains(stmt0Id));
+        assertEquals(1, statementIds.size());
+
+        // close the database. native method dbclose() will finalize all statements
+        // before closing the database.
+        // again do it in a separate thread
+        Thread t3 = new Thread() {
+            @Override public void run() {
+                mDatabase.close();
+            }
+        };
+        t3.start();
+        t3.join();
+
+        // check mClosedStatementIds in mDatabase. it should still have 'stmt0Id'
+        statementIds = mDatabase.getQueuedUpStmtList();
+        assertTrue(statementIds.contains(stmt0Id));
+
+        // try to finalize the pending statements. and there should be no exceptions from anywhere
+        // just for the heck of it, do it in a separate thread
+        Thread t4 = new Thread() {
+            @Override public void run() {
+                try {
+                    mDatabase.closePendingStatements();
+                } catch (Exception e) {
+                    fail("not expected");
+                }
+            }
+        };
+        t4.start();
+        t4.join();
+
+        // mClosedStatementIds in mDatabase should be empty
+        statementIds = mDatabase.getQueuedUpStmtList();
+        assertEquals(0, statementIds.size());
+    }
 }
