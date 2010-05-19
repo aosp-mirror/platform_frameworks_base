@@ -1039,10 +1039,9 @@ public class PackageManagerTests extends AndroidTestCase {
      * Install package on sdcard. Unmount and then mount the media.
      * (Use PackageManagerService private api for now)
      * Make sure the installed package is available.
-     * STOPSHIP will uncomment when MountService api's to mount/unmount
-     * are made asynchronous.
      */
-    public void xxxtestMountSdNormalInternal() {
+    @MediumTest
+    public void testMountSdNormalInternal() {
         assertTrue(mountFromRawResource());
     }
 
@@ -1444,7 +1443,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int result = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
-    //TODO: To be reenabled after investigation
+    @MediumTest
     public void testMoveAppFailInternalToExternalDelete() {
         int installFlags = 0;
         int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
@@ -1461,7 +1460,8 @@ public class PackageManagerTests extends AndroidTestCase {
             ip = installFromRawResource("install.apk", R.raw.install, installFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             // Delete the package now retaining data.
-            pm.deletePackage(ip.pkg.packageName, null, PackageManager.DONT_DELETE_DATA);
+            GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+            invokeDeletePackage(ip.pkg.packageName, PackageManager.DONT_DELETE_DATA, receiver);
             assertTrue(invokeMovePackageFail(ip.pkg.packageName, moveFlags, result));
         } catch (Exception e) {
             failStr(e);

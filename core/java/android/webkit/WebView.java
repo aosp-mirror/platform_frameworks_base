@@ -109,36 +109,51 @@ import junit.framework.Assert;
  * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
  * (introduced in API version 3).
  * <p>Note that, in order for your Activity to access the Internet and load web pages
- * in a WebView, you must add the <var>INTERNET</var> permissions to your
+ * in a WebView, you must add the {@code INTERNET} permissions to your
  * Android Manifest file:</p>
  * <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre>
  *
- * <p>This must be a child of the <code>&lt;manifest></code> element.</p>
+ * <p>This must be a child of the <a
+ * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code &lt;manifest&gt;}</a>
+ * element.</p>
  *
  * <h3>Basic usage</h3>
  *
  * <p>By default, a WebView provides no browser-like widgets, does not
- * enable JavaScript and errors will be ignored. If your goal is only
+ * enable JavaScript and web page errors are ignored. If your goal is only
  * to display some HTML as a part of your UI, this is probably fine;
  * the user won't need to interact with the web page beyond reading
  * it, and the web page won't need to interact with the user. If you
- * actually want a fully blown web browser, then you probably want to
- * invoke the Browser application with your URL rather than show it
- * with a WebView. See {@link android.content.Intent} for more information.</p>
+ * actually want a full-blown web browser, then you probably want to
+ * invoke the Browser application with a URL Intent rather than show it
+ * with a WebView. For example:
+ * <pre>
+ * Uri uri = Uri.parse("http://www.example.com");
+ * Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+ * startActivity(intent);
+ * </pre>
+ * <p>See {@link android.content.Intent} for more information.</p>
  *
+ * <p>To provide a WebView in your own Activity, include a {@code &lt;WebView&gt;} in your layout,
+ * or set the entire Activity window as a WebView during {@link
+ * android.app.Activity#onCreate(Bundle) onCreate()}:</p>
  * <pre class="prettyprint">
  * WebView webview = new WebView(this);
  * setContentView(webview);
+ * </pre>
  *
+ * <p>Then load the desired web page:</p>
+ * <pre>
  * // Simplest usage: note that an exception will NOT be thrown
  * // if there is an error loading this page (see below).
  * webview.loadUrl("http://slashdot.org/");
  *
- * // Of course you can also load from any string:
- * String summary = "&lt;html>&lt;body>You scored &lt;b>192</b> points.&lt;/body>&lt;/html>";
+ * // OR, you can also load from an HTML string:
+ * String summary = "&lt;html>&lt;body>You scored &lt;b>192&lt;/b> points.&lt;/body>&lt;/html>";
  * webview.loadData(summary, "text/html", "utf-8");
  * // ... although note that there are restrictions on what this HTML can do.
- * // See the JavaDocs for loadData and loadDataWithBaseUrl for more info.
+ * // See the JavaDocs for {@link #loadData(String,String,String) loadData()} and {@link
+ * #loadDataWithBaseURL(String,String,String,String,String) loadDataWithBaseURL()} for more info.
  * </pre>
  *
  * <p>A WebView has several customization points where you can add your
@@ -148,15 +163,20 @@ import junit.framework.Assert;
  *   <li>Creating and setting a {@link android.webkit.WebChromeClient} subclass.
  *       This class is called when something that might impact a
  *       browser UI happens, for instance, progress updates and
- *       JavaScript alerts are sent here.
+ *       JavaScript alerts are sent here (see <a
+ * href="{@docRoot}guide/developing/debug-tasks.html#DebuggingWebPages">Debugging Tasks</a>).
  *   </li>
  *   <li>Creating and setting a {@link android.webkit.WebViewClient} subclass.
  *       It will be called when things happen that impact the
  *       rendering of the content, eg, errors or form submissions. You
- *       can also intercept URL loading here.</li>
- *   <li>Via the {@link android.webkit.WebSettings} class, which contains
- *       miscellaneous configuration. </li>
- *   <li>With the {@link android.webkit.WebView#addJavascriptInterface} method.
+ *       can also intercept URL loading here (via {@link
+ * android.webkit.WebViewClient#shouldOverrideUrlLoading(WebView,String)
+ * shouldOverrideUrlLoading()}).</li>
+ *   <li>Modifying the {@link android.webkit.WebSettings}, such as
+ * enabling JavaScript with {@link android.webkit.WebSettings#setJavaScriptEnabled(boolean)
+ * setJavaScriptEnabled()}. </li>
+ *   <li>Adding JavaScript-to-Java interfaces with the {@link
+ * android.webkit.WebView#addJavascriptInterface} method.
  *       This lets you bind Java objects into the WebView so they can be
  *       controlled from the web pages JavaScript.</li>
  * </ul>
@@ -191,8 +211,8 @@ import junit.framework.Assert;
  * <h3>Cookie and window management</h3>
  *
  * <p>For obvious security reasons, your application has its own
- * cache, cookie store etc - it does not share the Browser
- * applications data. Cookies are managed on a separate thread, so
+ * cache, cookie store etc.&mdash;it does not share the Browser
+ * application's data. Cookies are managed on a separate thread, so
  * operations like index building don't block the UI
  * thread. Follow the instructions in {@link android.webkit.CookieSyncManager}
  * if you want to use cookies in your application.
@@ -201,15 +221,79 @@ import junit.framework.Assert;
  * <p>By default, requests by the HTML to open new windows are
  * ignored. This is true whether they be opened by JavaScript or by
  * the target attribute on a link. You can customize your
- * WebChromeClient to provide your own behaviour for opening multiple windows,
+ * {@link WebChromeClient} to provide your own behaviour for opening multiple windows,
  * and render them in whatever manner you want.</p>
  *
- * <p>Standard behavior for an Activity is to be destroyed and
- * recreated when the devices orientation is changed. This will cause
+ * <p>The standard behavior for an Activity is to be destroyed and
+ * recreated when the device orientation or any other configuration changes. This will cause
  * the WebView to reload the current page. If you don't want that, you
- * can set your Activity to handle the orientation and keyboardHidden
+ * can set your Activity to handle the {@code orientation} and {@code keyboardHidden}
  * changes, and then just leave the WebView alone. It'll automatically
- * re-orient itself as appropriate.</p>
+ * re-orient itself as appropriate. Read <a
+ * href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a> for
+ * more information about how to handle configuration changes during runtime.</p>
+ *
+ *
+ * <h3>Building web pages to support different screen densities</h3>
+ *
+ * <p>The screen density of a device is based on the screen resolution. A screen with low density
+ * has fewer available pixels per inch, where a screen with high density
+ * has more — sometimes significantly more — pixels per inch. The density of a
+ * screen is important because, other things being equal, a UI element (such as a button) whose
+ * height and width are defined in terms of screen pixels will appear larger on the lower density
+ * screen and smaller on the higher density screen.
+ * For simplicity, Android collapses all actual screen densities into three generalized densities:
+ * high, medium, and low.</p>
+ * <p>By default, WebView scales a web page so that it is drawn at a size that matches the default
+ * appearance on a medium density screen. So, it applies 1.5x scaling on a high density screen
+ * (because its pixels are smaller) and 0.75x scaling on a low density screen (because its pixels
+ * are bigger).
+ * Starting with API Level 5 (Android 2.0), WebView supports DOM, CSS, and meta tag features to help
+ * you (as a web developer) target screens with different screen densities.</p>
+ * <p>Here's a summary of the features you can use to handle different screen densities:</p>
+ * <ul>
+ * <li>The {@code window.devicePixelRatio} DOM property. The value of this property specifies the
+ * default scaling factor used for the current device. For example, if the value of {@code
+ * window.devicePixelRatio} is "1.0", then the device is considered a medium density (mdpi) device
+ * and default scaling is not applied to the web page; if the value is "1.5", then the device is
+ * considered a high density device (hdpi) and the page content is scaled 1.5x; if the
+ * value is "0.75", then the device is considered a low density device (ldpi) and the content is
+ * scaled 0.75x. However, if you specify the {@code "target-densitydpi"} meta property
+ * (discussed below), then you can stop this default scaling behavior.</li>
+ * <li>The {@code -webkit-device-pixel-ratio} CSS media query. Use this to specify the screen
+ * densities for which this style sheet is to be used. The corresponding value should be either
+ * "0.75", "1", or "1.5", to indicate that the styles are for devices with low density, medium
+ * density, or high density screens, respectively. For example:
+ * <pre>
+ * &lt;link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio:1.5)" href="hdpi.css" /&gt;</pre>
+ * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ration of 1.5,
+ * which is the high density pixel ratio.</p>
+ * </li>
+ * <li>The {@code target-densitydpi} property for the {@code viewport} meta tag. You can use
+ * this to specify the target density for which the web page is designed, using the following
+ * values:
+ * <ul>
+ * <li>{@code device-dpi} - Use the device's native dpi as the target dpi. Default scaling never
+ * occurs.</li>
+ * <li>{@code high-dpi} - Use hdpi as the target dpi. Medium and low density screens scale down
+ * as appropriate.</li>
+ * <li>{@code medium-dpi} - Use mdpi as the target dpi. High density screens scale up and
+ * low density screens scale down. This is also the default behavior.</li>
+ * <li>{@code low-dpi} - Use ldpi as the target dpi. Medium and high density screens scale up
+ * as appropriate.</li>
+ * <li><em>{@code &lt;value&gt;}</em> - Specify a dpi value to use as the target dpi (accepted
+ * values are 70-400).</li>
+ * </ul>
+ * <p>Here's an example meta tag to specify the target density:</p>
+ * <pre>&lt;meta name="viewport" content="target-densitydpi=device-dpi" /&gt;</pre></li>
+ * </ul>
+ * <p>If you want to modify your web page for different densities, by using the {@code
+ * -webkit-device-pixel-ratio} CSS media query and/or the {@code
+ * window.devicePixelRatio} DOM property, then you should set the {@code target-densitydpi} meta
+ * property to {@code device-dpi}. This stops Android from performing scaling in your web page and
+ * allows you to make the necessary adjustments for each density via CSS and JavaScript.</p>
+ *
+ * 
  */
 @Widget
 public class WebView extends AbsoluteLayout
