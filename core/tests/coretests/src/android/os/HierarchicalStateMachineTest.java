@@ -74,15 +74,15 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (isQuit(message)) {
                     mQuitCount += 1;
                     if (mQuitCount > 2) {
-                        // Returning false to actually quit
-                        return false;
+                        // Returning NOT_HANDLED to actually quit
+                        return NOT_HANDLED;
                     } else {
                         // Do NOT quit
-                        return true;
+                        return HANDLED;
                     }
                 } else  {
                     // All other message are handled
-                    return true;
+                    return HANDLED;
                 }
             }
         }
@@ -172,12 +172,18 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         class S1 extends HierarchicalState {
             @Override protected void enter() {
+                // Test that message is HSM_INIT_CMD
+                assertEquals(HSM_INIT_CMD, getCurrentMessage().what);
+
                 // Test that a transition in enter and the initial state works
                 mS1EnterCount += 1;
                 transitionTo(mS2);
                 Log.d(TAG, "S1.enter");
             }
             @Override protected void exit() {
+                // Test that message is HSM_INIT_CMD
+                assertEquals(HSM_INIT_CMD, getCurrentMessage().what);
+
                 mS1ExitCount += 1;
                 Log.d(TAG, "S1.exit");
             }
@@ -185,10 +191,16 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         class S2 extends HierarchicalState {
             @Override protected void enter() {
+                // Test that message is HSM_INIT_CMD
+                assertEquals(HSM_INIT_CMD, getCurrentMessage().what);
+
                 mS2EnterCount += 1;
                 Log.d(TAG, "S2.enter");
             }
             @Override protected void exit() {
+                // Test that message is TEST_CMD_1
+                assertEquals(TEST_CMD_1, getCurrentMessage().what);
+
                 // Test transition in exit work
                 mS2ExitCount += 1;
                 transitionTo(mS4);
@@ -196,10 +208,10 @@ public class HierarchicalStateMachineTest extends TestCase {
             }
             @Override protected boolean processMessage(Message message) {
                 // Start a transition to S3 but it will be
-                // changed to a transition to S4
+                // changed to a transition to S4 in exit
                 transitionTo(mS3);
                 Log.d(TAG, "S2.processMessage");
-                return true;
+                return HANDLED;
             }
         }
 
@@ -264,7 +276,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         }
 
         synchronized (smEnterExitTranstionToTest) {
-            smEnterExitTranstionToTest.sendMessage(1);
+            smEnterExitTranstionToTest.sendMessage(TEST_CMD_1);
 
             try {
                 // wait for the messages to be handled
@@ -321,7 +333,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_6) {
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
         }
 
@@ -415,7 +427,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                     assertEquals(1, mExitCount);
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
 
             @Override protected void exit() {
@@ -510,7 +522,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_2) {
                     transitionTo(mS2);
                 }
-                return true;
+                return HANDLED;
             }
 
             @Override protected void exit() {
@@ -523,7 +535,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_2) {
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
         }
 
@@ -612,13 +624,13 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_2) {
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
         }
 
         class ChildState extends HierarchicalState {
             @Override protected boolean processMessage(Message message) {
-                return false;
+                return NOT_HANDLED;
             }
         }
 
@@ -697,20 +709,20 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_2) {
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
         }
 
         class ChildState1 extends HierarchicalState {
             @Override protected boolean processMessage(Message message) {
                 transitionTo(mChildState2);
-                return true;
+                return HANDLED;
             }
         }
 
         class ChildState2 extends HierarchicalState {
             @Override protected boolean processMessage(Message message) {
-                return false;
+                return NOT_HANDLED;
             }
         }
 
@@ -794,7 +806,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 mParentState1EnterCount += 1;
             }
             @Override protected boolean processMessage(Message message) {
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mParentState1ExitCount += 1;
@@ -822,7 +834,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 assertEquals(0, mChildState5ExitCount);
 
                 transitionTo(mChildState2);
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mChildState1ExitCount += 1;
@@ -850,7 +862,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 assertEquals(0, mChildState5ExitCount);
 
                 transitionTo(mChildState5);
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mChildState2ExitCount += 1;
@@ -878,7 +890,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 assertEquals(1, mChildState5ExitCount);
 
                 transitionToHaltingState();
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mParentState2ExitCount += 1;
@@ -906,7 +918,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 assertEquals(1, mChildState5ExitCount);
 
                 transitionTo(mChildState4);
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mChildState3ExitCount += 1;
@@ -934,7 +946,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 assertEquals(1, mChildState5ExitCount);
 
                 transitionTo(mParentState2);
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mChildState4ExitCount += 1;
@@ -962,7 +974,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 assertEquals(0, mChildState5ExitCount);
 
                 transitionTo(mChildState3);
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 mChildState5ExitCount += 1;
@@ -1108,7 +1120,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                     mArrivalTimeMsg2 = SystemClock.elapsedRealtime();
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
 
             @Override protected void exit() {
@@ -1190,7 +1202,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         class S1 extends HierarchicalState {
             @Override protected boolean processMessage(Message message) {
                 transitionTo(mS2);
-                return true;
+                return HANDLED;
             }
             @Override protected void exit() {
                 sendMessage(TEST_CMD_2);
@@ -1216,7 +1228,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (mMsgCount == 2) {
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
 
             @Override protected void exit() {
@@ -1300,7 +1312,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_2) {
                     transitionToHaltingState();
                 }
-                return false;
+                return NOT_HANDLED;
             }
         }
 
@@ -1369,7 +1381,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 if (message.what == TEST_CMD_4) {
                     transitionToHaltingState();
                 }
-                return true;
+                return HANDLED;
             }
         }
 
@@ -1563,10 +1575,10 @@ class Hsm1 extends HierarchicalStateMachine {
             if (message.what == CMD_1) {
                 // Transition to ourself to show that enter/exit is called
                 transitionTo(mS1);
-                return true;
+                return HANDLED;
             } else {
                 // Let parent process all other messages
-                return false;
+                return NOT_HANDLED;
             }
         }
         @Override protected void exit() {
@@ -1618,7 +1630,7 @@ class Hsm1 extends HierarchicalStateMachine {
                 transitionToHaltingState();
                 break;
             }
-            return true;
+            return HANDLED;
         }
         @Override protected void exit() {
             Log.d(TAG, "P2.exit");
