@@ -46,6 +46,15 @@ public:
     inline int64_t      getInt64() { return (int64_t)getUInt64(); }
     void                getString(MtpStringBuffer& string);
 
+    Int8List*           getAInt8();
+    UInt8List*          getAUInt8();
+    Int16List*          getAInt16();
+    UInt16List*         getAUInt16();
+    Int32List*          getAInt32();
+    UInt32List*         getAUInt32();
+    Int64List*          getAInt64();
+    UInt64List*         getAUInt64();
+
     void                putInt8(int8_t value);
     void                putUInt8(uint8_t value);
     void                putInt16(int16_t value);

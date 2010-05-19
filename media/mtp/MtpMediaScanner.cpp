@@ -16,6 +16,7 @@
 
 #include "MtpDatabase.h"
 #include "MtpMediaScanner.h"
+#include "mtp.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

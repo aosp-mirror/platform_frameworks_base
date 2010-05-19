@@ -75,6 +75,70 @@ void MtpDataPacket::getString(MtpStringBuffer& string)
     string.readFromPacket(this);
 }
 
+Int8List* MtpDataPacket::getAInt8() {
+    Int8List* result = new Int8List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getInt8());
+    return result;
+}
+
+UInt8List* MtpDataPacket::getAUInt8() {
+    UInt8List* result = new UInt8List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getUInt8());
+    return result;
+}
+
+Int16List* MtpDataPacket::getAInt16() {
+    Int16List* result = new Int16List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getInt16());
+    return result;
+}
+
+UInt16List* MtpDataPacket::getAUInt16() {
+    UInt16List* result = new UInt16List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getUInt16());
+    return result;
+}
+
+Int32List* MtpDataPacket::getAInt32() {
+    Int32List* result = new Int32List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getInt32());
+    return result;
+}
+
+UInt32List* MtpDataPacket::getAUInt32() {
+    UInt32List* result = new UInt32List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getUInt32());
+    return result;
+}
+
+Int64List* MtpDataPacket::getAInt64() {
+    Int64List* result = new Int64List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getInt64());
+    return result;
+}
+
+UInt64List* MtpDataPacket::getAUInt64() {
+    UInt64List* result = new UInt64List;
+    int count = getUInt32();
+    for (int i = 0; i < count; i++)
+        result->push(getUInt64());
+    return result;
+}
+
 void MtpDataPacket::putInt8(int8_t value) {
     allocate(mOffset + 1);
     mBuffer[mOffset++] = (uint8_t)value;

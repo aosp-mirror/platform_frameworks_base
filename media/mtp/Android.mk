@@ -57,13 +57,17 @@ LOCAL_SRC_FILES:=                                       \
                   MtpClient.cpp                         \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
+                  MtpDeviceInfo.cpp                     \
                   MtpPacket.cpp                         \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
+                  MtpStorageInfo.cpp                    \
                   MtpStringBuffer.cpp                   \
+                  ../../libs/utils/VectorImpl.cpp       \
+                  ../../libs/utils/SharedBuffer.cpp     \
 
 
-LOCAL_STATIC_LIBRARIES := libusbhost
+LOCAL_STATIC_LIBRARIES := libusbhost libcutils
 LOCAL_LDLIBS := -lpthread
 
 LOCAL_CFLAGS := -g -DMTP_HOST

@@ -19,31 +19,6 @@
 
 #include <stdint.h>
 
-typedef uint16_t MtpOperationCode;
-typedef uint16_t MtpResponseCode;
-typedef uint32_t MtpSessionID;
-typedef uint32_t MtpStorageID;
-typedef uint32_t MtpTransactionID;
-typedef uint16_t MtpObjectFormat;
-typedef uint16_t MtpObjectProperty;
-
-// object handles are unique across all storage but only within a single session.
-// object handles cannot be reused after an object is deleted.
-// values 0x00000000 and 0xFFFFFFFF are reserved for special purposes.
-typedef uint32_t MtpObjectHandle;
-
-#define kInvalidObjectHandle    0xFFFFFFFF
-
-// MtpObjectHandle bits and masks
-#define kObjectHandleMarkBit        0x80000000      // used for mark & sweep by MtpMediaScanner
-#define kObjectHandleTableMask      0x70000000      // mask for object table
-#define kObjectHandleTableFile      0x00000000      // object is only in the file table
-#define kObjectHandleTableAudio     0x10000000      // object is in the audio table
-#define kObjectHandleTableVideo     0x20000000      // object is in the video table
-#define kObjectHandleTableImage     0x30000000      // object is in the images table
-#define kObjectHandleTablePlaylist  0x40000000      // object is in the playlist table
-#define kObjectHandleIndexMask      0x0FFFFFFF      // mask for object index in file table
-
 #define MTP_STANDARD_VERSION            100
 
 // Container Types

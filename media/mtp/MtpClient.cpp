@@ -26,6 +26,8 @@
 
 #include "MtpClient.h"
 #include "MtpDebug.h"
+#include "MtpDeviceInfo.h"
+#include "MtpStorageInfo.h"
 #include "MtpStringBuffer.h"
 
 namespace android {
@@ -65,30 +67,55 @@ printf("openSession\n");
     return true;
 }
 
-bool MtpClient::getDeviceInfo() {
-    mRequest.reset();
-    if (!sendRequest(MTP_OPERATION_GET_DEVICE_INFO))
-        return false;
-    if (!readData())
-        return false;
-    MtpResponseCode ret = readResponse();
-    if (ret == MTP_RESPONSE_OK) {
-        MtpStringBuffer string;
-
-        // fill in device info
-        printf("MTP standard version: %d\n", mData.getUInt16());
-        printf("MTP Vendor Extension ID: %d\n", mData.getUInt32());
-        printf("MTP vendor extension version: %d\n", mData.getUInt16());
-        mData.getString(string);
-        printf("vendor extension desc %s\n", (const char *)string);
-
-        return true;
-    }
-    return false;
+bool MtpClient::closeSession() {
+    // FIXME
+    return true;
 }
 
-bool MtpClient::closeSession() {
-    return true;
+MtpDeviceInfo* MtpClient::getDeviceInfo() {
+    mRequest.reset();
+    if (!sendRequest(MTP_OPERATION_GET_DEVICE_INFO))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+printf("getDeviceInfo returned %04X\n", ret);
+    if (ret == MTP_RESPONSE_OK) {
+        MtpDeviceInfo* info = new MtpDeviceInfo;
+        info->read(mData);
+        return info;
+    }
+    return NULL;
+}
+
+MtpStorageIDList* MtpClient::getStorageIDs() {
+    mRequest.reset();
+    if (!sendRequest(MTP_OPERATION_GET_STORAGE_IDS))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+    if (ret == MTP_RESPONSE_OK) {
+        return mData.getAUInt32();
+    }
+    return NULL;
+}
+
+MtpStorageInfo* MtpClient::getStorageInfo(MtpStorageID storageID) {
+    mRequest.reset();
+    mRequest.setParameter(1, storageID);
+    if (!sendRequest(MTP_OPERATION_GET_STORAGE_INFO))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+printf("getStorageInfo returned %04X\n", ret);
+    if (ret == MTP_RESPONSE_OK) {
+        MtpStorageInfo* info = new MtpStorageInfo(storageID);
+        info->read(mData);
+        return info;
+    }
+    return NULL;
 }
 
 bool MtpClient::sendRequest(MtpOperationCode operation) {
@@ -111,7 +138,8 @@ bool MtpClient::sendData(MtpOperationCode operation) {
 }
 
 bool MtpClient::readData() {
-     int ret = mData.read(mEndpointIn);
+    mData.reset();
+    int ret = mData.read(mEndpointIn);
     printf("readData returned %d\n", ret);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mData.dump();

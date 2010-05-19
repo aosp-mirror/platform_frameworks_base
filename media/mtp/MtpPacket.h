@@ -17,10 +17,7 @@
 #ifndef _MTP_PACKET_H
 #define _MTP_PACKET_H
 
-#include "mtp.h"
-#include "MtpUtils.h"
-
-#include <stdint.h>
+#include "MtpTypes.h"
 
 struct usb_endpoint;
 

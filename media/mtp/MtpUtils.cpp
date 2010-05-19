@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include <time.h>
 
 #include <cutils/tztime.h>

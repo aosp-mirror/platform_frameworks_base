@@ -20,11 +20,12 @@
 #include "MtpRequestPacket.h"
 #include "MtpDataPacket.h"
 #include "MtpResponsePacket.h"
-#include "mtp.h"
-
-#include "MtpUtils.h"
+#include "MtpTypes.h"
 
 namespace android {
+
+class MtpDeviceInfo;
+class MtpStorageInfo;
 
 class MtpClient {
 private:
@@ -47,8 +48,11 @@ public:
     virtual             ~MtpClient();
 
     bool                openSession();
-    bool                getDeviceInfo();
     bool                closeSession();
+
+    MtpDeviceInfo*      getDeviceInfo();
+    MtpStorageIDList*   getStorageIDs();
+    MtpStorageInfo*     getStorageInfo(MtpStorageID storageID);
 
 private:
     bool                sendRequest(MtpOperationCode operation);

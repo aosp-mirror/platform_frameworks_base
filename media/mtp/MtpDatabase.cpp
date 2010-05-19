@@ -16,6 +16,7 @@
 
 #include "MtpDatabase.h"
 #include "MtpDataPacket.h"
+#include "MtpUtils.h"
 #include "SqliteDatabase.h"
 #include "SqliteStatement.h"
 

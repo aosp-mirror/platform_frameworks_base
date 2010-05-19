@@ -21,6 +21,7 @@
 #include <usbhost/usbhost.h>
 
 #include "MtpPacket.h"
+#include "mtp.h"
 
 namespace android {
 

@@ -14,18 +14,36 @@
  * limitations under the License.
  */
 
-#ifndef _MTP_DEBUG_H
-#define _MTP_DEBUG_H
+#ifndef _MTP_STORAGE_INFO_H
+#define _MTP_STORAGE_INFO_H
 
 #include "MtpTypes.h"
 
 namespace android {
 
-class MtpDebug {
+class MtpDataPacket;
+
+class MtpStorageInfo {
 public:
-    static const char* getOperationCodeName(MtpOperationCode code);
+    MtpStorageID        mStorageID;
+    uint16_t            mStorageType;
+    uint16_t            mFileSystemType;
+    uint16_t            mAccessCapability;
+    uint64_t            mMaxCapacity;
+    uint64_t            mFreeSpaceBytes;
+    uint32_t            mFreeSpaceObjects;
+    char*               mStorageDescription;
+    char*               mVolumeIdentifier;
+
+public:
+                        MtpStorageInfo(MtpStorageID id);
+    virtual             ~MtpStorageInfo();
+
+    void                read(MtpDataPacket& packet);
+
+    void                print();
 };
 
 }; // namespace android
 
-#endif // _MTP_DEBUG_H
+#endif // _MTP_STORAGE_INFO_H

@@ -17,9 +17,8 @@
 #ifndef _MTP_DATABASE_H
 #define _MTP_DATABASE_H
 
-#include "MtpUtils.h"
+#include "MtpTypes.h"
 #include "SqliteDatabase.h"
-#include "mtp.h"
 
 namespace android {
 

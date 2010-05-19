@@ -22,6 +22,8 @@
 #include <linux/usb/ch9.h>
 
 #include "MtpClient.h"
+#include "MtpDeviceInfo.h"
+#include "MtpStorageInfo.h"
 
 using namespace android;
 
@@ -37,7 +39,21 @@ static void start_session(struct usb_endpoint *ep_in, struct usb_endpoint *ep_ou
         delete sClient;
     sClient = new MtpClient(ep_in, ep_out, ep_intr);
     sClient->openSession();
-    sClient->getDeviceInfo();
+    MtpDeviceInfo* info = sClient->getDeviceInfo();
+    if (info) {
+        info->print();
+        delete info;
+    }
+    MtpStorageIDList* storageIDs = sClient->getStorageIDs();
+    if (storageIDs) {
+        for (int i = 0; i < storageIDs->size(); i++) {
+            MtpStorageInfo* info = sClient->getStorageInfo((*storageIDs)[i]);
+            if (info) {
+                info->print();
+                delete info;
+            }
+        }
+    }
 }
 
 static void usb_device_added(const char *devname)
