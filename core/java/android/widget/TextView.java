@@ -4552,6 +4552,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     outText.text = TextUtils.substring(content, partialStartOffset,
                             partialEndOffset);
                 }
+            } else {
+                outText.partialStartOffset = 0;
+                outText.partialEndOffset = 0;
+                outText.text = "";
             }
             outText.flags = 0;
             if (MetaKeyKeyListener.getMetaState(mText, MetaKeyKeyListener.META_SELECTING) != 0) {
