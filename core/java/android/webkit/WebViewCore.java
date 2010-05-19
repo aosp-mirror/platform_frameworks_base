@@ -705,6 +705,12 @@ final class WebViewCore {
         int mY;
     }
 
+    static class TouchHighlightData {
+        int mX;
+        int mY;
+        int mSlop;
+    }
+
     // mAction of TouchEventData can be MotionEvent.getAction() which uses the
     // last two bytes or one of the following values
     static final int ACTION_LONGPRESS = 0x100;
@@ -874,6 +880,9 @@ final class WebViewCore {
         static final int ADD_PACKAGE_NAMES = 184;
         static final int ADD_PACKAGE_NAME = 185;
         static final int REMOVE_PACKAGE_NAME = 186;
+
+        static final int GET_TOUCH_HIGHLIGHT_RECTS = 187;
+        static final int REMOVE_TOUCH_HIGHLIGHT_RECTS = 188;
 
         // accessibility support
         static final int MODIFY_SELECTION = 190;
@@ -1382,6 +1391,21 @@ final class WebViewCore {
                             }
                             BrowserFrame.sJavaBridge.removePackageName(
                                     (String) msg.obj);
+                            break;
+
+                        case GET_TOUCH_HIGHLIGHT_RECTS:
+                            TouchHighlightData d = (TouchHighlightData) msg.obj;
+                            ArrayList<Rect> rects = nativeGetTouchHighlightRects
+                                    (d.mX, d.mY, d.mSlop);
+                            mWebView.mPrivateHandler.obtainMessage(
+                                    WebView.SET_TOUCH_HIGHLIGHT_RECTS, rects)
+                                    .sendToTarget();
+                            break;
+
+                        case REMOVE_TOUCH_HIGHLIGHT_RECTS:
+                            mWebView.mPrivateHandler.obtainMessage(
+                                    WebView.SET_TOUCH_HIGHLIGHT_RECTS, null)
+                                    .sendToTarget();
                             break;
                     }
                 }
@@ -2041,6 +2065,12 @@ final class WebViewCore {
             mWebView.mViewManager.postReadyToDrawAll();
         }
 
+        // remove the touch highlight when moving to a new page
+        if (getSettings().supportTouchOnly()) {
+            mEventHub.sendMessage(Message.obtain(null,
+                    EventHub.REMOVE_TOUCH_HIGHLIGHT_RECTS));
+        }
+
         // reset the scroll position, the restored offset and scales
         mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY
                 = mRestoredScale = mRestoredScreenWidthScale = 0;
@@ -2498,4 +2528,6 @@ final class WebViewCore {
     private native boolean nativeValidNodeAndBounds(int frame, int node,
             Rect bounds);
 
+    private native ArrayList<Rect> nativeGetTouchHighlightRects(int x, int y,
+            int slop);
 }
