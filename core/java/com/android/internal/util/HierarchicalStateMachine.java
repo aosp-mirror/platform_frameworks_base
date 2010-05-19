@@ -51,7 +51,7 @@ import java.util.HashMap;
       mS2   mS1 ----> initial state
 </code>
  * After the state machine is created and started, messages are sent to a state
- * machine using <code>sendMessage</code and the messages are created using
+ * machine using <code>sendMessage</code> and the messages are created using
  * <code>obtainMessage</code>. When the state machine receives a message the
  * current state's <code>processMessage</code> is invoked. In the above example
  * mS1.processMessage will be invoked first. The state may use <code>transitionTo</code>
@@ -59,9 +59,9 @@ import java.util.HashMap;
  *
  * Each state in the state machine may have a zero or one parent states and if
  * a child state is unable to handle a message it may have the message processed
- * by its parent by returning false. If a message is never processed <code>unhandledMessage</code>
- * will be invoked to give one last chance for the state machine to process
- * the message.
+ * by its parent by returning false or NOT_HANDLED. If a message is never processed
+ * <code>unhandledMessage</code> will be invoked to give one last chance for the state machine
+ * to process the message.
  *
  * When all processing is completed a state machine may choose to call
  * <code>transitionToHaltingState</code>. When the current <code>processingMessage</code>
@@ -95,7 +95,7 @@ import java.util.HashMap;
  * any other messages that are on the queue or might be added later. Both of
  * these are protected and may only be invoked from within a state machine.
  *
- * To illustrate some of these properties we'll use state machine with 8
+ * To illustrate some of these properties we'll use state machine with an 8
  * state hierarchy:
 <code>
           mP0
@@ -109,44 +109,19 @@ import java.util.HashMap;
  *
  * After starting mS5 the list of active states is mP0, mP1, mS1 and mS5.
  * So the order of calling processMessage when a message is received is mS5,
- * mS1, mP1, mP0 assuming each processMessage  indicates it can't handle this
- * message by returning false.
+ * mS1, mP1, mP0 assuming each processMessage indicates it can't handle this
+ * message by returning false or NOT_HANDLED.
  *
  * Now assume mS5.processMessage receives a message it can handle, and during
- * the handling determines the machine should changes states. It would call
- * transitionTo(mS4) and return true. Immediately after returning from
+ * the handling determines the machine should change states. It could call
+ * transitionTo(mS4) and return true or HANDLED. Immediately after returning from
  * processMessage the state machine runtime will find the common parent,
  * which is mP1. It will then call mS5.exit, mS1.exit, mS2.enter and then
  * mS4.enter. The new list of active states is mP0, mP1, mS2 and mS4. So
  * when the next message is received mS4.processMessage will be invoked.
  *
- * To assist in describing an HSM a simple grammar has been created which
- * is informally defined here and a formal EBNF description is at the end
- * of the class comment.
- *
- * An HSM starts with the name and includes a set of hierarchical states.
- * A state is preceeded by one or more plus signs (+), to indicate its
- * depth and a hash (#) if its the initial state. Child states follow their
- * parents and have one more plus sign then their parent. Inside a state
- * are a series of messages, the actions they perform and if the processing
- * is complete ends with a period (.). If processing isn't complete and
- * the parent should process the message it ends with a caret (^). The
- * actions include send a message ($MESSAGE), defer a message (%MESSAGE),
- * transition to a new state (>MESSAGE) and an if statement
- * (if ( expression ) { list of actions }.)
- *
- * The Hsm HelloWorld could documented as:
- *
- * HelloWorld {
- *   + # mState1.
- * }
- *
- * and interpreted as HSM HelloWorld:
- *
- * mState1 a root state (single +) and initial state (#) which
- * processes all messages completely, the period (.).
- *
- * The implementation is:
+ * Now for some concrete examples, here is the canonical HelloWorld as an HSM.
+ * It responds with "Hello World" being printed to the log for every message.
 <code>
 class HelloWorld extends HierarchicalStateMachine {
     Hsm1(String name) {
@@ -164,7 +139,7 @@ class HelloWorld extends HierarchicalStateMachine {
     class State1 extends HierarchicalState {
         @Override public boolean processMessage(Message message) {
             Log.d(TAG, "Hello World");
-            return true;
+            return HANDLED;
         }
     }
     State1 mState1 = new State1();
@@ -176,7 +151,7 @@ void testHelloWorld() {
 }
 </code>
  *
- * A more interesting state machine is one of four states
+ * A more interesting state machine is one with four states
  * with two independent parent states.
 <code>
         mP1      mP2
@@ -184,45 +159,68 @@ void testHelloWorld() {
       mS2   mS1
 </code>
  *
- * documented as:
+ * Here is a description of this state machine using pseudo code.
  *
- * Hsm1 {
- *   + mP1 {
- *       CMD_2 {
- *          $CMD_3
- *          %CMD_2
- *          >mS2
- *       }.
- *     }
- *   ++ # mS1 { CMD_1{ >mS1 }^ }
- *   ++   mS2 {
- *            CMD_2{$CMD_4}.
- *            CMD_3{%CMD_3 ; >mP2}.
- *     }
  *
- *   + mP2 e($CMD_5) {
- *            CMD_3, CMD_4.
- *            CMD_5{>HALT}.
- *     }
+ * state mP1 {
+ *      enter { log("mP1.enter"); }
+ *      exit { log("mP1.exit");  }
+ *      on msg {
+ *          CMD_2 {
+ *              send(CMD_3);
+ *              defer(msg);
+ *              transitonTo(mS2);
+ *              return HANDLED;
+ *          }
+ *          return NOT_HANDLED;
+ *      }
  * }
  *
- * and interpreted as HierarchicalStateMachine Hsm1:
+ * INITIAL
+ * state mS1 parent mP1 {
+ *      enter { log("mS1.enter"); }
+ *      exit  { log("mS1.exit");  }
+ *      on msg {
+ *          CMD_1 {
+ *              transitionTo(mS1);
+ *              return HANDLED;
+ *          }
+ *          return NOT_HANDLED;
+ *      }
+ * }
  *
- * mP1 a root state.
- *      processes message CMD_2 which sends CMD_3, defers CMD_2, and transitions to mS2
+ * state mS2 parent mP1 {
+ *      enter { log("mS2.enter"); }
+ *      exit  { log("mS2.exit");  }
+ *      on msg {
+ *          CMD_2 {
+ *              send(CMD_4);
+ *              return HANDLED;
+ *          }
+ *          CMD_3 {
+ *              defer(msg);
+ *              transitionTo(mP2);
+ *              return HANDLED;
+ *          }
+ *          return NOT_HANDLED;
+ *      }
+ * }
  *
- * mS1 a child of mP1 is the initial state:
- *      processes message CMD_1 which transitions to itself and returns false to let mP1 handle it.
- *
- * mS2 a child of mP1:
- *      processes message CMD_2 which send CMD_4
- *      processes message CMD_3 which defers CMD_3 and transitions to mP2
- *
- * mP2 a root state.
- *      on enter it sends CMD_5
- *      processes message CMD_3
- *      processes message CMD_4
- *      processes message CMD_5 which transitions to halt state
+ * state mP2 {
+ *      enter {
+ *          log("mP2.enter");
+ *          send(CMD_5);
+ *      }
+ *      exit { log("mP2.exit"); }
+ *      on msg {
+ *          CMD_3, CMD_4 { return HANDLED; }
+ *          CMD_5 {
+ *              transitionTo(HaltingState);
+ *              return HANDLED;
+ *          }
+ *          return NOT_HANDLED;
+ *      }
+ * }
  *
  * The implementation is below and also in HierarchicalStateMachineTest:
 <code>
@@ -271,11 +269,11 @@ class Hsm1 extends HierarchicalStateMachine {
                 sendMessage(obtainMessage(CMD_3));
                 deferMessage(message);
                 transitionTo(mS2);
-                retVal = true;
+                retVal = HANDLED;
                 break;
             default:
                 // Any message we don't understand in this state invokes unhandledMessage
-                retVal = false;
+                retVal = NOT_HANDLED;
                 break;
             }
             return retVal;
@@ -294,10 +292,10 @@ class Hsm1 extends HierarchicalStateMachine {
             if (message.what == CMD_1) {
                 // Transition to ourself to show that enter/exit is called
                 transitionTo(mS1);
-                return true;
+                return HANDLED;
             } else {
                 // Let parent process all other messages
-                return false;
+                return NOT_HANDLED;
             }
         }
         @Override public void exit() {
@@ -315,15 +313,15 @@ class Hsm1 extends HierarchicalStateMachine {
             switch(message.what) {
             case(CMD_2):
                 sendMessage(obtainMessage(CMD_4));
-                retVal = true;
+                retVal = HANDLED;
                 break;
             case(CMD_3):
                 deferMessage(message);
                 transitionTo(mP2);
-                retVal = true;
+                retVal = HANDLED;
                 break;
             default:
-                retVal = false;
+                retVal = NOT_HANDLED;
                 break;
             }
             return retVal;
@@ -349,7 +347,7 @@ class Hsm1 extends HierarchicalStateMachine {
                 transitionToHaltingState();
                 break;
             }
-            return true;
+            return HANDLED;
         }
         @Override public void exit() {
             Log.d(TAG, "mP2.exit");
@@ -357,7 +355,7 @@ class Hsm1 extends HierarchicalStateMachine {
     }
 
     @Override
-    protected void halting() {
+    void halting() {
         Log.d(TAG, "halting");
         synchronized (this) {
             this.notifyAll();
@@ -413,52 +411,31 @@ class Hsm1 extends HierarchicalStateMachine {
  * D/hsm1    ( 1999): mP2.exit
  * D/hsm1    ( 1999): halting
  *
- * Here is the HSM a BNF grammar, this is a first stab at creating an
- * HSM description language, suggestions corrections or alternatives
- * would be much appreciated.
- *
- * Legend:
- *   {}  ::= zero or more
- *   {}+ ::= one or more
- *   []  ::= zero or one
- *   ()  ::= define a group with "or" semantics.
- *
- * HSM EBNF:
- *   HSM = HSM_NAME "{" { STATE }+ "}" ;
- *   HSM_NAME = alpha_numeric_name ;
- *   STATE = INTRODUCE_STATE [ ENTER | [ ENTER EXIT ] "{" [ MESSAGES ] "}" [ EXIT ] ;
- *   INTRODUCE_STATE = { STATE_DEPTH }+ [ INITIAL_STATE_INDICATOR ] STATE_NAME ;
- *   STATE_DEPTH = "+" ;
- *   INITIAL_STATE_INDICATOR = "#"
- *   ENTER = "e(" SEND_ACTION | TRANSITION_ACTION | HALT_ACTION ")" ;
- *   MESSAGES = { MSG_LIST MESSAGE_ACTIONS } ;
- *   MSG_LIST = { MSG_NAME { "," MSG_NAME } };
- *   EXIT = "x(" SEND_ACTION | TRANSITION_ACTION | HALT_ACTION ")" ;
- *   PROCESS_COMPLETION = PROCESS_IN_PARENT_OR_COMPLETE | PROCESS_COMPLETE ;
- *   SEND_ACTION = "$" MSG_NAME ;
- *   DEFER_ACTION = "%" MSG_NAME ;
- *   TRANSITION_ACTION = ">" STATE_NAME ;
- *   HALT_ACTION = ">" HALT ;
- *   MESSAGE_ACTIONS = { "{" ACTION_LIST "}" } [ PROCESS_COMPLETION ] ;
- *   ACTION_LIST = ACTION { (";" | "\n") ACTION } ;
- *   ACTION = IF_ACTION | SEND_ACTION | DEFER_ACTION | TRANSITION_ACTION | HALT_ACTION ;
- *   IF_ACTION = "if(" boolean_expression ")" "{" ACTION_LIST "}"
- *   PROCESS_IN_PARENT_OR_COMPLETE = "^" ;
- *   PROCESS_COMPLETE = "." ;
- *   STATE_NAME = alpha_numeric_name ;
- *   MSG_NAME = alpha_numeric_name | ALL_OTHER_MESSAGES ;
- *   ALL_OTHER_MESSAGES = "*" ;
- *   EXP = boolean_expression ;
- *
- * Idioms:
- *   * { %* }. ::= All other messages will be deferred.
  */
 public class HierarchicalStateMachine {
 
     private static final String TAG = "HierarchicalStateMachine";
     private String mName;
 
+    /** Message.what value when quitting */
     public static final int HSM_QUIT_CMD = -1;
+
+    /** Message.what value when initializing */
+    public static final int HSM_INIT_CMD = -1;
+
+    /**
+     * Convenience constant that maybe returned by processMessage
+     * to indicate the the message was processed and is not to be
+     * processed by parent states
+     */
+    public static final boolean HANDLED = true;
+
+    /**
+     * Convenience constant that maybe returned by processMessage
+     * to indicate the the message was NOT processed and is to be
+     * processed by parent states
+     */
+    public static final boolean NOT_HANDLED = false;
 
     private static class HsmHandler extends Handler {
 
@@ -467,6 +444,12 @@ public class HierarchicalStateMachine {
 
         /** The quit object */
         private static final Object mQuitObj = new Object();
+
+        /** The initialization message */
+        private static final Message mInitMsg = null;
+
+        /** The current message */
+        private Message mMsg;
 
         /** A list of messages that this state machine has processed */
         private ProcessedMessages mProcessedMessages = new ProcessedMessages();
@@ -550,8 +533,7 @@ public class HierarchicalStateMachine {
         private class QuittingState extends HierarchicalState {
             @Override
             public boolean processMessage(Message msg) {
-                // Ignore
-                return false;
+                return NOT_HANDLED;
             }
         }
 
@@ -564,6 +546,9 @@ public class HierarchicalStateMachine {
         @Override
         public final void handleMessage(Message msg) {
             if (mDbg) Log.d(TAG, "handleMessage: E msg.what=" + msg.what);
+
+            /** Save the current message */
+            mMsg = msg;
 
             /**
              * Check that construction was completed
@@ -679,6 +664,7 @@ public class HierarchicalStateMachine {
              * starting at the first entry.
              */
             mIsConstructionCompleted = true;
+            mMsg = obtainMessage(HSM_INIT_CMD);
             invokeEnterMethods(0);
 
             /**
@@ -855,6 +841,13 @@ public class HierarchicalStateMachine {
         }
 
         /**
+         * @return current message
+         */
+        private final Message getCurrentMessage() {
+            return mMsg;
+        }
+
+        /**
          * @return current state
          */
         private final HierarchicalState getCurrentState() {
@@ -1025,13 +1018,20 @@ public class HierarchicalStateMachine {
     protected final void addState(HierarchicalState state, HierarchicalState parent) {
         mHsmHandler.addState(state, parent);
     }
+
+    /**
+     * @return current message
+     */
+    protected final Message getCurrentMessage() {
+        return mHsmHandler.getCurrentMessage();
+    }
+
     /**
      * @return current state
      */
     protected final HierarchicalState getCurrentState() {
         return mHsmHandler.getCurrentState();
     }
-
 
     /**
      * Add a new state to the state machine, parent will be null
