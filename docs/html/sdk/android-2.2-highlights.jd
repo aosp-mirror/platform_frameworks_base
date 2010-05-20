@@ -26,6 +26,9 @@ page.title=Android 2.2 Platform Highlights
 #jd-content table.columns td+td {
   padding:0 2em;
 }
+#jd-content table.columns td img {
+  margin:0;
+}
 #jd-content table.columns td+td>*:first-child {
   margin-top:-2em;
 }
@@ -35,17 +38,17 @@ page.title=Android 2.2 Platform Highlights
 }
 </style>
 
-<!--
+
 <div class="video">
 <object width="278 height="180">
-<param name="movie" value="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&"></param>
+<param name="movie" value="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&"></param>
 <param name="allowFullScreen" value="true"></param><param name="allowscriptaccess"
 value="always"></param>
-<embed src="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&" type="application/x-shockwave-flash" 
+<embed src="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&" type="application/x-shockwave-flash"
 allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
 </object>
 </div>
--->
+
 
 <p>The Android 2.2 platform introduces many new and exciting features for
 users and developers. This document provides a glimpse at some of the new user features
@@ -68,35 +71,19 @@ href="android-2.2.html#api">Android 2.2 version notes</a>.</p>
 <table class="columns" style="max-width:800px">
 <tr>
   <td>
-<p>New Home screen <span class="green">tips widget</span> assists new users on how to configure the
+<img src="images/2.2/22home.png" alt="" height=230 />
+  </td>
+  <td>
+<p style="margin-top:0">New Home screen <span class="green">tips widget</span> assists new users on
+how to configure the
 home screen with shortcuts and widgets and how to make use of multiple home screens.</p>
 <p>The Phone, applications Launcher, and Browser now have <span class="green">dedicated
 shortcuts</span> on the Home screen, making it easy to access them from any of the 5 home screen
 panels.</p>
   </td>
-  <td>
-<img src="images/2.2/22home.png" alt="" height=150 />
-  </td>
 </tr>
 </table>
 
-
-<h3>Browser</h3>
-
-<table class="columns" style="max-width:800px">
-<tr>
-  <td>
-<img src="images/2.2/22browser.png" alt="" height=220 />
-  </td>
-  <td>
-<p><span class="green">Flash:</span> Browser is able to fully support the latest version of Flash so
-the web experience is even closer to the desktop. Adobe Flash will be available to download from
-Android Market.</p>
-<p><span class="green">Performance of the browser</span> has been enhanced using the V8 engine,
-which enables faster loading of JavaScript-heavy pages.</p>
-  </td>
-</tr>
-</table>
 
 
 <h3>Exchange support</h3>
@@ -176,11 +163,13 @@ the keys as well as the auto-suggest dictionary.</p>
 </table>
 
 
-<h3>Improved operating system performance</h3>
+<h3>Improved performance</h3>
 
 <table class="columns" style="max-width:800px">
 <tr>
   <td>
+<p><span class="green">Performance of the browser</span> has been enhanced using the V8 engine,
+which enables faster loading of JavaScript-heavy pages.</p>
 <p><span class="green">Dalvik Performance Boost:</span> 2x-5x performance speedup for CPU-heavy code
 over Android 2.1 with Dalvik JIT.</p>
 <p>The graph to the right shows the performance <span class="green">speedup</span> from Android 2.1
