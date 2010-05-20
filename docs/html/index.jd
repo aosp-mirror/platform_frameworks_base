@@ -141,18 +141,20 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
 + "<a href='{@docRoot}sdk/index.html'>SDK starter package</a>."
     },
 
-    'adc2': {
+    'tv': {
       'layout':"imgLeft",
-      'icon':"adc2_s.png",
-      'name':"ADC 2",
-      'img':"adc2_l.png",
-      'title':"Android Developer Challenge 2",
-      'desc': "<p>We're pleased to announce the "
-               + "<a href='http://code.google.com/android/adc/gallery_winners.html'>winners "
-               + "of the Android Developer Challenge 2</a>! Please see our "
-               + "<a href='http://android-developers.blogspot.com/2009/11/announcing-winners-of-adc-2.html'>blog post</a> "
-               + "for full information. Thanks to everyone who participated by submitting an application or judging!</p>"
-               + "<p><a href='http://code.google.com/android/adc/'>Learn more about ADC 2 &raquo;</a></p>"
+      'icon':"tv_s.png",
+      'name':"Google TV",
+      'img':"tv_l.png",
+      'title':"Announcing Google TV!",
+      'desc': "<p><a href='http://www.google.com/tv/'>Google TV</a> is a new platform "
+               + "for television built on Android. Google "
+               + "has partnered with Sony and Logitech to integrate "
+               + "this platform into TVs, blu-ray players, and companion "
+               + "boxes. An add-on for the Android SDK will be "
+               + "available early next year. </p>"
+               + "<p><a href='http://www.google.com/tv/'>Learn more about "
+               + "Google TV &raquo;</a></p>"
     },
 
     'devphone': {
