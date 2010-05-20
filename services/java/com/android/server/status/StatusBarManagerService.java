@@ -269,7 +269,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public IBinder addNotification(StatusBarNotification notification) {
         synchronized (mNotifications) {
-            IBinder key = mNotifications.add(notification);
+            IBinder key = new Binder();
+            mNotifications.add(key, notification);
             // TODO: tell mBar
             return key;
         }

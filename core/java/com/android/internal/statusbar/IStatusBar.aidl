@@ -17,12 +17,16 @@
 package com.android.internal.statusbar;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.StatusBarNotification;
 
 /** @hide */
 oneway interface IStatusBar
 {
     void setIcon(int index, in StatusBarIcon icon);
     void removeIcon(int index);
+    void addNotification(IBinder key, in StatusBarNotification notification);
+    void updateNotification(IBinder key, in StatusBarNotification notification);
+    void removeNotification(IBinder key);
     void disable(int state);
     void animateExpand();
     void animateCollapse();
