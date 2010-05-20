@@ -31,7 +31,7 @@ page.title=Data Backup
     <li><a href="#RestoreVersion">Checking the Restore Data Version</a></li>
     <li><a href="#RequestingBackup">Requesting Backup</a></li>
     <li><a href="#RequestingRestore">Requesting Restore</a></li>
-    <li><a href="#DevelopingTestings">Developing and Testing Your Backup Agent</a></li>
+    <li><a href="#DevelopingTesting">Developing and Testing Your Backup Agent</a></li>
   </ol>
 
   <h2>Key classes</h2>
@@ -761,7 +761,7 @@ restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">
 tool</a>.</p>
 
 
-<h2 id="DevelopingTestings">Developing and Testing Your Backup Agent</h2>
+<h2 id="DevelopingTesting">Developing and Testing Your Backup Agent</h2>
 
 <p>To develop and test your backup agent:</p>
 <ul>
