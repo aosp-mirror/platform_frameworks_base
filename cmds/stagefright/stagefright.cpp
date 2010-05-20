@@ -85,6 +85,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     if (gPlaybackAudio) {
         AudioPlayer *player = new AudioPlayer(NULL);
         player->setSource(rawSource);
+        rawSource.clear();
 
         player->start(true /* sourceAlreadyStarted */);
 
@@ -95,6 +96,8 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
         delete player;
         player = NULL;
+
+        return;
     } else if (gReproduceBug >= 3 && gReproduceBug <= 5) {
         int64_t durationUs;
         CHECK(meta->findInt64(kKeyDuration, &durationUs));
