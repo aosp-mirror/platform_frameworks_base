@@ -1845,21 +1845,19 @@ public class Camera {
          * #autoFocus(AutoFocusCallback)}, {@link #cancelAutoFocus}, or {@link
          * #startPreview()}. Applications can call {@link #getParameters()}
          * and this method anytime to get the latest focus distances. If the
-         * focus mode is FOCUS_MODE_EDOF, the values may be all 0, which means
-         * focus distance is not applicable. If the focus mode is
-         * FOCUS_MODE_CONTINUOUS and autofocus has started, focus distances may
-         * change from time to time.
+         * focus mode is FOCUS_MODE_CONTINUOUS and autofocus has started, focus
+         * distances may change from time to time.
          *
-         * Far focus distance > optimal focus distance > near focus distance. If
-         * the far focus distance is infinity, the value will be
+         * Far focus distance >= optimal focus distance >= near focus distance.
+         * If the focus distance is infinity, the value will be
          * Float.POSITIVE_INFINITY.
          *
          * @param output focus distances in meters. output must be a float
          *        array with three elements. Near focus distance, optimal focus
          *        distance, and far focus distance will be filled in the array.
-         * @see #NEAR_FOCUS_DISTANCE_INDEX
-         * @see #OPTIMAL_FOCUS_DISTANCE_INDEX
-         * @see #FAR_FOCUS_DISTANCE_INDEX
+         * @see #FOCUS_DISTANCE_NEAR_INDEX
+         * @see #FOCUS_DISTANCE_OPTIMAL_INDEX
+         * @see #FOCUS_DISTANCE_FAR_INDEX
          */
         public void getFocusDistances(float[] output) {
             if (output == null || output.length != 3) {
