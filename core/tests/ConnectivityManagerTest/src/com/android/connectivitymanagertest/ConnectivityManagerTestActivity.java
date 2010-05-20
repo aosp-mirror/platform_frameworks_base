@@ -301,7 +301,7 @@ public class ConnectivityManagerTestActivity extends Activity {
             if (sr.SSID.equals(knownSSID)) {
                 Log.v(LOG_TAG, "found " + knownSSID + " in the scan result list");
                 WifiConfiguration config = new WifiConfiguration();
-                config.SSID = sr.SSID;
+                config.SSID = convertToQuotedString(sr.SSID);
                 config.allowedKeyManagement.set(KeyMgmt.NONE);
                 int networkId = mWifiManager.addNetwork(config);
                 // Connect to network by disabling others.
@@ -385,6 +385,10 @@ public class ConnectivityManagerTestActivity extends Activity {
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.putExtra("state", enableAM);
         context.sendBroadcast(intent);
+    }
+
+    protected static String convertToQuotedString(String string) {
+        return "\"" + string + "\"";
     }
 
     @Override
