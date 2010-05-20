@@ -932,8 +932,6 @@ status_t OMXCodec::setupAVCEncoderParameters() {
     h264type.bEnableFMO = OMX_FALSE;
     h264type.bEnableASO = OMX_FALSE;
     h264type.bEnableRS = OMX_FALSE;
-    h264type.eProfile = OMX_VIDEO_AVCProfileBaseline;
-    h264type.eLevel = OMX_VIDEO_AVCLevel1b;
     h264type.bFrameMBsOnly = OMX_TRUE;
     h264type.bMBAFF = OMX_FALSE;
     h264type.bEntropyCodingCABAC = OMX_FALSE;
