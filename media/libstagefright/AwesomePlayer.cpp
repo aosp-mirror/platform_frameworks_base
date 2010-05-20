@@ -822,7 +822,12 @@ status_t AwesomePlayer::initVideoDecoder() {
         CHECK(mVideoTrack->getFormat()->findInt32(kKeyWidth, &mVideoWidth));
         CHECK(mVideoTrack->getFormat()->findInt32(kKeyHeight, &mVideoHeight));
 
-        mVideoSource->start();
+        status_t err = mVideoSource->start();
+
+        if (err != OK) {
+            mVideoSource.clear();
+            return err;
+        }
     }
 
     return mVideoSource != NULL ? OK : UNKNOWN_ERROR;

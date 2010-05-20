@@ -120,9 +120,16 @@ status_t M4vH263Decoder::start(MetaData *) {
         vol_size = 0;
 
     }
-    CHECK_EQ(PV_TRUE, PVInitVideoDecoder(
-            mHandle, vol_data, &vol_size, 1, mWidth, mHeight, mode));
+
+    Bool success = PVInitVideoDecoder(
+            mHandle, vol_data, &vol_size, 1, mWidth, mHeight, mode);
     if (vol_data[0]) free(vol_data[0]);
+
+    if (success != PV_TRUE) {
+        LOGW("PVInitVideoDecoder failed. Unsupported content?");
+        return ERROR_UNSUPPORTED;
+    }
+
     MP4DecodingMode actualMode = PVGetDecBitstreamMode(mHandle);
     CHECK_EQ(mode, actualMode);
 
