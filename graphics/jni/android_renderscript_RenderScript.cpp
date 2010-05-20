@@ -880,29 +880,6 @@ nScriptSetVarV(JNIEnv *_env, jobject _this, jint script, jint slot, jbyteArray d
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
-static void
-nScriptSetClearColor(JNIEnv *_env, jobject _this, jint script, jfloat r, jfloat g, jfloat b, jfloat a)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptSetClearColor, con(%p), s(%p), r(%f), g(%f), b(%f), a(%f)", con, (void *)script, r, g, b, a);
-    rsScriptSetClearColor(con, (RsScript)script, r, g, b, a);
-}
-
-static void
-nScriptSetClearDepth(JNIEnv *_env, jobject _this, jint script, jfloat d)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearDepth, con(%p), s(%p), depth(%f)", con, (void *)script, d);
-    rsScriptSetClearDepth(con, (RsScript)script, d);
-}
-
-static void
-nScriptSetClearStencil(JNIEnv *_env, jobject _this, jint script, jint stencil)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearStencil, con(%p), s(%p), stencil(%i)", con, (void *)script, stencil);
-    rsScriptSetClearStencil(con, (RsScript)script, stencil);
-}
 
 static void
 nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone)
@@ -1410,9 +1387,6 @@ static JNINativeMethod methods[] = {
 {"nAdapter2DCreate",               "()I",                                  (void*)nAdapter2DCreate },
 
 {"nScriptBindAllocation",          "(III)V",                               (void*)nScriptBindAllocation },
-{"nScriptSetClearColor",           "(IFFFF)V",                             (void*)nScriptSetClearColor },
-{"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
-{"nScriptSetClearStencil",         "(II)V",                                (void*)nScriptSetClearStencil },
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
 {"nScriptInvoke",                  "(II)V",                                (void*)nScriptInvoke },
 {"nScriptInvokeData",              "(II)V",                                (void*)nScriptInvokeData },

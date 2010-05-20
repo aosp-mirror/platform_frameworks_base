@@ -54,6 +54,11 @@ public:
 
     const Allocation *ptrToAllocation(const void *) const;
 
+    void setTLS();
+    void clearTLS();
+
+    virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len);
+
     virtual void setupScript();
     virtual uint32_t run(Context *, uint32_t launchID);
 };

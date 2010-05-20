@@ -213,13 +213,9 @@ public class FilmRS {
 
         Log.e("rs", "Done loading named");
 
-        //mStripPositionType = Type.createFromClass(mRS, StripPosition.class, 1);
-
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.filmstrip);
-        //sb.setType(mStripPositionType, "Pos", 1);
         mScriptStrip = sb.create();
-        mScriptStrip.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         mAllocPos = Allocation.createTyped(mRS, mStripPositionType);
 

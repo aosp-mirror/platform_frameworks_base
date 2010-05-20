@@ -248,28 +248,11 @@ ScriptBindAllocation {
 ScriptCBegin {
 	}
 
-ScriptSetClearColor {
-	param RsScript s
-	param float r
-	param float g
-	param float b
-	param float a
-	}
 
 ScriptSetTimeZone {
 	param RsScript s
 	param const char * timeZone
 	param uint32_t length
-	}
-
-ScriptSetClearDepth {
-	param RsScript s
-	param float depth
-	}
-
-ScriptSetClearStencil {
-	param RsScript s
-	param uint32_t stencil
 	}
 
 

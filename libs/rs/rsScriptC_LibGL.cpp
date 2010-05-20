@@ -402,10 +402,15 @@ static void SC_hsb(float h, float s, float b, float a)
     }
 }
 
-static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
+static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel)
 {
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, false, baseMipLevel);
+}
+static void SC_uploadToTexture(RsAllocation va)
+{
+    GET_TLS();
+    rsi_AllocationUploadToTexture(rsc, va, false, 0);
 }
 
 static void SC_uploadToBufferObject(RsAllocation va)
@@ -414,21 +419,26 @@ static void SC_uploadToBufferObject(RsAllocation va)
     rsi_AllocationUploadToBufferObject(rsc, va);
 }
 
-static void SC_syncToGL(RsAllocation va)
-{
-    GET_TLS();
-    Allocation *a = static_cast<Allocation *>(va);
-
-}
-
 static void SC_ClearColor(float r, float g, float b, float a)
 {
-    //LOGE("c %f %f %f %f", r, g, b, a);
     GET_TLS();
-    sc->mEnviroment.mClearColor[0] = r;
-    sc->mEnviroment.mClearColor[1] = g;
-    sc->mEnviroment.mClearColor[2] = b;
-    sc->mEnviroment.mClearColor[3] = a;
+    if (!rsc->setupCheck()) {
+        return;
+    }
+
+    glClearColor(r, g, b, a);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+static void SC_ClearDepth(float v)
+{
+    GET_TLS();
+    if (!rsc->setupCheck()) {
+        return;
+    }
+
+    glClearDepthf(v);
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 static uint32_t SC_getWidth()
@@ -466,49 +476,49 @@ static uint32_t SC_getHeight()
 //                 ::= d  # double
 
 static ScriptCState::SymbolTable_t gSyms[] = {
+    { "rsgBindProgramFragment", (void *)&SC_bindProgramFragment },
+    { "rsgBindProgramStore", (void *)&SC_bindProgramStore },
+    { "rsgBindProgramVertex", (void *)&SC_bindProgramVertex },
+    { "rsgBindProgramRaster", (void *)&SC_bindProgramRaster },
+    { "rsgBindSampler", (void *)&SC_bindSampler },
+    { "rsgBindTexture", (void *)&SC_bindTexture },
+
+    { "rsgProgramVertexLoadModelMatrix", (void *)&SC_vpLoadModelMatrix },
+    { "rsgProgramVertexLoadTextureMatrix", (void *)&SC_vpLoadTextureMatrix },
+
+    { "rsgGetWidth", (void *)&SC_getWidth },
+    { "rsgGetHeight", (void *)&SC_getHeight },
+
+    { "_Z18rsgUploadToTextureii", (void *)&SC_uploadToTexture2 },
+    { "_Z18rsgUploadToTexturei", (void *)&SC_uploadToTexture },
+    { "rsgUploadToBufferObject", (void *)&SC_uploadToBufferObject },
+
+    { "rsgDrawRect", (void *)&SC_drawRect },
+    { "rsgDrawQuad", (void *)&SC_drawQuad },
+    { "rsgDrawQuadTexCoords", (void *)&SC_drawQuadTexCoords },
+    //{ "drawSprite", (void *)&SC_drawSprite },
+    { "rsgDrawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
+    { "rsgDrawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped },
+    { "rsgDrawLine", (void *)&SC_drawLine },
+    { "rsgDrawPoint", (void *)&SC_drawPoint },
+    { "_Z17rsgDrawSimpleMeshi", (void *)&SC_drawSimpleMesh },
+    { "_Z17rsgDrawSimpleMeshiii", (void *)&SC_drawSimpleMeshRange },
+
+    { "rsgClearColor", (void *)&SC_ClearColor },
+    { "rsgClearDepth", (void *)&SC_ClearDepth },
+
+
+    //////////////////////////////////////
     // IO
     { "updateSimpleMesh", (void *)&SC_updateSimpleMesh },
 
-    // context
-    { "bindProgramFragment", (void *)&SC_bindProgramFragment },
-    { "bindProgramStore", (void *)&SC_bindProgramStore },
-    { "bindProgramVertex", (void *)&SC_bindProgramVertex },
-    { "bindProgramRaster", (void *)&SC_bindProgramRaster },
-    { "bindSampler", (void *)&SC_bindSampler },
-    { "bindTexture", (void *)&SC_bindTexture },
-
-    // vp
-    { "vpLoadModelMatrix", (void *)&SC_vpLoadModelMatrix },
-    { "vpLoadTextureMatrix", (void *)&SC_vpLoadTextureMatrix },
-
-    // drawing
-    { "drawRect", (void *)&SC_drawRect },
-    { "drawQuad", (void *)&SC_drawQuad },
-    { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords },
-    { "drawSprite", (void *)&SC_drawSprite },
-    { "drawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
-    { "drawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped },
-    { "drawLine", (void *)&SC_drawLine },
-    { "drawPoint", (void *)&SC_drawPoint },
-    { "drawSimpleMesh", (void *)&SC_drawSimpleMesh },
-    { "drawSimpleMeshRange", (void *)&SC_drawSimpleMeshRange },
-
-
     // misc
-    { "pfClearColor", (void *)&SC_ClearColor },
+    //{ "pfClearColor", (void *)&SC_ClearColor },
     { "color", (void *)&SC_color },
     { "hsb", (void *)&SC_hsb },
     { "hsbToRgb", (void *)&SC_hsbToRgb },
     { "hsbToAbgr", (void *)&SC_hsbToAbgr },
     { "pointAttenuation", (void *)&SC_pointAttenuation },
-
-    { "uploadToTexture", (void *)&SC_uploadToTexture },
-    { "uploadToBufferObject", (void *)&SC_uploadToBufferObject },
-
-    { "syncToGL", (void *)&SC_syncToGL },
-
-    { "getWidth", (void *)&SC_getWidth },
-    { "getHeight", (void *)&SC_getHeight },
 
     { NULL, NULL }
 };

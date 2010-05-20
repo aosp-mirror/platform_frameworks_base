@@ -40,10 +40,6 @@ public:
     virtual ~Script();
 
     struct Enviroment_t {
-        float mClearColor[4];
-        float mClearDepth;
-        uint32_t mClearStencil;
-
         uint32_t mStartTimeMillis;
         const char* mTimeZone;
 
@@ -68,6 +64,7 @@ public:
 
     void setVar(uint32_t slot, const void *val, uint32_t len);
 
+    virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) = 0;
     virtual void setupScript() = 0;
     virtual uint32_t run(Context *, uint32_t launchID) = 0;
 };

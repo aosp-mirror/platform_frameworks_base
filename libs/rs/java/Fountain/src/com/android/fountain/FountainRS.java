@@ -77,9 +77,7 @@ public class FountainRS {
         mSM.bindVertexAllocation(mPoints.getAllocation(), vtxSlot);
 
         mScript = new ScriptC_Fountain(mRS, mRes, true);
-        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mScript.set_partMesh(mSM);
-        mScript.set_partBuffer(mPoints.getAllocation());
         mScript.bind_point(mPoints);
         mRS.contextBindRootScript(mScript);
     }

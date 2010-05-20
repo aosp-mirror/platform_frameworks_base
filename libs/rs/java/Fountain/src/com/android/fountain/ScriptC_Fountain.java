@@ -20,17 +20,14 @@ public class ScriptC_Fountain
     public void set_partMesh(SimpleMesh v) {
         setVar(1, v.getID());
     }
-    public void set_partBuffer(Allocation v) {
-        setVar(2, v.getID());
-    }
 
     private ScriptField_Point mField_point;
     public void bind_point(ScriptField_Point f) {
         mField_point = f;
         if (f == null) {
-            bindAllocation(null, 3);
+            bindAllocation(null, 2);
         } else {
-            bindAllocation(f.getAllocation(), 3);
+            bindAllocation(f.getAllocation(), 2);
         }
     }
     public ScriptField_Point get_point() {

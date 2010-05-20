@@ -202,9 +202,9 @@ static float SC_cosf_fast(float x)
     return 0.2215f * (y * fabsf(y) - y) + y;
 }
 
+
 static float SC_randf(float max)
 {
-    //LOGE("max %f", max);
     float r = (float)rand();
     return r / RAND_MAX * max;
 }
@@ -213,6 +213,16 @@ static float SC_randf2(float min, float max)
 {
     float r = (float)rand();
     return r / RAND_MAX * (max - min) + min;
+}
+
+static int SC_randi(int max)
+{
+    return (int)SC_randf(max);
+}
+
+static int SC_randi2(int min, int max)
+{
+    return (int)SC_randf2(min, max);
 }
 
 static int SC_sign(int value)
@@ -253,16 +263,6 @@ static float SC_magf2(float a, float b)
 static float SC_magf3(float a, float b, float c)
 {
     return sqrtf(a * a + b * b + c * c);
-}
-
-static float SC_normf(float start, float stop, float value)
-{
-    return (value - start) / (stop - start);
-}
-
-static float SC_mapf(float minStart, float minStop, float maxStart, float maxStop, float value)
-{
-    return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
 }
 
 static float SC_frac(float v)
@@ -345,6 +345,24 @@ static int32_t SC_year()
     struct tm *timeinfo;
     timeinfo = localtime(&rawtime);
     return timeinfo->tm_year;
+}
+
+static int64_t SC_uptimeMillis2()
+{
+    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
+}
+
+static int64_t SC_startTimeMillis2()
+{
+    GET_TLS();
+    return sc->mEnviroment.mStartTimeMillis;
+}
+
+static int64_t SC_elapsedTimeMillis2()
+{
+    GET_TLS();
+    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC))
+            - sc->mEnviroment.mStartTimeMillis;
 }
 
 static int32_t SC_uptimeMillis()
@@ -438,17 +456,6 @@ static void SC_matrixTranslate(rsc_Matrix *mat, float x, float y, float z)
 }
 
 
-static rsvF_2 SC_vec2Rand(float maxLen)
-{
-    float2 t;
-    float angle = SC_randf(M_PI * 2);
-    float len = SC_randf(maxLen);
-    t.f[0] = len * sinf(angle);
-    t.f[1] = len * cosf(angle);
-    return t.v;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -492,24 +499,23 @@ static uint32_t SC_allocGetDimFaces(RsAllocation va)
 
 
 
-static void SC_debugF(const char *s, float f)
-{
-    LOGE("%s %f", s, f);
+static void SC_debugF(const char *s, float f) {
+    LOGE("%s %f, 0x%08x", s, f, *((int *) (&f)));
 }
-
-static void SC_debugHexF(const char *s, float f)
-{
-    LOGE("%s 0x%x", s, *((int *) (&f)));
+static void SC_debugFv2(const char *s, rsvF_2 fv) {
+    float *f = (float *)&fv;
+    LOGE("%s {%f, %f}", s, f[0], f[1]);
 }
-
-static void SC_debugI32(const char *s, int32_t i)
-{
-    LOGE("%s %i", s, i);
+static void SC_debugFv3(const char *s, rsvF_4 fv) {
+    float *f = (float *)&fv;
+    LOGE("%s {%f, %f, %f}", s, f[0], f[1], f[2]);
 }
-
-static void SC_debugHexI32(const char *s, int32_t i)
-{
-    LOGE("%s 0x%x", s, i);
+static void SC_debugFv4(const char *s, rsvF_4 fv) {
+    float *f = (float *)&fv;
+    LOGE("%s {%f, %f, %f, %f}", s, f[0], f[1], f[2], f[3]);
+}
+static void SC_debugI32(const char *s, int32_t i) {
+    LOGE("%s %i  0x%x", s, i, i);
 }
 
 static uchar4 SC_convertColorTo8888_f3(float r, float g, float b) {
@@ -595,94 +601,86 @@ int SC_getAllocation(const void *ptr)
 static ScriptCState::SymbolTable_t gSyms[] = {
     { "__divsi3", (void *)&SC_divsi3 },
 
+    // allocation
+    { "rsAllocationGetDimX", (void *)&SC_allocGetDimX },
+    { "rsAllocationGetDimY", (void *)&SC_allocGetDimY },
+    { "rsAllocationGetDimZ", (void *)&SC_allocGetDimZ },
+    { "rsAllocationGetDimLOD", (void *)&SC_allocGetDimLOD },
+    { "rsAllocationGetDimFaces", (void *)&SC_allocGetDimFaces },
+    { "rsGetAllocation", (void *)&SC_getAllocation },
+
+    // color
+    { "_Z17rsPackColorTo8888fff", (void *)&SC_convertColorTo8888_f3 },
+    { "_Z17rsPackColorTo8888ffff", (void *)&SC_convertColorTo8888_f4 },
+    //extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3);
+    //extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4);
+    //extern float4 rsUnpackColor8888(uchar4);
+    //extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float r, float g, float b);
+    //extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float3);
+    //extern float4 rsUnpackColor565(uchar4);
+
+    // Debug
+    { "_Z7rsDebugPKcf", (void *)&SC_debugF },
+    { "_Z7rsDebugPKcDv2_f", (void *)&SC_debugFv2 },
+    { "_Z7rsDebugPKcDv3_f", (void *)&SC_debugFv3 },
+    { "_Z7rsDebugPKcDv4_f", (void *)&SC_debugFv4 },
+    { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
+    //extern void __attribute__((overloadable))rsDebug(const char *, const void *);
+
+
+    // RS Math
+    { "_Z6rsRandi", (void *)&SC_randi },
+    { "_Z6rsRandii", (void *)&SC_randi2 },
+    { "_Z6rsRandf", (void *)&SC_randf },
+    { "_Z6rsRandff", (void *)&SC_randf2 },
+    { "_Z6rsFracf", (void *)&SC_frac },
+
+    // time
+    { "rsSecond", (void *)&SC_second },
+    { "rsMinute", (void *)&SC_minute },
+    { "rsHour", (void *)&SC_hour },
+    { "rsDay", (void *)&SC_day },
+    { "rsMonth", (void *)&SC_month },
+    { "rsYear", (void *)&SC_year },
+    { "rsUptimeMillis", (void*)&SC_uptimeMillis2 },
+    { "rsStartTimeMillis", (void*)&SC_startTimeMillis2 },
+    { "rsElapsedTimeMillis", (void*)&SC_elapsedTimeMillis2 },
+
+    { "rsSendToClient", (void *)&SC_toClient },
+
+    // matrix
+    { "rsMatrixLoadIdentity", (void *)&SC_matrixLoadIdentity },
+    { "rsMatrixLoadFloat", (void *)&SC_matrixLoadFloat },
+    { "rsMatrixLoadMat", (void *)&SC_matrixLoadMat },
+    { "rsMatrixLoadRotate", (void *)&SC_matrixLoadRotate },
+    { "rsMatrixLoadScale", (void *)&SC_matrixLoadScale },
+    { "rsMatrixLoadTranslate", (void *)&SC_matrixLoadTranslate },
+    { "rsMatrixLoadMultiply", (void *)&SC_matrixLoadMultiply },
+    { "rsMatrixMultiply", (void *)&SC_matrixMultiply },
+    { "rsMatrixRotate", (void *)&SC_matrixRotate },
+    { "rsMatrixScale", (void *)&SC_matrixScale },
+    { "rsMatrixTranslate", (void *)&SC_matrixTranslate },
+
+
+////////////////////////////////////////////////////////////////////
+
     { "modf", (void *)&fmod },
-    { "_Z4fracf", (void *)&SC_frac },
     //{ "sinf_fast", (void *)&SC_sinf_fast },
     //{ "cosf_fast", (void *)&SC_cosf_fast },
-    { "randf", (void *)&SC_randf },
-    { "randf2", (void *)&SC_randf2 },
-    { "sign", (void *)&SC_sign },
-    { "clamp", (void *)&SC_clamp },
-    { "distf2", (void *)&SC_distf2 },
-    { "distf3", (void *)&SC_distf3 },
-    { "magf2", (void *)&SC_magf2 },
-    { "magf3", (void *)&SC_magf3 },
-    { "normf", (void *)&SC_normf },
-    { "mapf", (void *)&SC_mapf },
+    //{ "sign", (void *)&SC_sign },
+    //{ "clamp", (void *)&SC_clamp },
+    //{ "distf2", (void *)&SC_distf2 },
+    //{ "distf3", (void *)&SC_distf3 },
+    //{ "magf2", (void *)&SC_magf2 },
+    //{ "magf3", (void *)&SC_magf3 },
+    //{ "mapf", (void *)&SC_mapf },
     { "noisef", (void *)&SC_noisef },
     { "noisef2", (void *)&SC_noisef2 },
     { "noisef3", (void *)&SC_noisef3 },
     { "turbulencef2", (void *)&SC_turbulencef2 },
     { "turbulencef3", (void *)&SC_turbulencef3 },
 
-    // time
-    { "second", (void *)&SC_second },
-    { "minute", (void *)&SC_minute },
-    { "hour", (void *)&SC_hour },
-    { "day", (void *)&SC_day },
-    { "month", (void *)&SC_month },
-    { "year", (void *)&SC_year },
-    { "uptimeMillis", (void*)&SC_uptimeMillis },      // TODO: use long instead
-    { "startTimeMillis", (void*)&SC_startTimeMillis },      // TODO: use long instead
-    { "elapsedTimeMillis", (void*)&SC_elapsedTimeMillis },      // TODO: use long instead
-
-    // matrix
-    { "matrixLoadIdentity", (void *)&SC_matrixLoadIdentity },
-    { "matrixLoadFloat", (void *)&SC_matrixLoadFloat },
-    { "matrixLoadMat", (void *)&SC_matrixLoadMat },
-    { "matrixLoadRotate", (void *)&SC_matrixLoadRotate },
-    { "matrixLoadScale", (void *)&SC_matrixLoadScale },
-    { "matrixLoadTranslate", (void *)&SC_matrixLoadTranslate },
-    { "matrixLoadMultiply", (void *)&SC_matrixLoadMultiply },
-    { "matrixMultiply", (void *)&SC_matrixMultiply },
-    { "matrixRotate", (void *)&SC_matrixRotate },
-    { "matrixScale", (void *)&SC_matrixScale },
-    { "matrixTranslate", (void *)&SC_matrixTranslate },
-
-    // vector
-    { "vec2Rand", (void *)&SC_vec2Rand },
-
-    // vec3
-    { "vec3Norm", (void *)&SC_vec3Norm },
-    { "vec3Length", (void *)&SC_vec3Length },
-    { "vec3Add", (void *)&SC_vec3Add },
-    { "vec3Sub", (void *)&SC_vec3Sub },
-    { "vec3Cross", (void *)&SC_vec3Cross },
-    { "vec3Dot", (void *)&SC_vec3Dot },
-    { "vec3Scale", (void *)&SC_vec3Scale },
-
-    // vec4
-    { "vec4Norm", (void *)&SC_vec4Norm },
-    { "vec4Length", (void *)&SC_vec4Length },
-    { "vec4Add", (void *)&SC_vec4Add },
-    { "vec4Sub", (void *)&SC_vec4Sub },
-    { "vec4Dot", (void *)&SC_vec4Dot },
-    { "vec4Scale", (void *)&SC_vec4Scale },
-
-    // allocation
-    { "allocGetDimX", (void *)&SC_allocGetDimX },
-    { "allocGetDimY", (void *)&SC_allocGetDimY },
-    { "allocGetDimZ", (void *)&SC_allocGetDimZ },
-    { "allocGetDimLOD", (void *)&SC_allocGetDimLOD },
-    { "allocGetDimFaces", (void *)&SC_allocGetDimFaces },
-
-
-    // misc
-    { "sendToClient", (void *)&SC_toClient },
-
-    { "_Z18convertColorTo8888fff", (void *)&SC_convertColorTo8888_f3 },
-    { "_Z18convertColorTo8888ffff", (void *)&SC_convertColorTo8888_f4 },
-
-    { "debugF", (void *)&SC_debugF },
-    { "debugI32", (void *)&SC_debugI32 },
-    { "debugHexF", (void *)&SC_debugHexF },
-    { "debugHexI32", (void *)&SC_debugHexI32 },
-    { "debugP", (void *)&SC_debugP },
-    { "debugPf", (void *)&SC_debugPf },
-    { "debugPi", (void *)&SC_debugPi },
-
     { "scriptCall", (void *)&SC_scriptCall },
-    { "rsGetAllocation", (void *)&SC_getAllocation },
 
 
     { NULL, NULL }

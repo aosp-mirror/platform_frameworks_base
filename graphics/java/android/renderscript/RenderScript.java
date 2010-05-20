@@ -134,9 +134,6 @@ public class RenderScript {
     native int  nAdapter2DCreate();
 
     native void nScriptBindAllocation(int script, int alloc, int slot);
-    native void nScriptSetClearColor(int script, float r, float g, float b, float a);
-    native void nScriptSetClearDepth(int script, float depth);
-    native void nScriptSetClearStencil(int script, int stencil);
     native void nScriptSetTimeZone(int script, byte[] timeZone);
     native void nScriptInvoke(int id, int slot);
     native void nScriptInvokeData(int id, int slot);
