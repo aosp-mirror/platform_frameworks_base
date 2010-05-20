@@ -1,0 +1,298 @@
+page.title=Android 2.2 Platform Highlights
+
+@jd:body
+
+
+<style type="text/css">
+#jd-content {
+  max-width:800px;
+}
+#jd-content div.screenshot {
+  float:left;
+  clear:left;
+  padding:15px 30px 15px 0;
+}
+#jd-content div.video {
+  float:right;
+  padding:0 60px 40px;
+  margin-top:-15px;
+}
+#jd-content table.columns {
+  margin:0 0 1em 0;
+}
+#jd-content table.columns td {
+  padding:0;
+}
+#jd-content table.columns td+td {
+  padding:0 2em;
+}
+#jd-content table.columns td img {
+  margin:0;
+}
+#jd-content table.columns td+td>*:first-child {
+  margin-top:-2em;
+}
+.green {
+  color:#8db529;
+  font-weight:bold;
+}
+</style>
+
+
+<div class="video">
+<object width="278 height="180">
+<param name="movie" value="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&"></param>
+<param name="allowFullScreen" value="true"></param><param name="allowscriptaccess"
+value="always"></param>
+<embed src="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&" type="application/x-shockwave-flash"
+allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
+</object>
+</div>
+
+
+<p>The Android 2.2 platform introduces many new and exciting features for
+users and developers. This document provides a glimpse at some of the new user features
+and technologies in Android 2.2. For more information about the new developer APIs, see the <a
+href="android-2.2.html#api">Android 2.2 version notes</a>.</p>
+
+<ul>
+  <li><a href="#UserFeatures">New User Features</a></li>
+  <li><a href="#PlatformTechnologies">New Platform Technologies</a></li>
+  <li><a href="#DeveloperServices">New Developer Services</a></li>
+  <li><a href="#DeveloperApis">New Developer APIs</a></li>
+</ul>
+
+
+
+<h2 id="UserFeatures" style="clear:right">New User Features</h2>
+
+<h3>Home</h3>
+
+<table class="columns" style="max-width:800px">
+<tr>
+  <td>
+<img src="images/2.2/22home.png" alt="" height=230 />
+  </td>
+  <td>
+<p style="margin-top:0">New Home screen <span class="green">tips widget</span> assists new users on
+how to configure the
+home screen with shortcuts and widgets and how to make use of multiple home screens.</p>
+<p>The Phone, applications Launcher, and Browser now have <span class="green">dedicated
+shortcuts</span> on the Home screen, making it easy to access them from any of the 5 home screen
+panels.</p>
+  </td>
+</tr>
+</table>
+
+
+
+<h3>Exchange support</h3>
+
+<table class="columns" style="max-width:800px">
+<tr>
+  <td>
+<p><span class="green">Improved security</span> with the addition of numeric pin or alpha-numeric
+password options to unlock device. Exchange administrators can enforce password policy across
+devices.</p>
+<p><span class="green">Remote wipe:</span> Exchange administrators can remotely reset the device to
+factory defaults to secure data in case device is lost or stolen.</p>
+<p><span class="green">Exchange Calendars are now supported</span> in the Calendar application.</p>
+<p><span class="green">Auto-discovery:</span> you just need to know your user-name and password to
+easily set up and sync an Exchange account (available for Exchange 2007 and higher).</p>
+<p><span class="green">Global Address Lists look-up</span> is now available in the Email
+application, enabling users to auto-complete recipient names from the directory.</p>
+  </td>
+  <td>
+<img src="images/2.2/22exchange.png" alt="" height=300 />
+  </td>
+</tr>
+</table>
+
+
+<h3>Camera and Gallery</h3>
+
+<table class="columns" style="max-width:800px">
+<tr>
+  <td>
+<img src="images/2.2/22gallery.png" alt="" height=220 />
+  </td>
+  <td>
+<p>Gallery allows you to <span class="green">peek into picture stacks</span> using a zoom
+gesture.</p>
+<p>Camera <span class="green">onscreen buttons</span> provide easy access to a new UI for
+controling zoom, flash, white balance, geo-tagging, focus and exposure. Camcorder also provides
+an easy way to set video size/quality for MMS and YouTube.</p>
+<p>With the <span class="green">LED flash</span> now enabled for the Camcorder, videos can be shot
+at night or in low light settings.</p>
+  </td>
+</tr>
+</table>
+
+
+<h3>Portable hotspot</h3>
+
+<table class="columns" style="max-width:800px">
+<tr>
+  <td>
+<p>Certain devices like the Nexus One can be turned into <span class="green">a portable Wi-Fi
+hotspot</span> that can be shared with up to 8 devices.</p>
+<p>You can use your Android-powered phone as a 3G connection for a Windows or Linux laptop by
+connecting their phone to the computer with a USB cable. The connection is then shared between the
+two devices.</p>
+  </td>
+  <td>
+<img src="images/2.2/22hotspot.png" alt="" height=180 />
+  </td>
+</tr>
+</table>
+
+
+<h3>Multiple keyboard languages</h3>
+
+<table class="columns" style="max-width:800px">
+<tr>
+  <td>
+<img src="images/2.2/22keyboard.png" alt="" height=220 />
+  </td>
+  <td>
+<p>Multi-lingual users can add multiple languages to the keyboard and <span class="green">switch
+between multiple Latin-based input languages</span> by swiping across the space bar. This changes
+the keys as well as the auto-suggest dictionary.</p>
+  </td>
+</tr>
+</table>
+
+
+<h3>Improved performance</h3>
+
+<table class="columns" style="max-width:800px">
+<tr>
+  <td>
+<p><span class="green">Performance of the browser</span> has been enhanced using the V8 engine,
+which enables faster loading of JavaScript-heavy pages.</p>
+<p><span class="green">Dalvik Performance Boost:</span> 2x-5x performance speedup for CPU-heavy code
+over Android 2.1 with Dalvik JIT.</p>
+<p>The graph to the right shows the performance <span class="green">speedup</span> from Android 2.1
+to Android 2.2 using various benchmark tests. For example, LinPack is now more than 5 times
+faster.</p>
+<p><span class="green">Kernel Memory Management Boost:</span> Improved memory reclaim by up to 20x,
+which results in faster app switching and smoother performance on memory-constrained devices.</p>
+  </td>
+  <td>
+<img src="images/2.2/jit-graph.png" alt="" height=200 />
+  </td>
+</tr>
+</table>
+
+
+
+
+
+<h2 id="PlatformTechnologies">New Platform Technologies</h2>
+
+
+<h3>Media framework</h3>
+
+<ul>
+  <li>New media framework (Stagefright) that supports local file playback and HTTP progressive
+streaming</li>
+  <li>Continued support for OpenCore in Android 2.2</li>
+</ul>
+
+
+<h3>Bluetooth</h3>
+
+<ul>
+  <li>Voice dialing over Bluetooth</li>
+  <li>Ability to share contacts with other phones</li>
+  <li>Support for Bluetooth enabled car and desk docks</li>
+  <li>Improved compatibility matrix with car kits and headsets</li>
+</ul>
+
+
+<h3>2.6.32 kernel upgrade</h3>
+
+<ul>
+  <li>HIGHMEM support for RAM &gt;256MB</li>
+  <li>SDIO scheduling and BT improvements</li>
+</ul>
+
+
+
+
+<h2 id="DeveloperServices">New Developer Services</h2>
+
+
+<h3>Android Cloud to Device Messaging</h3>
+
+<p>Apps can utilize Android Cloud to Device Messaging to enable mobile alert, send to phone, and
+two-way push sync functionality.</p>
+
+
+<h3>Android Application Error Reports</h3>
+
+<p>New bug reporting feature for Android Market apps enables developers to receive crash and freeze
+reports from their users. The reports will be available when they log into their publisher
+account.</p>
+
+
+
+
+<h2 id="DeveloperApis">New Developer APIs</h2>
+
+
+<h3>Apps on external storage</h3>
+
+<p>Applications can now request installation on the shared external storage (such as an SD
+card).</p>
+
+
+<h3>Media framework</h3>
+
+<p>Provides new APIs for audio focus, routing audio to SCO, and auto-scan of files to media
+database. Also provides APIs to let applications detect completion of sound loading and auto-pause
+and auto-resume audio playback.</p>
+
+
+<h3>Camera and Camcorder</h3>
+
+<p>New preview API doubles the frame rate from ~10FPS to ~20FPS. Camera now supports portrait
+orientation, zoom controls, access to exposure data, and a thumbnail utility. A new camcorder
+profile enables apps to determine device hardware capablities.</p>
+
+
+<h3>Graphics</h3>
+
+<p>New APIs for OpenGL ES 2.0, working with YUV image format, and ETC1 for texture
+compression.</p>
+
+
+<h3>Data backup</h3>
+
+<p>Apps can participate in data backup and restore, to ensure that users maintain their data
+after performing a factory reset or when switching devices.</p>
+
+
+<h3>Device policy manager</h3>
+
+<p>New device policy management APIs allow developers to write "device administrator" applications
+that can control security features on the device, such as the minimum password strength, data wipe,
+and so on. Users can select the administrators that are enabled on their devices.</p>
+
+
+<h3>UI framework</h3>
+
+<p>New "car mode" and "night mode" controls and configurations allow applications to adjust their UI
+for these situations. A scale gesture detector API provides improved definition of multi-touch
+events. Applications can now customize the bottom strip of a TabWidget.</p>
+
+
+
+<p>For more information about the new developer APIs, see the <a
+href="android-2.2.html#api">Android 2.2 version notes</a> and the <a
+href="{@docRoot}sdk/api_diff/8/changes.html">API Differences Report</a>.</p>
+
+
+
+
+

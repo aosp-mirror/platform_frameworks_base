@@ -171,7 +171,9 @@ device screen, and adapts them to the actual pixel map of the screen.</p>
 
 <p>The table below lists some of the more common screens supported
 by Android and illustrates how the platform maps them to generalized screen
-configurations.</p>
+configurations. Some devices use screens that are not specifically listed
+in the table &mdash; the platform maps those to the same set generalized
+screen configurations. </p>
 
 <p class="table-caption" id="screens-table"><strong>Table 1.</strong> Examples of
 device screens supported by Android.</p> 

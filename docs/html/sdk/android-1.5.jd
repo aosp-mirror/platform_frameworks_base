@@ -10,25 +10,31 @@ sdk.platform.deployableDate=May 2009
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>In this document</h2>
-  <ol>
-	<li><a href="#features">Platform Highlights</a></li>
-	<li><a href="#relnotes">Revisions</a></li>
-	<li><a href="#apps">Built-in Applications</a></li>
-	<li><a href="#locs">Locales</a></li>
-	<li><a href="#skins">Emulator Skins</a></li>
-	<li><a href="#api">Framework API</a>
-        <ol>
-	<li><a href="#api-level">API level</a></li>
-	<li><a href="#api-changes">API changes summary</a></li>
-	<li><a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API differences report &raquo;</a> </li>
-        </ol></li>
-  </ol>
+<h2>In this document</h2>
+<ol>
+  <li><a href="#features">Platform Highlights</a></li>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#api">Framework API Changes</a>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
 
-  <h2>See Also</h2>
-  <ol>
-    <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
-  </ol>
+    </ol>
+  </li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
+</ol>
 
 </div>
 </div>
@@ -87,7 +93,8 @@ function toggleDiv(link) {
 </script>
 <style>
 .toggleable {
-padding: .25em 1em;
+  padding: .25em 1em 0em 1em;
+  margin-bottom: 0;
 }
 .toggleme {
   padding: 1em 1em 0 2em;
@@ -161,6 +168,106 @@ padding: .25em 1em;
 <p>Not available as an SDK component &mdash; please use Android 1.5, r3 instead. </p>
  </div>
 </div>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your
+application, you need to set the proper value, "{@sdkPlatformApiLevel}", in the
+<code>android:minSdkVersion</code> attributes of the <code>&lt;uses-sdk&gt;</code>
+element in your application's manifest. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+
+<h2 id="api">Framework API Changes</h2>
+
+<p>The sections below provide information about the application framework API provided by the Android {@sdkPlatformVersion} platform. </p>
+
+<h3>UI framework</h3>
+  <ul>
+    <li>Framework for easier background/UI thread interaction</li>
+    <li>New {@link android.widget.SlidingDrawer SlidingDrawer} widget</li>
+    <li>New {@link android.widget.HorizontalScrollView HorizontalScrollview} widget</li>
+  </ul>
+
+<h3>AppWidget framework</h3>
+  <ul>
+    <li>APIs for creating secure home screen {@link android.appwidget
+AppWidgets}. For information about how to use AppWidgets, see the Developer's
+Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
+documentation. Also see <a
+href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
+Introducing home screen widgets and the AppWidget
+framework</a> on the Android Developer's Blog.</li>
+    <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
+        with custom content.</li>
+  </ul>
+
+<h3>Media framework</h3>
+  <ul>
+    <li>Raw audio recording and playback APIs</li>
+    <li>Interactive MIDI playback engine</li>
+    <li>Video recording APIs for developers (3GP format)</li>
+    <li>Video and photo sharing Intents</li>
+    <li>Media search Intent</li>
+  </ul>
+
+<h3>Input Method framework </h3>
+   <ul>
+    <li>{@link android.inputmethodservice.InputMethodService Input Method
+        Service} framework</li>
+    <li>Text-prediction engine</li>
+    <li>Ability to provide downloadable IMEs to users</li>
+  </ul>
+
+<h3>Application-defined hardware requirements</h3>
+
+<p>Applications can now use a new element in their manifest files, <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>
+ to indicate to the Android system what hardware features
+they require in order to function properly. For example, an application might
+use the element to specify that it requires a physical keyboard or a particular
+navigation device, such as a trackball. Prior to installing the application, the
+Android system checks the attributes defined for the
+<code>&lt;uses-configuration&gt;</code> element and allows the installation to
+continue only if the required hardware is present.</p>
+
+<h3>Speech recognition framework</h3>
+    <ul>
+    <li>Support for using speech recognition libraries via Intent. See {@link
+android.speech.RecognizerIntent RecognizerIntent}.</li>
+  </ul>
+
+<h3>Miscellaneous API additions</h3>
+  <ul>
+    <li>LocationManager - Applications can get location change updates via
+        Intent</li>
+    <li>WebView - Touch start/end/move/cancel DOM event support</li>
+    <li>Redesigned {@link android.hardware.SensorManager Sensor Manager
+        APIs}</li>
+    <li>GLSurfaceView - convenience framework for creating OpenGL
+        applications</li>
+    <li>Broadcast Intent for app update install succeeded - for smoother app
+        upgrade experience</li>
+  </ul>
+
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
+the previous version, see the <a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API 
+Differences Report</a>.</p>
+
 
 <h2 id="apps">Built-in Applications</h2>
 
@@ -268,101 +375,3 @@ through Settings.</p>
 </ul>
 
 <p>For more information about how to develop an application that displays and functions properly on all Android-powered devices, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
-
-
-<h2 id="api">Framework API</h2>
-
-<p>The sections below provide information about the application framework API provided by the Android {@sdkPlatformVersion} platform. </p>
-
-
-<h3 id="api-level">API level</h3>
-
-<p>The Android {@sdkPlatformVersion} platform delivers an updated version of the framework
-API. As with previous versions, the Android {@sdkPlatformVersion} API 
-is assigned an integer identifier &mdash; <strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
-stored in the system itself. This identifier, called the "API Level", allows the
-system to correctly determine whether an application is compatible with
-the system, prior to installing the application. </p>
-
-<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to 
-set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code> 
-element in your application's manifest. </p>
-
-<p>For more information about how to use API Level, see the <a
-href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
-
-<h3 id="api-changes">API changes summary</h3>
-
-<h4>UI framework</h4>
-  <ul>
-    <li>Framework for easier background/UI thread interaction</li>
-    <li>New {@link android.widget.SlidingDrawer SlidingDrawer} widget</li>
-    <li>New {@link android.widget.HorizontalScrollView HorizontalScrollview} widget</li>
-  </ul>
-
-<h4>AppWidget framework</h4>
-  <ul>
-    <li>APIs for creating secure home screen {@link android.appwidget
-AppWidgets}. For information about how to use AppWidgets, see the Developer's
-Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
-documentation. Also see <a
-href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
-Introducing home screen widgets and the AppWidget
-framework</a> on the Android Developer's Blog.</li>
-    <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
-        with custom content.</li>
-  </ul>
-
-<h4>Media framework</h4>
-  <ul>
-    <li>Raw audio recording and playback APIs</li>
-    <li>Interactive MIDI playback engine</li>
-    <li>Video recording APIs for developers (3GP format)</li>
-    <li>Video and photo sharing Intents</li>
-    <li>Media search Intent</li>
-  </ul>
-
-<h4>Input Method framework </h4>
-   <ul>
-    <li>{@link android.inputmethodservice.InputMethodService Input Method
-        Service} framework</li>
-    <li>Text-prediction engine</li>
-    <li>Ability to provide downloadable IMEs to users</li>
-  </ul>
-
-<h4>Application-defined hardware requirements</h4>
-   <p>Applications can now use a new element in their manifest files, <a
-href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>
- to indicate to the Android system what hardware features
-they require in order to function properly. For example, an application might
-use the element to specify that it requires a physical keyboard or a particular
-navigation device, such as a trackball. Prior to installing the application, the
-Android system checks the attributes defined for the
-<code>&lt;uses-configuration&gt;</code> element and allows the installation to
-continue only if the required hardware is present.</p>
-
-<h4>Speech recognition framework</h4>
-    <ul>
-    <li>Support for using speech recognition libraries via Intent. See {@link
-android.speech.RecognizerIntent RecognizerIntent}.</li>
-  </ul>
-
-<h4>Miscellaneous API additions</h4>
-  <ul>
-    <li>LocationManager - Applications can get location change updates via
-        Intent</li>
-    <li>WebView - Touch start/end/move/cancel DOM event support</li>
-    <li>Redesigned {@link android.hardware.SensorManager Sensor Manager
-        APIs}</li>
-    <li>GLSurfaceView - convenience framework for creating OpenGL
-        applications</li>
-    <li>Broadcast Intent for app update install succeeded - for smoother app
-        upgrade experience</li>
-  </ul>
-
-
-<h3 id="api-diff">API differences report</h3>
-
-<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
-the previous version, see the <a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API 
-Differences Report</a>.</p>

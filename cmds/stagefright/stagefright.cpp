@@ -75,7 +75,12 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
         }
     }
 
-    rawSource->start();
+    status_t err = rawSource->start();
+
+    if (err != OK) {
+        fprintf(stderr, "rawSource returned error %d (0x%08x)\n", err, err);
+        return;
+    }
 
     if (gPlaybackAudio) {
         AudioPlayer *player = new AudioPlayer(NULL);
