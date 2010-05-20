@@ -87,6 +87,21 @@ const Allocation *ScriptC::ptrToAllocation(const void *ptr) const
     return NULL;
 }
 
+void ScriptC::setTLS()
+{
+    Context::ScriptTLSStruct * tls = (Context::ScriptTLSStruct *)
+                                  pthread_getspecific(Context::gThreadTLSKey);
+    rsAssert(tls);
+    tls->mScript = this;
+}
+
+void ScriptC::clearTLS()
+{
+    Context::ScriptTLSStruct * tls = (Context::ScriptTLSStruct *)
+                                  pthread_getspecific(Context::gThreadTLSKey);
+    rsAssert(tls);
+    tls->mScript = NULL;
+}
 
 uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
@@ -94,10 +109,6 @@ uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
         return 0;
     }
-
-    Context::ScriptTLSStruct * tls =
-    (Context::ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey);
-    rsAssert(tls);
 
     if (mEnviroment.mFragmentStore.get()) {
         rsc->setFragmentStore(mEnviroment.mFragmentStore.get());
@@ -119,12 +130,52 @@ uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
     setupScript();
 
     uint32_t ret = 0;
-    tls->mScript = this;
+    setTLS();
     //LOGE("ScriptC::run %p", mProgram.mRoot);
     ret = mProgram.mRoot();
-    tls->mScript = NULL;
+    clearTLS();
     //LOGE("ScriptC::run ret %i", ret);
     return ret;
+}
+
+void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len)
+{
+    //LOGE("rsi_ScriptInvoke %i", slot);
+    if ((slot >= mEnviroment.mInvokeFunctionCount) ||
+        (mEnviroment.mInvokeFunctions[slot] == NULL)) {
+        rsc->setError(RS_ERROR_BAD_SCRIPT, "Calling invoke on bad script");
+        return;
+    }
+    setupScript();
+    setTLS();
+
+    const uint32_t * dPtr = (const uint32_t *)data;
+    switch(len) {
+    case 0:
+        mEnviroment.mInvokeFunctions[slot]();
+        break;
+    case 4:
+        ((void (*)(uint32_t))
+         mEnviroment.mInvokeFunctions[slot])(dPtr[0]);
+        break;
+    case 8:
+        ((void (*)(uint32_t, uint32_t))
+         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1]);
+        break;
+    case 12:
+        ((void (*)(uint32_t, uint32_t, uint32_t))
+         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2]);
+        break;
+    case 16:
+        ((void (*)(uint32_t, uint32_t, uint32_t, uint32_t))
+         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2], dPtr[3]);
+        break;
+    case 20:
+        ((void (*)(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t))
+         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2], dPtr[3], dPtr[4]);
+        break;
+    }
+    clearTLS();
 }
 
 ScriptCState::ScriptCState()

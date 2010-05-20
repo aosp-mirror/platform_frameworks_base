@@ -2,17 +2,17 @@
 typedef char int8_t;
 typedef short int16_t;
 typedef int int32_t;
-//typedef long int64_t;
+typedef long long int64_t;
 
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
-//typedef long uint64_t;
+typedef unsigned long long uint64_t;
 
 typedef uint8_t uchar;
 typedef uint16_t ushort;
 typedef uint32_t uint;
-//typedef uint64_t ulong;
+typedef uint64_t ulong;
 
 typedef int rs_element;
 typedef int rs_type;
@@ -93,4 +93,8 @@ typedef float4 rs_texture_coord4;
 
 // RS_KIND_INDEX
 typedef ushort rs_index;
+
+typedef struct {
+    float m[16];
+} rs_matrix4x4;
 
