@@ -113,7 +113,7 @@ public class GridView extends AbsListView {
      */
     @Override
     public void setAdapter(ListAdapter adapter) {
-        if (null != mAdapter) {
+        if (mAdapter != null && mDataSetObserver != null) {
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
         }
 
