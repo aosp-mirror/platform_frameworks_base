@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc.
+ * Copyright (C) 2009-2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 #include <nativehelper/jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <tts/TtsEngine.h>
+#include <android/tts.h>
 #include <media/AudioTrack.h>
 #include <math.h>
 
@@ -154,7 +154,7 @@ static Mutex engineMutex;
 class SynthProxyJniStorage {
     public :
         jobject                   tts_ref;
-        TtsEngine*                mNativeSynthInterface;
+        android_tts_engine_t*       mEngine;
         void*                     mEngineLibHandle;
         AudioTrack*               mAudioOut;
         int8_t                    mPlayState;
@@ -168,7 +168,7 @@ class SynthProxyJniStorage {
 
         SynthProxyJniStorage() {
             tts_ref = NULL;
-            mNativeSynthInterface = NULL;
+            mEngine = NULL;
             mEngineLibHandle = NULL;
             mAudioOut = NULL;
             mPlayState =  SYNTHPLAYSTATE_IS_STOPPED;
@@ -184,9 +184,9 @@ class SynthProxyJniStorage {
         ~SynthProxyJniStorage() {
             //LOGV("entering ~SynthProxyJniStorage()");
             killAudio();
-            if (mNativeSynthInterface) {
-                mNativeSynthInterface->shutdown();
-                mNativeSynthInterface = NULL;
+            if (mEngine) {
+                mEngine->funcs->shutdown(mEngine);
+                mEngine = NULL;
             }
             if (mEngineLibHandle) {
                 //LOGE("~SynthProxyJniStorage(): before close library");
@@ -273,28 +273,45 @@ void prepAudioTrack(SynthProxyJniStorage* pJniData, AudioSystem::stream_type str
  * Callback from TTS engine.
  * Directly speaks using AudioTrack or write to file
  */
-static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
-                           uint32_t format, int channel,
-                           int8_t *&wav, size_t &bufferSize, tts_synth_status status) {
+extern "C" android_tts_callback_status_t
+__ttsSynthDoneCB(void ** pUserdata, uint32_t rate,
+               android_tts_audio_format_t format, int channel,
+               int8_t **pWav, size_t *pBufferSize,
+               android_tts_synth_status_t status) 
+{
     //LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
+    AudioSystem::audio_format  encoding;
 
-    if (userdata == NULL){
+    if (*pUserdata == NULL){
         LOGE("userdata == NULL");
-        return TTS_CALLBACK_HALT;
+        return ANDROID_TTS_CALLBACK_HALT;
     }
-    afterSynthData_t* pForAfter = (afterSynthData_t*)userdata;
+    switch (format) {
+    case ANDROID_TTS_AUDIO_FORMAT_PCM_8_BIT:
+        encoding = AudioSystem::PCM_8_BIT;
+        break;
+    case ANDROID_TTS_AUDIO_FORMAT_PCM_16_BIT:
+        encoding = AudioSystem::PCM_16_BIT;
+        break;
+    default:
+        LOGE("Can't play, bad format");
+        return ANDROID_TTS_CALLBACK_HALT;
+    }
+    afterSynthData_t* pForAfter = (afterSynthData_t*) *pUserdata;
     SynthProxyJniStorage* pJniData = (SynthProxyJniStorage*)(pForAfter->jniStorage);
 
     if (pForAfter->usageMode == USAGEMODE_PLAY_IMMEDIATELY){
         //LOGV("Direct speech");
 
-        if (wav == NULL) {
+        if (*pWav == NULL) {
             delete pForAfter;
+            pForAfter = NULL;
             LOGV("Null: speech has completed");
+            return ANDROID_TTS_CALLBACK_HALT;
         }
 
-        if (bufferSize > 0) {
-            prepAudioTrack(pJniData, pForAfter->streamType, rate, (AudioSystem::audio_format)format, channel);
+        if (*pBufferSize > 0) {
+            prepAudioTrack(pJniData, pForAfter->streamType, rate, encoding, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mPlayLock.lock();
                 if(pJniData->mAudioOut->stopped()
@@ -303,28 +320,31 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
                 }
                 pJniData->mPlayLock.unlock();
                 if (bUseFilter) {
-                    applyFilter((int16_t*)wav, bufferSize/2);
+                    applyFilter((int16_t*)*pWav, *pBufferSize/2);
                 }
-                pJniData->mAudioOut->write(wav, bufferSize);
-                memset(wav, 0, bufferSize);
+                pJniData->mAudioOut->write(*pWav, *pBufferSize);
+                memset(*pWav, 0, *pBufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
             } else {
                 LOGE("Can't play, null audiotrack");
+                delete pForAfter;
+                pForAfter = NULL;
+                return ANDROID_TTS_CALLBACK_HALT;
             }
         }
     } else  if (pForAfter->usageMode == USAGEMODE_WRITE_TO_FILE) {
         //LOGV("Save to file");
-        if (wav == NULL) {
+        if (*pWav == NULL) {
             delete pForAfter;
             LOGV("Null: speech has completed");
-            return TTS_CALLBACK_HALT;
+            return ANDROID_TTS_CALLBACK_HALT;
         }
-        if (bufferSize > 0){
+        if (*pBufferSize > 0){
             if (bUseFilter) {
-                applyFilter((int16_t*)wav, bufferSize/2);
+                applyFilter((int16_t*)*pWav, *pBufferSize/2);
             }
-            fwrite(wav, 1, bufferSize, pForAfter->outputFile);
-            memset(wav, 0, bufferSize);
+            fwrite(*pWav, 1, *pBufferSize, pForAfter->outputFile);
+            memset(*pWav, 0, *pBufferSize);
         }
     }
     // Future update:
@@ -332,7 +352,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
     //      javaTTSFields.synthProxyMethodPost methode to notify
     //      playback has completed if the synthesis is done or if a marker has been reached.
 
-    if (status == TTS_SYNTH_DONE) {
+    if (status == ANDROID_TTS_SYNTH_DONE) {
         // this struct was allocated in the original android_tts_SynthProxy_speak call,
         // all processing matching this call is now done.
         LOGV("Speech synthesis done.");
@@ -342,16 +362,16 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
             delete pForAfter;
             pForAfter = NULL;
         }
-        return TTS_CALLBACK_HALT;
+        return ANDROID_TTS_CALLBACK_HALT;
     }
 
     // we don't update the wav (output) parameter as we'll let the next callback
     // write at the same location, we've consumed the data already, but we need
     // to update bufferSize to let the TTS engine know how much it can write the
     // next time it calls this function.
-    bufferSize = pJniData->mBufferSize;
+    *pBufferSize = pJniData->mBufferSize;
 
-    return TTS_CALLBACK_CONTINUE;
+    return ANDROID_TTS_CALLBACK_CONTINUE;
 }
 
 
@@ -360,7 +380,7 @@ static int
 android_tts_SynthProxy_setLowShelf(JNIEnv *env, jobject thiz, jboolean applyFilter,
         jfloat filterGain, jfloat attenuationInDb, jfloat freqInHz, jfloat slope)
 {
-    int result = TTS_SUCCESS;
+    int result = ANDROID_TTS_SUCCESS;
 
     bUseFilter = applyFilter;
     if (applyFilter) {
@@ -373,7 +393,7 @@ android_tts_SynthProxy_setLowShelf(JNIEnv *env, jobject thiz, jboolean applyFilt
             initializeEQ();
         } else {
             LOGE("Invalid slope, can't be null");
-            result = TTS_FAILURE;
+            result = ANDROID_TTS_FAILURE;
         }
     }
 
@@ -385,7 +405,7 @@ static int
 android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
         jobject weak_this, jstring nativeSoLib, jstring engConfig)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     bUseFilter = false;
 
@@ -402,18 +422,28 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
     if (engine_lib_handle == NULL) {
        LOGE("android_tts_SynthProxy_native_setup(): engine_lib_handle == NULL");
     } else {
-        TtsEngine *(*get_TtsEngine)() =
-            reinterpret_cast<TtsEngine* (*)()>(dlsym(engine_lib_handle, "getTtsEngine"));
+        android_tts_engine_t * (*get_TtsEngine)() =
+            reinterpret_cast<android_tts_engine_t* (*)()>(dlsym(engine_lib_handle, "android_getTtsEngine"));
 
-        pJniStorage->mNativeSynthInterface = (*get_TtsEngine)();
-        pJniStorage->mEngineLibHandle = engine_lib_handle;
-
-        if (pJniStorage->mNativeSynthInterface) {
-            Mutex::Autolock l(engineMutex);
-            pJniStorage->mNativeSynthInterface->init(ttsSynthDoneCB, engConfigString);
+        // Support obsolete/legacy binary modules
+        if (get_TtsEngine == NULL) {
+            get_TtsEngine =
+                reinterpret_cast<android_tts_engine_t* (*)()>(dlsym(engine_lib_handle, "getTtsEngine"));
         }
 
-        result = TTS_SUCCESS;
+        pJniStorage->mEngine = (*get_TtsEngine)();
+        pJniStorage->mEngineLibHandle = engine_lib_handle;
+
+        android_tts_engine_t *engine = pJniStorage->mEngine;
+        if (engine) {
+            Mutex::Autolock l(engineMutex);
+            engine->funcs->init(
+                engine,
+                __ttsSynthDoneCB,
+                engConfigString);
+        }
+
+        result = ANDROID_TTS_SUCCESS;
     }
 
     // we use a weak reference so the SynthProxy object can be garbage collected.
@@ -462,7 +492,7 @@ static int
 android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
 {
-    int result = TTS_LANG_NOT_SUPPORTED;
+    int result = ANDROID_TTS_LANG_NOT_SUPPORTED;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_isLanguageAvailable(): invalid JNI data");
@@ -474,8 +504,10 @@ android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniDa
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
     const char *variantNativeString = env->GetStringUTFChars(variant, 0);
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->isLanguageAvailable(langNativeString,
+    android_tts_engine_t *engine = pSynthData->mEngine;
+
+    if (engine) {
+        result = engine->funcs->isLanguageAvailable(engine,langNativeString,
                 countryNativeString, variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
@@ -487,7 +519,7 @@ android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniDa
 static int
 android_tts_SynthProxy_setConfig(JNIEnv *env, jobject thiz, jint jniData, jstring engineConfig)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setConfig(): invalid JNI data");
@@ -498,9 +530,10 @@ android_tts_SynthProxy_setConfig(JNIEnv *env, jobject thiz, jint jniData, jstrin
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     const char *engineConfigNativeString = env->GetStringUTFChars(engineConfig, 0);
+    android_tts_engine_t *engine = pSynthData->mEngine;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->setProperty(ANDROID_TTS_ENGINE_PROPERTY_CONFIG,
+    if (engine) {
+        result = engine->funcs->setProperty(engine,ANDROID_TTS_ENGINE_PROPERTY_CONFIG,
                 engineConfigNativeString, strlen(engineConfigNativeString));
     }
     env->ReleaseStringUTFChars(engineConfig, engineConfigNativeString);
@@ -512,7 +545,7 @@ static int
 android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
 {
-    int result = TTS_LANG_NOT_SUPPORTED;
+    int result = ANDROID_TTS_LANG_NOT_SUPPORTED;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setLanguage(): invalid JNI data");
@@ -525,9 +558,10 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
     const char *variantNativeString = env->GetStringUTFChars(variant, 0);
+    android_tts_engine_t *engine = pSynthData->mEngine;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->setLanguage(langNativeString,
+    if (engine) {
+        result = engine->funcs->setLanguage(engine, langNativeString,
                 countryNativeString, variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
@@ -541,7 +575,7 @@ static int
 android_tts_SynthProxy_loadLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
 {
-    int result = TTS_LANG_NOT_SUPPORTED;
+    int result = ANDROID_TTS_LANG_NOT_SUPPORTED;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_loadLanguage(): invalid JNI data");
@@ -552,9 +586,10 @@ android_tts_SynthProxy_loadLanguage(JNIEnv *env, jobject thiz, jint jniData,
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
     const char *variantNativeString = env->GetStringUTFChars(variant, 0);
+    android_tts_engine_t *engine = pSynthData->mEngine;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->loadLanguage(langNativeString,
+    if (engine) {
+        result = engine->funcs->loadLanguage(engine, langNativeString,
                 countryNativeString, variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
@@ -569,7 +604,7 @@ static int
 android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
         jint speechRate)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setSpeechRate(): invalid JNI data");
@@ -584,9 +619,10 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     LOGI("setting speech rate to %d", speechRate);
+    android_tts_engine_t *engine = pSynthData->mEngine;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->setProperty("rate", buffer, bufSize);
+    if (engine) {
+        result = engine->funcs->setProperty(engine, "rate", buffer, bufSize);
     }
 
     return result;
@@ -597,7 +633,7 @@ static int
 android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
         jint pitch)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setPitch(): invalid JNI data");
@@ -612,9 +648,10 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     LOGI("setting pitch to %d", pitch);
+    android_tts_engine_t *engine = pSynthData->mEngine;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->setProperty("pitch", buffer, bufSize);
+    if (engine) {
+        result = engine->funcs->setProperty(engine, "pitch", buffer, bufSize);
     }
 
     return result;
@@ -625,7 +662,7 @@ static int
 android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         jstring textJavaString, jstring filenameJavaString)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid JNI data");
@@ -633,7 +670,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    if (!pSynthData->mNativeSynthInterface) {
+    if (!pSynthData->mEngine) {
         LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid engine handle");
         return result;
     }
@@ -643,12 +680,22 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     Mutex::Autolock l(engineMutex);
 
     // Retrieve audio parameters before writing the file header
-    AudioSystem::audio_format encoding = DEFAULT_TTS_FORMAT;
+    AudioSystem::audio_format encoding;
     uint32_t rate = DEFAULT_TTS_RATE;
     int channels = DEFAULT_TTS_NB_CHANNELS;
-    pSynthData->mNativeSynthInterface->setAudioFormat(encoding, rate, channels);
+    android_tts_engine_t *engine = pSynthData->mEngine;
+    android_tts_audio_format_t  format = ANDROID_TTS_AUDIO_FORMAT_DEFAULT;
 
-    if ((encoding != AudioSystem::PCM_16_BIT) && (encoding != AudioSystem::PCM_8_BIT)) {
+    engine->funcs->setAudioFormat(engine, &format, &rate, &channels);
+
+    switch (format) {
+    case ANDROID_TTS_AUDIO_FORMAT_PCM_16_BIT:
+        encoding = AudioSystem::PCM_16_BIT;
+        break;
+    case ANDROID_TTS_AUDIO_FORMAT_PCM_8_BIT:
+        encoding = AudioSystem::PCM_8_BIT;
+        break;
+    default:
         LOGE("android_tts_SynthProxy_synthesizeToFile(): engine uses invalid format");
         return result;
     }
@@ -677,7 +724,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     unsigned int unique_identifier;
 
     memset(pSynthData->mBuffer, 0, pSynthData->mBufferSize);
-    result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
+
+    result = engine->funcs->synthesizeText(engine, textNativeString,
             pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
 
     long filelen = ftell(pForAfter->outputFile);
@@ -737,7 +785,7 @@ static int
 android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
         jstring textJavaString, jint javaStreamType)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_speak(): invalid JNI data");
@@ -759,10 +807,12 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
     pForAfter->usageMode  = USAGEMODE_PLAY_IMMEDIATELY;
     pForAfter->streamType = (AudioSystem::stream_type) javaStreamType;
 
-    if (pSynthData->mNativeSynthInterface) {
+    if (pSynthData->mEngine) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
         memset(pSynthData->mBuffer, 0, pSynthData->mBufferSize);
-        result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
+        android_tts_engine_t *engine = pSynthData->mEngine;
+
+        result = engine->funcs->synthesizeText(engine, textNativeString,
                 pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
     }
@@ -774,7 +824,7 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 static int
 android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_stop(): invalid JNI data");
@@ -790,8 +840,9 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
     }
     pSynthData->mPlayLock.unlock();
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->stop();
+    android_tts_engine_t *engine = pSynthData->mEngine;
+    if (engine) {
+        result = engine->funcs->stop(engine);
     }
 
     return result;
@@ -801,7 +852,7 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 static int
 android_tts_SynthProxy_stopSync(JNIEnv *env, jobject thiz, jint jniData)
 {
-    int result = TTS_FAILURE;
+    int result = ANDROID_TTS_FAILURE;
 
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_stop(): invalid JNI data");
@@ -829,7 +880,7 @@ android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
-    if (pSynthData->mNativeSynthInterface) {
+    if (pSynthData->mEngine) {
         size_t bufSize = 100;
         char lang[bufSize];
         char country[bufSize];
@@ -839,7 +890,9 @@ android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
         memset(variant, 0, bufSize);
         jobjectArray retLocale = (jobjectArray)env->NewObjectArray(3,
                 env->FindClass("java/lang/String"), env->NewStringUTF(""));
-        pSynthData->mNativeSynthInterface->getLanguage(lang, country, variant);
+
+        android_tts_engine_t *engine = pSynthData->mEngine;
+        engine->funcs->getLanguage(engine, lang, country, variant);
         env->SetObjectArrayElement(retLocale, 0, env->NewStringUTF(lang));
         env->SetObjectArrayElement(retLocale, 1, env->NewStringUTF(country));
         env->SetObjectArrayElement(retLocale, 2, env->NewStringUTF(variant));
@@ -864,8 +917,9 @@ android_tts_SynthProxy_getRate(JNIEnv *env, jobject thiz, jint jniData)
     char buf[bufSize];
     memset(buf, 0, bufSize);
     // TODO check return codes
-    if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->getProperty("rate", buf, &bufSize);
+    android_tts_engine_t *engine = pSynthData->mEngine;
+    if (engine) {
+        engine->funcs->getProperty(engine,"rate", buf, &bufSize);
     }
     return atoi(buf);
 }

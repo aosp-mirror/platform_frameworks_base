@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
 	android_tts_SynthProxy.cpp
 
 LOCAL_C_INCLUDES += \
+	frameworks/base/native/include \
 	$(JNI_H_INCLUDE)
 
 LOCAL_SHARED_LIBRARIES := \
