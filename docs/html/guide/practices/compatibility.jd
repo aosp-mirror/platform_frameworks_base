@@ -36,15 +36,16 @@ exchange, however, it also means that your apps will have to cope with that same
 variety of hardware.</p>
 
 <p>Fortunately, Android has built-in tools and support that make it easy for
-your apps to do that, while at the same time maintaining control of what types
-of devices your app is available to. If you do your work properly, users
+your apps to do that, while at the same time letting you maintain control of
+what types of devices your app is available to. With a bit of forethought and
+some minor changes in your app's manifest file, you can ensure that users
 whose devices can’t run your app will never see it in the Android Market, and
 will not get in trouble by downloading it. This page explains how you can
 control which devices have access to your apps, and how to prepare your apps to
 make sure they reach the right audience.</p>
 
 
-<h3 id="defined">What does “Compatibility” mean?</h3>
+<h3 id="defined">What does “compatibility” mean?</h3>
 
 <p>A device is “Android compatible” if it can correctly run apps written for the
 <em>Android execution environment</em>. The exact details of the Android execution
