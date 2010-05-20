@@ -31,6 +31,7 @@ page.title=Data Backup
     <li><a href="#RestoreVersion">Checking the Restore Data Version</a></li>
     <li><a href="#RequestingBackup">Requesting Backup</a></li>
     <li><a href="#RequestingRestore">Requesting Restore</a></li>
+    <li><a href="#DevelopingTestings">Developing and Testing Your Backup Agent</a></li>
   </ol>
 
   <h2>Key classes</h2>
@@ -758,4 +759,23 @@ implementation, passing the data from the current set of backup data.</p>
 <p class="note"><strong>Note:</strong> While developing your application, you can request a
 restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">bmgr
 tool</a>.</p>
+
+
+<h2 id="DevelopingTestings">Developing and Testing Your Backup Agent</h2>
+
+<p>To develop and test your backup agent:</p>
+<ul>
+  <li>Set your build target to a platform using API Level 8 or higher</li>
+  <li>Run your application on a suitable Android system image:
+    <ul>
+      <li>If using the emulator, create and use an AVD with the Google APIs add-on (API Level
+8) &mdash; the Google APIs add-on is available as an SDK component through the SDK and AVD
+Manager</li>
+      <li>If using a device, the device must be running Android 2.2 or greater and have Android
+Market built in</li>
+    </ul>
+  </li>
+  <li>Test your backup agent using the <a href="{@docRoot}guide/developing/tools/bmgr.html">{@code
+bmgr}</a> tool to initiate backup and restore operations</li>
+</ul>
 
