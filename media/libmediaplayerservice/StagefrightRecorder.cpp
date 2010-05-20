@@ -584,8 +584,8 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         // Check on video frame rate
         int frameRate = newCameraParams.getPreviewFrameRate();
         if (frameRate < 0 || (frameRate - mFrameRate) != 0) {
-            LOGE("Failed to set frame rate to %d", mFrameRate);
-            return UNKNOWN_ERROR;
+            LOGE("Failed to set frame rate to %d fps. The actual "
+                 "frame rate is %d", mFrameRate, frameRate);
         }
 
         CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
