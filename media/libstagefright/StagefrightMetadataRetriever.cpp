@@ -120,7 +120,11 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
         return NULL;
     }
 
-    decoder->start();
+    status_t err = decoder->start();
+    if (err != OK) {
+        LOGW("OMXCodec::start returned error %d (0x%08x)\n", err, err);
+        return NULL;
+    }
 
     // Read one output buffer, ignore format change notifications
     // and spurious empty buffers.
@@ -134,7 +138,6 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     }
 
     MediaBuffer *buffer = NULL;
-    status_t err;
     do {
         if (buffer != NULL) {
             buffer->release();
