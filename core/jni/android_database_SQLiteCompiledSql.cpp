@@ -91,22 +91,11 @@ static void native_compile(JNIEnv* env, jobject object, jstring sqlString)
     compile(env, object, GET_HANDLE(env, object), sqlString);
 }
 
-static void native_finalize(JNIEnv* env, jobject object)
-{
-    int err;
-    sqlite3_stmt * statement = GET_STATEMENT(env, object);
-
-    if (statement != NULL) {
-        sqlite3_finalize(statement);
-        env->SetIntField(object, gStatementField, 0);
-    }
-}
 
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
     {"native_compile", "(Ljava/lang/String;)V", (void *)native_compile},
-    {"native_finalize", "()V", (void *)native_finalize},
 };
 
 int register_android_database_SQLiteCompiledSql(JNIEnv * env)

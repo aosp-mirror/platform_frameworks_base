@@ -230,8 +230,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     // lock acquistions of the database.
     /* package */ static final String GET_LOCK_LOG_PREFIX = "GETLOCK:";
 
-    /** Used by native code, do not rename */
-    /* package */ int mNativeHandle = 0;
+    /** Used by native code, do not rename. make it volatile, so it is thread-safe. */
+    /* package */ volatile int mNativeHandle = 0;
 
     /** Used to make temp table names unique */
     /* package */ int mTempTableSequence = 0;
@@ -312,6 +312,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     // System property that enables logging of slow queries. Specify the threshold in ms.
     private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
     private final int mSlowQueryThreshold;
+
+    /** stores the list of statement ids that need to be finalized by sqlite */
+    private ArrayList<Integer> mClosedStatementIds = new ArrayList<Integer>();
 
     /** {@link DatabaseErrorHandler} to be used when SQLite returns any of the following errors
      *    Corruption
@@ -1778,6 +1781,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
         try {
+            closePendingStatements();
             native_execSQL(sql);
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
@@ -2101,6 +2105,52 @@ public class SQLiteDatabase extends SQLiteClosable {
         mMaxSqlCacheSize = cacheSize;
     }
 
+    /* package */ void finalizeStatementLater(int id) {
+        if (!isOpen()) {
+            // database already closed. this statement will already have been finalized.
+            return;
+        }
+        synchronized(mClosedStatementIds) {
+            if (mClosedStatementIds.contains(id)) {
+                // this statement id is already queued up for finalization.
+                return;
+            }
+            mClosedStatementIds.add(id);
+        }
+    }
+
+    /**
+     * public visibility only for testing. otherwise, package visibility is sufficient
+     * @hide
+     */
+    public void closePendingStatements() {
+        if (!isOpen()) {
+            // since this database is already closed, no need to finalize anything.
+            mClosedStatementIds.clear();
+            return;
+        }
+        verifyLockOwner();
+        /* to minimize synchronization on mClosedStatementIds, make a copy of the list */
+        ArrayList<Integer> list = new ArrayList<Integer>(mClosedStatementIds.size());
+        synchronized(mClosedStatementIds) {
+            list.addAll(mClosedStatementIds);
+            mClosedStatementIds.clear();
+        }
+        // finalize all the statements from the copied list
+        int size = list.size();
+        for (int i = 0; i < size; i++) {
+            native_finalize(list.get(i));
+        }
+    }
+
+    /**
+     * for testing only
+     * @hide
+     */
+    public ArrayList<Integer> getQueuedUpStmtList() {
+        return mClosedStatementIds;
+    }
+
     static class ActiveDatabases {
         private static final ActiveDatabases activeDatabases = new ActiveDatabases();
         private HashSet<WeakReference<SQLiteDatabase>> mActiveDatabases =
@@ -2310,4 +2360,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return int value of SQLITE_DBSTATUS_LOOKASIDE_USED
      */
     private native int native_getDbLookaside();
+
+    /**
+     * finalizes the given statement id.
+     *
+     * @param statementId statement to be finzlied by sqlite
+     */
+    private final native void native_finalize(int statementId);
 }
