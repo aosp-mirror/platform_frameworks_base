@@ -31,6 +31,9 @@ interface IDevicePolicyManager {
     void setPasswordMinimumLength(in ComponentName who, int length);
     int getPasswordMinimumLength(in ComponentName who);
     
+    void setPasswordHistoryLength(in ComponentName who, int length);
+    int getPasswordHistoryLength(in ComponentName who);
+
     boolean isActivePasswordSufficient();
     int getCurrentFailedPasswordAttempts();
     

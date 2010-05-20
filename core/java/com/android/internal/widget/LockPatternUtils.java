@@ -86,12 +86,6 @@ public class LockPatternUtils {
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = 3;
 
-    /**
-     * The number of previous password hashes to store. This is used to prevent
-     * the user from setting the same password as any of the stored ones.
-     */
-    public static final int MAX_PASSWORD_HISTORY_LENGTH = 5;
-
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
@@ -144,6 +138,10 @@ public class LockPatternUtils {
      */
     public int getRequestedPasswordQuality() {
         return getDevicePolicyManager().getPasswordQuality(null);
+    }
+
+    public int getRequestedPasswordHistoryLength() {
+        return getDevicePolicyManager().getPasswordHistoryLength(null);
     }
 
     /**
@@ -219,7 +217,21 @@ public class LockPatternUtils {
     public boolean checkPasswordHistory(String password) {
         String passwordHashString = new String(passwordToHash(password));
         String passwordHistory = getString(PASSWORD_HISTORY_KEY);
-        return passwordHistory != null && passwordHistory.contains(passwordHashString);
+        if (passwordHistory == null) {
+            return false;
+        }
+        // Password History may be too long...
+        int passwordHashLength = passwordHashString.length();
+        int passwordHistoryLength = getRequestedPasswordHistoryLength();
+        if(passwordHistoryLength == 0) {
+            return false;
+        }
+        int neededPasswordHistoryLength = passwordHashLength * passwordHistoryLength
+                + passwordHistoryLength - 1;
+        if (passwordHistory.length() > neededPasswordHistoryLength) {
+            passwordHistory = passwordHistory.substring(0, neededPasswordHistoryLength);
+        }
+        return passwordHistory.contains(passwordHashString);
     }
 
     /**
@@ -413,12 +425,17 @@ public class LockPatternUtils {
                 if (passwordHistory == null) {
                     passwordHistory = new String();
                 }
-                passwordHistory = new String(hash) + "," + passwordHistory;
-                // Cut it to contain MAX_PASSWORD_HISTORY_LENGTH hashes
-                // and MAX_PASSWORD_HISTORY_LENGTH -1 commas.
-                passwordHistory = passwordHistory.substring(0, Math.min(hash.length
-                        * MAX_PASSWORD_HISTORY_LENGTH + MAX_PASSWORD_HISTORY_LENGTH - 1,
-                        passwordHistory.length()));
+                int passwordHistoryLength = getRequestedPasswordHistoryLength();
+                if (passwordHistoryLength == 0) {
+                    passwordHistory = "";
+                } else {
+                    passwordHistory = new String(hash) + "," + passwordHistory;
+                    // Cut it to contain passwordHistoryLength hashes
+                    // and passwordHistoryLength -1 commas.
+                    passwordHistory = passwordHistory.substring(0, Math.min(hash.length
+                            * passwordHistoryLength + passwordHistoryLength - 1, passwordHistory
+                            .length()));
+                }
                 setString(PASSWORD_HISTORY_KEY, passwordHistory);
             } else {
                 dpm.setActivePasswordState(
