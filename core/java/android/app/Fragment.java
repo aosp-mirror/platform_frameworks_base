@@ -308,7 +308,7 @@ public class Fragment implements ComponentCallbacks {
     /**
      * Return true if the fragment has been hidden.  By default fragments
      * are shown.  You can find out about changes to this state with
-     * {@link #onHiddenChanged()}.  Note that the hidden state is orthogonal
+     * {@link #onHiddenChanged}.  Note that the hidden state is orthogonal
      * to other states -- that is, to be visible to the user, a fragment
      * must be both started and not hidden.
      */
