@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
@@ -128,12 +127,8 @@ final class FragmentState implements Parcelable {
  * that can be placed in an {@link Activity}.
  */
 public class Fragment implements ComponentCallbacks {
-    private static final Object[] sConstructorArgs = new Object[0];
-
-    private static final Class[] sConstructorSignature = new Class[] { };
-
-    private static final HashMap<String, Constructor> sConstructorMap =
-            new HashMap<String, Constructor>();
+    private static final HashMap<String, Class> sClassMap =
+            new HashMap<String, Class>();
     
     static final int INITIALIZING = 0;  // Not yet created.
     static final int CREATED = 1;       // Created.
@@ -178,6 +173,10 @@ public class Fragment implements ComponentCallbacks {
     // fragments that are not part of the layout.
     String mTag;
     
+    // Set to true when the app has requested that this fragment be hidden
+    // from the user.
+    boolean mHidden;
+    
     // If set this fragment would like its instance retained across
     // configuration changes.
     boolean mRetainInstance;
@@ -187,6 +186,9 @@ public class Fragment implements ComponentCallbacks {
     
     // Used to verify that subclasses call through to super class.
     boolean mCalled;
+    
+    // If app has requested a specific animation, this is the one to use.
+    int mNextAnim;
     
     // The parent container of the fragment after dynamically added to UI.
     ViewGroup mContainer;
@@ -201,16 +203,14 @@ public class Fragment implements ComponentCallbacks {
             throws NoSuchMethodException, ClassNotFoundException,
             IllegalArgumentException, InstantiationException,
             IllegalAccessException, InvocationTargetException {
-        Constructor constructor = sConstructorMap.get(fname);
-        Class clazz = null;
+        Class clazz = sClassMap.get(fname);
 
-        if (constructor == null) {
+        if (clazz == null) {
             // Class not found in the cache, see if it's real, and try to add it
             clazz = activity.getClassLoader().loadClass(fname);
-            constructor = clazz.getConstructor(sConstructorSignature);
-            sConstructorMap.put(fname, constructor);
+            sClassMap.put(fname, clazz);
         }
-        return (Fragment)constructor.newInstance(sConstructorArgs);
+        return (Fragment)clazz.newInstance();
     }
     
     void restoreViewState() {
@@ -244,6 +244,27 @@ public class Fragment implements ComponentCallbacks {
         return super.hashCode();
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("Fragment{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        if (mIndex >= 0) {
+            sb.append(" #");
+            sb.append(mIndex);
+        }
+        if (mFragmentId != 0) {
+            sb.append(" id=0x");
+            sb.append(Integer.toHexString(mFragmentId));
+        }
+        if (mTag != null) {
+            sb.append(" ");
+            sb.append(mTag);
+        }
+        sb.append('}');
+        return sb.toString();
+    }
+    
     /**
      * Return the identifier this fragment is known by.  This is either
      * the android:id value supplied in a layout or the container view ID
@@ -265,6 +286,44 @@ public class Fragment implements ComponentCallbacks {
      */
     public Activity getActivity() {
         return mActivity;
+    }
+    
+    /**
+     * Return true if the fragment is currently added to its activity.
+     */
+    public boolean isAdded() {
+        return mActivity != null && mActivity.mFragments.mAdded.contains(this);
+    }
+    
+    /**
+     * Return true if the fragment is currently visible to the user.  This means
+     * it: (1) has been added, (2) has its view attached to the window, and 
+     * (3) is not hidden.
+     */
+    public boolean isVisible() {
+        return isAdded() && !isHidden() && mView != null
+                && mView.getWindowToken() != null && mView.getVisibility() == View.VISIBLE;
+    }
+    
+    /**
+     * Return true if the fragment has been hidden.  By default fragments
+     * are shown.  You can find out about changes to this state with
+     * {@link #onHiddenChanged()}.  Note that the hidden state is orthogonal
+     * to other states -- that is, to be visible to the user, a fragment
+     * must be both started and not hidden.
+     */
+    public boolean isHidden() {
+        return mHidden;
+    }
+    
+    /**
+     * Called when the hidden state (as returned by {@link #isHidden()} of
+     * the fragment has changed.  Fragments start out not hidden; this will
+     * be called whenever the fragment changes state from that.
+     * @param hidden True if the fragment is now hidden, false if it is not
+     * visible.
+     */
+    public void onHiddenChanged(boolean hidden) {
     }
     
     /**
@@ -351,7 +410,7 @@ public class Fragment implements ComponentCallbacks {
         mCalled = true;
     }
     
-    public Animation onCreateAnimation(int transit, boolean enter) {
+    public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
         return null;
     }
     
@@ -459,7 +518,7 @@ public class Fragment implements ComponentCallbacks {
     public void onDestroy() {
         mCalled = true;
     }
-    
+
     /**
      * Called when the fragment is no longer attached to its activity.  This
      * is called after {@link #onDestroy()}.

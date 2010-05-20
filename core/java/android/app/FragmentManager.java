@@ -21,239 +21,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
-
-final class BackStackEntry implements FragmentTransaction, Runnable {
-    final FragmentManager mManager;
-    
-    ArrayList<Fragment> mAdded;
-    ArrayList<Fragment> mRemoved;
-    int mTransition;
-    int mTransitionStyle;
-    boolean mAddToBackStack;
-    String mName;
-    boolean mCommitted;
-    
-    public BackStackEntry(FragmentManager manager) {
-        mManager = manager;
-    }
-    
-    public FragmentTransaction add(Fragment fragment, String tag) {
-        fragment.mTag = tag;
-        return add(fragment, 0);
-    }
-
-    public FragmentTransaction add(Fragment fragment, int containerViewId) {
-        if (fragment.mActivity != null) {
-            throw new IllegalStateException("Fragment already added: " + fragment);
-        }
-        if (mRemoved != null) {
-            mRemoved.remove(fragment);
-        }
-        if (mAdded == null) {
-            mAdded = new ArrayList<Fragment>();
-        }
-        fragment.mContainerId = fragment.mFragmentId = containerViewId;
-        mAdded.add(fragment);
-        return this;
-    }
-
-    public FragmentTransaction replace(Fragment fragment, int containerViewId) {
-        if (containerViewId == 0) {
-            throw new IllegalArgumentException("Must use non-zero containerViewId");
-        }
-        if (mManager.mAdded != null) {
-            for (int i=0; i<mManager.mAdded.size(); i++) {
-                Fragment old = mManager.mAdded.get(i);
-                if (old.mContainerId == containerViewId) {
-                    remove(old);
-                }
-            }
-        }
-        return add(fragment, containerViewId);
-    }
-    
-    public FragmentTransaction remove(Fragment fragment) {
-        if (fragment.mActivity == null) {
-            throw new IllegalStateException("Fragment not added: " + fragment);
-        }
-        if (mAdded != null) {
-            mAdded.remove(fragment);
-        }
-        if (mRemoved == null) {
-            mRemoved = new ArrayList<Fragment>();
-        }
-        mRemoved.add(fragment);
-        return this;
-    }
-
-    public FragmentTransaction setTransition(int transition) {
-        mTransition = transition;
-        return this;
-    }
-    
-    public FragmentTransaction setTransitionStyle(int styleRes) {
-        mTransitionStyle = styleRes;
-        return this;
-    }
-    
-    public FragmentTransaction addToBackStack(String name) {
-        mAddToBackStack = true;
-        mName = name;
-        return this;
-    }
-
-    public void commit() {
-        if (mCommitted) throw new IllegalStateException("commit already called");
-        mCommitted = true;
-        mManager.mActivity.mHandler.post(this);
-    }
-    
-    public void run() {
-        if (mRemoved != null) {
-            for (int i=mRemoved.size()-1; i>=0; i--) {
-                Fragment f = mRemoved.get(i);
-                if (mAddToBackStack) {
-                    f.mBackStackNesting++;
-                }
-                mManager.removeFragment(f, mTransition, mTransitionStyle);
-            }
-        }
-        if (mAdded != null) {
-            for (int i=mAdded.size()-1; i>=0; i--) {
-                Fragment f = mAdded.get(i);
-                if (mAddToBackStack) {
-                    f.mBackStackNesting++;
-                }
-                mManager.addFragment(f, false);
-            }
-        }
-        mManager.moveToState(mManager.mCurState, mTransition,
-                mTransitionStyle, true);
-        if (mAddToBackStack) {
-            mManager.addBackStackState(this);
-        }
-    }
-    
-    public void popFromBackStack() {
-        if (mAdded != null) {
-            for (int i=mAdded.size()-1; i>=0; i--) {
-                Fragment f = mAdded.get(i);
-                if (mAddToBackStack) {
-                    f.mBackStackNesting--;
-                }
-                mManager.removeFragment(f,
-                        FragmentManager.reverseTransit(mTransition),
-                        mTransitionStyle);
-            }
-        }
-        if (mRemoved != null) {
-            for (int i=mRemoved.size()-1; i>=0; i--) {
-                Fragment f = mRemoved.get(i);
-                if (mAddToBackStack) {
-                    f.mBackStackNesting--;
-                }
-                mManager.addFragment(f, false);
-            }
-        }
-    }
-    
-    public String getName() {
-        return mName;
-    }
-    
-    public int getTransition() {
-        return mTransition;
-    }
-    
-    public int getTransitionStyle() {
-        return mTransitionStyle;
-    }
-}
-
-final class BackStackState implements Parcelable {
-    final int[] mAdded;
-    final int[] mRemoved;
-    final int mTransition;
-    final int mTransitionStyle;
-    final String mName;
-    
-    public BackStackState(FragmentManager fm, BackStackEntry bse) {
-        mAdded = buildFragmentStateList(fm, bse.mAdded);
-        mRemoved = buildFragmentStateList(fm, bse.mRemoved);
-        mTransition = bse.mTransition;
-        mTransitionStyle = bse.mTransitionStyle;
-        mName = bse.mName;
-    }
-    
-    public BackStackState(Parcel in) {
-        mAdded = in.createIntArray();
-        mRemoved = in.createIntArray();
-        mTransition = in.readInt();
-        mTransitionStyle = in.readInt();
-        mName = in.readString();
-    }
-    
-    public BackStackEntry instantiate(FragmentManager fm) {
-        BackStackEntry bse = new BackStackEntry(fm);
-        bse.mAdded = buildFragmentList(fm, mAdded);
-        bse.mRemoved = buildFragmentList(fm, mRemoved);
-        bse.mTransition = mTransition;
-        bse.mTransitionStyle = mTransitionStyle;
-        bse.mName = mName;
-        return bse;
-    }
-    
-    static int[] buildFragmentStateList(FragmentManager fm, ArrayList<Fragment> frags) {
-        if (frags == null) return null;
-        final int N = frags.size();
-        int[] ids = new int[N];
-        for (int i=0; i<N; i++) {
-            ids[i] = frags.get(i).mIndex;
-        }
-        return ids;
-    }
-    
-    static ArrayList<Fragment> buildFragmentList(FragmentManager fm, int[] states) {
-        if (states == null) return null;
-        final int N = states.length;
-        ArrayList<Fragment> frags = new ArrayList<Fragment>(N);
-        for (int i=0; i<N; i++) {
-            Fragment f = fm.mActive.get(states[i]);
-            f.mBackStackNesting++;
-            frags.add(f);
-        }
-        return frags;
-    }
-    
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeIntArray(mAdded);
-        dest.writeIntArray(mRemoved);
-        dest.writeInt(mTransition);
-        dest.writeInt(mTransitionStyle);
-        dest.writeString(mName);
-    }
-    
-    public static final Parcelable.Creator<BackStackState> CREATOR
-            = new Parcelable.Creator<BackStackState>() {
-        public BackStackState createFromParcel(Parcel in) {
-            return new BackStackState(in);
-        }
-        
-        public BackStackState[] newArray(int size) {
-            return new BackStackState[size];
-        }
-    };
-}
 
 final class FragmentManagerState implements Parcelable {
     FragmentState[] mActive;
@@ -296,6 +71,9 @@ final class FragmentManagerState implements Parcelable {
  * Container for fragments associated with an activity.
  */
 public class FragmentManager {
+    static final boolean DEBUG = true;
+    static final String TAG = "FragmentManager";
+    
     ArrayList<Fragment> mActive;
     ArrayList<Fragment> mAdded;
     ArrayList<Integer> mAvailIndices;
@@ -310,9 +88,17 @@ public class FragmentManager {
     
     Animation loadAnimation(Fragment fragment, int transit, boolean enter,
             int transitionStyle) {
-        Animation animObj = fragment.onCreateAnimation(transitionStyle, enter);
+        Animation animObj = fragment.onCreateAnimation(transitionStyle, enter,
+                fragment.mNextAnim);
         if (animObj != null) {
             return animObj;
+        }
+        
+        if (fragment.mNextAnim != 0) {
+            Animation anim = AnimationUtils.loadAnimation(mActivity, fragment.mNextAnim);
+            if (anim != null) {
+                return anim;
+            }
         }
         
         if (transit == 0) {
@@ -352,6 +138,7 @@ public class FragmentManager {
         if (f.mState < newState) {
             switch (f.mState) {
                 case Fragment.INITIALIZING:
+                    if (DEBUG) Log.v(TAG, "moveto CREATED: " + f);
                     f.mActivity = mActivity;
                     f.mCalled = false;
                     f.onAttach(mActivity);
@@ -378,10 +165,12 @@ public class FragmentManager {
                         if (f.mView != null) {
                             f.mView.setSaveFromParentEnabled(false);
                             f.restoreViewState();
+                            if (f.mHidden) f.mView.setVisibility(View.GONE); 
                         }
                     }
                 case Fragment.CREATED:
                     if (newState > Fragment.CREATED) {
+                        if (DEBUG) Log.v(TAG, "moveto CONTENT: " + f);
                         if (!f.mFromLayout) {
                             ViewGroup container = null;
                             if (f.mContainerId != 0) {
@@ -406,6 +195,7 @@ public class FragmentManager {
                                     container.addView(f.mView);
                                     f.restoreViewState();
                                 }
+                                if (f.mHidden) f.mView.setVisibility(View.GONE); 
                             }
                         }
                         
@@ -419,6 +209,7 @@ public class FragmentManager {
                     }
                 case Fragment.CONTENT:
                     if (newState > Fragment.CONTENT) {
+                        if (DEBUG) Log.v(TAG, "moveto STARTED: " + f);
                         f.mCalled = false;
                         f.onStart();
                         if (!f.mCalled) {
@@ -428,6 +219,7 @@ public class FragmentManager {
                     }
                 case Fragment.STARTED:
                     if (newState > Fragment.STARTED) {
+                        if (DEBUG) Log.v(TAG, "moveto RESUMED: " + f);
                         f.mCalled = false;
                         f.onResume();
                         if (!f.mCalled) {
@@ -440,6 +232,7 @@ public class FragmentManager {
             switch (f.mState) {
                 case Fragment.RESUMED:
                     if (newState < Fragment.RESUMED) {
+                        if (DEBUG) Log.v(TAG, "movefrom RESUMED: " + f);
                         f.mCalled = false;
                         f.onPause();
                         if (!f.mCalled) {
@@ -449,6 +242,7 @@ public class FragmentManager {
                     }
                 case Fragment.STARTED:
                     if (newState < Fragment.STARTED) {
+                        if (DEBUG) Log.v(TAG, "movefrom STARTED: " + f);
                         f.mCalled = false;
                         f.onStop();
                         if (!f.mCalled) {
@@ -458,6 +252,7 @@ public class FragmentManager {
                     }
                 case Fragment.CONTENT:
                     if (newState < Fragment.CONTENT) {
+                        if (DEBUG) Log.v(TAG, "movefrom CONTENT: " + f);
                         if (f.mView != null) {
                             // Need to save the current view state if not
                             // done already.
@@ -480,6 +275,7 @@ public class FragmentManager {
                     }
                 case Fragment.CREATED:
                     if (newState < Fragment.CREATED) {
+                        if (DEBUG) Log.v(TAG, "movefrom CREATED: " + f);
                         if (!f.mRetaining) {
                             f.mCalled = false;
                             f.onDestroy();
@@ -559,6 +355,7 @@ public class FragmentManager {
     }
     
     public void addFragment(Fragment fragment, boolean moveToStateNow) {
+        if (DEBUG) Log.v(TAG, "add: " + fragment);
         if (mAdded == null) {
             mAdded = new ArrayList<Fragment>();
         }
@@ -571,6 +368,7 @@ public class FragmentManager {
     }
     
     public void removeFragment(Fragment fragment, int transition, int transitionStyle) {
+        if (DEBUG) Log.v(TAG, "remove: " + fragment);
         mAdded.remove(fragment);
         final boolean inactive = fragment.mBackStackNesting <= 0;
         if (inactive) {
@@ -581,8 +379,48 @@ public class FragmentManager {
                 transition, transitionStyle);
     }
     
+    public void hideFragment(Fragment fragment, int transition, int transitionStyle) {
+        if (DEBUG) Log.v(TAG, "hide: " + fragment);
+        if (!fragment.mHidden) {
+            fragment.mHidden = true;
+            if (fragment.mView != null) {
+                Animation anim = loadAnimation(fragment, transition, false,
+                        transitionStyle);
+                if (anim != null) {
+                    fragment.mView.setAnimation(anim);
+                }
+                fragment.mView.setVisibility(View.GONE);
+            }
+            fragment.onHiddenChanged(true);
+        }
+    }
+    
+    public void showFragment(Fragment fragment, int transition, int transitionStyle) {
+        if (DEBUG) Log.v(TAG, "show: " + fragment);
+        if (fragment.mHidden) {
+            fragment.mHidden = false;
+            if (fragment.mView != null) {
+                Animation anim = loadAnimation(fragment, transition, true,
+                        transitionStyle);
+                if (anim != null) {
+                    fragment.mView.setAnimation(anim);
+                }
+                fragment.mView.setVisibility(View.VISIBLE);
+            }
+            fragment.onHiddenChanged(false);
+        }
+    }
+    
     public Fragment findFragmentById(int id) {
         if (mActive != null) {
+            // First look through added fragments.
+            for (int i=mAdded.size()-1; i>=0; i--) {
+                Fragment f = mAdded.get(i);
+                if (f != null && f.mFragmentId == id) {
+                    return f;
+                }
+            }
+            // Now for any known fragment.
             for (int i=mActive.size()-1; i>=0; i--) {
                 Fragment f = mActive.get(i);
                 if (f != null && f.mFragmentId == id) {
@@ -595,6 +433,14 @@ public class FragmentManager {
     
     public Fragment findFragmentByTag(String tag) {
         if (mActive != null && tag != null) {
+            // First look through added fragments.
+            for (int i=mAdded.size()-1; i>=0; i--) {
+                Fragment f = mAdded.get(i);
+                if (f != null && tag.equals(f.mTag)) {
+                    return f;
+                }
+            }
+            // Now for any known fragment.
             for (int i=mActive.size()-1; i>=0; i--) {
                 Fragment f = mActive.get(i);
                 if (f != null && tag.equals(f.mTag)) {

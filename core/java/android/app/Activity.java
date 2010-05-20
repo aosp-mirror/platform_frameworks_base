@@ -3877,6 +3877,9 @@ public class Activity extends ContextThemeWrapper
             // instantiated this fragment from the state and should use
             // that instance instead of making a new one.
             Fragment fragment = mFragments.findFragmentById(id);
+            if (FragmentManager.DEBUG) Log.v(TAG, "onCreateView: id=0x"
+                    + Integer.toHexString(id) + " fname=" + fname
+                    + " existing=" + fragment);
             if (fragment == null) {
                 fragment = Fragment.instantiate(this, fname);
                 fragment.mFromLayout = true;
