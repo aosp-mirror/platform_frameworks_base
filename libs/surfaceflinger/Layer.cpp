@@ -60,7 +60,7 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
     // no OpenGL operation is possible here, since we might not be
     // in the OpenGL thread.
     lcblk = new SharedBufferServer(
-            client->ctrlblk, i, mBufferManager.getBufferCount(),
+            client->ctrlblk, i, mBufferManager.getDefaultBufferCount(),
             getIdentity());
 
    mBufferManager.setActiveBufferIndex( lcblk->getFrontBuffer() );
@@ -68,7 +68,10 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
 
 Layer::~Layer()
 {
-    destroy();
+    // FIXME: must be called from the main UI thread
+    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+    mBufferManager.destroy(dpy);
+
     // the actual buffers will be destroyed here
     delete lcblk;
 }
@@ -81,17 +84,6 @@ void Layer::onRemoved()
     lcblk->setStatus(NO_INIT);
 }
 
-void Layer::destroy()
-{
-    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-    mBufferManager.destroy(dpy);
-
-    mSurface.clear();
-
-    Mutex::Autolock _l(mLock);
-    mWidth = mHeight = 0;
-}
-
 sp<LayerBaseClient::Surface> Layer::createSurface() const
 {
     return mSurface;
@@ -99,9 +91,17 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 
 status_t Layer::ditch()
 {
+    // NOTE: Called from the main UI thread
+
     // the layer is not on screen anymore. free as much resources as possible
     mFreezeLock.clear();
-    destroy();
+
+    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+    mBufferManager.destroy(dpy);
+    mSurface.clear();
+
+    Mutex::Autolock _l(mLock);
+    mWidth = mHeight = 0;
     return NO_ERROR;
 }
 
@@ -211,7 +211,7 @@ void Layer::onDraw(const Region& clip) const
 
 status_t Layer::setBufferCount(int bufferCount)
 {
-    // this ensures our client doesn't go away while we're accessing
+    // Ensures our client doesn't go away while we're accessing
     // the shared area.
     sp<Client> ourClient(client.promote());
     if (ourClient == 0) {
@@ -219,15 +219,10 @@ status_t Layer::setBufferCount(int bufferCount)
         return DEAD_OBJECT;
     }
 
-    status_t err;
-
-    // FIXME: resize() below is NOT thread-safe, we need to synchronize
-    // the users of lcblk in our process (ie: retire), and we assume the
-    // client is not mucking with the SharedStack, which is only enforced
-    // by construction, therefore we need to protect ourselves against
-    // buggy and malicious client (as always)
-
-    err = lcblk->resize(bufferCount);
+    // NOTE: lcblk->resize() is protected by an internal lock
+    status_t err = lcblk->resize(bufferCount);
+    if (err == NO_ERROR)
+        mBufferManager.resize(bufferCount);
 
     return err;
 }
@@ -248,7 +243,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
      * This is called from the client's Surface::dequeue(). This can happen
      * at any time, especially while we're in the middle of using the
      * buffer 'index' as our front buffer.
-     * 
+     *
      * Make sure the buffer we're resizing is not the front buffer and has been
      * dequeued. Once this condition is asserted, we are guaranteed that this
      * buffer cannot become the front buffer under our feet, since we're called
@@ -544,12 +539,20 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
 // ---------------------------------------------------------------------------
 
 Layer::BufferManager::BufferManager(TextureManager& tm)
-    : mTextureManager(tm), mActiveBuffer(0), mFailover(false)
+    : mNumBuffers(NUM_BUFFERS), mTextureManager(tm),
+      mActiveBuffer(0), mFailover(false)
 {
 }
 
-size_t Layer::BufferManager::getBufferCount() const {
-    return NUM_BUFFERS;
+Layer::BufferManager::~BufferManager()
+{
+}
+
+status_t Layer::BufferManager::resize(size_t size)
+{
+    Mutex::Autolock _l(mLock);
+    mNumBuffers = size;
+    return NO_ERROR;
 }
 
 // only for debugging
@@ -568,51 +571,55 @@ size_t Layer::BufferManager::getActiveBufferIndex() const {
 }
 
 Texture Layer::BufferManager::getActiveTexture() const {
-    return mFailover ? mFailoverTexture : mBufferData[mActiveBuffer].texture;
+    Texture res;
+    if (mFailover) {
+        res = mFailoverTexture;
+    } else {
+        static_cast<Image&>(res) = mBufferData[mActiveBuffer].texture;
+    }
+    return res;
 }
 
 sp<GraphicBuffer> Layer::BufferManager::getActiveBuffer() const {
+    const size_t activeBuffer = mActiveBuffer;
+    BufferData const * const buffers = mBufferData;
     Mutex::Autolock _l(mLock);
-    return mBufferData[mActiveBuffer].buffer;
+    return buffers[activeBuffer].buffer;
 }
 
 sp<GraphicBuffer> Layer::BufferManager::detachBuffer(size_t index)
 {
+    BufferData* const buffers = mBufferData;
     sp<GraphicBuffer> buffer;
     Mutex::Autolock _l(mLock);
-    buffer = mBufferData[index].buffer;
-    mBufferData[index].buffer = 0;
+    buffer = buffers[index].buffer;
+    buffers[index].buffer = 0;
     return buffer;
 }
 
 status_t Layer::BufferManager::attachBuffer(size_t index,
         const sp<GraphicBuffer>& buffer)
 {
+    BufferData* const buffers = mBufferData;
     Mutex::Autolock _l(mLock);
-    mBufferData[index].buffer = buffer;
-    mBufferData[index].texture.dirty = true;
-    return NO_ERROR;
-}
-
-status_t Layer::BufferManager::destroyTexture(Texture* tex, EGLDisplay dpy)
-{
-    if (tex->name != -1U) {
-        glDeleteTextures(1, &tex->name);
-        tex->name = -1U;
-    }
-    if (tex->image != EGL_NO_IMAGE_KHR) {
-        eglDestroyImageKHR(dpy, tex->image);
-        tex->image = EGL_NO_IMAGE_KHR;
-    }
+    buffers[index].buffer = buffer;
+    buffers[index].texture.dirty = true;
     return NO_ERROR;
 }
 
 status_t Layer::BufferManager::destroy(EGLDisplay dpy)
 {
-    Mutex::Autolock _l(mLock);
-    for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
-        destroyTexture(&mBufferData[i].texture, dpy);
-        mBufferData[i].buffer = 0;
+    BufferData* const buffers = mBufferData;
+    size_t num;
+    { // scope for the lock
+        Mutex::Autolock _l(mLock);
+        num = mNumBuffers;
+        for (size_t i=0 ; i<num ; i++) {
+            buffers[i].buffer = 0;
+        }
+    }
+    for (size_t i=0 ; i<num ; i++) {
+        destroyTexture(&buffers[i].texture, dpy);
     }
     destroyTexture(&mFailoverTexture, dpy);
     return NO_ERROR;
@@ -622,7 +629,7 @@ status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
         const sp<GraphicBuffer>& buffer)
 {
     size_t index = mActiveBuffer;
-    Texture& texture(mBufferData[index].texture);
+    Image& texture(mBufferData[index].texture);
     status_t err = mTextureManager.initEglImage(&texture, dpy, buffer);
     // if EGLImage fails, we switch to regular texture mode, and we
     // free all resources associated with using EGLImages.
@@ -631,7 +638,8 @@ status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
         destroyTexture(&mFailoverTexture, dpy);
     } else {
         mFailover = true;
-        for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
+        const size_t num = mNumBuffers;
+        for (size_t i=0 ; i<num ; i++) {
             destroyTexture(&mBufferData[i].texture, dpy);
         }
     }
@@ -642,6 +650,19 @@ status_t Layer::BufferManager::loadTexture(
         const Region& dirty, const GGLSurface& t)
 {
     return mTextureManager.loadTexture(&mFailoverTexture, dirty, t);
+}
+
+status_t Layer::BufferManager::destroyTexture(Image* tex, EGLDisplay dpy)
+{
+    if (tex->name != -1U) {
+        glDeleteTextures(1, &tex->name);
+        tex->name = -1U;
+    }
+    if (tex->image != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(dpy, tex->image);
+        tex->image = EGL_NO_IMAGE_KHR;
+    }
+    return NO_ERROR;
 }
 
 // ---------------------------------------------------------------------------
@@ -661,6 +682,11 @@ sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
     sp<GraphicBuffer> buffer;
     sp<Layer> owner(getOwner());
     if (owner != 0) {
+        /*
+         * requestBuffer() cannot be called from the main thread
+         * as it could cause a dead-lock, since it may have to wait
+         * on conditions updated my the main thread.
+         */
         buffer = owner->requestBuffer(index, usage);
     }
     return buffer;
@@ -671,6 +697,11 @@ status_t Layer::SurfaceLayer::setBufferCount(int bufferCount)
     status_t err = DEAD_OBJECT;
     sp<Layer> owner(getOwner());
     if (owner != 0) {
+        /*
+         * setBufferCount() cannot be called from the main thread
+         * as it could cause a dead-lock, since it may have to wait
+         * on conditions updated my the main thread.
+         */
         err = owner->setBufferCount(bufferCount);
     }
     return err;

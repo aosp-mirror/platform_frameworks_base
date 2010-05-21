@@ -426,7 +426,7 @@ void SurfaceFlinger::waitForEvent()
             timeout = waitTime>0 ? waitTime : 0;
         }
 
-        MessageList::value_type msg = mEventQueue.waitMessage(timeout);
+        sp<MessageBase> msg = mEventQueue.waitMessage(timeout);
 
         // see if we timed out
         if (isFrozen()) {
@@ -461,9 +461,20 @@ void SurfaceFlinger::signal() const {
     const_cast<SurfaceFlinger*>(this)->signalEvent();
 }
 
-void SurfaceFlinger::signalDelayedEvent(nsecs_t delay)
+status_t SurfaceFlinger::postMessageAsync(const sp<MessageBase>& msg,
+        nsecs_t reltime, uint32_t flags)
 {
-    mEventQueue.postMessage( new MessageBase(MessageQueue::INVALIDATE), delay);
+    return mEventQueue.postMessage(msg, reltime, flags);
+}
+
+status_t SurfaceFlinger::postMessageSync(const sp<MessageBase>& msg,
+        nsecs_t reltime, uint32_t flags)
+{
+    status_t res = mEventQueue.postMessage(msg, reltime, flags);
+    if (res == NO_ERROR) {
+        msg->wait();
+    }
+    return res;
 }
 
 // ----------------------------------------------------------------------------
@@ -1135,15 +1146,11 @@ uint32_t SurfaceFlinger::getTransactionFlags(uint32_t flags)
     return android_atomic_and(~flags, &mTransactionFlags) & flags;
 }
 
-uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags, nsecs_t delay)
+uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
 {
     uint32_t old = android_atomic_or(flags, &mTransactionFlags);
     if ((old & flags)==0) { // wake the server up
-        if (delay > 0) {
-            signalDelayedEvent(delay);
-        } else {
-            signalEvent();
-        }
+        signalEvent();
     }
     return old;
 }
@@ -1245,7 +1252,7 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
 
     //LOGD("createSurface for pid %d (%d x %d)", pid, w, h);
     int32_t id = client->generateId(pid);
-    if (uint32_t(id) >= NUM_LAYERS_MAX) {
+    if (uint32_t(id) >= SharedBufferStack::NUM_LAYERS_MAX) {
         LOGE("createSurface() failed, generateId = %d", id);
         return surfaceHandle;
     }
@@ -1399,7 +1406,7 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
         }
     };
 
-    mEventQueue.postMessage( new MessageDestroySurface(this, layer) );
+    postMessageAsync( new MessageDestroySurface(this, layer) );
     return NO_ERROR;
 }
 
@@ -1672,7 +1679,7 @@ Client::~Client() {
 int32_t Client::generateId(int pid)
 {
     const uint32_t i = clz( ~mBitmap );
-    if (i >= NUM_LAYERS_MAX) {
+    if (i >= SharedBufferStack::NUM_LAYERS_MAX) {
         return NO_MEMORY;
     }
     mPid = pid;
@@ -1699,7 +1706,8 @@ void Client::free(int32_t id)
 }
 
 bool Client::isValid(int32_t i) const {
-    return (uint32_t(i)<NUM_LAYERS_MAX) && (mBitmap & (1<<(31-i)));
+    return (uint32_t(i)<SharedBufferStack::NUM_LAYERS_MAX) &&
+            (mBitmap & (1<<(31-i)));
 }
 
 sp<LayerBaseClient> Client::getLayerUser(int32_t i) const {

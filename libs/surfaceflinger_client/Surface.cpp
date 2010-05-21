@@ -678,19 +678,18 @@ int Surface::setBufferCount(int bufferCount)
     sp<ISurface> s(mSurface);
     if (s == 0) return NO_INIT;
 
-    // FIXME: this needs to be synchronized dequeue/queue
+    class SetBufferCountIPC : public SharedBufferClient::SetBufferCountCallback {
+        sp<ISurface> surface;
+        virtual status_t operator()(int bufferCount) const {
+            return surface->setBufferCount(bufferCount);
+        }
+    public:
+        SetBufferCountIPC(const sp<ISurface>& surface) : surface(surface) { }
+    } ipc(s);
 
-    status_t err = s->setBufferCount(bufferCount);
+    status_t err = mSharedBufferClient->setBufferCount(bufferCount, ipc);
     LOGE_IF(err, "ISurface::setBufferCount(%d) returned %s",
             bufferCount, strerror(-err));
-    if (err == NO_ERROR) {
-        err = mSharedBufferClient->getStatus();
-        LOGE_IF(err,  "Surface (identity=%d) state = %d", mIdentity, err);
-        if (!err) {
-            // update our local copy of the buffer count
-            mSharedBufferClient->setBufferCount(bufferCount);
-        }
-    }
     return err;
 }
 
