@@ -16,6 +16,9 @@
 
 package android.location;
 
+import android.os.RemoteException;
+import android.util.Log;
+
 /**
  * An abstract superclass for location providers.  A location provider
  * provides periodic reports on the geographical location of the
@@ -36,7 +39,8 @@ public abstract class LocationProvider {
     // in the name of a LocationProvider.
     static final String BAD_CHARS_REGEX = "[^a-zA-Z0-9]";
 
-    private String mName;
+    private final String mName;
+    private final ILocationManager mService;
 
     public static final int OUT_OF_SERVICE = 0;
     public static final int TEMPORARILY_UNAVAILABLE = 1;
@@ -50,13 +54,13 @@ public abstract class LocationProvider {
      *
      * {@hide}
      */
-    public LocationProvider(String name) {
+    public LocationProvider(String name, ILocationManager service) {
         if (name.matches(BAD_CHARS_REGEX)) {
             throw new IllegalArgumentException("name " + name +
                 " contains an illegal character");
         }
-        // Log.d(TAG, "Constructor: name = " + name);
         mName = name;
+        mService = service;
     }
 
     /**
@@ -71,29 +75,12 @@ public abstract class LocationProvider {
      * false otherwise.
      */
     public boolean meetsCriteria(Criteria criteria) {
-        // We do not want to match the special passive provider based on criteria.
-        if (LocationManager.PASSIVE_PROVIDER.equals(mName)) {
+        try {
+            return mService.providerMeetsCriteria(mName, criteria);
+        } catch (RemoteException e) {
+            Log.e(TAG, "meetsCriteria: RemoteException", e);
             return false;
         }
-        if ((criteria.getAccuracy() != Criteria.NO_REQUIREMENT) && 
-            (criteria.getAccuracy() < getAccuracy())) {
-            return false;
-        }
-        int criteriaPower = criteria.getPowerRequirement();
-        if ((criteriaPower != Criteria.NO_REQUIREMENT) &&
-            (criteriaPower < getPowerRequirement())) {
-            return false;
-        }
-        if (criteria.isAltitudeRequired() && !supportsAltitude()) {
-            return false;
-        }
-        if (criteria.isSpeedRequired() && !supportsSpeed()) {
-            return false;
-        }
-        if (criteria.isBearingRequired() && !supportsBearing()) {
-            return false;
-        }
-        return true;
     }
 
     /**
