@@ -926,6 +926,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         lock();
         try {
             closeClosable();
+            // finalize ALL statements queued up so far
+            closePendingStatements();
             // close this database instance - regardless of its reference count value
             onAllReferencesReleased();
         } finally {

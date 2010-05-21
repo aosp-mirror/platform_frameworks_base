@@ -215,7 +215,6 @@ static void enableSqlProfiling(JNIEnv* env, jobject object, jstring databaseName
 static void dbclose(JNIEnv* env, jobject object)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-    sqlite3_stmt * pStmt;
 
     if (handle != NULL) {
         // release the memory associated with the traceFuncArg in enableSqlTracing function
@@ -227,10 +226,6 @@ static void dbclose(JNIEnv* env, jobject object)
         traceFuncArg = sqlite3_profile(handle, &sqlProfile, NULL);
         if (traceFuncArg != NULL) {
             free(traceFuncArg);
-        }
-        // finalize all statements on this handle
-        while ((pStmt = sqlite3_next_stmt(handle, 0)) != 0 ) {
-            sqlite3_finalize(pStmt);
         }
         LOGV("Closing database: handle=%p\n", handle);
         int result = sqlite3_close(handle);
