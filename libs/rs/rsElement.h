@@ -59,6 +59,9 @@ public:
     String8 getGLSLType(uint32_t indent=0) const;
 
     void dumpLOGV(const char *prefix) const;
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_ELEMENT; }
+    static Element *createFromStream(Context *rsc, IStream *stream);
 
     static const Element * create(Context *rsc, RsDataType dt, RsDataKind dk,
                             bool isNorm, uint32_t vecSize);
@@ -90,7 +93,7 @@ public:
     ~ElementState();
 
     // Cache of all existing elements.
-    Vector<const Element *> mElements;
+    Vector<Element *> mElements;
 };
 
 

@@ -21,8 +21,6 @@
 
 #include "RenderScriptEnv.h"
 
-#include <utils/KeyedVector.h>
-
 struct BCCscript;
 
 // ---------------------------------------------------------------------------
@@ -61,6 +59,10 @@ public:
 
     virtual void setupScript();
     virtual uint32_t run(Context *, uint32_t launchID);
+    
+    virtual void serialize(OStream *stream) const {    }
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_SCRIPT_C; }
+    static Type *createFromStream(Context *rsc, IStream *stream) { return NULL; }
 };
 
 class ScriptCState

@@ -18,6 +18,7 @@
 #define ANDROID_RS_PROGRAM_FRAGMENT_STORE_H
 
 #include "rsProgram.h"
+#include "rsStream.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -41,6 +42,10 @@ public:
     void setColorMask(bool, bool, bool, bool);
 
     void setDitherEnable(bool);
+
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_STORE; }
+    static ProgramStore *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     bool mDitherEnable;

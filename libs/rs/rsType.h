@@ -74,6 +74,9 @@ public:
     void enableGLVertexBuffer2(class VertexArray *) const;
 
     void dumpLOGV(const char *prefix) const;
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_TYPE; }
+    static Type *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     struct LOD {

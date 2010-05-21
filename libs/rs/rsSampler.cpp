@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-
 #include "rsContext.h"
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
 #include "rsSampler.h"
 
 
@@ -94,6 +100,17 @@ void Sampler::unbindFromContext(SamplerState *ss)
     mBoundSlot = -1;
     ss->mSamplers[slot].clear();
 }
+
+void Sampler::serialize(OStream *stream) const
+{
+    
+}
+
+Sampler *Sampler::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
+}
+
 /*
 void SamplerState::setupGL()
 {

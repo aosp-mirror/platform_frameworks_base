@@ -36,7 +36,10 @@ public:
                               RsAnimationEdge pre, RsAnimationEdge post);
 
     float eval(float) const;
-
+    
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_ANIMATION; }
+    static Animation *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     Animation(Context *rsc);

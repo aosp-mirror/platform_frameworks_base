@@ -19,15 +19,23 @@
 
 #define LOG_NDEBUG 0
 #define LOG_TAG "RenderScript"
+
 #include <utils/Log.h>
-#include <utils/Vector.h>
-#include <utils/KeyedVector.h>
+
+#include "rsStream.h"
+#include "rsFileA3DDecls.h"
+
 #include <utils/String8.h>
+#include <utils/Vector.h>
+
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include <EGL/egl.h>
+#endif
+
 #include <math.h>
 
 #include "RenderScript.h"

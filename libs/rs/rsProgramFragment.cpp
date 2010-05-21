@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-#include "rsProgramFragment.h"
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
+#include "rsProgramFragment.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -83,12 +89,15 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
 
         glEnable(GL_TEXTURE_2D);
         if (rsc->checkVersion1_1()) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST // These are GLES only
             if (mPointSpriteEnable) {
                 glEnable(GL_POINT_SPRITE_OES);
             } else {
                 glDisable(GL_POINT_SPRITE_OES);
             }
             glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
+#endif //ANDROID_RS_BUILD_FOR_HOST
+            
         }
         mTextures[ct]->uploadCheck(rsc);
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
@@ -287,6 +296,16 @@ void ProgramFragment::init(Context *rsc)
     mUniformNames[1].setTo("uni_Tex1");
 
     createShader();
+}
+
+void ProgramFragment::serialize(OStream *stream) const
+{
+    
+}
+
+ProgramFragment *ProgramFragment::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
 }
 
 ProgramFragmentState::ProgramFragmentState()

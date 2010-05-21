@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#else
+#include "rsContextHostStub.h"
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -68,6 +72,16 @@ void Adapter1D::data(const void *data)
     memcpy(getElement(0),
            data,
            mAllocation.get()->getType()->getSizeBytes());
+}
+
+void Adapter1D::serialize(OStream *stream) const
+{
+    
+}
+
+Adapter1D *Adapter1D::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
 }
 
 namespace android {
@@ -185,6 +199,15 @@ void Adapter2D::data(const void *data)
            mAllocation.get()->getType()->getSizeBytes());
 }
 
+void Adapter2D::serialize(OStream *stream) const
+{
+    
+}
+
+Adapter2D *Adapter2D::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
+}
 
 
 namespace android {

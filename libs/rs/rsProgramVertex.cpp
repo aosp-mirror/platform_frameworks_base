@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-#include "rsProgramVertex.h"
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
+#include "rsProgramVertex.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -81,9 +87,12 @@ void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     if (mLightCount) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST // GLES Only
         int v = 0;
         glEnable(GL_LIGHTING);
+
         glLightModelxv(GL_LIGHT_MODEL_TWO_SIDE, &v);
+
         for (uint32_t ct = 0; ct < mLightCount; ct++) {
             const Light *l = mLights[ct].get();
             glEnable(GL_LIGHT0 + ct);
@@ -92,6 +101,7 @@ void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
         for (uint32_t ct = mLightCount; ct < MAX_LIGHTS; ct++) {
             glDisable(GL_LIGHT0 + ct);
         }
+#endif //ANDROID_RS_BUILD_FOR_HOST
     } else {
         glDisable(GL_LIGHTING);
     }
@@ -351,6 +361,16 @@ void ProgramVertex::init(Context *rsc)
     createShader();
 }
 
+void ProgramVertex::serialize(OStream *stream) const
+{
+
+}
+
+ProgramVertex *ProgramVertex::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -364,6 +384,7 @@ ProgramVertexState::~ProgramVertexState()
 
 void ProgramVertexState::init(Context *rsc)
 {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
     RsElement e = (RsElement) Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
 
     rsi_TypeBegin(rsc, e);
@@ -372,6 +393,7 @@ void ProgramVertexState::init(Context *rsc)
 
     ProgramVertex *pv = new ProgramVertex(rsc, false);
     Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType.get());
+
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
     pv->init(rsc);
@@ -383,6 +405,8 @@ void ProgramVertexState::init(Context *rsc)
     color[3] = 1.f;
 
     updateSize(rsc);
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
 }
 
 void ProgramVertexState::updateSize(Context *rsc)

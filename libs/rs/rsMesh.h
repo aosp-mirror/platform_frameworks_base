@@ -62,15 +62,17 @@ public:
         uint16_t *mRestarts;
     };
 
-    Verticies_t * mVerticies;
+    Verticies_t ** mVerticies;
     uint32_t mVerticiesCount;
 
     Primitive_t ** mPrimitives;
     uint32_t mPrimitivesCount;
 
-
-
     void analyzeElement();
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_MESH; }
+    static Mesh *createFromStream(Context *rsc, IStream *stream);
+    
 protected:
 };
 

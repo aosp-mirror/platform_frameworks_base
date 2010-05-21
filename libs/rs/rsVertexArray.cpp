@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#endif
+
 
 using namespace android;
 using namespace android::renderscript;
@@ -77,7 +82,7 @@ void VertexArray::clear(uint32_t n)
 
 void VertexArray::addUser(const Attrib &a, uint32_t stride)
 {
-    assert(mCount < RS_MAX_ATTRIBS);
+    rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].set(a);
     mAttribs[mCount].buffer = mActiveBuffer;
     mAttribs[mCount].stride = stride;
@@ -87,7 +92,7 @@ void VertexArray::addUser(const Attrib &a, uint32_t stride)
 
 void VertexArray::addLegacy(uint32_t type, uint32_t size, uint32_t stride, RsDataKind kind, bool normalized, uint32_t offset)
 {
-    assert(mCount < RS_MAX_ATTRIBS);
+    rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].clear();
     mAttribs[mCount].type = type;
     mAttribs[mCount].size = size;
@@ -117,7 +122,9 @@ void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) con
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#ifndef ANDROID_RS_BUILD_FOR_HOST // GLES only
     glDisableClientState(GL_POINT_SIZE_ARRAY_OES);
+#endif //ANDROID_RS_BUILD_FOR_HOST
 
     for (uint32_t ct=0; ct < mCount; ct++) {
         switch(mAttribs[ct].kind) {
@@ -160,7 +167,7 @@ void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) con
                               mAttribs[ct].stride,
                               (void *)mAttribs[ct].offset);
             break;
-
+#ifndef ANDROID_RS_BUILD_FOR_HOST // GLES only
         case RS_KIND_POINT_SIZE:
             //logAttrib(POINT_SIZE);
             glEnableClientState(GL_POINT_SIZE_ARRAY_OES);
@@ -169,6 +176,7 @@ void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) con
                                   mAttribs[ct].stride,
                                   (void *)mAttribs[ct].offset);
             break;
+#endif //ANDROID_RS_BUILD_FOR_HOST
 
         default:
             rsAssert(0);

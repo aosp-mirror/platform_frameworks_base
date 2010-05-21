@@ -52,6 +52,9 @@ public:
     virtual void loadShader(Context *);
     virtual void init(Context *);
 
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_VERTEX; }
+    static ProgramVertex *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     uint32_t mLightCount;

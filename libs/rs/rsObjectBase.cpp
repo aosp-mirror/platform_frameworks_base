@@ -15,7 +15,12 @@
  */
 
 #include "rsObjectBase.h"
+
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#else
+#include "rsContextHostStub.h"
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -24,7 +29,6 @@ ObjectBase::ObjectBase(Context *rsc)
 {
     mUserRefCount = 0;
     mSysRefCount = 0;
-    mName = NULL;
     mRSC = NULL;
     mNext = NULL;
     mPrev = NULL;
@@ -39,14 +43,13 @@ ObjectBase::~ObjectBase()
     rsAssert(!mUserRefCount);
     rsAssert(!mSysRefCount);
     remove();
-    delete[] mName;
 }
 
 void ObjectBase::dumpLOGV(const char *op) const
 {
-    if (mName) {
+    if (mName.size()) {
         LOGV("%s RSobj %p, name %s, refs %i,%i  from %s,%i links %p,%p,%p",
-             op, this, mName, mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
+             op, this, mName.string(), mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
     } else {
         LOGV("%s RSobj %p, no-name, refs %i,%i  from %s,%i links %p,%p,%p",
              op, this, mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
@@ -113,18 +116,12 @@ bool ObjectBase::decSysRef() const
 
 void ObjectBase::setName(const char *name)
 {
-    setName(name, strlen(name));
+    mName.setTo(name);
 }
 
 void ObjectBase::setName(const char *name, uint32_t len)
 {
-    delete mName;
-    mName = NULL;
-    if (name) {
-        mName = new char[len + 1];
-        memcpy(mName, name, len);
-        mName[len] = 0;
-    }
+    mName.setTo(name, len);
 }
 
 void ObjectBase::add() const

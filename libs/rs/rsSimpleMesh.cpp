@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+
+#include <GLES/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES/glext.h>
+#else
+#include "rsContextHostStub.h"
+
+#include <OpenGL/gl.h>
+#include <OpenGl/glext.h>
+#endif
 
 using namespace android;
 using namespace android::renderscript;
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
+
+
 
 SimpleMesh::SimpleMesh(Context *rsc) : ObjectBase(rsc)
 {
@@ -101,6 +112,95 @@ void SimpleMesh::uploadAll(Context *rsc)
     rsc->checkError("SimpleMesh::uploadAll");
 }
 
+void SimpleMesh::updateGLPrimitive()
+{
+    switch(mPrimitive) {
+        case RS_PRIMITIVE_POINT:          mGLPrimitive = GL_POINTS; break;
+        case RS_PRIMITIVE_LINE:           mGLPrimitive = GL_LINES; break;
+        case RS_PRIMITIVE_LINE_STRIP:     mGLPrimitive = GL_LINE_STRIP; break;
+        case RS_PRIMITIVE_TRIANGLE:       mGLPrimitive = GL_TRIANGLES; break;
+        case RS_PRIMITIVE_TRIANGLE_STRIP: mGLPrimitive = GL_TRIANGLE_STRIP; break;
+        case RS_PRIMITIVE_TRIANGLE_FAN:   mGLPrimitive = GL_TRIANGLE_FAN; break;
+    }
+}
+
+void SimpleMesh::serialize(OStream *stream) const
+{
+    // Need to identify ourselves
+    stream->addU32((uint32_t)getClassId());
+
+    String8 name(getName());
+    stream->addString(&name);
+
+    // Add primitive type
+    stream->addU8((uint8_t)mPrimitive);
+
+    // And now serialize the allocations
+    mIndexBuffer->serialize(stream);
+
+    // We need to indicate if the primitive buffer is present
+    if(mPrimitiveBuffer.get() != NULL) {
+        // Write if the primitive buffer is present
+        stream->addU32(1);
+        mPrimitiveBuffer->serialize(stream);
+    }
+    else {
+        // No buffer present, will need this when we read
+        stream->addU32(0);
+    }
+
+    // Store number of vertex streams
+    stream->addU32(mVertexTypeCount);
+    for(uint32_t vCount = 0; vCount < mVertexTypeCount; vCount ++) {
+        mVertexBuffers[vCount]->serialize(stream);
+    }
+}
+
+SimpleMesh *SimpleMesh::createFromStream(Context *rsc, IStream *stream)
+{
+    // First make sure we are reading the correct object
+    A3DClassID classID = (A3DClassID)stream->loadU32();
+    if(classID != A3D_CLASS_ID_SIMPLE_MESH) {
+        LOGE("simple mesh loading skipped due to invalid class id");
+        return NULL;
+    }
+
+    SimpleMesh * mesh = new SimpleMesh(rsc);
+
+    String8 name;
+    stream->loadString(&name);
+    mesh->setName(name.string(), name.size());
+
+    mesh->mPrimitive = (RsPrimitive)stream->loadU8();
+    mesh->updateGLPrimitive();
+
+    Allocation *indexAlloc = Allocation::createFromStream(rsc, stream);
+    const Type *indexType = indexAlloc->getType();
+    mesh->mIndexBuffer.set(indexAlloc);
+    mesh->mIndexType.set(indexType);
+
+    bool isPrimitivePresent = stream->loadU32() != 0;
+    if(isPrimitivePresent) {
+        mesh->mPrimitiveBuffer.set(Allocation::createFromStream(rsc, stream));
+        mesh->mPrimitiveType.set(mesh->mPrimitiveBuffer->getType());
+    }
+
+    mesh->mVertexTypeCount = stream->loadU32();
+    if(mesh->mVertexTypeCount) {
+        mesh->mVertexTypes = new ObjectBaseRef<const Type>[mesh->mVertexTypeCount];
+        mesh->mVertexBuffers = new ObjectBaseRef<Allocation>[mesh->mVertexTypeCount];
+
+        for(uint32_t vCount = 0; vCount < mesh->mVertexTypeCount; vCount ++) {
+            Allocation *vertexAlloc = Allocation::createFromStream(rsc, stream);
+            const Type *vertexType = vertexAlloc->getType();
+            mesh->mVertexBuffers[vCount].set(vertexAlloc);
+            mesh->mVertexTypes[vCount].set(vertexType);
+        }
+    }
+
+    return mesh;
+}
+
 
 SimpleMeshContext::SimpleMeshContext()
 {
@@ -131,14 +231,7 @@ RsSimpleMesh rsi_SimpleMeshCreate(Context *rsc, RsType prim, RsType idx, RsType 
     }
 
     sm->mPrimitive = (RsPrimitive)primType;
-    switch(sm->mPrimitive) {
-    case RS_PRIMITIVE_POINT:          sm->mGLPrimitive = GL_POINTS; break;
-    case RS_PRIMITIVE_LINE:           sm->mGLPrimitive = GL_LINES; break;
-    case RS_PRIMITIVE_LINE_STRIP:     sm->mGLPrimitive = GL_LINE_STRIP; break;
-    case RS_PRIMITIVE_TRIANGLE:       sm->mGLPrimitive = GL_TRIANGLES; break;
-    case RS_PRIMITIVE_TRIANGLE_STRIP: sm->mGLPrimitive = GL_TRIANGLE_STRIP; break;
-    case RS_PRIMITIVE_TRIANGLE_FAN:   sm->mGLPrimitive = GL_TRIANGLE_FAN; break;
-    }
+    sm->updateGLPrimitive();
     return sm;
 }
 

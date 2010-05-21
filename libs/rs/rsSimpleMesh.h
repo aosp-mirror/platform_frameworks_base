@@ -48,7 +48,11 @@ public:
     void render(Context *) const;
     void renderRange(Context *, uint32_t start, uint32_t len) const;
     void uploadAll(Context *);
-
+    void updateGLPrimitive();
+    
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_SIMPLE_MESH; }
+    static SimpleMesh *createFromStream(Context *rsc, IStream *stream);
 
 protected:
 };

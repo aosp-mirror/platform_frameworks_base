@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES/glext.h>
+#else
+#include "rsContextHostStub.h"
+
+#include <OpenGL/gl.h>
+#include <OpenGl/glext.h>
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -167,7 +173,9 @@ void Allocation::uploadToTexture(const Context *rsc)
                      0, format, type, ptr);
     }
     if (mTextureGenMipmap) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
         glGenerateMipmap(GL_TEXTURE_2D);
+#endif //ANDROID_RS_BUILD_FOR_HOST
     }
 
     rsc->checkError("Allocation::uploadToTexture");
@@ -286,7 +294,7 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
 
 void Allocation::addProgramToDirty(const Program *p)
 {
-    mToDirtyList.add(p);
+    mToDirtyList.push(p);
 }
 
 void Allocation::removeProgramToDirty(const Program *p)
@@ -316,6 +324,60 @@ void Allocation::dumpLOGV(const char *prefix) const
     LOGV("%s allocation mIsTexture=%i mTextureID=%i, mIsVertexBuffer=%i, mBufferID=%i",
           prefix, mIsTexture, mTextureID, mIsVertexBuffer, mBufferID);
 
+}
+
+void Allocation::serialize(OStream *stream) const
+{
+    // Need to identify ourselves
+    stream->addU32((uint32_t)getClassId());
+
+    String8 name(getName());
+    stream->addString(&name);
+
+    // First thing we need to serialize is the type object since it will be needed
+    // to initialize the class
+    mType->serialize(stream);
+
+    uint32_t dataSize = mType->getSizeBytes();
+    // Write how much data we are storing
+    stream->addU32(dataSize);
+    // Now write the data
+    stream->addByteArray(mPtr, dataSize);
+}
+
+Allocation *Allocation::createFromStream(Context *rsc, IStream *stream)
+{
+    // First make sure we are reading the correct object
+    A3DClassID classID = (A3DClassID)stream->loadU32();
+    if(classID != A3D_CLASS_ID_ALLOCATION) {
+        LOGE("allocation loading skipped due to invalid class id\n");
+        return NULL;
+    }
+
+    String8 name;
+    stream->loadString(&name);
+
+    Type *type = Type::createFromStream(rsc, stream);
+    if(!type) {
+        return NULL;
+    }
+    type->compute();
+
+    // Number of bytes we wrote out for this allocation
+    uint32_t dataSize = stream->loadU32();
+    if(dataSize != type->getSizeBytes()) {
+        LOGE("failed to read allocation because numbytes written is not the same loaded type wants\n");
+        delete type;
+        return NULL;
+    }
+
+    Allocation *alloc = new Allocation(rsc, type);
+    alloc->setName(name.string(), name.size());
+
+    // Read in all of our allocation data
+    stream->loadByteArray(alloc->getPtr(), dataSize);
+
+    return alloc;
 }
 
 void Allocation::sendDirty() const
@@ -514,6 +576,8 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src)
     return 0;
 }
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
+
 RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
                                            void *bmp, void *callbackData, RsBitmapCallback_t callback)
 {
@@ -615,6 +679,7 @@ void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)
     a->read(data);
 }
 
+#endif //ANDROID_RS_BUILD_FOR_HOST
 
 }
 }

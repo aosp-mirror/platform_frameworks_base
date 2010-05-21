@@ -24,6 +24,7 @@ namespace android {
 namespace renderscript {
 
 class Context;
+class OStream;
 
 // An element is a group of Components that occupies one cell in a structure.
 class ObjectBase
@@ -40,7 +41,7 @@ public:
     bool zeroUserRef() const;
 
     const char * getName() const {
-        return mName;
+        return mName.string();
     }
     void setName(const char *);
     void setName(const char *, uint32_t len);
@@ -52,6 +53,8 @@ public:
     static void dumpAll(Context *rsc);
 
     virtual void dumpLOGV(const char *prefix) const;
+    virtual void serialize(OStream *stream) const = 0;
+    virtual A3DClassID getClassId() const = 0;
 
 protected:
     const char *mAllocFile;
@@ -64,7 +67,7 @@ private:
 
     bool checkDelete() const;
 
-    char * mName;
+    String8 mName;
     mutable int32_t mSysRefCount;
     mutable int32_t mUserRefCount;
 

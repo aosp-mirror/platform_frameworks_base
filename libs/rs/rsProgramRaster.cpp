@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-#include "rsProgramRaster.h"
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#include <OpenGl/glext.h>
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
+#include "rsProgramRaster.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -76,11 +82,13 @@ void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
     }
 
     if (rsc->checkVersion1_1()) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
         if (mPointSprite) {
             glEnable(GL_POINT_SPRITE_OES);
         } else {
             glDisable(GL_POINT_SPRITE_OES);
         }
+#endif //ANDROID_RS_BUILD_FOR_HOST
     }
 }
 
@@ -92,7 +100,15 @@ void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
     state->mLast.set(this);
 }
 
+void ProgramRaster::serialize(OStream *stream) const
+{
+    
+}
 
+ProgramRaster *ProgramRaster::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
+}
 
 ProgramRasterState::ProgramRasterState()
 {

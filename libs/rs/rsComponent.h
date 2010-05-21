@@ -48,6 +48,10 @@ public:
     bool getIsSigned() const {return mIsSigned;}
     uint32_t getBits() const {return mBits;}
 
+    // Helpers for reading / writing this class out
+    void serialize(OStream *stream) const;
+    void loadFromStream(IStream *stream);
+
 protected:
     RsDataType mType;
     RsDataKind mKind;

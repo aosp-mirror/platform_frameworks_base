@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-#include "rsProgramStore.h"
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#include <OpenGl/glext.h>
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
+#include "rsProgramStore.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -125,6 +131,17 @@ void ProgramStore::setDitherEnable(bool enable)
 {
     mDitherEnable = enable;
 }
+
+void ProgramStore::serialize(OStream *stream) const
+{
+
+}
+
+ProgramStore *ProgramStore::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
+}
+
 
 void ProgramStore::setDepthFunc(RsDepthFunc func)
 {

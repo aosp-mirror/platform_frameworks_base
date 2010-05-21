@@ -40,6 +40,9 @@ public:
     virtual void createShader();
     virtual void loadShader(Context *rsc);
     virtual void init(Context *rsc);
+    virtual void serialize(OStream *stream) const;
+    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_FRAGMENT; }
+    static ProgramFragment *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     // Hacks to create a program for now

@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
 #include <GLES/gl.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -281,6 +286,57 @@ void Type::dumpLOGV(const char *prefix) const
     LOGV("%s   Type: x=%i y=%i z=%i mip=%i face=%i", prefix, mDimX, mDimY, mDimZ, mDimLOD, mFaces);
     sprintf(buf, "%s element: ", prefix);
     mElement->dumpLOGV(buf);
+}
+
+void Type::serialize(OStream *stream) const
+{
+    // Need to identify ourselves
+    stream->addU32((uint32_t)getClassId());
+
+    String8 name(getName());
+    stream->addString(&name);
+
+    mElement->serialize(stream);
+
+    stream->addU32(mDimX);
+    stream->addU32(mDimY);
+    stream->addU32(mDimZ);
+
+    stream->addU8((uint8_t)(mDimLOD ? 1 : 0));
+    stream->addU8((uint8_t)(mFaces ? 1 : 0));
+}
+
+Type *Type::createFromStream(Context *rsc, IStream *stream)
+{
+    // First make sure we are reading the correct object
+    A3DClassID classID = (A3DClassID)stream->loadU32();
+    if(classID != A3D_CLASS_ID_TYPE) {
+        LOGE("type loading skipped due to invalid class id\n");
+        return NULL;
+    }
+
+    String8 name;
+    stream->loadString(&name);
+
+    Element *elem = Element::createFromStream(rsc, stream);
+    if(!elem) {
+        return NULL;
+    }
+
+    Type *type = new Type(rsc);
+    type->mDimX = stream->loadU32();
+    type->mDimY = stream->loadU32();
+    type->mDimZ = stream->loadU32();
+
+    uint8_t temp = stream->loadU8();
+    type->mDimLOD = temp != 0;
+
+    temp = stream->loadU8();
+    type->mFaces = temp != 0;
+
+    type->setElement(elem);
+
+    return type;
 }
 
 bool Type::getIsNp2() const

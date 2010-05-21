@@ -16,7 +16,11 @@
 
 #include "rsComponent.h"
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include <GLES/gl.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -333,5 +337,26 @@ void Component::dumpLOGV(const char *prefix) const
     LOGV("%s   Component: %s, %s, vectorSize=%i, bits=%i",
          prefix, gTypeStrings[mType], gKindStrings[mKind], mVectorSize, mBits);
 }
+
+void Component::serialize(OStream *stream) const
+{
+    stream->addU8((uint8_t)mType);
+    stream->addU8((uint8_t)mKind);
+    stream->addU8((uint8_t)(mNormalized ? 1 : 0));
+    stream->addU32(mVectorSize);
+}
+
+void Component::loadFromStream(IStream *stream)
+{
+    mType = (RsDataType)stream->loadU8();
+    mKind = (RsDataKind)stream->loadU8();
+    uint8_t temp = stream->loadU8();
+    mNormalized = temp != 0;
+    mVectorSize = stream->loadU32();
+
+    set(mType, mKind, mNormalized, mVectorSize);
+}
+
+
 
 

@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-#include "rsContext.h"
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
+#include "rsContext.h"
 #include <GLES/gl.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -81,6 +86,90 @@ void Element::dumpLOGV(const char *prefix) const
         sprintf(buf, "%s component %i: ", prefix, ct);
         //mComponents[ct]->dumpLOGV(buf);
     }
+}
+
+void Element::serialize(OStream *stream) const
+{
+    // Need to identify ourselves
+    stream->addU32((uint32_t)getClassId());
+
+    String8 name(getName());
+    stream->addString(&name);
+
+    mComponent.serialize(stream);
+
+    // Now serialize all the fields
+    stream->addU32(mFieldCount);
+    for(uint32_t ct = 0; ct < mFieldCount; ct++) {
+        stream->addString(&mFields[ct].name);
+        mFields[ct].e->serialize(stream);
+    }
+}
+
+Element *Element::createFromStream(Context *rsc, IStream *stream)
+{
+    // First make sure we are reading the correct object
+    A3DClassID classID = (A3DClassID)stream->loadU32();
+    if(classID != A3D_CLASS_ID_ELEMENT) {
+        LOGE("element loading skipped due to invalid class id\n");
+        return NULL;
+    }
+
+    String8 name;
+    stream->loadString(&name);
+
+    Element *elem = new Element(rsc);
+    elem->mComponent.loadFromStream(stream);
+    elem->mBits = elem->mComponent.getBits();
+
+    elem->mFieldCount = stream->loadU32();
+    if(elem->mFieldCount) {
+        elem->mFields = new ElementField_t [elem->mFieldCount];
+        for(uint32_t ct = 0; ct < elem->mFieldCount; ct ++) {
+            stream->loadString(&elem->mFields[ct].name);
+            Element *fieldElem = Element::createFromStream(rsc, stream);
+            elem->mFields[ct].e.set(fieldElem);
+        }
+    }
+
+    // We need to check if this already exists
+    for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
+        Element *ee = rsc->mStateElement.mElements[ct];
+
+        if (!ee->getFieldCount() ) {
+
+            if((ee->getComponent().getType() == elem->getComponent().getType()) &&
+               (ee->getComponent().getKind() == elem->getComponent().getKind()) &&
+               (ee->getComponent().getIsNormalized() == elem->getComponent().getIsNormalized()) &&
+               (ee->getComponent().getVectorSize() == elem->getComponent().getVectorSize())) {
+                // Match
+                delete elem;
+                ee->incUserRef();
+                return ee;
+            }
+
+        } else if (ee->getFieldCount() == elem->mFieldCount) {
+
+            bool match = true;
+            for (uint32_t i=0; i < elem->mFieldCount; i++) {
+                if ((ee->mFields[i].e.get() != elem->mFields[i].e.get()) ||
+                    (ee->mFields[i].name.length() != elem->mFields[i].name.length()) ||
+                    (ee->mFields[i].name != elem->mFields[i].name)) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                delete elem;
+                ee->incUserRef();
+                return ee;
+            }
+
+        }
+    }
+
+    rsc->mStateElement.mElements.push(elem);
+    return elem;
 }
 
 

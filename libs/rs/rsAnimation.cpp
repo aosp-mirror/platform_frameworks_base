@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#else
+#include "rsContextHostStub.h"
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
 #include "rsAnimation.h"
 
 
 using namespace android;
 using namespace android::renderscript;
+
+void Animation::serialize(OStream *stream) const
+{
+    
+}
+
+Animation *Animation::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
+}
 
 /*
 Animation::Animation(Context *rsc) : ObjectBase(rsc)

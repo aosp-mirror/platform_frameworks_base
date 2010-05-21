@@ -15,7 +15,11 @@
  */
 
 #include "rsDevice.h"
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#else
+#include "rsContextHostStub.h"
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -33,7 +37,7 @@ Device::~Device()
 
 void Device::addContext(Context *rsc)
 {
-    mContexts.add(rsc);
+    mContexts.push(rsc);
 }
 
 void Device::removeContext(Context *rsc)

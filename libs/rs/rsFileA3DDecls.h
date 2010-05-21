@@ -23,16 +23,23 @@
 namespace android {
 namespace renderscript {
 
-    enum A3DChunkType {
-        CHUNK_EMPTY,
-
-        CHUNK_ELEMENT,
-        CHUNK_ELEMENT_SOURCE,
-        CHUNK_VERTICIES,
-        CHUNK_MESH,
-        CHUNK_PRIMITIVE,
-
-        CHUNK_LAST
+    enum A3DClassID {
+        A3D_CLASS_ID_UNKNOWN,
+        A3D_CLASS_ID_MESH,
+        A3D_CLASS_ID_SIMPLE_MESH,
+        A3D_CLASS_ID_TYPE,
+        A3D_CLASS_ID_ELEMENT,
+        A3D_CLASS_ID_ALLOCATION,
+        A3D_CLASS_ID_PROGRAM_VERTEX,
+        A3D_CLASS_ID_PROGRAM_RASTER,
+        A3D_CLASS_ID_PROGRAM_FRAGMENT,
+        A3D_CLASS_ID_PROGRAM_STORE,
+        A3D_CLASS_ID_SAMPLER,
+        A3D_CLASS_ID_ANIMATION,
+        A3D_CLASS_ID_LIGHT,
+        A3D_CLASS_ID_ADAPTER_1D,
+        A3D_CLASS_ID_ADAPTER_2D,
+        A3D_CLASS_ID_SCRIPT_C
     };
 
 
