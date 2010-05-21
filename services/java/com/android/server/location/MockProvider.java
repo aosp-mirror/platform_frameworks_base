@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationProvider;
@@ -138,6 +139,28 @@ public class MockProvider implements LocationProviderInterface {
         return mSupportsSpeed;
     }
 
+    public boolean meetsCriteria(Criteria criteria) {
+        if ((criteria.getAccuracy() != Criteria.NO_REQUIREMENT) &&
+            (criteria.getAccuracy() < mAccuracy)) {
+            return false;
+        }
+        int criteriaPower = criteria.getPowerRequirement();
+        if ((criteriaPower != Criteria.NO_REQUIREMENT) &&
+            (criteriaPower < mPowerRequirement)) {
+            return false;
+        }
+        if (criteria.isAltitudeRequired() && !mSupportsAltitude) {
+            return false;
+        }
+        if (criteria.isSpeedRequired() && !mSupportsSpeed) {
+            return false;
+        }
+        if (criteria.isBearingRequired() && !mSupportsBearing) {
+            return false;
+        }
+        return true;
+    }
+
     public void setLocation(Location l) {
         mLocation.set(l);
         mHasLocation = true;
@@ -172,6 +195,10 @@ public class MockProvider implements LocationProviderInterface {
     }
 
     public void enableLocationTracking(boolean enable) {
+    }
+
+    public boolean requestSingleShotFix() {
+        return false;
     }
 
     public void setMinTime(long minTime) {

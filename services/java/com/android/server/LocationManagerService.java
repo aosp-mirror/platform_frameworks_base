@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.Address;
+import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
@@ -68,6 +69,8 @@ import com.android.server.location.PassiveProvider;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -610,10 +613,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return out;
     }
 
-    public List<String> getProviders(boolean enabledOnly) {
+    public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
         try {
             synchronized (mLock) {
-                return _getProvidersLocked(enabledOnly);
+                return _getProvidersLocked(criteria, enabledOnly);
             }
         } catch (SecurityException se) {
             throw se;
@@ -623,7 +626,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    private List<String> _getProvidersLocked(boolean enabledOnly) {
+    private List<String> _getProvidersLocked(Criteria criteria, boolean enabledOnly) {
         if (LOCAL_LOGV) {
             Slog.v(TAG, "getProviders");
         }
@@ -635,10 +638,223 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (enabledOnly && !isAllowedBySettingsLocked(name)) {
                     continue;
                 }
+                if (criteria != null && !p.meetsCriteria(criteria)) {
+                    continue;
+                }
                 out.add(name);
             }
         }
         return out;
+    }
+
+    /**
+     * Returns the next looser power requirement, in the sequence:
+     *
+     * POWER_LOW -> POWER_MEDIUM -> POWER_HIGH -> NO_REQUIREMENT
+     */
+    private int nextPower(int power) {
+        switch (power) {
+        case Criteria.POWER_LOW:
+            return Criteria.POWER_MEDIUM;
+        case Criteria.POWER_MEDIUM:
+            return Criteria.POWER_HIGH;
+        case Criteria.POWER_HIGH:
+            return Criteria.NO_REQUIREMENT;
+        case Criteria.NO_REQUIREMENT:
+        default:
+            return Criteria.NO_REQUIREMENT;
+        }
+    }
+
+    /**
+     * Returns the next looser accuracy requirement, in the sequence:
+     *
+     * ACCURACY_FINE -> ACCURACY_APPROXIMATE-> NO_REQUIREMENT
+     */
+    private int nextAccuracy(int accuracy) {
+        if (accuracy == Criteria.ACCURACY_FINE) {
+            return Criteria.ACCURACY_COARSE;
+        } else {
+            return Criteria.NO_REQUIREMENT;
+        }
+    }
+
+    private class LpPowerComparator implements Comparator<LocationProviderInterface> {
+        public int compare(LocationProviderInterface l1, LocationProviderInterface l2) {
+            // Smaller is better
+            return (l1.getPowerRequirement() - l2.getPowerRequirement());
+         }
+
+         public boolean equals(LocationProviderInterface l1, LocationProviderInterface l2) {
+             return (l1.getPowerRequirement() == l2.getPowerRequirement());
+         }
+    }
+
+    private class LpAccuracyComparator implements Comparator<LocationProviderInterface> {
+        public int compare(LocationProviderInterface l1, LocationProviderInterface l2) {
+            // Smaller is better
+            return (l1.getAccuracy() - l2.getAccuracy());
+         }
+
+         public boolean equals(LocationProviderInterface l1, LocationProviderInterface l2) {
+             return (l1.getAccuracy() == l2.getAccuracy());
+         }
+    }
+
+    private class LpCapabilityComparator implements Comparator<LocationProviderInterface> {
+
+        private static final int ALTITUDE_SCORE = 4;
+        private static final int BEARING_SCORE = 4;
+        private static final int SPEED_SCORE = 4;
+
+        private int score(LocationProviderInterface p) {
+            return (p.supportsAltitude() ? ALTITUDE_SCORE : 0) +
+                (p.supportsBearing() ? BEARING_SCORE : 0) +
+                (p.supportsSpeed() ? SPEED_SCORE : 0);
+        }
+
+        public int compare(LocationProviderInterface l1, LocationProviderInterface l2) {
+            return (score(l2) - score(l1)); // Bigger is better
+         }
+
+         public boolean equals(LocationProviderInterface l1, LocationProviderInterface l2) {
+             return (score(l1) == score(l2));
+         }
+    }
+
+    private LocationProviderInterface best(List<String> providerNames) {
+        ArrayList<LocationProviderInterface> providers;
+        synchronized (mLock) {
+            providers = new ArrayList<LocationProviderInterface>(mProviders.size());
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                providers.add(mProviders.get(i));
+            }
+        }
+
+        if (providers.size() < 2) {
+            return providers.get(0);
+        }
+
+        // First, sort by power requirement
+        Collections.sort(providers, new LpPowerComparator());
+        int power = providers.get(0).getPowerRequirement();
+        if (power < providers.get(1).getPowerRequirement()) {
+            return providers.get(0);
+        }
+
+        int idx, size;
+
+        ArrayList<LocationProviderInterface> tmp = new ArrayList<LocationProviderInterface>();
+        idx = 0;
+        size = providers.size();
+        while ((idx < size) && (providers.get(idx).getPowerRequirement() == power)) {
+            tmp.add(providers.get(idx));
+            idx++;
+        }
+
+        // Next, sort by accuracy
+        Collections.sort(tmp, new LpAccuracyComparator());
+        int acc = tmp.get(0).getAccuracy();
+        if (acc < tmp.get(1).getAccuracy()) {
+            return tmp.get(0);
+        }
+
+        ArrayList<LocationProviderInterface> tmp2 = new ArrayList<LocationProviderInterface>();
+        idx = 0;
+        size = tmp.size();
+        while ((idx < size) && (tmp.get(idx).getAccuracy() == acc)) {
+            tmp2.add(tmp.get(idx));
+            idx++;
+        }
+
+        // Finally, sort by capability "score"
+        Collections.sort(tmp2, new LpCapabilityComparator());
+        return tmp2.get(0);
+    }
+
+    /**
+     * Returns the name of the provider that best meets the given criteria. Only providers
+     * that are permitted to be accessed by the calling activity will be
+     * returned.  If several providers meet the criteria, the one with the best
+     * accuracy is returned.  If no provider meets the criteria,
+     * the criteria are loosened in the following sequence:
+     *
+     * <ul>
+     * <li> power requirement
+     * <li> accuracy
+     * <li> bearing
+     * <li> speed
+     * <li> altitude
+     * </ul>
+     *
+     * <p> Note that the requirement on monetary cost is not removed
+     * in this process.
+     *
+     * @param criteria the criteria that need to be matched
+     * @param enabledOnly if true then only a provider that is currently enabled is returned
+     * @return name of the provider that best matches the requirements
+     */
+    public String getBestProvider(Criteria criteria, boolean enabledOnly) {
+        List<String> goodProviders = getProviders(criteria, enabledOnly);
+        if (!goodProviders.isEmpty()) {
+            return best(goodProviders).getName();
+        }
+
+        // Make a copy of the criteria that we can modify
+        criteria = new Criteria(criteria);
+
+        // Loosen power requirement
+        int power = criteria.getPowerRequirement();
+        while (goodProviders.isEmpty() && (power != Criteria.NO_REQUIREMENT)) {
+            power = nextPower(power);
+            criteria.setPowerRequirement(power);
+            goodProviders = getProviders(criteria, enabledOnly);
+        }
+        if (!goodProviders.isEmpty()) {
+            return best(goodProviders).getName();
+        }
+
+        // Loosen accuracy requirement
+        int accuracy = criteria.getAccuracy();
+        while (goodProviders.isEmpty() && (accuracy != Criteria.NO_REQUIREMENT)) {
+            accuracy = nextAccuracy(accuracy);
+            criteria.setAccuracy(accuracy);
+            goodProviders = getProviders(criteria, enabledOnly);
+        }
+        if (!goodProviders.isEmpty()) {
+            return best(goodProviders).getName();
+        }
+
+        // Remove bearing requirement
+        criteria.setBearingRequired(false);
+        goodProviders = getProviders(criteria, enabledOnly);
+        if (!goodProviders.isEmpty()) {
+            return best(goodProviders).getName();
+        }
+
+        // Remove speed requirement
+        criteria.setSpeedRequired(false);
+        goodProviders = getProviders(criteria, enabledOnly);
+        if (!goodProviders.isEmpty()) {
+            return best(goodProviders).getName();
+        }
+
+        // Remove altitude requirement
+        criteria.setAltitudeRequired(false);
+        goodProviders = getProviders(criteria, enabledOnly);
+        if (!goodProviders.isEmpty()) {
+            return best(goodProviders).getName();
+        }
+
+        return null;
+    }
+
+    public boolean providerMeetsCriteria(String provider, Criteria criteria) {
+        LocationProviderInterface p = mProvidersByName.get(provider);
+        if (p == null) {
+            throw new IllegalArgumentException("provider=" + provider);
+        }
+        return p.meetsCriteria(criteria);
     }
 
     private void updateProvidersLocked() {
@@ -717,6 +933,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         final Receiver mReceiver;
         final long mMinTime;
         final float mMinDistance;
+        final boolean mSingleShot;
         final int mUid;
         Location mLastFixBroadcast;
         long mLastStatusBroadcast;
@@ -724,12 +941,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         /**
          * Note: must be constructed with lock held.
          */
-        UpdateRecord(String provider, long minTime, float minDistance,
+        UpdateRecord(String provider, long minTime, float minDistance, boolean singleShot,
             Receiver receiver, int uid) {
             mProvider = provider;
             mReceiver = receiver;
             mMinTime = minTime;
             mMinDistance = minDistance;
+            mSingleShot = singleShot;
             mUid = uid;
 
             ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
@@ -764,6 +982,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             pw.println(prefix + this);
             pw.println(prefix + "mProvider=" + mProvider + " mReceiver=" + mReceiver);
             pw.println(prefix + "mMinTime=" + mMinTime + " mMinDistance=" + mMinDistance);
+            pw.println(prefix + "mSingleShot=" + mSingleShot);
             pw.println(prefix + "mUid=" + mUid);
             pw.println(prefix + "mLastFixBroadcast:");
             if (mLastFixBroadcast != null) {
@@ -819,12 +1038,21 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return false;
     }
 
-    public void requestLocationUpdates(String provider,
-        long minTime, float minDistance, ILocationListener listener) {
-
+    public void requestLocationUpdates(String provider, Criteria criteria,
+        long minTime, float minDistance, boolean singleShot, ILocationListener listener) {
+        if (criteria != null) {
+            // FIXME - should we consider using multiple providers simultaneously
+            // rather than only the best one?
+            // Should we do anything different for single shot fixes?
+            provider = getBestProvider(criteria, true);
+            if (provider == null) {
+                throw new IllegalArgumentException("no providers found for criteria");
+            }
+        }
         try {
             synchronized (mLock) {
-                requestLocationUpdatesLocked(provider, minTime, minDistance, getReceiver(listener));
+                requestLocationUpdatesLocked(provider, minTime, minDistance, singleShot,
+                        getReceiver(listener));
             }
         } catch (SecurityException se) {
             throw se;
@@ -835,11 +1063,21 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    public void requestLocationUpdatesPI(String provider,
-            long minTime, float minDistance, PendingIntent intent) {
+    public void requestLocationUpdatesPI(String provider, Criteria criteria,
+            long minTime, float minDistance, boolean singleShot, PendingIntent intent) {
+        if (criteria != null) {
+            // FIXME - should we consider using multiple providers simultaneously
+            // rather than only the best one?
+            // Should we do anything different for single shot fixes?
+            provider = getBestProvider(criteria, true);
+            if (provider == null) {
+                throw new IllegalArgumentException("no providers found for criteria");
+            }
+        }
         try {
             synchronized (mLock) {
-                requestLocationUpdatesLocked(provider, minTime, minDistance, getReceiver(intent));
+                requestLocationUpdatesLocked(provider, minTime, minDistance, singleShot,
+                        getReceiver(intent));
             }
         } catch (SecurityException se) {
             throw se;
@@ -850,8 +1088,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    private void requestLocationUpdatesLocked(String provider,
-            long minTime, float minDistance, Receiver receiver) {
+    private void requestLocationUpdatesLocked(String provider, long minTime, float minDistance,
+            boolean singleShot, Receiver receiver) {
         if (LOCAL_LOGV) {
             Slog.v(TAG, "_requestLocationUpdates: listener = " + receiver);
         }
@@ -868,7 +1106,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         boolean newUid = !providerHasListener(provider, callingUid, null);
         long identity = Binder.clearCallingIdentity();
         try {
-            UpdateRecord r = new UpdateRecord(provider, minTime, minDistance, receiver, callingUid);
+            UpdateRecord r = new UpdateRecord(provider, minTime, minDistance, singleShot,
+                    receiver, callingUid);
             UpdateRecord oldRecord = receiver.mUpdateRecords.put(provider, r);
             if (oldRecord != null) {
                 oldRecord.disposeLocked();
@@ -882,7 +1121,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (isProviderEnabled) {
                 long minTimeForProvider = getMinTimeLocked(provider);
                 p.setMinTime(minTimeForProvider);
-                p.enableLocationTracking(true);
+                // try requesting single shot if singleShot is true, and fall back to
+                // regular location tracking if requestSingleShotFix() is not supported
+                if (!singleShot || !p.requestSingleShotFix()) {
+                    p.enableLocationTracking(true);
+                }
             } else {
                 // Notify the listener that updates are currently disabled
                 receiver.callProviderEnabledLocked(provider, false);
@@ -1288,7 +1531,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
             for (int i = mProviders.size() - 1; i >= 0; i--) {
                 LocationProviderInterface provider = mProviders.get(i);
-                requestLocationUpdatesLocked(provider.getName(), 1000L, 1.0f, mProximityReceiver);
+                requestLocationUpdatesLocked(provider.getName(), 1000L, 1.0f,
+                        false, mProximityReceiver);
             }
         }
     }
@@ -1486,6 +1730,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         for (int i=0; i<N; i++) {
             UpdateRecord r = records.get(i);
             Receiver receiver = r.mReceiver;
+            boolean receiverDead = false;
 
             Location lastLoc = r.mLastFixBroadcast;
             if ((lastLoc == null) || shouldBroadcastSafe(location, lastLoc, r)) {
@@ -1497,10 +1742,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 }
                 if (!receiver.callLocationChangedLocked(location)) {
                     Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
-                    if (deadReceivers == null) {
-                        deadReceivers = new ArrayList<Receiver>();
-                    }
-                    deadReceivers.add(receiver);
+                    receiverDead = true;
                 }
             }
 
@@ -1510,13 +1752,18 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
                 r.mLastStatusBroadcast = newStatusUpdateTime;
                 if (!receiver.callStatusChangedLocked(provider, status, extras)) {
+                    receiverDead = true;
                     Slog.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
-                    if (deadReceivers == null) {
-                        deadReceivers = new ArrayList<Receiver>();
-                    }
-                    if (!deadReceivers.contains(receiver)) {
-                        deadReceivers.add(receiver);
-                    }
+                }
+            }
+
+            // remove receiver if it is dead or we just processed a single shot request
+            if (receiverDead || r.mSingleShot) {
+                if (deadReceivers == null) {
+                    deadReceivers = new ArrayList<Receiver>();
+                }
+                if (!deadReceivers.contains(receiver)) {
+                    deadReceivers.add(receiver);
                 }
             }
         }
