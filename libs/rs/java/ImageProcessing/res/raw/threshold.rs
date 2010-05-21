@@ -50,7 +50,7 @@ void computeColorMatrix() {
 
     float oneMinusS = 1.0f - saturation;
 
-    matrixLoadIdentity(colorMat);
+    rsMatrixLoadIdentity((rs_matrix4x4 *)colorMat);
 
     colorMat[0][0] = oneMinusS * rWeight + saturation;
     colorMat[0][1] = oneMinusS * rWeight;
@@ -165,7 +165,7 @@ void processNoBlur() {
             output->a = input->a;
         }
     }
-    sendToClient(&count, 1, 4, 0);
+    rsSendToClient(&count, 1, 4, 0);
 }
 
 void horizontalBlur() {
@@ -294,16 +294,15 @@ void verticalBlur() {
 }
 
 void filter() {
-    debugP(0, (void *)height);
-    debugP(0, (void *)width);
-    debugP(0, (void *)radius);
-
-    debugPf(10, inBlack);
-    debugPf(11, outBlack);
-    debugPf(12, inWhite);
-    debugPf(13, outWhite);
-    debugPf(14, gamma);
-    debugPf(15, saturation);
+    RS_DEBUG(height);
+    RS_DEBUG(width);
+    RS_DEBUG(radius);
+    RS_DEBUG(inBlack);
+    RS_DEBUG(outBlack);
+    RS_DEBUG(inWhite);
+    RS_DEBUG(outWhite);
+    RS_DEBUG(gamma);
+    RS_DEBUG(saturation);
 
     computeColorMatrix();
 
@@ -318,7 +317,7 @@ void filter() {
     verticalBlur();
 
     int count = 0;
-    sendToClient(&count, 1, 4, 0);
+    rsSendToClient(&count, 1, 4, 0);
 }
 
 void filterBenchmark() {
@@ -329,6 +328,6 @@ void filterBenchmark() {
     verticalBlur();
 
     int count = 0;
-    sendToClient(&count, 1, 4, 0);
+    rsSendToClient(&count, 1, 4, 0);
 }
 

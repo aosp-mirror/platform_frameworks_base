@@ -17,7 +17,6 @@
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix.h"
-#include "rsNoise.h"
 
 #include "acc/acc.h"
 #include "utils/Timers.h"
@@ -223,11 +222,6 @@ static int SC_randi(int max)
 static int SC_randi2(int min, int max)
 {
     return (int)SC_randf2(min, max);
-}
-
-static int SC_sign(int value)
-{
-    return (value > 0) - (value < 0);
 }
 
 static int SC_clamp(int amount, int low, int high)
@@ -549,21 +543,6 @@ static void SC_scriptCall(int scriptID)
     rsc->runScript((Script *)scriptID, 0);
 }
 
-static void SC_debugP(int i, void *p)
-{
-    LOGE("debug P  %i  %p, %i", i, p, (int)p);
-}
-
-static void SC_debugPi(int i, int p)
-{
-    LOGE("debug Pi %i  0x%08x, %i", i, p, (int)p);
-}
-
-static void SC_debugPf(int i, float p)
-{
-    LOGE("debug Pf  %i  %f,   0x%08x", i, p, reinterpret_cast<uint32_t *>(&p)[0]);
-}
-
 int SC_divsi3(int a, int b)
 {
     return a / b;
@@ -664,21 +643,14 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
 ////////////////////////////////////////////////////////////////////
 
-    { "modf", (void *)&fmod },
     //{ "sinf_fast", (void *)&SC_sinf_fast },
     //{ "cosf_fast", (void *)&SC_cosf_fast },
-    //{ "sign", (void *)&SC_sign },
     //{ "clamp", (void *)&SC_clamp },
     //{ "distf2", (void *)&SC_distf2 },
     //{ "distf3", (void *)&SC_distf3 },
     //{ "magf2", (void *)&SC_magf2 },
     //{ "magf3", (void *)&SC_magf3 },
     //{ "mapf", (void *)&SC_mapf },
-    { "noisef", (void *)&SC_noisef },
-    { "noisef2", (void *)&SC_noisef2 },
-    { "noisef3", (void *)&SC_noisef3 },
-    { "turbulencef2", (void *)&SC_turbulencef2 },
-    { "turbulencef3", (void *)&SC_turbulencef3 },
 
     { "scriptCall", (void *)&SC_scriptCall },
 

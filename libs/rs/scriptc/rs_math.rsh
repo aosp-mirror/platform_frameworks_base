@@ -70,9 +70,6 @@ extern void rsMatrixTranslate(rs_matrix4x4 *mat, float x, float y, float z);
 ///////////////////////////////////////////////////////////////////
 // non update funcs
 
-extern float turbulencef2(float x, float y, float octaves);
-extern float turbulencef3(float x, float y, float z, float octaves);
-
 /*
 extern float3 float3Norm(float3);
 extern float float3Length(float3);
