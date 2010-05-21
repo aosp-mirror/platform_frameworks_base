@@ -95,7 +95,9 @@ void LayerBlur::unlockPageFlip(const Transform& planeTransform, Region& outDirty
                     mCacheDirty = false;
                 } else {
                     if (!mAutoRefreshPending) {
-                        mFlinger->signalDelayedEvent(ms2ns(500));
+                        mFlinger->postMessageAsync(
+                                new MessageBase(MessageQueue::INVALIDATE),
+                                ms2ns(500));
                         mAutoRefreshPending = true;
                     }
                 }

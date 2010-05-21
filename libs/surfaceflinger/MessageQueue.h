@@ -25,6 +25,7 @@
 #include <utils/Timers.h>
 #include <utils/List.h>
 
+#include "Barrier.h"
 
 namespace android {
 
@@ -37,7 +38,6 @@ class MessageList
     List< sp<MessageBase> > mList;
     typedef List< sp<MessageBase> > LIST;
 public:
-    typedef sp<MessageBase> value_type;
     inline LIST::iterator begin()                { return mList.begin(); }
     inline LIST::const_iterator begin() const    { return mList.begin(); }
     inline LIST::iterator end()                  { return mList.end(); }
@@ -63,11 +63,19 @@ public:
     
     // return true if message has a handler
     virtual bool handler() { return false; }
+
+    // waits for the handler to be processed
+    void wait() const { barrier.wait(); }
     
+    // releases all waiters. this is done automatically if
+    // handler returns true
+    void notify() const { barrier.open(); }
+
 protected:
     virtual ~MessageBase() { }
 
 private:
+    mutable Barrier barrier;
     friend class LightRefBase<MessageBase>;
 };
 
@@ -82,42 +90,33 @@ class MessageQueue
     typedef List< sp<MessageBase> > LIST;
 public:
 
-    // this is a work-around the multichar constant warning. A macro would
-    // work too, but would pollute the namespace.
-    template <int a, int b, int c, int d>
-    struct WHAT {
-        static const uint32_t Value = 
-            (uint32_t(a&0xff)<<24)|(uint32_t(b&0xff)<<16)|
-            (uint32_t(c&0xff)<<8)|uint32_t(d&0xff);
-    };
-    
     MessageQueue();
     ~MessageQueue();
 
     // pre-defined messages
     enum {
-        INVALIDATE = WHAT<'_','p','d','t'>::Value
+        INVALIDATE = '_upd'
     };
 
-    MessageList::value_type waitMessage(nsecs_t timeout = -1);
+    sp<MessageBase> waitMessage(nsecs_t timeout = -1);
     
-    status_t postMessage(const MessageList::value_type& message, 
+    status_t postMessage(const sp<MessageBase>& message,
             nsecs_t reltime=0, uint32_t flags = 0);
-        
+
     status_t invalidate();
     
-    void dump(const MessageList::value_type& message);
+    void dump(const sp<MessageBase>& message);
 
 private:
-    status_t queueMessage(const MessageList::value_type& message,
+    status_t queueMessage(const sp<MessageBase>& message,
             nsecs_t reltime, uint32_t flags);
-    void dumpLocked(const MessageList::value_type& message);
+    void dumpLocked(const sp<MessageBase>& message);
     
     Mutex           mLock;
     Condition       mCondition;
     MessageList     mMessages;
     bool            mInvalidate;
-    MessageList::value_type mInvalidateMessage;
+    sp<MessageBase> mInvalidateMessage;
 };
 
 // ---------------------------------------------------------------------------

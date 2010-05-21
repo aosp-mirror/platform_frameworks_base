@@ -255,8 +255,6 @@ private:
 public:     // hack to work around gcc 4.0.3 bug
             void        signalEvent();
 private:
-            void        signalDelayedEvent(nsecs_t delay);
-
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
             void        handleTransactionLocked(
@@ -286,7 +284,7 @@ private:
             void        free_resources_l();
 
             uint32_t    getTransactionFlags(uint32_t flags);
-            uint32_t    setTransactionFlags(uint32_t flags, nsecs_t delay = 0);
+            uint32_t    setTransactionFlags(uint32_t flags);
             void        commitTransaction();
 
 
@@ -310,7 +308,12 @@ private:
            
 
     mutable     MessageQueue    mEventQueue;
-    
+
+    status_t postMessageAsync(const sp<MessageBase>& msg,
+            nsecs_t reltime=0, uint32_t flags = 0);
+
+    status_t postMessageSync(const sp<MessageBase>& msg,
+            nsecs_t reltime=0, uint32_t flags = 0);
                 
                 
                 // access must be protected by mStateLock

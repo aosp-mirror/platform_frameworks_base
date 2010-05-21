@@ -55,12 +55,6 @@ namespace android {
  * 
  */
 
-// When changing these values, the COMPILE_TIME_ASSERT at the end of this
-// file need to be updated.
-const unsigned int NUM_LAYERS_MAX  = 31;
-const unsigned int NUM_BUFFER_MAX  = 16;
-const unsigned int NUM_DISPLAY_MAX = 4;
-
 // ----------------------------------------------------------------------------
 
 class Region;
@@ -82,6 +76,12 @@ class SharedBufferStack
     friend class SharedBufferServer;
 
 public:
+    // When changing these values, the COMPILE_TIME_ASSERT at the end of this
+    // file need to be updated.
+    static const unsigned int NUM_LAYERS_MAX  = 31;
+    static const unsigned int NUM_BUFFER_MAX  = 16;
+    static const unsigned int NUM_DISPLAY_MAX = 4;
+
     struct Statistics { // 4 longs
         typedef int32_t usecs_t;
         usecs_t  totalTime;
@@ -147,7 +147,7 @@ private:
     // FIXME: this should be replaced by a lock-less primitive
     Mutex lock;
     Condition cv;
-    SharedBufferStack surfaces[ NUM_LAYERS_MAX ];
+    SharedBufferStack surfaces[ SharedBufferStack::NUM_LAYERS_MAX ];
 };
 
 // ============================================================================
@@ -155,7 +155,7 @@ private:
 class SharedBufferBase
 {
 public:
-    SharedBufferBase(SharedClient* sharedClient, int surface, int num,
+    SharedBufferBase(SharedClient* sharedClient, int surface,
             int32_t identity);
     ~SharedBufferBase();
     uint32_t getIdentity();
@@ -166,9 +166,7 @@ public:
 protected:
     SharedClient* const mSharedClient;
     SharedBufferStack* const mSharedStack;
-    int mNumBuffers;
     const int mIdentity;
-    int32_t computeTail() const;
 
     friend struct Update;
     friend struct QueueUpdate;
@@ -217,8 +215,16 @@ public:
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
     status_t setCrop(int buffer, const Rect& reg);
-    status_t setBufferCount(int bufferCount);
     
+
+    class SetBufferCountCallback {
+        friend class SharedBufferClient;
+        virtual status_t operator()(int bufferCount) const = 0;
+    protected:
+        virtual ~SetBufferCountCallback() { }
+    };
+    status_t setBufferCount(int bufferCount, const SetBufferCountCallback& ipc);
+
 private:
     friend struct Condition;
     friend struct DequeueCondition;
@@ -249,11 +255,16 @@ private:
         inline const char* name() const { return "LockCondition"; }
     };
 
+    int32_t computeTail() const;
+
+    mutable RWLock mLock;
+    int mNumBuffers;
+
     int32_t tail;
     int32_t undoDequeueTail;
     int32_t queued_head;
     // statistics...
-    nsecs_t mDequeueTime[NUM_BUFFER_MAX];
+    nsecs_t mDequeueTime[SharedBufferStack::NUM_BUFFER_MAX];
 };
 
 // ----------------------------------------------------------------------------
@@ -287,7 +298,8 @@ private:
         size_t mCapacity;
         uint32_t mList;
     public:
-        BufferList(size_t c = NUM_BUFFER_MAX) : mCapacity(c), mList(0) { }
+        BufferList(size_t c = SharedBufferStack::NUM_BUFFER_MAX)
+            : mCapacity(c), mList(0) { }
         status_t add(int value);
         status_t remove(int value);
 
@@ -324,6 +336,9 @@ private:
         }
     };
 
+    // this protects mNumBuffers and mBufferList
+    mutable RWLock mLock;
+    int mNumBuffers;
     BufferList mBufferList;
 
     struct UnlockUpdate : public UpdateBase {
@@ -373,7 +388,7 @@ struct surface_flinger_cblk_t   // 4KB max
     uint8_t         connected;
     uint8_t         reserved[3];
     uint32_t        pad[7];
-    display_cblk_t  displays[NUM_DISPLAY_MAX];
+    display_cblk_t  displays[SharedBufferStack::NUM_DISPLAY_MAX];
 };
 
 // ---------------------------------------------------------------------------
