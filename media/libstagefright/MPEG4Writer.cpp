@@ -334,8 +334,6 @@ static void StripStartcode(MediaBuffer *buffer) {
 }
 
 off_t MPEG4Writer::addLengthPrefixedSample_l(MediaBuffer *buffer) {
-    StripStartcode(buffer);
-
     off_t old_offset = mOffset;
 
     size_t length = buffer->range_length();
@@ -826,6 +824,8 @@ void MPEG4Writer::Track::threadEntry() {
 
             continue;
         }
+
+        if (is_avc) StripStartcode(buffer);
 
         SampleInfo info;
         info.size = is_avc

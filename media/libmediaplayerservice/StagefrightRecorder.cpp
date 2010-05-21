@@ -701,6 +701,7 @@ status_t StagefrightRecorder::reset() {
     mSampleRate    = 8000;
     mAudioChannels = 1;
     mAudioBitRate  = 12200;
+    mInterleaveDurationUs = 0;
 
     mOutputFd = -1;
     mFlags = 0;
