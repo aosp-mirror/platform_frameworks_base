@@ -119,14 +119,17 @@ public:
     // should not set default value for this parameter.
     // Example value: "0" or "90" or "180" or "270". Write only.
     static const char KEY_ROTATION[];
-    // GPS latitude coordinate. This will be stored in JPEG EXIF header.
-    // Example value: "25.032146". Write only.
+    // GPS latitude coordinate. GPSLatitude and GPSLatitudeRef will be stored in
+    // JPEG EXIF header.
+    // Example value: "25.032146" or "-33.462809". Write only.
     static const char KEY_GPS_LATITUDE[];
-    // GPS longitude coordinate. This will be stored in JPEG EXIF header.
-    // Example value: "121.564448". Write only.
+    // GPS longitude coordinate. GPSLongitude and GPSLongitudeRef will be stored
+    // in JPEG EXIF header.
+    // Example value: "121.564448" or "-70.660286". Write only.
     static const char KEY_GPS_LONGITUDE[];
-    // GPS altitude. This will be stored in JPEG EXIF header.
-    // Example value: "21.0". Write only.
+    // GPS altitude. GPSAltitude and GPSAltitudeRef will be stored in JPEG EXIF
+    // header.
+    // Example value: "21.0" or "-5". Write only.
     static const char KEY_GPS_ALTITUDE[];
     // GPS timestamp (UTC in seconds since January 1, 1970). This should be
     // stored in JPEG EXIF header.
