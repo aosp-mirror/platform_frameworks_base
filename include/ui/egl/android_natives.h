@@ -81,6 +81,7 @@ enum {
     NATIVE_WINDOW_CONNECT,
     NATIVE_WINDOW_DISCONNECT,
     NATIVE_WINDOW_SET_CROP,
+    NATIVE_WINDOW_SET_BUFFER_COUNT,
 };
 
 /* parameter for NATIVE_WINDOW_[DIS]CONNECT */
@@ -190,6 +191,7 @@ typedef struct android_native_window_t
      *     NATIVE_WINDOW_CONNECT
      *     NATIVE_WINDOW_DISCONNECT
      *     NATIVE_WINDOW_SET_CROP
+     *     NATIVE_WINDOW_SET_BUFFER_COUNT
      *  
      */
     
@@ -201,8 +203,9 @@ typedef struct android_native_window_t
 
 
 /*
- *  native_window_set_usage() sets the intended usage flags for the next
- *  buffers acquired with (*lockBuffer)() and on.
+ *  native_window_set_usage(..., usage)
+ *  Sets the intended usage flags for the next buffers
+ *  acquired with (*lockBuffer)() and on.
  *  By default (if this function is never called), a usage of
  *      GRALLOC_USAGE_HW_RENDER | GRALLOC_USAGE_HW_TEXTURE
  *  is assumed.
@@ -217,8 +220,8 @@ static inline int native_window_set_usage(
 }
 
 /*
- * native_window_connect(..., NATIVE_WINDOW_API_EGL) must be called
- * by EGL when the window is made current.
+ * native_window_connect(..., NATIVE_WINDOW_API_EGL)
+ * Must be called by EGL when the window is made current.
  * Returns -EINVAL if for some reason the window cannot be connected, which
  * can happen if it's connected to some other API.
  */
@@ -229,8 +232,8 @@ static inline int native_window_connect(
 }
 
 /*
- * native_window_disconnect(..., NATIVE_WINDOW_API_EGL) must be called
- * by EGL when the window is made not current.
+ * native_window_disconnect(..., NATIVE_WINDOW_API_EGL)
+ * Must be called by EGL when the window is made not current.
  * An error is returned if for instance the window wasn't connected in the
  * first place.
  */
@@ -241,8 +244,8 @@ static inline int native_window_disconnect(
 }
 
 /*
- * native_window_set_crop(..., crop) sets which region of the next queued
- * buffers needs to be considered.
+ * native_window_set_crop(..., crop)
+ * Sets which region of the next queued buffers needs to be considered.
  * A buffer's crop region is scaled to match the surface's size.
  *
  * The specified crop region applies to all buffers queued after it is called.
@@ -257,6 +260,17 @@ static inline int native_window_set_crop(
         android_native_rect_t const * crop)
 {
     return window->perform(window, NATIVE_WINDOW_SET_CROP, crop);
+}
+
+/*
+ * native_window_set_buffer_count(..., count)
+ * Sets the number of buffers associated with this native window.
+ */
+static inline int native_window_set_buffer_count(
+        android_native_window_t* window,
+        size_t bufferCount)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFER_COUNT, bufferCount);
 }
 
 // ---------------------------------------------------------------------------

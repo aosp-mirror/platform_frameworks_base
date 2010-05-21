@@ -584,6 +584,9 @@ int Surface::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_CROP:
         res = dispatch_crop( args );
         break;
+    case NATIVE_WINDOW_SET_BUFFER_COUNT:
+        res = dispatch_set_buffer_count( args );
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
@@ -606,6 +609,10 @@ int Surface::dispatch_disconnect(va_list args) {
 int Surface::dispatch_crop(va_list args) {
     android_native_rect_t const* rect = va_arg(args, android_native_rect_t*);
     return crop( reinterpret_cast<Rect const*>(rect) );
+}
+int Surface::dispatch_set_buffer_count(va_list args) {
+    size_t bufferCount = va_arg(args, size_t);
+    return setBufferCount(bufferCount);
 }
 
 
@@ -856,7 +863,7 @@ status_t Surface::getBufferLocked(int index, int usage)
                 currentBuffer->setIndex(index);
             }
         } else {
-            err = err<0 ? err : NO_MEMORY;
+            err = err<0 ? err : status_t(NO_MEMORY);
         }
     }
     return err; 

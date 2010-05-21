@@ -463,6 +463,9 @@ status_t SharedBufferClient::setBufferCount(
     if (uint32_t(bufferCount) >= SharedBufferStack::NUM_BUFFER_MAX)
         return BAD_VALUE;
 
+    if (uint32_t(bufferCount) < SharedBufferStack::NUM_BUFFER_MIN)
+        return BAD_VALUE;
+
     RWLock::AutoWLock _wr(mLock);
 
     status_t err = ipc(bufferCount);
