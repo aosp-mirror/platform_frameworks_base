@@ -255,11 +255,11 @@ public abstract class LocationProvider {
 
     /**
      * Returns a information on the status of this provider.
-     * {@link #OUT_OF_SERVICE} is returned if the provider is
+     * {@link android.location.LocationProvider#OUT_OF_SERVICE} is returned if the provider is
      * out of service, and this is not expected to change in the near
-     * future; {@link #TEMPORARILY_UNAVAILABLE} is returned if
+     * future; {@link android.location.LocationProvider#TEMPORARILY_UNAVAILABLE} is returned if
      * the provider is temporarily unavailable but is expected to be
-     * available shortly; and {@link #AVAILABLE} is returned
+     * available shortly; and {@link android.location.LocationProvider#AVAILABLE} is returned
      * if the provider is currently available.
      *
      * <p> If extras is non-null, additional status information may be
@@ -308,9 +308,9 @@ public abstract class LocationProvider {
 
     /**
      * Updates the network state for the given provider. This function must
-     * be overwritten if {@link #requiresNetwork} returns true. The state is
-     * {@link #TEMPORARILY_UNAVAILABLE} (disconnected), OR {@link #AVAILABLE}
-     * (connected or connecting).
+     * be overwritten if {@link android.location.LocationProvider#requiresNetwork} returns true.
+     * The state is {@link android.location.LocationProvider#TEMPORARILY_UNAVAILABLE} (disconnected)
+     * OR {@link android.location.LocationProvider#AVAILABLE} (connected or connecting).
      *
      * @param state data state
      */
