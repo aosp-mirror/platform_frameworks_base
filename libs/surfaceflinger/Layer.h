@@ -90,7 +90,6 @@ private:
 
     sp<GraphicBuffer> requestBuffer(int index, int usage);
     status_t setBufferCount(int bufferCount);
-    void destroy();
 
     class SurfaceLayer : public LayerBaseClient::Surface {
     public:
@@ -120,24 +119,31 @@ private:
                 static const size_t NUM_BUFFERS = 2;
                 struct BufferData {
                     sp<GraphicBuffer>   buffer;
-                    Texture             texture;
+                    Image               texture;
                 };
+                // this lock protect mBufferData[].buffer but since there
+                // is very little contention, we have only one like for
+                // the whole array, we also use it to protect mNumBuffers.
                 mutable Mutex mLock;
-                BufferData          mBufferData[NUM_BUFFERS];
+                BufferData          mBufferData[SharedBufferStack::NUM_BUFFER_MAX];
+                size_t              mNumBuffers;
                 Texture             mFailoverTexture;
                 TextureManager&     mTextureManager;
                 ssize_t             mActiveBuffer;
                 bool                mFailover;
-                static status_t destroyTexture(Texture* tex, EGLDisplay dpy);
+                static status_t destroyTexture(Image* tex, EGLDisplay dpy);
 
             public:
+                static size_t getDefaultBufferCount() { return NUM_BUFFERS; }
                 BufferManager(TextureManager& tm);
-
-                size_t getBufferCount() const;
+                ~BufferManager();
 
                 // detach/attach buffer from/to given index
                 sp<GraphicBuffer> detachBuffer(size_t index);
                 status_t attachBuffer(size_t index, const sp<GraphicBuffer>& buffer);
+
+                // resize the number of active buffers
+                status_t resize(size_t size);
 
                 // ----------------------------------------------
                 // must be called from GL thread
@@ -170,6 +176,8 @@ private:
             TextureManager mTextureManager;
             BufferManager mBufferManager;
 
+            // this lock protects mWidth and mHeight which are accessed from
+            // the main thread and requestBuffer's binder transaction thread.
             mutable Mutex mLock;
             uint32_t    mWidth;
             uint32_t    mHeight;

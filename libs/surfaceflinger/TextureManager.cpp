@@ -68,7 +68,7 @@ bool TextureManager::isSupportedYuvFormat(int format)
     return false;
 }
 
-status_t TextureManager::initEglImage(Texture* texture,
+status_t TextureManager::initEglImage(Image* texture,
         EGLDisplay dpy, const sp<GraphicBuffer>& buffer)
 {
     status_t err = NO_ERROR;
@@ -108,7 +108,6 @@ status_t TextureManager::initEglImage(Texture* texture,
             err = INVALID_OPERATION;
         } else {
             // Everything went okay!
-            texture->NPOTAdjust = false;
             texture->dirty  = false;
             texture->width  = clientBuf->width;
             texture->height = clientBuf->height;
