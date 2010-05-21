@@ -29,8 +29,6 @@ import java.util.Locale;
  * as well as the Geocoder client's package name for geocoder server
  * logging.  This information is kept in a separate class to allow for
  * future expansion of the IGeocodeProvider interface.
- *
- * @hide
  */
 public class GeocoderParams implements Parcelable {
     private Locale mLocale;

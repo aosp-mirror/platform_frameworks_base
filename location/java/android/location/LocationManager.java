@@ -545,8 +545,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present to access
      * the location services.
-     *
-     * {@hide}
      */
     public void requestLocationUpdates(long minTime, float minDistance,
             Criteria criteria, LocationListener listener, Looper looper) {
@@ -683,8 +681,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider.
-     *
-     * {@hide}
      */
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria, PendingIntent intent) {
         if (criteria == null) {
@@ -740,8 +736,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present for the provider.
-     *
-     * {@hide}
      */
     public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
         if (provider == null) {
@@ -783,8 +777,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present to access
      * the location services.
-     *
-     * {@hide}
      */
     public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
         if (criteria == null) {
@@ -813,8 +805,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider.
-     *
-     * {@hide}
      */
     public void requestSingleUpdate(String provider, PendingIntent intent) {
         if (provider == null) {
@@ -844,8 +834,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider.
-     *
-     * {@hide}
      */
     public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
         if (criteria == null) {
