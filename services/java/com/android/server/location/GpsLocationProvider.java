@@ -1173,7 +1173,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
 
-        updateStatus(mStatus, svCount);
+        // return number of sets used in fix instead of total
+        updateStatus(mStatus, Integer.bitCount(mSvMasks[USED_FOR_FIX_MASK]));
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
             System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
