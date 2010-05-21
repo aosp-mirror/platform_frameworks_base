@@ -51,7 +51,7 @@ public abstract class GeocodeProvider {
 
     /**
      * This method is overridden to implement the
-     * {@link Geocoder#getFromLocation(double, double, int)} method.
+     * {@link android.location.Geocoder#getFromLocation(double, double, int)} method.
      * Classes implementing this method should not hold a reference to the params parameter.
      */
     public abstract String onGetFromLocation(double latitude, double longitude, int maxResults,
@@ -59,7 +59,7 @@ public abstract class GeocodeProvider {
 
     /**
      * This method is overridden to implement the
-     * {@link Geocoder#getFromLocationName(String, int, double, double, double, double)} method.
+     * {@link android.location.Geocoder#getFromLocationName(String, int, double, double, double, double)} method.
      * Classes implementing this method should not hold a reference to the params parameter.
      */
     public abstract String onGetFromLocationName(String locationName,
