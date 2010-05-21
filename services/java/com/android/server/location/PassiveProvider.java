@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -79,6 +80,11 @@ public class PassiveProvider implements LocationProviderInterface {
         return -1;
     }
 
+    public boolean meetsCriteria(Criteria criteria) {
+        // We do not want to match the special passive provider based on criteria.
+        return false;
+    }
+
     public int getAccuracy() {
         return -1;
     }
@@ -111,6 +117,10 @@ public class PassiveProvider implements LocationProviderInterface {
 
     public void enableLocationTracking(boolean enable) {
         mTracking = enable;
+    }
+
+    public boolean requestSingleShotFix() {
+        return false;
     }
 
     public void setMinTime(long minTime) {

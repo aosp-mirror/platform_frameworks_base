@@ -18,6 +18,7 @@ package android.location.provider;
 
 import android.content.Context;
 import android.net.NetworkInfo;
+import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
 import android.location.Location;
@@ -73,6 +74,10 @@ public abstract class LocationProvider {
 
         public int getPowerRequirement() {
             return LocationProvider.this.onGetPowerRequirement();
+        }
+
+        public boolean meetsCriteria(Criteria criteria) {
+            return LocationProvider.this.onMeetsCriteria(criteria);
         }
 
         public int getAccuracy() {
@@ -224,6 +229,12 @@ public abstract class LocationProvider {
      * constants Criteria.POWER_REQUIREMENT_*.
      */
     public abstract int onGetPowerRequirement();
+
+    /**
+     * Returns true if this provider meets the given criteria,
+     * false otherwise.
+     */
+    public abstract boolean onMeetsCriteria(Criteria criteria);
 
     /**
      * Returns a constant describing horizontal accuracy of this provider.

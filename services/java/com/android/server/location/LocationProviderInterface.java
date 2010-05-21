@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.location.Criteria;
 import android.location.Location;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ public interface LocationProviderInterface {
     boolean supportsSpeed();
     boolean supportsBearing();
     int getPowerRequirement();
+    boolean meetsCriteria(Criteria criteria);
     int getAccuracy();
     boolean isEnabled();
     void enable();
@@ -42,6 +44,8 @@ public interface LocationProviderInterface {
     int getStatus(Bundle extras);
     long getStatusUpdateTime();
     void enableLocationTracking(boolean enable);
+    /* returns false if single shot is not supported */
+    boolean requestSingleShotFix();
     String getInternalState();
     void setMinTime(long minTime);
     void updateNetworkState(int state, NetworkInfo info);

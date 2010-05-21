@@ -28,8 +28,6 @@ import android.util.Log;
 import com.android.internal.location.DummyLocationProvider;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -249,15 +247,12 @@ public class LocationManager {
      * factory Context.getSystemService.
      */
     public LocationManager(ILocationManager service) {
-        if (false) {
-            Log.d(TAG, "Constructor: service = " + service);
-        }
         mService = service;
     }
 
     private LocationProvider createProvider(String name, Bundle info) {
         DummyLocationProvider provider =
-            new DummyLocationProvider(name);
+            new DummyLocationProvider(name, mService);
         provider.setRequiresNetwork(info.getBoolean("network"));
         provider.setRequiresSatellite(info.getBoolean("satellite"));
         provider.setRequiresCell(info.getBoolean("cell"));
@@ -299,7 +294,7 @@ public class LocationManager {
      */
     public List<String> getProviders(boolean enabledOnly) {
         try {
-            return mService.getProviders(enabledOnly);
+            return mService.getProviders(null, enabledOnly);
         } catch (RemoteException ex) {
             Log.e(TAG, "getProviders: RemoteException", ex);
         }
@@ -344,173 +339,15 @@ public class LocationManager {
      * @return list of Strings containing names of the providers
      */
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
-        List<String> goodProviders = Collections.emptyList();
-        List<String> providers = getProviders(enabledOnly);
-        for (String providerName : providers) {
-            LocationProvider provider = getProvider(providerName);
-            if (provider != null && provider.meetsCriteria(criteria)) {
-                if (goodProviders.isEmpty()) {
-                    goodProviders = new ArrayList<String>();
-                }
-                goodProviders.add(providerName);
-            }
+        if (criteria == null) {
+            throw new IllegalArgumentException("criteria==null");
         }
-        return goodProviders;
-    }
-
-    /**
-     * Returns the next looser power requirement, in the sequence:
-     *
-     * POWER_LOW -> POWER_MEDIUM -> POWER_HIGH -> NO_REQUIREMENT
-     */
-    private int nextPower(int power) {
-        switch (power) {
-        case Criteria.POWER_LOW:
-            return Criteria.POWER_MEDIUM;
-        case Criteria.POWER_MEDIUM:
-            return Criteria.POWER_HIGH;
-        case Criteria.POWER_HIGH:
-            return Criteria.NO_REQUIREMENT;
-        case Criteria.NO_REQUIREMENT:
-        default:
-            return Criteria.NO_REQUIREMENT;
+        try {
+            return mService.getProviders(criteria, enabledOnly);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getProviders: RemoteException", ex);
         }
-    }
-
-    /**
-     * Returns the next looser accuracy requirement, in the sequence:
-     *
-     * ACCURACY_FINE -> ACCURACY_APPROXIMATE-> NO_REQUIREMENT
-     */
-    private int nextAccuracy(int accuracy) {
-        if (accuracy == Criteria.ACCURACY_FINE) {
-            return Criteria.ACCURACY_COARSE;
-        } else {
-            return Criteria.NO_REQUIREMENT;
-        }
-    }
-
-    private abstract class LpComparator implements Comparator<LocationProvider> {
-
-        public int compare(int a1, int a2) {
-            if (a1 < a2) {
-                return -1;
-            } else if (a1 > a2) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-
-        public int compare(float a1, float a2) {
-            if (a1 < a2) {
-                return -1;
-            } else if (a1 > a2) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    private class LpPowerComparator extends LpComparator {
-        public int compare(LocationProvider l1, LocationProvider l2) {
-            int a1 = l1.getPowerRequirement();
-            int a2 = l2.getPowerRequirement();
-            return compare(a1, a2); // Smaller is better
-         }
-
-         public boolean equals(LocationProvider l1, LocationProvider l2) {
-             int a1 = l1.getPowerRequirement();
-             int a2 = l2.getPowerRequirement();
-             return a1 == a2;
-         }
-    }
-
-    private class LpAccuracyComparator extends LpComparator {
-        public int compare(LocationProvider l1, LocationProvider l2) {
-            int a1 = l1.getAccuracy();
-            int a2 = l2.getAccuracy();
-            return compare(a1, a2); // Smaller is better
-         }
-
-         public boolean equals(LocationProvider l1, LocationProvider l2) {
-             int a1 = l1.getAccuracy();
-             int a2 = l2.getAccuracy();
-             return a1 == a2;
-         }
-    }
-
-    private class LpCapabilityComparator extends LpComparator {
-
-        private static final int ALTITUDE_SCORE = 4;
-        private static final int BEARING_SCORE = 4;
-        private static final int SPEED_SCORE = 4;
-
-        private int score(LocationProvider p) {
-            return (p.supportsAltitude() ? ALTITUDE_SCORE : 0) +
-                (p.supportsBearing() ? BEARING_SCORE : 0) +
-                (p.supportsSpeed() ? SPEED_SCORE : 0);
-        }
-
-        public int compare(LocationProvider l1, LocationProvider l2) {
-            int a1 = score(l1);
-            int a2 = score(l2);
-            return compare(-a1, -a2); // Bigger is better
-         }
-
-         public boolean equals(LocationProvider l1, LocationProvider l2) {
-             int a1 = score(l1);
-             int a2 = score(l2);
-             return a1 == a2;
-         }
-    }
-
-    private LocationProvider best(List<String> providerNames) {
-        List<LocationProvider> providers = new ArrayList<LocationProvider>(providerNames.size());
-        for (String name : providerNames) {
-            providers.add(getProvider(name));
-        }
-
-        if (providers.size() < 2) {
-            return providers.get(0);
-        }
-
-        // First, sort by power requirement
-        Collections.sort(providers, new LpPowerComparator());
-        int power = providers.get(0).getPowerRequirement();
-        if (power < providers.get(1).getPowerRequirement()) {
-            return providers.get(0);
-        }
-
-        int idx, size;
-
-        List<LocationProvider> tmp = new ArrayList<LocationProvider>();
-        idx = 0;
-        size = providers.size();
-        while ((idx < size) && (providers.get(idx).getPowerRequirement() == power)) {
-            tmp.add(providers.get(idx));
-            idx++;
-        }
-
-        // Next, sort by accuracy
-        Collections.sort(tmp, new LpAccuracyComparator());
-        int acc = tmp.get(0).getAccuracy();
-        if (acc < tmp.get(1).getAccuracy()) {
-            return tmp.get(0);
-        }
-
-        List<LocationProvider> tmp2 = new ArrayList<LocationProvider>();
-        idx = 0;
-        size = tmp.size();
-        while ((idx < size) && (tmp.get(idx).getAccuracy() == acc)) {
-            tmp2.add(tmp.get(idx));
-            idx++;
-        }
-
-        // Finally, sort by capability "score"
-        Collections.sort(tmp2, new LpCapabilityComparator());
-        return tmp2.get(0);
+        return null;
     }
 
     /**
@@ -536,72 +373,14 @@ public class LocationManager {
      * @return name of the provider that best matches the requirements
      */
     public String getBestProvider(Criteria criteria, boolean enabledOnly) {
-        List<String> goodProviders = getProviders(criteria, enabledOnly);
-        if (!goodProviders.isEmpty()) {
-            return best(goodProviders).getName();
+        if (criteria == null) {
+            throw new IllegalArgumentException("criteria==null");
         }
-
-        // Make a copy of the criteria that we can modify
-        criteria = new Criteria(criteria);
-
-        // Loosen power requirement
-        int power = criteria.getPowerRequirement();
-        while (goodProviders.isEmpty() && (power != Criteria.NO_REQUIREMENT)) {
-            power = nextPower(power);
-            criteria.setPowerRequirement(power);
-            goodProviders = getProviders(criteria, enabledOnly);
+        try {
+            return mService.getBestProvider(criteria, enabledOnly);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getBestProvider: RemoteException", ex);
         }
-        if (!goodProviders.isEmpty()) {
-            return best(goodProviders).getName();
-        }
-
-//        // Loosen response time requirement
-//        int responseTime = criteria.getPreferredResponseTime();
-//        while (goodProviders.isEmpty() &&
-//            (responseTime != Criteria.NO_REQUIREMENT)) {
-//            responseTime += 1000;
-//            if (responseTime > 60000) {
-//                responseTime = Criteria.NO_REQUIREMENT;
-//            }
-//            criteria.setPreferredResponseTime(responseTime);
-//            goodProviders = getProviders(criteria);
-//        }
-//        if (!goodProviders.isEmpty()) {
-//            return best(goodProviders);
-//        }
-
-        // Loosen accuracy requirement
-        int accuracy = criteria.getAccuracy();
-        while (goodProviders.isEmpty() && (accuracy != Criteria.NO_REQUIREMENT)) {
-            accuracy = nextAccuracy(accuracy);
-            criteria.setAccuracy(accuracy);
-            goodProviders = getProviders(criteria, enabledOnly);
-        }
-        if (!goodProviders.isEmpty()) {
-            return best(goodProviders).getName();
-        }
-
-        // Remove bearing requirement
-        criteria.setBearingRequired(false);
-        goodProviders = getProviders(criteria, enabledOnly);
-        if (!goodProviders.isEmpty()) {
-            return best(goodProviders).getName();
-        }
-
-        // Remove speed requirement
-        criteria.setSpeedRequired(false);
-        goodProviders = getProviders(criteria, enabledOnly);
-        if (!goodProviders.isEmpty()) {
-            return best(goodProviders).getName();
-        }
-
-        // Remove altitude requirement
-        criteria.setAltitudeRequired(false);
-        goodProviders = getProviders(criteria, enabledOnly);
-        if (!goodProviders.isEmpty()) {
-            return best(goodProviders).getName();
-        }
-
         return null;
     }
 
@@ -658,7 +437,7 @@ public class LocationManager {
         if (listener == null) {
             throw new IllegalArgumentException("listener==null");
         }
-        _requestLocationUpdates(provider, minTime, minDistance, listener, null);
+        _requestLocationUpdates(provider, null, minTime, minDistance, false, listener, null);
     }
 
     /**
@@ -701,10 +480,10 @@ public class LocationManager {
      * each location update
      * @param looper a Looper object whose message queue will be used to
      * implement the callback mechanism.
+     * If looper is null then the callbacks will be called on the main thread.
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
-     * @throws IllegalArgumentException if looper is null
      * @throws SecurityException if no suitable permission is present for the provider.
      */
     public void requestLocationUpdates(String provider,
@@ -716,15 +495,72 @@ public class LocationManager {
         if (listener == null) {
             throw new IllegalArgumentException("listener==null");
         }
-        if (looper == null) {
-            throw new IllegalArgumentException("looper==null");
-        }
-        _requestLocationUpdates(provider, minTime, minDistance, listener, looper);
+        _requestLocationUpdates(provider, null, minTime, minDistance, false, listener, looper);
     }
 
-    private void _requestLocationUpdates(String provider,
-        long minTime, float minDistance, LocationListener listener,
-        Looper looper) {
+    /**
+     * Registers the current activity to be notified periodically based on
+     * the specified criteria.  Periodically, the supplied LocationListener will
+     * be called with the current Location or with status updates.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * <p> In case the provider is disabled by the user, updates will stop,
+     * and the {@link LocationListener#onProviderDisabled(String)}
+     * method will be called. As soon as the provider is enabled again,
+     * the {@link LocationListener#onProviderEnabled(String)} method will
+     * be called and location updates will start again.
+     *
+     * <p> The frequency of notification may be controlled using the
+     * minTime and minDistance parameters. If minTime is greater than 0,
+     * the LocationManager could potentially rest for minTime milliseconds
+     * between location updates to conserve power. If minDistance is greater than 0,
+     * a location will only be broadcasted if the device moves by minDistance meters.
+     * To obtain notifications as frequently as possible, set both parameters to 0.
+     *
+     * <p> Background services should be careful about setting a sufficiently high
+     * minTime so that the device doesn't consume too much power by keeping the
+     * GPS or wireless radios on all the time. In particular, values under 60000ms
+     * are not recommended.
+     *
+     * <p> The supplied Looper is used to implement the callback mechanism.
+     *
+     * @param minTime the minimum time interval for notifications, in
+     * milliseconds. This field is only used as a hint to conserve power, and actual
+     * time between location updates may be greater or lesser than this value.
+     * @param minDistance the minimum distance interval for notifications,
+     * in meters
+     * @param criteria contains parameters for the location manager to choose the
+     * appropriate provider and parameters to compute the location
+     * @param listener a {#link LocationListener} whose
+     * {@link LocationListener#onLocationChanged} method will be called for
+     * each location update
+     * @param looper a Looper object whose message queue will be used to
+     * implement the callback mechanism.
+     * If looper is null then the callbacks will be called on the main thread.
+     *
+     * @throws IllegalArgumentException if criteria is null
+     * @throws IllegalArgumentException if listener is null
+     * @throws SecurityException if no suitable permission is present to access
+     * the location services.
+     *
+     * {@hide}
+     */
+    public void requestLocationUpdates(long minTime, float minDistance,
+            Criteria criteria, LocationListener listener, Looper looper) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("criteria==null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener==null");
+        }
+        _requestLocationUpdates(null, criteria, minTime, minDistance, false, listener, looper);
+    }
+
+    private void _requestLocationUpdates(String provider, Criteria criteria, long minTime,
+            float minDistance, boolean singleShot, LocationListener listener, Looper looper) {
         if (minTime < 0L) {
             minTime = 0L;
         }
@@ -739,7 +575,7 @@ public class LocationManager {
                     transport = new ListenerTransport(listener, looper);
                 }
                 mListeners.put(listener, transport);
-                mService.requestLocationUpdates(provider, minTime, minDistance, transport);
+                mService.requestLocationUpdates(provider, criteria, minTime, minDistance, singleShot, transport);
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "requestLocationUpdates: DeadObjectException", ex);
@@ -785,7 +621,7 @@ public class LocationManager {
      * time between location updates may be greater or lesser than this value.
      * @param minDistance the minimum distance interval for notifications,
      * in meters
-     * @param intent a {#link PendingIntet} to be sent for each location update
+     * @param intent a {#link PendingIntent} to be sent for each location update
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
@@ -799,11 +635,69 @@ public class LocationManager {
         if (intent == null) {
             throw new IllegalArgumentException("intent==null");
         }
-        _requestLocationUpdates(provider, minTime, minDistance, intent);
+        _requestLocationUpdates(provider, null, minTime, minDistance, false, intent);
     }
 
-    private void _requestLocationUpdates(String provider,
-            long minTime, float minDistance, PendingIntent intent) {
+    /**
+     * Registers the current activity to be notified periodically based on
+     * the specified criteria.  Periodically, the supplied PendingIntent will
+     * be broadcast with the current Location or with status updates.
+     *
+     * <p> Location updates are sent with a key of KEY_LOCATION_CHANGED and a Location value.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * <p> The frequency of notification or new locations may be controlled using the
+     * minTime and minDistance parameters. If minTime is greater than 0,
+     * the LocationManager could potentially rest for minTime milliseconds
+     * between location updates to conserve power. If minDistance is greater than 0,
+     * a location will only be broadcast if the device moves by minDistance meters.
+     * To obtain notifications as frequently as possible, set both parameters to 0.
+     *
+     * <p> Background services should be careful about setting a sufficiently high
+     * minTime so that the device doesn't consume too much power by keeping the
+     * GPS or wireless radios on all the time. In particular, values under 60000ms
+     * are not recommended.
+     *
+     * <p> In case the provider is disabled by the user, updates will stop,
+     * and an intent will be sent with an extra with key KEY_PROVIDER_ENABLED and a boolean value
+     * of false.  If the provider is re-enabled, an intent will be sent with an
+     * extra with key KEY_PROVIDER_ENABLED and a boolean value of true and location updates will
+     * start again.
+     *
+     * <p> If the provider's status changes, an intent will be sent with an extra with key
+     * KEY_STATUS_CHANGED and an integer value indicating the new status.  Any extras associated
+     * with the status update will be sent as well.
+     *
+     * @param minTime the minimum time interval for notifications, in
+     * milliseconds. This field is only used as a hint to conserve power, and actual
+     * time between location updates may be greater or lesser than this value.
+     * @param minDistance the minimum distance interval for notifications,
+     * in meters
+     * @param criteria contains parameters for the location manager to choose the
+     * appropriate provider and parameters to compute the location
+     * @param intent a {#link PendingIntent} to be sent for each location update
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if intent is null
+     * @throws SecurityException if no suitable permission is present for the provider.
+     *
+     * {@hide}
+     */
+    public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria, PendingIntent intent) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("criteria==null");
+        }
+        if (intent == null) {
+            throw new IllegalArgumentException("intent==null");
+        }
+        _requestLocationUpdates(null, criteria, minTime, minDistance, false, intent);
+    }
+
+    private void _requestLocationUpdates(String provider, Criteria criteria,
+            long minTime, float minDistance, boolean singleShot, PendingIntent intent) {
         if (minTime < 0L) {
             minTime = 0L;
         }
@@ -812,10 +706,155 @@ public class LocationManager {
         }
 
         try {
-            mService.requestLocationUpdatesPI(provider, minTime, minDistance, intent);
+            mService.requestLocationUpdatesPI(provider, criteria, minTime, minDistance, singleShot, intent);
         } catch (RemoteException ex) {
             Log.e(TAG, "requestLocationUpdates: RemoteException", ex);
         }
+    }
+
+    /**
+     * Registers the current activity to be notified periodically by
+     * the named provider.  Periodically, the supplied LocationListener will
+     * be called with the current Location or with status updates.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * <p> In case the provider is disabled by the user, updates will stop,
+     * and the {@link LocationListener#onProviderDisabled(String)}
+     * method will be called. As soon as the provider is enabled again,
+     * the {@link LocationListener#onProviderEnabled(String)} method will
+     * be called and location updates will start again.
+     *
+     * <p> The supplied Looper is used to implement the callback mechanism.
+     *
+     * @param provider the name of the provider with which to register
+     * @param listener a {#link LocationListener} whose
+     * {@link LocationListener#onLocationChanged} method will be called for
+     * each location update
+     * @param looper a Looper object whose message queue will be used to
+     * implement the callback mechanism.
+     * If looper is null then the callbacks will be called on the main thread.
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if listener is null
+     * @throws SecurityException if no suitable permission is present for the provider.
+     *
+     * {@hide}
+     */
+    public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
+        if (provider == null) {
+            throw new IllegalArgumentException("provider==null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener==null");
+        }
+        _requestLocationUpdates(provider, null, 0L, 0.0f, true, listener, looper);
+    }
+
+    /**
+     * Registers the current activity to be notified periodically based on
+     * the specified criteria.  Periodically, the supplied LocationListener will
+     * be called with the current Location or with status updates.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * <p> In case the provider is disabled by the user, updates will stop,
+     * and the {@link LocationListener#onProviderDisabled(String)}
+     * method will be called. As soon as the provider is enabled again,
+     * the {@link LocationListener#onProviderEnabled(String)} method will
+     * be called and location updates will start again.
+     *
+     * <p> The supplied Looper is used to implement the callback mechanism.
+     *
+     * @param criteria contains parameters for the location manager to choose the
+     * appropriate provider and parameters to compute the location
+     * @param listener a {#link LocationListener} whose
+     * {@link LocationListener#onLocationChanged} method will be called for
+     * each location update
+     * @param looper a Looper object whose message queue will be used to
+     * implement the callback mechanism.
+     * If looper is null then the callbacks will be called on the current thread.
+     *
+     * @throws IllegalArgumentException if criteria is null
+     * @throws IllegalArgumentException if listener is null
+     * @throws SecurityException if no suitable permission is present to access
+     * the location services.
+     *
+     * {@hide}
+     */
+    public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("criteria==null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener==null");
+        }
+        _requestLocationUpdates(null, criteria, 0L, 0.0f, true, listener, looper);
+    }
+
+    /**
+     * Registers the current activity to be notified periodically by
+     * the named provider.  Periodically, the supplied PendingIntent will
+     * be broadcast with the current Location or with status updates.
+     *
+     * <p> Location updates are sent with a key of KEY_LOCATION_CHANGED and a Location value.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * @param provider the name of the provider with which to register
+     * @param intent a {#link PendingIntent} to be sent for the location update
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if intent is null
+     * @throws SecurityException if no suitable permission is present for the provider.
+     *
+     * {@hide}
+     */
+    public void requestSingleUpdate(String provider, PendingIntent intent) {
+        if (provider == null) {
+            throw new IllegalArgumentException("provider==null");
+        }
+        if (intent == null) {
+            throw new IllegalArgumentException("intent==null");
+        }
+        _requestLocationUpdates(provider, null, 0L, 0.0f, true, intent);
+    }
+
+    /**
+     * Registers the current activity to be notified periodically based on
+     * the specified criteria.  Periodically, the supplied PendingIntent will
+     * be broadcast with the current Location or with status updates.
+     *
+     * <p> Location updates are sent with a key of KEY_LOCATION_CHANGED and a Location value.
+     *
+     * <p> It may take a while to receive the most recent location. If
+     * an immediate location is required, applications may use the
+     * {@link #getLastKnownLocation(String)} method.
+     *
+     * @param criteria contains parameters for the location manager to choose the
+     * appropriate provider and parameters to compute the location
+     * @param intent a {#link PendingIntent} to be sent for the location update
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if intent is null
+     * @throws SecurityException if no suitable permission is present for the provider.
+     *
+     * {@hide}
+     */
+    public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("criteria==null");
+        }
+        if (intent == null) {
+            throw new IllegalArgumentException("intent==null");
+        }
+        _requestLocationUpdates(null, criteria, 0L, 0.0f, true, intent);
     }
 
     /**
