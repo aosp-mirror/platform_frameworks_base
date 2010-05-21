@@ -17,7 +17,6 @@
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix.h"
-#include "rsNoise.h"
 
 #include "acc/acc.h"
 #include "utils/Timers.h"

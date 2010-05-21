@@ -88,7 +88,6 @@ LOCAL_SRC_FILES:= \
 	rsMatrix.cpp \
     rsMesh.cpp \
     rsMutex.cpp \
-	rsNoise.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
 	rsProgramStore.cpp \
