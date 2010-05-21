@@ -130,6 +130,17 @@ public final class ContactsContract {
     public static final String REQUESTING_PACKAGE_PARAM_KEY = "requesting_package";
 
     /**
+     * Query parameter that should be used by the client to access a specific
+     * {@link Directory}. The parameter value should be the _ID of the corresponding
+     * directory, e.g.
+     * {@code content://com.android.contacts/data/emails/filter/acme?directory=3}
+     *
+     * @hide
+     */
+    public static final String DIRECTORY_PARAM_KEY = "directory";
+
+
+    /**
      * @hide
      */
     public static final class Preferences {
@@ -178,6 +189,227 @@ public final class ContactsContract {
          * @hide
          */
         public static final int DISPLAY_ORDER_ALTERNATIVE = 2;
+    }
+
+    /**
+     * A Directory represents a contacts corpus, e.g. Local contacts,
+     * Google Apps Global Address List or Corporate Global Address List.
+     * <p>
+     * A Directory is implemented as a content provider with its unique authority and
+     * the same API as the main Contacts Provider.  However, there is no expectation that
+     * every directory provider will implement this Contract in its entirety.  If a
+     * directory provider does not have an implementation for a specific request, it
+     * should throw an UnsupportedOperationException.
+     * </p>
+     * <p>
+     * The most important use case for Directories is search.  A Directory provider is
+     * expected to support at least {@link Contacts#CONTENT_FILTER_URI
+     * Contacts#CONTENT_FILTER_URI}.  If a Directory provider wants to participate
+     * in email and phone lookup functionalities, it should also implement
+     * {@link CommonDataKinds.Email#CONTENT_FILTER_URI CommonDataKinds.Email.CONTENT_FILTER_URI}
+     * and
+     * {@link CommonDataKinds.Phone#CONTENT_FILTER_URI CommonDataKinds.Phone.CONTENT_FILTER_URI}.
+     * </p>
+     * <p>
+     * A directory provider should return NULL for every projection field it does not
+     * recognize, rather than throwing an exception.  This way it will not be broken
+     * if ContactsContract is extended with new fields in the future.
+     * </p>
+     * <p>
+     * The client interacts with a directory via Contacts Provider by supplying an
+     * optional {@code directory=} query parameter.
+     * <p>
+     * <p>
+     * When the Contacts Provider receives the request, it transforms the URI and forwards
+     * the request to the corresponding directory content provider.
+     * The URI is transformed in the following fashion:
+     * <ul>
+     * <li>The URI authority is replaced with the corresponding {@link #DIRECTORY_AUTHORITY}.</li>
+     * <li>The {@code accountName=} and {@code accountType=} parameters are added or
+     * replaced using the corresponding {@link #ACCOUNT_TYPE} and {@link #ACCOUNT_NAME} values.</li>
+     * <li>If the URI is missing a {@link ContactsContract#REQUESTING_PACKAGE_PARAM_KEY}
+     * parameter, this parameter is added.</li>
+     * </ul>
+     * </p>
+     * <p>
+     * Clients should send directory requests to Contacts Provider and let it
+     * forward them to the respective providers rather than constructing directory provider
+     * URIs by themselves.  This level of indirection allows Contacts Provider to
+     * implement additional system-level features and optimizations.
+     * Also, directory providers may reject requests coming from other
+     * clients than the Contacts Provider itself.
+     * </p>
+     * <p>
+     * The Directory table always has at least these two rows:
+     * <ul>
+     * <li>
+     * The local directory. It has {@link Directory#_ID Directory._ID} =
+     * {@link Directory#DEFAULT Directory.DEFAULT}. This directory can be used to access locally
+     * stored contacts. The same can be achieved by omitting the {@code directory=}
+     * parameter altogether.
+     * </li>
+     * <li>
+     * The local invisible contacts. The corresponding directory ID is
+     * {@link Directory#LOCAL_INVISIBLE Directory.LOCAL_INVISIBLE}.
+     * </li>
+     * </ul>
+     * </p>
+     * <p>
+     * Other directories should register themselves by explicitly adding rows to this table.
+     * </p>
+     * <p>
+     * When a row is inserted in this table, it is automatically associated with the package
+     * (apk) that made the request.  If the package is later uninstalled, all directory rows
+     * it inserted are automatically removed.
+     * </p>
+     * <p>
+     * A directory row can be optionally associated with an account.
+     * If the account is later removed, the corresponding directory rows are
+     * automatically removed.
+     * </p>
+     *
+     * @hide
+     */
+    public static final class Directory implements BaseColumns {
+
+        /**
+         * Not instantiable.
+         */
+        private Directory() {
+        }
+
+        /**
+         * The content:// style URI for this table.  Requests to this URI can be
+         * performed on the UI thread because they are always unblocking.
+         *
+         * @hide
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "directories");
+
+        /**
+         * The MIME-type of {@link #CONTENT_URI} providing a directory of
+         * contact directories.
+         *
+         * @hide
+         */
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/contact_directories";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} item.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/contact_directory";
+
+        /**
+         * The name of the package that owns this directory. This field is
+         * required in an insert request and must match the name of the package
+         * making the request. If the package is later uninstalled, the
+         * directories it owns are automatically removed from this table. Only
+         * the specified package is allowed to modify or delete this row later.
+         *
+         * <p>TYPE: TEXT</p>
+         *
+         * @hide
+         */
+        public static final String PACKAGE_NAME = "packageName";
+
+        /**
+         * The type of directory captured as a resource ID in the context of the
+         * package {@link #PACKAGE_NAME}, e.g. "Corporate Directory"
+         *
+         * <p>TYPE: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final String TYPE_RESOURCE_ID = "typeResourceId";
+
+        /**
+         * An optional name that can be used in the UI to represent this directory,
+         * e.g. "Acme Corp"
+         * <p>TYPE: text</p>
+         *
+         * @hide
+         */
+        public static final String DISPLAY_NAME = "displayName";
+
+        /**
+         * The authority to which the request should forwarded in order to access
+         * this directory.
+         *
+         * <p>TYPE: text</p>
+         *
+         * @hide
+         */
+        public static final String DIRECTORY_AUTHORITY = "authority";
+
+        /**
+         * The account type which this directory is associated.
+         *
+         * <p>TYPE: text</p>
+         *
+         * @hide
+         */
+        public static final String ACCOUNT_TYPE = "accountType";
+
+        /**
+         * The account with which this directory is associated. If the account is later
+         * removed, the directories it owns are automatically removed from this table.
+         *
+         * <p>TYPE: text</p>
+         *
+         * @hide
+         */
+        public static final String ACCOUNT_NAME = "accountName";
+
+        /**
+         * One of {@link #EXPORT_SUPPORT_NONE}, {@link #EXPORT_SUPPORT_ANY_ACCOUNT},
+         * {@link #EXPORT_SUPPORT_SAME_ACCOUNT_ONLY}. This is the expectation the
+         * directory has for data exported from it.  Clients must obey this setting.
+         *
+         * @hide
+         */
+        public static final String EXPORT_SUPPORT = "exportSupport";
+
+        /**
+         * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
+         * does not allow any data to be copied out of it.
+         *
+         * @hide
+         */
+        public static final int EXPORT_SUPPORT_NONE = 0;
+
+        /**
+         * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
+         * allow its data copied only to the account specified by
+         * {@link #ACCOUNT_TYPE}/{@link #ACCOUNT_NAME}.
+         *
+         * @hide
+         */
+        public static final int EXPORT_SUPPORT_SAME_ACCOUNT_ONLY = 1;
+
+        /**
+         * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
+         * allow its data copied to any contacts account.
+         *
+         * @hide
+         */
+        public static final int EXPORT_SUPPORT_ANY_ACCOUNT = 2;
+
+        /**
+         * _ID of the default directory, which represents locally stored contacts.
+         *
+         * @hide
+         */
+        public static final long DEFAULT = 0;
+
+        /**
+         * _ID of the directory that represents locally stored invisible contacts.
+         *
+         * @hide
+         */
+        public static final long LOCAL_INVISIBLE = 1;
     }
 
     /**
