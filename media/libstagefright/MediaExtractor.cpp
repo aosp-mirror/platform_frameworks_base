@@ -24,6 +24,8 @@
 #include "include/WAVExtractor.h"
 #include "include/OggExtractor.h"
 
+#include "matroska/MatroskaExtractor.h"
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -69,6 +71,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new WAVExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
         return new OggExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
+        return new MatroskaExtractor(source);
     }
 
     return NULL;

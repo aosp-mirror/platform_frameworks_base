@@ -20,6 +20,7 @@ namespace android {
 
 const char *MEDIA_MIMETYPE_IMAGE_JPEG = "image/jpeg";
 
+const char *MEDIA_MIMETYPE_VIDEO_VPX = "video/x-vnd.on2.vp8";
 const char *MEDIA_MIMETYPE_VIDEO_AVC = "video/avc";
 const char *MEDIA_MIMETYPE_VIDEO_MPEG4 = "video/mp4v-es";
 const char *MEDIA_MIMETYPE_VIDEO_H263 = "video/3gpp";
@@ -36,5 +37,6 @@ const char *MEDIA_MIMETYPE_AUDIO_RAW = "audio/raw";
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG4 = "video/mpeg4";
 const char *MEDIA_MIMETYPE_CONTAINER_WAV = "audio/wav";
 const char *MEDIA_MIMETYPE_CONTAINER_OGG = "application/ogg";
+const char *MEDIA_MIMETYPE_CONTAINER_MATROSKA = "video/x-matroska";
 
 }  // namespace android

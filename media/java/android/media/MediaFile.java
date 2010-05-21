@@ -46,8 +46,9 @@ public class MediaFile {
     public static final int FILE_TYPE_WMA     = 6;
     public static final int FILE_TYPE_OGG     = 7;
     public static final int FILE_TYPE_AAC     = 8;
+    public static final int FILE_TYPE_MKA     = 9;
     private static final int FIRST_AUDIO_FILE_TYPE = FILE_TYPE_MP3;
-    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_AAC;
+    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_MKA;
 
     // MIDI file types
     public static final int FILE_TYPE_MID     = 11;
@@ -63,8 +64,9 @@ public class MediaFile {
     public static final int FILE_TYPE_3GPP2   = 24;
     public static final int FILE_TYPE_WMV     = 25;
     public static final int FILE_TYPE_ASF     = 26;
+    public static final int FILE_TYPE_MKV     = 27;
     private static final int FIRST_VIDEO_FILE_TYPE = FILE_TYPE_MP4;
-    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_ASF;
+    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_MKV;
     
     // Image file types
     public static final int FILE_TYPE_JPEG    = 31;
@@ -134,6 +136,7 @@ public class MediaFile {
         addFileType("OGG", FILE_TYPE_OGG, "application/ogg");
         addFileType("OGA", FILE_TYPE_OGG, "application/ogg");
         addFileType("AAC", FILE_TYPE_AAC, "audio/aac");
+        addFileType("MKA", FILE_TYPE_MKA, "audio/x-matroska");
  
         addFileType("MID", FILE_TYPE_MID, "audio/midi");
         addFileType("MIDI", FILE_TYPE_MID, "audio/midi");
@@ -151,6 +154,8 @@ public class MediaFile {
         addFileType("3GPP", FILE_TYPE_3GPP, "video/3gpp");
         addFileType("3G2", FILE_TYPE_3GPP2, "video/3gpp2");
         addFileType("3GPP2", FILE_TYPE_3GPP2, "video/3gpp2");
+        addFileType("MKV", FILE_TYPE_MKV, "video/x-matroska");
+        addFileType("WEBM", FILE_TYPE_MKV, "video/x-matroska");
         if (isWMVEnabled()) {
             addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv");
             addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
