@@ -51,14 +51,11 @@ class StatusBarIcon {
         switch (data.type) {
             case IconData.TEXT: {
                 TextView t;
-                t = new TextView(context);
+                t = new TextView(context, null, com.android.internal.R.style.TextAppearance_StatusBar_Icon);
                 mTextView = t;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.MATCH_PARENT);
-                t.setTextSize(16);
-                t.setTextColor(0xff000000);
-                t.setTypeface(Typeface.DEFAULT_BOLD);
                 t.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 t.setPadding(6, 0, 0, 0);
                 t.setLayoutParams(layoutParams);
