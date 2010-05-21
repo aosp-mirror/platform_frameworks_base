@@ -63,7 +63,6 @@ public class Criteria implements Parcelable {
      * For horizontal and vertical position this corresponds to an accuracy
      * greater than 500 meters.  For speed and bearing, this corresponds
      * to greater than 5 meters/second velocity and 10 degrees for bearing.
-     * {@hide}
      */
     public static final int ACCURACY_LOW = 1;
 
@@ -74,7 +73,6 @@ public class Criteria implements Parcelable {
      * 100 and 500 meters, and between 200 and 500 meters for vertical accuracy.
      * For speed and bearing, this corresponds to 1 meter/second to 5 meters/second
      * velocity and and between 5 and 10 degrees for bearing.
-     * {@hide}
      */
     public static final int ACCURACY_MEDIUM = 2;
 
@@ -84,7 +82,6 @@ public class Criteria implements Parcelable {
      * For horizontal and vertical position this corresponds to an accuracy
      * less than 100 meters.  For speed and bearing, this corresponds
      * to less 1 meter/second velocity less than 5 degrees for bearing.
-     * {@hide}
      */
     public static final int ACCURACY_HIGH = 3;
 
@@ -92,37 +89,31 @@ public class Criteria implements Parcelable {
      * a constant indicating the best accuracy that is available for any
      * location provider available
      * - may be used for horizontal, altitude, speed or bearing accuracy.
-     * {@hide}
      */
     public static final int ACCURACY_BEST = 4;
 
     /**
      * A constant indicating horizontal accuracy has the top priority
-     * {@hide}
      */
     public static final int HORIZONTAL_ACCURACY_PRIORITY = 1;
 
     /**
      * A constant indicating altitude accuracy has the top priority
-     * {@hide}
      */
     public static final int VERTICAL_ACCURACY_PRIORITY = 2;
 
     /**
      * A constant indicating speed accuracy has the top priority
-     * {@hide}
      */
     public static final int SPEED_ACCURACY_PRIORITY = 3;
 
     /**
      * A constant indicating bearing accuracy has the top priority
-     * {@hide}
      */
     public static final int BEARING_ACCURACY_PRIORITY = 4;
 
     /**
      * A constant indicating power requirement has the top priority
-     * {@hide}
      */
     public static final int POWER_REQUIREMENT_PRIORITY = 5;
 
@@ -168,7 +159,6 @@ public class Criteria implements Parcelable {
      * More accurate location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
-     * {@hide}
      */
     public void setHorizontalAccuracy(int accuracy) {
         if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_BEST) {
@@ -181,7 +171,6 @@ public class Criteria implements Parcelable {
      * Returns a constant indicating the desired horizontal accuracy (latitude and longitude).
      * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
      * {@link #ACCURACY_HIGH}, {@link #ACCURACY_BEST},
-     * {@hide}
      */
     public int getHorizontalAccuracy() {
         return mHorizontalAccuracy;
@@ -194,7 +183,6 @@ public class Criteria implements Parcelable {
      * More accurate location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
-     * {@hide}
      */
     public void setVerticalAccuracy(int accuracy) {
         if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_BEST) {
@@ -207,7 +195,6 @@ public class Criteria implements Parcelable {
      * Returns a constant indicating the desired vertical accuracy (altitude).
      * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
      * {@link #ACCURACY_HIGH}, {@link #ACCURACY_BEST},
-     * {@hide}
      */
     public int getVerticalAccuracy() {
         return mVerticalAccuracy;
@@ -220,7 +207,6 @@ public class Criteria implements Parcelable {
      * More accurate location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
-     * {@hide}
      */
     public void setSpeedAccuracy(int accuracy) {
         if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_BEST) {
@@ -233,7 +219,6 @@ public class Criteria implements Parcelable {
      * Returns a constant indicating the desired speed accuracy
      * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
      * {@link #ACCURACY_HIGH}, {@link #ACCURACY_BEST},
-     * {@hide}
      */
     public int getSpeedAccuracy() {
         return mSpeedAccuracy;
@@ -246,7 +231,6 @@ public class Criteria implements Parcelable {
      * More accurate location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
-     * {@hide}
      */
     public void setBearingAccuracy(int accuracy) {
         if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_BEST) {
@@ -259,7 +243,6 @@ public class Criteria implements Parcelable {
      * Returns a constant indicating the desired bearing accuracy.
      * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
      * {@link #ACCURACY_HIGH}, {@link #ACCURACY_BEST},
-     * {@hide}
      */
     public int getBearingAccuracy() {
         return mBearingAccuracy;
@@ -277,7 +260,6 @@ public class Criteria implements Parcelable {
      * {@link #HORIZONTAL_ACCURACY_PRIORITY}, {@link #POWER_REQUIREMENT_PRIORITY},
      * {@link #VERTICAL_ACCURACY_PRIORITY}, {@link #SPEED_ACCURACY_PRIORITY},
      * {@link #BEARING_ACCURACY_PRIORITY}.
-     * {@hide}
      */
     public void setPreferredPriority(int priority) {
         if (priority < HORIZONTAL_ACCURACY_PRIORITY || priority > POWER_REQUIREMENT_PRIORITY) {
@@ -292,7 +274,6 @@ public class Criteria implements Parcelable {
      * The value can be {@link #HORIZONTAL_ACCURACY_PRIORITY},
      * {@link #VERTICAL_ACCURACY_PRIORITY}, {@link #SPEED_ACCURACY_PRIORITY},
      * {@link #BEARING_ACCURACY_PRIORITY} or {@link #POWER_REQUIREMENT_PRIORITY}.
-     * {@hide}
      */
     public int getPriority() {
         return mPriority;

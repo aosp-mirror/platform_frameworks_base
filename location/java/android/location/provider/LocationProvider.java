@@ -33,8 +33,6 @@ import android.util.Log;
  * outside of the core android platform.
  * Location providers can be implemented as services and return the result of
  * {@link LocationProvider#getBinder()} in its getBinder() method.
- *
- * @hide
  */
 public abstract class LocationProvider {
 

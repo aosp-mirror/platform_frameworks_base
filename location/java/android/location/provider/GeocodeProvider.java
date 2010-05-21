@@ -29,8 +29,6 @@ import java.util.List;
  * outside of the core android platform.
  * Geocode providers can be implemented as services and return the result of
  * {@link GeocodeProvider#getBinder()} in its getBinder() method.
- *
- * @hide
  */
 public abstract class GeocodeProvider {
 
