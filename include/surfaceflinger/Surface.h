@@ -212,6 +212,7 @@ private:
     int  dispatch_connect(va_list args);
     int  dispatch_disconnect(va_list args);
     int  dispatch_crop(va_list args);
+    int  dispatch_set_buffer_count(va_list args);
     
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
