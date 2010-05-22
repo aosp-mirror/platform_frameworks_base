@@ -98,10 +98,6 @@ public final class VCardParser_V21 implements VCardParser {
         mVCardParserImpl = new VCardParserImpl_V21(vcardType);
     }
 
-    public VCardParser_V21(int parseType, String inputCharset) {
-        mVCardParserImpl = new VCardParserImpl_V21(parseType, null);
-    }
-
     public void parse(InputStream is, VCardInterpreter interepreter)
             throws IOException, VCardException {
         mVCardParserImpl.parse(is, interepreter);

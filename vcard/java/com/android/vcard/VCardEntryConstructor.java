@@ -68,7 +68,7 @@ public class VCardEntryConstructor implements VCardInterpreter {
     private final List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
 
     public VCardEntryConstructor() {
-        this(VCardConfig.VCARD_TYPE_V21_GENERIC, null, null, false);
+        this(VCardConfig.VCARD_TYPE_V21_GENERIC, null);
     }
 
     public VCardEntryConstructor(final int vcardType) {
@@ -85,7 +85,7 @@ public class VCardEntryConstructor implements VCardInterpreter {
     }
 
     /**
-     * @hide
+     * @hide Just for testing.
      */
     public VCardEntryConstructor(final int vcardType, final Account account,
             final String inputCharset, final boolean strictLineBreakParsing) {

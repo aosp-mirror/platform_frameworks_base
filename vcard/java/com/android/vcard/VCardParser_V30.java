@@ -76,10 +76,6 @@ public class VCardParser_V30 implements VCardParser {
         mVCardParserImpl = new VCardParserImpl_V30(vcardType);
     }
 
-    public VCardParser_V30(int vcardType, String importCharset) {
-        mVCardParserImpl = new VCardParserImpl_V30(vcardType, importCharset);
-    }
-
     public void parse(InputStream is, VCardInterpreter interepreter)
             throws IOException, VCardException {
         mVCardParserImpl.parse(is, interepreter);

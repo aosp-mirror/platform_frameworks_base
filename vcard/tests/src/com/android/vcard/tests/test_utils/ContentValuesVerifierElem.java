@@ -62,8 +62,7 @@ public class ContentValuesVerifierElem {
         } else {
             vCardParser = new VCardParser_V21();
         }
-        VCardEntryConstructor builder =
-                new VCardEntryConstructor(vCardType, null, null, false);
+        final VCardEntryConstructor builder = new VCardEntryConstructor(vCardType, null);
         builder.addEntryHandler(mHandler);
         try {
             vCardParser.parse(is, builder);

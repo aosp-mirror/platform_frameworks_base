@@ -62,23 +62,11 @@ import java.util.List;
     private boolean mStrictLineBreakParsing;
     
     public VNodeBuilder() {
-        this(VCardConfig.DEFAULT_INTERMEDIATE_CHARSET, VCardConfig.DEFAULT_IMPORT_CHARSET, false);
+        this(VCardConfig.DEFAULT_IMPORT_CHARSET, false);
     }
 
     public VNodeBuilder(String targetCharset, boolean strictLineBreakParsing) {
-        this(null, targetCharset, strictLineBreakParsing);
-    }
-    
-    /**
-     * @hide sourceCharset is temporal. 
-     */
-    public VNodeBuilder(String sourceCharset, String targetCharset,
-            boolean strictLineBreakParsing) {
-        if (sourceCharset != null) {
-            mSourceCharset = sourceCharset;
-        } else {
-            mSourceCharset = VCardConfig.DEFAULT_INTERMEDIATE_CHARSET;
-        }
+        mSourceCharset = VCardConfig.DEFAULT_INTERMEDIATE_CHARSET;
         if (targetCharset != null) {
             mTargetCharset = targetCharset;
         } else {

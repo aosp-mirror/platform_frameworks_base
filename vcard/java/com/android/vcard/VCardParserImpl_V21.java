@@ -15,7 +15,6 @@
  */
 package com.android.vcard;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.vcard.exception.VCardAgentNotSupportedException;
@@ -64,12 +63,12 @@ import java.util.Set;
         }
     }
 
-    private static final String sDefaultEncoding = "8BIT";
+    private static final String DEFAULT_ENCODING = "8BIT";
 
     protected boolean mCanceled;
     protected VCardInterpreter mInterpreter;
 
-    protected final String mImportCharset;
+    protected final String mIntermediateCharset;
 
     /**
      * <p>
@@ -136,20 +135,15 @@ import java.util.Set;
     private long mTimeHandleBase64;
 
     public VCardParserImpl_V21() {
-        this(VCardConfig.VCARD_TYPE_DEFAULT, null);
+        this(VCardConfig.VCARD_TYPE_DEFAULT);
     }
 
     public VCardParserImpl_V21(int vcardType) {
-        this(vcardType, null);
-    }
-
-    public VCardParserImpl_V21(int vcardType, String importCharset) {
         if ((vcardType & VCardConfig.FLAG_TORELATE_NEST) != 0) {
             mNestCount = 1;
         }
 
-        mImportCharset = (!TextUtils.isEmpty(importCharset) ? importCharset :
-            VCardConfig.DEFAULT_INTERMEDIATE_CHARSET);
+        mIntermediateCharset =  VCardConfig.DEFAULT_INTERMEDIATE_CHARSET;
     }
 
     /**
@@ -385,7 +379,7 @@ import java.util.Set;
      * "AGENT" [params] ":" vcard CRLF
      */
     protected boolean parseItem() throws IOException, VCardException {
-        mCurrentEncoding = sDefaultEncoding;
+        mCurrentEncoding = DEFAULT_ENCODING;
 
         final String line = getNonEmptyLine();
         long start = System.currentTimeMillis();
@@ -928,7 +922,7 @@ import java.util.Set;
     }
 
     protected String getDefaultEncoding() {
-        return sDefaultEncoding;
+        return DEFAULT_ENCODING;
     }
 
 
@@ -938,7 +932,7 @@ import java.util.Set;
             throw new NullPointerException("InputStream must not be null.");
         }
 
-        final InputStreamReader tmpReader = new InputStreamReader(is, mImportCharset);
+        final InputStreamReader tmpReader = new InputStreamReader(is, mIntermediateCharset);
         if (VCardConfig.showPerformanceLog()) {
             mReader = new CustomBufferedReader(tmpReader);
         } else {

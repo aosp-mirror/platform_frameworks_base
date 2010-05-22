@@ -46,11 +46,7 @@ import java.util.Set;
     }
 
     public VCardParserImpl_V30(int vcardType) {
-        super(vcardType, null);
-    }
-
-    public VCardParserImpl_V30(int vcardType, String importCharset) {
-        super(vcardType, importCharset);
+        super(vcardType);
     }
 
     @Override

@@ -43,15 +43,20 @@ public class VCardConfig {
      * The charset used during import.
      * </p>
      * <p>
-     * We cannot determine which charset should be used to interpret a given vCard file
-     * at first, while we have to decode sime encoded data (e.g. BASE64) to binary.
-     * In order to avoid "misinterpretation" of charset as much as possible,
-     * "ISO-8859-1" (a.k.a Latin-1) is first used for reading a stream.
-     * When charset is specified in a property (with "CHARSET=..." parameter),
+     * We cannot determine which charset should be used to interpret lines in vCard,
+     * while Java requires us to specify it when InputStream is used.
+     * We need to rely on the mechanism due to some performance reason.
+     * </p>
+     * <p>
+     * In order to avoid "misinterpretation" of charset and lose any data in vCard,
+     * "ISO-8859-1" is first used for reading the stream.
+     * When a charset is specified in a property (with "CHARSET=..." parameter),
      * the string is decoded to raw bytes and encoded into the specific charset,
-     * assuming "ISO-8859-1" is able to map "all" 8bit characters to some unicode,
-     * and it has 1 to 1 mapping in all 8bit characters.
-     * If the assumption is not correct, this setting will cause some bug.
+     * </p>
+     * <p>
+     * Unicode specification there's a one to one mapping between each byte in ISO-8859-1
+     * and a codepoint, and Java specification requires runtime must have the charset.
+     * Thus, ISO-8859-1 is one effective mapping for intermediate mapping.
      * </p>
      */
     public static final String DEFAULT_INTERMEDIATE_CHARSET = "ISO-8859-1";
