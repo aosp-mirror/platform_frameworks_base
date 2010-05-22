@@ -76,11 +76,87 @@ public final class Calendar {
      */
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
+
+    /**
+     * Columns for Sync information used by Calendars and Events tables.
+     */
+    public interface SyncColumns {
+        /**
+         * The account that was used to sync the entry to the device.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ACCOUNT = "_sync_account";
+
+        /**
+         * The type of the account that was used to sync the entry to the device.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+
+        /**
+         * The unique ID for a row assigned by the sync source. NULL if the row has never been synced.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ID = "_sync_id";
+
+        /**
+         * The last time, from the sync source's point of view, that this row has been synchronized.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_TIME = "_sync_time";
+
+        /**
+         * The version of the row, as assigned by the server.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_VERSION = "_sync_version";
+
+        /**
+         * For use by sync adapter at its discretion; not modified by CalendarProvider
+         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
+         * schema change.
+         * TODO Replace this with something more general in the future.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_DATA = "_sync_local_id";
+
+        /**
+         * Used only in persistent providers, and only during merging.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_MARK = "_sync_mark";
+
+        /**
+         * Used to indicate that local, unsynced, changes are present.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_DIRTY = "_sync_dirty";
+
+    }
+
+    /**
+     * Columns from the Account information used by Calendars and Events tables.
+     */
+    public interface AccountColumns {
+        /**
+         * The name of the account instance to which this row belongs, which when paired with
+         * {@link #ACCOUNT_TYPE} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The type of account to which this row belongs, which when paired with
+         * {@link #ACCOUNT_NAME} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+    }
+
     /**
      * Columns from the Calendars table that other tables join into themselves.
      */
-    public interface CalendarsColumns
-    {
+    public interface CalendarsColumns {
         /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
@@ -135,75 +211,105 @@ public final class Calendar {
         public static final String SYNC_STATE = "sync_state";
 
         /**
-         * The account that was used to sync the entry to the device.
-         * <P>Type: TEXT</P>
+         * Whether the row has been deleted.  A deleted row should be ignored.
+         * <P>Type: INTEGER (boolean)</P>
          */
-        public static final String _SYNC_ACCOUNT = "_sync_account";
-
-        /**
-         * The type of the account that was used to sync the entry to the device.
-         * <P>Type: TEXT</P>
-         */
-        public static final String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
-
-        /**
-         * The unique ID for a row assigned by the sync source. NULL if the row has never been synced.
-         * <P>Type: TEXT</P>
-         */
-        public static final String _SYNC_ID = "_sync_id";
-
-        /**
-         * The last time, from the sync source's point of view, that this row has been synchronized.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _SYNC_TIME = "_sync_time";
-
-        /**
-         * The version of the row, as assigned by the server.
-         * <P>Type: TEXT</P>
-         */
-        public static final String _SYNC_VERSION = "_sync_version";
-
-        /**
-         * For use by sync adapter at its discretion; not modified by CalendarProvider
-         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
-         * schema change.
-         * TODO Replace this with something more general in the future.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _SYNC_DATA = "_sync_local_id";
-
-        /**
-         * Used only in persistent providers, and only during merging.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _SYNC_MARK = "_sync_mark";
-
-        /**
-         * Used to indicate that local, unsynced, changes are present.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _SYNC_DIRTY = "_sync_dirty";
-
-        /**
-         * The name of the account instance to which this row belongs, which when paired with
-         * {@link #ACCOUNT_TYPE} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_NAME = "account_name";
-
-        /**
-         * The type of account to which this row belongs, which when paired with
-         * {@link #ACCOUNT_NAME} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_TYPE = "account_type";
+        public static final String DELETED = "deleted";
     }
+
+    /**
+     * Class that represents a Calendar Entity. There is one entry per calendar.
+     */
+    public static class CalendarsEntity implements BaseColumns, SyncColumns, CalendarsColumns {
+
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
+                "/calendar_entities");
+
+        public static EntityIterator newEntityIterator(Cursor cursor, ContentResolver resolver) {
+            return new EntityIteratorImpl(cursor, resolver);
+        }
+
+        public static EntityIterator newEntityIterator(Cursor cursor,
+                ContentProviderClient provider) {
+            return new EntityIteratorImpl(cursor, provider);
+        }
+
+        private static class EntityIteratorImpl extends CursorEntityIterator {
+            private final ContentResolver mResolver;
+            private final ContentProviderClient mProvider;
+
+            public EntityIteratorImpl(Cursor cursor, ContentResolver resolver) {
+                super(cursor);
+                mResolver = resolver;
+                mProvider = null;
+            }
+
+            public EntityIteratorImpl(Cursor cursor, ContentProviderClient provider) {
+                super(cursor);
+                mResolver = null;
+                mProvider = provider;
+            }
+
+            @Override
+            public Entity getEntityAndIncrementCursor(Cursor cursor) throws RemoteException {
+                // we expect the cursor is already at the row we need to read from
+                final long calendarId = cursor.getLong(cursor.getColumnIndexOrThrow(_ID));
+
+                // Create the content value
+                ContentValues cv = new ContentValues();
+                cv.put(_ID, calendarId);
+
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ACCOUNT);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ACCOUNT_TYPE);
+
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_TIME);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_MARK);
+
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.URL);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SELF_URL);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.EDIT_URL);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.EVENTS_URL);
+
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.DISPLAY_NAME);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.HIDDEN);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.COLOR);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SELECTED);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SYNC_EVENTS);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.LOCATION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, TIMEZONE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.OWNER_ACCOUNT);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
+                        Calendars.ORGANIZER_CAN_RESPOND);
+
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
+
+                // Create the Entity from the ContentValue
+                Entity entity = new Entity(cv);
+
+                // Set cursor to next row
+                cursor.moveToNext();
+
+                // Return the created Entity
+                return entity;
+            }
+        }
+     }
 
     /**
      * Contains a list of available calendars.
      */
-    public static class Calendars implements BaseColumns, CalendarsColumns
+    public static class Calendars implements BaseColumns, SyncColumns, AccountColumns,
+            CalendarsColumns
     {
         private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars._SYNC_ACCOUNT + "=?"
                 + " AND " + Calendars._SYNC_ACCOUNT_TYPE + "=?";
@@ -258,6 +364,24 @@ public final class Calendar {
         public static final String URL = "url";
 
         /**
+         * The URL for the calendar itself
+         * <P>Type: TEXT (URL)</P>
+         */
+        public static final String SELF_URL = "selfUrl";
+
+        /**
+         * The URL for the calendar to be edited
+         * <P>Type: TEXT (URL)</P>
+         */
+        public static final String EDIT_URL = "editUrl";
+
+        /**
+         * The URL for the calendar events
+         * <P>Type: TEXT (URL)</P>
+         */
+        public static final String EVENTS_URL = "eventsUrl";
+
+        /**
          * The name of the calendar
          * <P>Type: TEXT</P>
          */
@@ -296,6 +420,9 @@ public final class Calendar {
         public static final String ORGANIZER_CAN_RESPOND = "organizerCanRespond";
     }
 
+    /**
+     * Columns from the Attendees table that other tables join into themselves.
+     */
     public interface AttendeesColumns {
 
         /**
@@ -361,8 +488,7 @@ public final class Calendar {
     /**
      * Columns from the Events table that other tables join into themselves.
      */
-    public interface EventsColumns
-    {
+    public interface EventsColumns {
         /**
          * The calendar the event belongs to
          * <P>Type: INTEGER (foreign key to the Calendars table)</P>
@@ -616,7 +742,8 @@ public final class Calendar {
     /**
      * Contains one entry per calendar event. Recurring events show up as a single entry.
      */
-    public static final class EventsEntity implements BaseColumns, EventsColumns, CalendarsColumns {
+    public static final class EventsEntity implements BaseColumns, SyncColumns, AccountColumns,
+            EventsColumns {
         /**
          * The content:// style URL for this table
          */
@@ -721,7 +848,7 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.URL);
 
                 Entity entity = new Entity(cv);
@@ -813,7 +940,8 @@ public final class Calendar {
     /**
      * Contains one entry per calendar event. Recurring events show up as a single entry.
      */
-    public static final class Events implements BaseColumns, EventsColumns, CalendarsColumns {
+    public static final class Events implements BaseColumns, SyncColumns, AccountColumns,
+            EventsColumns {
 
         private static final String[] FETCH_ENTRY_COLUMNS =
                 new String[] { Events._SYNC_ACCOUNT, Events._SYNC_ID };
