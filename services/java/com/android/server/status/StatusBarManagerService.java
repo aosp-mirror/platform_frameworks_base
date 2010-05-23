@@ -271,7 +271,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         synchronized (mNotifications) {
             IBinder key = new Binder();
             mNotifications.add(key, notification);
-            // TODO: tell mBar
+            if (mBar != null) {
+                try {
+                    mBar.addNotification(key, notification);
+                } catch (RemoteException ex) {
+                }
+            }
             return key;
         }
     }
@@ -279,14 +284,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     public void updateNotification(IBinder key, StatusBarNotification notification) {
         synchronized (mNotifications) {
             mNotifications.update(key, notification);
-            // TODO: tell mBar
+            if (mBar != null) {
+                try {
+                    mBar.updateNotification(key, notification);
+                } catch (RemoteException ex) {
+                }
+            }
         }
     }
 
     public void removeNotification(IBinder key) {
         synchronized (mNotifications) {
             mNotifications.remove(key);
-            // TODO: tell mBar
+            if (mBar != null) {
+                try {
+                    mBar.removeNotification(key);
+                } catch (RemoteException ex) {
+                }
+            }
         }
     }
 
