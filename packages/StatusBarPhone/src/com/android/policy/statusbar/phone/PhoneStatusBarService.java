@@ -341,7 +341,7 @@ public class PhoneStatusBarService extends StatusBarService {
         iconView.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
                     notification.notification.iconLevel));
         // Add the expanded view.
-        final int viewIndex = list.add(key, notification, view);
+        final int viewIndex = list.add(key, notification, view, iconView);
         parent.addView(view, viewIndex);
         // Add the icon.
         final int iconIndex = chooseIconIndex(isOngoing, viewIndex);
@@ -359,6 +359,26 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     public void removeNotification(IBinder key) {
+        Slog.d(TAG, "removeNotification key=" + key);
+        NotificationData.Entry entry = mOngoing.remove(key);
+        if (entry == null) {
+            entry = mLatest.remove(key);
+            if (entry == null) {
+                Slog.w(TAG, "removeNotification for nonexistent key: " + key);
+                return;
+            }
+        }
+        // Remove the expanded view.
+        ((ViewGroup)entry.expanded.getParent()).removeView(entry.expanded);
+        // Remove the icon.
+        ((ViewGroup)entry.icon.getParent()).removeView(entry.icon);
+
+        // Cancel the ticker if it's still running
+        // TODO
+
+        // Recalculate the position of the sliding windows and the titles.
+        setAreThereNotifications();
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
 
     /**
