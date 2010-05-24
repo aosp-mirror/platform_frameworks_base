@@ -14,9 +14,8 @@ home=true
                                   <img src="{@docRoot}images/home/io-logo.png" alt="Google IO
 2010" width="200" height="41" style="padding:22px 12px;"/>
                                   <div id="announcement" style="width:295px">
-<p>Google I/O is happening now! To those of you with us, welcome! If you couldn't make it to the
-event, stay tuned for videos and slides from the Android sessions, which will be posted at the
-Google I/O web site.</p><p><a
+<p>Thanks to everyone who visited us at Google I/O in San Francisco! Stay tuned for
+videos and slides from the Android sessions, which will be posted at the Google I/O web site.</p><p><a
 href="http://code.google.com/events/io/2010/sessions.html#Android">Learn more &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
