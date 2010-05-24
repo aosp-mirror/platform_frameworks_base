@@ -1941,6 +1941,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     // Geocoder
 
+    public Boolean geocoderIsImplemented() {
+        return mGeocodeProvider != null;
+    }
+
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
         if (mGeocodeProvider != null) {

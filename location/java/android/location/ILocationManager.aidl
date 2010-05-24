@@ -67,6 +67,7 @@ interface ILocationManager
     // it need not be shared with other providers.
     void reportLocation(in Location location, boolean passive);
 
+    boolean geocoderIsImplemented();
     String getFromLocation(double latitude, double longitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
     String getFromLocationName(String locationName,
