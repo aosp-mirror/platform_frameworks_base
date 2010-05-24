@@ -122,6 +122,16 @@ public class NotificationTestList extends TestActivity
             }
         },
 
+        new Test("Bad Icon") {
+            public void run() {
+                mNM.notify(1, new Notification(NotificationTestList.this,
+                            R.layout.chrono_notification, /* not a drawable! */
+                            null, System.currentTimeMillis()-(1000*60*60*24),
+                            "(453) 123-2328",
+                            "", null));
+            }
+        },
+
         new Test("Bad resource #2") {
             public void run()
             {
