@@ -299,7 +299,7 @@ programmatically-constructed example:</p>
 
 <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-  android:id=&quot;@id+/textview&quot;
+  android:id=&quot;@+id/textview&quot;
   android:layout_width=&quot;fill_parent&quot;
   android:layout_height=&quot;fill_parent&quot;
   android:text=&quot;@string/hello&quot;/&gt;</pre>
@@ -410,7 +410,7 @@ the following XML:
 
 <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-  android:id=&quot;@id+/textview&quot;
+  android:id=&quot;@+id/textview&quot;
   android:layout_width=&quot;fill_parent&quot;
   android:layout_height=&quot;fill_parent&quot;
   android:text=&quot;@string/hello&quot;/&gt;</pre>
