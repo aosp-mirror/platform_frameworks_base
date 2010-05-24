@@ -1941,7 +1941,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     // Geocoder
 
-    public Boolean geocoderIsImplemented() {
+    public boolean geocoderIsImplemented() {
         return mGeocodeProvider != null;
     }
 
