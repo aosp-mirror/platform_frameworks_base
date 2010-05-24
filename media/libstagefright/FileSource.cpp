@@ -45,6 +45,10 @@ status_t FileSource::initCheck() const {
 }
 
 ssize_t FileSource::readAt(off_t offset, void *data, size_t size) {
+    if (mFile == NULL) {
+        return NO_INIT;
+    }
+
     Mutex::Autolock autoLock(mLock);
 
     if (mLength >= 0) {
@@ -67,6 +71,10 @@ ssize_t FileSource::readAt(off_t offset, void *data, size_t size) {
 }
 
 status_t FileSource::getSize(off_t *size) {
+    if (mFile == NULL) {
+        return NO_INIT;
+    }
+
     if (mLength >= 0) {
         *size = mLength;
 
