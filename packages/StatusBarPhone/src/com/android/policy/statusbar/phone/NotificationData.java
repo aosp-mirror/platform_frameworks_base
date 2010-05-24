@@ -30,8 +30,9 @@ public class NotificationData {
     public static final class Entry {
         public IBinder key;
         public StatusBarNotification notification;
-        public View expanded;
         public StatusBarIconView icon;
+        public View expanded; // the outer expanded view
+        public View contents; // the inflated RemoteViews
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
 
@@ -41,6 +42,17 @@ public class NotificationData {
 
     public Entry getEntryAt(int index) {
         return mEntries.get(index);
+    }
+
+    public int findEntry(IBinder key) {
+        final int N = mEntries.size();
+        for (int i=0; i<N; i++) {
+            Entry entry = mEntries.get(i);
+            if (entry.key == key) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public int add(IBinder key, StatusBarNotification notification, View expanded,
