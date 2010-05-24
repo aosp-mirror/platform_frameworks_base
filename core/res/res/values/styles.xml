@@ -187,10 +187,25 @@
 
     <!-- Status Bar Styles -->
 
-    <style name="TextAppearance.StatusBarTitle">
+    <style name="TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="TextAppearance.StatusBar.Ticker">
+    </style>
+    <style name="TextAppearance.StatusBar.Title">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Icon">
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.StatusBar.EventContent">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+    <style name="TextAppearance.StatusBar.EventContent.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <!-- Widget Styles -->
