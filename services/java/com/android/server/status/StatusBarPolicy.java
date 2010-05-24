@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -49,7 +50,10 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
+import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Slog;
@@ -85,6 +89,12 @@ public class StatusBarPolicy {
 
     // message codes for the handler
     private static final int EVENT_BATTERY_CLOSE = 4;
+
+    private static final int AM_PM_STYLE_NORMAL  = 0;
+    private static final int AM_PM_STYLE_SMALL   = 1;
+    private static final int AM_PM_STYLE_GONE    = 2;
+
+    private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
     private final Context mContext;
     private final StatusBarService mService;
@@ -576,29 +586,31 @@ public class StatusBarPolicy {
              * add dummy characters around it to let us find it again after
              * formatting and change its size.
              */
-            int a = -1;
-            boolean quoted = false;
-            for (int i = 0; i < format.length(); i++) {
-                char c = format.charAt(i);
+            if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
+                int a = -1;
+                boolean quoted = false;
+                for (int i = 0; i < format.length(); i++) {
+                    char c = format.charAt(i);
 
-                if (c == '\'') {
-                    quoted = !quoted;
+                    if (c == '\'') {
+                        quoted = !quoted;
+                    }
+
+                    if (!quoted && c == 'a') {
+                        a = i;
+                        break;
+                    }
                 }
 
-                if (!quoted && c == 'a') {
-                    a = i;
-                    break;
+                if (a >= 0) {
+                    // Move a back so any whitespace before the AM/PM is also in the alternate size.
+                    final int b = a;
+                    while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                        a--;
+                    }
+                    format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
+                            + "a" + MAGIC2 + format.substring(b + 1);
                 }
-            }
-
-            if (a >= 0) {
-                // Move a back so any whitespace before the AM/PM is also in the alternate size.
-                final int b = a;
-                while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
-                    a--;
-                }
-                format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
-                        + "a" + MAGIC2 + format.substring(b + 1);
             }
 
             mClockFormat = sdf = new SimpleDateFormat(format);
@@ -608,22 +620,31 @@ public class StatusBarPolicy {
         }
         String result = sdf.format(mCalendar.getTime());
 
-        int magic1 = result.indexOf(MAGIC1);
-        int magic2 = result.indexOf(MAGIC2);
+        if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
+            int magic1 = result.indexOf(MAGIC1);
+            int magic2 = result.indexOf(MAGIC2);
 
-        if (magic1 >= 0 && magic2 > magic1) {
-            SpannableStringBuilder formatted = new SpannableStringBuilder(result);
+            if (magic1 >= 0 && magic2 > magic1) {
+                SpannableStringBuilder formatted = new SpannableStringBuilder(result);
 
-            formatted.setSpan(new RelativeSizeSpan(0.7f), magic1, magic2,
-                              Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                if (AM_PM_STYLE == AM_PM_STYLE_GONE) {
+                    formatted.delete(magic1, magic2+1);
+                } else {
+                    if (AM_PM_STYLE == AM_PM_STYLE_SMALL) {
+                        CharacterStyle style = new RelativeSizeSpan(0.7f);
+                        formatted.setSpan(style, magic1, magic2,
+                                          Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                    }
 
-            formatted.delete(magic2, magic2 + 1);
-            formatted.delete(magic1, magic1 + 1);
+                    formatted.delete(magic2, magic2 + 1);
+                    formatted.delete(magic1, magic1 + 1);
+                }
 
-            return formatted;
-        } else {
-            return result;
+                return formatted;
+            }
         }
+ 
+        return result;
     }
 
     private final void updateClock() {
