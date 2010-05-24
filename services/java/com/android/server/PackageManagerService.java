@@ -9549,7 +9549,8 @@ class PackageManagerService extends IPackageManager.Stub {
     * Update media status on PackageManager.
     */
    public void updateExternalMediaStatus(final boolean mediaStatus, final boolean reportStatus) {
-       if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+       int callingUid = Binder.getCallingUid();
+       if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
            throw new SecurityException("Media status can only be updated by the system");
        }
        synchronized (mPackages) {
