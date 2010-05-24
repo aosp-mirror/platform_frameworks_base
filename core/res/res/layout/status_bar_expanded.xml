@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="?android:attr/textColorSecondaryInverse"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:paddingLeft="4dp"
                     />
                 <TextView android:id="@+id/spnLabel"
@@ -56,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="?android:attr/textColorSecondaryInverse"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:paddingLeft="4dp"
                     />
         </LinearLayout>
@@ -67,7 +67,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginBottom="1dp"
             android:textSize="14sp"
-            android:textColor="#ff000000"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             android:text="@string/status_bar_clear_all_button"
             style="?android:attr/buttonStyle"
             android:paddingLeft="15dp"
@@ -99,7 +99,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/title_bar_portrait"
                     android:paddingLeft="5dp"
-                    android:textAppearance="@style/TextAppearance.StatusBarTitle"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Title"
                     android:text="@string/status_bar_no_notifications_title"
                     />
 
@@ -108,7 +108,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/title_bar_portrait"
                     android:paddingLeft="5dp"
-                    android:textAppearance="@style/TextAppearance.StatusBarTitle"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Title"
                     android:text="@string/status_bar_ongoing_events_title"
                     />
                 <LinearLayout android:id="@+id/ongoingItems"
@@ -122,7 +122,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/title_bar_portrait"
                     android:paddingLeft="5dp"
-                    android:textAppearance="@style/TextAppearance.StatusBarTitle"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Title"
                     android:text="@string/status_bar_latest_events_title"
                     />
                 <LinearLayout android:id="@+id/latestItems"
