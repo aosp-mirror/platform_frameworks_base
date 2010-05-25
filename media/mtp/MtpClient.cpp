@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpClient"
+#include "utils/Log.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -23,180 +26,143 @@
 #include <errno.h>
 
 #include <usbhost/usbhost.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 20)
+#include <linux/usb/ch9.h>
+#else
+#include <linux/usb_ch9.h>
+#endif
 
 #include "MtpClient.h"
+#include "MtpDevice.h"
 #include "MtpDebug.h"
-#include "MtpDeviceInfo.h"
-#include "MtpObjectInfo.h"
-#include "MtpStorageInfo.h"
-#include "MtpStringBuffer.h"
 
 namespace android {
 
-MtpClient::MtpClient(struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
-            struct usb_endpoint *ep_intr)
-    :   mEndpointIn(ep_in),
-        mEndpointOut(ep_out),
-        mEndpointIntr(ep_intr),
-        mSessionID(0),
-        mTransactionID(0)
+MtpClient::MtpClient()
+    :   mStarted(false)
 {
-
 }
 
 MtpClient::~MtpClient() {
 }
 
-bool MtpClient::openSession() {
-printf("openSession\n");
-    mSessionID = 0;
-    mTransactionID = 0;
-    MtpSessionID newSession = 1;
-    mRequest.reset();
-    mRequest.setParameter(1, newSession);
-    if (!sendRequest(MTP_OPERATION_OPEN_SESSION))
-        return false;
-    MtpResponseCode ret = readResponse();
-    if (ret == MTP_RESPONSE_SESSION_ALREADY_OPEN)
-        newSession = mResponse.getParameter(1);
-    else if (ret != MTP_RESPONSE_OK)
-        return false;
-
-    mSessionID = newSession;
-    mTransactionID = 1;
-    return true;
-}
-
-bool MtpClient::closeSession() {
-    // FIXME
-    return true;
-}
-
-MtpDeviceInfo* MtpClient::getDeviceInfo() {
-    mRequest.reset();
-    if (!sendRequest(MTP_OPERATION_GET_DEVICE_INFO))
-        return NULL;
-    if (!readData())
-        return NULL;
-    MtpResponseCode ret = readResponse();
-printf("getDeviceInfo returned %04X\n", ret);
-    if (ret == MTP_RESPONSE_OK) {
-        MtpDeviceInfo* info = new MtpDeviceInfo;
-        info->read(mData);
-        return info;
-    }
-    return NULL;
-}
-
-MtpStorageIDList* MtpClient::getStorageIDs() {
-    mRequest.reset();
-    if (!sendRequest(MTP_OPERATION_GET_STORAGE_IDS))
-        return NULL;
-    if (!readData())
-        return NULL;
-    MtpResponseCode ret = readResponse();
-    if (ret == MTP_RESPONSE_OK) {
-        return mData.getAUInt32();
-    }
-    return NULL;
-}
-
-MtpStorageInfo* MtpClient::getStorageInfo(MtpStorageID storageID) {
-    mRequest.reset();
-    mRequest.setParameter(1, storageID);
-    if (!sendRequest(MTP_OPERATION_GET_STORAGE_INFO))
-        return NULL;
-    if (!readData())
-        return NULL;
-    MtpResponseCode ret = readResponse();
-printf("getStorageInfo returned %04X\n", ret);
-    if (ret == MTP_RESPONSE_OK) {
-        MtpStorageInfo* info = new MtpStorageInfo(storageID);
-        info->read(mData);
-        return info;
-    }
-    return NULL;
-}
-
-MtpObjectHandleList* MtpClient::getObjectHandles(MtpStorageID storageID,
-            MtpObjectFormat format, MtpObjectHandle parent) {
-    mRequest.reset();
-    mRequest.setParameter(1, storageID);
-    mRequest.setParameter(2, format);
-    mRequest.setParameter(3, parent);
-    if (!sendRequest(MTP_OPERATION_GET_OBJECT_HANDLES))
-        return NULL;
-    if (!readData())
-        return NULL;
-    MtpResponseCode ret = readResponse();
-printf("getObjectHandles returned %04X\n", ret);
-    if (ret == MTP_RESPONSE_OK) {
-        return mData.getAUInt32();
-    }
-    return NULL;
-}
-
-MtpObjectInfo* MtpClient::getObjectInfo(MtpObjectHandle handle) {
-    mRequest.reset();
-    mRequest.setParameter(1, handle);
-    if (!sendRequest(MTP_OPERATION_GET_OBJECT_INFO))
-        return NULL;
-    if (!readData())
-        return NULL;
-    MtpResponseCode ret = readResponse();
-printf("getObjectInfo returned %04X\n", ret);
-    if (ret == MTP_RESPONSE_OK) {
-        MtpObjectInfo* info = new MtpObjectInfo(handle);
-        info->read(mData);
-        return info;
-    }
-    return NULL;
-}
-
-bool MtpClient::sendRequest(MtpOperationCode operation) {
-    printf("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
-    mRequest.setOperationCode(operation);
-    if (mTransactionID > 0)
-        mRequest.setTransactionID(mTransactionID++);
-    int ret = mRequest.write(mEndpointOut);
-    mRequest.dump();
-    return (ret > 0);
-}
-
-bool MtpClient::sendData(MtpOperationCode operation) {
-    printf("sendData\n");
-    mData.setOperationCode(mRequest.getOperationCode());
-    mData.setTransactionID(mRequest.getTransactionID());
-    int ret = mData.write(mEndpointOut);
-    mData.dump();
-    return (ret > 0);
-}
-
-bool MtpClient::readData() {
-    mData.reset();
-    int ret = mData.read(mEndpointIn);
-    printf("readData returned %d\n", ret);
-    if (ret >= MTP_CONTAINER_HEADER_SIZE) {
-        mData.dump();
+bool MtpClient::start() {
+    if (mStarted)
         return true;
-    }
-    else {
-        printf("readResponse failed\n");
+
+    if (usb_host_init(usb_device_added, usb_device_removed, this)) {
+        LOGE("MtpClient::start failed\n");
         return false;
+    }
+    mStarted = true;
+    return true;
+}
+
+void MtpClient::usbDeviceAdded(const char *devname) {
+    struct usb_descriptor_header* desc;
+    struct usb_descriptor_iter iter;
+
+    struct usb_device *device = usb_device_open(devname);
+    if (!device) {
+        LOGE("usb_device_open failed\n");
+        return;
+    }
+
+    usb_descriptor_iter_init(device, &iter);
+
+    while ((desc = usb_descriptor_iter_next(&iter)) != NULL) {
+        if (desc->bDescriptorType == USB_DT_INTERFACE) {
+            struct usb_interface_descriptor *interface = (struct usb_interface_descriptor *)desc;
+
+            if (interface->bInterfaceClass == USB_CLASS_STILL_IMAGE &&
+                interface->bInterfaceSubClass == 1 && // Still Image Capture
+                interface->bInterfaceProtocol == 1)     // Picture Transfer Protocol (PIMA 15470)
+            {
+                LOGD("Found camera: \"%s\" \"%s\"\n", usb_device_get_manufacturer_name(device),
+                        usb_device_get_product_name(device));
+
+                // interface should be followed by three endpoints
+                struct usb_endpoint_descriptor *ep;
+                struct usb_endpoint_descriptor *ep_in_desc = NULL;
+                struct usb_endpoint_descriptor *ep_out_desc = NULL;
+                struct usb_endpoint_descriptor *ep_intr_desc = NULL;
+                for (int i = 0; i < 3; i++) {
+                    ep = (struct usb_endpoint_descriptor *)usb_descriptor_iter_next(&iter);
+                    if (!ep || ep->bDescriptorType != USB_DT_ENDPOINT) {
+                        LOGE("endpoints not found\n");
+                        return;
+                    }
+                    if (ep->bmAttributes == USB_ENDPOINT_XFER_BULK) {
+                        if (ep->bEndpointAddress & USB_ENDPOINT_DIR_MASK)
+                            ep_in_desc = ep;
+                        else
+                            ep_out_desc = ep;
+                    } else if (ep->bmAttributes == USB_ENDPOINT_XFER_INT &&
+                        ep->bEndpointAddress & USB_ENDPOINT_DIR_MASK) {
+                        ep_intr_desc = ep;
+                    }
+                }
+                if (!ep_in_desc || !ep_out_desc || !ep_intr_desc) {
+                    LOGE("endpoints not found\n");
+                    return;
+                }
+
+                struct usb_endpoint *ep_in = usb_endpoint_open(device, ep_in_desc);
+                struct usb_endpoint *ep_out = usb_endpoint_open(device, ep_out_desc);
+                struct usb_endpoint *ep_intr = usb_endpoint_open(device, ep_intr_desc);
+
+                if (usb_device_claim_interface(device, interface->bInterfaceNumber)) {
+                    LOGE("usb_device_claim_interface failed\n");
+                    usb_endpoint_close(ep_in);
+                    usb_endpoint_close(ep_out);
+                    usb_endpoint_close(ep_intr);
+                    return;
+                }
+
+                MtpDevice* mtpDevice = new MtpDevice(device, interface->bInterfaceNumber,
+                            ep_in, ep_out, ep_intr);
+                mDeviceList.add(mtpDevice);
+                mtpDevice->initialize();
+                deviceAdded(mtpDevice);
+                return;
+            }
+        }
+    }
+
+    usb_device_close(device);
+}
+
+MtpDevice* MtpClient::getDevice(int id) {
+    for (int i = 0; i < mDeviceList.size(); i++) {
+        MtpDevice* device = mDeviceList[i];
+        if (device->getID() == id)
+            return device;
+    }
+    return NULL;
+}
+
+void MtpClient::usbDeviceRemoved(const char *devname) {
+    for (int i = 0; i < mDeviceList.size(); i++) {
+        MtpDevice* device = mDeviceList[i];
+        if (!strcmp(devname, device->getDeviceName())) {
+            deviceRemoved(device);
+            mDeviceList.removeAt(i);
+            delete device;
+            LOGD("Camera removed!\n");
+            break;
+        }
     }
 }
 
-MtpResponseCode MtpClient::readResponse() {
-    printf("readResponse\n");
-    int ret = mResponse.read(mEndpointIn);
-    if (ret >= MTP_CONTAINER_HEADER_SIZE) {
-        mResponse.dump();
-        return mResponse.getResponseCode();
-    }
-    else {
-        printf("readResponse failed\n");
-        return -1;
-    }
+void MtpClient::usb_device_added(const char *devname, void* client_data) {
+    LOGD("usb_device_added %s\n", devname);
+    ((MtpClient *)client_data)->usbDeviceAdded(devname);
+}
+
+void MtpClient::usb_device_removed(const char *devname, void* client_data) {
+    LOGD("usb_device_removed %s\n", devname);
+    ((MtpClient *)client_data)->usbDeviceRemoved(devname);
 }
 
 }  // namespace android

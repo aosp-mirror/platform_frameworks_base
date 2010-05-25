@@ -17,52 +17,33 @@
 #ifndef _MTP_CLIENT_H
 #define _MTP_CLIENT_H
 
-#include "MtpRequestPacket.h"
-#include "MtpDataPacket.h"
-#include "MtpResponsePacket.h"
 #include "MtpTypes.h"
 
 namespace android {
 
-class MtpDeviceInfo;
-class MtpObjectInfo;
-class MtpStorageInfo;
-
 class MtpClient {
 private:
-    struct usb_endpoint*    mEndpointIn;
-    struct usb_endpoint*    mEndpointOut;
-    struct usb_endpoint*    mEndpointIntr;
-
-    // current session ID
-    MtpSessionID            mSessionID;
-    // current transaction ID
-    MtpTransactionID        mTransactionID;
-
-    MtpRequestPacket        mRequest;
-    MtpDataPacket           mData;
-    MtpResponsePacket       mResponse;
+    MtpDeviceList           mDeviceList;
+    bool                    mStarted;
 
 public:
-                            MtpClient(struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
-                                    struct usb_endpoint *ep_intr);
+                            MtpClient();
     virtual                 ~MtpClient();
 
-    bool                    openSession();
-    bool                    closeSession();
+    bool                    start();
 
-    MtpDeviceInfo*          getDeviceInfo();
-    MtpStorageIDList*       getStorageIDs();
-    MtpStorageInfo*         getStorageInfo(MtpStorageID storageID);
-    MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format, MtpObjectHandle parent);
-    MtpObjectInfo*          getObjectInfo(MtpObjectHandle handle);
+    inline MtpDeviceList&   getDeviceList() { return mDeviceList; }
+    MtpDevice*              getDevice(int id);
+
+
+    virtual void            deviceAdded(MtpDevice *device) = 0;
+    virtual void            deviceRemoved(MtpDevice *device) = 0;
 
 private:
-    bool                    sendRequest(MtpOperationCode operation);
-    bool                    sendData(MtpOperationCode operation);
-    bool                    readData();
-    MtpResponseCode         readResponse();
-
+    void                    usbDeviceAdded(const char *devname);
+    void                    usbDeviceRemoved(const char *devname);
+    static void             usb_device_added(const char *devname, void* client_data);
+    static void             usb_device_removed(const char *devname, void* client_data);
 };
 
 }; // namespace android
