@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -497,9 +498,10 @@ import java.util.ArrayList;
             // to big for the case of a small textfield.
             int smallerSlop = slop/2;
             if (dx > smallerSlop || dy > smallerSlop) {
-                if (mWebView != null) {
-                    float maxScrollX = (float) Touch.getMaxScrollX(this,
-                                getLayout(), mScrollY);
+                Layout layout = getLayout();
+                if (mWebView != null && layout != null) {
+                    float maxScrollX = (float) Touch.getMaxScrollX(this, layout,
+                            mScrollY);
                     if (DebugFlags.WEB_TEXT_VIEW) {
                         Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
                                 + mScrollY + " maxX=" + maxScrollX);
