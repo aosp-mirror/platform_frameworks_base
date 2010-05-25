@@ -18,6 +18,8 @@
 //#define LOG_NDEBUG 0
 
 #include "EffectsFactory.h"
+#include <string.h>
+#include <stdlib.h>
 #include <dlfcn.h>
 
 
@@ -277,7 +279,7 @@ int EffectLoadLibrary(const char *libPath, int *handle)
     if (ret < 0) {
         return ret;
     }
-    if (libPath == NULL || strnlen(libPath, PATH_MAX) >= PATH_MAX) {
+    if (libPath == NULL) {
         return -EINVAL;
     }
     return loadLibrary(libPath, handle);

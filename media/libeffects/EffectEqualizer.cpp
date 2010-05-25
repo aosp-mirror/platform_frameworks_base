@@ -20,6 +20,7 @@
 #include <cutils/log.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <new>
 #include "AudioEqualizer.h"
 #include "AudioBiquadFilter.h"
