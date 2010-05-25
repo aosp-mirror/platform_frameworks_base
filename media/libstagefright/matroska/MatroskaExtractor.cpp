@@ -121,6 +121,29 @@ static void hexdump(const void *_data, size_t size) {
     }
 }
 
+struct BlockIterator {
+    BlockIterator(mkvparser::Segment *segment, unsigned long trackNum);
+
+    bool eos() const;
+
+    void advance();
+    void reset();
+    void seek(int64_t seekTimeUs);
+
+    const mkvparser::Block *block() const;
+    int64_t blockTimeUs() const;
+
+private:
+    mkvparser::Segment *mSegment;
+    unsigned long mTrackNum;
+
+    mkvparser::Cluster *mCluster;
+    const mkvparser::BlockEntry *mBlockEntry;
+
+    BlockIterator(const BlockIterator &);
+    BlockIterator &operator=(const BlockIterator &);
+};
+
 struct MatroskaSource : public MediaSource {
     MatroskaSource(
             const sp<MatroskaExtractor> &extractor, size_t index);
@@ -142,10 +165,8 @@ private:
 
     sp<MatroskaExtractor> mExtractor;
     size_t mTrackIndex;
-    unsigned long mTrackNum;
     Type mType;
-    mkvparser::Cluster *mCluster;
-    const mkvparser::BlockEntry *mBlockEntry;
+    BlockIterator mBlockIter;
 
     status_t advance();
 
@@ -158,10 +179,8 @@ MatroskaSource::MatroskaSource(
     : mExtractor(extractor),
       mTrackIndex(index),
       mType(OTHER),
-      mCluster(NULL),
-      mBlockEntry(NULL) {
-    mTrackNum = mExtractor->mTracks.itemAt(index).mTrackNum;
-
+      mBlockIter(mExtractor->mSegment,
+                 mExtractor->mTracks.itemAt(index).mTrackNum) {
     const char *mime;
     CHECK(mExtractor->mTracks.itemAt(index).mMeta->
             findCString(kKeyMIMEType, &mime));
@@ -174,8 +193,7 @@ MatroskaSource::MatroskaSource(
 }
 
 status_t MatroskaSource::start(MetaData *params) {
-    mCluster = NULL;
-    mBlockEntry = NULL;
+    mBlockIter.reset();
 
     return OK;
 }
@@ -188,30 +206,75 @@ sp<MetaData> MatroskaSource::getFormat() {
     return mExtractor->mTracks.itemAt(mTrackIndex).mMeta;
 }
 
-status_t MatroskaSource::advance() {
-    for (;;) {
-        if (mBlockEntry == NULL || mBlockEntry->EOS()) {
-            if (mCluster == NULL) {
-                mCluster = mExtractor->mSegment->GetFirst();
-            } else {
-                mCluster = mExtractor->mSegment->GetNext(mCluster);
+////////////////////////////////////////////////////////////////////////////////
+
+BlockIterator::BlockIterator(
+        mkvparser::Segment *segment, unsigned long trackNum)
+    : mSegment(segment),
+      mTrackNum(trackNum),
+      mCluster(NULL),
+      mBlockEntry(NULL) {
+    reset();
+}
+
+bool BlockIterator::eos() const {
+    return mCluster == NULL || mCluster->EOS();
+}
+
+void BlockIterator::advance() {
+    while (!eos()) {
+        if (mBlockEntry != NULL) {
+            mBlockEntry = mCluster->GetNext(mBlockEntry);
+        } else if (mCluster != NULL) {
+            mCluster = mSegment->GetNext(mCluster);
+
+            if (eos()) {
+                break;
             }
-            if (mCluster == NULL || mCluster->EOS()) {
-                return ERROR_END_OF_STREAM;
-            }
+
             mBlockEntry = mCluster->GetFirst();
         }
 
-        if (mBlockEntry->GetBlock()->GetTrackNumber() != mTrackNum) {
-            mBlockEntry = mCluster->GetNext(mBlockEntry);
-            continue;
+        if (mBlockEntry != NULL
+                && mBlockEntry->GetBlock()->GetTrackNumber() == mTrackNum) {
+            break;
         }
+    }
+}
 
-        break;
+void BlockIterator::reset() {
+    mCluster = mSegment->GetFirst();
+    mBlockEntry = mCluster->GetFirst();
+
+    while (!eos() && block()->GetTrackNumber() != mTrackNum) {
+        advance();
+    }
+}
+
+void BlockIterator::seek(int64_t seekTimeUs) {
+    mCluster = mSegment->GetCluster(seekTimeUs * 1000ll);
+    mBlockEntry = mCluster != NULL ? mCluster->GetFirst() : NULL;
+
+    while (!eos() && block()->GetTrackNumber() != mTrackNum) {
+        advance();
     }
 
-    return OK;
+    while (!eos() && !mBlockEntry->GetBlock()->IsKey()) {
+        advance();
+    }
 }
+
+const mkvparser::Block *BlockIterator::block() const {
+    CHECK(!eos());
+
+    return mBlockEntry->GetBlock();
+}
+
+int64_t BlockIterator::blockTimeUs() const {
+    return (mBlockEntry->GetBlock()->GetTime(mCluster) + 500ll) / 1000ll;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 status_t MatroskaSource::read(
         MediaBuffer **out, const ReadOptions *options) {
@@ -219,29 +282,19 @@ status_t MatroskaSource::read(
 
     int64_t seekTimeUs;
     if (options && options->getSeekTo(&seekTimeUs)) {
-        mBlockEntry = NULL;
-        mCluster = mExtractor->mSegment->GetCluster(seekTimeUs * 1000ll);
-
-        status_t err;
-        while ((err = advance()) == OK && !mBlockEntry->GetBlock()->IsKey()) {
-            mBlockEntry = mCluster->GetNext(mBlockEntry);
-        }
-
-        if (err != OK) {
-            return ERROR_END_OF_STREAM;
-        }
+        mBlockIter.seek(seekTimeUs);
     }
 
-    if (advance() != OK) {
+    if (mBlockIter.eos()) {
         return ERROR_END_OF_STREAM;
     }
 
-    const mkvparser::Block *block = mBlockEntry->GetBlock();
+    const mkvparser::Block *block = mBlockIter.block();
     size_t size = block->GetSize();
-    long long timeNs = block->GetTime(mCluster);
+    int64_t timeUs = mBlockIter.blockTimeUs();
 
     MediaBuffer *buffer = new MediaBuffer(size + 2);
-    buffer->meta_data()->setInt64(kKeyTime, (timeNs + 500) / 1000);
+    buffer->meta_data()->setInt64(kKeyTime, timeUs);
 
     long res = block->Read(
             mExtractor->mReader, (unsigned char *)buffer->data() + 2);
@@ -280,7 +333,7 @@ status_t MatroskaSource::read(
             buffer->range_length());
 #endif
 
-    mBlockEntry = mCluster->GetNext(mBlockEntry);
+    mBlockIter.advance();
 
     return OK;
 }
@@ -290,7 +343,8 @@ status_t MatroskaSource::read(
 MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
     : mDataSource(source),
       mReader(new DataSourceReader(mDataSource)),
-      mSegment(NULL) {
+      mSegment(NULL),
+      mExtractedThumbnails(false) {
     mkvparser::EBMLHeader ebmlHeader;
     long long pos;
     if (ebmlHeader.Parse(mReader, pos) < 0) {
@@ -340,6 +394,11 @@ sp<MetaData> MatroskaExtractor::getTrackMetaData(
         size_t index, uint32_t flags) {
     if (index >= mTracks.size()) {
         return NULL;
+    }
+
+    if ((flags & kIncludeExtensiveMetaData) && !mExtractedThumbnails) {
+        findThumbnails();
+        mExtractedThumbnails = true;
     }
 
     return mTracks.itemAt(index).mMeta;
@@ -476,6 +535,37 @@ void MatroskaExtractor::addTracks() {
         TrackInfo *trackInfo = &mTracks.editItemAt(mTracks.size() - 1);
         trackInfo->mTrackNum = track->GetNumber();
         trackInfo->mMeta = meta;
+    }
+}
+
+void MatroskaExtractor::findThumbnails() {
+    for (size_t i = 0; i < mTracks.size(); ++i) {
+        TrackInfo *info = &mTracks.editItemAt(i);
+
+        const char *mime;
+        CHECK(info->mMeta->findCString(kKeyMIMEType, &mime));
+
+        if (strncasecmp(mime, "video/", 6)) {
+            continue;
+        }
+
+        BlockIterator iter(mSegment, info->mTrackNum);
+        int32_t i = 0;
+        int64_t thumbnailTimeUs = 0;
+        size_t maxBlockSize = 0;
+        while (!iter.eos() && i < 20) {
+            if (iter.block()->IsKey()) {
+                ++i;
+
+                size_t blockSize = iter.block()->GetSize();
+                if (blockSize > maxBlockSize) {
+                    maxBlockSize = blockSize;
+                    thumbnailTimeUs = iter.blockTimeUs();
+                }
+            }
+            iter.advance();
+        }
+        info->mMeta->setInt64(kKeyThumbnailTime, thumbnailTimeUs);
     }
 }
 
