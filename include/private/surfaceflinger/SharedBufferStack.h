@@ -303,6 +303,7 @@ private:
             : mCapacity(c), mList(0) { }
         status_t add(int value);
         status_t remove(int value);
+        uint32_t getMask() const { return mList; }
 
         class const_iterator {
             friend class BufferList;

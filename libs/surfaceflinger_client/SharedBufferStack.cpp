@@ -440,7 +440,7 @@ status_t SharedBufferClient::queue(int buf)
 bool SharedBufferClient::needNewBuffer(int buf) const
 {
     SharedBufferStack& stack( *mSharedStack );
-    const uint32_t mask = 1<<buf;
+    const uint32_t mask = 1<<(31-buf);
     return (android_atomic_and(~mask, &stack.reallocMask) & mask) != 0;
 }
 
@@ -532,7 +532,7 @@ status_t SharedBufferServer::reallocate()
     RWLock::AutoRLock _l(mLock);
 
     SharedBufferStack& stack( *mSharedStack );
-    uint32_t mask = (1<<mNumBuffers)-1;
+    uint32_t mask = mBufferList.getMask();
     android_atomic_or(mask, &stack.reallocMask); 
     return NO_ERROR;
 }
