@@ -86,6 +86,7 @@ public class FileFilter {
         ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
         ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
+        ignoreResultList.add("http/tests/appcache/fallback.html"); // http://b/issue?id=2713004
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
         ignoreResultList.add("storage/database-lock-after-reload.html"); // Succeeds but DumpRenderTree does not read result correctly
