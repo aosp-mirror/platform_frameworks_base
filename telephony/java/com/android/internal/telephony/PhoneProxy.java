@@ -764,6 +764,10 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.exitEmergencyCallbackMode();
     }
 
+    public boolean needsOtaServiceProvisioning(){
+        return mActivePhone.needsOtaServiceProvisioning();
+    }
+
     public boolean isOtaSpNumber(String dialStr){
         return mActivePhone.isOtaSpNumber(dialStr);
     }

@@ -867,26 +867,6 @@ public class CDMAPhone extends PhoneBase {
         mRuimRecords.setVoiceMessageWaiting(1, mwi);
     }
 
-    /**
-     * Returns true if CDMA OTA Service Provisioning needs to be performed.
-     */
-    /* package */ boolean
-    needsOtaServiceProvisioning() {
-        String cdmaMin = getCdmaMin();
-        boolean needsProvisioning;
-        if (cdmaMin == null || (cdmaMin.length() < 6)) {
-            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
-                                    + cdmaMin + "' assume provisioning needed.");
-            needsProvisioning = true;
-        } else {
-            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
-                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
-                    || SystemProperties.getBoolean("test_cdma_setup", false);
-        }
-        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
-        return needsProvisioning;
-    }
-
     @Override
     public void exitEmergencyCallbackMode() {
         if (mWakeLock.isHeld()) {
@@ -1178,6 +1158,26 @@ public class CDMAPhone extends PhoneBase {
      */
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response) {
         mSMS.setCellBroadcastConfig(configValuesArray, response);
+    }
+
+    /**
+     * Returns true if OTA Service Provisioning needs to be performed.
+     */
+    @Override
+    public boolean needsOtaServiceProvisioning() {
+        String cdmaMin = getCdmaMin();
+        boolean needsProvisioning;
+        if (cdmaMin == null || (cdmaMin.length() < 6)) {
+            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
+                                    + cdmaMin + "' assume provisioning needed.");
+            needsProvisioning = true;
+        } else {
+            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
+                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
+                    || SystemProperties.getBoolean("test_cdma_setup", false);
+        }
+        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
+        return needsProvisioning;
     }
 
     private static final String IS683A_FEATURE_CODE = "*228";

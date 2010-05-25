@@ -824,9 +824,19 @@ public abstract class PhoneBase extends Handler implements Phone {
         logUnexpectedCdmaMethodCall("unregisterForSubscriptionInfoReady");
     }
 
+    /**
+     * Returns true if OTA Service Provisioning needs to be performed.
+     * If not overridden return false.
+     */
+    public boolean needsOtaServiceProvisioning() {
+        return false;
+    }
+
+    /**
+     * Return true if number is an OTASP number.
+     * If not overridden return false.
+     */
     public  boolean isOtaSpNumber(String dialStr) {
-        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        logUnexpectedCdmaMethodCall("isOtaSpNumber");
         return false;
     }
 
