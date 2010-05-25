@@ -1657,7 +1657,7 @@ public class AccountManagerService
                 }
                 boolean needsProvisioning;
                 try {
-                    needsProvisioning = telephony.getCdmaNeedsProvisioning();
+                    needsProvisioning = telephony.needsOtaServiceProvisioning();
                 } catch (RemoteException e) {
                     Log.w(TAG, "exception while checking provisioning", e);
                     // default to NOT wiping out the passwords
