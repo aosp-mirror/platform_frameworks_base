@@ -172,6 +172,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mTimeoutInMillis = intent.getIntExtra(TIMEOUT_IN_MILLIS, 0);
         mGetDrawtime = intent.getBooleanExtra(GET_DRAW_TIME, false);
         mSaveImagePath = intent.getStringExtra(SAVE_IMAGE);
+        mTestCount = intent.getIntExtra(TEST_COUNT, 0);
+        mTestIndex = intent.getIntExtra(TEST_INDEX, 0);
+        setTitle("Test " + mTestIndex + " of " + mTestCount);
 
         Log.v(LOGTAG, "  Loading " + mTestUrl);
         mWebView.loadUrl(mTestUrl);
@@ -571,9 +574,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         @Override
         public void onReceivedTitle(WebView view, String title) {
-            if (title.length() > 30)
-                title = "..."+title.substring(title.length()-30);
-            setTitle(title);
+            setTitle("Test " + mTestIndex + " of " + mTestCount + ": "+ title);
             if (mDumpTitleChanges) {
                 mTitleChanges.append("TITLE CHANGED: ");
                 mTitleChanges.append(title);
@@ -842,6 +843,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private String mSaveImagePath;
     private BufferedReader mTestListReader;
     private boolean mGetDrawtime;
+    private int mTestCount;
+    private int mTestIndex;
 
     // States
     private boolean mTimedOut;
@@ -879,6 +882,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String UI_AUTO_TEST = "UiAutoTest";
     static final String GET_DRAW_TIME = "GetDrawTime";
     static final String SAVE_IMAGE = "SaveImage";
+    static final String TEST_COUNT = "TestCount";
+    static final String TEST_INDEX = "TestIndex";
 
     static final int DRAW_RUNS = 5;
     static final String DRAW_TIME_LOG = "/sdcard/android/page_draw_time.txt";
