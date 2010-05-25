@@ -59,8 +59,10 @@ private:
     sp<DataSource> mDataSource;
     DataSourceReader *mReader;
     mkvparser::Segment *mSegment;
+    bool mExtractedThumbnails;
 
     void addTracks();
+    void findThumbnails();
 
     MatroskaExtractor(const MatroskaExtractor &);
     MatroskaExtractor &operator=(const MatroskaExtractor &);
