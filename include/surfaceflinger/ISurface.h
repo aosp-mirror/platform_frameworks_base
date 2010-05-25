@@ -53,7 +53,8 @@ protected:
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
+            uint32_t w, uint32_t h, uint32_t format, uint32_t usage) = 0;
     virtual status_t setBufferCount(int bufferCount) = 0;
     
     class BufferHeap {

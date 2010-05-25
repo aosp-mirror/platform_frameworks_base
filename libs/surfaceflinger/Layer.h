@@ -57,7 +57,8 @@ public:
     status_t setBuffers(uint32_t w, uint32_t h, 
             PixelFormat format, uint32_t flags=0);
 
-    void setDrawingSize(uint32_t w, uint32_t h);
+    void setBufferSize(uint32_t w, uint32_t h);
+    bool isFixedSize() const;
 
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t transactionFlags);
@@ -88,7 +89,8 @@ private:
 
     uint32_t getEffectiveUsage(uint32_t usage) const;
 
-    sp<GraphicBuffer> requestBuffer(int index, int usage);
+    sp<GraphicBuffer> requestBuffer(int bufferIdx,
+            uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
     status_t setBufferCount(int bufferCount);
 
     class SurfaceLayer : public LayerBaseClient::Surface {
@@ -97,7 +99,8 @@ private:
                 SurfaceID id, const sp<Layer>& owner);
         ~SurfaceLayer();
     private:
-        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
+                uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
         virtual status_t setBufferCount(int bufferCount);
         sp<Layer> getOwner() const {
             return static_cast<Layer*>(Surface::getOwner().get());
@@ -181,6 +184,10 @@ private:
             mutable Mutex mLock;
             uint32_t    mWidth;
             uint32_t    mHeight;
+            uint32_t    mReqWidth;
+            uint32_t    mReqHeight;
+            uint32_t    mReqFormat;
+            bool        mFixedSize;
 };
 
 // ---------------------------------------------------------------------------

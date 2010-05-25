@@ -301,7 +301,8 @@ public:
         sp<LayerBaseClient> getOwner() const;
 
     private:
-        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
+                uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
         virtual status_t setBufferCount(int bufferCount);
 
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 

@@ -55,7 +55,8 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
         mNeedsBlending(true),
         mNeedsDithering(false),
         mTextureManager(mFlags),
-        mBufferManager(mTextureManager)
+        mBufferManager(mTextureManager),
+        mWidth(0), mHeight(0), mFixedSize(false)
 {
     // no OpenGL operation is possible here, since we might not be
     // in the OpenGL thread.
@@ -227,9 +228,17 @@ status_t Layer::setBufferCount(int bufferCount)
     return err;
 }
 
-sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
+sp<GraphicBuffer> Layer::requestBuffer(int index,
+        uint32_t reqWidth, uint32_t reqHeight, uint32_t reqFormat,
+        uint32_t usage)
 {
     sp<GraphicBuffer> buffer;
+
+    if ((reqWidth | reqHeight | reqFormat) < 0)
+        return buffer;
+
+    if ((!reqWidth && reqHeight) || (reqWidth && !reqHeight))
+        return buffer;
 
     // this ensures our client doesn't go away while we're accessing
     // the shared area.
@@ -256,23 +265,33 @@ sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
         return buffer;
     }
 
-    uint32_t w, h;
+    uint32_t w, h, f;
     { // scope for the lock
         Mutex::Autolock _l(mLock);
-        w = mWidth;
-        h = mHeight;
+        const bool fixedSizeChanged = mFixedSize != (reqWidth && reqHeight);
+        const bool formatChanged    = mReqFormat != reqFormat;
+        mReqWidth  = reqWidth;
+        mReqHeight = reqHeight;
+        mReqFormat = reqFormat;
+        mFixedSize = reqWidth && reqHeight;
+        w = reqWidth  ? reqWidth  : mWidth;
+        h = reqHeight ? reqHeight : mHeight;
+        f = reqFormat ? reqFormat : mFormat;
         buffer = mBufferManager.detachBuffer(index);
+        if (fixedSizeChanged || formatChanged) {
+            lcblk->reallocateAllExcept(index);
+        }
     }
 
     const uint32_t effectiveUsage = getEffectiveUsage(usage);
     if (buffer!=0 && buffer->getStrongCount() == 1) {
-        err = buffer->reallocate(w, h, mFormat, effectiveUsage);
+        err = buffer->reallocate(w, h, f, effectiveUsage);
     } else {
         // here we have to reallocate a new buffer because we could have a
         // client in our process with a reference to it (eg: status bar),
         // and we can't release the handle under its feet.
         buffer.clear();
-        buffer = new GraphicBuffer(w, h, mFormat, effectiveUsage);
+        buffer = new GraphicBuffer(w, h, f, effectiveUsage);
         err = buffer->initCheck();
     }
 
@@ -288,12 +307,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
 
     if (err == NO_ERROR && buffer->handle != 0) {
         Mutex::Autolock _l(mLock);
-        if (mWidth && mHeight) {
-            mBufferManager.attachBuffer(index, buffer);
-        } else {
-            // oops we got killed while we were allocating the buffer
-            buffer.clear();
-        }
+        mBufferManager.attachBuffer(index, buffer);
     }
     return buffer;
 }
@@ -330,39 +344,46 @@ uint32_t Layer::doTransaction(uint32_t flags)
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
-    if ((front.requested_w != temp.requested_w) || 
-        (front.requested_h != temp.requested_h)) {
+    const bool sizeChanged = (front.requested_w != temp.requested_w) ||
+            (front.requested_h != temp.requested_h);
+
+    if (sizeChanged) {
         // the size changed, we need to ask our client to request a new buffer
         LOGD_IF(DEBUG_RESIZE,
-                    "resize (layer=%p), requested (%dx%d), drawing (%d,%d)",
-                    this, 
-                    int(temp.requested_w), int(temp.requested_h),
-                    int(front.requested_w), int(front.requested_h));
+                "resize (layer=%p), requested (%dx%d), drawing (%d,%d)",
+                this,
+                int(temp.requested_w), int(temp.requested_h),
+                int(front.requested_w), int(front.requested_h));
 
-        // we're being resized and there is a freeze display request,
-        // acquire a freeze lock, so that the screen stays put
-        // until we've redrawn at the new size; this is to avoid
-        // glitches upon orientation changes.
-        if (mFlinger->hasFreezeRequest()) {
-            // if the surface is hidden, don't try to acquire the
-            // freeze lock, since hidden surfaces may never redraw
-            if (!(front.flags & ISurfaceComposer::eLayerHidden)) {
-                mFreezeLock = mFlinger->getFreezeLock();
+        if (!isFixedSize()) {
+            // we're being resized and there is a freeze display request,
+            // acquire a freeze lock, so that the screen stays put
+            // until we've redrawn at the new size; this is to avoid
+            // glitches upon orientation changes.
+            if (mFlinger->hasFreezeRequest()) {
+                // if the surface is hidden, don't try to acquire the
+                // freeze lock, since hidden surfaces may never redraw
+                if (!(front.flags & ISurfaceComposer::eLayerHidden)) {
+                    mFreezeLock = mFlinger->getFreezeLock();
+                }
             }
+
+            // this will make sure LayerBase::doTransaction doesn't update
+            // the drawing state's size
+            Layer::State& editDraw(mDrawingState);
+            editDraw.requested_w = temp.requested_w;
+            editDraw.requested_h = temp.requested_h;
+
+            // record the new size, form this point on, when the client request
+            // a buffer, it'll get the new size.
+            setBufferSize(temp.requested_w, temp.requested_h);
+
+            // all buffers need reallocation
+            lcblk->reallocateAll();
+        } else {
+            // record the new size
+            setBufferSize(temp.requested_w, temp.requested_h);
         }
-
-        // this will make sure LayerBase::doTransaction doesn't update
-        // the drawing state's size
-        Layer::State& editDraw(mDrawingState);
-        editDraw.requested_w = temp.requested_w;
-        editDraw.requested_h = temp.requested_h;
-
-        // record the new size, form this point on, when the client request a
-        // buffer, it'll get the new size.
-        setDrawingSize(temp.requested_w, temp.requested_h);
-
-        // all buffers need reallocation
-        lcblk->reallocate();
     }
 
     if (temp.sequence != front.sequence) {
@@ -376,10 +397,15 @@ uint32_t Layer::doTransaction(uint32_t flags)
     return LayerBase::doTransaction(flags);
 }
 
-void Layer::setDrawingSize(uint32_t w, uint32_t h) {
+void Layer::setBufferSize(uint32_t w, uint32_t h) {
     Mutex::Autolock _l(mLock);
     mWidth = w;
     mHeight = h;
+}
+
+bool Layer::isFixedSize() const {
+    Mutex::Autolock _l(mLock);
+    return mFixedSize;
 }
 
 // ----------------------------------------------------------------------------
@@ -677,7 +703,8 @@ Layer::SurfaceLayer::~SurfaceLayer()
 {
 }
 
-sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
+sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index,
+        uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
 {
     sp<GraphicBuffer> buffer;
     sp<Layer> owner(getOwner());
@@ -687,7 +714,7 @@ sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
          * as it could cause a dead-lock, since it may have to wait
          * on conditions updated my the main thread.
          */
-        buffer = owner->requestBuffer(index, usage);
+        buffer = owner->requestBuffer(index, w, h, format, usage);
     }
     return buffer;
 }

@@ -36,6 +36,7 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+class GraphicBuffer;
 class GraphicBufferMapper;
 class IOMX;
 class Rect;
@@ -213,12 +214,14 @@ private:
     int  dispatch_disconnect(va_list args);
     int  dispatch_crop(va_list args);
     int  dispatch_set_buffer_count(va_list args);
+    int  dispatch_set_buffers_geometry(va_list args);
     
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
     int  disconnect(int api);
     int  crop(Rect const* rect);
     int  setBufferCount(int bufferCount);
+    int  setBuffersGeometry(int w, int h, int format);
 
     /*
      *  private stuff...
@@ -231,12 +234,34 @@ private:
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
     inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
 
-    status_t getBufferLocked(int index, int usage);
+    status_t getBufferLocked(int index,
+            uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
     int getBufferIndex(const sp<GraphicBuffer>& buffer) const;
 
-    uint32_t getUsage() const;
-    int      getConnectedApi() const;
+    int getConnectedApi() const;
     
+    bool needNewBuffer(int bufIdx,
+            uint32_t *pWidth, uint32_t *pHeight,
+            uint32_t *pFormat, uint32_t *pUsage) const;
+
+    class BufferInfo {
+        uint32_t mWidth;
+        uint32_t mHeight;
+        uint32_t mFormat;
+        uint32_t mUsage;
+        mutable uint32_t mDirty;
+        enum {
+            GEOMETRY = 0x01
+        };
+    public:
+        BufferInfo();
+        void set(uint32_t w, uint32_t h, uint32_t format);
+        void set(uint32_t usage);
+        void get(uint32_t *pWidth, uint32_t *pHeight,
+                uint32_t *pFormat, uint32_t *pUsage) const;
+        bool validateBuffer(const sp<GraphicBuffer>& buffer) const;
+    };
+
     // constants
     sp<SurfaceComposerClient>   mClient;
     sp<ISurface>                mSurface;
@@ -249,13 +274,12 @@ private:
 
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;
-    uint32_t                    mUsage;
     int                         mConnected;
     Rect                        mNextBufferCrop;
+    BufferInfo                  mBufferInfo;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
-    sp<GraphicBuffer>           mBuffers[2];
     mutable Region              mDirtyRegion;
 
     // must be used from the lock/unlock thread
@@ -263,6 +287,9 @@ private:
     sp<GraphicBuffer>           mPostedBuffer;
     mutable Region              mOldDirtyRegion;
     bool                        mReserved;
+
+    // only used from dequeueBuffer()
+    Vector< sp<GraphicBuffer> > mBuffers;
 
     // query() must be called from dequeueBuffer() thread
     uint32_t                    mWidth;

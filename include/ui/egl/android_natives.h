@@ -82,6 +82,7 @@ enum {
     NATIVE_WINDOW_DISCONNECT,
     NATIVE_WINDOW_SET_CROP,
     NATIVE_WINDOW_SET_BUFFER_COUNT,
+    NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
 };
 
 /* parameter for NATIVE_WINDOW_[DIS]CONNECT */
@@ -192,6 +193,7 @@ typedef struct android_native_window_t
      *     NATIVE_WINDOW_DISCONNECT
      *     NATIVE_WINDOW_SET_CROP
      *     NATIVE_WINDOW_SET_BUFFER_COUNT
+     *     NATIVE_WINDOW_SET_BUFFERS_GEOMETRY
      *  
      */
     
@@ -271,6 +273,25 @@ static inline int native_window_set_buffer_count(
         size_t bufferCount)
 {
     return window->perform(window, NATIVE_WINDOW_SET_BUFFER_COUNT, bufferCount);
+}
+
+/*
+ * native_window_set_buffers_geometry(..., int w, int h, int format)
+ * All buffers dequeued after this call will have the geometry specified.
+ * In particular, all buffers will have a fixed-size, independent form the
+ * native-window size. They will be appropriately scaled to the window-size
+ * upon composition.
+ *
+ * If all parameters are 0, the normal behavior is restored. That is,
+ * dequeued buffers following this call will be sized to the window's size.
+ *
+ */
+static inline int native_window_set_buffers_geometry(
+        android_native_window_t* window,
+        int w, int h, int format)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
+            w, h, format);
 }
 
 // ---------------------------------------------------------------------------

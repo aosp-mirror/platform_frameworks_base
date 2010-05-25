@@ -279,7 +279,8 @@ public:
     ssize_t retireAndLock();
     status_t unlock(int buffer);
     void setStatus(status_t status);
-    status_t reallocate();
+    status_t reallocateAll();
+    status_t reallocateAllExcept(int buffer);
     status_t assertReallocate(int buffer);
     int32_t getQueuedCount() const;
     Region getDirtyRegion(int buffer) const;

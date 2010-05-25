@@ -71,11 +71,15 @@ public:
     {
     }
 
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage)
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
+            uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
         data.writeInt32(bufferIdx);
+        data.writeInt32(w);
+        data.writeInt32(h);
+        data.writeInt32(format);
         data.writeInt32(usage);
         remote()->transact(REQUEST_BUFFER, data, &reply);
         sp<GraphicBuffer> buffer = new GraphicBuffer();
@@ -150,8 +154,11 @@ status_t BnSurface::onTransact(
         case REQUEST_BUFFER: {
             CHECK_INTERFACE(ISurface, data, reply);
             int bufferIdx = data.readInt32();
-            int usage = data.readInt32();
-            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, usage));
+            uint32_t w = data.readInt32();
+            uint32_t h = data.readInt32();
+            uint32_t format = data.readInt32();
+            uint32_t usage = data.readInt32();
+            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, w, h, format, usage));
             if (buffer == NULL)
                 return BAD_VALUE;
             return reply->write(*buffer);
