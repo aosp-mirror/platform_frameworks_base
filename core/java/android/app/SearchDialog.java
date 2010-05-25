@@ -1336,7 +1336,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             } else {
                 // If the intent was created from a suggestion, it will always have an explicit
                 // component here.
-                Log.i(LOG_TAG, "Starting (as ourselves) " + intent.toURI());
+                Log.i(LOG_TAG, "Starting (as ourselves) " + intent.toUri(0));
                 getContext().startActivity(intent);
                 // If the search switches to a different activity,
                 // SearchDialogWrapper#performActivityResuming
@@ -1418,7 +1418,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             String resultWho = null;
             int requestCode = -1;
             boolean onlyIfNeeded = false;
-            Log.i(LOG_TAG, "Starting (uid " + uid + ", " + packageName + ") " + intent.toURI());
+            Log.i(LOG_TAG, "Starting (uid " + uid + ", " + packageName + ") " + intent.toUri(0));
             int result = ActivityManagerNative.getDefault().startActivityInPackage(
                     uid, intent, resolvedType, resultTo, resultWho, requestCode, onlyIfNeeded);
             checkStartActivityResult(result, intent);

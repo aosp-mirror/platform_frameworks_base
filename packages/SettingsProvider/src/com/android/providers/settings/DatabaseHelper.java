@@ -637,7 +637,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     info = packageManager.getActivityInfo(cn, 0);
                     intent.setComponent(cn);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    values.put(Settings.Bookmarks.INTENT, intent.toURI());
+                    values.put(Settings.Bookmarks.INTENT, intent.toUri(0));
                     values.put(Settings.Bookmarks.TITLE,
                             info.loadLabel(packageManager).toString());
                     values.put(Settings.Bookmarks.SHORTCUT, shortcutValue);
