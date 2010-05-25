@@ -25,10 +25,10 @@ import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
 import android.icu.text.ArabicShaping;
 import android.text.Layout.Directions;
+import android.text.Layout.TabStops;
 import android.text.style.CharacterStyle;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
-import android.text.style.TabStopSpan;
 import android.util.Log;
 
 /**
@@ -51,7 +51,7 @@ class TextLine {
     private int mDir;
     private Directions mDirections;
     private boolean mHasTabs;
-    private TabStopSpan[] mTabs;
+    private TabStops mTabs;
 
     private char[] mChars;
     private boolean mCharsValid;
@@ -117,11 +117,10 @@ class TextLine {
      * @param dir the paragraph direction of this line
      * @param directions the directions information of this line
      * @param hasTabs true if the line might contain tabs or emoji
-     * @param spans array of paragraph-level spans, of which only TabStopSpans
-     * are used.  Can be null.
+     * @param tabStops the tabStops. Can be null.
      */
     void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
-            Directions directions, boolean hasTabs, Object[] spans) {
+            Directions directions, boolean hasTabs, TabStops tabStops) {
         mPaint = paint;
         mText = text;
         mStart = start;
@@ -148,38 +147,8 @@ class TextLine {
                 mChars = new char[ArrayUtils.idealCharArraySize(mLen)];
             }
             TextUtils.getChars(text, start, limit, mChars, 0);
-
-            if (hasTabs) {
-                TabStopSpan[] tabs = mTabs;
-                int tabLen = 0;
-                if (mSpanned != null && spans == null) {
-                    TabStopSpan[] newTabs = mSpanned.getSpans(start, limit,
-                            TabStopSpan.class);
-                    if (tabs == null || tabs.length < newTabs.length) {
-                        tabs = newTabs;
-                    } else {
-                        for (int i = 0; i < newTabs.length; ++i) {
-                            tabs[i] = newTabs[i];
-                        }
-                    }
-                    tabLen = newTabs.length;
-                } else if (spans != null) {
-                    if (tabs == null || tabs.length < spans.length) {
-                        tabs = new TabStopSpan[spans.length];
-                    }
-                    for (int i = 0; i < spans.length; ++i) {
-                        if (spans[i] instanceof TabStopSpan) {
-                            tabs[tabLen++] = (TabStopSpan) spans[i];
-                        }
-                    }
-                }
-
-                if (tabs != null && tabLen < tabs.length){
-                    tabs[tabLen] = null;
-                }
-                mTabs = tabs;
-            }
         }
+        mTabs = tabStops;
     }
 
     /**
@@ -993,23 +962,10 @@ class TextLine {
      * @return the (unsigned) tab position after this offset
      */
     float nextTab(float h) {
-        float nh = Float.MAX_VALUE;
-        boolean alltabs = false;
-
-        if (mHasTabs && mTabs != null) {
-            TabStopSpan[] tabs = mTabs;
-            for (int i = 0; i < tabs.length && tabs[i] != null; ++i) {
-                int where = tabs[i].getTabStop();
-                if (where < nh && where > h) {
-                    nh = where;
-                }
-            }
-            if (nh != Float.MAX_VALUE) {
-                return nh;
-            }
+        if (mTabs != null) {
+            return mTabs.nextTab(h);
         }
-
-        return ((int) ((h + TAB_INCREMENT) / TAB_INCREMENT)) * TAB_INCREMENT;
+        return TabStops.nextDefaultStop(h, TAB_INCREMENT);
     }
 
     private static final int TAB_INCREMENT = 20;

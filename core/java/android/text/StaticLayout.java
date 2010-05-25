@@ -23,6 +23,8 @@ import android.graphics.Paint;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
+import android.text.style.TabStopSpan;
+import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -146,7 +148,7 @@ extends Layout
                 paraEnd++;
             int paraLen = paraEnd - paraStart;
 
-            int firstWidthLineCount = 1;
+            int firstWidthLineLimit = mLineCount + 1;
             int firstwidth = outerwidth;
             int restwidth = outerwidth;
 
@@ -159,10 +161,16 @@ extends Layout
                     LeadingMarginSpan lms = sp[i];
                     firstwidth -= sp[i].getLeadingMargin(true);
                     restwidth -= sp[i].getLeadingMargin(false);
-                    if (lms instanceof LeadingMarginSpan.LeadingMarginSpan2) {
-                        firstWidthLineCount =
-                            ((LeadingMarginSpan.LeadingMarginSpan2)lms)
-                            .getLeadingMarginLineCount();
+                    
+                    // LeadingMarginSpan2 is odd.  The count affects all
+                    // leading margin spans, not just this particular one,
+                    // and start from the top of the span, not the top of the
+                    // paragraph.
+                    if (lms instanceof LeadingMarginSpan2) {
+                        LeadingMarginSpan2 lms2 = (LeadingMarginSpan2) lms;
+                        int lmsFirstLine = getLineForOffset(spanned.getSpanStart(lms2));
+                        firstWidthLineLimit = lmsFirstLine + 
+                            lms2.getLeadingMarginLineCount();
                     }
                 }
 
@@ -214,7 +222,9 @@ extends Layout
             float fitwidth = w;
             int fitascent = 0, fitdescent = 0, fittop = 0, fitbottom = 0;
 
-            boolean tab = false;
+            boolean hasTabOrEmoji = false;
+            boolean hasTab = false;
+            TabStops tabStops = null;
 
             for (int spanStart = paraStart, spanEnd = spanStart, nextSpanStart;
                     spanStart < paraEnd; spanStart = nextSpanStart) {
@@ -252,8 +262,21 @@ extends Layout
                     if (c == '\n') {
                         ;
                     } else if (c == '\t') {
-                        w = Layout.nextTab(sub, paraStart, paraEnd, w, null);
-                        tab = true;
+                        if (hasTab == false) {
+                            hasTab = true;
+                            hasTabOrEmoji = true;
+                            // First tab this para, check for tabstops
+                            TabStopSpan[] spans = spanned.getSpans(paraStart, 
+                                    paraEnd, TabStopSpan.class);
+                            if (spans.length > 0) {
+                                tabStops = new TabStops(TAB_INCREMENT, spans);
+                            }
+                        }
+                        if (tabStops != null) {
+                            w = tabStops.nextTab(w);
+                        } else {
+                            w = TabStops.nextDefaultStop(w, TAB_INCREMENT);
+                        }
                     } else if (c >= 0xD800 && c <= 0xDFFF && j + 1 < spanEnd) {
                         int emoji = Character.codePointAt(chs, j - paraStart);
 
@@ -275,7 +298,7 @@ extends Layout
                                             bm.getHeight();
 
                                 w += wid;
-                                tab = true;
+                                hasTabOrEmoji = true;
                                 j++;
                             } else {
                                 w += widths[j - paraStart];
@@ -351,7 +374,7 @@ extends Layout
                                     okascent, okdescent, oktop, okbottom,
                                     v,
                                     spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, tab,
+                                    choosehtv, fm, hasTabOrEmoji,
                                     needMultiply, paraStart, chdirs, dir, easy,
                                     ok == bufend, includepad, trackpad,
                                     chs, widths, here - paraStart,
@@ -387,7 +410,7 @@ extends Layout
                                     okascent, okdescent, oktop, okbottom,
                                     v,
                                     spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, tab,
+                                    choosehtv, fm, hasTabOrEmoji,
                                     needMultiply, paraStart, chdirs, dir, easy,
                                     ok == bufend, includepad, trackpad,
                                     chs, widths, here - paraStart,
@@ -403,7 +426,7 @@ extends Layout
                                     fittop, fitbottom,
                                     v,
                                     spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, tab,
+                                    choosehtv, fm, hasTabOrEmoji,
                                     needMultiply, paraStart, chdirs, dir, easy,
                                     fit == bufend, includepad, trackpad,
                                     chs, widths, here - paraStart,
@@ -424,7 +447,7 @@ extends Layout
                                     fm.top, fm.bottom,
                                     v,
                                     spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, tab,
+                                    choosehtv, fm, hasTabOrEmoji,
                                     needMultiply, paraStart, chdirs, dir, easy,
                                     here + 1 == bufend, includepad,
                                     trackpad,
@@ -449,7 +472,7 @@ extends Layout
                         fitascent = fitdescent = fittop = fitbottom = 0;
                         okascent = okdescent = oktop = okbottom = 0;
 
-                        if (--firstWidthLineCount <= 0) {
+                        if (--firstWidthLineLimit <= 0) {
                             width = restwidth;
                         }
                     }
@@ -473,7 +496,7 @@ extends Layout
                         fittop, fitbottom,
                         v,
                         spacingmult, spacingadd, chooseht,
-                        choosehtv, fm, tab,
+                        choosehtv, fm, hasTabOrEmoji,
                         needMultiply, paraStart, chdirs, dir, easy,
                         paraEnd == bufend, includepad, trackpad,
                         chs, widths, here - paraStart,
@@ -613,7 +636,7 @@ extends Layout
                       int above, int below, int top, int bottom, int v,
                       float spacingmult, float spacingadd,
                       LineHeightSpan[] chooseht, int[] choosehtv,
-                      Paint.FontMetricsInt fm, boolean tab,
+                      Paint.FontMetricsInt fm, boolean hasTabOrEmoji,
                       boolean needMultiply, int pstart, byte[] chdirs,
                       int dir, boolean easy, boolean last,
                       boolean includepad, boolean trackpad,
@@ -700,7 +723,7 @@ extends Layout
         lines[off + mColumns + START] = end;
         lines[off + mColumns + TOP] = v;
 
-        if (tab)
+        if (hasTabOrEmoji)
             lines[off + TAB] |= TAB_MASK;
 
         lines[off + DIR] |= dir << DIR_SHIFT;
@@ -914,7 +937,7 @@ extends Layout
     private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
 
-    private static final char FIRST_RIGHT_TO_LEFT = '\u0590';
+    private static final int TAB_INCREMENT = 20; // same as Layout, but that's private
 
     /*
      * This is reused across calls to generate()
