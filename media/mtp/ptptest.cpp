@@ -70,7 +70,7 @@ static void start_session(struct usb_endpoint *ep_in, struct usb_endpoint *ep_ou
     }
 }
 
-static void usb_device_added(const char *devname)
+static void usb_device_added(const char *devname, void *client_data)
 {
     struct usb_descriptor_header* desc;
     struct usb_descriptor_iter iter;
@@ -140,7 +140,7 @@ static void usb_device_added(const char *devname)
         usb_device_close(device);
 }
 
-static void usb_device_removed(const char *devname)
+static void usb_device_removed(const char *devname, void *client_data)
 {
     if (sCameraDevice && !strcmp(devname, usb_device_get_name(sCameraDevice))) {
         delete sClient;
@@ -153,7 +153,7 @@ static void usb_device_removed(const char *devname)
 
 int main(int argc, char* argv[])
 {
-    if (usb_host_init(usb_device_added, usb_device_removed)) {
+    if (usb_host_init(usb_device_added, usb_device_removed, NULL)) {
         fprintf(stderr, "usb_host_init failed\n");
         return -1;
     }
