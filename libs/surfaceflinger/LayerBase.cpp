@@ -616,7 +616,8 @@ status_t LayerBaseClient::Surface::onTransact(
     return BnSurface::onTransact(code, data, reply, flags);
 }
 
-sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int index, int usage) 
+sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int bufferIdx,
+        uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
 {
     return NULL; 
 }

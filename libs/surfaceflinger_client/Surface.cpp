@@ -349,15 +349,18 @@ void Surface::init()
     const_cast<int&>(android_native_window_t::maxSwapInterval) = 1;
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
     // be default we request a hardware surface
-    mUsage = GRALLOC_USAGE_HW_RENDER;
     mConnected = 0;
+    // two buffers by default
+    mBuffers.setCapacity(2);
+    mBuffers.insertAt(0, 2);
 }
 
 Surface::~Surface()
 {
     // this is a client-side operation, the surface is destroyed, unmap
     // its buffers in this process.
-    for (int i=0 ; i<2 ; i++) {
+    size_t size = mBuffers.size();
+    for (size_t i=0 ; i<size ; i++) {
         if (mBuffers[i] != 0 && mBuffers[i]->handle != 0) {
             getBufferMapper().unregisterBuffer(mBuffers[i]->handle);
         }
@@ -365,6 +368,7 @@ Surface::~Surface()
 
     // clear all references and trigger an IPC now, to make sure things
     // happen without delay, since these resources are quite heavy.
+    mBuffers.clear();
     mClient.clear();
     mSurface.clear();
     delete mSharedBufferClient;
@@ -463,6 +467,22 @@ int Surface::perform(android_native_window_t* window,
 
 // ----------------------------------------------------------------------------
 
+bool Surface::needNewBuffer(int bufIdx,
+        uint32_t *pWidth, uint32_t *pHeight,
+        uint32_t *pFormat, uint32_t *pUsage) const
+{
+    Mutex::Autolock _l(mSurfaceLock);
+
+    // Always call needNewBuffer(), since it clears the needed buffers flags
+    bool needNewBuffer = mSharedBufferClient->needNewBuffer(bufIdx);
+    bool validBuffer = mBufferInfo.validateBuffer(mBuffers[bufIdx]);
+    bool newNeewBuffer = needNewBuffer || !validBuffer;
+    if (newNeewBuffer) {
+        mBufferInfo.get(pWidth, pHeight, pFormat, pUsage);
+    }
+    return newNeewBuffer;
+}
+
 int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 {
     sp<SurfaceComposerClient> client(getClient());
@@ -476,27 +496,28 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
         return bufIdx;
     }
 
-    // below we make sure we AT LEAST have the usage flags we want
-    const uint32_t usage(getUsage());
-    const sp<GraphicBuffer>& backBuffer(mBuffers[bufIdx]);
+    // grow the buffer array if needed
+    const size_t size = mBuffers.size();
+    const size_t needed = bufIdx+1;
+    if (size < needed) {
+        mBuffers.insertAt(size, needed-size);
+    }
 
-    // Always call needNewBuffer(), since it clears the needed buffers flags
-    bool needNewBuffer = mSharedBufferClient->needNewBuffer(bufIdx);
-    if (backBuffer == 0 || 
-        ((uint32_t(backBuffer->usage) & usage) != usage) ||
-        needNewBuffer)
-    {
-        err = getBufferLocked(bufIdx, usage);
-        LOGE_IF(err, "getBufferLocked(%ld, %08x) failed (%s)",
-                bufIdx, usage, strerror(-err));
+    uint32_t w, h, format, usage;
+    if (needNewBuffer(bufIdx, &w, &h, &format, &usage)) {
+        err = getBufferLocked(bufIdx, w, h, format, usage);
+        LOGE_IF(err, "getBufferLocked(%ld, %u, %u, %u, %08x) failed (%s)",
+                bufIdx, w, h, format, usage, strerror(-err));
         if (err == NO_ERROR) {
             // reset the width/height with the what we get from the buffer
+            const sp<GraphicBuffer>& backBuffer(mBuffers[bufIdx]);
             mWidth  = uint32_t(backBuffer->width);
             mHeight = uint32_t(backBuffer->height);
         }
     }
 
     // if we still don't have a buffer here, we probably ran out of memory
+    const sp<GraphicBuffer>& backBuffer(mBuffers[bufIdx]);
     if (!err && backBuffer==0) {
         err = NO_MEMORY;
     }
@@ -614,12 +635,17 @@ int Surface::dispatch_set_buffer_count(va_list args) {
     size_t bufferCount = va_arg(args, size_t);
     return setBufferCount(bufferCount);
 }
-
+int Surface::dispatch_set_buffers_geometry(va_list args) {
+    int w = va_arg(args, int);
+    int h = va_arg(args, int);
+    int f = va_arg(args, int);
+    return setBuffersGeometry(w, h, f);
+}
 
 void Surface::setUsage(uint32_t reqUsage)
 {
     Mutex::Autolock _l(mSurfaceLock);
-    mUsage = reqUsage;
+    mBufferInfo.set(reqUsage);
 }
 
 int Surface::connect(int api)
@@ -660,18 +686,6 @@ int Surface::disconnect(int api)
     return err;
 }
 
-uint32_t Surface::getUsage() const
-{
-    Mutex::Autolock _l(mSurfaceLock);
-    return mUsage;
-}
-
-int Surface::getConnectedApi() const
-{
-    Mutex::Autolock _l(mSurfaceLock);
-    return mConnected;
-}
-
 int Surface::crop(Rect const* rect)
 {
     Mutex::Autolock _l(mSurfaceLock);
@@ -700,6 +714,26 @@ int Surface::setBufferCount(int bufferCount)
     return err;
 }
 
+int Surface::setBuffersGeometry(int w, int h, int format)
+{
+    if (w<0 || h<0 || format<0)
+        return BAD_VALUE;
+
+    if ((w && !h) || (!w && h))
+        return BAD_VALUE;
+
+    Mutex::Autolock _l(mSurfaceLock);
+    mBufferInfo.set(w, h, format);
+    return NO_ERROR;
+}
+
+// ----------------------------------------------------------------------------
+
+int Surface::getConnectedApi() const
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    return mConnected;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -830,7 +864,8 @@ int Surface::getBufferIndex(const sp<GraphicBuffer>& buffer) const
     return buffer->getIndex();
 }
 
-status_t Surface::getBufferLocked(int index, int usage)
+status_t Surface::getBufferLocked(int index,
+        uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
 {
     sp<ISurface> s(mSurface);
     if (s == 0) return NO_INIT;
@@ -838,20 +873,21 @@ status_t Surface::getBufferLocked(int index, int usage)
     status_t err = NO_MEMORY;
 
     // free the current buffer
-    sp<GraphicBuffer>& currentBuffer(mBuffers[index]);
+    sp<GraphicBuffer>& currentBuffer(mBuffers.editItemAt(index));
     if (currentBuffer != 0) {
         getBufferMapper().unregisterBuffer(currentBuffer->handle);
         currentBuffer.clear();
     }
 
-    sp<GraphicBuffer> buffer = s->requestBuffer(index, usage);
+    sp<GraphicBuffer> buffer = s->requestBuffer(index, w, h, format, usage);
     LOGE_IF(buffer==0,
             "ISurface::getBuffer(%d, %08x) returned NULL",
             index, usage);
     if (buffer != 0) { // this should never happen by construction
         LOGE_IF(buffer->handle == NULL, 
-                "Surface (identity=%d) requestBuffer(%d, %08x) returned"
-                "a buffer with a null handle", mIdentity, index, usage);
+                "Surface (identity=%d) requestBuffer(%d, %u, %u, %u, %08x) "
+                "returned a buffer with a null handle",
+                mIdentity, index, w, h, format, usage);
         err = mSharedBufferClient->getStatus();
         LOGE_IF(err,  "Surface (identity=%d) state = %d", mIdentity, err);
         if (!err && buffer->handle != NULL) {
@@ -869,5 +905,44 @@ status_t Surface::getBufferLocked(int index, int usage)
     return err; 
 }
 
+// ----------------------------------------------------------------------------
+Surface::BufferInfo::BufferInfo()
+    : mWidth(0), mHeight(0), mFormat(0),
+      mUsage(GRALLOC_USAGE_HW_RENDER), mDirty(0)
+{
+}
+
+void Surface::BufferInfo::set(uint32_t w, uint32_t h, uint32_t format) {
+    if ((mWidth != w) || (mHeight != h) || (mFormat != format)) {
+        mWidth = w;
+        mHeight = h;
+        mFormat = format;
+        mDirty |= GEOMETRY;
+    }
+}
+
+void Surface::BufferInfo::set(uint32_t usage) {
+    mUsage = usage;
+}
+
+void Surface::BufferInfo::get(uint32_t *pWidth, uint32_t *pHeight,
+        uint32_t *pFormat, uint32_t *pUsage) const {
+    *pWidth  = mWidth;
+    *pHeight = mHeight;
+    *pFormat = mFormat;
+    *pUsage  = mUsage;
+}
+
+bool Surface::BufferInfo::validateBuffer(const sp<GraphicBuffer>& buffer) const {
+    // make sure we AT LEAST have the usage flags we want
+    if (mDirty || buffer==0 ||
+            ((buffer->usage & mUsage) != mUsage)) {
+        mDirty = 0;
+        return false;
+    }
+    return true;
+}
+
+// ----------------------------------------------------------------------------
 }; // namespace android
 
