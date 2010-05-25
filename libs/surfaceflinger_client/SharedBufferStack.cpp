@@ -527,13 +527,25 @@ void SharedBufferServer::setStatus(status_t status)
     }
 }
 
-status_t SharedBufferServer::reallocate()
+status_t SharedBufferServer::reallocateAll()
 {
     RWLock::AutoRLock _l(mLock);
 
     SharedBufferStack& stack( *mSharedStack );
     uint32_t mask = mBufferList.getMask();
-    android_atomic_or(mask, &stack.reallocMask); 
+    android_atomic_or(mask, &stack.reallocMask);
+    return NO_ERROR;
+}
+
+status_t SharedBufferServer::reallocateAllExcept(int buffer)
+{
+    RWLock::AutoRLock _l(mLock);
+
+    SharedBufferStack& stack( *mSharedStack );
+    BufferList temp(mBufferList);
+    temp.remove(buffer);
+    uint32_t mask = temp.getMask();
+    android_atomic_or(mask, &stack.reallocMask);
     return NO_ERROR;
 }
 
