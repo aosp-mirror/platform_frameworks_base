@@ -222,7 +222,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         // underlying surface is created and destroyed
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
-        holder.setFormat(PixelFormat.RGB_565);
         // setType is not needed for SDK 2.0 or newer. Uncomment this
         // statement if back-porting this code to older SDKs.
         // holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
