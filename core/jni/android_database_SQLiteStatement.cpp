@@ -58,7 +58,9 @@ static void native_execute(JNIEnv* env, jobject object)
     err = sqlite3_step(statement);
 
     // Throw an exception if an error occured
-    if (err != SQLITE_DONE) {
+    if (err == SQLITE_ROW) {
+        LOGV("Queries cannot be performed using execute(). use SQLiteDatabase.query() instead.");
+    } else if (err != SQLITE_DONE) {
         throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
     }
 
