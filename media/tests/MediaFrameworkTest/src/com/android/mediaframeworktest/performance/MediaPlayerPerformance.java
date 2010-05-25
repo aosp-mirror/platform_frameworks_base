@@ -237,18 +237,20 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     }
 
     public void stressCameraPreview() {
-        try {
-            initializeMessageLooper();
-            mCamera.setPreviewCallback(mRawPreviewCallback);
-            mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-            mCamera.setPreviewDisplay(mSurfaceHolder);
-            mCamera.startPreview();
-            waitForPreviewDone();
-            Thread.sleep(1000);
-            mCamera.stopPreview();
-            terminateMessageLooper();
-        } catch (Exception e) {
-            Log.v(TAG, e.toString());
+        for (int i = 0; i < NUM_PLAYBACk_IN_EACH_LOOP; i++) {
+            try {
+                initializeMessageLooper();
+                mCamera.setPreviewCallback(mRawPreviewCallback);
+                mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+                mCamera.setPreviewDisplay(mSurfaceHolder);
+                mCamera.startPreview();
+                waitForPreviewDone();
+                Thread.sleep(1000);
+                mCamera.stopPreview();
+                terminateMessageLooper();
+            } catch (Exception e) {
+                Log.v(TAG, e.toString());
+            }
         }
     }
 
