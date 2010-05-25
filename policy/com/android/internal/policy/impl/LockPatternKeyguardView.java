@@ -667,6 +667,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
                     currentMode = UnlockMode.Password;
                     break;
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:

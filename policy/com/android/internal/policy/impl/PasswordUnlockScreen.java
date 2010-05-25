@@ -88,7 +88,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         final int quality = lockPatternUtils.getKeyguardStoredPasswordQuality();
         final boolean isAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
-                || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality;
+                || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
+                || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
 
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
@@ -200,7 +201,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 mPasswordEntry.setEnabled(true);
                 final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
                 final boolean isAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
-                        || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality;
+                        || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
+                        || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
                 if(isAlpha) {
                     mTitle.setText(R.string.keyguard_password_enter_password_code);
                 } else {

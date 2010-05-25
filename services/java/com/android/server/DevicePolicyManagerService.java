@@ -75,6 +75,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     int mActivePasswordLength = 0;
+    int mActivePasswordUpperCase = 0;
+    int mActivePasswordLowerCase = 0;
+    int mActivePasswordLetters = 0;
+    int mActivePasswordNumeric = 0;
+    int mActivePasswordSymbols = 0;
     int mFailedPasswordAttempts = 0;
 
     int mPasswordOwner = -1;
@@ -90,6 +95,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int passwordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         int minimumPasswordLength = 0;
         int passwordHistoryLength = 0;
+        int minimumPasswordUpperCase = 0;
+        int minimumPasswordLowerCase = 0;
+        int minimumPasswordLetters = 1;
+        int minimumPasswordNumeric = 1;
+        int minimumPasswordSymbols = 1;
         long maximumTimeToUnlock = 0;
         int maximumFailedPasswordsForWipe = 0;
 
@@ -117,6 +127,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     out.startTag(null, "password-history-length");
                     out.attribute(null, "value", Integer.toString(passwordHistoryLength));
                     out.endTag(null, "password-history-length");
+                }
+                if (minimumPasswordUpperCase > 0) {
+                    out.startTag(null, "min-password-uppercase");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordUpperCase));
+                    out.endTag(null, "min-password-uppercase");
+                }
+                if (minimumPasswordLowerCase > 0) {
+                    out.startTag(null, "min-password-lowercase");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordLowerCase));
+                    out.endTag(null, "min-password-lowercase");
+                }
+                if (minimumPasswordLetters > 0) {
+                    out.startTag(null, "min-password-letters");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordLetters));
+                    out.endTag(null, "min-password-letters");
+                }
+                if (minimumPasswordNumeric > 0) {
+                    out.startTag(null, "min-password-numeric");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordNumeric));
+                    out.endTag(null, "min-password-numeric");
+                }
+                if (minimumPasswordSymbols > 0) {
+                    out.startTag(null, "min-password-symbols");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordSymbols));
+                    out.endTag(null, "min-password-symbols");
                 }
             }
             if (maximumTimeToUnlock != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
@@ -152,6 +187,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("password-history-length".equals(tag)) {
                     passwordHistoryLength = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
+                } else if ("min-password-uppercase".equals(tag)) {
+                    minimumPasswordUpperCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-lowercase".equals(tag)) {
+                    minimumPasswordLowerCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-letters".equals(tag)) {
+                    minimumPasswordLetters = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-numeric".equals(tag)) {
+                    minimumPasswordNumeric = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-symbols".equals(tag)) {
+                    minimumPasswordSymbols = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
                 } else if ("max-time-to-unlock".equals(tag)) {
                     maximumTimeToUnlock = Long.parseLong(
                             parser.getAttributeValue(null, "value"));
@@ -180,6 +230,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(minimumPasswordLength);
             pw.print(prefix); pw.print("passwordHistoryLength=");
                     pw.println(passwordHistoryLength);
+            pw.print(prefix); pw.print("minimumPasswordUpperCase=");
+                    pw.println(minimumPasswordUpperCase);
+            pw.print(prefix); pw.print("minimumPasswordLowerCase=");
+                    pw.println(minimumPasswordLowerCase);
+            pw.print(prefix); pw.print("minimumPasswordLetters=");
+                    pw.println(minimumPasswordLetters);
+            pw.print(prefix); pw.print("minimumPasswordNumeric=");
+                    pw.println(minimumPasswordNumeric);
+            pw.print(prefix); pw.print("minimumPasswordSymbols=");
+                    pw.println(minimumPasswordSymbols);
             pw.print(prefix); pw.print("maximumTimeToUnlock=");
                     pw.println(maximumTimeToUnlock);
             pw.print(prefix); pw.print("maximumFailedPasswordsForWipe=");
@@ -366,10 +426,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, "failed-password-attempts");
             }
 
-            if (mActivePasswordQuality != 0 || mActivePasswordLength != 0) {
+            if (mActivePasswordQuality != 0 || mActivePasswordLength != 0
+                    || mActivePasswordUpperCase != 0 || mActivePasswordLowerCase != 0
+                    || mActivePasswordLetters != 0 || mActivePasswordNumeric != 0
+                    || mActivePasswordSymbols != 0) {
                 out.startTag(null, "active-password");
                 out.attribute(null, "quality", Integer.toString(mActivePasswordQuality));
                 out.attribute(null, "length", Integer.toString(mActivePasswordLength));
+                out.attribute(null, "uppercase", Integer.toString(mActivePasswordUpperCase));
+                out.attribute(null, "lowercase", Integer.toString(mActivePasswordLowerCase));
+                out.attribute(null, "letters", Integer.toString(mActivePasswordLetters));
+                out.attribute(null, "numeric", Integer
+                        .toString(mActivePasswordNumeric));
+                out.attribute(null, "symbols", Integer.toString(mActivePasswordSymbols));
                 out.endTag(null, "active-password");
             }
 
@@ -443,6 +512,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "quality"));
                     mActivePasswordLength = Integer.parseInt(
                             parser.getAttributeValue(null, "length"));
+                    mActivePasswordUpperCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "uppercase"));
+                    mActivePasswordLowerCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "lowercase"));
+                    mActivePasswordLetters = Integer.parseInt(
+                            parser.getAttributeValue(null, "letters"));
+                    mActivePasswordNumeric = Integer.parseInt(
+                            parser.getAttributeValue(null, "numeric"));
+                    mActivePasswordSymbols = Integer.parseInt(
+                            parser.getAttributeValue(null, "symbols"));
                     XmlUtils.skipCurrentTag(parser);
                 } else {
                     Slog.w(TAG, "Unknown tag: " + tag);
@@ -480,6 +559,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + Integer.toHexString(utils.getActivePasswordQuality()));
             mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             mActivePasswordLength = 0;
+            mActivePasswordUpperCase = 0;
+            mActivePasswordLowerCase = 0;
+            mActivePasswordLetters = 0;
+            mActivePasswordNumeric = 0;
+            mActivePasswordSymbols = 0;
         }
 
         validatePasswordOwnerLocked();
@@ -502,6 +586,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
                 return;
         }
         throw new IllegalArgumentException("Invalid quality constant: 0x"
@@ -712,14 +797,194 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    public void setPasswordMinimumUpperCase(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordUpperCase != length) {
+                ap.minimumPasswordUpperCase = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumUpperCase(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordUpperCase : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordUpperCase) {
+                    length = admin.minimumPasswordUpperCase;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumLowerCase(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordLowerCase != length) {
+                ap.minimumPasswordLowerCase = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumLowerCase(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordLowerCase : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordLowerCase) {
+                    length = admin.minimumPasswordLowerCase;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumLetters(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordLetters != length) {
+                ap.minimumPasswordLetters = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumLetters(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordLetters : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordLetters) {
+                    length = admin.minimumPasswordLetters;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumNumeric(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordNumeric != length) {
+                ap.minimumPasswordNumeric = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumNumeric(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordNumeric : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordNumeric) {
+                    length = admin.minimumPasswordNumeric;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumSymbols(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordSymbols != length) {
+                ap.minimumPasswordSymbols = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumSymbols(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordSymbols : length;
+            }
+
+            final int N = mAdminList.size();
+            for  (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordSymbols) {
+                    length = admin.minimumPasswordSymbols;
+                }
+            }
+            return length;
+        }
+    }
+
     public boolean isActivePasswordSufficient() {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-            return mActivePasswordQuality >= getPasswordQuality(null)
-                    && mActivePasswordLength >= getPasswordMinimumLength(null);
+            if (mActivePasswordQuality < getPasswordQuality(null)
+                    || mActivePasswordLength < getPasswordMinimumLength(null)) {
+                return false;
+            }
+            if(mActivePasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+                return true;
+            }
+            return mActivePasswordUpperCase >= getPasswordMinimumUpperCase(null)
+                    && mActivePasswordLowerCase >= getPasswordMinimumLowerCase(null)
+                    && mActivePasswordLetters >= getPasswordMinimumLetters(null)
+                    && mActivePasswordNumeric >= getPasswordMinimumNumeric(null)
+                    && mActivePasswordSymbols >= getPasswordMinimumSymbols(null);
         }
     }
 
@@ -781,19 +1046,82 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             quality = getPasswordQuality(null);
             if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 int realQuality = LockPatternUtils.computePasswordQuality(password);
-                if (realQuality < quality) {
+                if (realQuality < quality
+                        && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
                     Slog.w(TAG, "resetPassword: password quality 0x"
                             + Integer.toHexString(quality)
                             + " does not meet required quality 0x"
                             + Integer.toHexString(quality));
                     return false;
                 }
-                quality = realQuality;
+                quality = Math.max(realQuality, quality);
             }
             int length = getPasswordMinimumLength(null);
             if (password.length() < length) {
                 Slog.w(TAG, "resetPassword: password length " + password.length()
                         + " does not meet required length " + length);
+                return false;
+            }
+            if (quality == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+                int letters = 0;
+                int uppercase = 0;
+                int lowercase = 0;
+                int numbers = 0;
+                int symbols = 0;
+                for (int i = 0; i < password.length(); i++) {
+                    char c = password.charAt(i);
+                    if (c >= 'A' && c <= 'Z') {
+                        letters++;
+                        uppercase++;
+                    } else if (c >= 'a' && c <= 'z') {
+                        letters++;
+                        lowercase++;
+                    } else if (c >= '0' && c <= '9') {
+                        numbers++;
+                    } else {
+                        symbols++;
+                    }
+                }
+                int neededLetters = getPasswordMinimumLetters(null);
+                if(letters < neededLetters) {
+                    Slog.w(TAG, "resetPassword: number of letters " + letters
+                            + " does not meet required number of letters " + neededLetters);
+                    return false;
+                }
+                int neededNumbers = getPasswordMinimumNumeric(null);
+                if (numbers < neededNumbers) {
+                    Slog
+                            .w(TAG, "resetPassword: number of numerical digits " + numbers
+                                    + " does not meet required number of numerical digits "
+                                    + neededNumbers);
+                    return false;
+                }
+                int neededLowerCase = getPasswordMinimumLowerCase(null);
+                if (lowercase < neededLowerCase) {
+                    Slog.w(TAG, "resetPassword: number of lowercase letters " + lowercase
+                            + " does not meet required number of lowercase letters "
+                            + neededLowerCase);
+                    return false;
+                }
+                int neededUpperCase = getPasswordMinimumUpperCase(null);
+                if (uppercase < neededUpperCase) {
+                    Slog.w(TAG, "resetPassword: number of uppercase letters " + uppercase
+                            + " does not meet required number of uppercase letters "
+                            + neededUpperCase);
+                    return false;
+                }
+                int neededSymbols = getPasswordMinimumSymbols(null);
+                if (symbols < neededSymbols) {
+                    Slog.w(TAG, "resetPassword: number of special symbols " + symbols
+                            + " does not meet required number of special symbols " + neededSymbols);
+                    return false;
+                }
+            }
+
+            LockPatternUtils utils = new LockPatternUtils(mContext);
+            if(utils.checkPasswordHistory(password)) {
+                Slog.w(TAG, "resetPassword: password is the same as one of the last "
+                        + getPasswordHistoryLength(null) + " passwords");
                 return false;
             }
         }
@@ -946,7 +1274,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void setActivePasswordState(int quality, int length) {
+    public void setActivePasswordState(int quality, int length, int letters, int uppercase,
+            int lowercase, int numbers, int symbols) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
@@ -954,11 +1283,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (this) {
             if (mActivePasswordQuality != quality || mActivePasswordLength != length
-                    || mFailedPasswordAttempts != 0) {
+                    || mFailedPasswordAttempts != 0 || mActivePasswordLetters != letters
+                    || mActivePasswordUpperCase != uppercase
+                    || mActivePasswordLowerCase != lowercase || mActivePasswordNumeric != numbers
+                    || mActivePasswordSymbols != symbols) {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mActivePasswordQuality = quality;
                     mActivePasswordLength = length;
+                    mActivePasswordLetters = letters;
+                    mActivePasswordLowerCase = lowercase;
+                    mActivePasswordUpperCase = uppercase;
+                    mActivePasswordNumeric = numbers;
+                    mActivePasswordSymbols = symbols;
                     mFailedPasswordAttempts = 0;
                     saveSettingsLocked();
                     sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
@@ -1042,6 +1379,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             pw.print("  mActivePasswordQuality=0x");
                     pw.println(Integer.toHexString(mActivePasswordQuality));
             pw.print("  mActivePasswordLength="); pw.println(mActivePasswordLength);
+            pw.print("  mActivePasswordUpperCase="); pw.println(mActivePasswordUpperCase);
+            pw.print("  mActivePasswordLowerCase="); pw.println(mActivePasswordLowerCase);
+            pw.print("  mActivePasswordLetters="); pw.println(mActivePasswordLetters);
+            pw.print("  mActivePasswordNumeric="); pw.println(mActivePasswordNumeric);
+            pw.print("  mActivePasswordSymbols="); pw.println(mActivePasswordSymbols);
             pw.print("  mFailedPasswordAttempts="); pw.println(mFailedPasswordAttempts);
             pw.print("  mPasswordOwner="); pw.println(mPasswordOwner);
         }

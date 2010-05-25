@@ -205,6 +205,14 @@ public class DevicePolicyManager {
     public static final int PASSWORD_QUALITY_ALPHANUMERIC = 0x50000;
 
     /**
+     * Constant for {@link #setPasswordQuality}: the user must have entered a
+     * password containing numeric <em>and</em> alphabetic characters,
+     * <em>and</em> special symbols. Note that quality constants are ordered so
+     * that higher values are more restrictive.
+     */
+    public static final int PASSWORD_QUALITY_COMPLEX = 0x60000;
+
+    /**
      * Called by an application that is administering the device to set the
      * password restrictions it is imposing.  After setting this, the user
      * will not be able to enter a new password that is not at least as
@@ -226,7 +234,7 @@ public class DevicePolicyManager {
      * @param quality The new desired quality.  One of
      * {@link #PASSWORD_QUALITY_UNSPECIFIED}, {@link #PASSWORD_QUALITY_SOMETHING},
      * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC},
-     * or {@link #PASSWORD_QUALITY_ALPHANUMERIC}.
+     * {@link #PASSWORD_QUALITY_ALPHANUMERIC} or {@link #PASSWORD_QUALITY_COMPLEX}.
      */
     public void setPasswordQuality(ComponentName admin, int quality) {
         if (mService != null) {
@@ -264,8 +272,8 @@ public class DevicePolicyManager {
      * take place immediately.  To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.  This
      * constraint is only imposed if the administrator has also requested either
-     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC},
-     * or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
+     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC}
+     * {@link #PASSWORD_QUALITY_ALPHANUMERIC}, or {@link #PASSWORD_QUALITY_COMPLEX}
      * with {@link #setPasswordQuality}.
      *
      * <p>The calling device admin must have requested
@@ -296,6 +304,255 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getPasswordMinimumLength(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by an application that is administering the device to set the
+     * minimum number of upper case letters required in the password. After
+     * setting this, the user will not be able to enter a new password that is
+     * not at least as restrictive as what has been set. Note that the current
+     * password will remain until the user has set a new one, so the change does
+     * not take place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param length The new desired minimum number of upper case letters
+     *            required in the password. A value of 0 means there is no
+     *            restriction.
+     */
+    public void setPasswordMinimumUpperCase(ComponentName admin, int length) {
+        if (mService != null) {
+            try {
+                mService.setPasswordMinimumUpperCase(admin, length);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current number of upper case letters required in the
+     * password for all admins or a particular one.
+     *
+     * @param admin The name of the admin component to check, or null to
+     *            aggregate all admins.
+     * @return The minimum number of upper case letters required in the
+     *         password.
+     */
+    public int getPasswordMinimumUpperCase(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumUpperCase(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by an application that is administering the device to set the
+     * minimum number of lower case letters required in the password. After
+     * setting this, the user will not be able to enter a new password that is
+     * not at least as restrictive as what has been set. Note that the current
+     * password will remain until the user has set a new one, so the change does
+     * not take place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param length The new desired minimum number of lower case letters
+     *            required in the password. A value of 0 means there is no
+     *            restriction.
+     */
+    public void setPasswordMinimumLowerCase(ComponentName admin, int length) {
+        if (mService != null) {
+            try {
+                mService.setPasswordMinimumLowerCase(admin, length);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current number of lower case letters required in the
+     * password for all admins or a particular one.
+     *
+     * @param admin The name of the admin component to check, or null to
+     *            aggregate all admins.
+     * @return The minimum number of lower case letters required in the
+     *         password.
+     */
+    public int getPasswordMinimumLowerCase(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumLowerCase(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by an application that is administering the device to set the
+     * minimum number of letters required in the password. After setting this,
+     * the user will not be able to enter a new password that is not at least as
+     * restrictive as what has been set. Note that the current password will
+     * remain until the user has set a new one, so the change does not take
+     * place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param length The new desired minimum number of letters required in the
+     *            password. A value of 0 means there is no restriction.
+     */
+    public void setPasswordMinimumLetters(ComponentName admin, int length) {
+        if (mService != null) {
+            try {
+                mService.setPasswordMinimumLetters(admin, length);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current number of letters required in the password for all
+     * admins or a particular one.
+     *
+     * @param admin The name of the admin component to check, or null to
+     *            aggregate all admins.
+     * @return The minimum number of letters required in the password.
+     */
+    public int getPasswordMinimumLetters(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumLetters(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by an application that is administering the device to set the
+     * minimum number of numerical digits required in the password. After
+     * setting this, the user will not be able to enter a new password that is
+     * not at least as restrictive as what has been set. Note that the current
+     * password will remain until the user has set a new one, so the change does
+     * not take place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param length The new desired minimum number of numerical digits required
+     *            in the password. A value of 0 means there is no restriction.
+     */
+    public void setPasswordMinimumNumeric(ComponentName admin, int length) {
+        if (mService != null) {
+            try {
+                mService.setPasswordMinimumNumeric(admin, length);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current number of numerical digits required in the password
+     * for all admins or a particular one.
+     *
+     * @param admin The name of the admin component to check, or null to
+     *            aggregate all admins.
+     * @return The minimum number of numerical digits required in the password.
+     */
+    public int getPasswordMinimumNumeric(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumNumeric(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by an application that is administering the device to set the
+     * minimum number of symbols required in the password. After setting this,
+     * the user will not be able to enter a new password that is not at least as
+     * restrictive as what has been set. Note that the current password will
+     * remain until the user has set a new one, so the change does not take
+     * place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param length The new desired minimum number of symbols required in the
+     *            password. A value of 0 means there is no restriction.
+     */
+    public void setPasswordMinimumSymbols(ComponentName admin, int length) {
+        if (mService != null) {
+            try {
+                mService.setPasswordMinimumSymbols(admin, length);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current number of symbols required in the password for all
+     * admins or a particular one.
+     *
+     * @param admin The name of the admin component to check, or null to
+     *            aggregate all admins.
+     * @return The minimum number of symbols required in the password.
+     */
+    public int getPasswordMinimumSymbols(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumSymbols(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -627,10 +884,12 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public void setActivePasswordState(int quality, int length) {
+    public void setActivePasswordState(int quality, int length, int letters, int uppercase,
+            int lowercase, int numbers, int symbols) {
         if (mService != null) {
             try {
-                mService.setActivePasswordState(quality, length);
+                mService.setActivePasswordState(quality, length, letters, uppercase, lowercase,
+                        numbers, symbols);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

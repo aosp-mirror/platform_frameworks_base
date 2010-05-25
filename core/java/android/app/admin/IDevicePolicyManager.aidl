@@ -27,9 +27,24 @@ import android.os.RemoteCallback;
 interface IDevicePolicyManager {
     void setPasswordQuality(in ComponentName who, int quality);
     int getPasswordQuality(in ComponentName who);
-    
+
     void setPasswordMinimumLength(in ComponentName who, int length);
     int getPasswordMinimumLength(in ComponentName who);
+
+    void setPasswordMinimumUpperCase(in ComponentName who, int length);
+    int getPasswordMinimumUpperCase(in ComponentName who);
+
+    void setPasswordMinimumLowerCase(in ComponentName who, int length);
+    int getPasswordMinimumLowerCase(in ComponentName who);
+
+    void setPasswordMinimumLetters(in ComponentName who, int length);
+    int getPasswordMinimumLetters(in ComponentName who);
+
+    void setPasswordMinimumNumeric(in ComponentName who, int length);
+    int getPasswordMinimumNumeric(in ComponentName who);
+
+    void setPasswordMinimumSymbols(in ComponentName who, int length);
+    int getPasswordMinimumSymbols(in ComponentName who);
     
     void setPasswordHistoryLength(in ComponentName who, int length);
     int getPasswordHistoryLength(in ComponentName who);
@@ -56,7 +71,7 @@ interface IDevicePolicyManager {
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
     
-    void setActivePasswordState(int quality, int length);
+    void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase, int numbers, int symbols);
     void reportFailedPasswordAttempt();
     void reportSuccessfulPasswordAttempt();
 }
