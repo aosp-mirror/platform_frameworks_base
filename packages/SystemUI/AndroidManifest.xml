@@ -1,0 +1,22 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.systemui"
+        android:sharedUserId="android.uid.system">
+
+    <application
+        android:allowClearUserData="false"
+        android:label="@string/app_label"
+        android:icon="@drawable/ic_launcher_settings">
+                 
+        <receiver
+            android:name=".statusbar.StatusBarStarter"
+            >
+            <intent-filter>
+                <action android:name="com.android.internal.policy.statusbar.START" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".statusbar.PhoneStatusBarService"
+            android:exported="false"
+            />
+    </application>
+</manifest>
