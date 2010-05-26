@@ -123,13 +123,6 @@ public:
     status_t linkToComposerDeath(const sp<IBinder::DeathRecipient>& recipient,
             void* cookie = NULL, uint32_t flags = 0);
 
-private:
-    friend class Surface;
-    friend class SurfaceControl;
-    
-    SurfaceComposerClient(const sp<ISurfaceComposer>& sm, 
-            const sp<IBinder>& conn);
-
     status_t    hide(SurfaceID id);
     status_t    show(SurfaceID id, int32_t layer = -1);
     status_t    freeze(SurfaceID id);
@@ -142,17 +135,21 @@ private:
     status_t    setMatrix(SurfaceID id, float dsdx, float dtdx, float dsdy, float dtdy);
     status_t    setPosition(SurfaceID id, int32_t x, int32_t y);
     status_t    setSize(SurfaceID id, uint32_t w, uint32_t h);
-    
     void        signalServer();
-
     status_t    destroySurface(SurfaceID sid);
 
-    void        _init(const sp<ISurfaceComposer>& sm,
+    SharedClient*   getSharedClient() const;
+
+private:
+    SurfaceComposerClient(const sp<ISurfaceComposer>& sm,
+            const sp<IBinder>& conn);
+
+    void        init(const sp<ISurfaceComposer>& sm,
                     const sp<ISurfaceFlingerClient>& conn);
 
-    inline layer_state_t*   _get_state_l(SurfaceID id);
-    layer_state_t*          _lockLayerState(SurfaceID id);
-    inline void             _unlockLayerState();
+    inline layer_state_t*   get_state_l(SurfaceID id);
+    layer_state_t*          lockLayerState(SurfaceID id);
+    inline void             unlockLayerState();
 
     mutable     Mutex                               mLock;
                 layer_state_t*                      mPrebuiltLayerState;

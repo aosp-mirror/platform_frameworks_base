@@ -159,7 +159,6 @@ public:
     SharedBufferBase(SharedClient* sharedClient, int surface,
             int32_t identity);
     ~SharedBufferBase();
-    uint32_t getIdentity();
     status_t getStatus() const;
     size_t getFrontBuffer() const;
     String8 dump(char const* prefix) const;
