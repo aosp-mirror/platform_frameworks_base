@@ -103,6 +103,9 @@ static void dumpstate() {
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("ARP CACHE", "/proc/net/arp");
 
+    run_command("WIFI NETWORKS", 20,
+            "su", "root", "wpa_cli", "list_networks", NULL);
+
 #ifdef FWDUMP_bcm4329
     run_command("DUMP WIFI FIRMWARE LOG", 60,
             "su", "root", "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
