@@ -500,7 +500,7 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 
 // ---------------------------------------------------------------------------
 
-int32_t LayerBaseClient::sIdentity = 0;
+int32_t LayerBaseClient::sIdentity = 1;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)

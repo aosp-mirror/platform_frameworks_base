@@ -123,11 +123,11 @@ SurfaceComposerClient::SurfaceComposerClient()
 {
     sp<ISurfaceComposer> sm(getComposerService());
     if (sm == 0) {
-        _init(0, 0);
+        init(0, 0);
         return;
     }
 
-    _init(sm, sm->createConnection());
+    init(sm, sm->createConnection());
 
     if (mClient != 0) {
         Mutex::Autolock _l(gLock);
@@ -139,9 +139,14 @@ SurfaceComposerClient::SurfaceComposerClient()
 SurfaceComposerClient::SurfaceComposerClient(
         const sp<ISurfaceComposer>& sm, const sp<IBinder>& conn)
 {
-    _init(sm, interface_cast<ISurfaceFlingerClient>(conn));
+    init(sm, interface_cast<ISurfaceFlingerClient>(conn));
 }
 
+SurfaceComposerClient::~SurfaceComposerClient()
+{
+    VERBOSE("Destroying client %p, conn %p", this, mClient.get());
+    dispose();
+}
 
 status_t SurfaceComposerClient::linkToComposerDeath(
         const sp<IBinder::DeathRecipient>& recipient,
@@ -151,7 +156,7 @@ status_t SurfaceComposerClient::linkToComposerDeath(
     return sm->asBinder()->linkToDeath(recipient, cookie, flags);    
 }
 
-void SurfaceComposerClient::_init(
+void SurfaceComposerClient::init(
         const sp<ISurfaceComposer>& sm, const sp<ISurfaceFlingerClient>& conn)
 {
     VERBOSE("Creating client %p, conn %p", this, conn.get());
@@ -172,10 +177,9 @@ void SurfaceComposerClient::_init(
     mControl = static_cast<SharedClient *>(mControlMemory->getBase());
 }
 
-SurfaceComposerClient::~SurfaceComposerClient()
+SharedClient* SurfaceComposerClient::getSharedClient() const
 {
-    VERBOSE("Destroying client %p, conn %p", this, mClient.get());
-    dispose();
+    return mControl;
 }
 
 status_t SurfaceComposerClient::initCheck() const
@@ -488,7 +492,7 @@ status_t SurfaceComposerClient::closeTransaction()
     return NO_ERROR;
 }
 
-layer_state_t* SurfaceComposerClient::_get_state_l(SurfaceID index)
+layer_state_t* SurfaceComposerClient::get_state_l(SurfaceID index)
 {
     // API usage error, do nothing.
     if (mTransactionOpen<=0) {
@@ -508,49 +512,49 @@ layer_state_t* SurfaceComposerClient::_get_state_l(SurfaceID index)
     return mStates.editArray() + i;
 }
 
-layer_state_t* SurfaceComposerClient::_lockLayerState(SurfaceID id)
+layer_state_t* SurfaceComposerClient::lockLayerState(SurfaceID id)
 {
     layer_state_t* s;
     mLock.lock();
-    s = _get_state_l(id);
+    s = get_state_l(id);
     if (!s) mLock.unlock();
     return s;
 }
 
-void SurfaceComposerClient::_unlockLayerState()
+void SurfaceComposerClient::unlockLayerState()
 {
     mLock.unlock();
 }
 
 status_t SurfaceComposerClient::setPosition(SurfaceID id, int32_t x, int32_t y)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::ePositionChanged;
     s->x = x;
     s->y = y;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setSize(SurfaceID id, uint32_t w, uint32_t h)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eSizeChanged;
     s->w = w;
     s->h = h;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setLayer(SurfaceID id, int32_t z)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eLayerChanged;
     s->z = z;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
@@ -579,34 +583,34 @@ status_t SurfaceComposerClient::unfreeze(SurfaceID id)
 status_t SurfaceComposerClient::setFlags(SurfaceID id,
         uint32_t flags, uint32_t mask)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eVisibilityChanged;
     s->flags &= ~mask;
     s->flags |= (flags & mask);
     s->mask |= mask;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setTransparentRegionHint(
         SurfaceID id, const Region& transparentRegion)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eTransparentRegionChanged;
     s->transparentRegion = transparentRegion;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setAlpha(SurfaceID id, float alpha)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eAlphaChanged;
     s->alpha = alpha;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
@@ -615,7 +619,7 @@ status_t SurfaceComposerClient::setMatrix(
         float dsdx, float dtdx,
         float dsdy, float dtdy )
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eMatrixChanged;
     layer_state_t::matrix22_t matrix;
@@ -624,17 +628,17 @@ status_t SurfaceComposerClient::setMatrix(
     matrix.dsdy = dsdy;
     matrix.dtdy = dtdy;
     s->matrix = matrix;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setFreezeTint(SurfaceID id, uint32_t tint)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eFreezeTintChanged;
     s->tint = tint;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 

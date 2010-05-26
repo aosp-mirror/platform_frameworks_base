@@ -228,7 +228,7 @@ private:
      */
     void init();
     status_t validate() const;
-    sp<SurfaceComposerClient> getClient() const;
+    status_t initCheck() const;
     sp<ISurface> getISurface() const;
 
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
@@ -271,6 +271,7 @@ private:
     uint32_t                    mFlags;
     GraphicBufferMapper&        mBufferMapper;
     SharedBufferClient*         mSharedBufferClient;
+    status_t                    mInitCheck;
 
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;
