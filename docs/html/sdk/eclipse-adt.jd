@@ -95,7 +95,7 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-ADT 0.9.6</a> <em>(March 2010)</em>
+ADT 0.9.7</a> <em>(May 2010)</em>
   <div class="toggleme">
 
 <dl>
