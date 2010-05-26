@@ -76,7 +76,7 @@ struct MyVorbisExtractor {
     status_t seekToOffset(off_t offset);
     status_t readNextPacket(MediaBuffer **buffer);
 
-    void init();
+    status_t init();
 
     sp<MetaData> getFileMetaData() { return mFileMeta; }
 
@@ -107,7 +107,7 @@ private:
     ssize_t readPage(off_t offset, Page *page);
     status_t findNextPage(off_t startOffset, off_t *pageOffset);
 
-    void verifyHeader(
+    status_t verifyHeader(
             MediaBuffer *buffer, uint8_t type);
 
     void parseFileMetaData();
@@ -308,6 +308,7 @@ ssize_t MyVorbisExtractor::readPage(off_t offset, Page *page) {
         totalSize += page->mLace[i];
     }
 
+#if 0
     String8 tmp;
     for (size_t i = 0; i < page->mNumSegments; ++i) {
         char x[32];
@@ -316,7 +317,8 @@ ssize_t MyVorbisExtractor::readPage(off_t offset, Page *page) {
         tmp.append(x);
     }
 
-    // LOGV("%c %s", page->mFlags & 1 ? '+' : ' ', tmp.string());
+    LOGV("%c %s", page->mFlags & 1 ? '+' : ' ', tmp.string());
+#endif
 
     return sizeof(header) + page->mNumSegments + totalSize;
 }
@@ -432,43 +434,60 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
     }
 }
 
-void MyVorbisExtractor::init() {
+status_t MyVorbisExtractor::init() {
     mMeta = new MetaData;
     mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_VORBIS);
 
     MediaBuffer *packet;
-    CHECK_EQ(readNextPacket(&packet), OK);
+    status_t err;
+    if ((err = readNextPacket(&packet)) != OK) {
+        return err;
+    }
     LOGV("read packet of size %d\n", packet->range_length());
-    verifyHeader(packet, 1);
+    err = verifyHeader(packet, 1);
     packet->release();
     packet = NULL;
+    if (err != OK) {
+        return err;
+    }
 
-    CHECK_EQ(readNextPacket(&packet), OK);
+    if ((err = readNextPacket(&packet)) != OK) {
+        return err;
+    }
     LOGV("read packet of size %d\n", packet->range_length());
-    verifyHeader(packet, 3);
+    err = verifyHeader(packet, 3);
     packet->release();
     packet = NULL;
+    if (err != OK) {
+        return err;
+    }
 
-    CHECK_EQ(readNextPacket(&packet), OK);
+    if ((err = readNextPacket(&packet)) != OK) {
+        return err;
+    }
     LOGV("read packet of size %d\n", packet->range_length());
-    verifyHeader(packet, 5);
+    err = verifyHeader(packet, 5);
     packet->release();
     packet = NULL;
+    if (err != OK) {
+        return err;
+    }
 
     mFirstDataOffset = mOffset + mCurrentPageSize;
+
+    return OK;
 }
 
-void MyVorbisExtractor::verifyHeader(
+status_t MyVorbisExtractor::verifyHeader(
         MediaBuffer *buffer, uint8_t type) {
     const uint8_t *data =
         (const uint8_t *)buffer->data() + buffer->range_offset();
 
     size_t size = buffer->range_length();
 
-    CHECK(size >= 7);
-
-    CHECK_EQ(data[0], type);
-    CHECK(!memcmp(&data[1], "vorbis", 6));
+    if (size < 7 || data[0] != type || memcmp(&data[1], "vorbis", 6)) {
+        return ERROR_MALFORMED;
+    }
 
     ogg_buffer buf;
     buf.data = (uint8_t *)data;
@@ -515,7 +534,9 @@ void MyVorbisExtractor::verifyHeader(
 
         case 3:
         {
-            CHECK_EQ(0, _vorbis_unpack_comment(&mVc, &bits));
+            if (0 != _vorbis_unpack_comment(&mVc, &bits)) {
+                return ERROR_MALFORMED;
+            }
 
             parseFileMetaData();
             break;
@@ -523,12 +544,16 @@ void MyVorbisExtractor::verifyHeader(
 
         case 5:
         {
-            CHECK_EQ(0, _vorbis_unpack_books(&mVi, &bits));
+            if (0 != _vorbis_unpack_books(&mVi, &bits)) {
+                return ERROR_MALFORMED;
+            }
 
             mMeta->setData(kKeyVorbisBooks, 0, data, size);
             break;
         }
     }
+
+    return OK;
 }
 
 uint64_t MyVorbisExtractor::approxBitrate() {
@@ -732,10 +757,11 @@ OggExtractor::OggExtractor(const sp<DataSource> &source)
       mInitCheck(NO_INIT),
       mImpl(NULL) {
     mImpl = new MyVorbisExtractor(mDataSource);
-    CHECK_EQ(mImpl->seekToOffset(0), OK);
-    mImpl->init();
+    mInitCheck = mImpl->seekToOffset(0);
 
-    mInitCheck = OK;
+    if (mInitCheck == OK) {
+        mInitCheck = mImpl->init();
+    }
 }
 
 OggExtractor::~OggExtractor() {
