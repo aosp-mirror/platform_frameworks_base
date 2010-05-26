@@ -32,6 +32,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import com.android.mediaframeworktest.MediaRecorderStressTestRunner;
 
 /**
  * Junit / Instrumentation test case for the media player api
@@ -310,20 +311,51 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         output.close();
     }
 
+    public void validateRecordedVideo(String recorded_file) {
+        try {
+            MediaPlayer mp = new MediaPlayer();
+            mp.setDataSource(recorded_file);
+            mp.prepare();
+            int duration = mp.getDuration();
+            if (duration <= 0){
+                assertTrue("stressRecordAndPlayback", false);
+            }
+        } catch (Exception e) {
+            assertTrue("stressRecordAndPlayback", false);
+        }
+    }
+
+    public void removeRecodedVideo(String filename){
+        File video = new File(filename);
+        Log.v(TAG, "remove recorded video " + filename);
+        video.delete();
+    }
+
     //Stress test case for record a video and play right away.
     @LargeTest
     public void testStressRecordVideoAndPlayback() throws Exception {
+        int iterations = MediaRecorderStressTestRunner.mIterations;
+        int video_encoder = MediaRecorderStressTestRunner.mVideoEncoder;
+        int audio_encoder = MediaRecorderStressTestRunner.mAudioEncdoer;
+        int frame_rate = MediaRecorderStressTestRunner.mFrameRate;
+        int video_width = MediaRecorderStressTestRunner.mVideoWidth;
+        int video_height = MediaRecorderStressTestRunner.mVideoHeight;
+        int bit_rate = MediaRecorderStressTestRunner.mBitRate;
+        boolean remove_video = MediaRecorderStressTestRunner.mRemoveVideo;
+        int record_duration = MediaRecorderStressTestRunner.mDuration;
+
         String filename;
         SurfaceHolder mSurfaceHolder;
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
-        Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
+        Writer output = new BufferedWriter(
+                new FileWriter(stressOutFile, true));
         output.write("Video record and play back stress test:\n");
         output.write("Total number of loops:"
                 + NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS + "\n");
         try {
             output.write("No of loop: ");
-            for (int i = 0; i < NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS; i++){
+            for (int i = 0; i < iterations; i++){
                 filename = OUTPUT_FILE + i + OUTPUT_FILE_EXT;
                 Log.v(TAG, filename);
                 synchronized (recorderlock) {
@@ -334,20 +366,29 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                         Log.v(TAG, "wait was interrupted.");
                     }
                 }
+                Log.v(TAG, "iterations : " + iterations);
+                Log.v(TAG, "video_encoder : " + video_encoder);
+                Log.v(TAG, "audio_encoder : " + audio_encoder);
+                Log.v(TAG, "frame_rate : " + frame_rate);
+                Log.v(TAG, "video_width : " + video_width);
+                Log.v(TAG, "video_height : " + video_height);
+                Log.v(TAG, "bit rate : " + bit_rate);
+                Log.v(TAG, "record_duration : " + record_duration);
+
                 mRecorder.setOnErrorListener(mRecorderErrorCallback);
                 mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
                 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setOutputFile(filename);
-                mRecorder.setVideoFrameRate(20);
-                mRecorder.setVideoSize(352,288);
-                mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
-                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                mRecorder.setVideoFrameRate(frame_rate);
+                mRecorder.setVideoSize(video_width, video_height);
+                mRecorder.setVideoEncoder(video_encoder);
+                mRecorder.setAudioEncoder(audio_encoder);
                 Log.v(TAG, "mediaRecorder setPreview");
                 mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
                 mRecorder.prepare();
                 mRecorder.start();
-                Thread.sleep(WAIT_TIME_RECORD);
+                Thread.sleep(record_duration);
                 Log.v(TAG, "Before stop");
                 mRecorder.stop();
                 terminateRecorderMessageLooper();
@@ -357,8 +398,12 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 mp.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
                 mp.prepare();
                 mp.start();
-                Thread.sleep(WAIT_TIME_PLAYBACK);
+                Thread.sleep(record_duration);
                 mp.release();
+                validateRecordedVideo(filename);
+                if (remove_video) {
+                    removeRecodedVideo(filename);
+                }
                 output.write(", " + i);
             }
         } catch (Exception e) {
