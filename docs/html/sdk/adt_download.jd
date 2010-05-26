@@ -22,11 +22,18 @@ ADT Installation</a>.</p>
     <th>Notes</th>
   </tr>
   <tr>
-     <td>0.9.6</td>
-     <td><a href="http://dl-ssl.google.com/android/ADT-0.9.6.zip">ADT-0.9.6.zip</a></td>
+     <td>0.9.7</td>
+     <td><a href="http://dl-ssl.google.com/android/ADT-0.9.7.zip">ADT-0.9.7.zip</a></td>
      <td><nobr>{@adtZipBytes} bytes</nobr></td>
      <td>{@adtZipChecksum}</td>
-     <td>Requires SDK Tools, Revision 5 <em><nobr>March 2009</nobr></em></td>
+     <td>Requires SDK Tools, Revision 6 <em><nobr>May 2010</nobr></em></td>
+  </tr>
+  <tr>
+     <td>0.9.6</td>
+     <td><a href="http://dl-ssl.google.com/android/ADT-0.9.6.zip">ADT-0.9.6.zip</a></td>
+     <td><nobr>7456339 bytes</nobr></td>
+     <td>ea45d271be52b87b5dd1c9fb17536223</td>
+     <td>Requires SDK Tools, Revision 5 <em><nobr>March 2010</nobr></em></td>
   </tr>
   <tr>
      <td>0.9.5</td>

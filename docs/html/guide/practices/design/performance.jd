@@ -279,7 +279,7 @@ address some of them here.</p>
 <p>On devices without a JIT, it is true that invoking methods via a
 variable with an exact type rather than an interface is slightly more
 efficient. (So, for example, it was cheaper to invoke methods on a
-<code>Map map</code> than a <code>HashMap map</code>, even though in both
+<code>HashMap map</code> than a <code>Map map</code>, even though in both
 cases the map was a <code>HashMap</code>.) It was not the case that this
 was 2x slower; the actual difference was more like 6% slower. Furthermore,
 the JIT makes the two effectively indistinguishable.</p>
