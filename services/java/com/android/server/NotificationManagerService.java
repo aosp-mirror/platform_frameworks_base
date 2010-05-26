@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import com.android.server.status.IconData;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.server.status.StatusBarManagerService;
 
