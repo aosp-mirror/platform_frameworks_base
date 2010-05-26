@@ -1643,7 +1643,7 @@
 
     <!-- Do not translate.  WebView User Agent string -->
     <string name="web_user_agent" translatable="false"><xliff:g id="x">Mozilla/5.0 (Linux; U; Android %s)
-        AppleWebKit/534.0 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.0</xliff:g></string>
+        AppleWebKit/534.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.1</xliff:g></string>
 
     <!-- Title for a JavaScript dialog. "The page at <url of current page> says:" -->
     <string name="js_dialog_title">The page at \'<xliff:g id="title">%s</xliff:g>\' says:</string>
