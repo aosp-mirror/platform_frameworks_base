@@ -153,6 +153,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     private String mJsEngine;
     private String mTestPathPrefix;
     private boolean mFinished;
+    private int mTestCount;
+    private int mResumeIndex = 0;
 
     public LayoutTestsAutoTest() {
       super(TestShellActivity.class);
@@ -176,6 +178,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         } catch (Exception e) {
             Log.e(LOGTAG, "Error while reading test list : " + e.getMessage());
         }
+        mTestCount = mTestList.size();
     }
 
     private void resumeTestList() {
@@ -186,6 +189,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                 if (mTestList.elementAt(i).equals(line)) {
                     mTestList = new Vector<String>(mTestList.subList(i+1, mTestList.size()));
                     mTestListIgnoreResult = new Vector<Boolean>(mTestListIgnoreResult.subList(i+1, mTestListIgnoreResult.size()));
+                    mResumeIndex = i;
                     break;
                 }
             }
@@ -286,7 +290,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
     }
 
-    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult) {
+    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult, int testIndex) {
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LayoutTestsAutoTest.this) {
@@ -322,6 +326,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(test));
         intent.putExtra(TestShellActivity.RESULT_FILE, resultFile);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
+        intent.putExtra(TestShellActivity.TEST_COUNT, mTestCount);
+        intent.putExtra(TestShellActivity.TEST_INDEX, testIndex);
         activity.startActivity(intent);
 
         // Wait until done.
@@ -396,7 +402,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             boolean ignoreResult = mTestListIgnoreResult.elementAt(i);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
             // Run tests
-            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult);
+            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult, i + 1 + mResumeIndex);
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
