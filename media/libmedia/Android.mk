@@ -26,7 +26,9 @@ LOCAL_SRC_FILES:= \
     MediaScannerClient.cpp \
     autodetect.cpp \
     IMediaDeathNotifier.cpp \
-    MediaProfiles.cpp
+    MediaProfiles.cpp \
+    IEffect.cpp \
+    IEffectClient.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat libsurfaceflinger_client libcamera_client
