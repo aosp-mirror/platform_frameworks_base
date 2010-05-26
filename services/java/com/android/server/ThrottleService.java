@@ -203,6 +203,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                     Settings.Secure.THROTTLE_NOTIFICATION_TYPE), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.THROTTLE_HELP_URI), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC), false, this);
         }
 
         @Override
@@ -438,10 +440,13 @@ public class ThrottleService extends IThrottleManager.Stub {
             mPolicyNotificationsAllowedMask = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.THROTTLE_NOTIFICATION_TYPE, defaultNotificationType);
 
+            mMaxNtpCacheAgeSec = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC, MAX_NTP_CACHE_AGE_SEC);
+
             Slog.d(TAG, "onPolicyChanged testing=" + testing +", period=" + mPolicyPollPeriodSec +
                     ", threshold=" + mPolicyThreshold.get() + ", value=" +
                     mPolicyThrottleValue.get() + ", resetDay=" + mPolicyResetDay + ", noteType=" +
-                    mPolicyNotificationsAllowedMask);
+                    mPolicyNotificationsAllowedMask + ", maxNtpCacheAge=" + mMaxNtpCacheAgeSec);
 
             // force updates
             mThrottleIndex.set(THROTTLE_INDEX_UNINITIALIZED);
@@ -719,8 +724,9 @@ public class ThrottleService extends IThrottleManager.Stub {
         getBestTime(false);
     }
 
-    private static final int MAX_NTP_CACHE_AGE = 60 * 1000;
+    private static final int MAX_NTP_CACHE_AGE_SEC = 60 * 60 * 24; // 1 day
     private static final int MAX_NTP_FETCH_WAIT = 20 * 1000;
+    private int mMaxNtpCacheAgeSec = MAX_NTP_CACHE_AGE_SEC;
     private long cachedNtp;
     private long cachedNtpTimestamp;
 
@@ -731,7 +737,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         if (mNtpServer != null) {
             if (mNtpActive) {
                 long ntpAge = SystemClock.elapsedRealtime() - cachedNtpTimestamp;
-                if (ntpAge < MAX_NTP_CACHE_AGE || fast) {
+                if (ntpAge < mMaxNtpCacheAgeSec * 1000 || fast) {
                     if (VDBG) Slog.v(TAG, "using cached time");
                     return cachedNtp + ntpAge;
                 }
@@ -1117,6 +1123,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                 " seconds.");
         pw.println("Polling every " + mPolicyPollPeriodSec + " seconds");
         pw.println("Current Throttle Index is " + mThrottleIndex.get());
+        pw.println("Max NTP Cache Age is " + mMaxNtpCacheAgeSec);
 
         for (int i = 0; i < mRecorder.getPeriodCount(); i++) {
             pw.println(" Period[" + i + "] - read:" + mRecorder.getPeriodRx(i) + ", written:" +

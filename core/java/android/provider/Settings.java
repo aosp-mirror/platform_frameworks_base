@@ -3332,6 +3332,14 @@ public final class Settings {
          */
         public static final String THROTTLE_HELP_URI = "throttle_help_uri";
 
+        /**
+         * The length of time in Sec that we allow our notion of NTP time
+         * to be cached before we refresh it
+         * @hide
+         */
+        public static final String THROTTLE_MAX_NTP_CACHE_AGE_SEC =
+                "throttle_max_ntp_cache_age_sec";
+
 
         /**
          * @hide
