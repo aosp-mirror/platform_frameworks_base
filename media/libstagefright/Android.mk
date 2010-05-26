@@ -77,6 +77,8 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_mp3dec \
         libstagefright_vorbisdec \
         libstagefright_matroska \
+        libstagefright_vpxdec \
+        libvpx \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
