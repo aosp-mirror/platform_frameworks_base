@@ -1142,7 +1142,7 @@ currently supported.</p>
 emulator checks the value of the <code>http_proxy</code> environment variable at
 startup and uses its value automatically, if defined. </p>
 
-<p>You can use the <code>-verbose-proxy</code> option to diagnose proxy
+<p>You can use the <code>-debug-proxy</code> option to diagnose proxy
 connection problems.</p>
 
 <a name="connecting"></a>
