@@ -4659,6 +4659,7 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                         if (!inFullScreenMode()) {
+                            mPrivateHandler.removeMessages(PREVENT_DEFAULT_TIMEOUT);
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
                                     .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
                                             action, 0), TAP_TIMEOUT);
