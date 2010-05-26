@@ -155,12 +155,6 @@ SharedBufferBase::~SharedBufferBase()
 {
 }
 
-uint32_t SharedBufferBase::getIdentity()
-{
-    SharedBufferStack& stack( *mSharedStack );
-    return stack.identity;
-}
-
 status_t SharedBufferBase::getStatus() const
 {
     SharedBufferStack& stack( *mSharedStack );

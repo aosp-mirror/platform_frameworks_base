@@ -151,75 +151,75 @@ bool SurfaceControl::isSameSurface(
 }
 
 status_t SurfaceControl::setLayer(int32_t layer) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setLayer(mToken, layer);
 }
 status_t SurfaceControl::setPosition(int32_t x, int32_t y) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setPosition(mToken, x, y);
 }
 status_t SurfaceControl::setSize(uint32_t w, uint32_t h) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setSize(mToken, w, h);
 }
 status_t SurfaceControl::hide() {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->hide(mToken);
 }
 status_t SurfaceControl::show(int32_t layer) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->show(mToken, layer);
 }
 status_t SurfaceControl::freeze() {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->freeze(mToken);
 }
 status_t SurfaceControl::unfreeze() {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->unfreeze(mToken);
 }
 status_t SurfaceControl::setFlags(uint32_t flags, uint32_t mask) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setFlags(mToken, flags, mask);
 }
 status_t SurfaceControl::setTransparentRegionHint(const Region& transparent) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setTransparentRegionHint(mToken, transparent);
 }
 status_t SurfaceControl::setAlpha(float alpha) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setAlpha(mToken, alpha);
 }
 status_t SurfaceControl::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setMatrix(mToken, dsdx, dtdx, dsdy, dtdy);
 }
 status_t SurfaceControl::setFreezeTint(uint32_t tint) {
-    const sp<SurfaceComposerClient>& client(mClient);
     status_t err = validate();
     if (err < 0) return err;
+    const sp<SurfaceComposerClient>& client(mClient);
     return client->setFreezeTint(mToken, tint);
 }
 
@@ -228,23 +228,6 @@ status_t SurfaceControl::validate() const
     if (mToken<0 || mClient==0) {
         LOGE("invalid token (%d, identity=%u) or client (%p)", 
                 mToken, mIdentity, mClient.get());
-        return NO_INIT;
-    }
-    SharedClient const* cblk = mClient->mControl;
-    if (cblk == 0) {
-        LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
-        return NO_INIT;
-    }
-    status_t err = cblk->validate(mToken);
-    if (err != NO_ERROR) {
-        LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
-                mToken, mIdentity, err, strerror(-err));
-        return err;
-    }
-    uint32_t identity = cblk->getIdentity(mToken);
-    if (mIdentity != identity) {
-        LOGE("using an invalid surface id=%d, identity=%u should be %d",
-                mToken, mIdentity, identity);
         return NO_INIT;
     }
     return NO_ERROR;
@@ -300,16 +283,15 @@ Surface::Surface(const sp<SurfaceControl>& surface)
       mToken(surface->mToken), mIdentity(surface->mIdentity),
       mFormat(surface->mFormat), mFlags(surface->mFlags),
       mBufferMapper(GraphicBufferMapper::get()), mSharedBufferClient(NULL),
+      mInitCheck(NO_INIT),
       mWidth(surface->mWidth), mHeight(surface->mHeight)
 {
-    mSharedBufferClient = new SharedBufferClient(
-            mClient->mControl, mToken, 2, mIdentity);
-
     init();
 }
 
 Surface::Surface(const Parcel& parcel)
-    :  mBufferMapper(GraphicBufferMapper::get()), mSharedBufferClient(NULL)
+    :  mBufferMapper(GraphicBufferMapper::get()),
+       mSharedBufferClient(NULL), mInitCheck(NO_INIT)
 {
     sp<IBinder> clientBinder = parcel.readStrongBinder();
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
@@ -323,9 +305,6 @@ Surface::Surface(const Parcel& parcel)
     // FIXME: what does that mean if clientBinder is NULL here?
     if (clientBinder != NULL) {
         mClient = SurfaceComposerClient::clientForConnection(clientBinder);
-
-        mSharedBufferClient = new SharedBufferClient(
-                mClient->mControl, mToken, 2, mIdentity);
     }
 
     init();
@@ -339,7 +318,7 @@ void Surface::init()
     android_native_window_t::queueBuffer      = queueBuffer;
     android_native_window_t::query            = query;
     android_native_window_t::perform          = perform;
-    mSwapRectangle.makeInvalid();
+
     DisplayInfo dinfo;
     SurfaceComposerClient::getDisplayInfo(0, &dinfo);
     const_cast<float&>(android_native_window_t::xdpi) = dinfo.xdpi;
@@ -348,11 +327,19 @@ void Surface::init()
     const_cast<int&>(android_native_window_t::minSwapInterval) = 1;
     const_cast<int&>(android_native_window_t::maxSwapInterval) = 1;
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
-    // be default we request a hardware surface
+
     mConnected = 0;
+    mSwapRectangle.makeInvalid();
     // two buffers by default
     mBuffers.setCapacity(2);
     mBuffers.insertAt(0, 2);
+
+    if (mClient != 0) {
+        mSharedBufferClient = new SharedBufferClient(
+                mClient->getSharedClient(), mToken, 2, mIdentity);
+    }
+
+    mInitCheck = initCheck();
 }
 
 Surface::~Surface()
@@ -375,54 +362,71 @@ Surface::~Surface()
     IPCThreadState::self()->flushCommands();
 }
 
-sp<SurfaceComposerClient> Surface::getClient() const {
-    return mClient;
-}
-
-sp<ISurface> Surface::getISurface() const {
-    return mSurface;
-}
-
-bool Surface::isValid() {
-    return mToken>=0 && mClient!=0;
-}
-
-status_t Surface::validate() const
+status_t Surface::initCheck() const
 {
-    sp<SurfaceComposerClient> client(getClient());
     if (mToken<0 || mClient==0) {
-        LOGE("invalid token (%d, identity=%u) or client (%p)", 
-                mToken, mIdentity, client.get());
         return NO_INIT;
     }
-    SharedClient const* cblk = mClient->mControl;
+    SharedClient const* cblk = mClient->getSharedClient();
     if (cblk == 0) {
         LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
         return NO_INIT;
     }
+    return NO_ERROR;
+}
+
+bool Surface::isValid() {
+    return mInitCheck == NO_ERROR;
+}
+
+status_t Surface::validate() const
+{
+    // check that we initialized ourself properly
+    if (mInitCheck != NO_ERROR) {
+        LOGE("invalid token (%d, identity=%u) or client (%p)",
+                mToken, mIdentity, mClient.get());
+        return mInitCheck;
+    }
+
+    // verify the identity of this surface
+    SharedClient const* cblk = mClient->getSharedClient();
+
+    uint32_t identity = cblk->getIdentity(mToken);
+
+    // this is a bit of a (temporary) special case, identity==0 means that
+    // no operation are allowed from the client (eg: dequeue/queue), this
+    // is used with PUSH_BUFFER surfaces for instance
+    if (identity == 0) {
+        LOGE("[Surface] invalid operation (identity=%u)", mIdentity);
+        return INVALID_OPERATION;
+    }
+
+    if (mIdentity != identity) {
+        LOGE("[Surface] using an invalid surface id=%d, "
+                "identity=%u should be %d",
+                mToken, mIdentity, identity);
+        return NO_INIT;
+    }
+
+    // check the surface didn't become invalid
     status_t err = cblk->validate(mToken);
     if (err != NO_ERROR) {
         LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
                 mToken, mIdentity, err, strerror(-err));
         return err;
     }
-    uint32_t identity = cblk->getIdentity(mToken);
-    if (mIdentity != identity) {
-        LOGE("using an invalid surface id=%d, identity=%u should be %d",
-                mToken, mIdentity, identity);
-        return NO_INIT;
-    }
+
     return NO_ERROR;
 }
 
-
-bool Surface::isSameSurface(
-        const sp<Surface>& lhs, const sp<Surface>& rhs) 
-{
+bool Surface::isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs) {
     if (lhs == 0 || rhs == 0)
         return false;
-
     return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
+}
+
+sp<ISurface> Surface::getISurface() const {
+    return mSurface;
 }
 
 // ----------------------------------------------------------------------------
@@ -485,7 +489,6 @@ bool Surface::needNewBuffer(int bufIdx,
 
 int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 {
-    sp<SurfaceComposerClient> client(getClient());
     status_t err = validate();
     if (err != NO_ERROR)
         return err;
@@ -534,7 +537,6 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
 int Surface::lockBuffer(android_native_buffer_t* buffer)
 {
-    sp<SurfaceComposerClient> client(getClient());
     status_t err = validate();
     if (err != NO_ERROR)
         return err;
@@ -547,7 +549,6 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
 
 int Surface::queueBuffer(android_native_buffer_t* buffer)
 {   
-    sp<SurfaceComposerClient> client(getClient());
     status_t err = validate();
     if (err != NO_ERROR)
         return err;
@@ -564,6 +565,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
 
     if (err == NO_ERROR) {
         // FIXME: can we avoid this IPC if we know there is one pending?
+        const sp<SurfaceComposerClient>& client(mClient);
         client->signalServer();
     }
     return err;
