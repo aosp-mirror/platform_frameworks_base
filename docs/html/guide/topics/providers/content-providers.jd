@@ -176,17 +176,7 @@ people (both controlled by the Contacts content provider) are:
 <p>
 <p style="margin-left: 2em">{@code android.provider.Contacts.Phones.CONTENT_URI}
 <br/>{@code android.provider.Contacts.Photos.CONTENT_URI}
-</p>   
-
-<p>
-Similarly, the URIs for the table of recent phone calls and the table 
-of calendar entries are:
-</p>   
-
-<p>
-<p style="margin-left: 2em">{@code android.provider.CallLog.Calls.CONTENT_URI}
-<br/>{@code android.provider.Calendar.CONTENT_URI}
-</p>   
+</p>
 
 <p>
 The URI constant is used in all interactions with the content provider. 
