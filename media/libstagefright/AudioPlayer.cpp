@@ -87,7 +87,9 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
                 DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 &AudioPlayer::AudioSinkCallback, this);
         if (err != OK) {
-            mSource->stop();
+            if (!sourceAlreadyStarted) {
+                mSource->stop();
+            }
 
             return err;
         }
@@ -108,7 +110,9 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
             delete mAudioTrack;
             mAudioTrack = NULL;
 
-            mSource->stop();
+            if (!sourceAlreadyStarted) {
+                mSource->stop();
+            }
 
             return err;
         }
