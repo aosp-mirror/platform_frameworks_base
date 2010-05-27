@@ -29,7 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "CursorWindow.h"
+#include "binder/CursorWindow.h"
 #include "sqlite3_exception.h"
 
 
