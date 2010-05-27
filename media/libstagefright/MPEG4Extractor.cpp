@@ -1633,7 +1633,7 @@ status_t MPEG4Source::read(
     }
 }
 
-bool SniffMPEG4(
+static bool LegacySniffMPEG4(
         const sp<DataSource> &source, String8 *mimeType, float *confidence) {
     uint8_t header[8];
 
@@ -1651,6 +1651,84 @@ bool SniffMPEG4(
         *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
         *confidence = 0.1;
 
+        return true;
+    }
+
+    return false;
+}
+
+static bool isCompatibleBrand(uint32_t fourcc) {
+    static const uint32_t kCompatibleBrands[] = {
+        FOURCC('i', 's', 'o', 'm'),
+        FOURCC('i', 's', 'o', '2'),
+        FOURCC('a', 'v', 'c', '1'),
+        FOURCC('3', 'g', 'p', '4'),
+        FOURCC('m', 'p', '4', '1'),
+        FOURCC('m', 'p', '4', '2'),
+    };
+
+    for (size_t i = 0;
+         i < sizeof(kCompatibleBrands) / sizeof(kCompatibleBrands[0]);
+         ++i) {
+        if (kCompatibleBrands[i] == fourcc) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Attempt to actually parse the 'ftyp' atom and determine if a suitable
+// compatible brand is present.
+static bool BetterSniffMPEG4(
+        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+    uint8_t header[12];
+    if (source->readAt(0, header, 12) != 12
+            || memcmp("ftyp", &header[4], 4)) {
+        return false;
+    }
+
+    size_t atomSize = U32_AT(&header[0]);
+    if (atomSize < 16 || (atomSize % 4) != 0) {
+        return false;
+    }
+
+    bool success = false;
+    if (isCompatibleBrand(U32_AT(&header[8]))) {
+        success = true;
+    } else {
+        size_t numCompatibleBrands = (atomSize - 16) / 4;
+        for (size_t i = 0; i < numCompatibleBrands; ++i) {
+            uint8_t tmp[4];
+            if (source->readAt(16 + i * 4, tmp, 4) != 4) {
+                return false;
+            }
+
+            if (isCompatibleBrand(U32_AT(&tmp[0]))) {
+                success = true;
+                break;
+            }
+        }
+    }
+
+    if (!success) {
+        return false;
+    }
+
+    *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
+    *confidence = 0.3f;
+
+    return true;
+}
+
+bool SniffMPEG4(
+        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
+    if (BetterSniffMPEG4(source, mimeType, confidence)) {
+        return true;
+    }
+
+    if (LegacySniffMPEG4(source, mimeType, confidence)) {
+        LOGW("Identified supported mpeg4 through LegacySniffMPEG4.");
         return true;
     }
 
