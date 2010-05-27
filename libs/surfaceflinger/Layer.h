@@ -67,6 +67,7 @@ public:
     virtual void finishPageFlip();
     virtual bool needsBlending() const      { return mNeedsBlending; }
     virtual bool needsDithering() const     { return mNeedsDithering; }
+    virtual bool needsFiltering() const;
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
