@@ -174,7 +174,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mSaveImagePath = intent.getStringExtra(SAVE_IMAGE);
         mTestCount = intent.getIntExtra(TEST_COUNT, 0);
         mTestIndex = intent.getIntExtra(TEST_INDEX, 0);
-        setTitle("Test " + mTestIndex + " of " + mTestCount);
+        setTitle("Test " + (mTestIndex + 1) + " of " + mTestCount);
 
         Log.v(LOGTAG, "  Loading " + mTestUrl);
         mWebView.loadUrl(mTestUrl);
@@ -574,7 +574,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         @Override
         public void onReceivedTitle(WebView view, String title) {
-            setTitle("Test " + mTestIndex + " of " + mTestCount + ": "+ title);
+            setTitle("Test " + (mTestIndex + 1) + " of " + mTestCount + ": "+ title);
             if (mDumpTitleChanges) {
                 mTitleChanges.append("TITLE CHANGED: ");
                 mTitleChanges.append(title);

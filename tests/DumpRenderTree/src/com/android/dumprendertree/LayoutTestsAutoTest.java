@@ -154,7 +154,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     private String mTestPathPrefix;
     private boolean mFinished;
     private int mTestCount;
-    private int mResumeIndex = 0;
+    private int mResumeIndex;
 
     public LayoutTestsAutoTest() {
       super(TestShellActivity.class);
@@ -189,7 +189,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                 if (mTestList.elementAt(i).equals(line)) {
                     mTestList = new Vector<String>(mTestList.subList(i+1, mTestList.size()));
                     mTestListIgnoreResult = new Vector<Boolean>(mTestListIgnoreResult.subList(i+1, mTestListIgnoreResult.size()));
-                    mResumeIndex = i;
+                    mResumeIndex = i + 1;
                     break;
                 }
             }
@@ -402,7 +402,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             boolean ignoreResult = mTestListIgnoreResult.elementAt(i);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
             // Run tests
-            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult, i + 1 + mResumeIndex);
+            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult, i + mResumeIndex);
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
