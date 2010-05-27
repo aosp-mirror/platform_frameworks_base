@@ -337,23 +337,17 @@ keys)</td>
 <td><code>-v</code></td><td>Enable verbose output.</td>
 </tr>
 <tr>
-<td><code>-keystore&nbsp;&lt;keystore-name&gt;.keystore</code></td><td>A name
-for the keystore containing the private key.</td>
-</tr>
-<tr>
-<td><code>-storepass &lt;password&gt;</code></td><td><p>A password for the
-keystore.</p><p>As a security precaution, do not include this option 
-in your command line unless you are working at a secure computer.
-If not supplied, Keytool prompts you to enter the password. In this 
-way, your password is not stored in your shell history.</p></td>
-</tr>
-<tr>
 <td><code>-alias &lt;alias_name&gt;</code></td><td>An alias for the key. Only
 the first 8 characters of the alias are used.</td>
 </tr>
 <tr>
 <td><code>-keyalg &lt;alg&gt;</code></td><td>The encryption algorithm to use 
 when generating the key. Both DSA and RSA are supported.</td>
+</tr>
+<tr>
+<td><code>-keysize &lt;size&gt;</code></td><td>The size of each generated key
+(bits). If not supplied, Keytool uses a default key size of 1024 bits. In
+general, we recommend using a key size of 2048 bits or higher. </td>
 </tr>
 <tr>
 <td><code>-dname &lt;name&gt;</code></td><td><p>A Distinguished Name that describes
@@ -363,22 +357,31 @@ in the command line. If not supplied, Jarsigner prompts you to enter each
 of the Distinguished Name fields (CN, OU, and so on).</p></td>
 </tr>
 <tr>
+<td><code>-keypass &lt;password&gt;</code></td><td><p>The password for the
+key.</p> <p>As a security precaution, do not include this option in your command
+line. If not supplied, Keytool prompts you to enter the password. In this way,
+your password is not stored in your shell history.</p></td>
+</tr>
+<tr>
 <td><code>-validity &lt;valdays&gt;</code></td><td><p>The validity period for the
 key, in days. </p><p><strong>Note:</strong> A value of 10000 or greater is recommended.</p></td>
 </tr>
 <tr>
-<td><code>-keypass &lt;password&gt;</code></td><td><p>The password for the key.</p>
-<p>As a security precaution, do not include this option 
-in your command line unless you are working at a secure computer.
-If not supplied, Keytool prompts you to enter the password. In this 
-way, your password is not stored in your shell history.</p></td>
+<td><code>-keystore&nbsp;&lt;keystore-name&gt;.keystore</code></td><td>A name
+for the keystore containing the private key.</td>
+</tr>
+<tr>
+<td><code>-storepass &lt;password&gt;</code></td><td><p>A password for the
+keystore.</p><p>As a security precaution, do not include this option in your
+command line. If not supplied, Keytool prompts you to enter the password. In
+this way, your password is not stored in your shell history.</p></td>
 </tr>
 </table>
 
 <p>Here's an example of a Keytool command that generates a private key:</p>
 
 <pre>$ keytool -genkey -v -keystore my-release-key.keystore 
--alias alias_name -keyalg RSA -validity 10000</pre>
+-alias alias_name -keyalg RSA -keysize 2048 -validity 10000</pre>
 
 <p>Running the example command above, Keytool prompts you to provide
 passwords for the keystore and key, and to provide the Distinguished

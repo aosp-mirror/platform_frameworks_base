@@ -494,13 +494,21 @@ class NetworkManagementService extends INetworkManagementService.Stub {
              * argv8 - Max SCB
              */
             String str = String.format("softap set " + wlanIface + " " + softapIface +
-                                       " \"%s\" %s %s", wifiConfig.SSID,
+                                       " %s %s %s", convertQuotedString(wifiConfig.SSID),
                                        wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
                                        "wpa2-psk" : "open",
-                                       wifiConfig.preSharedKey);
+                                       convertQuotedString(wifiConfig.preSharedKey));
             mConnector.doCommand(str);
         }
         mConnector.doCommand(String.format("softap startap"));
+    }
+
+    private String convertQuotedString(String s) {
+        if (s == null) {
+            return s;
+        }
+        /* Replace \ with \\, then " with \" and add quotes at end */
+        return '"' + s.replaceAll("\\\\","\\\\\\\\").replaceAll("\"","\\\\\"") + '"';
     }
 
     public void stopAccessPoint() throws IllegalStateException {
@@ -521,10 +529,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
         } else {
             String str = String.format("softap set " + wlanIface + " " + softapIface +
-                                       " \"%s\" %s %s", wifiConfig.SSID,
+                                       " %s %s %s", convertQuotedString(wifiConfig.SSID),
                                        wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
                                        "wpa2-psk" : "open",
-                                       wifiConfig.preSharedKey);
+                                       convertQuotedString(wifiConfig.preSharedKey));
             mConnector.doCommand(str);
         }
     }
