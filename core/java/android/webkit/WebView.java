@@ -3459,7 +3459,9 @@ public class WebView extends AbsoluteLayout
      *  @param  end     End of selection.
      */
     /* package */ void setSelection(int start, int end) {
-        mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
+        }
     }
 
     @Override
