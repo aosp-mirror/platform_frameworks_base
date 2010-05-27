@@ -19,6 +19,7 @@
 #define CAMERA_SOURCE_H_
 
 #include <media/stagefright/MediaBuffer.h>
+#include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaSource.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
@@ -61,6 +62,7 @@ private:
     int32_t mNumFramesReceived;
     int32_t mNumFramesEncoded;
     int32_t mNumFramesDropped;
+    MediaBufferGroup *mBufferGroup;
     bool mStarted;
 
     CameraSource(const sp<Camera> &camera);

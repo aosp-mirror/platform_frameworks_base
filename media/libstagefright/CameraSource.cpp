@@ -104,6 +104,7 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mNumFramesReceived(0),
       mNumFramesEncoded(0),
       mNumFramesDropped(0),
+      mBufferGroup(NULL),
       mStarted(false) {
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
@@ -118,6 +119,23 @@ CameraSource::~CameraSource() {
     }
 }
 
+static int bytesPerPixelTimes10(const char *colorFormat) {
+    LOGI("color format: %s", colorFormat);
+    return 20;
+#if 0
+    // XXX: Fix Camera Hal bug?
+    // On sholes, it returns CameraParameters::PIXEL_FORMAT_YUV420SP???
+    if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV422SP) ||
+        !strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV422I)  ||
+        !strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_RGB565)) {
+        return 20;
+    } else if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV420SP)) {
+        return 15;
+    }
+    CHECK_EQ(0, "Unknown color format");
+#endif
+}
+
 status_t CameraSource::start(MetaData *) {
     LOGV("start");
     CHECK(!mStarted);
@@ -126,6 +144,12 @@ status_t CameraSource::start(MetaData *) {
     CHECK_EQ(OK, mCamera->startRecording());
 
     mStarted = true;
+    mBufferGroup = new MediaBufferGroup();
+    String8 s = mCamera->getParameters();
+    CameraParameters params(s);
+    const char *colorFormat = params.getPreviewFormat();
+    const int size = (mWidth * mHeight * bytesPerPixelTimes10(colorFormat))/10;
+    mBufferGroup->add_buffer(new MediaBuffer(size));
 
     return OK;
 }
@@ -139,6 +163,8 @@ status_t CameraSource::stop() {
     mCamera->stopRecording();
 
     releaseQueuedFrames();
+    delete mBufferGroup;
+    mBufferGroup = NULL;
     LOGI("Frames received/encoded/dropped: %d/%d/%d, timestamp (us) last/first: %lld/%lld",
             mNumFramesReceived, mNumFramesEncoded, mNumFramesDropped,
             mLastFrameTimestampUs, mFirstFrameTimeUs);
@@ -197,7 +223,7 @@ status_t CameraSource::read(
         ++mNumFramesEncoded;
     }
 
-    *buffer = new MediaBuffer(frame->size());
+    mBufferGroup->acquire_buffer(buffer);
     memcpy((*buffer)->data(), frame->pointer(), frame->size());
     (*buffer)->set_range(0, frame->size());
     mCamera->releaseRecordingFrame(frame);
