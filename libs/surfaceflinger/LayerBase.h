@@ -182,11 +182,6 @@ public:
     virtual bool needsFiltering() const { return mNeedsFiltering; }
 
     /**
-     * transformed -- true is this surface needs a to be transformed
-     */
-    virtual bool transformed() const    { return mTransformed; }
-
-    /**
      * isSecure - true if this surface is secure, that is if it prevents
      * screenshots or VNC servers.
      */
@@ -236,7 +231,6 @@ protected:
                 uint32_t        mFlags;
 
                 // cached during validateVisibility()
-                bool            mTransformed;
                 bool            mNeedsFiltering;
                 int32_t         mOrientation;
                 GLfloat         mVertices[4][2];
