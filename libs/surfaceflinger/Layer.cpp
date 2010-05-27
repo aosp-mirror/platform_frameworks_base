@@ -209,6 +209,19 @@ void Layer::onDraw(const Region& clip) const
     drawWithOpenGL(clip, tex);
 }
 
+bool Layer::needsFiltering() const
+{
+    if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
+        // NOTE: there is a race here, because mFixedSize is updated in a
+        // binder transaction. however, it doesn't really matter since it is
+        // evaluated each time we draw. To be perfectly correct, this flag
+        // would have to be associated with a buffer.
+        if (mFixedSize)
+            return true;
+    }
+    return LayerBase::needsFiltering();
+}
+
 
 status_t Layer::setBufferCount(int bufferCount)
 {
