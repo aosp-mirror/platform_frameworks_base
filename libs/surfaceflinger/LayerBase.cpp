@@ -42,7 +42,6 @@ namespace android {
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
-      mTransformed(false),
       mNeedsFiltering(false),
       mOrientation(0),
       mLeft(0), mTop(0),
@@ -259,7 +258,6 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     // cache a few things...
     mOrientation = tr.getOrientation();
     mTransformedBounds = tr.makeBounds(w, h);
-    mTransformed = transformed;
     mLeft = tr.tx();
     mTop  = tr.ty();
 }
