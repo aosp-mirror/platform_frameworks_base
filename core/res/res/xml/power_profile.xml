@@ -18,7 +18,7 @@
 -->
 
 <device name="Android">
-  <!-- All values are in mAh except as noted ->
+  <!-- All values are in mAh except as noted -->
   <item name="none">0</item>
   <item name="screen.on">0.1</item>
   <item name="bluetooth.active">0.1</item>
