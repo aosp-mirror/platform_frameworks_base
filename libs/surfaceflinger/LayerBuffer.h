@@ -46,7 +46,6 @@ class LayerBuffer : public LayerBaseClient
         virtual void onVisibilityResolved(const Transform& planeTransform);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        virtual bool transformed() const;
         virtual void destroy() { }
     protected:
         LayerBuffer& mLayer;
@@ -66,7 +65,6 @@ public:
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
-    virtual bool transformed() const;
 
     status_t registerBuffers(const ISurface::BufferHeap& buffers);
     void postBuffer(ssize_t offset);
@@ -130,7 +128,6 @@ private:
         virtual void onDraw(const Region& clip) const;
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        virtual bool transformed() const;
         virtual void destroy() { }
     private:
         status_t initTempBuffer() const;
