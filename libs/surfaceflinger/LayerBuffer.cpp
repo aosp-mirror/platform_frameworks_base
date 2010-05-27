@@ -118,7 +118,7 @@ uint32_t LayerBuffer::doTransaction(uint32_t flags)
         source->onTransaction(flags);
     uint32_t res = LayerBase::doTransaction(flags);
     // we always want filtering for these surfaces
-    mUseLinearFiltering = !(mFlags & DisplayHardware::SLOW_CONFIG);
+    mNeedsFiltering = !(mFlags & DisplayHardware::SLOW_CONFIG);
     return res;
 }
 
@@ -542,7 +542,7 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
     // figure out if we need linear filtering
     if (buffers.w * h == buffers.h * w) {
         // same pixel area, don't use filtering
-        mLayer.mUseLinearFiltering = false;
+        mLayer.mNeedsFiltering = false;
     }
 
     // Allocate a temporary buffer and create the corresponding EGLImageKHR
