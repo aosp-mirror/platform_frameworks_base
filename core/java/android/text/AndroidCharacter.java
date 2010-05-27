@@ -53,10 +53,10 @@ public class AndroidCharacter
 
     /**
      * Fill the first <code>count</code> bytes of <code>dest</code> with the
-     * East Asian Width from the first <code>count</code> chars of
-     * <code>src</code>. East Asian Width is calculated based on
+     * East Asian Width from <code>count</code> chars of <code>src</code>
+     * starting at <code>start</code>. East Asian Width is calculated based on
      * <a href="http://unicode.org/reports/tr11/">Unicode TR#11</a>. Each entry
-     * in <code>dest> will be one of {@link #EAST_ASIAN_WIDTH_NEUTRAL},
+     * in <code>dest</code> will be one of {@link #EAST_ASIAN_WIDTH_NEUTRAL},
      * {@link #EAST_ASIAN_WIDTH_AMBIGUOUS}, {@link #EAST_ASIAN_WIDTH_HALF_WIDTH},
      * {@link #EAST_ASIAN_WIDTH_FULL_WIDTH}, {@link #EAST_ASIAN_WIDTH_NARROW},
      * or {@link #EAST_ASIAN_WIDTH_WIDE}.
