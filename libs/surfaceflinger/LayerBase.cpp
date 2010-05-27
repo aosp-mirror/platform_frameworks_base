@@ -338,13 +338,13 @@ void LayerBase::draw(const Region& inClip) const
     */
 }
 
-void LayerBase::clearWithOpenGL(const Region& clip, GLclampx red,
-                                GLclampx green, GLclampx blue,
-                                GLclampx alpha) const
+void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
+                                GLclampf green, GLclampf blue,
+                                GLclampf alpha) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
-    glColor4x(red,green,blue,alpha);
+    glColor4f(red,green,blue,alpha);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
