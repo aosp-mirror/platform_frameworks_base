@@ -177,6 +177,11 @@ public:
     virtual bool needsDithering() const { return false; }
 
     /**
+     * needsLinearFiltering - true if this surface needs filtering
+     */
+    virtual bool needsFiltering() const { return mNeedsFiltering; }
+
+    /**
      * transformed -- true is this surface needs a to be transformed
      */
     virtual bool transformed() const    { return mTransformed; }
@@ -232,7 +237,7 @@ protected:
 
                 // cached during validateVisibility()
                 bool            mTransformed;
-                bool            mUseLinearFiltering;
+                bool            mNeedsFiltering;
                 int32_t         mOrientation;
                 GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;

@@ -43,7 +43,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
       mTransformed(false),
-      mUseLinearFiltering(false),
+      mNeedsFiltering(false),
       mOrientation(0),
       mLeft(0), mTop(0),
       mTransactionFlags(0),
@@ -214,13 +214,12 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
         flags |= eVisibleRegion;
         this->contentDirty = true;
 
-        const bool linearFiltering = mUseLinearFiltering;
-        mUseLinearFiltering = false;
+        mNeedsFiltering = false;
         if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
             // we may use linear filtering, if the matrix scales us
             const uint8_t type = temp.transform.getType();
             if (!temp.transform.preserveRects() || (type >= Transform::SCALE)) {
-                mUseLinearFiltering = true;
+                mNeedsFiltering = true;
             }
         }
     }
@@ -466,7 +465,7 @@ void LayerBase::validateTexture(GLint textureName) const
     glBindTexture(GL_TEXTURE_2D, textureName);
     // TODO: reload the texture if needed
     // this is currently done in loadTexture() below
-    if (mUseLinearFiltering) {
+    if (needsFiltering()) {
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     } else {
