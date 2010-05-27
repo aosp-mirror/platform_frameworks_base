@@ -104,7 +104,6 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mNumFramesReceived(0),
       mNumFramesEncoded(0),
       mNumFramesDropped(0),
-      mBufferGroup(NULL),
       mStarted(false) {
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
@@ -139,8 +138,12 @@ status_t CameraSource::stop() {
     mCamera->stopRecording();
 
     releaseQueuedFrames();
-    delete mBufferGroup;
-    mBufferGroup = NULL;
+
+    while (!mFramesBeingEncoded.empty()) {
+        LOGI("Number of outstanding frames is being encoded: %d", mFramesBeingEncoded.size());
+        mFrameCompleteCondition.wait(mLock);
+    }
+
     LOGI("Frames received/encoded/dropped: %d/%d/%d, timestamp (us) last/first: %lld/%lld",
             mNumFramesReceived, mNumFramesEncoded, mNumFramesDropped,
             mLastFrameTimestampUs, mFirstFrameTimeUs);
@@ -151,10 +154,10 @@ status_t CameraSource::stop() {
 
 void CameraSource::releaseQueuedFrames() {
     List<sp<IMemory> >::iterator it;
-    while (!mFrames.empty()) {
-        it = mFrames.begin();
+    while (!mFramesReceived.empty()) {
+        it = mFramesReceived.begin();
         mCamera->releaseRecordingFrame(*it);
-        mFrames.erase(it);
+        mFramesReceived.erase(it);
         ++mNumFramesDropped;
     }
 }
@@ -167,6 +170,23 @@ sp<MetaData> CameraSource::getFormat() {
     meta->setInt32(kKeyHeight, mHeight);
 
     return meta;
+}
+
+void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
+    LOGV("signalBufferReturned: %p", buffer->data());
+    for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
+         it != mFramesBeingEncoded.end(); ++it) {
+        if ((*it)->pointer() ==  buffer->data()) {
+            mCamera->releaseRecordingFrame((*it));
+            mFramesBeingEncoded.erase(it);
+            ++mNumFramesEncoded;
+            buffer->setObserver(0);
+            buffer->release();
+            mFrameCompleteCondition.signal();
+            return;
+        }
+    }
+    CHECK_EQ(0, "signalBufferReturned: bogus buffer");
 }
 
 status_t CameraSource::read(
@@ -185,33 +205,24 @@ status_t CameraSource::read(
 
     {
         Mutex::Autolock autoLock(mLock);
-        while (mStarted && mFrames.empty()) {
+        while (mStarted && mFramesReceived.empty()) {
             mFrameAvailableCondition.wait(mLock);
         }
         if (!mStarted) {
             return OK;
         }
-        frame = *mFrames.begin();
-        mFrames.erase(mFrames.begin());
+        frame = *mFramesReceived.begin();
+        mFramesReceived.erase(mFramesReceived.begin());
 
         frameTime = *mFrameTimes.begin();
         mFrameTimes.erase(mFrameTimes.begin());
-        ++mNumFramesEncoded;
+
+        mFramesBeingEncoded.push_back(frame);
+        *buffer = new MediaBuffer(frame->pointer(), frame->size());
+        (*buffer)->setObserver(this);
+        (*buffer)->add_ref();
+        (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
     }
-    if (mBufferGroup == NULL) {
-        mBufferGroup = new MediaBufferGroup();
-        CHECK(mBufferGroup != NULL);
-        mBufferGroup->add_buffer(new MediaBuffer(frame->size()));
-    }
-
-    mBufferGroup->acquire_buffer(buffer);
-    memcpy((*buffer)->data(), frame->pointer(), frame->size());
-    (*buffer)->set_range(0, frame->size());
-    mCamera->releaseRecordingFrame(frame);
-
-    (*buffer)->meta_data()->clear();
-    (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
-
     return OK;
 }
 
@@ -232,7 +243,7 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     }
     ++mNumFramesReceived;
 
-    mFrames.push_back(data);
+    mFramesReceived.push_back(data);
     mFrameTimes.push_back(timestampUs - mFirstFrameTimeUs);
     mFrameAvailableCondition.signal();
 }
