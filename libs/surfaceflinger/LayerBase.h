@@ -222,8 +222,8 @@ protected:
     const GraphicPlane& graphicPlane(int dpy) const;
           GraphicPlane& graphicPlane(int dpy);
 
-          void clearWithOpenGL(const Region& clip, GLclampx r, GLclampx g,
-                               GLclampx b, GLclampx alpha) const;
+          void clearWithOpenGL(const Region& clip, GLclampf r, GLclampf g,
+                               GLclampf b, GLclampf alpha) const;
           void clearWithOpenGL(const Region& clip) const;
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
           
