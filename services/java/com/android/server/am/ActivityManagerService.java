@@ -1106,7 +1106,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mHandler.sendMessageDelayed(nmsg, BROADCAST_TIMEOUT);
                     return;
                 }
-                broadcastTimeout();
+                // Only process broadcast timeouts if the system is ready. That way
+                // PRE_BOOT_COMPLETED broadcasts can't timeout as they are intended
+                // to do heavy lifting for system up
+                if (mSystemReady) {
+                    broadcastTimeout();
+                }
             } break;
             case PAUSE_TIMEOUT_MSG: {
                 IBinder token = (IBinder)msg.obj;
@@ -13116,10 +13121,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
                 // Ensure that even if something goes awry with the timeout
                 // detection, we catch "hung" broadcasts here, discard them,
-                // and continue to make progress.  
+                // and continue to make progress.
+                //
+                // This is only done if the system is ready so that PRE_BOOT_COMPLETED
+                // receivers don't get executed with with timeouts. They're intended for
+                // one time heavy lifting after system upgrades and can take
+                // significant amounts of time.
                 int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
-                long now = SystemClock.uptimeMillis();
-                if (r.dispatchTime > 0) {
+                if (mSystemReady && r.dispatchTime > 0) {
+                    long now = SystemClock.uptimeMillis();
                     if ((numReceivers > 0) &&
                             (now > r.dispatchTime + (2*BROADCAST_TIMEOUT*numReceivers))) {
                         Slog.w(TAG, "Hung broadcast discarded after timeout failure:"
