@@ -123,4 +123,13 @@ public class StatusBarManager {
             throw new RuntimeException(ex);
         }
     }
+
+    public void setIconVisibility(String slot, boolean visible) {
+        try {
+            mService.setIconVisibility(slot, visible);
+        } catch (RemoteException ex) {
+            // system process is dead anyway.
+            throw new RuntimeException(ex);
+        }
+    }
 }

@@ -220,9 +220,6 @@
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
 
-    <!-- Control whether status bar should distinguish HSPA data icon form UMTS data icon on devices -->
-    <bool name="config_hspa_data_distinguishable">false</bool>
-
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 zones as follows:
 
