@@ -610,6 +610,9 @@ int Surface::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFER_COUNT:
         res = dispatch_set_buffer_count( args );
         break;
+    case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
+        res = dispatch_set_buffers_geometry( args );
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
