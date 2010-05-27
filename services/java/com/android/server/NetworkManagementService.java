@@ -504,8 +504,11 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     private String convertQuotedString(String s) {
-      /* Replace \ with \\, then " with \" and add quotes at end */
-      return '"' + s.replaceAll("\\\\","\\\\\\\\").replaceAll("\"","\\\\\"") + '"';
+        if (s == null) {
+            return s;
+        }
+        /* Replace \ with \\, then " with \" and add quotes at end */
+        return '"' + s.replaceAll("\\\\","\\\\\\\\").replaceAll("\"","\\\\\"") + '"';
     }
 
     public void stopAccessPoint() throws IllegalStateException {
