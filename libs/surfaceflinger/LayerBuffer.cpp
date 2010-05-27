@@ -143,14 +143,6 @@ void LayerBuffer::onDraw(const Region& clip) const
     }
 }
 
-bool LayerBuffer::transformed() const
-{
-    sp<Source> source(getSource());
-    if (LIKELY(source != 0))
-        return source->transformed();
-    return false;
-}
-
 void LayerBuffer::serverDestroy()
 {
     sp<Source> source(clearSource());
@@ -319,9 +311,6 @@ void LayerBuffer::Source::postBuffer(ssize_t offset) {
 }
 void LayerBuffer::Source::unregisterBuffers() {
 }
-bool LayerBuffer::Source::transformed() const {
-    return mLayer.mTransformed; 
-}
 
 // ---------------------------------------------------------------------------
 
@@ -440,11 +429,6 @@ void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
 {
     Mutex::Autolock _l(mBufferSourceLock);
     mBuffer = buffer;
-}
-
-bool LayerBuffer::BufferSource::transformed() const
-{
-    return mBufferHeap.transform ? true : Source::transformed(); 
 }
 
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
