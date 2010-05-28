@@ -51,7 +51,7 @@ final class JWebCoreJavaBridge extends Handler {
     /* package */
     static final int REFRESH_PLUGINS = 100;
 
-    private HashMap<String, String> mContentUriToFileNameMap;
+    private HashMap<String, String> mContentUriToFilePathMap;
 
     /**
      * Construct a new JWebCoreJavaBridge to interface with
@@ -273,9 +273,9 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     // Called on the WebCore thread through JNI.
-    private String resolveFileNameForContentUri(String uri) {
-        if (mContentUriToFileNameMap != null) {
-            String fileName = mContentUriToFileNameMap.get(uri);
+    private String resolveFilePathForContentUri(String uri) {
+        if (mContentUriToFilePathMap != null) {
+            String fileName = mContentUriToFilePathMap.get(uri);
             if (fileName != null) {
                 return fileName;
             }
@@ -287,11 +287,11 @@ final class JWebCoreJavaBridge extends Handler {
         return jUri.getLastPathSegment();
     }
 
-    public void storeFileNameForContentUri(String fileName, String contentUri) {
-        if (mContentUriToFileNameMap == null) {
-            mContentUriToFileNameMap = new HashMap<String, String>();
+    public void storeFilePathForContentUri(String path, String contentUri) {
+        if (mContentUriToFilePathMap == null) {
+            mContentUriToFilePathMap = new HashMap<String, String>();
         }
-        mContentUriToFileNameMap.put(contentUri, fileName);
+        mContentUriToFilePathMap.put(contentUri, path);
     }
 
     private native void nativeConstructor();
