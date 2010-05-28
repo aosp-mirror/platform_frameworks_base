@@ -58,7 +58,7 @@ import android.os.Message;
 public class Camera {
     private static final String TAG = "Camera";
 
-    // These match the enums in frameworks/base/include/ui/Camera.h
+    // These match the enums in frameworks/base/include/camera/Camera.h
     private static final int CAMERA_MSG_ERROR            = 0x001;
     private static final int CAMERA_MSG_SHUTTER          = 0x002;
     private static final int CAMERA_MSG_FOCUS            = 0x004;
