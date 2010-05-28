@@ -233,7 +233,6 @@ public class PhoneStatusBarService extends StatusBarService {
         mStatusBarView = sb;
         mStatusIcons = (LinearLayout)sb.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)sb.findViewById(R.id.notificationIcons);
-        mNotificationIcons.service = this;
         mIcons = (LinearLayout)sb.findViewById(R.id.icons);
         mTickerView = sb.findViewById(R.id.ticker);
         mDateView = (DateView)sb.findViewById(R.id.date);
@@ -267,6 +266,12 @@ public class PhoneStatusBarService extends StatusBarService {
         mCloseView.mService = this;
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
+
+        // the more notifications icon
+        StatusBarIconView moreView = new StatusBarIconView(this, "more");
+        moreView.set(new StatusBarIcon(null, R.drawable.stat_notify_more, 0));
+        mNotificationIcons.addMoreView(moreView,
+                new LinearLayout.LayoutParams(mIconWidth, mHeight));
 
         // set the inital view visibility
         setAreThereNotifications();
@@ -414,13 +419,13 @@ public class PhoneStatusBarService extends StatusBarService {
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
 
-    private int chooseIconIndex(boolean isOngoing, int index) {
-        final int ongoingSize = mOngoing.size();
+    private int chooseIconIndex(boolean isOngoing, int viewIndex) {
         final int latestSize = mLatest.size();
-        if (!isOngoing) {
-            index = mLatest.size() + index;
+        if (isOngoing) {
+            return latestSize + (mOngoing.size() - viewIndex);
+        } else {
+            return latestSize - viewIndex;
         }
-        return (ongoingSize + latestSize) - index - 1;
     }
 
     View[] makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
