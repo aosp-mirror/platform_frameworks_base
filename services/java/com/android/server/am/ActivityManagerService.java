@@ -4779,10 +4779,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     /**
      * If a stack trace dump file is configured, dump process stack traces.
+     * @param clearTraces causes the dump file to be erased prior to the new
+     *    traces being written, if true; when false, the new traces will be
+     *    appended to any existing file content.
      * @param pids of dalvik VM processes to dump stack traces for
      * @return file containing stack traces, or null if no dump file is configured
      */
-    public static File dumpStackTraces(ArrayList<Integer> pids) {
+    public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> pids) {
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
         if (tracesPath == null || tracesPath.length() == 0) {
             return null;
@@ -4794,7 +4797,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (!tracesDir.exists()) tracesFile.mkdirs();
             FileUtils.setPermissions(tracesDir.getPath(), 0775, -1, -1);  // drwxrwxr-x
 
-            if (tracesFile.exists()) tracesFile.delete();
+            if (clearTraces && tracesFile.exists()) tracesFile.delete();
             tracesFile.createNewFile();
             FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
         } catch (IOException e) {
@@ -4869,7 +4872,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        File tracesFile = dumpStackTraces(pids);
+        File tracesFile = dumpStackTraces(true, pids);
 
         // Log the ANR to the main log.
         StringBuilder info = mStringBuilder;
