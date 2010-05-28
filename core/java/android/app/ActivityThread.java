@@ -31,6 +31,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
@@ -2149,8 +2150,27 @@ public final class ActivityThread {
 
         void maybeSnapshot() {
             if (mBoundApplication != null) {
-                SamplingProfilerIntegration.writeSnapshot(
-                        mBoundApplication.processName);
+                // convert the *private* ActivityThread.PackageInfo to *public* known
+                // android.content.pm.PackageInfo
+                String packageName = mBoundApplication.info.mPackageName;
+                android.content.pm.PackageInfo packageInfo = null;
+                try {
+                    Context context = getSystemContext();
+                    if(context == null) {
+                        Log.e(TAG, "cannot get a valid context");
+                        return;
+                    }
+                    PackageManager pm = context.getPackageManager();
+                    if(pm == null) {
+                        Log.e(TAG, "cannot get a valid PackageManager");
+                        return;
+                    }
+                    packageInfo = pm.getPackageInfo(
+                            packageName, PackageManager.GET_ACTIVITIES);
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "cannot get package info for " + packageName, e);
+                }
+                SamplingProfilerIntegration.writeSnapshot(mBoundApplication.processName, packageInfo);
             }
         }
     }

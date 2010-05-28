@@ -16,14 +16,11 @@
 
 package android.provider;
 
-import com.google.android.collect.Maps;
 
-import org.apache.commons.codec.binary.Base64;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
-import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -38,19 +35,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.*;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Config;
 import android.util.Log;
 
 import java.net.URISyntaxException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 
 /**
@@ -2414,6 +2406,14 @@ public final class Settings {
          * No longer supported.
          */
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
+
+        /**
+         * A positive value indicates the frequency of SamplingProfiler
+         * taking snapshots in hertz. Zero value means SamplingProfiler is disabled.
+         *
+         * @hide
+         */
+        public static final String SAMPLING_PROFILER_HZ = "sampling_profiler_hz";
 
         /**
          * Settings classname to launch when Settings is clicked from All
