@@ -18,18 +18,13 @@
 #define LOG_TAG "CursorWindow"
 
 #include <utils/Log.h>
+#include <binder/CursorWindow.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include <jni.h>
-#include <JNIHelp.h>
-
-#include "CursorWindow.h"
-
 
 namespace android {
 
