@@ -44,6 +44,7 @@ class Surface;
 class SurfaceComposerClient;
 class SharedClient;
 class SharedBufferClient;
+class SurfaceClient;
 
 // ---------------------------------------------------------------------------
 
@@ -263,7 +264,7 @@ private:
     };
 
     // constants
-    sp<SurfaceComposerClient>   mClient;
+    sp<SurfaceClient>           mClient;
     sp<ISurface>                mSurface;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;

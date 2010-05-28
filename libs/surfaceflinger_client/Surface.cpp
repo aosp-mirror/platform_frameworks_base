@@ -278,14 +278,16 @@ sp<Surface> SurfaceControl::getSurface() const
 //  Surface
 // ============================================================================
 
+
 Surface::Surface(const sp<SurfaceControl>& surface)
-    : mClient(surface->mClient), mSurface(surface->mSurface),
+    : mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
       mFormat(surface->mFormat), mFlags(surface->mFlags),
       mBufferMapper(GraphicBufferMapper::get()), mSharedBufferClient(NULL),
       mInitCheck(NO_INIT),
       mWidth(surface->mWidth), mHeight(surface->mHeight)
 {
+    mClient = new SurfaceClient(surface->mClient);
     init();
 }
 
@@ -293,7 +295,7 @@ Surface::Surface(const Parcel& parcel)
     :  mBufferMapper(GraphicBufferMapper::get()),
        mSharedBufferClient(NULL), mInitCheck(NO_INIT)
 {
-    sp<IBinder> clientBinder = parcel.readStrongBinder();
+    sp<IBinder> conn = parcel.readStrongBinder();
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
     mToken      = parcel.readInt32();
     mIdentity   = parcel.readInt32();
@@ -301,12 +303,7 @@ Surface::Surface(const Parcel& parcel)
     mHeight     = parcel.readInt32();
     mFormat     = parcel.readInt32();
     mFlags      = parcel.readInt32();
-
-    // FIXME: what does that mean if clientBinder is NULL here?
-    if (clientBinder != NULL) {
-        mClient = SurfaceComposerClient::clientForConnection(clientBinder);
-    }
-
+    mClient = new SurfaceClient(conn);
     init();
 }
 
@@ -334,7 +331,7 @@ void Surface::init()
     mBuffers.setCapacity(2);
     mBuffers.insertAt(0, 2);
 
-    if (mClient != 0) {
+    if (mClient != 0 && mClient->initCheck() == NO_ERROR) {
         mSharedBufferClient = new SharedBufferClient(
                 mClient->getSharedClient(), mToken, 2, mIdentity);
     }
@@ -364,7 +361,7 @@ Surface::~Surface()
 
 status_t Surface::initCheck() const
 {
-    if (mToken<0 || mClient==0) {
+    if (mToken<0 || mClient==0 || mClient->initCheck() != NO_ERROR) {
         return NO_INIT;
     }
     SharedClient const* cblk = mClient->getSharedClient();
@@ -565,8 +562,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
 
     if (err == NO_ERROR) {
         // FIXME: can we avoid this IPC if we know there is one pending?
-        const sp<SurfaceComposerClient>& client(mClient);
-        client->signalServer();
+        mClient->signalServer();
     }
     return err;
 }
