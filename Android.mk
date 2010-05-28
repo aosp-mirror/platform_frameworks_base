@@ -301,34 +301,14 @@ fwbase_dirs_to_document += core/config/sdk
 # Intentionally not included from libcore:
 #     icu openssl suncompat support
 libcore_to_document := \
-	annotation/src/main/java/java \
-	archive/src/main/java/java \
-	auth/src/main/java/javax \
-	awt-kernel/src/main/java/java \
-	concurrent/src/main/java \
-	crypto/src/main/java/javax \
 	dalvik/src/main/java/dalvik \
 	json/src/main/java \
 	junit/src/main/java \
-	logging/src/main/java/java \
 	luni/src/main/java/java \
-	luni-kernel/src/main/java/java \
-	math/src/main/java/java \
-	nio/src/main/java/java \
-	nio_char/src/main/java/java \
-	prefs/src/main/java/java \
-	regex/src/main/java/java \
-	security/src/main/java/java \
-	security/src/main/java/javax \
-	security-kernel/src/main/java/java \
-	sql/src/main/java/java \
-	sql/src/main/java/javax \
-	text/src/main/java/java \
-	x-net/src/main/java/javax \
-	xml/src/main/java/javax \
-	xml/src/main/java/org/xml/sax \
+	luni/src/main/java/javax \
+	luni/src/main/java/org/xml/sax \
+	luni/src/main/java/org/w3c \
 	xml/src/main/java/org/xmlpull/v1 \
-	xml/src/main/java/org/w3c
 
 non_base_dirs := \
 	../../external/apache-http/src/org/apache/http

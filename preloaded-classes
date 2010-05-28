@@ -693,7 +693,6 @@ com.google.android.gles_jni.GLImpl
 com.ibm.icu4jni.charset.CharsetDecoderICU
 com.ibm.icu4jni.charset.CharsetEncoderICU
 com.ibm.icu4jni.charset.CharsetICU
-com.ibm.icu4jni.charset.CharsetProviderICU
 com.ibm.icu4jni.charset.NativeConverter
 com.ibm.icu4jni.common.ErrorCode
 com.ibm.icu4jni.lang.UCharacter
@@ -703,9 +702,6 @@ com.ibm.icu4jni.text.NativeBreakIterator
 com.ibm.icu4jni.text.NativeCollation
 com.ibm.icu4jni.text.NativeDecimalFormat
 com.ibm.icu4jni.text.RuleBasedCollator
-com.ibm.icu4jni.text.RuleBasedNumberFormat
-com.ibm.icu4jni.util.Resources
-com.ibm.icu4jni.util.Resources$DefaultTimeZones
 dalvik.system.DalvikLogHandler
 dalvik.system.DalvikLogging
 dalvik.system.NativeStart
@@ -754,7 +750,6 @@ java.io.PrintStream
 java.io.PrintWriter
 java.io.PushbackReader
 java.io.RandomAccessFile
-java.io.RandomAccessFile$RepositionLock
 java.io.Reader
 java.io.Serializable
 java.io.StreamCorruptedException
@@ -926,7 +921,6 @@ java.security.Security
 java.security.cert.X509Certificate
 java.text.AttributedCharacterIterator$Attribute
 java.text.Collator
-java.text.Collator$1
 java.text.DateFormat
 java.text.DateFormat$Field
 java.text.DecimalFormat
