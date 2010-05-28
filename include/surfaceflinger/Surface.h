@@ -28,7 +28,7 @@
 #include <ui/egl/android_natives.h>
 
 #include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 
 #define ANDROID_VIEW_SURFACE_JNI_ID    "mNativeSurface"
 
@@ -108,7 +108,7 @@ private:
     SurfaceControl(
             const sp<SurfaceComposerClient>& client,
             const sp<ISurface>& surface,
-            const ISurfaceFlingerClient::surface_data_t& data,
+            const ISurfaceComposerClient::surface_data_t& data,
             uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
 
     ~SurfaceControl();

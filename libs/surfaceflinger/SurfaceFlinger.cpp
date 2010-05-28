@@ -225,7 +225,7 @@ sp<IMemoryHeap> SurfaceFlinger::getCblk() const
     return mServerHeap;
 }
 
-sp<ISurfaceFlingerClient> SurfaceFlinger::createConnection()
+sp<ISurfaceComposerClient> SurfaceFlinger::createConnection()
 {
     Mutex::Autolock _l(mStateLock);
     uint32_t token = mTokens.acquire();
@@ -1230,7 +1230,7 @@ int SurfaceFlinger::setOrientation(DisplayID dpy,
 }
 
 sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
-        const String8& name, ISurfaceFlingerClient::surface_data_t* params,
+        const String8& name, ISurfaceComposerClient::surface_data_t* params,
         DisplayID d, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
@@ -1740,7 +1740,7 @@ sp<IMemoryHeap> BClient::getControlBlock() const {
 }
 
 sp<ISurface> BClient::createSurface(
-        ISurfaceFlingerClient::surface_data_t* params, int pid,
+        ISurfaceComposerClient::surface_data_t* params, int pid,
         const String8& name,
         DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)

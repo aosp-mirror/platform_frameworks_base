@@ -104,7 +104,7 @@ static status_t copyBlt(
 SurfaceControl::SurfaceControl(
         const sp<SurfaceComposerClient>& client, 
         const sp<ISurface>& surface,
-        const ISurfaceFlingerClient::surface_data_t& data,
+        const ISurfaceComposerClient::surface_data_t& data,
         uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
     : mClient(client), mSurface(surface),
       mToken(data.token), mIdentity(data.identity),
@@ -278,7 +278,6 @@ sp<Surface> SurfaceControl::getSurface() const
 //  Surface
 // ============================================================================
 
-
 Surface::Surface(const sp<SurfaceControl>& surface)
     : mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
@@ -369,7 +368,7 @@ status_t Surface::initCheck() const
         LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
         return NO_INIT;
     }
-    return NO_ERROR;
+    return cblk->validate(mToken);
 }
 
 bool Surface::isValid() {
@@ -386,9 +385,7 @@ status_t Surface::validate() const
     }
 
     // verify the identity of this surface
-    SharedClient const* cblk = mClient->getSharedClient();
-
-    uint32_t identity = cblk->getIdentity(mToken);
+    uint32_t identity = mSharedBufferClient->getIdentity();
 
     // this is a bit of a (temporary) special case, identity==0 means that
     // no operation are allowed from the client (eg: dequeue/queue), this
@@ -406,7 +403,7 @@ status_t Surface::validate() const
     }
 
     // check the surface didn't become invalid
-    status_t err = cblk->validate(mToken);
+    status_t err = mSharedBufferClient->getStatus();
     if (err != NO_ERROR) {
         LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
                 mToken, mIdentity, err, strerror(-err));

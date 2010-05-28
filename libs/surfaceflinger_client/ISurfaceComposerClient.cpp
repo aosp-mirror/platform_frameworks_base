@@ -30,7 +30,7 @@
 #include <ui/Rect.h>
 
 #include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 #include <private/surfaceflinger/LayerState.h>
 
 // ---------------------------------------------------------------------------
@@ -56,18 +56,18 @@ enum {
     SET_STATE
 };
 
-class BpSurfaceFlingerClient : public BpInterface<ISurfaceFlingerClient>
+class BpSurfaceComposerClient : public BpInterface<ISurfaceComposerClient>
 {
 public:
-    BpSurfaceFlingerClient(const sp<IBinder>& impl)
-        : BpInterface<ISurfaceFlingerClient>(impl)
+    BpSurfaceComposerClient(const sp<IBinder>& impl)
+        : BpInterface<ISurfaceComposerClient>(impl)
     {
     }
 
     virtual sp<IMemoryHeap> getControlBlock() const
     {
         Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
+        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
         remote()->transact(GET_CBLK, data, &reply);
         return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
@@ -82,7 +82,7 @@ public:
                                         uint32_t flags)
     {
         Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
+        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
         data.writeInt32(pid);
         data.writeString8(name);
         data.writeInt32(display);
@@ -94,11 +94,11 @@ public:
         params->readFromParcel(reply);
         return interface_cast<ISurface>(reply.readStrongBinder());
     }
-                                    
+
     virtual status_t destroySurface(SurfaceID sid)
     {
         Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
+        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
         data.writeInt32(sid);
         remote()->transact(DESTROY_SURFACE, data, &reply);
         return reply.readInt32();
@@ -107,7 +107,7 @@ public:
     virtual status_t setState(int32_t count, const layer_state_t* states)
     {
         Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
+        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
         data.writeInt32(count);
         for (int i=0 ; i<count ; i++)
             states[i].write(data);
@@ -116,18 +116,18 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(SurfaceFlingerClient, "android.ui.ISurfaceFlingerClient");
+IMPLEMENT_META_INTERFACE(SurfaceComposerClient, "android.ui.ISurfaceComposerClient");
 
 // ----------------------------------------------------------------------
 
-status_t BnSurfaceFlingerClient::onTransact(
+status_t BnSurfaceComposerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     // codes that don't require permission check
 
     switch(code) {
         case GET_CBLK: {
-            CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
+            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             sp<IMemoryHeap> ctl(getControlBlock());
             reply->writeStrongBinder(ctl->asBinder());
             return NO_ERROR;
@@ -135,7 +135,7 @@ status_t BnSurfaceFlingerClient::onTransact(
     }
 
     // these must be checked
-     
+
      IPCThreadState* ipc = IPCThreadState::self();
      const int pid = ipc->getCallingPid();
      const int uid = ipc->getCallingUid();
@@ -150,10 +150,10 @@ status_t BnSurfaceFlingerClient::onTransact(
              return PERMISSION_DENIED;
          }
      }
-   
+
      switch(code) {
         case CREATE_SURFACE: {
-            CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
+            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             surface_data_t params;
             int32_t pid = data.readInt32();
             String8 name = data.readString8();
@@ -169,12 +169,12 @@ status_t BnSurfaceFlingerClient::onTransact(
             return NO_ERROR;
         } break;
         case DESTROY_SURFACE: {
-            CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
+            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             reply->writeInt32( destroySurface( data.readInt32() ) );
             return NO_ERROR;
         } break;
         case SET_STATE: {
-            CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
+            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             int32_t count = data.readInt32();
             layer_state_t* states = new layer_state_t[count];
             for (int i=0 ; i<count ; i++)
@@ -191,7 +191,7 @@ status_t BnSurfaceFlingerClient::onTransact(
 
 // ----------------------------------------------------------------------
 
-status_t ISurfaceFlingerClient::surface_data_t::readFromParcel(const Parcel& parcel)
+status_t ISurfaceComposerClient::surface_data_t::readFromParcel(const Parcel& parcel)
 {
     token    = parcel.readInt32();
     identity = parcel.readInt32();
@@ -201,7 +201,7 @@ status_t ISurfaceFlingerClient::surface_data_t::readFromParcel(const Parcel& par
     return NO_ERROR;
 }
 
-status_t ISurfaceFlingerClient::surface_data_t::writeToParcel(Parcel* parcel) const
+status_t ISurfaceComposerClient::surface_data_t::writeToParcel(Parcel* parcel) const
 {
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
