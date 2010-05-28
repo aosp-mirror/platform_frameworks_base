@@ -19,7 +19,6 @@
 #define CAMERA_SOURCE_H_
 
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaSource.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
@@ -31,7 +30,7 @@ class ICamera;
 class IMemory;
 class Camera;
 
-class CameraSource : public MediaSource {
+class CameraSource : public MediaSource, public MediaBufferObserver {
 public:
     static CameraSource *Create();
     static CameraSource *CreateFromCamera(const sp<Camera> &camera);
@@ -46,6 +45,8 @@ public:
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
+    virtual void signalBufferReturned(MediaBuffer* buffer);
+
 private:
     friend class CameraSourceListener;
 
@@ -53,7 +54,9 @@ private:
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
-    List<sp<IMemory> > mFrames;
+    Condition mFrameCompleteCondition;
+    List<sp<IMemory> > mFramesReceived;
+    List<sp<IMemory> > mFramesBeingEncoded;
     List<int64_t> mFrameTimes;
 
     int mWidth, mHeight;
@@ -62,7 +65,6 @@ private:
     int32_t mNumFramesReceived;
     int32_t mNumFramesEncoded;
     int32_t mNumFramesDropped;
-    MediaBufferGroup *mBufferGroup;
     bool mStarted;
 
     CameraSource(const sp<Camera> &camera);
