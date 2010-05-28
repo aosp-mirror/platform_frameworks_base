@@ -65,13 +65,15 @@ public:
     // Supported preview frame sizes in pixels.
     // Example value: "800x600,480x320". Read only.
     static const char KEY_SUPPORTED_PREVIEW_SIZES[];
-    // The image format for preview frames.
+    // The image format for preview frames. See CAMERA_MSG_PREVIEW_FRAME in
+    // frameworks/base/include/camera/Camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PREVIEW_FORMAT[];
     // Supported image formats for preview frames.
     // Example value: "yuv420sp,yuv422i-yuyv". Read only.
     static const char KEY_SUPPORTED_PREVIEW_FORMATS[];
-    // Number of preview frames per second.
+    // Number of preview frames per second. This is the target frame rate. The
+    // actual frame rate depends on the driver.
     // Example value: "15". Read/write.
     static const char KEY_PREVIEW_FRAME_RATE[];
     // Supported number of preview frames per second.
@@ -83,7 +85,8 @@ public:
     // Supported dimensions for captured pictures in pixels.
     // Example value: "2048x1536,1024x768". Read only.
     static const char KEY_SUPPORTED_PICTURE_SIZES[];
-    // The image format for captured pictures.
+    // The image format for captured pictures. See CAMERA_MSG_COMPRESSED_IMAGE
+    // in frameworks/base/include/camera/Camera.h.
     // Example value: "jpeg" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PICTURE_FORMAT[];
     // Supported image formats for captured pictures.
@@ -241,6 +244,11 @@ public:
     // third is far focus distance.
     // Example value: "0.95,1.9,Infinity" or "0.049,0.05,0.051". Read only.
     static const char KEY_FOCUS_DISTANCES[];
+
+    // The image format for video frames. See CAMERA_MSG_VIDEO_FRAME in
+    // frameworks/base/include/camera/Camera.h.
+    // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.
+    static const char KEY_VIDEO_FRAME_FORMAT[];
 
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
