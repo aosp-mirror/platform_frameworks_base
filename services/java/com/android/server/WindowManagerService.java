@@ -5185,19 +5185,24 @@ public class WindowManagerService extends IWindowManager.Stub
                     WindowState out = mKeyWaiter.mOutsideTouchTargets;
                     if (out != null) {
                         MotionEvent oev = MotionEvent.obtain(ev);
-                        oev.setAction(MotionEvent.ACTION_OUTSIDE);
-                        do {
-                            final Rect frame = out.mFrame;
-                            oev.offsetLocation(-(float)frame.left, -(float)frame.top);
-                            try {
-                                out.mClient.dispatchPointer(oev, eventTime, false);
-                            } catch (android.os.RemoteException e) {
-                                Slog.i(TAG, "WINDOW DIED during outside motion dispatch: " + out);
-                            }
-                            oev.offsetLocation((float)frame.left, (float)frame.top);
-                            out = out.mNextOutsideTouch;
-                        } while (out != null);
-                        mKeyWaiter.mOutsideTouchTargets = null;
+                        try {
+                            oev.setAction(MotionEvent.ACTION_OUTSIDE);
+                            do {
+                                final Rect frame = out.mFrame;
+                                oev.offsetLocation(-(float)frame.left, -(float)frame.top);
+                                try {
+                                    out.mClient.dispatchPointer(oev, eventTime, false);
+                                } catch (android.os.RemoteException e) {
+                                    Slog.i(TAG,
+                                            "WINDOW DIED during outside motion dispatch: " + out);
+                                }
+                                oev.offsetLocation((float)frame.left, (float)frame.top);
+                                out = out.mNextOutsideTouch;
+                            } while (out != null);
+                            mKeyWaiter.mOutsideTouchTargets = null;
+                        } finally {
+                            oev.recycle();
+                        }
                     }
                 }
 
