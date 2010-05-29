@@ -540,7 +540,7 @@ static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
 static void SC_scriptCall(int scriptID)
 {
     GET_TLS();
-    rsc->runScript((Script *)scriptID, 0);
+    rsc->runScript((Script *)scriptID);
 }
 
 int SC_divsi3(int a, int b)
@@ -553,6 +553,58 @@ int SC_getAllocation(const void *ptr)
     GET_TLS();
     const Allocation *alloc = sc->ptrToAllocation(ptr);
     return (int)alloc;
+}
+
+
+void SC_ForEachii(RsScript vs, RsAllocation vin)
+{
+    GET_TLS();
+    Script *s = static_cast<Script *>(vs);
+    Allocation *ain = static_cast<Allocation *>(vin);
+    s->runForEach(rsc, ain, NULL);
+}
+
+void SC_ForEachiii(RsScript vs, RsAllocation vin, RsAllocation vout)
+{
+    GET_TLS();
+    Script *s = static_cast<Script *>(vs);
+    Allocation *ain = static_cast<Allocation *>(vin);
+    Allocation *aout = static_cast<Allocation *>(vout);
+    s->runForEach(rsc, ain, aout);
+}
+
+void SC_ForEachiiii(RsScript vs, RsAllocation vin, int xStart, int xEnd)
+{
+    GET_TLS();
+    Script *s = static_cast<Script *>(vs);
+    Allocation *ain = static_cast<Allocation *>(vin);
+    s->runForEach(rsc, ain, NULL, xStart, xEnd);
+}
+
+void SC_ForEachiiiii(RsScript vs, RsAllocation vin, RsAllocation vout, int xStart, int xEnd)
+{
+    GET_TLS();
+    Script *s = static_cast<Script *>(vs);
+    Allocation *ain = static_cast<Allocation *>(vin);
+    Allocation *aout = static_cast<Allocation *>(vout);
+    s->runForEach(rsc, ain, aout, xStart, xEnd);
+}
+
+void SC_ForEachiiiiii(RsScript vs, RsAllocation vin, int xStart, int yStart, int xEnd, int yEnd)
+{
+    GET_TLS();
+    Script *s = static_cast<Script *>(vs);
+    Allocation *ain = static_cast<Allocation *>(vin);
+    s->runForEach(rsc, ain, NULL, xStart, yStart, xEnd, yEnd);
+}
+
+void SC_ForEachiiiiiii(RsScript vs, RsAllocation vin, RsAllocation vout, int xStart, int yStart, int xEnd, int yEnd)
+{
+    GET_TLS();
+    Script *s = static_cast<Script *>(vs);
+    Allocation *ain = static_cast<Allocation *>(vin);
+    Allocation *aout = static_cast<Allocation *>(vout);
+    s->runForEach(rsc, ain, aout, xStart, yStart, xEnd, yEnd);
 }
 
 
@@ -640,6 +692,12 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsMatrixScale", (void *)&SC_matrixScale },
     { "rsMatrixTranslate", (void *)&SC_matrixTranslate },
 
+    { "_Z9rsForEachii", (void *)&SC_ForEachii },
+    { "_Z9rsForEachiii", (void *)&SC_ForEachiii },
+    { "_Z9rsForEachiiii", (void *)&SC_ForEachiiii },
+    { "_Z9rsForEachiiiii", (void *)&SC_ForEachiiiii },
+    { "_Z9rsForEachiiiiii", (void *)&SC_ForEachiiiiii },
+    { "_Z9rsForEachiiiiiii", (void *)&SC_ForEachiiiiiii },
 
 ////////////////////////////////////////////////////////////////////
 

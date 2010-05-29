@@ -49,8 +49,12 @@ ScriptC::~ScriptC()
     mEnviroment.mScriptText = NULL;
 }
 
-void ScriptC::setupScript()
+void ScriptC::setupScript(Context *rsc)
 {
+    setupGLState(rsc);
+    mEnviroment.mStartTimeMillis
+                = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
+
     for (uint32_t ct=0; ct < mEnviroment.mFieldCount; ct++) {
         if (!mSlots[ct].get())
             continue;
@@ -87,29 +91,19 @@ const Allocation *ScriptC::ptrToAllocation(const void *ptr) const
     return NULL;
 }
 
-void ScriptC::setTLS()
+Script * ScriptC::setTLS(Script *sc)
 {
     Context::ScriptTLSStruct * tls = (Context::ScriptTLSStruct *)
                                   pthread_getspecific(Context::gThreadTLSKey);
     rsAssert(tls);
-    tls->mScript = this;
+    Script *old = tls->mScript;
+    tls->mScript = sc;
+    return old;
 }
 
-void ScriptC::clearTLS()
-{
-    Context::ScriptTLSStruct * tls = (Context::ScriptTLSStruct *)
-                                  pthread_getspecific(Context::gThreadTLSKey);
-    rsAssert(tls);
-    tls->mScript = NULL;
-}
 
-uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
+void ScriptC::setupGLState(Context *rsc)
 {
-    if (mProgram.mRoot == NULL) {
-        rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
-        return 0;
-    }
-
     if (mEnviroment.mFragmentStore.get()) {
         rsc->setFragmentStore(mEnviroment.mFragmentStore.get());
     }
@@ -122,21 +116,74 @@ uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
     if (mEnviroment.mRaster.get()) {
         rsc->setRaster(mEnviroment.mRaster.get());
     }
+}
 
-    if (launchIndex == 0) {
-        mEnviroment.mStartTimeMillis
-                = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
+uint32_t ScriptC::run(Context *rsc)
+{
+    if (mProgram.mRoot == NULL) {
+        rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
+        return 0;
     }
-    setupScript();
+
+    setupScript(rsc);
 
     uint32_t ret = 0;
-    setTLS();
+    Script * oldTLS = setTLS(this);
     //LOGE("ScriptC::run %p", mProgram.mRoot);
     ret = mProgram.mRoot();
-    clearTLS();
+    setTLS(oldTLS);
     //LOGE("ScriptC::run ret %i", ret);
     return ret;
 }
+
+void ScriptC::runForEach(Context *rsc, const Allocation *ain, Allocation *aout,
+                         uint32_t xStart, uint32_t yStart, uint32_t xEnd, uint32_t yEnd)
+{
+    LOGE("ScriptC::runForEach not implemented");
+}
+
+void ScriptC::runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t xEnd)
+{
+    uint32_t dimX = ain->getType()->getDimX();
+    rsAssert(xStart < dimX);
+    rsAssert(xEnd <= dimX);
+    rsAssert(ain->getType()->getDimY() == 0);
+    rsAssert(ain->getType()->getDimZ() == 0);
+
+    if (xStart >= dimX) xStart = dimX - 1;
+    if (xEnd >= dimX) xEnd = dimX - 1;
+    if (xStart > xEnd) return;
+
+    setupScript(rsc);
+    Script * oldTLS = setTLS(this);
+
+    typedef int (*rs_t)(const void *, void *, uint32_t);
+    const uint8_t *ptrIn = (const uint8_t *)ain->getPtr();
+    uint32_t strideIn = ain->getType()->getElementSizeBytes();
+
+    uint8_t *ptrOut = NULL;
+    uint32_t strideOut = 0;
+    if (aout) {
+        ptrOut = (uint8_t *)aout->getPtr();
+        strideOut = aout->getType()->getElementSizeBytes();
+    }
+
+    for (uint32_t ct=xStart; ct < xEnd; ct++) {
+        ((rs_t)mProgram.mRoot) (ptrIn + (strideIn * ct), ptrOut + (strideOut * ct), ct);
+    }
+
+    setTLS(oldTLS);
+}
+
+void ScriptC::runForEach(Context *rsc, const Allocation *ain, Allocation *aout)
+{
+    if (ain->getType()->getDimY()) {
+        runForEach(rsc, ain, aout, 0, 0, 0xffffffff, 0xffffffff);
+    } else {
+        runForEach(rsc, ain, aout, 0, 0xffffffff);
+    }
+}
+
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len)
 {
@@ -146,8 +193,8 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Calling invoke on bad script");
         return;
     }
-    setupScript();
-    setTLS();
+    setupScript(rsc);
+    Script * oldTLS = setTLS(this);
 
     const uint32_t * dPtr = (const uint32_t *)data;
     switch(len) {
@@ -175,7 +222,7 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
          mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2], dPtr[3], dPtr[4]);
         break;
     }
-    clearTLS();
+    setTLS(oldTLS);
 }
 
 ScriptCState::ScriptCState()

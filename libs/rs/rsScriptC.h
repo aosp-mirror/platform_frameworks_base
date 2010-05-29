@@ -52,17 +52,24 @@ public:
 
     const Allocation *ptrToAllocation(const void *) const;
 
-    void setTLS();
-    void clearTLS();
 
     virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len);
 
-    virtual void setupScript();
-    virtual uint32_t run(Context *, uint32_t launchID);
-    
+    virtual uint32_t run(Context *);
+
+    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout);
+    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t xEnd);
+    virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t yStart, uint32_t xEnd, uint32_t yEnd);
+
+
     virtual void serialize(OStream *stream) const {    }
     virtual A3DClassID getClassId() const { return A3D_CLASS_ID_SCRIPT_C; }
     static Type *createFromStream(Context *rsc, IStream *stream) { return NULL; }
+
+protected:
+    void setupScript(Context *);
+    void setupGLState(Context *);
+    Script * setTLS(Script *);
 };
 
 class ScriptCState

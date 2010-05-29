@@ -107,7 +107,7 @@ public:
 
     uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
     bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
-    uint32_t runScript(Script *s, uint32_t launchID);
+    uint32_t runScript(Script *s);
 
     void initToClient();
     void deinitToClient();
