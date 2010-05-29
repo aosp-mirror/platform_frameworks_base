@@ -49,10 +49,6 @@ status_t SharedClient::validate(size_t i) const {
     return surfaces[i].status;
 }
 
-uint32_t SharedClient::getIdentity(size_t token) const {
-    return uint32_t(surfaces[token].identity);
-}
-
 // ----------------------------------------------------------------------------
 
 
@@ -159,6 +155,12 @@ status_t SharedBufferBase::getStatus() const
 {
     SharedBufferStack& stack( *mSharedStack );
     return stack.status;
+}
+
+int32_t SharedBufferBase::getIdentity() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.identity;
 }
 
 size_t SharedBufferBase::getFrontBuffer() const

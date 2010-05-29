@@ -27,7 +27,7 @@
 
 #include <ui/PixelFormat.h>
 
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
@@ -86,7 +86,7 @@ public:
      * ACCESS_SURFACE_FLINGER permission
      */
 
-    virtual sp<ISurfaceFlingerClient> createConnection() = 0;
+    virtual sp<ISurfaceComposerClient> createConnection() = 0;
 
     /* retrieve the control block */
     virtual sp<IMemoryHeap> getCblk() const = 0;
