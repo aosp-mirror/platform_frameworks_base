@@ -66,6 +66,14 @@ extern void rsMatrixRotate(rs_matrix4x4 *mat, float rot, float x, float y, float
 extern void rsMatrixScale(rs_matrix4x4 *mat, float x, float y, float z);
 extern void rsMatrixTranslate(rs_matrix4x4 *mat, float x, float y, float z);
 
+// Script to Script
+extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input);
+extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output);
+extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, int xStart, int xEnd);
+extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output, int xStart, int xEnd);
+extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, int xStart, int yStart, int xEnd, int yEnd);
+extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output, int xStart, int yStart, int xEnd, int yEnd);
+
 
 ///////////////////////////////////////////////////////////////////
 // non update funcs
