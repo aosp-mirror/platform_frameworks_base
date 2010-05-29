@@ -12,8 +12,8 @@ rs_mesh partMesh;
 
 typedef struct __attribute__((packed, aligned(4))) Point_s {
     float2 delta;
-    rs_position2 pos;
-    rs_color4u color;
+    float2 position;
+    uchar4 color;
 } Point_t;
 Point_t *point;
 
@@ -28,8 +28,8 @@ int root() {
     Point_t * p = point;
     for (int ct=0; ct < size; ct++) {
         p->delta.y += 0.15f;
-        p->pos += p->delta;
-        if ((p->pos.y > height) && (p->delta.y > 0)) {
+        p->position += p->delta;
+        if ((p->position.y > height) && (p->delta.y > 0)) {
             p->delta.y *= -0.3f;
         }
         p++;
@@ -42,16 +42,18 @@ int root() {
 
 void addParticles(int rate, int x, int y)
 {
-    rsDebug("partColor", partColor);
-    rsDebug("partColor x", partColor.x);
-    rsDebug("partColor y", partColor.y);
-    rsDebug("partColor z", partColor.z);
-    rsDebug("partColor w", partColor.w);
+    //rsDebug("partColor", partColor);
+    //rsDebug("partColor x", partColor.x);
+    //rsDebug("partColor y", partColor.y);
+    //rsDebug("partColor z", partColor.z);
+    //rsDebug("partColor w", partColor.w);
 
     float rMax = ((float)rate) * 0.005f;
     int size = rsAllocationGetDimX(rsGetAllocation(point));
 
-    rs_color4u c = rsPackColorTo8888(partColor.x, partColor.y, partColor.z);
+    uchar4 c = rsPackColorTo8888(partColor.x, partColor.y, partColor.z);
+
+    //rsDebug("color ", ((int *)&c)[0]);
     Point_t * np = &point[newPart];
 
     float2 p = {x, y};
@@ -60,7 +62,7 @@ void addParticles(int rate, int x, int y)
         float len = rsRand(rMax);
         np->delta.x = len * sin(angle);
         np->delta.y = len * cos(angle);
-        np->pos = p;
+        np->position = p;
         np->color = c;
         newPart++;
         np++;
