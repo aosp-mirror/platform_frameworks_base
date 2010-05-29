@@ -23,7 +23,7 @@ import android.os.SystemClock;
  * The statement cannot return multiple rows, but 1x1 result sets are allowed.
  * Don't use SQLiteStatement constructor directly, please use
  * {@link SQLiteDatabase#compileStatement(String)}
- *
+ *<p>
  * SQLiteStatement is not internally synchronized so code using a SQLiteStatement from multiple
  * threads should perform its own synchronization when using the SQLiteStatement.
  */
@@ -47,9 +47,7 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -74,9 +72,7 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -101,9 +97,7 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -128,9 +122,7 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 

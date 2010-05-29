@@ -20,7 +20,7 @@ import android.util.Log;
 
 /**
  * A base class for compiled SQLite programs.
- *
+ *<p>
  * SQLiteProgram is not internally synchronized so code using a SQLiteProgram from multiple
  * threads should perform its own synchronization when using the SQLiteProgram.
  */
@@ -176,9 +176,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param index The 1-based index to the parameter to bind null to
      */
     public void bindNull(int index) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         acquireReference();
         try {
             native_bind_null(index);
@@ -195,9 +193,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindLong(int index, long value) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         acquireReference();
         try {
             native_bind_long(index, value);
@@ -214,9 +210,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindDouble(int index, double value) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         acquireReference();
         try {
             native_bind_double(index, value);
@@ -236,9 +230,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         acquireReference();
         try {
             native_bind_string(index, value);
@@ -258,9 +250,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         acquireReference();
         try {
             native_bind_blob(index, value);
@@ -273,9 +263,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * Clears all existing bindings. Unset bindings are treated as NULL.
      */
     public void clearBindings() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
+        mDatabase.verifyDbIsOpen();
         acquireReference();
         try {
             native_clear_bindings();
