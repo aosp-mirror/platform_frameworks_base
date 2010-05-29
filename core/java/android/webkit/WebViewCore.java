@@ -114,7 +114,7 @@ final class WebViewCore {
     private int mViewportDensityDpi = -1;
 
     private int mRestoredScale = 0;
-    private int mRestoredScreenWidthScale = 0;
+    private int mRestoredTextWrapScale = 0;
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
@@ -477,12 +477,12 @@ final class WebViewCore {
         of layout/line-breaking. These coordinates are in document space,
         which is the same as View coords unless we have zoomed the document
         (see nativeSetZoom).
-        screenWidth is used by layout to wrap column around. If viewport uses
-        fixed size, screenWidth can be different from width with zooming.
+        textWrapWidth is used by layout to wrap column around. If viewport uses
+        fixed size, textWrapWidth can be different from width with zooming.
         should this be called nativeSetViewPortSize?
     */
-    private native void nativeSetSize(int width, int height, int screenWidth,
-            float scale, int realScreenWidth, int screenHeight, int anchorX,
+    private native void nativeSetSize(int width, int height, int textWrapWidth,
+            float scale, int screenWidth, int screenHeight, int anchorX,
             int anchorY, boolean ignoreHeight);
 
     private native int nativeGetContentMinPrefWidth();
@@ -2073,7 +2073,7 @@ final class WebViewCore {
 
         // reset the scroll position, the restored offset and scales
         mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY
-                = mRestoredScale = mRestoredScreenWidthScale = 0;
+                = mRestoredScale = mRestoredTextWrapScale = 0;
     }
 
     // called by JNI
@@ -2179,9 +2179,9 @@ final class WebViewCore {
         mRestoreState.mMobileSite = (0 == mViewportWidth);
         if (mRestoredScale > 0) {
             mRestoreState.mViewScale = mRestoredScale / 100.0f;
-            if (mRestoredScreenWidthScale > 0) {
+            if (mRestoredTextWrapScale > 0) {
                 mRestoreState.mTextWrapScale =
-                        mRestoredScreenWidthScale / 100.0f;
+                        mRestoredTextWrapScale / 100.0f;
             } else {
                 mRestoreState.mTextWrapScale = mRestoreState.mViewScale;
             }
@@ -2270,20 +2270,12 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void restoreScale(int scale) {
+    private void restoreScale(int scale, int textWrapScale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
             mRestoredScale = scale;
-        }
-    }
-
-    // called by JNI
-    private void restoreScreenWidthScale(int scale) {
-        if (!mSettings.getUseWideViewPort()) {
-            return;
-        }
-
-        if (mBrowserFrame.firstLayoutDone() == false) {
-            mRestoredScreenWidthScale = scale;
+            if (mSettings.getUseWideViewPort()) {
+                mRestoredTextWrapScale = textWrapScale;
+            }
         }
     }
 
