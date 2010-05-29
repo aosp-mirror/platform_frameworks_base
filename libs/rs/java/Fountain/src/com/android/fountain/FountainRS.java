@@ -27,26 +27,36 @@ public class FountainRS {
     public FountainRS() {
     }
 
+    private Resources mRes;
+    private RenderScriptGL mRS;
+    private ScriptC_Fountain mScript;
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
-        initRS();
+
+        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
+
+        SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
+        int vtxSlot = smb.addVertexType(points.getType());
+        smb.setPrimitive(Primitive.POINT);
+        SimpleMesh sm = smb.create();
+        sm.bindVertexAllocation(points.getAllocation(), vtxSlot);
+
+        mScript = new ScriptC_Fountain(mRS, mRes, true);
+        mScript.set_partMesh(sm);
+        mScript.bind_point(points);
+        mRS.contextBindRootScript(mScript);
     }
 
     Float4 tmpColor = new Float4();
     boolean holdingColor = false;
+    java.util.Random mRand = new java.util.Random();
     public void newTouchPosition(int x, int y, int rate) {
         if (rate > 0) {
-            if (true/*!holdingColor*/) {
-                tmpColor.x = ((x & 0x1) != 0) ? 0.f : 1.f;
-                tmpColor.y = ((x & 0x2) != 0) ? 0.f : 1.f;
-                tmpColor.z = ((x & 0x4) != 0) ? 0.f : 1.f;
-                if ((tmpColor.x + tmpColor.y + tmpColor.z) < 0.9f) {
-                    tmpColor.x = 0.8f;
-                    tmpColor.y = 0.5f;
-                    tmpColor.z = 1.0f;
-                }
-                android.util.Log.e("rs", "set color " + tmpColor.x + ", " + tmpColor.y + ", " + tmpColor.z);
+            if (!holdingColor) {
+                tmpColor.x = mRand.nextFloat() * 0.5f + 0.5f;
+                tmpColor.y = mRand.nextFloat();
+                tmpColor.z = mRand.nextFloat();
                 mScript.set_partColor(tmpColor);
             }
             mScript.invokable_addParticles(rate, x, y);
@@ -56,32 +66,6 @@ public class FountainRS {
         }
 
     }
-
-
-    /////////////////////////////////////////
-
-    private Resources mRes;
-
-    private ScriptField_Point mPoints;
-    private ScriptC_Fountain mScript;
-    private RenderScriptGL mRS;
-    private SimpleMesh mSM;
-
-    private void initRS() {
-        mPoints = new ScriptField_Point(mRS, PART_COUNT);
-
-        SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
-        int vtxSlot = smb.addVertexType(mPoints.getType());
-        smb.setPrimitive(Primitive.POINT);
-        mSM = smb.create();
-        mSM.bindVertexAllocation(mPoints.getAllocation(), vtxSlot);
-
-        mScript = new ScriptC_Fountain(mRS, mRes, true);
-        mScript.set_partMesh(mSM);
-        mScript.bind_point(mPoints);
-        mRS.contextBindRootScript(mScript);
-    }
-
 }
 
 

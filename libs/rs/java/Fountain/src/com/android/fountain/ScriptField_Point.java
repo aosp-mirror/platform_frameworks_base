@@ -31,7 +31,7 @@ public class ScriptField_Point
 
         Element.Builder eb = new Element.Builder(rs);
         eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 2), "delta");
-        eb.add(Element.createAttrib(rs, Element.DataType.FLOAT_32, Element.DataKind.POSITION, 2), "pos");
+        eb.add(Element.createAttrib(rs, Element.DataType.FLOAT_32, Element.DataKind.POSITION, 2), "position");
         eb.add(Element.createAttrib(rs, Element.DataType.UNSIGNED_8, Element.DataKind.COLOR, 4), "color");
         mElement = eb.create();
 
