@@ -68,32 +68,6 @@ typedef int int8 __attribute__((ext_vector_type(8)));
 typedef int int16 __attribute__((ext_vector_type(16)));
 
 
-// RS_KIND_POSITION
-typedef float rs_position1;
-typedef float2 rs_position2;
-typedef float3 rs_position3;
-typedef float4 rs_position4;
-
-// RS_KIND_COLOR
-typedef float3 rs_color3f;
-typedef float4 rs_color4f;
-typedef uchar4 rs_color4u;
-
-// RS_KIND_NORMAL
-typedef float3 rs_normal;
-
-// RS_KIND_POINT_SIZE
-typedef float rs_point_size;
-
-// RS_KIND_TEXTURE
-typedef float rs_texture_coord1;
-typedef float2 rs_texture_coord2;
-typedef float3 rs_texture_coord3;
-typedef float4 rs_texture_coord4;
-
-// RS_KIND_INDEX
-typedef ushort rs_index;
-
 typedef struct {
     float m[16];
 } rs_matrix4x4;

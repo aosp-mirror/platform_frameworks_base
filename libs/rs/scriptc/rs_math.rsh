@@ -1,4 +1,6 @@
 #include "rs_cl.rsh"
+#include "rs_core.rsh"
+
 
 
 // Allocations
@@ -9,18 +11,6 @@ extern uint32_t rsAllocationGetDimZ(rs_allocation);
 extern uint32_t rsAllocationGetDimLOD(rs_allocation);
 extern uint32_t rsAllocationGetDimFaces(rs_allocation);
 
-
-
-// Color conversion
-extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b);
-extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a);
-extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3);
-extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4);
-extern float4 rsUnpackColor8888(uchar4);
-
-extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float r, float g, float b);
-extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float3);
-extern float4 rsUnpackColor565(uchar4);
 
 
 // Debugging
