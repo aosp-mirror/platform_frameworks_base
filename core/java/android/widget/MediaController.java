@@ -123,7 +123,7 @@ public class MediaController extends FrameLayout {
     }
 
     private void initFloatingWindow() {
-        mWindowManager = (WindowManager)mContext.getSystemService("window");
+        mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindow = PolicyManager.makeNewWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);

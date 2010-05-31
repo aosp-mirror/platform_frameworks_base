@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.widget.ArrayAdapter;
 import android.view.View;
 import android.widget.ListView;
+import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.app.Notification;
@@ -60,7 +61,7 @@ public class NotificationTestList extends TestActivity
     private Test[] mTests = new Test[] {
         new Test("Off and sound") {
             public void run() {
-                PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService("power");
+                PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE);
                 PowerManager.WakeLock wl = 
                             pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sound");
                 wl.acquire();
@@ -549,7 +550,7 @@ public class NotificationTestList extends TestActivity
             public void run()
             {
                 PowerManager.WakeLock wl
-                        = ((PowerManager)NotificationTestList.this.getSystemService("power"))
+                        = ((PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE))
                             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "crasher");
                 wl.acquire();
                 mHandler.postDelayed(new Runnable() {
