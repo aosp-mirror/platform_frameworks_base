@@ -54,7 +54,8 @@ public class Watchdog extends Thread {
     static final int MONITOR = 2718;
     static final int GLOBAL_PSS = 2719;
 
-    static final int TIME_TO_WAIT = DB ? 15*1000 : 60*1000;
+    static final int TIME_TO_RESTART = DB ? 15*1000 : 60*1000;
+    static final int TIME_TO_WAIT = TIME_TO_RESTART / 2;
 
     static final int MEMCHECK_DEFAULT_INTERVAL = DB ? 30 : 30*60; // 30 minutes
     static final int MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL = DB ? 60 : 2*60*60;      // 2 hours
@@ -792,6 +793,7 @@ public class Watchdog extends Thread {
 
     @Override
     public void run() {
+        boolean waitedHalf = false;
         while (true) {
             mCompleted = false;
             mHandler.sendEmptyMessage(MONITOR);
@@ -801,7 +803,7 @@ public class Watchdog extends Thread {
 
                 // NOTE: We use uptimeMillis() here because we do not want to increment the time we
                 // wait while asleep. If the device is asleep then the thing that we are waiting
-                // to timeout on is asleep as well and won't have a chance to run. Causing a false
+                // to timeout on is asleep as well and won't have a chance to run, causing a false
                 // positive on when to kill things.
                 long start = SystemClock.uptimeMillis();
                 while (timeout > 0 && !mForceKillSystem) {
@@ -815,6 +817,17 @@ public class Watchdog extends Thread {
 
                 if (mCompleted && !mForceKillSystem) {
                     // The monitors have returned.
+                    waitedHalf = false;
+                    continue;
+                }
+
+                if (!waitedHalf) {
+                    // We've waited half the deadlock-detection interval.  Pull a stack
+                    // trace and wait another half.
+                    ArrayList pids = new ArrayList();
+                    pids.add(Process.myPid());
+                    File stack = ActivityManagerService.dumpStackTraces(true, pids);
+                    waitedHalf = true;
                     continue;
                 }
             }
@@ -829,7 +842,9 @@ public class Watchdog extends Thread {
             ArrayList pids = new ArrayList();
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
-            File stack = ActivityManagerService.dumpStackTraces(pids);
+            // Pass !waitedHalf so that just in case we somehow wind up here without having
+            // dumped the halfway stacks, we properly re-initialize the trace file.
+            File stack = ActivityManagerService.dumpStackTraces(!waitedHalf, pids);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
@@ -845,6 +860,8 @@ public class Watchdog extends Thread {
             } else {
                 Slog.w(TAG, "Debugger connected: Watchdog is *not* killing the system process");
             }
+
+            waitedHalf = false;
         }
     }
 }
