@@ -31,42 +31,64 @@ import java.util.Random;
 /**
  * This test case provides a framework in which you can test Service classes in
  * a controlled environment.  It provides basic support for the lifecycle of a
- * Service, and hooks by which you can inject various dependencies and control
+ * Service, and hooks with which you can inject various dependencies and control
  * the environment in which your Service is tested.
  *
  * <p><b>Lifecycle Support.</b>
- * Every Service is designed to be accessed within a specific sequence of
- * calls.  <insert link to Service lifecycle doc here>. 
- * In order to support the lifecycle of a Service, this test case will make the
- * following calls at the following times.
+ * A Service is accessed with a specific sequence of
+ * calls, as documented in the section
+ * <a href="http://developer.android.com/guide/topics/fundamentals.html#servlife">
+ * Service lifecycle</a> in the Developer Guide. In order to support the lifecycle of a Service,
+ * <code>ServiceTestCase</code> enforces this protocol:
  *
- * <ul><li>The test case will not call onCreate() until your test calls 
- * {@link #startService} or {@link #bindService}.  This gives you a chance
- * to set up or adjust any additional framework or test logic before
- * onCreate().</li>
- * <li>When your test calls {@link #startService} or {@link #bindService}
- * the test case will call onCreate(), and then call the corresponding entry point in your service.
- * It will record any parameters or other support values necessary to support the lifecycle.</li>
- * <li>After your test completes, the test case {@link #tearDown} function is
- * automatically called, and it will stop and destroy your service with the appropriate
- * calls (depending on how your test invoked the service.)</li>
+ * <ul>
+ *      <li>
+ *          The {@link #setUp()} method is called before each test method. The base implementation
+ *          gets the system context. If you override <code>setUp()</code>, you must call
+ *          <code>super.setUp()</code> as the first statement in your override.
+ *      </li>
+ *      <li>
+ *          The test case waits to call {@link android.app.Service#onCreate()} until one of your
+ *          test methods calls {@link #startService} or {@link #bindService}.  This gives you an
+ *          opportunity to set up or adjust any additional framework or test logic before you test
+ *          the running service.
+ *      </li>
+ *      <li>
+ *          When one of your test methods calls {@link #startService ServiceTestCase.startService()}
+ *          or {@link #bindService  ServiceTestCase.bindService()}, the test case calls
+ *          {@link android.app.Service#onCreate() Service.onCreate()} and then calls either
+ *          {@link android.app.Service#startService(Intent) Service.startService(Intent)} or
+ *          {@link android.app.Service#bindService(Intent, ServiceConnection, int)
+ *          Service.bindService(Intent, ServiceConnection, int)}, as appropriate. It also stores
+ *          values needed to track and support the lifecycle.
+ *      </li>
+ *      <li>
+ *          After each test method finishes, the test case calls the {@link #tearDown} method. This
+ *          method stops and destroys the service with the appropriate calls, depending on how the
+ *          service was started. If you override <code>tearDown()</code>, your must call the
+ *          <code>super.tearDown()</code> as the last statement in your override.
+ *      </li>
  * </ul>
- * 
- * <p><b>Dependency Injection.</b>
- * Every service has two inherent dependencies, the {@link android.content.Context Context} in
- * which it runs, and the {@link android.app.Application Application} with which it is associated.
- * This framework allows you to inject modified, mock, or isolated replacements for these 
- * dependencies, and thus perform a true unit test.
- * 
- * <p>If simply run your tests as-is, your Service will be injected with a fully-functional
- * Context, and a generic {@link android.test.mock.MockApplication MockApplication} object.
- * You can create and inject alternatives to either of these by calling 
- * {@link AndroidTestCase#setContext(Context) setContext()} or 
- * {@link #setApplication setApplication()}.  You must do this <i>before</i> calling
- * startService() or bindService().  The test framework provides a
- * number of alternatives for Context, including {link android.test.mock.MockContext MockContext}, 
- * {@link android.test.RenamingDelegatingContext RenamingDelegatingContext}, and 
- * {@link android.content.ContextWrapper ContextWrapper}.
+ *
+ * <p>
+ *      <strong>Dependency Injection.</strong>
+ *      A service has two inherent dependencies, its {@link android.content.Context Context} and its
+ *      associated {@link android.app.Application Application}. The ServiceTestCase framework
+ *      allows you to inject modified, mock, or isolated replacements for these dependencies, and
+ *      thus perform unit tests with controlled dependencies in an isolated environment.
+ * </p>
+ * <p>
+ *      By default, the test case is injected with a full system context and a generic
+ *      {@link android.test.mock.MockApplication MockApplication} object. You can inject
+ *      alternatives to either of these by invoking
+ *      {@link AndroidTestCase#setContext(Context) setContext()} or
+ *      {@link #setApplication setApplication()}.  You must do this <em>before</em> calling
+ *      startService() or bindService().  The test framework provides a
+ *      number of alternatives for Context, including
+ *      {link android.test.mock.MockContext MockContext},
+ *      {@link android.test.RenamingDelegatingContext RenamingDelegatingContext},
+ *      {@link android.content.ContextWrapper ContextWrapper}, and
+ *      {@link android.test.IsolatedContext}.
  */
 public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase {
 
@@ -75,6 +97,10 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
     private Context mSystemContext;
     private Application mApplication;
 
+    /**
+     * Constructor
+     * @param serviceClass The type of the service under test.
+     */
     public ServiceTestCase(Class<T> serviceClass) {
         mServiceClass = serviceClass;
     }
@@ -88,30 +114,35 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
     private int mServiceId;
 
     /**
-     * @return Returns the actual service under test.
+     * @return An instance of the service under test. This instance is created automatically when
+     * a test calls {@link #startService} or {@link #bindService}.
      */
     public T getService() {
         return mService;
     }
 
     /**
-     * This will do the work to instantiate the Service under test.  After this, your test 
-     * code must also start and stop the service.
+     * Gets the current system context and stores it.
+     *
+     * Extend this method to do your own test initialization. If you do so, you
+     * must call <code>super.setUp()</code> as the first statement in your override. The method is
+     * called before each test method is executed.
      */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         // get the real context, before the individual tests have a chance to muck with it
         mSystemContext = getContext();
 
     }
-    
+
     /**
-     * Create the service under test and attach all injected dependencies (Context, Application) to
-     * it.  This will be called automatically by {@link #startService} or by {@link #bindService}.
-     * If you wish to call {@link AndroidTestCase#setContext(Context) setContext()} or 
-     * {@link #setApplication setApplication()}, you must do so  before calling this function.
+     * Creates the service under test and attaches all injected dependencies
+     * (Context, Application) to it.  This is called automatically by {@link #startService} or
+     * by {@link #bindService}.
+     * If you need to call {@link AndroidTestCase#setContext(Context) setContext()} or
+     * {@link #setApplication setApplication()}, do so before calling this method.
      */
     protected void setupService() {
         mService = null;
@@ -131,60 +162,74 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
                 getApplication(),
                 null                // mocked services don't talk with the activity manager
                 );
-        
+
         assertNotNull(mService);
-        
+
         mServiceId = new Random().nextInt();
         mServiceAttached = true;
     }
-    
+
     /**
-     * Start the service under test, in the same way as if it was started by
-     * {@link android.content.Context#startService Context.startService()}, providing the 
-     * arguments it supplied.  If you use this method to start the service, it will automatically
-     * be stopped by {@link #tearDown}.
-     *  
-     * @param intent The Intent as if supplied to {@link android.content.Context#startService}.
+     * Starts the service under test, in the same way as if it were started by
+     * {@link android.content.Context#startService(Intent) Context.startService(Intent)} with
+     * an {@link android.content.Intent} that identifies a service.
+     * If you use this method to start the service, it is automatically stopped by
+     * {@link #tearDown}.
+     *
+     * @param intent An Intent that identifies a service, of the same form as the Intent passed to
+     * {@link android.content.Context#startService(Intent) Context.startService(Intent)}.
      */
     protected void startService(Intent intent) {
         if (!mServiceAttached) {
             setupService();
         }
         assertNotNull(mService);
-        
+
         if (!mServiceCreated) {
             mService.onCreate();
             mServiceCreated = true;
         }
         mService.onStartCommand(intent, 0, mServiceId);
-        
+
         mServiceStarted = true;
     }
-    
-    /**
-     * Start the service under test, in the same way as if it was started by
-     * {@link android.content.Context#bindService Context.bindService()}, providing the 
-     * arguments it supplied.
-     *  
-     * Return the communication channel to the service.  May return null if 
-     * clients can not bind to the service.  The returned
-     * {@link android.os.IBinder} is usually for a complex interface
-     * that has been <a href="{@docRoot}guide/developing/tools/aidl.html">described using
-     * aidl</a>. 
-     * 
-     * Note:  In order to test with this interface, your service must implement a getService()
-     * method, as shown in samples.ApiDemos.app.LocalService.
 
-     * @param intent The Intent as if supplied to {@link android.content.Context#bindService}.
-     * 
-     * @return Return an IBinder for making further calls into the Service.
+    /**
+     * <p>
+     *      Starts the service under test, in the same way as if it were started by
+     *      {@link android.content.Context#bindService(Intent, ServiceConnection, int)
+     *      Context.bindService(Intent, ServiceConnection, flags)} with an
+     *      {@link android.content.Intent} that identifies a service.
+     * </p>
+     * <p>
+     *      Notice that the parameters are different. You do not provide a
+     *      {@link android.content.ServiceConnection} object or the flags parameter. Instead,
+     *      you only provide the Intent. The method returns an object whose type is a
+     *      subclass of {@link android.os.IBinder}, or null if the method fails. An IBinder
+     *      object refers to a communication channel between the application and
+     *      the service. The flag is assumed to be {@link android.content.Context#BIND_AUTO_CREATE}.
+     * </p>
+     * <p>
+     *      See <a href="{@docRoot}guide/developing/tools/aidl.html">Designing a Remote Interface
+     *      Using AIDL</a> for more information about the communication channel object returned
+     *      by this method.
+     * </p>
+     * Note:  To be able to use bindService in a test, the service must implement getService()
+     * method. An example of this is in the ApiDemos sample application, in the
+     * LocalService demo.
+     *
+     * @param intent An Intent object of the form expected by
+     * {@link android.content.Context#bindService}.
+     *
+     * @return An object whose type is a subclass of IBinder, for making further calls into
+     * the service.
      */
     protected IBinder bindService(Intent intent) {
         if (!mServiceAttached) {
             setupService();
         }
         assertNotNull(mService);
-        
+
         if (!mServiceCreated) {
             mService.onCreate();
             mServiceCreated = true;
@@ -192,15 +237,15 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
         // no extras are expected by unbind
         mServiceIntent = intent.cloneFilter();
         IBinder result = mService.onBind(intent);
-        
+
         mServiceBound = true;
         return result;
     }
-    
+
     /**
-     * This will make the necessary calls to stop (or unbind) the Service under test, and
-     * call onDestroy().  Ordinarily this will be called automatically (by {@link #tearDown}, but
-     * you can call it directly from your test in order to check for proper shutdown behaviors.
+     * Makes the necessary calls to stop (or unbind) the service under test, and
+     * calls onDestroy().  Ordinarily this is called automatically (by {@link #tearDown}, but
+     * you can call it directly from your test in order to check for proper shutdown behavior.
      */
     protected void shutdownService() {
         if (mServiceStarted) {
@@ -214,13 +259,18 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
             mService.onDestroy();
         }
     }
-    
+
     /**
-     * Shuts down the Service under test.  Also makes sure all resources are cleaned up and 
-     * garbage collected before moving on to the next
-     * test.  Subclasses that override this method should make sure they call super.tearDown()
-     * at the end of the overriding method.
-     * 
+     * <p>
+     *      Shuts down the service under test.  Ensures all resources are cleaned up and
+     *      garbage collected before moving on to the next test. This method is called after each
+     *      test method.
+     * </p>
+     * <p>
+     *      Subclasses that override this method must call <code>super.tearDown()</code> as their
+     *      last statement.
+     * </p>
+     *
      * @throws Exception
      */
     @Override
@@ -228,45 +278,54 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
         shutdownService();
         mService = null;
 
-        // Scrub out members - protects against memory leaks in the case where someone 
+        // Scrub out members - protects against memory leaks in the case where someone
         // creates a non-static inner class (thus referencing the test case) and gives it to
         // someone else to hold onto
         scrubClass(ServiceTestCase.class);
 
         super.tearDown();
     }
-    
+
     /**
-     * Set the application for use during the test.  If your test does not call this function,
-     * a new {@link android.test.mock.MockApplication MockApplication} object will be generated.
-     * 
-     * @param application The Application object that will be injected into the Service under test.
+     * Sets the application that is used during the test.  If you do not call this method,
+     * a new {@link android.test.mock.MockApplication MockApplication} object is used.
+     *
+     * @param application The Application object that is used by the service under test.
+     *
+     * @see #getApplication()
      */
     public void setApplication(Application application) {
         mApplication = application;
     }
 
     /**
-     * Return the Application object being used by the Service under test.
-     * 
-     * @return Returns the application object.
-     * 
+     * Returns the Application object in use by the service under test.
+     *
+     * @return The application object.
+     *
      * @see #setApplication
      */
     public Application getApplication() {
         return mApplication;
     }
-    
+
     /**
-     * Return a real (not mocked or instrumented) system Context that can be used when generating
-     * Mock or other Context objects for your Service under test.
-     * 
-     * @return Returns a reference to a normal Context.
+     * Returns the real system context that is saved by {@link #setUp()}. Use it to create
+     * mock or other types of context objects for the service under test.
+     *
+     * @return A normal system context.
      */
     public Context getSystemContext() {
         return mSystemContext;
     }
 
+    /**
+     * Tests that {@link #setupService()} runs correctly and issues an
+     * {@link junit.framework.Assert#assertNotNull(String, Object)} if it does.
+     * You can override this test method if you wish.
+     *
+     * @throws Exception
+     */
     public void testServiceTestCaseSetUpProperly() throws Exception {
         setupService();
         assertNotNull("service should be launched successfully", mService);
