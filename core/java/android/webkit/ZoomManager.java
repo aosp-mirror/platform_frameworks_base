@@ -16,7 +16,9 @@
 
 package android.webkit;
 
+import android.graphics.Canvas;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 
 class ZoomManager {
@@ -53,8 +55,9 @@ class ZoomManager {
     // the last zoom scale.
     boolean mInZoomOverview = false;
 
-    // These keep track of the center point of the zoom.  They are used to
-    // determine the point around which we should zoom.
+    // These keep track of the center point of the zoom and they are used to
+    // determine the point around which we should zoom. They are stored in view
+    // coordinates.
     float mZoomCenterX;
     float mZoomCenterY;
 
@@ -75,13 +78,19 @@ class ZoomManager {
     // the current computed zoom scale and its inverse.
     float mActualScale;
     float mInvActualScale;
-    // if this is non-zero, it is used on drawing rather than mActualScale
-    float mZoomScale;
-    float mInvInitialZoomScale;
-    float mInvFinalZoomScale;
-    int mInitialScrollX;
-    int mInitialScrollY;
-    long mZoomStart;
+    
+    /*
+     * The following member variables are only to be used for animating zoom. If
+     * mZoomScale is non-zero then we are in the middle of a zoom animation. The
+     * other variables are used as a cache (e.g. inverse) or as a way to store
+     * the state of the view prior to animating (e.g. initial scroll coords).
+     */
+    private float mZoomScale;
+    private float mInvInitialZoomScale;
+    private float mInvFinalZoomScale;
+    private int mInitialScrollX;
+    private int mInitialScrollY;
+    private long mZoomStart;
     static final int ZOOM_ANIMATION_LENGTH = 500;
 
     public ZoomManager(WebView webView, CallbackProxy callbackProxy) {
@@ -133,10 +142,6 @@ class ZoomManager {
         return mActualScale - mMinZoomScale <= MINIMUM_SCALE_INCREMENT;
     }
 
-    public boolean isZoomAnimating() {
-        return mZoomScale != 0;
-    }
-
     public boolean zoomIn() {
         mInZoomOverview = false;
         return zoom(1.25f);
@@ -156,7 +161,7 @@ class ZoomManager {
         int anchorX = mWebView.viewToContentX((int) mZoomCenterX + mWebView.getScrollX());
         int anchorY = mWebView.viewToContentY((int) mZoomCenterY + mWebView.getScrollY());
         mWebView.setViewSizeAnchor(anchorX, anchorY);
-        return animateZoom(mActualScale * zoomMultiplier, true);
+        return startZoomAnimation(mActualScale * zoomMultiplier, true);
     }
 
     public void zoomToOverview() {
@@ -166,15 +171,20 @@ class ZoomManager {
         if (scrollY < mWebView.getTitleHeight()) {
             mWebView.updateScrollCoordinates(mWebView.getScrollX(), 0);
         }
-        animateZoom((float) mWebView.getViewWidth() / mZoomOverviewWidth, true);
+        startZoomAnimation((float) mWebView.getViewWidth() / mZoomOverviewWidth, true);
     }
 
     public void zoomToDefaultLevel(boolean reflowText) {
         mInZoomOverview = false;
-        animateZoom(mDefaultScale, reflowText);
+        startZoomAnimation(mDefaultScale, reflowText);
     }
 
-    public boolean animateZoom(float scale, boolean reflowText) {
+    /**
+     * Initiates an animated zoom of the WebView.
+     *
+     * @return true if the new scale triggered an animation and false otherwise.
+     */
+    public boolean startZoomAnimation(float scale, boolean reflowText) {
         float oldScale = mActualScale;
         mInitialScrollX = mWebView.getScrollX();
         mInitialScrollY = mWebView.getScrollY();
@@ -198,6 +208,61 @@ class ZoomManager {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Computes and returns the relevant data needed by the WebView's drawing
+     * model to animate a zoom.
+     *
+     * This method is to be called when a zoom animation is occurring. The
+     * animation begins by calling startZoomAnimation(...).  The caller can
+     * check to see if the animation has completed by calling isZoomAnimating().
+     *
+     * @return an array containing the values needed to animate the drawing
+     * surface.
+     * [0] = delta for the new scrollX position
+     * [1] = delta for the new scrollY position
+     * [2] = current zoom scale
+     */
+    public float[] animateZoom() {
+        if (mZoomScale == 0) {
+            Log.w(LOGTAG, "A WebView is attempting to animate a zoom when no " +
+                    "zoom is in progress");
+            float[] result = {0, 0, mActualScale};
+            return result;
+        }
+
+        float zoomScale;
+        int interval = (int) (SystemClock.uptimeMillis() - mZoomStart);
+        if (interval < ZOOM_ANIMATION_LENGTH) {
+            float ratio = (float) interval / ZOOM_ANIMATION_LENGTH;
+            zoomScale = 1.0f / (mInvInitialZoomScale
+                    + (mInvFinalZoomScale - mInvInitialZoomScale) * ratio);
+        } else {
+            zoomScale = mZoomScale;
+            // set mZoomScale to be 0 as we have finished animating
+            mZoomScale = 0;
+        }
+        // calculate the intermediate scroll position. Since we need to use
+        // zoomScale, we can't use the WebView's pinLocX/Y functions directly.
+        float scale = zoomScale * mInvInitialZoomScale;
+        int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX) - mZoomCenterX);
+        tx = -WebView.pinLoc(tx, mWebView.getViewWidth(), Math.round(mWebView.getContentWidth()
+                * zoomScale)) + mWebView.getScrollX();
+        int titleHeight = mWebView.getTitleHeight();
+        int ty = Math.round(scale
+                * (mInitialScrollY + mZoomCenterY - titleHeight)
+                - (mZoomCenterY - titleHeight));
+        ty = -(ty <= titleHeight ? Math.max(ty, 0) : WebView.pinLoc(ty
+                - titleHeight, mWebView.getViewHeight(), Math.round(mWebView.getContentHeight()
+                * zoomScale)) + titleHeight) + mWebView.getScrollY();
+
+        float[] result = {tx, ty, zoomScale};
+        return result;
+    }
+
+    public boolean isZoomAnimating() {
+        return mZoomScale != 0;
     }
 
     public void refreshZoomScale(boolean reflowText) {
