@@ -58,7 +58,7 @@ SharedBufferStack::SharedBufferStack()
 
 void SharedBufferStack::init(int32_t i)
 {
-    inUse = -1;
+    inUse = -2;
     status = NO_ERROR;
     identity = i;
 }
@@ -282,8 +282,10 @@ SharedBufferServer::UnlockUpdate::UnlockUpdate(
 }
 ssize_t SharedBufferServer::UnlockUpdate::operator()() {
     if (stack.inUse != lockedBuffer) {
-        LOGE("unlocking %d, but currently locked buffer is %d",
-                lockedBuffer, stack.inUse);
+        LOGE("unlocking %d, but currently locked buffer is %d "
+             "(identity=%d, token=%d)",
+                lockedBuffer, stack.inUse,
+                stack.identity, stack.token);
         return BAD_VALUE;
     }
     android_atomic_write(-1, &stack.inUse);
@@ -480,6 +482,7 @@ SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
       mNumBuffers(num)
 {
     mSharedStack->init(identity);
+    mSharedStack->token = surface;
     mSharedStack->head = num-1;
     mSharedStack->available = num;
     mSharedStack->queued = 0;

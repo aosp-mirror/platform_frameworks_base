@@ -55,6 +55,15 @@ public:
         return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
     }
 
+    virtual sp<ISurfaceComposerClient> createClientConnection()
+    {
+        uint32_t n;
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
+        remote()->transact(BnSurfaceComposer::CREATE_CLIENT_CONNECTION, data, &reply);
+        return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
+    }
+
     virtual sp<IMemoryHeap> getCblk() const
     {
         Parcel data, reply;
@@ -134,6 +143,11 @@ status_t BnSurfaceComposer::onTransact(
         case CREATE_CONNECTION: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             sp<IBinder> b = createConnection()->asBinder();
+            reply->writeStrongBinder(b);
+        } break;
+        case CREATE_CLIENT_CONNECTION: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
+            sp<IBinder> b = createClientConnection()->asBinder();
             reply->writeStrongBinder(b);
         } break;
         case OPEN_GLOBAL_TRANSACTION: {

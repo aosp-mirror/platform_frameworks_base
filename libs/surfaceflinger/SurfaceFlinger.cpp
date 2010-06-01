@@ -236,6 +236,18 @@ sp<ISurfaceComposerClient> SurfaceFlinger::createConnection()
     return bclient;
 }
 
+sp<ISurfaceComposerClient> SurfaceFlinger::createClientConnection()
+{
+    sp<ISurfaceComposerClient> bclient;
+    sp<UserClient> client(new UserClient(this));
+    status_t err = client->initCheck();
+    if (err == NO_ERROR) {
+        bclient = client;
+    }
+    return bclient;
+}
+
+
 const GraphicPlane& SurfaceFlinger::graphicPlane(int dpy) const
 {
     LOGE_IF(uint32_t(dpy) >= DISPLAY_COUNT, "Invalid DisplayID %d", dpy);
@@ -772,7 +784,8 @@ void SurfaceFlinger::commitTransaction()
 void SurfaceFlinger::handlePageFlip()
 {
     bool visibleRegions = mVisibleRegionsDirty;
-    LayerVector& currentLayers = const_cast<LayerVector&>(mDrawingState.layersSortedByZ);
+    LayerVector& currentLayers = const_cast<LayerVector&>(
+            mDrawingState.layersSortedByZ);
     visibleRegions |= lockPageFlip(currentLayers);
 
         const DisplayHardware& hw = graphicPlane(0).displayHardware();
@@ -794,7 +807,7 @@ bool SurfaceFlinger::lockPageFlip(const LayerVector& currentLayers)
     size_t count = currentLayers.size();
     sp<LayerBase> const* layers = currentLayers.array();
     for (size_t i=0 ; i<count ; i++) {
-        const sp<LayerBase>& layer = layers[i];
+        const sp<LayerBase>& layer(layers[i]);
         layer->lockPageFlip(recomputeVisibleRegions);
     }
     return recomputeVisibleRegions;
@@ -807,7 +820,7 @@ void SurfaceFlinger::unlockPageFlip(const LayerVector& currentLayers)
     size_t count = currentLayers.size();
     sp<LayerBase> const* layers = currentLayers.array();
     for (size_t i=0 ; i<count ; i++) {
-        const sp<LayerBase>& layer = layers[i];
+        const sp<LayerBase>& layer(layers[i]);
         layer->unlockPageFlip(planeTransform, mDirtyRegion);
     }
 }
@@ -839,7 +852,7 @@ void SurfaceFlinger::handleRepaint()
         // takes a rectangle, we must make sure to update that whole
         // rectangle in that case
         if (flags & DisplayHardware::SWAP_RECTANGLE) {
-            // FIXME: we really should be able to pass a region to
+            // TODO: we really should be able to pass a region to
             // SWAP_RECTANGLE so that we don't have to redraw all this.
             mDirtyRegion.set(mInvalidRegion.bounds());
         } else {
@@ -1060,6 +1073,10 @@ status_t SurfaceFlinger::removeLayer(const sp<LayerBase>& layer)
 
 status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
 {
+    sp<LayerBaseClient> lbc(layerBase->getLayerBaseClient());
+    if (lbc != 0) {
+        mLayerMap.removeItem( lbc->getSurface()->asBinder() );
+    }
     ssize_t index = mCurrentState.layersSortedByZ.remove(layerBase);
     if (index >= 0) {
         mLayersRemoved = true;
@@ -1192,12 +1209,14 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
     }
     
     //LOGD("createSurface for pid %d (%d x %d)", pid, w, h);
+    sp<Layer> normalLayer;
     switch (flags & eFXSurfaceMask) {
         case eFXSurfaceNormal:
             if (UNLIKELY(flags & ePushBuffers)) {
                 layer = createPushBuffersSurface(client, d, w, h, flags);
             } else {
-                layer = createNormalSurface(client, d, w, h, flags, format);
+                normalLayer = createNormalSurface(client, d, w, h, flags, format);
+                layer = normalLayer;
             }
             break;
         case eFXSurfaceBlur:
@@ -1212,6 +1231,7 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
         layer->initStates(w, h, flags);
         layer->setName(name);
         ssize_t token = addClientLayer(client, layer);
+
         surfaceHandle = layer->getSurface();
         if (surfaceHandle != 0) { 
             params->token = token;
@@ -1219,14 +1239,19 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
             params->width = w;
             params->height = h;
             params->format = format;
+            if (normalLayer != 0) {
+                Mutex::Autolock _l(mStateLock);
+                mLayerMap.add(surfaceHandle->asBinder(), normalLayer);
+            }
         }
+
         setTransactionFlags(eTransactionNeeded);
     }
 
     return surfaceHandle;
 }
 
-sp<LayerBaseClient> SurfaceFlinger::createNormalSurface(
+sp<Layer> SurfaceFlinger::createNormalSurface(
         const sp<Client>& client, DisplayID display,
         uint32_t w, uint32_t h, uint32_t flags,
         PixelFormat& format)
@@ -1251,7 +1276,7 @@ sp<LayerBaseClient> SurfaceFlinger::createNormalSurface(
     return layer;
 }
 
-sp<LayerBaseClient> SurfaceFlinger::createBlurSurface(
+sp<LayerBlur> SurfaceFlinger::createBlurSurface(
         const sp<Client>& client, DisplayID display,
         uint32_t w, uint32_t h, uint32_t flags)
 {
@@ -1260,7 +1285,7 @@ sp<LayerBaseClient> SurfaceFlinger::createBlurSurface(
     return layer;
 }
 
-sp<LayerBaseClient> SurfaceFlinger::createDimSurface(
+sp<LayerDim> SurfaceFlinger::createDimSurface(
         const sp<Client>& client, DisplayID display,
         uint32_t w, uint32_t h, uint32_t flags)
 {
@@ -1269,7 +1294,7 @@ sp<LayerBaseClient> SurfaceFlinger::createDimSurface(
     return layer;
 }
 
-sp<LayerBaseClient> SurfaceFlinger::createPushBuffersSurface(
+sp<LayerBuffer> SurfaceFlinger::createPushBuffersSurface(
         const sp<Client>& client, DisplayID display,
         uint32_t w, uint32_t h, uint32_t flags)
 {
@@ -1567,32 +1592,24 @@ status_t SurfaceFlinger::onTransact(
 }
 
 // ---------------------------------------------------------------------------
-#if 0
-#pragma mark -
-#endif
+
+sp<Layer> SurfaceFlinger::getLayer(const sp<ISurface>& sur) const
+{
+    sp<Layer> result;
+    Mutex::Autolock _l(mStateLock);
+    result = mLayerMap.valueFor( sur->asBinder() ).promote();
+    return result;
+}
+
+// ---------------------------------------------------------------------------
 
 Client::Client(const sp<SurfaceFlinger>& flinger)
-    : ctrlblk(0), mBitmap(0), mFlinger(flinger)
+    : mFlinger(flinger), mNameGenerator(1)
 {
-    const int pgsize = getpagesize();
-    const int cblksize = ((sizeof(SharedClient)+(pgsize-1))&~(pgsize-1));
-
-    mCblkHeap = new MemoryHeapBase(cblksize, 0,
-            "SurfaceFlinger Client control-block");
-
-    ctrlblk = static_cast<SharedClient *>(mCblkHeap->getBase());
-    if (ctrlblk) { // construct the shared structure in-place.
-        new(ctrlblk) SharedClient;
-    }
-
 }
 
 Client::~Client()
 {
-    if (ctrlblk) {
-        ctrlblk->~SharedClient();  // destroy our shared-structure.
-    }
-
     const size_t count = mLayers.size();
     for (size_t i=0 ; i<count ; i++) {
         sp<LayerBaseClient> layer(mLayers.valueAt(i).promote());
@@ -1603,32 +1620,18 @@ Client::~Client()
 }
 
 status_t Client::initCheck() const {
-    return ctrlblk == 0 ? NO_INIT : NO_ERROR;
+    return NO_ERROR;
 }
 
 ssize_t Client::attachLayer(const sp<LayerBaseClient>& layer)
 {
-    // TODO: get rid of this
-    int32_t name = 0;
-    while (mBitmap & (1LU<<name)) {
-        name++;
-        if (name >= 31)
-            return NO_MEMORY;
-    }
-    mBitmap |= 1LU<<name;
-    layer->setToken(name);
+    int32_t name = android_atomic_inc(&mNameGenerator);
     mLayers.add(name, layer);
     return name;
 }
 
-void Client::free(LayerBaseClient const* layer)
+void Client::detachLayer(const LayerBaseClient* layer)
 {
-    // TODO: get rid of this
-    int32_t name = layer->getToken();
-    if (name >= 0) {
-        mBitmap &= ~(1LU<<name);
-    }
-
     // we do a linear search here, because this doesn't happen often
     const size_t count = mLayers.size();
     for (size_t i=0 ; i<count ; i++) {
@@ -1649,12 +1652,15 @@ sp<LayerBaseClient> Client::getLayerUser(int32_t i) const {
 }
 
 sp<IMemoryHeap> Client::getControlBlock() const {
-    return mCblkHeap;
+    return 0;
+}
+ssize_t Client::getTokenForSurface(const sp<ISurface>& sur) const {
+    return -1;
 }
 sp<ISurface> Client::createSurface(
-        ISurfaceComposerClient::surface_data_t* params,
-        int pid, const String8& name,
-        DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
+        ISurfaceComposerClient::surface_data_t* params, int pid,
+        const String8& name,
+        DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
     return mFlinger->createSurface(this, pid, name, params,
@@ -1665,6 +1671,100 @@ status_t Client::destroySurface(SurfaceID sid) {
 }
 status_t Client::setState(int32_t count, const layer_state_t* states) {
     return mFlinger->setClientState(this, count, states);
+}
+
+// ---------------------------------------------------------------------------
+
+UserClient::UserClient(const sp<SurfaceFlinger>& flinger)
+    : ctrlblk(0), mBitmap(0), mFlinger(flinger)
+{
+    const int pgsize = getpagesize();
+    const int cblksize = ((sizeof(SharedClient)+(pgsize-1))&~(pgsize-1));
+
+    mCblkHeap = new MemoryHeapBase(cblksize, 0,
+            "SurfaceFlinger Client control-block");
+
+    ctrlblk = static_cast<SharedClient *>(mCblkHeap->getBase());
+    if (ctrlblk) { // construct the shared structure in-place.
+        new(ctrlblk) SharedClient;
+    }
+}
+
+UserClient::~UserClient()
+{
+    if (ctrlblk) {
+        ctrlblk->~SharedClient();  // destroy our shared-structure.
+    }
+
+    /*
+     * When a UserClient dies, it's unclear what to do exactly.
+     * We could go ahead and destroy all surfaces linked to that client
+     * however, it wouldn't be fair to the main Client
+     * (usually the the window-manager), which might want to re-target
+     * the layer to another UserClient.
+     * I think the best is to do nothing, or not much; in most cases the
+     * WM itself will go ahead and clean things up when it detects a client of
+     * his has died.
+     * The remaining question is what to display? currently we keep
+     * just keep the current buffer.
+     */
+}
+
+status_t UserClient::initCheck() const {
+    return ctrlblk == 0 ? NO_INIT : NO_ERROR;
+}
+
+void UserClient::detachLayer(const Layer* layer)
+{
+    int32_t name = layer->getToken();
+    if (name >= 0) {
+        android_atomic_and(~(1LU<<name), &mBitmap);
+    }
+}
+
+sp<IMemoryHeap> UserClient::getControlBlock() const {
+    return mCblkHeap;
+}
+
+ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
+{
+    int32_t name = NAME_NOT_FOUND;
+    sp<Layer> layer(mFlinger->getLayer(sur));
+    if (layer == 0) return name;
+
+    // this layer already has a token, just return it
+    // FIXME: we should check that this token is for the same client
+    name = layer->getToken();
+    if (name >= 0) return name;
+
+    name = 0;
+    do {
+        int32_t mask = 1LU<<name;
+        if ((android_atomic_or(mask, &mBitmap) & mask) == 0) {
+            // we found and locked that name
+            layer->setToken(const_cast<UserClient*>(this), ctrlblk, name);
+            break;
+        }
+        if (++name > 31)
+            name = NO_MEMORY;
+    } while(name >= 0);
+
+    //LOGD("getTokenForSurface(%p) => %d", sur->asBinder().get(), name);
+    return name;
+}
+
+sp<ISurface> UserClient::createSurface(
+        ISurfaceComposerClient::surface_data_t* params, int pid,
+        const String8& name,
+        DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
+        uint32_t flags) {
+    return 0;
+}
+status_t UserClient::destroySurface(SurfaceID sid) {
+    return INVALID_OPERATION;
+}
+status_t UserClient::setState(int32_t count, const layer_state_t* states) {
+    return INVALID_OPERATION;
 }
 
 // ---------------------------------------------------------------------------

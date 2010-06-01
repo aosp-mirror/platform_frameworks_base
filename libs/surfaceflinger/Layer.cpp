@@ -50,10 +50,9 @@ template <typename T> inline T min(T a, T b) {
 Layer::Layer(SurfaceFlinger* flinger,
         DisplayID display, const sp<Client>& client)
     :   LayerBaseClient(flinger, display, client),
-        lcblk(NULL),
-        mSecure(false),
         mNeedsBlending(true),
         mNeedsDithering(false),
+        mSecure(false),
         mTextureManager(mFlags),
         mBufferManager(mTextureManager),
         mWidth(0), mHeight(0), mFixedSize(false)
@@ -66,32 +65,43 @@ Layer::~Layer()
     EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
     mBufferManager.destroy(dpy);
 
-    // the actual buffers will be destroyed here
-    delete lcblk;
+    // we can use getUserClientUnsafe here because we know we're
+    // single-threaded at that point.
+    sp<UserClient> ourClient(mUserClientRef.getUserClientUnsafe());
+    if (ourClient != 0) {
+        ourClient->detachLayer(this);
+    }
 }
 
-// TODO: get rid of this
-void Layer::setToken(int32_t token)
+status_t Layer::setToken(const sp<UserClient>& userClient,
+        SharedClient* sharedClient, int32_t token)
 {
-    sp<Client> ourClient(client.promote());
-
-    mToken = token;
-
-    // no OpenGL operation is possible here, since we might not be
-    // in the OpenGL thread.
-    lcblk = new SharedBufferServer(
-            ourClient->ctrlblk, token, mBufferManager.getDefaultBufferCount(),
+    SharedBufferServer* lcblk = new SharedBufferServer(
+            sharedClient, token, mBufferManager.getDefaultBufferCount(),
             getIdentity());
 
-   mBufferManager.setActiveBufferIndex( lcblk->getFrontBuffer() );
+    status_t err = mUserClientRef.setToken(userClient, lcblk, token);
+    if (err != NO_ERROR) {
+        LOGE("ClientRef::setToken(%p, %p, %u) failed",
+                userClient.get(), lcblk, token);
+        delete lcblk;
+    }
+
+    return err;
+}
+
+int32_t Layer::getToken() const
+{
+    return mUserClientRef.getToken();
 }
 
 // called with SurfaceFlinger::mStateLock as soon as the layer is entered
 // in the purgatory list
 void Layer::onRemoved()
 {
-    sp<Client> ourClient(client.promote());
-    if (ourClient != 0) {
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    if (lcblk) {
         // wake up the condition
         lcblk->setStatus(NO_INIT);
     }
@@ -237,10 +247,9 @@ bool Layer::needsFiltering() const
 
 status_t Layer::setBufferCount(int bufferCount)
 {
-    // Ensures our client doesn't go away while we're accessing
-    // the shared area.
-    sp<Client> ourClient(client.promote());
-    if (ourClient == 0) {
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    if (!lcblk) {
         // oops, the client is already gone
         return DEAD_OBJECT;
     }
@@ -259,7 +268,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
 {
     sp<GraphicBuffer> buffer;
 
-    if ((reqWidth | reqHeight | reqFormat) < 0)
+    if (int32_t(reqWidth | reqHeight | reqFormat) < 0)
         return buffer;
 
     if ((!reqWidth && reqHeight) || (reqWidth && !reqHeight))
@@ -267,8 +276,9 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
 
     // this ensures our client doesn't go away while we're accessing
     // the shared area.
-    sp<Client> ourClient(client.promote());
-    if (ourClient == 0) {
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    if (!lcblk) {
         // oops, the client is already gone
         return buffer;
     }
@@ -403,8 +413,9 @@ uint32_t Layer::doTransaction(uint32_t flags)
             // a buffer, it'll get the new size.
             setBufferSize(temp.requested_w, temp.requested_h);
 
-            sp<Client> ourClient(client.promote());
-            if (ourClient != 0) {
+            ClientRef::Access sharedClient(mUserClientRef);
+            SharedBufferServer* lcblk(sharedClient.get());
+            if (lcblk) {
                 // all buffers need reallocation
                 lcblk->reallocateAll();
             }
@@ -442,8 +453,9 @@ bool Layer::isFixedSize() const {
 
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
-    sp<Client> ourClient(client.promote());
-    if (ourClient == 0) {
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    if (!lcblk) {
         // client died
         recomputeVisibleRegions = true;
         return;
@@ -458,14 +470,14 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     }
 
     if (buf < NO_ERROR) {
-        LOGE("retireAndLock() buffer index (%d) out of range", buf);
+        LOGE("retireAndLock() buffer index (%d) out of range", int(buf));
         mPostedDirtyRegion.clear();
         return;
     }
 
     // we retired a buffer, which becomes the new front buffer
     if (mBufferManager.setActiveBufferIndex(buf) < NO_ERROR) {
-        LOGE("retireAndLock() buffer index (%d) out of range", buf);
+        LOGE("retireAndLock() buffer index (%d) out of range", int(buf));
         mPostedDirtyRegion.clear();
         return;
     }
@@ -560,11 +572,16 @@ void Layer::unlockPageFlip(
 
 void Layer::finishPageFlip()
 {
-    sp<Client> ourClient(client.promote());
-    if (ourClient != 0) {
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    if (lcblk) {
         int buf = mBufferManager.getActiveBufferIndex();
-        status_t err = lcblk->unlock( buf );
-        LOGE_IF(err!=NO_ERROR, "layer %p, buffer=%d wasn't locked!", this, buf);
+        if (buf >= 0) {
+            status_t err = lcblk->unlock( buf );
+            LOGE_IF(err!=NO_ERROR,
+                    "layer %p, buffer=%d wasn't locked!",
+                    this, buf);
+        }
     }
 }
 
@@ -573,8 +590,15 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
 {
     LayerBaseClient::dump(result, buffer, SIZE);
 
-    SharedBufferStack::Statistics stats = lcblk->getStats();
-    result.append( lcblk->dump("      ") );
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    uint32_t totalTime = 0;
+    if (lcblk) {
+        SharedBufferStack::Statistics stats = lcblk->getStats();
+        totalTime= stats.totalTime;
+        result.append( lcblk->dump("      ") );
+    }
+
     sp<const GraphicBuffer> buf0(getBuffer(0));
     sp<const GraphicBuffer> buf1(getBuffer(1));
     uint32_t w0=0, h0=0, s0=0;
@@ -593,18 +617,59 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
             "      "
             "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
             " freezeLock=%p, dq-q-time=%u us\n",
-            pixelFormat(),
-            w0, h0, s0, w1, h1, s1,
-            getFreezeLock().get(), stats.totalTime);
+            mFormat, w0, h0, s0, w1, h1, s1,
+            getFreezeLock().get(), totalTime);
 
     result.append(buffer);
 }
 
 // ---------------------------------------------------------------------------
 
+Layer::ClientRef::ClientRef()
+    : mToken(-1) {
+}
+
+Layer::ClientRef::~ClientRef() {
+    delete lcblk;
+}
+
+int32_t Layer::ClientRef::getToken() const {
+    Mutex::Autolock _l(mLock);
+    return mToken;
+}
+
+status_t Layer::ClientRef::setToken(const sp<UserClient>& uc,
+        SharedBufferServer* sharedClient, int32_t token) {
+    Mutex::Autolock _l(mLock);
+    if (mToken >= 0)
+        return INVALID_OPERATION;
+    mUserClient = uc;
+    mToken = token;
+    lcblk = sharedClient;
+    return NO_ERROR;
+}
+
+sp<UserClient> Layer::ClientRef::getUserClientUnsafe() const {
+    return mUserClient.promote();
+}
+
+// this class gives us access to SharedBufferServer safely
+// it makes sure the UserClient (and its associated shared memory)
+// won't go away while we're accessing it.
+Layer::ClientRef::Access::Access(const ClientRef& ref)
+    : lcblk(0)
+{
+    Mutex::Autolock _l(ref.mLock);
+    mUserClientStrongRef = ref.mUserClient.promote();
+    if (mUserClientStrongRef != 0)
+        lcblk = ref.lcblk;
+}
+
+// ---------------------------------------------------------------------------
+
 Layer::BufferManager::BufferManager(TextureManager& tm)
     : mNumBuffers(NUM_BUFFERS), mTextureManager(tm),
-      mActiveBuffer(0), mFailover(false)
+      mActiveBuffer(-1), mFailover(false)
 {
 }
 
@@ -625,7 +690,6 @@ sp<GraphicBuffer> Layer::BufferManager::getBuffer(size_t index) const {
 }
 
 status_t Layer::BufferManager::setActiveBufferIndex(size_t index) {
-    // TODO: need to validate 'index'
     mActiveBuffer = index;
     return NO_ERROR;
 }
@@ -636,7 +700,7 @@ size_t Layer::BufferManager::getActiveBufferIndex() const {
 
 Texture Layer::BufferManager::getActiveTexture() const {
     Texture res;
-    if (mFailover) {
+    if (mFailover || mActiveBuffer<0) {
         res = mFailoverTexture;
     } else {
         static_cast<Image&>(res) = mBufferData[mActiveBuffer].texture;
@@ -645,10 +709,14 @@ Texture Layer::BufferManager::getActiveTexture() const {
 }
 
 sp<GraphicBuffer> Layer::BufferManager::getActiveBuffer() const {
-    const size_t activeBuffer = mActiveBuffer;
-    BufferData const * const buffers = mBufferData;
-    Mutex::Autolock _l(mLock);
-    return buffers[activeBuffer].buffer;
+    sp<GraphicBuffer> result;
+    const ssize_t activeBuffer = mActiveBuffer;
+    if (activeBuffer >= 0) {
+        BufferData const * const buffers = mBufferData;
+        Mutex::Autolock _l(mLock);
+        result = buffers[activeBuffer].buffer;
+    }
+    return result;
 }
 
 sp<GraphicBuffer> Layer::BufferManager::detachBuffer(size_t index)
@@ -692,19 +760,22 @@ status_t Layer::BufferManager::destroy(EGLDisplay dpy)
 status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
         const sp<GraphicBuffer>& buffer)
 {
-    size_t index = mActiveBuffer;
-    Image& texture(mBufferData[index].texture);
-    status_t err = mTextureManager.initEglImage(&texture, dpy, buffer);
-    // if EGLImage fails, we switch to regular texture mode, and we
-    // free all resources associated with using EGLImages.
-    if (err == NO_ERROR) {
-        mFailover = false;
-        destroyTexture(&mFailoverTexture, dpy);
-    } else {
-        mFailover = true;
-        const size_t num = mNumBuffers;
-        for (size_t i=0 ; i<num ; i++) {
-            destroyTexture(&mBufferData[i].texture, dpy);
+    status_t err = NO_INIT;
+    ssize_t index = mActiveBuffer;
+    if (index >= 0) {
+        Image& texture(mBufferData[index].texture);
+        err = mTextureManager.initEglImage(&texture, dpy, buffer);
+        // if EGLImage fails, we switch to regular texture mode, and we
+        // free all resources associated with using EGLImages.
+        if (err == NO_ERROR) {
+            mFailover = false;
+            destroyTexture(&mFailoverTexture, dpy);
+        } else {
+            mFailover = true;
+            const size_t num = mNumBuffers;
+            for (size_t i=0 ; i<num ; i++) {
+                destroyTexture(&mBufferData[i].texture, dpy);
+            }
         }
     }
     return err;

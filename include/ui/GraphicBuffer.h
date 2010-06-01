@@ -93,10 +93,8 @@ public:
     
     void setIndex(int index);
     int getIndex() const;
-    void setVerticalStride(uint32_t vstride);
-    uint32_t getVerticalStride() const;
 
-protected:
+private:
     virtual ~GraphicBuffer();
 
     enum {
@@ -105,8 +103,12 @@ protected:
         ownData   = 2,
     };
 
-    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
-    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
+    inline const GraphicBufferMapper& getBufferMapper() const {
+        return mBufferMapper;
+    }
+    inline GraphicBufferMapper& getBufferMapper() {
+        return mBufferMapper;
+    }
     uint8_t mOwner;
 
 private:
@@ -134,7 +136,6 @@ private:
 
     GraphicBufferMapper& mBufferMapper;
     ssize_t mInitCheck;
-    uint32_t mVStride;
     int mIndex;
 };
 

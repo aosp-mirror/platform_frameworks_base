@@ -151,7 +151,6 @@ bool LayerBase::setAlpha(uint8_t alpha) {
     return true;
 }
 bool LayerBase::setMatrix(const layer_state_t::matrix22_t& matrix) {
-    // TODO: check the matrix has changed
     mCurrentState.sequence++;
     mCurrentState.transform.set(
             matrix.dsdx, matrix.dsdy, matrix.dtdx, matrix.dtdy);
@@ -159,7 +158,6 @@ bool LayerBase::setMatrix(const layer_state_t::matrix22_t& matrix) {
     return true;
 }
 bool LayerBase::setTransparentRegionHint(const Region& transparent) {
-    // TODO: check the region has changed
     mCurrentState.sequence++;
     mCurrentState.transparentRegion = transparent;
     requestTransaction();
@@ -489,16 +487,16 @@ int32_t LayerBaseClient::sIdentity = 1;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client)
-    : LayerBase(flinger, display), client(client),
+    : LayerBase(flinger, display), mClientRef(client),
       mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
 }
 
 LayerBaseClient::~LayerBaseClient()
 {
-    sp<Client> c(client.promote());
+    sp<Client> c(mClientRef.promote());
     if (c != 0) {
-        c->free(this);
+        c->detachLayer(this);
     }
 }
 
@@ -524,7 +522,7 @@ void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
 {
     LayerBase::dump(result, buffer, SIZE);
 
-    sp<Client> client(this->client.promote());
+    sp<Client> client(mClientRef.promote());
     snprintf(buffer, SIZE,
             "      name=%s\n"
             "      client=%p, identity=%u\n",

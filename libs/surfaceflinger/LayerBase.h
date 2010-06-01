@@ -45,6 +45,7 @@ class DisplayHardware;
 class Client;
 class GraphicBuffer;
 class GraphicPlane;
+class LayerBaseClient;
 class SurfaceFlinger;
 class Texture;
 
@@ -99,6 +100,8 @@ public:
             void drawRegion(const Region& reg) const;
 
             void invalidate();
+
+    virtual sp<LayerBaseClient> getLayerBaseClient() const { return 0; }
 
     virtual const char* getTypeId() const { return "LayerBase"; }
 
@@ -268,14 +271,14 @@ class LayerBaseClient : public LayerBase
 public:
     class Surface;
 
-    const wp<Client> client;
-
             LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
                         const sp<Client>& client);
     virtual ~LayerBaseClient();
 
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
+    virtual sp<LayerBaseClient> getLayerBaseClient() const {
+        return const_cast<LayerBaseClient*>(this); }
     virtual const char* getTypeId() const { return "LayerBaseClient"; }
 
     uint32_t getIdentity() const { return mIdentity; }
@@ -318,14 +321,10 @@ protected:
 private:
     mutable Mutex mLock;
     mutable wp<Surface> mClientSurface;
+    const wp<Client> mClientRef;
     // only read
     const uint32_t mIdentity;
     static int32_t sIdentity;
-
-    // TODO: get rid of this
-public:
-    virtual void setToken(int32_t token) { }
-    virtual int32_t getToken() const { return -1; }
 };
 
 // ---------------------------------------------------------------------------
