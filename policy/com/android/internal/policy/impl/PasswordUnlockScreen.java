@@ -53,6 +53,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
 
+    private boolean mIsAlpha;
+
     private EditText mPasswordEntry;
     private Button mEmergencyCallButton;
     private LockPatternUtils mLockPatternUtils;
@@ -87,7 +89,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         }
 
         final int quality = lockPatternUtils.getKeyguardStoredPasswordQuality();
-        final boolean isAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
+        mIsAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
                 || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
                 || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
 
@@ -100,7 +102,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mTitle = (TextView) findViewById(R.id.enter_password_label);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this);
-        mKeyboardHelper.setKeyboardMode(isAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
+        mKeyboardHelper.setKeyboardMode(mIsAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
                 : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
 
         mKeyboardView.setVisibility(mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
@@ -109,7 +111,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         // This allows keyboards with overlapping qwerty/numeric keys to choose just the
         // numeric keys.
-        if (isAlpha) {
+        if (mIsAlpha) {
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         } else {
             mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
@@ -140,6 +142,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     public void onResume() {
         // start fresh
         mPasswordEntry.setText("");
+        resetStatusInfo();
         mPasswordEntry.requestFocus();
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 
@@ -176,6 +179,9 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
+            mTitle.setText(R.string.lockscreen_password_wrong);
+        } else if (entry.length() > 0) {
+            mTitle.setText(R.string.lockscreen_password_wrong);
         }
         mPasswordEntry.setText("");
     }
@@ -199,16 +205,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             @Override
             public void onFinish() {
                 mPasswordEntry.setEnabled(true);
-                final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
-                final boolean isAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
-                        || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
-                        || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
-                if(isAlpha) {
-                    mTitle.setText(R.string.keyguard_password_enter_password_code);
-                } else {
-                    mTitle.setText(R.string.keyguard_password_enter_pin_password_code);
-                }
                 mKeyboardView.setEnabled(true);
+                resetStatusInfo();
             }
         }.start();
     }
@@ -272,6 +270,14 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     public void onTimeChanged() {
 
+    }
+
+    private void resetStatusInfo() {
+        if(mIsAlpha) {
+            mTitle.setText(R.string.keyguard_password_enter_password_code);
+        } else {
+            mTitle.setText(R.string.keyguard_password_enter_pin_password_code);
+        }
     }
 
 }
