@@ -68,21 +68,12 @@ void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
 
     rsc->checkError("SimpleMesh::renderRange 1");
     VertexArray va;
-    if (rsc->checkVersion2_0()) {
-        for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
-            mVertexBuffers[ct]->uploadCheck(rsc);
-            va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
-            mVertexTypes[ct]->enableGLVertexBuffer2(&va);
-        }
-        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
-    } else {
-        for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
-            mVertexBuffers[ct]->uploadCheck(rsc);
-            va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
-            mVertexTypes[ct]->enableGLVertexBuffer(&va);
-        }
-        va.setupGL(rsc, 0);
+    for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
+        mVertexBuffers[ct]->uploadCheck(rsc);
+        va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
+        mVertexTypes[ct]->enableGLVertexBuffer(&va);
     }
+    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
 
     rsc->checkError("SimpleMesh::renderRange 2");
     if (mIndexType.get()) {

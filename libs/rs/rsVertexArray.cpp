@@ -60,7 +60,6 @@ void VertexArray::Attrib::set(const Attrib &a)
     size = a.size;
     stride = a.stride;
     normalized = a.normalized;
-    kind = RS_KIND_USER;
     name.setTo(a.name);
 }
 
@@ -80,17 +79,16 @@ void VertexArray::clear(uint32_t n)
     mAttribs[n].clear();
 }
 
-void VertexArray::addUser(const Attrib &a, uint32_t stride)
+void VertexArray::add(const Attrib &a, uint32_t stride)
 {
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].set(a);
     mAttribs[mCount].buffer = mActiveBuffer;
     mAttribs[mCount].stride = stride;
-    mAttribs[mCount].kind = RS_KIND_USER;
     mCount ++;
 }
 
-void VertexArray::addLegacy(uint32_t type, uint32_t size, uint32_t stride, RsDataKind kind, bool normalized, uint32_t offset)
+void VertexArray::add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name)
 {
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].clear();
@@ -100,96 +98,25 @@ void VertexArray::addLegacy(uint32_t type, uint32_t size, uint32_t stride, RsDat
     mAttribs[mCount].normalized = normalized;
     mAttribs[mCount].buffer = mActiveBuffer;
     mAttribs[mCount].stride = stride;
-    mAttribs[mCount].kind = kind;
+    mAttribs[mCount].name.setTo(name);
     mCount ++;
 }
 
 void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
-    LOGE("va %i: slot=%i name=%s buf=%i  size=%i  type=0x%x  kind=%i  stride=0x%x  norm=%i  offset=0x%x", idx, slot,
+    LOGE("va %i: slot=%i name=%s buf=%i  size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx, slot,
          mAttribs[idx].name.string(),
          mAttribs[idx].buffer,
          mAttribs[idx].size,
          mAttribs[idx].type,
-         mAttribs[idx].kind,
          mAttribs[idx].stride,
          mAttribs[idx].normalized,
          mAttribs[idx].offset);
 }
 
-void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) const
-{
-    glClientActiveTexture(GL_TEXTURE0);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#ifndef ANDROID_RS_BUILD_FOR_HOST // GLES only
-    glDisableClientState(GL_POINT_SIZE_ARRAY_OES);
-#endif //ANDROID_RS_BUILD_FOR_HOST
-
-    for (uint32_t ct=0; ct < mCount; ct++) {
-        switch(mAttribs[ct].kind) {
-        case RS_KIND_POSITION:
-            //logAttrib(POSITION);
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-            glVertexPointer(mAttribs[ct].size,
-                            mAttribs[ct].type,
-                            mAttribs[ct].stride,
-                            (void *)mAttribs[ct].offset);
-            break;
-
-        case RS_KIND_NORMAL:
-            //logAttrib(NORMAL);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            rsAssert(mAttribs[ct].size == 3);
-            glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-            glNormalPointer(mAttribs[ct].type,
-                            mAttribs[ct].stride,
-                            (void *)mAttribs[ct].offset);
-            break;
-
-        case RS_KIND_COLOR:
-            //logAttrib(COLOR);
-            glEnableClientState(GL_COLOR_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-            glColorPointer(mAttribs[ct].size,
-                           mAttribs[ct].type,
-                           mAttribs[ct].stride,
-                           (void *)mAttribs[ct].offset);
-            break;
-
-        case RS_KIND_TEXTURE:
-            //logAttrib(TEXTURE);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-            glTexCoordPointer(mAttribs[ct].size,
-                              mAttribs[ct].type,
-                              mAttribs[ct].stride,
-                              (void *)mAttribs[ct].offset);
-            break;
-#ifndef ANDROID_RS_BUILD_FOR_HOST // GLES only
-        case RS_KIND_POINT_SIZE:
-            //logAttrib(POINT_SIZE);
-            glEnableClientState(GL_POINT_SIZE_ARRAY_OES);
-            glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-            glPointSizePointerOES(mAttribs[ct].type,
-                                  mAttribs[ct].stride,
-                                  (void *)mAttribs[ct].offset);
-            break;
-#endif //ANDROID_RS_BUILD_FOR_HOST
-
-        default:
-            rsAssert(0);
-        }
-    }
-
-    rsc->checkError("VertexArray::setupGL");
-}
-
 void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, ShaderCache *sc) const
 {
     rsc->checkError("VertexArray::setupGL2 start");
-    for (uint32_t ct=1; ct <= state->mLastEnableCount; ct++) {
+    for (uint32_t ct=1; ct <= 0xf/*state->mLastEnableCount*/; ct++) {
         glDisableVertexAttribArray(ct);
     }
 
@@ -199,16 +126,24 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
         if (sc->isUserVertexProgram()) {
             slot = sc->vtxAttribSlot(ct);
         } else {
-            if (mAttribs[ct].kind == RS_KIND_USER) {
+            if (mAttribs[ct].name == "position") {
+                slot = 0;
+            } else if (mAttribs[ct].name == "color") {
+                slot = 1;
+            } else if (mAttribs[ct].name == "normal") {
+                slot = 2;
+            } else if (mAttribs[ct].name == "pointSize") {
+                slot = 3;
+            } else if (mAttribs[ct].name == "texture0") {
+                slot = 4;
+            } else {
                 continue;
             }
-            slot = sc->vtxAttribSlot(mAttribs[ct].kind);
         }
 
-        //logAttrib(ct, slot);
+        logAttrib(ct, slot);
         glEnableVertexAttribArray(slot);
         glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-
         glVertexAttribPointer(slot,
                               mAttribs[ct].size,
                               mAttribs[ct].type,

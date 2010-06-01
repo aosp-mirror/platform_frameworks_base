@@ -178,11 +178,11 @@ void ProgramVertex::createShader()
         }
         mShader.append(mUserShader);
     } else {
-        mShader.append("attribute vec4 ATTRIB_LegacyPosition;\n");
-        mShader.append("attribute vec4 ATTRIB_LegacyColor;\n");
-        mShader.append("attribute vec3 ATTRIB_LegacyNormal;\n");
-        mShader.append("attribute float ATTRIB_LegacyPointSize;\n");
-        mShader.append("attribute vec4 ATTRIB_LegacyTexture;\n");
+        mShader.append("attribute vec4 ATTRIB_position;\n");
+        mShader.append("attribute vec4 ATTRIB_color;\n");
+        mShader.append("attribute vec3 ATTRIB_normal;\n");
+        mShader.append("attribute float ATTRIB_pointSize;\n");
+        mShader.append("attribute vec4 ATTRIB_texture0;\n");
 
         for (uint32_t ct=0; ct < mUniformCount; ct++) {
             mShader.append("uniform mat4 ");
@@ -191,14 +191,14 @@ void ProgramVertex::createShader()
         }
 
         mShader.append("void main() {\n");
-        mShader.append("  gl_Position = UNI_MVP * ATTRIB_LegacyPosition;\n");
-        mShader.append("  gl_PointSize = ATTRIB_LegacyPointSize;\n");
+        mShader.append("  gl_Position = UNI_MVP * ATTRIB_position;\n");
+        mShader.append("  gl_PointSize = ATTRIB_pointSize;\n");
 
-        mShader.append("  varColor = ATTRIB_LegacyColor;\n");
+        mShader.append("  varColor = ATTRIB_color;\n");
         if (mTextureMatrixEnable) {
-            mShader.append("  varTex0 = UNI_TexMatrix * ATTRIB_LegacyTexture;\n");
+            mShader.append("  varTex0 = UNI_TexMatrix * ATTRIB_texture0;\n");
         } else {
-            mShader.append("  varTex0 = ATTRIB_LegacyTexture;\n");
+            mShader.append("  varTex0 = ATTRIB_texture0;\n");
         }
         //mShader.append("  pos.x = pos.x / 480.0;\n");
         //mShader.append("  pos.y = pos.y / 800.0;\n");

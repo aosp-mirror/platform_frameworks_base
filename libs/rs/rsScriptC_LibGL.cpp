@@ -131,12 +131,8 @@ static void SC_drawLine(float x1, float y1, float z1,
 
     float vtx[] = { x1, y1, z1, x2, y2, z2 };
     VertexArray va;
-    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
-    if (rsc->checkVersion2_0()) {
-        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
-    } else {
-        va.setupGL(rsc, &rsc->mStateVertexArray);
-    }
+    va.add(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "position");
+    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
 
     glDrawArrays(GL_LINES, 0, 2);
 }
@@ -151,12 +147,8 @@ static void SC_drawPoint(float x, float y, float z)
     float vtx[] = { x, y, z };
 
     VertexArray va;
-    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
-    if (rsc->checkVersion2_0()) {
-        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
-    } else {
-        va.setupGL(rsc, &rsc->mStateVertexArray);
-    }
+    va.add(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "position");
+    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
 
     glDrawArrays(GL_POINTS, 0, 1);
 }
@@ -185,14 +177,9 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
     VertexArray va;
-    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
-    va.addLegacy(GL_FLOAT, 2, 8, RS_KIND_TEXTURE, false, (uint32_t)tex);
-    if (rsc->checkVersion2_0()) {
-        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
-    } else {
-        va.setupGL(rsc, &rsc->mStateVertexArray);
-    }
-
+    va.add(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "position");
+    va.add(GL_FLOAT, 2, 8, false, (uint32_t)tex, "texture0");
+    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }

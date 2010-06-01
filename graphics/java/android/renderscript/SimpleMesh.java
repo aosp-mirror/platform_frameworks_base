@@ -313,30 +313,20 @@ public class SimpleMesh extends BaseObj {
         public SimpleMesh create() {
             Element.Builder b = new Element.Builder(mRS);
             int floatCount = mVtxSize;
-            b.add(Element.createAttrib(mRS,
+            b.add(Element.createVector(mRS,
                                        Element.DataType.FLOAT_32,
-                                       Element.DataKind.POSITION,
                                        mVtxSize), "position");
             if ((mFlags & COLOR) != 0) {
                 floatCount += 4;
-                b.add(Element.createAttrib(mRS,
-                                           Element.DataType.FLOAT_32,
-                                           Element.DataKind.COLOR,
-                                           4), "color");
+                b.add(Element.F32_4(mRS), "color");
             }
             if ((mFlags & TEXTURE_0) != 0) {
                 floatCount += 2;
-                b.add(Element.createAttrib(mRS,
-                                           Element.DataType.FLOAT_32,
-                                           Element.DataKind.TEXTURE,
-                                           2), "texture");
+                b.add(Element.F32_2(mRS), "texture0");
             }
             if ((mFlags & NORMAL) != 0) {
                 floatCount += 3;
-                b.add(Element.createAttrib(mRS,
-                                           Element.DataType.FLOAT_32,
-                                           Element.DataKind.NORMAL,
-                                           3), "normal");
+                b.add(Element.F32_3(mRS), "normal");
             }
             mElement = b.create();
 
