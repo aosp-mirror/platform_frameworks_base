@@ -25,6 +25,7 @@ import android.database.DefaultDatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.Debug;
+import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -235,6 +236,12 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /** Used to make temp table names unique */
     /* package */ int mTempTableSequence = 0;
+
+    /**
+     * The size, in bytes, of a block on "/data". This corresponds to the Unix
+     * statfs.f_bsize field. note that this field is lazily initialized.
+     */
+    private static int sBlockSize = 0;
 
     /** The path for the database file */
     private String mPath;
@@ -858,6 +865,15 @@ public class SQLiteDatabase extends SQLiteClosable {
             errorHandler.onCorruption(sqliteDatabase);
             sqliteDatabase = new SQLiteDatabase(path, factory, flags);
         }
+
+        // set sqlite pagesize to mBlockSize
+        if (sBlockSize == 0) {
+            // TODO: "/data" should be a static final String constant somewhere. it is hardcoded
+            // in several places right now.
+            sBlockSize = new StatFs("/data").getBlockSize();
+        }
+        sqliteDatabase.setPageSize(sBlockSize);
+
         ActiveDatabases.getInstance().mActiveDatabases.add(
                 new WeakReference<SQLiteDatabase>(sqliteDatabase));
         return sqliteDatabase;
