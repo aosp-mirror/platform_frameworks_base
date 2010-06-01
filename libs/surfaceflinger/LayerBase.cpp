@@ -379,33 +379,21 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     
     glEnable(GL_TEXTURE_2D);
 
+    GLenum src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
     if (UNLIKELY(s.alpha < 0xFF)) {
-        // We have an alpha-modulation. We need to modulate all
-        // texture components by alpha because we're always using 
-        // premultiplied alpha.
-        
-        // If the texture doesn't have an alpha channel we can
-        // use REPLACE and switch to non premultiplied alpha
-        // blending (SRCA/ONE_MINUS_SRCA).
-        
-        GLenum env, src;
-        if (needsBlending()) {
-            env = GL_MODULATE;
-            src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
-        } else {
-            env = GL_REPLACE;
-            src = GL_SRC_ALPHA;
-        }
         const GLfloat alpha = s.alpha * (1.0f/255.0f);
-        glColor4f(alpha, alpha, alpha, alpha);
+        if (mPremultipliedAlpha) {
+            glColor4f(alpha, alpha, alpha, alpha);
+        } else {
+            glColor4f(1, 1, 1, alpha);
+        }
         glEnable(GL_BLEND);
         glBlendFunc(src, GL_ONE_MINUS_SRC_ALPHA);
-        glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, env);
+        glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     } else {
-        glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         glColor4f(1, 1, 1, 1);
+        glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         if (needsBlending()) {
-            GLenum src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
             glEnable(GL_BLEND);
             glBlendFunc(src, GL_ONE_MINUS_SRC_ALPHA);
         } else {
