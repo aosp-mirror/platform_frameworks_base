@@ -1892,7 +1892,7 @@ public class WebView extends AbsoluteLayout
         msg.sendToTarget();
     }
 
-    private static int pinLoc(int x, int viewMax, int docMax) {
+    static int pinLoc(int x, int viewMax, int docMax) {
 //        Log.d(LOGTAG, "-- pinLoc " + x + " " + viewMax + " " + docMax);
         if (docMax < viewMax) {   // the doc has room on the sides for "blank"
             // pin the short document to the top/left of the screen
@@ -3283,17 +3283,12 @@ public class WebView extends AbsoluteLayout
             }
         }
         if (animateZoom) {
-            float zoomScale;
-            int interval = (int) (SystemClock.uptimeMillis() - mZoomManager.mZoomStart);
-            if (interval < mZoomManager.ZOOM_ANIMATION_LENGTH) {
-                float ratio = (float) interval / mZoomManager.ZOOM_ANIMATION_LENGTH;
-                zoomScale = 1.0f / (mZoomManager.mInvInitialZoomScale
-                        + (mZoomManager.mInvFinalZoomScale - mZoomManager.mInvInitialZoomScale) * ratio);
+            final float[] zoomValues = mZoomManager.animateZoom();
+            final boolean isStillAnimating = mZoomManager.isZoomAnimating();
+
+            if (isStillAnimating) {
                 invalidate();
             } else {
-                zoomScale = mZoomManager.mZoomScale;
-                // set mZoomScale to be 0 as we have done animation
-                mZoomManager.mZoomScale = 0;
                 WebViewCore.resumeUpdatePicture(mWebViewCore);
                 // call invalidate() again to draw with the final filters
                 invalidate();
@@ -3307,24 +3302,11 @@ public class WebView extends AbsoluteLayout
                     }
                 }
             }
-            // calculate the intermediate scroll position. As we need to use
-            // zoomScale, we can't use pinLocX/Y directly. Copy the logic here.
-            float scale = zoomScale * mZoomManager.mInvInitialZoomScale;
-            int tx = Math.round(scale * (mZoomManager.mInitialScrollX + mZoomManager.mZoomCenterX)
-                    - mZoomManager.mZoomCenterX);
-            tx = -pinLoc(tx, getViewWidth(), Math.round(mContentWidth
-                    * zoomScale)) + mScrollX;
-            int titleHeight = getTitleHeight();
-            int ty = Math.round(scale
-                    * (mZoomManager.mInitialScrollY + mZoomManager.mZoomCenterY - titleHeight)
-                    - (mZoomManager.mZoomCenterY - titleHeight));
-            ty = -(ty <= titleHeight ? Math.max(ty, 0) : pinLoc(ty
-                    - titleHeight, getViewHeight(), Math.round(mContentHeight
-                    * zoomScale)) + titleHeight) + mScrollY;
-            canvas.translate(tx, ty);
-            canvas.scale(zoomScale, zoomScale);
-            if (inEditingMode() && !mNeedToAdjustWebTextView
-                    && mZoomManager.isZoomAnimating()) {
+
+            canvas.translate(zoomValues[0], zoomValues[1]);
+            canvas.scale(zoomValues[2], zoomValues[2]);
+
+            if (inEditingMode() && !mNeedToAdjustWebTextView && isStillAnimating) {
                 // The WebTextView is up.  Keep track of this so we can adjust
                 // its size and placement when we finish zooming
                 mNeedToAdjustWebTextView = true;
@@ -5796,7 +5778,7 @@ public class WebView extends AbsoluteLayout
             float zoomCenterY = (oldScreenY * scale - newScreenY * actualScale)
                     / (scale - actualScale);
             mZoomManager.setZoomCenter(zoomCenterX, zoomCenterY);
-            mZoomManager.animateZoom(scale, false);
+            mZoomManager.startZoomAnimation(scale, false);
         }
     }
 
