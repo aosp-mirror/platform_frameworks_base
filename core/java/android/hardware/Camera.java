@@ -825,21 +825,81 @@ public class Camera {
          */
         public static final String FLASH_MODE_TORCH = "torch";
 
-        // Values for scene mode settings.
+        /**
+         * Scene mode is off.
+         */
         public static final String SCENE_MODE_AUTO = "auto";
+
+        /**
+         * Take photos of fast moving objects. Same as {@link
+         * #SCENE_MODE_SPORTS}.
+         */
         public static final String SCENE_MODE_ACTION = "action";
+
+        /**
+         * Take people pictures.
+         */
         public static final String SCENE_MODE_PORTRAIT = "portrait";
+
+        /**
+         * Take pictures on distant objects.
+         */
         public static final String SCENE_MODE_LANDSCAPE = "landscape";
+
+        /**
+         * Take photos at night.
+         */
         public static final String SCENE_MODE_NIGHT = "night";
+
+        /**
+         * Take people pictures at night.
+         */
         public static final String SCENE_MODE_NIGHT_PORTRAIT = "night-portrait";
+
+        /**
+         * Take photos in a theater. Flash light is off.
+         */
         public static final String SCENE_MODE_THEATRE = "theatre";
+
+        /**
+         * Take pictures on the beach.
+         */
         public static final String SCENE_MODE_BEACH = "beach";
+
+        /**
+         * Take pictures on the snow.
+         */
         public static final String SCENE_MODE_SNOW = "snow";
+
+        /**
+         * Take sunset photos.
+         */
         public static final String SCENE_MODE_SUNSET = "sunset";
+
+        /**
+         * Avoid blurry pictures (for example, due to hand shake).
+         */
         public static final String SCENE_MODE_STEADYPHOTO = "steadyphoto";
+
+        /**
+         * For shooting firework displays.
+         */
         public static final String SCENE_MODE_FIREWORKS = "fireworks";
+
+        /**
+         * Take photos of fast moving objects. Same as {@link
+         * #SCENE_MODE_ACTION}.
+         */
         public static final String SCENE_MODE_SPORTS = "sports";
+
+        /**
+         * Take indoor low-light shot.
+         */
         public static final String SCENE_MODE_PARTY = "party";
+
+        /**
+         * Capture the naturally warm color of scenes lit by candles.
+         */
         public static final String SCENE_MODE_CANDLELIGHT = "candlelight";
 
         /**
