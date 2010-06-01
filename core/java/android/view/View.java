@@ -8594,13 +8594,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mAttachInfo == null) {
             return false;
         }
-        if ((flags&HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
+        if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
                 && !isHapticFeedbackEnabled()) {
             return false;
         }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(
-                feedbackConstant,
-                (flags&HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0);
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant,
+                (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0);
     }
 
     /**
@@ -8671,8 +8670,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 ViewConfiguration.getLongPressTimeout() - delayOffset);
     }
 
-    private static int[] stateSetUnion(final int[] stateSet1,
-                                       final int[] stateSet2) {
+    private static int[] stateSetUnion(final int[] stateSet1, final int[] stateSet2) {
         final int stateSet1Length = stateSet1.length;
         final int stateSet2Length = stateSet2.length;
         final int[] newSet = new int[stateSet1Length + stateSet2Length];
@@ -8710,7 +8708,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         LayoutInflater factory = LayoutInflater.from(context);
         return factory.inflate(resource, root);
     }
-
+    
     /**
      * A MeasureSpec encapsulates the layout requirements passed from parent to child.
      * Each MeasureSpec represents a requirement for either the width or the height.

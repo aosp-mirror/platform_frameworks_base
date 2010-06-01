@@ -1536,6 +1536,12 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_hardwareAccelerated,
+                false)) {
+            ai.flags |= ApplicationInfo.FLAG_HARDWARE_ACCELERATED;
+        }
+
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hasCode,
                 true)) {
             ai.flags |= ApplicationInfo.FLAG_HAS_CODE;

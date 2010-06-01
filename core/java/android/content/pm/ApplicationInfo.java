@@ -273,6 +273,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
     /**
+     * Value for {@link #flags}: true when the application's rendering should
+     * be hardware accelerated.
+     */
+    public static final int FLAG_HARDWARE_ACCELERATED = 1<<20;
+    
+    /**
      * Value for {@link #flags}: this is true if the application has set
      * its android:neverEncrypt to true, false otherwise. It is used to specify
      * that this package specifically "opts-out" of a secured file system solution,

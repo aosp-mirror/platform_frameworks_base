@@ -1281,6 +1281,7 @@
   <public type="attr" name="displayOptions" />
   <public type="attr" name="subtitle" />
   <public type="attr" name="customNavigationLayout" />
+  <public type="attr" name="hardwareAccelerated" />
 
   <public type="id" name="home" />
 

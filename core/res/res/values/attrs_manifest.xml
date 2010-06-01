@@ -235,6 +235,10 @@
          the safe mode.  -->
     <attr name="vmSafeMode" format="boolean" />
 
+    <!-- Flag indicating whether the application's rendering should be hardware
+         accelerated if possible.  -->
+    <attr name="hardwareAccelerated" format="boolean" />
+
     <!-- Flag indicating whether the given application component is available
          to other applications.  If false, it can only be accessed by
          applications with its same user id (which usually means only by
@@ -730,6 +734,7 @@
         <attr name="enabled" />
         <attr name="debuggable" />
         <attr name="vmSafeMode" />
+        <attr name="hardwareAccelerated" />
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />

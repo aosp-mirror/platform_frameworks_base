@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.pm.ApplicationInfo;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
@@ -33,7 +34,6 @@ import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.EventLog;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -52,7 +52,6 @@ import android.Manifest;
 import android.media.AudioManager;
 
 import java.lang.ref.WeakReference;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -68,14 +67,12 @@ import static javax.microedition.khronos.opengles.GL10.*;
  *
  * {@hide}
  */
-@SuppressWarnings({"EmptyCatchBlock"})
-public final class ViewRoot extends Handler implements ViewParent,
-        View.AttachInfo.Callbacks {
+@SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
+public final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Callbacks {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;
     private static final boolean SHOW_FPS = false;
-    @SuppressWarnings({"ConstantConditionalExpression"})
-    private static final boolean LOCAL_LOGV = false ? Config.LOGD : Config.LOGV;
+    private static final boolean LOCAL_LOGV = false;
     /** @noinspection PointlessBooleanExpression*/
     private static final boolean DEBUG_DRAW = false || LOCAL_LOGV;
     private static final boolean DEBUG_LAYOUT = false || LOCAL_LOGV;
@@ -202,14 +199,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mCurScrollY;
     Scroller mScroller;
 
-    EGL10 mEgl;
-    EGLDisplay mEglDisplay;
-    EGLContext mEglContext;
-    EGLSurface mEglSurface;
-    GL11 mGL;
-    Canvas mGlCanvas;
-    boolean mUseGL;
-    boolean mGlWanted;
+    HardwareRenderer mHwRenderer;
 
     final ViewConfiguration mViewConfiguration;
 
@@ -239,8 +229,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     public ViewRoot(Context context) {
         super();
 
-        if (MEASURE_LATENCY && lt == null) {
-            lt = new LatencyTimer(100, 1000);
+        if (MEASURE_LATENCY) {
+            if (lt == null) {
+                lt = new LatencyTimer(100, 1000);
+            }
         }
 
         // For debug only
@@ -270,6 +262,12 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
+
+        // Try to enable hardware acceleration if requested
+        if ((context.getApplicationInfo().flags &
+                ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            mHwRenderer = new HardwareRenderer();
+        }
     }
 
     // For debug only
@@ -328,112 +326,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         return false;
     }
 
-    private void initializeGL() {
-        initializeGLInner();
-        int err = mEgl.eglGetError();
-        if (err != EGL10.EGL_SUCCESS) {
-            // give-up on using GL
-            destroyGL();
-            mGlWanted = false;
-        }
-    }
-
-    private void initializeGLInner() {
-        final EGL10 egl = (EGL10) EGLContext.getEGL();
-        mEgl = egl;
-
-        /*
-         * Get to the default display.
-         */
-        final EGLDisplay eglDisplay = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-        mEglDisplay = eglDisplay;
-
-        /*
-         * We can now initialize EGL for that display
-         */
-        int[] version = new int[2];
-        egl.eglInitialize(eglDisplay, version);
-
-        /*
-         * Specify a configuration for our opengl session
-         * and grab the first configuration that matches is
-         */
-        final int[] configSpec = {
-                EGL10.EGL_RED_SIZE,      5,
-                EGL10.EGL_GREEN_SIZE,    6,
-                EGL10.EGL_BLUE_SIZE,     5,
-                EGL10.EGL_DEPTH_SIZE,    0,
-                EGL10.EGL_NONE
-        };
-        final EGLConfig[] configs = new EGLConfig[1];
-        final int[] num_config = new int[1];
-        egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, num_config);
-        final EGLConfig config = configs[0];
-
-        /*
-         * Create an OpenGL ES context. This must be done only once, an
-         * OpenGL context is a somewhat heavy object.
-         */
-        final EGLContext context = egl.eglCreateContext(eglDisplay, config,
-                EGL10.EGL_NO_CONTEXT, null);
-        mEglContext = context;
-
-        /*
-         * Create an EGL surface we can render into.
-         */
-        final EGLSurface surface = egl.eglCreateWindowSurface(eglDisplay, config, mHolder, null);
-        mEglSurface = surface;
-
-        /*
-         * Before we can issue GL commands, we need to make sure
-         * the context is current and bound to a surface.
-         */
-        egl.eglMakeCurrent(eglDisplay, surface, surface, context);
-
-        /*
-         * Get to the appropriate GL interface.
-         * This is simply done by casting the GL context to either
-         * GL10 or GL11.
-         */
-        final GL11 gl = (GL11) context.getGL();
-        mGL = gl;
-        mGlCanvas = new Canvas(gl);
-        mUseGL = true;
-    }
-
-    private void destroyGL() {
-        // inform skia that the context is gone
-        nativeAbandonGlCaches();
-
-        mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
-                EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
-        mEgl.eglDestroyContext(mEglDisplay, mEglContext);
-        mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
-        mEgl.eglTerminate(mEglDisplay);
-        mEglContext = null;
-        mEglSurface = null;
-        mEglDisplay = null;
-        mEgl = null;
-        mGlCanvas = null;
-        mGL = null;
-        mUseGL = false;
-    }
-
-    private void checkEglErrors() {
-        if (mUseGL) {
-            int err = mEgl.eglGetError();
-            if (err != EGL10.EGL_SUCCESS) {
-                // something bad has happened revert to
-                // normal rendering.
-                destroyGL();
-                if (err != EGL11.EGL_CONTEXT_LOST) {
-                    // we'll try again if it was context lost
-                    mGlWanted = false;
-                }
-            }
-        }
-    }
-
     // fd [0] is the receiver, [1] is the sender
     private native int[] makeInputChannel();
 
@@ -490,10 +382,10 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                 // Set up the input event channel
                 if (false) {
-                int[] fds = makeInputChannel();
-                if (DEBUG_INPUT) {
-                    Log.v(TAG, "makeInputChannel() returned " + fds);
-                }
+                    int[] fds = makeInputChannel();
+                    if (DEBUG_INPUT) {
+                        Log.v(TAG, "makeInputChannel() returned " + java.util.Arrays.toString(fds));
+                    }
                 }
 
                 // Schedule the first layout -before- adding to the window
@@ -772,8 +664,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             attachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
-                if (mUseGL) {
-                    destroyGL();
+                if (mHwRenderer != null) {
+                    mHwRenderer.destroyGL();
                 }
             }
             if (viewVisibility == View.GONE) {
@@ -889,10 +781,12 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         final boolean computesInternalInsets =
                 attachInfo.mTreeObserver.hasComputeInternalInsetsListeners();
+
         boolean insetsPending = false;
         int relayoutResult = 0;
-        if (mFirst || windowShouldResize || insetsChanged
-                || viewVisibilityChanged || params != null) {
+
+        if (mFirst || windowShouldResize || insetsChanged ||
+                viewVisibilityChanged || params != null) {
 
             if (viewVisibility == View.VISIBLE) {
                 // If this window is giving internal insets to the window
@@ -904,15 +798,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // window, waiting until we can finish laying out this window
                 // and get back to the window manager with the ultimately
                 // computed insets.
-                insetsPending = computesInternalInsets
-                        && (mFirst || viewVisibilityChanged);
-
-                if (mWindowAttributes.memoryType == WindowManager.LayoutParams.MEMORY_TYPE_GPU) {
-                    if (params == null) {
-                        params = mWindowAttributes;
-                    }
-                    mGlWanted = true;
-                }
+                insetsPending = computesInternalInsets && (mFirst || viewVisibilityChanged);
             }
 
             if (mSurfaceHolder != null) {
@@ -921,11 +807,12 @@ public final class ViewRoot extends Handler implements ViewParent,
                 lp.format = mSurfaceHolder.getRequestedFormat();
                 lp.type = mSurfaceHolder.getRequestedType();
             }
-            
-            boolean initialized = false;
+
+            boolean hwIntialized = false;
             boolean contentInsetsChanged = false;
             boolean visibleInsetsChanged;
             boolean hadSurface = mSurface.isValid();
+
             try {
                 int fl = 0;
                 if (params != null) {
@@ -985,9 +872,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                         fullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
-                        if (mGlWanted && !mUseGL) {
-                            initializeGL();
-                            initialized = mGlCanvas != null;
+                        if (mHwRenderer != null) {
+                            hwIntialized = mHwRenderer.initialize();
                         }
                     }
                 } else if (!mSurface.isValid()) {
@@ -1065,9 +951,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
             
-            if (initialized) {
-                mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
-                        (int) (mHeight * appScale + 0.5f));
+            if (hwIntialized) {
+                mHwRenderer.setup(appScale);
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -1328,7 +1213,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (!sFirstDrawComplete) {
             synchronized (sFirstDrawHandlers) {
                 sFirstDrawComplete = true;
-                for (int i=0; i<sFirstDrawHandlers.size(); i++) {
+                final int count = sFirstDrawHandlers.size();
+                for (int i = 0; i< count; i++) {
                     post(sFirstDrawHandlers.get(i));
                 }
             }
@@ -1362,53 +1248,16 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
         
-        if (mUseGL) {
+        if (mHwRenderer != null && mHwRenderer.mEnabled) {
             if (!dirty.isEmpty()) {
-                Canvas canvas = mGlCanvas;
-                if (mGL != null && canvas != null) {
-                    mGL.glDisable(GL_SCISSOR_TEST);
-                    mGL.glClearColor(0, 0, 0, 0);
-                    mGL.glClear(GL_COLOR_BUFFER_BIT);
-                    mGL.glEnable(GL_SCISSOR_TEST);
-
-                    mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
-                    mAttachInfo.mIgnoreDirtyState = true;
-                    mView.mPrivateFlags |= View.DRAWN;
-
-                    int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
-                    try {
-                        canvas.translate(0, -yoff);
-                        if (mTranslator != null) {
-                            mTranslator.translateCanvas(canvas);
-                        }
-                        canvas.setScreenDensity(scalingRequired
-                                ? DisplayMetrics.DENSITY_DEVICE : 0);
-                        mView.draw(canvas);
-                        if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
-                            mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
-                        }
-                    } finally {
-                        canvas.restoreToCount(saveCount);
-                    }
-
-                    mAttachInfo.mIgnoreDirtyState = false;
-
-                    mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
-                    checkEglErrors();
-
-                    if (SHOW_FPS || Config.DEBUG && ViewDebug.showFps) {
-                        int now = (int)SystemClock.elapsedRealtime();
-                        if (sDrawTime != 0) {
-                            nativeShowFPS(canvas, now - sDrawTime);
-                        }
-                        sDrawTime = now;
-                    }
-                }
+                mHwRenderer.draw(yoff, scalingRequired);
             }
+
             if (scrolling) {
                 mFullRedrawNeeded = true;
                 scheduleTraversals();
             }
+
             return;
         }
 
@@ -1720,8 +1569,6 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     void dispatchDetachedFromWindow() {
-        if (Config.LOGV) Log.v("ViewRoot", "Detaching in " + this + " of " + mSurface);
-
         if (mView != null) {
             mView.dispatchDetachedFromWindow();
         }
@@ -1730,8 +1577,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
 
-        if (mUseGL) {
-            destroyGL();
+        if (mHwRenderer != null) {
+            mHwRenderer.destroyGL();
         }
         mSurface.release();
 
@@ -1850,8 +1697,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                     event = sWindowSession.getPendingPointerMove(mWindow);
 
                     if (MEASURE_LATENCY && event != null) {
-                        lt.sample("9 Client got events      ", System.nanoTime() - event.getEventTimeNano());
-                        lt.sample("8 Client getting events  ", timeBeforeGettingEvents - event.getEventTimeNano());
+                        lt.sample("9 Client got events      ",
+                                System.nanoTime() - event.getEventTimeNano());
+                        lt.sample("8 Client getting events  ",
+                                timeBeforeGettingEvents - event.getEventTimeNano());
                     }
                 } catch (RemoteException e) {
                 }
@@ -1876,11 +1725,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                         event.offsetLocation(0, mCurScrollY);
                     }
                     if (MEASURE_LATENCY) {
-                        lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
+                        lt.sample("A Dispatching TouchEvents",
+                                System.nanoTime() - event.getEventTimeNano());
                     }
                     handled = mView.dispatchTouchEvent(event);
                     if (MEASURE_LATENCY) {
-                        lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
+                        lt.sample("B Dispatched TouchEvents ",
+                                System.nanoTime() - event.getEventTimeNano());
                     }
                     if (!handled && isDown) {
                         int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
@@ -1990,18 +1841,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     boolean inTouchMode = msg.arg2 != 0;
                     ensureTouchModeLocally(inTouchMode);
 
-                    if (mGlWanted) {
-                        checkEglErrors();
-                        // we lost the gl context, so recreate it.
-                        if (mGlWanted && !mUseGL) {
-                            initializeGL();
-                            if (mGlCanvas != null) {
-                                float appScale = mAttachInfo.mApplicationScale;
-                                mGlCanvas.setViewport(
-                                        (int) (mWidth * appScale + 0.5f),
-                                        (int) (mHeight * appScale + 0.5f));
-                            }
-                        }
+                    if (mHwRenderer != null) {
+                        mHwRenderer.initializeAndSetup();
                     }
                 }
 
@@ -2051,8 +1892,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
                 // The IME is trying to say this event is from the
                 // system!  Bad bad bad!
-                event = KeyEvent.changeFlags(event,
-                        event.getFlags()&~KeyEvent.FLAG_FROM_SYSTEM);
+                event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
             }
             deliverKeyEventToViewHierarchy((KeyEvent)msg.obj, false);
         } break;
@@ -2497,8 +2337,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
         // If mView is null, we just consume the key event because it doesn't
         // make sense to do anything else with it.
-        boolean handled = mView != null
-                ? mView.dispatchKeyEventPreIme(event) : true;
+        boolean handled = mView == null || mView.dispatchKeyEventPreIme(event);
         if (handled) {
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
@@ -2535,7 +2374,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             final boolean sendDone = seq >= 0;
             if (!handled) {
                 deliverKeyEventToViewHierarchy(event, sendDone);
-                return;
             } else if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
                         "ViewRoot", "Telling window manager key is finished");
@@ -2742,7 +2580,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     void doDie() {
         checkThread();
-        if (Config.LOGV) Log.v("ViewRoot", "DIE in " + this + " of " + mSurface);
+        if (LOCAL_LOGV) Log.v("ViewRoot", "DIE in " + this + " of " + mSurface);
         synchronized (this) {
             if (mAdded && !mFirst) {
                 int viewVisibility = mView.getVisibility();
@@ -2803,13 +2641,12 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             //noinspection ConstantConditions
             if (false && event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
-                if (Config.LOGD) Log.d("keydisp",
-                        "===================================================");
-                if (Config.LOGD) Log.d("keydisp", "Focused view Hierarchy is:");
+                if (DBG) Log.d("keydisp", "===================================================");
+                if (DBG) Log.d("keydisp", "Focused view Hierarchy is:");
+
                 debug();
 
-                if (Config.LOGD) Log.d("keydisp",
-                        "===================================================");
+                if (DBG) Log.d("keydisp", "===================================================");
             }
         }
 
@@ -3476,6 +3313,180 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
+    class HardwareRenderer {
+        private EGL10 mEgl;
+        private EGLDisplay mEglDisplay;
+        private EGLContext mEglContext;
+        private EGLSurface mEglSurface;
+        private GL11 mGL;
+
+        private Canvas mGlCanvas;
+
+        boolean mEnabled;
+        boolean mRequested = true;
+
+        private void initializeGL() {
+            initializeGLInner();
+            int err = mEgl.eglGetError();
+            if (err != EGL10.EGL_SUCCESS) {
+                destroyGL();
+                mRequested = false;
+            }
+        }
+
+        private void initializeGLInner() {
+            final EGL10 egl = (EGL10) EGLContext.getEGL();
+            mEgl = egl;
+    
+            final EGLDisplay eglDisplay = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+            mEglDisplay = eglDisplay;
+    
+            int[] version = new int[2];
+            egl.eglInitialize(eglDisplay, version);
+    
+            final int[] configSpec = {
+                    EGL10.EGL_RED_SIZE,      8,
+                    EGL10.EGL_GREEN_SIZE,    8,
+                    EGL10.EGL_BLUE_SIZE,     8,
+                    EGL10.EGL_DEPTH_SIZE,    0,
+                    EGL10.EGL_NONE
+            };
+            final EGLConfig[] configs = new EGLConfig[1];
+            final int[] numConfig = new int[1];
+            egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, numConfig);
+            final EGLConfig config = configs[0];
+
+            /*
+             * Create an OpenGL ES context. This must be done only once, an
+             * OpenGL context is a somewhat heavy object.
+             */
+            final EGLContext context = egl.eglCreateContext(eglDisplay, config,
+                    EGL10.EGL_NO_CONTEXT, null);
+            mEglContext = context;
+    
+            /*
+             * Create an EGL surface we can render into.
+             */
+            EGLSurface surface = egl.eglCreateWindowSurface(eglDisplay, config, mHolder, null);
+            mEglSurface = surface;
+    
+            /*
+             * Before we can issue GL commands, we need to make sure
+             * the context is current and bound to a surface.
+             */
+            egl.eglMakeCurrent(eglDisplay, surface, surface, context);
+    
+            /*
+             * Get to the appropriate GL interface.
+             * This is simply done by casting the GL context to either
+             * GL10 or GL11.
+             */
+            final GL11 gl = (GL11) context.getGL();
+            mGL = gl;
+            mGlCanvas = new Canvas(gl);
+            mEnabled = true;
+        }
+
+        void destroyGL() {
+            if (!mEnabled) return;
+            
+            // inform skia that the context is gone
+            nativeAbandonGlCaches();
+    
+            mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
+                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+            mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+            mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
+            mEgl.eglTerminate(mEglDisplay);
+
+            mEglContext = null;
+            mEglSurface = null;
+            mEglDisplay = null;
+            mEgl = null;
+            mGlCanvas = null;
+            mGL = null;
+
+            mEnabled = false;
+        }
+    
+        private void checkErrors() {
+            if (mEnabled) {
+                int err = mEgl.eglGetError();
+                if (err != EGL10.EGL_SUCCESS) {
+                    // something bad has happened revert to
+                    // normal rendering.
+                    destroyGL();
+                    if (err != EGL11.EGL_CONTEXT_LOST) {
+                        // we'll try again if it was context lost
+                        mRequested = false;
+                    }
+                }
+            }
+        }
+
+        boolean initialize() {
+            if (mRequested && !mEnabled) {
+                initializeGL();
+                return mGlCanvas != null;
+            }
+            return false;
+        }
+
+        void setup(float appScale) {
+            mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
+                    (int) (mHeight * appScale + 0.5f));
+        }
+
+        void draw(int yoff, boolean scalingRequired) {
+            Canvas canvas = mGlCanvas;
+            if (mGL != null && canvas != null) {
+                mGL.glDisable(GL_SCISSOR_TEST);
+                mGL.glClearColor(0, 0, 0, 0);
+                mGL.glClear(GL_COLOR_BUFFER_BIT);
+                mGL.glEnable(GL_SCISSOR_TEST);
+    
+                mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
+                mAttachInfo.mIgnoreDirtyState = true;
+                mView.mPrivateFlags |= View.DRAWN;
+    
+                int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                try {
+                    canvas.translate(0, -yoff);
+                    if (mTranslator != null) {
+                        mTranslator.translateCanvas(canvas);
+                    }
+                    canvas.setScreenDensity(scalingRequired ?
+                            DisplayMetrics.DENSITY_DEVICE : 0);
+    
+                    mView.draw(canvas);
+    
+                } finally {
+                    canvas.restoreToCount(saveCount);
+                }
+    
+                mAttachInfo.mIgnoreDirtyState = false;
+    
+                mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
+                checkErrors();
+            }
+        }
+
+        void initializeAndSetup() {
+            if (mRequested) {
+                checkErrors();
+                // we lost the gl context, so recreate it.
+                if (mRequested && !mEnabled) {
+                    initializeGL();
+                    if (mGlCanvas != null) {
+                        float appScale = mAttachInfo.mApplicationScale;
+                        mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
+                                (int) (mHeight * appScale + 0.5f));
+                    }
+                }
+            }
+        }
+    }
+    
     private static native void nativeShowFPS(Canvas canvas, int durationMillis);
 
     // inform skia to just abandon its texture cache IDs
