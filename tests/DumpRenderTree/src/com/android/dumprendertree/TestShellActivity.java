@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
@@ -117,6 +118,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
 
         LinearLayout contentView = new LinearLayout(this);
         contentView.setOrientation(LinearLayout.VERTICAL);
@@ -159,6 +161,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             return;
         }
 
+        mTotalTestCount = intent.getIntExtra(TOTAL_TEST_COUNT, mTotalTestCount);
+        mCurrentTestNumber = intent.getIntExtra(CURRENT_TEST_NUMBER, mCurrentTestNumber);
+
         mTestUrl = intent.getStringExtra(TEST_URL);
         if (mTestUrl == null) {
             mUiAutoTestPath = intent.getStringExtra(UI_AUTO_TEST);
@@ -172,9 +177,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mTimeoutInMillis = intent.getIntExtra(TIMEOUT_IN_MILLIS, 0);
         mGetDrawtime = intent.getBooleanExtra(GET_DRAW_TIME, false);
         mSaveImagePath = intent.getStringExtra(SAVE_IMAGE);
-        mTestCount = intent.getIntExtra(TEST_COUNT, 0);
-        mTestIndex = intent.getIntExtra(TEST_INDEX, 0);
-        setTitle("Test " + (mTestIndex + 1) + " of " + mTestCount);
+        setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount);
+        float ratio = (float)mCurrentTestNumber / mTotalTestCount;
+        int progress = (int)(ratio * Window.PROGRESS_END);
+        getWindow().setFeatureInt(Window.FEATURE_PROGRESS, progress);
 
         Log.v(LOGTAG, "  Loading " + mTestUrl);
         mWebView.loadUrl(mTestUrl);
@@ -240,6 +246,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(url));
+        intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, ++mCurrentTestNumber);
         intent.putExtra(TIMEOUT_IN_MILLIS, 10000);
         executeIntent(intent);
     }
@@ -574,7 +581,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         @Override
         public void onReceivedTitle(WebView view, String title) {
-            setTitle("Test " + (mTestIndex + 1) + " of " + mTestCount + ": "+ title);
+            setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount + ": "+ title);
             if (mDumpTitleChanges) {
                 mTitleChanges.append("TITLE CHANGED: ");
                 mTitleChanges.append(title);
@@ -843,8 +850,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private String mSaveImagePath;
     private BufferedReader mTestListReader;
     private boolean mGetDrawtime;
-    private int mTestCount;
-    private int mTestIndex;
+    private int mTotalTestCount;
+    private int mCurrentTestNumber;
 
     // States
     private boolean mTimedOut;
@@ -882,8 +889,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String UI_AUTO_TEST = "UiAutoTest";
     static final String GET_DRAW_TIME = "GetDrawTime";
     static final String SAVE_IMAGE = "SaveImage";
-    static final String TEST_COUNT = "TestCount";
-    static final String TEST_INDEX = "TestIndex";
+    static final String TOTAL_TEST_COUNT = "TestCount";
+    static final String CURRENT_TEST_NUMBER = "TestNumber";
 
     static final int DRAW_RUNS = 5;
     static final String DRAW_TIME_LOG = "/sdcard/android/page_draw_time.txt";

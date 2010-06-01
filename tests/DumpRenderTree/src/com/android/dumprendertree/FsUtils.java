@@ -42,8 +42,13 @@ public class FsUtils {
         //no creation of instances
     }
 
-    public static void findLayoutTestsRecursively(BufferedOutputStream bos,
+    /**
+     * @return the number of tests in the list.
+     */
+    public static int writeLayoutTestListRecursively(BufferedOutputStream bos,
             String dir, boolean ignoreResultsInDir) throws IOException {
+
+        int testCount = 0;
         Log.v(LOGTAG, "Searching tests under " + dir);
 
         File d = new File(dir);
@@ -61,7 +66,7 @@ public class FsUtils {
                 // If this is not a test directory, we don't recurse into it.
                 if (!FileFilter.isNonTestDir(s)) {
                     Log.v(LOGTAG, "Recursing on " + s);
-                    findLayoutTestsRecursively(bos, s, ignoreResultsInDir);
+                    testCount += writeLayoutTestListRecursively(bos, s, ignoreResultsInDir);
                 }
                 continue;
             }
@@ -81,8 +86,10 @@ public class FsUtils {
                     bos.write((" IGNORE_RESULT").getBytes());
                 }
                 bos.write('\n');
+                testCount++;
             }
         }
+        return testCount;
     }
 
     public static void updateTestStatus(String statusFile, String s) {

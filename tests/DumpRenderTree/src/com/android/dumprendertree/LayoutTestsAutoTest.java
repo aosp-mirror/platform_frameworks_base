@@ -290,7 +290,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
     }
 
-    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult, int testIndex) {
+    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult, int testNumber) {
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LayoutTestsAutoTest.this) {
@@ -326,8 +326,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(test));
         intent.putExtra(TestShellActivity.RESULT_FILE, resultFile);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
-        intent.putExtra(TestShellActivity.TEST_COUNT, mTestCount);
-        intent.putExtra(TestShellActivity.TEST_INDEX, testIndex);
+        intent.putExtra(TestShellActivity.TOTAL_TEST_COUNT, mTestCount);
+        intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, testNumber);
         activity.startActivity(intent);
 
         // Wait until done.
@@ -402,7 +402,9 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             boolean ignoreResult = mTestListIgnoreResult.elementAt(i);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
             // Run tests
-            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult, i + mResumeIndex);
+            // i is 0 based, but test count is 1 based so add 1 to i here.
+            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult,
+                    i + 1 + mResumeIndex);
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
@@ -427,7 +429,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
-            FsUtils.findLayoutTestsRecursively(bos, getTestPath(), false); // Don't ignore results
+            FsUtils.writeLayoutTestListRecursively(bos, getTestPath(), false); // Don't ignore results
             bos.flush();
             bos.close();
        } catch (Exception e) {
