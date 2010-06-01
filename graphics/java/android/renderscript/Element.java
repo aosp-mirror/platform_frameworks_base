@@ -91,109 +91,109 @@ public class Element extends BaseObj {
         }
     }
 
-    public static Element USER_U8(RenderScript rs) {
-        if(rs.mElement_USER_U8 == null) {
-            rs.mElement_USER_U8 = createUser(rs, DataType.UNSIGNED_8);
+    public static Element U8(RenderScript rs) {
+        if(rs.mElement_U8 == null) {
+            rs.mElement_U8 = createUser(rs, DataType.UNSIGNED_8);
         }
-        return rs.mElement_USER_U8;
+        return rs.mElement_U8;
     }
 
-    public static Element USER_I8(RenderScript rs) {
-        if(rs.mElement_USER_I8 == null) {
-            rs.mElement_USER_I8 = createUser(rs, DataType.SIGNED_8);
+    public static Element I8(RenderScript rs) {
+        if(rs.mElement_I8 == null) {
+            rs.mElement_I8 = createUser(rs, DataType.SIGNED_8);
         }
-        return rs.mElement_USER_I8;
+        return rs.mElement_I8;
     }
 
-    public static Element USER_U32(RenderScript rs) {
-        if(rs.mElement_USER_U32 == null) {
-            rs.mElement_USER_U32 = createUser(rs, DataType.UNSIGNED_32);
+    public static Element U32(RenderScript rs) {
+        if(rs.mElement_U32 == null) {
+            rs.mElement_U32 = createUser(rs, DataType.UNSIGNED_32);
         }
-        return rs.mElement_USER_U32;
+        return rs.mElement_U32;
     }
 
-    public static Element USER_I32(RenderScript rs) {
-        if(rs.mElement_USER_I32 == null) {
-            rs.mElement_USER_I32 = createUser(rs, DataType.SIGNED_32);
+    public static Element I32(RenderScript rs) {
+        if(rs.mElement_I32 == null) {
+            rs.mElement_I32 = createUser(rs, DataType.SIGNED_32);
         }
-        return rs.mElement_USER_I32;
+        return rs.mElement_I32;
     }
 
-    public static Element USER_F32(RenderScript rs) {
-        if(rs.mElement_USER_F32 == null) {
-            rs.mElement_USER_F32 = createUser(rs, DataType.FLOAT_32);
+    public static Element F32(RenderScript rs) {
+        if(rs.mElement_F32 == null) {
+            rs.mElement_F32 = createUser(rs, DataType.FLOAT_32);
         }
-        return rs.mElement_USER_F32;
+        return rs.mElement_F32;
     }
 
-    public static Element USER_ELEMENT(RenderScript rs) {
-        if(rs.mElement_USER_ELEMENT == null) {
-            rs.mElement_USER_ELEMENT = createUser(rs, DataType.RS_ELEMENT);
+    public static Element ELEMENT(RenderScript rs) {
+        if(rs.mElement_ELEMENT == null) {
+            rs.mElement_ELEMENT = createUser(rs, DataType.RS_ELEMENT);
         }
-        return rs.mElement_USER_ELEMENT;
+        return rs.mElement_ELEMENT;
     }
 
-    public static Element USER_TYPE(RenderScript rs) {
-        if(rs.mElement_USER_TYPE == null) {
-            rs.mElement_USER_TYPE = createUser(rs, DataType.RS_TYPE);
+    public static Element TYPE(RenderScript rs) {
+        if(rs.mElement_TYPE == null) {
+            rs.mElement_TYPE = createUser(rs, DataType.RS_TYPE);
         }
-        return rs.mElement_USER_TYPE;
+        return rs.mElement_TYPE;
     }
 
-    public static Element USER_ALLOCATION(RenderScript rs) {
-        if(rs.mElement_USER_ALLOCATION == null) {
-            rs.mElement_USER_ALLOCATION = createUser(rs, DataType.RS_ALLOCATION);
+    public static Element ALLOCATION(RenderScript rs) {
+        if(rs.mElement_ALLOCATION == null) {
+            rs.mElement_ALLOCATION = createUser(rs, DataType.RS_ALLOCATION);
         }
-        return rs.mElement_USER_ALLOCATION;
+        return rs.mElement_ALLOCATION;
     }
 
-    public static Element USER_SAMPLER(RenderScript rs) {
-        if(rs.mElement_USER_SAMPLER == null) {
-            rs.mElement_USER_SAMPLER = createUser(rs, DataType.RS_SAMPLER);
+    public static Element SAMPLER(RenderScript rs) {
+        if(rs.mElement_SAMPLER == null) {
+            rs.mElement_SAMPLER = createUser(rs, DataType.RS_SAMPLER);
         }
-        return rs.mElement_USER_SAMPLER;
+        return rs.mElement_SAMPLER;
     }
 
-    public static Element USER_SCRIPT(RenderScript rs) {
-        if(rs.mElement_USER_SCRIPT == null) {
-            rs.mElement_USER_SCRIPT = createUser(rs, DataType.RS_SCRIPT);
+    public static Element SCRIPT(RenderScript rs) {
+        if(rs.mElement_SCRIPT == null) {
+            rs.mElement_SCRIPT = createUser(rs, DataType.RS_SCRIPT);
         }
-        return rs.mElement_USER_SCRIPT;
+        return rs.mElement_SCRIPT;
     }
 
-    public static Element USER_MESH(RenderScript rs) {
-        if(rs.mElement_USER_MESH == null) {
-            rs.mElement_USER_MESH = createUser(rs, DataType.RS_MESH);
+    public static Element MESH(RenderScript rs) {
+        if(rs.mElement_MESH == null) {
+            rs.mElement_MESH = createUser(rs, DataType.RS_MESH);
         }
-        return rs.mElement_USER_MESH;
+        return rs.mElement_MESH;
     }
 
-    public static Element USER_PROGRAM_FRAGMENT(RenderScript rs) {
-        if(rs.mElement_USER_PROGRAM_FRAGMENT == null) {
-            rs.mElement_USER_PROGRAM_FRAGMENT = createUser(rs, DataType.RS_PROGRAM_FRAGMENT);
+    public static Element PROGRAM_FRAGMENT(RenderScript rs) {
+        if(rs.mElement_PROGRAM_FRAGMENT == null) {
+            rs.mElement_PROGRAM_FRAGMENT = createUser(rs, DataType.RS_PROGRAM_FRAGMENT);
         }
-        return rs.mElement_USER_PROGRAM_FRAGMENT;
+        return rs.mElement_PROGRAM_FRAGMENT;
     }
 
-    public static Element USER_PROGRAM_VERTEX(RenderScript rs) {
-        if(rs.mElement_USER_PROGRAM_VERTEX == null) {
-            rs.mElement_USER_PROGRAM_VERTEX = createUser(rs, DataType.RS_PROGRAM_VERTEX);
+    public static Element PROGRAM_VERTEX(RenderScript rs) {
+        if(rs.mElement_PROGRAM_VERTEX == null) {
+            rs.mElement_PROGRAM_VERTEX = createUser(rs, DataType.RS_PROGRAM_VERTEX);
         }
-        return rs.mElement_USER_PROGRAM_VERTEX;
+        return rs.mElement_PROGRAM_VERTEX;
     }
 
-    public static Element USER_PROGRAM_RASTER(RenderScript rs) {
-        if(rs.mElement_USER_PROGRAM_RASTER == null) {
-            rs.mElement_USER_PROGRAM_RASTER = createUser(rs, DataType.RS_PROGRAM_RASTER);
+    public static Element PROGRAM_RASTER(RenderScript rs) {
+        if(rs.mElement_PROGRAM_RASTER == null) {
+            rs.mElement_PROGRAM_RASTER = createUser(rs, DataType.RS_PROGRAM_RASTER);
         }
-        return rs.mElement_USER_PROGRAM_RASTER;
+        return rs.mElement_PROGRAM_RASTER;
     }
 
-    public static Element USER_PROGRAM_STORE(RenderScript rs) {
-        if(rs.mElement_USER_PROGRAM_STORE == null) {
-            rs.mElement_USER_PROGRAM_STORE = createUser(rs, DataType.RS_PROGRAM_STORE);
+    public static Element PROGRAM_STORE(RenderScript rs) {
+        if(rs.mElement_PROGRAM_STORE == null) {
+            rs.mElement_PROGRAM_STORE = createUser(rs, DataType.RS_PROGRAM_STORE);
         }
-        return rs.mElement_USER_PROGRAM_STORE;
+        return rs.mElement_PROGRAM_STORE;
     }
 
 
@@ -246,47 +246,34 @@ public class Element extends BaseObj {
         return rs.mElement_INDEX_16;
     }
 
-    public static Element ATTRIB_POSITION_2(RenderScript rs) {
-        if(rs.mElement_POSITION_2 == null) {
-            rs.mElement_POSITION_2 = createAttrib(rs, DataType.FLOAT_32, DataKind.POSITION, 2);
+    public static Element F32_2(RenderScript rs) {
+        if(rs.mElement_FLOAT_2 == null) {
+            rs.mElement_FLOAT_2 = createVector(rs, DataType.FLOAT_32, 2);
         }
-        return rs.mElement_POSITION_2;
+        return rs.mElement_FLOAT_2;
     }
 
-    public static Element ATTRIB_POSITION_3(RenderScript rs) {
-        if(rs.mElement_POSITION_3 == null) {
-            rs.mElement_POSITION_3 = createAttrib(rs, DataType.FLOAT_32, DataKind.POSITION, 3);
+    public static Element F32_3(RenderScript rs) {
+        if(rs.mElement_FLOAT_3 == null) {
+            rs.mElement_FLOAT_3 = createVector(rs, DataType.FLOAT_32, 3);
         }
-        return rs.mElement_POSITION_3;
+        return rs.mElement_FLOAT_3;
     }
 
-    public static Element ATTRIB_TEXTURE_2(RenderScript rs) {
-        if(rs.mElement_TEXTURE_2 == null) {
-            rs.mElement_TEXTURE_2 = createAttrib(rs, DataType.FLOAT_32, DataKind.TEXTURE, 2);
+    public static Element F32_4(RenderScript rs) {
+        if(rs.mElement_FLOAT_4 == null) {
+            rs.mElement_FLOAT_4 = createVector(rs, DataType.FLOAT_32, 4);
         }
-        return rs.mElement_TEXTURE_2;
+        return rs.mElement_FLOAT_4;
     }
 
-    public static Element ATTRIB_NORMAL_3(RenderScript rs) {
-        if(rs.mElement_NORMAL_3 == null) {
-            rs.mElement_NORMAL_3 = createAttrib(rs, DataType.FLOAT_32, DataKind.NORMAL, 3);
+    public static Element U8_4(RenderScript rs) {
+        if(rs.mElement_UCHAR_4 == null) {
+            rs.mElement_UCHAR_4 = createVector(rs, DataType.UNSIGNED_8, 4);
         }
-        return rs.mElement_NORMAL_3;
+        return rs.mElement_UCHAR_4;
     }
 
-    public static Element ATTRIB_COLOR_U8_4(RenderScript rs) {
-        if(rs.mElement_COLOR_U8_4 == null) {
-            rs.mElement_COLOR_U8_4 = createAttrib(rs, DataType.UNSIGNED_8, DataKind.COLOR, 4);
-        }
-        return rs.mElement_COLOR_U8_4;
-    }
-
-    public static Element ATTRIB_COLOR_F32_4(RenderScript rs) {
-        if(rs.mElement_COLOR_F32_4 == null) {
-            rs.mElement_COLOR_F32_4 = createAttrib(rs, DataType.FLOAT_32, DataKind.COLOR, 4);
-        }
-        return rs.mElement_COLOR_F32_4;
-    }
 
     Element(RenderScript rs, Element[] e, String[] n) {
         super(rs);
@@ -329,55 +316,6 @@ public class Element extends BaseObj {
 
     public static Element createIndex(RenderScript rs) {
         return new Element(rs, DataType.UNSIGNED_16, DataKind.INDEX, false, 1);
-    }
-
-    public static Element createAttrib(RenderScript rs, DataType dt, DataKind dk, int size) {
-        if (!(dt == DataType.FLOAT_32 ||
-              dt == DataType.UNSIGNED_8 ||
-              dt == DataType.UNSIGNED_16 ||
-              dt == DataType.UNSIGNED_32 ||
-              dt == DataType.SIGNED_8 ||
-              dt == DataType.SIGNED_16 ||
-              dt == DataType.SIGNED_32)) {
-            throw new IllegalArgumentException("Unsupported DataType");
-        }
-
-        if (!(dk == DataKind.COLOR ||
-              dk == DataKind.POSITION ||
-              dk == DataKind.TEXTURE ||
-              dk == DataKind.NORMAL ||
-              dk == DataKind.POINT_SIZE ||
-              dk == DataKind.USER)) {
-            throw new IllegalArgumentException("Unsupported DataKind");
-        }
-
-        if (dk == DataKind.COLOR &&
-            ((dt != DataType.FLOAT_32 && dt != DataType.UNSIGNED_8) ||
-             size < 3 || size > 4)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.POSITION && (size < 1 || size > 4)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.TEXTURE &&
-            (dt != DataType.FLOAT_32 || size < 1 || size > 4)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.NORMAL &&
-            (dt != DataType.FLOAT_32 || size != 3)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.POINT_SIZE &&
-            (dt != DataType.FLOAT_32 || size != 1)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-
-        boolean norm = false;
-        if (dk == DataKind.COLOR && dt == DataType.UNSIGNED_8) {
-            norm = true;
-        }
-
-        return new Element(rs, dt, dk, norm, size);
     }
 
     public static Element createPixel(RenderScript rs, DataType dt, DataKind dk) {

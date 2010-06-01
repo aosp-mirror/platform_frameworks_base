@@ -43,7 +43,6 @@ public:
         uint32_t stride;
         bool normalized;
         String8 name;
-        RsDataKind kind;
 
         Attrib();
         void set(const Attrib &);
@@ -53,8 +52,9 @@ public:
 
     void clearAll();
     void setActiveBuffer(uint32_t id) {mActiveBuffer = id;}
-    void addUser(const Attrib &, uint32_t stride);
-    void addLegacy(uint32_t type, uint32_t size, uint32_t stride, RsDataKind kind, bool normalized, uint32_t offset);
+    void add(const Attrib &, uint32_t stride);
+    //void addLegacy(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset);
+    void add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name);
 
     void setupGL(const Context *rsc, class VertexArrayState *) const;
     void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;

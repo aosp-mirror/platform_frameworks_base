@@ -1,10 +1,10 @@
 #ifndef __RS_CORE_RSH__
 #define __RS_CORE_RSH__
 
-uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b);
-uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a);
+//uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b);
+//uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a);
 
-uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b)
+static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b)
 {
     uchar4 c;
     c.x = (uchar)(r * 255.f);
@@ -14,7 +14,7 @@ uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b
     return c;
 }
 
-uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a)
+static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a)
 {
     uchar4 c;
     c.x = (uchar)(r * 255.f);

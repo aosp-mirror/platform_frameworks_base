@@ -98,16 +98,11 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         glAttachShader(pgm, frag->getShaderID());
 
         if (!vtx->isUserProgram()) {
-            glBindAttribLocation(pgm, 0, "ATTRIB_LegacyPosition");
-            glBindAttribLocation(pgm, 1, "ATTRIB_LegacyColor");
-            glBindAttribLocation(pgm, 2, "ATTRIB_LegacyNormal");
-            glBindAttribLocation(pgm, 3, "ATTRIB_LegacyPointSize");
-            glBindAttribLocation(pgm, 4, "ATTRIB_LegacyTexture");
-            e->mVtxAttribSlots[RS_KIND_POSITION] = 0;
-            e->mVtxAttribSlots[RS_KIND_COLOR] = 1;
-            e->mVtxAttribSlots[RS_KIND_NORMAL] = 2;
-            e->mVtxAttribSlots[RS_KIND_POINT_SIZE] = 3;
-            e->mVtxAttribSlots[RS_KIND_TEXTURE] = 4;
+            glBindAttribLocation(pgm, 0, "ATTRIB_position");
+            glBindAttribLocation(pgm, 1, "ATTRIB_color");
+            glBindAttribLocation(pgm, 2, "ATTRIB_normal");
+            glBindAttribLocation(pgm, 3, "ATTRIB_pointSize");
+            glBindAttribLocation(pgm, 4, "ATTRIB_texture0");
         }
 
         //LOGE("e2 %x", glGetError());

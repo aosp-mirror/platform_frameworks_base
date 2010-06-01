@@ -192,24 +192,24 @@ public class RenderScript {
     @SuppressWarnings({"FieldCanBeLocal"})
     protected MessageThread mMessageThread;
 
-    Element mElement_USER_U8;
-    Element mElement_USER_I8;
-    Element mElement_USER_U16;
-    Element mElement_USER_I16;
-    Element mElement_USER_U32;
-    Element mElement_USER_I32;
-    Element mElement_USER_F32;
+    Element mElement_U8;
+    Element mElement_I8;
+    Element mElement_U16;
+    Element mElement_I16;
+    Element mElement_U32;
+    Element mElement_I32;
+    Element mElement_F32;
 
-    Element mElement_USER_ELEMENT;
-    Element mElement_USER_TYPE;
-    Element mElement_USER_ALLOCATION;
-    Element mElement_USER_SAMPLER;
-    Element mElement_USER_SCRIPT;
-    Element mElement_USER_MESH;
-    Element mElement_USER_PROGRAM_FRAGMENT;
-    Element mElement_USER_PROGRAM_VERTEX;
-    Element mElement_USER_PROGRAM_RASTER;
-    Element mElement_USER_PROGRAM_STORE;
+    Element mElement_ELEMENT;
+    Element mElement_TYPE;
+    Element mElement_ALLOCATION;
+    Element mElement_SAMPLER;
+    Element mElement_SCRIPT;
+    Element mElement_MESH;
+    Element mElement_PROGRAM_FRAGMENT;
+    Element mElement_PROGRAM_VERTEX;
+    Element mElement_PROGRAM_RASTER;
+    Element mElement_PROGRAM_STORE;
 
     Element mElement_A_8;
     Element mElement_RGB_565;
@@ -219,12 +219,10 @@ public class RenderScript {
     Element mElement_RGBA_8888;
 
     Element mElement_INDEX_16;
-    Element mElement_POSITION_2;
-    Element mElement_POSITION_3;
-    Element mElement_TEXTURE_2;
-    Element mElement_NORMAL_3;
-    Element mElement_COLOR_U8_4;
-    Element mElement_COLOR_F32_4;
+    Element mElement_FLOAT_2;
+    Element mElement_FLOAT_3;
+    Element mElement_FLOAT_4;
+    Element mElement_UCHAR_4;
 
     Sampler mSampler_CLAMP_NEAREST;
     Sampler mSampler_CLAMP_LINEAR;
