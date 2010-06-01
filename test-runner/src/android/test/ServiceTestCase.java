@@ -147,9 +147,6 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
      * @param intent The Intent as if supplied to {@link android.content.Context#startService}.
      */
     protected void startService(Intent intent) {
-        assertFalse(mServiceStarted);
-        assertFalse(mServiceBound);
-        
         if (!mServiceAttached) {
             setupService();
         }
@@ -159,7 +156,7 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
             mService.onCreate();
             mServiceCreated = true;
         }
-        mService.onStart(intent, mServiceId);
+        mService.onStartCommand(intent, 0, mServiceId);
         
         mServiceStarted = true;
     }
@@ -183,9 +180,6 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
      * @return Return an IBinder for making further calls into the Service.
      */
     protected IBinder bindService(Intent intent) {
-        assertFalse(mServiceStarted);
-        assertFalse(mServiceBound);
-        
         if (!mServiceAttached) {
             setupService();
         }
