@@ -31,7 +31,7 @@
 #include <ui/DisplayInfo.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 
@@ -42,18 +42,14 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-class Composer : public Singleton<Composer>
+class ComposerService : public Singleton<ComposerService>
 {
     // these are constants
     sp<ISurfaceComposer> mComposerService;
     sp<IMemoryHeap> mServerCblkMemory;
     surface_flinger_cblk_t volatile* mServerCblk;
 
-    Mutex mLock;
-    SortedVector< wp<SurfaceComposerClient> > mActiveConnections;
-    SortedVector<sp<SurfaceComposerClient> > mOpenTransactions;
-
-    Composer() : Singleton<Composer>() {
+    ComposerService() : Singleton<ComposerService>() {
         const String16 name("SurfaceFlinger");
         while (getService(name, &mComposerService) != NO_ERROR) {
             usleep(250000);
@@ -61,6 +57,39 @@ class Composer : public Singleton<Composer>
         mServerCblkMemory = mComposerService->getCblk();
         mServerCblk = static_cast<surface_flinger_cblk_t volatile *>(
                 mServerCblkMemory->getBase());
+    }
+
+    friend class Singleton<ComposerService>;
+
+public:
+    static sp<ISurfaceComposer> getComposerService() {
+        return ComposerService::getInstance().mComposerService;
+    }
+    static surface_flinger_cblk_t const volatile * getControlBlock() {
+        return ComposerService::getInstance().mServerCblk;
+    }
+};
+
+ANDROID_SINGLETON_STATIC_INSTANCE(ComposerService);
+
+
+static inline sp<ISurfaceComposer> getComposerService() {
+    return ComposerService::getComposerService();
+}
+
+static inline surface_flinger_cblk_t const volatile * get_cblk() {
+    return ComposerService::getControlBlock();
+}
+
+// ---------------------------------------------------------------------------
+
+class Composer : public Singleton<Composer>
+{
+    Mutex mLock;
+    SortedVector< wp<SurfaceComposerClient> > mActiveConnections;
+    SortedVector<sp<SurfaceComposerClient> > mOpenTransactions;
+
+    Composer() : Singleton<Composer>() {
     }
 
     void addClientImpl(const sp<SurfaceComposerClient>& client) {
@@ -102,7 +131,7 @@ class Composer : public Singleton<Composer>
             mOpenTransactions.clear();
         mLock.unlock();
 
-        sp<ISurfaceComposer> sm(mComposerService);
+        sp<ISurfaceComposer> sm(getComposerService());
         sm->openGlobalTransaction();
             const size_t N = clients.size();
             for (size_t i=0; i<N; i++) {
@@ -114,12 +143,6 @@ class Composer : public Singleton<Composer>
     friend class Singleton<Composer>;
 
 public:
-    static sp<ISurfaceComposer> getComposerService() {
-        return Composer::getInstance().mComposerService;
-    }
-    static surface_flinger_cblk_t const volatile * getControlBlock() {
-        return Composer::getInstance().mServerCblk;
-    }
     static void addClient(const sp<SurfaceComposerClient>& client) {
         Composer::getInstance().addClientImpl(client);
     }
@@ -135,14 +158,6 @@ public:
 };
 
 ANDROID_SINGLETON_STATIC_INSTANCE(Composer);
-
-static inline sp<ISurfaceComposer> getComposerService() {
-    return Composer::getComposerService();
-}
-
-static inline surface_flinger_cblk_t const volatile * get_cblk() {
-    return Composer::getControlBlock();
-}
 
 // ---------------------------------------------------------------------------
 
@@ -162,7 +177,7 @@ void SurfaceComposerClient::onFirstRef()
 {
     sp<ISurfaceComposer> sm(getComposerService());
     if (sm != 0) {
-        sp<ISurfaceFlingerClient> conn = sm->createConnection();
+        sp<ISurfaceComposerClient> conn = sm->createConnection();
         if (conn != 0) {
             mClient = conn;
             Composer::addClient(this);
@@ -199,7 +214,7 @@ status_t SurfaceComposerClient::linkToComposerDeath(
 void SurfaceComposerClient::dispose()
 {
     // this can be called more than once.
-    sp<ISurfaceFlingerClient> client;
+    sp<ISurfaceComposerClient> client;
     Mutex::Autolock _lm(mLock);
     if (mClient != 0) {
         Composer::removeClient(this);
@@ -296,7 +311,7 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
 {
     sp<SurfaceControl> result;
     if (mStatus == NO_ERROR) {
-        ISurfaceFlingerClient::surface_data_t data;
+        ISurfaceComposerClient::surface_data_t data;
         sp<ISurface> surface = mClient->createSurface(&data, pid, name,
                 display, w, h, format, flags);
         if (surface != 0) {
@@ -558,8 +573,8 @@ SurfaceClient::SurfaceClient(const sp<IBinder>& conn)
 }
 void SurfaceClient::init(const sp<IBinder>& conn)
 {
-    mSignalServer = getComposerService();
-    sp<ISurfaceFlingerClient> sf(interface_cast<ISurfaceFlingerClient>(conn));
+    mComposerService = getComposerService();
+    sp<ISurfaceComposerClient> sf(interface_cast<ISurfaceComposerClient>(conn));
     if (sf != 0) {
         mConnection = conn;
         mControlMemory = sf->getControlBlock();
@@ -574,7 +589,7 @@ SharedClient* SurfaceClient::getSharedClient() const {
     return mControl;
 }
 void SurfaceClient::signalServer() const {
-    mSignalServer->signal();
+    mComposerService->signal();
 }
 
 // ----------------------------------------------------------------------------

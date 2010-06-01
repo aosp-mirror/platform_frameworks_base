@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_ISURFACE_FLINGER_CLIENT_H
-#define ANDROID_SF_ISURFACE_FLINGER_CLIENT_H
+#ifndef ANDROID_SF_ISURFACE_COMPOSER_CLIENT_H
+#define ANDROID_SF_ISURFACE_COMPOSER_CLIENT_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -26,7 +26,7 @@
 #include <binder/IInterface.h>
 
 #include <ui/PixelFormat.h>
-  
+
 #include <surfaceflinger/ISurface.h>
 
 namespace android {
@@ -42,10 +42,10 @@ typedef int32_t    DisplayID;
 
 class layer_state_t;
 
-class ISurfaceFlingerClient : public IInterface
+class ISurfaceComposerClient : public IInterface
 {
-public: 
-    DECLARE_META_INTERFACE(SurfaceFlingerClient);
+public:
+    DECLARE_META_INTERFACE(SurfaceComposerClient);
 
     struct surface_data_t {
         int32_t             token;
@@ -56,21 +56,21 @@ public:
         status_t readFromParcel(const Parcel& parcel);
         status_t writeToParcel(Parcel* parcel) const;
     };
-    
+
     virtual sp<IMemoryHeap> getControlBlock() const = 0;
 
     /*
      * Requires ACCESS_SURFACE_FLINGER permission
      */
     virtual sp<ISurface> createSurface( surface_data_t* data,
-                                        int pid, 
+                                        int pid,
                                         const String8& name,
                                         DisplayID display,
                                         uint32_t w,
                                         uint32_t h,
                                         PixelFormat format,
                                         uint32_t flags) = 0;
-                                    
+
     /*
      * Requires ACCESS_SURFACE_FLINGER permission
      */
@@ -84,7 +84,7 @@ public:
 
 // ----------------------------------------------------------------------------
 
-class BnSurfaceFlingerClient : public BnInterface<ISurfaceFlingerClient>
+class BnSurfaceComposerClient : public BnInterface<ISurfaceComposerClient>
 {
 public:
     virtual status_t    onTransact( uint32_t code,
@@ -97,4 +97,4 @@ public:
 
 }; // namespace android
 
-#endif // ANDROID_SF_ISURFACE_FLINGER_CLIENT_H
+#endif // ANDROID_SF_ISURFACE_COMPOSER_CLIENT_H

@@ -29,7 +29,7 @@
 #include <ui/Region.h>
 #include <ui/Overlay.h>
 
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 #include <private/surfaceflinger/SharedBufferStack.h>
 #include <private/surfaceflinger/LayerState.h>
 

@@ -136,9 +136,7 @@ class SharedClient
 public:
     SharedClient();
     ~SharedClient();
-
     status_t validate(size_t token) const;
-    uint32_t getIdentity(size_t token) const;
 
 private:
     friend class SharedBufferBase;
@@ -160,6 +158,7 @@ public:
             int32_t identity);
     ~SharedBufferBase();
     status_t getStatus() const;
+    int32_t getIdentity() const;
     size_t getFrontBuffer() const;
     String8 dump(char const* prefix) const;
 

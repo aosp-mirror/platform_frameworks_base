@@ -149,7 +149,7 @@ private:
                 // these don't need to be protected because they never change
                 // after assignment
                 status_t                    mStatus;
-                sp<ISurfaceFlingerClient>   mClient;
+                sp<ISurfaceComposerClient>  mClient;
 };
 
 // ---------------------------------------------------------------------------
@@ -161,7 +161,7 @@ class SurfaceClient : public RefBase
     SharedClient*               mControl;
     sp<IMemoryHeap>             mControlMemory;
     sp<IBinder>                 mConnection;
-    sp<ISurfaceComposer>        mSignalServer;
+    sp<ISurfaceComposer>        mComposerService;
     void init(const sp<IBinder>& conn);
 public:
     explicit SurfaceClient(const sp<IBinder>& conn);
