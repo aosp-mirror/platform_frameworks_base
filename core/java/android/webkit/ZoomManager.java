@@ -138,8 +138,12 @@ class ZoomManager {
         return exceedsMinScaleIncrement(scale, mActualScale);
     }
 
-    public boolean isZoomedOut() {
-        return mActualScale - mMinZoomScale <= MINIMUM_SCALE_INCREMENT;
+    public boolean canZoomIn() {
+        return mMaxZoomScale - mActualScale > MINIMUM_SCALE_INCREMENT;
+    }
+
+    public boolean canZoomOut() {
+        return mActualScale - mMinZoomScale > MINIMUM_SCALE_INCREMENT;
     }
 
     public boolean zoomIn() {

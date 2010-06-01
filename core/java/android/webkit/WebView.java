@@ -2248,7 +2248,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryWidth;
         } else if (mHorizontalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && mZoomManager.isZoomedOut()) {
+                && !mZoomManager.canZoomOut()) {
             // only honor the scrollbar mode when it is at minimum zoom level
             return computeHorizontalScrollExtent();
         } else {
@@ -2262,7 +2262,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryHeight;
         } else if (mVerticalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && mZoomManager.isZoomedOut()) {
+                && !mZoomManager.canZoomOut()) {
             // only honor the scrollbar mode when it is at minimum zoom level
             return computeVerticalScrollExtent();
         } else {
@@ -4493,7 +4493,7 @@ public class WebView extends AbsoluteLayout
                 mAnchorY = viewToContentY((int) mZoomManager.mZoomCenterY + mScrollY);
                 // don't reflow when zoom in; when zoom out, do reflow if the
                 // new scale is almost minimum scale;
-                boolean reflowNow = mZoomManager.isZoomedOut()
+                boolean reflowNow = !mZoomManager.canZoomOut()
                         || (mZoomManager.mActualScale <= 0.8 * mZoomManager.mTextWrapScale);
                 // force zoom after mPreviewZoomOnly is set to false so that the
                 // new view size will be passed to the WebKit
@@ -5554,6 +5554,20 @@ public class WebView extends AbsoluteLayout
 
     float getDefaultZoomScale() {
         return mZoomManager.mDefaultScale;
+    }
+
+    /**
+     * @return TRUE if the WebView can be zoomed in.
+     */
+    public boolean canZoomIn() {
+        return mZoomManager.canZoomIn();
+    }
+
+    /**
+     * @return TRUE if the WebView can be zoomed out.
+     */
+    public boolean canZoomOut() {
+        return mZoomManager.canZoomOut();
     }
 
     /**
