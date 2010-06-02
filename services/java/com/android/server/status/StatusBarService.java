@@ -21,7 +21,7 @@ import com.android.internal.util.CharSequences;
 
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
-import android.app.IStatusBar;
+import android.app.IStatusBarService;
 import android.app.IPoo;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -76,7 +76,7 @@ import java.util.Set;
  * are called from other classes just post a message, and everything else is batched
  * and coalesced into a series of calls to methods that all start with "perform."
  * There are two reasons for this.  The first is that some of the methods (activate/deactivate)
- * are on IStatusBar, so they're called from the thread pool and they need to make their
+ * are on IStatusBarService, so they're called from the thread pool and they need to make their
  * way onto the UI thread.  The second is that the message queue is stopped while animations
  * are happening in order to make for smoother transitions.
  * <p>
@@ -84,7 +84,7 @@ import java.util.Set;
  * separately throughout the code, although they both use the same key, which is assigned
  * when they are created.
  */
-public class StatusBarService extends IStatusBar.Stub
+public class StatusBarService extends IStatusBarService.Stub
 {
     static final String TAG = "StatusBar";
     static final boolean SPEW = false;
@@ -360,7 +360,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     // ================================================================================
-    // From IStatusBar
+    // From IStatusBarService
     // ================================================================================
     public void activate() {
         enforceExpandStatusBar();
