@@ -16,19 +16,24 @@
 
 package com.android.systemui.statusbar;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.text.format.DateFormat;
-import android.text.style.RelativeSizeSpan;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.format.DateFormat;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
@@ -49,6 +54,12 @@ public class Clock extends TextView {
     private Calendar mCalendar;
     private String mClockFormatString;
     private SimpleDateFormat mClockFormat;
+
+    private static final int AM_PM_STYLE_NORMAL  = 0;
+    private static final int AM_PM_STYLE_SMALL   = 1;
+    private static final int AM_PM_STYLE_GONE    = 2;
+
+    private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
     public Clock(Context context) {
         this(context, null);
@@ -139,29 +150,30 @@ public class Clock extends TextView {
              * add dummy characters around it to let us find it again after
              * formatting and change its size.
              */
-            int a = -1;
-            boolean quoted = false;
-            for (int i = 0; i < format.length(); i++) {
-                char c = format.charAt(i);
+            if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
+                int a = -1;
+                boolean quoted = false;
+                for (int i = 0; i < format.length(); i++) {
+                    char c = format.charAt(i);
 
-                if (c == '\'') {
-                    quoted = !quoted;
+                    if (c == '\'') {
+                        quoted = !quoted;
+                    }
+                    if (!quoted && c == 'a') {
+                        a = i;
+                        break;
+                    }
                 }
 
-                if (!quoted && c == 'a') {
-                    a = i;
-                    break;
-                }
-            }
-
-            if (a >= 0) {
-                // Move a back so any whitespace before the AM/PM is also in the alternate size.
-                final int b = a;
-                while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
-                    a--;
-                }
-                format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
+                if (a >= 0) {
+                    // Move a back so any whitespace before AM/PM is also in the alternate size.
+                    final int b = a;
+                    while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                        a--;
+                    }
+                    format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
                         + "a" + MAGIC2 + format.substring(b + 1);
+                }
             }
 
             mClockFormat = sdf = new SimpleDateFormat(format);
@@ -171,22 +183,28 @@ public class Clock extends TextView {
         }
         String result = sdf.format(mCalendar.getTime());
 
-        int magic1 = result.indexOf(MAGIC1);
-        int magic2 = result.indexOf(MAGIC2);
-
-        if (magic1 >= 0 && magic2 > magic1) {
-            SpannableStringBuilder formatted = new SpannableStringBuilder(result);
-
-            formatted.setSpan(new RelativeSizeSpan(0.7f), magic1, magic2,
-                              Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-
-            formatted.delete(magic2, magic2 + 1);
-            formatted.delete(magic1, magic1 + 1);
-
-            return formatted;
-        } else {
-            return result;
+        if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
+            int magic1 = result.indexOf(MAGIC1);
+            int magic2 = result.indexOf(MAGIC2);
+            if (magic1 >= 0 && magic2 > magic1) {
+                SpannableStringBuilder formatted = new SpannableStringBuilder(result);
+                if (AM_PM_STYLE == AM_PM_STYLE_GONE) {
+                    formatted.delete(magic1, magic2+1);
+                } else {
+                    if (AM_PM_STYLE == AM_PM_STYLE_SMALL) {
+                        CharacterStyle style = new RelativeSizeSpan(0.7f);
+                        formatted.setSpan(style, magic1, magic2,
+                                          Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                    }
+                    formatted.delete(magic2, magic2 + 1);
+                    formatted.delete(magic1, magic1 + 1);
+                }
+                return formatted;
+            }
         }
+ 
+        return result;
+
     }
 }
 
