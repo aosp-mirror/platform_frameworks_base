@@ -37,12 +37,13 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
-import com.android.internal.statusbar.StatusBarNotificationList;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -62,7 +63,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     NotificationCallbacks mNotificationCallbacks;
     volatile IStatusBar mBar;
     StatusBarIconList mIcons = new StatusBarIconList();
-    StatusBarNotificationList mNotifications = new StatusBarNotificationList();
+    HashMap<IBinder,StatusBarNotification> mNotifications
+            = new HashMap<IBinder,StatusBarNotification>();
 
     // for disabling the status bar
     ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
@@ -250,10 +252,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // Callbacks from the status bar service.
     // ================================================================================
-    public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList) {
+    public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
+            List<IBinder> notificationKeys, List<StatusBarNotification> notifications) {
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
-        iconList.copyFrom(mIcons);
+        synchronized (mIcons) {
+            iconList.copyFrom(mIcons);
+        }
+        synchronized (mNotifications) {
+            for (Map.Entry<IBinder,StatusBarNotification> e: mNotifications.entrySet()) {
+                notificationKeys.add(e.getKey());
+                notifications.add(e.getValue());
+            }
+        }
     }
 
     /**
@@ -277,8 +288,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public IBinder addNotification(StatusBarNotification notification) {
         synchronized (mNotifications) {
+            Slog.d(TAG, "addNotification notification=" + notification);
             IBinder key = new Binder();
-            mNotifications.add(key, notification);
+            mNotifications.put(key, notification);
             if (mBar != null) {
                 try {
                     mBar.addNotification(key, notification);
@@ -291,7 +303,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
         synchronized (mNotifications) {
-            mNotifications.update(key, notification);
+            if (!mNotifications.containsKey(key)) {
+                throw new IllegalArgumentException("updateNotification key not found: " + key);
+            }
+            mNotifications.put(key, notification);
             if (mBar != null) {
                 try {
                     mBar.updateNotification(key, notification);
@@ -303,7 +318,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     public void removeNotification(IBinder key) {
         synchronized (mNotifications) {
-            mNotifications.remove(key);
+            final StatusBarNotification n = mNotifications.remove(key);
+            if (n == null) {
+                throw new IllegalArgumentException("removeNotification key not found: " + key);
+            }
             if (mBar != null) {
                 try {
                     mBar.removeNotification(key);
@@ -386,7 +404,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
 
         synchronized (mNotifications) {
-            mNotifications.dump(pw);
+            int i=0;
+            pw.println("Notification list:");
+            for (Map.Entry<IBinder,StatusBarNotification> e: mNotifications.entrySet()) {
+                pw.printf("  %2d: %s\n", i, e.getValue().toString());
+                i++;
+            }
         }
 
         synchronized (mDisableRecords) {

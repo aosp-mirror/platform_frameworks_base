@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
@@ -36,6 +37,10 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.statusbar.StatusBarNotification;
+
+import java.util.Arrays;
+import java.util.ArrayList;
 
 public abstract class StatusBarService extends Service implements CommandQueue.Callbacks {
     private static final String TAG = "StatusBarService";
@@ -53,17 +58,19 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
     public void onCreate() {
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
+        ArrayList<IBinder> notificationKeys = new ArrayList<IBinder>();
+        ArrayList<StatusBarNotification> notifications = new ArrayList<StatusBarNotification>();
         mCommandQueue = new CommandQueue(this, iconList);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconList);
+            mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
 
         // Set up the initial icon state
-        final int N = iconList.size();
+        int N = iconList.size();
         int viewIndex = 0;
         for (int i=0; i<N; i++) {
             StatusBarIcon icon = iconList.getIcon(i);
@@ -71,6 +78,18 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
                 addIcon(iconList.getSlot(i), i, viewIndex, icon);
                 viewIndex++;
             }
+        }
+
+        // Set up the initial notification state
+        N = notificationKeys.size();
+        Slog.d(TAG, "installing " + N + " initial notifications");
+        if (N == notifications.size()) {
+            for (int i=0; i<N; i++) {
+                addNotification(notificationKeys.get(i), notifications.get(i));
+            }
+        } else {
+            Log.wtf(TAG, "Notification list length mismatch: keys=" + N
+                    + " notifications=" + notifications.size());
         }
 
         // Put up the view
