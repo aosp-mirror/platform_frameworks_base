@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
 
@@ -43,49 +44,30 @@ import java.util.HashMap;
 
 
 /**
- * The public (ok, semi-public) service for the status bar.
- * <p>
- * This interesting thing to note about this class is that most of the methods that
- * are called from other classes just post a message, and everything else is batched
- * and coalesced into a series of calls to methods that all start with "perform."
- * There are two reasons for this.  The first is that some of the methods (activate/deactivate)
- * are on IStatusBarService, so they're called from the thread pool and they need to make their
- * way onto the UI thread.  The second is that the message queue is stopped while animations
- * are happening in order to make for smoother transitions.
- * <p>
- * Each icon is either an icon or an icon and a notification.  They're treated mostly
- * separately throughout the code, although they both use the same key, which is assigned
- * when they are created.
+ * A note on locking:  We rely on the fact that calls onto mBar are oneway or
+ * if they are local, that they just enqueue messages to not deadlock.
  */
 public class StatusBarManagerService extends IStatusBarService.Stub
 {
     static final String TAG = "StatusBar";
-    static final boolean SPEW = false;
+    static final boolean SPEW = true;
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    static final int EXPANDED_LEAVE_ALONE = -10000;
-    static final int EXPANDED_FULL_OPEN = -10001;
+    final Context mContext;
+    Handler mHandler = new Handler();
+    NotificationCallbacks mNotificationCallbacks;
+    IStatusBar mBar;
+    StatusBarIconList mIcons = new StatusBarIconList();
+    private UninstallReceiver mUninstallReceiver;
 
-    private static final int MSG_ANIMATE = 1000;
-    private static final int MSG_ANIMATE_REVEAL = 1001;
+    // expanded notifications
+    NotificationViewList mNotificationData = new NotificationViewList();
 
-    private static final int OP_ADD_ICON = 1;
-    private static final int OP_UPDATE_ICON = 2;
-    private static final int OP_REMOVE_ICON = 3;
-    private static final int OP_SET_VISIBLE = 4;
-    private static final int OP_EXPAND = 5;
-    private static final int OP_TOGGLE = 6;
-    private static final int OP_DISABLE = 7;
-    private class PendingOp {
-        IBinder key;
-        int code;
-        IconData iconData;
-        NotificationData notificationData;
-        boolean visible;
-        int integer;
-    }
+    // for disabling the status bar
+    ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
+    int mDisabled = 0;
 
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
@@ -105,23 +87,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         void onNotificationClick(String pkg, String tag, int id);
         void onPanelRevealed();
     }
-
-    final Context mContext;
-    Object mQueueLock = new Object();
-    ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
-    NotificationCallbacks mNotificationCallbacks;
-    IStatusBar mBar;
-    
-    // icons
-    StatusBarIconList mIcons = new StatusBarIconList();
-    private UninstallReceiver mUninstallReceiver;
-
-    // expanded notifications
-    NotificationViewList mNotificationData = new NotificationViewList();
-
-    // for disabling the status bar
-    ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
-    int mDisabled = 0;
 
     /**
      * Construct the service, add the status bar view to the window manager
@@ -154,11 +119,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
-    public void activate() {
+    public void expand() {
         enforceExpandStatusBar();
     }
 
-    public void deactivate() {
+    public void collapse() {
         enforceExpandStatusBar();
     }
 
@@ -168,18 +133,29 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     public void disable(int what, IBinder token, String pkg) {
         enforceStatusBar();
-        synchronized (mNotificationCallbacks) {
-            // This is a little gross, but I think it's safe as long as nobody else
-            // synchronizes on mNotificationCallbacks.  It's important that the the callback
-            // and the pending op get done in the correct order and not interleaved with
-            // other calls, otherwise they'll get out of sync.
-            int net;
-            synchronized (mDisableRecords) {
-                manageDisableListLocked(what, token, pkg);
-                net = gatherDisableActionsLocked();
-                mNotificationCallbacks.onSetDisabled(net);
+
+        // It's important that the the callback and the call to mBar get done
+        // in the same order when multiple threads are calling this function
+        // so they are paired correctly.  The messages on the handler will be
+        // handled in the order they were enqueued, but will be outside the lock.
+        synchronized (mDisableRecords) {
+            manageDisableListLocked(what, token, pkg);
+            final int net = gatherDisableActionsLocked();
+            Slog.d(TAG, "disable... net=0x" + Integer.toHexString(net));
+            if (net != mDisabled) {
+                mDisabled = net;
+                mHandler.post(new Runnable() {
+                        public void run() {
+                            mNotificationCallbacks.onSetDisabled(net);
+                        }
+                    });
+                if (mBar != null) {
+                    try {
+                        mBar.disable(net);
+                    } catch (RemoteException ex) {
+                    }
+                }
             }
-            //addPendingOp(OP_DISABLE, net);
         }
     }
 
@@ -196,7 +172,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.setIcon(index, icon);
 
-            // Tell the client.  If it fails, it'll restart soon and we'll sync up.
             if (mBar != null) {
                 try {
                     mBar.setIcon(index, icon);
@@ -223,7 +198,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             if (icon.visible != visible) {
                 icon.visible = visible;
 
-                // Tell the client.  If it fails, it'll restart soon and we'll sync up.
                 if (mBar != null) {
                     try {
                         mBar.setIcon(index, icon);
@@ -245,7 +219,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
             mIcons.removeIcon(index);
 
-            // Tell the client.  If it fails, it'll restart soon and we'll sync up.
             if (mBar != null) {
                 try {
                     mBar.removeIcon(index);
@@ -289,8 +262,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // lock on mDisableRecords
     void manageDisableListLocked(int what, IBinder token, String pkg) {
         if (SPEW) {
-            Slog.d(TAG, "manageDisableList what=0x" + Integer.toHexString(what)
-                    + " pkg=" + pkg);
+            Slog.d(TAG, "manageDisableList what=0x" + Integer.toHexString(what) + " pkg=" + pkg);
         }
         // update the list
         synchronized (mDisableRecords) {
@@ -361,18 +333,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             mIcons.dump(pw);
         }
         
-        synchronized (mQueueLock) {
-            pw.println("Current Status Bar state:");
-            final int N = mQueue.size();
-            pw.println("  mQueue.size=" + N);
-            for (int i=0; i<N; i++) {
-                PendingOp op = mQueue.get(i);
-                pw.println("    [" + i + "] key=" + op.key + " code=" + op.code + " visible="
-                        + op.visible);
-                pw.println("           iconData=" + op.iconData);
-                pw.println("           notificationData=" + op.notificationData);
-            }
-        }
         synchronized (mNotificationData) {
             int N = mNotificationData.ongoingCount();
             pw.println("  ongoingCount.size=" + N);
@@ -419,47 +379,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    void performDisableActions(int net) {
-        /*
-        int old = mDisabled;
-        int diff = net ^ old;
-        mDisabled = net;
-
-        // act accordingly
-        if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
-            if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Slog.d(TAG, "DISABLE_EXPAND: yes");
-                //animateCollapse();
-            }
-        }
-        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-            if ((net & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
-                if (mTicking) {
-                    //mTicker.halt();
-                } else {
-                    setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
-                }
-            } else {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
-                if (!mExpandedVisible) {
-                    setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
-                }
-            }
-        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-            if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                //mTicker.halt();
-            }
-        }
-        */
-    }
-
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                deactivate();
+                collapse();
             }
             /*
             else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {

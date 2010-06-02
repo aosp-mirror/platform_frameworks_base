@@ -1541,7 +1541,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (sbs != null) {
                 try {
                     // Make sure the window shade is hidden.
-                    sbs.deactivate();
+                    sbs.collapse();
                 } catch (RemoteException e) {
                 }
             }

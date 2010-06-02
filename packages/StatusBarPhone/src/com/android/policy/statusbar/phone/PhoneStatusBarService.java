@@ -101,7 +101,7 @@ public class PhoneStatusBarService extends StatusBarService {
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
                 if (!down) {
-                    //TODO PhoneStatusBarService.this.deactivate();
+                    //TODO PhoneStatusBarService.this.collapse();
                 }
                 return true;
             }
@@ -328,6 +328,42 @@ public class PhoneStatusBarService extends StatusBarService {
     public void removeIcon(String slot, int index, int viewIndex) {
         Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
         mStatusIcons.removeViewAt(viewIndex);
+    }
+
+    /**
+     * State is one or more of the DISABLE constants from StatusBarManager.
+     */
+    public void disable(int state) {
+        final int old = mDisabled;
+        final int diff = state ^ old;
+        mDisabled = state;
+
+        if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
+            if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
+                Slog.d(TAG, "DISABLE_EXPAND: yes");
+                animateCollapse();
+            }
+        }
+        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+            if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
+                if (mTicking) {
+                    mTicker.halt();
+                } else {
+                    setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
+                }
+            } else {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
+                if (!mExpandedVisible) {
+                    setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
+                }
+            }
+        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+            if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+                Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
+                mTicker.halt();
+            }
+        }
     }
     
     /**
@@ -854,7 +890,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 // the stack trace isn't very helpful here.  Just log the exception message.
                 Slog.w(TAG, "Sending contentIntent failed: " + e);
             }
-            //deactivate();
+            //collapse();
         }
     }
 
@@ -1224,7 +1260,7 @@ public class PhoneStatusBarService extends StatusBarService {
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.d(TAG, "DISABLE_EXPAND: yes");
-                animateCollapse();
+                //animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
@@ -1261,7 +1297,7 @@ public class PhoneStatusBarService extends StatusBarService {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                //deactivate();
+                //collapse();
             }
             else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
                 updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
