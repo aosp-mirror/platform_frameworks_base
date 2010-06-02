@@ -1470,6 +1470,8 @@
     <string name="lockscreen_pattern_correct">Correct!</string>
     <!-- On the unlock pattern screen, shown when the user enters the wrong lock pattern and must try again. -->
     <string name="lockscreen_pattern_wrong">Sorry, try again</string>
+    <!-- On the unlock password screen, shown when the user enters the wrong lock password and must try again. -->
+    <string name="lockscreen_password_wrong">Sorry, try again</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, show the current charge %.  -->
