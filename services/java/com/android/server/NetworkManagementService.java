@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import android.provider.Settings;
 import android.content.ContentResolver;
@@ -226,44 +227,61 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        return mConnector.doListCommand("interface list", NetdResponseCode.InterfaceListResult);
+        try {
+            return mConnector.doListCommand("interface list", NetdResponseCode.InterfaceListResult);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Cannot communicate with native daemon to list interfaces");
+        }
     }
 
     public InterfaceConfiguration getInterfaceConfig(String iface) throws IllegalStateException {
-        String rsp = mConnector.doCommand("interface getcfg " + iface).get(0);
+        String rsp;
+        try {
+            rsp = mConnector.doCommand("interface getcfg " + iface).get(0);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Cannot communicate with native daemon to get interface config");
+        }
         Slog.d(TAG, String.format("rsp <%s>", rsp));
 
         // Rsp: 213 xx:xx:xx:xx:xx:xx yyy.yyy.yyy.yyy zzz.zzz.zzz.zzz [flag1 flag2 flag3]
         StringTokenizer st = new StringTokenizer(rsp);
 
+        InterfaceConfiguration cfg;
         try {
-            int code = Integer.parseInt(st.nextToken(" "));
-            if (code != NetdResponseCode.InterfaceGetCfgResult) {
+            try {
+                int code = Integer.parseInt(st.nextToken(" "));
+                if (code != NetdResponseCode.InterfaceGetCfgResult) {
+                    throw new IllegalStateException(
+                        String.format("Expected code %d, but got %d",
+                                NetdResponseCode.InterfaceGetCfgResult, code));
+                }
+            } catch (NumberFormatException nfe) {
                 throw new IllegalStateException(
-                    String.format("Expected code %d, but got %d",
-                            NetdResponseCode.InterfaceGetCfgResult, code));
+                        String.format("Invalid response from daemon (%s)", rsp));
             }
-        } catch (NumberFormatException nfe) {
+
+            cfg = new InterfaceConfiguration();
+            cfg.hwAddr = st.nextToken(" ");
+            try {
+                cfg.ipAddr = stringToIpAddr(st.nextToken(" "));
+            } catch (UnknownHostException uhe) {
+                Slog.e(TAG, "Failed to parse ipaddr", uhe);
+                cfg.ipAddr = 0;
+            }
+
+            try {
+                cfg.netmask = stringToIpAddr(st.nextToken(" "));
+            } catch (UnknownHostException uhe) {
+                Slog.e(TAG, "Failed to parse netmask", uhe);
+                cfg.netmask = 0;
+            }
+            cfg.interfaceFlags = st.nextToken("]").trim() +"]";
+        } catch (NoSuchElementException nsee) {
             throw new IllegalStateException(
                     String.format("Invalid response from daemon (%s)", rsp));
         }
-
-        InterfaceConfiguration cfg = new InterfaceConfiguration();
-        cfg.hwAddr = st.nextToken(" ");
-        try {
-            cfg.ipAddr = stringToIpAddr(st.nextToken(" "));
-        } catch (UnknownHostException uhe) {
-            Slog.e(TAG, "Failed to parse ipaddr", uhe);
-            cfg.ipAddr = 0;
-        }
-
-        try {
-            cfg.netmask = stringToIpAddr(st.nextToken(" "));
-        } catch (UnknownHostException uhe) {
-            Slog.e(TAG, "Failed to parse netmask", uhe);
-            cfg.netmask = 0;
-        }
-        cfg.interfaceFlags = st.nextToken("]").trim() +"]";
         Slog.d(TAG, String.format("flags <%s>", cfg.interfaceFlags));
         return cfg;
     }
@@ -272,7 +290,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             String iface, InterfaceConfiguration cfg) throws IllegalStateException {
         String cmd = String.format("interface setcfg %s %s %s %s", iface,
                 intToIpString(cfg.ipAddr), intToIpString(cfg.netmask), cfg.interfaceFlags);
-        mConnector.doCommand(cmd);
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate with native daemon to interface setcfg");
+        }
     }
 
     public void shutdown() {
@@ -289,20 +312,25 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        ArrayList<String> rsp = mConnector.doCommand("ipfwd status");
+        ArrayList<String> rsp;
+        try {
+            rsp = mConnector.doCommand("ipfwd status");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate with native daemon to ipfwd status");
+        }
 
         for (String line : rsp) {
-            String []tok = line.split(" ");
+            String[] tok = line.split(" ");
+            if (tok.length < 3) {
+                Slog.e(TAG, "Malformed response from native daemon: " + line);
+                return false;
+            }
+
             int code = Integer.parseInt(tok[0]);
             if (code == NetdResponseCode.IpFwdStatusResult) {
                 // 211 Forwarding <enabled/disabled>
-                if (tok.length !=2) {
-                    throw new IllegalStateException(
-                            String.format("Malformatted list entry '%s'", line));
-                }
-                if (tok[2].equals("enabled"))
-                    return true;
-                return false;
+                return "enabled".equals(tok[2]);
             } else {
                 throw new IllegalStateException(String.format("Unexpected response code %d", code));
             }
@@ -326,29 +354,45 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         for (String d : dhcpRange) {
             cmd += " " + d;
         }
-        mConnector.doCommand(cmd);
+
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Unable to communicate to native daemon");
+        }
     }
 
     public void stopTethering() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand("tether stop");
+        try {
+            mConnector.doCommand("tether stop");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Unable to communicate to native daemon to stop tether");
+        }
     }
 
     public boolean isTetheringStarted() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        ArrayList<String> rsp = mConnector.doCommand("tether status");
+        ArrayList<String> rsp;
+        try {
+            rsp = mConnector.doCommand("tether status");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon to get tether status");
+        }
 
         for (String line : rsp) {
-            String []tok = line.split(" ");
+            String[] tok = line.split(" ");
+            if (tok.length < 3) {
+                throw new IllegalStateException("Malformed response for tether status: " + line);
+            }
             int code = Integer.parseInt(tok[0]);
             if (code == NetdResponseCode.TetherStatusResult) {
                 // XXX: Tethering services <started/stopped> <TBD>...
-                if (tok[2].equals("started"))
-                    return true;
-                return false;
+                return "started".equals(tok[2]);
             } else {
                 throw new IllegalStateException(String.format("Unexpected response code %d", code));
             }
@@ -359,20 +403,35 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public void tetherInterface(String iface) throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand("tether interface add " + iface);
+        try {
+            mConnector.doCommand("tether interface add " + iface);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for adding tether interface");
+        }
     }
 
     public void untetherInterface(String iface) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand("tether interface remove " + iface);
+        try {
+            mConnector.doCommand("tether interface remove " + iface);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for removing tether interface");
+        }
     }
 
     public String[] listTetheredInterfaces() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-        return mConnector.doListCommand(
-                "tether interface list", NetdResponseCode.TetherInterfaceListResult);
+        try {
+            return mConnector.doListCommand(
+                    "tether interface list", NetdResponseCode.TetherInterfaceListResult);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for listing tether interfaces");
+        }
     }
 
     public void setDnsForwarders(String[] dns) throws IllegalStateException {
@@ -383,7 +442,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             for (String s : dns) {
                 cmd += " " + InetAddress.getByName(s).getHostAddress();
             }
-            mConnector.doCommand(cmd);
+            try {
+                mConnector.doCommand(cmd);
+            } catch (NativeDaemonConnectorException e) {
+                throw new IllegalStateException(
+                        "Unable to communicate to native daemon for setting tether dns");
+            }
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Error resolving dns name", e);
         }
@@ -392,30 +456,50 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public String[] getDnsForwarders() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-        return mConnector.doListCommand(
-                "tether dns list", NetdResponseCode.TetherDnsFwdTgtListResult);
+        try {
+            return mConnector.doListCommand(
+                    "tether dns list", NetdResponseCode.TetherDnsFwdTgtListResult);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for listing tether dns");
+        }
     }
 
     public void enableNat(String internalInterface, String externalInterface)
             throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand(
-                String.format("nat enable %s %s", internalInterface, externalInterface));
+        try {
+            mConnector.doCommand(
+                    String.format("nat enable %s %s", internalInterface, externalInterface));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for enabling NAT interface");
+        }
     }
 
     public void disableNat(String internalInterface, String externalInterface)
             throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand(
-                String.format("nat disable %s %s", internalInterface, externalInterface));
+        try {
+            mConnector.doCommand(
+                    String.format("nat disable %s %s", internalInterface, externalInterface));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for disabling NAT interface");
+        }
     }
 
     public String[] listTtys() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-        return mConnector.doListCommand("list_ttys", NetdResponseCode.TtyListResult);
+        try {
+            return mConnector.doListCommand("list_ttys", NetdResponseCode.TtyListResult);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate to native daemon for listing TTYs");
+        }
     }
 
     public void attachPppd(String tty, String localAddr, String remoteAddr, String dns1Addr,
@@ -430,31 +514,52 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     InetAddress.getByName(dns2Addr).getHostAddress()));
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Error resolving addr", e);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon to attach pppd", e);
         }
     }
 
     public void detachPppd(String tty) throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand(String.format("pppd detach %s", tty));
+        try {
+            mConnector.doCommand(String.format("pppd detach %s", tty));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon to detach pppd", e);
+        }
     }
 
     public void startUsbRNDIS() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand("usb startrndis");
+        try {
+            mConnector.doCommand("usb startrndis");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating to native daemon for starting RNDIS", e);
+        }
     }
 
     public void stopUsbRNDIS() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand("usb stoprndis");
+        try {
+            mConnector.doCommand("usb stoprndis");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon", e);
+        }
     }
 
     public boolean isUsbRNDISStarted() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-        ArrayList<String> rsp = mConnector.doCommand("usb rndisstatus");
+        ArrayList<String> rsp;
+        try {
+            rsp = mConnector.doCommand("usb rndisstatus");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating to native daemon to check RNDIS status", e);
+        }
 
         for (String line : rsp) {
             String []tok = line.split(" ");
@@ -476,31 +581,35 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
-        mConnector.doCommand(String.format("softap stop " + wlanIface));
-        mConnector.doCommand(String.format("softap fwreload " + wlanIface + " AP"));
-        mConnector.doCommand(String.format("softap start " + wlanIface));
-        if (wifiConfig == null) {
-            mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
-        } else {
-            /**
-             * softap set arg1 arg2 arg3 [arg4 arg5 arg6 arg7 arg8]
-             * argv1 - wlan interface
-             * argv2 - softap interface
-             * argv3 - SSID
-             * argv4 - Security
-             * argv5 - Key
-             * argv6 - Channel
-             * argv7 - Preamble
-             * argv8 - Max SCB
-             */
-            String str = String.format("softap set " + wlanIface + " " + softapIface +
-                                       " %s %s %s", convertQuotedString(wifiConfig.SSID),
-                                       wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
-                                       "wpa2-psk" : "open",
-                                       convertQuotedString(wifiConfig.preSharedKey));
-            mConnector.doCommand(str);
+        try {
+            mConnector.doCommand(String.format("softap stop " + wlanIface));
+            mConnector.doCommand(String.format("softap fwreload " + wlanIface + " AP"));
+            mConnector.doCommand(String.format("softap start " + wlanIface));
+            if (wifiConfig == null) {
+                mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
+            } else {
+                /**
+                 * softap set arg1 arg2 arg3 [arg4 arg5 arg6 arg7 arg8]
+                 * argv1 - wlan interface
+                 * argv2 - softap interface
+                 * argv3 - SSID
+                 * argv4 - Security
+                 * argv5 - Key
+                 * argv6 - Channel
+                 * argv7 - Preamble
+                 * argv8 - Max SCB
+                 */
+                String str = String.format("softap set " + wlanIface + " " + softapIface +
+                                           " %s %s %s", convertQuotedString(wifiConfig.SSID),
+                                           wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
+                                           "wpa2-psk" : "open",
+                                           convertQuotedString(wifiConfig.preSharedKey));
+                mConnector.doCommand(str);
+            }
+            mConnector.doCommand(String.format("softap startap"));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon to start softap", e);
         }
-        mConnector.doCommand(String.format("softap startap"));
     }
 
     private String convertQuotedString(String s) {
@@ -516,7 +625,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
-        mConnector.doCommand("softap stopap");
+        try {
+            mConnector.doCommand("softap stopap");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon to stop soft AP",
+                    e);
+        }
     }
 
     public void setAccessPoint(WifiConfiguration wifiConfig, String wlanIface, String softapIface)
@@ -525,15 +639,19 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mContext.enforceCallingOrSelfPermission(
             android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
-        if (wifiConfig == null) {
-            mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
-        } else {
-            String str = String.format("softap set " + wlanIface + " " + softapIface +
-                                       " %s %s %s", convertQuotedString(wifiConfig.SSID),
-                                       wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
-                                       "wpa2-psk" : "open",
-                                       convertQuotedString(wifiConfig.preSharedKey));
-            mConnector.doCommand(str);
+        try {
+            if (wifiConfig == null) {
+                mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
+            } else {
+                String str = String.format("softap set " + wlanIface + " " + softapIface
+                        + " %s %s %s", convertQuotedString(wifiConfig.SSID),
+                        wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ? "wpa2-psk" : "open",
+                        convertQuotedString(wifiConfig.preSharedKey));
+                mConnector.doCommand(str);
+            }
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon to set soft AP",
+                    e);
         }
     }
 
@@ -541,9 +659,22 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         try {
-            String rsp = mConnector.doCommand(
-                    String.format("interface read%scounter %s", (rx ? "rx" : "tx"), iface)).get(0);
-            String []tok = rsp.split(" ");
+            String rsp;
+            try {
+                rsp = mConnector.doCommand(
+                        String.format("interface read%scounter %s", (rx ? "rx" : "tx"), iface)).get(0);
+            } catch (NativeDaemonConnectorException e1) {
+                Slog.e(TAG, "Error communicating with native daemon", e1);
+                return -1;
+            }
+
+            String[] tok = rsp.split(" ");
+            if (tok.length < 2) {
+                Slog.e(TAG, String.format("Malformed response for reading %s interface",
+                        (rx ? "rx" : "tx")));
+                return -1;
+            }
+
             int code;
             try {
                 code = Integer.parseInt(tok[0]);
@@ -575,17 +706,34 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand(String.format(
-                "interface setthrottle %s %d %d", iface, rxKbps, txKbps));
+        try {
+            mConnector.doCommand(String.format(
+                    "interface setthrottle %s %d %d", iface, rxKbps, txKbps));
+        } catch (NativeDaemonConnectorException e) {
+            Slog.e(TAG, "Error communicating with native daemon to set throttle", e);
+        }
     }
 
     private int getInterfaceThrottle(String iface, boolean rx) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         try {
-            String rsp = mConnector.doCommand(
-                    String.format("interface getthrottle %s %s", iface,(rx ? "rx" : "tx"))).get(0);
-            String []tok = rsp.split(" ");
+            String rsp;
+            try {
+                rsp = mConnector.doCommand(
+                        String.format("interface getthrottle %s %s", iface,
+                                (rx ? "rx" : "tx"))).get(0);
+            } catch (NativeDaemonConnectorException e) {
+                Slog.e(TAG, "Error communicating with native daemon to getthrottle", e);
+                return -1;
+            }
+
+            String[] tok = rsp.split(" ");
+            if (tok.length < 2) {
+                Slog.e(TAG, "Malformed response to getthrottle command");
+                return -1;
+            }
+
             int code;
             try {
                 code = Integer.parseInt(tok[0]);
