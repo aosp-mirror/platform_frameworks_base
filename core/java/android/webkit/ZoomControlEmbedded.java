@@ -67,9 +67,8 @@ class ZoomControlEmbedded implements ZoomControlBase {
             return;
         }
 
-        boolean canZoomIn = mWebView.getScale() < mZoomManager.mMaxZoomScale;
-        boolean canZoomOut = mWebView.getScale() > mZoomManager.mMinZoomScale &&
-                                                  !mZoomManager.mInZoomOverview;
+        boolean canZoomIn = mZoomManager.canZoomIn();
+        boolean canZoomOut = mZoomManager.canZoomOut() && !mZoomManager.mInZoomOverview;
         if (!canZoomIn && !canZoomOut) {
             // Hide the zoom in and out buttons if the page cannot zoom
             mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
