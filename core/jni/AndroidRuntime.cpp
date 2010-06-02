@@ -128,6 +128,7 @@ extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_pim_EventRecurrence(JNIEnv* env);
 extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
+extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_ParcelFileDescriptor(JNIEnv *env);
 extern int register_android_os_Power(JNIEnv *env);
 extern int register_android_os_StatFs(JNIEnv *env);
@@ -155,11 +156,11 @@ extern int register_android_server_BluetoothEventLoop(JNIEnv *env);
 extern int register_android_server_BluetoothA2dpService(JNIEnv* env);
 extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv* env);
-extern int register_android_location_GpsLocationProvider(JNIEnv* env);
 extern int register_android_backup_BackupDataInput(JNIEnv *env);
 extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
 extern int register_android_backup_BackupHelperDispatcher(JNIEnv *env);
+extern int register_android_app_NativeActivity(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -1249,6 +1250,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_Debug),
     REG_JNI(register_android_os_FileObserver),
     REG_JNI(register_android_os_FileUtils),
+    REG_JNI(register_android_os_MessageQueue),
     REG_JNI(register_android_os_ParcelFileDescriptor),
     REG_JNI(register_android_os_Power),
     REG_JNI(register_android_os_StatFs),
@@ -1278,11 +1280,12 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_server_BluetoothA2dpService),
     REG_JNI(register_android_message_digest_sha1),
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),
-    REG_JNI(register_android_location_GpsLocationProvider),
     REG_JNI(register_android_backup_BackupDataInput),
     REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelperBase),
     REG_JNI(register_android_backup_BackupHelperDispatcher),
+    
+    REG_JNI(register_android_app_NativeActivity),
 };
 
 /*

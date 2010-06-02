@@ -58,7 +58,7 @@ import android.os.Message;
 public class Camera {
     private static final String TAG = "Camera";
 
-    // These match the enums in frameworks/base/include/ui/Camera.h
+    // These match the enums in frameworks/base/include/camera/Camera.h
     private static final int CAMERA_MSG_ERROR            = 0x001;
     private static final int CAMERA_MSG_SHUTTER          = 0x002;
     private static final int CAMERA_MSG_FOCUS            = 0x004;
@@ -84,13 +84,29 @@ public class Camera {
     private boolean mWithBuffer;
 
     /**
-     * Returns a new Camera object.
+     * Returns the number of Cameras available.
+     * @hide
      */
-    public static Camera open() {
-        return new Camera();
+    public native static int getNumberOfCameras();
+
+    /**
+     * Returns a new Camera object.
+     * If {@link #getNumberOfCameras()} returns N, the valid is is 0 to N-1.
+     * The id 0 is the default camera.
+     * @hide
+     */
+    public static Camera open(int cameraId) {
+        return new Camera(cameraId);
     }
 
-    Camera() {
+    /**
+     * Returns a new Camera object. This returns the default camera.
+     */
+    public static Camera open() {
+        return new Camera(0);
+    }
+
+    Camera(int cameraId) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -107,14 +123,14 @@ public class Camera {
             mEventHandler = null;
         }
 
-        native_setup(new WeakReference<Camera>(this));
+        native_setup(new WeakReference<Camera>(this), cameraId);
     }
 
     protected void finalize() {
         native_release();
     }
 
-    private native final void native_setup(Object camera_this);
+    private native final void native_setup(Object camera_this, int cameraId);
     private native final void native_release();
 
 
@@ -746,6 +762,8 @@ public class Camera {
         private static final String KEY_ZOOM_RATIOS = "zoom-ratios";
         private static final String KEY_ZOOM_SUPPORTED = "zoom-supported";
         private static final String KEY_SMOOTH_ZOOM_SUPPORTED = "smooth-zoom-supported";
+        private static final String KEY_FOCUS_DISTANCES = "focus-distances";
+
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
@@ -807,21 +825,81 @@ public class Camera {
          */
         public static final String FLASH_MODE_TORCH = "torch";
 
-        // Values for scene mode settings.
+        /**
+         * Scene mode is off.
+         */
         public static final String SCENE_MODE_AUTO = "auto";
+
+        /**
+         * Take photos of fast moving objects. Same as {@link
+         * #SCENE_MODE_SPORTS}.
+         */
         public static final String SCENE_MODE_ACTION = "action";
+
+        /**
+         * Take people pictures.
+         */
         public static final String SCENE_MODE_PORTRAIT = "portrait";
+
+        /**
+         * Take pictures on distant objects.
+         */
         public static final String SCENE_MODE_LANDSCAPE = "landscape";
+
+        /**
+         * Take photos at night.
+         */
         public static final String SCENE_MODE_NIGHT = "night";
+
+        /**
+         * Take people pictures at night.
+         */
         public static final String SCENE_MODE_NIGHT_PORTRAIT = "night-portrait";
+
+        /**
+         * Take photos in a theater. Flash light is off.
+         */
         public static final String SCENE_MODE_THEATRE = "theatre";
+
+        /**
+         * Take pictures on the beach.
+         */
         public static final String SCENE_MODE_BEACH = "beach";
+
+        /**
+         * Take pictures on the snow.
+         */
         public static final String SCENE_MODE_SNOW = "snow";
+
+        /**
+         * Take sunset photos.
+         */
         public static final String SCENE_MODE_SUNSET = "sunset";
+
+        /**
+         * Avoid blurry pictures (for example, due to hand shake).
+         */
         public static final String SCENE_MODE_STEADYPHOTO = "steadyphoto";
+
+        /**
+         * For shooting firework displays.
+         */
         public static final String SCENE_MODE_FIREWORKS = "fireworks";
+
+        /**
+         * Take photos of fast moving objects. Same as {@link
+         * #SCENE_MODE_ACTION}.
+         */
         public static final String SCENE_MODE_SPORTS = "sports";
+
+        /**
+         * Take indoor low-light shot.
+         */
         public static final String SCENE_MODE_PARTY = "party";
+
+        /**
+         * Capture the naturally warm color of scenes lit by candles.
+         */
         public static final String SCENE_MODE_CANDLELIGHT = "candlelight";
 
         /**
@@ -857,6 +935,36 @@ public class Camera {
          * #autoFocus(AutoFocusCallback)} in this mode.
          */
         public static final String FOCUS_MODE_EDOF = "edof";
+
+        // Indices for focus distance array.
+        /**
+         * The array index of near focus distance for use with
+         * {@link #getFocusDistances(float[])}.
+         */
+        public static final int FOCUS_DISTANCE_NEAR_INDEX = 0;
+
+        /**
+         * The array index of optimal focus distance for use with
+         * {@link #getFocusDistances(float[])}.
+         */
+        public static final int FOCUS_DISTANCE_OPTIMAL_INDEX = 1;
+
+        /**
+         * The array index of far focus distance for use with
+         * {@link #getFocusDistances(float[])}.
+         */
+        public static final int FOCUS_DISTANCE_FAR_INDEX = 2;
+
+        /**
+         * Continuous focus mode. The camera continuously tries to focus. This
+         * is ideal for shooting video or shooting photo of moving object.
+         * Continuous focus starts when {@link #autoFocus(AutoFocusCallback)} is
+         * called. Continuous focus stops when {@link #cancelAutoFocus()} is
+         * called. AutoFocusCallback will be only called once as soon as the
+         * picture is in focus.
+         */
+        public static final String FOCUS_MODE_CONTINUOUS = "continuous";
+
 
         // Formats for setPreviewFormat and setPictureFormat.
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
@@ -1788,6 +1896,40 @@ public class Camera {
             return TRUE.equals(str);
         }
 
+        /**
+         * Gets the distances from the camera to where an object appears to be
+         * in focus. The object is sharpest at the optimal focus distance. The
+         * depth of field is the far focus distance minus near focus distance.
+         *
+         * Focus distances may change after calling {@link
+         * #autoFocus(AutoFocusCallback)}, {@link #cancelAutoFocus}, or {@link
+         * #startPreview()}. Applications can call {@link #getParameters()}
+         * and this method anytime to get the latest focus distances. If the
+         * focus mode is FOCUS_MODE_CONTINUOUS and autofocus has started, focus
+         * distances may change from time to time.
+         *
+         * Far focus distance >= optimal focus distance >= near focus distance.
+         * If the focus distance is infinity, the value will be
+         * Float.POSITIVE_INFINITY.
+         *
+         * @param output focus distances in meters. output must be a float
+         *        array with three elements. Near focus distance, optimal focus
+         *        distance, and far focus distance will be filled in the array.
+         * @see #FOCUS_DISTANCE_NEAR_INDEX
+         * @see #FOCUS_DISTANCE_OPTIMAL_INDEX
+         * @see #FOCUS_DISTANCE_FAR_INDEX
+         */
+        public void getFocusDistances(float[] output) {
+            if (output == null || output.length != 3) {
+                throw new IllegalArgumentException(
+                        "output must be an float array with three elements.");
+            }
+            List<Float> distances = splitFloat(get(KEY_FOCUS_DISTANCES));
+            output[0] = distances.get(0);
+            output[1] = distances.get(1);
+            output[2] = distances.get(2);
+        }
+
         // Splits a comma delimited string to an ArrayList of String.
         // Return null if the passing string is null or the size is 0.
         private ArrayList<String> split(String str) {
@@ -1812,6 +1954,21 @@ public class Camera {
             while (tokenizer.hasMoreElements()) {
                 String token = tokenizer.nextToken();
                 substrings.add(Integer.parseInt(token));
+            }
+            if (substrings.size() == 0) return null;
+            return substrings;
+        }
+
+        // Splits a comma delimited string to an ArrayList of Float.
+        // Return null if the passing string is null or the size is 0.
+        private ArrayList<Float> splitFloat(String str) {
+            if (str == null) return null;
+
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
+            ArrayList<Float> substrings = new ArrayList<Float>();
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                substrings.add(Float.parseFloat(token));
             }
             if (substrings.size() == 0) return null;
             return substrings;

@@ -55,12 +55,12 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="15dip"
             android:layout_marginLeft="20dip"
-            android:paddingBottom="8dip"
             >
 
             <TextView android:id="@+id/timeDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="bottom"
                 android:singleLine="true"
                 android:ellipsize="none"
                 android:textSize="56sp"
@@ -74,9 +74,8 @@
 
             <TextView android:id="@+id/am_pm"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/timeDisplay"
-                android:layout_alignBaseline="@id/timeDisplay"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
                 android:singleLine="true"
                 android:ellipsize="none"
                 android:textSize="18sp"

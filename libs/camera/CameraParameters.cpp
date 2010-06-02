@@ -69,8 +69,11 @@ const char CameraParameters::KEY_MAX_ZOOM[] = "max-zoom";
 const char CameraParameters::KEY_ZOOM_RATIOS[] = "zoom-ratios";
 const char CameraParameters::KEY_ZOOM_SUPPORTED[] = "zoom-supported";
 const char CameraParameters::KEY_SMOOTH_ZOOM_SUPPORTED[] = "smooth-zoom-supported";
+const char CameraParameters::KEY_FOCUS_DISTANCES[] = "focus-distances";
+const char CameraParameters::KEY_VIDEO_FRAME_FORMAT[] = "video-frame-format";
 
 const char CameraParameters::TRUE[] = "true";
+const char CameraParameters::FOCUS_DISTANCE_INFINITY[] = "Infinity";
 
 // Values for white balance settings.
 const char CameraParameters::WHITE_BALANCE_AUTO[] = "auto";
@@ -137,6 +140,7 @@ const char CameraParameters::FOCUS_MODE_INFINITY[] = "infinity";
 const char CameraParameters::FOCUS_MODE_MACRO[] = "macro";
 const char CameraParameters::FOCUS_MODE_FIXED[] = "fixed";
 const char CameraParameters::FOCUS_MODE_EDOF[] = "edof";
+const char CameraParameters::FOCUS_MODE_CONTINUOUS[] = "continuous";
 
 CameraParameters::CameraParameters()
                 : mMap()

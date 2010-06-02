@@ -32,7 +32,7 @@
 
 #include <ui/PixelFormat.h>
 #include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 
 #include "Barrier.h"
 #include "Layer.h"
@@ -73,7 +73,6 @@ public:
 
     inline  bool                    isValid(int32_t i) const;
     sp<LayerBaseClient>             getLayerUser(int32_t i) const;
-    void                            dump(const char* what);
     
     const Vector< wp<LayerBaseClient> >& getLayers() const { 
         return mLayers; 
@@ -159,7 +158,7 @@ public:
     virtual status_t dump(int fd, const Vector<String16>& args);
 
     // ISurfaceComposer interface
-    virtual sp<ISurfaceFlingerClient>   createConnection();
+    virtual sp<ISurfaceComposerClient>  createConnection();
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        openGlobalTransaction();
@@ -190,7 +189,7 @@ private:
     friend class LayerDim;
 
     sp<ISurface> createSurface(ClientID client, int pid, const String8& name,
-            ISurfaceFlingerClient::surface_data_t* params,
+            ISurfaceComposerClient::surface_data_t* params,
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
 
@@ -256,8 +255,6 @@ private:
 public:     // hack to work around gcc 4.0.3 bug
             void        signalEvent();
 private:
-            void        signalDelayedEvent(nsecs_t delay);
-
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
             void        handleTransactionLocked(
@@ -281,12 +278,13 @@ private:
             void        destroyConnection(ClientID cid);
             sp<LayerBaseClient> getLayerUser_l(SurfaceID index) const;
             status_t    addLayer_l(const sp<LayerBase>& layer);
+            status_t    addClientLayer_l(const sp<LayerBaseClient>& lbc);
             status_t    removeLayer_l(const sp<LayerBase>& layer);
             status_t    purgatorizeLayer_l(const sp<LayerBase>& layer);
             void        free_resources_l();
 
             uint32_t    getTransactionFlags(uint32_t flags);
-            uint32_t    setTransactionFlags(uint32_t flags, nsecs_t delay = 0);
+            uint32_t    setTransactionFlags(uint32_t flags);
             void        commitTransaction();
 
 
@@ -310,7 +308,12 @@ private:
            
 
     mutable     MessageQueue    mEventQueue;
-    
+
+    status_t postMessageAsync(const sp<MessageBase>& msg,
+            nsecs_t reltime=0, uint32_t flags = 0);
+
+    status_t postMessageSync(const sp<MessageBase>& msg,
+            nsecs_t reltime=0, uint32_t flags = 0);
                 
                 
                 // access must be protected by mStateLock
@@ -390,14 +393,14 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class BClient : public BnSurfaceFlingerClient
+class BClient : public BnSurfaceComposerClient
 {
 public:
     BClient(SurfaceFlinger *flinger, ClientID cid,
             const sp<IMemoryHeap>& cblk);
     ~BClient();
 
-    // ISurfaceFlingerClient interface
+    // ISurfaceComposerClient interface
     virtual sp<IMemoryHeap> getControlBlock() const;
 
     virtual sp<ISurface> createSurface(

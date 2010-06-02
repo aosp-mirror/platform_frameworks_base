@@ -29,7 +29,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -48,7 +50,10 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
+import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Slog;
@@ -62,7 +67,6 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
@@ -85,6 +89,12 @@ public class StatusBarPolicy {
 
     // message codes for the handler
     private static final int EVENT_BATTERY_CLOSE = 4;
+
+    private static final int AM_PM_STYLE_NORMAL  = 0;
+    private static final int AM_PM_STYLE_SMALL   = 1;
+    private static final int AM_PM_STYLE_GONE    = 2;
+
+    private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
     private final Context mContext;
     private final StatusBarService mService;
@@ -390,8 +400,8 @@ public class StatusBarPolicy {
                     action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
                 updateWifi(intent);
             }
-            else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION) ||
-                    action.equals(GpsLocationProvider.GPS_FIX_CHANGE_ACTION)) {
+            else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) ||
+                    action.equals(LocationManager.GPS_FIX_CHANGE_ACTION)) {
                 updateGps(intent);
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
@@ -536,8 +546,8 @@ public class StatusBarPolicy {
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
-        filter.addAction(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION);
-        filter.addAction(GpsLocationProvider.GPS_FIX_CHANGE_ACTION);
+        filter.addAction(LocationManager.GPS_ENABLED_CHANGE_ACTION);
+        filter.addAction(LocationManager.GPS_FIX_CHANGE_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
@@ -576,29 +586,31 @@ public class StatusBarPolicy {
              * add dummy characters around it to let us find it again after
              * formatting and change its size.
              */
-            int a = -1;
-            boolean quoted = false;
-            for (int i = 0; i < format.length(); i++) {
-                char c = format.charAt(i);
+            if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
+                int a = -1;
+                boolean quoted = false;
+                for (int i = 0; i < format.length(); i++) {
+                    char c = format.charAt(i);
 
-                if (c == '\'') {
-                    quoted = !quoted;
+                    if (c == '\'') {
+                        quoted = !quoted;
+                    }
+
+                    if (!quoted && c == 'a') {
+                        a = i;
+                        break;
+                    }
                 }
 
-                if (!quoted && c == 'a') {
-                    a = i;
-                    break;
+                if (a >= 0) {
+                    // Move a back so any whitespace before the AM/PM is also in the alternate size.
+                    final int b = a;
+                    while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                        a--;
+                    }
+                    format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
+                            + "a" + MAGIC2 + format.substring(b + 1);
                 }
-            }
-
-            if (a >= 0) {
-                // Move a back so any whitespace before the AM/PM is also in the alternate size.
-                final int b = a;
-                while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
-                    a--;
-                }
-                format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
-                        + "a" + MAGIC2 + format.substring(b + 1);
             }
 
             mClockFormat = sdf = new SimpleDateFormat(format);
@@ -608,22 +620,31 @@ public class StatusBarPolicy {
         }
         String result = sdf.format(mCalendar.getTime());
 
-        int magic1 = result.indexOf(MAGIC1);
-        int magic2 = result.indexOf(MAGIC2);
+        if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
+            int magic1 = result.indexOf(MAGIC1);
+            int magic2 = result.indexOf(MAGIC2);
 
-        if (magic1 >= 0 && magic2 > magic1) {
-            SpannableStringBuilder formatted = new SpannableStringBuilder(result);
+            if (magic1 >= 0 && magic2 > magic1) {
+                SpannableStringBuilder formatted = new SpannableStringBuilder(result);
 
-            formatted.setSpan(new RelativeSizeSpan(0.7f), magic1, magic2,
-                              Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                if (AM_PM_STYLE == AM_PM_STYLE_GONE) {
+                    formatted.delete(magic1, magic2+1);
+                } else {
+                    if (AM_PM_STYLE == AM_PM_STYLE_SMALL) {
+                        CharacterStyle style = new RelativeSizeSpan(0.7f);
+                        formatted.setSpan(style, magic1, magic2,
+                                          Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                    }
 
-            formatted.delete(magic2, magic2 + 1);
-            formatted.delete(magic1, magic1 + 1);
+                    formatted.delete(magic2, magic2 + 1);
+                    formatted.delete(magic1, magic1 + 1);
+                }
 
-            return formatted;
-        } else {
-            return result;
+                return formatted;
+            }
         }
+ 
+        return result;
     }
 
     private final void updateClock() {
@@ -954,7 +975,9 @@ public class StatusBarPolicy {
                  && ((mServiceState.getRadioTechnology()
                         == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
                      || (mServiceState.getRadioTechnology()
-                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)));
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
+                     || (mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_B)));
     }
 
     private boolean hasService() {
@@ -1070,7 +1093,6 @@ public class StatusBarPolicy {
     }
 
     private final void updateDataNetType(int net) {
-
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
             mDataIconList = sDataNetType_e;
@@ -1096,6 +1118,7 @@ public class StatusBarPolicy {
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
+        case TelephonyManager.NETWORK_TYPE_EVDO_B:
             mDataIconList = sDataNetType_3g;
             break;
         default:
@@ -1179,7 +1202,7 @@ public class StatusBarPolicy {
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||
                 ringerMode == AudioManager.RINGER_MODE_VIBRATE;
-        final int iconId = (ringerMode == AudioManager.RINGER_MODE_VIBRATE)
+        final int iconId = audioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)
                 ? com.android.internal.R.drawable.stat_sys_ringer_vibrate
                 : com.android.internal.R.drawable.stat_sys_ringer_silent;
 
@@ -1290,13 +1313,13 @@ public class StatusBarPolicy {
 
     private final void updateGps(Intent intent) {
         final String action = intent.getAction();
-        final boolean enabled = intent.getBooleanExtra(GpsLocationProvider.EXTRA_ENABLED, false);
+        final boolean enabled = intent.getBooleanExtra(LocationManager.EXTRA_GPS_ENABLED, false);
 
-        if (action.equals(GpsLocationProvider.GPS_FIX_CHANGE_ACTION) && enabled) {
+        if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && enabled) {
             // GPS is getting fixes
             mService.updateIcon(mGpsIcon, mGpsFixIconData, null);
             mService.setIconVisibility(mGpsIcon, true);
-        } else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
+        } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
             // GPS is off
             mService.setIconVisibility(mGpsIcon, false);
         } else {

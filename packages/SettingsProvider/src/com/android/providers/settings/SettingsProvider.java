@@ -399,9 +399,12 @@ public class SettingsProvider extends ContentProvider {
                     }
                 } else if (prefix == '-' && index >= 0) {
                     // remove the provider from the list if present
-                    // remove leading and trailing commas
-                    if (index > 0) index--;
-                    if (end < providers.length()) end++;
+                    // remove leading or trailing comma
+                    if (index > 0) {
+                        index--;
+                    } else if (end < providers.length()) {
+                        end++;
+                    }
 
                     newProviders = providers.substring(0, index);
                     if (end < providers.length()) {

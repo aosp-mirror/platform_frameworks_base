@@ -228,14 +228,10 @@ MediaPlayerService::~MediaPlayerService()
 
 sp<IMediaRecorder> MediaPlayerService::createMediaRecorder(pid_t pid)
 {
-#ifndef NO_OPENCORE
     sp<MediaRecorderClient> recorder = new MediaRecorderClient(this, pid);
     wp<MediaRecorderClient> w = recorder;
     Mutex::Autolock lock(mLock);
     mMediaRecorderClients.add(w);
-#else
-    sp<MediaRecorderClient> recorder = NULL;
-#endif
     LOGV("Create new media recorder client from pid %d", pid);
     return recorder;
 }
@@ -758,7 +754,7 @@ player_type getPlayerType(const char* url)
         int len = strlen(FILE_EXTS[i].extension);
         int start = lenURL - len;
         if (start > 0) {
-            if (!strncmp(url + start, FILE_EXTS[i].extension, len)) {
+            if (!strncasecmp(url + start, FILE_EXTS[i].extension, len)) {
                 if (FILE_EXTS[i].playertype == VORBIS_PLAYER
                     && !strncasecmp(url, "http://", 7)
                     && useStagefrightForHTTP) {

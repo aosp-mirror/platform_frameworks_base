@@ -185,7 +185,7 @@ nContextSetSurface(JNIEnv *_env, jobject _this, jint width, jint height, jobject
 
     } else {
         jclass surface_class = _env->FindClass("android/view/Surface");
-        jfieldID surfaceFieldID = _env->GetFieldID(surface_class, "mSurface", "I");
+        jfieldID surfaceFieldID = _env->GetFieldID(surface_class, ANDROID_VIEW_SURFACE_JNI_ID, "I");
         window = (Surface*)_env->GetIntField(wnd, surfaceFieldID);
     }
 

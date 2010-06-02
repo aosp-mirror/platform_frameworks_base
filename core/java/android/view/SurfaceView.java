@@ -140,7 +140,10 @@ public class SurfaceView extends View {
     boolean mViewVisibility = false;
     int mRequestedWidth = -1;
     int mRequestedHeight = -1;
-    int mRequestedFormat = PixelFormat.OPAQUE;
+    /* Set SurfaceView's format to 565 by default to maintain backward
+     * compatibility with applications assuming this format.
+     */
+    int mRequestedFormat = PixelFormat.RGB_565;
     int mRequestedType = -1;
 
     boolean mHaveFrame = false;
@@ -163,16 +166,20 @@ public class SurfaceView extends View {
     
     public SurfaceView(Context context) {
         super(context);
-        setWillNotDraw(true);
+        init();
     }
     
     public SurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setWillNotDraw(true);
+        init();
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        init();
+    }
+
+    private void init() {
         setWillNotDraw(true);
     }
     

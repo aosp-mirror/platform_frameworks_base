@@ -47,47 +47,42 @@ template <typename T> inline T min(T a, T b) {
 
 // ---------------------------------------------------------------------------
 
-const uint32_t Layer::typeInfo = LayerBaseClient::typeInfo | 4;
-const char* const Layer::typeID = "Layer";
-
-// ---------------------------------------------------------------------------
-
 Layer::Layer(SurfaceFlinger* flinger, DisplayID display, 
-        const sp<Client>& c, int32_t i)
-    :   LayerBaseClient(flinger, display, c, i),
+        const sp<Client>& client, int32_t i)
+    :   LayerBaseClient(flinger, display, client, i),
+        lcblk(NULL),
         mSecure(false),
-        mNoEGLImageForSwBuffers(false),
         mNeedsBlending(true),
-        mNeedsDithering(false)
+        mNeedsDithering(false),
+        mTextureManager(mFlags),
+        mBufferManager(mTextureManager),
+        mWidth(0), mHeight(0), mFixedSize(false)
 {
     // no OpenGL operation is possible here, since we might not be
     // in the OpenGL thread.
-    mFrontBufferIndex = lcblk->getFrontBuffer();
+    lcblk = new SharedBufferServer(
+            client->ctrlblk, i, mBufferManager.getDefaultBufferCount(),
+            getIdentity());
+
+   mBufferManager.setActiveBufferIndex( lcblk->getFrontBuffer() );
 }
 
 Layer::~Layer()
 {
-    destroy();
+    // FIXME: must be called from the main UI thread
+    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+    mBufferManager.destroy(dpy);
+
     // the actual buffers will be destroyed here
+    delete lcblk;
 }
 
-void Layer::destroy()
+// called with SurfaceFlinger::mStateLock as soon as the layer is entered
+// in the purgatory list
+void Layer::onRemoved()
 {
-    for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
-        if (mTextures[i].name != -1U) {
-            glDeleteTextures(1, &mTextures[i].name);
-            mTextures[i].name = -1U;
-        }
-        if (mTextures[i].image != EGL_NO_IMAGE_KHR) {
-            EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-            eglDestroyImageKHR(dpy, mTextures[i].image);
-            mTextures[i].image = EGL_NO_IMAGE_KHR;
-        }
-        Mutex::Autolock _l(mLock);
-        mBuffers[i].clear();
-        mWidth = mHeight = 0;
-    }
-    mSurface.clear();
+    // wake up the condition
+    lcblk->setStatus(NO_INIT);
 }
 
 sp<LayerBaseClient::Surface> Layer::createSurface() const
@@ -97,9 +92,17 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 
 status_t Layer::ditch()
 {
+    // NOTE: Called from the main UI thread
+
     // the layer is not on screen anymore. free as much resources as possible
     mFreezeLock.clear();
-    destroy();
+
+    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+    mBufferManager.destroy(dpy);
+    mSurface.clear();
+
+    Mutex::Autolock _l(mLock);
+    mWidth = mHeight = 0;
     return NO_ERROR;
 }
 
@@ -131,24 +134,19 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     mHeight = h;
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
-    mNoEGLImageForSwBuffers = !(hwFlags & DisplayHardware::CACHED_BUFFERS);
 
     // we use the red index
     int displayRedSize = displayInfo.getSize(PixelFormatInfo::INDEX_RED);
     int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);
     mNeedsDithering = layerRedsize > displayRedSize;
 
-    for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
-        mBuffers[i] = new GraphicBuffer();
-    }
     mSurface = new SurfaceLayer(mFlinger, clientIndex(), this);
     return NO_ERROR;
 }
 
 void Layer::reloadTexture(const Region& dirty)
 {
-    Mutex::Autolock _l(mLock);
-    sp<GraphicBuffer> buffer(getFrontBufferLocked());
+    sp<GraphicBuffer> buffer(mBufferManager.getActiveBuffer());
     if (buffer == NULL) {
         // this situation can happen if we ran out of memory for instance.
         // not much we can do. continue to use whatever texture was bound
@@ -156,118 +154,24 @@ void Layer::reloadTexture(const Region& dirty)
         return;
     }
 
-    const int index = mFrontBufferIndex;
-
-    // create the new texture name if needed
-    if (UNLIKELY(mTextures[index].name == -1U)) {
-        mTextures[index].name = createTexture();
-        mTextures[index].width = 0;
-        mTextures[index].height = 0;
-    }
-
 #ifdef EGL_ANDROID_image_native_buffer
     if (mFlags & DisplayHardware::DIRECT_TEXTURE) {
-        if (buffer->usage & GraphicBuffer::USAGE_HW_TEXTURE) {
-            if (mTextures[index].dirty) {
-                if (initializeEglImage(buffer, &mTextures[index]) != NO_ERROR) {
-                    // not sure what we can do here...
-                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
-                    goto slowpath;
-                }
-            }
-        } else {
-            if (mHybridBuffer==0 || (mHybridBuffer->width != buffer->width ||
-                    mHybridBuffer->height != buffer->height)) {
-                mHybridBuffer.clear();
-                mHybridBuffer = new GraphicBuffer(
-                        buffer->width, buffer->height, buffer->format,
-                        GraphicBuffer::USAGE_SW_WRITE_OFTEN |
-                        GraphicBuffer::USAGE_HW_TEXTURE);
-                if (initializeEglImage(
-                        mHybridBuffer, &mTextures[0]) != NO_ERROR) {
-                    // not sure what we can do here...
-                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
-                    mHybridBuffer.clear();
-                    goto slowpath;
-                }
-            }
-
-            GGLSurface t;
-            status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
-            LOGE_IF(res, "error %d (%s) locking buffer %p",
-                    res, strerror(res), buffer.get());
-            if (res == NO_ERROR) {
-                Texture* const texture(&mTextures[0]);
-
-                glBindTexture(GL_TEXTURE_2D, texture->name);
-
-                sp<GraphicBuffer> buf(mHybridBuffer);
-                void* vaddr;
-                res = buf->lock(GraphicBuffer::USAGE_SW_WRITE_OFTEN, &vaddr);
-                if (res == NO_ERROR) {
-                    int bpp = 0;
-                    switch (t.format) {
-                    case HAL_PIXEL_FORMAT_RGB_565:
-                    case HAL_PIXEL_FORMAT_RGBA_4444:
-                        bpp = 2;
-                        break;
-                    case HAL_PIXEL_FORMAT_RGBA_8888:
-                    case HAL_PIXEL_FORMAT_RGBX_8888:
-                        bpp = 4;
-                        break;
-                    default:
-                        if (isSupportedYuvFormat(t.format)) {
-                            // just show the Y plane of YUV buffers
-                            bpp = 1;
-                            break;
-                        }
-                        // oops, we don't handle this format!
-                        LOGE("layer %p, texture=%d, using format %d, which is not "
-                                "supported by the GL", this, texture->name, t.format);
-                    }
-                    if (bpp) {
-                        const Rect bounds(dirty.getBounds());
-                        size_t src_stride = t.stride;
-                        size_t dst_stride = buf->stride;
-                        if (src_stride == dst_stride &&
-                            bounds.width() == t.width &&
-                            bounds.height() == t.height)
-                        {
-                            memcpy(vaddr, t.data, t.height * t.stride * bpp);
-                        } else {
-                            GLubyte const * src = t.data +
-                                (bounds.left + bounds.top * src_stride) * bpp;
-                            GLubyte * dst = (GLubyte *)vaddr +
-                                (bounds.left + bounds.top * dst_stride) * bpp;
-                            const size_t length = bounds.width() * bpp;
-                            size_t h = bounds.height();
-                            src_stride *= bpp;
-                            dst_stride *= bpp;
-                            while (h--) {
-                                memcpy(dst, src, length);
-                                dst += dst_stride;
-                                src += src_stride;
-                            }
-                        }
-                    }
-                    buf->unlock();
-                }
-                buffer->unlock();
-            }
+        EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+        if (mBufferManager.initEglImage(dpy, buffer) != NO_ERROR) {
+            // not sure what we can do here...
+            mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
+            goto slowpath;
         }
     } else
 #endif
     {
 slowpath:
-        for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
-            mTextures[i].image = EGL_NO_IMAGE_KHR;
-        }
         GGLSurface t;
         status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
         LOGE_IF(res, "error %d (%s) locking buffer %p",
                 res, strerror(res), buffer.get());
         if (res == NO_ERROR) {
-            loadTexture(&mTextures[0], dirty, t);
+            mBufferManager.loadTexture(dirty, t);
             buffer->unlock();
         }
     }
@@ -275,11 +179,8 @@ slowpath:
 
 void Layer::onDraw(const Region& clip) const
 {
-    int index = mFrontBufferIndex;
-    if (mTextures[index].image == EGL_NO_IMAGE_KHR)
-        index = 0;
-    GLuint textureName = mTextures[index].name;
-    if (UNLIKELY(textureName == -1LU)) {
+    Texture tex(mBufferManager.getActiveTexture());
+    if (tex.name == -1LU) {
         // the texture has not been created yet, this Layer has
         // in fact never been drawn into. This happens frequently with
         // SurfaceView because the WindowManager can't know when the client
@@ -305,12 +206,52 @@ void Layer::onDraw(const Region& clip) const
         }
         return;
     }
-    drawWithOpenGL(clip, mTextures[index]);
+    drawWithOpenGL(clip, tex);
 }
 
-sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
+bool Layer::needsFiltering() const
+{
+    if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
+        // NOTE: there is a race here, because mFixedSize is updated in a
+        // binder transaction. however, it doesn't really matter since it is
+        // evaluated each time we draw. To be perfectly correct, this flag
+        // would have to be associated with a buffer.
+        if (mFixedSize)
+            return true;
+    }
+    return LayerBase::needsFiltering();
+}
+
+
+status_t Layer::setBufferCount(int bufferCount)
+{
+    // Ensures our client doesn't go away while we're accessing
+    // the shared area.
+    sp<Client> ourClient(client.promote());
+    if (ourClient == 0) {
+        // oops, the client is already gone
+        return DEAD_OBJECT;
+    }
+
+    // NOTE: lcblk->resize() is protected by an internal lock
+    status_t err = lcblk->resize(bufferCount);
+    if (err == NO_ERROR)
+        mBufferManager.resize(bufferCount);
+
+    return err;
+}
+
+sp<GraphicBuffer> Layer::requestBuffer(int index,
+        uint32_t reqWidth, uint32_t reqHeight, uint32_t reqFormat,
+        uint32_t usage)
 {
     sp<GraphicBuffer> buffer;
+
+    if ((reqWidth | reqHeight | reqFormat) < 0)
+        return buffer;
+
+    if ((!reqWidth && reqHeight) || (reqWidth && !reqHeight))
+        return buffer;
 
     // this ensures our client doesn't go away while we're accessing
     // the shared area.
@@ -324,7 +265,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
      * This is called from the client's Surface::dequeue(). This can happen
      * at any time, especially while we're in the middle of using the
      * buffer 'index' as our front buffer.
-     * 
+     *
      * Make sure the buffer we're resizing is not the front buffer and has been
      * dequeued. Once this condition is asserted, we are guaranteed that this
      * buffer cannot become the front buffer under our feet, since we're called
@@ -337,31 +278,33 @@ sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
         return buffer;
     }
 
-    uint32_t w, h;
+    uint32_t w, h, f;
     { // scope for the lock
         Mutex::Autolock _l(mLock);
-        w = mWidth;
-        h = mHeight;
-        buffer = mBuffers[index];
-        
-        // destroy() could have been called before we get here, we log it
-        // because it's uncommon, and the code below should handle it
-        LOGW_IF(buffer==0, 
-                "mBuffers[%d] is null (mWidth=%d, mHeight=%d)",
-                index, w, h);
-        
-        mBuffers[index].clear();
+        const bool fixedSizeChanged = mFixedSize != (reqWidth && reqHeight);
+        const bool formatChanged    = mReqFormat != reqFormat;
+        mReqWidth  = reqWidth;
+        mReqHeight = reqHeight;
+        mReqFormat = reqFormat;
+        mFixedSize = reqWidth && reqHeight;
+        w = reqWidth  ? reqWidth  : mWidth;
+        h = reqHeight ? reqHeight : mHeight;
+        f = reqFormat ? reqFormat : mFormat;
+        buffer = mBufferManager.detachBuffer(index);
+        if (fixedSizeChanged || formatChanged) {
+            lcblk->reallocateAllExcept(index);
+        }
     }
 
     const uint32_t effectiveUsage = getEffectiveUsage(usage);
     if (buffer!=0 && buffer->getStrongCount() == 1) {
-        err = buffer->reallocate(w, h, mFormat, effectiveUsage);
+        err = buffer->reallocate(w, h, f, effectiveUsage);
     } else {
         // here we have to reallocate a new buffer because we could have a
         // client in our process with a reference to it (eg: status bar),
         // and we can't release the handle under its feet.
         buffer.clear();
-        buffer = new GraphicBuffer(w, h, mFormat, effectiveUsage);
+        buffer = new GraphicBuffer(w, h, f, effectiveUsage);
         err = buffer->initCheck();
     }
 
@@ -377,15 +320,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
 
     if (err == NO_ERROR && buffer->handle != 0) {
         Mutex::Autolock _l(mLock);
-        if (mWidth && mHeight) {
-            // and we have new buffer
-            mBuffers[index] = buffer;
-            // texture is now dirty...
-            mTextures[index].dirty = true;
-        } else {
-            // oops we got killed while we were allocating the buffer
-            buffer.clear();
-        }
+        mBufferManager.attachBuffer(index, buffer);
     }
     return buffer;
 }
@@ -411,15 +346,8 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
     } else {
         // it's allowed to modify the usage flags here, but generally
         // the requested flags should be honored.
-        if (mNoEGLImageForSwBuffers) {
-            if (usage & GraphicBuffer::USAGE_HW_MASK) {
-                // request EGLImage for h/w buffers only
-                usage |= GraphicBuffer::USAGE_HW_TEXTURE;
-            }
-        } else {
-            // request EGLImage for all buffers
-            usage |= GraphicBuffer::USAGE_HW_TEXTURE;
-        }
+        // request EGLImage for all buffers
+        usage |= GraphicBuffer::USAGE_HW_TEXTURE;
     }
     return usage;
 }
@@ -429,42 +357,46 @@ uint32_t Layer::doTransaction(uint32_t flags)
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
-    if ((front.requested_w != temp.requested_w) || 
-        (front.requested_h != temp.requested_h)) {
+    const bool sizeChanged = (front.requested_w != temp.requested_w) ||
+            (front.requested_h != temp.requested_h);
+
+    if (sizeChanged) {
         // the size changed, we need to ask our client to request a new buffer
         LOGD_IF(DEBUG_RESIZE,
-                    "resize (layer=%p), requested (%dx%d), "
-                    "drawing (%d,%d), (%dx%d), (%dx%d)",
-                    this, 
-                    int(temp.requested_w), int(temp.requested_h),
-                    int(front.requested_w), int(front.requested_h),
-                    int(mBuffers[0]->getWidth()), int(mBuffers[0]->getHeight()),
-                    int(mBuffers[1]->getWidth()), int(mBuffers[1]->getHeight()));
+                "resize (layer=%p), requested (%dx%d), drawing (%d,%d)",
+                this,
+                int(temp.requested_w), int(temp.requested_h),
+                int(front.requested_w), int(front.requested_h));
 
-        // we're being resized and there is a freeze display request,
-        // acquire a freeze lock, so that the screen stays put
-        // until we've redrawn at the new size; this is to avoid
-        // glitches upon orientation changes.
-        if (mFlinger->hasFreezeRequest()) {
-            // if the surface is hidden, don't try to acquire the
-            // freeze lock, since hidden surfaces may never redraw
-            if (!(front.flags & ISurfaceComposer::eLayerHidden)) {
-                mFreezeLock = mFlinger->getFreezeLock();
+        if (!isFixedSize()) {
+            // we're being resized and there is a freeze display request,
+            // acquire a freeze lock, so that the screen stays put
+            // until we've redrawn at the new size; this is to avoid
+            // glitches upon orientation changes.
+            if (mFlinger->hasFreezeRequest()) {
+                // if the surface is hidden, don't try to acquire the
+                // freeze lock, since hidden surfaces may never redraw
+                if (!(front.flags & ISurfaceComposer::eLayerHidden)) {
+                    mFreezeLock = mFlinger->getFreezeLock();
+                }
             }
+
+            // this will make sure LayerBase::doTransaction doesn't update
+            // the drawing state's size
+            Layer::State& editDraw(mDrawingState);
+            editDraw.requested_w = temp.requested_w;
+            editDraw.requested_h = temp.requested_h;
+
+            // record the new size, form this point on, when the client request
+            // a buffer, it'll get the new size.
+            setBufferSize(temp.requested_w, temp.requested_h);
+
+            // all buffers need reallocation
+            lcblk->reallocateAll();
+        } else {
+            // record the new size
+            setBufferSize(temp.requested_w, temp.requested_h);
         }
-
-        // this will make sure LayerBase::doTransaction doesn't update
-        // the drawing state's size
-        Layer::State& editDraw(mDrawingState);
-        editDraw.requested_w = temp.requested_w;
-        editDraw.requested_h = temp.requested_h;
-
-        // record the new size, form this point on, when the client request a
-        // buffer, it'll get the new size.
-        setDrawingSize(temp.requested_w, temp.requested_h);
-
-        // all buffers need reallocation
-        lcblk->reallocate();
     }
 
     if (temp.sequence != front.sequence) {
@@ -478,10 +410,15 @@ uint32_t Layer::doTransaction(uint32_t flags)
     return LayerBase::doTransaction(flags);
 }
 
-void Layer::setDrawingSize(uint32_t w, uint32_t h) {
+void Layer::setBufferSize(uint32_t w, uint32_t h) {
     Mutex::Autolock _l(mLock);
     mWidth = w;
     mHeight = h;
+}
+
+bool Layer::isFixedSize() const {
+    Mutex::Autolock _l(mLock);
+    return mFixedSize;
 }
 
 // ----------------------------------------------------------------------------
@@ -491,22 +428,25 @@ void Layer::setDrawingSize(uint32_t w, uint32_t h) {
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
     ssize_t buf = lcblk->retireAndLock();
-    if (buf < NO_ERROR) {
-        //LOGW("nothing to retire (%s)", strerror(-buf));
-        // NOTE: here the buffer is locked because we will used 
+    if (buf == NOT_ENOUGH_DATA) {
+        // NOTE: This is not an error, it simply means there is nothing to
+        // retire. The buffer is locked because we will use it
         // for composition later in the loop
         return;
     }
 
-    // ouch, this really should never happen
-    if (uint32_t(buf)>=NUM_BUFFERS) {
+    if (buf < NO_ERROR) {
         LOGE("retireAndLock() buffer index (%d) out of range", buf);
         mPostedDirtyRegion.clear();
         return;
     }
 
     // we retired a buffer, which becomes the new front buffer
-    mFrontBufferIndex = buf;
+    if (mBufferManager.setActiveBufferIndex(buf) < NO_ERROR) {
+        LOGE("retireAndLock() buffer index (%d) out of range", buf);
+        mPostedDirtyRegion.clear();
+        return;
+    }
 
     // get the dirty region
     sp<GraphicBuffer> newFrontBuffer(getBuffer(buf));
@@ -559,9 +499,15 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         mFlinger->signalEvent();
     }
 
-    if (!mPostedDirtyRegion.isEmpty()) {
-        reloadTexture( mPostedDirtyRegion );
-    }
+    /* a buffer was posted, so we need to call reloadTexture(), which
+     * will update our internal data structures (eg: EGLImageKHR or
+     * texture names). we need to do this even if mPostedDirtyRegion is
+     * empty -- it's orthogonal to the fact that a new buffer was posted,
+     * for instance, a degenerate case could be that the user did an empty
+     * update but repainted the buffer with appropriate content (after a
+     * resize for instance).
+     */
+    reloadTexture( mPostedDirtyRegion );
 }
 
 void Layer::unlockPageFlip(
@@ -585,17 +531,177 @@ void Layer::unlockPageFlip(
     }
     if (visibleRegionScreen.isEmpty()) {
         // an invisible layer should not hold a freeze-lock
-        // (because it may never be updated and thereore never release it)
+        // (because it may never be updated and therefore never release it)
         mFreezeLock.clear();
     }
 }
 
 void Layer::finishPageFlip()
 {
-    status_t err = lcblk->unlock( mFrontBufferIndex );
-    LOGE_IF(err!=NO_ERROR, 
-            "layer %p, buffer=%d wasn't locked!",
-            this, mFrontBufferIndex);
+    int buf = mBufferManager.getActiveBufferIndex();
+    status_t err = lcblk->unlock( buf );
+    LOGE_IF(err!=NO_ERROR, "layer %p, buffer=%d wasn't locked!", this, buf);
+}
+
+
+void Layer::dump(String8& result, char* buffer, size_t SIZE) const
+{
+    LayerBaseClient::dump(result, buffer, SIZE);
+
+    SharedBufferStack::Statistics stats = lcblk->getStats();
+    result.append( lcblk->dump("      ") );
+    sp<const GraphicBuffer> buf0(getBuffer(0));
+    sp<const GraphicBuffer> buf1(getBuffer(1));
+    uint32_t w0=0, h0=0, s0=0;
+    uint32_t w1=0, h1=0, s1=0;
+    if (buf0 != 0) {
+        w0 = buf0->getWidth();
+        h0 = buf0->getHeight();
+        s0 = buf0->getStride();
+    }
+    if (buf1 != 0) {
+        w1 = buf1->getWidth();
+        h1 = buf1->getHeight();
+        s1 = buf1->getStride();
+    }
+    snprintf(buffer, SIZE,
+            "      "
+            "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
+            " freezeLock=%p, dq-q-time=%u us\n",
+            pixelFormat(),
+            w0, h0, s0, w1, h1, s1,
+            getFreezeLock().get(), stats.totalTime);
+
+    result.append(buffer);
+}
+
+// ---------------------------------------------------------------------------
+
+Layer::BufferManager::BufferManager(TextureManager& tm)
+    : mNumBuffers(NUM_BUFFERS), mTextureManager(tm),
+      mActiveBuffer(0), mFailover(false)
+{
+}
+
+Layer::BufferManager::~BufferManager()
+{
+}
+
+status_t Layer::BufferManager::resize(size_t size)
+{
+    Mutex::Autolock _l(mLock);
+    mNumBuffers = size;
+    return NO_ERROR;
+}
+
+// only for debugging
+sp<GraphicBuffer> Layer::BufferManager::getBuffer(size_t index) const {
+    return mBufferData[index].buffer;
+}
+
+status_t Layer::BufferManager::setActiveBufferIndex(size_t index) {
+    // TODO: need to validate 'index'
+    mActiveBuffer = index;
+    return NO_ERROR;
+}
+
+size_t Layer::BufferManager::getActiveBufferIndex() const {
+    return mActiveBuffer;
+}
+
+Texture Layer::BufferManager::getActiveTexture() const {
+    Texture res;
+    if (mFailover) {
+        res = mFailoverTexture;
+    } else {
+        static_cast<Image&>(res) = mBufferData[mActiveBuffer].texture;
+    }
+    return res;
+}
+
+sp<GraphicBuffer> Layer::BufferManager::getActiveBuffer() const {
+    const size_t activeBuffer = mActiveBuffer;
+    BufferData const * const buffers = mBufferData;
+    Mutex::Autolock _l(mLock);
+    return buffers[activeBuffer].buffer;
+}
+
+sp<GraphicBuffer> Layer::BufferManager::detachBuffer(size_t index)
+{
+    BufferData* const buffers = mBufferData;
+    sp<GraphicBuffer> buffer;
+    Mutex::Autolock _l(mLock);
+    buffer = buffers[index].buffer;
+    buffers[index].buffer = 0;
+    return buffer;
+}
+
+status_t Layer::BufferManager::attachBuffer(size_t index,
+        const sp<GraphicBuffer>& buffer)
+{
+    BufferData* const buffers = mBufferData;
+    Mutex::Autolock _l(mLock);
+    buffers[index].buffer = buffer;
+    buffers[index].texture.dirty = true;
+    return NO_ERROR;
+}
+
+status_t Layer::BufferManager::destroy(EGLDisplay dpy)
+{
+    BufferData* const buffers = mBufferData;
+    size_t num;
+    { // scope for the lock
+        Mutex::Autolock _l(mLock);
+        num = mNumBuffers;
+        for (size_t i=0 ; i<num ; i++) {
+            buffers[i].buffer = 0;
+        }
+    }
+    for (size_t i=0 ; i<num ; i++) {
+        destroyTexture(&buffers[i].texture, dpy);
+    }
+    destroyTexture(&mFailoverTexture, dpy);
+    return NO_ERROR;
+}
+
+status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
+        const sp<GraphicBuffer>& buffer)
+{
+    size_t index = mActiveBuffer;
+    Image& texture(mBufferData[index].texture);
+    status_t err = mTextureManager.initEglImage(&texture, dpy, buffer);
+    // if EGLImage fails, we switch to regular texture mode, and we
+    // free all resources associated with using EGLImages.
+    if (err == NO_ERROR) {
+        mFailover = false;
+        destroyTexture(&mFailoverTexture, dpy);
+    } else {
+        mFailover = true;
+        const size_t num = mNumBuffers;
+        for (size_t i=0 ; i<num ; i++) {
+            destroyTexture(&mBufferData[i].texture, dpy);
+        }
+    }
+    return err;
+}
+
+status_t Layer::BufferManager::loadTexture(
+        const Region& dirty, const GGLSurface& t)
+{
+    return mTextureManager.loadTexture(&mFailoverTexture, dirty, t);
+}
+
+status_t Layer::BufferManager::destroyTexture(Image* tex, EGLDisplay dpy)
+{
+    if (tex->name != -1U) {
+        glDeleteTextures(1, &tex->name);
+        tex->name = -1U;
+    }
+    if (tex->image != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(dpy, tex->image);
+        tex->image = EGL_NO_IMAGE_KHR;
+    }
+    return NO_ERROR;
 }
 
 // ---------------------------------------------------------------------------
@@ -610,18 +716,35 @@ Layer::SurfaceLayer::~SurfaceLayer()
 {
 }
 
-sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
+sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index,
+        uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
 {
     sp<GraphicBuffer> buffer;
     sp<Layer> owner(getOwner());
     if (owner != 0) {
-        LOGE_IF(uint32_t(index)>=NUM_BUFFERS,
-                "getBuffer() index (%d) out of range", index);
-        if (uint32_t(index) < NUM_BUFFERS) {
-            buffer = owner->requestBuffer(index, usage);
-        }
+        /*
+         * requestBuffer() cannot be called from the main thread
+         * as it could cause a dead-lock, since it may have to wait
+         * on conditions updated my the main thread.
+         */
+        buffer = owner->requestBuffer(index, w, h, format, usage);
     }
     return buffer;
+}
+
+status_t Layer::SurfaceLayer::setBufferCount(int bufferCount)
+{
+    status_t err = DEAD_OBJECT;
+    sp<Layer> owner(getOwner());
+    if (owner != 0) {
+        /*
+         * setBufferCount() cannot be called from the main thread
+         * as it could cause a dead-lock, since it may have to wait
+         * on conditions updated my the main thread.
+         */
+        err = owner->setBufferCount(bufferCount);
+    }
+    return err;
 }
 
 // ---------------------------------------------------------------------------

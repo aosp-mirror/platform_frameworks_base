@@ -38,7 +38,7 @@ void assert_fail(const char *file, int line, const char *func, const char *expr)
     INFO("assertion failed at file %s, line %d, function %s:",
             file, line, func);
     INFO("%s", expr);
-    exit(1);
+    abort();
 }
 
 void assert_eq_fail(const char *file, int line, const char *func,
@@ -46,7 +46,7 @@ void assert_eq_fail(const char *file, int line, const char *func,
     INFO("assertion failed at file %s, line %d, function %s:",
             file, line, func);
     INFO("(expected) %s != (actual) %d", expr, actual);
-    exit(1);
+    abort();
 }
 
 #define ASSERT(e) \
@@ -155,7 +155,7 @@ public:
     virtual void notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2);
     virtual void dataCallback(int32_t msgType, const sp<IMemory>& data);
     virtual void dataCallbackTimestamp(nsecs_t timestamp,
-            int32_t msgType, const sp<IMemory>& data) {}
+            int32_t msgType, const sp<IMemory>& data);
 
     // new functions
     void clearStat();
@@ -176,6 +176,7 @@ private:
     DefaultKeyedVector<int32_t, int> mDataCount;
     DefaultKeyedVector<int32_t, int> mDataSize;
     bool test(OP op, int v1, int v2);
+    void assertTest(OP op, int v1, int v2);
 
     ICamera *mReleaser;
 };
@@ -199,26 +200,33 @@ bool MCameraClient::test(OP op, int v1, int v2) {
     return false;
 }
 
+void MCameraClient::assertTest(OP op, int v1, int v2) {
+    if (!test(op, v1, v2)) {
+        LOGE("assertTest failed: op=%d, v1=%d, v2=%d", op, v1, v2);
+        ASSERT(0);
+    }
+}
+
 void MCameraClient::assertNotify(int32_t msgType, OP op, int count) {
     Mutex::Autolock _l(mLock);
     int v = mNotifyCount.valueFor(msgType);
-    ASSERT(test(op, v, count));
+    assertTest(op, v, count);
 }
 
 void MCameraClient::assertData(int32_t msgType, OP op, int count) {
     Mutex::Autolock _l(mLock);
     int v = mDataCount.valueFor(msgType);
-    ASSERT(test(op, v, count));
+    assertTest(op, v, count);
 }
 
 void MCameraClient::assertDataSize(int32_t msgType, OP op, int dataSize) {
     Mutex::Autolock _l(mLock);
     int v = mDataSize.valueFor(msgType);
-    ASSERT(test(op, v, dataSize));
+    assertTest(op, v, dataSize);
 }
 
 void MCameraClient::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) {
-    INFO(__func__);
+    INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ssize_t i = mNotifyCount.indexOfKey(msgType);
     if (i < 0) {
@@ -230,7 +238,7 @@ void MCameraClient::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) 
 }
 
 void MCameraClient::dataCallback(int32_t msgType, const sp<IMemory>& data) {
-    INFO(__func__);
+    INFO("%s", __func__);
     int dataSize = data->size();
     INFO("data type = %d, size = %d", msgType, dataSize);
     Mutex::Autolock _l(mLock);
@@ -248,6 +256,11 @@ void MCameraClient::dataCallback(int32_t msgType, const sp<IMemory>& data) {
         ASSERT(mReleaser != NULL);
         mReleaser->releaseRecordingFrame(data);
     }
+}
+
+void MCameraClient::dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType,
+        const sp<IMemory>& data) {
+    dataCallback(msgType, data);
 }
 
 void MCameraClient::waitNotify(int32_t msgType, OP op, int count) {
@@ -285,6 +298,7 @@ public:
     virtual sp<OverlayRef> createOverlay(
             uint32_t w, uint32_t h, int32_t format, int32_t orientation);
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage);
+    virtual status_t setBufferCount(int bufferCount);
 
     // new functions
     void clearStat();
@@ -300,7 +314,7 @@ private:
 };
 
 status_t MSurface::registerBuffers(const BufferHeap& buffers) {
-    INFO(__func__);
+    INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ++registerBuffersCount;
     mCond.signal();
@@ -308,21 +322,26 @@ status_t MSurface::registerBuffers(const BufferHeap& buffers) {
 }
 
 void MSurface::postBuffer(ssize_t offset) {
-    // INFO(__func__);
+    // INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ++postBufferCount;
     mCond.signal();
 }
 
 void MSurface::unregisterBuffers() {
-    INFO(__func__);
+    INFO("%s", __func__);
     Mutex::Autolock _l(mLock);
     ++unregisterBuffersCount;
     mCond.signal();
 }
 
 sp<GraphicBuffer> MSurface::requestBuffer(int bufferIdx, int usage) {
-    INFO(__func__);
+    INFO("%s", __func__);
+    return NULL;
+}
+
+status_t MSurface::setBufferCount(int bufferCount) {
+    INFO("%s", __func__);
     return NULL;
 }
 
@@ -348,10 +367,9 @@ void MSurface::waitUntil(int c0, int c1, int c2) {
 
 sp<OverlayRef> MSurface::createOverlay(uint32_t w, uint32_t h, int32_t format,
         int32_t orientation) {
-    // We don't expect this to be called in current hardware.
+    // Not implemented.
     ASSERT(0);
-    sp<OverlayRef> dummy;
-    return dummy;
+    return NULL;
 }
 
 //
@@ -368,17 +386,17 @@ sp<IHolder> getHolder() {
 }
 
 void putTempObject(sp<IBinder> obj) {
-    INFO(__func__);
+    INFO("%s", __func__);
     getHolder()->put(obj);
 }
 
 sp<IBinder> getTempObject() {
-    INFO(__func__);
+    INFO("%s", __func__);
     return getHolder()->get();
 }
 
 void clearTempObject() {
-    INFO(__func__);
+    INFO("%s", __func__);
     getHolder()->clear();
 }
 
@@ -395,64 +413,71 @@ sp<ICameraService> getCameraService() {
     return cs;
 }
 
+int getNumberOfCameras() {
+    sp<ICameraService> cs = getCameraService();
+    return cs->getNumberOfCameras();
+}
+
 //
 // Various Connect Tests
 //
-void testConnect() {
-    INFO(__func__);
+void testConnect(int cameraId) {
+    INFO("%s", __func__);
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
-    sp<ICamera> c = cs->connect(cc);
+    sp<ICamera> c = cs->connect(cc, cameraId);
     ASSERT(c != 0);
     c->disconnect();
 }
 
-void testAllowConnectOnceOnly() {
-    INFO(__func__);
+void testAllowConnectOnceOnly(int cameraId) {
+    INFO("%s", __func__);
     sp<ICameraService> cs = getCameraService();
     // Connect the first client.
     sp<MCameraClient> cc = new MCameraClient();
-    sp<ICamera> c = cs->connect(cc);
+    sp<ICamera> c = cs->connect(cc, cameraId);
     ASSERT(c != 0);
     // Same client -- ok.
-    ASSERT(cs->connect(cc) != 0);
+    ASSERT(cs->connect(cc, cameraId) != 0);
     // Different client -- not ok.
     sp<MCameraClient> cc2 = new MCameraClient();
-    ASSERT(cs->connect(cc2) == 0);
+    ASSERT(cs->connect(cc2, cameraId) == 0);
     c->disconnect();
 }
 
 void testReconnectFailed() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
-    sp<MCameraClient> cc2 = new MCameraClient();
-    ASSERT(c->connect(cc2) != NO_ERROR);
+    sp<MCameraClient> cc = new MCameraClient();
+    ASSERT(c->connect(cc) != NO_ERROR);
 }
 
 void testReconnectSuccess() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     sp<MCameraClient> cc = new MCameraClient();
     ASSERT(c->connect(cc) == NO_ERROR);
+    c->disconnect();
 }
 
 void testLockFailed() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     ASSERT(c->lock() != NO_ERROR);
 }
 
 void testLockUnlockSuccess() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     ASSERT(c->lock() == NO_ERROR);
     ASSERT(c->unlock() == NO_ERROR);
 }
 
 void testLockSuccess() {
-    INFO(__func__);
+    INFO("%s", __func__);
     sp<ICamera> c = interface_cast<ICamera>(getTempObject());
     ASSERT(c->lock() == NO_ERROR);
+    c->disconnect();
 }
 
 //
@@ -499,11 +524,11 @@ void runInAnotherProcess(const char *tag) {
     }
 }
 
-void testReconnect() {
-    INFO(__func__);
+void testReconnect(int cameraId) {
+    INFO("%s", __func__);
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
-    sp<ICamera> c = cs->connect(cc);
+    sp<ICamera> c = cs->connect(cc, cameraId);
     ASSERT(c != 0);
     // Reconnect to the same client -- ok.
     ASSERT(c->connect(cc) == NO_ERROR);
@@ -514,10 +539,10 @@ void testReconnect() {
     cc->assertNotify(CAMERA_MSG_ERROR, MCameraClient::EQ, 0);
 }
 
-void testLockUnlock() {
+void testLockUnlock(int cameraId) {
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
-    sp<ICamera> c = cs->connect(cc);
+    sp<ICamera> c = cs->connect(cc, cameraId);
     ASSERT(c != 0);
     // We can lock as many times as we want.
     ASSERT(c->lock() == NO_ERROR);
@@ -530,16 +555,15 @@ void testLockUnlock() {
     runInAnotherProcess("testLockUnlockSuccess");
     // Unlock then lock from a different process -- ok.
     runInAnotherProcess("testLockSuccess");
-    c->disconnect();
     clearTempObject();
 }
 
-void testReconnectFromAnotherProcess() {
-    INFO(__func__);
+void testReconnectFromAnotherProcess(int cameraId) {
+    INFO("%s", __func__);
 
     sp<ICameraService> cs = getCameraService();
     sp<MCameraClient> cc = new MCameraClient();
-    sp<ICamera> c = cs->connect(cc);
+    sp<ICamera> c = cs->connect(cc, cameraId);
     ASSERT(c != 0);
     // Reconnect from a different process -- not ok.
     putTempObject(c->asBinder());
@@ -547,7 +571,6 @@ void testReconnectFromAnotherProcess() {
     // Unlock then reconnect from a different process -- ok.
     ASSERT(c->unlock() == NO_ERROR);
     runInAnotherProcess("testReconnectSuccess");
-    c->disconnect();
     clearTempObject();
 }
 
@@ -560,10 +583,11 @@ static void flushCommands() {
 }
 
 // Run a test case
-#define RUN(class_name) do { \
+#define RUN(class_name, cameraId) do { \
     { \
         INFO(#class_name); \
         class_name instance; \
+        instance.init(cameraId); \
         instance.run(); \
     } \
     flushCommands(); \
@@ -571,19 +595,21 @@ static void flushCommands() {
 
 // Base test case after the the camera is connected.
 class AfterConnect {
+public:
+    void init(int cameraId) {
+        cs = getCameraService();
+        cc = new MCameraClient();
+        c = cs->connect(cc, cameraId);
+        ASSERT(c != 0);
+    }
+
 protected:
     sp<ICameraService> cs;
     sp<MCameraClient> cc;
     sp<ICamera> c;
 
-    AfterConnect() {
-        cs = getCameraService();
-        cc = new MCameraClient();
-        c = cs->connect(cc);
-        ASSERT(c != 0);
-    }
-
     ~AfterConnect() {
+        c->disconnect();
         c.clear();
         cc.clear();
         cs.clear();
@@ -612,19 +638,16 @@ public:
         surface->waitUntil(1, 10, 0); // needs 1 registerBuffers and 10 postBuffer
         surface->clearStat();
 
-        c->disconnect();
-        // TODO: CameraService crashes for this. Fix it.
-#if 0
         sp<MSurface> another_surface = new MSurface();
         c->setPreviewDisplay(another_surface);  // just to make sure unregisterBuffers
                                                 // is called.
         surface->waitUntil(0, 0, 1);  // needs unregisterBuffers
-#endif
+
         cc->assertNotify(CAMERA_MSG_ERROR, MCameraClient::EQ, 0);
     }
 };
 
-class TestStartPreviewWithoutDisplay : AfterConnect {
+class TestStartPreviewWithoutDisplay : public AfterConnect {
 public:
     void run() {
         ASSERT(c->startPreview() == NO_ERROR);
@@ -636,14 +659,16 @@ public:
 
 // Base test case after the the camera is connected and the preview is started.
 class AfterStartPreview : public AfterConnect {
-protected:
-    sp<MSurface> surface;
-
-    AfterStartPreview() {
+public:
+    void init(int cameraId) {
+        AfterConnect::init(cameraId);
         surface = new MSurface();
         ASSERT(c->setPreviewDisplay(surface) == NO_ERROR);
         ASSERT(c->startPreview() == NO_ERROR);
     }
+
+protected:
+    sp<MSurface> surface;
 
     ~AfterStartPreview() {
         surface.clear();
@@ -680,9 +705,6 @@ public:
         cc->waitData(CAMERA_MSG_RAW_IMAGE, MCameraClient::EQ, 1);
         cc->waitData(CAMERA_MSG_COMPRESSED_IMAGE, MCameraClient::EQ, 1);
         c->stopPreview();
-#if 1  // TODO: It crashes if we don't have this. Fix it.
-        usleep(100000);
-#endif
         c->disconnect();
         cc->assertNotify(CAMERA_MSG_ERROR, MCameraClient::EQ, 0);
     }
@@ -697,7 +719,6 @@ public:
             cc->waitNotify(CAMERA_MSG_SHUTTER, MCameraClient::EQ, 1);
             cc->waitData(CAMERA_MSG_RAW_IMAGE, MCameraClient::EQ, 1);
             cc->waitData(CAMERA_MSG_COMPRESSED_IMAGE, MCameraClient::EQ, 1);
-            usleep(100000);  // 100ms
         }
         c->disconnect();
         cc->assertNotify(CAMERA_MSG_ERROR, MCameraClient::EQ, 0);
@@ -708,36 +729,71 @@ class TestGetParameters: public AfterStartPreview {
 public:
     void run() {
         String8 param_str = c->getParameters();
-        INFO(param_str);
+        INFO("%s", static_cast<const char*>(param_str));
     }
 };
+
+static bool getNextSize(const char **ptrS, int *w, int *h) {
+    const char *s = *ptrS;
+
+    // skip over ','
+    if (*s == ',') s++;
+
+    // remember start position in p
+    const char *p = s;
+    while (*s != '\0' && *s != 'x') {
+        s++;
+    }
+    if (*s == '\0') return false;
+
+    // get the width
+    *w = atoi(p);
+
+    // skip over 'x'
+    ASSERT(*s == 'x');
+    p = s + 1;
+    while (*s != '\0' && *s != ',') {
+        s++;
+    }
+
+    // get the height
+    *h = atoi(p);
+    *ptrS = s;
+    return true;
+}
 
 class TestPictureSize : public AfterStartPreview {
 public:
     void checkOnePicture(int w, int h) {
-        const float rate = 0.5;  // byte per pixel limit
+        const float rate = 0.9;  // byte per pixel limit
         int pixels = w * h;
 
         CameraParameters param(c->getParameters());
         param.setPictureSize(w, h);
+        // disable thumbnail to get more accurate size.
+        param.set(CameraParameters::KEY_JPEG_THUMBNAIL_WIDTH, 0);
+        param.set(CameraParameters::KEY_JPEG_THUMBNAIL_HEIGHT, 0);
         c->setParameters(param.flatten());
 
         cc->clearStat();
         ASSERT(c->takePicture() == NO_ERROR);
         cc->waitData(CAMERA_MSG_RAW_IMAGE, MCameraClient::EQ, 1);
-        cc->assertDataSize(CAMERA_MSG_RAW_IMAGE, MCameraClient::EQ, pixels*3/2);
+        //cc->assertDataSize(CAMERA_MSG_RAW_IMAGE, MCameraClient::EQ, pixels*3/2);
         cc->waitData(CAMERA_MSG_COMPRESSED_IMAGE, MCameraClient::EQ, 1);
         cc->assertDataSize(CAMERA_MSG_COMPRESSED_IMAGE, MCameraClient::LT,
                 int(pixels * rate));
         cc->assertDataSize(CAMERA_MSG_COMPRESSED_IMAGE, MCameraClient::GT, 0);
         cc->assertNotify(CAMERA_MSG_ERROR, MCameraClient::EQ, 0);
-        usleep(100000);  // 100ms
     }
 
     void run() {
-        checkOnePicture(2048, 1536);
-        checkOnePicture(1600, 1200);
-        checkOnePicture(1024, 768);
+        CameraParameters param(c->getParameters());
+        int w, h;
+        const char *s = param.get(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES);
+        while (getNextSize(&s, &w, &h)) {
+            LOGD("checking picture size %dx%d", w, h);
+            checkOnePicture(w, h);
+        }
     }
 };
 
@@ -749,6 +805,8 @@ public:
 
         // Try all flag combinations.
         for (int v = 0; v < 8; v++) {
+            LOGD("TestPreviewCallbackFlag: flag=%d", v);
+            usleep(100000); // sleep a while to clear the in-flight callbacks.
             cc->clearStat();
             c->setPreviewCallbackFlag(v);
             ASSERT(c->previewEnabled() == false);
@@ -781,6 +839,7 @@ public:
         ASSERT(c->recordingEnabled() == true);
         sleep(2);
         c->stopRecording();
+        usleep(100000); // sleep a while to clear the in-flight callbacks.
         cc->setReleaser(NULL);
         cc->assertData(CAMERA_MSG_VIDEO_FRAME, MCameraClient::GE, 10);
     }
@@ -806,9 +865,13 @@ public:
     }
 
     void run() {
-        checkOnePicture(480, 320);
-        checkOnePicture(352, 288);
-        checkOnePicture(176, 144);
+        CameraParameters param(c->getParameters());
+        int w, h;
+        const char *s = param.get(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES);
+        while (getNextSize(&s, &w, &h)) {
+            LOGD("checking preview size %dx%d", w, h);
+            checkOnePicture(w, h);
+        }
     }
 };
 
@@ -827,23 +890,30 @@ int main(int argc, char **argv)
     INFO("CameraServiceTest start");
     gExecutable = argv[0];
     runHolderService();
+    int n = getNumberOfCameras();
+    INFO("%d Cameras available", n);
 
-    testConnect();                              flushCommands();
-    testAllowConnectOnceOnly();                 flushCommands();
-    testReconnect();                            flushCommands();
-    testLockUnlock();                           flushCommands();
-    testReconnectFromAnotherProcess();          flushCommands();
+    for (int id = 0; id < n; id++) {
+        INFO("Testing camera %d", id);
+        testConnect(id);                              flushCommands();
+        testAllowConnectOnceOnly(id);                 flushCommands();
+        testReconnect(id);                            flushCommands();
+        testLockUnlock(id);                           flushCommands();
+        testReconnectFromAnotherProcess(id);          flushCommands();
 
-    RUN(TestSetPreviewDisplay);
-    RUN(TestStartPreview);
-    RUN(TestStartPreviewWithoutDisplay);
-    RUN(TestAutoFocus);
-    RUN(TestStopPreview);
-    RUN(TestTakePicture);
-    RUN(TestTakeMultiplePictures);
-    RUN(TestGetParameters);
-    RUN(TestPictureSize);
-    RUN(TestPreviewCallbackFlag);
-    RUN(TestRecording);
-    RUN(TestPreviewSize);
+        RUN(TestSetPreviewDisplay, id);
+        RUN(TestStartPreview, id);
+        RUN(TestStartPreviewWithoutDisplay, id);
+        RUN(TestAutoFocus, id);
+        RUN(TestStopPreview, id);
+        RUN(TestTakePicture, id);
+        RUN(TestTakeMultiplePictures, id);
+        RUN(TestGetParameters, id);
+        RUN(TestPictureSize, id);
+        RUN(TestPreviewCallbackFlag, id);
+        RUN(TestRecording, id);
+        RUN(TestPreviewSize, id);
+    }
+
+    INFO("CameraServiceTest finished");
 }

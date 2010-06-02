@@ -61,7 +61,7 @@ public final class CdmaCallTracker extends CallTracker {
     RegistrantList callWaitingRegistrants =  new RegistrantList();
 
 
-    // connections dropped durin last poll
+    // connections dropped during last poll
     ArrayList<CdmaConnection> droppedDuringPoll
         = new ArrayList<CdmaConnection>(MAX_CONNECTIONS);
 

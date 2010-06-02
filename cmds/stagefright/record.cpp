@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
 
-#if 1
+#if 0
     sp<MediaSource> source = createSource(argv[1]);
 
     if (source == NULL) {
@@ -165,14 +165,15 @@ int main(int argc, char **argv) {
     success = success && meta->findInt32(kKeyHeight, &height);
     CHECK(success);
 #else
-    int width = 800;
+    int width = 720;
     int height = 480;
     sp<MediaSource> decoder = new DummySource(width, height);
 #endif
 
     sp<MetaData> enc_meta = new MetaData;
     // enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
-    enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
+    // enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
+    enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
@@ -213,6 +214,8 @@ int main(int argc, char **argv) {
 
 #if 0
     CameraSource *source = CameraSource::Create();
+    source->start();
+
     printf("source = %p\n", source);
 
     for (int i = 0; i < 100; ++i) {
@@ -226,6 +229,8 @@ int main(int argc, char **argv) {
         buffer->release();
         buffer = NULL;
     }
+
+    source->stop();
 
     delete source;
     source = NULL;

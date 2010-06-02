@@ -1,6 +1,8 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+include frameworks/base/media/libstagefright/codecs/common/Config.mk
+
 LOCAL_SRC_FILES:=                 \
         ESDS.cpp                  \
         MediaBuffer.cpp           \
@@ -65,19 +67,26 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \
+        libstagefright_aacenc \
         libstagefright_amrnbdec \
         libstagefright_amrnbenc \
         libstagefright_amrwbdec \
+        libstagefright_amrwbenc \
         libstagefright_avcdec \
         libstagefright_m4vh263dec \
         libstagefright_mp3dec \
-        libstagefright_vorbisdec
+        libstagefright_vorbisdec \
+        libstagefright_matroska \
+        libstagefright_vpxdec \
+        libvpx \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
+        libstagefright_enc_common \
         libstagefright_avc_common
 
 ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
+
 
 LOCAL_STATIC_LIBRARIES += \
         libstagefright_id3

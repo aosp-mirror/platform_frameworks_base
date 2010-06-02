@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <sys/time.h>
+//#define LOG_NDEBUG 0
+#define LOG_TAG "CameraSource"
+#include <utils/Log.h>
 
 #include <OMX_Component.h>
 
-#include <binder/IServiceManager.h>
-#include <cutils/properties.h> // for property_get
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -27,45 +27,9 @@
 #include <media/stagefright/MetaData.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
-#include <ui/GraphicBuffer.h>
-#include <ui/Overlay.h>
-#include <surfaceflinger/ISurface.h>
 #include <utils/String8.h>
 
 namespace android {
-
-static int64_t getNowUs() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    return (int64_t)tv.tv_usec + tv.tv_sec * 1000000;
-}
-
-struct DummySurface : public BnSurface {
-    DummySurface() {}
-
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) {
-        return NULL;
-    }
-
-    virtual status_t registerBuffers(const BufferHeap &buffers) {
-        return OK;
-    }
-
-    virtual void postBuffer(ssize_t offset) {}
-    virtual void unregisterBuffers() {}
-
-    virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format, int32_t orientation) {
-        return NULL;
-    }
-
-protected:
-    virtual ~DummySurface() {}
-
-    DummySurface(const DummySurface &);
-    DummySurface &operator=(const DummySurface &);
-};
 
 struct CameraSourceListener : public CameraListener {
     CameraSourceListener(const sp<CameraSource> &source);
@@ -100,22 +64,20 @@ void CameraSourceListener::notify(int32_t msgType, int32_t ext1, int32_t ext2) {
 void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr) {
     LOGV("postData(%d, ptr:%p, size:%d)",
          msgType, dataPtr->pointer(), dataPtr->size());
-
-    sp<CameraSource> source = mSource.promote();
-    if (source.get() != NULL) {
-        source->dataCallback(msgType, dataPtr);
-    }
 }
 
 void CameraSourceListener::postDataTimestamp(
         nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr) {
-    LOGV("postDataTimestamp(%lld, %d, ptr:%p, size:%d)",
-         timestamp, msgType, dataPtr->pointer(), dataPtr->size());
+
+    sp<CameraSource> source = mSource.promote();
+    if (source.get() != NULL) {
+        source->dataCallbackTimestamp(timestamp/1000, msgType, dataPtr);
+    }
 }
 
 // static
 CameraSource *CameraSource::Create() {
-    sp<Camera> camera = Camera::connect();
+    sp<Camera> camera = Camera::connect(0);
 
     if (camera.get() == NULL) {
         return NULL;
@@ -125,9 +87,7 @@ CameraSource *CameraSource::Create() {
 }
 
 // static
-CameraSource *CameraSource::CreateFromICamera(const sp<ICamera> &icamera) {
-    sp<Camera> camera = Camera::create(icamera);
-
+CameraSource *CameraSource::CreateFromCamera(const sp<Camera> &camera) {
     if (camera.get() == NULL) {
         return NULL;
     }
@@ -140,15 +100,11 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mWidth(0),
       mHeight(0),
       mFirstFrameTimeUs(0),
-      mNumFrames(0),
+      mLastFrameTimestampUs(0),
+      mNumFramesReceived(0),
+      mNumFramesEncoded(0),
+      mNumFramesDropped(0),
       mStarted(false) {
-    char value[PROPERTY_VALUE_MAX];
-    if (property_get("ro.hardware", value, NULL) && !strcmp(value, "sholes")) {
-        // The hardware encoder(s) do not support yuv420, but only YCbYCr,
-        // fortunately the camera also supports this, so we needn't transcode.
-        mCamera->setParameters(String8("preview-format=yuv422i-yuyv"));
-    }
-
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
 
@@ -162,40 +118,48 @@ CameraSource::~CameraSource() {
     }
 }
 
-void CameraSource::setPreviewSurface(const sp<ISurface> &surface) {
-    mPreviewSurface = surface;
-}
-
 status_t CameraSource::start(MetaData *) {
+    LOGV("start");
     CHECK(!mStarted);
 
     mCamera->setListener(new CameraSourceListener(this));
-
-    status_t err =
-        mCamera->setPreviewDisplay(
-                mPreviewSurface != NULL ? mPreviewSurface : new DummySurface);
-    CHECK_EQ(err, OK);
-
-    mCamera->setPreviewCallbackFlags(
-            FRAME_CALLBACK_FLAG_ENABLE_MASK
-            | FRAME_CALLBACK_FLAG_COPY_OUT_MASK);
-
-    err = mCamera->startPreview();
-    CHECK_EQ(err, OK);
+    CHECK_EQ(OK, mCamera->startRecording());
 
     mStarted = true;
-
     return OK;
 }
 
 status_t CameraSource::stop() {
-    CHECK(mStarted);
-
-    mCamera->stopPreview();
-
+    LOGV("stop");
+    Mutex::Autolock autoLock(mLock);
     mStarted = false;
+    mFrameAvailableCondition.signal();
+    mCamera->setListener(NULL);
+    mCamera->stopRecording();
 
+    releaseQueuedFrames();
+
+    while (!mFramesBeingEncoded.empty()) {
+        LOGI("Number of outstanding frames is being encoded: %d", mFramesBeingEncoded.size());
+        mFrameCompleteCondition.wait(mLock);
+    }
+
+    LOGI("Frames received/encoded/dropped: %d/%d/%d, timestamp (us) last/first: %lld/%lld",
+            mNumFramesReceived, mNumFramesEncoded, mNumFramesDropped,
+            mLastFrameTimestampUs, mFirstFrameTimeUs);
+
+    CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
     return OK;
+}
+
+void CameraSource::releaseQueuedFrames() {
+    List<sp<IMemory> >::iterator it;
+    while (!mFramesReceived.empty()) {
+        it = mFramesReceived.begin();
+        mCamera->releaseRecordingFrame(*it);
+        mFramesReceived.erase(it);
+        ++mNumFramesDropped;
+    }
 }
 
 sp<MetaData> CameraSource::getFormat() {
@@ -208,9 +172,26 @@ sp<MetaData> CameraSource::getFormat() {
     return meta;
 }
 
+void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
+    LOGV("signalBufferReturned: %p", buffer->data());
+    for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
+         it != mFramesBeingEncoded.end(); ++it) {
+        if ((*it)->pointer() ==  buffer->data()) {
+            mCamera->releaseRecordingFrame((*it));
+            mFramesBeingEncoded.erase(it);
+            ++mNumFramesEncoded;
+            buffer->setObserver(0);
+            buffer->release();
+            mFrameCompleteCondition.signal();
+            return;
+        }
+    }
+    CHECK_EQ(0, "signalBufferReturned: bogus buffer");
+}
+
 status_t CameraSource::read(
         MediaBuffer **buffer, const ReadOptions *options) {
-    CHECK(mStarted);
+    LOGV("read");
 
     *buffer = NULL;
 
@@ -224,38 +205,46 @@ status_t CameraSource::read(
 
     {
         Mutex::Autolock autoLock(mLock);
-        while (mFrames.empty()) {
+        while (mStarted && mFramesReceived.empty()) {
             mFrameAvailableCondition.wait(mLock);
         }
-
-        frame = *mFrames.begin();
-        mFrames.erase(mFrames.begin());
+        if (!mStarted) {
+            return OK;
+        }
+        frame = *mFramesReceived.begin();
+        mFramesReceived.erase(mFramesReceived.begin());
 
         frameTime = *mFrameTimes.begin();
         mFrameTimes.erase(mFrameTimes.begin());
+
+        mFramesBeingEncoded.push_back(frame);
+        *buffer = new MediaBuffer(frame->pointer(), frame->size());
+        (*buffer)->setObserver(this);
+        (*buffer)->add_ref();
+        (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
     }
-
-    *buffer = new MediaBuffer(frame->size());
-    memcpy((*buffer)->data(), frame->pointer(), frame->size());
-    (*buffer)->set_range(0, frame->size());
-
-    (*buffer)->meta_data()->clear();
-    (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
-
     return OK;
 }
 
-void CameraSource::dataCallback(int32_t msgType, const sp<IMemory> &data) {
+void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
+        int32_t msgType, const sp<IMemory> &data) {
+    LOGV("dataCallbackTimestamp: timestamp %lld us", timestampUs);
+    mLastFrameTimestampUs = timestampUs;
     Mutex::Autolock autoLock(mLock);
-
-    int64_t nowUs = getNowUs();
-    if (mNumFrames == 0) {
-        mFirstFrameTimeUs = nowUs;
+    if (!mStarted) {
+        mCamera->releaseRecordingFrame(data);
+        ++mNumFramesReceived;
+        ++mNumFramesDropped;
+        return;
     }
-    ++mNumFrames;
 
-    mFrames.push_back(data);
-    mFrameTimes.push_back(nowUs - mFirstFrameTimeUs);
+    if (mNumFramesReceived == 0) {
+        mFirstFrameTimeUs = timestampUs;
+    }
+    ++mNumFramesReceived;
+
+    mFramesReceived.push_back(data);
+    mFrameTimes.push_back(timestampUs - mFirstFrameTimeUs);
     mFrameAvailableCondition.signal();
 }
 

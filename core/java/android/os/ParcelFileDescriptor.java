@@ -179,7 +179,7 @@ public class ParcelFileDescriptor implements Parcelable {
     /**
      * An InputStream you can create on a ParcelFileDescriptor, which will
      * take care of calling {@link ParcelFileDescriptor#close
-     * ParcelFileDescritor.close()} for you when the stream is closed.
+     * ParcelFileDescriptor.close()} for you when the stream is closed.
      */
     public static class AutoCloseInputStream extends FileInputStream {
         private final ParcelFileDescriptor mFd;
@@ -198,7 +198,7 @@ public class ParcelFileDescriptor implements Parcelable {
     /**
      * An OutputStream you can create on a ParcelFileDescriptor, which will
      * take care of calling {@link ParcelFileDescriptor#close
-     * ParcelFileDescritor.close()} for you when the stream is closed.
+     * ParcelFileDescriptor.close()} for you when the stream is closed.
      */
     public static class AutoCloseOutputStream extends FileOutputStream {
         private final ParcelFileDescriptor mFd;

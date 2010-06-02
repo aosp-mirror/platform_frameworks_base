@@ -33,11 +33,6 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerBlur::typeInfo = LayerBaseClient::typeInfo | 8;
-const char* const LayerBlur::typeID = "LayerBlur";
-
-// ---------------------------------------------------------------------------
-
 LayerBlur::LayerBlur(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
@@ -100,7 +95,9 @@ void LayerBlur::unlockPageFlip(const Transform& planeTransform, Region& outDirty
                     mCacheDirty = false;
                 } else {
                     if (!mAutoRefreshPending) {
-                        mFlinger->signalDelayedEvent(ms2ns(500));
+                        mFlinger->postMessageAsync(
+                                new MessageBase(MessageQueue::INVALIDATE),
+                                ms2ns(500));
                         mAutoRefreshPending = true;
                     }
                 }
@@ -206,8 +203,8 @@ void LayerBlur::onDraw(const Region& clip) const
 
         const State& s = drawingState();
         if (UNLIKELY(s.alpha < 0xFF)) {
-            const GGLfixed alpha = (s.alpha << 16)/255;
-            glColor4x(0, 0, 0, alpha);
+            const GLfloat alpha = s.alpha * (1.0f/255.0f);
+            glColor4f(0, 0, 0, alpha);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -225,38 +222,20 @@ void LayerBlur::onDraw(const Region& clip) const
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        if (UNLIKELY(transformed()
-                || !(mFlags & DisplayHardware::DRAW_TEXTURE_EXTENSION) )) {
-            // This is a very rare scenario.
-            glMatrixMode(GL_TEXTURE);
-            glLoadIdentity();
-            glScalef(mWidthScale, mHeightScale, 1);
-            glTranslatef(-x, mYOffset - y, 0);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            glVertexPointer(2, GL_FIXED, 0, mVertices);
-            glTexCoordPointer(2, GL_FIXED, 0, mVertices);
-            while (it != end) {
-                const Rect& r = *it++;
-                const GLint sy = fbHeight - (r.top + r.height());
-                glScissor(r.left, sy, r.width(), r.height());
-                glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
-            }       
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        } else {
-            // NOTE: this is marginally faster with the software gl, because
-            // glReadPixels() reads the fb bottom-to-top, however we'll
-            // skip all the jaccobian computations.
-            Rect r;
-            GLint crop[4] = { 0, 0, w, h };
-            glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-            y = fbHeight - (y + h);
-            while (it != end) {
-                const Rect& r = *it++;
-                const GLint sy = fbHeight - (r.top + r.height());
-                glScissor(r.left, sy, r.width(), r.height());
-                glDrawTexiOES(x, y, 0, w, h);
-            }
+        glMatrixMode(GL_TEXTURE);
+        glLoadIdentity();
+        glScalef(mWidthScale, mHeightScale, 1);
+        glTranslatef(-x, mYOffset - y, 0);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, mVertices);
+        glTexCoordPointer(2, GL_FLOAT, 0, mVertices);
+        while (it != end) {
+            const Rect& r = *it++;
+            const GLint sy = fbHeight - (r.top + r.height());
+            glScissor(r.left, sy, r.width(), r.height());
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         }
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 }
 

@@ -4178,6 +4178,9 @@ void ResTable::print(bool inclValues) const
                             case ResTable_config::SCREENSIZE_LARGE:
                                 printf(" (large)");
                                 break;
+                            case ResTable_config::SCREENSIZE_XLARGE:
+                                printf(" (xlarge)");
+                                break;
                         }
                         printf(" lng=%d",
                                 type->config.screenLayout&ResTable_config::MASK_SCREENLONG);

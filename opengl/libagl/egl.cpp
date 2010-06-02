@@ -1525,8 +1525,13 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
     }
 
     if (ggl_unlikely(attrib_list==0)) {
-        *num_config = 0;
-        return EGL_TRUE;
+        /*
+         * A NULL attrib_list should be treated as though it was an empty
+         * one (terminated with EGL_NONE) as defined in
+         * section 3.4.1 "Querying Configurations" in the EGL specification.
+         */
+        static const EGLint dummy = EGL_NONE;
+        attrib_list = &dummy;
     }
 
     int numAttributes = 0;

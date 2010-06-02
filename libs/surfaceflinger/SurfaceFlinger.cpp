@@ -206,8 +206,8 @@ void SurfaceFlinger::init()
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
 
-    LOGI_IF(mDebugRegion,           "showupdates enabled");
-    LOGI_IF(mDebugBackground,       "showbackground enabled");
+    LOGI_IF(mDebugRegion,       "showupdates enabled");
+    LOGI_IF(mDebugBackground,   "showbackground enabled");
 }
 
 SurfaceFlinger::~SurfaceFlinger()
@@ -225,7 +225,7 @@ sp<IMemoryHeap> SurfaceFlinger::getCblk() const
     return mServerHeap;
 }
 
-sp<ISurfaceFlingerClient> SurfaceFlinger::createConnection()
+sp<ISurfaceComposerClient> SurfaceFlinger::createConnection()
 {
     Mutex::Autolock _l(mStateLock);
     uint32_t token = mTokens.acquire();
@@ -357,7 +357,6 @@ status_t SurfaceFlinger::readyToRun()
     dcblk->ydpi         = hw.getDpiY();
     dcblk->fps          = hw.getRefreshRate();
     dcblk->density      = hw.getDensity();
-    asm volatile ("":::"memory");
 
     // Initialize OpenGL|ES
     glActiveTexture(GL_TEXTURE0);
@@ -427,7 +426,7 @@ void SurfaceFlinger::waitForEvent()
             timeout = waitTime>0 ? waitTime : 0;
         }
 
-        MessageList::value_type msg = mEventQueue.waitMessage(timeout);
+        sp<MessageBase> msg = mEventQueue.waitMessage(timeout);
 
         // see if we timed out
         if (isFrozen()) {
@@ -462,9 +461,20 @@ void SurfaceFlinger::signal() const {
     const_cast<SurfaceFlinger*>(this)->signalEvent();
 }
 
-void SurfaceFlinger::signalDelayedEvent(nsecs_t delay)
+status_t SurfaceFlinger::postMessageAsync(const sp<MessageBase>& msg,
+        nsecs_t reltime, uint32_t flags)
 {
-    mEventQueue.postMessage( new MessageBase(MessageQueue::INVALIDATE), delay);
+    return mEventQueue.postMessage(msg, reltime, flags);
+}
+
+status_t SurfaceFlinger::postMessageSync(const sp<MessageBase>& msg,
+        nsecs_t reltime, uint32_t flags)
+{
+    status_t res = mEventQueue.postMessage(msg, reltime, flags);
+    if (res == NO_ERROR) {
+        msg->wait();
+    }
+    return res;
 }
 
 // ----------------------------------------------------------------------------
@@ -1079,15 +1089,15 @@ status_t SurfaceFlinger::invalidateLayerVisibility(const sp<LayerBase>& layer)
 
 status_t SurfaceFlinger::addLayer_l(const sp<LayerBase>& layer)
 {
-    if (layer == 0)
-        return BAD_VALUE;
     ssize_t i = mCurrentState.layersSortedByZ.add(
                 layer, &LayerBase::compareCurrentStateZ);
-    sp<LayerBaseClient> lbc = LayerBase::dynamicCast< LayerBaseClient* >(layer.get());
-    if (lbc != 0) {
-        mLayerMap.add(lbc->serverIndex(), lbc);
-    }
-    return NO_ERROR;
+    return (i < 0) ? status_t(i) : status_t(NO_ERROR);
+}
+
+status_t SurfaceFlinger::addClientLayer_l(const sp<LayerBaseClient>& lbc)
+{
+    ssize_t serverIndex = lbc->serverIndex();
+    return mLayerMap.add(serverIndex, lbc);
 }
 
 status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
@@ -1095,10 +1105,9 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
     ssize_t index = mCurrentState.layersSortedByZ.remove(layerBase);
     if (index >= 0) {
         mLayersRemoved = true;
-        sp<LayerBaseClient> layer =
-            LayerBase::dynamicCast< LayerBaseClient* >(layerBase.get());
-        if (layer != 0) {
-            mLayerMap.removeItem(layer->serverIndex());
+        ssize_t serverIndex = layerBase->serverIndex();
+        if (serverIndex >= 0) {
+            mLayerMap.removeItem(serverIndex);
         }
         return NO_ERROR;
     }
@@ -1137,15 +1146,11 @@ uint32_t SurfaceFlinger::getTransactionFlags(uint32_t flags)
     return android_atomic_and(~flags, &mTransactionFlags) & flags;
 }
 
-uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags, nsecs_t delay)
+uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
 {
     uint32_t old = android_atomic_or(flags, &mTransactionFlags);
     if ((old & flags)==0) { // wake the server up
-        if (delay > 0) {
-            signalDelayedEvent(delay);
-        } else {
-            signalEvent();
-        }
+        signalEvent();
     }
     return old;
 }
@@ -1225,7 +1230,7 @@ int SurfaceFlinger::setOrientation(DisplayID dpy,
 }
 
 sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
-        const String8& name, ISurfaceFlingerClient::surface_data_t* params,
+        const String8& name, ISurfaceComposerClient::surface_data_t* params,
         DisplayID d, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
@@ -1247,7 +1252,7 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
 
     //LOGD("createSurface for pid %d (%d x %d)", pid, w, h);
     int32_t id = client->generateId(pid);
-    if (uint32_t(id) >= NUM_LAYERS_MAX) {
+    if (uint32_t(id) >= SharedBufferStack::NUM_LAYERS_MAX) {
         LOGE("createSurface() failed, generateId = %d", id);
         return surfaceHandle;
     }
@@ -1298,7 +1303,7 @@ sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
         format = PIXEL_FORMAT_RGBA_8888;
         break;
     case PIXEL_FORMAT_OPAQUE:
-        format = PIXEL_FORMAT_RGB_565;
+        format = PIXEL_FORMAT_RGBX_8888;
         break;
     }
 
@@ -1307,6 +1312,7 @@ sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
     if (LIKELY(err == NO_ERROR)) {
         layer->initStates(w, h, flags);
         addLayer_l(layer);
+        addClientLayer_l(layer);
     } else {
         LOGE("createNormalSurfaceLocked() failed (%s)", strerror(-err));
         layer.clear();
@@ -1321,6 +1327,7 @@ sp<LayerBaseClient> SurfaceFlinger::createBlurSurfaceLocked(
     sp<LayerBlur> layer = new LayerBlur(this, display, client, id);
     layer->initStates(w, h, flags);
     addLayer_l(layer);
+    addClientLayer_l(layer);
     return layer;
 }
 
@@ -1331,6 +1338,7 @@ sp<LayerBaseClient> SurfaceFlinger::createDimSurfaceLocked(
     sp<LayerDim> layer = new LayerDim(this, display, client, id);
     layer->initStates(w, h, flags);
     addLayer_l(layer);
+    addClientLayer_l(layer);
     return layer;
 }
 
@@ -1341,6 +1349,7 @@ sp<LayerBaseClient> SurfaceFlinger::createPushBuffersSurfaceLocked(
     sp<LayerBuffer> layer = new LayerBuffer(this, display, client, id);
     layer->initStates(w, h, flags);
     addLayer_l(layer);
+    addClientLayer_l(layer);
     return layer;
 }
 
@@ -1397,7 +1406,7 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
         }
     };
 
-    mEventQueue.postMessage( new MessageDestroySurface(this, layer) );
+    postMessageAsync( new MessageDestroySurface(this, layer) );
     return NO_ERROR;
 }
 
@@ -1512,83 +1521,17 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
-        size_t s = mClientsMap.size();
-        char name[64];
-        for (size_t i=0 ; i<s ; i++) {
-            sp<Client> client = mClientsMap.valueAt(i);
-            sprintf(name, "  Client (id=0x%08x)", client->cid);
-            client->dump(name);
-        }
         const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
         const size_t count = currentLayers.size();
         for (size_t i=0 ; i<count ; i++) {
-            /*** LayerBase ***/
-            const sp<LayerBase>& layer = currentLayers[i];
-            const Layer::State& s = layer->drawingState();
-            snprintf(buffer, SIZE,
-                    "+ %s %p\n"
-                    "      "
-                    "z=%9d, pos=(%4d,%4d), size=(%4d,%4d), "
-                    "needsBlending=%1d, needsDithering=%1d, invalidate=%1d, "
-                    "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
-                    layer->getTypeID(), layer.get(),
-                    s.z, layer->tx(), layer->ty(), s.w, s.h,
-                    layer->needsBlending(), layer->needsDithering(),
-                    layer->contentDirty,
-                    s.alpha, s.flags,
-                    s.transform[0][0], s.transform[0][1],
-                    s.transform[1][0], s.transform[1][1]);
-            result.append(buffer);
-            buffer[0] = 0;
-            /*** LayerBaseClient ***/
-            sp<LayerBaseClient> lbc =
-                LayerBase::dynamicCast< LayerBaseClient* >(layer.get());
-            if (lbc != 0) {
-                sp<Client> client(lbc->client.promote());
-                snprintf(buffer, SIZE,
-                        "      name=%s\n", lbc->getName().string());
-                result.append(buffer);
-                snprintf(buffer, SIZE,
-                        "      id=0x%08x, client=0x%08x, identity=%u\n",
-                        lbc->clientIndex(), client.get() ? client->cid : 0,
-                        lbc->getIdentity());
-
-                result.append(buffer);
-                buffer[0] = 0;
-            }
-            /*** Layer ***/
-            sp<Layer> l = LayerBase::dynamicCast< Layer* >(layer.get());
-            if (l != 0) {
-                SharedBufferStack::Statistics stats = l->lcblk->getStats();
-                result.append( l->lcblk->dump("      ") );
-                sp<const GraphicBuffer> buf0(l->getBuffer(0));
-                sp<const GraphicBuffer> buf1(l->getBuffer(1));
-                uint32_t w0=0, h0=0, s0=0;
-                uint32_t w1=0, h1=0, s1=0;
-                if (buf0 != 0) {
-                    w0 = buf0->getWidth();
-                    h0 = buf0->getHeight();
-                    s0 = buf0->getStride();
-                }
-                if (buf1 != 0) {
-                    w1 = buf1->getWidth();
-                    h1 = buf1->getHeight();
-                    s1 = buf1->getStride();
-                }
-                snprintf(buffer, SIZE,
-                        "      "
-                        "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
-                        " freezeLock=%p, dq-q-time=%u us\n",
-                        l->pixelFormat(),
-                        w0, h0, s0, w1, h1, s1,
-                        l->getFreezeLock().get(), stats.totalTime);
-                result.append(buffer);
-                buffer[0] = 0;
-            }
+            const sp<LayerBase>& layer(currentLayers[i]);
+            layer->dump(result, buffer, SIZE);
+            const Layer::State& s(layer->drawingState());
             s.transparentRegion.dump(result, "transparentRegion");
             layer->transparentRegionScreen.dump(result, "transparentRegionScreen");
             layer->visibleRegionScreen.dump(result, "visibleRegionScreen");
         }
+
         mWormholeRegion.dump(result, "WormholeRegion");
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         snprintf(buffer, SIZE,
@@ -1601,16 +1544,19 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 "  last transaction time     : %f us\n",
                 mLastSwapBufferTime/1000.0, mLastTransactionTime/1000.0);
         result.append(buffer);
+
         if (inSwapBuffersDuration || !locked) {
             snprintf(buffer, SIZE, "  eglSwapBuffers time: %f us\n",
                     inSwapBuffersDuration/1000.0);
             result.append(buffer);
         }
+
         if (inTransactionDuration || !locked) {
             snprintf(buffer, SIZE, "  transaction time: %f us\n",
                     inTransactionDuration/1000.0);
             result.append(buffer);
         }
+
         snprintf(buffer, SIZE, "  client count: %d\n", mClientsMap.size());
         result.append(buffer);
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
@@ -1733,7 +1679,7 @@ Client::~Client() {
 int32_t Client::generateId(int pid)
 {
     const uint32_t i = clz( ~mBitmap );
-    if (i >= NUM_LAYERS_MAX) {
+    if (i >= SharedBufferStack::NUM_LAYERS_MAX) {
         return NO_MEMORY;
     }
     mPid = pid;
@@ -1760,7 +1706,8 @@ void Client::free(int32_t id)
 }
 
 bool Client::isValid(int32_t i) const {
-    return (uint32_t(i)<NUM_LAYERS_MAX) && (mBitmap & (1<<(31-i)));
+    return (uint32_t(i)<SharedBufferStack::NUM_LAYERS_MAX) &&
+            (mBitmap & (1<<(31-i)));
 }
 
 sp<LayerBaseClient> Client::getLayerUser(int32_t i) const {
@@ -1771,10 +1718,6 @@ sp<LayerBaseClient> Client::getLayerUser(int32_t i) const {
         LOGE_IF(lbc==0, "getLayerUser(i=%d), idx=%d is dead", int(i), int(idx));
     }
     return lbc;
-}
-
-void Client::dump(const char* what)
-{
 }
 
 // ---------------------------------------------------------------------------
@@ -1797,7 +1740,7 @@ sp<IMemoryHeap> BClient::getControlBlock() const {
 }
 
 sp<ISurface> BClient::createSurface(
-        ISurfaceFlingerClient::surface_data_t* params, int pid,
+        ISurfaceComposerClient::surface_data_t* params, int pid,
         const String8& name,
         DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)

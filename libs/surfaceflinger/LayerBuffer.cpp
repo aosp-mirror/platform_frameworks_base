@@ -39,8 +39,6 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerBuffer::typeInfo = LayerBaseClient::typeInfo | 0x20;
-const char* const LayerBuffer::typeID = "LayerBuffer";
 gralloc_module_t const* LayerBuffer::sGrallocModule = 0;
 
 // ---------------------------------------------------------------------------
@@ -120,7 +118,7 @@ uint32_t LayerBuffer::doTransaction(uint32_t flags)
         source->onTransaction(flags);
     uint32_t res = LayerBase::doTransaction(flags);
     // we always want filtering for these surfaces
-    mUseLinearFiltering = !(mFlags & DisplayHardware::SLOW_CONFIG);
+    mNeedsFiltering = !(mFlags & DisplayHardware::SLOW_CONFIG);
     return res;
 }
 
@@ -143,14 +141,6 @@ void LayerBuffer::onDraw(const Region& clip) const
     } else {
         clearWithOpenGL(clip);
     }
-}
-
-bool LayerBuffer::transformed() const
-{
-    sp<Source> source(getSource());
-    if (LIKELY(source != 0))
-        return source->transformed();
-    return false;
 }
 
 void LayerBuffer::serverDestroy()
@@ -321,16 +311,13 @@ void LayerBuffer::Source::postBuffer(ssize_t offset) {
 }
 void LayerBuffer::Source::unregisterBuffers() {
 }
-bool LayerBuffer::Source::transformed() const {
-    return mLayer.mTransformed; 
-}
 
 // ---------------------------------------------------------------------------
 
 LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         const ISurface::BufferHeap& buffers)
     : Source(layer), mStatus(NO_ERROR), mBufferSize(0),
-      mUseEGLImageDirectly(true)
+      mTextureManager(layer.mFlags)
 {
     if (buffers.heap == NULL) {
         // this is allowed, but in this case, it is illegal to receive
@@ -444,11 +431,6 @@ void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
     mBuffer = buffer;
 }
 
-bool LayerBuffer::BufferSource::transformed() const
-{
-    return mBufferHeap.transform ? true : Source::transformed(); 
-}
-
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
 {
     sp<Buffer> ourBuffer(getBuffer());
@@ -462,35 +444,10 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     NativeBuffer src(ourBuffer->getBuffer());
     const Rect transformedBounds(mLayer.getTransformedBounds());
 
-    if (UNLIKELY(mTexture.name == -1LU)) {
-        mTexture.name = mLayer.createTexture();
-    }
-
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         err = INVALID_OPERATION;
         if (ourBuffer->supportsCopybit()) {
-
-            // there are constraints on buffers used by the GPU and these may not
-            // be honored here. We need to change the API so the buffers
-            // are allocated with gralloc. For now disable this code-path
-#if 0
-            // First, try to use the buffer as an EGLImage directly
-            if (mUseEGLImageDirectly) {
-                // NOTE: Assume the buffer is allocated with the proper USAGE flags
-
-                sp<GraphicBuffer> buffer = new  GraphicBuffer(
-                        src.img.w, src.img.h, src.img.format,
-                        GraphicBuffer::USAGE_HW_TEXTURE,
-                        src.img.w, src.img.handle, false);
-
-                err = mLayer.initializeEglImage(buffer, &mTexture);
-                if (err != NO_ERROR) {
-                    mUseEGLImageDirectly = false;
-                }
-            }
-#endif
-
             copybit_device_t* copybit = mLayer.mBlitEngine;
             if (copybit && err != NO_ERROR) {
                 // create our EGLImageKHR the first time
@@ -527,7 +484,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.format = src.img.format;
         t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
-        mLayer.loadTexture(&mTexture, dirty, t);
+        mTextureManager.loadTexture(&mTexture, dirty, t);
     }
 
     mTexture.transform = mBufferHeap.transform;
@@ -569,7 +526,7 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
     // figure out if we need linear filtering
     if (buffers.w * h == buffers.h * w) {
         // same pixel area, don't use filtering
-        mLayer.mUseLinearFiltering = false;
+        mLayer.mNeedsFiltering = false;
     }
 
     // Allocate a temporary buffer and create the corresponding EGLImageKHR
@@ -593,7 +550,8 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
         dst.crop.r = w;
         dst.crop.b = h;
 
-        err = mLayer.initializeEglImage(buffer, &mTexture);
+        EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
+        err = mTextureManager.initEglImage(&mTexture, dpy, buffer);
     }
 
     return err;
@@ -609,7 +567,6 @@ void LayerBuffer::BufferSource::clearTempBufferImage() const
     glDeleteTextures(1, &mTexture.name);
     Texture defaultTexture;
     mTexture = defaultTexture;
-    mTexture.name = mLayer.createTexture();
 }
 
 // ---------------------------------------------------------------------------
@@ -665,9 +622,9 @@ LayerBuffer::OverlaySource::~OverlaySource()
 void LayerBuffer::OverlaySource::onDraw(const Region& clip) const
 {
     // this would be where the color-key would be set, should we need it.
-    GLclampx red = 0;
-    GLclampx green = 0;
-    GLclampx blue = 0;
+    GLclampf red = 0;
+    GLclampf green = 0;
+    GLclampf blue = 0;
     mLayer.clearWithOpenGL(clip, red, green, blue, 0);
 }
 

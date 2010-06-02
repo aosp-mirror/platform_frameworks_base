@@ -198,10 +198,11 @@ static const int  SHIFT2 = 16;
 static const int  DELTA  = kYb*(1 << SHIFT2);
 static const int  GAMMA  = kYr*(1 << SHIFT2);
 
-int32_t ccrgb16toyuv_wo_colorkey(uint8_t *rgb16,uint8_t *yuv422,uint32_t *param,uint8_t *table[])
+int32_t ccrgb16toyuv_wo_colorkey(uint8_t *rgb16, uint8_t *yuv420,
+        uint32_t *param, uint8_t *table[])
 {
     uint16_t *inputRGB = (uint16_t*)rgb16;
-    uint8_t *outYUV =  yuv422;
+    uint8_t *outYUV = yuv420;
     int32_t width_dst = param[0];
     int32_t height_dst = param[1];
     int32_t pitch_dst = param[2];
@@ -260,12 +261,14 @@ uint32_t temp;
 
             tempY[0] = y0;
             tempY[1] = y1;
-            tempU[0] = u;
-            tempV[0] = v;
-
             tempY += 2;
-            tempU += 2;
-            tempV += 2;
+
+            if ((j&1) == 0) {
+                tempU[0] = u;
+                tempV[0] = v;
+                tempU += 2;
+                tempV += 2;
+            }
         }
 
         inputRGB += pitch_src;
@@ -277,7 +280,7 @@ uint32_t temp;
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-static void convert_rgb16_to_yuv422(uint8_t *rgb, uint8_t *yuv, int width, int height)
+static void convert_rgb16_to_yuv420(uint8_t *rgb, uint8_t *yuv, int width, int height)
 {
     if (!tables_initialized) {
         initYtab();
@@ -326,7 +329,7 @@ void FakeCamera::setSize(int width, int height)
     mCheckY = 0;
 
     // This will cause it to be reallocated on the next call
-    // to getNextFrameAsYuv422().
+    // to getNextFrameAsYuv420().
     delete[] mTmpRgb16Buffer;
     mTmpRgb16Buffer = 0;
 }
@@ -347,13 +350,13 @@ void FakeCamera::getNextFrameAsRgb565(uint16_t *buffer)
     mCounter++;
 }
 
-void FakeCamera::getNextFrameAsYuv422(uint8_t *buffer)
+void FakeCamera::getNextFrameAsYuv420(uint8_t *buffer)
 {
     if (mTmpRgb16Buffer == 0)
         mTmpRgb16Buffer = new uint16_t[mWidth * mHeight];
 
     getNextFrameAsRgb565(mTmpRgb16Buffer);
-    convert_rgb16_to_yuv422((uint8_t*)mTmpRgb16Buffer, buffer, mWidth, mHeight);
+    convert_rgb16_to_yuv420((uint8_t*)mTmpRgb16Buffer, buffer, mWidth, mHeight);
 }
 
 void FakeCamera::drawSquare(uint16_t *dst, int x, int y, int size, int color, int shadow)

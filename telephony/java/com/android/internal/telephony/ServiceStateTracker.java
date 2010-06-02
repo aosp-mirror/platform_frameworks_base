@@ -44,6 +44,7 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int DATA_ACCESS_HSDPA = 9;
     protected static final int DATA_ACCESS_HSUPA = 10;
     protected static final int DATA_ACCESS_HSPA = 11;
+    protected static final int DATA_ACCESS_CDMA_EvDo_B = 12;
 
     protected CommandsInterface cm;
 
@@ -206,8 +207,8 @@ public abstract class ServiceStateTracker extends Handler {
     }
 
     /**
-     * Reregister network through toggle perferred network type
-     * This is a work aorund to deregister and register network since there is
+     * Re-register network by toggling preferred network type.
+     * This is a work-around to deregister and register network since there is
      * no ril api to set COPS=2 (deregister) only.
      *
      * @param onComplete is dispatched when this is complete.  it will be
@@ -229,7 +230,7 @@ public abstract class ServiceStateTracker extends Handler {
     /**
      * These two flags manage the behavior of the cell lock -- the
      * lock should be held if either flag is true.  The intention is
-     * to allow temporary aquisition of the lock to get a single
+     * to allow temporary acquisition of the lock to get a single
      * update.  Such a lock grab and release can thus be made to not
      * interfere with more permanent lock holds -- in other words, the
      * lock will only be released if both flags are false, and so

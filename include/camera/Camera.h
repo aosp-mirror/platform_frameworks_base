@@ -113,7 +113,8 @@ class Camera : public BnCameraClient, public IBinder::DeathRecipient
 public:
             // construct a camera client from an existing remote
     static  sp<Camera>  create(const sp<ICamera>& camera);
-    static  sp<Camera>  connect();
+    static  int32_t     getNumberOfCameras();
+    static  sp<Camera>  connect(int cameraId);
                         ~Camera();
             void        init();
 

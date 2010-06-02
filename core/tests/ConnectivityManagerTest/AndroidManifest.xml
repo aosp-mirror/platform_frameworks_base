@@ -24,17 +24,19 @@
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:name="ConnectivityManagerTestActivity"
-          android:label="CMTest">
+          android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.TEST" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
     <!--
     This declares that this app uses the instrumentation test runner targeting
-    the package of browserpowertest. To run the tests use the command:
-    "adb shell am instrument -w com.android.connectivitymanagertest/.ConnectivityManagerTestRunner"
+    the package of connectivitymanagertest. To run the tests use the command:
+    "adb shell am instrument -e ssid <SSID> -w
+      com.android.connectivitymanagertest/.ConnectivityManagerTestRunner",
+      the access point <SSID> should be an open AP.
     -->
     <instrumentation android:name=".ConnectivityManagerTestRunner"
         android:targetPackage="com.android.connectivitymanagertest"

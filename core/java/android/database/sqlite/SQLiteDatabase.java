@@ -1134,7 +1134,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param sql The raw SQL statement, may contain ? for unknown values to be
      *            bound later.
-     * @return a pre-compiled statement object.
+     * @return A pre-compiled {@link SQLiteStatement} object. Note that
+     * {@link SQLiteStatement}s are not synchronized, see the documentation for more details.
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
         lock();
@@ -1175,7 +1176,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            default sort order, which may be unordered.
      * @param limit Limits the number of rows returned by the query,
      *            formatted as LIMIT clause. Passing null denotes no LIMIT clause.
-     * @return A Cursor object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
     public Cursor query(boolean distinct, String table, String[] columns,
@@ -1213,7 +1215,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            default sort order, which may be unordered.
      * @param limit Limits the number of rows returned by the query,
      *            formatted as LIMIT clause. Passing null denotes no LIMIT clause.
-     * @return A Cursor object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
     public Cursor queryWithFactory(CursorFactory cursorFactory,
@@ -1254,7 +1257,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param orderBy How to order the rows, formatted as an SQL ORDER BY clause
      *            (excluding the ORDER BY itself). Passing null will use the
      *            default sort order, which may be unordered.
-     * @return A {@link Cursor} object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
     public Cursor query(String table, String[] columns, String selection,
@@ -1291,7 +1295,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            default sort order, which may be unordered.
      * @param limit Limits the number of rows returned by the query,
      *            formatted as LIMIT clause. Passing null denotes no LIMIT clause.
-     * @return A {@link Cursor} object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
     public Cursor query(String table, String[] columns, String selection,
@@ -1309,7 +1314,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param selectionArgs You may include ?s in where clause in the query,
      *     which will be replaced by the values from selectionArgs. The
      *     values will be bound as Strings.
-     * @return A {@link Cursor} object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
     public Cursor rawQuery(String sql, String[] selectionArgs) {
         return rawQueryWithFactory(null, sql, selectionArgs, null);
@@ -1324,7 +1330,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *     which will be replaced by the values from selectionArgs. The
      *     values will be bound as Strings.
      * @param editTable the name of the first table, which is editable
-     * @return A {@link Cursor} object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
     public Cursor rawQueryWithFactory(
             CursorFactory cursorFactory, String sql, String[] selectionArgs,
@@ -1379,7 +1386,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *     values will be bound as Strings.
      * @param initialRead set the initial count of items to read from the cursor
      * @param maxRead set the count of items to read on each iteration after the first
-     * @return A {@link Cursor} object, which is positioned before the first entry
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
      *
      * This work is incomplete and not fully tested or reviewed, so currently
      * hidden.

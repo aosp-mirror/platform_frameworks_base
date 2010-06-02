@@ -198,6 +198,9 @@ LOCAL_JAVA_LIBRARIES := core ext
 LOCAL_MODULE := framework
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 
+LOCAL_NO_EMMA_INSTRUMENT := true
+LOCAL_NO_EMMA_COMPILE := true
+
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
 
@@ -294,7 +297,7 @@ fwbase_dirs_to_document := \
 # as "final" in the official SDK APIs.
 fwbase_dirs_to_document += core/config/sdk
 
-# These are relative to dalvik/libcore
+# These are relative to libcore
 # Intentionally not included from libcore:
 #     icu openssl suncompat support
 libcore_to_document := \
@@ -334,7 +337,7 @@ non_base_dirs := \
 dirs_to_document := \
 	$(fwbase_dirs_to_document) \
 	$(non_base_dirs) \
-	$(addprefix ../../dalvik/libcore/, $(libcore_to_document))
+	$(addprefix ../../libcore/, $(libcore_to_document))
 
 html_dirs := \
 	$(FRAMEWORKS_BASE_SUBDIRS) \
@@ -344,6 +347,10 @@ html_dirs := \
 framework_docs_LOCAL_SRC_FILES := \
 	$(call find-other-java-files, $(dirs_to_document)) \
 	$(call find-other-html-files, $(html_dirs))
+
+# This is used by ide.mk as the list of source files that are
+# always included.
+INTERNAL_SDK_SOURCE_DIRS := $(addprefix $(LOCAL_PATH)/,$(dirs_to_document))
 
 framework_docs_LOCAL_DROIDDOC_SOURCE_PATH := \
 	$(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
@@ -591,6 +598,9 @@ LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core
 
 LOCAL_MODULE := ext
+
+LOCAL_NO_EMMA_INSTRUMENT := true
+LOCAL_NO_EMMA_COMPILE := true
 
 include $(BUILD_JAVA_LIBRARY)
 

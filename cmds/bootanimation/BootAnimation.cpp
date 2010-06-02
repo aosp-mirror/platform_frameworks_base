@@ -38,7 +38,7 @@
 #include <ui/EGLUtils.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 
 #include <core/SkBitmap.h>
 #include <images/SkImageDecoder.h>

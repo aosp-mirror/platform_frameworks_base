@@ -76,28 +76,28 @@
             android:paddingTop="2dip"
             android:paddingRight="10dip">
             <TextView
+                android:textAppearance="@style/TextAppearance.StatusBar.Ticker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textColor="#ff000000" />
+                />
             <TextView
+                android:textAppearance="@style/TextAppearance.StatusBar.Ticker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textColor="#ff000000" />
+                />
         </com.android.server.status.TickerView>
     </LinearLayout>
 
     <com.android.server.status.DateView android:id="@+id/date"
+        android:textAppearance="@style/TextAppearance.StatusBar.Icon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:singleLine="true"
-        android:textSize="16sp"
-        android:textStyle="bold"
         android:gravity="center_vertical|left"
         android:paddingLeft="6px"
         android:paddingRight="6px"
-        android:textColor="?android:attr/textColorPrimaryInverse"
         android:background="@drawable/statusbar_background"
         />
 </com.android.server.status.StatusBarView>

@@ -18,6 +18,7 @@ package android.location.provider;
 
 import android.content.Context;
 import android.net.NetworkInfo;
+import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
 import android.location.Location;
@@ -32,8 +33,6 @@ import android.util.Log;
  * outside of the core android platform.
  * Location providers can be implemented as services and return the result of
  * {@link LocationProvider#getBinder()} in its getBinder() method.
- *
- * @hide
  */
 public abstract class LocationProvider {
 
@@ -73,6 +72,10 @@ public abstract class LocationProvider {
 
         public int getPowerRequirement() {
             return LocationProvider.this.onGetPowerRequirement();
+        }
+
+        public boolean meetsCriteria(Criteria criteria) {
+            return LocationProvider.this.onMeetsCriteria(criteria);
         }
 
         public int getAccuracy() {
@@ -226,6 +229,12 @@ public abstract class LocationProvider {
     public abstract int onGetPowerRequirement();
 
     /**
+     * Returns true if this provider meets the given criteria,
+     * false otherwise.
+     */
+    public abstract boolean onMeetsCriteria(Criteria criteria);
+
+    /**
      * Returns a constant describing horizontal accuracy of this provider.
      * If the provider returns finer grain or exact location,
      * {@link Criteria#ACCURACY_FINE} is returned, otherwise if the
@@ -246,11 +255,11 @@ public abstract class LocationProvider {
 
     /**
      * Returns a information on the status of this provider.
-     * {@link #OUT_OF_SERVICE} is returned if the provider is
+     * {@link android.location.LocationProvider#OUT_OF_SERVICE} is returned if the provider is
      * out of service, and this is not expected to change in the near
-     * future; {@link #TEMPORARILY_UNAVAILABLE} is returned if
+     * future; {@link android.location.LocationProvider#TEMPORARILY_UNAVAILABLE} is returned if
      * the provider is temporarily unavailable but is expected to be
-     * available shortly; and {@link #AVAILABLE} is returned
+     * available shortly; and {@link android.location.LocationProvider#AVAILABLE} is returned
      * if the provider is currently available.
      *
      * <p> If extras is non-null, additional status information may be
@@ -299,9 +308,9 @@ public abstract class LocationProvider {
 
     /**
      * Updates the network state for the given provider. This function must
-     * be overwritten if {@link #requiresNetwork} returns true. The state is
-     * {@link #TEMPORARILY_UNAVAILABLE} (disconnected), OR {@link #AVAILABLE}
-     * (connected or connecting).
+     * be overwritten if {@link android.location.LocationProvider#requiresNetwork} returns true.
+     * The state is {@link android.location.LocationProvider#TEMPORARILY_UNAVAILABLE} (disconnected)
+     * OR {@link android.location.LocationProvider#AVAILABLE} (connected or connecting).
      *
      * @param state data state
      */

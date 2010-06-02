@@ -37,6 +37,7 @@ import com.android.internal.telephony.DriverCall;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.telephony.UUSInfo;
 import com.android.internal.telephony.gsm.CallFailCause;
 import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.GsmCall;
@@ -65,7 +66,7 @@ public final class GsmCallTracker extends CallTracker {
     RegistrantList voiceCallStartedRegistrants = new RegistrantList();
 
 
-    // connections dropped durin last poll
+    // connections dropped during last poll
     ArrayList<GsmConnection> droppedDuringPoll
         = new ArrayList<GsmConnection>(MAX_CONNECTIONS);
 
@@ -167,7 +168,7 @@ public final class GsmCallTracker extends CallTracker {
      * clirMode is one of the CLIR_ constants
      */
     Connection
-    dial (String dialString, int clirMode) throws CallStateException {
+    dial (String dialString, int clirMode, UUSInfo uusInfo) throws CallStateException {
         // note that this triggers call state changed notif
         clearDisconnected();
 
@@ -213,7 +214,7 @@ public final class GsmCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
-            cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
+            cm.dial(pendingMO.address, clirMode, uusInfo, obtainCompleteMessage());
         }
 
         updatePhoneState();
@@ -222,10 +223,19 @@ public final class GsmCallTracker extends CallTracker {
         return pendingMO;
     }
 
+    Connection
+    dial(String dialString) throws CallStateException {
+        return dial(dialString, CommandsInterface.CLIR_DEFAULT, null);
+    }
 
     Connection
-    dial (String dialString) throws CallStateException {
-        return dial(dialString, CommandsInterface.CLIR_DEFAULT);
+    dial(String dialString, UUSInfo uusInfo) throws CallStateException {
+        return dial(dialString, CommandsInterface.CLIR_DEFAULT, uusInfo);
+    }
+
+    Connection
+    dial(String dialString, int clirMode) throws CallStateException {
+        return dial(dialString, clirMode, null);
     }
 
     void

@@ -73,7 +73,7 @@ void checkEGLErrors(const char* token)
 DisplayHardware::DisplayHardware(
         const sp<SurfaceFlinger>& flinger,
         uint32_t dpy)
-    : DisplayHardwareBase(flinger, dpy)
+    : DisplayHardwareBase(flinger, dpy), mFlags(0)
 {
     init(dpy);
 }
@@ -125,7 +125,6 @@ void DisplayHardware::init(uint32_t dpy)
     EGLint numConfigs=0;
     EGLSurface surface;
     EGLContext context;
-    mFlags = CACHED_BUFFERS;
 
     // TODO: all the extensions below should be queried through
     // eglGetProcAddress().
@@ -253,21 +252,9 @@ void DisplayHardware::init(uint32_t dpy)
     LOGI("GL_MAX_TEXTURE_SIZE = %d", mMaxTextureSize);
     LOGI("GL_MAX_VIEWPORT_DIMS = %d", mMaxViewportDims);
 
-#if 0
-    // for drivers that don't have proper support for flushing cached buffers
-    // on gralloc unlock, uncomment this block and test for the specific
-    // renderer substring
-    if (strstr(gl_renderer, "<some vendor string>")) {
-        LOGD("Assuming uncached graphics buffers.");
-        mFlags &= ~CACHED_BUFFERS;
-    }
-#endif
 
     if (strstr(gl_extensions, "GL_ARB_texture_non_power_of_two")) {
         mFlags |= NPOT_EXTENSION;
-    }
-    if (strstr(gl_extensions, "GL_OES_draw_texture")) {
-        mFlags |= DRAW_TEXTURE_EXTENSION;
     }
 #ifdef EGL_ANDROID_image_native_buffer
     if (strstr( gl_extensions, "GL_OES_EGL_image") &&

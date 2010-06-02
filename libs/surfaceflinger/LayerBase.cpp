@@ -32,29 +32,21 @@
 #include "LayerBase.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
+#include "TextureManager.h"
 
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
-const uint32_t LayerBase::typeInfo = 1;
-const char* const LayerBase::typeID = "LayerBase";
-
-const uint32_t LayerBaseClient::typeInfo = LayerBase::typeInfo | 2;
-const char* const LayerBaseClient::typeID = "LayerBaseClient";
-
-// ---------------------------------------------------------------------------
-
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
-      mTransformed(false),
-      mUseLinearFiltering(false),
+      mNeedsFiltering(false),
       mOrientation(0),
       mLeft(0), mTop(0),
       mTransactionFlags(0),
-      mPremultipliedAlpha(true), mDebug(false),
+      mPremultipliedAlpha(true), mName("unnamed"), mDebug(false),
       mInvalidate(0)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
@@ -221,13 +213,12 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
         flags |= eVisibleRegion;
         this->contentDirty = true;
 
-        const bool linearFiltering = mUseLinearFiltering;
-        mUseLinearFiltering = false;
+        mNeedsFiltering = false;
         if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
             // we may use linear filtering, if the matrix scales us
             const uint8_t type = temp.transform.getType();
             if (!temp.transform.preserveRects() || (type >= Transform::SCALE)) {
-                mUseLinearFiltering = true;
+                mNeedsFiltering = true;
             }
         }
     }
@@ -267,7 +258,6 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     // cache a few things...
     mOrientation = tr.getOrientation();
     mTransformedBounds = tr.makeBounds(w, h);
-    mTransformed = transformed;
     mLeft = tr.tx();
     mTop  = tr.ty();
 }
@@ -348,25 +338,13 @@ void LayerBase::draw(const Region& inClip) const
     */
 }
 
-GLuint LayerBase::createTexture() const
-{
-    GLuint textureName = -1;
-    glGenTextures(1, &textureName);
-    glBindTexture(GL_TEXTURE_2D, textureName);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    return textureName;
-}
-
-void LayerBase::clearWithOpenGL(const Region& clip, GLclampx red,
-                                GLclampx green, GLclampx blue,
-                                GLclampx alpha) const
+void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
+                                GLclampf green, GLclampf blue,
+                                GLclampf alpha) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
-    glColor4x(red,green,blue,alpha);
+    glColor4f(red,green,blue,alpha);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
@@ -374,7 +352,7 @@ void LayerBase::clearWithOpenGL(const Region& clip, GLclampx red,
     Region::const_iterator it = clip.begin();
     Region::const_iterator const end = clip.end();
     glEnable(GL_SCISSOR_TEST);
-    glVertexPointer(2, GL_FIXED, 0, mVertices);
+    glVertexPointer(2, GL_FLOAT, 0, mVertices);
     while (it != end) {
         const Rect& r = *it++;
         const GLint sy = fbHeight - (r.top + r.height());
@@ -418,14 +396,14 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
             env = GL_REPLACE;
             src = GL_SRC_ALPHA;
         }
-        const GGLfixed alpha = (s.alpha << 16)/255;
-        glColor4x(alpha, alpha, alpha, alpha);
+        const GLfloat alpha = s.alpha * (1.0f/255.0f);
+        glColor4f(alpha, alpha, alpha, alpha);
         glEnable(GL_BLEND);
         glBlendFunc(src, GL_ONE_MINUS_SRC_ALPHA);
         glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, env);
     } else {
         glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-        glColor4x(0x10000, 0x10000, 0x10000, 0x10000);
+        glColor4f(1, 1, 1, 1);
         if (needsBlending()) {
             GLenum src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
             glEnable(GL_BLEND);
@@ -437,13 +415,11 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 
     Region::const_iterator it = clip.begin();
     Region::const_iterator const end = clip.end();
-
-    //StopWatch watch("GL transformed");
-    const GLfixed texCoords[4][2] = {
-            { 0,        0 },
-            { 0,        0x10000 },
-            { 0x10000,  0x10000 },
-            { 0x10000,  0 }
+    const GLfloat texCoords[4][2] = {
+            { 0,  0 },
+            { 0,  1 },
+            { 1,  1 },
+            { 1,  0 }
     };
 
     glMatrixMode(GL_TEXTURE);
@@ -470,8 +446,8 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     }
 
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(2, GL_FIXED, 0, mVertices);
-    glTexCoordPointer(2, GL_FIXED, 0, texCoords);
+    glVertexPointer(2, GL_FLOAT, 0, mVertices);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
 
     while (it != end) {
         const Rect& r = *it++;
@@ -487,7 +463,7 @@ void LayerBase::validateTexture(GLint textureName) const
     glBindTexture(GL_TEXTURE_2D, textureName);
     // TODO: reload the texture if needed
     // this is currently done in loadTexture() below
-    if (mUseLinearFiltering) {
+    if (needsFiltering()) {
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     } else {
@@ -502,200 +478,32 @@ void LayerBase::validateTexture(GLint textureName) const
     }
 }
 
-bool LayerBase::isSupportedYuvFormat(int format) const
+void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 {
-    switch (format) {
-        case HAL_PIXEL_FORMAT_YCbCr_422_SP:
-        case HAL_PIXEL_FORMAT_YCbCr_420_SP:
-        case HAL_PIXEL_FORMAT_YCbCr_422_P:
-        case HAL_PIXEL_FORMAT_YCbCr_420_P:
-        case HAL_PIXEL_FORMAT_YCbCr_422_I:
-        case HAL_PIXEL_FORMAT_YCbCr_420_I:
-        case HAL_PIXEL_FORMAT_YCrCb_420_SP:
-            return true;
-    }
-    return false;
+    const Layer::State& s(drawingState());
+    snprintf(buffer, SIZE,
+            "+ %s %p\n"
+            "      "
+            "z=%9d, pos=(%4d,%4d), size=(%4d,%4d), "
+            "needsBlending=%1d, needsDithering=%1d, invalidate=%1d, "
+            "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
+            getTypeId(), this, s.z, tx(), ty(), s.w, s.h,
+            needsBlending(), needsDithering(), contentDirty,
+            s.alpha, s.flags,
+            s.transform[0][0], s.transform[0][1],
+            s.transform[1][0], s.transform[1][1]);
+    result.append(buffer);
 }
-
-void LayerBase::loadTexture(Texture* texture, 
-        const Region& dirty, const GGLSurface& t) const
-{
-    if (texture->name == -1U) {
-        // uh?
-        return;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, texture->name);
-
-    /*
-     * In OpenGL ES we can't specify a stride with glTexImage2D (however,
-     * GL_UNPACK_ALIGNMENT is a limited form of stride).
-     * So if the stride here isn't representable with GL_UNPACK_ALIGNMENT, we
-     * need to do something reasonable (here creating a bigger texture).
-     * 
-     * extra pixels = (((stride - width) * pixelsize) / GL_UNPACK_ALIGNMENT);
-     * 
-     * This situation doesn't happen often, but some h/w have a limitation
-     * for their framebuffer (eg: must be multiple of 8 pixels), and
-     * we need to take that into account when using these buffers as
-     * textures.
-     *
-     * This should never be a problem with POT textures
-     */
-    
-    int unpack = __builtin_ctz(t.stride * bytesPerPixel(t.format));
-    unpack = 1 << ((unpack > 3) ? 3 : unpack);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, unpack);
-    
-    /*
-     * round to POT if needed 
-     */
-    if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
-        texture->NPOTAdjust = true;
-    }
-    
-    if (texture->NPOTAdjust) {
-        // find the smallest power-of-two that will accommodate our surface
-        texture->potWidth  = 1 << (31 - clz(t.width));
-        texture->potHeight = 1 << (31 - clz(t.height));
-        if (texture->potWidth  < t.width)  texture->potWidth  <<= 1;
-        if (texture->potHeight < t.height) texture->potHeight <<= 1;
-        texture->wScale = float(t.width)  / texture->potWidth;
-        texture->hScale = float(t.height) / texture->potHeight;
-    } else {
-        texture->potWidth  = t.width;
-        texture->potHeight = t.height;
-    }
-
-    Rect bounds(dirty.bounds());
-    GLvoid* data = 0;
-    if (texture->width != t.width || texture->height != t.height) {
-        texture->width  = t.width;
-        texture->height = t.height;
-
-        // texture size changed, we need to create a new one
-        bounds.set(Rect(t.width, t.height));
-        if (t.width  == texture->potWidth &&
-            t.height == texture->potHeight) {
-            // we can do it one pass
-            data = t.data;
-        }
-
-        if (t.format == HAL_PIXEL_FORMAT_RGB_565) {
-            glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_RGB, texture->potWidth, texture->potHeight, 0,
-                    GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data);
-        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_4444) {
-            glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_RGBA, texture->potWidth, texture->potHeight, 0,
-                    GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data);
-        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_8888 ||
-                   t.format == HAL_PIXEL_FORMAT_RGBX_8888) {
-            glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_RGBA, texture->potWidth, texture->potHeight, 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else if (isSupportedYuvFormat(t.format)) {
-            // just show the Y plane of YUV buffers
-            glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_LUMINANCE, texture->potWidth, texture->potHeight, 0,
-                    GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
-        } else {
-            // oops, we don't handle this format!
-            LOGE("layer %p, texture=%d, using format %d, which is not "
-                 "supported by the GL", this, texture->name, t.format);
-        }
-    }
-    if (!data) {
-        if (t.format == HAL_PIXEL_FORMAT_RGB_565) {
-            glTexSubImage2D(GL_TEXTURE_2D, 0,
-                    0, bounds.top, t.width, bounds.height(),
-                    GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
-                    t.data + bounds.top*t.stride*2);
-        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_4444) {
-            glTexSubImage2D(GL_TEXTURE_2D, 0,
-                    0, bounds.top, t.width, bounds.height(),
-                    GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,
-                    t.data + bounds.top*t.stride*2);
-        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_8888 ||
-                   t.format == HAL_PIXEL_FORMAT_RGBX_8888) {
-            glTexSubImage2D(GL_TEXTURE_2D, 0,
-                    0, bounds.top, t.width, bounds.height(),
-                    GL_RGBA, GL_UNSIGNED_BYTE,
-                    t.data + bounds.top*t.stride*4);
-        } else if (isSupportedYuvFormat(t.format)) {
-            // just show the Y plane of YUV buffers
-            glTexSubImage2D(GL_TEXTURE_2D, 0,
-                    0, bounds.top, t.width, bounds.height(),
-                    GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                    t.data + bounds.top*t.stride);
-        }
-    }
-}
-
-status_t LayerBase::initializeEglImage(
-        const sp<GraphicBuffer>& buffer, Texture* texture)
-{
-    status_t err = NO_ERROR;
-
-    // we need to recreate the texture
-    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-
-    // free the previous image
-    if (texture->image != EGL_NO_IMAGE_KHR) {
-        eglDestroyImageKHR(dpy, texture->image);
-        texture->image = EGL_NO_IMAGE_KHR;
-    }
-
-    // construct an EGL_NATIVE_BUFFER_ANDROID
-    android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
-
-    // create the new EGLImageKHR
-    const EGLint attrs[] = {
-            EGL_IMAGE_PRESERVED_KHR,    EGL_TRUE,
-            EGL_NONE,                   EGL_NONE
-    };
-    texture->image = eglCreateImageKHR(
-            dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
-            (EGLClientBuffer)clientBuf, attrs);
-
-    if (texture->image != EGL_NO_IMAGE_KHR) {
-        glBindTexture(GL_TEXTURE_2D, texture->name);
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
-                (GLeglImageOES)texture->image);
-        GLint error = glGetError();
-        if (UNLIKELY(error != GL_NO_ERROR)) {
-            LOGE("layer=%p, glEGLImageTargetTexture2DOES(%p) "
-                 "failed err=0x%04x",
-                 this, texture->image, error);
-            err = INVALID_OPERATION;
-        } else {
-            // Everything went okay!
-            texture->NPOTAdjust = false;
-            texture->dirty  = false;
-            texture->width  = clientBuf->width;
-            texture->height = clientBuf->height;
-        }
-    } else {
-        LOGE("layer=%p, eglCreateImageKHR() failed. err=0x%4x",
-                this, eglGetError());
-        err = INVALID_OPERATION;
-    }
-    return err;
-}
-
 
 // ---------------------------------------------------------------------------
 
-int32_t LayerBaseClient::sIdentity = 0;
+int32_t LayerBaseClient::sIdentity = 1;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
-    : LayerBase(flinger, display), lcblk(NULL), client(client), mIndex(i),
+    : LayerBase(flinger, display), client(client), mIndex(i),
       mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
-    lcblk = new SharedBufferServer(
-            client->ctrlblk, i, NUM_BUFFERS,
-            mIdentity);
 }
 
 void LayerBaseClient::onFirstRef()
@@ -712,16 +520,15 @@ LayerBaseClient::~LayerBaseClient()
     if (client != 0) {
         client->free(mIndex);
     }
-    delete lcblk;
 }
 
-int32_t LayerBaseClient::serverIndex() const 
+ssize_t LayerBaseClient::serverIndex() const
 {
     sp<Client> client(this->client.promote());
     if (client != 0) {
         return (client->cid<<16)|mIndex;
     }
-    return 0xFFFF0000 | mIndex;
+    return ssize_t(0xFFFF0000 | mIndex);
 }
 
 sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
@@ -742,12 +549,19 @@ sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
             const_cast<LayerBaseClient *>(this));
 }
 
-// called with SurfaceFlinger::mStateLock as soon as the layer is entered
-// in the purgatory list
-void LayerBaseClient::onRemoved()
+void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
 {
-    // wake up the condition
-    lcblk->setStatus(NO_INIT);
+    LayerBase::dump(result, buffer, SIZE);
+
+    sp<Client> client(this->client.promote());
+    snprintf(buffer, SIZE,
+            "      name=%s\n"
+            "      id=0x%08x, client=0x%08x, identity=%u\n",
+            getName().string(),
+            clientIndex(), client.get() ? client->cid : 0,
+            getIdentity());
+
+    result.append(buffer);
 }
 
 // ---------------------------------------------------------------------------
@@ -799,9 +613,15 @@ status_t LayerBaseClient::Surface::onTransact(
     return BnSurface::onTransact(code, data, reply, flags);
 }
 
-sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int index, int usage) 
+sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int bufferIdx,
+        uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
 {
     return NULL; 
+}
+
+status_t LayerBaseClient::Surface::setBufferCount(int bufferCount)
+{
+    return INVALID_OPERATION;
 }
 
 status_t LayerBaseClient::Surface::registerBuffers(

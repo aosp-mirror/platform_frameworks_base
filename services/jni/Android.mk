@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:= \
     com_android_server_SensorService.cpp \
     com_android_server_SystemServer.cpp \
     com_android_server_VibratorService.cpp \
+	com_android_server_location_GpsLocationProvider.cpp \
     onload.cpp
 
 LOCAL_C_INCLUDES += \

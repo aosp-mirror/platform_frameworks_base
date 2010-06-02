@@ -65,13 +65,15 @@ public:
     // Supported preview frame sizes in pixels.
     // Example value: "800x600,480x320". Read only.
     static const char KEY_SUPPORTED_PREVIEW_SIZES[];
-    // The image format for preview frames.
+    // The image format for preview frames. See CAMERA_MSG_PREVIEW_FRAME in
+    // frameworks/base/include/camera/Camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PREVIEW_FORMAT[];
     // Supported image formats for preview frames.
     // Example value: "yuv420sp,yuv422i-yuyv". Read only.
     static const char KEY_SUPPORTED_PREVIEW_FORMATS[];
-    // Number of preview frames per second.
+    // Number of preview frames per second. This is the target frame rate. The
+    // actual frame rate depends on the driver.
     // Example value: "15". Read/write.
     static const char KEY_PREVIEW_FRAME_RATE[];
     // Supported number of preview frames per second.
@@ -83,7 +85,8 @@ public:
     // Supported dimensions for captured pictures in pixels.
     // Example value: "2048x1536,1024x768". Read only.
     static const char KEY_SUPPORTED_PICTURE_SIZES[];
-    // The image format for captured pictures.
+    // The image format for captured pictures. See CAMERA_MSG_COMPRESSED_IMAGE
+    // in frameworks/base/include/camera/Camera.h.
     // Example value: "jpeg" or PIXEL_FORMAT_XXX constants. Read/write.
     static const char KEY_PICTURE_FORMAT[];
     // Supported image formats for captured pictures.
@@ -119,14 +122,17 @@ public:
     // should not set default value for this parameter.
     // Example value: "0" or "90" or "180" or "270". Write only.
     static const char KEY_ROTATION[];
-    // GPS latitude coordinate. This will be stored in JPEG EXIF header.
-    // Example value: "25.032146". Write only.
+    // GPS latitude coordinate. GPSLatitude and GPSLatitudeRef will be stored in
+    // JPEG EXIF header.
+    // Example value: "25.032146" or "-33.462809". Write only.
     static const char KEY_GPS_LATITUDE[];
-    // GPS longitude coordinate. This will be stored in JPEG EXIF header.
-    // Example value: "121.564448". Write only.
+    // GPS longitude coordinate. GPSLongitude and GPSLongitudeRef will be stored
+    // in JPEG EXIF header.
+    // Example value: "121.564448" or "-70.660286". Write only.
     static const char KEY_GPS_LONGITUDE[];
-    // GPS altitude. This will be stored in JPEG EXIF header.
-    // Example value: "21.0". Write only.
+    // GPS altitude. GPSAltitude and GPSAltitudeRef will be stored in JPEG EXIF
+    // header.
+    // Example value: "21.0" or "-5". Write only.
     static const char KEY_GPS_ALTITUDE[];
     // GPS timestamp (UTC in seconds since January 1, 1970). This should be
     // stored in JPEG EXIF header.
@@ -221,8 +227,34 @@ public:
     // Example value: "true". Read only.
     static const char KEY_SMOOTH_ZOOM_SUPPORTED[];
 
+    // The distances (in meters) from the camera to where an object appears to
+    // be in focus. The object is sharpest at the optimal focus distance. The
+    // depth of field is the far focus distance minus near focus distance.
+    //
+    // Applications can read this parameter anytime to get the latest focus
+    // distances. If the focus mode is FOCUS_MODE_EDOF, the values may be all
+    // 0, which means focus distance is not applicable. If the focus mode is
+    // FOCUS_MODE_CONTINUOUS and autofocus has started, focus distances may
+    // change from time to time.
+    //
+    // Far focus distance > optimal focus distance > near focus distance. If
+    // the far focus distance is infinity, the value should be "Infinity" (case
+    // sensitive). The format is three float values separated by commas. The
+    // first is near focus distance. The second is optimal focus distance. The
+    // third is far focus distance.
+    // Example value: "0.95,1.9,Infinity" or "0.049,0.05,0.051". Read only.
+    static const char KEY_FOCUS_DISTANCES[];
+
+    // The image format for video frames. See CAMERA_MSG_VIDEO_FRAME in
+    // frameworks/base/include/camera/Camera.h.
+    // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.
+    static const char KEY_VIDEO_FRAME_FORMAT[];
+
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
+
+    // Value for KEY_FOCUS_DISTANCES.
+    static const char FOCUS_DISTANCE_INFINITY[];
 
     // Values for white balance settings.
     static const char WHITE_BALANCE_AUTO[];
@@ -309,6 +341,12 @@ public:
     // continuously. Applications should not call
     // CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_EDOF[];
+    // Continuous focus mode. The camera continuously tries to focus. This is
+    // ideal for shooting video or shooting photo of moving object. Continuous
+    // focus starts when CameraHardwareInterface.autoFocus is called. Focus
+    // callback will be only called once as soon as the picture is in focus.
+    static const char FOCUS_MODE_CONTINUOUS[];
+
 
 private:
     DefaultKeyedVector<String8,String8>    mMap;

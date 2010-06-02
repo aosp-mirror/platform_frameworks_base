@@ -473,6 +473,14 @@ public abstract class Window {
     }
 
     /**
+     * Take ownership of this window's surface.  The window's view hierarchy
+     * will no longer draw into the surface, though it will otherwise continue
+     * to operate (such as for receiving input events).  The given SurfaceHolder
+     * callback will be used to tell you about state changes to the surface.
+     */
+    public abstract void takeSurface(SurfaceHolder.Callback callback);
+    
+    /**
      * Return whether this window is being displayed with a floating style
      * (based on the {@link android.R.attr#windowIsFloating} attribute in
      * the style/theme).

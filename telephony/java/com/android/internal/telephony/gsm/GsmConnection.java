@@ -73,6 +73,7 @@ public class GsmConnection extends Connection {
     DisconnectCause cause = DisconnectCause.NOT_DISCONNECTED;
     PostDialState postDialState = PostDialState.NOT_STARTED;
     int numberPresentation = Connection.PRESENTATION_ALLOWED;
+    UUSInfo uusInfo;
 
     Handler h;
 
@@ -126,6 +127,7 @@ public class GsmConnection extends Connection {
         isIncoming = dc.isMT;
         createTime = System.currentTimeMillis();
         numberPresentation = dc.numberPresentation;
+        uusInfo = dc.uusInfo;
 
         this.index = index;
 
@@ -355,6 +357,9 @@ public class GsmConnection extends Connection {
 
             case CallFailCause.FDN_BLOCKED:
                 return DisconnectCause.FDN_BLOCKED;
+
+            case CallFailCause.UNOBTAINABLE_NUMBER:
+                return DisconnectCause.UNOBTAINABLE_NUMBER;
 
             case CallFailCause.ERROR_UNSPECIFIED:
             case CallFailCause.NORMAL_CLEARING:
@@ -727,5 +732,10 @@ public class GsmConnection extends Connection {
     @Override
     public int getNumberPresentation() {
         return numberPresentation;
+    }
+
+    @Override
+    public UUSInfo getUUSInfo() {
+        return uusInfo;
     }
 }

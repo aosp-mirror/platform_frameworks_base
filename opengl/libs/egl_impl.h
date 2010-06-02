@@ -31,6 +31,7 @@ namespace android {
 
 struct egl_connection_t
 {
+    inline egl_connection_t() : dso(0) { }
     void *              dso;
     gl_hooks_t *        hooks[2];
     EGLint              major;

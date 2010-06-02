@@ -67,7 +67,7 @@ public class MimeTypeMap {
             // if the filename contains special characters, we don't
             // consider it valid for our matching purposes:
             if (filename.length() > 0 &&
-                Pattern.matches("[a-zA-Z_0-9\\.\\-\\(\\)]+", filename)) {
+                Pattern.matches("[a-zA-Z_0-9\\.\\-\\(\\)\\%]+", filename)) {
                 int dotPos = filename.lastIndexOf('.');
                 if (0 <= dotPos) {
                     return filename.substring(dotPos + 1);

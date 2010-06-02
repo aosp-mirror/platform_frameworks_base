@@ -85,7 +85,8 @@ public class VpnManager {
 
     // TODO(oam): Test VPN when EFS is enabled (will do later)...
     public static String getProfilePath() {
-        return Environment.getDataDirectory().getPath() + PROFILES_PATH;
+        // This call will return the correct path if Encrypted FS is enabled or not.
+        return Environment.getSecureDataDirectory().getPath() + PROFILES_PATH;
     }
 
     /**

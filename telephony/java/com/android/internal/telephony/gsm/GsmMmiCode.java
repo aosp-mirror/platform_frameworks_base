@@ -39,7 +39,7 @@ import java.util.regex.Matcher;
  * {@hide}
  *
  */
-public final class GsmMmiCode  extends Handler implements MmiCode {
+public final class GsmMmiCode extends Handler implements MmiCode {
     static final String LOG_TAG = "GSM";
 
     //***** Constants
@@ -51,7 +51,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
     static final String ACTION_REGISTER = "**";
     static final String ACTION_ERASURE = "##";
 
-    // Supp Service cocdes from TS 22.030 Annex B
+    // Supp Service codes from TS 22.030 Annex B
 
     //Called line presentation
     static final String SC_CLIP    = "30";
@@ -154,7 +154,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
 
     /**
      * Some dial strings in GSM are defined to do non-call setup
-     * things, such as modify or query supplementry service settings (eg, call
+     * things, such as modify or query supplementary service settings (eg, call
      * forwarding). These are generally referred to as "MMI codes".
      * We look to see if the dial string contains a valid MMI code (potentially
      * with a dial string at the end as well) and return info here.
@@ -457,12 +457,13 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
                 && !PhoneNumberUtils.isEmergencyNumber(dialString)
                 && (phone.isInCall()
                     || !((dialString.length() == 2 && dialString.charAt(0) == '1')
-                         /* While contrary to TS 22.030, there is strong precendence
+                         /* While contrary to TS 22.030, there is strong precedence
                           * for treating "0" and "00" as call setup strings.
                           */
                          || dialString.equals("0")
                          || dialString.equals("00"))));
     }
+
     /**
      * @return true if the Service Code is PIN/PIN2/PUK/PUK2-related
      */
@@ -472,13 +473,12 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
      }
 
     /**
-     * *See TS 22.030 Annex B
+     * See TS 22.030 Annex B.
      * In temporary mode, to suppress CLIR for a single call, enter:
-     *      " * 31 # <called number> SEND "
+     *      " * 31 # [called number] SEND "
      *  In temporary mode, to invoke CLIR for a single call enter:
-     *       " # 31 # <called number> SEND "
+     *       " # 31 # [called number] SEND "
      */
-
     boolean
     isTemporaryModeCLIR() {
         return sc != null && sc.equals(SC_CLIR) && dialingNumber != null
@@ -779,7 +779,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
         // Note that unlike most everything else, the USSD complete
         // response does not complete this MMI code...we wait for
         // an unsolicited USSD "Notify" or "Request".
-        // The matching up of this is doene in GSMPhone.
+        // The matching up of this is done in GSMPhone.
 
         phone.mCM.sendUSSD(ussdMessage,
             obtainMessage(EVENT_USSD_COMPLETE, this));
@@ -832,8 +832,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
 
                 if (ar.exception != null) {
                     state = State.FAILED;
-                    message = context.getText(
-                                            com.android.internal.R.string.mmiError);
+                    message = getErrorMessage(ar);
 
                     phone.onMMIDone(this);
                 }
@@ -851,6 +850,19 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
         }
     }
     //***** Private instance methods
+
+    private CharSequence getErrorMessage(AsyncResult ar) {
+
+        if (ar.exception instanceof CommandException) {
+            CommandException.Error err = ((CommandException)(ar.exception)).getCommandError();
+            if (err == CommandException.Error.FDN_CHECK_FAILURE) {
+                Log.i(LOG_TAG, "FDN_CHECK_FAILURE");
+                return context.getText(com.android.internal.R.string.mmiFdnError);
+            }
+        }
+
+        return context.getText(com.android.internal.R.string.mmiError);
+    }
 
     private CharSequence getScString() {
         if (sc != null) {
@@ -904,6 +916,9 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
                     sb.append("\n");
                     sb.append(context.getText(
                             com.android.internal.R.string.needPuk2));
+                } else if (err == CommandException.Error.FDN_CHECK_FAILURE) {
+                    Log.i(LOG_TAG, "FDN_CHECK_FAILURE");
+                    sb.append(context.getText(com.android.internal.R.string.mmiFdnError));
                 } else {
                     sb.append(context.getText(
                             com.android.internal.R.string.mmiError));
@@ -953,7 +968,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
 
         if (ar.exception != null) {
             state = State.FAILED;
-            sb.append(context.getText(com.android.internal.R.string.mmiError));
+            sb.append(getErrorMessage(ar));
         } else {
             int clirArgs[];
 
@@ -1123,7 +1138,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
 
         if (ar.exception != null) {
             state = State.FAILED;
-            sb.append(context.getText(com.android.internal.R.string.mmiError));
+            sb.append(getErrorMessage(ar));
         } else {
             CallForwardInfo infos[];
 
@@ -1141,7 +1156,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
 
                 // Each bit in the service class gets its own result line
                 // The service classes may be split up over multiple
-                // CallForwardInfos. So, for each service classs, find out
+                // CallForwardInfos. So, for each service class, find out
                 // which CallForwardInfo represents it and then build
                 // the response text based on that
 
@@ -1175,7 +1190,7 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
 
         if (ar.exception != null) {
             state = State.FAILED;
-            sb.append(context.getText(com.android.internal.R.string.mmiError));
+            sb.append(getErrorMessage(ar));
         } else {
             int[] ints = (int[])ar.result;
 

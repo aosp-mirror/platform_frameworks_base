@@ -45,17 +45,18 @@ public abstract class Connection {
         POWER_OFF,                      /* radio is turned off explicitly */
         OUT_OF_SERVICE,                 /* out of service */
         ICC_ERROR,                      /* No ICC, ICC locked, or other ICC error */
-        CALL_BARRED,                    /* call was blocked by call barrring */
+        CALL_BARRED,                    /* call was blocked by call barring */
         FDN_BLOCKED,                    /* call was blocked by fixed dial number */
         CS_RESTRICTED,                  /* call was blocked by restricted all voice access */
         CS_RESTRICTED_NORMAL,           /* call was blocked by restricted normal voice access */
         CS_RESTRICTED_EMERGENCY,        /* call was blocked by restricted emergency voice access */
+        UNOBTAINABLE_NUMBER,            /* Unassigned number (3GPP TS 24.008 table 10.5.123) */
         CDMA_LOCKED_UNTIL_POWER_CYCLE,  /* MS is locked until next power cycle */
         CDMA_DROP,
         CDMA_INTERCEPT,                 /* INTERCEPT order received, MS state idle entered */
         CDMA_REORDER,                   /* MS has been redirected, call is cancelled */
         CDMA_SO_REJECT,                 /* service option rejection */
-        CDMA_RETRY_ORDER,               /* requeseted service is rejected, retry delay is set */
+        CDMA_RETRY_ORDER,               /* requested service is rejected, retry delay is set */
         CDMA_ACCESS_FAILURE,
         CDMA_PREEMPTED,
         CDMA_NOT_EMERGENCY,              /* not an emergency call */
@@ -68,8 +69,8 @@ public abstract class Connection {
     /* Instance Methods */
 
     /**
-     * Gets address (e.g., phone number) associated with connection
-     * TODO: distinguish reasons for unavailablity
+     * Gets address (e.g. phone number) associated with connection.
+     * TODO: distinguish reasons for unavailability
      *
      * @return address or null if unavailable
      */
@@ -77,7 +78,7 @@ public abstract class Connection {
     public abstract String getAddress();
 
     /**
-     * Gets cdma CNAP name  associated with connection
+     * Gets CDMA CNAP name associated with connection.
      * @return cnap name or null if unavailable
      */
     public String getCnapName() {
@@ -85,15 +86,15 @@ public abstract class Connection {
     }
 
     /**
-     * Get orignal dial string
-     * @return orignal dial string or null if unavailable
+     * Get original dial string.
+     * @return original dial string or null if unavailable
      */
     public String getOrigDialString(){
         return null;
     }
 
     /**
-     * Gets cdma CNAP presentation associated with connection
+     * Gets CDMA CNAP presentation associated with connection.
      * @return cnap name or null if unavailable
      */
 
@@ -115,45 +116,45 @@ public abstract class Connection {
     public abstract long getCreateTime();
 
     /**
-     * Connection connect time in currentTimeMillis() format
-     * For outgoing calls: Begins at (DIALING|ALERTING) -> ACTIVE transition
-     * For incoming calls: Begins at (INCOMING|WAITING) -> ACTIVE transition
-     * Returns 0 before then
+     * Connection connect time in currentTimeMillis() format.
+     * For outgoing calls: Begins at (DIALING|ALERTING) -> ACTIVE transition.
+     * For incoming calls: Begins at (INCOMING|WAITING) -> ACTIVE transition.
+     * Returns 0 before then.
      */
     public abstract long getConnectTime();
 
     /**
-     * Disconnect time in currentTimeMillis() format
-     * The time when this Connection makes a transition into ENDED or FAIL
-     * Returns 0 before then
+     * Disconnect time in currentTimeMillis() format.
+     * The time when this Connection makes a transition into ENDED or FAIL.
+     * Returns 0 before then.
      */
     public abstract long getDisconnectTime();
 
     /**
-     * returns the number of milliseconds the call has been connected,
+     * Returns the number of milliseconds the call has been connected,
      * or 0 if the call has never connected.
      * If the call is still connected, then returns the elapsed
-     * time since connect
+     * time since connect.
      */
     public abstract long getDurationMillis();
 
     /**
      * If this connection is HOLDING, return the number of milliseconds
-     * that it has been on hold for (approximently)
-     * If this connection is in any other state, return 0
+     * that it has been on hold for (approximately).
+     * If this connection is in any other state, return 0.
      */
 
     public abstract long getHoldDurationMillis();
 
     /**
-     * Returns "NOT_DISCONNECTED" if not yet disconnected
+     * Returns "NOT_DISCONNECTED" if not yet disconnected.
      */
     public abstract DisconnectCause getDisconnectCause();
 
     /**
      * Returns true of this connection originated elsewhere
      * ("MT" or mobile terminated; another party called this terminal)
-     * or false if this call originated here (MO or mobile originated)
+     * or false if this call originated here (MO or mobile originated).
      */
     public abstract boolean isIncoming();
 
@@ -271,6 +272,13 @@ public abstract class Connection {
      * @return one of PRESENTATION_*
      */
     public abstract int getNumberPresentation();
+
+    /**
+     * Returns the User to User Signaling (UUS) information associated with
+     * incoming and waiting calls
+     * @return UUSInfo containing the UUS userdata.
+     */
+    public abstract UUSInfo getUUSInfo();
 
     /**
      * Build a human representation of a connection instance, suitable for debugging.

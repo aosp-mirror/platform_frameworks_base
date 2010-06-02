@@ -22,6 +22,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
+#include <media/mediarecorder.h>
 
 namespace android {
 
@@ -53,8 +54,6 @@ status_t AMRWriter::initCheck() const {
 }
 
 status_t AMRWriter::addSource(const sp<MediaSource> &source) {
-    Mutex::Autolock autoLock(mLock);
-
     if (mInitCheck != OK) {
         return mInitCheck;
     }
@@ -95,8 +94,6 @@ status_t AMRWriter::addSource(const sp<MediaSource> &source) {
 }
 
 status_t AMRWriter::start() {
-    Mutex::Autolock autoLock(mLock);
-
     if (mInitCheck != OK) {
         return mInitCheck;
     }
@@ -127,15 +124,11 @@ status_t AMRWriter::start() {
 }
 
 void AMRWriter::stop() {
-    {
-        Mutex::Autolock autoLock(mLock);
-
-        if (!mStarted) {
-            return;
-        }
-
-        mDone = true;
+    if (!mStarted) {
+        return;
     }
+
+    mDone = true;
 
     void *dummy;
     pthread_join(mThread, &dummy);
@@ -143,6 +136,20 @@ void AMRWriter::stop() {
     mSource->stop();
 
     mStarted = false;
+}
+
+bool AMRWriter::exceedsFileSizeLimit() {
+    if (mMaxFileSizeLimitBytes == 0) {
+        return false;
+    }
+    return mEstimatedSizeBytes >= mMaxFileSizeLimitBytes;
+}
+
+bool AMRWriter::exceedsFileDurationLimit() {
+    if (mMaxFileDurationLimitUs == 0) {
+        return false;
+    }
+    return mEstimatedDurationUs >= mMaxFileDurationLimitUs;
 }
 
 // static
@@ -153,13 +160,10 @@ void *AMRWriter::ThreadWrapper(void *me) {
 }
 
 void AMRWriter::threadFunc() {
-    for (;;) {
-        Mutex::Autolock autoLock(mLock);
-
-        if (mDone) {
-            break;
-        }
-
+    mEstimatedDurationUs = 0;
+    mEstimatedSizeBytes = 0;
+    bool stoppedPrematurely = true;
+    while (!mDone) {
         MediaBuffer *buffer;
         status_t err = mSource->read(&buffer);
 
@@ -167,6 +171,25 @@ void AMRWriter::threadFunc() {
             break;
         }
 
+        mEstimatedSizeBytes += buffer->range_length();
+        if (exceedsFileSizeLimit()) {
+            buffer->release();
+            buffer = NULL;
+            notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED, 0);
+            break;
+        }
+
+        int64_t timestampUs;
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
+        if (timestampUs > mEstimatedDurationUs) {
+            mEstimatedDurationUs = timestampUs;
+        }
+        if (exceedsFileDurationLimit()) {
+            buffer->release();
+            buffer = NULL;
+            notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_DURATION_REACHED, 0);
+            break;
+        }
         ssize_t n = fwrite(
                 (const uint8_t *)buffer->data() + buffer->range_offset(),
                 1,
@@ -180,16 +203,26 @@ void AMRWriter::threadFunc() {
             break;
         }
 
+        // XXX: How to tell it is stopped prematurely?
+        if (stoppedPrematurely) {
+            stoppedPrematurely = false;
+        }
+
         buffer->release();
         buffer = NULL;
     }
 
-    Mutex::Autolock autoLock(mLock);
+    if (stoppedPrematurely) {
+        notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_STOP_PREMATURELY, 0);
+    }
+
+    fflush(mFile);
+    fclose(mFile);
+    mFile = NULL;
     mReachedEOS = true;
 }
 
 bool AMRWriter::reachedEOS() {
-    Mutex::Autolock autoLock(mLock);
     return mReachedEOS;
 }
 

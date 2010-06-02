@@ -114,6 +114,10 @@ static const KeycodeLabel KEYCODES[] = {
     { "MEDIA_REWIND", 89 },
     { "MEDIA_FAST_FORWARD", 90 },
     { "MUTE", 91 },
+    { "PAGE_UP", 92 },
+    { "PAGE_DOWN", 93 },
+    { "PICTSYMBOLS", 94 },
+    { "SWITCH_CHARSET", 95 },
 
     // NOTE: If you add a new keycode here you must also add it to:
     //   (enum KeyCode, in this file)
@@ -218,7 +222,11 @@ typedef enum KeyCode {
     kKeyCodePreviousSong = 88,
     kKeyCodeRewind = 89,
     kKeyCodeForward = 90,
-    kKeyCodeMute = 91
+    kKeyCodeMute = 91,
+    kKeyCodePageUp = 92,
+    kKeyCodePageDown = 93,
+    kKeyCodePictSymbols = 94,
+    kKeyCodeSwitchCharset = 95
 } KeyCode;
 
 static const KeycodeLabel FLAGS[] = {

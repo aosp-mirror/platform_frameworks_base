@@ -205,6 +205,8 @@ public class NotificationTestList extends TestActivity
                 Notification n = new Notification();
                 n.flags |= Notification.FLAG_SHOW_LIGHTS;
                 n.ledARGB = 0xff0000ff;
+                n.ledOnMS = 1;
+                n.ledOffMS = 0;
                 mNM.notify(1, n);
             }
         },
@@ -215,6 +217,8 @@ public class NotificationTestList extends TestActivity
                 Notification n = new Notification();
                 n.flags |= Notification.FLAG_SHOW_LIGHTS;
                 n.ledARGB = 0xffff0000;
+                n.ledOnMS = 1;
+                n.ledOffMS = 0;
                 mNM.notify(1, n);
             }
         },
@@ -225,6 +229,20 @@ public class NotificationTestList extends TestActivity
                 Notification n = new Notification();
                 n.flags |= Notification.FLAG_SHOW_LIGHTS;
                 n.ledARGB = 0xffffff00;
+                n.ledOnMS = 1;
+                n.ledOffMS = 0;
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Lights off") {
+            public void run()
+            {
+                Notification n = new Notification();
+                n.flags |= Notification.FLAG_SHOW_LIGHTS;
+                n.ledARGB = 0x00000000;
+                n.ledOnMS = 0;
+                n.ledOffMS = 0;
                 mNM.notify(1, n);
             }
         },
@@ -234,7 +252,7 @@ public class NotificationTestList extends TestActivity
             {
                 Notification n = new Notification();
                 n.flags |= Notification.FLAG_SHOW_LIGHTS;
-                n.ledARGB = 0xffffff00;
+                n.ledARGB = 0xff0000ff;
                 n.ledOnMS = 1300;
                 n.ledOffMS = 1300;
                 mNM.notify(1, n);
@@ -246,7 +264,7 @@ public class NotificationTestList extends TestActivity
             {
                 Notification n = new Notification();
                 n.flags |= Notification.FLAG_SHOW_LIGHTS;
-                n.ledARGB = 0xffffff00;
+                n.ledARGB = 0xff0000ff;
                 n.ledOnMS = 300;
                 n.ledOffMS = 300;
                 mNM.notify(1, n);

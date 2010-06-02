@@ -41,6 +41,14 @@ extern "C" {
 
 struct android_native_buffer_t;
 
+typedef struct android_native_rect_t
+{
+    int32_t left;
+    int32_t top;
+    int32_t right;
+    int32_t bottom;
+} android_native_rect_t;
+
 // ---------------------------------------------------------------------------
 
 typedef struct android_native_base_t
@@ -63,15 +71,18 @@ typedef struct android_native_base_t
 /* attributes queriable with query() */
 enum {
     NATIVE_WINDOW_WIDTH     = 0,
-    NATIVE_WINDOW_HEIGHT    = 1,
-    NATIVE_WINDOW_FORMAT    = 2,
+    NATIVE_WINDOW_HEIGHT,
+    NATIVE_WINDOW_FORMAT,
 };
 
 /* valid operations for the (*perform)() hook */
 enum {
     NATIVE_WINDOW_SET_USAGE  = 0,
-    NATIVE_WINDOW_CONNECT    = 1,
-    NATIVE_WINDOW_DISCONNECT = 2
+    NATIVE_WINDOW_CONNECT,
+    NATIVE_WINDOW_DISCONNECT,
+    NATIVE_WINDOW_SET_CROP,
+    NATIVE_WINDOW_SET_BUFFER_COUNT,
+    NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
 };
 
 /* parameter for NATIVE_WINDOW_[DIS]CONNECT */
@@ -88,6 +99,15 @@ typedef struct android_native_window_t
         common.magic = ANDROID_NATIVE_WINDOW_MAGIC;
         common.version = sizeof(android_native_window_t);
         memset(common.reserved, 0, sizeof(common.reserved));
+    }
+
+    // Implement the methods that sp<android_native_window_t> expects so that it
+    // can be used to automatically refcount android_native_window_t's.
+    void incStrong(const void* id) const {
+        common.incRef(const_cast<android_native_base_t*>(&common));
+    }
+    void decStrong(const void* id) const {
+        common.decRef(const_cast<android_native_base_t*>(&common));
     }
 #endif
     
@@ -125,7 +145,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*dequeueBuffer)(struct android_native_window_t* window, 
+    int     (*dequeueBuffer)(struct android_native_window_t* window,
                 struct android_native_buffer_t** buffer);
 
     /*
@@ -171,6 +191,9 @@ typedef struct android_native_window_t
      *     NATIVE_WINDOW_SET_USAGE
      *     NATIVE_WINDOW_CONNECT
      *     NATIVE_WINDOW_DISCONNECT
+     *     NATIVE_WINDOW_SET_CROP
+     *     NATIVE_WINDOW_SET_BUFFER_COUNT
+     *     NATIVE_WINDOW_SET_BUFFERS_GEOMETRY
      *  
      */
     
@@ -182,8 +205,9 @@ typedef struct android_native_window_t
 
 
 /*
- *  native_window_set_usage() sets the intended usage flags for the next
- *  buffers acquired with (*lockBuffer)() and on.
+ *  native_window_set_usage(..., usage)
+ *  Sets the intended usage flags for the next buffers
+ *  acquired with (*lockBuffer)() and on.
  *  By default (if this function is never called), a usage of
  *      GRALLOC_USAGE_HW_RENDER | GRALLOC_USAGE_HW_TEXTURE
  *  is assumed.
@@ -198,8 +222,8 @@ static inline int native_window_set_usage(
 }
 
 /*
- * native_window_connect(..., NATIVE_WINDOW_API_EGL) must be called
- * by EGL when the window is made current.
+ * native_window_connect(..., NATIVE_WINDOW_API_EGL)
+ * Must be called by EGL when the window is made current.
  * Returns -EINVAL if for some reason the window cannot be connected, which
  * can happen if it's connected to some other API.
  */
@@ -210,8 +234,8 @@ static inline int native_window_connect(
 }
 
 /*
- * native_window_disconnect(..., NATIVE_WINDOW_API_EGL) must be called
- * by EGL when the window is made not current.
+ * native_window_disconnect(..., NATIVE_WINDOW_API_EGL)
+ * Must be called by EGL when the window is made not current.
  * An error is returned if for instance the window wasn't connected in the
  * first place.
  */
@@ -221,6 +245,54 @@ static inline int native_window_disconnect(
     return window->perform(window, NATIVE_WINDOW_DISCONNECT, api);
 }
 
+/*
+ * native_window_set_crop(..., crop)
+ * Sets which region of the next queued buffers needs to be considered.
+ * A buffer's crop region is scaled to match the surface's size.
+ *
+ * The specified crop region applies to all buffers queued after it is called.
+ *
+ * if 'crop' is NULL, subsequently queued buffers won't be cropped.
+ *
+ * An error is returned if for instance the crop region is invalid,
+ * out of the buffer's bound or if the window is invalid.
+ */
+static inline int native_window_set_crop(
+        android_native_window_t* window,
+        android_native_rect_t const * crop)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_CROP, crop);
+}
+
+/*
+ * native_window_set_buffer_count(..., count)
+ * Sets the number of buffers associated with this native window.
+ */
+static inline int native_window_set_buffer_count(
+        android_native_window_t* window,
+        size_t bufferCount)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFER_COUNT, bufferCount);
+}
+
+/*
+ * native_window_set_buffers_geometry(..., int w, int h, int format)
+ * All buffers dequeued after this call will have the geometry specified.
+ * In particular, all buffers will have a fixed-size, independent form the
+ * native-window size. They will be appropriately scaled to the window-size
+ * upon composition.
+ *
+ * If all parameters are 0, the normal behavior is restored. That is,
+ * dequeued buffers following this call will be sized to the window's size.
+ *
+ */
+static inline int native_window_set_buffers_geometry(
+        android_native_window_t* window,
+        int w, int h, int format)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
+            w, h, format);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -263,6 +335,15 @@ namespace android {
 template <typename NATIVE_TYPE, typename TYPE, typename REF>
 class EGLNativeBase : public NATIVE_TYPE, public REF
 {
+public:
+    // Disambiguate between the incStrong in REF and NATIVE_TYPE
+    void incStrong(const void* id) const {
+        REF::incStrong(id);
+    }
+    void decStrong(const void* id) const {
+        REF::decStrong(id);
+    }
+
 protected:
     typedef EGLNativeBase<NATIVE_TYPE, TYPE, REF> BASE;
     EGLNativeBase() : NATIVE_TYPE(), REF() {

@@ -1249,6 +1249,17 @@ void AudioPolicyManagerBase::closeA2dpOutputs()
     LOGV("setDeviceConnectionState() closing A2DP and duplicated output!");
 
     if (mDuplicatedOutput != 0) {
+        AudioOutputDescriptor *dupOutputDesc = mOutputs.valueFor(mDuplicatedOutput);
+        AudioOutputDescriptor *hwOutputDesc = mOutputs.valueFor(mHardwareOutput);
+        // As all active tracks on duplicated output will be deleted,
+        // and as they were also referenced on hardware output, the reference
+        // count for their stream type must be adjusted accordingly on
+        // hardware output.
+        for (int i = 0; i < (int)AudioSystem::NUM_STREAM_TYPES; i++) {
+            int refCount = dupOutputDesc->mRefCount[i];
+            hwOutputDesc->changeRefCount((AudioSystem::stream_type)i,-refCount);
+        }
+
         mpClientInterface->closeOutput(mDuplicatedOutput);
         delete mOutputs.valueFor(mDuplicatedOutput);
         mOutputs.removeItem(mDuplicatedOutput);
@@ -1288,11 +1299,6 @@ void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, u
         for (int i = 0; i < (int)AudioSystem::NUM_STREAM_TYPES; i++) {
             if (getStrategy((AudioSystem::stream_type)i) == strategy) {
                 mpClientInterface->setStreamOutput((AudioSystem::stream_type)i, mHardwareOutput);
-                int refCount = a2dpOutputDesc->mRefCount[i];
-                // in the case of duplicated output, the ref count is first incremented
-                // and then decremented on hardware output tus keeping its value
-                hwOutputDesc->changeRefCount((AudioSystem::stream_type)i, refCount);
-                a2dpOutputDesc->changeRefCount((AudioSystem::stream_type)i,-refCount);
             }
         }
         // do not change newDevice if it was already set before this call by a previous call to
@@ -1318,11 +1324,6 @@ void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, u
         for (int i = 0; i < (int)AudioSystem::NUM_STREAM_TYPES; i++) {
             if (getStrategy((AudioSystem::stream_type)i) == strategy) {
                 mpClientInterface->setStreamOutput((AudioSystem::stream_type)i, a2dpOutput);
-                int refCount = hwOutputDesc->mRefCount[i];
-                // in the case of duplicated output, the ref count is first incremented
-                // and then decremented on hardware output tus keeping its value
-                a2dpOutputDesc->changeRefCount((AudioSystem::stream_type)i, refCount);
-                hwOutputDesc->changeRefCount((AudioSystem::stream_type)i,-refCount);
             }
         }
     }

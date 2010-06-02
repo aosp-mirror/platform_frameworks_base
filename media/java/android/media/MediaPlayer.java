@@ -133,7 +133,7 @@ import java.lang.ref.WeakReference;
  *         <li>It is good programming practice to have your application
  *         register a OnErrorListener to look out for error notifications from
  *         the internal player engine.</li>
- *         <li>IlleglStateException is
+ *         <li>IllegalStateException is
  *         thrown to prevent programming errors such as calling {@link #prepare()},
  *         {@link #prepareAsync()}, or one of the overloaded <code>setDataSource
  *         </code> methods in an invalid state. </li>

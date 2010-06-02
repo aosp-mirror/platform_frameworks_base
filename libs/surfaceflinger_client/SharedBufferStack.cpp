@@ -44,13 +44,9 @@ SharedClient::~SharedClient() {
 
 // these functions are used by the clients
 status_t SharedClient::validate(size_t i) const {
-    if (uint32_t(i) >= uint32_t(NUM_LAYERS_MAX))
+    if (uint32_t(i) >= uint32_t(SharedBufferStack::NUM_LAYERS_MAX))
         return BAD_INDEX;
     return surfaces[i].status;
-}
-
-uint32_t SharedClient::getIdentity(size_t token) const {
-    return uint32_t(surfaces[token].identity);
 }
 
 // ----------------------------------------------------------------------------
@@ -67,19 +63,47 @@ void SharedBufferStack::init(int32_t i)
     identity = i;
 }
 
+status_t SharedBufferStack::setCrop(int buffer, const Rect& crop)
+{
+    if (uint32_t(buffer) >= NUM_BUFFER_MAX)
+        return BAD_INDEX;
+
+    buffers[buffer].crop.l = uint16_t(crop.left);
+    buffers[buffer].crop.t = uint16_t(crop.top);
+    buffers[buffer].crop.r = uint16_t(crop.right);
+    buffers[buffer].crop.b = uint16_t(crop.bottom);
+    return NO_ERROR;
+}
+
 status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
 {
     if (uint32_t(buffer) >= NUM_BUFFER_MAX)
         return BAD_INDEX;
 
-    // in the current implementation we only send a single rectangle
-    const Rect bounds(dirty.getBounds());
-    FlatRegion& reg(dirtyRegion[buffer]);
-    reg.count = 1;
-    reg.rects[0] = uint16_t(bounds.left);
-    reg.rects[1] = uint16_t(bounds.top);
-    reg.rects[2] = uint16_t(bounds.right);
-    reg.rects[3] = uint16_t(bounds.bottom);
+    FlatRegion& reg(buffers[buffer].dirtyRegion);
+    if (dirty.isEmpty()) {
+        reg.count = 0;
+        return NO_ERROR;
+    }
+
+    size_t count;
+    Rect const* r = dirty.getArray(&count);
+    if (count > FlatRegion::NUM_RECT_MAX) {
+        const Rect bounds(dirty.getBounds());
+        reg.count = 1;
+        reg.rects[0].l = uint16_t(bounds.left);
+        reg.rects[0].t = uint16_t(bounds.top);
+        reg.rects[0].r = uint16_t(bounds.right);
+        reg.rects[0].b = uint16_t(bounds.bottom);
+    } else {
+        reg.count = count;
+        for (size_t i=0 ; i<count ; i++) {
+            reg.rects[i].l = uint16_t(r[i].left);
+            reg.rects[i].t = uint16_t(r[i].top);
+            reg.rects[i].r = uint16_t(r[i].right);
+            reg.rects[i].b = uint16_t(r[i].bottom);
+        }
+    }
     return NO_ERROR;
 }
 
@@ -89,18 +113,37 @@ Region SharedBufferStack::getDirtyRegion(int buffer) const
     if (uint32_t(buffer) >= NUM_BUFFER_MAX)
         return res;
 
-    const FlatRegion& reg(dirtyRegion[buffer]);
-    res.set(Rect(reg.rects[0], reg.rects[1], reg.rects[2], reg.rects[3]));
+    const FlatRegion& reg(buffers[buffer].dirtyRegion);
+    if (reg.count > FlatRegion::NUM_RECT_MAX)
+        return res;
+
+    if (reg.count == 1) {
+        const Rect r(
+                reg.rects[0].l,
+                reg.rects[0].t,
+                reg.rects[0].r,
+                reg.rects[0].b);
+        res.set(r);
+    } else {
+        for (size_t i=0 ; i<reg.count ; i++) {
+            const Rect r(
+                    reg.rects[i].l,
+                    reg.rects[i].t,
+                    reg.rects[i].r,
+                    reg.rects[i].b);
+            res.orSelf(r);
+        }
+    }
     return res;
 }
 
 // ----------------------------------------------------------------------------
 
 SharedBufferBase::SharedBufferBase(SharedClient* sharedClient,
-        int surface, int num, int32_t identity)
+        int surface, int32_t identity)
     : mSharedClient(sharedClient), 
       mSharedStack(sharedClient->surfaces + surface),
-      mNumBuffers(num), mIdentity(identity)
+      mIdentity(identity)
 {
 }
 
@@ -108,16 +151,16 @@ SharedBufferBase::~SharedBufferBase()
 {
 }
 
-uint32_t SharedBufferBase::getIdentity()
-{
-    SharedBufferStack& stack( *mSharedStack );
-    return stack.identity;
-}
-
 status_t SharedBufferBase::getStatus() const
 {
     SharedBufferStack& stack( *mSharedStack );
     return stack.status;
+}
+
+int32_t SharedBufferBase::getIdentity() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.identity;
 }
 
 size_t SharedBufferBase::getFrontBuffer() const
@@ -132,16 +175,52 @@ String8 SharedBufferBase::dump(char const* prefix) const
     char buffer[SIZE];
     String8 result;
     SharedBufferStack& stack( *mSharedStack );
-    int tail = (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
     snprintf(buffer, SIZE, 
-            "%s[ head=%2d, available=%2d, queued=%2d, tail=%2d ] "
-            "reallocMask=%08x, inUse=%2d, identity=%d, status=%d\n",
-            prefix, stack.head, stack.available, stack.queued, tail,
+            "%s[ head=%2d, available=%2d, queued=%2d ] "
+            "reallocMask=%08x, inUse=%2d, identity=%d, status=%d",
+            prefix, stack.head, stack.available, stack.queued,
             stack.reallocMask, stack.inUse, stack.identity, stack.status);
     result.append(buffer);
+    result.append("\n");
     return result;
 }
 
+status_t SharedBufferBase::waitForCondition(const ConditionBase& condition)
+{
+    const SharedBufferStack& stack( *mSharedStack );
+    SharedClient& client( *mSharedClient );
+    const nsecs_t TIMEOUT = s2ns(1);
+    const int identity = mIdentity;
+
+    Mutex::Autolock _l(client.lock);
+    while ((condition()==false) &&
+            (stack.identity == identity) &&
+            (stack.status == NO_ERROR))
+    {
+        status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
+        // handle errors and timeouts
+        if (CC_UNLIKELY(err != NO_ERROR)) {
+            if (err == TIMED_OUT) {
+                if (condition()) {
+                    LOGE("waitForCondition(%s) timed out (identity=%d), "
+                        "but condition is true! We recovered but it "
+                        "shouldn't happen." , condition.name(), stack.identity);
+                    break;
+                } else {
+                    LOGW("waitForCondition(%s) timed out "
+                        "(identity=%d, status=%d). "
+                        "CPU may be pegged. trying again.", condition.name(),
+                        stack.identity, stack.status);
+                }
+            } else {
+                LOGE("waitForCondition(%s) error (%s) ",
+                        condition.name(), strerror(-err));
+                return err;
+            }
+        }
+    }
+    return (stack.identity != mIdentity) ? status_t(BAD_INDEX) : stack.status;
+}
 // ============================================================================
 // conditions and updates
 // ============================================================================
@@ -149,24 +228,34 @@ String8 SharedBufferBase::dump(char const* prefix) const
 SharedBufferClient::DequeueCondition::DequeueCondition(
         SharedBufferClient* sbc) : ConditionBase(sbc)  { 
 }
-bool SharedBufferClient::DequeueCondition::operator()() {
+bool SharedBufferClient::DequeueCondition::operator()() const {
     return stack.available > 0;
 }
 
 SharedBufferClient::LockCondition::LockCondition(
         SharedBufferClient* sbc, int buf) : ConditionBase(sbc), buf(buf) { 
 }
-bool SharedBufferClient::LockCondition::operator()() {
-    return (buf != stack.head || 
+bool SharedBufferClient::LockCondition::operator()() const {
+    // NOTE: if stack.head is messed up, we could crash the client
+    // or cause some drawing artifacts. This is okay, as long as it is
+    // limited to the client.
+    return (buf != stack.index[stack.head] ||
             (stack.queued > 0 && stack.inUse != buf));
 }
 
 SharedBufferServer::ReallocateCondition::ReallocateCondition(
         SharedBufferBase* sbb, int buf) : ConditionBase(sbb), buf(buf) { 
 }
-bool SharedBufferServer::ReallocateCondition::operator()() {
+bool SharedBufferServer::ReallocateCondition::operator()() const {
+    int32_t head = stack.head;
+    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX) {
+        // if stack.head is messed up, we cannot allow the server to
+        // crash (since stack.head is mapped on the client side)
+        stack.status = BAD_VALUE;
+        return false;
+    }
     // TODO: we should also check that buf has been dequeued
-    return (buf != stack.head);
+    return (buf != stack.index[head]);
 }
 
 // ----------------------------------------------------------------------------
@@ -206,11 +295,12 @@ SharedBufferServer::RetireUpdate::RetireUpdate(
     : UpdateBase(sbb), numBuffers(numBuffers) {
 }
 ssize_t SharedBufferServer::RetireUpdate::operator()() {
-    // head is only written in this function, which is single-thread.
     int32_t head = stack.head;
+    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX)
+        return BAD_VALUE;
 
     // Preventively lock the current buffer before updating queued.
-    android_atomic_write(head, &stack.inUse);
+    android_atomic_write(stack.index[head], &stack.inUse);
 
     // Decrement the number of queued buffers 
     int32_t queued;
@@ -221,16 +311,15 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
         }
     } while (android_atomic_cmpxchg(queued, queued-1, &stack.queued));
     
-    // update the head pointer
-    head = ((head+1 >= numBuffers) ? 0 : head+1);
-
     // lock the buffer before advancing head, which automatically unlocks
     // the buffer we preventively locked upon entering this function
-    android_atomic_write(head, &stack.inUse);
 
-    // advance head
+    head = (head + 1) % numBuffers;
+    android_atomic_write(stack.index[head], &stack.inUse);
+
+    // head is only modified here, so we don't need to use cmpxchg
     android_atomic_write(head, &stack.head);
-    
+
     // now that head has moved, we can increment the number of available buffers
     android_atomic_inc(&stack.available);
     return head;
@@ -250,41 +339,31 @@ ssize_t SharedBufferServer::StatusUpdate::operator()() {
 
 SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
-    : SharedBufferBase(sharedClient, surface, num, identity), tail(0)
+    : SharedBufferBase(sharedClient, surface, identity),
+      mNumBuffers(num), tail(0), undoDequeueTail(0)
 {
+    SharedBufferStack& stack( *mSharedStack );
     tail = computeTail();
+    queued_head = stack.head;
 }
 
 int32_t SharedBufferClient::computeTail() const
 {
     SharedBufferStack& stack( *mSharedStack );
-    // we need to make sure we read available and head coherently,
-    // w.r.t RetireUpdate.
-    int32_t newTail;
-    int32_t avail;
-    int32_t head;
-    do {
-        avail = stack.available;
-        head = stack.head;
-    } while (stack.available != avail);
-    newTail = head - avail + 1;
-    if (newTail < 0) {
-        newTail += mNumBuffers;
-    } else if (newTail >= mNumBuffers) {
-        newTail -= mNumBuffers;
-    }
-    return newTail;
+    return (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
 }
 
 ssize_t SharedBufferClient::dequeue()
 {
     SharedBufferStack& stack( *mSharedStack );
 
-    if (stack.head == tail && stack.available == 2) {
+    if (stack.head == tail && stack.available == mNumBuffers) {
         LOGW("dequeue: tail=%d, head=%d, avail=%d, queued=%d",
                 tail, stack.head, stack.available, stack.queued);
     }
-        
+
+    RWLock::AutoRLock _rd(mLock);
+
     const nsecs_t dequeueTime = systemTime(SYSTEM_TIME_THREAD);
 
     //LOGD("[%d] about to dequeue a buffer",
@@ -301,9 +380,10 @@ ssize_t SharedBufferClient::dequeue()
         LOGW("dequeue probably called from multiple threads!");
     }
 
-    int dequeued = tail;
+    undoDequeueTail = tail;
+    int dequeued = stack.index[tail];
     tail = ((tail+1 >= mNumBuffers) ? 0 : tail+1);
-    LOGD_IF(DEBUG_ATOMICS, "dequeued=%d, tail=%d, %s",
+    LOGD_IF(DEBUG_ATOMICS, "dequeued=%d, tail++=%d, %s",
             dequeued, tail, dump("").string());
 
     mDequeueTime[dequeued] = dequeueTime; 
@@ -313,16 +393,23 @@ ssize_t SharedBufferClient::dequeue()
 
 status_t SharedBufferClient::undoDequeue(int buf)
 {
+    RWLock::AutoRLock _rd(mLock);
+
+    // TODO: we can only undo the previous dequeue, we should
+    // enforce that in the api
     UndoDequeueUpdate update(this);
     status_t err = updateCondition( update );
     if (err == NO_ERROR) {
-        tail = computeTail();
+        tail = undoDequeueTail;
     }
     return err;
 }
 
 status_t SharedBufferClient::lock(int buf)
 {
+    RWLock::AutoRLock _rd(mLock);
+
+    SharedBufferStack& stack( *mSharedStack );
     LockCondition condition(this, buf);
     status_t err = waitForCondition(condition);
     return err;
@@ -330,53 +417,100 @@ status_t SharedBufferClient::lock(int buf)
 
 status_t SharedBufferClient::queue(int buf)
 {
+    RWLock::AutoRLock _rd(mLock);
+
+    SharedBufferStack& stack( *mSharedStack );
+
+    queued_head = (queued_head + 1) % mNumBuffers;
+    stack.index[queued_head] = buf;
+
     QueueUpdate update(this);
     status_t err = updateCondition( update );
     LOGD_IF(DEBUG_ATOMICS, "queued=%d, %s", buf, dump("").string());
-    SharedBufferStack& stack( *mSharedStack );
+
     const nsecs_t now = systemTime(SYSTEM_TIME_THREAD);
     stack.stats.totalTime = ns2us(now - mDequeueTime[buf]);
     return err;
 }
 
-bool SharedBufferClient::needNewBuffer(int buffer) const
+bool SharedBufferClient::needNewBuffer(int buf) const
 {
     SharedBufferStack& stack( *mSharedStack );
-    const uint32_t mask = 1<<buffer;
+    const uint32_t mask = 1<<(31-buf);
     return (android_atomic_and(~mask, &stack.reallocMask) & mask) != 0;
 }
 
-status_t SharedBufferClient::setDirtyRegion(int buffer, const Region& reg)
+status_t SharedBufferClient::setCrop(int buf, const Rect& crop)
 {
     SharedBufferStack& stack( *mSharedStack );
-    return stack.setDirtyRegion(buffer, reg);
+    return stack.setCrop(buf, crop);
+}
+
+status_t SharedBufferClient::setDirtyRegion(int buf, const Region& reg)
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.setDirtyRegion(buf, reg);
+}
+
+status_t SharedBufferClient::setBufferCount(
+        int bufferCount, const SetBufferCountCallback& ipc)
+{
+    SharedBufferStack& stack( *mSharedStack );
+    if (uint32_t(bufferCount) >= SharedBufferStack::NUM_BUFFER_MAX)
+        return BAD_VALUE;
+
+    if (uint32_t(bufferCount) < SharedBufferStack::NUM_BUFFER_MIN)
+        return BAD_VALUE;
+
+    RWLock::AutoWLock _wr(mLock);
+
+    status_t err = ipc(bufferCount);
+    if (err == NO_ERROR) {
+        mNumBuffers = bufferCount;
+        queued_head = (stack.head + stack.queued) % mNumBuffers;
+    }
+    return err;
 }
 
 // ----------------------------------------------------------------------------
 
 SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
-    : SharedBufferBase(sharedClient, surface, num, identity)
+    : SharedBufferBase(sharedClient, surface, identity),
+      mNumBuffers(num)
 {
     mSharedStack->init(identity);
     mSharedStack->head = num-1;
     mSharedStack->available = num;
     mSharedStack->queued = 0;
     mSharedStack->reallocMask = 0;
-    memset(mSharedStack->dirtyRegion, 0, sizeof(mSharedStack->dirtyRegion));
+    memset(mSharedStack->buffers, 0, sizeof(mSharedStack->buffers));
+    for (int i=0 ; i<num ; i++) {
+        mBufferList.add(i);
+        mSharedStack->index[i] = i;
+    }
 }
 
 ssize_t SharedBufferServer::retireAndLock()
 {
+    RWLock::AutoRLock _l(mLock);
+
     RetireUpdate update(this, mNumBuffers);
     ssize_t buf = updateCondition( update );
-    LOGD_IF(DEBUG_ATOMICS && buf>=0, "retire=%d, %s", int(buf), dump("").string());
+    if (buf >= 0) {
+        if (uint32_t(buf) >= SharedBufferStack::NUM_BUFFER_MAX)
+            return BAD_VALUE;
+        SharedBufferStack& stack( *mSharedStack );
+        buf = stack.index[buf];
+        LOGD_IF(DEBUG_ATOMICS && buf>=0, "retire=%d, %s",
+                int(buf), dump("").string());
+    }
     return buf;
 }
 
-status_t SharedBufferServer::unlock(int buffer)
+status_t SharedBufferServer::unlock(int buf)
 {
-    UnlockUpdate update(this, buffer);
+    UnlockUpdate update(this, buf);
     status_t err = updateCondition( update );
     return err;
 }
@@ -389,11 +523,25 @@ void SharedBufferServer::setStatus(status_t status)
     }
 }
 
-status_t SharedBufferServer::reallocate()
+status_t SharedBufferServer::reallocateAll()
 {
+    RWLock::AutoRLock _l(mLock);
+
     SharedBufferStack& stack( *mSharedStack );
-    uint32_t mask = (1<<mNumBuffers)-1;
-    android_atomic_or(mask, &stack.reallocMask); 
+    uint32_t mask = mBufferList.getMask();
+    android_atomic_or(mask, &stack.reallocMask);
+    return NO_ERROR;
+}
+
+status_t SharedBufferServer::reallocateAllExcept(int buffer)
+{
+    RWLock::AutoRLock _l(mLock);
+
+    SharedBufferStack& stack( *mSharedStack );
+    BufferList temp(mBufferList);
+    temp.remove(buffer);
+    uint32_t mask = temp.getMask();
+    android_atomic_or(mask, &stack.reallocMask);
     return NO_ERROR;
 }
 
@@ -403,23 +551,106 @@ int32_t SharedBufferServer::getQueuedCount() const
     return stack.queued;
 }
 
-status_t SharedBufferServer::assertReallocate(int buffer)
+status_t SharedBufferServer::assertReallocate(int buf)
 {
-    ReallocateCondition condition(this, buffer);
+    /*
+     * NOTE: it's safe to hold mLock for read while waiting for
+     * the ReallocateCondition because that condition is not updated
+     * by the thread that holds mLock for write.
+     */
+    RWLock::AutoRLock _l(mLock);
+
+    // TODO: need to validate "buf"
+    ReallocateCondition condition(this, buf);
     status_t err = waitForCondition(condition);
     return err;
 }
 
-Region SharedBufferServer::getDirtyRegion(int buffer) const
+Region SharedBufferServer::getDirtyRegion(int buf) const
 {
     SharedBufferStack& stack( *mSharedStack );
-    return stack.getDirtyRegion(buffer);
+    return stack.getDirtyRegion(buf);
+}
+
+/*
+ * NOTE: this is not thread-safe on the server-side, meaning
+ * 'head' cannot move during this operation. The client-side
+ * can safely operate an usual.
+ *
+ */
+status_t SharedBufferServer::resize(int newNumBuffers)
+{
+    if (uint32_t(newNumBuffers) >= SharedBufferStack::NUM_BUFFER_MAX)
+        return BAD_VALUE;
+
+    RWLock::AutoWLock _l(mLock);
+
+    // for now we're not supporting shrinking
+    const int numBuffers = mNumBuffers;
+    if (newNumBuffers < numBuffers)
+        return BAD_VALUE;
+
+    SharedBufferStack& stack( *mSharedStack );
+    const int extra = newNumBuffers - numBuffers;
+
+    // read the head, make sure it's valid
+    int32_t head = stack.head;
+    if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX)
+        return BAD_VALUE;
+
+    int base = numBuffers;
+    int32_t avail = stack.available;
+    int tail = head - avail + 1;
+
+    if (tail >= 0) {
+        int8_t* const index = const_cast<int8_t*>(stack.index);
+        const int nb = numBuffers - head;
+        memmove(&index[head + extra], &index[head], nb);
+        base = head;
+        // move head 'extra' ahead, this doesn't impact stack.index[head];
+        stack.head = head + extra;
+    }
+    stack.available += extra;
+
+    // fill the new free space with unused buffers
+    BufferList::const_iterator curr(mBufferList.free_begin());
+    for (int i=0 ; i<extra ; i++) {
+        stack.index[base+i] = *curr;
+        mBufferList.add(*curr);
+        ++curr;
+    }
+
+    mNumBuffers = newNumBuffers;
+    return NO_ERROR;
 }
 
 SharedBufferStack::Statistics SharedBufferServer::getStats() const
 {
     SharedBufferStack& stack( *mSharedStack );
     return stack.stats;
+}
+
+// ---------------------------------------------------------------------------
+status_t SharedBufferServer::BufferList::add(int value)
+{
+    if (uint32_t(value) >= mCapacity)
+        return BAD_VALUE;
+    uint32_t mask = 1<<(31-value);
+    if (mList & mask)
+        return ALREADY_EXISTS;
+    mList |= mask;
+    return NO_ERROR;
+}
+
+status_t SharedBufferServer::BufferList::remove(int value)
+{
+    if (uint32_t(value) >= mCapacity)
+        return BAD_VALUE;
+    uint32_t mask = 1<<(31-value);
+    if (!(mList & mask))
+        return NAME_NOT_FOUND;
+    mList &= ~mask;
+    return NO_ERROR;
 }
 
 
