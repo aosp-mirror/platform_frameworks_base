@@ -138,7 +138,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     public Dialog(Context context, int theme) {
         mContext = new ContextThemeWrapper(
             context, theme == 0 ? com.android.internal.R.style.Theme_Dialog : theme);
-        mWindowManager = (WindowManager)context.getSystemService("window");
+        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Window w = PolicyManager.makeNewWindow(mContext);
         mWindow = w;
         w.setCallback(this);
