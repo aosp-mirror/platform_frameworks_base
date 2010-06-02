@@ -37,6 +37,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
@@ -1054,6 +1055,13 @@ public final class BridgeContext extends Context {
     @Override
     public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1,
             CursorFactory arg2) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1,
+            CursorFactory arg2, DatabaseErrorHandler arg3) {
         // TODO Auto-generated method stub
         return null;
     }
