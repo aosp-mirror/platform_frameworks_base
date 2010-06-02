@@ -107,6 +107,10 @@ public class StatusBarNotification implements Parcelable {
                 + " notification=" + notification + ")";
     }
 
+    public boolean isOngoing() {
+        return (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0;
+    }
+
 }
 
 

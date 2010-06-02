@@ -33,12 +33,14 @@ import android.widget.ImageSwitcher;
 
 import java.util.ArrayList;
 
+import com.android.internal.statusbar.StatusBarNotification;
+
 
 public abstract class Ticker {
     private static final int TICKER_SEGMENT_DELAY = 3000;
     
     private final class Segment {
-        NotificationData notificationData;
+        StatusBarNotification notificationData;
         Drawable icon;
         CharSequence text;
         int current;
@@ -114,7 +116,7 @@ public abstract class Ticker {
             return null;
         }
 
-        Segment(NotificationData n, Drawable icon, CharSequence text) {
+        Segment(StatusBarNotification n, Drawable icon, CharSequence text) {
             this.notificationData = n;
             this.icon = icon;
             this.text = text;
@@ -156,7 +158,7 @@ public abstract class Ticker {
         mPaint = text.getPaint();
     }
 
-    void addEntry(NotificationData n, Drawable icon, CharSequence text) {
+    void addEntry(StatusBarNotification n, Drawable icon, CharSequence text) {
         int initialCount = mSegments.size();
 
         Segment newSegment = new Segment(n, icon, text);

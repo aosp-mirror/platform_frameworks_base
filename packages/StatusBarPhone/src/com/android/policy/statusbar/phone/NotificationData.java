@@ -16,29 +16,51 @@
 
 package com.android.policy.statusbar.phone;
 
-import android.app.PendingIntent;
-import android.widget.RemoteViews;
+import android.os.IBinder;
+import android.view.View;
 
+import com.android.internal.statusbar.StatusBarNotification;
+
+import java.util.ArrayList;
+
+/**
+ * The list of currently displaying notifications.
+ */
 public class NotificationData {
-    public String pkg;
-    public String tag;
-    public int id;
-    public CharSequence tickerText;
+    public static final class Entry {
+        public IBinder key;
+        public StatusBarNotification notification;
+        public StatusBarIconView icon;
+        public View expanded;
+    }
+    private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
 
-    public long when;
-    public boolean ongoingEvent;
-    public boolean clearable;
+    public int size() {
+        return mEntries.size();
+    }
 
-    public RemoteViews contentView;
-    public PendingIntent contentIntent;
+    public Entry getEntryAt(int index) {
+        return mEntries.get(index);
+    }
 
-    public PendingIntent deleteIntent;
+    public int add(IBinder key, StatusBarNotification notification, View expanded) {
+        Entry entry = new Entry();
+        entry.key = key;
+        entry.notification = notification;
+        entry.expanded = expanded;
+        final int index = chooseIndex(notification.notification.when);
+        mEntries.add(index, entry);
+        return index;
+    }
 
-    public String toString() {
-        return "NotificationData(package=" + pkg + " id=" + id + " tickerText=" + tickerText
-                + " ongoingEvent=" + ongoingEvent + " contentIntent=" + contentIntent
-                + " deleteIntent=" + deleteIntent
-                + " clearable=" + clearable
-                + " contentView=" + contentView + " when=" + when + ")";
+    private int chooseIndex(final long when) {
+        final int N = mEntries.size();
+        for (int i=0; i<N; i++) {
+            Entry entry = mEntries.get(i);
+            if (entry.notification.notification.when > when) {
+                return i;
+            }
+        }
+        return N;
     }
 }
