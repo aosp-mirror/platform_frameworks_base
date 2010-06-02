@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
-import android.os.IBinder;
-import android.view.View;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.widget.LinearLayout;
 
-public class StatusBarNotification {
-    IBinder key;
-    NotificationData data;
-    View view;
-    View contentView;
+
+public class NotificationLinearLayout extends LinearLayout {
+    public NotificationLinearLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 }
+

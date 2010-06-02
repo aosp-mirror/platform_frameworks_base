@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -27,14 +27,12 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
-import com.android.internal.R;
-
 public class StatusBarView extends FrameLayout {
     private static final String TAG = "StatusBarView";
 
     static final int DIM_ANIM_TIME = 400;
     
-    StatusBarManagerService mService;
+    PhoneStatusBarService mService;
     boolean mTracking;
     int mStartX, mStartY;
     ViewGroup mNotificationIcons;
@@ -94,7 +92,7 @@ public class StatusBarView extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mService.updateExpandedViewPos(StatusBarManagerService.EXPANDED_LEAVE_ALONE);
+        mService.updateExpandedViewPos(PhoneStatusBarService.EXPANDED_LEAVE_ALONE);
     }
 
     @Override

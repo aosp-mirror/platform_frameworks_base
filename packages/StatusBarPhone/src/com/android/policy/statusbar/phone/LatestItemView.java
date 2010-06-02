@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
-import android.os.IBinder;
-import android.view.View;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.util.Slog;
+import android.view.MotionEvent;
+import android.widget.FrameLayout;
 
-public class StatusBarNotification {
-    IBinder key;
-    NotificationData data;
-    View view;
-    View contentView;
+public class LatestItemView extends FrameLayout {
+
+    public LatestItemView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return onTouchEvent(ev);
+    }
 }
