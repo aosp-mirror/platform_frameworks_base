@@ -142,7 +142,8 @@ public:
                                     uint32_t flags      = 0,
                                     callback_t cbf = 0,
                                     void* user = 0,
-                                    int notificationFrames = 0);
+                                    int notificationFrames = 0,
+                                    int sessionId = 0);
 
 
     /* Terminates the AudioRecord and unregisters it from AudioFlinger.
@@ -168,7 +169,8 @@ public:
                             callback_t cbf = 0,
                             void* user = 0,
                             int notificationFrames = 0,
-                            bool threadCanCallJava = false);
+                            bool threadCanCallJava = false,
+                            int sessionId = 0);
 
 
     /* Result of constructing the AudioRecord. This must be checked
@@ -270,6 +272,16 @@ public:
      */
             audio_io_handle_t    getInput();
 
+    /* returns the audio session ID associated to this AudioRecord.
+     *
+     * Parameters:
+     *  none.
+     *
+     * Returned value:
+     *  AudioRecord session ID.
+     */
+            int    getSessionId();
+
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
      * STOPPED instead of NO_ERROR as long as there are buffers availlable,
@@ -356,6 +368,7 @@ private:
     uint32_t                mFlags;
     uint32_t                mChannels;
     audio_io_handle_t       mInput;
+    int                     mSessionId;
 };
 
 }; // namespace android

@@ -58,7 +58,8 @@ AudioTrack::AudioTrack(
         uint32_t flags,
         callback_t cbf,
         void* user,
-        int notificationFrames)
+        int notificationFrames,
+        int sessionId)
     : mStatus(NO_INIT)
 {
     mStatus = set(streamType, sampleRate, format, channels,
@@ -74,7 +75,8 @@ AudioTrack::AudioTrack(
         uint32_t flags,
         callback_t cbf,
         void* user,
-        int notificationFrames)
+        int notificationFrames,
+        int sessionId)
     : mStatus(NO_INIT)
 {
     mStatus = set(streamType, sampleRate, format, channels,
@@ -110,7 +112,8 @@ status_t AudioTrack::set(
         void* user,
         int notificationFrames,
         const sp<IMemory>& sharedBuffer,
-        bool threadCanCallJava)
+        bool threadCanCallJava,
+        int sessionId)
 {
 
     LOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
@@ -171,8 +174,11 @@ status_t AudioTrack::set(
 
     mVolume[LEFT] = 1.0f;
     mVolume[RIGHT] = 1.0f;
+    mSendLevel = 0;
     mFrameCount = frameCount;
     mNotificationFramesReq = notificationFrames;
+    mSessionId = sessionId;
+
     // create the IAudioTrack
     status_t status = createTrack(streamType, sampleRate, format, channelCount,
                                   frameCount, flags, sharedBuffer, output, true);
@@ -396,19 +402,49 @@ bool AudioTrack::muted() const
     return mMuted;
 }
 
-void AudioTrack::setVolume(float left, float right)
+status_t AudioTrack::setVolume(float left, float right)
 {
+    if (left > 1.0f || right > 1.0f) {
+        return BAD_VALUE;
+    }
+
     mVolume[LEFT] = left;
     mVolume[RIGHT] = right;
 
     // write must be atomic
-    mCblk->volumeLR = (int32_t(int16_t(left * 0x1000)) << 16) | int16_t(right * 0x1000);
+    mCblk->volumeLR = (uint32_t(uint16_t(right * 0x1000)) << 16) | uint16_t(left * 0x1000);
+
+    return NO_ERROR;
 }
 
 void AudioTrack::getVolume(float* left, float* right)
 {
-    *left  = mVolume[LEFT];
-    *right = mVolume[RIGHT];
+    if (left != NULL) {
+        *left  = mVolume[LEFT];
+    }
+    if (right != NULL) {
+        *right = mVolume[RIGHT];
+    }
+}
+
+status_t AudioTrack::setSendLevel(float level)
+{
+    if (level > 1.0f) {
+        return BAD_VALUE;
+    }
+
+    mSendLevel = level;
+
+    mCblk->sendLevel = uint16_t(level * 0x1000);
+
+    return NO_ERROR;
+}
+
+void AudioTrack::getSendLevel(float* level)
+{
+    if (level != NULL) {
+        *level  = mSendLevel;
+    }
 }
 
 status_t AudioTrack::setSampleRate(int rate)
@@ -563,6 +599,16 @@ audio_io_handle_t AudioTrack::getOutput()
             mCblk->sampleRate, mFormat, mChannels, (AudioSystem::output_flags)mFlags);
 }
 
+int AudioTrack::getSessionId()
+{
+    return mSessionId;
+}
+
+status_t AudioTrack::attachAuxEffect(int effectId)
+{
+    return mAudioTrack->attachAuxEffect(effectId);
+}
+
 // -------------------------------------------------------------------------
 
 status_t AudioTrack::createTrack(
@@ -647,6 +693,7 @@ status_t AudioTrack::createTrack(
                                                       ((uint16_t)flags) << 16,
                                                       sharedBuffer,
                                                       output,
+                                                      &mSessionId,
                                                       &status);
 
     if (track == 0) {
@@ -672,7 +719,8 @@ status_t AudioTrack::createTrack(
         mCblk->stepUser(mCblk->frameCount);
     }
 
-    mCblk->volumeLR = (int32_t(int16_t(mVolume[LEFT] * 0x1000)) << 16) | int16_t(mVolume[RIGHT] * 0x1000);
+    mCblk->volumeLR = (uint32_t(uint16_t(mVolume[RIGHT] * 0x1000)) << 16) | uint16_t(mVolume[LEFT] * 0x1000);
+    mCblk->sendLevel = uint16_t(mSendLevel * 0x1000);
     mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
     mCblk->waitTimeMs = 0;
     mRemainingFrames = mNotificationFramesAct;
@@ -1016,7 +1064,7 @@ audio_track_cblk_t::audio_track_cblk_t()
     : lock(Mutex::SHARED), cv(Condition::SHARED), user(0), server(0),
     userBase(0), serverBase(0), buffers(0), frameCount(0),
     loopStart(UINT_MAX), loopEnd(UINT_MAX), loopCount(0), volumeLR(0),
-    flags(0)
+    flags(0), sendLevel(0)
 {
 }
 

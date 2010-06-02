@@ -45,7 +45,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 AudioRecord::AudioRecord()
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT), mSessionId(0)
 {
 }
 
@@ -58,11 +58,12 @@ AudioRecord::AudioRecord(
         uint32_t flags,
         callback_t cbf,
         void* user,
-        int notificationFrames)
-    : mStatus(NO_INIT)
+        int notificationFrames,
+        int sessionId)
+    : mStatus(NO_INIT), mSessionId(0)
 {
     mStatus = set(inputSource, sampleRate, format, channels,
-            frameCount, flags, cbf, user, notificationFrames);
+            frameCount, flags, cbf, user, notificationFrames, sessionId);
 }
 
 AudioRecord::~AudioRecord()
@@ -91,7 +92,8 @@ status_t AudioRecord::set(
         callback_t cbf,
         void* user,
         int notificationFrames,
-        bool threadCanCallJava)
+        bool threadCanCallJava,
+        int sessionId)
 {
 
     LOGV("set(): sampleRate %d, channels %d, frameCount %d",sampleRate, channels, frameCount);
@@ -119,6 +121,7 @@ status_t AudioRecord::set(
     if (!AudioSystem::isInputChannel(channels)) {
         return BAD_VALUE;
     }
+
     int channelCount = AudioSystem::popCount(channels);
 
     audio_io_handle_t input = AudioSystem::getInput(inputSource,
@@ -163,6 +166,8 @@ status_t AudioRecord::set(
     if (notificationFrames == 0) {
         notificationFrames = frameCount/2;
     }
+
+    mSessionId = sessionId;
 
     // create the IAudioRecord
     status_t status = openRecord(sampleRate, format, channelCount,
@@ -414,6 +419,7 @@ status_t AudioRecord::openRecord(
                                                        channelCount,
                                                        frameCount,
                                                        ((uint16_t)flags) << 16,
+                                                       &mSessionId,
                                                        &status);
     if (record == 0) {
         LOGE("AudioFlinger could not create record track, status: %d", status);
@@ -530,6 +536,11 @@ audio_io_handle_t AudioRecord::getInput()
                                 mFormat, mChannels,
                                 (AudioSystem::audio_in_acoustics)mFlags);
     return mInput;
+}
+
+int AudioRecord::getSessionId()
+{
+    return mSessionId;
 }
 
 // -------------------------------------------------------------------------

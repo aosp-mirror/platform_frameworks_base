@@ -39,7 +39,7 @@ static int gInitDone; // true is global initialization has been preformed
 static int init();
 static int loadLibrary(const char *libPath, int *handle);
 static int unloadLibrary(int handle);
-static int numEffectModules();
+static uint32_t numEffectModules();
 static int findEffect(effect_uuid_t *uuid, lib_entry_t **lib, effect_descriptor_t **desc);
 static void dumpEffectDescriptor(effect_descriptor_t *desc, char *str, size_t len);
 
@@ -96,7 +96,7 @@ const struct effect_interface_s gInterface = {
 //      Effect Factory Interface functions
 /////////////////////////////////////////////////
 
-int EffectQueryNumberEffects(int *pNumEffects)
+int EffectQueryNumberEffects(uint32_t *pNumEffects)
 {
     int ret = init();
     if (ret < 0) {
@@ -353,8 +353,8 @@ int loadLibrary(const char *libPath, int *handle)
     effect_QueryNextEffect_t queryFx;
     effect_CreateEffect_t createFx;
     effect_ReleaseEffect_t releaseFx;
-    int numFx;
-    int fx;
+    uint32_t numFx;
+    uint32_t fx;
     int ret;
     list_elem_t *e, *descHead = NULL;
     lib_entry_t *l;
@@ -525,9 +525,9 @@ int unloadLibrary(int handle)
 
 
 
-int numEffectModules() {
+uint32_t numEffectModules() {
     list_elem_t *e = gLibraryList;
-    int cnt = 0;
+    uint32_t cnt = 0;
 
     // Reset pointers for EffectQueryNext()
     gCurLib = e;
