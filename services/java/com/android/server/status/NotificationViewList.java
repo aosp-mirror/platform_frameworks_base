@@ -135,8 +135,8 @@ class NotificationViewList {
                 index++;
             }
         }
-        Slog.e(StatusBarService.TAG, "Couldn't find notification in NotificationViewList.");
-        Slog.e(StatusBarService.TAG, "notification=" + notification);
+        Slog.e(StatusBarManagerService.TAG, "Couldn't find notification in NotificationViewList.");
+        Slog.e(StatusBarManagerService.TAG, "notification=" + notification);
         dump(notification);
         return 0;
     }
@@ -173,8 +173,8 @@ class NotificationViewList {
     }
 
     void add(StatusBarNotification notification) {
-        if (StatusBarService.SPEW) {
-            Slog.d(StatusBarService.TAG, "before add NotificationViewList"
+        if (StatusBarManagerService.SPEW) {
+            Slog.d(StatusBarManagerService.TAG, "before add NotificationViewList"
                     + " notification.data.ongoingEvent=" + notification.data.ongoingEvent);
             dump(notification);
         }
@@ -192,14 +192,14 @@ class NotificationViewList {
         }
         list.add(index, notification);
 
-        if (StatusBarService.SPEW) {
-            Slog.d(StatusBarService.TAG, "after add NotificationViewList index=" + index);
+        if (StatusBarManagerService.SPEW) {
+            Slog.d(StatusBarManagerService.TAG, "after add NotificationViewList index=" + index);
             dump(notification);
         }
     }
 
     void dump(StatusBarNotification notification) {
-        if (StatusBarService.SPEW) {
+        if (StatusBarManagerService.SPEW) {
             boolean showTime = false;
             String s = "";
             for (int i=0; i<mOngoing.size(); i++) {
@@ -217,7 +217,7 @@ class NotificationViewList {
                 }
                 s += " ";
             }
-            Slog.d(StatusBarService.TAG, "NotificationViewList ongoing: " + s);
+            Slog.d(StatusBarManagerService.TAG, "NotificationViewList ongoing: " + s);
 
             s = "";
             for (int i=0; i<mLatest.size(); i++) {
@@ -235,7 +235,7 @@ class NotificationViewList {
                 }
                 s += " ";
             }
-            Slog.d(StatusBarService.TAG, "NotificationViewList latest:  " + s);
+            Slog.d(StatusBarManagerService.TAG, "NotificationViewList latest:  " + s);
         }
     }
 

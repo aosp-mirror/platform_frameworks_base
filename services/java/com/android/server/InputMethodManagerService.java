@@ -27,7 +27,7 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
 import com.android.server.status.IconData;
-import com.android.server.status.StatusBarService;
+import com.android.server.status.StatusBarManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -110,7 +110,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final Context mContext;
     final Handler mHandler;
     final SettingsObserver mSettingsObserver;
-    final StatusBarService mStatusBar;
+    final StatusBarManagerService mStatusBar;
     final IBinder mInputMethodIcon;
     final IconData mInputMethodData;
     final IWindowManager mIWindowManager;
@@ -447,7 +447,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public InputMethodManagerService(Context context, StatusBarService statusBar) {
+    public InputMethodManagerService(Context context, StatusBarManagerService statusBar) {
         mContext = context;
         mHandler = new Handler(this);
         mIWindowManager = IWindowManager.Stub.asInterface(
