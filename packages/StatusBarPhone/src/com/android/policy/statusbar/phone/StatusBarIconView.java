@@ -54,11 +54,16 @@ public class StatusBarIconView extends AnimatedImageView {
                 && mIcon.iconId == icon.iconId;
         final boolean levelEquals = iconEquals
                 && mIcon.iconLevel == icon.iconLevel;
+        final boolean visibilityEquals = mIcon != null
+                && mIcon.visible == icon.visible;
         if (!iconEquals) {
             setImageDrawable(getIcon(icon));
         }
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
+        }
+        if (!visibilityEquals) {
+            setVisibility(icon.visible ? VISIBLE : GONE);
         }
         mIcon = icon.clone();
     }

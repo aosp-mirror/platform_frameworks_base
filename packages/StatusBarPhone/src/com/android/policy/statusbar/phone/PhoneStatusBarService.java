@@ -359,16 +359,6 @@ public class PhoneStatusBarService extends StatusBarService {
         }
     }
 
-    /* private */ void performSetIconVisibility(IBinder key, boolean visible) {
-        synchronized (mIconMap) {
-            if (SPEW) {
-                Slog.d(TAG, "performSetIconVisibility key=" + key + " visible=" + visible);
-            }
-            StatusBarIconData icon = mIconMap.get(key);
-            icon.view.setVisibility(visible ? View.VISIBLE : View.GONE);
-        }
-    }
-    
     StatusBarNotification getNotification(IBinder key) {
         synchronized (mNotificationData) {
             return mNotificationData.get(key);
