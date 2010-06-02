@@ -69,6 +69,7 @@ public class StatusBarIconView extends AnimatedImageView {
                 Drawable drawable = getIcon(icon);
                 if (drawable == null) {
                     mError = true;
+                    Slog.w(PhoneStatusBarService.TAG, "No icon ID for slot " + mSlot);
                     break error;
                 }
                 setImageDrawable(drawable);
@@ -86,6 +87,10 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
+    private Drawable getIcon(StatusBarIcon icon) {
+        return getIcon(getContext(), icon);
+    }
+
     /**
      * Returns the right icon to use for this item, respecting the iconId and
      * iconPackage (if set)
@@ -94,8 +99,7 @@ public class StatusBarIconView extends AnimatedImageView {
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
-    private Drawable getIcon(StatusBarIcon icon) {
-        Context context = getContext();
+    public static Drawable getIcon(Context context, StatusBarIcon icon) {
         Resources r = null;
 
         if (icon.iconPackage != null) {
@@ -110,7 +114,6 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         if (icon.iconId == 0) {
-            Slog.w(PhoneStatusBarService.TAG, "No icon ID for slot " + mSlot);
             return null;
         }
         

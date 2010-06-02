@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.internal.util.CharSequences;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -334,7 +333,7 @@ public class PhoneStatusBarService extends StatusBarService {
         addNotificationViews(key, notification);
 
         // show the ticker
-        // TODO
+        tick(notification);
 
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
@@ -400,7 +399,7 @@ public class PhoneStatusBarService extends StatusBarService {
         }
 
         // Restart the ticker if it's still running
-        // TODO
+        tick(notification);
 
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
@@ -409,14 +408,16 @@ public class PhoneStatusBarService extends StatusBarService {
 
     public void removeNotification(IBinder key) {
         Slog.d(TAG, "removeNotification key=" + key);
-        removeNotificationViews(key);
+        StatusBarNotification old = removeNotificationViews(key);
 
-        // Cancel the ticker if it's still running
-        // TODO
+        if (old != null) {
+            // Cancel the ticker if it's still running
+            mTicker.removeEntry(old);
 
-        // Recalculate the position of the sliding windows and the titles.
-        setAreThereNotifications();
-        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+            // Recalculate the position of the sliding windows and the titles.
+            setAreThereNotifications();
+            updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+        }
     }
 
     private int chooseIconIndex(boolean isOngoing, int viewIndex) {
@@ -499,19 +500,21 @@ public class PhoneStatusBarService extends StatusBarService {
                 new LinearLayout.LayoutParams(mIconWidth, mHeight));
     }
 
-    void removeNotificationViews(IBinder key) {
+    StatusBarNotification removeNotificationViews(IBinder key) {
         NotificationData.Entry entry = mOngoing.remove(key);
         if (entry == null) {
             entry = mLatest.remove(key);
             if (entry == null) {
                 Slog.w(TAG, "removeNotification for unknown key: " + key);
-                return;
+                return null;
             }
         }
         // Remove the expanded view.
         ((ViewGroup)entry.row.getParent()).removeView(entry.row);
         // Remove the icon.
         ((ViewGroup)entry.icon.getParent()).removeView(entry.icon);
+
+        return entry.notification;
     }
 
     private void setAreThereNotifications() {
@@ -957,6 +960,19 @@ public class PhoneStatusBarService extends StatusBarService {
                 // system process is dead if we're here.
             }
             animateCollapse();
+        }
+    }
+
+    private void tick(StatusBarNotification n) {
+        // Show the ticker if one is requested. Also don't do this
+        // until status bar window is attached to the window manager,
+        // because...  well, what's the point otherwise?  And trying to
+        // run a ticker without being attached will crash!
+        if (n.notification.tickerText != null && mStatusBarView.getWindowToken() != null) {
+            if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
+                            | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
+                mTicker.addEntry(n);
+            }
         }
     }
 
