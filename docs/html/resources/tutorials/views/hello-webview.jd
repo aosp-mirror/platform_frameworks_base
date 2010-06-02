@@ -12,7 +12,7 @@ that can view and navigate web pages.</p>
    <li>Open the <code>res/layout/main.xml</code> file and insert the following:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;WebView
+&lt;WebView  xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/webview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -79,7 +79,7 @@ private class HelloWebViewClient extends WebViewClient {
   </li>
   <li>Then towards the end of the {@link android.app.Activity#onCreate(Bundle)} method, set an
   instance of the <code>HelloWebViewClient</code> as the {@link android.webkit.WebViewClient}:
-   <pre>mWebView.setWebViewClient(new WebViewClientDemo());</pre>
+   <pre>mWebView.setWebViewClient(new HelloWebViewClient());</pre>
 
     <p>This line can go anywhere following the initialization of the {@link
     android.webkit.WebView} object.</p>
