@@ -82,7 +82,6 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
 
         // Set up the initial notification state
         N = notificationKeys.size();
-        Slog.d(TAG, "installing " + N + " initial notifications");
         if (N == notifications.size()) {
             for (int i=0; i<N; i++) {
                 addNotification(notificationKeys.get(i), notifications.get(i));
