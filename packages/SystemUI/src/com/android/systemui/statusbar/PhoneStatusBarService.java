@@ -72,6 +72,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.StatusBarPolicy;
 
 public class PhoneStatusBarService extends StatusBarService {
     static final String TAG = "PhoneStatusBarService";
@@ -111,6 +112,8 @@ public class PhoneStatusBarService extends StatusBarService {
             return super.dispatchKeyEvent(event);
         }
     }
+
+    StatusBarPolicy mIconPolicy;
     
     int mHeight;
     int mIconWidth;
@@ -199,6 +202,9 @@ public class PhoneStatusBarService extends StatusBarService {
 
         // Next, call super.onCreate(), which will populate our views.
         super.onCreate();
+
+        // Lastly, call to the icon policy to install/update all the icons.
+        mIconPolicy = new StatusBarPolicy(this);
     }
 
     // ================================================================================

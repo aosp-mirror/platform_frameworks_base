@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Name of the status bar as seen in the applications info settings page. -->
     <string name="app_label">Status Bar</string>
 
@@ -36,5 +36,19 @@
     <!-- The label for the group of notifications for recent events in the opened version of
          the status bar.  Recently received text messsages (SMS), emails, calendar alerts, etc. -->
     <string name="status_bar_latest_events_title">Notifications</string>
+
+    <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert. -->
+    <string name="battery_low_title">Please connect charger</string>
+
+    <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. -->
+    <string name="battery_low_subtitle">The battery is getting low:</string>
+
+    <!-- A message that appears when the battery level is getting low in a dialog.  This is appened to the subtitle of the low battery alert. -->
+    <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g>
+    or less remaining.</string>
+
+    <!-- When the battery is low, this is the label of the button to go to the
+         power usage activity to find out what drained the battery. -->
+    <string name="battery_low_why">Battery use</string>
 
 </resources>

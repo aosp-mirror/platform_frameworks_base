@@ -1567,28 +1567,6 @@
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with capital "AM" or "PM" (example: "3PM"). -->
     <string name="hour_cap_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="PM">%p</xliff:g>"</string>
 
-    <!-- The big percent text in the middle of the battery icon that appears when you plug in
-         the charger. -->
-    <string name="battery_status_text_percent_format"><xliff:g id="number" example="50">%d</xliff:g><xliff:g id="percent" example="%">%%</xliff:g></string>
-
-    <!-- The big percent text in the middle of the battery icon that appears when you plug in
-         the charger. This indicates the current status of the battery.  -->
-    <string name="battery_status_charging">Charging\u2026</string>
-
-    <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert. -->
-    <string name="battery_low_title">Please connect charger</string>
-
-    <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. -->
-    <string name="battery_low_subtitle">The battery is getting low:</string>
-
-    <!-- A message that appears when the battery level is getting low in a dialog.  This is appened to the subtitle of the low battery alert. -->
-    <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g>
-    or less remaining.</string>
-
-    <!-- When the battery is low, this is the label of the button to go to the
-         power usage activity to find out what drained the battery. -->
-    <string name="battery_low_why">Battery use</string>
-
     <!-- Title of the alert when something went wrong in the factory test. -->
     <string name="factorytest_failed">Factory test failed</string>
     <!-- Error message displayed when a non-system application tries to start a factory test. -->
