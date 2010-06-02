@@ -18,7 +18,7 @@
 */
 -->
 
-<com.android.server.status.ExpandedView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.policy.statusbar.phone.ExpandedView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
@@ -87,7 +87,7 @@
             android:layout_height="match_parent"
             android:fadingEdge="none"
             >
-            <com.android.server.status.NotificationLinearLayout
+            <com.android.policy.statusbar.phone.NotificationLinearLayout
                 android:id="@+id/notificationLinearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -130,7 +130,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     />
-            </com.android.server.status.NotificationLinearLayout>
+            </com.android.policy.statusbar.phone.NotificationLinearLayout>
         </ScrollView>
 
         <ImageView
@@ -141,4 +141,4 @@
         />
 
     </FrameLayout>
-</com.android.server.status.ExpandedView>
+</com.android.policy.statusbar.phone.ExpandedView>

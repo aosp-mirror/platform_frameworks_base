@@ -23,6 +23,8 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.ServiceManager;
 
+import com.android.internal.statusbar.IStatusBarService;
+
 /**
  * Allows an app to control the status bar.
  *
@@ -116,27 +118,18 @@ public class StatusBarManager {
         }
     }
 
-    public IBinder addIcon(String slot, int iconId, int iconLevel) {
+    public void setIcon(String slot, int iconId, int iconLevel) {
         try {
-            return mService.addIcon(slot, mContext.getPackageName(), iconId, iconLevel);
+            mService.setIcon(slot, mContext.getPackageName(), iconId, iconLevel);
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
         }
     }
 
-    public void updateIcon(IBinder key, String slot, int iconId, int iconLevel) {
+    public void removeIcon(String slot) {
         try {
-            mService.updateIcon(key, slot, mContext.getPackageName(), iconId, iconLevel);
-        } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
-        }
-    }
-
-    public void removeIcon(IBinder key) {
-        try {
-            mService.removeIcon(key);
+            mService.removeIcon(slot);
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);

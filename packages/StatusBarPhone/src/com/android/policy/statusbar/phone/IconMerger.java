@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 
 public class IconMerger extends LinearLayout {
     PhoneStatusBarService service;
-    StatusBarIcon moreIcon;
+    StatusBarIconData moreIcon;
 
     public IconMerger(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -33,6 +33,9 @@ public class IconMerger extends LinearLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        if (true) {
+            return;
+        }
 
         final int maxWidth = r - l;
         final int N = getChildCount();
@@ -90,7 +93,7 @@ public class IconMerger extends LinearLayout {
                 if (childLeft < breakingPoint) {
                     // hide this one
                     child.layout(0, child.getTop(), 0, child.getBottom());
-                    int n = this.service.getIconNumberForView(child);
+                    int n = 0; // XXX this.service.getIconNumberForView(child);
                     if (n == 0) {
                         number += 1;
                     } else if (n > 0) {

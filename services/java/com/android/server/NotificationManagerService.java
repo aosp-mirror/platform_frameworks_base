@@ -734,7 +734,7 @@ class NotificationManagerService extends INotificationManager.Stub
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        mStatusBar.updateIcon(r.statusBarKey, icon, n);
+                        mStatusBar.updateNotification(r.statusBarKey, icon, n);
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -742,7 +742,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 } else {
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        r.statusBarKey = mStatusBar.addIcon(icon, n);
+                        r.statusBarKey = mStatusBar.addNotification(icon, n);
                         mAttentionLight.pulse();
                     }
                     finally {
@@ -756,7 +756,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 if (old != null && old.statusBarKey != null) {
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        mStatusBar.removeIcon(old.statusBarKey);
+                        mStatusBar.removeNotification(old.statusBarKey);
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -864,7 +864,7 @@ class NotificationManagerService extends INotificationManager.Stub
         if (r.notification.icon != 0) {
             long identity = Binder.clearCallingIdentity();
             try {
-                mStatusBar.removeIcon(r.statusBarKey);
+                mStatusBar.removeNotification(r.statusBarKey);
             }
             finally {
                 Binder.restoreCallingIdentity(identity);

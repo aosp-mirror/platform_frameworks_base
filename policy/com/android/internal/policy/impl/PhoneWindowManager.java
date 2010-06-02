@@ -19,7 +19,6 @@ package com.android.internal.policy.impl;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.IStatusBarService;
 import android.app.IUiModeManager;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
@@ -47,6 +46,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.android.internal.policy.PolicyManager;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 

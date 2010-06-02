@@ -40,7 +40,6 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.storage.StorageManager;
@@ -105,15 +104,11 @@ public class StatusBarPolicy {
     private Calendar mCalendar;
     private String mClockFormatString;
     private SimpleDateFormat mClockFormat;
-    private IBinder mClockIcon;
-    private IconData mClockData;
 
     // storage
     private StorageManager mStorageManager;
 
     // battery
-    private IBinder mBatteryIcon;
-    private IconData mBatteryData;
     private boolean mBatteryFirst = true;
     private boolean mBatteryPlugged;
     private int mBatteryLevel;
@@ -127,10 +122,9 @@ public class StatusBarPolicy {
 
     // phone
     private TelephonyManager mPhone;
-    private IBinder mPhoneIcon;
+    private int mPhoneSignalIconId;
 
     //***** Signal strength icons
-    private IconData mPhoneData;
     //GSM/UMTS
     private static final int[] sSignalImages = new int[] {
         com.android.internal.R.drawable.stat_sys_signal_0,
@@ -294,19 +288,13 @@ public class StatusBarPolicy {
     SignalStrength mSignalStrength;
 
     // data connection
-    private IBinder mDataIcon;
-    private IconData mDataData;
     private boolean mDataIconVisible;
     private boolean mHspaDataDistinguishable;
 
     // ringer volume
-    private IBinder mVolumeIcon;
-    private IconData mVolumeData;
     private boolean mVolumeVisible;
 
     // bluetooth device status
-    private IBinder mBluetoothIcon;
-    private IconData mBluetoothData;
     private int mBluetoothHeadsetState;
     private boolean mBluetoothA2dpConnected;
     private int mBluetoothPbapState;
@@ -324,33 +312,10 @@ public class StatusBarPolicy {
 
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
-    private IBinder mWifiIcon;
-    private IconData mWifiData;
-
-    // gps
-    private IBinder mGpsIcon;
-    private IconData mGpsEnabledIconData;
-    private IconData mGpsFixIconData;
-
-    // alarm clock
-    // Icon lit when clock is set
-    private IBinder mAlarmClockIcon;
-    private IconData mAlarmClockIconData;
 
     // sync state
     // If sync is active the SyncActive icon is displayed. If sync is not active but
     // sync is failing the SyncFailing icon is displayed. Otherwise neither are displayed.
-    private IBinder mSyncActiveIcon;
-    private IBinder mSyncFailingIcon;
-
-    // TTY mode
-    // Icon lit when TTY mode is enabled
-    private IBinder mTTYModeIcon;
-    private IconData mTTYModeEnableIconData;
-
-    // Cdma Roaming Indicator, ERI
-    private IBinder mCdmaRoamingIndicatorIcon;
-    private IconData mCdmaRoamingIndicatorIconData;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -425,8 +390,7 @@ public class StatusBarPolicy {
 
         // clock
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
-        mClockData = IconData.makeText("clock", "");
-        mClockIcon = service.addIcon(mClockData, null);
+        service.setIcon("clock", "");
         updateClock();
 
         // storage
@@ -435,15 +399,13 @@ public class StatusBarPolicy {
                 new com.android.server.status.StorageNotification(context));
 
         // battery
-        mBatteryData = IconData.makeIcon("battery",
-                null, com.android.internal.R.drawable.stat_sys_battery_unknown, 0, 0);
-        mBatteryIcon = service.addIcon(mBatteryData, null);
+        service.setIcon("battery",
+                null, com.android.internal.R.drawable.stat_sys_battery_unknown, 0);
 
         // phone_signal
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        mPhoneData = IconData.makeIcon("phone_signal",
-                null, com.android.internal.R.drawable.stat_sys_signal_null, 0, 0);
-        mPhoneIcon = service.addIcon(mPhoneData, null);
+        mPhoneSignalIconId = com.android.internal.R.drawable.stat_sys_signal_null;
+        service.setIcon("phone_signal", null, mPhoneSignalIconId, 0);
 
         // register for phone state notifications.
         ((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
@@ -455,33 +417,27 @@ public class StatusBarPolicy {
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY);
 
         // data_connection
-        mDataData = IconData.makeIcon("data_connection",
-                null, com.android.internal.R.drawable.stat_sys_data_connected_g, 0, 0);
-        mDataIcon = service.addIcon(mDataData, null);
-        service.setIconVisibility(mDataIcon, false);
+        service.setIcon("data_connection",
+                null, com.android.internal.R.drawable.stat_sys_data_connected_g, 0);
+        service.setIconVisibility("data_connection", false);
 
         // wifi
-        mWifiData = IconData.makeIcon("wifi", null, sWifiSignalImages[0], 0, 0);
-        mWifiIcon = service.addIcon(mWifiData, null);
-        service.setIconVisibility(mWifiIcon, false);
+        service.setIcon("wifi", null, sWifiSignalImages[0], 0);
+        service.setIconVisibility("wifi", false);
         // wifi will get updated by the sticky intents
 
         // TTY status
-        mTTYModeEnableIconData = IconData.makeIcon("tty",
-                null, com.android.internal.R.drawable.stat_sys_tty_mode, 0, 0);
-        mTTYModeIcon = service.addIcon(mTTYModeEnableIconData, null);
-        service.setIconVisibility(mTTYModeIcon, false);
+        service.setIcon("tty", null, com.android.internal.R.drawable.stat_sys_tty_mode, 0);
+        service.setIconVisibility("tty", false);
 
         // Cdma Roaming Indicator, ERI
-        mCdmaRoamingIndicatorIconData = IconData.makeIcon("cdma_eri",
-                null, com.android.internal.R.drawable.stat_sys_roaming_cdma_0, 0, 0);
-        mCdmaRoamingIndicatorIcon = service.addIcon(mCdmaRoamingIndicatorIconData, null);
-        service.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+        service.setIcon("cdma_eri",
+                null, com.android.internal.R.drawable.stat_sys_roaming_cdma_0, 0);
+        service.setIconVisibility("cdma_eri", false);
 
         // bluetooth status
-        mBluetoothData = IconData.makeIcon("bluetooth",
-                null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0, 0);
-        mBluetoothIcon = service.addIcon(mBluetoothData, null);
+        service.setIcon("bluetooth",
+                null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0);
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             mBluetoothEnabled = adapter.isEnabled();
@@ -491,36 +447,26 @@ public class StatusBarPolicy {
         mBluetoothA2dpConnected = false;
         mBluetoothHeadsetState = BluetoothHeadset.STATE_DISCONNECTED;
         mBluetoothPbapState = BluetoothPbap.STATE_DISCONNECTED;
-        mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
+        mService.setIconVisibility("bluetooth", mBluetoothEnabled);
 
         // Gps status
-        mGpsEnabledIconData = IconData.makeIcon("gps",
-                null, com.android.internal.R.drawable.stat_sys_gps_acquiring_anim, 0, 0);
-        mGpsFixIconData = IconData.makeIcon("gps",
-                null, com.android.internal.R.drawable.stat_sys_gps_on, 0, 0);
-        mGpsIcon = service.addIcon(mGpsEnabledIconData, null);
-        service.setIconVisibility(mGpsIcon, false);
+        service.setIcon("gps",
+                null, com.android.internal.R.drawable.stat_sys_gps_acquiring_anim, 0);
+        service.setIconVisibility("gps", false);
 
         // Alarm clock
-        mAlarmClockIconData = IconData.makeIcon(
-                "alarm_clock",
-                null, com.android.internal.R.drawable.stat_notify_alarm, 0, 0);
-        mAlarmClockIcon = service.addIcon(mAlarmClockIconData, null);
-        service.setIconVisibility(mAlarmClockIcon, false);
+        service.setIcon("alarm_clock", null, com.android.internal.R.drawable.stat_notify_alarm, 0);
+        service.setIconVisibility("alarm_clock", false);
 
         // Sync state
-        mSyncActiveIcon = service.addIcon(IconData.makeIcon("sync_active",
-                null, R.drawable.stat_notify_sync_anim0, 0, 0), null);
-        mSyncFailingIcon = service.addIcon(IconData.makeIcon("sync_failing",
-                null, R.drawable.stat_notify_sync_error, 0, 0), null);
-        service.setIconVisibility(mSyncActiveIcon, false);
-        service.setIconVisibility(mSyncFailingIcon, false);
+        service.setIcon("sync_active", null, R.drawable.stat_notify_sync_anim0, 0);
+        service.setIcon("sync_failing", null, R.drawable.stat_notify_sync_error, 0);
+        service.setIconVisibility("sync_active", false);
+        service.setIconVisibility("sync_failing", false);
 
         // volume
-        mVolumeData = IconData.makeIcon("volume",
-                null, com.android.internal.R.drawable.stat_sys_ringer_silent, 0, 0);
-        mVolumeIcon = service.addIcon(mVolumeData, null);
-        service.setIconVisibility(mVolumeIcon, false);
+        service.setIcon("volume", null, com.android.internal.R.drawable.stat_sys_ringer_silent, 0);
+        service.setIconVisibility("volume", false);
         updateVolume();
 
         IntentFilter filter = new IntentFilter();
@@ -649,30 +595,29 @@ public class StatusBarPolicy {
 
     private final void updateClock() {
         mCalendar.setTimeInMillis(System.currentTimeMillis());
-        mClockData.text = getSmallTime();
-        mService.updateIcon(mClockIcon, mClockData, null);
+        mService.setIcon("clock", getSmallTime());
     }
 
     private final void updateAlarm(Intent intent) {
         boolean alarmSet = intent.getBooleanExtra("alarmSet", false);
-        mService.setIconVisibility(mAlarmClockIcon, alarmSet);
+        mService.setIconVisibility("alarm_clock", alarmSet);
     }
 
     private final void updateSyncState(Intent intent) {
         boolean isActive = intent.getBooleanExtra("active", false);
         boolean isFailing = intent.getBooleanExtra("failing", false);
-        mService.setIconVisibility(mSyncActiveIcon, isActive);
+        mService.setIconVisibility("sync_active", isActive);
         // Don't display sync failing icon: BUG 1297963 Set sync error timeout to "never"
-        //mService.setIconVisibility(mSyncFailingIcon, isFailing && !isActive);
+        //mService.setIconVisibility("sync_failing", isFailing && !isActive);
     }
 
     private final void updateBattery(Intent intent) {
-        mBatteryData.iconId = intent.getIntExtra("icon-small", 0);
-        mBatteryData.iconLevel = intent.getIntExtra("level", 0);
-        mService.updateIcon(mBatteryIcon, mBatteryData, null);
+        final int id = intent.getIntExtra("icon-small", 0);
+        int level = intent.getIntExtra("level", 0);
+        mService.setIcon("battery", null, id, level);
 
         boolean plugged = intent.getIntExtra("plugged", 0) != 0;
-        int level = intent.getIntExtra("level", -1);
+        level = intent.getIntExtra("level", -1);
         if (false) {
             Slog.d(TAG, "updateBattery level=" + level
                     + " plugged=" + plugged
@@ -1003,11 +948,11 @@ public class StatusBarPolicy {
             //Slog.d(TAG, "updateSignalStrength: no service");
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
-                mPhoneData.iconId = com.android.internal.R.drawable.stat_sys_signal_flightmode;
+                mPhoneSignalIconId = com.android.internal.R.drawable.stat_sys_signal_flightmode;
             } else {
-                mPhoneData.iconId = com.android.internal.R.drawable.stat_sys_signal_null;
+                mPhoneSignalIconId = com.android.internal.R.drawable.stat_sys_signal_null;
             }
-            mService.updateIcon(mPhoneIcon, mPhoneData, null);
+            mService.setIcon("phone_signal", null, mPhoneSignalIconId, 0);
             return;
         }
 
@@ -1045,8 +990,8 @@ public class StatusBarPolicy {
                 iconLevel = getCdmaLevel();
             }
         }
-        mPhoneData.iconId = iconList[iconLevel];
-        mService.updateIcon(mPhoneIcon, mPhoneData, null);
+        mPhoneSignalIconId = iconList[iconLevel];
+        mService.setIcon("phone_signal", null, mPhoneSignalIconId, 0);
     }
 
     private int getCdmaLevel() {
@@ -1149,14 +1094,13 @@ public class StatusBarPolicy {
                             iconId = mDataIconList[0];
                             break;
                     }
-                    mDataData.iconId = iconId;
-                    mService.updateIcon(mDataIcon, mDataData, null);
+                    mService.setIcon("data_connection", null, iconId, 0);
                 } else {
                     visible = false;
                 }
             } else {
-                mDataData.iconId = com.android.internal.R.drawable.stat_sys_no_sim;
-                mService.updateIcon(mDataIcon, mDataData, null);
+                iconId = com.android.internal.R.drawable.stat_sys_no_sim;
+                mService.setIcon("data_connection", null, iconId, 0);
             }
         } else {
             // CDMA case, mDataActivity can be also DATA_ACTIVITY_DORMANT
@@ -1176,8 +1120,7 @@ public class StatusBarPolicy {
                         iconId = mDataIconList[0];
                         break;
                 }
-                mDataData.iconId = iconId;
-                mService.updateIcon(mDataIcon, mDataData, null);
+                mService.setIcon("data_connection", null, iconId, 0);
             } else {
                 visible = false;
             }
@@ -1192,7 +1135,7 @@ public class StatusBarPolicy {
         }
 
         if (mDataIconVisible != visible) {
-            mService.setIconVisibility(mDataIcon, visible);
+            mService.setIconVisibility("data_connection", visible);
             mDataIconVisible = visible;
         }
     }
@@ -1207,11 +1150,10 @@ public class StatusBarPolicy {
                 : com.android.internal.R.drawable.stat_sys_ringer_silent;
 
         if (visible) {
-            mVolumeData.iconId = iconId;
-            mService.updateIcon(mVolumeIcon, mVolumeData, null);
+            mService.setIcon("volume", null, iconId, 0);
         }
         if (visible != mVolumeVisible) {
-            mService.setIconVisibility(mVolumeIcon, visible);
+            mService.setIconVisibility("volume", visible);
             mVolumeVisible = visible;
         }
     }
@@ -1244,9 +1186,8 @@ public class StatusBarPolicy {
             iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth_connected;
         }
 
-        mBluetoothData.iconId = iconId;
-        mService.updateIcon(mBluetoothIcon, mBluetoothData, null);
-        mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
+        mService.setIcon("bluetooth", null, iconId, 0);
+        mService.setIconVisibility("bluetooth", mBluetoothEnabled);
     }
 
     private final void updateWifi(Intent intent) {
@@ -1258,14 +1199,14 @@ public class StatusBarPolicy {
 
             if (!enabled) {
                 // If disabled, hide the icon. (We show icon when connected.)
-                mService.setIconVisibility(mWifiIcon, false);
+                mService.setIconVisibility("wifi", false);
             }
 
         } else if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
             final boolean enabled = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED,
                                                            false);
             if (!enabled) {
-                mService.setIconVisibility(mWifiIcon, false);
+                mService.setIconVisibility("wifi", false);
             }
         } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
 
@@ -1282,7 +1223,7 @@ public class StatusBarPolicy {
                 }
 
                 // Show the icon since wi-fi is connected
-                mService.setIconVisibility(mWifiIcon, true);
+                mService.setIconVisibility("wifi", true);
 
             } else {
                 mLastWifiSignalLevel = -1;
@@ -1290,23 +1231,23 @@ public class StatusBarPolicy {
                 iconId = sWifiSignalImages[0];
 
                 // Hide the icon since we're not connected
-                mService.setIconVisibility(mWifiIcon, false);
+                mService.setIconVisibility("wifi", false);
             }
 
-            mWifiData.iconId = iconId;
-            mService.updateIcon(mWifiIcon, mWifiData, null);
+            mService.setIcon("wifi", null, iconId, 0);
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
+            int iconId;
             final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
             int newSignalLevel = WifiManager.calculateSignalLevel(newRssi,
                                                                   sWifiSignalImages.length);
             if (newSignalLevel != mLastWifiSignalLevel) {
                 mLastWifiSignalLevel = newSignalLevel;
                 if (mIsWifiConnected) {
-                    mWifiData.iconId = sWifiSignalImages[newSignalLevel];
+                    iconId = sWifiSignalImages[newSignalLevel];
                 } else {
-                    mWifiData.iconId = sWifiTemporarilyNotConnectedImage;
+                    iconId = sWifiTemporarilyNotConnectedImage;
                 }
-                mService.updateIcon(mWifiIcon, mWifiData, null);
+                mService.setIcon("wifi", null, iconId, 0);
             }
         }
     }
@@ -1317,15 +1258,16 @@ public class StatusBarPolicy {
 
         if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && enabled) {
             // GPS is getting fixes
-            mService.updateIcon(mGpsIcon, mGpsFixIconData, null);
-            mService.setIconVisibility(mGpsIcon, true);
+            mService.setIcon("gps", null, com.android.internal.R.drawable.stat_sys_gps_on, 0);
+            mService.setIconVisibility("gps", true);
         } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
             // GPS is off
-            mService.setIconVisibility(mGpsIcon, false);
+            mService.setIconVisibility("gps", false);
         } else {
             // GPS is on, but not receiving fixes
-            mService.updateIcon(mGpsIcon, mGpsEnabledIconData, null);
-            mService.setIconVisibility(mGpsIcon, true);
+            mService.setIcon("gps",
+                    null, com.android.internal.R.drawable.stat_sys_gps_acquiring_anim, 0);
+            mService.setIconVisibility("gps", true);
         }
     }
 
@@ -1338,23 +1280,23 @@ public class StatusBarPolicy {
         if (enabled) {
             // TTY is on
             if (false) Slog.v(TAG, "updateTTY: set TTY on");
-            mService.updateIcon(mTTYModeIcon, mTTYModeEnableIconData, null);
-            mService.setIconVisibility(mTTYModeIcon, true);
+            mService.setIcon("tty", null, com.android.internal.R.drawable.stat_sys_tty_mode, 0);
+            mService.setIconVisibility("tty", true);
         } else {
             // TTY is off
             if (false) Slog.v(TAG, "updateTTY: set TTY off");
-            mService.setIconVisibility(mTTYModeIcon, false);
+            mService.setIconVisibility("tty", false);
         }
     }
 
     private final void updateCdmaRoamingIcon(ServiceState state) {
         if (!hasService()) {
-            mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+            mService.setIconVisibility("cdma_eri", false);
             return;
         }
 
         if (!isCdma()) {
-            mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+            mService.setIconVisibility("cdma_eri", false);
             return;
         }
 
@@ -1374,25 +1316,23 @@ public class StatusBarPolicy {
 
         if (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) {
             if (false) Slog.v(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
-            mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+            mService.setIconVisibility("cdma_eri", false);
             return;
         }
 
         switch (iconMode) {
             case EriInfo.ROAMING_ICON_MODE_NORMAL:
-                mCdmaRoamingIndicatorIconData.iconId = iconList[iconIndex];
-                mService.updateIcon(mCdmaRoamingIndicatorIcon, mCdmaRoamingIndicatorIconData, null);
-                mService.setIconVisibility(mCdmaRoamingIndicatorIcon, true);
+                mService.setIcon("cdma_eri", null, iconList[iconIndex], 0);
+                mService.setIconVisibility("cdma_eri", true);
                 break;
             case EriInfo.ROAMING_ICON_MODE_FLASH:
-                mCdmaRoamingIndicatorIconData.iconId =
-                        com.android.internal.R.drawable.stat_sys_roaming_cdma_flash;
-                mService.updateIcon(mCdmaRoamingIndicatorIcon, mCdmaRoamingIndicatorIconData, null);
-                mService.setIconVisibility(mCdmaRoamingIndicatorIcon, true);
+                mService.setIcon("cdma_eri",
+                        null, com.android.internal.R.drawable.stat_sys_roaming_cdma_flash, 0);
+                mService.setIconVisibility("cdma_eri", true);
                 break;
 
         }
-        mService.updateIcon(mPhoneIcon, mPhoneData, null);
+        mService.setIcon("phone_signal", null, mPhoneSignalIconId, 0);
     }
 
 

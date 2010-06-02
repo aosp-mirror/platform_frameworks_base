@@ -14,9 +14,11 @@
  * limitations under the License.
  */
  
-package android.app;
+package com.android.internal.statusbar;
 
-import android.app.IStatusBar;
+import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.StatusBarIconList;
 
 /** @hide */
 interface IStatusBarService
@@ -25,10 +27,10 @@ interface IStatusBarService
     void deactivate();
     void toggle();
     void disable(int what, IBinder token, String pkg);
-    IBinder addIcon(String slot, String iconPackage, int iconId, int iconLevel);
-    void updateIcon(IBinder key, String slot, String iconPackage, int iconId, int iconLevel);
-    void removeIcon(IBinder key);
+    void setIcon(String slot, String iconPackage, int iconId, int iconLevel);
+    void setIconVisibility(String slot, boolean visible);
+    void removeIcon(String slot);
 
     // ---- Methods below are for use by the status bar policy services ----
-    void registerStatusBar(IStatusBar callbacks);
+    void registerStatusBar(IStatusBar callbacks, out StatusBarIconList state);
 }
