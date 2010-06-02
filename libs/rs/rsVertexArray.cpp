@@ -141,7 +141,7 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
             }
         }
 
-        logAttrib(ct, slot);
+        //logAttrib(ct, slot);
         glEnableVertexAttribArray(slot);
         glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
         glVertexAttribPointer(slot,
