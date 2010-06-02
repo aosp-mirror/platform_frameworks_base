@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -147,7 +146,6 @@ class CommandQueue extends IStatusBar.Stub {
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
-            Slog.d(TAG, "handleMessage what=0x" + Integer.toHexString(what) + " arg1=" + msg.arg1);
             switch (what) {
                 case MSG_ICON: {
                     final int index = msg.what & INDEX_MASK;

@@ -272,7 +272,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * the status bar is visible or not.
      */
     public void visibilityChanged(boolean visible) {
-        Slog.d(TAG, "visibilityChanged visible=" + visible);
+        //Slog.d(TAG, "visibilityChanged visible=" + visible);
     }
 
     public void onNotificationClick(String pkg, String tag, int id) {
@@ -288,7 +288,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public IBinder addNotification(StatusBarNotification notification) {
         synchronized (mNotifications) {
-            Slog.d(TAG, "addNotification notification=" + notification);
             IBinder key = new Binder();
             mNotifications.put(key, notification);
             if (mBar != null) {
