@@ -86,7 +86,9 @@ public class Rfc822Tokenizer implements MultiAutoCompleteTextView.Tokenizer {
                         i++;
                         break;
                     } else if (c == '\\') {
-                        name.append(text.charAt(i + 1));
+                        if (i + 1 < cursor) {
+                            name.append(text.charAt(i + 1));
+                        }
                         i += 2;
                     } else {
                         name.append(c);
@@ -112,7 +114,9 @@ public class Rfc822Tokenizer implements MultiAutoCompleteTextView.Tokenizer {
                         level++;
                         i++;
                     } else if (c == '\\') {
-                        comment.append(text.charAt(i + 1));
+                        if (i + 1 < cursor) {
+                            comment.append(text.charAt(i + 1));
+                        }
                         i += 2;
                     } else {
                         comment.append(c);
