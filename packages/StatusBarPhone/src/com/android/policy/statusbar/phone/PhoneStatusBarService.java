@@ -324,7 +324,8 @@ public class PhoneStatusBarService extends StatusBarService {
         // show the ticker
         // TODO
 
-        // recalculate the position of the sliding windows
+        // Recalculate the position of the sliding windows and the titles.
+        setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
 
@@ -483,7 +484,6 @@ public class PhoneStatusBarService extends StatusBarService {
         final int iconIndex = chooseIconIndex(isOngoing, viewIndex);
         mNotificationIcons.addView(iconView, iconIndex,
                 new LinearLayout.LayoutParams(mIconWidth, mHeight));
-
     }
 
     void removeNotificationViews(IBinder key) {
@@ -502,11 +502,11 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     private void setAreThereNotifications() {
-    /*
-        boolean ongoing = mOngoingItems.getChildCount() != 0;
-        boolean latest = mLatestItems.getChildCount() != 0;
+        boolean ongoing = mOngoing.hasVisibleItems();
+        boolean latest = mLatest.hasVisibleItems();
 
-        if (mNotificationData.hasClearableItems()) {
+        // (no ongoing notifications are clearable)
+        if (mLatest.hasClearableItems()) {
             mClearButton.setVisibility(View.VISIBLE);
         } else {
             mClearButton.setVisibility(View.INVISIBLE);
@@ -520,7 +520,6 @@ public class PhoneStatusBarService extends StatusBarService {
         } else {
             mNoNotificationsTitle.setVisibility(View.VISIBLE);
         }
-    */
     }
 
 
