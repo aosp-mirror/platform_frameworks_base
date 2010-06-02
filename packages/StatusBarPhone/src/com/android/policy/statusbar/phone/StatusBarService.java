@@ -98,17 +98,5 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
      * Implement this to add the main status bar view.
      */
     protected abstract void addStatusBarView();
-
-    public void activate() {
-    }
-
-    public void deactivate() {
-    }
-
-    public void toggle() {
-    }
-
-    public void disable(int what, IBinder token, String pkg) {
-    }
 }
 

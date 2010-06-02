@@ -83,18 +83,6 @@ public class PhoneStatusBarService extends StatusBarService {
     private static final int MSG_ANIMATE = 1000;
     private static final int MSG_ANIMATE_REVEAL = 1001;
 
-    private class DisableRecord implements IBinder.DeathRecipient {
-        String pkg;
-        int what;
-        IBinder token;
-
-        public void binderDied() {
-            Slog.i(TAG, "binder died for pkg=" + pkg);
-            disable(0, token, pkg);
-            token.unlinkToDeath(this, 0);
-        }
-    }
-
     public interface NotificationCallbacks {
         void onSetDisabled(int status);
         void onClearAll();
@@ -113,7 +101,7 @@ public class PhoneStatusBarService extends StatusBarService {
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
                 if (!down) {
-                    PhoneStatusBarService.this.deactivate();
+                    //TODO PhoneStatusBarService.this.deactivate();
                 }
                 return true;
             }
@@ -199,7 +187,6 @@ public class PhoneStatusBarService extends StatusBarService {
     int[] mAbsPos = new int[2];
     
     // for disabling the status bar
-    ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
     int mDisabled = 0;
 
     /**
@@ -867,7 +854,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 // the stack trace isn't very helpful here.  Just log the exception message.
                 Slog.w(TAG, "Sending contentIntent failed: " + e);
             }
-            deactivate();
+            //deactivate();
         }
     }
 
@@ -1001,16 +988,6 @@ public class PhoneStatusBarService extends StatusBarService {
                 StatusBarNotification n = mNotificationData.getLatest(i);
                 pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
                 pw.println("           data=" + n.data);
-            }
-        }
-        synchronized (mDisableRecords) {
-            final int N = mDisableRecords.size();
-            pw.println("  mDisableRecords.size=" + N
-                    + " mDisabled=0x" + Integer.toHexString(mDisabled));
-            for (int i=0; i<N; i++) {
-                DisableRecord tok = mDisableRecords.get(i);
-                pw.println("    [" + i + "] what=0x" + Integer.toHexString(tok.what)
-                                + " pkg=" + tok.pkg + " token=" + tok.token);
             }
         }
         
@@ -1284,7 +1261,7 @@ public class PhoneStatusBarService extends StatusBarService {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                deactivate();
+                //deactivate();
             }
             else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
                 updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),

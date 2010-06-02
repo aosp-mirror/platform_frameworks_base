@@ -48,7 +48,7 @@ public class TrackingView extends LinearLayout {
         switch (event.getKeyCode()) {
         case KeyEvent.KEYCODE_BACK:
             if (down) {
-                mService.deactivate();
+                //mService.deactivate();
             }
             return true;
         }
