@@ -16,7 +16,7 @@
 
 package android.webkit;
 
-import android.graphics.Canvas;
+import android.graphics.Point;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
@@ -68,7 +68,8 @@ class ZoomManager {
 
     // the default zoom scale. This value will is initially set based on the
     // display density, but can be changed at any time via the WebSettings.
-    float mDefaultScale;
+    private float mDefaultScale;
+    private float mInvDefaultScale;
 
     private static float MINIMUM_SCALE_INCREMENT = 0.01f;
 
@@ -79,6 +80,16 @@ class ZoomManager {
     float mActualScale;
     float mInvActualScale;
     
+    /*
+     * The initial scale for the WebView. 0 means default. If initial scale is
+     * greater than 0 the WebView starts with this value as its initial scale. The
+     * value is converted from an integer percentage so it is guarenteed to have
+     * no more than 2 significant digits after the decimal.  This restriction
+     * allows us to convert the scale back to the original percentage by simply
+     * multiplying the value by 100.
+     */
+    private float mInitialScale;
+
     /*
      * The following member variables are only to be used for animating zoom. If
      * mZoomScale is non-zero then we are in the middle of a zoom animation. The
@@ -109,7 +120,7 @@ class ZoomManager {
 
     public void updateDefaultZoomDensity(float density) {
         if (Math.abs(density - mDefaultScale) > MINIMUM_SCALE_INCREMENT) {
-            float scaleFactor = density / mDefaultScale;
+            float scaleFactor = density * mInvDefaultScale;
             // set the new default density
             setDefaultZoomScale(density);
             // adjust the limits
@@ -121,13 +132,22 @@ class ZoomManager {
 
     private void setDefaultZoomScale(float defaultScale) {
         mDefaultScale = defaultScale;
+        mInvDefaultScale = 1 / defaultScale;
         DEFAULT_MAX_ZOOM_SCALE = 4.0f * defaultScale;
         DEFAULT_MIN_ZOOM_SCALE = 0.25f * defaultScale;
+    }
+
+    public float getDefaultScale() {
+        return mDefaultScale;
     }
 
     public void setZoomCenter(float x, float y) {
         mZoomCenterX = x;
         mZoomCenterY = y;
+    }
+
+    public void setInitialScaleInPercent(int scaleInPercent) {
+        mInitialScale = scaleInPercent * 0.01f;
     }
 
     public static final boolean exceedsMinScaleIncrement(float scaleA, float scaleB) {
@@ -334,6 +354,169 @@ class ZoomManager {
             // if the we need to reflow the text then force the VIEW_SIZE_CHANGED
             // event to be sent to WebKit
             mWebView.sendViewSizeZoom(reflowText);
+        }
+    }
+
+    public void onSizeChanged(int w, int h, int ow, int oh) {
+        // reset zoom and anchor to the top left corner of the screen
+        // unless we are already zooming
+        if (!isZoomAnimating()) {
+            int visibleTitleHeight = mWebView.getVisibleTitleHeight();
+            mZoomCenterX = 0;
+            mZoomCenterY = visibleTitleHeight;
+            int anchorX = mWebView.viewToContentX(mWebView.getScrollX());
+            int anchorY = mWebView.viewToContentY(visibleTitleHeight + mWebView.getScrollY());
+            mWebView.setViewSizeAnchor(anchorX, anchorY);
+
+        }
+
+        // update mMinZoomScale if the minimum zoom scale is not fixed
+        if (!mMinZoomScaleFixed) {
+            // when change from narrow screen to wide screen, the new viewWidth
+            // can be wider than the old content width. We limit the minimum
+            // scale to 1.0f. The proper minimum scale will be calculated when
+            // the new picture shows up.
+            mMinZoomScale = Math.min(1.0f, (float) mWebView.getViewWidth()
+                    / (mWebView.drawHistory() ? mWebView.getHistoryPictureWidth()
+                            : mZoomOverviewWidth));
+            // limit the minZoomScale to the initialScale if it is set
+            if (mInitialScale > 0 && mInitialScale < mMinZoomScale) {
+                mMinZoomScale = mInitialScale;
+            }
+        }
+
+        dismissZoomPicker();
+
+        // onSizeChanged() is called during WebView layout. And any
+        // requestLayout() is blocked during layout. As refreshZoomScale() will
+        // cause its child View to reposition itself through ViewManager's
+        // scaleAll(), we need to post a Runnable to ensure requestLayout().
+        // Additionally, only update the text wrap scale if the width changed.
+        mWebView.post(new PostScale(w != ow));
+    }
+
+    private class PostScale implements Runnable {
+        final boolean mUpdateTextWrap;
+
+        public PostScale(boolean updateTextWrap) {
+            mUpdateTextWrap = updateTextWrap;
+        }
+
+        public void run() {
+            if (mWebView.getWebViewCore() != null) {
+                // we always force, in case our height changed, in which case we
+                // still want to send the notification over to webkit.
+                refreshZoomScale(mUpdateTextWrap);
+                // update the zoom buttons as the scale can be changed
+                updateZoomPicker();
+            }
+        }
+    }
+
+    public void updateZoomRange(WebViewCore.RestoreState restoreState,
+            int viewWidth, int minPrefWidth, boolean updateZoomOverview) {
+        if (restoreState.mMinScale == 0) {
+            if (restoreState.mMobileSite) {
+                if (minPrefWidth > Math.max(0, viewWidth)) {
+                    mMinZoomScale = (float) viewWidth / minPrefWidth;
+                    mMinZoomScaleFixed = false;
+                    if (updateZoomOverview) {
+                        WebSettings settings = mWebView.getSettings();
+                        mInZoomOverview = settings.getUseWideViewPort() &&
+                                settings.getLoadWithOverviewMode();
+                    }
+                } else {
+                    mMinZoomScale = restoreState.mDefaultScale;
+                    mMinZoomScaleFixed = true;
+                }
+            } else {
+                mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                mMinZoomScaleFixed = false;
+            }
+        } else {
+            mMinZoomScale = restoreState.mMinScale;
+            mMinZoomScaleFixed = true;
+        }
+        if (restoreState.mMaxScale == 0) {
+            mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+        } else {
+            mMaxZoomScale = restoreState.mMaxScale;
+        }
+    }
+
+    /**
+     * Updates zoom values when Webkit produces a new picture. This method
+     * should only be called from the UI thread's message handler.
+     */
+    public void onNewPicture(WebViewCore.DrawData drawData) {
+
+        final int viewWidth = mWebView.getViewWidth();
+
+        if (mWebView.getSettings().getUseWideViewPort()) {
+            // limit mZoomOverviewWidth upper bound to
+            // sMaxViewportWidth so that if the page doesn't behave
+            // well, the WebView won't go insane. limit the lower
+            // bound to match the default scale for mobile sites.
+            mZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth,
+                    Math.max((int) (viewWidth * mInvDefaultScale),
+                            Math.max(drawData.mMinPrefWidth,
+                                    drawData.mViewPoint.x)));
+        }
+        if (!mMinZoomScaleFixed) {
+            mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
+        }
+        if (!mWebView.drawHistory() && mInZoomOverview) {
+            // fit the content width to the current view. Ignore
+            // the rounding error case.
+            if (Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1) {
+                setZoomScale((float) viewWidth / mZoomOverviewWidth,
+                        !willScaleTriggerZoom(mTextWrapScale));
+            }
+        }
+    }
+
+    /**
+     * Updates zoom values when Webkit restores a old picture. This method
+     * should only be called from the UI thread's message handler.
+     */
+    public void restoreZoomState(WebViewCore.DrawData drawData) {
+        // precondition check
+        assert drawData != null;
+        assert drawData.mRestoreState != null;
+        assert mWebView.getSettings() != null;
+
+        WebViewCore.RestoreState restoreState = drawData.mRestoreState;
+        final Point viewSize = drawData.mViewPoint;
+        updateZoomRange(restoreState, viewSize.x, drawData.mMinPrefWidth, true);
+
+        if (!mWebView.drawHistory()) {
+            mInZoomOverview = false;
+
+            final float scale;
+            final boolean reflowText;
+
+            if (mInitialScale > 0) {
+                scale = mInitialScale;
+                reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
+            } else if (restoreState.mViewScale > 0) {
+                mTextWrapScale = restoreState.mTextWrapScale;
+                scale = restoreState.mViewScale;
+                reflowText = false;
+            } else {
+                WebSettings settings = mWebView.getSettings();
+                mInZoomOverview = settings.getUseWideViewPort() &&
+                        settings.getLoadWithOverviewMode();
+                if (mInZoomOverview) {
+                    scale = (float) mWebView.getViewWidth() / WebView.DEFAULT_VIEWPORT_WIDTH;
+                } else {
+                    scale = restoreState.mTextWrapScale;
+                }
+                reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
+            }
+            setZoomScale(scale, reflowText);
+
+            // update the zoom buttons as the scale can be changed
+            updateZoomPicker();
         }
     }
 
