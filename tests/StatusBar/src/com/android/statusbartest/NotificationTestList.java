@@ -623,9 +623,7 @@ public class NotificationTestList extends TestActivity
 
     private PendingIntent makeIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setComponent(new android.content.ComponentName(
-                    "com.android.contacts",
-                    "com.android.contacts.ContactsActivity"));
+        intent.addCategory(Intent.CATEGORY_HOME);
         return PendingIntent.getActivity(this, 0, intent, 0);
     }
 

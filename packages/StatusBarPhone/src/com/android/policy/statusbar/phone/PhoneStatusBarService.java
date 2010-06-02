@@ -297,10 +297,6 @@ public class PhoneStatusBarService extends StatusBarService {
         WindowManagerImpl.getDefault().addView(view, lp);
     }
 
-    // ================================================================================
-    // Always called from the UI thread.
-    // ================================================================================
-
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
@@ -323,6 +319,146 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
+        addNotificationViews(key, notification);
+
+        // show the ticker
+        // TODO
+
+        // recalculate the position of the sliding windows
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    }
+
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
+        Slog.d(TAG, "updateNotification key=" + key + " notification=" + notification);
+
+        NotificationData oldList;
+        int oldIndex = mOngoing.findEntry(key);
+        if (oldIndex >= 0) {
+            oldList = mOngoing;
+        } else {
+            oldIndex = mLatest.findEntry(key);
+            if (oldIndex < 0) {
+                Slog.w(TAG, "updateNotification for unknown key: " + key);
+                return;
+            }
+            oldList = mLatest;
+        }
+        final NotificationData.Entry oldEntry = oldList.getEntryAt(oldIndex);
+        final StatusBarNotification oldNotification = oldEntry.notification;
+        final RemoteViews oldContentView = oldNotification.notification.contentView;
+
+        final RemoteViews contentView = notification.notification.contentView;
+
+        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
+        // didn't change.
+        if (notification.notification.when == oldNotification.notification.when
+                && notification.isOngoing() == oldNotification.isOngoing()
+                && oldEntry.contents != null
+                && contentView != null && oldContentView != null
+                && contentView.getPackage() != null
+                && oldContentView.getPackage() != null
+                && oldContentView.getPackage().equals(contentView.getPackage())
+                && oldContentView.getLayoutId() == contentView.getLayoutId()) {
+            Slog.d(TAG, "reusing notification");
+            oldEntry.notification = notification;
+            try {
+                // Reapply the RemoteViews
+                contentView.reapply(this, oldEntry.contents);
+                // update the contentIntent
+                ViewGroup clickView = (ViewGroup)oldEntry.expanded.findViewById(
+                        com.android.internal.R.id.content);
+                final PendingIntent contentIntent = notification.notification.contentIntent;
+                if (contentIntent != null) {
+                    clickView.setOnClickListener(new Launcher(contentIntent, notification.pkg,
+                                notification.tag, notification.id));
+                }
+            }
+            catch (RuntimeException e) {
+                // It failed to add cleanly.  Log, and remove the view from the panel.
+                Slog.w(TAG, "couldn't reapply views for package " + contentView.getPackage(), e);
+                removeNotificationViews(key);
+                addNotificationViews(key, notification);
+            }
+            // Update the icon.
+            oldEntry.icon.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
+                    notification.notification.iconLevel, notification.notification.number));
+        } else {
+            Slog.d(TAG, "not reusing notification");
+            removeNotificationViews(key);
+            addNotificationViews(key, notification);
+        }
+
+        // Restart the ticker if it's still running
+        // TODO
+
+        // Recalculate the position of the sliding windows and the titles.
+        setAreThereNotifications();
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    }
+
+    public void removeNotification(IBinder key) {
+        Slog.d(TAG, "removeNotification key=" + key);
+        removeNotificationViews(key);
+
+        // Cancel the ticker if it's still running
+        // TODO
+
+        // Recalculate the position of the sliding windows and the titles.
+        setAreThereNotifications();
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    }
+
+    private int chooseIconIndex(boolean isOngoing, int index) {
+        final int ongoingSize = mOngoing.size();
+        final int latestSize = mLatest.size();
+        if (!isOngoing) {
+            index = mLatest.size() + index;
+        }
+        return (ongoingSize + latestSize) - index - 1;
+    }
+
+    View makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
+        Notification n = notification.notification;
+        RemoteViews remoteViews = n.contentView;
+        if (remoteViews == null) {
+            return null;
+        }
+
+        // create the row view
+        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event,
+                parent, false);
+
+        // bind the click event to the content area
+        ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
+        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        content.setOnFocusChangeListener(mFocusChangeListener);
+        PendingIntent contentIntent = n.contentIntent;
+        if (contentIntent != null) {
+            content.setOnClickListener(new Launcher(contentIntent, notification.pkg,
+                        notification.tag, notification.id));
+        }
+
+        View child = null;
+        Exception exception = null;
+        try {
+            child = remoteViews.apply(this, content);
+        }
+        catch (RuntimeException e) {
+            exception = e;
+        }
+        if (child == null) {
+            Slog.e(TAG, "couldn't inflate view for package " + notification.pkg, exception);
+            return null;
+        }
+        content.addView(child);
+
+        row.setDrawingCacheEnabled(true);
+
+        return row;
+    }
+
+    void addNotificationViews(IBinder key, StatusBarNotification notification) {
         NotificationData list;
         ViewGroup parent;
         final boolean isOngoing = notification.isOngoing();
@@ -339,7 +475,7 @@ public class PhoneStatusBarService extends StatusBarService {
         StatusBarIconView iconView = new StatusBarIconView(this,
                 notification.pkg + "/" + notification.id);
         iconView.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
-                    notification.notification.iconLevel));
+                    notification.notification.iconLevel, notification.notification.number));
         // Add the expanded view.
         final int viewIndex = list.add(key, notification, view, iconView);
         parent.addView(view, viewIndex);
@@ -348,23 +484,14 @@ public class PhoneStatusBarService extends StatusBarService {
         mNotificationIcons.addView(iconView, iconIndex,
                 new LinearLayout.LayoutParams(mIconWidth, mHeight));
 
-        // show the ticker
-        // TODO
-
-        // recalculate the position of the sliding windows
-        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
 
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-    }
-
-    public void removeNotification(IBinder key) {
-        Slog.d(TAG, "removeNotification key=" + key);
+    void removeNotificationViews(IBinder key) {
         NotificationData.Entry entry = mOngoing.remove(key);
         if (entry == null) {
             entry = mLatest.remove(key);
             if (entry == null) {
-                Slog.w(TAG, "removeNotification for nonexistent key: " + key);
+                Slog.w(TAG, "removeNotification for unknown key: " + key);
                 return;
             }
         }
@@ -372,14 +499,30 @@ public class PhoneStatusBarService extends StatusBarService {
         ((ViewGroup)entry.expanded.getParent()).removeView(entry.expanded);
         // Remove the icon.
         ((ViewGroup)entry.icon.getParent()).removeView(entry.icon);
-
-        // Cancel the ticker if it's still running
-        // TODO
-
-        // Recalculate the position of the sliding windows and the titles.
-        setAreThereNotifications();
-        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
+
+    private void setAreThereNotifications() {
+    /*
+        boolean ongoing = mOngoingItems.getChildCount() != 0;
+        boolean latest = mLatestItems.getChildCount() != 0;
+
+        if (mNotificationData.hasClearableItems()) {
+            mClearButton.setVisibility(View.VISIBLE);
+        } else {
+            mClearButton.setVisibility(View.INVISIBLE);
+        }
+
+        mOngoingTitle.setVisibility(ongoing ? View.VISIBLE : View.GONE);
+        mLatestTitle.setVisibility(latest ? View.VISIBLE : View.GONE);
+
+        if (ongoing || latest) {
+            mNoNotificationsTitle.setVisibility(View.GONE);
+        } else {
+            mNoNotificationsTitle.setVisibility(View.VISIBLE);
+        }
+    */
+    }
+
 
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
@@ -440,158 +583,6 @@ public class PhoneStatusBarService extends StatusBarService {
             v.setSelected(hasFocus);
         }
     };
-
-    private int chooseIconIndex(boolean isOngoing, int index) {
-        final int ongoingSize = mOngoing.size();
-        final int latestSize = mLatest.size();
-        if (!isOngoing) {
-            index = mLatest.size() + index;
-        }
-        return (ongoingSize + latestSize) - index - 1;
-    }
-    
-    View makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
-        Notification n = notification.notification;
-        RemoteViews remoteViews = n.contentView;
-        if (remoteViews == null) {
-            return null;
-        }
-
-        // create the row view
-        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event,
-                parent, false);
-
-        // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
-        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        content.setOnFocusChangeListener(mFocusChangeListener);
-        PendingIntent contentIntent = n.contentIntent;
-        if (contentIntent != null) {
-            content.setOnClickListener(new Launcher(contentIntent, notification.pkg,
-                        notification.tag, notification.id));
-        }
-
-        View child = null;
-        Exception exception = null;
-        try {
-            child = remoteViews.apply(this, content);
-        }
-        catch (RuntimeException e) {
-            exception = e;
-        }
-        if (child == null) {
-            Slog.e(TAG, "couldn't inflate view for package " + notification.pkg, exception);
-            return null;
-        }
-        content.addView(child);
-
-        row.setDrawingCacheEnabled(true);
-
-        /*
-        notification.view = row;
-        notification.contentView = child;
-        */
-
-        return row;
-    }
-
-    /*
-                StatusBarIcon icon = new StatusBarIcon(pkg, notification.icon,
-                        notification.iconLevel);
-                icon.number = notification.number;
-    */     
-    /*
-    void addNotificationView(StatusBarNotification notification) {
-        if (notification.view != null) {
-            throw new RuntimeException("Assertion failed: notification.view="
-                    + notification.view);
-        }
-
-        LinearLayout parent = notification.data.ongoingEvent ? mOngoingItems : mLatestItems;
-
-        View child = makeNotificationView(notification, parent);
-        if (child == null) {
-            return ;
-        }
-
-        int index = mNotificationData.getExpandedIndex(notification);
-        parent.addView(child, index);
-    }
-    */
-
-    /**
-     * Remove the old one and put the new one in its place.
-     * @param notification the notification
-     */
-    /*
-    void updateNotificationView(StatusBarNotification notification, NotificationData oldData) {
-        NotificationData n = notification.data;
-        if (oldData != null && n != null
-                && n.when == oldData.when
-                && n.ongoingEvent == oldData.ongoingEvent
-                && n.contentView != null && oldData.contentView != null
-                && n.contentView.getPackage() != null
-                && oldData.contentView.getPackage() != null
-                && oldData.contentView.getPackage().equals(n.contentView.getPackage())
-                && oldData.contentView.getLayoutId() == n.contentView.getLayoutId()
-                && notification.view != null) {
-            mNotificationData.update(notification);
-            try {
-                n.contentView.reapply(this, notification.contentView);
-
-                // update the contentIntent
-                ViewGroup content = (ViewGroup)notification.view.findViewById(
-                        com.android.internal.R.id.content);
-                PendingIntent contentIntent = n.contentIntent;
-                if (contentIntent != null) {
-                    content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.tag, n.id));
-                }
-            }
-            catch (RuntimeException e) {
-                // It failed to add cleanly.  Log, and remove the view from the panel.
-                Slog.w(TAG, "couldn't reapply views for package " + n.contentView.getPackage(), e);
-                removeNotificationView(notification);
-            }
-        } else {
-            mNotificationData.update(notification);
-            removeNotificationView(notification);
-            addNotificationView(notification);
-        }
-        setAreThereNotifications();
-    }
-
-    void removeNotificationView(StatusBarNotification notification) {
-        View v = notification.view;
-        if (v != null) {
-            ViewGroup parent = (ViewGroup)v.getParent();
-            parent.removeView(v);
-            notification.view = null;
-        }
-    }
-    */
-
-    private void setAreThereNotifications() {
-    /*
-        boolean ongoing = mOngoingItems.getChildCount() != 0;
-        boolean latest = mLatestItems.getChildCount() != 0;
-
-        if (mNotificationData.hasClearableItems()) {
-            mClearButton.setVisibility(View.VISIBLE);
-        } else {
-            mClearButton.setVisibility(View.INVISIBLE);
-        }
-
-        mOngoingTitle.setVisibility(ongoing ? View.VISIBLE : View.GONE);
-        mLatestTitle.setVisibility(latest ? View.VISIBLE : View.GONE);
-
-        if (ongoing || latest) {
-            mNoNotificationsTitle.setVisibility(View.GONE);
-        } else {
-            mNoNotificationsTitle.setVisibility(View.VISIBLE);
-        }
-    */
-    }
 
     private void makeExpandedVisible() {
         if (SPEW) Slog.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);

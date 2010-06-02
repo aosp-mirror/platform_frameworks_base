@@ -103,7 +103,7 @@ public class StatusBarNotification implements Parcelable {
     }
 
     public String toString() {
-        return "StatusBarNotification(package=" + pkg + " tag=" + tag
+        return "StatusBarNotification(package=" + pkg + " id=" + id + " tag=" + tag
                 + " notification=" + notification + ")";
     }
 
