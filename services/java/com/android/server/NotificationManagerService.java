@@ -17,7 +17,7 @@
 package com.android.server;
 
 import com.android.server.status.IconData;
-import com.android.server.status.NotificationData;
+import com.android.internal.statusbar.StatusBarNotification;
 import com.android.server.status.StatusBarManagerService;
 
 import android.app.ActivityManagerNative;
@@ -705,36 +705,12 @@ class NotificationManagerService extends INotificationManager.Stub
             }
 
             if (notification.icon != 0) {
-                IconData icon = IconData.makeIcon(null, pkg, notification.icon,
-                                                    notification.iconLevel,
-                                                    notification.number);
-                CharSequence truncatedTicker = notification.tickerText;
-
-                // TODO: make this restriction do something smarter like never fill
-                // more than two screens.  "Why would anyone need more than 80 characters." :-/
-                final int maxTickerLen = 80;
-                if (truncatedTicker != null && truncatedTicker.length() > maxTickerLen) {
-                    truncatedTicker = truncatedTicker.subSequence(0, maxTickerLen);
-                }
-
-                NotificationData n = new NotificationData();
-                n.pkg = pkg;
-                n.tag = tag;
-                n.id = id;
-                n.when = notification.when;
-                n.tickerText = truncatedTicker;
-                n.ongoingEvent = (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0;
-                if (!n.ongoingEvent && (notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
-                    n.clearable = true;
-                }
-                n.contentView = notification.contentView;
-                n.contentIntent = notification.contentIntent;
-                n.deleteIntent = notification.deleteIntent;
+                StatusBarNotification n = new StatusBarNotification(pkg, id, tag, notification);
                 if (old != null && old.statusBarKey != null) {
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        mStatusBar.updateNotification(r.statusBarKey, icon, n);
+                        mStatusBar.updateNotification(r.statusBarKey, n);
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -742,16 +718,14 @@ class NotificationManagerService extends INotificationManager.Stub
                 } else {
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        r.statusBarKey = mStatusBar.addNotification(icon, n);
+                        r.statusBarKey = mStatusBar.addNotification(n);
                         mAttentionLight.pulse();
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
                     }
                 }
-
                 sendAccessibilityEvent(notification, pkg);
-
             } else {
                 if (old != null && old.statusBarKey != null) {
                     long identity = Binder.clearCallingIdentity();

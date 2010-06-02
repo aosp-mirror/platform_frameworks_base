@@ -61,6 +61,7 @@ public class StatusBarIconView extends AnimatedImageView {
                 && mIcon.visible == icon.visible;
         if (!iconEquals) {
             setImageDrawable(getIcon(icon));
+            // TODO: What if getIcon returns null?
         }
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
