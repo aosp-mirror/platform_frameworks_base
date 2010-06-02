@@ -34,46 +34,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
-public abstract class StatusBarService extends Service {
-    private static final String TAG = "StatusBarService";
-
-    Bar mBar = new Bar();
-    IStatusBarService mBarService;
+public class PhoneStatusBarService extends StatusBarService {
 
     @Override
-    public void onCreate() {
-        // Put up the view
-        addStatusBarView();
+    protected void addStatusBarView() {
+        final View view = new View(this);
 
-        // Connect in to the status bar manager service
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        try {
-            mBarService.registerStatusBar(mBar);
-        } catch (RemoteException ex) {
-            // If the system process isn't there we're doomed anyway.
-        }
+        // TODO final StatusBarView view = mStatusBarView;
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                view.getContext().getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height),
+                WindowManager.LayoutParams.TYPE_STATUS_BAR,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
+                PixelFormat.RGB_888);
+        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        lp.setTitle("StatusBar");
+        // TODO lp.windowAnimations = R.style.Animation_StatusBar;
+
+        WindowManagerImpl.getDefault().addView(view, lp);
     }
-
-    @Override
-    public void onDestroy() {
-        // we're never destroyed
-    }
-
-    /**
-     * Nobody binds to us.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    class Bar extends IStatusBar.Stub {
-    }
-
-    /**
-     * Implement this to add the main status bar view.
-     */
-    protected abstract void addStatusBarView();
 }
-

@@ -15,7 +15,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name="StatusBarService"
+            android:name="PhoneStatusBarService"
             android:exported="false"
             />
     </application>
