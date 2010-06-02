@@ -119,16 +119,8 @@ public class PhoneStatusBarService extends StatusBarService {
     Object mQueueLock = new Object();
     NotificationCallbacks mNotificationCallbacks;
     
-    // All accesses to mIconMap and mNotificationData are syncronized on those objects,
-    // but this is only so dump() can work correctly.  Modifying these outside of the UI
-    // thread will not work, there are places in the code that unlock and reaquire between
-    // reads and require them to not be modified.
-
     // icons
-    HashMap<IBinder,StatusBarIconData> mIconMap = new HashMap<IBinder,StatusBarIconData>();
-    ArrayList<StatusBarIconData> mIconList = new ArrayList<StatusBarIconData>();
     String[] mRightIconSlots;
-    StatusBarIconData[] mRightIcons;
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
     LinearLayout mStatusIcons;
@@ -209,7 +201,6 @@ public class PhoneStatusBarService extends StatusBarService {
     private void makeStatusBarView(Context context) {
         Resources res = context.getResources();
         mRightIconSlots = res.getStringArray(R.array.status_bar_icon_order);
-        mRightIcons = new StatusBarIconData[mRightIconSlots.length];
 
         mHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mIconWidth = mHeight;
@@ -993,18 +984,6 @@ public class PhoneStatusBarService extends StatusBarService {
             pw.println("  mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
             pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
-        }
-        synchronized (mIconMap) {
-            final int N = mIconMap.size();
-            pw.println("  mIconMap.size=" + N);
-            Set<IBinder> keys = mIconMap.keySet();
-            int i=0;
-            for (IBinder key: keys) {
-                StatusBarIconData icon = mIconMap.get(key);
-                pw.println("    [" + i + "] key=" + key);
-                pw.println("           data=" + icon.mData);
-                i++;
-            }
         }
         synchronized (mNotificationData) {
             int N = mNotificationData.ongoingCount();
