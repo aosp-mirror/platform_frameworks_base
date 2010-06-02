@@ -30,8 +30,8 @@ public class NotificationData {
     public static final class Entry {
         public IBinder key;
         public StatusBarNotification notification;
-        public StatusBarIconView icon;
         public View expanded;
+        public StatusBarIconView icon;
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
 
@@ -43,14 +43,28 @@ public class NotificationData {
         return mEntries.get(index);
     }
 
-    public int add(IBinder key, StatusBarNotification notification, View expanded) {
+    public int add(IBinder key, StatusBarNotification notification, View expanded,
+            StatusBarIconView icon) {
         Entry entry = new Entry();
         entry.key = key;
         entry.notification = notification;
         entry.expanded = expanded;
+        entry.icon = icon;
         final int index = chooseIndex(notification.notification.when);
         mEntries.add(index, entry);
         return index;
+    }
+
+    public Entry remove(IBinder key) {
+        final int N = mEntries.size();
+        for (int i=0; i<N; i++) {
+            Entry entry = mEntries.get(i);
+            if (entry.key == key) {
+                mEntries.remove(i);
+                return entry;
+            }
+        }
+        return null;
     }
 
     private int chooseIndex(final long when) {
