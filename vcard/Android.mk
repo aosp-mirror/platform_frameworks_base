@@ -18,9 +18,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := com.android.vcard
 LOCAL_SRC_FILES := $(call all-java-files-under, java)
 
-# Use google-common instead of android-common for using hidden code in telephony library.
 # Use ext for using Quoted-Printable codec.
-LOCAL_JAVA_LIBRARIES := google-common ext
+LOCAL_JAVA_LIBRARIES := ext
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
