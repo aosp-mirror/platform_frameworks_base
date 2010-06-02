@@ -642,8 +642,9 @@ class MountService extends IMountService.Stub
     }
 
     private boolean doGetShareMethodAvailable(String method) {
+        ArrayList<String> rsp;
         try {
-            ArrayList<String> rsp = mConnector.doCommand("share status " + method);
+            rsp = mConnector.doCommand("share status " + method);
         } catch (NativeDaemonConnectorException ex) {
             Slog.e(TAG, "Failed to determine whether share method " + method + " is available.");
             return false;
