@@ -18,7 +18,7 @@ package com.android.policy.statusbar.phone;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -72,7 +72,7 @@ class CommandQueue extends IStatusBar.Stub {
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             int what = msg.what & MSG_MASK;
-            switch (msg.what) {
+            switch (what) {
                 case MSG_ICON: {
                     int index = msg.what & INDEX_MASK;
                     int viewIndex = mList.getViewIndex(index);

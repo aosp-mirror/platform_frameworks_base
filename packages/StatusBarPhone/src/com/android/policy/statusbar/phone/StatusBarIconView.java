@@ -39,6 +39,9 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     private static boolean streq(String a, String b) {
+        if (a == b) {
+            return true;
+        }
         if (a == null && b != null) {
             return false;
         }
