@@ -5001,7 +5001,10 @@ public class WebView extends AbsoluteLayout
                                 break;
                             }
                         } else {
-                            if (mTouchMode == TOUCH_INIT_MODE) {
+                            // only trigger double tap if the WebView is
+                            // scalable
+                            if (mTouchMode == TOUCH_INIT_MODE
+                                    && (canZoomIn() || canZoomOut())) {
                                 mPrivateHandler.sendEmptyMessageDelayed(
                                         RELEASE_SINGLE_TAP, ViewConfiguration
                                                 .getDoubleTapTimeout());
