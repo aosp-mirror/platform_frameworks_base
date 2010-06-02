@@ -40,15 +40,14 @@ includes reading or writing the user's private data (such as contacts or
 e-mails), reading or writing another application's files, performing
 network access, keeping the device awake, etc.<p>
 
-<p>An application's process is a secure sandbox.  It can't disrupt other
-applications, except by explicitly declaring the <em>permissions</em> it needs
-for additional capabilities not provided by the basic sandbox.  These
-permissions it requests can be handled by the operating in various ways,
-typically by automatically allowing or disallowing based on certificates or
-by prompting the user.  The permissions required by an application are declared
-statically in that application, so they can be known up-front at install time
-and will not change after that.</p>
-
+<p>An application's process runs in a security sandbox. The sandbox is designed
+to prevent applications from disrupting each other, except by explicitly
+declaring the <em>permissions</em> they need for additional capabilities not
+provided by the basic sandbox. The system handles requests for permissions
+in various ways, typically by automatically allowing or disallowing based on
+certificates or by prompting the user.  The permissions required by an
+application are declared statically in that application, so they can be known
+up-front at install time and will not change after that.</p>
 
 <a name="signing"></a>
 <h2>Application Signing</h2>
