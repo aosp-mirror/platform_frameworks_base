@@ -32,7 +32,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.provider.OpenableColumns;
+import android.provider.MediaStore;
+import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -283,24 +284,26 @@ final class WebViewCore {
     private String openFileChooser(String acceptType) {
         Uri uri = mCallbackProxy.openFileChooser(acceptType);
         if (uri != null) {
-            String fileName = "";
+            String filePath = "";
+            // Note - querying for MediaStore.Images.Media.DATA
+            // seems to work for all content URIs, not just images
             Cursor cursor = mContext.getContentResolver().query(
                     uri,
-                    new String[] { OpenableColumns.DISPLAY_NAME },
+                    new String[] { MediaStore.Images.Media.DATA },
                     null, null, null);
             if (cursor != null) {
                 try {
                     if (cursor.moveToNext()) {
-                        fileName = cursor.getString(0);
+                        filePath = cursor.getString(0);
                     }
                 } finally {
                     cursor.close();
                 }
             } else {
-                fileName = uri.getLastPathSegment();
+                filePath = uri.getLastPathSegment();
             }
             String uriString = uri.toString();
-            BrowserFrame.sJavaBridge.storeFileNameForContentUri(fileName, uriString);
+            BrowserFrame.sJavaBridge.storeFilePathForContentUri(filePath, uriString);
             return uriString;
         }
         return "";
