@@ -17,8 +17,8 @@
 package com.android.policy.statusbar.phone;
 
 import android.app.Service;
+import android.app.IStatusBar;
 import android.app.IStatusBarService;
-import android.app.IPoo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -68,7 +68,7 @@ public class StatusBarService extends Service {
         return null;
     }
 
-    class Bar extends IPoo.Stub {
+    class Bar extends IStatusBar.Stub {
     }
 
     // ================================================================================

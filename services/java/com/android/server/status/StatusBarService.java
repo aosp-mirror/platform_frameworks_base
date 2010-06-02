@@ -21,8 +21,8 @@ import com.android.internal.util.CharSequences;
 
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
+import android.app.IStatusBar;
 import android.app.IStatusBarService;
-import android.app.IPoo;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -422,7 +422,7 @@ public class StatusBarService extends IStatusBarService.Stub
                 "StatusBarService");
     }
 
-    public void registerStatusBar(IPoo bar) {
+    public void registerStatusBar(IStatusBar bar) {
         Slog.d(TAG, "registerStatusBar bar=" + bar);
     }
     
