@@ -33,4 +33,6 @@ interface IStatusBarService
     // ---- Methods below are for use by the status bar policy services ----
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList state);
     void visibilityChanged(boolean visible);
+    void onNotificationClick(String pkg, String tag, int id);
+    void onClearAllNotifications();
 }

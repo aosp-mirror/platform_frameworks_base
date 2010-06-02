@@ -103,7 +103,7 @@ public class PhoneStatusBarService extends StatusBarService {
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
                 if (!down) {
-                    //TODO PhoneStatusBarService.this.collapse();
+                    animateCollapse();
                 }
                 return true;
             }
@@ -119,7 +119,6 @@ public class PhoneStatusBarService extends StatusBarService {
     int mPixelFormat;
     H mHandler = new H();
     Object mQueueLock = new Object();
-    NotificationCallbacks mNotificationCallbacks;
     
     // icons
     String[] mRightIconSlots;
@@ -925,12 +924,16 @@ public class PhoneStatusBarService extends StatusBarService {
                     new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
             try {
                 mIntent.send(PhoneStatusBarService.this, 0, overlay);
-                mNotificationCallbacks.onNotificationClick(mPkg, mTag, mId);
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.  Just log the exception message.
                 Slog.w(TAG, "Sending contentIntent failed: " + e);
             }
-            //collapse();
+            try {
+                mBarService.onNotificationClick(mPkg, mTag, mId);
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
+            animateCollapse();
         }
     }
 
@@ -1314,7 +1317,11 @@ public class PhoneStatusBarService extends StatusBarService {
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
-            mNotificationCallbacks.onClearAll();
+            try {
+                mBarService.onClearAllNotifications();
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
             animateCollapse();
         }
     };

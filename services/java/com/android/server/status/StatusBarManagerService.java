@@ -255,13 +255,21 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mBar = bar;
         iconList.copyFrom(mIcons);
     }
-    
+
     /**
      * The status bar service should call this when the user changes whether
      * the status bar is visible or not.
      */
     public void visibilityChanged(boolean visible) {
         Slog.d(TAG, "visibilityChanged visible=" + visible);
+    }
+
+    public void onNotificationClick(String pkg, String tag, int id) {
+        mNotificationCallbacks.onNotificationClick(pkg, tag, id);
+    }
+
+    public void onClearAllNotifications() {
+        mNotificationCallbacks.onClearAll();
     }
 
     // ================================================================================
