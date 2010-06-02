@@ -19,7 +19,8 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<com.android.policy.statusbar.phone.StatusBarView xmlns:android="http://schemas.android.com/apk/res/android" 
+<com.android.policy.statusbar.phone.StatusBarView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/statusbar_background"
     android:orientation="vertical"
     android:focusable="true"
@@ -87,13 +88,13 @@
             android:paddingTop="2dip"
             android:paddingRight="10dip">
             <TextView
-                android:textAppearance="@style/TextAppearance.StatusBar.Ticker"
+                android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 />
             <TextView
-                android:textAppearance="@style/TextAppearance.StatusBar.Ticker"
+                android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
@@ -102,7 +103,7 @@
     </LinearLayout>
 
     <com.android.policy.statusbar.phone.DateView android:id="@+id/date"
-        android:textAppearance="@style/TextAppearance.StatusBar.Icon"
+        android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:singleLine="true"
