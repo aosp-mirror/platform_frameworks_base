@@ -24,6 +24,9 @@ import android.os.Parcelable;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+/**
+ * Contains a list of status bar notifications and IBinder keys in no particular order.
+ */
 public class StatusBarNotificationList implements Parcelable {
     private class Entry {
         IBinder key;
@@ -116,17 +119,14 @@ public class StatusBarNotificationList implements Parcelable {
         return mEntries.size();
     }
 
-    public IBinder add(StatusBarNotification notification) {
+    public void add(IBinder key, StatusBarNotification notification) {
         if (notification == null) throw new NullPointerException();
 
         Entry entry = new Entry();
-        entry.key = new Binder();
+        entry.key = key;
         entry.notification = notification.clone();
 
-        // TODO: Sort correctly by "when"
         mEntries.add(entry);
-
-        return entry.key;
     }
 
     public void update(IBinder key, StatusBarNotification notification) {
@@ -134,8 +134,7 @@ public class StatusBarNotificationList implements Parcelable {
         if (index < 0) {
             throw new IllegalArgumentException("got invalid key: " + key);
         }
-        final Entry entry = mEntries.get(index);
-        entry.notification = notification.clone();
+        mEntries.get(index).notification = notification.clone();
     }
 
     public void remove(IBinder key) {

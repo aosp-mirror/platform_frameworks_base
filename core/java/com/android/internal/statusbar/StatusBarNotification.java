@@ -38,7 +38,7 @@ public class StatusBarNotification implements Parcelable {
     public String pkg;
     public int id;
     public String tag;
-    Notification notification;
+    public Notification notification;
 
     public StatusBarNotification() {
     }

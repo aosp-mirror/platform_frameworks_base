@@ -20,6 +20,7 @@ import com.android.internal.util.CharSequences;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.StatusBarNotification;
 
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
@@ -124,7 +125,6 @@ public class PhoneStatusBarService extends StatusBarService {
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
     LinearLayout mStatusIcons;
-    private UninstallReceiver mUninstallReceiver;
 
     // expanded notifications
     NotificationViewList mNotificationData = new NotificationViewList();
@@ -189,7 +189,6 @@ public class PhoneStatusBarService extends StatusBarService {
         // First set up our views and stuff.
         mDisplay = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         makeStatusBarView(this);
-        mUninstallReceiver = new UninstallReceiver();
 
         // Next, call super.onCreate(), which will populate our views.
         super.onCreate();
@@ -317,6 +316,15 @@ public class PhoneStatusBarService extends StatusBarService {
         mStatusIcons.removeViewAt(viewIndex);
     }
 
+    public void addNotification(IBinder key, StatusBarNotification notification) {
+    }
+
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
+    }
+
+    public void removeNotification(IBinder key) {
+    }
+
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
@@ -366,12 +374,6 @@ public class PhoneStatusBarService extends StatusBarService {
                     doRevealAnimation();
                     break;
             }
-        }
-    }
-
-    StatusBarNotification getNotification(IBinder key) {
-        synchronized (mNotificationData) {
-            return mNotificationData.get(key);
         }
     }
 
@@ -990,6 +992,7 @@ public class PhoneStatusBarService extends StatusBarService {
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
             pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
         }
+        /*
         synchronized (mNotificationData) {
             int N = mNotificationData.ongoingCount();
             pw.println("  ongoingCount.size=" + N);
@@ -1006,6 +1009,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 pw.println("           data=" + n.data);
             }
         }
+        */
         
         if (false) {
             pw.println("see the logcat for a dump of the views we have created.");
@@ -1365,47 +1369,4 @@ public class PhoneStatusBarService extends StatusBarService {
             vibrate();
         }
     };
-    
-    class UninstallReceiver extends BroadcastReceiver {
-        public UninstallReceiver() {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-            filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-            filter.addDataScheme("package");
-            PhoneStatusBarService.this.registerReceiver(this, filter);
-            IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-            PhoneStatusBarService.this.registerReceiver(this, sdFilter);
-        }
-        
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String pkgList[] = null;
-            if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())) {
-                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            } else {
-                Uri data = intent.getData();
-                if (data != null) {
-                    String pkg = data.getSchemeSpecificPart();
-                    if (pkg != null) {
-                        pkgList = new String[]{pkg};
-                    }
-                }
-            }
-            ArrayList<StatusBarNotification> list = null;
-            if (pkgList != null) {
-                synchronized (PhoneStatusBarService.this) {
-                    for (String pkg : pkgList) {
-                        list = mNotificationData.notificationsForPackage(pkg);
-                    }
-                }
-            }
-            
-            if (list != null) {
-                final int N = list.size();
-                for (int i=0; i<N; i++) {
-                    //removeIcon(list.get(i).key);
-                }
-            }
-        }
-    }
 }
