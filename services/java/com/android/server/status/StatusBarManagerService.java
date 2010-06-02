@@ -183,9 +183,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    public void setIcon(String slot, CharSequence text) {
-    }
-
     public void setIcon(String slot, String iconPackage, int iconId, int iconLevel) {
         enforceStatusBar();
 

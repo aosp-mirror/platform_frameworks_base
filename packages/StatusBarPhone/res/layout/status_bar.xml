@@ -47,6 +47,17 @@
             android:paddingRight="6dip"
             android:gravity="center_vertical"
             android:orientation="horizontal"/>    
+
+        <com.android.policy.statusbar.phone.Clock
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:paddingRight="6dip"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:gravity="center_vertical|left"
+            android:textColor="?android:attr/textColorPrimaryInverse"
+            />
     </LinearLayout>
         
     <LinearLayout android:id="@+id/ticker"
