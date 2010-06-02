@@ -19,22 +19,37 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.systemui.R;
+
+
 public class IconMerger extends LinearLayout {
-    PhoneStatusBarService service;
+    private static final String TAG = "IconMerger";
+
+    private StatusBarIconView mMoreView;
 
     public IconMerger(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
+    public void addMoreView(StatusBarIconView v, LinearLayout.LayoutParams lp) {
+        super.addView(v, lp);
+        mMoreView = v;
+    }
+
+    public void addView(StatusBarIconView v, int index, LinearLayout.LayoutParams lp) {
+        if (index == 0) {
+            throw new RuntimeException("Attempt to put view before the more view: " + v);
+        }
+        super.addView(v, index, lp);
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        if (true) {
-            return;
-        }
 
         final int maxWidth = r - l;
         final int N = getChildCount();
@@ -51,13 +66,12 @@ public class IconMerger extends LinearLayout {
         }
 
         // find the first visible one that isn't the more icon
-        View moreView = null;
+        final StatusBarIconView moreView = mMoreView;
         int fitLeft = -1;
         int startIndex = -1;
         for (i=0; i<N; i++) {
             final View child = getChildAt(i);
-            if (com.android.internal.R.drawable.stat_notify_more == child.getId()) {
-                moreView = child;
+            if (child == moreView) {
                 startIndex = i+1;
             }
             else if (child.getVisibility() != GONE) {
@@ -67,7 +81,11 @@ public class IconMerger extends LinearLayout {
         }
 
         if (moreView == null || startIndex < 0) {
-            throw new RuntimeException("Status Bar / IconMerger moreView == null");
+            return;
+            /*
+            throw new RuntimeException("Status Bar / IconMerger moreView == " + moreView
+                    + " startIndex=" + startIndex);
+            */
         }
         
         // if it fits without the more icon, then hide the more icon and update fitLeft
@@ -85,14 +103,14 @@ public class IconMerger extends LinearLayout {
         int breakingPoint = fitLeft + extra + adjust;
         int number = 0;
         for (i=startIndex; i<N; i++) {
-            final View child = getChildAt(i);
+            final StatusBarIconView child = (StatusBarIconView)getChildAt(i);
             if (child.getVisibility() != GONE) {
                 int childLeft = child.getLeft();
                 int childRight = child.getRight();
                 if (childLeft < breakingPoint) {
                     // hide this one
                     child.layout(0, child.getTop(), 0, child.getBottom());
-                    int n = 0; // XXX this.service.getIconNumberForView(child);
+                    int n = child.getStatusBarIcon().number;
                     if (n == 0) {
                         number += 1;
                     } else if (n > 0) {
