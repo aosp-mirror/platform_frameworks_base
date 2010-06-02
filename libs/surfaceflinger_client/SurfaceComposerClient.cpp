@@ -17,98 +17,147 @@
 #define LOG_TAG "SurfaceComposerClient"
 
 #include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 
-#include <cutils/memory.h>
-
-#include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/threads.h>
-#include <utils/KeyedVector.h>
+#include <utils/SortedVector.h>
 #include <utils/Log.h>
+#include <utils/Singleton.h>
 
 #include <binder/IServiceManager.h>
 #include <binder/IMemory.h>
 
 #include <ui/DisplayInfo.h>
-#include <ui/Rect.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 
 #include <private/surfaceflinger/LayerState.h>
 #include <private/surfaceflinger/SharedBufferStack.h>
 
-#define VERBOSE(...)	((void)0)
-//#define VERBOSE			LOGD
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 namespace android {
+// ---------------------------------------------------------------------------
+
+class ComposerService : public Singleton<ComposerService>
+{
+    // these are constants
+    sp<ISurfaceComposer> mComposerService;
+    sp<IMemoryHeap> mServerCblkMemory;
+    surface_flinger_cblk_t volatile* mServerCblk;
+
+    ComposerService() : Singleton<ComposerService>() {
+        const String16 name("SurfaceFlinger");
+        while (getService(name, &mComposerService) != NO_ERROR) {
+            usleep(250000);
+        }
+        mServerCblkMemory = mComposerService->getCblk();
+        mServerCblk = static_cast<surface_flinger_cblk_t volatile *>(
+                mServerCblkMemory->getBase());
+    }
+
+    friend class Singleton<ComposerService>;
+
+public:
+    static sp<ISurfaceComposer> getComposerService() {
+        return ComposerService::getInstance().mComposerService;
+    }
+    static surface_flinger_cblk_t const volatile * getControlBlock() {
+        return ComposerService::getInstance().mServerCblk;
+    }
+};
+
+ANDROID_SINGLETON_STATIC_INSTANCE(ComposerService);
+
+
+static inline sp<ISurfaceComposer> getComposerService() {
+    return ComposerService::getComposerService();
+}
+
+static inline surface_flinger_cblk_t const volatile * get_cblk() {
+    return ComposerService::getControlBlock();
+}
 
 // ---------------------------------------------------------------------------
 
-// Must not be holding SurfaceComposerClient::mLock when acquiring gLock here.
-static Mutex                                                gLock;
-static sp<ISurfaceComposer>                                 gSurfaceManager;
-static DefaultKeyedVector< sp<IBinder>, wp<SurfaceComposerClient> > gActiveConnections;
-static SortedVector<sp<SurfaceComposerClient> >             gOpenTransactions;
-static sp<IMemoryHeap>                                      gServerCblkMemory;
-static volatile surface_flinger_cblk_t*                     gServerCblk;
-
-static sp<ISurfaceComposer> getComposerService()
+class Composer : public Singleton<Composer>
 {
-    sp<ISurfaceComposer> sc;
-    Mutex::Autolock _l(gLock);
-    if (gSurfaceManager != 0) {
-        sc = gSurfaceManager;
-    } else {
-        // release the lock while we're waiting...
-        gLock.unlock();
+    Mutex mLock;
+    SortedVector< wp<SurfaceComposerClient> > mActiveConnections;
+    SortedVector<sp<SurfaceComposerClient> > mOpenTransactions;
 
-        sp<IBinder> binder;
-        sp<IServiceManager> sm = defaultServiceManager();
-        do {
-            binder = sm->getService(String16("SurfaceFlinger"));
-            if (binder == 0) {
-                LOGW("SurfaceFlinger not published, waiting...");
-                usleep(500000); // 0.5 s
+    Composer() : Singleton<Composer>() {
+    }
+
+    void addClientImpl(const sp<SurfaceComposerClient>& client) {
+        Mutex::Autolock _l(mLock);
+        mActiveConnections.add(client);
+    }
+
+    void removeClientImpl(const sp<SurfaceComposerClient>& client) {
+        Mutex::Autolock _l(mLock);
+        mActiveConnections.remove(client);
+    }
+
+    void openGlobalTransactionImpl()
+    {
+        Mutex::Autolock _l(mLock);
+        if (mOpenTransactions.size()) {
+            LOGE("openGlobalTransaction() called more than once. skipping.");
+            return;
+        }
+        const size_t N = mActiveConnections.size();
+        for (size_t i=0; i<N; i++) {
+            sp<SurfaceComposerClient> client(mActiveConnections[i].promote());
+            if (client != 0 && mOpenTransactions.indexOf(client) < 0) {
+                if (client->openTransaction() == NO_ERROR) {
+                    mOpenTransactions.add(client);
+                } else {
+                    LOGE("openTransaction on client %p failed", client.get());
+                    // let it go, it'll fail later when the user
+                    // tries to do something with the transaction
+                }
             }
-        } while(binder == 0);
-
-        // grab the lock again for updating gSurfaceManager
-        gLock.lock();
-        if (gSurfaceManager == 0) {
-            sc = interface_cast<ISurfaceComposer>(binder);
-            gSurfaceManager = sc;
-        } else {
-            sc = gSurfaceManager;
         }
     }
-    return sc;
-}
 
-static volatile surface_flinger_cblk_t const * get_cblk()
-{
-    if (gServerCblk == 0) {
+    void closeGlobalTransactionImpl()
+    {
+        mLock.lock();
+            SortedVector< sp<SurfaceComposerClient> > clients(mOpenTransactions);
+            mOpenTransactions.clear();
+        mLock.unlock();
+
         sp<ISurfaceComposer> sm(getComposerService());
-        Mutex::Autolock _l(gLock);
-        if (gServerCblk == 0) {
-            gServerCblkMemory = sm->getCblk();
-            LOGE_IF(gServerCblkMemory==0, "Can't get server control block");
-            gServerCblk = (surface_flinger_cblk_t *)gServerCblkMemory->getBase();
-            LOGE_IF(gServerCblk==0, "Can't get server control block address");
-        }
+        sm->openGlobalTransaction();
+            const size_t N = clients.size();
+            for (size_t i=0; i<N; i++) {
+                clients[i]->closeTransaction();
+            }
+        sm->closeGlobalTransaction();
     }
-    return gServerCblk;
-}
+
+    friend class Singleton<Composer>;
+
+public:
+    static void addClient(const sp<SurfaceComposerClient>& client) {
+        Composer::getInstance().addClientImpl(client);
+    }
+    static void removeClient(const sp<SurfaceComposerClient>& client) {
+        Composer::getInstance().removeClientImpl(client);
+    }
+    static void openGlobalTransaction() {
+        Composer::getInstance().openGlobalTransactionImpl();
+    }
+    static void closeGlobalTransaction() {
+        Composer::getInstance().closeGlobalTransactionImpl();
+    }
+};
+
+ANDROID_SINGLETON_STATIC_INSTANCE(Composer);
 
 // ---------------------------------------------------------------------------
 
@@ -120,61 +169,27 @@ static inline int compare_type( const layer_state_t& lhs,
 }
 
 SurfaceComposerClient::SurfaceComposerClient()
+    : mTransactionOpen(0), mPrebuiltLayerState(0), mStatus(NO_INIT)
+{
+}
+
+void SurfaceComposerClient::onFirstRef()
 {
     sp<ISurfaceComposer> sm(getComposerService());
-    if (sm == 0) {
-        _init(0, 0);
-        return;
+    if (sm != 0) {
+        sp<ISurfaceComposerClient> conn = sm->createConnection();
+        if (conn != 0) {
+            mClient = conn;
+            Composer::addClient(this);
+            mPrebuiltLayerState = new layer_state_t;
+            mStatus = NO_ERROR;
+        }
     }
-
-    _init(sm, sm->createConnection());
-
-    if (mClient != 0) {
-        Mutex::Autolock _l(gLock);
-        VERBOSE("Adding client %p to map", this);
-        gActiveConnections.add(mClient->asBinder(), this);
-    }
-}
-
-SurfaceComposerClient::SurfaceComposerClient(
-        const sp<ISurfaceComposer>& sm, const sp<IBinder>& conn)
-{
-    _init(sm, interface_cast<ISurfaceFlingerClient>(conn));
-}
-
-
-status_t SurfaceComposerClient::linkToComposerDeath(
-        const sp<IBinder::DeathRecipient>& recipient,
-        void* cookie, uint32_t flags)
-{
-    sp<ISurfaceComposer> sm(getComposerService());
-    return sm->asBinder()->linkToDeath(recipient, cookie, flags);    
-}
-
-void SurfaceComposerClient::_init(
-        const sp<ISurfaceComposer>& sm, const sp<ISurfaceFlingerClient>& conn)
-{
-    VERBOSE("Creating client %p, conn %p", this, conn.get());
-
-    mPrebuiltLayerState = 0;
-    mTransactionOpen = 0;
-    mStatus = NO_ERROR;
-    mControl = 0;
-
-    mClient = conn;
-    if (mClient == 0) {
-        mStatus = NO_INIT;
-        return;
-    }
-
-    mControlMemory = mClient->getControlBlock();
-    mSignalServer = sm;
-    mControl = static_cast<SharedClient *>(mControlMemory->getBase());
 }
 
 SurfaceComposerClient::~SurfaceComposerClient()
 {
-    VERBOSE("Destroying client %p, conn %p", this, mClient.get());
+    delete mPrebuiltLayerState;
     dispose();
 }
 
@@ -188,69 +203,31 @@ sp<IBinder> SurfaceComposerClient::connection() const
     return (mClient != 0) ? mClient->asBinder() : 0;
 }
 
-sp<SurfaceComposerClient>
-SurfaceComposerClient::clientForConnection(const sp<IBinder>& conn)
+status_t SurfaceComposerClient::linkToComposerDeath(
+        const sp<IBinder::DeathRecipient>& recipient,
+        void* cookie, uint32_t flags)
 {
-    sp<SurfaceComposerClient> client;
-
-    { // scope for lock
-        Mutex::Autolock _l(gLock);
-        client = gActiveConnections.valueFor(conn).promote();
-    }
-
-    if (client == 0) {
-        // Need to make a new client.
-        sp<ISurfaceComposer> sm(getComposerService());
-        client = new SurfaceComposerClient(sm, conn);
-        if (client != 0 && client->initCheck() == NO_ERROR) {
-            Mutex::Autolock _l(gLock);
-            gActiveConnections.add(conn, client);
-            //LOGD("we have %d connections", gActiveConnections.size());
-        } else {
-            client.clear();
-        }
-    }
-
-    return client;
+    sp<ISurfaceComposer> sm(getComposerService());
+    return sm->asBinder()->linkToDeath(recipient, cookie, flags);
 }
 
 void SurfaceComposerClient::dispose()
 {
     // this can be called more than once.
-
-    sp<IMemoryHeap>             controlMemory;
-    sp<ISurfaceFlingerClient>   client;
-
-    {
-        Mutex::Autolock _lg(gLock);
-        Mutex::Autolock _lm(mLock);
-
-        mSignalServer = 0;
-
-        if (mClient != 0) {
-            client = mClient;
-            mClient.clear();
-
-            ssize_t i = gActiveConnections.indexOfKey(client->asBinder());
-            if (i >= 0 && gActiveConnections.valueAt(i) == this) {
-                VERBOSE("Removing client %p from map at %d", this, int(i));
-                gActiveConnections.removeItemsAt(i);
-            }
-        }
-
-        delete mPrebuiltLayerState;
-        mPrebuiltLayerState = 0;
-        controlMemory = mControlMemory;
-        mControlMemory.clear();
-        mControl = 0;
-        mStatus = NO_INIT;
+    sp<ISurfaceComposerClient> client;
+    Mutex::Autolock _lm(mLock);
+    if (mClient != 0) {
+        Composer::removeClient(this);
+        client = mClient; // hold ref while lock is held
+        mClient.clear();
     }
+    mStatus = NO_INIT;
 }
 
 status_t SurfaceComposerClient::getDisplayInfo(
         DisplayID dpy, DisplayInfo* info)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
 
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
@@ -268,7 +245,7 @@ status_t SurfaceComposerClient::getDisplayInfo(
 
 ssize_t SurfaceComposerClient::getDisplayWidth(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -277,7 +254,7 @@ ssize_t SurfaceComposerClient::getDisplayWidth(DisplayID dpy)
 
 ssize_t SurfaceComposerClient::getDisplayHeight(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -286,7 +263,7 @@ ssize_t SurfaceComposerClient::getDisplayHeight(DisplayID dpy)
 
 ssize_t SurfaceComposerClient::getDisplayOrientation(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -305,12 +282,6 @@ ssize_t SurfaceComposerClient::getNumberOfDisplays()
     return n;
 }
 
-
-void SurfaceComposerClient::signalServer()
-{
-    mSignalServer->signal();
-}
-
 sp<SurfaceControl> SurfaceComposerClient::createSurface(
         int pid,
         DisplayID display,
@@ -327,7 +298,6 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
 
     return SurfaceComposerClient::createSurface(pid, name, display,
             w, h, format, flags);
-
 }
 
 sp<SurfaceControl> SurfaceComposerClient::createSurface(
@@ -341,11 +311,11 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
 {
     sp<SurfaceControl> result;
     if (mStatus == NO_ERROR) {
-        ISurfaceFlingerClient::surface_data_t data;
+        ISurfaceComposerClient::surface_data_t data;
         sp<ISurface> surface = mClient->createSurface(&data, pid, name,
                 display, w, h, format, flags);
         if (surface != 0) {
-            if (uint32_t(data.token) < NUM_LAYERS_MAX) {
+            if (uint32_t(data.token) < SharedBufferStack::NUM_LAYERS_MAX) {
                 result = new SurfaceControl(this, surface, data, w, h, format, flags);
             }
         }
@@ -373,55 +343,13 @@ status_t SurfaceComposerClient::destroySurface(SurfaceID sid)
 
 void SurfaceComposerClient::openGlobalTransaction()
 {
-    Mutex::Autolock _l(gLock);
-
-    if (gOpenTransactions.size()) {
-        LOGE("openGlobalTransaction() called more than once. skipping.");
-        return;
-    }
-
-    const size_t N = gActiveConnections.size();
-    VERBOSE("openGlobalTransaction (%ld clients)", N);
-    for (size_t i=0; i<N; i++) {
-        sp<SurfaceComposerClient> client(gActiveConnections.valueAt(i).promote());
-        if (client != 0 && gOpenTransactions.indexOf(client) < 0) {
-            if (client->openTransaction() == NO_ERROR) {
-                if (gOpenTransactions.add(client) < 0) {
-                    // Ooops!
-                    LOGE(   "Unable to add a SurfaceComposerClient "
-                            "to the global transaction set (out of memory?)");
-                    client->closeTransaction();
-                    // let it go, it'll fail later when the user
-                    // tries to do something with the transaction
-                }
-            } else {
-                LOGE("openTransaction on client %p failed", client.get());
-                // let it go, it'll fail later when the user
-                // tries to do something with the transaction
-            }
-        }
-    }
+    Composer::openGlobalTransaction();
 }
 
 void SurfaceComposerClient::closeGlobalTransaction()
 {
-    gLock.lock();
-        SortedVector< sp<SurfaceComposerClient> > clients(gOpenTransactions);
-        gOpenTransactions.clear();
-    gLock.unlock();
-
-    const size_t N = clients.size();
-    VERBOSE("closeGlobalTransaction (%ld clients)", N);
-
-    sp<ISurfaceComposer> sm(getComposerService());
-    sm->openGlobalTransaction();
-    for (size_t i=0; i<N; i++) {
-        clients[i]->closeTransaction();
-    }
-    sm->closeGlobalTransaction();
-
+    Composer::closeGlobalTransaction();
 }
-
 
 status_t SurfaceComposerClient::freezeDisplay(DisplayID dpy, uint32_t flags)
 {
@@ -447,15 +375,9 @@ status_t SurfaceComposerClient::openTransaction()
     if (mStatus != NO_ERROR)
         return mStatus;
     Mutex::Autolock _l(mLock);
-    VERBOSE(   "openTransaction (client %p, mTransactionOpen=%d)",
-            this, mTransactionOpen);
     mTransactionOpen++;
-    if (mPrebuiltLayerState == 0) {
-        mPrebuiltLayerState = new layer_state_t;
-    }
     return NO_ERROR;
 }
-
 
 status_t SurfaceComposerClient::closeTransaction()
 {
@@ -463,10 +385,6 @@ status_t SurfaceComposerClient::closeTransaction()
         return mStatus;
 
     Mutex::Autolock _l(mLock);
-
-    VERBOSE(   "closeTransaction (client %p, mTransactionOpen=%d)",
-            this, mTransactionOpen);
-
     if (mTransactionOpen <= 0) {
         LOGE(   "closeTransaction (client %p, mTransactionOpen=%d) "
                 "called more times than openTransaction()",
@@ -488,7 +406,7 @@ status_t SurfaceComposerClient::closeTransaction()
     return NO_ERROR;
 }
 
-layer_state_t* SurfaceComposerClient::_get_state_l(SurfaceID index)
+layer_state_t* SurfaceComposerClient::get_state_l(SurfaceID index)
 {
     // API usage error, do nothing.
     if (mTransactionOpen<=0) {
@@ -498,7 +416,7 @@ layer_state_t* SurfaceComposerClient::_get_state_l(SurfaceID index)
     }
 
     // use mPrebuiltLayerState just to find out if we already have it
-    layer_state_t& dummy = *mPrebuiltLayerState;
+    layer_state_t& dummy(*mPrebuiltLayerState);
     dummy.surface = index;
     ssize_t i = mStates.indexOf(dummy);
     if (i < 0) {
@@ -508,49 +426,49 @@ layer_state_t* SurfaceComposerClient::_get_state_l(SurfaceID index)
     return mStates.editArray() + i;
 }
 
-layer_state_t* SurfaceComposerClient::_lockLayerState(SurfaceID id)
+layer_state_t* SurfaceComposerClient::lockLayerState(SurfaceID id)
 {
     layer_state_t* s;
     mLock.lock();
-    s = _get_state_l(id);
+    s = get_state_l(id);
     if (!s) mLock.unlock();
     return s;
 }
 
-void SurfaceComposerClient::_unlockLayerState()
+void SurfaceComposerClient::unlockLayerState()
 {
     mLock.unlock();
 }
 
 status_t SurfaceComposerClient::setPosition(SurfaceID id, int32_t x, int32_t y)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::ePositionChanged;
     s->x = x;
     s->y = y;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setSize(SurfaceID id, uint32_t w, uint32_t h)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eSizeChanged;
     s->w = w;
     s->h = h;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setLayer(SurfaceID id, int32_t z)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eLayerChanged;
     s->z = z;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
@@ -579,34 +497,34 @@ status_t SurfaceComposerClient::unfreeze(SurfaceID id)
 status_t SurfaceComposerClient::setFlags(SurfaceID id,
         uint32_t flags, uint32_t mask)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eVisibilityChanged;
     s->flags &= ~mask;
     s->flags |= (flags & mask);
     s->mask |= mask;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setTransparentRegionHint(
         SurfaceID id, const Region& transparentRegion)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eTransparentRegionChanged;
     s->transparentRegion = transparentRegion;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setAlpha(SurfaceID id, float alpha)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eAlphaChanged;
     s->alpha = alpha;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
@@ -615,7 +533,7 @@ status_t SurfaceComposerClient::setMatrix(
         float dsdx, float dtdx,
         float dsdy, float dtdy )
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eMatrixChanged;
     layer_state_t::matrix22_t matrix;
@@ -624,19 +542,56 @@ status_t SurfaceComposerClient::setMatrix(
     matrix.dsdy = dsdy;
     matrix.dtdy = dtdy;
     s->matrix = matrix;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
 status_t SurfaceComposerClient::setFreezeTint(SurfaceID id, uint32_t tint)
 {
-    layer_state_t* s = _lockLayerState(id);
+    layer_state_t* s = lockLayerState(id);
     if (!s) return BAD_INDEX;
     s->what |= ISurfaceComposer::eFreezeTintChanged;
     s->tint = tint;
-    _unlockLayerState();
+    unlockLayerState();
     return NO_ERROR;
 }
 
+// ----------------------------------------------------------------------------
+
+SurfaceClient::SurfaceClient(const sp<SurfaceComposerClient>& client)
+    : mStatus(NO_INIT), mControl(0)
+{
+    if (client != 0) {
+        sp<IBinder> conn = client->connection();
+        init(conn);
+    }
+}
+SurfaceClient::SurfaceClient(const sp<IBinder>& conn)
+    : mStatus(NO_INIT), mControl(0)
+{
+    init(conn);
+}
+void SurfaceClient::init(const sp<IBinder>& conn)
+{
+    mComposerService = getComposerService();
+    sp<ISurfaceComposerClient> sf(interface_cast<ISurfaceComposerClient>(conn));
+    if (sf != 0) {
+        mConnection = conn;
+        mControlMemory = sf->getControlBlock();
+        mControl = static_cast<SharedClient *>(mControlMemory->getBase());
+        mStatus = NO_ERROR;
+    }
+}
+status_t SurfaceClient::initCheck() const {
+    return mStatus;
+}
+SharedClient* SurfaceClient::getSharedClient() const {
+    return mControl;
+}
+void SurfaceClient::signalServer() const {
+    mComposerService->signal();
+}
+
+// ----------------------------------------------------------------------------
 }; // namespace android
 

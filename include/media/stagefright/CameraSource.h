@@ -28,17 +28,14 @@ namespace android {
 
 class ICamera;
 class IMemory;
-class ISurface;
 class Camera;
 
-class CameraSource : public MediaSource {
+class CameraSource : public MediaSource, public MediaBufferObserver {
 public:
     static CameraSource *Create();
-    static CameraSource *CreateFromICamera(const sp<ICamera> &icamera);
+    static CameraSource *CreateFromCamera(const sp<Camera> &camera);
 
     virtual ~CameraSource();
-
-    void setPreviewSurface(const sp<ISurface> &surface);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -48,25 +45,34 @@ public:
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
+    virtual void signalBufferReturned(MediaBuffer* buffer);
+
 private:
     friend class CameraSourceListener;
 
     sp<Camera> mCamera;
-    sp<ISurface> mPreviewSurface;
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
-    List<sp<IMemory> > mFrames;
+    Condition mFrameCompleteCondition;
+    List<sp<IMemory> > mFramesReceived;
+    List<sp<IMemory> > mFramesBeingEncoded;
     List<int64_t> mFrameTimes;
 
     int mWidth, mHeight;
     int64_t mFirstFrameTimeUs;
-    int32_t mNumFrames;
+    int64_t mLastFrameTimestampUs;
+    int32_t mNumFramesReceived;
+    int32_t mNumFramesEncoded;
+    int32_t mNumFramesDropped;
     bool mStarted;
 
     CameraSource(const sp<Camera> &camera);
 
-    void dataCallback(int32_t msgType, const sp<IMemory> &data);
+    void dataCallbackTimestamp(
+            int64_t timestampUs, int32_t msgType, const sp<IMemory> &data);
+
+    void releaseQueuedFrames();
 
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);

@@ -18,6 +18,7 @@ package android.location;
 
 import android.app.PendingIntent;
 import android.location.Address;
+import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
@@ -32,13 +33,15 @@ import android.os.Bundle;
  */
 interface ILocationManager
 {
-    List getAllProviders();
-    List getProviders(boolean enabledOnly);
+    List<String> getAllProviders();
+    List<String> getProviders(in Criteria criteria, boolean enabledOnly);
+    String getBestProvider(in Criteria criteria, boolean enabledOnly);
+    boolean providerMeetsCriteria(String provider, in Criteria criteria);
 
-    void requestLocationUpdates(String provider, long minTime, float minDistance,
-        in ILocationListener listener);
-    void requestLocationUpdatesPI(String provider, long minTime, float minDistance,
-        in PendingIntent intent);
+    void requestLocationUpdates(String provider, in Criteria criteria, long minTime, float minDistance,
+        boolean singleShot, in ILocationListener listener);
+    void requestLocationUpdatesPI(String provider, in Criteria criteria, long minTime, float minDistance,
+        boolean singleShot, in PendingIntent intent);
     void removeUpdates(in ILocationListener listener);
     void removeUpdatesPI(in PendingIntent intent);
 
@@ -64,6 +67,7 @@ interface ILocationManager
     // it need not be shared with other providers.
     void reportLocation(in Location location, boolean passive);
 
+    boolean geocoderIsImplemented();
     String getFromLocation(double latitude, double longitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
     String getFromLocationName(String locationName,

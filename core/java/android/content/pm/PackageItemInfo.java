@@ -67,6 +67,14 @@ public class PackageItemInfo {
     public int icon;
     
     /**
+     * A drawable resource identifier (in the package's resources) of this
+     * component's logo. Logos may be larger/wider than icons and are
+     * displayed by certain UI elements in place of a name or name/icon
+     * combination. From the "logo" attribute or, if not set, 0. 
+     */
+    public int logo;
+    
+    /**
      * Additional meta-data associated with this component.  This field
      * will only be filled in if you set the
      * {@link PackageManager#GET_META_DATA} flag when requesting the info.
@@ -84,6 +92,7 @@ public class PackageItemInfo {
         nonLocalizedLabel = orig.nonLocalizedLabel;
         if (nonLocalizedLabel != null) nonLocalizedLabel = nonLocalizedLabel.toString().trim();
         icon = orig.icon;
+        logo = orig.logo;
         metaData = orig.metaData;
     }
 
@@ -152,6 +161,42 @@ public class PackageItemInfo {
     }
     
     /**
+     * Retrieve the current graphical logo associated with this item. This
+     * will call back on the given PackageManager to load the logo from
+     * the application.
+     * 
+     * @param pm A PackageManager from which the logo can be loaded; usually
+     * the PackageManager from which you originally retrieved this item.
+     * 
+     * @return Returns a Drawable containing the item's logo. If the item
+     * does not have a logo, this method will return null.
+     */
+    public Drawable loadLogo(PackageManager pm) {
+        if (logo != 0) {
+            Drawable d = pm.getDrawable(packageName, logo, getApplicationInfo());
+            if (d != null) {
+                return d;
+            }
+        }
+        return loadDefaultLogo(pm);
+    }
+    
+    /**
+     * Retrieve the default graphical logo associated with this item.
+     * 
+     * @param pm A PackageManager from which the logo can be loaded; usually
+     * the PackageManager from which you originally retrieved this item.
+     * 
+     * @return Returns a Drawable containing the item's default logo
+     * or null if no default logo is available.
+     * 
+     * @hide
+     */
+    protected Drawable loadDefaultLogo(PackageManager pm) {
+        return null;
+    }
+    
+    /**
      * Load an XML resource attached to the meta-data of this item.  This will
      * retrieved the name meta-data entry, and if defined call back on the
      * given PackageManager to load its XML file from the application.
@@ -196,6 +241,7 @@ public class PackageItemInfo {
         dest.writeInt(labelRes);
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
+        dest.writeInt(logo);
         dest.writeBundle(metaData);
     }
     
@@ -206,6 +252,7 @@ public class PackageItemInfo {
         nonLocalizedLabel
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
+        logo = source.readInt();
         metaData = source.readBundle();
     }
 

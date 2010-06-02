@@ -46,12 +46,10 @@ public:
         DIRECT_TEXTURE          = 0x00000002,
         COPY_BITS_EXTENSION     = 0x00000008,
         NPOT_EXTENSION          = 0x00000100,
-        DRAW_TEXTURE_EXTENSION  = 0x00000200,
         BUFFER_PRESERVED        = 0x00010000,
         PARTIAL_UPDATES         = 0x00020000,   // video driver feature
         SLOW_CONFIG             = 0x00040000,   // software
         SWAP_RECTANGLE          = 0x00080000,
-        CACHED_BUFFERS          = 0x00100000
     };
 
     DisplayHardware(

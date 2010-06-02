@@ -421,7 +421,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
-        mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
+        mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
         mBaseStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
 

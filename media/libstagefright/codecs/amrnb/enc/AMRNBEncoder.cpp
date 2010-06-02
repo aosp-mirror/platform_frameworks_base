@@ -29,8 +29,9 @@ namespace android {
 static const int32_t kNumSamplesPerFrame = 160;
 static const int32_t kSampleRate = 8000;
 
-AMRNBEncoder::AMRNBEncoder(const sp<MediaSource> &source)
+AMRNBEncoder::AMRNBEncoder(const sp<MediaSource> &source, const sp<MetaData> &meta)
     : mSource(source),
+      mMeta(meta),
       mStarted(false),
       mBufferGroup(NULL),
       mEncState(NULL),
@@ -119,28 +120,16 @@ status_t AMRNBEncoder::stop() {
 sp<MetaData> AMRNBEncoder::getFormat() {
     sp<MetaData> srcFormat = mSource->getFormat();
 
-    int32_t numChannels;
-    int32_t sampleRate;
-
-    CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
-    CHECK_EQ(numChannels, 1);
-
-    CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
-    CHECK_EQ(sampleRate, kSampleRate);
-
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AMR_NB);
-    meta->setInt32(kKeyChannelCount, numChannels);
-    meta->setInt32(kKeySampleRate, sampleRate);
+    mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AMR_NB);
 
     int64_t durationUs;
     if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
-        meta->setInt64(kKeyDuration, durationUs);
+        mMeta->setInt64(kKeyDuration, durationUs);
     }
 
-    meta->setCString(kKeyDecoderComponent, "AMRNBEncoder");
+    mMeta->setCString(kKeyDecoderComponent, "AMRNBEncoder");
 
-    return meta;
+    return mMeta;
 }
 
 status_t AMRNBEncoder::read(

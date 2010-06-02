@@ -47,13 +47,30 @@ protected:
         POST_BUFFER, // one-way transaction
         CREATE_OVERLAY,
         REQUEST_BUFFER,
+        SET_BUFFER_COUNT,
     };
 
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
+    /*
+     * requests a new buffer for the given index. If w, h, or format are
+     * null the buffer is created with the parameters assigned to the
+     * surface it is bound to. Otherwise the buffer's parameters are
+     * set to those specified.
+     */
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
+            uint32_t w, uint32_t h, uint32_t format, uint32_t usage) = 0;
+
+    /*
+     * sets the number of buffers dequeuable for this surface.
+     */
+    virtual status_t setBufferCount(int bufferCount) = 0;
     
+    // ------------------------------------------------------------------------
+    // Deprecated...
+    // ------------------------------------------------------------------------
+
     class BufferHeap {
     public:
         enum {

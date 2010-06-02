@@ -46,7 +46,7 @@ protected:
     virtual ~AudioSource();
 
 private:
-    enum { kMaxBufferSize = 8192 };
+    enum { kMaxBufferSize = 2048 };
 
     AudioRecord *mRecord;
     status_t mInitCheck;

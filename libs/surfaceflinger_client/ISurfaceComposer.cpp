@@ -46,13 +46,13 @@ public:
     {
     }
 
-    virtual sp<ISurfaceFlingerClient> createConnection()
+    virtual sp<ISurfaceComposerClient> createConnection()
     {
         uint32_t n;
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
         remote()->transact(BnSurfaceComposer::CREATE_CONNECTION, data, &reply);
-        return interface_cast<ISurfaceFlingerClient>(reply.readStrongBinder());
+        return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
     }
 
     virtual sp<IMemoryHeap> getCblk() const

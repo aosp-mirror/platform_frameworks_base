@@ -140,13 +140,13 @@ public class Surface implements Parcelable {
     public static final int FLAGS_ORIENTATION_ANIMATION_DISABLE = 0x000000001;
 
     @SuppressWarnings("unused")
-    private int mSurface;
-    @SuppressWarnings("unused")
     private int mSurfaceControl;
     @SuppressWarnings("unused")
     private int mSaveCount;
     @SuppressWarnings("unused")
     private Canvas mCanvas;
+    @SuppressWarnings("unused")
+    private int mNativeSurface;
     private String mName;
 
     // The display metrics used to provide the pseudo canvas size for applications
@@ -422,13 +422,13 @@ public class Surface implements Parcelable {
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
-        if (mSurface != 0 || mSurfaceControl != 0) {
+        if (mNativeSurface != 0 || mSurfaceControl != 0) {
             if (DEBUG_RELEASE) {
                 Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
-                        + mSurface + ", " + mSurfaceControl + ")", mCreationStack);
+                        + mNativeSurface + ", " + mSurfaceControl + ")", mCreationStack);
             } else {
                 Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
-                        + mSurface + ", " + mSurfaceControl + ")");
+                        + mNativeSurface + ", " + mSurfaceControl + ")");
             }
         }
         release();

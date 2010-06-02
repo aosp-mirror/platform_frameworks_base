@@ -55,12 +55,6 @@ namespace android {
  * 
  */
 
-// When changing these values, the COMPILE_TIME_ASSERT at the end of this
-// file need to be updated.
-const unsigned int NUM_LAYERS_MAX  = 31;
-const unsigned int NUM_BUFFER_MAX  = 4;
-const unsigned int NUM_DISPLAY_MAX = 4;
-
 // ----------------------------------------------------------------------------
 
 class Region;
@@ -69,7 +63,11 @@ class SharedClient;
 
 // ----------------------------------------------------------------------------
 
-// should be 128 bytes (32 longs)
+// 4 * (11 + 7 + (1 + 2*NUM_RECT_MAX) * NUM_BUFFER_MAX) * NUM_LAYERS_MAX
+// 4 * (11 + 7 + (1 + 2*7)*16) * 31
+// 1032 * 31
+// = ~27 KiB (31992)
+
 class SharedBufferStack
 {
     friend class SharedClient;
@@ -78,21 +76,38 @@ class SharedBufferStack
     friend class SharedBufferServer;
 
 public:
-    struct FlatRegion { // 12 bytes
-        static const unsigned int NUM_RECT_MAX = 1;
-        uint32_t    count;
-        uint16_t    rects[4*NUM_RECT_MAX];
-    };
-    
+    // When changing these values, the COMPILE_TIME_ASSERT at the end of this
+    // file need to be updated.
+    static const unsigned int NUM_LAYERS_MAX  = 31;
+    static const unsigned int NUM_BUFFER_MAX  = 16;
+    static const unsigned int NUM_BUFFER_MIN  = 2;
+    static const unsigned int NUM_DISPLAY_MAX = 4;
+
     struct Statistics { // 4 longs
         typedef int32_t usecs_t;
         usecs_t  totalTime;
         usecs_t  reserved[3];
     };
+
+    struct SmallRect {
+        uint16_t l, t, r, b;
+    };
+
+    struct FlatRegion { // 52 bytes = 4 * (1 + 2*N)
+        static const unsigned int NUM_RECT_MAX = 6;
+        uint32_t    count;
+        SmallRect   rects[NUM_RECT_MAX];
+    };
+    
+    struct BufferData {
+        FlatRegion dirtyRegion;
+        SmallRect  crop;
+    };
     
     SharedBufferStack();
     void init(int32_t identity);
     status_t setDirtyRegion(int buffer, const Region& reg);
+    status_t setCrop(int buffer, const Rect& reg);
     Region getDirtyRegion(int buffer) const;
 
     // these attributes are part of the conditions/updates
@@ -104,24 +119,24 @@ public:
 
     // not part of the conditions
     volatile int32_t reallocMask;
+    volatile int8_t index[NUM_BUFFER_MAX];
 
     int32_t     identity;       // surface's identity (const)
-    int32_t     reserved32[9];
+    int32_t     reserved32[2];
     Statistics  stats;
-    FlatRegion  dirtyRegion[NUM_BUFFER_MAX];    // 12*4=48 bytes
+    int32_t     reserved;
+    BufferData  buffers[NUM_BUFFER_MAX];     // 960 bytes
 };
 
 // ----------------------------------------------------------------------------
 
-// 4 KB max
+// 32 KB max
 class SharedClient
 {
 public:
     SharedClient();
     ~SharedClient();
-
     status_t validate(size_t token) const;
-    uint32_t getIdentity(size_t token) const;
 
 private:
     friend class SharedBufferBase;
@@ -131,7 +146,7 @@ private:
     // FIXME: this should be replaced by a lock-less primitive
     Mutex lock;
     Condition cv;
-    SharedBufferStack surfaces[ NUM_LAYERS_MAX ];
+    SharedBufferStack surfaces[ SharedBufferStack::NUM_LAYERS_MAX ];
 };
 
 // ============================================================================
@@ -139,18 +154,17 @@ private:
 class SharedBufferBase
 {
 public:
-    SharedBufferBase(SharedClient* sharedClient, int surface, int num,
+    SharedBufferBase(SharedClient* sharedClient, int surface,
             int32_t identity);
     ~SharedBufferBase();
-    uint32_t getIdentity();
     status_t getStatus() const;
+    int32_t getIdentity() const;
     size_t getFrontBuffer() const;
     String8 dump(char const* prefix) const;
 
 protected:
     SharedClient* const mSharedClient;
     SharedBufferStack* const mSharedStack;
-    const int mNumBuffers;
     const int mIdentity;
 
     friend struct Update;
@@ -160,59 +174,20 @@ protected:
         SharedBufferStack& stack;
         inline ConditionBase(SharedBufferBase* sbc) 
             : stack(*sbc->mSharedStack) { }
+        virtual ~ConditionBase() { };
+        virtual bool operator()() const = 0;
+        virtual const char* name() const = 0;
     };
+    status_t waitForCondition(const ConditionBase& condition);
 
     struct UpdateBase {
         SharedBufferStack& stack;
         inline UpdateBase(SharedBufferBase* sbb) 
             : stack(*sbb->mSharedStack) { }
     };
-
-    template <typename T>
-    status_t waitForCondition(T condition);
-
     template <typename T>
     status_t updateCondition(T update);
 };
-
-template <typename T>
-status_t SharedBufferBase::waitForCondition(T condition) 
-{
-    const SharedBufferStack& stack( *mSharedStack );
-    SharedClient& client( *mSharedClient );
-    const nsecs_t TIMEOUT = s2ns(1);
-    Mutex::Autolock _l(client.lock);
-    while ((condition()==false) &&
-            (stack.identity == mIdentity) &&
-            (stack.status == NO_ERROR))
-    {
-        status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
-        
-        // handle errors and timeouts
-        if (CC_UNLIKELY(err != NO_ERROR)) {
-            if (err == TIMED_OUT) {
-                if (condition()) {
-                    LOGE("waitForCondition(%s) timed out (identity=%d), "
-                        "but condition is true! We recovered but it "
-                        "shouldn't happen." , T::name(),
-                        stack.identity);
-                    break;
-                } else {
-                    LOGW("waitForCondition(%s) timed out "
-                        "(identity=%d, status=%d). "
-                        "CPU may be pegged. trying again.", T::name(),
-                        stack.identity, stack.status);
-                }
-            } else {
-                LOGE("waitForCondition(%s) error (%s) ",
-                        T::name(), strerror(-err));
-                return err;
-            }
-        }
-    }
-    return (stack.identity != mIdentity) ? status_t(BAD_INDEX) : stack.status;
-}
-
 
 template <typename T>
 status_t SharedBufferBase::updateCondition(T update) {
@@ -238,13 +213,21 @@ public:
     status_t queue(int buf);
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
+    status_t setCrop(int buffer, const Rect& reg);
     
+
+    class SetBufferCountCallback {
+        friend class SharedBufferClient;
+        virtual status_t operator()(int bufferCount) const = 0;
+    protected:
+        virtual ~SetBufferCountCallback() { }
+    };
+    status_t setBufferCount(int bufferCount, const SetBufferCountCallback& ipc);
+
 private:
     friend struct Condition;
     friend struct DequeueCondition;
     friend struct LockCondition;
-    
-    int32_t computeTail() const;
 
     struct QueueUpdate : public UpdateBase {
         inline QueueUpdate(SharedBufferBase* sbb);
@@ -260,20 +243,27 @@ private:
 
     struct DequeueCondition : public ConditionBase {
         inline DequeueCondition(SharedBufferClient* sbc);
-        inline bool operator()();
-        static inline const char* name() { return "DequeueCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "DequeueCondition"; }
     };
 
     struct LockCondition : public ConditionBase {
         int buf;
         inline LockCondition(SharedBufferClient* sbc, int buf);
-        inline bool operator()();
-        static inline const char* name() { return "LockCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "LockCondition"; }
     };
 
+    int32_t computeTail() const;
+
+    mutable RWLock mLock;
+    int mNumBuffers;
+
     int32_t tail;
+    int32_t undoDequeueTail;
+    int32_t queued_head;
     // statistics...
-    nsecs_t mDequeueTime[NUM_BUFFER_MAX];
+    nsecs_t mDequeueTime[SharedBufferStack::NUM_BUFFER_MAX];
 };
 
 // ----------------------------------------------------------------------------
@@ -287,16 +277,71 @@ public:
     ssize_t retireAndLock();
     status_t unlock(int buffer);
     void setStatus(status_t status);
-    status_t reallocate();
+    status_t reallocateAll();
+    status_t reallocateAllExcept(int buffer);
     status_t assertReallocate(int buffer);
     int32_t getQueuedCount() const;
-    
     Region getDirtyRegion(int buffer) const;
+
+    status_t resize(int newNumBuffers);
 
     SharedBufferStack::Statistics getStats() const;
     
 
 private:
+    /*
+     * BufferList is basically a fixed-capacity sorted-vector of
+     * unsigned 5-bits ints using a 32-bits int as storage.
+     * it has efficient iterators to find items in the list and not in the list.
+     */
+    class BufferList {
+        size_t mCapacity;
+        uint32_t mList;
+    public:
+        BufferList(size_t c = SharedBufferStack::NUM_BUFFER_MAX)
+            : mCapacity(c), mList(0) { }
+        status_t add(int value);
+        status_t remove(int value);
+        uint32_t getMask() const { return mList; }
+
+        class const_iterator {
+            friend class BufferList;
+            uint32_t mask, curr;
+            const_iterator(uint32_t mask) :
+                mask(mask), curr(__builtin_clz(mask)) {
+            }
+        public:
+            inline bool operator == (const const_iterator& rhs) const {
+                return mask == rhs.mask;
+            }
+            inline bool operator != (const const_iterator& rhs) const {
+                return mask != rhs.mask;
+            }
+            inline int operator *() const { return curr; }
+            inline const const_iterator& operator ++() {
+                mask &= ~(1<<(31-curr));
+                curr = __builtin_clz(mask);
+                return *this;
+            }
+        };
+
+        inline const_iterator begin() const {
+            return const_iterator(mList);
+        }
+        inline const_iterator end() const   {
+            return const_iterator(0);
+        }
+        inline const_iterator free_begin() const {
+            uint32_t mask = (1 << (32-mCapacity)) - 1;
+            return const_iterator( ~(mList | mask) );
+        }
+    };
+
+    // this protects mNumBuffers and mBufferList
+    mutable RWLock mLock;
+    int mNumBuffers;
+    BufferList mBufferList;
+
     struct UnlockUpdate : public UpdateBase {
         const int lockedBuffer;
         inline UnlockUpdate(SharedBufferBase* sbb, int lockedBuffer);
@@ -318,8 +363,8 @@ private:
     struct ReallocateCondition : public ConditionBase {
         int buf;
         inline ReallocateCondition(SharedBufferBase* sbb, int buf);
-        inline bool operator()();
-        static inline const char* name() { return "ReallocateCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "ReallocateCondition"; }
     };
 };
 
@@ -344,13 +389,12 @@ struct surface_flinger_cblk_t   // 4KB max
     uint8_t         connected;
     uint8_t         reserved[3];
     uint32_t        pad[7];
-    display_cblk_t  displays[NUM_DISPLAY_MAX];
+    display_cblk_t  displays[SharedBufferStack::NUM_DISPLAY_MAX];
 };
 
 // ---------------------------------------------------------------------------
 
-COMPILE_TIME_ASSERT(sizeof(SharedClient) <= 4096)
-COMPILE_TIME_ASSERT(sizeof(SharedBufferStack) == 128)
+COMPILE_TIME_ASSERT(sizeof(SharedClient) <= 32768)
 COMPILE_TIME_ASSERT(sizeof(surface_flinger_cblk_t) <= 4096)
 
 // ---------------------------------------------------------------------------

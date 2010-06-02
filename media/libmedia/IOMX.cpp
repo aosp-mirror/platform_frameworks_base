@@ -57,7 +57,7 @@ sp<IOMXRenderer> IOMX::createRendererFromJavaSurface(
         return NULL;
     }
 
-    jfieldID surfaceID = env->GetFieldID(surfaceClass, "mSurface", "I");
+    jfieldID surfaceID = env->GetFieldID(surfaceClass, ANDROID_VIEW_SURFACE_JNI_ID, "I");
     if (surfaceID == NULL) {
         LOGE("Can't find Surface.mSurface");
         return NULL;

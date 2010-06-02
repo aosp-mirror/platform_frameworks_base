@@ -76,7 +76,9 @@ struct MyVorbisExtractor {
     status_t seekToOffset(off_t offset);
     status_t readNextPacket(MediaBuffer **buffer);
 
-    void init();
+    status_t init();
+
+    sp<MetaData> getFileMetaData() { return mFileMeta; }
 
 private:
     struct Page {
@@ -100,12 +102,16 @@ private:
     vorbis_comment mVc;
 
     sp<MetaData> mMeta;
+    sp<MetaData> mFileMeta;
 
     ssize_t readPage(off_t offset, Page *page);
     status_t findNextPage(off_t startOffset, off_t *pageOffset);
 
-    void verifyHeader(
+    status_t verifyHeader(
             MediaBuffer *buffer, uint8_t type);
+
+    void parseFileMetaData();
+    void extractAlbumArt(const void *data, size_t size);
 
     MyVorbisExtractor(const MyVorbisExtractor &);
     MyVorbisExtractor &operator=(const MyVorbisExtractor &);
@@ -188,9 +194,14 @@ MyVorbisExtractor::MyVorbisExtractor(const sp<DataSource> &source)
       mNextLaceIndex(0),
       mFirstDataOffset(-1) {
     mCurrentPage.mNumSegments = 0;
+
+    vorbis_info_init(&mVi);
+    vorbis_comment_init(&mVc);
 }
 
 MyVorbisExtractor::~MyVorbisExtractor() {
+    vorbis_comment_clear(&mVc);
+    vorbis_info_clear(&mVi);
 }
 
 sp<MetaData> MyVorbisExtractor::getFormat() const {
@@ -297,6 +308,7 @@ ssize_t MyVorbisExtractor::readPage(off_t offset, Page *page) {
         totalSize += page->mLace[i];
     }
 
+#if 0
     String8 tmp;
     for (size_t i = 0; i < page->mNumSegments; ++i) {
         char x[32];
@@ -306,6 +318,7 @@ ssize_t MyVorbisExtractor::readPage(off_t offset, Page *page) {
     }
 
     LOGV("%c %s", page->mFlags & 1 ? '+' : ' ', tmp.string());
+#endif
 
     return sizeof(header) + page->mNumSegments + totalSize;
 }
@@ -421,47 +434,60 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
     }
 }
 
-void MyVorbisExtractor::init() {
-    vorbis_info_init(&mVi);
-
-    vorbis_comment mVc;
-
+status_t MyVorbisExtractor::init() {
     mMeta = new MetaData;
     mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_VORBIS);
 
     MediaBuffer *packet;
-    CHECK_EQ(readNextPacket(&packet), OK);
+    status_t err;
+    if ((err = readNextPacket(&packet)) != OK) {
+        return err;
+    }
     LOGV("read packet of size %d\n", packet->range_length());
-    verifyHeader(packet, 1);
+    err = verifyHeader(packet, 1);
     packet->release();
     packet = NULL;
+    if (err != OK) {
+        return err;
+    }
 
-    CHECK_EQ(readNextPacket(&packet), OK);
+    if ((err = readNextPacket(&packet)) != OK) {
+        return err;
+    }
     LOGV("read packet of size %d\n", packet->range_length());
-    verifyHeader(packet, 3);
+    err = verifyHeader(packet, 3);
     packet->release();
     packet = NULL;
+    if (err != OK) {
+        return err;
+    }
 
-    CHECK_EQ(readNextPacket(&packet), OK);
+    if ((err = readNextPacket(&packet)) != OK) {
+        return err;
+    }
     LOGV("read packet of size %d\n", packet->range_length());
-    verifyHeader(packet, 5);
+    err = verifyHeader(packet, 5);
     packet->release();
     packet = NULL;
+    if (err != OK) {
+        return err;
+    }
 
     mFirstDataOffset = mOffset + mCurrentPageSize;
+
+    return OK;
 }
 
-void MyVorbisExtractor::verifyHeader(
+status_t MyVorbisExtractor::verifyHeader(
         MediaBuffer *buffer, uint8_t type) {
     const uint8_t *data =
         (const uint8_t *)buffer->data() + buffer->range_offset();
 
     size_t size = buffer->range_length();
 
-    CHECK(size >= 7);
-
-    CHECK_EQ(data[0], type);
-    CHECK(!memcmp(&data[1], "vorbis", 6));
+    if (size < 7 || data[0] != type || memcmp(&data[1], "vorbis", 6)) {
+        return ERROR_MALFORMED;
+    }
 
     ogg_buffer buf;
     buf.data = (uint8_t *)data;
@@ -508,18 +534,26 @@ void MyVorbisExtractor::verifyHeader(
 
         case 3:
         {
-            CHECK_EQ(0, _vorbis_unpack_comment(&mVc, &bits));
+            if (0 != _vorbis_unpack_comment(&mVc, &bits)) {
+                return ERROR_MALFORMED;
+            }
+
+            parseFileMetaData();
             break;
         }
 
         case 5:
         {
-            CHECK_EQ(0, _vorbis_unpack_books(&mVi, &bits));
+            if (0 != _vorbis_unpack_books(&mVi, &bits)) {
+                return ERROR_MALFORMED;
+            }
 
             mMeta->setData(kKeyVorbisBooks, 0, data, size);
             break;
         }
     }
+
+    return OK;
 }
 
 uint64_t MyVorbisExtractor::approxBitrate() {
@@ -530,6 +564,192 @@ uint64_t MyVorbisExtractor::approxBitrate() {
     return (mVi.bitrate_lower + mVi.bitrate_upper) / 2;
 }
 
+void MyVorbisExtractor::parseFileMetaData() {
+    mFileMeta = new MetaData;
+    mFileMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_CONTAINER_OGG);
+
+    struct {
+        const char *const mTag;
+        uint32_t mKey;
+    } kMap[] = {
+        { "TITLE", kKeyTitle },
+        { "ARTIST", kKeyArtist },
+        { "ALBUM", kKeyAlbum },
+        { "COMPOSER", kKeyComposer },
+        { "GENRE", kKeyGenre },
+        { "AUTHOR", kKeyAuthor },
+        { "TRACKNUMBER", kKeyCDTrackNumber },
+        { "DISCNUMBER", kKeyDiscNumber },
+        { "DATE", kKeyDate },
+        { "LYRICIST", kKeyWriter },
+        { "METADATA_BLOCK_PICTURE", kKeyAlbumArt },
+    };
+
+    for (int i = 0; i < mVc.comments; ++i) {
+        const char *comment = mVc.user_comments[i];
+
+        for (size_t j = 0; j < sizeof(kMap) / sizeof(kMap[0]); ++j) {
+            size_t tagLen = strlen(kMap[j].mTag);
+            if (!strncasecmp(kMap[j].mTag, comment, tagLen)
+                    && comment[tagLen] == '=') {
+                if (kMap[j].mKey == kKeyAlbumArt) {
+                    extractAlbumArt(
+                            &comment[tagLen + 1],
+                            mVc.comment_lengths[i] - tagLen - 1);
+                } else {
+                    mFileMeta->setCString(kMap[j].mKey, &comment[tagLen + 1]);
+                }
+            }
+        }
+
+    }
+
+#if 0
+    for (int i = 0; i < mVc.comments; ++i) {
+        LOGI("comment #%d: '%s'", i + 1, mVc.user_comments[i]);
+    }
+#endif
+}
+
+// The returned buffer should be free()d.
+static uint8_t *DecodeBase64(const char *s, size_t size, size_t *outSize) {
+    *outSize = 0;
+
+    if ((size % 4) != 0) {
+        return NULL;
+    }
+
+    size_t n = size;
+    size_t padding = 0;
+    if (n >= 1 && s[n - 1] == '=') {
+        padding = 1;
+
+        if (n >= 2 && s[n - 2] == '=') {
+            padding = 2;
+        }
+    }
+
+    size_t outLen = 3 * size / 4 - padding;
+
+    *outSize = outLen;
+
+    void *buffer = malloc(outLen);
+
+    uint8_t *out = (uint8_t *)buffer;
+    size_t j = 0;
+    uint32_t accum = 0;
+    for (size_t i = 0; i < n; ++i) {
+        char c = s[i];
+        unsigned value;
+        if (c >= 'A' && c <= 'Z') {
+            value = c - 'A';
+        } else if (c >= 'a' && c <= 'z') {
+            value = 26 + c - 'a';
+        } else if (c >= '0' && c <= '9') {
+            value = 52 + c - '0';
+        } else if (c == '+') {
+            value = 62;
+        } else if (c == '/') {
+            value = 63;
+        } else if (c != '=') {
+            return NULL;
+        } else {
+            if (i < n - padding) {
+                return NULL;
+            }
+
+            value = 0;
+        }
+
+        accum = (accum << 6) | value;
+
+        if (((i + 1) % 4) == 0) {
+            out[j++] = (accum >> 16);
+
+            if (j < outLen) { out[j++] = (accum >> 8) & 0xff; }
+            if (j < outLen) { out[j++] = accum & 0xff; }
+
+            accum = 0;
+        }
+    }
+
+    return (uint8_t *)buffer;
+}
+
+void MyVorbisExtractor::extractAlbumArt(const void *data, size_t size) {
+    LOGV("extractAlbumArt from '%s'", (const char *)data);
+
+    size_t flacSize;
+    uint8_t *flac = DecodeBase64((const char *)data, size, &flacSize);
+
+    if (flac == NULL) {
+        LOGE("malformed base64 encoded data.");
+        return;
+    }
+
+    LOGV("got flac of size %d", flacSize);
+
+    uint32_t picType;
+    uint32_t typeLen;
+    uint32_t descLen;
+    uint32_t dataLen;
+    char type[128];
+
+    if (flacSize < 8) {
+        goto exit;
+    }
+
+    picType = U32_AT(flac);
+
+    if (picType != 3) {
+        // This is not a front cover.
+        goto exit;
+    }
+
+    typeLen = U32_AT(&flac[4]);
+    if (typeLen + 1 > sizeof(type)) {
+        goto exit;
+    }
+
+    if (flacSize < 8 + typeLen) {
+        goto exit;
+    }
+
+    memcpy(type, &flac[8], typeLen);
+    type[typeLen] = '\0';
+
+    LOGV("picType = %d, type = '%s'", picType, type);
+
+    if (!strcmp(type, "-->")) {
+        // This is not inline cover art, but an external url instead.
+        goto exit;
+    }
+
+    descLen = U32_AT(&flac[8 + typeLen]);
+
+    if (flacSize < 32 + typeLen + descLen) {
+        goto exit;
+    }
+
+    dataLen = U32_AT(&flac[8 + typeLen + 4 + descLen + 16]);
+
+    if (flacSize < 32 + typeLen + descLen + dataLen) {
+        goto exit;
+    }
+
+    LOGV("got image data, %d trailing bytes",
+         flacSize - 32 - typeLen - descLen - dataLen);
+
+    mFileMeta->setData(
+            kKeyAlbumArt, 0, &flac[8 + typeLen + 4 + descLen + 20], dataLen);
+
+    mFileMeta->setCString(kKeyAlbumArtMIME, type);
+
+exit:
+    free(flac);
+    flac = NULL;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 OggExtractor::OggExtractor(const sp<DataSource> &source)
@@ -537,10 +757,11 @@ OggExtractor::OggExtractor(const sp<DataSource> &source)
       mInitCheck(NO_INIT),
       mImpl(NULL) {
     mImpl = new MyVorbisExtractor(mDataSource);
-    CHECK_EQ(mImpl->seekToOffset(0), OK);
-    mImpl->init();
+    mInitCheck = mImpl->seekToOffset(0);
 
-    mInitCheck = OK;
+    if (mInitCheck == OK) {
+        mInitCheck = mImpl->init();
+    }
 }
 
 OggExtractor::~OggExtractor() {
@@ -570,15 +791,7 @@ sp<MetaData> OggExtractor::getTrackMetaData(
 }
 
 sp<MetaData> OggExtractor::getMetaData() {
-    sp<MetaData> meta = new MetaData;
-
-    if (mInitCheck != OK) {
-        return meta;
-    }
-
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_CONTAINER_OGG);
-
-    return meta;
+    return mImpl->getFileMetaData();
 }
 
 bool SniffOgg(

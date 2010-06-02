@@ -52,8 +52,11 @@ public class VpnServiceBinder extends Service {
     // The actual implementation is delegated to the VpnService class.
     private VpnService<? extends VpnProfile> mService;
 
+    // TODO(oam): Test VPN when EFS is enabled (will do later)...
     private static String getStateFilePath() {
-	return Environment.getDataDirectory().getPath() + STATES_FILE_RELATIVE_PATH;
+        // This call will return the correcu directory whether Encrypted FS is enabled or not
+        // Disabled: /data/misc/vpn/.states   Enabled: /data/secure/misc/vpn/.states
+	return Environment.getSecureDataDirectory().getPath() + STATES_FILE_RELATIVE_PATH;
     }
 
     private final IBinder mBinder = new IVpnService.Stub() {

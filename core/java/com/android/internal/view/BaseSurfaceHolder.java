@@ -33,9 +33,11 @@ public abstract class BaseSurfaceHolder implements SurfaceHolder {
 
     public final ArrayList<SurfaceHolder.Callback> mCallbacks
             = new ArrayList<SurfaceHolder.Callback>();
-
+    SurfaceHolder.Callback[] mGottenCallbacks;
+    boolean mHaveGottenCallbacks;
+    
     public final ReentrantLock mSurfaceLock = new ReentrantLock();
-    public final Surface mSurface = new Surface();
+    public Surface mSurface = new Surface();
 
     int mRequestedWidth = -1;
     int mRequestedHeight = -1;
@@ -81,6 +83,31 @@ public abstract class BaseSurfaceHolder implements SurfaceHolder {
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
         }
+    }
+    
+    public SurfaceHolder.Callback[] getCallbacks() {
+        if (mHaveGottenCallbacks) {
+            return mGottenCallbacks;
+        }
+        
+        synchronized (mCallbacks) {
+            final int N = mCallbacks.size();
+            if (N > 0) {
+                if (mGottenCallbacks == null || mGottenCallbacks.length != N) {
+                    mGottenCallbacks = new SurfaceHolder.Callback[N];
+                }
+                mCallbacks.toArray(mGottenCallbacks);
+            } else {
+                mGottenCallbacks = null;
+            }
+            mHaveGottenCallbacks = true;
+        }
+        
+        return mGottenCallbacks;
+    }
+    
+    public void ungetCallbacks() {
+        mHaveGottenCallbacks = false;
     }
     
     public void setFixedSize(int width, int height) {

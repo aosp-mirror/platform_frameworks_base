@@ -31,11 +31,6 @@ namespace android {
 class LayerBlur : public LayerBaseClient
 {
 public:    
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-    
                 LayerBlur(SurfaceFlinger* flinger, DisplayID display,
                         const sp<Client>& client, int32_t i);
         virtual ~LayerBlur();
@@ -43,6 +38,7 @@ public:
     virtual void onDraw(const Region& clip) const;
     virtual bool needsBlending() const  { return true; }
     virtual bool isSecure() const       { return false; }
+    virtual const char* getTypeId() const { return "LayerBlur"; }
 
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void setVisibleRegion(const Region& visibleRegion);

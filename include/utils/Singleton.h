@@ -54,11 +54,13 @@ private:
  * (eg: <TYPE>.cpp) to create the static instance of Singleton<>'s attributes,
  * and avoid to have a copy of them in each compilation units Singleton<TYPE>
  * is used.
+ * NOTE: we use a version of Mutex ctor that takes a parameter, because
+ * for some unknown reason using the default ctor doesn't emit the variable!
  */
 
-#define ANDROID_SINGLETON_STATIC_INSTANCE(TYPE)             \
-    template class Singleton< TYPE >;                       \
-    template< class TYPE > Mutex Singleton< TYPE >::sLock;  \
+#define ANDROID_SINGLETON_STATIC_INSTANCE(TYPE)                 \
+    template class Singleton< TYPE >;                           \
+    template<> Mutex Singleton< TYPE >::sLock(Mutex::PRIVATE);  \
     template<> TYPE* Singleton< TYPE >::sInstance(0);
 
 

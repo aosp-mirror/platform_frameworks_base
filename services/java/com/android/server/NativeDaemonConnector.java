@@ -128,12 +128,11 @@ final class NativeDaemonConnector implements Runnable {
                                     Slog.e(TAG, String.format(
                                             "Error handling '%s'", event), ex);
                                 }
-                            } else {
-                                try {
-                                    mResponseQueue.put(event);
-                                } catch (InterruptedException ex) {
-                                    Slog.e(TAG, "Failed to put response onto queue", ex);
-                                }
+                            }
+                            try {
+                                mResponseQueue.put(event);
+                            } catch (InterruptedException ex) {
+                                Slog.e(TAG, "Failed to put response onto queue", ex);
                             }
                         } catch (NumberFormatException nfe) {
                             Slog.w(TAG, String.format("Bad msg (%s)", event));

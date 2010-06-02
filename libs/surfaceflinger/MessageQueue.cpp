@@ -60,9 +60,9 @@ MessageQueue::~MessageQueue()
 {
 }
 
-MessageList::value_type MessageQueue::waitMessage(nsecs_t timeout)
+sp<MessageBase> MessageQueue::waitMessage(nsecs_t timeout)
 {
-    MessageList::value_type result;
+    sp<MessageBase> result;
 
     bool again;
     do {
@@ -132,6 +132,7 @@ MessageList::value_type MessageQueue::waitMessage(nsecs_t timeout)
         if (again) {
             // the message has been processed. release our reference to it
             // without holding the lock.
+            result->notify();
             result = 0;
         }
         
@@ -141,7 +142,7 @@ MessageList::value_type MessageQueue::waitMessage(nsecs_t timeout)
 }
 
 status_t MessageQueue::postMessage(
-        const MessageList::value_type& message, nsecs_t relTime, uint32_t flags)
+        const sp<MessageBase>& message, nsecs_t relTime, uint32_t flags)
 {
     return queueMessage(message, relTime, flags);
 }
@@ -154,7 +155,7 @@ status_t MessageQueue::invalidate() {
 }
 
 status_t MessageQueue::queueMessage(
-        const MessageList::value_type& message, nsecs_t relTime, uint32_t flags)
+        const sp<MessageBase>& message, nsecs_t relTime, uint32_t flags)
 {
     Mutex::Autolock _l(mLock);
     message->when = systemTime() + relTime;
@@ -167,13 +168,13 @@ status_t MessageQueue::queueMessage(
     return NO_ERROR;
 }
 
-void MessageQueue::dump(const MessageList::value_type& message)
+void MessageQueue::dump(const sp<MessageBase>& message)
 {
     Mutex::Autolock _l(mLock);
     dumpLocked(message);
 }
 
-void MessageQueue::dumpLocked(const MessageList::value_type& message)
+void MessageQueue::dumpLocked(const sp<MessageBase>& message)
 {
     LIST::const_iterator cur(mMessages.begin());
     LIST::const_iterator end(mMessages.end());

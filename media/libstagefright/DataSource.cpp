@@ -20,6 +20,8 @@
 #include "include/WAVExtractor.h"
 #include "include/OggExtractor.h"
 
+#include "matroska/MatroskaExtractor.h"
+
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
@@ -94,6 +96,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffWAV);
     RegisterSniffer(SniffOgg);
+    RegisterSniffer(SniffMatroska);
 }
 
 // static

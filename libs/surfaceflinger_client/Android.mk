@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	ISurfaceComposer.cpp \
 	ISurface.cpp \
-	ISurfaceFlingerClient.cpp \
+	ISurfaceComposerClient.cpp \
 	LayerState.cpp \
 	SharedBufferStack.cpp \
 	Surface.cpp \

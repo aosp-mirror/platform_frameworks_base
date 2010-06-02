@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include "LayerBase.h"
+#include "TextureManager.h"
 
 struct copybit_device_t;
 
@@ -45,31 +46,25 @@ class LayerBuffer : public LayerBaseClient
         virtual void onVisibilityResolved(const Transform& planeTransform);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        virtual bool transformed() const;
         virtual void destroy() { }
     protected:
         LayerBuffer& mLayer;
     };
 
 public:
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-
             LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
                     const sp<Client>& client, int32_t i);
         virtual ~LayerBuffer();
 
     virtual void onFirstRef();
     virtual bool needsBlending() const;
+    virtual const char* getTypeId() const { return "LayerBuffer"; }
 
     virtual sp<LayerBaseClient::Surface> createSurface() const;
     virtual status_t ditch();
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
-    virtual bool transformed() const;
 
     status_t registerBuffers(const ISurface::BufferHeap& buffers);
     void postBuffer(ssize_t offset);
@@ -133,7 +128,6 @@ private:
         virtual void onDraw(const Region& clip) const;
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
-        virtual bool transformed() const;
         virtual void destroy() { }
     private:
         status_t initTempBuffer() const;
@@ -143,9 +137,9 @@ private:
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
         size_t                          mBufferSize;
-        mutable LayerBase::Texture      mTexture;
+        mutable Texture                 mTexture;
         mutable NativeBuffer            mTempBuffer;
-        mutable bool                    mUseEGLImageDirectly;
+        mutable TextureManager          mTextureManager;
     };
     
     class OverlaySource : public Source {

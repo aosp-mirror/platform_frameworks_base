@@ -51,6 +51,19 @@ public class ExifInterface {
     public static final String TAG_GPS_LATITUDE_REF = "GPSLatitudeRef";
     /** Type is String. */
     public static final String TAG_GPS_LONGITUDE_REF = "GPSLongitudeRef";
+
+    /**
+     * The altitude (in meters) based on the reference in TAG_GPS_ALTITUDE_REF.
+     * Type is rational.
+     */
+    public static final String TAG_GPS_ALTITUDE = "GPSAltitude";
+
+    /**
+     * 0 if the altitude is above sea level. 1 if the altitude is below sea
+     * level. Type is int.
+     */
+    public static final String TAG_GPS_ALTITUDE_REF = "GPSAltitudeRef";
+
     /** Type is String. */
     public static final String TAG_GPS_TIMESTAMP = "GPSTimeStamp";
     /** Type is String. */
@@ -289,6 +302,23 @@ public class ExifInterface {
     }
 
     /**
+     * Return the altitude in meters. If the exif tag does not exist, return
+     * <var>defaultValue</var>.
+     *
+     * @param defaultValue the value to return if the tag is not available.
+     */
+    public double getAltitude(double defaultValue) {
+        double altitude = getAttributeDouble(TAG_GPS_ALTITUDE, -1);
+        int ref = getAttributeInt(TAG_GPS_ALTITUDE_REF, -1);
+
+        if (altitude >= 0 && ref >= 0) {
+            return (double) (altitude * ((ref == 1) ? -1 : 1));
+        } else {
+            return defaultValue;
+        }
+    }
+
+    /**
      * Returns number of milliseconds since Jan. 1, 1970, midnight.
      * Returns -1 if the date time information if not available.
      * @hide
@@ -345,14 +375,14 @@ public class ExifInterface {
                     / Float.parseFloat(pair[1].trim())));
 
             pair = parts[2].split("/");
-            float seconds = Float.parseFloat(pair[0].trim())
-                    / Float.parseFloat(pair[1].trim());
+            double seconds = Double.parseDouble(pair[0].trim())
+                    / Double.parseDouble(pair[1].trim());
 
-            float result = degrees + (minutes / 60F) + (seconds / (60F * 60F));
+            double result = degrees + (minutes / 60.0) + (seconds / 3600.0);
             if ((ref.equals("S") || ref.equals("W"))) {
-                return -result;
+                return (float) -result;
             }
-            return result;
+            return (float) result;
         } catch (RuntimeException ex) {
             // if for whatever reason we can't parse the lat long then return
             // null

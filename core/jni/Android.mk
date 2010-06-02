@@ -28,6 +28,7 @@ LOCAL_SRC_FILES:= \
 	Time.cpp \
 	com_google_android_gles_jni_EGLImpl.cpp \
 	com_google_android_gles_jni_GLImpl.cpp.arm \
+	android_app_NativeActivity.cpp \
 	android_opengl_GLES10.cpp \
 	android_opengl_GLES10Ext.cpp \
 	android_opengl_GLES11.cpp \
@@ -50,6 +51,7 @@ LOCAL_SRC_FILES:= \
 	android_os_Debug.cpp \
 	android_os_FileUtils.cpp \
 	android_os_MemoryFile.cpp \
+	android_os_MessageQueue.cpp \
 	android_os_ParcelFileDescriptor.cpp \
 	android_os_Power.cpp \
 	android_os_StatFs.cpp \
@@ -122,7 +124,6 @@ LOCAL_SRC_FILES:= \
 	android_server_BluetoothA2dpService.cpp \
 	android_message_digest_sha1.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
-	android_location_GpsLocationProvider.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
 	com_android_internal_graphics_NativeUtils.cpp \
 	android_backup_BackupDataInput.cpp \

@@ -48,15 +48,22 @@
 /* elements combined with a valid package name to form paths */
 
 #define PKG_DIR_PREFIX         "/data/data/"
+#define PKG_SEC_DIR_PREFIX     "/data/secure/data/"
 #define PKG_DIR_POSTFIX        ""
 
 #define PKG_LIB_PREFIX         "/data/data/"
+#define PKG_SEC_LIB_PREFIX     "/data/secure/data/"
 #define PKG_LIB_POSTFIX        "/lib"
 
 #define CACHE_DIR_PREFIX       "/data/data/"
+#define CACHE_SEC_DIR_PREFIX   "/data/secure/data/"
 #define CACHE_DIR_POSTFIX      "/cache"
 
 #define APK_DIR_PREFIX         "/data/app/"
+
+/* Encrypted File SYstems constants */
+#define USE_ENCRYPTED_FS       1
+#define USE_UNENCRYPTED_FS     0
 
 /* other handy constants */
 
@@ -89,16 +96,16 @@ int delete_dir_contents_fd(int dfd, const char *name);
 
 /* commands.c */
 
-int install(const char *pkgname, uid_t uid, gid_t gid);
-int uninstall(const char *pkgname);
-int renamepkg(const char *oldpkgname, const char *newpkgname);
-int delete_user_data(const char *pkgname);
-int delete_cache(const char *pkgname);
+int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid);
+int uninstall(const char *pkgname, int encrypted_fs_flag);
+int renamepkg(const char *oldpkgname, const char *newpkgname, int encrypted_fs_flag);
+int delete_user_data(const char *pkgname, int encrypted_fs_flag);
+int delete_cache(const char *pkgname, int encrypted_fs_flag);
 int move_dex(const char *src, const char *dst);
 int rm_dex(const char *path);
 int protect(char *pkgname, gid_t gid);
 int get_size(const char *pkgname, const char *apkpath, const char *fwdlock_apkpath,
-             int *codesize, int *datasize, int *cachesize);
+             int *codesize, int *datasize, int *cachesize, int encrypted_fs_flag);
 int free_cache(int free_size);
 int dexopt(const char *apk_path, uid_t uid, int is_public);
 int movefiles();

@@ -29,7 +29,7 @@
 #include <ui/Region.h>
 #include <ui/Overlay.h>
 
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 #include <private/surfaceflinger/SharedBufferStack.h>
 #include <private/surfaceflinger/LayerState.h>
 
@@ -46,40 +46,15 @@ class Client;
 class GraphicBuffer;
 class GraphicPlane;
 class SurfaceFlinger;
+class Texture;
 
 // ---------------------------------------------------------------------------
 
 class LayerBase : public RefBase
 {
-    // poor man's dynamic_cast below
-    template<typename T>
-    struct getTypeInfoOfAnyType {
-        static uint32_t get() { return T::typeInfo; }
-    };
-
-    template<typename T>
-    struct getTypeInfoOfAnyType<T*> {
-        static uint32_t get() { return getTypeInfoOfAnyType<T>::get(); }
-    };
-
 public:
-    static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-    
-    template<typename T>
-    static T dynamicCast(LayerBase* base) {
-        uint32_t mostDerivedInfo = base->getTypeInfo();
-        uint32_t castToInfo = getTypeInfoOfAnyType<T>::get();
-        if ((mostDerivedInfo & castToInfo) == castToInfo)
-            return static_cast<T>(base);
-        return 0;
-    }
+            LayerBase(SurfaceFlinger* flinger, DisplayID display);
 
-    
-    LayerBase(SurfaceFlinger* flinger, DisplayID display);
-    
     DisplayID           dpy;
     mutable bool        contentDirty;
             Region      visibleRegionScreen;
@@ -124,6 +99,9 @@ public:
             void drawRegion(const Region& reg) const;
 
             void invalidate();
+
+    virtual const char* getTypeId() const { return "LayerBase"; }
+    virtual ssize_t serverIndex() const { return -1; }
 
     /**
      * draw - performs some global clipping optimizations
@@ -199,9 +177,9 @@ public:
     virtual bool needsDithering() const { return false; }
 
     /**
-     * transformed -- true is this surface needs a to be transformed
+     * needsLinearFiltering - true if this surface needs filtering
      */
-    virtual bool transformed() const    { return mTransformed; }
+    virtual bool needsFiltering() const { return mNeedsFiltering; }
 
     /**
      * isSecure - true if this surface is secure, that is if it prevents
@@ -217,7 +195,10 @@ public:
      *  current list */
     virtual void onRemoved() { };
     
-    
+    /** always call base class first */
+    virtual void dump(String8& result, char* scratch, size_t size) const;
+
+
     enum { // flags for doTransaction()
         eVisibleRegion      = 0x00000002,
     };
@@ -241,44 +222,18 @@ protected:
     const GraphicPlane& graphicPlane(int dpy) const;
           GraphicPlane& graphicPlane(int dpy);
 
-          GLuint createTexture() const;
-    
-          struct Texture {
-              Texture() : name(-1U), width(0), height(0),
-                  image(EGL_NO_IMAGE_KHR), transform(0), 
-                  NPOTAdjust(false), dirty(true) { }
-              GLuint        name;
-              GLuint        width;
-              GLuint        height;
-              GLuint        potWidth;
-              GLuint        potHeight;
-              GLfloat       wScale;
-              GLfloat       hScale;
-              EGLImageKHR   image;
-              uint32_t      transform;
-              bool          NPOTAdjust;
-              bool          dirty;
-          };
-
-          void clearWithOpenGL(const Region& clip, GLclampx r, GLclampx g,
-                               GLclampx b, GLclampx alpha) const;
+          void clearWithOpenGL(const Region& clip, GLclampf r, GLclampf g,
+                               GLclampf b, GLclampf alpha) const;
           void clearWithOpenGL(const Region& clip) const;
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
-          void loadTexture(Texture* texture, 
-                  const Region& dirty, const GGLSurface& t) const;
-          status_t initializeEglImage(
-                  const sp<GraphicBuffer>& buffer, Texture* texture);
-
-          bool isSupportedYuvFormat(int format) const;
           
                 sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
 
                 // cached during validateVisibility()
-                bool            mTransformed;
-                bool            mUseLinearFiltering;
+                bool            mNeedsFiltering;
                 int32_t         mOrientation;
-                GLfixed         mVertices[4][2];
+                GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;
                 int             mLeft;
                 int             mTop;
@@ -313,14 +268,6 @@ class LayerBaseClient : public LayerBase
 {
 public:
     class Surface;
-   static const uint32_t typeInfo;
-    static const char* const typeID;
-    virtual char const* getTypeID() const { return typeID; }
-    virtual uint32_t getTypeInfo() const { return typeInfo; }
-
-    // lcblk is (almost) only accessed from the main SF thread, in the places
-    // where it's not, a reference to Client must be held
-    SharedBufferServer*     lcblk;
 
     LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
             const sp<Client>& client, int32_t i);
@@ -331,14 +278,11 @@ public:
 
     inline  uint32_t    getIdentity() const { return mIdentity; }
     inline  int32_t     clientIndex() const { return mIndex; }
-            int32_t     serverIndex() const;
-
    
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
-    
-    virtual void onRemoved();
-
+    virtual ssize_t     serverIndex() const;
+    virtual const char* getTypeId() const { return "LayerBaseClient"; }
 
     class Surface : public BnSurface 
     {
@@ -356,7 +300,10 @@ public:
         sp<LayerBaseClient> getOwner() const;
 
     private:
-        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
+                uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
+        virtual status_t setBufferCount(int bufferCount);
+
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
@@ -373,8 +320,11 @@ public:
 
     friend class Surface;
 
+protected:
+    virtual void dump(String8& result, char* scratch, size_t size) const;
+
 private:
-                int32_t         mIndex;
+    int32_t         mIndex;
     mutable     Mutex           mLock;
     mutable     wp<Surface>     mClientSurface;
     // only read

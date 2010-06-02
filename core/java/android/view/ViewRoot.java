@@ -16,8 +16,10 @@
 
 package android.view;
 
+import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.RootViewSurfaceTaker;
 
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -26,12 +28,12 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.*;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.EventLog;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -50,6 +52,7 @@ import android.Manifest;
 import android.media.AudioManager;
 
 import java.lang.ref.WeakReference;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -76,6 +79,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     /** @noinspection PointlessBooleanExpression*/
     private static final boolean DEBUG_DRAW = false || LOCAL_LOGV;
     private static final boolean DEBUG_LAYOUT = false || LOCAL_LOGV;
+    private static final boolean DEBUG_INPUT = true || LOCAL_LOGV;
     private static final boolean DEBUG_INPUT_RESIZE = false || LOCAL_LOGV;
     private static final boolean DEBUG_ORIENTATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_TRACKBALL = false || LOCAL_LOGV;
@@ -133,6 +137,11 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mViewVisibility;
     boolean mAppVisible = true;
 
+    SurfaceHolder.Callback mSurfaceHolderCallback;
+    BaseSurfaceHolder mSurfaceHolder;
+    boolean mIsCreating;
+    boolean mDrawingAllowed;
+    
     final Region mTransparentRegion;
     final Region mPreviousTransparentRegion;
 
@@ -425,6 +434,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
+    // fd [0] is the receiver, [1] is the sender
+    private native int[] makeInputChannel();
+
     /**
      * We have one child
      */
@@ -435,6 +447,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
+                if (view instanceof RootViewSurfaceTaker) {
+                    mSurfaceHolderCallback =
+                            ((RootViewSurfaceTaker)view).willYouTakeTheSurface();
+                    if (mSurfaceHolderCallback != null) {
+                        mSurfaceHolder = new TakenSurfaceHolder();
+                    }
+                }
                 Resources resources = mView.getContext().getResources();
                 CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
@@ -468,6 +487,14 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 mAdded = true;
                 int res; /* = WindowManagerImpl.ADD_OKAY; */
+
+                // Set up the input event channel
+                if (false) {
+                int[] fds = makeInputChannel();
+                if (DEBUG_INPUT) {
+                    Log.v(TAG, "makeInputChannel() returned " + fds);
+                }
+                }
 
                 // Schedule the first layout -before- adding to the window
                 // manager, to make sure we do the relayout before receiving
@@ -682,6 +709,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean windowResizesToFitContent = false;
         boolean fullRedrawNeeded = mFullRedrawNeeded;
         boolean newSurface = false;
+        boolean surfaceChanged = false;
         WindowManager.LayoutParams lp = mWindowAttributes;
 
         int desiredWindowWidth;
@@ -700,6 +728,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         WindowManager.LayoutParams params = null;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
+            surfaceChanged = true;
             params = lp;
         }
         Rect frame = mWinFrame;
@@ -886,11 +915,18 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
 
+            if (mSurfaceHolder != null) {
+                mSurfaceHolder.mSurfaceLock.lock();
+                mDrawingAllowed = true;
+                lp.format = mSurfaceHolder.getRequestedFormat();
+                lp.type = mSurfaceHolder.getRequestedType();
+            }
+            
             boolean initialized = false;
             boolean contentInsetsChanged = false;
             boolean visibleInsetsChanged;
+            boolean hadSurface = mSurface.isValid();
             try {
-                boolean hadSurface = mSurface.isValid();
                 int fl = 0;
                 if (params != null) {
                     fl = params.flags;
@@ -965,6 +1001,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             } catch (RemoteException e) {
             }
+            
             if (DEBUG_ORIENTATION) Log.v(
                     "ViewRoot", "Relayout returned: frame=" + frame + ", surface=" + mSurface);
 
@@ -977,6 +1014,57 @@ public final class ViewRoot extends Handler implements ViewParent,
             mWidth = frame.width();
             mHeight = frame.height();
 
+            if (mSurfaceHolder != null) {
+                // The app owns the surface; tell it about what is going on.
+                if (mSurface.isValid()) {
+                    // XXX .copyFrom() doesn't work!
+                    //mSurfaceHolder.mSurface.copyFrom(mSurface);
+                    mSurfaceHolder.mSurface = mSurface;
+                }
+                mSurfaceHolder.mSurfaceLock.unlock();
+                if (mSurface.isValid()) {
+                    if (!hadSurface) {
+                        mSurfaceHolder.ungetCallbacks();
+
+                        mIsCreating = true;
+                        mSurfaceHolderCallback.surfaceCreated(mSurfaceHolder);
+                        SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                        if (callbacks != null) {
+                            for (SurfaceHolder.Callback c : callbacks) {
+                                c.surfaceCreated(mSurfaceHolder);
+                            }
+                        }
+                        surfaceChanged = true;
+                    }
+                    if (surfaceChanged) {
+                        mSurfaceHolderCallback.surfaceChanged(mSurfaceHolder,
+                                lp.format, mWidth, mHeight);
+                        SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                        if (callbacks != null) {
+                            for (SurfaceHolder.Callback c : callbacks) {
+                                c.surfaceChanged(mSurfaceHolder, lp.format,
+                                        mWidth, mHeight);
+                            }
+                        }
+                    }
+                    mIsCreating = false;
+                } else if (hadSurface) {
+                    mSurfaceHolder.ungetCallbacks();
+                    SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                    mSurfaceHolderCallback.surfaceDestroyed(mSurfaceHolder);
+                    if (callbacks != null) {
+                        for (SurfaceHolder.Callback c : callbacks) {
+                            c.surfaceDestroyed(mSurfaceHolder);
+                        }
+                    }
+                    mSurfaceHolder.mSurfaceLock.lock();
+                    // Make surface invalid.
+                    //mSurfaceHolder.mSurface.copyFrom(mSurface);
+                    mSurfaceHolder.mSurface = new Surface();
+                    mSurfaceHolder.mSurfaceLock.unlock();
+                }
+            }
+            
             if (initialized) {
                 mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
                         (int) (mHeight * appScale + 0.5f));
@@ -1268,6 +1356,12 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean scalingRequired = mAttachInfo.mScalingRequired;
 
         Rect dirty = mDirty;
+        if (mSurfaceHolder != null) {
+            // The app owns the surface, we won't draw.
+            dirty.setEmpty();
+            return;
+        }
+        
         if (mUseGL) {
             if (!dirty.isEmpty()) {
                 Canvas canvas = mGlCanvas;
@@ -1332,103 +1426,105 @@ public final class ViewRoot extends Handler implements ViewParent,
                     appScale + ", width=" + mWidth + ", height=" + mHeight);
         }
 
-        Canvas canvas;
-        try {
-            int left = dirty.left;
-            int top = dirty.top;
-            int right = dirty.right;
-            int bottom = dirty.bottom;
-            canvas = surface.lockCanvas(dirty);
+        if (!dirty.isEmpty() || mIsAnimating) {
+            Canvas canvas;
+            try {
+                int left = dirty.left;
+                int top = dirty.top;
+                int right = dirty.right;
+                int bottom = dirty.bottom;
+                canvas = surface.lockCanvas(dirty);
 
-            if (left != dirty.left || top != dirty.top || right != dirty.right ||
-                    bottom != dirty.bottom) {
-                mAttachInfo.mIgnoreDirtyState = true;
+                if (left != dirty.left || top != dirty.top || right != dirty.right ||
+                        bottom != dirty.bottom) {
+                    mAttachInfo.mIgnoreDirtyState = true;
+                }
+
+                // TODO: Do this in native
+                canvas.setDensity(mDensity);
+            } catch (Surface.OutOfResourcesException e) {
+                Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
+                // TODO: we should ask the window manager to do something!
+                // for now we just do nothing
+                return;
+            } catch (IllegalArgumentException e) {
+                Log.e("ViewRoot", "IllegalArgumentException locking surface", e);
+                // TODO: we should ask the window manager to do something!
+                // for now we just do nothing
+                return;
             }
 
-            // TODO: Do this in native
-            canvas.setDensity(mDensity);
-        } catch (Surface.OutOfResourcesException e) {
-            Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
-            // TODO: we should ask the window manager to do something!
-            // for now we just do nothing
-            return;
-        } catch (IllegalArgumentException e) {
-            Log.e("ViewRoot", "IllegalArgumentException locking surface", e);
-            // TODO: we should ask the window manager to do something!
-            // for now we just do nothing
-            return;
-        }
+            try {
+                if (!dirty.isEmpty() || mIsAnimating) {
+                    long startTime = 0L;
 
-        try {
-            if (!dirty.isEmpty() || mIsAnimating) {
-                long startTime = 0L;
-
-                if (DEBUG_ORIENTATION || DEBUG_DRAW) {
-                    Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
-                            + canvas.getWidth() + ", h=" + canvas.getHeight());
-                    //canvas.drawARGB(255, 255, 0, 0);
-                }
-
-                if (Config.DEBUG && ViewDebug.profileDrawing) {
-                    startTime = SystemClock.elapsedRealtime();
-                }
-
-                // If this bitmap's format includes an alpha channel, we
-                // need to clear it before drawing so that the child will
-                // properly re-composite its drawing on a transparent
-                // background. This automatically respects the clip/dirty region
-                // or
-                // If we are applying an offset, we need to clear the area
-                // where the offset doesn't appear to avoid having garbage
-                // left in the blank areas.
-                if (!canvas.isOpaque() || yoff != 0) {
-                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                }
-
-                dirty.setEmpty();
-                mIsAnimating = false;
-                mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
-                mView.mPrivateFlags |= View.DRAWN;
-
-                if (DEBUG_DRAW) {
-                    Context cxt = mView.getContext();
-                    Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
-                            ", metrics=" + cxt.getResources().getDisplayMetrics() +
-                            ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
-                }
-                int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
-                try {
-                    canvas.translate(0, -yoff);
-                    if (mTranslator != null) {
-                        mTranslator.translateCanvas(canvas);
+                    if (DEBUG_ORIENTATION || DEBUG_DRAW) {
+                        Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
+                                + canvas.getWidth() + ", h=" + canvas.getHeight());
+                        //canvas.drawARGB(255, 255, 0, 0);
                     }
-                    canvas.setScreenDensity(scalingRequired
-                            ? DisplayMetrics.DENSITY_DEVICE : 0);
-                    mView.draw(canvas);
-                } finally {
-                    mAttachInfo.mIgnoreDirtyState = false;
-                    canvas.restoreToCount(saveCount);
-                }
 
-                if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
-                    mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
-                }
-
-                if (SHOW_FPS || Config.DEBUG && ViewDebug.showFps) {
-                    int now = (int)SystemClock.elapsedRealtime();
-                    if (sDrawTime != 0) {
-                        nativeShowFPS(canvas, now - sDrawTime);
+                    if (Config.DEBUG && ViewDebug.profileDrawing) {
+                        startTime = SystemClock.elapsedRealtime();
                     }
-                    sDrawTime = now;
+
+                    // If this bitmap's format includes an alpha channel, we
+                    // need to clear it before drawing so that the child will
+                    // properly re-composite its drawing on a transparent
+                    // background. This automatically respects the clip/dirty region
+                    // or
+                    // If we are applying an offset, we need to clear the area
+                    // where the offset doesn't appear to avoid having garbage
+                    // left in the blank areas.
+                    if (!canvas.isOpaque() || yoff != 0) {
+                        canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                    }
+
+                    dirty.setEmpty();
+                    mIsAnimating = false;
+                    mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
+                    mView.mPrivateFlags |= View.DRAWN;
+
+                    if (DEBUG_DRAW) {
+                        Context cxt = mView.getContext();
+                        Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
+                                ", metrics=" + cxt.getResources().getDisplayMetrics() +
+                                ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
+                    }
+                    int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                    try {
+                        canvas.translate(0, -yoff);
+                        if (mTranslator != null) {
+                            mTranslator.translateCanvas(canvas);
+                        }
+                        canvas.setScreenDensity(scalingRequired
+                                ? DisplayMetrics.DENSITY_DEVICE : 0);
+                        mView.draw(canvas);
+                    } finally {
+                        mAttachInfo.mIgnoreDirtyState = false;
+                        canvas.restoreToCount(saveCount);
+                    }
+
+                    if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                        mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
+                    }
+
+                    if (SHOW_FPS || Config.DEBUG && ViewDebug.showFps) {
+                        int now = (int)SystemClock.elapsedRealtime();
+                        if (sDrawTime != 0) {
+                            nativeShowFPS(canvas, now - sDrawTime);
+                        }
+                        sDrawTime = now;
+                    }
+
+                    if (Config.DEBUG && ViewDebug.profileDrawing) {
+                        EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
+                    }
                 }
 
-                if (Config.DEBUG && ViewDebug.profileDrawing) {
-                    EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
-                }
+            } finally {
+                surface.unlockCanvasAndPost(canvas);
             }
-
-        } finally {
-            surface.unlockCanvasAndPost(canvas);
         }
 
         if (LOCAL_LOGV) {
@@ -2813,6 +2909,46 @@ public final class ViewRoot extends Handler implements ViewParent,
         return scrollToRectOrFocus(rectangle, immediate);
     }
 
+    class TakenSurfaceHolder extends BaseSurfaceHolder {
+        @Override
+        public boolean onAllowLockCanvas() {
+            return mDrawingAllowed;
+        }
+
+        @Override
+        public void onRelayoutContainer() {
+            // Not currently interesting -- from changing between fixed and layout size.
+        }
+
+        public void setFormat(int format) {
+            ((RootViewSurfaceTaker)mView).setSurfaceFormat(format);
+        }
+
+        public void setType(int type) {
+            ((RootViewSurfaceTaker)mView).setSurfaceType(type);
+        }
+        
+        @Override
+        public void onUpdateSurface() {
+            // We take care of format and type changes on our own.
+            throw new IllegalStateException("Shouldn't be here");
+        }
+
+        public boolean isCreating() {
+            return mIsCreating;
+        }
+
+        @Override
+        public void setFixedSize(int width, int height) {
+            throw new UnsupportedOperationException(
+                    "Currently only support sizing from layout");
+        }
+        
+        public void setKeepScreenOn(boolean screenOn) {
+            ((RootViewSurfaceTaker)mView).setSurfaceKeepScreenOn(screenOn);
+        }
+    }
+    
     static class InputMethodCallback extends IInputMethodCallback.Stub {
         private WeakReference<ViewRoot> mViewRoot;
 

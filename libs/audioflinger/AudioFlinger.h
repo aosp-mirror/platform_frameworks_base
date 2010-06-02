@@ -57,7 +57,7 @@ class AudioResampler;
 
 static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 
-class AudioFlinger : public BnAudioFlinger, public IBinder::DeathRecipient
+class AudioFlinger : public BnAudioFlinger
 {
 public:
     static void instantiate();
@@ -139,9 +139,6 @@ public:
 
     virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output);
 
-    // IBinder::DeathRecipient
-    virtual     void        binderDied(const wp<IBinder>& who);
-
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
         AUDIO_HW_INIT,
@@ -205,6 +202,27 @@ private:
         pid_t               mPid;
     };
 
+    // --- Notification Client ---
+    class NotificationClient : public IBinder::DeathRecipient {
+    public:
+                            NotificationClient(const sp<AudioFlinger>& audioFlinger,
+                                                const sp<IAudioFlingerClient>& client,
+                                                pid_t pid);
+        virtual             ~NotificationClient();
+
+                sp<IAudioFlingerClient>    client() { return mClient; }
+
+                // IBinder::DeathRecipient
+                virtual     void        binderDied(const wp<IBinder>& who);
+
+    private:
+                            NotificationClient(const NotificationClient&);
+                            NotificationClient& operator = (const NotificationClient&);
+
+        sp<AudioFlinger>        mAudioFlinger;
+        pid_t                   mPid;
+        sp<IAudioFlingerClient> mClient;
+    };
 
     class TrackHandle;
     class RecordHandle;
@@ -324,7 +342,7 @@ private:
         virtual     bool        checkForNewParameters_l() = 0;
         virtual     status_t    setParameters(const String8& keyValuePairs);
         virtual     String8     getParameters(const String8& keys) = 0;
-        virtual     void        audioConfigChanged(int event, int param = 0) = 0;
+        virtual     void        audioConfigChanged_l(int event, int param = 0) = 0;
                     void        sendConfigEvent(int event, int param = 0);
                     void        sendConfigEvent_l(int event, int param = 0);
                     void        processConfigEvents();
@@ -348,9 +366,10 @@ private:
                     sp<AudioFlinger>        mAudioFlinger;
                     uint32_t                mSampleRate;
                     size_t                  mFrameCount;
-                    int                     mChannelCount;
+                    uint32_t                mChannels;
+                    uint16_t                mChannelCount;
+                    uint16_t                mFrameSize;
                     int                     mFormat;
-                    uint32_t                mFrameSize;
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
@@ -528,7 +547,7 @@ private:
                     void        restore() { if (mSuspended) mSuspended--; }
                     bool        isSuspended() { return (mSuspended != 0); }
         virtual     String8     getParameters(const String8& keys);
-        virtual     void        audioConfigChanged(int event, int param = 0);
+        virtual     void        audioConfigChanged_l(int event, int param = 0);
         virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
 
         struct  stream_type_t {
@@ -594,11 +613,7 @@ private:
         // Thread virtuals
         virtual     bool        threadLoop();
 
-                    void        getTracks(SortedVector < sp<Track> >& tracks,
-                                      SortedVector < wp<Track> >& activeTracks,
-                                      int streamType);
-                    void        putTracks(SortedVector < sp<Track> >& tracks,
-                                      SortedVector < wp<Track> >& activeTracks);
+                    void        invalidateTracks(int streamType);
         virtual     bool        checkForNewParameters_l();
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
@@ -685,6 +700,7 @@ private:
 
 
                 void        removeClient_l(pid_t pid);
+                void        removeNotificationClient(pid_t pid);
 
 
     // record thread
@@ -744,7 +760,7 @@ private:
         virtual void        releaseBuffer(AudioBufferProvider::Buffer* buffer);
         virtual bool        checkForNewParameters_l();
         virtual String8     getParameters(const String8& keys);
-        virtual void        audioConfigChanged(int event, int param = 0);
+        virtual void        audioConfigChanged_l(int event, int param = 0);
                 void        readInputParameters();
         virtual unsigned int  getInputFramesLost();
 
@@ -796,8 +812,11 @@ private:
 
                 DefaultKeyedVector< int, sp<RecordThread> >    mRecordThreads;
 
-                SortedVector< sp<IBinder> >         mNotificationClients;
+                DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 int                                 mNextThreadId;
+#ifdef LVMX
+                int mLifeVibesClientPid;
+#endif
 };
 
 // ----------------------------------------------------------------------------

@@ -1504,8 +1504,7 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
     }
 
     jobjectArray array = env->NewObjectArray(N, cls, NULL);
-    if (array == NULL) {
-        doThrow(env, "java/lang/OutOfMemoryError");
+    if (env->ExceptionCheck()) {
         res.unlockBag(startOfBag);
         return NULL;
     }
@@ -1533,15 +1532,23 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
             } else {
                 const char16_t* str16 = pool->stringAt(value.data, &strLen);
                 str = env->NewString(str16, strLen);
-                if (str == NULL) {
-                    doThrow(env, "java/lang/OutOfMemoryError");
-                    res.unlockBag(startOfBag);
-                    return NULL;
-                }
+            }
+
+            // If one of our NewString{UTF} calls failed due to memory, an
+            // exception will be pending.
+            if (env->ExceptionCheck()) {
+                res.unlockBag(startOfBag);
+                return NULL;
             }
         }
 
         env->SetObjectArrayElement(array, i, str);
+
+        // If we have a large amount of strings in our array, we might
+        // overflow the local reference table of the VM.
+        if (str != NULL) {
+            env->DeleteLocalRef(str);
+        }
     }
     res.unlockBag(startOfBag);
     return array;

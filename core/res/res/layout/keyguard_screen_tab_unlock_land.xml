@@ -46,7 +46,6 @@
             android:ellipsize="marquee"
             android:gravity="right|bottom"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="22sp"
             />
 
         <!-- "emergency calls only" shown when sim is missing or PUKd -->
@@ -66,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/carrier"
             android:layout_marginTop="56dip"
-            android:paddingBottom="8dip"
+            android:layout_marginBottom="8dip"
             >
 
             <TextView android:id="@+id/timeDisplay"

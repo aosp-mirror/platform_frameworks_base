@@ -34,6 +34,8 @@
 
 namespace android {
 
+static const char kStartCode[4] = { 0x00, 0x00, 0x00, 0x01 };
+
 static int32_t Malloc(void *userData, int32_t size, int32_t attrs) {
     return reinterpret_cast<int32_t>(malloc(size));
 }
@@ -154,9 +156,7 @@ status_t AVCDecoder::start(MetaData *) {
         }
     }
 
-    sp<MetaData> params = new MetaData;
-    params->setInt32(kKeyWantsNALFragments, true);
-    mSource->start(params.get());
+    mSource->start();
 
     mAnchorTimeUs = 0;
     mNumSamplesOutput = 0;
@@ -167,9 +167,10 @@ status_t AVCDecoder::start(MetaData *) {
 }
 
 void AVCDecoder::addCodecSpecificData(const uint8_t *data, size_t size) {
-    MediaBuffer *buffer = new MediaBuffer(size);
-    memcpy(buffer->data(), data, size);
-    buffer->set_range(0, size);
+    MediaBuffer *buffer = new MediaBuffer(size + 4);
+    memcpy(buffer->data(), kStartCode, 4);
+    memcpy((uint8_t *)buffer->data() + 4, data, size);
+    buffer->set_range(0, size + 4);
 
     mCodecSpecificData.push(buffer);
 }
@@ -198,6 +199,29 @@ status_t AVCDecoder::stop() {
 
 sp<MetaData> AVCDecoder::getFormat() {
     return mFormat;
+}
+
+static void findNALFragment(
+        const MediaBuffer *buffer, const uint8_t **fragPtr, size_t *fragSize) {
+    const uint8_t *data =
+        (const uint8_t *)buffer->data() + buffer->range_offset();
+
+    size_t size = buffer->range_length();
+
+    CHECK(size >= 4);
+    CHECK(!memcmp(kStartCode, data, 4));
+
+    size_t offset = 4;
+    while (offset + 3 < size && memcmp(kStartCode, &data[offset], 4)) {
+        ++offset;
+    }
+
+    *fragPtr = &data[4];
+    if (offset + 3 >= size) {
+        *fragSize = size - 4;
+    } else {
+        *fragSize = offset - 4;
+    }
 }
 
 status_t AVCDecoder::read(
@@ -254,37 +278,31 @@ status_t AVCDecoder::read(
         }
     }
 
-    const uint8_t *inPtr =
-        (const uint8_t *)mInputBuffer->data() + mInputBuffer->range_offset();
+    const uint8_t *fragPtr;
+    size_t fragSize;
+    findNALFragment(mInputBuffer, &fragPtr, &fragSize);
+
+    bool releaseFragment = true;
+    status_t err = UNKNOWN_ERROR;
 
     int nalType;
     int nalRefIdc;
     AVCDec_Status res =
         PVAVCDecGetNALType(
-                const_cast<uint8_t *>(inPtr), mInputBuffer->range_length(),
+                const_cast<uint8_t *>(fragPtr), fragSize,
                 &nalType, &nalRefIdc);
 
     if (res != AVCDEC_SUCCESS) {
         LOGE("cannot determine nal type");
-
-        mInputBuffer->release();
-        mInputBuffer = NULL;
-
-        return UNKNOWN_ERROR;
-    }
-
-    switch (nalType) {
+    } else switch (nalType) {
         case AVC_NALTYPE_SPS:
         {
             res = PVAVCDecSeqParamSet(
-                    mHandle, const_cast<uint8_t *>(inPtr),
-                    mInputBuffer->range_length());
+                    mHandle, const_cast<uint8_t *>(fragPtr),
+                    fragSize);
 
             if (res != AVCDEC_SUCCESS) {
-                mInputBuffer->release();
-                mInputBuffer = NULL;
-
-                return UNKNOWN_ERROR;
+                break;
             }
 
             AVCDecObject *pDecVid = (AVCDecObject *)mHandle->AVCObject;
@@ -324,47 +342,53 @@ status_t AVCDecoder::read(
 
             int32_t aligned_width = (crop_right - crop_left + 1 + 15) & ~15;
             int32_t aligned_height = (crop_bottom - crop_top + 1 + 15) & ~15;
-            mFormat->setInt32(kKeyWidth, aligned_width);
-            mFormat->setInt32(kKeyHeight, aligned_height);
 
-            mInputBuffer->release();
-            mInputBuffer = NULL;
+            int32_t oldWidth, oldHeight;
+            CHECK(mFormat->findInt32(kKeyWidth, &oldWidth));
+            CHECK(mFormat->findInt32(kKeyHeight, &oldHeight));
 
-            return INFO_FORMAT_CHANGED;
+            if (oldWidth != aligned_width || oldHeight != aligned_height) {
+                mFormat->setInt32(kKeyWidth, aligned_width);
+                mFormat->setInt32(kKeyHeight, aligned_height);
+
+                err = INFO_FORMAT_CHANGED;
+            } else {
+                *out = new MediaBuffer(0);
+                err = OK;
+            }
+            break;
         }
 
         case AVC_NALTYPE_PPS:
         {
             res = PVAVCDecPicParamSet(
-                    mHandle, const_cast<uint8_t *>(inPtr),
-                    mInputBuffer->range_length());
-
-            mInputBuffer->release();
-            mInputBuffer = NULL;
+                    mHandle, const_cast<uint8_t *>(fragPtr),
+                    fragSize);
 
             if (res != AVCDEC_SUCCESS) {
-                return UNKNOWN_ERROR;
+                break;
             }
 
             *out = new MediaBuffer(0);
 
-            return OK;
+            err = OK;
+            break;
         }
 
         case AVC_NALTYPE_SLICE:
         case AVC_NALTYPE_IDR:
         {
             res = PVAVCDecodeSlice(
-                    mHandle, const_cast<uint8_t *>(inPtr),
-                    mInputBuffer->range_length());
+                    mHandle, const_cast<uint8_t *>(fragPtr),
+                    fragSize);
 
             if (res == AVCDEC_PICTURE_OUTPUT_READY) {
                 int32_t index;
                 int32_t Release;
                 AVCFrameIO Output;
                 Output.YCbCr[0] = Output.YCbCr[1] = Output.YCbCr[2] = NULL;
-                CHECK_EQ(PVAVCDecGetOutput(
-                            mHandle, &index, &Release, &Output),
+
+                CHECK_EQ(PVAVCDecGetOutput(mHandle, &index, &Release, &Output),
                          AVCDEC_SUCCESS);
 
                 CHECK(index >= 0);
@@ -376,48 +400,44 @@ status_t AVCDecoder::read(
 
                 // Do _not_ release input buffer yet.
 
-                return OK;
+                releaseFragment = false;
+                err = OK;
+                break;
             }
-
-            mInputBuffer->release();
-            mInputBuffer = NULL;
 
             if (res == AVCDEC_PICTURE_READY || res == AVCDEC_SUCCESS) {
                 *out = new MediaBuffer(0);
 
-                return OK;
+                err = OK;
             } else {
                 LOGV("failed to decode frame (res = %d)", res);
-                return UNKNOWN_ERROR;
             }
+            break;
         }
 
         case AVC_NALTYPE_SEI:
         {
             res = PVAVCDecSEI(
-                    mHandle, const_cast<uint8_t *>(inPtr),
-                    mInputBuffer->range_length());
-
-            mInputBuffer->release();
-            mInputBuffer = NULL;
+                    mHandle, const_cast<uint8_t *>(fragPtr),
+                    fragSize);
 
             if (res != AVCDEC_SUCCESS) {
-                return UNKNOWN_ERROR;
+                break;
             }
 
             *out = new MediaBuffer(0);
 
-            return OK;
+            err = OK;
+            break;
         }
 
         case AVC_NALTYPE_AUD:
+        case AVC_NALTYPE_FILL:
         {
-            mInputBuffer->release();
-            mInputBuffer = NULL;
-
             *out = new MediaBuffer(0);
 
-            return OK;
+            err = OK;
+            break;
         }
 
         default:
@@ -428,10 +448,19 @@ status_t AVCDecoder::read(
         }
     }
 
-    mInputBuffer->release();
-    mInputBuffer = NULL;
+    if (releaseFragment) {
+        size_t offset = mInputBuffer->range_offset();
+        if (fragSize + 4 == mInputBuffer->range_length()) {
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+        } else {
+            mInputBuffer->set_range(
+                    offset + fragSize + 4,
+                    mInputBuffer->range_length() - fragSize - 4);
+        }
+    }
 
-    return UNKNOWN_ERROR;
+    return err;
 }
 
 // static

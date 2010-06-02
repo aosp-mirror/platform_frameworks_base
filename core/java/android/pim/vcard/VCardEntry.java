@@ -488,7 +488,7 @@ public class VCardEntry {
         final StringBuilder builder = new StringBuilder();
         final String trimed = data.trim();
         final String formattedNumber;
-        if (type == Phone.TYPE_PAGER) {
+        if (type == Phone.TYPE_PAGER || VCardConfig.refrainPhoneNumberFormatting(mVCardType)) {
             formattedNumber = trimed;
         } else {
             final int length = trimed.length();
@@ -500,8 +500,7 @@ public class VCardEntry {
             }
 
             // Use NANP in default when there's no information about locale.
-            final int formattingType = (VCardConfig.isJapaneseDevice(mVCardType) ?
-                    PhoneNumberUtils.FORMAT_JAPAN : PhoneNumberUtils.FORMAT_NANP);
+            final int formattingType = VCardUtils.getPhoneNumberFormat(mVCardType);
             formattedNumber = PhoneNumberUtils.formatNumber(builder.toString(), formattingType);
         }
         PhoneData phoneData = new PhoneData(type, formattedNumber, label, isPrimary);

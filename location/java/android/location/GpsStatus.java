@@ -150,15 +150,17 @@ public final class GpsStatus {
         for (i = 0; i < svCount; i++) {
             int prn = prns[i] - 1;
             int prnShift = (1 << prn);
-            GpsSatellite satellite = mSatellites[prn];
-
-            satellite.mValid = true;
-            satellite.mSnr = snrs[i];
-            satellite.mElevation = elevations[i];
-            satellite.mAzimuth = azimuths[i];
-            satellite.mHasEphemeris = ((ephemerisMask & prnShift) != 0);
-            satellite.mHasAlmanac = ((almanacMask & prnShift) != 0);
-            satellite.mUsedInFix = ((usedInFixMask & prnShift) != 0);
+            if (prn >= 0 && prn < mSatellites.length) {
+                GpsSatellite satellite = mSatellites[prn];
+    
+                satellite.mValid = true;
+                satellite.mSnr = snrs[i];
+                satellite.mElevation = elevations[i];
+                satellite.mAzimuth = azimuths[i];
+                satellite.mHasEphemeris = ((ephemerisMask & prnShift) != 0);
+                satellite.mHasAlmanac = ((almanacMask & prnShift) != 0);
+                satellite.mUsedInFix = ((usedInFixMask & prnShift) != 0);
+            }
         }
     }
 

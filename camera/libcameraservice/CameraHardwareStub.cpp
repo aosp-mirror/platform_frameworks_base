@@ -47,14 +47,14 @@ void CameraHardwareStub::initDefaultParameters()
 {
     CameraParameters p;
 
-    p.set("preview-size-values","320x240");
+    p.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "320x240");
     p.setPreviewSize(320, 240);
     p.setPreviewFrameRate(15);
-    p.setPreviewFormat("yuv422sp");
+    p.setPreviewFormat(CameraParameters::PIXEL_FORMAT_YUV420SP);
 
-    p.set("picture-size-values", "320x240");
+    p.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES, "320x240");
     p.setPictureSize(320, 240);
-    p.setPictureFormat("jpeg");
+    p.setPictureFormat(CameraParameters::PIXEL_FORMAT_JPEG);
 
     if (setParameters(p) != NO_ERROR) {
         LOGE("Failed to set default parameters?!");
@@ -66,14 +66,14 @@ void CameraHardwareStub::initHeapLocked()
     // Create raw heap.
     int picture_width, picture_height;
     mParameters.getPictureSize(&picture_width, &picture_height);
-    mRawHeap = new MemoryHeapBase(picture_width * 2 * picture_height);
+    mRawHeap = new MemoryHeapBase(picture_width * picture_height * 3 / 2);
 
     int preview_width, preview_height;
     mParameters.getPreviewSize(&preview_width, &preview_height);
     LOGD("initHeapLocked: preview size=%dx%d", preview_width, preview_height);
 
-    // Note that we enforce yuv422 in setParameters().
-    int how_big = preview_width * preview_height * 2;
+    // Note that we enforce yuv420sp in setParameters().
+    int how_big = preview_width * preview_height * 3 / 2;
 
     // If we are being reinitialized to the same size as before, no
     // work needs to be done.
@@ -99,7 +99,6 @@ CameraHardwareStub::~CameraHardwareStub()
 {
     delete mFakeCamera;
     mFakeCamera = 0; // paranoia
-    singleton.clear();
 }
 
 sp<IMemoryHeap> CameraHardwareStub::getPreviewHeap() const
@@ -175,7 +174,7 @@ int CameraHardwareStub::previewThread()
 
         // Fill the current frame with the fake camera.
         uint8_t *frame = ((uint8_t *)base) + offset;
-        fakeCamera->getNextFrameAsYuv422(frame);
+        fakeCamera->getNextFrameAsYuv420(frame);
 
         //LOGV("previewThread: generated frame to buffer %d", mCurrentPreviewFrame);
 
@@ -288,9 +287,9 @@ int CameraHardwareStub::pictureThread()
         // In the meantime just make another fake camera picture.
         int w, h;
         mParameters.getPictureSize(&w, &h);
-        sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * 2 * h);
+        sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * h * 3 / 2);
         FakeCamera cam(w, h);
-        cam.getNextFrameAsYuv422((uint8_t *)mRawHeap->base());
+        cam.getNextFrameAsYuv420((uint8_t *)mRawHeap->base());
         mDataCb(CAMERA_MSG_RAW_IMAGE, mem, mCallbackCookie);
     }
 
@@ -307,7 +306,7 @@ status_t CameraHardwareStub::takePicture()
 {
     stopPreview();
     if (createThread(beginPictureThread, this) == false)
-        return -1;
+        return UNKNOWN_ERROR;
     return NO_ERROR;
 }
 
@@ -339,12 +338,14 @@ status_t CameraHardwareStub::setParameters(const CameraParameters& params)
     Mutex::Autolock lock(mLock);
     // XXX verify params
 
-    if (strcmp(params.getPreviewFormat(), "yuv422sp") != 0) {
-        LOGE("Only yuv422sp preview is supported");
+    if (strcmp(params.getPreviewFormat(),
+        CameraParameters::PIXEL_FORMAT_YUV420SP) != 0) {
+        LOGE("Only yuv420sp preview is supported");
         return -1;
     }
 
-    if (strcmp(params.getPictureFormat(), "jpeg") != 0) {
+    if (strcmp(params.getPictureFormat(),
+        CameraParameters::PIXEL_FORMAT_JPEG) != 0) {
         LOGE("Only jpeg still pictures are supported");
         return -1;
     }
@@ -379,22 +380,12 @@ void CameraHardwareStub::release()
 {
 }
 
-wp<CameraHardwareInterface> CameraHardwareStub::singleton;
-
 sp<CameraHardwareInterface> CameraHardwareStub::createInstance()
 {
-    if (singleton != 0) {
-        sp<CameraHardwareInterface> hardware = singleton.promote();
-        if (hardware != 0) {
-            return hardware;
-        }
-    }
-    sp<CameraHardwareInterface> hardware(new CameraHardwareStub());
-    singleton = hardware;
-    return hardware;
+    return new CameraHardwareStub();
 }
 
-extern "C" sp<CameraHardwareInterface> openCameraHardware()
+extern "C" sp<CameraHardwareInterface> openCameraHardwareStub()
 {
     return CameraHardwareStub::createInstance();
 }

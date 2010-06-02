@@ -8,6 +8,8 @@
                  android:backupAgent="SettingsBackupAgent"
                  android:killAfterRestore="false"
                  android:icon="@drawable/ic_launcher_settings">
+                 
+    <!-- todo add: android:neverEncrypt="true" -->
 
         <provider android:name="SettingsProvider" android:authorities="settings"
                   android:multiprocess="false"

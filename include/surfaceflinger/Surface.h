@@ -28,12 +28,15 @@
 #include <ui/egl/android_natives.h>
 
 #include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
+
+#define ANDROID_VIEW_SURFACE_JNI_ID    "mNativeSurface"
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
+class GraphicBuffer;
 class GraphicBufferMapper;
 class IOMX;
 class Rect;
@@ -41,6 +44,7 @@ class Surface;
 class SurfaceComposerClient;
 class SharedClient;
 class SharedBufferClient;
+class SurfaceClient;
 
 // ---------------------------------------------------------------------------
 
@@ -104,7 +108,7 @@ private:
     SurfaceControl(
             const sp<SurfaceComposerClient>& client,
             const sp<ISurface>& surface,
-            const ISurfaceFlingerClient::surface_data_t& data,
+            const ISurfaceComposerClient::surface_data_t& data,
             uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
 
     ~SurfaceControl();
@@ -163,38 +167,36 @@ public:
     // setSwapRectangle() is intended to be used by GL ES clients
     void        setSwapRectangle(const Rect& r);
 
+
 private:
-    // can't be copied
-    Surface& operator = (Surface& rhs);
-    Surface(const Surface& rhs);
-
-    Surface(const sp<SurfaceControl>& control);
-    void init();
-     ~Surface();
-  
-    friend class SurfaceComposerClient;
-    friend class SurfaceControl;
-
-    
+    /*
+     * Android frameworks friends
+     * (eventually this should go away and be replaced by proper APIs)
+     */
     // camera and camcorder need access to the ISurface binder interface for preview
     friend class Camera;
     friend class MediaRecorder;
-    // mediaplayer needs access to ISurface for display
+    // MediaPlayer needs access to ISurface for display
     friend class MediaPlayer;
     friend class IOMX;
     // this is just to be able to write some unit tests
     friend class Test;
 
-    sp<SurfaceComposerClient> getClient() const;
-    sp<ISurface> getISurface() const;
+private:
+    friend class SurfaceComposerClient;
+    friend class SurfaceControl;
 
-    status_t getBufferLocked(int index, int usage);
-   
-           status_t validate() const;
+    // can't be copied
+    Surface& operator = (Surface& rhs);
+    Surface(const Surface& rhs);
 
-    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
-    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
-    
+    Surface(const sp<SurfaceControl>& control);
+    ~Surface();
+
+
+    /*
+     *  android_native_window_t hooks
+     */
     static int setSwapInterval(android_native_window_t* window, int interval);
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
@@ -208,21 +210,61 @@ private:
     int query(int what, int* value);
     int perform(int operation, va_list args);
 
-    status_t dequeueBuffer(sp<GraphicBuffer>* buffer);
-
     void dispatch_setUsage(va_list args);
     int  dispatch_connect(va_list args);
     int  dispatch_disconnect(va_list args);
+    int  dispatch_crop(va_list args);
+    int  dispatch_set_buffer_count(va_list args);
+    int  dispatch_set_buffers_geometry(va_list args);
     
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
     int  disconnect(int api);
+    int  crop(Rect const* rect);
+    int  setBufferCount(int bufferCount);
+    int  setBuffersGeometry(int w, int h, int format);
 
-    uint32_t getUsage() const;
-    int      getConnectedApi() const;
+    /*
+     *  private stuff...
+     */
+    void init();
+    status_t validate() const;
+    status_t initCheck() const;
+    sp<ISurface> getISurface() const;
+
+    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
+    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
+
+    status_t getBufferLocked(int index,
+            uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
+    int getBufferIndex(const sp<GraphicBuffer>& buffer) const;
+
+    int getConnectedApi() const;
     
+    bool needNewBuffer(int bufIdx,
+            uint32_t *pWidth, uint32_t *pHeight,
+            uint32_t *pFormat, uint32_t *pUsage) const;
+
+    class BufferInfo {
+        uint32_t mWidth;
+        uint32_t mHeight;
+        uint32_t mFormat;
+        uint32_t mUsage;
+        mutable uint32_t mDirty;
+        enum {
+            GEOMETRY = 0x01
+        };
+    public:
+        BufferInfo();
+        void set(uint32_t w, uint32_t h, uint32_t format);
+        void set(uint32_t usage);
+        void get(uint32_t *pWidth, uint32_t *pHeight,
+                uint32_t *pFormat, uint32_t *pUsage) const;
+        bool validateBuffer(const sp<GraphicBuffer>& buffer) const;
+    };
+
     // constants
-    sp<SurfaceComposerClient>   mClient;
+    sp<SurfaceClient>           mClient;
     sp<ISurface>                mSurface;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
@@ -230,22 +272,26 @@ private:
     uint32_t                    mFlags;
     GraphicBufferMapper&        mBufferMapper;
     SharedBufferClient*         mSharedBufferClient;
+    status_t                    mInitCheck;
 
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;
-    uint32_t                    mUsage;
     int                         mConnected;
+    Rect                        mNextBufferCrop;
+    BufferInfo                  mBufferInfo;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
-    sp<GraphicBuffer>           mBuffers[2];
     mutable Region              mDirtyRegion;
 
     // must be used from the lock/unlock thread
     sp<GraphicBuffer>           mLockedBuffer;
     sp<GraphicBuffer>           mPostedBuffer;
     mutable Region              mOldDirtyRegion;
-    bool                        mNeedFullUpdate;
+    bool                        mReserved;
+
+    // only used from dequeueBuffer()
+    Vector< sp<GraphicBuffer> > mBuffers;
 
     // query() must be called from dequeueBuffer() thread
     uint32_t                    mWidth;

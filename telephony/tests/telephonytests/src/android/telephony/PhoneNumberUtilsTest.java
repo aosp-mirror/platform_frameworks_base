@@ -16,13 +16,16 @@
 
 package com.android.internal.telephony;
 
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
+import android.content.Context;
 
 import junit.framework.TestCase;
 
-public class PhoneNumberUtilsTest extends TestCase {
+public class PhoneNumberUtilsTest extends AndroidTestCase {
 
     @SmallTest
     public void testExtractNetworkPortion() throws Exception {
@@ -481,5 +484,21 @@ public class PhoneNumberUtilsTest extends TestCase {
         assertEquals("+18475797000",
                 PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+18475797000",
                 PhoneNumberUtils.FORMAT_UNKNOWN,PhoneNumberUtils.FORMAT_UNKNOWN));
+    }
+
+    /**
+     * Basic checks for the VoiceMail number.
+     */
+    @SmallTest
+    public void testWithNumberNotEqualToVoiceMail() throws Exception {
+        assertFalse(PhoneNumberUtils.isVoiceMailNumber("911"));
+        assertFalse(PhoneNumberUtils.isVoiceMailNumber("tel:911"));
+        assertFalse(PhoneNumberUtils.isVoiceMailNumber("+18001234567"));
+        assertFalse(PhoneNumberUtils.isVoiceMailNumber(""));
+        assertFalse(PhoneNumberUtils.isVoiceMailNumber(null));
+        TelephonyManager mTelephonyManager =
+            (TelephonyManager)getContext().getSystemService(Context.TELEPHONY_SERVICE);
+        String mVoiceMailNumber = mTelephonyManager.getDefault().getVoiceMailNumber();
+        assertTrue(PhoneNumberUtils.isVoiceMailNumber(mVoiceMailNumber));
     }
 }

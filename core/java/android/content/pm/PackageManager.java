@@ -1597,6 +1597,79 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
+     * Retrieve the logo associated with an activity.  Given the full name of
+     * an activity, retrieves the information about it and calls
+     * {@link ComponentInfo#loadLogo ComponentInfo.loadLogo()} to return its logo.
+     * If the activity can not be found, NameNotFoundException is thrown.
+     *
+     * @param activityName Name of the activity whose logo is to be retrieved.
+     *
+     * @return Returns the image of the logo or null if the activity has no
+     * logo specified.
+     * 
+     * @throws NameNotFoundException Thrown if the resources for the given
+     * activity could not be loaded.
+     *
+     * @see #getActivityLogo(Intent)
+     */
+    public abstract Drawable getActivityLogo(ComponentName activityName)
+            throws NameNotFoundException;
+
+    /**
+     * Retrieve the logo associated with an Intent.  If intent.getClassName() is
+     * set, this simply returns the result of
+     * getActivityLogo(intent.getClassName()).  Otherwise it resolves the intent's
+     * component and returns the logo associated with the resolved component.
+     * If intent.getClassName() can not be found or the Intent can not be resolved
+     * to a component, NameNotFoundException is thrown.
+     *
+     * @param intent The intent for which you would like to retrieve a logo.
+     *
+     * @return Returns the image of the logo, or null if the activity has no
+     * logo specified.
+     * 
+     * @throws NameNotFoundException Thrown if the resources for application
+     * matching the given intent could not be loaded.
+     *
+     * @see #getActivityLogo(ComponentName)
+     */
+    public abstract Drawable getActivityLogo(Intent intent)
+            throws NameNotFoundException;
+
+    /**
+     * Retrieve the logo associated with an application.  If it has not specified
+     * a logo, this method returns null.
+     *
+     * @param info Information about application being queried.
+     *
+     * @return Returns the image of the logo, or null if no logo is specified
+     * by the application.
+     *
+     * @see #getApplicationLogo(String)
+     */
+    public abstract Drawable getApplicationLogo(ApplicationInfo info);
+
+    /**
+     * Retrieve the logo associated with an application.  Given the name of the
+     * application's package, retrieves the information about it and calls
+     * getApplicationLogo() to return its logo. If the application can not be
+     * found, NameNotFoundException is thrown.
+     *
+     * @param packageName Name of the package whose application logo is to be
+     *                    retrieved.
+     *
+     * @return Returns the image of the logo, or null if no application logo
+     * has been specified.
+     * 
+     * @throws NameNotFoundException Thrown if the resources for the given
+     * application could not be loaded.
+     *
+     * @see #getApplicationLogo(ApplicationInfo)
+     */
+    public abstract Drawable getApplicationLogo(String packageName)
+            throws NameNotFoundException;
+
+    /**
      * Retrieve text from a package.  This is a low-level API used by
      * the various package manager info structures (such as
      * {@link ComponentInfo} to implement retrieval of their associated

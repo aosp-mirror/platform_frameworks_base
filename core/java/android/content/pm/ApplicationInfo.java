@@ -174,7 +174,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Value for {@link #flags}: true when the application's window can be
      * increased in size for larger screens.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_largeScreens
-     * android:smallScreens}.
+     * android:largeScreens}.
      */
     public static final int FLAG_SUPPORTS_LARGE_SCREENS = 1<<11;
     
@@ -252,6 +252,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_RESTORE_ANY_VERSION = 1<<17;
 
     /**
+     * Value for {@link #flags}: Set to true if the application has been
+     * installed using the forward lock option.
+     *
      * Value for {@link #flags}: Set to true if the application is
      * currently installed on external/removable/unprotected storage.  Such
      * applications may not be available if their storage is not currently
@@ -262,12 +265,30 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_EXTERNAL_STORAGE = 1<<18;
 
     /**
+     * Value for {@link #flags}: true when the application's window can be
+     * increased in size for extra large screens.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_xlargeScreens
+     * android:xlargeScreens}.
+     */
+    public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
+    
+    /**
+     * Value for {@link #flags}: this is true if the application has set
+     * its android:neverEncrypt to true, false otherwise. It is used to specify
+     * that this package specifically "opts-out" of a secured file system solution,
+     * and will always store its data in-the-clear.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_NEVER_ENCRYPT = 1<<30;
+
+    /**
      * Value for {@link #flags}: Set to true if the application has been
      * installed using the forward lock option.
      *
      * {@hide}
      */
-    public static final int FLAG_FORWARD_LOCK = 1<<20;
+    public static final int FLAG_FORWARD_LOCK = 1<<29;
 
     /**
      * Value for {@link #flags}: Set to true if the application is
@@ -275,7 +296,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_NATIVE_DEBUGGABLE = 1<<21;
+    public static final int FLAG_NATIVE_DEBUGGABLE = 1<<28;
 
     /**
      * Flags associated with the application.  Any combination of
@@ -285,7 +306,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
-     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS},
+     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_SUPPORTS_XLARGE_SCREENS},
+     * {@link #FLAG_RESIZEABLE_FOR_SCREENS},
      * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}, {@link #FLAG_VM_SAFE_MODE}
      */
     public int flags = 0;
@@ -517,7 +539,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public void disableCompatibilityMode() {
         flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
-                FLAG_SUPPORTS_SCREEN_DENSITIES);
+                FLAG_SUPPORTS_SCREEN_DENSITIES | FLAG_SUPPORTS_XLARGE_SCREENS);
     }
     
     /**

@@ -40,7 +40,9 @@ class SharedClient;
 class ISurfaceComposer;
 class DisplayInfo;
 
-class SurfaceComposerClient : virtual public RefBase
+// ---------------------------------------------------------------------------
+
+class SurfaceComposerClient : public RefBase
 {
 public:    
                 SurfaceComposerClient();
@@ -52,10 +54,6 @@ public:
     // Return the connection of this client
     sp<IBinder> connection() const;
     
-    // Retrieve a client for an existing connection.
-    static sp<SurfaceComposerClient>
-                clientForConnection(const sp<IBinder>& conn);
-
     // Forcibly remove connection before all references have gone away.
     void        dispose();
 
@@ -123,13 +121,6 @@ public:
     status_t linkToComposerDeath(const sp<IBinder::DeathRecipient>& recipient,
             void* cookie = NULL, uint32_t flags = 0);
 
-private:
-    friend class Surface;
-    friend class SurfaceControl;
-    
-    SurfaceComposerClient(const sp<ISurfaceComposer>& sm, 
-            const sp<IBinder>& conn);
-
     status_t    hide(SurfaceID id);
     status_t    show(SurfaceID id, int32_t layer = -1);
     status_t    freeze(SurfaceID id);
@@ -142,32 +133,45 @@ private:
     status_t    setMatrix(SurfaceID id, float dsdx, float dtdx, float dsdy, float dtdy);
     status_t    setPosition(SurfaceID id, int32_t x, int32_t y);
     status_t    setSize(SurfaceID id, uint32_t w, uint32_t h);
-    
-    void        signalServer();
-
     status_t    destroySurface(SurfaceID sid);
 
-    void        _init(const sp<ISurfaceComposer>& sm,
-                    const sp<ISurfaceFlingerClient>& conn);
-
-    inline layer_state_t*   _get_state_l(SurfaceID id);
-    layer_state_t*          _lockLayerState(SurfaceID id);
-    inline void             _unlockLayerState();
+private:
+    virtual void onFirstRef();
+    inline layer_state_t*   get_state_l(SurfaceID id);
+    layer_state_t*          lockLayerState(SurfaceID id);
+    inline void             unlockLayerState();
 
     mutable     Mutex                               mLock;
-                layer_state_t*                      mPrebuiltLayerState;
                 SortedVector<layer_state_t>         mStates;
                 int32_t                             mTransactionOpen;
+                layer_state_t*                      mPrebuiltLayerState;
 
                 // these don't need to be protected because they never change
                 // after assignment
                 status_t                    mStatus;
-                SharedClient*               mControl;
-                sp<IMemoryHeap>             mControlMemory;
-                sp<ISurfaceFlingerClient>   mClient;
-                sp<ISurfaceComposer>        mSignalServer;
+                sp<ISurfaceComposerClient>  mClient;
 };
 
+// ---------------------------------------------------------------------------
+
+class SurfaceClient : public RefBase
+{
+    // all these attributes are constants
+    status_t                    mStatus;
+    SharedClient*               mControl;
+    sp<IMemoryHeap>             mControlMemory;
+    sp<IBinder>                 mConnection;
+    sp<ISurfaceComposer>        mComposerService;
+    void init(const sp<IBinder>& conn);
+public:
+    explicit SurfaceClient(const sp<IBinder>& conn);
+    explicit SurfaceClient(const sp<SurfaceComposerClient>& client);
+    status_t initCheck() const;
+    SharedClient* getSharedClient() const;
+    void signalServer() const;
+};
+
+// ---------------------------------------------------------------------------
 }; // namespace android
 
 #endif // ANDROID_SF_SURFACE_COMPOSER_CLIENT_H

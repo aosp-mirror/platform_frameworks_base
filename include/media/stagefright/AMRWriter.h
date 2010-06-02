@@ -42,18 +42,20 @@ protected:
     virtual ~AMRWriter();
 
 private:
-    Mutex mLock;
-
     FILE *mFile;
     status_t mInitCheck;
     sp<MediaSource> mSource;
     bool mStarted;
     volatile bool mDone;
-    bool mReachedEOS;
+    volatile bool mReachedEOS;
     pthread_t mThread;
+    int64_t mEstimatedSizeBytes;
+    int64_t mEstimatedDurationUs;
 
     static void *ThreadWrapper(void *);
     void threadFunc();
+    bool exceedsFileSizeLimit();
+    bool exceedsFileDurationLimit();
 
     AMRWriter(const AMRWriter &);
     AMRWriter &operator=(const AMRWriter &);
