@@ -1092,16 +1092,20 @@ public class AudioService extends IAudioService.Stub {
     private BluetoothHeadset.ServiceListener mBluetoothHeadsetServiceListener =
         new BluetoothHeadset.ServiceListener() {
         public void onServiceConnected() {
-            if (mBluetoothHeadset != null &&
-                mBluetoothHeadset.getState() == BluetoothHeadset.STATE_CONNECTED) {
-                mBluetoothHeadsetConnected = true;
+            if (mBluetoothHeadset != null) {
+                BluetoothDevice device = mBluetoothHeadset.getCurrentHeadset();
+                if (mBluetoothHeadset.getState(device) == BluetoothHeadset.STATE_CONNECTED) {
+                    mBluetoothHeadsetConnected = true;
+                }
             }
         }
         public void onServiceDisconnected() {
-            if (mBluetoothHeadset != null &&
-                mBluetoothHeadset.getState() == BluetoothHeadset.STATE_DISCONNECTED) {
-                mBluetoothHeadsetConnected = false;
-                clearAllScoClients();
+            if (mBluetoothHeadset != null) {
+                BluetoothDevice device = mBluetoothHeadset.getCurrentHeadset();
+                if (mBluetoothHeadset.getState(device) == BluetoothHeadset.STATE_DISCONNECTED) {
+                    mBluetoothHeadsetConnected = false;
+                    clearAllScoClients();
+                }
             }
         }
     };

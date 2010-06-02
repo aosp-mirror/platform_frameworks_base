@@ -2324,7 +2324,7 @@ public class WifiStateTracker extends NetworkStateTracker {
          * @return Whether to disable coexistence mode.
          */
         private boolean shouldDisableCoexistenceMode() {
-            int state = mBluetoothHeadset.getState();
+            int state = mBluetoothHeadset.getState(mBluetoothHeadset.getCurrentHeadset());
             return state == BluetoothHeadset.STATE_DISCONNECTED;
         }
     }

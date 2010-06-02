@@ -189,11 +189,11 @@ public final class BluetoothHeadset {
      * @return One of the STATE_ return codes, or STATE_ERROR if this proxy
      *         object is currently not connected to the Headset service.
      */
-    public int getState() {
+    public int getState(BluetoothDevice device) {
         if (DBG) log("getState()");
         if (mService != null) {
             try {
-                return mService.getState();
+                return mService.getState(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -271,11 +271,11 @@ public final class BluetoothHeadset {
      * be made asynchornous. Returns false if this proxy object is
      * not currently connected to the Headset service.
      */
-    public boolean disconnectHeadset() {
+    public boolean disconnectHeadset(BluetoothDevice device) {
         if (DBG) log("disconnectHeadset()");
         if (mService != null) {
             try {
-                mService.disconnectHeadset();
+                mService.disconnectHeadset(device);
                 return true;
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
