@@ -25,7 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -49,7 +48,6 @@ import com.android.internal.R;
  * minutes.
  */
 public class Clock extends TextView {
-    private final Handler mHandler = new Handler();
     private boolean mAttached;
     private Calendar mCalendar;
     private String mClockFormatString;
@@ -86,7 +84,7 @@ public class Clock extends TextView {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
 
-            getContext().registerReceiver(mIntentReceiver, filter, null, mHandler);
+            getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
