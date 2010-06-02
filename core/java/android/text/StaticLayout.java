@@ -216,25 +216,29 @@ extends Layout
 
             boolean tab = false;
 
-            int spanEnd;
-            for (int spanStart = paraStart; spanStart < paraEnd; spanStart = spanEnd) {
-                if (spanned == null)
-                    spanEnd = paraEnd;
-                else
-                    spanEnd = spanned.nextSpanTransition(spanStart, paraEnd,
-                            MetricAffectingSpan.class);
+            for (int spanStart = paraStart, spanEnd = spanStart, nextSpanStart;
+                    spanStart < paraEnd; spanStart = nextSpanStart) {
 
-                int spanLen = spanEnd - spanStart;
+                if (spanStart == spanEnd) {
+                    if (spanned == null)
+                        spanEnd = paraEnd;
+                    else
+                        spanEnd = spanned.nextSpanTransition(spanStart, paraEnd,
+                                MetricAffectingSpan.class);
+
+                    int spanLen = spanEnd - spanStart;
+                    if (spanned == null) {
+                        measured.addStyleRun(paint, spanLen, fm);
+                    } else {
+                        MetricAffectingSpan[] spans =
+                            spanned.getSpans(spanStart, spanEnd, MetricAffectingSpan.class);
+                        measured.addStyleRun(paint, spans, spanLen, fm);
+                    }
+                }
+
+                nextSpanStart = spanEnd;
                 int startInPara = spanStart - paraStart;
                 int endInPara = spanEnd - paraStart;
-
-                if (spanned == null) {
-                    measured.addStyleRun(paint, spanLen, fm);
-                } else {
-                    MetricAffectingSpan[] spans =
-                        spanned.getSpans(spanStart, spanEnd, MetricAffectingSpan.class);
-                    measured.addStyleRun(paint, spans, spanLen, fm);
-                }
 
                 int fmtop = fm.top;
                 int fmbottom = fm.bottom;
@@ -432,7 +436,10 @@ extends Layout
                         }
 
                         if (here < spanStart) {
-                            j = spanEnd = here; // must remeasure
+                            // didn't output all the text for this span
+                            // we've measured the raw widths, though, so
+                            // just reset the start point
+                            j = nextSpanStart = here;
                         } else {
                             j = here - 1;    // continue looping
                         }
