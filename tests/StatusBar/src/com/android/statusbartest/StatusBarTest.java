@@ -134,13 +134,9 @@ public class StatusBarTest extends TestActivity
                     }, 3000);
             }
         },
-        new Test("Expand in 3 sec.") {
+        new Test("Expand") {
             public void run() {
-                mHandler.postDelayed(new Runnable() {
-                        public void run() {
-                            mStatusBarManager.expand();
-                        }
-                    }, 3000);
+                mStatusBarManager.expand();
             }
         },
         new Test("Expand in 3 sec.") {
@@ -157,15 +153,6 @@ public class StatusBarTest extends TestActivity
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
                             mStatusBarManager.collapse();
-                        }
-                    }, 3000);
-            }
-        },
-        new Test("Toggle in 3 sec.") {
-            public void run() {
-                mHandler.postDelayed(new Runnable() {
-                        public void run() {
-                            mStatusBarManager.toggle();
                         }
                     }, 3000);
             }

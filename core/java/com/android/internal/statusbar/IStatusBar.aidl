@@ -24,5 +24,7 @@ oneway interface IStatusBar
     void setIcon(int index, in StatusBarIcon icon);
     void removeIcon(int index);
     void disable(int state);
+    void animateExpand();
+    void animateCollapse();
 }
 

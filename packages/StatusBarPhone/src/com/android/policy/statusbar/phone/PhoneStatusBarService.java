@@ -71,7 +71,7 @@ import java.util.Set;
 
 
 public class PhoneStatusBarService extends StatusBarService {
-    static final String TAG = "StatusBar";
+    static final String TAG = "PhoneStatusBarService";
     static final boolean SPEW = false;
 
     public static final String ACTION_STATUSBAR_START
@@ -201,10 +201,6 @@ public class PhoneStatusBarService extends StatusBarService {
 
         // Next, call super.onCreate(), which will populate our views.
         super.onCreate();
-    }
-
-    public void setNotificationCallbacks(NotificationCallbacks listener) {
-        mNotificationCallbacks = listener;
     }
 
     // ================================================================================
@@ -365,7 +361,7 @@ public class PhoneStatusBarService extends StatusBarService {
             }
         }
     }
-    
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
@@ -531,7 +527,7 @@ public class PhoneStatusBarService extends StatusBarService {
             return;
         }
         mExpandedVisible = true;
-        panelSlightlyVisible(true);
+        visibilityChanged(true);
         
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -545,7 +541,7 @@ public class PhoneStatusBarService extends StatusBarService {
         }
     }
     
-    void animateExpand() {
+    public void animateExpand() {
         if (SPEW) Slog.d(TAG, "Animate expand: expanded=" + mExpanded);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
@@ -558,7 +554,7 @@ public class PhoneStatusBarService extends StatusBarService {
         performFling(0, 2000.0f, true);
     }
     
-    void animateCollapse() {
+    public void animateCollapse() {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
                     + " mExpandedVisible=" + mExpandedVisible
@@ -618,7 +614,7 @@ public class PhoneStatusBarService extends StatusBarService {
             return;
         }
         mExpandedVisible = false;
-        panelSlightlyVisible(false);
+        visibilityChanged(false);
         mExpandedParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         mExpandedDialog.getWindow().setAttributes(mExpandedParams);
@@ -1205,7 +1201,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 // because the window itself extends below the content view.
                 mExpandedParams.y = -disph;
             }
-            panelSlightlyVisible(visible);
+            visibilityChanged(visible);
             mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         }
 
@@ -1237,16 +1233,13 @@ public class PhoneStatusBarService extends StatusBarService {
      * this is what he wants. (see bug 1131461)
      */
     private boolean mPanelSlightlyVisible;
-    void panelSlightlyVisible(boolean visible) {
-        if (true) {
-            // XXX
-            return;
-        }
+    void visibilityChanged(boolean visible) {
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
-            if (visible) {
-                // tell the notification manager to turn off the lights.
-                mNotificationCallbacks.onPanelRevealed();
+            try {
+                mBarService.visibilityChanged(visible);
+            } catch (RemoteException ex) {
+                // Won't fail unless the world has ended.
             }
         }
     }
@@ -1260,7 +1253,7 @@ public class PhoneStatusBarService extends StatusBarService {
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.d(TAG, "DISABLE_EXPAND: yes");
-                //animateCollapse();
+                animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
@@ -1288,7 +1281,7 @@ public class PhoneStatusBarService extends StatusBarService {
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             mNotificationCallbacks.onClearAll();
-            //addPendingOp(OP_EXPAND, null, false);
+            animateCollapse();
         }
     };
 

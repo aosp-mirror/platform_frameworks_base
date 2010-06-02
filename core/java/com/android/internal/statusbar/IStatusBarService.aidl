@@ -25,7 +25,6 @@ interface IStatusBarService
 {
     void expand();
     void collapse();
-    void toggle();
     void disable(int what, IBinder token, String pkg);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel);
     void setIconVisibility(String slot, boolean visible);
@@ -33,4 +32,5 @@ interface IStatusBarService
 
     // ---- Methods below are for use by the status bar policy services ----
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList state);
+    void visibilityChanged(boolean visible);
 }

@@ -1140,22 +1140,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
             }
-        } else if (code == KeyEvent.KEYCODE_NOTIFICATION) {
-            if (down) {
-                // this key doesn't exist on current hardware, but if a device
-                // didn't have a touchscreen, it would want one of these to open
-                // the status bar.
-                IStatusBarService sbs = IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar"));
-                if (sbs != null) {
-                    try {
-                        sbs.toggle();
-                    } catch (RemoteException e) {
-                        // we're screwed anyway, since it's in this process
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-            return true;
         } else if (code == KeyEvent.KEYCODE_SEARCH) {
             if (down) {
                 if (repeatCount == 0) {
