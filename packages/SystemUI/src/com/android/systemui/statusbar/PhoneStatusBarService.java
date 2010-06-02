@@ -43,7 +43,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.provider.Telephony;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
@@ -138,8 +137,6 @@ public class PhoneStatusBarService extends StatusBarService {
     View mExpandedContents;
     // top bar
     TextView mNoNotificationsTitle;
-    TextView mSpnLabel;
-    TextView mPlmnLabel;
     TextView mClearButton;
     // drag bar
     CloseDragHandle mCloseView;
@@ -246,8 +243,6 @@ public class PhoneStatusBarService extends StatusBarService {
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
         mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
-        mSpnLabel = (TextView)expanded.findViewById(R.id.spnLabel);
-        mPlmnLabel = (TextView)expanded.findViewById(R.id.plmnLabel);
         mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
         mNotificationLinearLayout = expanded.findViewById(R.id.notificationLinearLayout);
 
@@ -276,18 +271,11 @@ public class PhoneStatusBarService extends StatusBarService {
         setAreThereNotifications();
         mDateView.setVisibility(View.INVISIBLE);
 
-        // before we register for broadcasts
-        mPlmnLabel.setText(com.android.internal.R.string.lockscreen_carrier_default);
-        mPlmnLabel.setVisibility(View.VISIBLE);
-        mSpnLabel.setText("");
-        mSpnLabel.setVisibility(View.GONE);
-
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -1372,44 +1360,11 @@ public class PhoneStatusBarService extends StatusBarService {
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 //collapse();
             }
-            else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
-                updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
-                        intent.getStringExtra(Telephony.Intents.EXTRA_SPN),
-                        intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
-                        intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
-            }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 updateResources();
             }
         }
     };
-
-    void updateNetworkName(boolean showSpn, String spn, boolean showPlmn, String plmn) {
-        if (false) {
-            Slog.d(TAG, "updateNetworkName showSpn=" + showSpn + " spn=" + spn
-                    + " showPlmn=" + showPlmn + " plmn=" + plmn);
-        }
-        boolean something = false;
-        if (showPlmn) {
-            mPlmnLabel.setVisibility(View.VISIBLE);
-            if (plmn != null) {
-                mPlmnLabel.setText(plmn);
-            } else {
-                mPlmnLabel.setText(com.android.internal.R.string.lockscreen_carrier_default);
-            }
-        } else {
-            mPlmnLabel.setText("");
-            mPlmnLabel.setVisibility(View.GONE);
-        }
-        if (showSpn && spn != null) {
-            mSpnLabel.setText(spn);
-            mSpnLabel.setVisibility(View.VISIBLE);
-            something = true;
-        } else {
-            mSpnLabel.setText("");
-            mSpnLabel.setVisibility(View.GONE);
-        }
-    }
 
     /**
      * Reload some of our resources when the configuration changes.
