@@ -566,6 +566,7 @@ class BluetoothEventLoop {
             authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
                 Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
+                mBluetoothService.notifyIncomingA2dpConnection(address);
             } else {
                 Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
             }

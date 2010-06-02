@@ -395,7 +395,6 @@ public final class BluetoothHeadset {
         }
         return -1;
     }
-
     /**
      * Indicates if current platform supports voice dialing over bluetooth SCO.
      * @return true if voice dialing over bluetooth is supported, false otherwise.
@@ -406,6 +405,92 @@ public final class BluetoothHeadset {
                 com.android.internal.R.bool.config_bluetooth_sco_off_call);
     }
 
+    /**
+     * Cancel the outgoing connection.
+     * @hide
+     */
+    public boolean cancelConnectThread() {
+        if (DBG) log("cancelConnectThread");
+        if (mService != null) {
+            try {
+                return mService.cancelConnectThread();
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Accept the incoming connection.
+     * @hide
+     */
+    public boolean acceptIncomingConnect(BluetoothDevice device) {
+        if (DBG) log("acceptIncomingConnect");
+        if (mService != null) {
+            try {
+                return mService.acceptIncomingConnect(device);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Create the connect thread the incoming connection.
+     * @hide
+     */
+    public boolean createIncomingConnect(BluetoothDevice device) {
+        if (DBG) log("createIncomingConnect");
+        if (mService != null) {
+            try {
+                return mService.createIncomingConnect(device);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Connect to a Bluetooth Headset.
+     * Note: This is an internal function and shouldn't be exposed
+     * @hide
+     */
+    public boolean connectHeadsetInternal(BluetoothDevice device) {
+        if (DBG) log("connectHeadsetInternal");
+        if (mService != null) {
+            try {
+                return mService.connectHeadsetInternal(device);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Disconnect a Bluetooth Headset.
+     * Note: This is an internal function and shouldn't be exposed
+     * @hide
+     */
+    public boolean disconnectHeadsetInternal(BluetoothDevice device) {
+        if (DBG) log("disconnectHeadsetInternal");
+        if (mService != null) {
+            try {
+                 return mService.disconnectHeadsetInternal(device);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");

@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfileConnectionState;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
@@ -112,7 +113,7 @@ public class BluetoothService extends IBluetooth.Stub {
             BluetoothUuid.HSP,
             BluetoothUuid.ObexObjectPush };
 
-
+    // TODO(): Optimize all these string handling
     private final Map<String, String> mAdapterProperties;
     private final HashMap<String, Map<String, String>> mDeviceProperties;
 
@@ -122,6 +123,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private final HashMap<Integer, Integer> mServiceRecordToPid;
 
+    private final HashMap<String, BluetoothProfileConnectionState> mProfileConnectionMgr;
+
+    private BluetoothA2dpService mA2dpService;
     private static String mDockAddress;
     private String mDockPin;
 
@@ -179,6 +183,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mUuidIntentTracker = new ArrayList<String>();
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
         mServiceRecordToPid = new HashMap<Integer, Integer>();
+        mProfileConnectionMgr = new HashMap<String, BluetoothProfileConnectionState>();
 
         IntentFilter filter = new IntentFilter();
         registerForAirplaneMode(filter);
@@ -187,7 +192,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.registerReceiver(mReceiver, filter);
     }
 
-     public static synchronized String readDockBluetoothAddress() {
+    public static synchronized String readDockBluetoothAddress() {
         if (mDockAddress != null) return mDockAddress;
 
         BufferedInputStream file = null;
@@ -534,6 +539,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 mIsDiscovering = false;
                 mBondState.readAutoPairingData();
                 mBondState.loadBondState();
+                initProfileState();
                 mHandler.sendMessageDelayed(
                         mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 1, -1), 3000);
 
@@ -646,6 +652,12 @@ public class BluetoothService extends IBluetooth.Stub {
                 if (address.equals(mPendingOutgoingBonding)) {
                     mPendingOutgoingBonding = null;
                 }
+            }
+
+            if (state == BluetoothDevice.BOND_BONDED) {
+                addProfileState(address);
+            } else if (state == BluetoothDevice.BOND_NONE) {
+                removeProfileState(address);
             }
 
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
@@ -1167,6 +1179,16 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
+        BluetoothProfileConnectionState state = mProfileConnectionMgr.get(address);
+        if (state != null) {
+            state.sendMessage(BluetoothProfileConnectionState.UNPAIR);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public synchronized boolean removeBondInternal(String address) {
         return removeDeviceNative(getObjectPathFromAddress(address));
     }
 
@@ -1917,6 +1939,104 @@ public class BluetoothService extends IBluetooth.Stub {
         boolean result = setLinkTimeoutNative(path, num_slots);
 
         if (!result) log("Set Link Timeout to:" + num_slots + " slots failed");
+    }
+
+    public boolean connectHeadset(String address) {
+        BluetoothProfileConnectionState state = mProfileConnectionMgr.get(address);
+        if (state != null) {
+          state.sendMessage(BluetoothProfileConnectionState.CONNECT_HFP_OUTGOING);
+          return true;
+        }
+        return false;
+    }
+
+    public boolean disconnectHeadset(String address) {
+        BluetoothProfileConnectionState state = mProfileConnectionMgr.get(address);
+        if (state != null) {
+            state.sendMessage(BluetoothProfileConnectionState.DISCONNECT_HFP_OUTGOING);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean connectSink(String address) {
+        BluetoothProfileConnectionState state = mProfileConnectionMgr.get(address);
+        if (state != null) {
+          state.sendMessage(BluetoothProfileConnectionState.CONNECT_A2DP_OUTGOING);
+          return true;
+        }
+        return false;
+    }
+
+    public boolean disconnectSink(String address) {
+        BluetoothProfileConnectionState state = mProfileConnectionMgr.get(address);
+        if (state != null) {
+            state.sendMessage(BluetoothProfileConnectionState.DISCONNECT_A2DP_OUTGOING);
+            return true;
+        }
+        return false;
+    }
+
+    private BluetoothProfileConnectionState addProfileState(String address) {
+        BluetoothProfileConnectionState state = mProfileConnectionMgr.get(address);
+        if (state != null) return state;
+
+        state = new BluetoothProfileConnectionState(mContext, address, this, mA2dpService);
+        mProfileConnectionMgr.put(address, state);
+        state.start();
+        return state;
+    }
+
+    private void removeProfileState(String address) {
+        mProfileConnectionMgr.remove(address);
+    }
+
+    private void initProfileState() {
+        String []bonds = null;
+        String val = getPropertyInternal("Devices");
+        if (val != null) {
+            bonds = val.split(",");
+        }
+        if (bonds == null) {
+            return;
+        }
+
+        for (String path : bonds) {
+            String address = getAddressFromObjectPath(path);
+            BluetoothProfileConnectionState state = addProfileState(address);
+            // Allow 8 secs for SDP records to get registered.
+            Message msg = new Message();
+            msg.what = BluetoothProfileConnectionState.AUTO_CONNECT_PROFILES;
+            state.sendMessageDelayed(msg, 8000);
+        }
+    }
+
+    public boolean notifyIncomingConnection(String address) {
+        BluetoothProfileConnectionState state =
+             mProfileConnectionMgr.get(address);
+        if (state != null) {
+            Message msg = new Message();
+            msg.what = BluetoothProfileConnectionState.CONNECT_HFP_INCOMING;
+            state.sendMessage(msg);
+            return true;
+        }
+        return false;
+    }
+
+    /*package*/ boolean notifyIncomingA2dpConnection(String address) {
+       BluetoothProfileConnectionState state =
+            mProfileConnectionMgr.get(address);
+       if (state != null) {
+           Message msg = new Message();
+           msg.what = BluetoothProfileConnectionState.CONNECT_A2DP_INCOMING;
+           state.sendMessage(msg);
+           return true;
+       }
+       return false;
+    }
+
+    /*package*/ void setA2dpService(BluetoothA2dpService a2dpService) {
+        mA2dpService = a2dpService;
     }
 
     private static void log(String msg) {
