@@ -341,6 +341,44 @@ public class Notification implements Parcelable
         iconLevel = parcel.readInt();
     }
 
+    public Notification clone() {
+        Notification that = new Notification();
+
+        that.when = this.when;
+        that.icon = this.icon;
+        that.number = this.number;
+
+        // PendingIntents are global, so there's no reason (or way) to clone them.
+        that.contentIntent = this.contentIntent;
+        that.deleteIntent = this.deleteIntent;
+
+        if (this.tickerText != null) {
+            that.tickerText = this.tickerText.toString();
+        }
+        if (this.contentView != null) {
+            that.contentView = this.contentView.clone();
+        }
+        that.iconLevel = that.iconLevel;
+        that.sound = this.sound; // android.net.Uri is immutable
+        that.audioStreamType = this.audioStreamType;
+
+        final long[] vibrate = this.vibrate;
+        if (vibrate != null) {
+            final int N = vibrate.length;
+            final long[] vib = that.vibrate = new long[N];
+            System.arraycopy(vibrate, 0, vib, 0, N);
+        }
+
+        that.ledARGB = this.ledARGB;
+        that.ledOnMS = this.ledOnMS;
+        that.ledOffMS = this.ledOffMS;
+        that.defaults = this.defaults;
+        
+        that.flags = this.flags;
+
+        return that;
+    }
+
     public int describeContents() {
         return 0;
     }

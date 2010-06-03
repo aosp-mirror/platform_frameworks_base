@@ -36,6 +36,8 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.statusbar.StatusBarNotification;
+import com.android.internal.statusbar.StatusBarNotificationList;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -60,10 +62,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     NotificationCallbacks mNotificationCallbacks;
     volatile IStatusBar mBar;
     StatusBarIconList mIcons = new StatusBarIconList();
-    private UninstallReceiver mUninstallReceiver;
-
-    // expanded notifications
-    NotificationViewList mNotificationData = new NotificationViewList();
+    StatusBarNotificationList mNotifications = new StatusBarNotificationList();
 
     // for disabling the status bar
     ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
@@ -93,7 +92,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      */
     public StatusBarManagerService(Context context) {
         mContext = context;
-        mUninstallReceiver = new UninstallReceiver();
 
         final Resources res = context.getResources();
         mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.status_bar_icon_order));
@@ -266,15 +264,29 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         Slog.d(TAG, "visibilityChanged visible=" + visible);
     }
 
-    public IBinder addNotification(IconData iconData, NotificationData notificationData) {
-        return new Binder();
+    // ================================================================================
+    // Callbacks for NotificationManagerService.
+    // ================================================================================
+    public IBinder addNotification(StatusBarNotification notification) {
+        synchronized (mNotifications) {
+            IBinder key = mNotifications.add(notification);
+            // TODO: tell mBar
+            return key;
+        }
     }
 
-    public void updateNotification(IBinder key, IconData iconData,
-            NotificationData notificationData) {
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
+        synchronized (mNotifications) {
+            mNotifications.update(key, notification);
+            // TODO: tell mBar
+        }
     }
 
     public void removeNotification(IBinder key) {
+        synchronized (mNotifications) {
+            mNotifications.remove(key);
+            // TODO: tell mBar
+        }
     }
 
     // ================================================================================
@@ -336,12 +348,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // Always called from UI thread
     // ================================================================================
 
-    StatusBarNotification getNotification(IBinder key) {
-        synchronized (mNotificationData) {
-            return mNotificationData.get(key);
-        }
-    }
-
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -354,23 +360,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         synchronized (mIcons) {
             mIcons.dump(pw);
         }
-        
-        synchronized (mNotificationData) {
-            int N = mNotificationData.ongoingCount();
-            pw.println("  ongoingCount.size=" + N);
-            for (int i=0; i<N; i++) {
-                StatusBarNotification n = mNotificationData.getOngoing(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
-            }
-            N = mNotificationData.latestCount();
-            pw.println("  ongoingCount.size=" + N);
-            for (int i=0; i<N; i++) {
-                StatusBarNotification n = mNotificationData.getLatest(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
-            }
+
+        synchronized (mNotifications) {
+            mNotifications.dump(pw);
         }
+
         synchronized (mDisableRecords) {
             final int N = mDisableRecords.size();
             pw.println("  mDisableRecords.size=" + N
@@ -422,47 +416,4 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     };
 
-
-    class UninstallReceiver extends BroadcastReceiver {
-        public UninstallReceiver() {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-            filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-            filter.addDataScheme("package");
-            mContext.registerReceiver(this, filter);
-            IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-            mContext.registerReceiver(this, sdFilter);
-        }
-        
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String pkgList[] = null;
-            if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())) {
-                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            } else {
-                Uri data = intent.getData();
-                if (data != null) {
-                    String pkg = data.getSchemeSpecificPart();
-                    if (pkg != null) {
-                        pkgList = new String[]{pkg};
-                    }
-                }
-            }
-            ArrayList<StatusBarNotification> list = null;
-            if (pkgList != null) {
-                synchronized (StatusBarManagerService.this) {
-                    for (String pkg : pkgList) {
-                        list = mNotificationData.notificationsForPackage(pkg);
-                    }
-                }
-            }
-            
-            if (list != null) {
-                final int N = list.size();
-                for (int i=0; i<N; i++) {
-                    // TODO: removeIcon(list.get(i).key);
-                }
-            }
-        }
-    }
 }
