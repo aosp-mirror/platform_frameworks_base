@@ -30,7 +30,6 @@ import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Interpolator;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -1055,7 +1054,7 @@ public class WebView extends AbsoluteLayout
     /*
      * Return the amount of the titlebarview (if any) that is visible
      */
-    private int getVisibleTitleHeight() {
+    int getVisibleTitleHeight() {
         return Math.max(getTitleHeight() - mScrollY, 0);
     }
 
@@ -1763,7 +1762,7 @@ public class WebView extends AbsoluteLayout
      * @param scaleInPercent The initial scale in percent.
      */
     public void setInitialScale(int scaleInPercent) {
-        mInitialScaleInPercent = scaleInPercent;
+        mZoomManager.setInitialScaleInPercent(scaleInPercent);
     }
 
     /**
@@ -3387,6 +3386,10 @@ public class WebView extends AbsoluteLayout
         return mDrawHistory;
     }
 
+    int getHistoryPictureWidth() {
+        return (mHistoryPicture != null) ? mHistoryPicture.getWidth() : 0;
+    }
+
     // Should only be called in UI thread
     void switchOutDrawHistory() {
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
@@ -3462,11 +3465,11 @@ public class WebView extends AbsoluteLayout
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         // bring it back to the default scale so that user can enter text
-        boolean zoom = mZoomManager.mActualScale < mZoomManager.mDefaultScale;
+        boolean zoom = mZoomManager.mActualScale < mZoomManager.getDefaultScale();
         if (zoom) {
             mZoomManager.setZoomCenter(mLastTouchX, mLastTouchY);
             mZoomManager.mInZoomOverview = false;
-            mZoomManager.setZoomScale(mZoomManager.mDefaultScale, false);
+            mZoomManager.setZoomScale(mZoomManager.getDefaultScale(), false);
         }
         if (isTextView) {
             rebuildWebTextView();
@@ -4143,73 +4146,19 @@ public class WebView extends AbsoluteLayout
         return changed;
     }
 
-    private static class PostScale implements Runnable {
-        final WebView mWebView;
-        final boolean mUpdateTextWrap;
-
-        public PostScale(WebView webView, boolean updateTextWrap) {
-            mWebView = webView;
-            mUpdateTextWrap = updateTextWrap;
-        }
-
-        public void run() {
-            if (mWebView.mWebViewCore != null) {
-                // we always force, in case our height changed, in which case we
-                // still want to send the notification over to webkit.
-                mWebView.mZoomManager.refreshZoomScale(mUpdateTextWrap);
-                // update the zoom buttons as the scale can be changed
-                mWebView.mZoomManager.updateZoomPicker();
-            }
-        }
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
         super.onSizeChanged(w, h, ow, oh);
-        // reset zoom and anchor to the top left corner of the screen
-        // unless we are already zooming
-        if (!mZoomManager.isZoomAnimating()) {
-            int visibleTitleHeight = getVisibleTitleHeight();
-            mZoomManager.setZoomCenter(0, visibleTitleHeight);
-            mAnchorX = viewToContentX(mScrollX);
-            mAnchorY = viewToContentY(visibleTitleHeight + mScrollY);
-        }
 
         // adjust the max viewport width depending on the view dimensions. This
         // is to ensure the scaling is not going insane. So do not shrink it if
         // the view size is temporarily smaller, e.g. when soft keyboard is up.
-        int newMaxViewportWidth = (int) (Math.max(w, h) / mZoomManager.DEFAULT_MIN_ZOOM_SCALE);
+        int newMaxViewportWidth = (int) (Math.max(w, h) / ZoomManager.DEFAULT_MIN_ZOOM_SCALE);
         if (newMaxViewportWidth > sMaxViewportWidth) {
             sMaxViewportWidth = newMaxViewportWidth;
         }
 
-        // update mMinZoomScale if the minimum zoom scale is not fixed
-        if (!mZoomManager.mMinZoomScaleFixed) {
-            // when change from narrow screen to wide screen, the new viewWidth
-            // can be wider than the old content width. We limit the minimum
-            // scale to 1.0f. The proper minimum scale will be calculated when
-            // the new picture shows up.
-            mZoomManager.mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
-                    / (mDrawHistory ? mHistoryPicture.getWidth()
-                            : mZoomManager.mZoomOverviewWidth));
-            if (mInitialScaleInPercent > 0) {
-                // limit the minZoomScale to the initialScale if it is set
-                float initialScale = mInitialScaleInPercent / 100.0f;
-                if (mZoomManager.mMinZoomScale > initialScale) {
-                    mZoomManager.mMinZoomScale = initialScale;
-                }
-            }
-        }
-
-        mZoomManager.dismissZoomPicker();
-
-        // onSizeChanged() is called during WebView layout. And any
-        // requestLayout() is blocked during layout. As setNewZoomScale() will
-        // call its child View to reposition itself through ViewManager's
-        // scaleAll(), we need to post a Runnable to ensure requestLayout().
-        // <b/>
-        // only update the text wrap scale if width changed.
-        post(new PostScale(this, w != ow));
+        mZoomManager.onSizeChanged(w, h, ow, oh);
     }
 
     @Override
@@ -5556,7 +5505,7 @@ public class WebView extends AbsoluteLayout
     }
 
     float getDefaultZoomScale() {
-        return mZoomManager.mDefaultScale;
+        return mZoomManager.getDefaultScale();
     }
 
     /**
@@ -5837,7 +5786,7 @@ public class WebView extends AbsoluteLayout
             float newScale = (float) getViewWidth() / mZoomManager.mZoomOverviewWidth;
             if (mZoomManager.willScaleTriggerZoom(newScale)) {
                 mZoomManager.zoomToOverview();
-            } else if (mZoomManager.willScaleTriggerZoom(mZoomManager.mDefaultScale)) {
+            } else if (mZoomManager.willScaleTriggerZoom(mZoomManager.getDefaultScale())) {
                 zoomToDefault = true;
             }
         } else {
@@ -5852,8 +5801,8 @@ public class WebView extends AbsoluteLayout
                 // Re-calculate the zoom center so that the new scroll x will be
                 // on the left edge.
                 if (viewLeft > 0) {
-                    mZoomManager.mZoomCenterX = viewLeft * mZoomManager.mDefaultScale
-                            / (mZoomManager.mDefaultScale - mZoomManager.mActualScale);
+                    mZoomManager.mZoomCenterX = viewLeft * mZoomManager.getDefaultScale()
+                            / (mZoomManager.getDefaultScale() - mZoomManager.mActualScale);
                 } else {
                     scrollBy(viewLeft, 0);
                     mZoomManager.mZoomCenterX = 0;
@@ -6177,7 +6126,7 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.RestoreState restoreState
                             = (WebViewCore.RestoreState) msg.obj;
                     // mScrollX contains the new minPrefWidth
-                    updateZoomRange(restoreState, getViewWidth(),
+                    mZoomManager.updateZoomRange(restoreState, getViewWidth(),
                             restoreState.mScrollX, false);
                     break;
                 }
@@ -6188,54 +6137,24 @@ public class WebView extends AbsoluteLayout
                         mDelayedDeleteRootLayer = false;
                         nativeSetRootLayer(0);
                     }
-                    WebSettings settings = mWebViewCore.getSettings();
                     // called for new content
-                    final int viewWidth = getViewWidth();
-                    final WebViewCore.DrawData draw =
-                            (WebViewCore.DrawData) msg.obj;
+                    final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
+
                     final Point viewSize = draw.mViewPoint;
-                    boolean useWideViewport = settings.getUseWideViewPort();
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
                     boolean hasRestoreState = restoreState != null;
                     if (hasRestoreState) {
-                        updateZoomRange(restoreState, viewSize.x,
-                                draw.mMinPrefWidth, true);
+                        mZoomManager.restoreZoomState(draw);
                         if (!mDrawHistory) {
-                            mZoomManager.mInZoomOverview = false;
-
-                            if (mInitialScaleInPercent > 0) {
-                                final float initialScale = mInitialScaleInPercent / 100.0f;
-                                final boolean reflowText =
-                                    mInitialScaleInPercent != mZoomManager.mTextWrapScale * 100;
-                                mZoomManager.setZoomScale(initialScale, reflowText);
-                            } else if (restoreState.mViewScale > 0) {
-                                mZoomManager.mTextWrapScale = restoreState.mTextWrapScale;
-                                mZoomManager.setZoomScale(restoreState.mViewScale, false);
-                            } else {
-                                mZoomManager.mInZoomOverview = useWideViewport
-                                    && settings.getLoadWithOverviewMode();
-                                float scale;
-                                if (mZoomManager.mInZoomOverview) {
-                                    scale = (float) viewWidth
-                                        / DEFAULT_VIEWPORT_WIDTH;
-                                } else {
-                                    scale = restoreState.mTextWrapScale;
-                                }
-                                mZoomManager.setZoomScale(scale,
-                                        ZoomManager.exceedsMinScaleIncrement(
-                                        mZoomManager.mTextWrapScale, scale));
-                            }
-                            setContentScrollTo(restoreState.mScrollX,
-                                restoreState.mScrollY);
+                            setContentScrollTo(restoreState.mScrollX, restoreState.mScrollY);
                             // As we are on a new page, remove the WebTextView. This
                             // is necessary for page loads driven by webkit, and in
                             // particular when the user was on a password field, so
                             // the WebTextView was visible.
                             clearTextEntry(false);
-                            // update the zoom buttons as the scale can be changed
-                            mZoomManager.updateZoomPicker();
                         }
                     }
+
                     // We update the layout (i.e. request a layout from the
                     // view system) if the last view size that we sent to
                     // WebCore matches the view size of the picture we just
@@ -6250,33 +6169,14 @@ public class WebView extends AbsoluteLayout
                                 b.left+","+b.top+","+b.right+","+b.bottom+"}");
                     }
                     invalidateContentRect(draw.mInvalRegion.getBounds());
+
                     if (mPictureListener != null) {
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
-                    if (useWideViewport) {
-                        // limit mZoomOverviewWidth upper bound to
-                        // sMaxViewportWidth so that if the page doesn't behave
-                        // well, the WebView won't go insane. limit the lower
-                        // bound to match the default scale for mobile sites.
-                        mZoomManager.mZoomOverviewWidth = Math.min(sMaxViewportWidth, Math
-                                .max((int) (viewWidth / mZoomManager.mDefaultScale),
-                                        Math.max(draw.mMinPrefWidth,
-                                                draw.mViewPoint.x)));
-                    }
-                    if (!mZoomManager.mMinZoomScaleFixed) {
-                        mZoomManager.mMinZoomScale = (float) viewWidth / 
-                            mZoomManager.mZoomOverviewWidth;
-                    }
-                    if (!mDrawHistory && mZoomManager.mInZoomOverview) {
-                        // fit the content width to the current view. Ignore
-                        // the rounding error case.
-                        if (Math.abs((viewWidth * mZoomManager.mInvActualScale)
-                                - mZoomManager.mZoomOverviewWidth) > 1) {
-                            mZoomManager.setZoomScale(
-                                    (float) viewWidth / mZoomManager.mZoomOverviewWidth,
-                                    !mZoomManager.willScaleTriggerZoom(mZoomManager.mTextWrapScale));
-                        }
-                    }
+
+                    // update the zoom information based on the new picture
+                    mZoomManager.onNewPicture(draw);
+
                     if (draw.mFocusSizeChanged && inEditingMode()) {
                         mFocusSizeChanged = true;
                     }
@@ -6942,37 +6842,6 @@ public class WebView extends AbsoluteLayout
             selectedArray) {
         mPrivateHandler.post(
                 new InvokeListBox(array, enabledArray, selectedArray));
-    }
-
-    private void updateZoomRange(WebViewCore.RestoreState restoreState,
-            int viewWidth, int minPrefWidth, boolean updateZoomOverview) {
-        if (restoreState.mMinScale == 0) {
-            if (restoreState.mMobileSite) {
-                if (minPrefWidth > Math.max(0, viewWidth)) {
-                    mZoomManager.mMinZoomScale = (float) viewWidth / minPrefWidth;
-                    mZoomManager.mMinZoomScaleFixed = false;
-                    if (updateZoomOverview) {
-                        WebSettings settings = getSettings();
-                        mZoomManager.mInZoomOverview = settings.getUseWideViewPort() &&
-                                settings.getLoadWithOverviewMode();
-                    }
-                } else {
-                    mZoomManager.mMinZoomScale = restoreState.mDefaultScale;
-                    mZoomManager.mMinZoomScaleFixed = true;
-                }
-            } else {
-                mZoomManager.mMinZoomScale = mZoomManager.DEFAULT_MIN_ZOOM_SCALE;
-                mZoomManager.mMinZoomScaleFixed = false;
-            }
-        } else {
-            mZoomManager.mMinZoomScale = restoreState.mMinScale;
-            mZoomManager.mMinZoomScaleFixed = true;
-        }
-        if (restoreState.mMaxScale == 0) {
-            mZoomManager.mMaxZoomScale = mZoomManager.DEFAULT_MAX_ZOOM_SCALE;
-        } else {
-            mZoomManager.mMaxZoomScale = restoreState.mMaxScale;
-        }
     }
 
     /*
