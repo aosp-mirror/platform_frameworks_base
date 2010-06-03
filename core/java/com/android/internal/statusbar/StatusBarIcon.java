@@ -38,6 +38,13 @@ public class StatusBarIcon implements Parcelable {
         this.iconLevel = iconLevel;
     }
 
+    public StatusBarIcon(String iconPackage, int iconId, int iconLevel, int number) {
+        this.iconPackage = iconPackage;
+        this.iconId = iconId;
+        this.iconLevel = iconLevel;
+        this.number = number;
+    }
+
     public String toString() {
         return "StatusBarIcon(pkg=" + this.iconPackage + " id=0x" + Integer.toHexString(this.iconId)
                 + " level=" + this.iconLevel + " visible=" + visible
