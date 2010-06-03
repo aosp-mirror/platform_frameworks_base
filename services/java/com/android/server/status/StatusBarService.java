@@ -22,6 +22,7 @@ import com.android.internal.util.CharSequences;
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.app.IStatusBar;
+import android.app.IPoo;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -87,6 +88,9 @@ public class StatusBarService extends IStatusBar.Stub
 {
     static final String TAG = "StatusBar";
     static final boolean SPEW = false;
+
+    public static final String ACTION_STATUSBAR_START
+            = "com.android.internal.policy.statusbar.START";
 
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
@@ -346,7 +350,13 @@ public class StatusBarService extends IStatusBar.Stub
         lp.setTitle("StatusBar");
         lp.windowAnimations = R.style.Animation_StatusBar;
 
-        WindowManagerImpl.getDefault().addView(view, lp);
+        //WindowManagerImpl.getDefault().addView(view, lp);
+    }
+
+    public void systemReady2() {
+        // Start the status bar app
+        Intent intent = new Intent(ACTION_STATUSBAR_START);
+        mContext.sendBroadcast(intent /** permission  **/);
     }
     
     // ================================================================================
@@ -411,6 +421,11 @@ public class StatusBarService extends IStatusBar.Stub
                 android.Manifest.permission.EXPAND_STATUS_BAR,
                 "StatusBarService");
     }
+
+    public void registerStatusBar(IPoo bar) {
+        Slog.d(TAG, "registerStatusBar bar=" + bar);
+    }
+    
 
     // ================================================================================
     // Can be called from any thread
