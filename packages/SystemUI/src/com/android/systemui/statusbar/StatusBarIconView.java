@@ -124,4 +124,8 @@ public class StatusBarIconView extends AnimatedImageView {
 
         return null;
     }
+
+    public StatusBarIcon getStatusBarIcon() {
+        return mIcon;
+    }
 }
