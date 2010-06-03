@@ -358,7 +358,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Log.v(LOGTAG, "notifyDone called: " + url);
         if (mWaitUntilDone) {
             mWaitUntilDone = false;
-            mChromeClient.onProgressChanged(mWebView, 101);
+            if (!mRequestedWebKitData && !mTimedOut && !finished()) {
+                requestWebKitData();
+            }
         }
     }
 
@@ -500,11 +502,30 @@ public class TestShellActivity extends Activity implements LayoutTestController 
                     drawPageToFile(mSaveImagePath + "/" + name + ".png", mWebView);
                 }
             }
+
             // Calling finished() will check if we've met all the conditions for completing
-            // this test and move to the next one if we are ready.
+            // this test and move to the next one if we are ready. Otherwise we ask WebCore to
+            // dump the page.
             if (finished()) {
                 return;
             }
+
+            if (!mWaitUntilDone && !mRequestedWebKitData && !mTimedOut) {
+                requestWebKitData();
+            } else {
+                if (mWaitUntilDone) {
+                    Log.v(LOGTAG, "page finished loading but waiting for notifyDone to be called: " + url);
+                }
+
+                if (mRequestedWebKitData) {
+                    Log.v(LOGTAG, "page finished loading but webkit data has already been requested: " + url);
+                }
+
+                if (mTimedOut) {
+                    Log.v(LOGTAG, "page finished loading but already timed out: " + url);
+                }
+            }
+
             super.onPageFinished(view, url);
         }
 
@@ -545,40 +566,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
 
     private final WebChromeClient mChromeClient = new WebChromeClient() {
-        @Override
-        public void onProgressChanged(WebView view, int newProgress) {
-
-            // notifyDone calls this with 101%. We only want to update this flag if this
-            // is the real call from WebCore.
-            if (newProgress == 100) {
-                mOneHundredPercentComplete = true;
-            }
-
-            // With the flag updated, we can now proceed as normal whether the progress update came from
-            // WebCore or notifyDone.
-            if (newProgress >= 100) {
-                // finished() will check if we are ready to move to the next test and do so if we are.
-                if (finished()) {
-                    return;
-                }
-
-                if (!mTimedOut && !mWaitUntilDone && !mRequestedWebKitData) {
-                    String url = mWebView.getUrl();
-                    Log.v(LOGTAG, "Finished: "+ url);
-                    requestWebKitData();
-                } else {
-                    String url = mWebView.getUrl();
-                    if (mTimedOut) {
-                        Log.v(LOGTAG, "Timed out before finishing: " + url);
-                    } else if (mWaitUntilDone) {
-                        Log.v(LOGTAG, "Waiting for notifyDone: " + url);
-                    } else if (mRequestedWebKitData) {
-                        Log.v(LOGTAG, "Requested webkit data ready: " + url);
-                    }
-                }
-            }
-        }
-
         @Override
         public void onReceivedTitle(WebView view, String title) {
             setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount + ": "+ title);
@@ -760,7 +747,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mEventSender.clearTouchPoints();
         mEventSender.clearTouchMetaState();
         mPageFinished = false;
-        mOneHundredPercentComplete = false;
         mDumpWebKitData = false;
         mGetDrawtime = false;
         mSaveImagePath = null;
@@ -801,7 +787,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     private boolean canMoveToNextTest() {
-        return (mDumpWebKitData && mOneHundredPercentComplete && mPageFinished && !mWaitUntilDone) || mTimedOut;
+        return (mDumpWebKitData && mPageFinished && !mWaitUntilDone) || mTimedOut;
     }
 
     private void setupWebViewForLayoutTests(WebView webview, CallbackProxy callbackProxy) {
@@ -874,7 +860,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     private boolean mPageFinished = false;
     private boolean mDumpWebKitData = false;
-    private boolean mOneHundredPercentComplete = false;
 
     static final String TIMEOUT_STR = "**Test timeout";
 
