@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 
 
 public class IconMerger extends LinearLayout {
-    StatusBarService service;
+    StatusBarManagerService service;
     StatusBarIcon moreIcon;
 
     public IconMerger(Context context, AttributeSet attrs) {

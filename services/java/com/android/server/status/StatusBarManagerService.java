@@ -84,7 +84,7 @@ import java.util.Set;
  * separately throughout the code, although they both use the same key, which is assigned
  * when they are created.
  */
-public class StatusBarService extends IStatusBarService.Stub
+public class StatusBarManagerService extends IStatusBarService.Stub
 {
     static final String TAG = "StatusBar";
     static final boolean SPEW = false;
@@ -144,7 +144,7 @@ public class StatusBarService extends IStatusBarService.Stub
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
                 if (!down) {
-                    StatusBarService.this.deactivate();
+                    StatusBarManagerService.this.deactivate();
                 }
                 return true;
             }
@@ -236,7 +236,7 @@ public class StatusBarService extends IStatusBarService.Stub
     /**
      * Construct the service, add the status bar view to the window manager
      */
-    public StatusBarService(Context context) {
+    public StatusBarManagerService(Context context) {
         mContext = context;
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -413,13 +413,13 @@ public class StatusBarService extends IStatusBarService.Stub
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.STATUS_BAR,
-                "StatusBarService");
+                "StatusBarManagerService");
     }
 
     private void enforceExpandStatusBar() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.EXPAND_STATUS_BAR,
-                "StatusBarService");
+                "StatusBarManagerService");
     }
 
     public void registerStatusBar(IStatusBar bar) {
@@ -1878,7 +1878,7 @@ public class StatusBarService extends IStatusBarService.Stub
             }
             ArrayList<StatusBarNotification> list = null;
             if (pkgList != null) {
-                synchronized (StatusBarService.this) {
+                synchronized (StatusBarManagerService.this) {
                     for (String pkg : pkgList) {
                         list = mNotificationData.notificationsForPackage(pkg);
                     }

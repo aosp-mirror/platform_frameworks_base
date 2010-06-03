@@ -97,7 +97,7 @@ public class StatusBarPolicy {
     private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
     private final Context mContext;
-    private final StatusBarService mService;
+    private final StatusBarManagerService mService;
     private final Handler mHandler = new StatusBarHandler();
     private final IBatteryStats mBatteryStats;
 
@@ -417,7 +417,7 @@ public class StatusBarPolicy {
         }
     };
 
-    private StatusBarPolicy(Context context, StatusBarService service) {
+    private StatusBarPolicy(Context context, StatusBarManagerService service) {
         mContext = context;
         mService = service;
         mSignalStrength = new SignalStrength();
@@ -561,7 +561,7 @@ public class StatusBarPolicy {
         }
     }
 
-    public static void installIcons(Context context, StatusBarService service) {
+    public static void installIcons(Context context, StatusBarManagerService service) {
         sInstance = new StatusBarPolicy(context, service);
     }
 
