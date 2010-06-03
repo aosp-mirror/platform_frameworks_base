@@ -32,6 +32,7 @@ public class StatusBarIconView extends AnimatedImageView {
 
     private StatusBarIcon mIcon;
     @ViewDebug.ExportedProperty private String mSlot;
+    @ViewDebug.ExportedProperty private boolean mError;
 
     public StatusBarIconView(Context context, String slot) {
         super(context);
@@ -52,24 +53,37 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void set(StatusBarIcon icon) {
-        final boolean iconEquals = mIcon != null
-                && streq(mIcon.iconPackage, icon.iconPackage)
-                && mIcon.iconId == icon.iconId;
-        final boolean levelEquals = iconEquals
-                && mIcon.iconLevel == icon.iconLevel;
-        final boolean visibilityEquals = mIcon != null
-                && mIcon.visible == icon.visible;
-        if (!iconEquals) {
-            setImageDrawable(getIcon(icon));
-            // TODO: What if getIcon returns null?
+        error: {
+            final boolean iconEquals = !mError
+                    && mIcon != null
+                    && streq(mIcon.iconPackage, icon.iconPackage)
+                    && mIcon.iconId == icon.iconId;
+            final boolean levelEquals = !mError
+                    && iconEquals
+                    && mIcon.iconLevel == icon.iconLevel;
+            final boolean visibilityEquals = !mError
+                    && mIcon != null
+                    && mIcon.visible == icon.visible;
+            mError = false;
+            if (!iconEquals) {
+                Drawable drawable = getIcon(icon);
+                if (drawable == null) {
+                    mError = true;
+                    break error;
+                }
+                setImageDrawable(drawable);
+            }
+            if (!levelEquals) {
+                setImageLevel(icon.iconLevel);
+            }
+            if (!visibilityEquals) {
+                setVisibility(icon.visible ? VISIBLE : GONE);
+            }
+            mIcon = icon.clone();
         }
-        if (!levelEquals) {
-            setImageLevel(icon.iconLevel);
+        if (mError) {
+            setVisibility(GONE);
         }
-        if (!visibilityEquals) {
-            setVisibility(icon.visible ? VISIBLE : GONE);
-        }
-        mIcon = icon.clone();
     }
 
     /**
