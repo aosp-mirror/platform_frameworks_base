@@ -71,6 +71,7 @@ const char CameraParameters::KEY_ZOOM_SUPPORTED[] = "zoom-supported";
 const char CameraParameters::KEY_SMOOTH_ZOOM_SUPPORTED[] = "smooth-zoom-supported";
 const char CameraParameters::KEY_FOCUS_DISTANCES[] = "focus-distances";
 const char CameraParameters::KEY_VIDEO_FRAME_FORMAT[] = "video-frame-format";
+const char CameraParameters::KEY_METERING_MODE[] = "metering-mode";
 
 const char CameraParameters::TRUE[] = "true";
 const char CameraParameters::FOCUS_DISTANCE_INFINITY[] = "Infinity";
@@ -141,6 +142,11 @@ const char CameraParameters::FOCUS_MODE_MACRO[] = "macro";
 const char CameraParameters::FOCUS_MODE_FIXED[] = "fixed";
 const char CameraParameters::FOCUS_MODE_EDOF[] = "edof";
 const char CameraParameters::FOCUS_MODE_CONTINUOUS[] = "continuous";
+
+// Values for metering mode settings.
+const char METERING_MODE_CENTER_WEIGHTED[] = "center-weighted";
+const char METERING_MODE_FRAME_AVERAGE[] = "frame-average";
+const char METERING_MODE_SPOT[] = "spot";
 
 CameraParameters::CameraParameters()
                 : mMap()
