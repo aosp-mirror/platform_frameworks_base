@@ -19,6 +19,7 @@ package com.android.internal.statusbar;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.statusbar.StatusBarNotification;
 
 /** @hide */
 interface IStatusBarService
@@ -31,7 +32,8 @@ interface IStatusBarService
     void removeIcon(String slot);
 
     // ---- Methods below are for use by the status bar policy services ----
-    void registerStatusBar(IStatusBar callbacks, out StatusBarIconList state);
+    void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
+            out List<IBinder> notificationKeys, out List<StatusBarNotification> notifications);
     void visibilityChanged(boolean visible);
     void onNotificationClick(String pkg, String tag, int id);
     void onClearAllNotifications();
