@@ -87,7 +87,7 @@ public class StatusBarManager {
      */
     public void expand() {
         try {
-            mService.activate();
+            mService.expand();
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);
@@ -99,7 +99,7 @@ public class StatusBarManager {
      */
     public void collapse() {
         try {
-            mService.deactivate();
+            mService.collapse();
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);

@@ -24,6 +24,12 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 
+/**
+ * This class takes the functions from IStatusBar that come in on
+ * binder pool threads and posts messages to get them onto the main
+ * thread, and calls onto Callbacks.  It also takes care of
+ * coalescing these calls so they don't stack up.
+ */
 class CommandQueue extends IStatusBar.Stub {
     private static final String TAG = "StatusBar.CommandQueue";
 
@@ -33,6 +39,8 @@ class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_ICON = 0x00010000;
     private static final int OP_SET_ICON = 1;
     private static final int OP_REMOVE_ICON = 2;
+
+    private static final int MSG_DISABLE = 0x00020000;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -46,6 +54,7 @@ class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
+        public void disable(int state);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -69,13 +78,20 @@ class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void disable(int state) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_DISABLE);
+            mHandler.obtainMessage(MSG_DISABLE, state, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
-            int what = msg.what & MSG_MASK;
+            final int what = msg.what & MSG_MASK;
             switch (what) {
                 case MSG_ICON: {
-                    int index = msg.what & INDEX_MASK;
-                    int viewIndex = mList.getViewIndex(index);
+                    final int index = msg.what & INDEX_MASK;
+                    final int viewIndex = mList.getViewIndex(index);
                     switch (msg.arg1) {
                         case OP_SET_ICON: {
                             StatusBarIcon icon = (StatusBarIcon)msg.obj;
@@ -96,7 +112,10 @@ class CommandQueue extends IStatusBar.Stub {
                             break;
                     }
                     break;
-               }
+                }
+                case MSG_DISABLE:
+                    mCallbacks.disable(msg.arg1);
+                    break;
             }
         }
     }
