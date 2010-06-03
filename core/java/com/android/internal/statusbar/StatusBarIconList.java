@@ -155,13 +155,7 @@ public class StatusBarIconList implements Parcelable {
         final int N = mSlots.length;
         pw.println("Icon list:");
         for (int i=0; i<N; i++) {
-            final StatusBarIcon icon = mIcons[i];
-            if (icon == null) {
-                pw.printf("  %2d: (%s) null\n", i, mSlots[i]);
-            } else {
-                pw.printf("  %2d: (%s) pkg=%s id=0x%08x level=%d\n", i, mSlots[i], icon.iconPackage,
-                        icon.iconId, icon.iconLevel);
-            }
+            pw.printf("  %2d: (%s) %s\n", i, mSlots[i], mIcons[i]);
         }
     }
 }

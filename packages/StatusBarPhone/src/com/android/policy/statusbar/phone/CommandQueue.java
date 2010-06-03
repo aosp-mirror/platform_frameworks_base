@@ -18,12 +18,14 @@ package com.android.policy.statusbar.phone;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 
 class CommandQueue extends IStatusBar.Stub {
+    private static final String TAG = "StatusBar.CommandQueue";
 
     private static final int MSG_MASK = 0xffff0000;
     private static final int INDEX_MASK = 0x0000ffff;
