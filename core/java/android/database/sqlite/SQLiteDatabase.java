@@ -255,7 +255,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     /** The optional factory to use when creating new Cursors */
     private final CursorFactory mFactory;
 
-    private WeakHashMap<SQLiteClosable, Object> mPrograms;
+    private final WeakHashMap<SQLiteClosable, Object> mPrograms;
 
     /**
      * for each instance of this class, a LRU cache is maintained to store
@@ -274,7 +274,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     // default statement-cache size per database connection ( = instance of this class)
     private int mMaxSqlCacheSize = 25;
-    /* package */ Map<String, SQLiteCompiledSql> mCompiledQueries =
+    /* package */ final Map<String, SQLiteCompiledSql> mCompiledQueries =
         new LinkedHashMap<String, SQLiteCompiledSql>(mMaxSqlCacheSize + 1, 0.75f, true) {
             @Override
             public boolean removeEldestEntry(Map.Entry<String, SQLiteCompiledSql> eldest) {
@@ -314,19 +314,19 @@ public class SQLiteDatabase extends SQLiteClosable {
     private int mNumCacheMisses;
 
     /** Used to find out where this object was created in case it never got closed. */
-    private Throwable mStackTrace = null;
+    private final Throwable mStackTrace;
 
     // System property that enables logging of slow queries. Specify the threshold in ms.
     private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
     private final int mSlowQueryThreshold;
 
     /** stores the list of statement ids that need to be finalized by sqlite */
-    private ArrayList<Integer> mClosedStatementIds = new ArrayList<Integer>();
+    private final ArrayList<Integer> mClosedStatementIds = new ArrayList<Integer>();
 
     /** {@link DatabaseErrorHandler} to be used when SQLite returns any of the following errors
      *    Corruption
      * */
-    private DatabaseErrorHandler mErrorHandler;
+    private final DatabaseErrorHandler mErrorHandler;
 
     /**
      * @param closable
@@ -857,10 +857,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags,
             DatabaseErrorHandler errorHandler) {
-        SQLiteDatabase sqliteDatabase = new SQLiteDatabase(path, factory, flags);
-
-        // set the ErrorHandler to be used when SQLite reports exceptions
-        sqliteDatabase.mErrorHandler = errorHandler;
+        SQLiteDatabase sqliteDatabase = new SQLiteDatabase(path, factory, flags, errorHandler);
 
         try {
             // Open the database.
@@ -874,7 +871,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         } catch (SQLiteDatabaseCorruptException e) {
             // Database is not even openable.
             errorHandler.onCorruption(sqliteDatabase);
-            sqliteDatabase = new SQLiteDatabase(path, factory, flags);
+            sqliteDatabase = new SQLiteDatabase(path, factory, flags, errorHandler);
         }
 
         // set sqlite pagesize to mBlockSize
@@ -1852,14 +1849,17 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Private constructor. See {@link #create} and {@link #openDatabase}.
+     * Private constructor.
      *
      * @param path The full path to the database
      * @param factory The factory to use when creating cursors, may be NULL.
      * @param flags 0 or {@link #NO_LOCALIZED_COLLATORS}.  If the database file already
      *              exists, mFlags will be updated appropriately.
+     * @param errorHandler The {@link DatabaseErrorHandler} to be used when sqlite reports database
+     * corruption. may be NULL.
      */
-    private SQLiteDatabase(String path, CursorFactory factory, int flags) {
+    private SQLiteDatabase(String path, CursorFactory factory, int flags,
+            DatabaseErrorHandler errorHandler) {
         if (path == null) {
             throw new IllegalArgumentException("path should not be null");
         }
@@ -1869,6 +1869,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         mFactory = factory;
         mPrograms = new WeakHashMap<SQLiteClosable,Object>();
+        // Set the DatabaseErrorHandler to be used when SQLite reports corruption.
+        // If the caller sets errorHandler = null, then use default errorhandler.
+        mErrorHandler = (errorHandler == null) ? new DefaultDatabaseErrorHandler() : errorHandler;
     }
 
     /**
