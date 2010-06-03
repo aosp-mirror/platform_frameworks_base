@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,4 @@
  * limitations under the License.
  */
 
-package com.android.policy.statusbar.phone;
 
-import android.os.IBinder;
-import android.view.View;
-
-public class StatusBarNotification {
-    IBinder key;
-    NotificationData data;
-    View view;
-    View contentView;
-}

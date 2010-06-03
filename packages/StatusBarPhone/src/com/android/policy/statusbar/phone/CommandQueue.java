@@ -17,12 +17,15 @@
 package com.android.policy.statusbar.phone;
 
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.statusbar.StatusBarNotification;
+import com.android.internal.statusbar.StatusBarNotificationList;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -41,15 +44,24 @@ class CommandQueue extends IStatusBar.Stub {
     private static final int OP_SET_ICON = 1;
     private static final int OP_REMOVE_ICON = 2;
 
-    private static final int MSG_DISABLE = 0x00020000;
+    private static final int MSG_ADD_NOTIFICATION = 0x00020000;
+    private static final int MSG_UPDATE_NOTIFICATION = 0x00030000;
+    private static final int MSG_REMOVE_NOTIFICATION = 0x00040000;
 
-    private static final int MSG_SET_VISIBILITY = 0x00030000;
+    private static final int MSG_DISABLE = 0x00050000;
+
+    private static final int MSG_SET_VISIBILITY = 0x00060000;
     private static final int OP_EXPAND = 1;
     private static final int OP_COLLAPSE = 2;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
+
+    private class NotificationQueueEntry {
+        IBinder key;
+        StatusBarNotification notification;
+    }
 
     /**
      * These methods are called back on the main thread.
@@ -59,6 +71,9 @@ class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
+        public void addNotification(IBinder key, StatusBarNotification notification);
+        public void updateNotification(IBinder key, StatusBarNotification notification);
+        public void removeNotification(IBinder key);
         public void disable(int state);
         public void animateExpand();
         public void animateCollapse();
@@ -82,6 +97,30 @@ class CommandQueue extends IStatusBar.Stub {
             int what = MSG_ICON | index;
             mHandler.removeMessages(what);
             mHandler.obtainMessage(what, OP_REMOVE_ICON, 0, null).sendToTarget();
+        }
+    }
+
+    public void addNotification(IBinder key, StatusBarNotification notification) {
+        synchronized (mList) {
+            NotificationQueueEntry ne = new NotificationQueueEntry();
+            ne.key = key;
+            ne.notification = notification;
+            mHandler.obtainMessage(MSG_ADD_NOTIFICATION, 0, 0, ne).sendToTarget();
+        }
+    }
+
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
+        synchronized (mList) {
+            NotificationQueueEntry ne = new NotificationQueueEntry();
+            ne.key = key;
+            ne.notification = notification;
+            mHandler.obtainMessage(MSG_UPDATE_NOTIFICATION, 0, 0, ne).sendToTarget();
+        }
+    }
+
+    public void removeNotification(IBinder key) {
+        synchronized (mList) {
+            mHandler.obtainMessage(MSG_REMOVE_NOTIFICATION, 0, 0, key).sendToTarget();
         }
     }
 
@@ -135,6 +174,20 @@ class CommandQueue extends IStatusBar.Stub {
                     }
                     break;
                 }
+                case MSG_ADD_NOTIFICATION: {
+                    final NotificationQueueEntry ne = (NotificationQueueEntry)msg.obj;
+                    mCallbacks.addNotification(ne.key, ne.notification);
+                    break;
+                }
+                case MSG_UPDATE_NOTIFICATION: {
+                    final NotificationQueueEntry ne = (NotificationQueueEntry)msg.obj;
+                    mCallbacks.updateNotification(ne.key, ne.notification);
+                    break;
+                }
+                case MSG_REMOVE_NOTIFICATION: {
+                    mCallbacks.removeNotification((IBinder)msg.obj);
+                    break;
+                }
                 case MSG_DISABLE:
                     mCallbacks.disable(msg.arg1);
                     break;
@@ -148,5 +201,4 @@ class CommandQueue extends IStatusBar.Stub {
         }
     }
 }
-
 
