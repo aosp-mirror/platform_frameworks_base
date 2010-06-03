@@ -729,7 +729,6 @@ java.io.DataOutputStream
 java.io.File
 java.io.FileDescriptor
 java.io.FileInputStream
-java.io.FileInputStream$RepositioningLock
 java.io.FileNotFoundException
 java.io.FileOutputStream
 java.io.FilterInputStream
@@ -1120,7 +1119,6 @@ org.apache.harmony.luni.util.InputStreamHelper
 org.apache.harmony.luni.util.InputStreamHelper$1
 org.apache.harmony.luni.util.InputStreamHelper$ExposedByteArrayInputStream
 org.apache.harmony.luni.util.LocaleCache
-org.apache.harmony.luni.util.Msg
 org.apache.harmony.luni.util.NumberConverter
 org.apache.harmony.luni.util.PriviAction
 org.apache.harmony.luni.util.ThreadLocalCache
@@ -1133,7 +1131,6 @@ org.apache.harmony.luni.util.Util
 org.apache.harmony.nio.FileChannelFactory
 org.apache.harmony.nio.internal.DirectBuffer
 org.apache.harmony.nio.internal.FileChannelImpl
-org.apache.harmony.nio.internal.FileChannelImpl$RepositioningLock
 org.apache.harmony.nio.internal.FileLockImpl
 org.apache.harmony.nio.internal.LockManager
 org.apache.harmony.nio.internal.LockManager$1
