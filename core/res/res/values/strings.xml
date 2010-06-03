@@ -1421,12 +1421,6 @@
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
 
-    <!-- Attbution of a contact status update, when the time of update is unknown -->
-    <string name="contact_status_update_attribution">via <xliff:g id="source" example="Google Talk">%1$s</xliff:g></string>
-
-    <!-- Attbution of a contact status update, when the time of update is known -->
-    <string name="contact_status_update_attribution_with_date"><xliff:g id="date" example="3 hours ago">%1$s</xliff:g> via <xliff:g id="source" example="Google Talk">%2$s</xliff:g></string>
-
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
@@ -2269,12 +2263,6 @@
     <string name="reset">Reset</string>
     <!-- Label for <input type="submit"> button in html -->
     <string name="submit">Submit</string>
-
-    <!-- String describing the Star/Favorite checkbox
-
-         Used by AccessibilityService to announce the purpose of the view.
-    -->
-    <string name="description_star">favorite</string>
 
     <!-- Strings for car mode notification -->
     <!-- Shown when car mode is enabled -->
