@@ -32,8 +32,9 @@ public class NotificationData {
         public IBinder key;
         public StatusBarNotification notification;
         public StatusBarIconView icon;
-        public View expanded; // the outer expanded view
-        public View contents; // the inflated RemoteViews
+        public View row; // the outer expanded view
+        public View content; // takes the click events and sends the PendingIntent
+        public View expanded; // the inflated RemoteViews
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
 
@@ -56,11 +57,13 @@ public class NotificationData {
         return -1;
     }
 
-    public int add(IBinder key, StatusBarNotification notification, View expanded,
-            StatusBarIconView icon) {
+    public int add(IBinder key, StatusBarNotification notification, View row, View content,
+            View expanded, StatusBarIconView icon) {
         Entry entry = new Entry();
         entry.key = key;
         entry.notification = notification;
+        entry.row = row;
+        entry.content = content;
         entry.expanded = expanded;
         entry.icon = icon;
         final int index = chooseIndex(notification.notification.when);
@@ -95,7 +98,14 @@ public class NotificationData {
      * Return whether there are any visible items (i.e. items without an error).
      */
     public boolean hasVisibleItems() {
-        return mEntries.size() != 0; // TODO
+        final int N = mEntries.size();
+        for (int i=0; i<N; i++) {
+            Entry entry = mEntries.get(i);
+            if (entry.expanded != null) { // the view successfully inflated
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -105,9 +115,10 @@ public class NotificationData {
         final int N = mEntries.size();
         for (int i=0; i<N; i++) {
             Entry entry = mEntries.get(i);
-            // TODO: if (!entry.error)
-            if ((entry.notification.notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
-                return true;
+            if (entry.expanded != null) { // the view successfully inflated
+                if ((entry.notification.notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
+                    return true;
+                }
             }
         }
         return false;
