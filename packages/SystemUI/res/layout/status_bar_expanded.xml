@@ -33,7 +33,7 @@
         android:paddingRight="3dp"
         android:background="@drawable/shade_header_background"
         >
-        <LinearLayout
+        <com.android.systemui.statusbar.CarrierLabel
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -41,25 +41,10 @@
             android:layout_marginLeft="5dp"
             android:layout_gravity="center_vertical"
             android:paddingBottom="1dp"
-            android:orientation="vertical"
-            >
-                <TextView android:id="@+id/plmnLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:paddingLeft="4dp"
-                    />
-                <TextView android:id="@+id/spnLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:paddingLeft="4dp"
-                    />
-        </LinearLayout>
+            android:paddingLeft="4dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="?android:attr/textColorSecondary"
+            />
         <TextView android:id="@+id/clear_all_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
