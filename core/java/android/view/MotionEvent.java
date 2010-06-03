@@ -255,17 +255,19 @@ public final class MotionEvent implements Parcelable {
     }
 
     static private MotionEvent obtain() {
+        final MotionEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 return new MotionEvent();
             }
-            MotionEvent ev = gRecyclerTop;
+            ev = gRecyclerTop;
             gRecyclerTop = ev.mNext;
             gRecyclerUsed--;
-            ev.mRecycledLocation = null;
-            ev.mRecycled = false;
-            return ev;
         }
+        ev.mRecycledLocation = null;
+        ev.mRecycled = false;
+        ev.mNext = null;
+        return ev;
     }
 
     /**
@@ -620,11 +622,14 @@ public final class MotionEvent implements Parcelable {
                 throw new RuntimeException(toString() + " recycled twice!", mRecycledLocation);
             }
             mRecycledLocation = new RuntimeException("Last recycled here");
-        } else if (mRecycled) {
-            throw new RuntimeException(toString() + " recycled twice!");
+            //Log.w("MotionEvent", "Recycling event " + this, mRecycledLocation);
+        } else {
+            if (mRecycled) {
+                throw new RuntimeException(toString() + " recycled twice!");
+            }
+            mRecycled = true;
         }
 
-        //Log.w("MotionEvent", "Recycling event " + this, mRecycledLocation);
         synchronized (gRecyclerLock) {
             if (gRecyclerUsed < MAX_RECYCLED) {
                 gRecyclerUsed++;
