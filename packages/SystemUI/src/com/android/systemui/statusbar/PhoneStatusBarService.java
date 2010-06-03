@@ -487,7 +487,7 @@ public class PhoneStatusBarService extends StatusBarService {
         final View expanded = views[2];
         // Construct the icon.
         StatusBarIconView iconView = new StatusBarIconView(this,
-                notification.pkg + "/" + notification.id);
+                notification.pkg + "/0x" + Integer.toHexString(notification.id));
         iconView.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
                     notification.notification.iconLevel, notification.notification.number));
         // Add the expanded view.
