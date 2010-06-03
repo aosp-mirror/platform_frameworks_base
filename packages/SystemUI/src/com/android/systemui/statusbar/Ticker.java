@@ -33,14 +33,24 @@ import android.widget.ImageSwitcher;
 
 import java.util.ArrayList;
 
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
+import com.android.internal.util.CharSequences;
 import com.android.systemui.R;
 
 public abstract class Ticker {
     private static final int TICKER_SEGMENT_DELAY = 3000;
     
+    private Context mContext;
+    private Handler mHandler = new Handler();
+    private ArrayList<Segment> mSegments = new ArrayList();
+    private TextPaint mPaint;
+    private View mTickerView;
+    private ImageSwitcher mIconSwitcher;
+    private TextSwitcher mTextSwitcher;
+
     private final class Segment {
-        StatusBarNotification notificationData;
+        StatusBarNotification notification;
         Drawable icon;
         CharSequence text;
         int current;
@@ -117,7 +127,7 @@ public abstract class Ticker {
         }
 
         Segment(StatusBarNotification n, Drawable icon, CharSequence text) {
-            this.notificationData = n;
+            this.notification = n;
             this.icon = icon;
             this.text = text;
             int index = 0;
@@ -131,14 +141,8 @@ public abstract class Ticker {
         }
     };
 
-    private Handler mHandler = new Handler();
-    private ArrayList<Segment> mSegments = new ArrayList();
-    private TextPaint mPaint;
-    private View mTickerView;
-    private ImageSwitcher mIconSwitcher;
-    private TextSwitcher mTextSwitcher;
-
     Ticker(Context context, StatusBarView sb) {
+        mContext = context;
         mTickerView = sb.findViewById(R.id.ticker);
 
         mIconSwitcher = (ImageSwitcher)sb.findViewById(R.id.tickerIcon);
@@ -158,20 +162,34 @@ public abstract class Ticker {
         mPaint = text.getPaint();
     }
 
-    void addEntry(StatusBarNotification n, Drawable icon, CharSequence text) {
+
+    void addEntry(StatusBarNotification n) {
         int initialCount = mSegments.size();
 
-        Segment newSegment = new Segment(n, icon, text);
+        // If what's being displayed has the same text and icon, just drop it
+        // (which will let the current one finish, this happens when apps do
+        // a notification storm).
+        if (initialCount > 0) {
+            final Segment seg = mSegments.get(0);
+            if (n.pkg.equals(seg.notification.pkg)
+                    && n.notification.icon == seg.notification.notification.icon
+                    && n.notification.iconLevel == seg.notification.notification.iconLevel
+                    && CharSequences.equals(seg.notification.notification.tickerText,
+                        n.notification.tickerText)) {
+                return;
+            }
+        }
 
-        // prune out any preexisting ones for this notification, but not the current one.
-        // let that finish, even if it's the same id
-        for (int i=1; i<initialCount; i++) {
+        final Drawable icon = StatusBarIconView.getIcon(mContext,
+                new StatusBarIcon(n.pkg, n.notification.icon, n.notification.iconLevel, 0));
+        final Segment newSegment = new Segment(n, icon, n.notification.tickerText);
+
+        // If there's already a notification schedule for this package and id, remove it.
+        for (int i=0; i<initialCount; i++) {
             Segment seg = mSegments.get(i);
-            if (n.id == seg.notificationData.id && n.pkg.equals(seg.notificationData.pkg)) {
+            if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
                 // just update that one to use this new data instead
-                mSegments.set(i, newSegment);
-                // and since we know initialCount != 0, just return
-                return ;
+                mSegments.remove(i);
             }
         }
 
@@ -191,6 +209,15 @@ public abstract class Ticker {
             
             tickerStarting();
             scheduleAdvance();
+        }
+    }
+
+    void removeEntry(StatusBarNotification n) {
+        for (int i=mSegments.size()-1; i>=0; i--) {
+            Segment seg = mSegments.get(i);
+            if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
+                mSegments.remove(i);
+            }
         }
     }
 
