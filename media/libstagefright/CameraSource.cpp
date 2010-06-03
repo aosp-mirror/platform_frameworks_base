@@ -75,6 +75,26 @@ void CameraSourceListener::postDataTimestamp(
     }
 }
 
+static int32_t getColorFormat(const char* colorFormat) {
+    if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV422SP)) {
+       return OMX_COLOR_FormatYUV422SemiPlanar;
+    }
+
+    if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV420SP)) {
+        return OMX_COLOR_FormatYUV420SemiPlanar;
+    }
+
+    if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV422I)) {
+        return OMX_COLOR_FormatYCbYCr;
+    }
+
+    if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_RGB565)) {
+       return OMX_COLOR_Format16bitRGB565;
+    }
+
+    CHECK_EQ(0, "Unknown color format");
+}
+
 // static
 CameraSource *CameraSource::Create() {
     sp<Camera> camera = Camera::connect(0);
@@ -97,8 +117,6 @@ CameraSource *CameraSource::CreateFromCamera(const sp<Camera> &camera) {
 
 CameraSource::CameraSource(const sp<Camera> &camera)
     : mCamera(camera),
-      mWidth(0),
-      mHeight(0),
       mFirstFrameTimeUs(0),
       mLastFrameTimestampUs(0),
       mNumFramesReceived(0),
@@ -108,8 +126,19 @@ CameraSource::CameraSource(const sp<Camera> &camera)
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
 
+    int32_t width, height;
     CameraParameters params(s);
-    params.getPreviewSize(&mWidth, &mHeight);
+    params.getPreviewSize(&width, &height);
+
+    const char *colorFormatStr = params.get(CameraParameters::KEY_VIDEO_FRAME_FORMAT);
+    CHECK(colorFormatStr != NULL);
+    int32_t colorFormat = getColorFormat(colorFormatStr);
+
+    mMeta = new MetaData;
+    mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
+    mMeta->setInt32(kKeyColorFormat, colorFormat);
+    mMeta->setInt32(kKeyWidth, width);
+    mMeta->setInt32(kKeyHeight, height);
 }
 
 CameraSource::~CameraSource() {
@@ -163,13 +192,7 @@ void CameraSource::releaseQueuedFrames() {
 }
 
 sp<MetaData> CameraSource::getFormat() {
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
-    meta->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420SemiPlanar);
-    meta->setInt32(kKeyWidth, mWidth);
-    meta->setInt32(kKeyHeight, mHeight);
-
-    return meta;
+    return mMeta;
 }
 
 void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
