@@ -573,6 +573,7 @@ status_t parseAndAddBag(Bundle* bundle,
                         const String16& parentIdent,
                         const String16& itemIdent,
                         int32_t curFormat,
+                        bool isFormatted,
                         bool pseudolocalize,
                         const bool overwrite,
                         ResourceTable* outTable)
@@ -583,7 +584,7 @@ status_t parseAndAddBag(Bundle* bundle,
     String16 str;
     Vector<StringPool::entry_style_span> spans;
     err = parseStyledString(bundle, in->getPrintableSource().string(),
-                            block, item16, &str, &spans,
+                            block, item16, &str, &spans, isFormatted,
                             pseudolocalize);
     if (err != NO_ERROR) {
         return err;
@@ -616,6 +617,7 @@ status_t parseAndAddEntry(Bundle* bundle,
                         const String16& curTag,
                         bool curIsStyled,
                         int32_t curFormat,
+                        bool isFormatted,
                         bool pseudolocalize,
                         const bool overwrite,
                         ResourceTable* outTable)
@@ -626,7 +628,7 @@ status_t parseAndAddEntry(Bundle* bundle,
     Vector<StringPool::entry_style_span> spans;
     err = parseStyledString(bundle, in->getPrintableSource().string(), block,
                             curTag, &str, curIsStyled ? &spans : NULL,
-                            pseudolocalize);
+                            isFormatted, pseudolocalize);
 
     if (err < NO_ERROR) { 
         return err;
@@ -709,12 +711,18 @@ status_t compileResourceFile(Bundle* bundle,
     // useful attribute names and special values
     const String16 name16("name");
     const String16 translatable16("translatable");
+    const String16 formatted16("formatted");
     const String16 false16("false");
 
     const String16 myPackage(assets->getPackage());
 
     bool hasErrors = false;
-    
+
+    bool fileIsTranslatable = true;
+    if (strstr(in->getPrintableSource().string(), "donottranslate") != NULL) {
+        fileIsTranslatable = false;
+    }
+
     DefaultKeyedVector<String16, uint32_t> nextPublicId(0);
 
     ResXMLTree::event_code_t code;
@@ -751,6 +759,7 @@ status_t compileResourceFile(Bundle* bundle,
             bool curIsBagReplaceOnOverwrite = false;
             bool curIsStyled = false;
             bool curIsPseudolocalizable = false;
+            bool curIsFormatted = fileIsTranslatable;
             bool localHasErrors = false;
 
             if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
@@ -1136,6 +1145,7 @@ status_t compileResourceFile(Bundle* bundle,
                 String8 locale(rawLocale);
                 String16 name;
                 String16 translatable;
+                String16 formatted;
 
                 size_t n = block.getAttributeCount();
                 for (size_t i = 0; i < n; i++) {
@@ -1145,11 +1155,14 @@ status_t compileResourceFile(Bundle* bundle,
                         name.setTo(block.getAttributeStringValue(i, &length));
                     } else if (strcmp16(attr, translatable16.string()) == 0) {
                         translatable.setTo(block.getAttributeStringValue(i, &length));
+                    } else if (strcmp16(attr, formatted16.string()) == 0) {
+                        formatted.setTo(block.getAttributeStringValue(i, &length));
                     }
                 }
                 
                 if (name.size() > 0) {
                     if (translatable == false16) {
+                        curIsFormatted = false;
                         // Untranslatable strings must only exist in the default [empty] locale
                         if (locale.size() > 0) {
                             fprintf(stderr, "aapt: warning: string '%s' in %s marked untranslatable but exists"
@@ -1166,6 +1179,10 @@ status_t compileResourceFile(Bundle* bundle,
                         }
                     } else {
                         outTable->addLocalization(name, locale);
+                    }
+
+                    if (formatted == false16) {
+                        curIsFormatted = false;
                     }
                 }
 
@@ -1356,7 +1373,7 @@ status_t compileResourceFile(Bundle* bundle,
                         block.getPosition(&parserPosition);
 
                         err = parseAndAddBag(bundle, in, &block, curParams, myPackage, curType,
-                                ident, parentIdent, itemIdent, curFormat, 
+                                ident, parentIdent, itemIdent, curFormat, curIsFormatted,
                                 false, overwrite, outTable);
                         if (err == NO_ERROR) {
                             if (curIsPseudolocalizable && localeIsDefined(curParams)
@@ -1365,8 +1382,8 @@ status_t compileResourceFile(Bundle* bundle,
 #if 1
                                 block.setPosition(parserPosition);
                                 err = parseAndAddBag(bundle, in, &block, pseudoParams, myPackage,
-                                        curType, ident, parentIdent, itemIdent, curFormat, true,
-                                        overwrite, outTable);
+                                        curType, ident, parentIdent, itemIdent, curFormat,
+                                        curIsFormatted, true, overwrite, outTable);
 #endif
                             }
                         } 
@@ -1389,7 +1406,8 @@ status_t compileResourceFile(Bundle* bundle,
                 block.getPosition(&parserPosition);
 
                 err = parseAndAddEntry(bundle, in, &block, curParams, myPackage, curType, ident,
-                        *curTag, curIsStyled, curFormat, false, overwrite, outTable);
+                        *curTag, curIsStyled, curFormat, curIsFormatted,
+                        false, overwrite, outTable);
 
                 if (err < NO_ERROR) { // Why err < NO_ERROR instead of err != NO_ERROR?
                     hasErrors = localHasErrors = true;
@@ -1400,7 +1418,8 @@ status_t compileResourceFile(Bundle* bundle,
                         // pseudolocalize here
                         block.setPosition(parserPosition);
                         err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
-                                ident, *curTag, curIsStyled, curFormat, true, overwrite, outTable);
+                                ident, *curTag, curIsStyled, curFormat,
+                                curIsFormatted, true, overwrite, outTable);
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }

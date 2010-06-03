@@ -68,12 +68,118 @@ String16 getNamespaceResourcePackage(String16 namespaceUri, bool* outIsPublic)
     return String16(namespaceUri, namespaceUri.size()-prefixSize, prefixSize);
 }
 
+status_t hasSubstitutionErrors(const char* fileName,
+                               ResXMLTree* inXml,
+                               String16 str16)
+{
+    const char16_t* str = str16.string();
+    const char16_t* p = str;
+    const char16_t* end = str + str16.size();
+
+    bool nonpositional = false;
+    int argCount = 0;
+
+    while (p < end) {
+        /*
+         * Look for the start of a Java-style substitution sequence.
+         */
+        if (*p == '%' && p + 1 < end) {
+            p++;
+
+            // A literal percent sign represented by %%
+            if (*p == '%') {
+                p++;
+                continue;
+            }
+
+            argCount++;
+
+            if (*p >= '0' && *p <= '9') {
+                do {
+                    p++;
+                } while (*p >= '0' && *p <= '9');
+                if (*p != '$') {
+                    // This must be a size specification instead of position.
+                    nonpositional = true;
+                }
+            } else if (*p == '<') {
+                // Reusing last argument; bad idea since it can be re-arranged.
+                nonpositional = true;
+                p++;
+
+                // Optionally '$' can be specified at the end.
+                if (p < end && *p == '$') {
+                    p++;
+                }
+            } else {
+                nonpositional = true;
+            }
+
+            // Ignore flags and widths
+            while (p < end && (*p == '-' ||
+                    *p == '#' ||
+                    *p == '+' ||
+                    *p == ' ' ||
+                    *p == ',' ||
+                    *p == '(' ||
+                    (*p >= '0' && *p <= '9'))) {
+                p++;
+            }
+
+            /*
+             * This is a shortcut to detect strings that are going to Time.format()
+             * instead of String.format()
+             *
+             * Comparison of String.format() and Time.format() args:
+             *
+             * String: ABC E GH  ST X abcdefgh  nost x
+             *   Time:    DEFGHKMS W Za  d   hkm  s w yz
+             *
+             * Therefore we know it's definitely Time if we have:
+             *     DFKMWZkmwyz
+             */
+            if (p < end) {
+                switch (*p) {
+                case 'D':
+                case 'F':
+                case 'K':
+                case 'M':
+                case 'W':
+                case 'Z':
+                case 'k':
+                case 'm':
+                case 'w':
+                case 'y':
+                case 'z':
+                    return NO_ERROR;
+                }
+            }
+        }
+
+        p++;
+    }
+
+    /*
+     * If we have more than one substitution in this string and any of them
+     * are not in positional form, give the user an error.
+     */
+    if (argCount > 1 && nonpositional) {
+        SourcePos(String8(fileName), inXml->getLineNumber()).error(
+                "Multiple substitutions specified in non-positional format; "
+                "did you mean to add the formatted=\"true\" attribute?\n");
+        return NOT_ENOUGH_DATA;
+    }
+
+    return NO_ERROR;
+}
+
 status_t parseStyledString(Bundle* bundle,
                            const char* fileName,
                            ResXMLTree* inXml,
                            const String16& endTag,
                            String16* outString,
                            Vector<StringPool::entry_style_span>* outSpans,
+                           bool isFormatted,
                            bool pseudolocalize)
 {
     Vector<StringPool::entry_style_span> spanStack;
@@ -101,7 +207,11 @@ status_t parseStyledString(Bundle* bundle,
                 std::string pseudo = pseudolocalize_string(orig);
                 curString.append(String16(String8(pseudo.c_str())));
             } else {
-                curString.append(text);
+                if (isFormatted && hasSubstitutionErrors(fileName, inXml, text) != NO_ERROR) {
+                    return UNKNOWN_ERROR;
+                } else {
+                    curString.append(text);
+                }
             }
         } else if (code == ResXMLTree::START_TAG) {
             const String16 element16(inXml->getElementName(&len));

@@ -25,6 +25,7 @@ status_t parseStyledString(Bundle* bundle,
                            const String16& endTag,
                            String16* outString,
                            Vector<StringPool::entry_style_span>* outSpans,
+                           bool isFormatted,
                            bool isPseudolocalizable);
 
 void printXMLBlock(ResXMLTree* block);
