@@ -50,7 +50,7 @@ public:
     SharedBufferServer*     lcblk;
 
                  Layer(SurfaceFlinger* flinger, DisplayID display,
-                         const sp<Client>& client, int32_t i);
+                         const sp<Client>& client);
 
         virtual ~Layer();
 
@@ -96,8 +96,7 @@ private:
 
     class SurfaceLayer : public LayerBaseClient::Surface {
     public:
-        SurfaceLayer(const sp<SurfaceFlinger>& flinger,
-                SurfaceID id, const sp<Layer>& owner);
+        SurfaceLayer(const sp<SurfaceFlinger>& flinger, const sp<Layer>& owner);
         ~SurfaceLayer();
     private:
         virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
@@ -189,6 +188,12 @@ private:
             uint32_t    mReqHeight;
             uint32_t    mReqFormat;
             bool        mFixedSize;
+
+    // TODO: get rid of this
+private:
+    virtual void setToken(int32_t token);
+    virtual int32_t getToken() const { return mToken; }
+    int32_t mToken;
 };
 
 // ---------------------------------------------------------------------------
