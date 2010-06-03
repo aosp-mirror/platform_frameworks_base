@@ -19,7 +19,7 @@ package android.app;
 import android.app.IPoo;
 
 /** @hide */
-interface IStatusBar
+interface IStatusBarService
 {
     void activate();
     void deactivate();

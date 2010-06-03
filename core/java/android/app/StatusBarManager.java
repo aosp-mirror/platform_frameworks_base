@@ -58,12 +58,12 @@ public class StatusBarManager {
     public static final int DISABLE_NONE = 0x00000000;
 
     private Context mContext;
-    private IStatusBar mService;
+    private IStatusBarService mService;
     private IBinder mToken = new Binder();
 
     StatusBarManager(Context context) {
         mContext = context;
-        mService = IStatusBar.Stub.asInterface(
+        mService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 

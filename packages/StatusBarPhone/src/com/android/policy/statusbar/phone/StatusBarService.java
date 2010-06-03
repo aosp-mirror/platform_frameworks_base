@@ -17,7 +17,7 @@
 package com.android.policy.statusbar.phone;
 
 import android.app.Service;
-import android.app.IStatusBar;
+import android.app.IStatusBarService;
 import android.app.IPoo;
 import android.content.Context;
 import android.content.Intent;
@@ -38,7 +38,7 @@ public class StatusBarService extends Service {
     private static final String TAG = "StatusBarService";
 
     Bar mBar = new Bar();
-    IStatusBar mBarService;
+    IStatusBarService mBarService;
 
     @Override
     public void onCreate() {
@@ -46,7 +46,7 @@ public class StatusBarService extends Service {
         addStatusBarView();
 
         // Connect in to the status bar manager service
-        mBarService = IStatusBar.Stub.asInterface(
+        mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         try {
             mBarService.registerStatusBar(mBar);
