@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ import com.android.internal.util.HierarchicalStateMachine;
  * Todo(): Write tests for this class, when the Android Mock support is completed.
  * @hide
  */
-public final class BluetoothProfileConnectionState extends HierarchicalStateMachine {
-    private static final String TAG = "BluetoothProfileConnectionState";
+public final class BluetoothDeviceProfileState extends HierarchicalStateMachine {
+    private static final String TAG = "BluetoothDeviceProfileState";
     private static final boolean DBG = true; //STOPSHIP - Change to false
 
     public static final int CONNECT_HFP_OUTGOING = 1;
@@ -72,7 +72,7 @@ public final class BluetoothProfileConnectionState extends HierarchicalStateMach
     public static final int AUTO_CONNECT_PROFILES = 10;
     public static final int TRANSITION_TO_STABLE = 11;
 
-    private static final int AUTO_CONNECT_DELAY = 8000; // 8 secs
+    private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
 
     private BondedDevice mBondedDevice = new BondedDevice();
     private OutgoingHandsfree mOutgoingHandsfree = new OutgoingHandsfree();
@@ -137,7 +137,22 @@ public final class BluetoothProfileConnectionState extends HierarchicalStateMach
       }
     };
 
-    public BluetoothProfileConnectionState(Context context, String address,
+    private boolean isPhoneDocked(BluetoothDevice autoConnectDevice) {
+      // This works only because these broadcast intents are "sticky"
+      Intent i = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_DOCK_EVENT));
+      if (i != null) {
+          int state = i.getIntExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
+          if (state != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+              BluetoothDevice device = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+              if (device != null && autoConnectDevice.equals(device)) {
+                  return true;
+              }
+          }
+      }
+      return false;
+  }
+
+    public BluetoothDeviceProfileState(Context context, String address,
           BluetoothService service, BluetoothA2dpService a2dpService) {
         super(address);
         mContext = context;
@@ -168,12 +183,12 @@ public final class BluetoothProfileConnectionState extends HierarchicalStateMach
             mHeadsetService = new BluetoothHeadset(mContext, this);
         }
         public void onServiceConnected() {
-            synchronized(BluetoothProfileConnectionState.this) {
+            synchronized(BluetoothDeviceProfileState.this) {
                 mHeadsetServiceConnected = true;
             }
         }
         public void onServiceDisconnected() {
-            synchronized(BluetoothProfileConnectionState.this) {
+            synchronized(BluetoothDeviceProfileState.this) {
                 mHeadsetServiceConnected = false;
             }
         }
@@ -222,16 +237,21 @@ public final class BluetoothProfileConnectionState extends HierarchicalStateMach
                     processCommand(UNPAIR);
                     break;
                 case AUTO_CONNECT_PROFILES:
-                    if (!mHeadsetServiceConnected) {
+                    if (isPhoneDocked(mDevice)) {
+                        // Don't auto connect to docks.
+                        break;
+                    } else if (!mHeadsetServiceConnected) {
                         deferMessage(message);
                     } else {
                         if (mHeadsetService.getPriority(mDevice) ==
-                            BluetoothHeadset.PRIORITY_AUTO_CONNECT) {
+                              BluetoothHeadset.PRIORITY_AUTO_CONNECT &&
+                              !mHeadsetService.isConnected(mDevice)) {
                             mHeadsetService.connectHeadset(mDevice);
                         }
                         if (mA2dpService != null &&
-                            mA2dpService.getSinkPriority(mDevice) ==
-                              BluetoothA2dp.PRIORITY_AUTO_CONNECT) {
+                              mA2dpService.getSinkPriority(mDevice) ==
+                              BluetoothA2dp.PRIORITY_AUTO_CONNECT &&
+                              mA2dpService.getConnectedSinks().length == 0) {
                             mA2dpService.connectSink(mDevice);
                         }
                     }
@@ -631,6 +651,10 @@ public final class BluetoothProfileConnectionState extends HierarchicalStateMach
                 Log.e(TAG, "Error: Unknown Command");
         }
         return false;
+    }
+
+    /*package*/ BluetoothDevice getDevice() {
+        return mDevice;
     }
 
     private void log(String message) {
