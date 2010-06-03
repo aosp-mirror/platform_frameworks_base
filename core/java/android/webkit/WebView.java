@@ -1182,18 +1182,29 @@ public class WebView extends AbsoluteLayout
             return false;
         }
         final Picture p = capturePicture();
+
+        FileOutputStream out = null;
+        boolean success = false;
         try {
-            final FileOutputStream out = new FileOutputStream(dest);
+            out = new FileOutputStream(dest);
             p.writeToStream(out);
-            out.close();
+            success = true;
         } catch (FileNotFoundException e){
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (RuntimeException e) {
             e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (Throwable t) {
+                }
+            }
         }
-        if (dest.length() > 0) {
+
+        if (success && dest.length() > 0) {
             b.putInt("scrollX", mScrollX);
             b.putInt("scrollY", mScrollY);
             b.putFloat("scale", mActualScale);
@@ -1217,16 +1228,23 @@ public class WebView extends AbsoluteLayout
         }
         if (src.exists()) {
             Picture p = null;
+            FileInputStream in = null;
             try {
-                final FileInputStream in = new FileInputStream(src);
+                in = new FileInputStream(src);
                 p = Picture.createFromStream(in);
-                in.close();
             } catch (FileNotFoundException e){
                 e.printStackTrace();
             } catch (RuntimeException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (Throwable t) {
+                    }
+                }
             }
             if (p != null) {
                 int sx = b.getInt("scrollX", 0);
