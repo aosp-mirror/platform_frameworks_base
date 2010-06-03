@@ -52,17 +52,19 @@ typedef uint32_t MtpObjectHandle;
 #define kObjectHandleIndexMask      0x0FFFFFFF      // mask for object index in file table
 
 class MtpStorage;
+class MtpDevice;
 
-typedef android::Vector<MtpStorage *> MtpStorageList;
+typedef Vector<MtpStorage *> MtpStorageList;
+typedef Vector<MtpDevice*> MtpDeviceList;
 
-typedef android::Vector<uint8_t> UInt8List;
-typedef android::Vector<uint32_t> UInt16List;
-typedef android::Vector<uint32_t> UInt32List;
-typedef android::Vector<uint64_t> UInt64List;
-typedef android::Vector<int8_t> Int8List;
-typedef android::Vector<int32_t> Int16List;
-typedef android::Vector<int32_t> Int32List;
-typedef android::Vector<int64_t> Int64List;
+typedef Vector<uint8_t> UInt8List;
+typedef Vector<uint32_t> UInt16List;
+typedef Vector<uint32_t> UInt32List;
+typedef Vector<uint64_t> UInt64List;
+typedef Vector<int8_t> Int8List;
+typedef Vector<int32_t> Int16List;
+typedef Vector<int32_t> Int32List;
+typedef Vector<int64_t> Int64List;
 
 typedef UInt16List MtpDevicePropertyList;
 typedef UInt16List MtpObjectFormatList;
@@ -70,7 +72,7 @@ typedef UInt32List MtpObjectHandleList;
 typedef UInt16List MtpObjectPropertyList;
 typedef UInt32List MtpStorageIDList;
 
-typedef android::String8    MtpString;
+typedef String8    MtpString;
 
 }; // namespace android
 

@@ -47,16 +47,16 @@ include $(BUILD_EXECUTABLE)
 
 endif
 
-ifeq ($(HOST_OS),linux)
-
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := ptptest
+LOCAL_MODULE := libmtphost
+
 LOCAL_SRC_FILES:=                                       \
-                  ptptest.cpp                           \
                   MtpClient.cpp                         \
+                  MtpCursor.cpp                         \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
+                  MtpDevice.cpp                         \
                   MtpDeviceInfo.cpp                     \
                   MtpObjectInfo.cpp                     \
                   MtpPacket.cpp                         \
@@ -65,17 +65,12 @@ LOCAL_SRC_FILES:=                                       \
                   MtpStorageInfo.cpp                    \
                   MtpStringBuffer.cpp                   \
                   MtpUtils.cpp                          \
-                  ../../libs/utils/VectorImpl.cpp       \
-                  ../../libs/utils/SharedBuffer.cpp     \
 
-
-LOCAL_STATIC_LIBRARIES := libusbhost libcutils
-LOCAL_LDLIBS := -lpthread
 
 LOCAL_CFLAGS := -g -DMTP_HOST
 LOCAL_LDFLAGS := -g
 
-include $(BUILD_HOST_EXECUTABLE)
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -103,5 +98,3 @@ LOCAL_CFLAGS := -g
 LOCAL_LDFLAGS := -g
 
 include $(BUILD_EXECUTABLE)
-
-endif
