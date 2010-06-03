@@ -837,10 +837,23 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * same as {@link #openDatabase(String, CursorFactory, int)} except for an additional param
-     * errorHandler.
-     * @param errorHandler the {@link DatabaseErrorHandler} obj to be used when database
-     * corruption is detected on the database.
+     * Open the database according to the flags {@link #OPEN_READWRITE}
+     * {@link #OPEN_READONLY} {@link #CREATE_IF_NECESSARY} and/or {@link #NO_LOCALIZED_COLLATORS}.
+     *
+     * <p>Sets the locale of the database to the  the system's current locale.
+     * Call {@link #setLocale} if you would like something else.</p>
+     *
+     * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
+     * used to handle corruption when sqlite reports database corruption.</p>
+     *
+     * @param path to database file to open and/or create
+     * @param factory an optional factory class that is called to instantiate a
+     *            cursor when query is called, or null for default
+     * @param flags to control database access mode
+     * @param errorHandler the {@link DatabaseErrorHandler} obj to be used to handle corruption
+     * when sqlite reports database corruption
+     * @return the newly opened database
+     * @throws SQLiteException if the database cannot be opened
      */
     public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags,
             DatabaseErrorHandler errorHandler) {

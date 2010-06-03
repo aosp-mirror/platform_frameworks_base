@@ -17,6 +17,8 @@
 package android.database.sqlite;
 
 import android.content.Context;
+import android.database.DatabaseErrorHandler;
+import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
 
@@ -39,6 +41,7 @@ public abstract class SQLiteOpenHelper {
 
     private SQLiteDatabase mDatabase = null;
     private boolean mIsInitializing = false;
+    private final DatabaseErrorHandler mErrorHandler;
 
     /**
      * Create a helper object to create, open, and/or manage a database.
@@ -52,12 +55,37 @@ public abstract class SQLiteOpenHelper {
      *     {@link #onUpgrade} will be used to upgrade the database
      */
     public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version) {
+        this(context, name, factory, version, new DefaultDatabaseErrorHandler());
+    }
+
+    /**
+     * Create a helper object to create, open, and/or manage a database.
+     * The database is not actually created or opened until one of
+     * {@link #getWritableDatabase} or {@link #getReadableDatabase} is called.
+     *
+     * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
+     * used to handle corruption when sqlite reports database corruption.</p>
+     *
+     * @param context to use to open or create the database
+     * @param name of the database file, or null for an in-memory database
+     * @param factory to use for creating cursor objects, or null for the default
+     * @param version number of the database (starting at 1); if the database is older,
+     *     {@link #onUpgrade} will be used to upgrade the database
+     * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
+     * corruption.
+     */
+    public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version,
+            DatabaseErrorHandler errorHandler) {
         if (version < 1) throw new IllegalArgumentException("Version must be >= 1, was " + version);
+        if (errorHandler == null) {
+            throw new IllegalArgumentException("DatabaseErrorHandler param value can't be null.");
+        }
 
         mContext = context;
         mName = name;
         mFactory = factory;
         mNewVersion = version;
+        mErrorHandler = errorHandler;
     }
 
     /**
@@ -95,7 +123,7 @@ public abstract class SQLiteOpenHelper {
             if (mName == null) {
                 db = SQLiteDatabase.create(null);
             } else {
-                db = mContext.openOrCreateDatabase(mName, 0, mFactory);
+                db = mContext.openOrCreateDatabase(mName, 0, mFactory, mErrorHandler);
             }
 
             int version = db.getVersion();
@@ -169,7 +197,8 @@ public abstract class SQLiteOpenHelper {
         try {
             mIsInitializing = true;
             String path = mContext.getDatabasePath(mName).getPath();
-            db = SQLiteDatabase.openDatabase(path, mFactory, SQLiteDatabase.OPEN_READONLY);
+            db = SQLiteDatabase.openDatabase(path, mFactory, SQLiteDatabase.OPEN_READONLY,
+                    mErrorHandler);
             if (db.getVersion() != mNewVersion) {
                 throw new SQLiteException("Can't upgrade read-only database from version " +
                         db.getVersion() + " to " + mNewVersion + ": " + path);
