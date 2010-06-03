@@ -405,12 +405,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                com.android.server.status.StatusBarPolicy.installIcons(context, statusBar);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure installing status bar icons", e);
-            }
-
-            try {
                 Slog.i(TAG, "DiskStats Service");
                 ServiceManager.addService("diskstats", new DiskStatsService(context));
             } catch (Throwable e) {
