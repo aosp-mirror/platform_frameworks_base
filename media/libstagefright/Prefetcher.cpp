@@ -58,13 +58,14 @@ private:
     status_t mFinalStatus;
     int64_t mSeekTimeUs;
     int64_t mCacheDurationUs;
+    size_t mCacheSizeBytes;
     bool mPrefetcherStopped;
     bool mCurrentlyPrefetching;
 
     List<MediaBuffer *> mCachedBuffers;
 
     // Returns true iff source is currently caching.
-    bool getCacheDurationUs(int64_t *durationUs);
+    bool getCacheDurationUs(int64_t *durationUs, size_t *totalSize = NULL);
 
     void updateCacheDuration_l();
     void clearCache_l();
@@ -125,21 +126,31 @@ int Prefetcher::ThreadWrapper(void *me) {
     return 0;
 }
 
-// Cache about 10secs for each source.
-static int64_t kMaxCacheDurationUs = 10000000ll;
+// Cache at most 1 min for each source.
+static int64_t kMaxCacheDurationUs = 60 * 1000000ll;
+
+// At the same time cache at most 5MB per source.
+static size_t kMaxCacheSizeBytes = 5 * 1024 * 1024;
+
+// If the amount of cached data drops below this,
+// fill the cache up to the max duration again.
+static int64_t kLowWaterDurationUs = 5000000ll;
 
 void Prefetcher::threadFunc() {
+    bool fillingCache = false;
+
     for (;;) {
         sp<PrefetchedSource> minSource;
+        int64_t minCacheDurationUs = -1;
 
         {
             Mutex::Autolock autoLock(mLock);
             if (mDone) {
                 break;
             }
-            mCondition.waitRelative(mLock, 10000000ll);
+            mCondition.waitRelative(
+                    mLock, fillingCache ? 10000000ll : 1000000000ll);
 
-            int64_t minCacheDurationUs = -1;
             ssize_t minIndex = -1;
             for (size_t i = 0; i < mSources.size(); ++i) {
                 sp<PrefetchedSource> source = mSources[i].promote();
@@ -149,11 +160,18 @@ void Prefetcher::threadFunc() {
                 }
 
                 int64_t cacheDurationUs;
-                if (!source->getCacheDurationUs(&cacheDurationUs)) {
+                size_t cacheSizeBytes;
+                if (!source->getCacheDurationUs(&cacheDurationUs, &cacheSizeBytes)) {
                     continue;
                 }
 
-                if (cacheDurationUs >= kMaxCacheDurationUs) {
+                if (cacheSizeBytes > kMaxCacheSizeBytes) {
+                    LOGI("max cache size reached");
+                    continue;
+                }
+
+                if (mSources.size() > 1 && cacheDurationUs >= kMaxCacheDurationUs) {
+                    LOGI("max duration reached, size = %d bytes", cacheSizeBytes);
                     continue;
                 }
 
@@ -165,14 +183,26 @@ void Prefetcher::threadFunc() {
             }
 
             if (minIndex < 0) {
+                if (fillingCache) {
+                    LOGV("[%p] done filling the cache, above high water mark.",
+                         this);
+                    fillingCache = false;
+                }
                 continue;
             }
         }
 
-        // Make sure not to hold the lock while calling into the source.
-        // The lock guards the list of sources, not the individual sources
-        // themselves.
-        minSource->cacheMore();
+        if (!fillingCache && minCacheDurationUs < kLowWaterDurationUs) {
+            LOGI("[%p] cache below low water mark, filling cache.", this);
+            fillingCache = true;
+        }
+
+        if (fillingCache) {
+            // Make sure not to hold the lock while calling into the source.
+            // The lock guards the list of sources, not the individual sources
+            // themselves.
+            minSource->cacheMore();
+        }
     }
 
     Mutex::Autolock autoLock(mLock);
@@ -250,6 +280,7 @@ PrefetchedSource::PrefetchedSource(
       mReachedEOS(false),
       mSeekTimeUs(0),
       mCacheDurationUs(0),
+      mCacheSizeBytes(0),
       mPrefetcherStopped(false),
       mCurrentlyPrefetching(false) {
 }
@@ -323,6 +354,7 @@ status_t PrefetchedSource::read(
     *out = *mCachedBuffers.begin();
     mCachedBuffers.erase(mCachedBuffers.begin());
     updateCacheDuration_l();
+    mCacheSizeBytes -= (*out)->size();
 
     return OK;
 }
@@ -331,10 +363,14 @@ sp<MetaData> PrefetchedSource::getFormat() {
     return mSource->getFormat();
 }
 
-bool PrefetchedSource::getCacheDurationUs(int64_t *durationUs) {
+bool PrefetchedSource::getCacheDurationUs(
+        int64_t *durationUs, size_t *totalSize) {
     Mutex::Autolock autoLock(mLock);
 
     *durationUs = mCacheDurationUs;
+    if (totalSize != NULL) {
+        *totalSize = mCacheSizeBytes;
+    }
 
     if (!mStarted || mReachedEOS) {
         return false;
@@ -397,6 +433,7 @@ void PrefetchedSource::cacheMore() {
 
     mCachedBuffers.push_back(copy);
     updateCacheDuration_l();
+    mCacheSizeBytes += copy->size();
 
     mCurrentlyPrefetching = false;
     mCondition.signal();
@@ -425,6 +462,7 @@ void PrefetchedSource::clearCache_l() {
     }
 
     updateCacheDuration_l();
+    mCacheSizeBytes = 0;
 }
 
 void PrefetchedSource::onPrefetcherStopped() {
