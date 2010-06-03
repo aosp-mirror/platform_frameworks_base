@@ -244,26 +244,26 @@ public class SQLiteDatabase extends SQLiteClosable {
     private static int sBlockSize = 0;
 
     /** The path for the database file */
-    private String mPath;
+    private final String mPath;
 
     /** The anonymized path for the database file for logging purposes */
     private String mPathForLogs = null;  // lazily populated
 
     /** The flags passed to open/create */
-    private int mFlags;
+    private final int mFlags;
 
     /** The optional factory to use when creating new Cursors */
-    private CursorFactory mFactory;
+    private final CursorFactory mFactory;
 
     private WeakHashMap<SQLiteClosable, Object> mPrograms;
 
     /**
      * for each instance of this class, a LRU cache is maintained to store
      * the compiled query statement ids returned by sqlite database.
-     *     key = sql statement with "?" for bind args
+     *     key = SQL statement with "?" for bind args
      *     value = {@link SQLiteCompiledSql}
      * If an application opens the database and keeps it open during its entire life, then
-     * there will not be an overhead of compilation of sql statements by sqlite.
+     * there will not be an overhead of compilation of SQL statements by sqlite.
      *
      * why is this cache NOT static? because sqlite attaches compiledsql statements to the
      * struct created when {@link SQLiteDatabase#openDatabase(String, CursorFactory, int)} is
@@ -303,7 +303,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     /**
      * absolute max value that can be set by {@link #setMaxSqlCacheSize(int)}
      * size of each prepared-statement is between 1K - 6K, depending on the complexity of the
-     * sql statement & schema.
+     * SQL statement & schema.
      */
     public static final int MAX_SQL_CACHE_SIZE = 100;
     private int mCacheFullWarnings;
@@ -326,7 +326,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     /** {@link DatabaseErrorHandler} to be used when SQLite returns any of the following errors
      *    Corruption
      * */
-    private DatabaseErrorHandler errorHandler;
+    private DatabaseErrorHandler mErrorHandler;
 
     /**
      * @param closable
@@ -383,7 +383,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /* package */ void onCorruption() {
         EventLog.writeEvent(EVENT_DB_CORRUPT, mPath);
-        errorHandler.onCorruption(this);
+        mErrorHandler.onCorruption(this);
     }
 
     /**
@@ -481,11 +481,14 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Begins a transaction. Transactions can be nested. When the outer transaction is ended all of
+     * Begins a transaction in EXCLUSIVE mode.
+     * <p>
+     * Transactions can be nested.
+     * When the outer transaction is ended all of
      * the work done in that transaction and all of the nested transactions will be committed or
      * rolled back. The changes will be rolled back if any transaction is ended without being
      * marked as clean (by calling setTransactionSuccessful). Otherwise they will be committed.
-     *
+     * </p>
      * <p>Here is the standard idiom for transactions:
      *
      * <pre>
@@ -503,11 +506,14 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Begins a transaction. Transactions can be nested. When the outer transaction is ended all of
+     * Begins a transaction in EXCLUSIVE mode.
+     * <p>
+     * Transactions can be nested.
+     * When the outer transaction is ended all of
      * the work done in that transaction and all of the nested transactions will be committed or
      * rolled back. The changes will be rolled back if any transaction is ended without being
      * marked as clean (by calling setTransactionSuccessful). Otherwise they will be committed.
-     *
+     * </p>
      * <p>Here is the standard idiom for transactions:
      *
      * <pre>
@@ -519,15 +525,14 @@ public class SQLiteDatabase extends SQLiteClosable {
      *     db.endTransaction();
      *   }
      * </pre>
+     *
      * @param transactionListener listener that should be notified when the transaction begins,
      * commits, or is rolled back, either explicitly or by a call to
      * {@link #yieldIfContendedSafely}.
      */
     public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
+        verifyDbIsOpen();
         lockForced();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         boolean ok = false;
         try {
             // If this thread already had the lock then get out
@@ -572,12 +577,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * are committed and rolled back.
      */
     public void endTransaction() {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
-        if (!mLock.isHeldByCurrentThread()) {
-            throw new IllegalStateException("no transaction pending");
-        }
+        verifyLockOwner();
         try {
             if (mInnerTransactionIsSuccessful) {
                 mInnerTransactionIsSuccessful = false;
@@ -635,9 +635,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * transaction is already marked as successful.
      */
     public void setTransactionSuccessful() {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
+        verifyDbIsOpen();
         if (!mLock.isHeldByCurrentThread()) {
             throw new IllegalStateException("no transaction pending");
         }
@@ -849,7 +847,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         SQLiteDatabase sqliteDatabase = new SQLiteDatabase(path, factory, flags);
 
         // set the ErrorHandler to be used when SQLite reports exceptions
-        sqliteDatabase.errorHandler = errorHandler;
+        sqliteDatabase.mErrorHandler = errorHandler;
 
         try {
             // Open the database.
@@ -874,8 +872,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         sqliteDatabase.setPageSize(sBlockSize);
 
-        ActiveDatabases.getInstance().mActiveDatabases.add(
-                new WeakReference<SQLiteDatabase>(sqliteDatabase));
+        // add this database to the list of databases opened in this process
+        ActiveDatabases.addActiveDatabase(sqliteDatabase);
         return sqliteDatabase;
     }
 
@@ -952,7 +950,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     private void closeClosable() {
-        /* deallocate all compiled sql statement objects from mCompiledQueries cache.
+        /* deallocate all compiled SQL statement objects from mCompiledQueries cache.
          * this should be done before de-referencing all {@link SQLiteClosable} objects
          * from this database object because calling
          * {@link SQLiteClosable#onAllReferencesReleasedFromContainer()} could cause the database
@@ -982,19 +980,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the database version
      */
     public int getVersion() {
-        SQLiteStatement prog = null;
-        lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
-        try {
-            prog = new SQLiteStatement(this, "PRAGMA user_version;");
-            long version = prog.simpleQueryForLong();
-            return (int) version;
-        } finally {
-            if (prog != null) prog.close();
-            unlock();
-        }
+        return ((Long) DatabaseUtils.longForQuery(this, "PRAGMA user_version;", null)).intValue();
     }
 
     /**
@@ -1012,20 +998,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the new maximum database size
      */
     public long getMaximumSize() {
-        SQLiteStatement prog = null;
-        lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
-        try {
-            prog = new SQLiteStatement(this,
-                    "PRAGMA max_page_count;");
-            long pageCount = prog.simpleQueryForLong();
-            return pageCount * getPageSize();
-        } finally {
-            if (prog != null) prog.close();
-            unlock();
-        }
+        long pageCount = DatabaseUtils.longForQuery(this, "PRAGMA max_page_count;", null);
+        return pageCount * getPageSize();
     }
 
     /**
@@ -1036,26 +1010,15 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the new maximum database size
      */
     public long setMaximumSize(long numBytes) {
-        SQLiteStatement prog = null;
-        lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
+        long pageSize = getPageSize();
+        long numPages = numBytes / pageSize;
+        // If numBytes isn't a multiple of pageSize, bump up a page
+        if ((numBytes % pageSize) != 0) {
+            numPages++;
         }
-        try {
-            long pageSize = getPageSize();
-            long numPages = numBytes / pageSize;
-            // If numBytes isn't a multiple of pageSize, bump up a page
-            if ((numBytes % pageSize) != 0) {
-                numPages++;
-            }
-            prog = new SQLiteStatement(this,
-                    "PRAGMA max_page_count = " + numPages);
-            long newPageCount = prog.simpleQueryForLong();
-            return newPageCount * pageSize;
-        } finally {
-            if (prog != null) prog.close();
-            unlock();
-        }
+        long newPageCount = DatabaseUtils.longForQuery(this, "PRAGMA max_page_count = " + numPages,
+                null);
+        return newPageCount * pageSize;
     }
 
     /**
@@ -1064,20 +1027,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the database page size, in bytes
      */
     public long getPageSize() {
-        SQLiteStatement prog = null;
-        lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
-        try {
-            prog = new SQLiteStatement(this,
-                    "PRAGMA page_size;");
-            long size = prog.simpleQueryForLong();
-            return size;
-        } finally {
-            if (prog != null) prog.close();
-            unlock();
-        }
+        return DatabaseUtils.longForQuery(this, "PRAGMA page_size;", null);
     }
 
     /**
@@ -1165,7 +1115,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (info != null) {
             execSQL("UPDATE " + info.masterTable
                     + " SET _sync_dirty=1 WHERE _id=(SELECT " + info.foreignKey
-                    + " FROM " + table + " WHERE _id=" + rowId + ")");
+                    + " FROM " + table + " WHERE _id=?)", new String[] {String.valueOf(rowId)});
         }
     }
 
@@ -1205,10 +1155,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      * {@link SQLiteStatement}s are not synchronized, see the documentation for more details.
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
+        verifyDbIsOpen();
         lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         try {
             return new SQLiteStatement(this, sql);
         } finally {
@@ -1290,9 +1238,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             boolean distinct, String table, String[] columns,
             String selection, String[] selectionArgs, String groupBy,
             String having, String orderBy, String limit) {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
+        verifyDbIsOpen();
         String sql = SQLiteQueryBuilder.buildQueryString(
                 distinct, table, columns, selection, groupBy, having, orderBy, limit);
 
@@ -1403,9 +1349,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     public Cursor rawQueryWithFactory(
             CursorFactory cursorFactory, String sql, String[] selectionArgs,
             String editTable) {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
+        verifyDbIsOpen();
         long timeStart = 0;
 
         if (Config.LOGV || mSlowQueryThreshold != -1) {
@@ -1564,9 +1508,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
             ContentValues initialValues, int conflictAlgorithm) {
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
+        verifyDbIsOpen();
 
         // Measurements show most sql lengths <= 152
         StringBuilder sql = new StringBuilder(152);
@@ -1655,10 +1597,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      *         whereClause.
      */
     public int delete(String table, String whereClause, String[] whereArgs) {
+        verifyDbIsOpen();
         lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         SQLiteStatement statement = null;
         try {
             statement = compileStatement("DELETE FROM " + table
@@ -1737,10 +1677,8 @@ public class SQLiteDatabase extends SQLiteClosable {
             sql.append(whereClause);
         }
 
+        verifyDbIsOpen();
         lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql.toString());
@@ -1785,18 +1723,24 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Execute a single SQL statement that is not a query. For example, CREATE
-     * TABLE, DELETE, INSERT, etc. Multiple statements separated by ;s are not
-     * supported. it takes a write lock
+     * Execute a single SQL statement that is NOT a SELECT
+     * or any other SQL statement that returns data.
+     * <p>
+     * Use of this method is discouraged as it doesn't perform well when issuing the same SQL
+     * statement repeatedly (see {@link #compileStatement(String)} to prepare statements for
+     * repeated use), and it has no means to return any data (such as the number of affected rows).
+     * Instead, you're encouraged to use {@link #insert(String, String, ContentValues)},
+     * {@link #update(String, ContentValues, String, String[])}, et al, when possible.
+     * </p>
      *
+     * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
+     * not supported.
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
+        verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
         lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
         try {
             closePendingStatements();
@@ -1819,11 +1763,39 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Execute a single SQL statement that is not a query. For example, CREATE
-     * TABLE, DELETE, INSERT, etc. Multiple statements separated by ;s are not
-     * supported. it takes a write lock,
+     * Execute a single SQL statement that is NOT a SELECT/INSERT/UPDATE/DELETE.
+     * <p>
+     * For INSERT statements, use any of the following instead.
+     * <ul>
+     *   <li>{@link #insert(String, String, ContentValues)}</li>
+     *   <li>{@link #insertOrThrow(String, String, ContentValues)}</li>
+     *   <li>{@link #insertWithOnConflict(String, String, ContentValues, int)}</li>
+     * </ul>
+     * <p>
+     * For UPDATE statements, use any of the following instead.
+     * <ul>
+     *   <li>{@link #update(String, ContentValues, String, String[])}</li>
+     *   <li>{@link #updateWithOnConflict(String, ContentValues, String, String[], int)}</li>
+     * </ul>
+     * <p>
+     * For DELETE statements, use any of the following instead.
+     * <ul>
+     *   <li>{@link #delete(String, String, String[])}</li>
+     * </ul>
+     * <p>
+     * For example, the following are good candidates for using this method:
+     * <ul>
+     *   <li>ALTER TABLE</li>
+     *   <li>CREATE or DROP table / trigger / view / index / virtual table</li>
+     *   <li>REINDEX</li>
+     *   <li>RELEASE</li>
+     *   <li>SAVEPOINT</li>
+     *   <li>PRAGMA that returns no data</li>
+     * </ul>
+     * </p>
      *
-     * @param sql
+     * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
+     * not supported.
      * @param bindArgs only byte[], String, Long and Double are supported in bindArgs.
      * @throws SQLException If the SQL string is invalid for some reason
      */
@@ -1831,11 +1803,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
+        verifyDbIsOpen();
         long timeStart = SystemClock.uptimeMillis();
         lock();
-        if (!isOpen()) {
-            throw new IllegalStateException("database not open");
-        }
         SQLiteStatement statement = null;
         try {
             statement = compileStatement(sql);
@@ -2011,11 +1981,15 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
-    /* package */ void verifyLockOwner() {
+    /* package */ void verifyDbIsOpen() {
         if (!isOpen()) {
             throw new IllegalStateException("database " + getPath() + " already closed");
         }
-        if (!isDbLockedByCurrentThread() && mLockingEnabled) {
+    }
+
+    /* package */ void verifyLockOwner() {
+        verifyDbIsOpen();
+        if (mLockingEnabled && !isDbLockedByCurrentThread()) {
             throw new IllegalStateException("Don't have database lock!");
         }
     }
@@ -2027,10 +2001,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * ============================================================================
      */
     /**
-     * adds the given sql and its compiled-statement-id-returned-by-sqlite to the
+     * Adds the given SQL and its compiled-statement-id-returned-by-sqlite to the
      * cache of compiledQueries attached to 'this'.
-     *
-     * if there is already a {@link SQLiteCompiledSql} in compiledQueries for the given sql,
+     * <p>
+     * If there is already a {@link SQLiteCompiledSql} in compiledQueries for the given SQL,
      * the new {@link SQLiteCompiledSql} object is NOT inserted into the cache (i.e.,the current
      * mapping is NOT replaced with the new mapping).
      */
@@ -2076,8 +2050,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * from the compiledQueries cache, returns the compiled-statement-id for the given sql.
-     * returns null, if not found in the cache.
+     * From the compiledQueries cache, returns the compiled-statement-id for the given SQL.
+     * Returns null, if not found in the cache.
      */
     /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
         SQLiteCompiledSql compiledStatement = null;
@@ -2101,14 +2075,15 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * set the max size of the prepared-statement cache for this database.
+     * Sets the maximum size of the prepared-statement cache for this database.
      * (size of the cache = number of compiled-sql-statements stored in the cache).
+     *<p>
+     * Maximum cache size can ONLY be increased from its current size (default = 10).
+     * If this method is called with smaller size than the current maximum value,
+     * then IllegalStateException is thrown.
+     *<p>
+     * This method is thread-safe.
      *
-     * max cache size can ONLY be increased from its current size (default = 10).
-     * if this method is called with smaller size than the current value of mMaxSqlCacheSize,
-     * then IllegalStateException is thrown
-     *
-     * synchronized because we don't want t threads to change cache size at the same time.
      * @param cacheSize the size of the cache. can be (0 to {@link #MAX_SQL_CACHE_SIZE})
      * @throws IllegalStateException if input cacheSize > {@link #MAX_SQL_CACHE_SIZE} or
      * > the value set with previous setMaxSqlCacheSize() call.
@@ -2172,9 +2147,14 @@ public class SQLiteDatabase extends SQLiteClosable {
     static class ActiveDatabases {
         private static final ActiveDatabases activeDatabases = new ActiveDatabases();
         private HashSet<WeakReference<SQLiteDatabase>> mActiveDatabases =
-            new HashSet<WeakReference<SQLiteDatabase>>();
+                new HashSet<WeakReference<SQLiteDatabase>>();
         private ActiveDatabases() {} // disable instantiation of this class
-        static ActiveDatabases getInstance() {return activeDatabases;}
+        static ActiveDatabases getInstance() {
+            return activeDatabases;
+        }
+        private static void addActiveDatabase(SQLiteDatabase sqliteDatabase) {
+            activeDatabases.mActiveDatabases.add(new WeakReference<SQLiteDatabase>(sqliteDatabase));
+        }
     }
 
     /**
@@ -2188,70 +2168,59 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (db == null || !db.isOpen()) {
                 continue;
             }
-            // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
-            int lookasideUsed = db.native_getDbLookaside();
 
-            // get the lastnode of the dbname
-            String path = db.getPath();
-            int indx = path.lastIndexOf("/");
-            String lastnode = path.substring((indx != -1) ? ++indx : 0);
+            try {
+                // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
+                int lookasideUsed = db.native_getDbLookaside();
 
-            // get list of attached dbs and for each db, get its size and pagesize
-            ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
-            if (attachedDbs == null) {
-                continue;
-            }
-            for (int i = 0; i < attachedDbs.size(); i++) {
-                Pair<String, String> p = attachedDbs.get(i);
-                long pageCount = getPragmaVal(db, p.first + ".page_count;");
+                // get the lastnode of the dbname
+                String path = db.getPath();
+                int indx = path.lastIndexOf("/");
+                String lastnode = path.substring((indx != -1) ? ++indx : 0);
 
-                // first entry in the attached db list is always the main database
-                // don't worry about prefixing the dbname with "main"
-                String dbName;
-                if (i == 0) {
-                    dbName = lastnode;
-                } else {
-                    // lookaside is only relevant for the main db
-                    lookasideUsed = 0;
-                    dbName = "  (attached) " + p.first;
-                    // if the attached db has a path, attach the lastnode from the path to above
-                    if (p.second.trim().length() > 0) {
-                        int idx = p.second.lastIndexOf("/");
-                        dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+                // get list of attached dbs and for each db, get its size and pagesize
+                ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
+                if (attachedDbs == null) {
+                    continue;
+                }
+                for (int i = 0; i < attachedDbs.size(); i++) {
+                    Pair<String, String> p = attachedDbs.get(i);
+                    long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
+                            + ".page_count;", null);
+
+                    // first entry in the attached db list is always the main database
+                    // don't worry about prefixing the dbname with "main"
+                    String dbName;
+                    if (i == 0) {
+                        dbName = lastnode;
+                    } else {
+                        // lookaside is only relevant for the main db
+                        lookasideUsed = 0;
+                        dbName = "  (attached) " + p.first;
+                        // if the attached db has a path, attach the lastnode from the path to above
+                        if (p.second.trim().length() > 0) {
+                            int idx = p.second.lastIndexOf("/");
+                            dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+                        }
+                    }
+                    if (pageCount > 0) {
+                        dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
+                                lookasideUsed, db.mNumCacheHits, db.mNumCacheMisses,
+                                db.mCompiledQueries.size()));
                     }
                 }
-                if (pageCount > 0) {
-                    dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
-                            lookasideUsed, db.mNumCacheHits, db.mNumCacheMisses,
-                            db.mCompiledQueries.size()));
-                }
+            } catch (SQLiteException e) {
+                // ignore. we don't care about exceptions when we are taking adb
+                // bugreport!
             }
         }
         return dbStatsList;
     }
 
     /**
-     * get the specified pragma value from sqlite for the specified database.
-     * only handles pragma's that return int/long.
-     * NO JAVA locks are held in this method.
-     * TODO: use this to do all pragma's in this class
-     */
-    private static long getPragmaVal(SQLiteDatabase db, String pragma) {
-        if (!db.isOpen()) {
-            return 0;
-        }
-        SQLiteStatement prog = null;
-        try {
-            prog = new SQLiteStatement(db, "PRAGMA " + pragma);
-            long val = prog.simpleQueryForLong();
-            return val;
-        } finally {
-            if (prog != null) prog.close();
-        }
-    }
-
-    /**
-     * returns list of full pathnames of all attached databases including the main database
+     * Returns list of full pathnames of all attached databases including the main database
+     * by executing 'pragma database_list' on the database.
+     *
      * @return ArrayList of pairs of (database name, database file path) or null if the database
      * is not open.
      */
@@ -2280,20 +2249,20 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * run pragma integrity_check on the given database (and all the attached databases)
-     * and return true if the given database (and all its attached databases) pass integrity_check,
+     * Runs 'pragma integrity_check' on the given database (and all the attached databases)
+     * and returns true if the given database (and all its attached databases) pass integrity_check,
      * false otherwise.
-     *
-     * if the result is false, then this method logs the errors reported by the integrity_check
+     *<p>
+     * If the result is false, then this method logs the errors reported by the integrity_check
      * command execution.
+     *<p>
+     * Note that 'pragma integrity_check' on a database can take a long time.
      *
      * @return true if the given database (and all its attached databases) pass integrity_check,
-     * false otherwise
+     * false otherwise.
      */
     public boolean isDatabaseIntegrityOk() {
-        if (!isOpen()) {
-            throw new IllegalStateException("database: " + getPath() + " is NOT open");
-        }
+        verifyDbIsOpen();
         ArrayList<Pair<String, String>> attachedDbs = getAttachedDbs();
         if (attachedDbs == null) {
             throw new IllegalStateException("databaselist for: " + getPath() + " couldn't " +
@@ -2326,16 +2295,16 @@ public class SQLiteDatabase extends SQLiteClosable {
     private native void dbopen(String path, int flags);
 
     /**
-     * Native call to setup tracing of all sql statements
+     * Native call to setup tracing of all SQL statements
      *
      * @param path the full path to the database
      */
     private native void enableSqlTracing(String path);
 
     /**
-     * Native call to setup profiling of all sql statements.
+     * Native call to setup profiling of all SQL statements.
      * currently, sqlite's profiling = printing of execution-time
-     * (wall-clock time) of each of the sql statements, as they
+     * (wall-clock time) of each of the SQL statements, as they
      * are executed.
      *
      * @param path the full path to the database
