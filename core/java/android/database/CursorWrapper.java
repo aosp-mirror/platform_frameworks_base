@@ -130,6 +130,10 @@ public class CursorWrapper implements Cursor {
         return mCursor.isLast();
     }
 
+    public int getType(int columnIndex) {
+        return mCursor.getType(columnIndex);
+    }
+
     public boolean isNull(int columnIndex) {
         return mCursor.isNull(columnIndex);
     }

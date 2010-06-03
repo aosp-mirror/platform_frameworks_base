@@ -652,6 +652,22 @@ static void freeLastRow(JNIEnv * env, jobject object) {
     window->freeLastRow();
 }
 
+static jint getType_native(JNIEnv* env, jobject object, jint row, jint column)
+{
+    int32_t err;
+    CursorWindow * window = GET_WINDOW(env, object);
+    LOG_WINDOW("returning column type affinity for %d,%d from %p", row, column, window);
+
+    field_slot_t field;
+    err = window->read_field_slot(row, column, &field);
+    if (err != 0) {
+        throwExceptionWithRowCol(env, row, column);
+        return NULL;
+    }
+
+    return field.type;
+}
+
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
@@ -679,6 +695,7 @@ static JNINativeMethod sMethods[] =
     {"isString_native", "(II)Z", (void *)isString_native},
     {"isFloat_native", "(II)Z", (void *)isFloat_native},
     {"isInteger_native", "(II)Z", (void *)isInteger_native},
+    {"getType_native", "(II)I", (void *)getType_native},
 };
 
 int register_android_database_CursorWindow(JNIEnv * env)

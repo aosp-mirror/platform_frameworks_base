@@ -149,63 +149,36 @@ public abstract class AbstractWindowedCursor extends AbstractCursor
             }
         }
 
-        return mWindow.isNull(mPos, columnIndex);
+        return mWindow.getType(mPos, columnIndex) == Cursor.FIELD_TYPE_NULL;
     }
 
-    public boolean isBlob(int columnIndex)
+    public boolean isBlob(int columnIndex) {
+        return getType(columnIndex) == Cursor.FIELD_TYPE_BLOB;
+    }
+
+    public boolean isString(int columnIndex) {
+        return getType(columnIndex) == Cursor.FIELD_TYPE_STRING;
+    }
+
+    public boolean isLong(int columnIndex) {
+        return getType(columnIndex) == Cursor.FIELD_TYPE_INTEGER;
+    }
+
+    public boolean isFloat(int columnIndex) {
+        return getType(columnIndex) == Cursor.FIELD_TYPE_FLOAT;
+    }
+
+    @Override
+    public int getType(int columnIndex)
     {
         checkPosition();
-
         synchronized(mUpdatedRows) {
             if (isFieldUpdated(columnIndex)) {
-                Object object = getUpdatedField(columnIndex);
-                return object == null || object instanceof byte[];
+                return DatabaseUtils.getTypeOfObject(getUpdatedField(columnIndex));
             }
         }
 
-        return mWindow.isBlob(mPos, columnIndex);
-    }
-
-    public boolean isString(int columnIndex)
-    {
-        checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Object object = getUpdatedField(columnIndex);
-                return object == null || object instanceof String;
-            }
-        }
-
-        return mWindow.isString(mPos, columnIndex);
-    }
-
-    public boolean isLong(int columnIndex)
-    {
-        checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Object object = getUpdatedField(columnIndex);
-                return object != null && (object instanceof Integer || object instanceof Long);
-            }
-        }
-
-        return mWindow.isLong(mPos, columnIndex);
-    }
-
-    public boolean isFloat(int columnIndex)
-    {
-        checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Object object = getUpdatedField(columnIndex);
-                return object != null && (object instanceof Float || object instanceof Double);
-            }
-        }
-
-        return mWindow.isFloat(mPos, columnIndex);
+        return mWindow.getType(mPos, columnIndex);
     }
 
     @Override

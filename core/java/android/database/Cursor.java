@@ -30,6 +30,25 @@ import java.util.Map;
  * threads should perform its own synchronization when using the Cursor.
  */
 public interface Cursor {
+    /*
+     * Values returned by {@link #getType(int)}.
+     * These should be consistent with the corresponding types defined in CursorWindow.h
+     */
+    /** Value returned by {@link #getType(int)} if the specified column is null */
+    static final int FIELD_TYPE_NULL = 0;
+
+    /** Value returned by {@link #getType(int)} if the specified  column type is integer */
+    static final int FIELD_TYPE_INTEGER = 1;
+
+    /** Value returned by {@link #getType(int)} if the specified column type is float */
+    static final int FIELD_TYPE_FLOAT = 2;
+
+    /** Value returned by {@link #getType(int)} if the specified column type is string */
+    static final int FIELD_TYPE_STRING = 3;
+
+    /** Value returned by {@link #getType(int)} if the specified column type is blob */
+    static final int FIELD_TYPE_BLOB = 4;
+
     /**
      * Returns the numbers of rows in the cursor.
      *
@@ -277,6 +296,27 @@ public interface Cursor {
      * @return the value of that column as a double.
      */
     double getDouble(int columnIndex);
+
+    /**
+     * Returns data type of the given column's value.
+     * The preferred type of the column is returned but the data may be converted to other types
+     * as documented in the get-type methods such as {@link #getInt(int)}, {@link #getFloat(int)}
+     * etc.
+     *<p>
+     * Returned column types are
+     * <ul>
+     *   <li>{@link #FIELD_TYPE_NULL}</li>
+     *   <li>{@link #FIELD_TYPE_INTEGER}</li>
+     *   <li>{@link #FIELD_TYPE_FLOAT}</li>
+     *   <li>{@link #FIELD_TYPE_STRING}</li>
+     *   <li>{@link #FIELD_TYPE_BLOB}</li>
+     *</ul>
+     *</p>
+     *
+     * @param columnIndex the zero-based index of the target column.
+     * @return column value type
+     */
+    int getType(int columnIndex);
 
     /**
      * Returns <code>true</code> if the value in the indicated column is null.

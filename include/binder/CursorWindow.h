@@ -1,16 +1,16 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0 
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -80,11 +80,11 @@ typedef struct
     } data;
 } __attribute__((packed)) field_slot_t;
 
+#define FIELD_TYPE_NULL 0
 #define FIELD_TYPE_INTEGER 1
 #define FIELD_TYPE_FLOAT 2
 #define FIELD_TYPE_STRING 3
 #define FIELD_TYPE_BLOB 4
-#define FIELD_TYPE_NULL 5
 
 /**
  * This class stores a set of rows from a database in a buffer. The begining of the
@@ -170,7 +170,7 @@ public:
     row_slot_t *        allocRowSlot();
 
     row_slot_t *        getRowSlot(int row);
-    
+
                         /**
                          * return NULL if Failed to find rowSlot or
                          * Invalid rowSlot

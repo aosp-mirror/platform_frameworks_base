@@ -191,4 +191,8 @@ public class MockCursor implements Cursor {
     public void unregisterDataSetObserver(DataSetObserver observer) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
+
+    public int getType(int columnIndex) {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
 }
