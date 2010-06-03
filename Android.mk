@@ -86,8 +86,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ISearchManager.aidl \
 	core/java/android/app/ISearchManagerCallback.aidl \
 	core/java/android/app/IServiceConnection.aidl \
-	core/java/android/app/IStatusBar.aidl \
-	core/java/android/app/IStatusBarService.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IUiModeManager.aidl \
@@ -156,6 +154,8 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
 	core/java/com/android/internal/os/IDropBoxManagerService.aidl \
 	core/java/com/android/internal/os/IResultReceiver.aidl \
+	core/java/com/android/internal/statusbar/IStatusBar.aidl \
+	core/java/com/android/internal/statusbar/IStatusBarService.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
 	core/java/com/android/internal/view/IInputMethod.aidl \

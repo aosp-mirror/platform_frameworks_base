@@ -145,8 +145,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private Context mContext;
     private AlarmManager mAlarmManager;
     private StatusBarManager mStatusBarManager;
-    private boolean mShowLockIcon = false;
-    private IBinder mSecureLockIcon = null;
+    private boolean mShowLockIcon;
+    private boolean mShowingLockIcon;
 
     private boolean mSystemReady;
 
@@ -1036,14 +1036,15 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (mShowLockIcon) {
                 // Give feedback to user when secure keyguard is active and engaged
                 if (mShowing && isSecure()) {
-                    if (mSecureLockIcon == null) {
-                        mSecureLockIcon = mStatusBarManager.addIcon("secure",
-                            com.android.internal.R.drawable.stat_sys_secure, 0);
+                    if (!mShowingLockIcon) {
+                        mStatusBarManager.setIcon("secure",
+                                com.android.internal.R.drawable.stat_sys_secure, 0);
+                        mShowingLockIcon = true;
                     }
                 } else {
-                    if (mSecureLockIcon != null) {
-                        mStatusBarManager.removeIcon(mSecureLockIcon);
-                        mSecureLockIcon = null;
+                    if (mShowingLockIcon) {
+                        mStatusBarManager.removeIcon("secure");
+                        mShowingLockIcon = false;
                     }
                 }
             }

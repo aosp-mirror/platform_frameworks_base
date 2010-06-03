@@ -26,7 +26,6 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
-import com.android.server.status.IconData;
 import com.android.server.status.StatusBarManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -111,8 +110,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final Handler mHandler;
     final SettingsObserver mSettingsObserver;
     final StatusBarManagerService mStatusBar;
-    final IBinder mInputMethodIcon;
-    final IconData mInputMethodData;
     final IWindowManager mIWindowManager;
     final HandlerCaller mCaller;
 
@@ -510,9 +507,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mStatusBar = statusBar;
-        mInputMethodData = IconData.makeIcon("ime", null, 0, 0, 0);
-        mInputMethodIcon = statusBar.addIcon(mInputMethodData, null);
-        statusBar.setIconVisibility(mInputMethodIcon, false);
+        statusBar.setIconVisibility("ime", false);
 
         mSettingsObserver = new SettingsObserver(mHandler);
         updateFromSettingsLocked();
@@ -914,7 +909,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mEnabledSession = null;
             mCurMethod = null;
         }
-        mStatusBar.setIconVisibility(mInputMethodIcon, false);
+        mStatusBar.setIconVisibility("ime", false);
     }
 
     public void onServiceDisconnected(ComponentName name) {
@@ -948,13 +943,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
-                    mStatusBar.setIconVisibility(mInputMethodIcon, false);
+                    mStatusBar.setIconVisibility("ime", false);
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
-                    mInputMethodData.iconId = iconId;
-                    mInputMethodData.iconPackage = packageName;
-                    mStatusBar.updateIcon(mInputMethodIcon, mInputMethodData, null);
-                    mStatusBar.setIconVisibility(mInputMethodIcon, true);
+                    mStatusBar.setIcon("ime", packageName, iconId, 0);
+                    mStatusBar.setIconVisibility("ime", true);
                 }
             }
         } finally {
@@ -1736,8 +1729,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("    sessionRequested=" + ci.sessionRequested);
                 p.println("    curSession=" + ci.curSession);
             }
-            p.println("  mInputMethodIcon=" + mInputMethodIcon);
-            p.println("  mInputMethodData=" + mInputMethodData);
             p.println("  mCurMethodId=" + mCurMethodId);
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);

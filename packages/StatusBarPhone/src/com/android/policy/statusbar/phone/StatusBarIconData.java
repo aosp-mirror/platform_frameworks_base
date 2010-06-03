@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -31,7 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class StatusBarIcon {
+public class StatusBarIconData {
     // TODO: get this from a resource
     private static final int ICON_GAP = 8;
     private static final int ICON_WIDTH = 25;
@@ -45,17 +45,20 @@ public class StatusBarIcon {
     private AnimatedImageView mImageView;
     private TextView mNumberView;
 
-    public StatusBarIcon(Context context, IconData data, ViewGroup parent) {
+    public StatusBarIconData(Context context, IconData data, ViewGroup parent) {
         mData = data.clone();
 
         switch (data.type) {
             case IconData.TEXT: {
                 TextView t;
-                t = new TextView(context, null, com.android.internal.R.style.TextAppearance_StatusBar_Icon);
+                t = new TextView(context);
                 mTextView = t;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.MATCH_PARENT);
+                t.setTextSize(16);
+                t.setTextColor(0xff000000);
+                t.setTypeface(Typeface.DEFAULT_BOLD);
                 t.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 t.setPadding(6, 0, 0, 0);
                 t.setLayoutParams(layoutParams);
@@ -68,17 +71,17 @@ public class StatusBarIcon {
                 // container
                 LayoutInflater inflater = (LayoutInflater)context.getSystemService(
                                                 Context.LAYOUT_INFLATER_SERVICE);
-                View v = inflater.inflate(com.android.internal.R.layout.status_bar_icon, parent, false);
+                View v = inflater.inflate(R.layout.status_bar_icon, parent, false);
                 this.view = v;
 
                 // icon
-                AnimatedImageView im = (AnimatedImageView)v.findViewById(com.android.internal.R.id.image);
+                AnimatedImageView im = (AnimatedImageView)v.findViewById(R.id.image);
                 im.setImageDrawable(getIcon(context, data));
                 im.setImageLevel(data.iconLevel);
                 mImageView = im;
 
                 // number
-                TextView nv = (TextView)v.findViewById(com.android.internal.R.id.number);
+                TextView nv = (TextView)v.findViewById(R.id.number);
                 mNumberView = nv;
                 if (data.number > 0) {
                     nv.setText("" + data.number);
@@ -153,7 +156,7 @@ public class StatusBarIcon {
             try {
                 r = context.getPackageManager().getResourcesForApplication(data.iconPackage);
             } catch (PackageManager.NameNotFoundException ex) {
-                Slog.e(StatusBarManagerService.TAG, "Icon package not found: " + data.iconPackage, ex);
+                Slog.e(PhoneStatusBarService.TAG, "Icon package not found: " + data.iconPackage, ex);
                 return null;
             }
         } else {
@@ -161,14 +164,14 @@ public class StatusBarIcon {
         }
 
         if (data.iconId == 0) {
-            Slog.w(StatusBarManagerService.TAG, "No icon ID for slot " + data.slot);
+            Slog.w(PhoneStatusBarService.TAG, "No icon ID for slot " + data.slot);
             return null;
         }
         
         try {
             return r.getDrawable(data.iconId);
         } catch (RuntimeException e) {
-            Slog.w(StatusBarManagerService.TAG, "Icon not found in "
+            Slog.w(PhoneStatusBarService.TAG, "Icon not found in "
                   + (data.iconPackage != null ? data.iconId : "<system>")
                   + ": " + Integer.toHexString(data.iconId));
         }

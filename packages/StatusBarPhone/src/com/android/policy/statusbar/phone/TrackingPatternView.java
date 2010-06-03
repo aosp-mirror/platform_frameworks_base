@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
 import android.content.Context;
 import android.content.res.TypedArray;

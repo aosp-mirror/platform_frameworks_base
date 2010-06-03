@@ -17,11 +17,12 @@
 package com.android.policy.statusbar.phone;
 
 import com.android.internal.util.CharSequences;
+import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.StatusBarIcon;
 
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
-import android.app.IStatusBar;
-import android.app.IStatusBarService;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.StatusBarManager;
@@ -82,22 +83,6 @@ public class PhoneStatusBarService extends StatusBarService {
     private static final int MSG_ANIMATE = 1000;
     private static final int MSG_ANIMATE_REVEAL = 1001;
 
-    private static final int OP_ADD_ICON = 1;
-    private static final int OP_UPDATE_ICON = 2;
-    private static final int OP_REMOVE_ICON = 3;
-    private static final int OP_SET_VISIBLE = 4;
-    private static final int OP_EXPAND = 5;
-    private static final int OP_TOGGLE = 6;
-    private static final int OP_DISABLE = 7;
-    private class PendingOp {
-        IBinder key;
-        int code;
-        IconData iconData;
-        NotificationData notificationData;
-        boolean visible;
-        int integer;
-    }
-
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
         int what;
@@ -136,12 +121,14 @@ public class PhoneStatusBarService extends StatusBarService {
         }
     }
     
-    final Display mDisplay;
+    int mHeight;
+    int mIconWidth;
+
+    Display mDisplay;
     StatusBarView mStatusBarView;
     int mPixelFormat;
     H mHandler = new H();
     Object mQueueLock = new Object();
-    ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
     NotificationCallbacks mNotificationCallbacks;
     
     // All accesses to mIconMap and mNotificationData are syncronized on those objects,
@@ -150,14 +137,13 @@ public class PhoneStatusBarService extends StatusBarService {
     // reads and require them to not be modified.
 
     // icons
-    HashMap<IBinder,StatusBarIcon> mIconMap = new HashMap<IBinder,StatusBarIcon>();
-    ArrayList<StatusBarIcon> mIconList = new ArrayList<StatusBarIcon>();
+    HashMap<IBinder,StatusBarIconData> mIconMap = new HashMap<IBinder,StatusBarIconData>();
+    ArrayList<StatusBarIconData> mIconList = new ArrayList<StatusBarIconData>();
     String[] mRightIconSlots;
-    StatusBarIcon[] mRightIcons;
+    StatusBarIconData[] mRightIcons;
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
     LinearLayout mStatusIcons;
-    StatusBarIcon mMoreIcon;
     private UninstallReceiver mUninstallReceiver;
 
     // expanded notifications
@@ -219,11 +205,15 @@ public class PhoneStatusBarService extends StatusBarService {
     /**
      * Construct the service, add the status bar view to the window manager
      */
-    public PhoneStatusBarService(Context context) {
-        mDisplay = ((WindowManager)context.getSystemService(
-                Context.WINDOW_SERVICE)).getDefaultDisplay();
-        makeStatusBarView(context);
+    @Override
+    public void onCreate() {
+        // First set up our views and stuff.
+        mDisplay = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        makeStatusBarView(this);
         mUninstallReceiver = new UninstallReceiver();
+
+        // Next, call super.onCreate(), which will populate our views.
+        super.onCreate();
     }
 
     public void setNotificationCallbacks(NotificationCallbacks listener) {
@@ -236,10 +226,13 @@ public class PhoneStatusBarService extends StatusBarService {
     private void makeStatusBarView(Context context) {
         Resources res = context.getResources();
         mRightIconSlots = res.getStringArray(R.array.status_bar_icon_order);
-        mRightIcons = new StatusBarIcon[mRightIconSlots.length];
+        mRightIcons = new StatusBarIconData[mRightIconSlots.length];
+
+        mHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mIconWidth = mHeight;
 
         ExpandedView expanded = (ExpandedView)View.inflate(context,
-                com.android.internal.R.layout.status_bar_expanded, null);
+                R.layout.status_bar_expanded, null);
         expanded.mService = this;
         StatusBarView sb = (StatusBarView)View.inflate(context, R.layout.status_bar, null);
         sb.mService = this;
@@ -282,21 +275,12 @@ public class PhoneStatusBarService extends StatusBarService {
         TickerView tickerView = (TickerView)sb.findViewById(R.id.tickerText);
         tickerView.mTicker = mTicker;
 
-        mTrackingView = (TrackingView)View.inflate(context,
-                com.android.internal.R.layout.status_bar_tracking, null);
+        mTrackingView = (TrackingView)View.inflate(context, R.layout.status_bar_tracking, null);
         mTrackingView.mService = this;
         mCloseView = (CloseDragHandle)mTrackingView.findViewById(R.id.close);
         mCloseView.mService = this;
 
-        mEdgeBorder = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_edge_ignore);
-
-        // add the more icon for the notifications
-        IconData moreData = IconData.makeIcon(null, context.getPackageName(),
-                R.drawable.stat_notify_more, 0, 42);
-        mMoreIcon = new StatusBarIcon(context, moreData, mNotificationIcons);
-        mMoreIcon.view.setId(R.drawable.stat_notify_more);
-        mNotificationIcons.moreIcon = mMoreIcon;
-        mNotificationIcons.addView(mMoreIcon.view);
+        mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
         // set the inital view visibility
         setAreThereNotifications();
@@ -319,17 +303,14 @@ public class PhoneStatusBarService extends StatusBarService {
 
     @Override
     protected void addStatusBarView() {
-        final View view = new View(this);
-
-        // TODO final StatusBarView view = mStatusBarView;
+        final StatusBarView view = mStatusBarView;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                view.getContext().getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height),
+                mHeight,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
-                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
-                PixelFormat.RGB_888);
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
+                PixelFormat.RGBX_8888);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBar");
         // TODO lp.windowAnimations = R.style.Animation_StatusBar;
@@ -338,415 +319,42 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     // ================================================================================
-    // From IStatusBarService
+    // Always called from the UI thread.
     // ================================================================================
-    public void activate() {
-        enforceExpandStatusBar();
-        addPendingOp(OP_EXPAND, null, true);
+
+    public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
+        Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+                + " icon=" + icon);
+        StatusBarIconView view = new StatusBarIconView(this, slot);
+        view.set(icon);
+        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconWidth, mHeight));
     }
 
-    public void deactivate() {
-        enforceExpandStatusBar();
-        addPendingOp(OP_EXPAND, null, false);
+    public void updateIcon(String slot, int index, int viewIndex,
+            StatusBarIcon old, StatusBarIcon icon) {
+        Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+                + " old=" + old + " icon=" + icon);
+        StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
+        view.set(icon);
     }
 
-    public void toggle() {
-        enforceExpandStatusBar();
-        addPendingOp(OP_TOGGLE, null, false);
-    }
-
-    public void disable(int what, IBinder token, String pkg) {
-        enforceStatusBar();
-        synchronized (mNotificationCallbacks) {
-            // This is a little gross, but I think it's safe as long as nobody else
-            // synchronizes on mNotificationCallbacks.  It's important that the the callback
-            // and the pending op get done in the correct order and not interleaved with
-            // other calls, otherwise they'll get out of sync.
-            int net;
-            synchronized (mDisableRecords) {
-                manageDisableListLocked(what, token, pkg);
-                net = gatherDisableActionsLocked();
-                mNotificationCallbacks.onSetDisabled(net);
-            }
-            addPendingOp(OP_DISABLE, net);
-        }
-    }
-
-    public IBinder addIcon(String slot, String iconPackage, int iconId, int iconLevel) {
-        enforceStatusBar();
-        return addIcon(IconData.makeIcon(slot, iconPackage, iconId, iconLevel, 0), null);
-    }
-
-    public void updateIcon(IBinder key,
-            String slot, String iconPackage, int iconId, int iconLevel) {
-        enforceStatusBar();
-        updateIcon(key, IconData.makeIcon(slot, iconPackage, iconId, iconLevel, 0), null);
-    }
-
-    public void removeIcon(IBinder key) {
-        enforceStatusBar();
-        addPendingOp(OP_REMOVE_ICON, key, null, null, -1);
-    }
-
-    private void enforceStatusBar() {
-        enforceCallingOrSelfPermission(
-                android.Manifest.permission.STATUS_BAR,
-                "PhoneStatusBarService");
-    }
-
-    private void enforceExpandStatusBar() {
-        enforceCallingOrSelfPermission(
-                android.Manifest.permission.EXPAND_STATUS_BAR,
-                "PhoneStatusBarService");
-    }
-
-    public void registerStatusBar(IStatusBar bar) {
-        Slog.d(TAG, "registerStatusBar bar=" + bar);
+    public void removeIcon(String slot, int index, int viewIndex) {
+        Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        mStatusIcons.removeViewAt(viewIndex);
     }
     
-
-    // ================================================================================
-    // Can be called from any thread
-    // ================================================================================
-    public IBinder addIcon(IconData data, NotificationData n) {
-        // TODO: Call onto the IStatusBar
-        int slot;
-        // assert early-on if they using a slot that doesn't exist.
-        if (data != null && n == null) {
-            slot = getRightIconIndex(data.slot);
-            if (slot < 0) {
-                throw new SecurityException("invalid status bar icon slot: "
-                        + (data.slot != null ? "'" + data.slot + "'" : "null"));
-            }
-        } else {
-            slot = -1;
-        }
-        IBinder key = new Binder();
-        addPendingOp(OP_ADD_ICON, key, data, n, -1);
-        return key;
-    }
-
-    public void updateIcon(IBinder key, IconData data, NotificationData n) {
-        addPendingOp(OP_UPDATE_ICON, key, data, n, -1);
-    }
-
-    public void setIconVisibility(IBinder key, boolean visible) {
-        addPendingOp(OP_SET_VISIBLE, key, visible);
-    }
-
-    private void addPendingOp(int code, IBinder key, IconData data, NotificationData n, int i) {
-        synchronized (mQueueLock) {
-            PendingOp op = new PendingOp();
-            op.key = key;
-            op.code = code;
-            op.iconData = data == null ? null : data.clone();
-            op.notificationData = n;
-            op.integer = i;
-            mQueue.add(op);
-            if (mQueue.size() == 1) {
-                mHandler.sendEmptyMessage(2);
-            }
-        }
-    }
-
-    private void addPendingOp(int code, IBinder key, boolean visible) {
-        synchronized (mQueueLock) {
-            PendingOp op = new PendingOp();
-            op.key = key;
-            op.code = code;
-            op.visible = visible;
-            mQueue.add(op);
-            if (mQueue.size() == 1) {
-                mHandler.sendEmptyMessage(1);
-            }
-        }
-    }
-
-    private void addPendingOp(int code, int integer) {
-        synchronized (mQueueLock) {
-            PendingOp op = new PendingOp();
-            op.code = code;
-            op.integer = integer;
-            mQueue.add(op);
-            if (mQueue.size() == 1) {
-                mHandler.sendEmptyMessage(1);
-            }
-        }
-    }
-
-    // lock on mDisableRecords
-    void manageDisableListLocked(int what, IBinder token, String pkg) {
-        if (SPEW) {
-            Slog.d(TAG, "manageDisableList what=0x" + Integer.toHexString(what)
-                    + " pkg=" + pkg);
-        }
-        // update the list
-        synchronized (mDisableRecords) {
-            final int N = mDisableRecords.size();
-            DisableRecord tok = null;
-            int i;
-            for (i=0; i<N; i++) {
-                DisableRecord t = mDisableRecords.get(i);
-                if (t.token == token) {
-                    tok = t;
-                    break;
-                }
-            }
-            if (what == 0 || !token.isBinderAlive()) {
-                if (tok != null) {
-                    mDisableRecords.remove(i);
-                    tok.token.unlinkToDeath(tok, 0);
-                }
-            } else {
-                if (tok == null) {
-                    tok = new DisableRecord();
-                    try {
-                        token.linkToDeath(tok, 0);
-                    }
-                    catch (RemoteException ex) {
-                        return; // give up
-                    }
-                    mDisableRecords.add(tok);
-                }
-                tok.what = what;
-                tok.token = token;
-                tok.pkg = pkg;
-            }
-        }
-    }
-
-    // lock on mDisableRecords
-    int gatherDisableActionsLocked() {
-        final int N = mDisableRecords.size();
-        // gather the new net flags
-        int net = 0;
-        for (int i=0; i<N; i++) {
-            net |= mDisableRecords.get(i).what;
-        }
-        return net;
-    }
-
-    private int getRightIconIndex(String slot) {
-        final int N = mRightIconSlots.length;
-        for (int i=0; i<N; i++) {
-            if (mRightIconSlots[i].equals(slot)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    // ================================================================================
-    // Always called from UI thread
-    // ================================================================================
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
     private class H extends Handler {
         public void handleMessage(Message m) {
-            if (m.what == MSG_ANIMATE) {
-                doAnimation();
-                return;
-            }
-            if (m.what == MSG_ANIMATE_REVEAL) {
-                doRevealAnimation();
-                return;
-            }
-
-            ArrayList<PendingOp> queue;
-            synchronized (mQueueLock) {
-                queue = mQueue;
-                mQueue = new ArrayList<PendingOp>();
-            }
-
-            boolean wasExpanded = mExpanded;
-
-            // for each one in the queue, find all of the ones with the same key
-            // and collapse that down into a final op and/or call to setVisibility, etc
-            boolean expand = wasExpanded;
-            boolean doExpand = false;
-            boolean doDisable = false;
-            int disableWhat = 0;
-            int N = queue.size();
-            while (N > 0) {
-                PendingOp op = queue.get(0);
-                boolean doOp = false;
-                boolean visible = false;
-                boolean doVisibility = false;
-                if (op.code == OP_SET_VISIBLE) {
-                    doVisibility = true;
-                    visible = op.visible;
-                }
-                else if (op.code == OP_EXPAND) {
-                    doExpand = true;
-                    expand = op.visible;
-                }
-                else if (op.code == OP_TOGGLE) {
-                    doExpand = true;
-                    expand = !expand;
-                }
-                else {
-                    doOp = true;
-                }
-
-                if (alwaysHandle(op.code)) {
-                    // coalesce these
-                    for (int i=1; i<N; i++) {
-                        PendingOp o = queue.get(i);
-                        if (!alwaysHandle(o.code) && o.key == op.key) {
-                            if (o.code == OP_SET_VISIBLE) {
-                                visible = o.visible;
-                                doVisibility = true;
-                            }
-                            else if (o.code == OP_EXPAND) {
-                                expand = o.visible;
-                                doExpand = true;
-                            }
-                            else {
-                                op.code = o.code;
-                                op.iconData = o.iconData;
-                                op.notificationData = o.notificationData;
-                            }
-                            queue.remove(i);
-                            i--;
-                            N--;
-                        }
-                    }
-                }
-
-                queue.remove(0);
-                N--;
-
-                if (doOp) {
-                    switch (op.code) {
-                        case OP_ADD_ICON:
-                        case OP_UPDATE_ICON:
-                            performAddUpdateIcon(op.key, op.iconData, op.notificationData);
-                            break;
-                        case OP_REMOVE_ICON:
-                            performRemoveIcon(op.key);
-                            break;
-                        case OP_DISABLE:
-                            doDisable = true;
-                            disableWhat = op.integer;
-                            break;
-                    }
-                }
-                if (doVisibility && op.code != OP_REMOVE_ICON) {
-                    performSetIconVisibility(op.key, visible);
-                }
-            }
-
-            if (queue.size() != 0) {
-                throw new RuntimeException("Assertion failed: queue.size=" + queue.size());
-            }
-            if (doExpand) {
-                // this is last so that we capture all of the pending changes before doing it
-                if (expand) {
-                    animateExpand();
-                } else {
-                    animateCollapse();
-                }
-            }
-            if (doDisable) {
-                performDisableActions(disableWhat);
-            }
-        }
-    }
-
-    private boolean alwaysHandle(int code) {
-        return code == OP_DISABLE;
-    }
-
-    /* private */ void performAddUpdateIcon(IBinder key, IconData data, NotificationData n)
-                        throws StatusBarException {
-        if (SPEW) {
-            Slog.d(TAG, "performAddUpdateIcon icon=" + data + " notification=" + n + " key=" + key);
-        }
-        // notification
-        if (n != null) {
-            StatusBarNotification notification = getNotification(key);
-            NotificationData oldData = null;
-            if (notification == null) {
-                // add
-                notification = new StatusBarNotification();
-                notification.key = key;
-                notification.data = n;
-                synchronized (mNotificationData) {
-                    mNotificationData.add(notification);
-                }
-                addNotificationView(notification);
-                setAreThereNotifications();
-            } else {
-                // update
-                oldData = notification.data;
-                notification.data = n;
-                updateNotificationView(notification, oldData);
-            }
-            // Show the ticker if one is requested, and the text is different
-            // than the currently displayed ticker.  Also don't do this
-            // until status bar window is attached to the window manager,
-            // because...  well, what's the point otherwise?  And trying to
-            // run a ticker without being attached will crash!
-            if (n.tickerText != null && mStatusBarView.getWindowToken() != null
-                    && (oldData == null
-                        || oldData.tickerText == null
-                        || !CharSequences.equals(oldData.tickerText, n.tickerText))) {
-                if (0 == (mDisabled & 
-                    (StatusBarManager.DISABLE_NOTIFICATION_ICONS | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-                    mTicker.addEntry(n, StatusBarIcon.getIcon(this, data), n.tickerText);
-                }
-            }
-            updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-        }
-
-        // icon
-        synchronized (mIconMap) {
-            StatusBarIcon icon = mIconMap.get(key);
-            if (icon == null) {
-                // add
-                LinearLayout v = n == null ? mStatusIcons : mNotificationIcons;
-
-                icon = new StatusBarIcon(this, data, v);
-                mIconMap.put(key, icon);
-                mIconList.add(icon);
-
-                if (n == null) {
-                    int slotIndex = getRightIconIndex(data.slot);
-                    StatusBarIcon[] rightIcons = mRightIcons;
-                    if (rightIcons[slotIndex] == null) {
-                        int pos = 0;
-                        for (int i=mRightIcons.length-1; i>slotIndex; i--) {
-                            StatusBarIcon ic = rightIcons[i];
-                            if (ic != null) {
-                                pos++;
-                            }
-                        }
-                        rightIcons[slotIndex] = icon;
-                        mStatusIcons.addView(icon.view, pos);
-                    } else {
-                        Slog.e(TAG, "duplicate icon in slot " + slotIndex + "/" + data.slot);
-                        mIconMap.remove(key);
-                        mIconList.remove(icon);
-                        return ;
-                    }
-                } else {
-                    int iconIndex = mNotificationData.getIconIndex(n);
-                    mNotificationIcons.addView(icon.view, iconIndex);
-                }
-            } else {
-                if (n == null) {
-                    // right hand side icons -- these don't reorder
-                    icon.update(this, data);
-                } else {
-                    // remove old
-                    ViewGroup parent = (ViewGroup)icon.view.getParent();
-                    parent.removeView(icon.view);
-                    // add new
-                    icon.update(this, data);
-                    int iconIndex = mNotificationData.getIconIndex(n);
-                    mNotificationIcons.addView(icon.view, iconIndex);
-                }
+            switch (m.what) {
+                case MSG_ANIMATE:
+                    doAnimation();
+                    break;
+                case MSG_ANIMATE_REVEAL:
+                    doRevealAnimation();
+                    break;
             }
         }
     }
@@ -756,57 +364,11 @@ public class PhoneStatusBarService extends StatusBarService {
             if (SPEW) {
                 Slog.d(TAG, "performSetIconVisibility key=" + key + " visible=" + visible);
             }
-            StatusBarIcon icon = mIconMap.get(key);
+            StatusBarIconData icon = mIconMap.get(key);
             icon.view.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
     
-    /* private */ void performRemoveIcon(IBinder key) {
-        synchronized (this) {
-            if (SPEW) {
-                Slog.d(TAG, "performRemoveIcon key=" + key);
-            }
-            StatusBarIcon icon = mIconMap.remove(key);
-            mIconList.remove(icon);
-            if (icon != null) {
-                ViewGroup parent = (ViewGroup)icon.view.getParent();
-                parent.removeView(icon.view);
-                int slotIndex = getRightIconIndex(icon.mData.slot);
-                if (slotIndex >= 0) {
-                    mRightIcons[slotIndex] = null;
-                }
-            }
-            StatusBarNotification notification = getNotification(key);
-            if (notification != null) {
-                removeNotificationView(notification);
-                synchronized (mNotificationData) {
-                    mNotificationData.remove(notification);
-                }
-                setAreThereNotifications();
-            }
-        }
-    }
-
-    int getIconNumberForView(View v) {
-        synchronized (mIconMap) {
-            StatusBarIcon icon = null;
-            final int N = mIconList.size();
-            for (int i=0; i<N; i++) {
-                StatusBarIcon ic = mIconList.get(i);
-                if (ic.view == v) {
-                    icon = ic;
-                    break;
-                }
-            }
-            if (icon != null) {
-                return icon.getNumber();
-            } else {
-                return -1;
-            }
-        }
-    }
-
-
     StatusBarNotification getNotification(IBinder key) {
         synchronized (mNotificationData) {
             return mNotificationData.get(key);
@@ -830,7 +392,8 @@ public class PhoneStatusBarService extends StatusBarService {
 
         // create the row view
         LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event, parent, false);
+        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event,
+                parent, false);
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
@@ -1406,15 +969,6 @@ public class PhoneStatusBarService extends StatusBarService {
                     + " mAnimatingReveal=" + mAnimatingReveal
                     + " mViewDelta=" + mViewDelta);
             pw.println("  mDisplayHeight=" + mDisplayHeight);
-            final int N = mQueue.size();
-            pw.println("  mQueue.size=" + N);
-            for (int i=0; i<N; i++) {
-                PendingOp op = mQueue.get(i);
-                pw.println("    [" + i + "] key=" + op.key + " code=" + op.code + " visible="
-                        + op.visible);
-                pw.println("           iconData=" + op.iconData);
-                pw.println("           notificationData=" + op.notificationData);
-            }
             pw.println("  mExpandedParams: " + mExpandedParams);
             pw.println("  mExpandedView: " + viewInfo(mExpandedView));
             pw.println("  mExpandedDialog: " + mExpandedDialog);
@@ -1437,7 +991,7 @@ public class PhoneStatusBarService extends StatusBarService {
             Set<IBinder> keys = mIconMap.keySet();
             int i=0;
             for (IBinder key: keys) {
-                StatusBarIcon icon = mIconMap.get(key);
+                StatusBarIconData icon = mIconMap.get(key);
                 pw.println("    [" + i + "] key=" + key);
                 pw.println("           data=" + icon.mData);
                 i++;
@@ -1681,6 +1235,10 @@ public class PhoneStatusBarService extends StatusBarService {
      */
     private boolean mPanelSlightlyVisible;
     void panelSlightlyVisible(boolean visible) {
+        if (true) {
+            // XXX
+            return;
+        }
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
             if (visible) {
@@ -1727,7 +1285,7 @@ public class PhoneStatusBarService extends StatusBarService {
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             mNotificationCallbacks.onClearAll();
-            addPendingOp(OP_EXPAND, null, false);
+            //addPendingOp(OP_EXPAND, null, false);
         }
     };
 
@@ -1865,7 +1423,7 @@ public class PhoneStatusBarService extends StatusBarService {
             if (list != null) {
                 final int N = list.size();
                 for (int i=0; i<N; i++) {
-                    removeIcon(list.get(i).key);
+                    //removeIcon(list.get(i).key);
                 }
             }
         }

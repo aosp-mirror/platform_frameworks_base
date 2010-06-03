@@ -14,10 +14,14 @@
  * limitations under the License.
  */
  
-package android.app;
+package com.android.internal.statusbar;
+
+import com.android.internal.statusbar.StatusBarIcon;
 
 /** @hide */
-interface IStatusBar
+oneway interface IStatusBar
 {
+    void setIcon(int index, in StatusBarIcon icon);
+    void removeIcon(int index);
 }
 
