@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
-import android.os.IBinder;
-import android.view.View;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.widget.TextSwitcher;
 
-public class StatusBarNotification {
-    IBinder key;
-    NotificationData data;
-    View view;
-    View contentView;
+
+public class TickerView extends TextSwitcher
+{
+    Ticker mTicker;
+
+    public TickerView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mTicker.reflowText();
+    }
 }
+

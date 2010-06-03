@@ -34,11 +34,21 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
+import com.android.server.status.IconData;
+import com.android.server.status.NotificationData;
+
 public abstract class StatusBarService extends Service {
     private static final String TAG = "StatusBarService";
 
     Bar mBar = new Bar();
     IStatusBarService mBarService;
+
+    /* TODO
+    H mHandler = new H();
+    Object mQueueLock = new Object();
+    ArrayList<PendingOp> mQueue = new ArrayList<PendingOp>();
+    NotificationCallbacks mNotificationCallbacks;
+    */
 
     @Override
     public void onCreate() {
@@ -75,5 +85,28 @@ public abstract class StatusBarService extends Service {
      * Implement this to add the main status bar view.
      */
     protected abstract void addStatusBarView();
+
+    public void activate() {
+    }
+
+    public void deactivate() {
+    }
+
+    public void toggle() {
+    }
+
+    public void disable(int what, IBinder token, String pkg) {
+    }
+    
+    public IBinder addIcon(IconData data, NotificationData n) {
+        return null;
+    }
+
+    public void updateIcon(IBinder key, IconData data, NotificationData n) {
+    }
+
+    public void setIconVisibility(IBinder key, boolean visible) {
+        //addPendingOp(OP_SET_VISIBLE, key, visible);
+    }
 }
 

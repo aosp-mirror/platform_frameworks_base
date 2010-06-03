@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
-
-import com.android.internal.R;
+package com.android.policy.statusbar.phone;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -36,7 +34,7 @@ import android.widget.ImageSwitcher;
 import java.util.ArrayList;
 
 
-abstract class Ticker {
+public abstract class Ticker {
     private static final int TICKER_SEGMENT_DELAY = 3000;
     
     private final class Segment {

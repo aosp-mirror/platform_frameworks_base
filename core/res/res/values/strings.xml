@@ -1593,23 +1593,6 @@
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with capital "AM" or "PM" (example: "3PM"). -->
     <string name="hour_cap_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="PM">%p</xliff:g>"</string>
 
-    <!-- The text for the button in the notification window-shade that clears
-         all of the currently visible notifications. -->
-    <string name="status_bar_clear_all_button">Clear</string>
-
-    <!-- The label in the bar at the top of the status bar when there are no notifications
-         showing. -->
-    <string name="status_bar_no_notifications_title">No notifications</string>
-
-    <!-- The label for the group of notifications for ongoing events in the opened version of
-         the status bar.  An ongoing call is the prime example of this.  The MP3 music player
-         might be another example.  -->
-    <string name="status_bar_ongoing_events_title">Ongoing</string>
-
-    <!-- The label for the group of notifications for recent events in the opened version of
-         the status bar.  Recently received text messsages (SMS), emails, calendar alerts, etc. -->
-    <string name="status_bar_latest_events_title">Notifications</string>
-
     <!-- The big percent text in the middle of the battery icon that appears when you plug in
          the charger. -->
     <string name="battery_status_text_percent_format"><xliff:g id="number" example="50">%d</xliff:g><xliff:g id="percent" example="%">%%</xliff:g></string>

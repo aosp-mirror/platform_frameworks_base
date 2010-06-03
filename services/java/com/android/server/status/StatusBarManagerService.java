@@ -154,7 +154,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     
     final Context mContext;
     final Display mDisplay;
-    StatusBarView mStatusBarView;
+    View /*StatusBarView*/ mStatusBarView;
     int mPixelFormat;
     H mHandler = new H();
     Object mQueueLock = new Object();
@@ -207,8 +207,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     int mTrackingPosition; // the position of the top of the tracking view.
 
     // ticker
-    private Ticker mTicker;
-    private View mTickerView;
     private boolean mTicking;
     
     // Tracking finger for opening/closing.
@@ -240,7 +238,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mContext = context;
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
-        makeStatusBarView(context);
         mUninstallReceiver = new UninstallReceiver();
     }
 
@@ -251,106 +248,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // Constructing the view
     // ================================================================================
-    private void makeStatusBarView(Context context) {
-        Resources res = context.getResources();
-        mRightIconSlots = res.getStringArray(com.android.internal.R.array.status_bar_icon_order);
-        mRightIcons = new StatusBarIcon[mRightIconSlots.length];
-
-        ExpandedView expanded = (ExpandedView)View.inflate(context,
-                com.android.internal.R.layout.status_bar_expanded, null);
-        expanded.mService = this;
-        StatusBarView sb = (StatusBarView)View.inflate(context,
-                com.android.internal.R.layout.status_bar, null);
-        sb.mService = this;
-
-        // figure out which pixel-format to use for the status bar.
-        mPixelFormat = PixelFormat.TRANSLUCENT;
-        Drawable bg = sb.getBackground();
-        if (bg != null) {
-            mPixelFormat = bg.getOpacity();
-        }
-
-        mStatusBarView = sb;
-        mStatusIcons = (LinearLayout)sb.findViewById(R.id.statusIcons);
-        mNotificationIcons = (IconMerger)sb.findViewById(R.id.notificationIcons);
-        mNotificationIcons.service = this;
-        mIcons = (LinearLayout)sb.findViewById(R.id.icons);
-        mTickerView = sb.findViewById(R.id.ticker);
-        mDateView = (DateView)sb.findViewById(R.id.date);
-
-        mExpandedDialog = new ExpandedDialog(context);
-        mExpandedView = expanded;
-        mExpandedContents = expanded.findViewById(R.id.notificationLinearLayout);
-        mOngoingTitle = (TextView)expanded.findViewById(R.id.ongoingTitle);
-        mOngoingItems = (LinearLayout)expanded.findViewById(R.id.ongoingItems);
-        mLatestTitle = (TextView)expanded.findViewById(R.id.latestTitle);
-        mLatestItems = (LinearLayout)expanded.findViewById(R.id.latestItems);
-        mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
-        mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
-        mClearButton.setOnClickListener(mClearButtonListener);
-        mSpnLabel = (TextView)expanded.findViewById(R.id.spnLabel);
-        mPlmnLabel = (TextView)expanded.findViewById(R.id.plmnLabel);
-        mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
-        mNotificationLinearLayout = expanded.findViewById(R.id.notificationLinearLayout);
-
-        mOngoingTitle.setVisibility(View.GONE);
-        mLatestTitle.setVisibility(View.GONE);
-        
-        mTicker = new MyTicker(context, sb);
-
-        TickerView tickerView = (TickerView)sb.findViewById(R.id.tickerText);
-        tickerView.mTicker = mTicker;
-
-        mTrackingView = (TrackingView)View.inflate(context,
-                com.android.internal.R.layout.status_bar_tracking, null);
-        mTrackingView.mService = this;
-        mCloseView = (CloseDragHandle)mTrackingView.findViewById(R.id.close);
-        mCloseView.mService = this;
-
-        mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
-
-        // add the more icon for the notifications
-        IconData moreData = IconData.makeIcon(null, context.getPackageName(),
-                R.drawable.stat_notify_more, 0, 42);
-        mMoreIcon = new StatusBarIcon(context, moreData, mNotificationIcons);
-        mMoreIcon.view.setId(R.drawable.stat_notify_more);
-        mNotificationIcons.moreIcon = mMoreIcon;
-        mNotificationIcons.addView(mMoreIcon.view);
-
-        // set the inital view visibility
-        setAreThereNotifications();
-        mDateView.setVisibility(View.INVISIBLE);
-
-        // before we register for broadcasts
-        mPlmnLabel.setText(R.string.lockscreen_carrier_default);
-        mPlmnLabel.setVisibility(View.VISIBLE);
-        mSpnLabel.setText("");
-        mSpnLabel.setVisibility(View.GONE);
-
-        // receive broadcasts
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
-        context.registerReceiver(mBroadcastReceiver, filter);
-    }
 
     public void systemReady() {
-        final StatusBarView view = mStatusBarView;
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                view.getContext().getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height),
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
-                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
-                mPixelFormat);
-        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
-        lp.setTitle("StatusBar");
-        lp.windowAnimations = R.style.Animation_StatusBar;
-
-        //WindowManagerImpl.getDefault().addView(view, lp);
     }
 
     public void systemReady2() {
@@ -431,6 +330,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // Can be called from any thread
     // ================================================================================
     public IBinder addIcon(IconData data, NotificationData n) {
+        if (true) {
+            return new Binder();
+        }
+        // TODO: Call onto the IStatusBar
         int slot;
         // assert early-on if they using a slot that doesn't exist.
         if (data != null && n == null) {
@@ -681,6 +584,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     /* private */ void performAddUpdateIcon(IBinder key, IconData data, NotificationData n)
                         throws StatusBarException {
+        if (true) {
+            return;
+        }
         if (SPEW) {
             Slog.d(TAG, "performAddUpdateIcon icon=" + data + " notification=" + n + " key=" + key);
         }
@@ -715,7 +621,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                         || !CharSequences.equals(oldData.tickerText, n.tickerText))) {
                 if (0 == (mDisabled & 
                     (StatusBarManager.DISABLE_NOTIFICATION_ICONS | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-                    mTicker.addEntry(n, StatusBarIcon.getIcon(mContext, data), n.tickerText);
+                    //mTicker.addEntry(n, StatusBarIcon.getIcon(mContext, data), n.tickerText);
                 }
             }
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -773,6 +679,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     /* private */ void performSetIconVisibility(IBinder key, boolean visible) {
+        if (true) {
+            return;
+        }
         synchronized (mIconMap) {
             if (SPEW) {
                 Slog.d(TAG, "performSetIconVisibility key=" + key + " visible=" + visible);
@@ -1340,47 +1249,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    private class MyTicker extends Ticker {
-        MyTicker(Context context, StatusBarView sb) {
-            super(context, sb);
-        }
-        
-        @Override
-        void tickerStarting() {
-            mTicking = true;
-            mIcons.setVisibility(View.GONE);
-            mTickerView.setVisibility(View.VISIBLE);
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
-            mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
-            if (mExpandedVisible) {
-                setDateViewVisibility(false, com.android.internal.R.anim.push_up_out);
-            }
-        }
-
-        @Override
-        void tickerDone() {
-            mIcons.setVisibility(View.VISIBLE);
-            mTickerView.setVisibility(View.GONE);
-            mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
-                        mTickingDoneListener));
-            if (mExpandedVisible) {
-                setDateViewVisibility(true, com.android.internal.R.anim.push_down_in);
-            }
-        }
-
-        void tickerHalting() {
-            mIcons.setVisibility(View.VISIBLE);
-            mTickerView.setVisibility(View.GONE);
-            mIcons.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.fade_out,
-                        mTickingDoneListener));
-            if (mExpandedVisible) {
-                setDateViewVisibility(true, com.android.internal.R.anim.fade_in);
-            }
-        }
-    }
-
     Animation.AnimationListener mTickingDoneListener = new Animation.AnimationListener() {;
         public void onAnimationEnd(Animation animation) {
             mTicking = false;
@@ -1448,7 +1316,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             pw.println("  mLatestItems: " + viewInfo(mLatestItems));
             pw.println("  mNoNotificationsTitle: " + viewInfo(mNoNotificationsTitle));
             pw.println("  mCloseView: " + viewInfo(mCloseView));
-            pw.println("  mTickerView: " + viewInfo(mTickerView));
             pw.println("  mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
             pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
@@ -1591,12 +1458,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     void setNotificationIconVisibility(boolean visible, int anim) {
+        /*
         int old = mNotificationIcons.getVisibility();
         int v = visible ? View.VISIBLE : View.INVISIBLE;
         if (old != v) {
             mNotificationIcons.setVisibility(v);
             mNotificationIcons.startAnimation(loadAnim(anim, null));
         }
+        */
     }
 
     void updateExpandedViewPos(int expandedPosition) {
@@ -1729,7 +1598,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 if (mTicking) {
                     mNotificationIcons.setVisibility(View.INVISIBLE);
-                    mTicker.halt();
+                    //mTicker.halt();
                 } else {
                     setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
                 }
@@ -1741,7 +1610,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                mTicker.halt();
+                //mTicker.halt();
             }
         }
     }

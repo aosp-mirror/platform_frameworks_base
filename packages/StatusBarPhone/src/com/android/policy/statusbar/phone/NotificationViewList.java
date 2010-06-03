@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.policy.statusbar.phone;
 
 import android.os.IBinder;
 import android.util.Slog;
@@ -135,8 +135,8 @@ public class NotificationViewList {
                 index++;
             }
         }
-        Slog.e(StatusBarManagerService.TAG, "Couldn't find notification in NotificationViewList.");
-        Slog.e(StatusBarManagerService.TAG, "notification=" + notification);
+        Slog.e(PhoneStatusBarService.TAG, "Couldn't find notification in NotificationViewList.");
+        Slog.e(PhoneStatusBarService.TAG, "notification=" + notification);
         dump(notification);
         return 0;
     }
@@ -173,8 +173,8 @@ public class NotificationViewList {
     }
 
     void add(StatusBarNotification notification) {
-        if (StatusBarManagerService.SPEW) {
-            Slog.d(StatusBarManagerService.TAG, "before add NotificationViewList"
+        if (PhoneStatusBarService.SPEW) {
+            Slog.d(PhoneStatusBarService.TAG, "before add NotificationViewList"
                     + " notification.data.ongoingEvent=" + notification.data.ongoingEvent);
             dump(notification);
         }
@@ -192,14 +192,14 @@ public class NotificationViewList {
         }
         list.add(index, notification);
 
-        if (StatusBarManagerService.SPEW) {
-            Slog.d(StatusBarManagerService.TAG, "after add NotificationViewList index=" + index);
+        if (PhoneStatusBarService.SPEW) {
+            Slog.d(PhoneStatusBarService.TAG, "after add NotificationViewList index=" + index);
             dump(notification);
         }
     }
 
     void dump(StatusBarNotification notification) {
-        if (StatusBarManagerService.SPEW) {
+        if (PhoneStatusBarService.SPEW) {
             boolean showTime = false;
             String s = "";
             for (int i=0; i<mOngoing.size(); i++) {
@@ -217,7 +217,7 @@ public class NotificationViewList {
                 }
                 s += " ";
             }
-            Slog.d(StatusBarManagerService.TAG, "NotificationViewList ongoing: " + s);
+            Slog.d(PhoneStatusBarService.TAG, "NotificationViewList ongoing: " + s);
 
             s = "";
             for (int i=0; i<mLatest.size(); i++) {
@@ -235,7 +235,7 @@ public class NotificationViewList {
                 }
                 s += " ";
             }
-            Slog.d(StatusBarManagerService.TAG, "NotificationViewList latest:  " + s);
+            Slog.d(PhoneStatusBarService.TAG, "NotificationViewList latest:  " + s);
         }
     }
 
