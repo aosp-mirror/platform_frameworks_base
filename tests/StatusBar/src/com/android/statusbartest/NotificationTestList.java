@@ -191,7 +191,7 @@ public class NotificationTestList extends TestActivity
                                 R.drawable.icon4,
                                 null, System.currentTimeMillis(), "Stress - Latest",
                                 "Notify me!!!", null);
-                        n.flags |= Notification.FLAG_ONGOING_EVENT;
+                        //n.flags |= Notification.FLAG_ONGOING_EVENT;
                         mNM.notify(1, n);
                     }
                 }
