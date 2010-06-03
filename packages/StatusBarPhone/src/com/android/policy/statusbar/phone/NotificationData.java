@@ -16,6 +16,7 @@
 
 package com.android.policy.statusbar.phone;
 
+import android.app.Notification;
 import android.os.IBinder;
 import android.view.View;
 
@@ -88,5 +89,27 @@ public class NotificationData {
             }
         }
         return N;
+    }
+
+    /**
+     * Return whether there are any visible items (i.e. items without an error).
+     */
+    public boolean hasVisibleItems() {
+        return mEntries.size() != 0; // TODO
+    }
+
+    /**
+     * Return whether there are any clearable items (that aren't errors).
+     */
+    public boolean hasClearableItems() {
+        final int N = mEntries.size();
+        for (int i=0; i<N; i++) {
+            Entry entry = mEntries.get(i);
+            // TODO: if (!entry.error)
+            if ((entry.notification.notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }
