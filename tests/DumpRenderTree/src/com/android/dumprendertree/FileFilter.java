@@ -105,6 +105,7 @@ public class FileFilter {
         ignoreResultList.add("http/tests/xmlhttprequest/workers"); // workers not supported
         ignoreResultList.add("storage/domstorage/localstorage/private-browsing-affects-storage.html"); // private browsing not supported
         ignoreResultList.add("storage/domstorage/sessionstorage/private-browsing-affects-storage.html"); // private browsing not supported
+        ignoreResultList.add("storage/indexeddb"); // indexeddb not supported
         ignoreResultList.add("storage/private-browsing-readonly.html"); // private browsing not supported
         ignoreResultList.add("websocket/tests/workers"); // workers not supported
 
