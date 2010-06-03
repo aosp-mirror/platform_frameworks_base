@@ -21,7 +21,7 @@
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
 <com.android.systemui.statusbar.StatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/statusbar_background"
+    android:background="@drawable/status_bar_background"
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
@@ -50,6 +50,7 @@
             android:orientation="horizontal"/>    
 
         <com.android.systemui.statusbar.Clock
+            android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:singleLine="true"
@@ -57,7 +58,6 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center_vertical|left"
-            android:textColor="?android:attr/textColorPrimaryInverse"
             />
     </LinearLayout>
         
@@ -110,6 +110,6 @@
         android:gravity="center_vertical|left"
         android:paddingLeft="6px"
         android:paddingRight="6px"
-        android:background="@drawable/statusbar_background"
+        android:background="@drawable/status_bar_background"
         />
 </com.android.systemui.statusbar.StatusBarView>
