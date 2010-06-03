@@ -445,7 +445,7 @@ onBackup()}.
 <p>For an example implementation of {@link android.app.backup.BackupAgent}, see the <a
 href="{@docRoot}resources/samples/BackupRestore/src/com/example/android/backuprestore/ExampleAgent.html">{@code
 ExampleAgent}</a> class in the <a
-href="{@docRoot}}resources/samples/BackupRestore/index.html">Backup and Restore</a> sample
+href="{@docRoot}resources/samples/BackupRestore/index.html">Backup and Restore</a> sample
 application.</p>
 </div>
 

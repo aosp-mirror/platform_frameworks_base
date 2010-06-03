@@ -344,7 +344,9 @@ import java.lang.ref.WeakReference;
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method does not change the state.</p></td></tr>
+ *     <td>Successful invoke of this method does not change the state. In order for the
+ *         target audio stream type to become effective, this method must be called before
+ *         prepare() or prepareAsync().</p></td></tr>
  * <tr><td>setDataSource </p></td>
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
@@ -1112,7 +1114,9 @@ public class MediaPlayer
 
     /**
      * Sets the audio stream type for this MediaPlayer. See {@link AudioManager}
-     * for a list of stream types.
+     * for a list of stream types. Must call this method before prepare() or
+     * prepareAsync() in order for the target stream type to become effective
+     * thereafter.
      *
      * @param streamtype the audio stream type
      * @see android.media.AudioManager
