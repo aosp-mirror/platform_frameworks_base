@@ -17,7 +17,7 @@
 package android.app;
 
 /** @hide */
-interface IPoo
+interface IStatusBar
 {
 }
 

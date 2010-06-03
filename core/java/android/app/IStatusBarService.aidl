@@ -16,7 +16,7 @@
  
 package android.app;
 
-import android.app.IPoo;
+import android.app.IStatusBar;
 
 /** @hide */
 interface IStatusBarService
@@ -30,5 +30,5 @@ interface IStatusBarService
     void removeIcon(IBinder key);
 
     // ---- Methods below are for use by the status bar policy services ----
-    void registerStatusBar(IPoo callbacks);
+    void registerStatusBar(IStatusBar callbacks);
 }
