@@ -24,6 +24,7 @@ import com.android.internal.statusbar.StatusBarNotification;
 
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.StatusBarManager;
@@ -127,22 +128,28 @@ public class PhoneStatusBarService extends StatusBarService {
     LinearLayout mStatusIcons;
 
     // expanded notifications
-    NotificationViewList mNotificationData = new NotificationViewList();
     Dialog mExpandedDialog;
     ExpandedView mExpandedView;
     WindowManager.LayoutParams mExpandedParams;
     ScrollView mScrollView;
     View mNotificationLinearLayout;
-    TextView mOngoingTitle;
-    LinearLayout mOngoingItems;
-    TextView mLatestTitle;
-    LinearLayout mLatestItems;
+    View mExpandedContents;
+    // top bar
     TextView mNoNotificationsTitle;
     TextView mSpnLabel;
     TextView mPlmnLabel;
     TextView mClearButton;
-    View mExpandedContents;
+    // drag bar
     CloseDragHandle mCloseView;
+    // ongoing
+    NotificationData mOngoing = new NotificationData();
+    TextView mOngoingTitle;
+    LinearLayout mOngoingItems;
+    // latest
+    NotificationData mLatest = new NotificationData();
+    TextView mLatestTitle;
+    LinearLayout mLatestItems;
+    // position
     int[] mPositionTmp = new int[2];
     boolean mExpanded;
     boolean mExpandedVisible;
@@ -317,6 +324,36 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
+        NotificationData list;
+        ViewGroup parent;
+        final boolean isOngoing = notification.isOngoing();
+        if (isOngoing) {
+            list = mOngoing;
+            parent = mOngoingItems;
+        } else {
+            list = mLatest;
+            parent = mLatestItems;
+        }
+        // Construct the expanded view.
+        final View view = makeNotificationView(notification, parent);
+        // Construct the icon.
+        StatusBarIconView iconView = new StatusBarIconView(this,
+                notification.pkg + "/" + notification.id);
+        iconView.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
+                    notification.notification.iconLevel));
+        // Add the expanded view.
+        final int viewIndex = list.add(key, notification, view);
+        parent.addView(view, viewIndex);
+        // Add the icon.
+        final int iconIndex = chooseIconIndex(isOngoing, viewIndex);
+        mNotificationIcons.addView(iconView, iconIndex,
+                new LinearLayout.LayoutParams(mIconWidth, mHeight));
+
+        // show the ticker
+        // TODO
+
+        // recalculate the position of the sliding windows
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
@@ -384,9 +421,18 @@ public class PhoneStatusBarService extends StatusBarService {
             v.setSelected(hasFocus);
         }
     };
+
+    private int chooseIconIndex(boolean isOngoing, int index) {
+        final int ongoingSize = mOngoing.size();
+        final int latestSize = mLatest.size();
+        if (!isOngoing) {
+            index = mLatest.size() + index;
+        }
+        return (ongoingSize + latestSize) - index - 1;
+    }
     
     View makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
-        NotificationData n = notification.data;
+        Notification n = notification.notification;
         RemoteViews remoteViews = n.contentView;
         if (remoteViews == null) {
             return null;
@@ -403,7 +449,8 @@ public class PhoneStatusBarService extends StatusBarService {
         content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = n.contentIntent;
         if (contentIntent != null) {
-            content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.tag, n.id));
+            content.setOnClickListener(new Launcher(contentIntent, notification.pkg,
+                        notification.tag, notification.id));
         }
 
         View child = null;
@@ -415,15 +462,17 @@ public class PhoneStatusBarService extends StatusBarService {
             exception = e;
         }
         if (child == null) {
-            Slog.e(TAG, "couldn't inflate view for package " + n.pkg, exception);
+            Slog.e(TAG, "couldn't inflate view for package " + notification.pkg, exception);
             return null;
         }
         content.addView(child);
 
         row.setDrawingCacheEnabled(true);
 
+        /*
         notification.view = row;
         notification.contentView = child;
+        */
 
         return row;
     }
@@ -433,6 +482,7 @@ public class PhoneStatusBarService extends StatusBarService {
                         notification.iconLevel);
                 icon.number = notification.number;
     */     
+    /*
     void addNotificationView(StatusBarNotification notification) {
         if (notification.view != null) {
             throw new RuntimeException("Assertion failed: notification.view="
@@ -449,11 +499,13 @@ public class PhoneStatusBarService extends StatusBarService {
         int index = mNotificationData.getExpandedIndex(notification);
         parent.addView(child, index);
     }
+    */
 
     /**
      * Remove the old one and put the new one in its place.
      * @param notification the notification
      */
+    /*
     void updateNotificationView(StatusBarNotification notification, NotificationData oldData) {
         NotificationData n = notification.data;
         if (oldData != null && n != null
@@ -498,8 +550,10 @@ public class PhoneStatusBarService extends StatusBarService {
             notification.view = null;
         }
     }
+    */
 
     private void setAreThereNotifications() {
+    /*
         boolean ongoing = mOngoingItems.getChildCount() != 0;
         boolean latest = mLatestItems.getChildCount() != 0;
 
@@ -517,6 +571,7 @@ public class PhoneStatusBarService extends StatusBarService {
         } else {
             mNoNotificationsTitle.setVisibility(View.VISIBLE);
         }
+    */
     }
 
     private void makeExpandedVisible() {
@@ -588,15 +643,6 @@ public class PhoneStatusBarService extends StatusBarService {
             return;
         }
 
-        // It seems strange to sometimes not expand...
-        if (false) {
-            synchronized (mNotificationData) {
-                if (mNotificationData.size() == 0) {
-                    return;
-                }
-            }
-        }
-        
         mExpanded = true;
         makeExpandedVisible();
         updateExpandedViewPos(EXPANDED_FULL_OPEN);

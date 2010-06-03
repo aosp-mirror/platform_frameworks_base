@@ -70,6 +70,7 @@ public class StatusBarIcon implements Parcelable {
         out.writeString(this.iconPackage);
         out.writeInt(this.iconId);
         out.writeInt(this.iconLevel);
+        out.writeInt(this.visible ? 1 : 0);
         out.writeInt(this.number);
     }
 
