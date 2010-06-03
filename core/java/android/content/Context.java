@@ -22,7 +22,6 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DatabaseErrorHandler;
-import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
@@ -603,7 +602,7 @@ public abstract class Context {
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
-     * corruption. if null, {@link DefaultDatabaseErrorHandler} is assumed.
+     * corruption. if null, {@link android.database.DefaultDatabaseErrorHandler} is assumed.
      * @return The contents of a newly created database with the given name.
      * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
      *
