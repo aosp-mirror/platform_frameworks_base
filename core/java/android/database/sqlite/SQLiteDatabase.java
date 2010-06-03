@@ -33,6 +33,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 
+import dalvik.system.BlockGuard;
+
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -1339,6 +1341,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
+        BlockGuard.getThreadPolicy().onReadFromDisk();
         long timeStart = 0;
 
         if (Config.LOGV || mSlowQueryThreshold != -1) {
@@ -1497,6 +1500,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
             ContentValues initialValues, int conflictAlgorithm) {
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
@@ -1588,6 +1592,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *         whereClause.
      */
     public int delete(String table, String whereClause, String[] whereArgs) {
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         lock();
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
@@ -1643,6 +1648,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, int conflictAlgorithm) {
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         if (values == null || values.size() == 0) {
             throw new IllegalArgumentException("Empty values");
         }
@@ -1725,6 +1731,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         long timeStart = SystemClock.uptimeMillis();
         lock();
         if (!isOpen()) {
@@ -1760,6 +1767,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
