@@ -1291,16 +1291,23 @@ public class WebView extends AbsoluteLayout
         final File temp = new File(dest.getPath() + ".writing");
         new Thread(new Runnable() {
             public void run() {
+                FileOutputStream out = null;
                 try {
-                    FileOutputStream out = new FileOutputStream(temp);
+                    out = new FileOutputStream(temp);
                     p.writeToStream(out);
-                    out.close();
                     // Writing the picture succeeded, rename the temporary file
                     // to the destination.
                     temp.renameTo(dest);
                 } catch (Exception e) {
                     // too late to do anything about it.
                 } finally {
+                    if (out != null) {
+                        try {
+                            out.close();
+                        } catch (Exception e) {
+                            // Can't do anything about that
+                        }
+                    }
                     temp.delete();
                 }
             }
@@ -1353,20 +1360,23 @@ public class WebView extends AbsoluteLayout
             final Bundle copy = new Bundle(b);
             new Thread(new Runnable() {
                 public void run() {
-                    final Picture p = Picture.createFromStream(in);
-                    if (p != null) {
-                        // Post a runnable on the main thread to update the
-                        // history picture fields.
-                        mPrivateHandler.post(new Runnable() {
-                            public void run() {
-                                restoreHistoryPictureFields(p, copy);
-                            }
-                        });
-                    }
                     try {
-                        in.close();
-                    } catch (Exception e) {
-                        // Nothing we can do now.
+                        final Picture p = Picture.createFromStream(in);
+                        if (p != null) {
+                            // Post a runnable on the main thread to update the
+                            // history picture fields.
+                            mPrivateHandler.post(new Runnable() {
+                                public void run() {
+                                    restoreHistoryPictureFields(p, copy);
+                                }
+                            });
+                        }
+                    } finally {
+                        try {
+                            in.close();
+                        } catch (Exception e) {
+                            // Nothing we can do now.
+                        }
                     }
                 }
             }).start();
