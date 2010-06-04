@@ -16,11 +16,33 @@
 
 package android.webkit;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
+/**
+ * The ZoomManager is responsible for maintaining the WebView's current zoom
+ * level state.  It is also responsible for managing the on-screen zoom controls
+ * as well as any animation of the WebView due to zooming.
+ *
+ * Currently, there are two methods for animating the zoom of a WebView.
+ *
+ * (1) The first method is triggered by startZoomAnimation(...) and is a fixed
+ * length animation where the final zoom scale is known at startup.  This type of
+ * animation notifies webkit of the final scale BEFORE it animates. The animation
+ * is then done by scaling the CANVAS incrementally based on a stepping function.
+ *
+ * (2) The second method is triggered by a multi-touch pinch and the new scale
+ * is determined dynamically based on the user's gesture. This type of animation
+ * only notifies webkit of new scale AFTER the gesture is complete. The animation
+ * effect is achieved by scaling the VIEWS (both WebView and ViewManager.ChildView)
+ * to the new scale in response to events related to the user's gesture.
+ */
 class ZoomManager {
 
     static final String LOGTAG = "webviewZoom";
@@ -73,9 +95,6 @@ class ZoomManager {
 
     private static float MINIMUM_SCALE_INCREMENT = 0.01f;
 
-    // set to true temporarily during ScaleGesture triggered zoom
-    boolean mPreviewZoomOnly = false;
-
     // the current computed zoom scale and its inverse.
     float mActualScale;
     float mInvActualScale;
@@ -103,6 +122,14 @@ class ZoomManager {
     private int mInitialScrollY;
     private long mZoomStart;
     static final int ZOOM_ANIMATION_LENGTH = 500;
+
+    // whether support multi-touch
+    private boolean mSupportMultiTouch;
+
+    // use the framework's ScaleGestureDetector to handle multi-touch
+    private ScaleGestureDetector mScaleDetector;
+
+    private boolean mPinchToZoomAnimating = false;
 
     public ZoomManager(WebView webView, CallbackProxy callbackProxy) {
         mWebView = webView;
@@ -226,7 +253,7 @@ class ZoomManager {
             mInvInitialZoomScale = 1.0f / oldScale;
             mInvFinalZoomScale = 1.0f / mActualScale;
             mZoomScale = mActualScale;
-            WebViewCore.pauseUpdatePicture(mWebView.getWebViewCore());
+            mWebView.onFixedLengthZoomAnimationStart();
             mWebView.invalidate();
             return true;
         } else {
@@ -235,25 +262,23 @@ class ZoomManager {
     }
 
     /**
-     * Computes and returns the relevant data needed by the WebView's drawing
-     * model to animate a zoom.
+     * This method is called by the WebView's drawing code when a fixed length zoom
+     * animation is occurring. Its purpose is to animate the zooming of the canvas
+     * to the desired scale which was specified in startZoomAnimation(...).
      *
-     * This method is to be called when a zoom animation is occurring. The
-     * animation begins by calling startZoomAnimation(...).  The caller can
-     * check to see if the animation has completed by calling isZoomAnimating().
+     * A fixed length animation begins when startZoomAnimation(...) is called and
+     * continues until the ZOOM_ANIMATION_LENGTH time has elapsed. During that
+     * interval each time the WebView draws it calls this function which is 
+     * responsible for generating the animation.
      *
-     * @return an array containing the values needed to animate the drawing
-     * surface.
-     * [0] = delta for the new scrollX position
-     * [1] = delta for the new scrollY position
-     * [2] = current zoom scale
+     * Additionally, the WebView can check to see if such an animation is currently
+     * in progress by calling isFixedLengthAnimationInProgress().
      */
-    public float[] animateZoom() {
+    public void animateZoom(Canvas canvas) {
         if (mZoomScale == 0) {
-            Log.w(LOGTAG, "A WebView is attempting to animate a zoom when no " +
-                    "zoom is in progress");
-            float[] result = {0, 0, mActualScale};
-            return result;
+            Log.w(LOGTAG, "A WebView is attempting to perform a fixed length "
+                    + "zoom animation when no zoom is in progress");
+            return;
         }
 
         float zoomScale;
@@ -262,10 +287,12 @@ class ZoomManager {
             float ratio = (float) interval / ZOOM_ANIMATION_LENGTH;
             zoomScale = 1.0f / (mInvInitialZoomScale
                     + (mInvFinalZoomScale - mInvInitialZoomScale) * ratio);
+            mWebView.invalidate();
         } else {
             zoomScale = mZoomScale;
             // set mZoomScale to be 0 as we have finished animating
             mZoomScale = 0;
+            mWebView.onFixedLengthZoomAnimationEnd();
         }
         // calculate the intermediate scroll position. Since we need to use
         // zoomScale, we can't use the WebView's pinLocX/Y functions directly.
@@ -281,11 +308,15 @@ class ZoomManager {
                 - titleHeight, mWebView.getViewHeight(), Math.round(mWebView.getContentHeight()
                 * zoomScale)) + titleHeight) + mWebView.getScrollY();
 
-        float[] result = {tx, ty, zoomScale};
-        return result;
+        canvas.translate(tx, ty);
+        canvas.scale(zoomScale, zoomScale);
     }
 
     public boolean isZoomAnimating() {
+        return isFixedLengthAnimationInProgress() || mPinchToZoomAnimating;
+    }
+
+    public boolean isFixedLengthAnimationInProgress() {
         return mZoomScale != 0;
     }
 
@@ -316,7 +347,7 @@ class ZoomManager {
             float oldScale = mActualScale;
             float oldInvScale = mInvActualScale;
 
-            if (scale != mActualScale && !mPreviewZoomOnly) {
+            if (scale != mActualScale && !mPinchToZoomAnimating) {
                 mCallbackProxy.onScaleChanged(mActualScale, scale);
             }
 
@@ -357,10 +388,98 @@ class ZoomManager {
         }
     }
 
+    public void updateMultiTouchSupport(Context context) {
+        // check the preconditions
+        assert mWebView.getSettings() != null;
+
+        WebSettings settings = mWebView.getSettings();
+        mSupportMultiTouch = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
+                && settings.supportZoom() && settings.getBuiltInZoomControls();
+        if (mSupportMultiTouch && (mScaleDetector == null)) {
+            mScaleDetector = new ScaleGestureDetector(context, new ScaleDetectorListener());
+        } else if (!mSupportMultiTouch && (mScaleDetector != null)) {
+            mScaleDetector = null;
+        }
+    }
+
+    public boolean supportsMultiTouchZoom() {
+        return mSupportMultiTouch;
+    }
+
+    /**
+     * Notifies the caller that the ZoomManager is requesting that scale related
+     * updates should not be sent to webkit. This can occur in cases where the
+     * ZoomManager is performing an animation and does not want webkit to update
+     * until the animation is complete.
+     *
+     * @return true if scale related updates should not be sent to webkit and
+     *         false otherwise.
+     */
+    public boolean isPreventingWebkitUpdates() {
+        // currently only animating a multi-touch zoom prevents updates, but
+        // others can add their own conditions to this method if necessary.
+        return mPinchToZoomAnimating;
+    }
+
+    public ScaleGestureDetector getMultiTouchGestureDetector() {
+        return mScaleDetector;
+    }
+
+    private class ScaleDetectorListener implements ScaleGestureDetector.OnScaleGestureListener {
+
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            dismissZoomPicker();
+            // reset the zoom overview mode so that the page won't auto grow
+            mInZoomOverview = false;
+            mWebView.mViewManager.startZoom();
+            mWebView.onPinchToZoomAnimationStart();
+            return true;
+        }
+
+        public boolean onScale(ScaleGestureDetector detector) {
+            float scale = Math.round(detector.getScaleFactor() * mActualScale * 100) * 0.01f;
+            if (willScaleTriggerZoom(scale)) {
+                mPinchToZoomAnimating = true;
+                // limit the scale change per step
+                if (scale > mActualScale) {
+                    scale = Math.min(scale, mActualScale * 1.25f);
+                } else {
+                    scale = Math.max(scale, mActualScale * 0.8f);
+                }
+                setZoomCenter(detector.getFocusX(), detector.getFocusY());
+                setZoomScale(scale, false);
+                mWebView.invalidate();
+                return true;
+            }
+            return false;
+        }
+
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            if (mPinchToZoomAnimating) {
+                mPinchToZoomAnimating = false;
+                mWebView.setViewSizeAnchor(mWebView.viewToContentX((int) mZoomCenterX
+                        + mWebView.getScrollX()), mWebView.viewToContentY((int) mZoomCenterY
+                        + mWebView.getScrollY()));
+                // don't reflow when zoom in; when zoom out, do reflow if the
+                // new scale is almost minimum scale;
+                boolean reflowNow = !canZoomOut() || (mActualScale <= 0.8 * mTextWrapScale);
+                // force zoom after mPreviewZoomOnly is set to false so that the
+                // new view size will be passed to the WebKit
+                refreshZoomScale(reflowNow);
+                // call invalidate() to draw without zoom filter
+                mWebView.invalidate();
+            }
+
+            mWebView.mViewManager.endZoom();
+            mWebView.onPinchToZoomAnimationEnd(detector);
+        }
+    }
+
     public void onSizeChanged(int w, int h, int ow, int oh) {
         // reset zoom and anchor to the top left corner of the screen
         // unless we are already zooming
-        if (!isZoomAnimating()) {
+        if (!isFixedLengthAnimationInProgress()) {
             int visibleTitleHeight = mWebView.getVisibleTitleHeight();
             mZoomCenterX = 0;
             mZoomCenterY = visibleTitleHeight;
