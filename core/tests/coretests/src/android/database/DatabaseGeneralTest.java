@@ -1385,8 +1385,8 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         assertTrue(statementIds.contains(stmt0Id));
         assertEquals(1, statementIds.size());
 
-        // close the database. native method dbclose() will finalize all statements
-        // before closing the database.
+        // close the database. everything from mClosedStatementIds in mDatabase
+        // should be finalized and cleared from the list
         // again do it in a separate thread
         Thread t3 = new Thread() {
             @Override public void run() {
@@ -1396,25 +1396,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         t3.start();
         t3.join();
 
-        // check mClosedStatementIds in mDatabase. it should still have 'stmt0Id'
-        statementIds = mDatabase.getQueuedUpStmtList();
-        assertTrue(statementIds.contains(stmt0Id));
-
-        // try to finalize the pending statements. and there should be no exceptions from anywhere
-        // just for the heck of it, do it in a separate thread
-        Thread t4 = new Thread() {
-            @Override public void run() {
-                try {
-                    mDatabase.closePendingStatements();
-                } catch (Exception e) {
-                    fail("not expected");
-                }
-            }
-        };
-        t4.start();
-        t4.join();
-
-        // mClosedStatementIds in mDatabase should be empty
+        // check mClosedStatementIds in mDatabase. it should be empty
         statementIds = mDatabase.getQueuedUpStmtList();
         assertEquals(0, statementIds.size());
     }
