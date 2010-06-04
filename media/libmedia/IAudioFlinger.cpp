@@ -62,7 +62,14 @@ enum {
     SET_STREAM_OUTPUT,
     SET_VOICE_VOLUME,
     GET_RENDER_POSITION,
-    GET_INPUT_FRAMES_LOST
+    GET_INPUT_FRAMES_LOST,
+    NEW_AUDIO_SESSION_ID,
+    LOAD_EFFECT_LIBRARY,
+    UNLOAD_EFFECT_LIBRARY,
+    QUERY_NUM_EFFECTS,
+    QUERY_NEXT_EFFECT,
+    GET_EFFECT_DESCRIPTOR,
+    CREATE_EFFECT
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -83,6 +90,7 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 int output,
+                                int *sessionId,
                                 status_t *status)
     {
         Parcel data, reply;
@@ -97,10 +105,19 @@ public:
         data.writeInt32(flags);
         data.writeStrongBinder(sharedBuffer->asBinder());
         data.writeInt32(output);
+        int lSessionId = 0;
+        if (sessionId != NULL) {
+            lSessionId = *sessionId;
+        }
+        data.writeInt32(lSessionId);
         status_t lStatus = remote()->transact(CREATE_TRACK, data, &reply);
         if (lStatus != NO_ERROR) {
             LOGE("createTrack error: %s", strerror(-lStatus));
         } else {
+            lSessionId = reply.readInt32();
+            if (sessionId != NULL) {
+                *sessionId = lSessionId;
+            }
             lStatus = reply.readInt32();
             track = interface_cast<IAudioTrack>(reply.readStrongBinder());
         }
@@ -118,6 +135,7 @@ public:
                                 int channelCount,
                                 int frameCount,
                                 uint32_t flags,
+                                int *sessionId,
                                 status_t *status)
     {
         Parcel data, reply;
@@ -130,10 +148,19 @@ public:
         data.writeInt32(channelCount);
         data.writeInt32(frameCount);
         data.writeInt32(flags);
+        int lSessionId = 0;
+        if (sessionId != NULL) {
+            lSessionId = *sessionId;
+        }
+        data.writeInt32(lSessionId);
         status_t lStatus = remote()->transact(OPEN_RECORD, data, &reply);
         if (lStatus != NO_ERROR) {
             LOGE("openRecord error: %s", strerror(-lStatus));
         } else {
+            lSessionId = reply.readInt32();
+            if (sessionId != NULL) {
+                *sessionId = lSessionId;
+            }
             lStatus = reply.readInt32();
             record = interface_cast<IAudioRecord>(reply.readStrongBinder());
         }
@@ -497,6 +524,157 @@ public:
         remote()->transact(GET_INPUT_FRAMES_LOST, data, &reply);
         return reply.readInt32();
     }
+
+    virtual int newAudioSessionId()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        status_t status = remote()->transact(NEW_AUDIO_SESSION_ID, data, &reply);
+        int id = 0;
+        if (status == NO_ERROR) {
+            id = reply.readInt32();
+        }
+        return id;
+    }
+
+    virtual status_t loadEffectLibrary(const char *libPath, int *handle)
+    {
+        if (libPath == NULL || handle == NULL) {
+            return BAD_VALUE;
+        }
+        *handle = 0;
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeCString(libPath);
+        status_t status = remote()->transact(LOAD_EFFECT_LIBRARY, data, &reply);
+        if (status == NO_ERROR) {
+            status = reply.readInt32();
+            if (status == NO_ERROR) {
+                *handle = reply.readInt32();
+            }
+        }
+        return status;
+    }
+
+    virtual status_t unloadEffectLibrary(int handle)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(handle);
+        status_t status = remote()->transact(UNLOAD_EFFECT_LIBRARY, data, &reply);
+        if (status == NO_ERROR) {
+            status = reply.readInt32();
+        }
+        return status;
+    }
+
+    virtual status_t queryNumberEffects(uint32_t *numEffects)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        status_t status = remote()->transact(QUERY_NUM_EFFECTS, data, &reply);
+        if (status != NO_ERROR) {
+            return status;
+        }
+        status = reply.readInt32();
+        if (status != NO_ERROR) {
+            return status;
+        }
+        if (numEffects) {
+            *numEffects = (uint32_t)reply.readInt32();
+        }
+        return NO_ERROR;
+    }
+
+    virtual status_t queryNextEffect(effect_descriptor_t *pDescriptor)
+    {
+        if (pDescriptor == NULL) {
+            return BAD_VALUE;
+        }
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        status_t status = remote()->transact(QUERY_NEXT_EFFECT, data, &reply);
+        if (status != NO_ERROR) {
+            return status;
+        }
+        status = reply.readInt32();
+        if (status != NO_ERROR) {
+            return status;
+        }
+        reply.read(pDescriptor, sizeof(effect_descriptor_t));
+        return NO_ERROR;
+    }
+
+    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid, effect_descriptor_t *pDescriptor)
+    {
+        if (pUuid == NULL || pDescriptor == NULL) {
+            return BAD_VALUE;
+        }
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.write(pUuid, sizeof(effect_uuid_t));
+        status_t status = remote()->transact(GET_EFFECT_DESCRIPTOR, data, &reply);
+        if (status != NO_ERROR) {
+            return status;
+        }
+        status = reply.readInt32();
+        if (status != NO_ERROR) {
+            return status;
+        }
+        reply.read(pDescriptor, sizeof(effect_descriptor_t));
+        return NO_ERROR;
+    }
+
+    virtual sp<IEffect> createEffect(pid_t pid,
+                                    effect_descriptor_t *pDesc,
+                                    const sp<IEffectClient>& client,
+                                    int32_t priority,
+                                    int output,
+                                    int sessionId,
+                                    status_t *status,
+                                    int *id,
+                                    int *enabled)
+    {
+        Parcel data, reply;
+        sp<IEffect> effect;
+
+        if (pDesc == NULL) {
+             return effect;
+             if (status) {
+                 *status = BAD_VALUE;
+             }
+         }
+
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(pid);
+        data.write(pDesc, sizeof(effect_descriptor_t));
+        data.writeStrongBinder(client->asBinder());
+        data.writeInt32(priority);
+        data.writeInt32(output);
+        data.writeInt32(sessionId);
+
+        status_t lStatus = remote()->transact(CREATE_EFFECT, data, &reply);
+        if (lStatus != NO_ERROR) {
+            LOGE("createEffect error: %s", strerror(-lStatus));
+        } else {
+            lStatus = reply.readInt32();
+            int tmp = reply.readInt32();
+            if (id) {
+                *id = tmp;
+            }
+            tmp = reply.readInt32();
+            if (enabled) {
+                *enabled = tmp;
+            }
+            effect = interface_cast<IEffect>(reply.readStrongBinder());
+            reply.read(pDesc, sizeof(effect_descriptor_t));
+        }
+        if (status) {
+            *status = lStatus;
+        }
+
+        return effect;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -518,10 +696,12 @@ status_t BnAudioFlinger::onTransact(
             uint32_t flags = data.readInt32();
             sp<IMemory> buffer = interface_cast<IMemory>(data.readStrongBinder());
             int output = data.readInt32();
+            int sessionId = data.readInt32();
             status_t status;
             sp<IAudioTrack> track = createTrack(pid,
                     streamType, sampleRate, format,
-                    channelCount, bufferCount, flags, buffer, output, &status);
+                    channelCount, bufferCount, flags, buffer, output, &sessionId, &status);
+            reply->writeInt32(sessionId);
             reply->writeInt32(status);
             reply->writeStrongBinder(track->asBinder());
             return NO_ERROR;
@@ -535,9 +715,11 @@ status_t BnAudioFlinger::onTransact(
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
+            int sessionId = data.readInt32();
             status_t status;
             sp<IAudioRecord> record = openRecord(pid, input,
-                    sampleRate, format, channelCount, bufferCount, flags, &status);
+                    sampleRate, format, channelCount, bufferCount, flags, &sessionId, &status);
+            reply->writeInt32(sessionId);
             reply->writeInt32(status);
             reply->writeStrongBinder(record->asBinder());
             return NO_ERROR;
@@ -768,7 +950,79 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32(getInputFramesLost(ioHandle));
             return NO_ERROR;
         } break;
+        case NEW_AUDIO_SESSION_ID: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            reply->writeInt32(newAudioSessionId());
+            return NO_ERROR;
+        } break;
+        case LOAD_EFFECT_LIBRARY: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            int handle;
+            status_t status = loadEffectLibrary(data.readCString(), &handle);
+            reply->writeInt32(status);
+            if (status == NO_ERROR) {
+                reply->writeInt32(handle);
+            }
+            return NO_ERROR;
+        }
+        case UNLOAD_EFFECT_LIBRARY: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            reply->writeInt32(unloadEffectLibrary(data.readInt32()));
+            return NO_ERROR;
+        }
+        case QUERY_NUM_EFFECTS: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            uint32_t numEffects;
+            status_t status = queryNumberEffects(&numEffects);
+            reply->writeInt32(status);
+            if (status == NO_ERROR) {
+                reply->writeInt32((int32_t)numEffects);
+            }
+            return NO_ERROR;
+        }
+        case QUERY_NEXT_EFFECT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            effect_descriptor_t desc;
+            status_t status = queryNextEffect(&desc);
+            reply->writeInt32(status);
+            if (status == NO_ERROR) {
+                reply->write(&desc, sizeof(effect_descriptor_t));
+            }
+            return NO_ERROR;
+        }
+        case GET_EFFECT_DESCRIPTOR: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            effect_uuid_t uuid;
+            data.read(&uuid, sizeof(effect_uuid_t));
+            effect_descriptor_t desc;
+            status_t status = getEffectDescriptor(&uuid, &desc);
+            reply->writeInt32(status);
+            if (status == NO_ERROR) {
+                reply->write(&desc, sizeof(effect_descriptor_t));
+            }
+            return NO_ERROR;
+        }
+        case CREATE_EFFECT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            pid_t pid = data.readInt32();
+            effect_descriptor_t desc;
+            data.read(&desc, sizeof(effect_descriptor_t));
+            sp<IEffectClient> client = interface_cast<IEffectClient>(data.readStrongBinder());
+            int32_t priority = data.readInt32();
+            int output = data.readInt32();
+            int sessionId = data.readInt32();
+            status_t status;
+            int id;
+            int enabled;
 
+            sp<IEffect> effect = createEffect(pid, &desc, client, priority, output, sessionId, &status, &id, &enabled);
+            reply->writeInt32(status);
+            reply->writeInt32(id);
+            reply->writeInt32(enabled);
+            reply->writeStrongBinder(effect->asBinder());
+            reply->write(&desc, sizeof(effect_descriptor_t));
+            return NO_ERROR;
+        } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }

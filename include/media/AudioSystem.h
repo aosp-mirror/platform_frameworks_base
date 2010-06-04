@@ -230,6 +230,8 @@ public:
     static status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int stream = DEFAULT);
 
     static unsigned int  getInputFramesLost(audio_io_handle_t ioHandle);
+
+    static int newAudioSessionId();
     //
     // AudioPolicyService interface
     //

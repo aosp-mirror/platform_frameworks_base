@@ -292,7 +292,7 @@ typedef struct reverb_module_s {
  * Effect API
  *------------------------------------
 */
-int EffectQueryNumberEffects(int *pNumEffects);
+int EffectQueryNumberEffects(uint32_t *pNumEffects);
 int EffectQueryNext(effect_descriptor_t *pDescriptor);
 int EffectCreate(effect_uuid_t *effectUID, effect_interface_t *pInterface);
 int EffectRelease(effect_interface_t interface);

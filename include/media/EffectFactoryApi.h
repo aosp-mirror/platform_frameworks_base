@@ -34,7 +34,7 @@ extern "C" {
 //
 //    Function:       EffectQueryNumberEffects
 //
-//    Description:    Returns the number of different effect in all loaded libraries.
+//    Description:    Returns the number of different effects in all loaded libraries.
 //          Each effect must have a different effect uuid (see
 //          effect_descriptor_t). This function together with EffectQueryNext()
 //          is used to enumerate all effects present in all loaded libraries.
@@ -52,7 +52,7 @@ extern "C" {
 //        *pNumEffects:     updated with number of effects in factory
 //
 ////////////////////////////////////////////////////////////////////////////////
-int EffectQueryNumberEffects(int *pNumEffects);
+int EffectQueryNumberEffects(uint32_t *pNumEffects);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -98,7 +98,7 @@ int EffectQueryNext(effect_descriptor_t *pDescriptor);
 //        returned value:    0          successful operation.
 //                          -ENODEV     factory failed to initialize
 //                          -EINVAL     invalid pEffectUuid or pInterface
-//                          -ENOENT     No effect with this uuid found
+//                          -ENOENT     no effect with this uuid found
 //        *pInterface:     updated with the effect interface.
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ int EffectRelease(effect_interface_t interface);
 //
 //    Output:
 //        returned value:    0          successful operation.
-//                          -ENODEV     Effect factory not initialized or
+//                          -ENODEV     effect factory not initialized or
 //                                      library could not be loaded or
 //                                      library does not implement required functions
 //                          -EINVAL     invalid libPath string or handle
@@ -159,7 +159,7 @@ int EffectLoadLibrary(const char *libPath, int *handle);
 //
 //    Output:
 //        returned value:    0          successful operation.
-//                          -ENODEV     Effect factory not initialized
+//                          -ENODEV     effect factory not initialized
 //                          -ENOENT     invalid handle
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ int EffectUnloadLibrary(int handle);
 //        returned value:    0          successful operation.
 //                          -ENODEV     factory failed to initialize
 //                          -EINVAL     invalid pEffectUuid or pDescriptor
-//                          -ENOENT     No effect with this uuid found
+//                          -ENOENT     no effect with this uuid found
 //        *pDescriptor:     updated with the effect descriptor.
 //
 ////////////////////////////////////////////////////////////////////////////////
