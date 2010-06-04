@@ -322,4 +322,19 @@ public class WebChromeClient {
     public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType) {
         uploadFile.onReceiveValue(null);
     }
+
+    /**
+     * Tell the client that the selection has been initiated.
+     * @hide
+     */
+    public void onSelectionStart() {
+    }
+
+    /**
+     * Tell the client that the selection has been copied or canceled.
+     * @hide
+     */
+    public void onSelectionDone() {
+    }
+
 }
