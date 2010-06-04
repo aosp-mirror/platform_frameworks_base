@@ -280,7 +280,9 @@ class DeviceStorageMonitorService extends Binder {
         mTotalMemory = ((long)mDataFileStats.getBlockCount() *
                         mDataFileStats.getBlockSize())/100L;
         mStorageLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW);
+        mStorageLowIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
+        mStorageOkIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         checkMemory(true);
     }
 
