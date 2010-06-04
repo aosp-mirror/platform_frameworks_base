@@ -158,6 +158,10 @@ void MtpServer::run() {
         int ret = mRequest.read(fd);
         if (ret < 0) {
             fprintf(stderr, "request read returned %d, errno: %d\n", ret, errno);
+            if (errno == ECANCELED) {
+                // return to top of loop and wait for next command
+                continue;
+            }
             break;
         }
         MtpOperationCode operation = mRequest.getOperationCode();
@@ -172,6 +176,10 @@ void MtpServer::run() {
             int ret = mData.read(fd);
             if (ret < 0) {
                 fprintf(stderr, "data read returned %d, errno: %d\n", ret, errno);
+                if (errno == ECANCELED) {
+                    // return to top of loop and wait for next command
+                    continue;
+                }
                 break;
             }
             printf("received data:\n");
@@ -180,30 +188,41 @@ void MtpServer::run() {
             mData.reset();
         }
 
-        handleRequest();
+        if (handleRequest()) {
+            if (!dataIn && mData.hasData()) {
+                mData.setOperationCode(operation);
+                mData.setTransactionID(transaction);
+                printf("sending data:\n");
+                mData.dump();
+                ret = mData.write(fd);
+                if (ret < 0) {
+                    fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
+                    if (errno == ECANCELED) {
+                        // return to top of loop and wait for next command
+                        continue;
+                    }
+                    break;
+                }
+            }
 
-        if (!dataIn && mData.hasData()) {
-            mData.setOperationCode(operation);
-            mData.setTransactionID(transaction);
-            printf("sending data:\n");
-            mData.dump();
-            ret = mData.write(fd);
+            mResponse.setTransactionID(transaction);
+            printf("sending response %04X\n", mResponse.getResponseCode());
+            ret = mResponse.write(fd);
             if (ret < 0) {
                 fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
+                if (errno == ECANCELED) {
+                    // return to top of loop and wait for next command
+                    continue;
+                }
                 break;
             }
-        }
-
-        mResponse.setTransactionID(transaction);
-        ret = mResponse.write(fd);
-        if (ret < 0) {
-            fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
-            break;
+        } else {
+            printf("skipping response\n");
         }
     }
 }
 
-void MtpServer::handleRequest() {
+bool MtpServer::handleRequest() {
     MtpOperationCode operation = mRequest.getOperationCode();
     MtpResponseCode response;
 
@@ -261,7 +280,10 @@ void MtpServer::handleRequest() {
             break;
     }
 
+    if (response == MTP_RESPONSE_TRANSACTION_CANCELLED)
+        return false;
     mResponse.setResponseCode(response);
+    return true;
 }
 
 MtpResponseCode MtpServer::doGetDeviceInfo() {
@@ -402,8 +424,12 @@ MtpResponseCode MtpServer::doGetObject() {
 
     // then transfer the file
     int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
-    // FIXME - check for errors here
-    printf("MTP_SEND_FILE returned %d\n", ret);
+    if (ret < 0) {
+        if (errno == ECANCELED)
+            return MTP_RESPONSE_TRANSACTION_CANCELLED;
+        else
+            return MTP_RESPONSE_GENERAL_ERROR;
+    }
     return MTP_RESPONSE_OK;
 }
 
@@ -508,13 +534,17 @@ MtpResponseCode MtpServer::doSendObject() {
 
     // transfer the file
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
-    // FIXME - check for errors here.
-    // we need to return a reasonable response and delete
-    // mSendObjectHandle from the database if this fails.
+    // FIXME - we need to delete mSendObjectHandle from the database if this fails.
     printf("MTP_RECEIVE_FILE returned %d\n", ret);
-
     mSendObjectHandle = kInvalidObjectHandle;
 
+    if (ret < 0) {
+        unlink(mSendObjectFilePath);
+        if (errno == ECANCELED)
+            return MTP_RESPONSE_TRANSACTION_CANCELLED;
+        else
+            return MTP_RESPONSE_GENERAL_ERROR;
+    }
     return MTP_RESPONSE_OK;
 }
 

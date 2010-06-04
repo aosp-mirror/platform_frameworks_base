@@ -67,7 +67,7 @@ public:
     void                run();
 
 private:
-    void                handleRequest();
+    bool                handleRequest();
 
     MtpResponseCode     doGetDeviceInfo();
     MtpResponseCode     doOpenSession();
