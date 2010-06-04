@@ -55,6 +55,35 @@ public class ApnSetting {
         this.types = types;
     }
 
+    // data[0] = name
+    // data[1] = apn
+    // data[2] = proxy
+    // data[3] = port
+    // data[4] = username
+    // data[5] = password
+    // data[6] = server
+    // data[7] = mmsc
+    // data[8] = mmsproxy
+    // data[9] = mmsport
+    // data[10] = mcc
+    // data[11] = mnc
+    // data[12] = auth
+    // data[13] = first type...
+    public static ApnSetting fromString(String data) {
+        if (data == null) return null;
+        String[] a = data.split("\\s*,\\s*");
+        if (a.length < 14) return null;
+        int authType = 0;
+        try {
+            authType = Integer.parseInt(a[12]);
+        } catch (Exception e) {
+        }
+        String[] typeArray = new String[a.length - 13];
+        System.arraycopy(a, 13, typeArray, 0, a.length - 13);
+        return new ApnSetting(-1,a[10]+a[11],a[0],a[1],a[2],a[3],a[7],a[8],
+                a[9],a[4],a[5],authType,typeArray);
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(carrier)
