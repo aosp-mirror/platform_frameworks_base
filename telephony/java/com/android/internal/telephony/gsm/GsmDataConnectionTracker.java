@@ -49,6 +49,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;
@@ -366,6 +367,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected boolean isApnTypeAvailable(String type) {
+        if (type.equals(Phone.APN_TYPE_DUN)) {
+            return (fetchDunApn() != null);
+        }
+
         if (allApns != null) {
             for (ApnSetting apn : allApns) {
                 if (apn.canHandleType(type)) {
@@ -1303,6 +1308,17 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
+    private ApnSetting fetchDunApn() {
+        Context c = phone.getContext();
+        String apnData = Settings.Secure.getString(c.getContentResolver(),
+                                    Settings.Secure.TETHER_DUN_APN);
+        ApnSetting dunSetting = ApnSetting.fromString(apnData);
+        if (dunSetting != null) return dunSetting;
+
+        apnData = c.getResources().getString(R.string.config_tether_apndata);
+        return ApnSetting.fromString(apnData);
+    }
+
     /**
      *
      * @return waitingApns list to be used to create PDP
@@ -1310,6 +1326,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private ArrayList<ApnSetting> buildWaitingApns() {
         ArrayList<ApnSetting> apnList = new ArrayList<ApnSetting>();
+
+        if (mRequestedApnType.equals(Phone.APN_TYPE_DUN)) {
+            ApnSetting dun = fetchDunApn();
+            if (dun != null) apnList.add(dun);
+            return apnList;
+        }
+
         String operator = mGsmPhone.mSIMRecords.getSIMOperatorNumeric();
 
         if (mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
