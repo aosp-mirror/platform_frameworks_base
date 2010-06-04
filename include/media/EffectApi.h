@@ -114,7 +114,8 @@ typedef struct effect_descriptor_s {
 //  +---------------------------+-----------+-----------------------------------
 //  | Volume management         | 5..6      | 0 none
 //  |                           |           | 1 implements volume control
-//  |                           |           | 2..3 reserved
+//  |                           |           | 2 requires volume indication
+//  |                           |           | 3 reserved
 //  +---------------------------+-----------+-----------------------------------
 //  | Device management         | 7..8      | 0 none
 //  |                           |           | 1 requires device updates
@@ -154,6 +155,7 @@ typedef struct effect_descriptor_s {
 // volume control
 #define EFFECT_FLAG_VOLUME_MASK         0x00000060
 #define EFFECT_FLAG_VOLUME_CTRL         0x00000020
+#define EFFECT_FLAG_VOLUME_IND          0x00000040
 #define EFFECT_FLAG_VOLUME_NONE         0x00000000
 
 // device control
@@ -296,10 +298,12 @@ struct effect_interface_s {
 //  | Set and get volume. Used by    | EFFECT_CMD_SET_VOLUME         | size: n * sizeof(uint32_t)    | size: n * sizeof(uint32_t)
 //  | audio framework to delegate    |                               | data: volume for each channel | data: volume for each channel
 //  | volume control to effect engine|                               | defined in effect_config_t in | defined in effect_config_t in
-//  | The engine must return the     |                               | 8.24 fixed point format       | 8.24 fixed point format
-//  | volume that should be applied  |                               |                               |
-//  | before the effect is processed |                               |                               |
-//  | The overall volume (the volume |                               |                               |
+//  | If volume control flag is set  |                               | 8.24 fixed point format       | 8.24 fixed point format
+//  | in the effect descriptor, the  |                               |                               | It is legal to receive a null
+//  | effect engine must return the  |                               |                               | pointer as pReplyData in which
+//  | volume that should be applied  |                               |                               | case the effect framework has
+//  | before the effect is processed |                               |                               | delegated volume control to
+//  | The overall volume (the volume |                               |                               | another effect.
 //  | actually applied by the effect |                               |                               |
 //  | multiplied by the returned     |                               |                               |
 //  | value) should match the        |                               |                               |
@@ -370,7 +374,7 @@ typedef struct buffer_provider_s {
 // structure that defines both input and output buffer configurations and is
 // passed by the EFFECT_CMD_CONFIGURE command.
 typedef struct buffer_config_s {
-    audio_buffer_t  buffer;     // buffer for use by process() function is not passed explicitly
+    audio_buffer_t  buffer;     // buffer for use by process() function if not passed explicitly
     uint32_t   samplingRate;    // sampling rate
     uint32_t   channels;        // channel mask (see audio_channels_e in AudioCommon.h)
     buffer_provider_t bufferProvider;   // buffer provider
@@ -457,7 +461,7 @@ typedef struct effect_param_s {
 //
 //    Function:       EffectQueryNumberEffects
 //
-//    Description:    Returns the number of different effect exposed by the
+//    Description:    Returns the number of different effects exposed by the
 //          library. Each effect must have a unique effect uuid (see
 //          effect_descriptor_t). This function together with EffectQueryNext()
 //          is used to enumerate all effects present in the library.
@@ -475,7 +479,7 @@ typedef struct effect_param_s {
 //        *pNumEffects:     updated with number of effects in library
 //
 ////////////////////////////////////////////////////////////////////////////////
-typedef int32_t (*effect_QueryNumberEffects_t)(int32_t *pNumEffects);
+typedef int32_t (*effect_QueryNumberEffects_t)(uint32_t *pNumEffects);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -521,7 +525,7 @@ typedef int32_t (*effect_QueryNextEffect_t)(effect_descriptor_t *pDescriptor);
 //        returned value:    0          successful operation.
 //                          -ENODEV     library failed to initialize
 //                          -EINVAL     invalid pEffectUuid or pInterface
-//                          -ENOENT     No effect with this uuid found
+//                          -ENOENT     no effect with this uuid found
 //        *pInterface:     updated with the effect interface handle.
 //
 ////////////////////////////////////////////////////////////////////////////////

@@ -87,7 +87,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
-    libhardware_legacy
+    libhardware_legacy \
+    libeffects
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
   LOCAL_STATIC_LIBRARIES += libaudiointerface libaudiopolicybase

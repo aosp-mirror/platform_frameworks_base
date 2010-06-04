@@ -63,11 +63,14 @@ public:
         // for target TRACK
         CHANNEL_COUNT   = 0x4000,
         FORMAT          = 0x4001,
+        MAIN_BUFFER     = 0x4002,
+        AUX_BUFFER      = 0x4003,
         // for TARGET RESAMPLE
         SAMPLE_RATE     = 0x4100,
         // for TARGET VOLUME (8 channels max)
         VOLUME0         = 0x4200,
         VOLUME1         = 0x4201,
+        AUXLEVEL        = 0x4210,
     };
 
 
@@ -78,10 +81,10 @@ public:
     status_t    disable(int name);
 
     status_t    setActiveTrack(int track);
-    status_t    setParameter(int target, int name, int value);
+    status_t    setParameter(int target, int name, void *value);
 
     status_t    setBufferProvider(AudioBufferProvider* bufferProvider);
-    void        process(void* output);
+    void        process();
 
     uint32_t    trackNames() const { return mTrackNames; }
 
@@ -94,6 +97,7 @@ private:
         NEEDS_FORMAT__MASK          = 0x000000F0,
         NEEDS_MUTE__MASK            = 0x00000100,
         NEEDS_RESAMPLE__MASK        = 0x00001000,
+        NEEDS_AUX__MASK             = 0x00010000,
     };
 
     enum {
@@ -107,6 +111,9 @@ private:
 
         NEEDS_RESAMPLE_DISABLED     = 0x00000000,
         NEEDS_RESAMPLE_ENABLED      = 0x00001000,
+
+        NEEDS_AUX_DISABLED     = 0x00000000,
+        NEEDS_AUX_ENABLED      = 0x00010000,
     };
 
     static inline int32_t applyVolume(int32_t in, int32_t v) {
@@ -115,9 +122,10 @@ private:
 
 
     struct state_t;
+    struct track_t;
 
-    typedef void (*mix_t)(state_t* state, void* output);
-
+    typedef void (*mix_t)(state_t* state);
+    typedef void (*hook_t)(track_t* t, int32_t* output, size_t numOutFrames, int32_t* temp, int32_t* aux);
     static const int BLOCKSIZE = 16; // 4 cache lines
 
     struct track_t {
@@ -131,6 +139,9 @@ private:
         int32_t     prevVolume[2];
 
         int32_t     volumeInc[2];
+        int32_t     auxLevel;
+        int32_t     auxInc;
+        int32_t     prevAuxLevel;
 
         uint16_t    frameCount;
 
@@ -142,15 +153,17 @@ private:
         AudioBufferProvider*                bufferProvider;
         mutable AudioBufferProvider::Buffer buffer;
 
-        void (*hook)(track_t* t, int32_t* output, size_t numOutFrames, int32_t* temp);
+        hook_t      hook;
         void const* in;             // current location in buffer
 
         AudioResampler*     resampler;
         uint32_t            sampleRate;
+        int32_t*           mainBuffer;
+        int32_t*           auxBuffer;
 
         bool        setResampler(uint32_t sampleRate, uint32_t devSampleRate);
         bool        doesResample() const;
-        void        adjustVolumeRamp();
+        void        adjustVolumeRamp(bool aux);
     };
 
     // pad to 32-bytes to fill cache line
@@ -173,18 +186,19 @@ private:
 
     void invalidateState(uint32_t mask);
 
-    static void track__genericResample(track_t* t, int32_t* out, size_t numFrames, int32_t* temp);
-    static void track__nop(track_t* t, int32_t* out, size_t numFrames, int32_t* temp);
-    static void volumeRampStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp);
-    static void track__16BitsStereo(track_t* t, int32_t* out, size_t numFrames, int32_t* temp);
-    static void track__16BitsMono(track_t* t, int32_t* out, size_t numFrames, int32_t* temp);
+    static void track__genericResample(track_t* t, int32_t* out, size_t numFrames, int32_t* temp, int32_t* aux);
+    static void track__nop(track_t* t, int32_t* out, size_t numFrames, int32_t* temp, int32_t* aux);
+    static void track__16BitsStereo(track_t* t, int32_t* out, size_t numFrames, int32_t* temp, int32_t* aux);
+    static void track__16BitsMono(track_t* t, int32_t* out, size_t numFrames, int32_t* temp, int32_t* aux);
+    static void volumeRampStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux);
+    static void volumeStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux);
 
-    static void process__validate(state_t* state, void* output);
-    static void process__nop(state_t* state, void* output);
-    static void process__genericNoResampling(state_t* state, void* output);
-    static void process__genericResampling(state_t* state, void* output);
-    static void process__OneTrack16BitsStereoNoResampling(state_t* state, void* output);
-    static void process__TwoTracks16BitsStereoNoResampling(state_t* state, void* output);
+    static void process__validate(state_t* state);
+    static void process__nop(state_t* state);
+    static void process__genericNoResampling(state_t* state);
+    static void process__genericResampling(state_t* state);
+    static void process__OneTrack16BitsStereoNoResampling(state_t* state);
+    static void process__TwoTracks16BitsStereoNoResampling(state_t* state);
 };
 
 // ----------------------------------------------------------------------------

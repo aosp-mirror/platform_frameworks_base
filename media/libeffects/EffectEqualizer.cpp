@@ -114,7 +114,7 @@ int Equalizer_setParameter(AudioEqualizer * pEqualizer, int32_t *pParam, void *p
 //--- Effect Library Interface Implementation
 //
 
-extern "C" int EffectQueryNumberEffects(int *pNumEffects) {
+extern "C" int EffectQueryNumberEffects(uint32_t *pNumEffects) {
     *pNumEffects = 1;
     gEffectIndex = 0;
     return 0;

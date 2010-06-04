@@ -27,6 +27,9 @@
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
 #include <media/IAudioFlingerClient.h>
+#include <media/EffectApi.h>
+#include <media/IEffect.h>
+#include <media/IEffectClient.h>
 #include <utils/String8.h>
 
 namespace android {
@@ -51,6 +54,7 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 int output,
+                                int *sessionId,
                                 status_t *status) = 0;
 
     virtual sp<IAudioRecord> openRecord(
@@ -61,6 +65,7 @@ public:
                                 int channelCount,
                                 int frameCount,
                                 uint32_t flags,
+                                int *sessionId,
                                 status_t *status) = 0;
 
     /* query the audio hardware state. This state never changes,
@@ -134,6 +139,28 @@ public:
     virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) = 0;
 
     virtual unsigned int  getInputFramesLost(int ioHandle) = 0;
+
+    virtual int newAudioSessionId() = 0;
+
+    virtual status_t loadEffectLibrary(const char *libPath, int *handle) = 0;
+
+    virtual status_t unloadEffectLibrary(int handle) = 0;
+
+    virtual status_t queryNumberEffects(uint32_t *numEffects) = 0;
+
+    virtual status_t queryNextEffect(effect_descriptor_t *pDescriptor) = 0;
+
+    virtual status_t getEffectDescriptor(effect_uuid_t *pEffectUUID, effect_descriptor_t *pDescriptor) = 0;
+
+    virtual sp<IEffect> createEffect(pid_t pid,
+                                    effect_descriptor_t *pDesc,
+                                    const sp<IEffectClient>& client,
+                                    int32_t priority,
+                                    int output,
+                                    int sessionId,
+                                    status_t *status,
+                                    int *id,
+                                    int *enabled) = 0;
 };
 
 

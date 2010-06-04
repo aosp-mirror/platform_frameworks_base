@@ -364,6 +364,12 @@ unsigned int AudioSystem::getInputFramesLost(audio_io_handle_t ioHandle) {
     return result;
 }
 
+int AudioSystem::newAudioSessionId() {
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    if (af == 0) return 0;
+    return af->newAudioSessionId();
+}
+
 // ---------------------------------------------------------------------------
 
 void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {

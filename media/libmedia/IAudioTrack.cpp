@@ -34,7 +34,8 @@ enum {
     STOP,
     FLUSH,
     MUTE,
-    PAUSE
+    PAUSE,
+    ATTACH_AUX_EFFECT
 };
 
 class BpAudioTrack : public BpInterface<IAudioTrack>
@@ -97,7 +98,21 @@ public:
             cblk = interface_cast<IMemory>(reply.readStrongBinder());
         }
         return cblk;
-    }    
+    }
+
+    virtual status_t attachAuxEffect(int effectId)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
+        data.writeInt32(effectId);
+        status_t status = remote()->transact(ATTACH_AUX_EFFECT, data, &reply);
+        if (status == NO_ERROR) {
+            status = reply.readInt32();
+        } else {
+            LOGW("attachAuxEffect() error: %s", strerror(-status));
+        }
+        return status;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioTrack, "android.media.IAudioTrack");
@@ -138,6 +153,11 @@ status_t BnAudioTrack::onTransact(
             pause();
             return NO_ERROR;
         }
+        case ATTACH_AUX_EFFECT: {
+            CHECK_INTERFACE(IAudioTrack, data, reply);
+            reply->writeInt32(attachAuxEffect(data.readInt32()));
+            return NO_ERROR;
+        } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }
