@@ -92,7 +92,7 @@ LOCAL_SRC_FILES:=                                       \
 #LOCAL_LDLIBS := -lpthread
 
 LOCAL_C_INCLUDES := external/sqlite/dist
-LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright
+LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libmedia
 
 
 LOCAL_CFLAGS := -g
