@@ -250,6 +250,10 @@ public:
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.
     static const char KEY_VIDEO_FRAME_FORMAT[];
 
+    // Metering mode. This affects how camera determines exposure.
+    // Example value: "spot" or METERING_MODE_XXX constants. Read/write.
+    static const char KEY_METERING_MODE[];
+
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
 
@@ -347,6 +351,15 @@ public:
     // callback will be only called once as soon as the picture is in focus.
     static const char FOCUS_MODE_CONTINUOUS[];
 
+    // The camera determines the exposure by giving more weight to the
+    // central part of the scene.
+    static const char METERING_MODE_CENTER_WEIGHTED[];
+    // The camera determines the exposure by averaging the entire scene,
+    // giving no weighting to any particular area.
+    static const char METERING_MODE_FRAME_AVERAGE[];
+    // The camera determines the exposure by a very small area of the scene,
+    // typically the center.
+    static const char METERING_MODE_SPOT[];
 
 private:
     DefaultKeyedVector<String8,String8>    mMap;
