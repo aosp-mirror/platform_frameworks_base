@@ -273,10 +273,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
     /**
+     * Value for {@link #flags}: set to <code>true</code> if the application
+     * has reported that it is heavy-weight, and thus can not participate in
+     * the normal application lifecycle.
+     * 
+     * <p>Comes from the
+     * {@link android.R.styleable#AndroidManifestApplication_heavyWeight android:heavyWeight}
+     * attribute of the &lt;application&gt; tag.
+     */
+    public static final int FLAG_HEAVY_WEIGHT = 1<<20;
+    
+    /**
      * Value for {@link #flags}: true when the application's rendering should
      * be hardware accelerated.
      */
-    public static final int FLAG_HARDWARE_ACCELERATED = 1<<20;
+    public static final int FLAG_HARDWARE_ACCELERATED = 1<<21;
     
     /**
      * Value for {@link #flags}: this is true if the application has set
