@@ -392,7 +392,7 @@ public class ListPopupWindow {
     /**
      * Set the horizontal offset of this popup from its anchor view in pixels.
      * 
-     * @param The horizontal offset of the popup from its anchor. 
+     * @param offset The horizontal offset of the popup from its anchor.
      */
     public void setHorizontalOffset(int offset) {
         mDropDownHorizontalOffset = offset;
@@ -408,7 +408,7 @@ public class ListPopupWindow {
     /**
      * Set the vertical offset of this popup from its anchor view in pixels.
      * 
-     * @param The vertical offset of the popup from its anchor. 
+     * @param offset The vertical offset of the popup from its anchor.
      */
     public void setVerticalOffset(int offset) {
         mDropDownVerticalOffset = offset;
