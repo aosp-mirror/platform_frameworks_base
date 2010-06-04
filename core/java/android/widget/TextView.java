@@ -4847,6 +4847,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
 
             case Gravity.RIGHT:
+                // Note, Layout resolves ALIGN_OPPOSITE to left or
+                // right based on the paragraph direction.
                 alignment = Layout.Alignment.ALIGN_OPPOSITE;
                 break;
 
@@ -5668,11 +5670,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int leftChar = mLayout.getOffsetForHorizontal(line, hs);
         final int rightChar = mLayout.getOffsetForHorizontal(line, hspace+hs);
         
+        // line might contain bidirectional text
+        final int lowChar = leftChar < rightChar ? leftChar : rightChar;
+        final int highChar = leftChar > rightChar ? leftChar : rightChar;
+
         int newStart = start;
-        if (newStart < leftChar) {
-            newStart = leftChar;
-        } else if (newStart > rightChar) {
-            newStart = rightChar;
+        if (newStart < lowChar) {
+            newStart = lowChar;
+        } else if (newStart > highChar) {
+            newStart = highChar;
         }
         
         if (newStart != start) {
