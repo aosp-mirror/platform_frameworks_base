@@ -249,12 +249,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 "StatusBarManagerService");
     }
 
+    private void enforceStatusBarService() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                "StatusBarManagerService");
+    }
+
 
     // ================================================================================
     // Callbacks from the status bar service.
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications) {
+        enforceStatusBarService();
+
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         synchronized (mIcons) {
@@ -273,20 +280,27 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * the status bar is visible or not.
      */
     public void visibilityChanged(boolean visible) {
+        enforceStatusBarService();
+
         //Slog.d(TAG, "visibilityChanged visible=" + visible);
     }
 
     public void onNotificationClick(String pkg, String tag, int id) {
+        enforceStatusBarService();
+
         mNotificationCallbacks.onNotificationClick(pkg, tag, id);
     }
 
     public void onNotificationError(String pkg, String tag, int id, String message) {
-        Slog.d(TAG, "onNotificationError message=" + message);
+        enforceStatusBarService();
+
         // WARNING: this will call back into us to do the remove.  Don't hold any locks.
         mNotificationCallbacks.onNotificationError(pkg, tag, id, message);
     }
 
     public void onClearAllNotifications() {
+        enforceStatusBarService();
+
         mNotificationCallbacks.onClearAll();
     }
 
