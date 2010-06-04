@@ -365,7 +365,7 @@ public class StatusBarPolicy {
         // storage
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         mStorageManager.registerListener(
-                new com.android.server.status.StorageNotification(context));
+                new com.android.systemui.usb.StorageNotification(context));
 
         // battery
         mService.setIcon("battery", com.android.internal.R.drawable.stat_sys_battery_unknown, 0);
