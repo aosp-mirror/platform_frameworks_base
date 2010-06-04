@@ -2609,6 +2609,24 @@ bool ResTable::expandResourceRef(const uint16_t* refStr, size_t refLen,
         *outType = *defType;
     }
     *outName = String16(p, end-p);
+    if(**outPackage == 0) {
+        if(outErrorMsg) {
+            *outErrorMsg = "Resource package cannot be an empty string";
+        }
+        return false;
+    }
+    if(**outType == 0) {
+        if(outErrorMsg) {
+            *outErrorMsg = "Resource type cannot be an empty string";
+        }
+        return false;
+    }
+    if(**outName == 0) {
+        if(outErrorMsg) {
+            *outErrorMsg = "Resource id cannot be an empty string";
+        }
+        return false;
+    }
     return true;
 }
 
