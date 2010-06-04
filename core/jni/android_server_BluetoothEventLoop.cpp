@@ -64,6 +64,8 @@ static jmethodID method_onDisplayPasskey;
 static jmethodID method_onAgentAuthorize;
 static jmethodID method_onAgentCancel;
 
+static jmethodID method_onInputDevicePropertyChanged;
+
 typedef event_loop_native_data_t native_data_t;
 
 #define EVENT_LOOP_REFS 10
@@ -116,6 +118,9 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                "(Ljava/lang/String;I)V");
     method_onDisplayPasskey = env->GetMethodID(clazz, "onDisplayPasskey",
                                                "(Ljava/lang/String;II)V");
+    method_onInputDevicePropertyChanged = env->GetMethodID(clazz, "onInputDevicePropertyChanged",
+                                                      "(Ljava/lang/String;[Ljava/lang/String;)V");
+
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
 #endif
@@ -852,6 +857,22 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         env->CallVoidMethod(nat->me,
                             method_onDeviceDisconnectRequested,
                             env->NewStringUTF(remote_device_path));
+        goto success;
+    } else if (dbus_message_is_signal(msg,
+                                      "org.bluez.Input",
+                                      "PropertyChanged")) {
+
+        jobjectArray str_array =
+                    parse_input_property_change(env, msg);
+        if (str_array != NULL) {
+            const char *c_path = dbus_message_get_path(msg);
+            env->CallVoidMethod(nat->me,
+                                method_onInputDevicePropertyChanged,
+                                env->NewStringUTF(c_path),
+                                str_array);
+        } else {
+            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+        }
         goto success;
     }
 

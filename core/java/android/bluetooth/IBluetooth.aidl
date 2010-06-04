@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.BluetoothDevice;
 import android.os.ParcelUuid;
 
 /**
@@ -72,4 +73,12 @@ interface IBluetooth
     boolean connectHeadset(String address);
     boolean disconnectHeadset(String address);
     boolean notifyIncomingConnection(String address);
+
+    // HID profile APIs
+    boolean connectInputDevice(in BluetoothDevice device);
+    boolean disconnectInputDevice(in BluetoothDevice device);
+    BluetoothDevice[] getConnectedInputDevices();  // change to Set<> once AIDL supports
+    int getInputDeviceState(in BluetoothDevice device);
+    boolean setInputDevicePriority(in BluetoothDevice device, int priority);
+    int getInputDevicePriority(in BluetoothDevice device);
 }

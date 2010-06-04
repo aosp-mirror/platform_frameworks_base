@@ -24,16 +24,19 @@
 
 package android.server;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothDeviceProfileState;
 import android.bluetooth.BluetoothProfileState;
+import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.IBluetoothHeadset;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -70,8 +73,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class BluetoothService extends IBluetooth.Stub {
     private static final String TAG = "BluetoothService";
@@ -129,6 +134,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private final BluetoothProfileState mHfpProfileState;
 
     private BluetoothA2dpService mA2dpService;
+    private final HashMap<BluetoothDevice, Integer> mInputDevices;
+
     private static String mDockAddress;
     private String mDockPin;
 
@@ -198,6 +205,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         filter.addAction(Intent.ACTION_DOCK_EVENT);
         mContext.registerReceiver(mReceiver, filter);
+        mInputDevices = new HashMap<BluetoothDevice, Integer>();
     }
 
     public static synchronized String readDockBluetoothAddress() {
@@ -1220,6 +1228,127 @@ public class BluetoothService extends IBluetooth.Stub {
         return sp.contains(SHARED_PREFERENCE_DOCK_ADDRESS + address);
     }
 
+    public synchronized boolean connectInputDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+
+        String objectPath = getObjectPathFromAddress(device.getAddress());
+        if (objectPath == null || getConnectedInputDevices().length != 0 ||
+            getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_OFF) {
+            return false;
+        }
+        if(connectInputDeviceNative(objectPath)) {
+            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_CONNECTING);
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized boolean disconnectInputDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+
+        String objectPath = getObjectPathFromAddress(device.getAddress());
+        if (objectPath == null || getConnectedInputDevices().length == 0) {
+            return false;
+        }
+        if(disconnectInputDeviceNative(objectPath)) {
+            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_DISCONNECTING);
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized int getInputDeviceState(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+
+        if (mInputDevices.get(device) == null) {
+            return BluetoothInputDevice.STATE_DISCONNECTED;
+        }
+        return mInputDevices.get(device.getAddress());
+    }
+
+    public synchronized BluetoothDevice[] getConnectedInputDevices() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        Set<BluetoothDevice> devices = lookupInputDevicesMatchingStates(
+            new int[] {BluetoothInputDevice.STATE_CONNECTED});
+        return devices.toArray(new BluetoothDevice[devices.size()]);
+    }
+
+    public synchronized int getInputDevicePriority(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.getBluetoothInputDevicePriorityKey(device.getAddress()),
+                BluetoothInputDevice.PRIORITY_UNDEFINED);
+    }
+
+    public synchronized boolean setInputDevicePriority(BluetoothDevice device, int priority) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        if (!BluetoothAdapter.checkBluetoothAddress(device.getAddress())) {
+            return false;
+        }
+        return Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.getBluetoothInputDevicePriorityKey(device.getAddress()),
+                priority);
+    }
+
+    /*package*/synchronized Set<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
+        Set<BluetoothDevice> inputDevices = new HashSet<BluetoothDevice>();
+        if (mInputDevices.isEmpty()) {
+            return inputDevices;
+        }
+        for (BluetoothDevice device: mInputDevices.keySet()) {
+            int inputDeviceState = getInputDeviceState(device);
+            for (int state : states) {
+                if (state == inputDeviceState) {
+                    inputDevices.add(device);
+                    break;
+                }
+            }
+        }
+        return inputDevices;
+    }
+
+    private synchronized void handleInputDeviceStateChange(BluetoothDevice device, int state) {
+        int prevState;
+        if (mInputDevices.get(device) == null) {
+            prevState = BluetoothInputDevice.STATE_DISCONNECTED;
+        } else {
+            prevState = mInputDevices.get(device);
+        }
+        if (prevState == state) return;
+
+        mInputDevices.put(device, state);
+
+        if (getInputDevicePriority(device) >
+              BluetoothInputDevice.PRIORITY_OFF &&
+            state == BluetoothInputDevice.STATE_CONNECTING ||
+            state == BluetoothInputDevice.STATE_CONNECTED) {
+            // We have connected or attempting to connect.
+            // Bump priority
+            setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_AUTO_CONNECT);
+        }
+
+        Intent intent = new Intent(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
+        intent.putExtra(BluetoothInputDevice.EXTRA_PREVIOUS_INPUT_DEVICE_STATE, prevState);
+        intent.putExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, state);
+        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+
+        if (DBG) log("InputDevice state : device: " + device + " State:" + prevState + "->" + state);
+
+    }
+
+    /*package*/ void handleInputDevicePropertyChange(String path, boolean connected) {
+        String address = getAddressFromObjectPath(path);
+        if (address == null) return;
+        int state = connected ? BluetoothInputDevice.STATE_CONNECTED :
+            BluetoothInputDevice.STATE_DISCONNECTED;
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        handleInputDeviceStateChange(device, state);
+    }
+
     /*package*/ boolean isRemoteDeviceInCache(String address) {
         return (mDeviceProperties.get(address) != null);
     }
@@ -2103,4 +2232,6 @@ public class BluetoothService extends IBluetooth.Stub {
             short channel);
     private native boolean removeServiceRecordNative(int handle);
     private native boolean setLinkTimeoutNative(String path, int num_slots);
+    private native boolean connectInputDeviceNative(String path);
+    private native boolean disconnectInputDeviceNative(String path);
 }

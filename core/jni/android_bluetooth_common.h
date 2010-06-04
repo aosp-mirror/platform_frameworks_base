@@ -162,6 +162,8 @@ jobjectArray parse_adapter_properties(JNIEnv *env, DBusMessageIter *iter);
 jobjectArray parse_remote_device_properties(JNIEnv *env, DBusMessageIter *iter);
 jobjectArray parse_remote_device_property_change(JNIEnv *env, DBusMessage *msg);
 jobjectArray parse_adapter_property_change(JNIEnv *env, DBusMessage *msg);
+jobjectArray parse_input_properties(JNIEnv *env, DBusMessageIter *iter);
+jobjectArray parse_input_property_change(JNIEnv *env, DBusMessage *msg);
 void append_variant(DBusMessageIter *iter, int type, void *val);
 int get_bdaddr(const char *str, bdaddr_t *ba);
 void get_bdaddr_as_string(const bdaddr_t *ba, char *str);

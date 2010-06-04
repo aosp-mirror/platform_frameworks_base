@@ -68,6 +68,10 @@ static Properties adapter_properties[] = {
     {"UUIDs", DBUS_TYPE_ARRAY},
 };
 
+static Properties input_properties[] = {
+    {"Connected", DBUS_TYPE_BOOLEAN},
+};
+
 typedef union {
     char *str_val;
     int int_val;
@@ -698,6 +702,11 @@ jobjectArray parse_remote_device_property_change(JNIEnv *env, DBusMessage *msg) 
                     sizeof(remote_device_properties) / sizeof(Properties));
 }
 
+jobjectArray parse_input_property_change(JNIEnv *env, DBusMessage *msg) {
+    return parse_property_change(env, msg, (Properties *) &input_properties,
+                    sizeof(input_properties) / sizeof(Properties));
+}
+
 jobjectArray parse_adapter_properties(JNIEnv *env, DBusMessageIter *iter) {
     return parse_properties(env, iter, (Properties *) &adapter_properties,
                             sizeof(adapter_properties) / sizeof(Properties));
@@ -706,6 +715,11 @@ jobjectArray parse_adapter_properties(JNIEnv *env, DBusMessageIter *iter) {
 jobjectArray parse_remote_device_properties(JNIEnv *env, DBusMessageIter *iter) {
     return parse_properties(env, iter, (Properties *) &remote_device_properties,
                           sizeof(remote_device_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_input_properties(JNIEnv *env, DBusMessageIter *iter) {
+    return parse_properties(env, iter, (Properties *) &input_properties,
+                          sizeof(input_properties) / sizeof(Properties));
 }
 
 int get_bdaddr(const char *str, bdaddr_t *ba) {
