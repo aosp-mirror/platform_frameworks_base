@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import com.android.internal.R;
+import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
@@ -39,10 +41,12 @@ import android.app.IActivityManager;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
+import android.app.INotificationManager;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
 import android.app.Service;
@@ -69,6 +73,7 @@ import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -473,7 +478,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * to become visible before completing whatever operation they are
      * supposed to do.
      */
-    final ArrayList mWaitingVisibleActivities = new ArrayList();
+    final ArrayList<HistoryRecord> mWaitingVisibleActivities
+            = new ArrayList<HistoryRecord>();
 
     /**
      * List of activities that are ready to be stopped, but waiting
@@ -501,7 +507,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * for the previous activity to settle down before doing so.  It contains
      * HistoryRecord objects.
      */
-    final ArrayList mFinishingActivities = new ArrayList();
+    final ArrayList<HistoryRecord> mFinishingActivities
+            = new ArrayList<HistoryRecord>();
 
     /**
      * All of the applications we currently have running organized by name.
@@ -512,6 +519,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final ProcessMap<ProcessRecord> mProcessNames
             = new ProcessMap<ProcessRecord>();
 
+    /**
+     * The currently running heavy-weight process, if any.
+     */
+    ProcessRecord mHeavyWeightProcess = null;
+    
     /**
      * The last time that various processes have crashed.
      */
@@ -726,21 +738,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * that a single provider may be published under multiple names, so
      * there may be multiple entries here for a single one in mProvidersByClass.
      */
-    final HashMap mProvidersByName = new HashMap();
+    final HashMap<String, ContentProviderRecord> mProvidersByName
+            = new HashMap<String, ContentProviderRecord>();
 
     /**
      * All of the currently running global content providers.  Keys are a
      * string containing the provider's implementation class and values are a
      * ContentProviderRecord object containing the data about it.
      */
-    final HashMap mProvidersByClass = new HashMap();
+    final HashMap<String, ContentProviderRecord> mProvidersByClass
+            = new HashMap<String, ContentProviderRecord>();
 
     /**
      * List of content providers who have clients waiting for them.  The
      * application is currently being launched and the provider will be
      * removed from this list once it is published.
      */
-    final ArrayList mLaunchingProviders = new ArrayList();
+    final ArrayList<ContentProviderRecord> mLaunchingProviders
+            = new ArrayList<ContentProviderRecord>();
 
     /**
      * Global set of specific Uri permissions that have been granted.
@@ -1006,6 +1021,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
     static final int KILL_APPLICATION_MSG = 22;
     static final int FINALIZE_PENDING_INTENT_MSG = 23;
+    static final int POST_HEAVY_NOTIFICATION_MSG = 24;
+    static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
 
     AlertDialog mUidAlert;
 
@@ -1234,6 +1251,62 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
                 ((PendingIntentRecord)msg.obj).completeFinalize();
+            } break;
+            case POST_HEAVY_NOTIFICATION_MSG: {
+                INotificationManager inm = NotificationManager.getService();
+                if (inm == null) {
+                    return;
+                }
+                
+                HistoryRecord root = (HistoryRecord)msg.obj;
+                ProcessRecord process = root.app;
+                if (process == null) {
+                    return;
+                }
+                
+                try {
+                    Context context = mContext.createPackageContext(process.info.packageName, 0);
+                    String text = mContext.getString(R.string.heavy_weight_notification,
+                            context.getApplicationInfo().loadLabel(context.getPackageManager()));
+                    Notification notification = new Notification();
+                    notification.icon = com.android.internal.R.drawable.stat_sys_adb; //context.getApplicationInfo().icon;
+                    notification.when = 0;
+                    notification.flags = Notification.FLAG_ONGOING_EVENT;
+                    notification.tickerText = text;
+                    notification.defaults = 0; // please be quiet
+                    notification.sound = null;
+                    notification.vibrate = null;
+                    notification.setLatestEventInfo(context, text,
+                            mContext.getText(R.string.heavy_weight_notification_detail),
+                            PendingIntent.getActivity(mContext, 0, root.intent,
+                                    PendingIntent.FLAG_CANCEL_CURRENT));
+                    
+                    try {
+                        int[] outId = new int[1];
+                        inm.enqueueNotification("android", R.string.heavy_weight_notification,
+                                notification, outId);
+                    } catch (RuntimeException e) {
+                        Slog.w(ActivityManagerService.TAG,
+                                "Error showing notification for heavy-weight app", e);
+                    } catch (RemoteException e) {
+                    }
+                } catch (NameNotFoundException e) {
+                    Log.w(TAG, "Unable to create context for heavy notification", e);
+                }
+            } break;
+            case CANCEL_HEAVY_NOTIFICATION_MSG: {
+                INotificationManager inm = NotificationManager.getService();
+                if (inm == null) {
+                    return;
+                }
+                try {
+                    inm.cancelNotification("android",
+                            R.string.heavy_weight_notification);
+                } catch (RuntimeException e) {
+                    Slog.w(ActivityManagerService.TAG,
+                            "Error canceling notification for service", e);
+                } catch (RemoteException e) {
+                }
             } break;
             }
         }
@@ -1822,6 +1895,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     System.identityHashCode(r),
                     r.info, r.icicle, results, newIntents, !andResume,
                     isNextTransitionForward());
+            
+            if ((app.info.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+                // This may be a heavy-weight process!  Note that the package
+                // manager will ensure that only activity can run in the main
+                // process of the .apk, which is the only thing that will be
+                // considered heavy-weight.
+                if (app.processName.equals(app.info.packageName)) {
+                    if (mHeavyWeightProcess != null && mHeavyWeightProcess != app) {
+                        Log.w(TAG, "Starting new heavy weight process " + app
+                                + " when already running " + mHeavyWeightProcess);
+                    }
+                    mHeavyWeightProcess = app;
+                    Message msg = mHandler.obtainMessage(POST_HEAVY_NOTIFICATION_MSG);
+                    msg.obj = r;
+                    mHandler.sendMessage(msg);
+                }
+            }
+            
         } catch (RemoteException e) {
             if (r.launchFailed) {
                 // This is the second time we failed -- finish activity
@@ -3678,7 +3769,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        final boolean componentSpecified = intent.getComponent() != null;
+        boolean componentSpecified = intent.getComponent() != null;
         
         // Don't modify the client's object!
         intent = new Intent(intent);
@@ -3727,6 +3818,74 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     "Starting activity when config will change = " + mConfigWillChange);
             
             final long origId = Binder.clearCallingIdentity();
+            
+            if (aInfo != null &&
+                    (aInfo.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+                // This may be a heavy-weight process!  Check to see if we already
+                // have another, different heavy-weight process running.
+                if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {
+                    if (mHeavyWeightProcess != null &&
+                            (mHeavyWeightProcess.info.uid != aInfo.applicationInfo.uid ||
+                            !mHeavyWeightProcess.processName.equals(aInfo.processName))) {
+                        int realCallingPid = callingPid;
+                        int realCallingUid = callingUid;
+                        if (caller != null) {
+                            ProcessRecord callerApp = getRecordForAppLocked(caller);
+                            if (callerApp != null) {
+                                realCallingPid = callerApp.pid;
+                                realCallingUid = callerApp.info.uid;
+                            } else {
+                                Slog.w(TAG, "Unable to find app for caller " + caller
+                                      + " (pid=" + realCallingPid + ") when starting: "
+                                      + intent.toString());
+                                return START_PERMISSION_DENIED;
+                            }
+                        }
+                        
+                        IIntentSender target = getIntentSenderLocked(
+                                IActivityManager.INTENT_SENDER_ACTIVITY, "android",
+                                realCallingUid, null, null, 0, intent,
+                                resolvedType, PendingIntent.FLAG_CANCEL_CURRENT
+                                | PendingIntent.FLAG_ONE_SHOT);
+                        
+                        Intent newIntent = new Intent();
+                        if (requestCode >= 0) {
+                            // Caller is requesting a result.
+                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_HAS_RESULT, true);
+                        }
+                        newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT,
+                                new IntentSender(target));
+                        if (mHeavyWeightProcess.activities.size() > 0) {
+                            HistoryRecord hist = mHeavyWeightProcess.activities.get(0);
+                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP,
+                                    hist.packageName);
+                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK,
+                                    hist.task.taskId);
+                        }
+                        newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_NEW_APP,
+                                aInfo.packageName);
+                        newIntent.setFlags(intent.getFlags());
+                        newIntent.setClassName("android",
+                                HeavyWeightSwitcherActivity.class.getName());
+                        intent = newIntent;
+                        resolvedType = null;
+                        caller = null;
+                        callingUid = Binder.getCallingUid();
+                        callingPid = Binder.getCallingPid();
+                        componentSpecified = true;
+                        try {
+                            ResolveInfo rInfo =
+                                ActivityThread.getPackageManager().resolveIntent(
+                                        intent, null,
+                                        PackageManager.MATCH_DEFAULT_ONLY
+                                        | STOCK_PM_FLAGS);
+                            aInfo = rInfo != null ? rInfo.activityInfo : null;
+                        } catch (RemoteException e) {
+                            aInfo = null;
+                        }
+                    }
+                }
+            }
             
             int res = startActivityLocked(caller, intent, resolvedType,
                     grantedUriPermissions, grantedMode, aInfo,
@@ -4316,6 +4475,40 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public final void finishHeavyWeightApp() {
+        if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: finishHeavyWeightApp() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.FORCE_STOP_PACKAGES;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        
+        synchronized(this) {
+            if (mHeavyWeightProcess == null) {
+                return;
+            }
+            
+            ArrayList<HistoryRecord> activities = new ArrayList<HistoryRecord>(
+                    mHeavyWeightProcess.activities);
+            for (int i=0; i<activities.size(); i++) {
+                HistoryRecord r = activities.get(i);
+                if (!r.finishing) {
+                    int index = indexOfTokenLocked(r);
+                    if (index >= 0) {
+                        finishActivityLocked(r, index, Activity.RESULT_CANCELED,
+                                null, "finish-heavy");
+                    }
+                }
+            }
+            
+            mHeavyWeightProcess = null;
+            mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
+        }
+    }
+    
     void sendActivityResultLocked(int callingUid, HistoryRecord r,
             String resultWho, int requestCode, int resultCode, Intent data) {
 
@@ -4512,6 +4705,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 int idx = r.app.activities.indexOf(r);
                 if (idx >= 0) {
                     r.app.activities.remove(idx);
+                }
+                if (mHeavyWeightProcess == r.app && r.app.activities.size() <= 0) {
+                    mHeavyWeightProcess = null;
+                    mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
                 }
                 if (r.persistent) {
                     decPersistentCountLocked(r.app);
@@ -5375,6 +5572,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             + "/" + uid + ")");
 
         mProcessNames.remove(name, uid);
+        if (mHeavyWeightProcess == app) {
+            mHeavyWeightProcess = null;
+            mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
+        }
         boolean needRestart = false;
         if (app.pid > 0 && app.pid != MY_PID) {
             int pid = app.pid;
@@ -5416,6 +5617,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, pid, app.info.uid,
                     app.processName);
             mProcessNames.remove(app.processName, app.info.uid);
+            if (mHeavyWeightProcess == app) {
+                mHeavyWeightProcess = null;
+                mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
+            }
             // Take care of any launching providers waiting for this process.
             checkAppInLaunchingProvidersLocked(app, true);
             // Take care of any services that are waiting for the process.
@@ -6101,57 +6306,66 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         throw new SecurityException(msg);
                     }
                 }
+                
+                return getIntentSenderLocked(type, packageName, callingUid,
+                        token, resultWho, requestCode, intent, resolvedType, flags);
+                
             } catch (RemoteException e) {
                 throw new SecurityException(e);
             }
-            HistoryRecord activity = null;
-            if (type == INTENT_SENDER_ACTIVITY_RESULT) {
-                int index = indexOfTokenLocked(token);
-                if (index < 0) {
-                    return null;
-                }
-                activity = (HistoryRecord)mHistory.get(index);
-                if (activity.finishing) {
-                    return null;
-                }
+        }
+    }
+    
+    IIntentSender getIntentSenderLocked(int type,
+            String packageName, int callingUid, IBinder token, String resultWho,
+            int requestCode, Intent intent, String resolvedType, int flags) {
+        HistoryRecord activity = null;
+        if (type == INTENT_SENDER_ACTIVITY_RESULT) {
+            int index = indexOfTokenLocked(token);
+            if (index < 0) {
+                return null;
             }
-
-            final boolean noCreate = (flags&PendingIntent.FLAG_NO_CREATE) != 0;
-            final boolean cancelCurrent = (flags&PendingIntent.FLAG_CANCEL_CURRENT) != 0;
-            final boolean updateCurrent = (flags&PendingIntent.FLAG_UPDATE_CURRENT) != 0;
-            flags &= ~(PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_CANCEL_CURRENT
-                    |PendingIntent.FLAG_UPDATE_CURRENT);
-
-            PendingIntentRecord.Key key = new PendingIntentRecord.Key(
-                    type, packageName, activity, resultWho,
-                    requestCode, intent, resolvedType, flags);
-            WeakReference<PendingIntentRecord> ref;
-            ref = mIntentSenderRecords.get(key);
-            PendingIntentRecord rec = ref != null ? ref.get() : null;
-            if (rec != null) {
-                if (!cancelCurrent) {
-                    if (updateCurrent) {
-                        rec.key.requestIntent.replaceExtras(intent);
-                    }
-                    return rec;
-                }
-                rec.canceled = true;
-                mIntentSenderRecords.remove(key);
+            activity = (HistoryRecord)mHistory.get(index);
+            if (activity.finishing) {
+                return null;
             }
-            if (noCreate) {
+        }
+
+        final boolean noCreate = (flags&PendingIntent.FLAG_NO_CREATE) != 0;
+        final boolean cancelCurrent = (flags&PendingIntent.FLAG_CANCEL_CURRENT) != 0;
+        final boolean updateCurrent = (flags&PendingIntent.FLAG_UPDATE_CURRENT) != 0;
+        flags &= ~(PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_CANCEL_CURRENT
+                |PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntentRecord.Key key = new PendingIntentRecord.Key(
+                type, packageName, activity, resultWho,
+                requestCode, intent, resolvedType, flags);
+        WeakReference<PendingIntentRecord> ref;
+        ref = mIntentSenderRecords.get(key);
+        PendingIntentRecord rec = ref != null ? ref.get() : null;
+        if (rec != null) {
+            if (!cancelCurrent) {
+                if (updateCurrent) {
+                    rec.key.requestIntent.replaceExtras(intent);
+                }
                 return rec;
             }
-            rec = new PendingIntentRecord(this, key, callingUid);
-            mIntentSenderRecords.put(key, rec.ref);
-            if (type == INTENT_SENDER_ACTIVITY_RESULT) {
-                if (activity.pendingResults == null) {
-                    activity.pendingResults
-                            = new HashSet<WeakReference<PendingIntentRecord>>();
-                }
-                activity.pendingResults.add(rec.ref);
-            }
+            rec.canceled = true;
+            mIntentSenderRecords.remove(key);
+        }
+        if (noCreate) {
             return rec;
         }
+        rec = new PendingIntentRecord(this, key, callingUid);
+        mIntentSenderRecords.put(key, rec.ref);
+        if (type == INTENT_SENDER_ACTIVITY_RESULT) {
+            if (activity.pendingResults == null) {
+                activity.pendingResults
+                        = new HashSet<WeakReference<PendingIntentRecord>>();
+            }
+            activity.pendingResults.add(rec.ref);
+        }
+        return rec;
     }
 
     public void cancelIntentSender(IIntentSender sender) {
@@ -6450,8 +6664,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         String name = uri.getAuthority();
         ProviderInfo pi = null;
-        ContentProviderRecord cpr
-                = (ContentProviderRecord)mProvidersByName.get(name);
+        ContentProviderRecord cpr = mProvidersByName.get(name);
         if (cpr != null) {
             pi = cpr.info;
         } else {
@@ -6648,8 +6861,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         final String authority = uri.getAuthority();
         ProviderInfo pi = null;
-        ContentProviderRecord cpr
-                = (ContentProviderRecord)mProvidersByName.get(authority);
+        ContentProviderRecord cpr = mProvidersByName.get(authority);
         if (cpr != null) {
             pi = cpr.info;
         } else {
@@ -6743,8 +6955,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             final String authority = uri.getAuthority();
             ProviderInfo pi = null;
-            ContentProviderRecord cpr
-                    = (ContentProviderRecord)mProvidersByName.get(authority);
+            ContentProviderRecord cpr = mProvidersByName.get(authority);
             if (cpr != null) {
                 pi = cpr.info;
             } else {
@@ -7752,8 +7963,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             for (int i=0; i<N; i++) {
                 ProviderInfo cpi =
                     (ProviderInfo)providers.get(i);
-                ContentProviderRecord cpr =
-                    (ContentProviderRecord)mProvidersByClass.get(cpi.name);
+                ContentProviderRecord cpr = mProvidersByClass.get(cpi.name);
                 if (cpr == null) {
                     cpr = new ContentProviderRecord(cpi, app.info);
                     mProvidersByClass.put(cpi.name, cpr);
@@ -7828,7 +8038,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             // First check if this content provider has been published...
-            cpr = (ContentProviderRecord)mProvidersByName.get(name);
+            cpr = mProvidersByName.get(name);
             if (cpr != null) {
                 cpi = cpr.info;
                 if (checkContentProviderPermissionLocked(cpi, r, -1) != null) {
@@ -7909,7 +8119,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             "Attempt to launch content provider before system ready");
                 }
                 
-                cpr = (ContentProviderRecord)mProvidersByClass.get(cpi.name);
+                cpr = mProvidersByClass.get(cpi.name);
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
                     try {
@@ -8043,7 +8253,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     public void removeContentProvider(IApplicationThread caller, String name) {
         synchronized (this) {
-            ContentProviderRecord cpr = (ContentProviderRecord)mProvidersByName.get(name);
+            ContentProviderRecord cpr = mProvidersByName.get(name);
             if(cpr == null) {
                 // remove from mProvidersByClass
                 if (DEBUG_PROVIDER) Slog.v(TAG, name +
@@ -8057,8 +8267,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         " when removing content provider " + name);
             }
             //update content provider record entry info
-            ContentProviderRecord localCpr = (ContentProviderRecord)
-                    mProvidersByClass.get(cpr.info.name);
+            ContentProviderRecord localCpr = mProvidersByClass.get(cpr.info.name);
             if (DEBUG_PROVIDER) Slog.v(TAG, "Removing provider requested by "
                     + r.info.processName + " from process "
                     + localCpr.appInfo.processName);
@@ -8082,7 +8291,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private void removeContentProviderExternal(String name) {
         synchronized (this) {
-            ContentProviderRecord cpr = (ContentProviderRecord)mProvidersByName.get(name);
+            ContentProviderRecord cpr = mProvidersByName.get(name);
             if(cpr == null) {
                 //remove from mProvidersByClass
                 if(localLOGV) Slog.v(TAG, name+" content provider not found in providers list");
@@ -8090,7 +8299,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             //update content provider record entry info
-            ContentProviderRecord localCpr = (ContentProviderRecord) mProvidersByClass.get(cpr.info.name);
+            ContentProviderRecord localCpr = mProvidersByClass.get(cpr.info.name);
             localCpr.externals--;
             if (localCpr.externals < 0) {
                 Slog.e(TAG, "Externals < 0 for content provider " + localCpr);
@@ -8122,8 +8331,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (src == null || src.info == null || src.provider == null) {
                     continue;
                 }
-                ContentProviderRecord dst =
-                    (ContentProviderRecord)r.pubProviders.get(src.info.name);
+                ContentProviderRecord dst = r.pubProviders.get(src.info.name);
                 if (dst != null) {
                     mProvidersByClass.put(dst.info.name, dst);
                     String names[] = dst.info.authority.split(";");
@@ -9038,9 +9246,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (app.services.size() != 0) {
             // Any services running in the application need to be placed
             // back in the pending list.
-            Iterator it = app.services.iterator();
+            Iterator<ServiceRecord> it = app.services.iterator();
             while (it.hasNext()) {
-                ServiceRecord sr = (ServiceRecord)it.next();
+                ServiceRecord sr = it.next();
                 sr.crashCount++;
             }
         }
@@ -9485,6 +9693,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
                     } else if (adj >= VISIBLE_APP_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+                    } else if (app == mHeavyWeightProcess) {
+                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_HEAVY_WEIGHT;
                     } else {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
                     }
@@ -9860,6 +10070,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         pw.println(" ");
         pw.println("  mHomeProcess: " + mHomeProcess);
+        if (mHeavyWeightProcess != null) {
+            pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+        }
         pw.println("  mConfiguration: " + mConfiguration);
         pw.println("  mConfigWillChange: " + mConfigWillChange);
         pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
@@ -10121,10 +10334,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mProvidersByClass.size() > 0) {
                 if (needSep) pw.println(" ");
                 pw.println("  Published content providers (by class):");
-                Iterator it = mProvidersByClass.entrySet().iterator();
+                Iterator<Map.Entry<String, ContentProviderRecord>> it
+                        = mProvidersByClass.entrySet().iterator();
                 while (it.hasNext()) {
-                    Map.Entry e = (Map.Entry)it.next();
-                    ContentProviderRecord r = (ContentProviderRecord)e.getValue();
+                    Map.Entry<String, ContentProviderRecord> e = it.next();
+                    ContentProviderRecord r = e.getValue();
                     pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
                 }
@@ -10134,10 +10348,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mProvidersByName.size() > 0) {
                 pw.println(" ");
                 pw.println("  Authority to provider mappings:");
-                Iterator it = mProvidersByName.entrySet().iterator();
+                Iterator<Map.Entry<String, ContentProviderRecord>> it
+                        = mProvidersByName.entrySet().iterator();
                 while (it.hasNext()) {
-                    Map.Entry e = (Map.Entry)it.next();
-                    ContentProviderRecord r = (ContentProviderRecord)e.getValue();
+                    Map.Entry<String, ContentProviderRecord> e = it.next();
+                    ContentProviderRecord r = e.getValue();
                     pw.print("  "); pw.print(e.getKey()); pw.print(": ");
                             pw.println(r);
                 }
@@ -10370,9 +10585,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // XXX we are letting the client link to the service for
             // death notifications.
             if (app.services.size() > 0) {
-                Iterator it = app.services.iterator();
+                Iterator<ServiceRecord> it = app.services.iterator();
                 while (it.hasNext()) {
-                    ServiceRecord r = (ServiceRecord)it.next();
+                    ServiceRecord r = it.next();
                     if (r.connections.size() > 0) {
                         Iterator<ConnectionRecord> jt
                                 = r.connections.values().iterator();
@@ -10407,9 +10622,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (app.services.size() != 0) {
             // Any services running in the application need to be placed
             // back in the pending list.
-            Iterator it = app.services.iterator();
+            Iterator<ServiceRecord> it = app.services.iterator();
             while (it.hasNext()) {
-                ServiceRecord sr = (ServiceRecord)it.next();
+                ServiceRecord sr = it.next();
                 synchronized (sr.stats.getBatteryStats()) {
                     sr.stats.stopLaunchedLocked();
                 }
@@ -10548,9 +10763,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         // Remove published content providers.
         if (!app.pubProviders.isEmpty()) {
-            Iterator it = app.pubProviders.values().iterator();
+            Iterator<ContentProviderRecord> it = app.pubProviders.values().iterator();
             while (it.hasNext()) {
-                ContentProviderRecord cpr = (ContentProviderRecord)it.next();
+                ContentProviderRecord cpr = it.next();
                 cpr.provider = null;
                 cpr.app = null;
 
@@ -10642,6 +10857,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_PROCESSES) Slog.v(TAG,
                     "Removing non-persistent process during cleanup: " + app);
             mProcessNames.remove(app.processName, app.info.uid);
+            if (mHeavyWeightProcess == app) {
+                mHeavyWeightProcess = null;
+                mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
+            }
         } else if (!app.removed) {
             // This app is persistent, so we need to keep its record around.
             // If it is not already on the pending app list, add it there
@@ -10683,8 +10902,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         int NL = mLaunchingProviders.size();
         boolean restart = false;
         for (int i=0; i<NL; i++) {
-            ContentProviderRecord cpr = (ContentProviderRecord)
-                    mLaunchingProviders.get(i);
+            ContentProviderRecord cpr = mLaunchingProviders.get(i);
             if (cpr.launchingApp == app) {
                 if (!alwaysBad && !app.bad) {
                     restart = true;
@@ -11601,7 +11819,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public void updateServiceForegroundLocked(ProcessRecord proc, boolean oomAdj) {
         boolean anyForeground = false;
-        for (ServiceRecord sr : (HashSet<ServiceRecord>)proc.services) {
+        for (ServiceRecord sr : proc.services) {
             if (sr.isForeground) {
                 anyForeground = true;
                 break;
@@ -13824,6 +14042,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             adj = FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
+        } else if (app == mHeavyWeightProcess) {
+            // We don't want to kill the current heavy-weight process.
+            adj = FOREGROUND_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
+            app.adjType = "heavy";
         } else if (app.persistentActivities > 0) {
             // Special persistent activities...  shouldn't be used these days.
             adj = FOREGROUND_APP_ADJ;
@@ -13867,7 +14090,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app.adjType = "bg-activities";
             N = app.activities.size();
             for (int j=0; j<N; j++) {
-                if (((HistoryRecord)app.activities.get(j)).visible) {
+                if (app.activities.get(j).visible) {
                     // This app has a visible activity!
                     app.hidden = false;
                     adj = VISIBLE_APP_ADJ;
@@ -13910,9 +14133,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             final long now = SystemClock.uptimeMillis();
             // This process is more important if the top activity is
             // bound to the service.
-            Iterator jt = app.services.iterator();
+            Iterator<ServiceRecord> jt = app.services.iterator();
             while (jt.hasNext() && adj > FOREGROUND_APP_ADJ) {
-                ServiceRecord s = (ServiceRecord)jt.next();
+                ServiceRecord s = jt.next();
                 if (s.startRequested) {
                     if (now < (s.lastActivity+MAX_SERVICE_INACTIVITY)) {
                         // This service has seen some activity within
@@ -14007,10 +14230,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (app.pubProviders.size() != 0 && (adj > FOREGROUND_APP_ADJ
                 || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
-            Iterator jt = app.pubProviders.values().iterator();
+            Iterator<ContentProviderRecord> jt = app.pubProviders.values().iterator();
             while (jt.hasNext() && (adj > FOREGROUND_APP_ADJ
                     || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
-                ContentProviderRecord cpr = (ContentProviderRecord)jt.next();
+                ContentProviderRecord cpr = jt.next();
                 if (cpr.clients.size() != 0) {
                     Iterator<ProcessRecord> kt = cpr.clients.iterator();
                     while (kt.hasNext() && adj > FOREGROUND_APP_ADJ) {
@@ -14491,7 +14714,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (Config.LOGV) Slog.v(
                         TAG, "Looking to quit " + app.processName);
                     for (j=0; j<NUMA && canQuit; j++) {
-                        HistoryRecord r = (HistoryRecord)app.activities.get(j);
+                        HistoryRecord r = app.activities.get(j);
                         if (Config.LOGV) Slog.v(
                             TAG, "  " + r.intent.getComponent().flattenToShortString()
                             + ": frozen=" + r.haveState + ", visible=" + r.visible);
@@ -14501,7 +14724,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (canQuit) {
                         // Finish all of the activities, and then the app itself.
                         for (j=0; j<NUMA; j++) {
-                            HistoryRecord r = (HistoryRecord)app.activities.get(j);
+                            HistoryRecord r = app.activities.get(j);
                             if (!r.finishing) {
                                 destroyActivityLocked(r, false);
                             }

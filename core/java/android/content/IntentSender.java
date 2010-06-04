@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IIntentSender;
@@ -166,6 +167,25 @@ public class IntentSender implements Parcelable {
             }
         } catch (RemoteException e) {
             throw new SendIntentException();
+        }
+    }
+
+    /**
+     * Return the package name of the application that created this
+     * IntentSender, that is the identity under which you will actually be
+     * sending the Intent.  The returned string is supplied by the system, so
+     * that an application can not spoof its package.
+     *
+     * @return The package name of the PendingIntent, or null if there is
+     * none associated with it.
+     */
+    public String getTargetPackage() {
+        try {
+            return ActivityManagerNative.getDefault()
+                .getPackageForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
         }
     }
 
