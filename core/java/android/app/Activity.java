@@ -2068,8 +2068,10 @@ public class Activity extends ContextThemeWrapper
 
     public void onContentChanged() {
         // First time content is available, let the fragment manager
-        // attach all of the fragments to it.
-        if (mFragments.mCurState < Fragment.CONTENT) {
+        // attach all of the fragments to it.  Don't do this if the
+        // activity is no longer attached (because it is being destroyed).
+        if (mFragments.mCurState < Fragment.CONTENT
+                && mFragments.mActivity != null) {
             mFragments.moveToState(Fragment.CONTENT, false);
         }
     }
