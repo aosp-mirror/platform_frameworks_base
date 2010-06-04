@@ -384,6 +384,8 @@ web_docs_sample_code_flags := \
                             resources/samples/CubeLiveWallpaper "Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
+		-samplecode $(sample_dir)/HeavyWeight \
+		            resources/samples/HeavyWeight "Heavy Weight App" \
 		-samplecode $(sample_dir)/JetBoy \
 		            resources/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
@@ -392,8 +394,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/MultiResolution "Multiple Resolutions" \
 		-samplecode $(sample_dir)/NotePad \
 		            resources/samples/NotePad "Note Pad" \
-                -samplecode $(sample_dir)/SampleSyncAdapter \
-                            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
+		-samplecode $(sample_dir)/SampleSyncAdapter \
+		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/SearchableDictionary \
 		            resources/samples/SearchableDictionary "Searchable Dictionary v2" \
 		-samplecode $(sample_dir)/Snake \
