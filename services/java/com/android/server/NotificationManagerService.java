@@ -303,6 +303,12 @@ class NotificationManagerService extends INotificationManager.Stub
                 updateLightsLocked();
             }
         }
+
+        public void onNotificationError(String pkg, String tag, int id, String message) {
+            Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id);
+            cancelNotification(pkg, tag, id, 0, 0);
+            // TODO: Tell the activity manager.
+        }
     };
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {

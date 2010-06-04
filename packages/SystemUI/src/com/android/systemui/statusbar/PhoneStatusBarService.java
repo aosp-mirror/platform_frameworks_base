@@ -373,6 +373,14 @@ public class PhoneStatusBarService extends StatusBarService {
                     oldEntry.content.setOnClickListener(new Launcher(contentIntent,
                                 notification.pkg, notification.tag, notification.id));
                 }
+                // Update the icon.
+                final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                        notification.notification.icon, notification.notification.iconLevel,
+                        notification.notification.number);
+                if (!oldEntry.icon.set(ic)) {
+                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
+                    return;
+                }
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
@@ -380,9 +388,6 @@ public class PhoneStatusBarService extends StatusBarService {
                 removeNotificationViews(key);
                 addNotificationViews(key, notification);
             }
-            // Update the icon.
-            oldEntry.icon.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
-                    notification.notification.iconLevel, notification.notification.number));
         } else {
             Slog.d(TAG, "not reusing notification");
             removeNotificationViews(key);
@@ -451,8 +456,9 @@ public class PhoneStatusBarService extends StatusBarService {
             exception = e;
         }
         if (expanded == null) {
-            Slog.e(TAG, "couldn't inflate view for package " + notification.pkg, exception);
-            row.setVisibility(View.GONE);
+            String ident = notification.pkg + "/0x" + Integer.toHexString(notification.id);
+            Slog.e(TAG, "couldn't inflate view for notification " + ident);
+            return null;
         } else {
             content.addView(expanded);
             row.setDrawingCacheEnabled(true);
@@ -474,14 +480,23 @@ public class PhoneStatusBarService extends StatusBarService {
         }
         // Construct the expanded view.
         final View[] views = makeNotificationView(notification, parent);
+        if (views == null) {
+            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
+                    + notification);
+            return;
+        }
         final View row = views[0];
         final View content = views[1];
         final View expanded = views[2];
         // Construct the icon.
-        StatusBarIconView iconView = new StatusBarIconView(this,
+        final StatusBarIconView iconView = new StatusBarIconView(this,
                 notification.pkg + "/0x" + Integer.toHexString(notification.id));
-        iconView.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
-                    notification.notification.iconLevel, notification.notification.number));
+        final StatusBarIcon ic = new StatusBarIcon(notification.pkg, notification.notification.icon,
+                    notification.notification.iconLevel, notification.notification.number);
+        if (!iconView.set(ic)) {
+            handleNotificationError(key, notification, "Coulding create icon: " + ic);
+            return;
+        }
         // Add the expanded view.
         final int viewIndex = list.add(key, notification, row, content, expanded, iconView);
         parent.addView(row, viewIndex);
@@ -964,6 +979,21 @@ public class PhoneStatusBarService extends StatusBarService {
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);
             }
+        }
+    }
+
+    /**
+     * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
+     * about the failure.
+     *
+     * WARNING: this will call back into us.  Don't hold any locks.
+     */
+    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
+        removeNotification(key);
+        try {
+            mBarService.onNotificationError(n.pkg, n.tag, n.id, message);
+        } catch (RemoteException ex) {
+            // The end is nigh.
         }
     }
 

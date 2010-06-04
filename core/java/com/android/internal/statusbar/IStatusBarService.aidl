@@ -36,5 +36,6 @@ interface IStatusBarService
             out List<IBinder> notificationKeys, out List<StatusBarNotification> notifications);
     void visibilityChanged(boolean visible);
     void onNotificationClick(String pkg, String tag, int id);
+    void onNotificationError(String pkg, String tag, int id, String message);
     void onClearAllNotifications();
 }
