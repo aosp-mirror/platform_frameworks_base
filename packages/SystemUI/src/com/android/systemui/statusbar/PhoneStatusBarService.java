@@ -85,13 +85,6 @@ public class PhoneStatusBarService extends StatusBarService {
     private static final int MSG_ANIMATE = 1000;
     private static final int MSG_ANIMATE_REVEAL = 1001;
 
-    public interface NotificationCallbacks {
-        void onSetDisabled(int status);
-        void onClearAll();
-        void onNotificationClick(String pkg, String tag, int id);
-        void onPanelRevealed();
-    }
-
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
             super(context, com.android.internal.R.style.Theme_Light_NoTitleBar);
