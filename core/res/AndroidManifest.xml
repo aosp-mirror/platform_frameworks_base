@@ -1250,6 +1250,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
+                android:theme="@style/Theme.Dialog"
+                android:label="@string/heavy_weight_switcher_title"
+                android:finishOnCloseSystemDialogs="true"
+                android:excludeFromRecents="true">
+        </activity>
         <activity android:name="com.android.internal.app.DisableCarModeActivity"
                 android:theme="@style/Theme.NoDisplay"
                 android:excludeFromRecents="true">

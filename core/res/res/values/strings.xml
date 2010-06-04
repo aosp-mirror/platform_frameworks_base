@@ -1935,8 +1935,29 @@
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
 
+    <!-- Notification text to tell the user that a heavy-weight application is running. -->
+    <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
+    
+    <!-- Notification details to tell the user that a heavy-weight application is running. -->
+    <string name="heavy_weight_notification_detail">Select to switch to application</string>
+    
+    <!-- Title of dialog prompting whether user wants to switch between heavy-weight apps. -->
+    <string name="heavy_weight_switcher_title">Switch applications?</string>
+    
+    <!-- Descriptive text for switching to a new heavy-weight application. -->
+    <string name="heavy_weight_switcher_text">Another application is already running
+    that must be stopped before you can start a new one.</string>
+    
+    <string name="old_app_action">Return to <xliff:g id="old_app">%1$s</xliff:g></string>
+    <string name="old_app_description">Don\'t start the new application.</string>
+    
+    <string name="new_app_action">Start <xliff:g id="old_app">%1$s</xliff:g></string>
+    <string name="new_app_description">Stop the old application without saving.</string>
+    
     <!-- Displayed in the title of the chooser for things to do with text that
-         is to be sent to another application. For example, I can send text through SMS or IM.  A dialog with those choices would be shown, and this would be the title. -->
+         is to be sent to another application. For example, I can send
+         text through SMS or IM.  A dialog with those choices would be shown,
+         and this would be the title. -->
     <string name="sendText">Select an action for text</string>
 
     <!-- Title of the dialog where the user is adjusting the phone ringer volume -->

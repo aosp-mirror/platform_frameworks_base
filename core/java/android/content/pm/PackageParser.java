@@ -1600,6 +1600,18 @@ public class PackageParser {
     
             ai.enabled = sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestApplication_enabled, true);
+            
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestApplication_heavyWeight,
+                    false)) {
+                ai.flags |= ApplicationInfo.FLAG_HEAVY_WEIGHT;
+                
+                // A heavy-weight application can not be in a custom process.
+                // We can do direct compare because we intern all strings.
+                if (ai.processName != null && ai.processName != ai.packageName) {
+                    outError[0] = "Heavy-weight applications can not use custom processes";
+                }
+            }
         }
 
         sa.recycle();
@@ -1889,6 +1901,14 @@ public class PackageParser {
 
         sa.recycle();
 
+        if (receiver && (owner.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+            // A heavy-weight application can not have receives in its main process
+            // We can do direct compare because we intern all strings.
+            if (a.info.processName == owner.packageName) {
+                outError[0] = "Heavy-weight applications can not have receivers in main process";
+            }
+        }
+        
         if (outError[0] != null) {
             return null;
         }
@@ -2171,6 +2191,15 @@ public class PackageParser {
 
         sa.recycle();
 
+        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+            // A heavy-weight application can not have providers in its main process
+            // We can do direct compare because we intern all strings.
+            if (p.info.processName == owner.packageName) {
+                outError[0] = "Heavy-weight applications can not have providers in main process";
+                return null;
+            }
+        }
+        
         if (cpname == null) {
             outError[0] = "<provider> does not incude authorities attribute";
             return null;
@@ -2403,6 +2432,15 @@ public class PackageParser {
 
         sa.recycle();
 
+        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_HEAVY_WEIGHT) != 0) {
+            // A heavy-weight application can not have services in its main process
+            // We can do direct compare because we intern all strings.
+            if (s.info.processName == owner.packageName) {
+                outError[0] = "Heavy-weight applications can not have services in main process";
+                return null;
+            }
+        }
+        
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT

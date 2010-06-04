@@ -303,6 +303,8 @@ public interface IActivityManager extends IInterface {
     
     public boolean isUserAMonkey() throws RemoteException;
     
+    public void finishHeavyWeightApp() throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -513,4 +515,5 @@ public interface IActivityManager extends IInterface {
     int WILL_ACTIVITY_BE_VISIBLE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+105;
     int START_ACTIVITY_WITH_CONFIG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+106;
     int GET_RUNNING_EXTERNAL_APPLICATIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+107;
+    int FINISH_HEAVY_WEIGHT_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+108;
 }
