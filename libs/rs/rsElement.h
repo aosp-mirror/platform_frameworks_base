@@ -60,7 +60,7 @@ public:
 
     void dumpLOGV(const char *prefix) const;
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_ELEMENT; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ELEMENT; }
     static Element *createFromStream(Context *rsc, IStream *stream);
 
     static const Element * create(Context *rsc, RsDataType dt, RsDataKind dk,

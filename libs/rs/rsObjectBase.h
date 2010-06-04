@@ -54,7 +54,7 @@ public:
 
     virtual void dumpLOGV(const char *prefix) const;
     virtual void serialize(OStream *stream) const = 0;
-    virtual A3DClassID getClassId() const = 0;
+    virtual RsA3DClassID getClassId() const = 0;
 
 protected:
     const char *mAllocFile;

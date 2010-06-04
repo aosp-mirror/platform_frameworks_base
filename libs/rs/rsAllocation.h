@@ -73,7 +73,7 @@ public:
 
     virtual void dumpLOGV(const char *prefix) const;
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_ALLOCATION; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ALLOCATION; }
     static Allocation *createFromStream(Context *rsc, IStream *stream);
 
     virtual void uploadCheck(const Context *rsc);

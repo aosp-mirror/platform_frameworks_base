@@ -18,21 +18,23 @@
 #define ANDROID_RS_FILE_A3D_H
 
 #include "RenderScript.h"
-#include "rsFileA3DDecls.h"
 #include "rsMesh.h"
 
 #include <utils/String8.h>
 #include "rsStream.h"
 #include <stdio.h>
 
+#define A3D_MAGIC_KEY "Android3D_ff"
+
 // ---------------------------------------------------------------------------
 namespace android {
+
 namespace renderscript {
 
-class FileA3D
+class FileA3D : public ObjectBase
 {
 public:
-    FileA3D();
+    FileA3D(Context *rsc);
     ~FileA3D();
 
     uint32_t mMajorVersion;
@@ -41,27 +43,47 @@ public:
     uint64_t mStringTableOffset;
     bool mUse64BitOffsets;
 
-    struct A3DIndexEntry {
-        String8 mID;
-        A3DClassID mType;
+    class A3DIndexEntry {
+        String8 mObjectName;
+        RsA3DClassID mType;
         uint64_t mOffset;
-        void * mRsObj;
+        uint64_t mLength;
+        ObjectBase *mRsObj;
+    public:
+        friend class FileA3D;
+        const String8 &getObjectName() const {
+            return mObjectName;
+        }
+        RsA3DClassID getType() const {
+            return mType;
+        }
     };
 
-    bool load(Context *rsc, FILE *f);
-    size_t getNumLoadedEntries() const;
-    const A3DIndexEntry* getLoadedEntry(size_t index) const;
-    ObjectBase *initializeFromEntry(const A3DIndexEntry *entry);
+    bool load(FILE *f);
+    bool load(const void *data, size_t length);
+
+    size_t getNumIndexEntries() const;
+    const A3DIndexEntry* getIndexEntry(size_t index) const;
+    ObjectBase *initializeFromEntry(size_t index);
 
     void appendToFile(ObjectBase *obj);
     bool writeFile(const char *filename);
 
+    // Currently files do not get serialized,
+    // but we need to inherit from ObjectBase for ref tracking
+    virtual void serialize(OStream *stream) const {
+    }
+    virtual RsA3DClassID getClassId() const {
+        return RS_A3D_CLASS_ID_UNKNOWN;
+    }
+
 protected:
+
+    void parseHeader(IStream *headerStream);
 
     const uint8_t * mData;
     void * mAlloc;
     uint64_t mDataSize;
-    Context * mRsc;
 
     OStream *mWriteStream;
     Vector<A3DIndexEntry*> mWriteIndex;

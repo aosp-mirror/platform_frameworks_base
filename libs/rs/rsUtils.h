@@ -23,7 +23,6 @@
 #include <utils/Log.h>
 
 #include "rsStream.h"
-#include "rsFileA3DDecls.h"
 
 #include <utils/String8.h>
 #include <utils/Vector.h>
