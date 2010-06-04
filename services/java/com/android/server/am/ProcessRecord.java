@@ -28,7 +28,6 @@ import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.PrintWriterPrinter;
 
 import java.io.PrintWriter;
@@ -45,7 +44,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     final ApplicationInfo info; // all about the first app in the process
     final String processName;   // name of the process
     // List of packages running in the process
-    final HashSet<String> pkgList = new HashSet();
+    final HashSet<String> pkgList = new HashSet<String>();
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
@@ -87,9 +86,9 @@ class ProcessRecord implements Watchdog.PssRequestor {
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     
     // contains HistoryRecord objects
-    final ArrayList activities = new ArrayList();
+    final ArrayList<HistoryRecord> activities = new ArrayList<HistoryRecord>();
     // all ServiceRecord running in this process
-    final HashSet services = new HashSet();
+    final HashSet<ServiceRecord> services = new HashSet<ServiceRecord>();
     // services that are currently executing code (need to remain foreground).
     final HashSet<ServiceRecord> executingServices
              = new HashSet<ServiceRecord>();
@@ -99,7 +98,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     // all IIntentReceivers that are registered from this process.
     final HashSet<ReceiverList> receivers = new HashSet<ReceiverList>();
     // class (String) -> ContentProviderRecord
-    final HashMap pubProviders = new HashMap(); 
+    final HashMap<String, ContentProviderRecord> pubProviders
+            = new HashMap<String, ContentProviderRecord>(); 
     // All ContentProviderRecord process is using
     final HashMap<ContentProviderRecord, Integer> conProviders
             = new HashMap<ContentProviderRecord, Integer>(); 
@@ -128,7 +128,6 @@ class ProcessRecord implements Watchdog.PssRequestor {
     ComponentName errorReportReceiver;
 
     void dump(PrintWriter pw, String prefix) {
-        long now = SystemClock.uptimeMillis();
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
@@ -249,7 +248,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     public boolean isInterestingToUserLocked() {
         final int size = activities.size();
         for (int i = 0 ; i < size ; i++) {
-            HistoryRecord r = (HistoryRecord) activities.get(i);
+            HistoryRecord r = activities.get(i);
             if (r.isInterestingToUserLocked()) {
                 return true;
             }
@@ -261,7 +260,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
         int i = activities.size();
         while (i > 0) {
             i--;
-            ((HistoryRecord)activities.get(i)).stopFreezingScreenLocked(true);
+            activities.get(i).stopFreezingScreenLocked(true);
         }
     }
     

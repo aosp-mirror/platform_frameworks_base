@@ -1251,6 +1251,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        
+        case FINISH_HEAVY_WEIGHT_APP_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            finishHeavyWeightApp();
+            reply.writeNoException();
+            return true;
+        }
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -2756,6 +2763,16 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
+    }
+    
+    public void finishHeavyWeightApp() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(FINISH_HEAVY_WEIGHT_APP_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
     
     private IBinder mRemote;
