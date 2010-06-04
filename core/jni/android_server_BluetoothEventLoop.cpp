@@ -1061,6 +1061,8 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
     DBusError err;
     dbus_error_init(&err);
     JNIEnv *env;
+    jstring addr;
+
     nat->vm->GetEnv((void**)&env, nat->envVer);
 
     LOGV("... address = %s", address);
@@ -1109,10 +1111,12 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
         }
     }
 
+    addr = env->NewStringUTF(address);
     env->CallVoidMethod(nat->me,
                         method_onCreatePairedDeviceResult,
-                        env->NewStringUTF(address),
+                        addr,
                         result);
+    env->DeleteLocalRef(addr);
 done:
     dbus_error_free(&err);
     free(user);
@@ -1139,10 +1143,12 @@ void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
         }
         LOG_AND_FREE_DBUS_ERROR(&err);
     }
+    jstring addr = env->NewStringUTF(address);
     env->CallVoidMethod(nat->me,
                         method_onCreateDeviceResult,
-                        env->NewStringUTF(address),
+                        addr,
                         result);
+    env->DeleteLocalRef(addr);
     free(user);
 }
 
@@ -1163,10 +1169,12 @@ void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
         LOG_AND_FREE_DBUS_ERROR(&err);
         result = JNI_FALSE;
     }
+    jstring jPath = env->NewStringUTF(path);
     env->CallVoidMethod(nat->me,
                         method_onDiscoverServicesResult,
-                        env->NewStringUTF(path),
+                        jPath,
                         result);
+    env->DeleteLocalRef(jPath);
     free(user);
 }
 
@@ -1194,10 +1202,12 @@ void onGetDeviceServiceChannelResult(DBusMessage *msg, void *user, void *n) {
     }
 
 done:
+    jstring addr = env->NewStringUTF(address);
     env->CallVoidMethod(nat->me,
                         method_onGetDeviceServiceChannelResult,
-                        env->NewStringUTF(address),
+                        addr,
                         channel);
+    env->DeleteLocalRef(addr);
     free(user);
 }
 #endif
