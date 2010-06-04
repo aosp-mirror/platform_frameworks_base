@@ -253,6 +253,9 @@ public:
     // Metering mode. This affects how camera determines exposure.
     // Example value: "spot" or METERING_MODE_XXX constants. Read/write.
     static const char KEY_METERING_MODE[];
+    // Supported metering modes.
+    // Example value: "center-weighted,frame-average,spot". Read only.
+    static const char KEY_SUPPORTED_METERING_MODES[];
 
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
