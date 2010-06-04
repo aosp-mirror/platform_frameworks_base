@@ -349,6 +349,16 @@ public class PhoneStatusBarService extends StatusBarService {
 
         final RemoteViews contentView = notification.notification.contentView;
 
+        if (false) {
+            Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " expanded=" + oldEntry.expanded
+                    + " contentView=" + oldContentView);
+            Slog.d(TAG, "new notification: when=" + notification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " contentView=" + contentView);
+        }
+
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
         if (notification.notification.when == oldNotification.notification.when
