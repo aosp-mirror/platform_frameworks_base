@@ -62,6 +62,11 @@ public:
      */
     virtual void        pause() = 0;
 
+    /* Attach track auxiliary output to specified effect. Use effectId = 0
+     * to detach track from effect.
+     */
+    virtual status_t    attachAuxEffect(int effectId) = 0;
+
     /* get this tracks control block */
     virtual sp<IMemory> getCblk() const = 0;    
 };

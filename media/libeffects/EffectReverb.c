@@ -18,7 +18,8 @@
 //
 #define LOG_NDEBUG 0
 #include <cutils/log.h>
-
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include "EffectReverb.h"
 #include "EffectsMath.h"
@@ -86,7 +87,7 @@ static const effect_descriptor_t * const gDescriptors[] = {
 
 /*--- Effect Library Interface Implementation ---*/
 
-int EffectQueryNumberEffects(int *pNumEffects) {
+int EffectQueryNumberEffects(uint32_t *pNumEffects) {
     *pNumEffects = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *)
             - 1;
     gEffectIndex = 0;

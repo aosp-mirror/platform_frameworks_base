@@ -138,7 +138,8 @@ public:
                                     uint32_t flags       = 0,
                                     callback_t cbf       = 0,
                                     void* user           = 0,
-                                    int notificationFrames = 0);
+                                    int notificationFrames = 0,
+                                    int sessionId = 0);
 
     /* Creates an audio track and registers it with AudioFlinger. With this constructor,
      * The PCM data to be rendered by AudioTrack is passed in a shared memory buffer
@@ -157,7 +158,8 @@ public:
                                     uint32_t flags      = 0,
                                     callback_t cbf      = 0,
                                     void* user          = 0,
-                                    int notificationFrames = 0);
+                                    int notificationFrames = 0,
+                                    int sessionId = 0);
 
     /* Terminates the AudioTrack and unregisters it from AudioFlinger.
      * Also destroys all resources assotiated with the AudioTrack.
@@ -182,7 +184,8 @@ public:
                             void* user          = 0,
                             int notificationFrames = 0,
                             const sp<IMemory>& sharedBuffer = 0,
-                            bool threadCanCallJava = false);
+                            bool threadCanCallJava = false,
+                            int sessionId = 0);
 
 
     /* Result of constructing the AudioTrack. This must be checked
@@ -239,9 +242,16 @@ public:
 
 
     /* set volume for this track, mostly used for games' sound effects
+     * left and right volumes. Levels must be <= 1.0.
      */
-            void        setVolume(float left, float right);
+            status_t    setVolume(float left, float right);
             void        getVolume(float* left, float* right);
+
+    /* set the send level for this track. An auxiliary effect should be attached
+     * to the track with attachEffect(). Level must be <= 1.0.
+     */
+            status_t    setSendLevel(float level);
+            void        getSendLevel(float* level);
 
     /* set sample rate for this track, mostly used for games' sound effects
      */
@@ -340,6 +350,31 @@ public:
      */
             audio_io_handle_t    getOutput();
 
+    /* returns the unique ID associated to this track.
+     *
+     * Parameters:
+     *  none.
+     *
+     * Returned value:
+     *  AudioTrack ID.
+     */
+            int    getSessionId();
+
+
+    /* Attach track auxiliary output to specified effect. Used effectId = 0
+     * to detach track from effect.
+     *
+     * Parameters:
+     *
+     * effectId:  effectId obtained from AudioEffect::id().
+     *
+     * Returned status (from utils/Errors.h) can be:
+     *  - NO_ERROR: successful operation
+     *  - INVALID_OPERATION: the effect is not an auxiliary effect.
+     *  - BAD_VALUE: The specified effect ID is invalid
+     */
+            status_t    attachAuxEffect(int effectId);
+
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
      * STOPPED instead of NO_ERROR as long as there are buffers availlable,
@@ -406,6 +441,7 @@ private:
     sp<AudioTrackThread>    mAudioTrackThread;
 
     float                   mVolume[2];
+    float                   mSendLevel;
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;
@@ -431,6 +467,7 @@ private:
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
     uint32_t                mFlags;
+    int                     mSessionId;
 };
 
 
