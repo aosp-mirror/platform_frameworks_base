@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -501,18 +502,32 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsAlert(mWebView, url, message,
                             res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         new AlertDialog.Builder(mContext)
                                 .setTitle(getJsDialogTitle(url))
                                 .setMessage(message)
                                 .setPositiveButton(R.string.ok,
-                                        new AlertDialog.OnClickListener() {
+                                        new DialogInterface.OnClickListener() {
                                             public void onClick(
                                                     DialogInterface dialog,
                                                     int which) {
                                                 res.confirm();
                                             }
                                         })
-                                .setCancelable(false)
+                                .setOnCancelListener(
+                                        new DialogInterface.OnCancelListener() {
+                                            public void onCancel(
+                                                    DialogInterface dialog) {
+                                                res.cancel();
+                                            }
+                                        })
                                 .show();
                     }
                     res.setReady();
@@ -526,6 +541,14 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsConfirm(mWebView, url, message,
                             res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         new AlertDialog.Builder(mContext)
                                 .setTitle(getJsDialogTitle(url))
                                 .setMessage(message)
@@ -566,6 +589,14 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsPrompt(mWebView, url, message,
                                 defaultVal, res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         final LayoutInflater factory = LayoutInflater
                                 .from(mContext);
                         final View view = factory.inflate(R.layout.js_prompt,
@@ -617,6 +648,14 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsBeforeUnload(mWebView, url,
                             message, res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         final String m = mContext.getString(
                                 R.string.js_dialog_before_unload, message);
                         new AlertDialog.Builder(mContext)
