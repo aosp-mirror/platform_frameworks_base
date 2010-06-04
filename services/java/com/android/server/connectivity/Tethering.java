@@ -98,6 +98,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
     private static final String DNS_DEFAULT_SERVER2 = "4.2.2.2";
 
+    // resampled each time we turn on tethering - used as cache for settings/config-val
     private boolean mDunRequired;  // configuration info - must use DUN apn on 3g
 
     private HierarchicalStateMachine mTetherMasterSM;
@@ -157,8 +158,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             mDhcpRange[2] = DHCP_DEFAULT_RANGE2_START;
             mDhcpRange[3] = DHCP_DEFAULT_RANGE2_STOP;
         }
-        mDunRequired = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_tether_dun_required);
+        mDunRequired = false; // resample when we turn on
 
         mTetherableUsbRegexs = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_usb_regexs);
@@ -555,7 +555,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public boolean isDunRequired() {
-        return mDunRequired;
+        boolean defaultVal = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_tether_dun_required);
+        boolean result = (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.TETHER_DUN_REQUIRED, (defaultVal ? 1 : 0)) == 1);
+        return result;
     }
 
     public String[] getTetheredIfaces() {
@@ -1263,6 +1267,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
+                        mDunRequired = isDunRequired();
                         TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
                         Log.d(TAG, "Tether Mode requested by " + who.toString());
                         mNotifyList.add(who);
