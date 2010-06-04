@@ -117,6 +117,11 @@ public class RenderScript {
     native void nAllocationSubDataFromObject(int id, Type t, int offset, Object o);
     native void nAllocationSubReadFromObject(int id, Type t, int offset, Object o);
 
+    native int  nFileA3DCreateFromAssetStream(int assetStream);
+    native int  nFileA3DGetNumIndexEntries(int fileA3D);
+    native void nFileA3DGetIndexEntries(int fileA3D, int numEntries, int[] IDs, String[] names);
+    native int  nFileA3DGetEntryByIndex(int fileA3D, int index);
+
     native void nAdapter1DBindAllocation(int ad, int alloc);
     native void nAdapter1DSetConstraint(int ad, int dim, int value);
     native void nAdapter1DData(int ad, int[] d);

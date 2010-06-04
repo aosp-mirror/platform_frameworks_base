@@ -70,9 +70,9 @@ public:
 
     void analyzeElement();
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_MESH; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
     static Mesh *createFromStream(Context *rsc, IStream *stream);
-    
+
 protected:
 };
 

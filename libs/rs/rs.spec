@@ -441,12 +441,34 @@ LightSetColor {
 	param float b
 	}
 
+FileA3DCreateFromAssetStream {
+	param const void * data
+	param size_t len
+	ret RsFile
+	}
+
 FileOpen {
 	ret RsFile
 	param const char *name
 	param size_t len
 	}
 
+FileA3DGetNumIndexEntries {
+	param int32_t * numEntries
+	param RsFile file
+	}
+
+FileA3DGetIndexEntries {
+	param RsFileIndexEntry * fileEntries
+	param uint32_t numEntries
+	param RsFile fileA3D
+	}
+
+FileA3DGetEntryByIndex {
+	param uint32_t index
+	param RsFile file
+	ret RsObjectBase
+	}
 
 SimpleMeshCreate {
 	ret RsSimpleMesh

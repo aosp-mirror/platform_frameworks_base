@@ -41,7 +41,7 @@ public:
     virtual void loadShader(Context *rsc);
     virtual void init(Context *rsc);
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_FRAGMENT; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_FRAGMENT; }
     static ProgramFragment *createFromStream(Context *rsc, IStream *stream);
 
 protected:

@@ -37,7 +37,7 @@ public:
     virtual void setupGL(const Context *, ProgramRasterState *);
     virtual void setupGL2(const Context *, ProgramRasterState *);
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_RASTER; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }
     static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
 
     void setLineWidth(float w);

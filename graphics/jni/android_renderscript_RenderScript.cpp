@@ -700,6 +700,59 @@ nAllocationSubReadFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _t
     free(bufAlloc);
 }
 
+// -----------------------------------
+
+static int
+nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, jint native_asset)
+{
+    LOGV("______nFileA3D %u", (uint32_t) native_asset);
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+
+    Asset* asset = reinterpret_cast<Asset*>(native_asset);
+
+    jint id = (jint)rsFileA3DCreateFromAssetStream(con, asset->getBuffer(false), asset->getLength());
+    return id;
+}
+
+static int
+nFileA3DGetNumIndexEntries(JNIEnv *_env, jobject _this, jint fileA3D)
+{
+    LOGV("______nFileA3D %u", (uint32_t) fileA3D);
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+
+    int32_t numEntries = 0;
+    rsFileA3DGetNumIndexEntries(con, &numEntries, (RsFile)fileA3D);
+    LOGV("______nFileA3D NumEntries %u", (uint32_t) numEntries);
+    return numEntries;
+}
+
+static void
+nFileA3DGetIndexEntries(JNIEnv *_env, jobject _this, jint fileA3D, jint numEntries, jintArray _ids, jobjectArray _entries)
+{
+    LOGV("______nFileA3D %u", (uint32_t) fileA3D);
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+
+    RsFileIndexEntry *fileEntries = (RsFileIndexEntry*)malloc((uint32_t)numEntries * sizeof(RsFileIndexEntry));
+
+    rsFileA3DGetIndexEntries(con, fileEntries, (uint32_t)numEntries, (RsFile)fileA3D);
+
+    for(jint i = 0; i < numEntries; i ++) {
+        _env->SetObjectArrayElement(_entries, i, _env->NewStringUTF(fileEntries[i].objectName));
+        _env->SetIntArrayRegion(_ids, i, 1, (const jint*)&fileEntries[i].classID);
+    }
+
+    free(fileEntries);
+}
+
+static int
+nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, jint fileA3D, jint index)
+{
+    LOGV("______nFileA3D %u", (uint32_t) fileA3D);
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+
+    jint id = (jint)rsFileA3DGetEntryByIndex(con, (uint32_t)index, (RsFile)fileA3D);
+    return id;
+}
 
 // -----------------------------------
 
@@ -1441,6 +1494,11 @@ static JNINativeMethod methods[] = {
 {"nSimpleMeshCreate",              "(II[II)I",                             (void*)nSimpleMeshCreate },
 {"nSimpleMeshBindVertex",          "(III)V",                               (void*)nSimpleMeshBindVertex },
 {"nSimpleMeshBindIndex",           "(II)V",                                (void*)nSimpleMeshBindIndex },
+
+{"nFileA3DCreateFromAssetStream", "(I)I",                                 (void*)nFileA3DCreateFromAssetStream },
+{"nFileA3DGetNumIndexEntries",     "(I)I",                                 (void*)nFileA3DGetNumIndexEntries },
+{"nFileA3DGetIndexEntries",        "(II[I[Ljava/lang/String;)V",          (void*)nFileA3DGetIndexEntries },
+{"nFileA3DGetEntryByIndex",        "(II)I",                                (void*)nFileA3DGetEntryByIndex },
 
 };
 

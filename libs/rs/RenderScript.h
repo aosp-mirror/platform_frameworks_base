@@ -40,6 +40,7 @@ typedef void * RsScript;
 typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsLight;
+typedef void * RsObjectBase;
 
 typedef void * RsProgram;
 typedef void * RsProgramVertex;
@@ -228,6 +229,30 @@ enum RsAnimationEdge {
     RS_ANIMATION_EDGE_OSCILLATE,
     RS_ANIMATION_EDGE_CYLE_RELATIVE
 };
+
+enum RsA3DClassID {
+    RS_A3D_CLASS_ID_UNKNOWN,
+    RS_A3D_CLASS_ID_MESH,
+    RS_A3D_CLASS_ID_SIMPLE_MESH,
+    RS_A3D_CLASS_ID_TYPE,
+    RS_A3D_CLASS_ID_ELEMENT,
+    RS_A3D_CLASS_ID_ALLOCATION,
+    RS_A3D_CLASS_ID_PROGRAM_VERTEX,
+    RS_A3D_CLASS_ID_PROGRAM_RASTER,
+    RS_A3D_CLASS_ID_PROGRAM_FRAGMENT,
+    RS_A3D_CLASS_ID_PROGRAM_STORE,
+    RS_A3D_CLASS_ID_SAMPLER,
+    RS_A3D_CLASS_ID_ANIMATION,
+    RS_A3D_CLASS_ID_LIGHT,
+    RS_A3D_CLASS_ID_ADAPTER_1D,
+    RS_A3D_CLASS_ID_ADAPTER_2D,
+    RS_A3D_CLASS_ID_SCRIPT_C
+};
+
+typedef struct {
+    RsA3DClassID classID;
+    const char* objectName;
+} RsFileIndexEntry;
 
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"

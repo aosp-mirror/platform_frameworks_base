@@ -38,7 +38,7 @@ public:
 
     void setupGL(uint32_t num) const;
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_LIGHT; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_LIGHT; }
     static Light *createFromStream(Context *rsc, IStream *stream);
 
 protected:

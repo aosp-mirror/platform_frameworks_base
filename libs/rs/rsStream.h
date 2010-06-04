@@ -86,6 +86,13 @@ public:
     OStream(uint64_t length, bool use64);
     ~OStream();
     
+    void align(uint32_t bytes) {
+        mPos = (mPos + (bytes - 1)) & (~(bytes - 1));
+        if(mPos >= mLength) {
+            growSize();
+        }
+    }
+    
     void addF(float v) {
         uint32_t uintV = *reinterpret_cast<uint32_t*> (&v);
         addU32(uintV);

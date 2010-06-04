@@ -44,7 +44,7 @@ public:
     void setDitherEnable(bool);
 
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_STORE; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_STORE; }
     static ProgramStore *createFromStream(Context *rsc, IStream *stream);
 
 protected:

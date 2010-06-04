@@ -53,7 +53,7 @@ public:
     virtual void init(Context *);
 
     virtual void serialize(OStream *stream) const;
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_PROGRAM_VERTEX; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_VERTEX; }
     static ProgramVertex *createFromStream(Context *rsc, IStream *stream);
 
 protected:

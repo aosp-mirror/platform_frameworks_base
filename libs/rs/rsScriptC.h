@@ -61,9 +61,8 @@ public:
     virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t xEnd);
     virtual void runForEach(Context *rsc, const Allocation *ain, Allocation *aout, uint32_t xStart, uint32_t yStart, uint32_t xEnd, uint32_t yEnd);
 
-
     virtual void serialize(OStream *stream) const {    }
-    virtual A3DClassID getClassId() const { return A3D_CLASS_ID_SCRIPT_C; }
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_SCRIPT_C; }
     static Type *createFromStream(Context *rsc, IStream *stream) { return NULL; }
 
 protected:

@@ -48,15 +48,18 @@ SimpleMesh::~SimpleMesh()
 void SimpleMesh::render(Context *rsc) const
 {
     if (mPrimitiveType.get()) {
+        LOGE("Rendering primitive");
         renderRange(rsc, 0, mPrimitiveType->getDimX());
         return;
     }
 
     if (mIndexType.get()) {
+        LOGE("Rendering index");
         renderRange(rsc, 0, mIndexType->getDimX());
         return;
     }
 
+    LOGE("Rendering non-indexed");
     renderRange(rsc, 0, mVertexTypes[0]->getDimX());
 }
 
@@ -150,8 +153,8 @@ void SimpleMesh::serialize(OStream *stream) const
 SimpleMesh *SimpleMesh::createFromStream(Context *rsc, IStream *stream)
 {
     // First make sure we are reading the correct object
-    A3DClassID classID = (A3DClassID)stream->loadU32();
-    if(classID != A3D_CLASS_ID_SIMPLE_MESH) {
+    RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
+    if(classID != RS_A3D_CLASS_ID_SIMPLE_MESH) {
         LOGE("simple mesh loading skipped due to invalid class id");
         return NULL;
     }
@@ -188,6 +191,25 @@ SimpleMesh *SimpleMesh::createFromStream(Context *rsc, IStream *stream)
             mesh->mVertexTypes[vCount].set(vertexType);
         }
     }
+
+    LOGE("Triangles: %u", indexType->getDimX()/3);
+    uint16_t *indices = (uint16_t*)indexAlloc->getPtr();
+    for(uint32_t i = 0; i < indexType->getDimX(); i += 3) {
+        LOGE("T: %.2u %.2u %2.u", indices[i], indices[i+1], indices[i+2]);
+    }
+
+    uint32_t numVerts = mesh->mVertexTypes[0]->getDimX();
+    LOGE("Vertices: %u", numVerts);
+    float *verts = (float*)mesh->mVertexBuffers[0]->getPtr();
+
+    for(uint32_t i = 0; i < numVerts; i ++) {
+
+        LOGE("Vpnt: %+4.2f %+4.2f %+4.2f %+4.2f %+4.2f %+4.2f %+4.2f %+4.2f", verts[8*i], verts[8*i+1], verts[8*i+2],
+                                                                                    verts[8*i+3], verts[8*i+4], verts[8*i+5],
+                                                                                    verts[8*i+6], verts[8*i+7] );
+    }
+
+    mesh->uploadAll(rsc);
 
     return mesh;
 }
