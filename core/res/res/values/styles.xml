@@ -451,6 +451,18 @@
     <style name="Widget.Spinner">
         <item name="android:background">@android:drawable/btn_dropdown</item>
         <item name="android:clickable">true</item>
+        <item name="android:spinnerMode">dialog</item>
+
+        <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
+        <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="android:dropDownVerticalOffset">-10dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:popupPromptView">@android:layout/simple_dropdown_hint</item>
+    </style>
+
+    <style name="Widget.Spinner.DropDown">
+        <item name="android:spinnerMode">dropdown</item>
     </style>
 
     <style name="Widget.TextView.PopupMenu">

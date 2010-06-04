@@ -1286,5 +1286,6 @@
   <public type="id" name="home" />
 
   <public type="style" name="Theme.WithActionBar" />
+  <public type="style" name="Widget.Spinner.DropDown" />
 
 </resources>
