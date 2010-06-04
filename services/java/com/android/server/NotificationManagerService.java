@@ -70,6 +70,8 @@ class NotificationManagerService extends INotificationManager.Stub
     private static final String TAG = "NotificationService";
     private static final boolean DBG = false;
 
+    private static final int MAX_PACKAGE_NOTIFICATIONS = 50;
+
     // message codes
     private static final int MESSAGE_TIMEOUT = 2;
 
@@ -656,6 +658,26 @@ class NotificationManagerService extends INotificationManager.Stub
             Notification notification, int[] idOut)
     {
         checkIncomingCall(pkg);
+
+        // Limit the number of notifications that any given package except the android
+        // package can enqueue.  Prevents DOS attacks and deals with leaks.
+        if (!"android".equals(pkg)) {
+            synchronized (mNotificationList) {
+                int count = 0;
+                final int N = mNotificationList.size();
+                for (int i=0; i<N; i++) {
+                    final NotificationRecord r = mNotificationList.get(i);
+                    if (r.pkg.equals(pkg)) {
+                        count++;
+                        if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                            Slog.e(TAG, "Package has already posted " + count
+                                    + " notifications.  Not showing more.  package=" + pkg);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
 
         // This conditional is a dirty hack to limit the logging done on
         //     behalf of the download manager without affecting other apps.
