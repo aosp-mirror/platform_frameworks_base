@@ -18,6 +18,8 @@ package android.database.sqlite;
 
 import android.os.SystemClock;
 
+import dalvik.system.BlockGuard;
+
 /**
  * A pre-compiled statement against a {@link SQLiteDatabase} that can be reused.
  * The statement cannot return multiple rows, but 1x1 result sets are allowed.
@@ -48,6 +50,7 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public void execute() {
         mDatabase.verifyDbIsOpen();
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -73,6 +76,7 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long executeInsert() {
         mDatabase.verifyDbIsOpen();
+        BlockGuard.getThreadPolicy().onWriteToDisk();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -98,6 +102,7 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long simpleQueryForLong() {
         mDatabase.verifyDbIsOpen();
+        BlockGuard.getThreadPolicy().onReadFromDisk();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
@@ -123,6 +128,7 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public String simpleQueryForString() {
         mDatabase.verifyDbIsOpen();
+        BlockGuard.getThreadPolicy().onReadFromDisk();
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
