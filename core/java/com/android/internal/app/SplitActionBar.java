@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.view.ActionBarView;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.SpinnerAdapter;
 
 /**
  * SplitActionBar is the ActionBar implementation used
@@ -42,8 +43,23 @@ public class SplitActionBar extends ActionBar {
         mActionView.setCallback(callback);
     }
 
-    public void setCustomNavigationView(View view) {
+    public void setCustomNavigationMode(View view) {
         mActionView.setCustomNavigationView(view);
+    }
+    
+    public void setDropdownNavigationMode(SpinnerAdapter adapter) {
+        mActionView.setNavigationMode(NAVIGATION_MODE_DROPDOWN_LIST);
+        mActionView.setDropdownAdapter(adapter);
+    }
+    
+    public void setStandardNavigationMode(CharSequence title) {
+        setStandardNavigationMode(title, null);
+    }
+    
+    public void setStandardNavigationMode(CharSequence title, CharSequence subtitle) {
+        mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
+        mActionView.setTitle(title);
+        mActionView.setSubtitle(subtitle);
     }
 
     public void setTitle(CharSequence title) {
@@ -52,10 +68,6 @@ public class SplitActionBar extends ActionBar {
 
     public void setSubtitle(CharSequence subtitle) {
         mActionView.setSubtitle(subtitle);
-    }
-
-    public void setNavigationMode(int mode) {
-        mActionView.setNavigationMode(mode);
     }
 
     public void setDisplayOptions(int options) {

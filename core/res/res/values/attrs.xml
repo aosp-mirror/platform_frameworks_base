@@ -397,6 +397,8 @@
         <attr name="horizontalScrollViewStyle" format="reference" />
         <!-- Default Spinner style. -->
         <attr name="spinnerStyle" format="reference" />
+        <!-- Dropdown Spinner style. -->
+        <attr name="dropDownSpinnerStyle" format="reference" />
         <!-- Default Star style. -->
         <attr name="starStyle" format="reference" />
         <!-- Default TabWidget style. -->
