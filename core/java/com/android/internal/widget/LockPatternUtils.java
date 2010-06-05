@@ -164,6 +164,9 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMinimumSymbols(null);
     }
 
+    public int getRequestedPasswordMinimumNonLetter() {
+        return getDevicePolicyManager().getPasswordMinimumNonLetter(null);
+    }
     /**
      * Returns the actual password mode, as set by keyguard after updating the password.
      *
@@ -369,10 +372,10 @@ public class LockPatternUtils {
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
-                        .size(), 0, 0, 0, 0, 0);
+                        .size(), 0, 0, 0, 0, 0, 0);
             } else {
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
-                        0, 0, 0, 0);
+                        0, 0, 0, 0, 0);
             }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings
@@ -441,6 +444,7 @@ public class LockPatternUtils {
                     int lowercase = 0;
                     int numbers = 0;
                     int symbols = 0;
+                    int nonletter = 0;
                     for (int i = 0; i < password.length(); i++) {
                         char c = password.charAt(i);
                         if (c >= 'A' && c <= 'Z') {
@@ -451,16 +455,18 @@ public class LockPatternUtils {
                             lowercase++;
                         } else if (c >= '0' && c <= '9') {
                             numbers++;
+                            nonletter++;
                         } else {
                             symbols++;
+                            nonletter++;
                         }
                     }
                     dpm.setActivePasswordState(Math.max(quality, computedQuality), password
-                            .length(), letters, uppercase, lowercase, numbers, symbols);
+                            .length(), letters, uppercase, lowercase, numbers, symbols, nonletter);
                 } else {
                     // The password is not anything.
                     dpm.setActivePasswordState(
-                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0);
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0);
                 }
                 // Add the password to the password history. We assume all
                 // password
@@ -483,7 +489,7 @@ public class LockPatternUtils {
                 setString(PASSWORD_HISTORY_KEY, passwordHistory);
             } else {
                 dpm.setActivePasswordState(
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0);
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0);
             }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider

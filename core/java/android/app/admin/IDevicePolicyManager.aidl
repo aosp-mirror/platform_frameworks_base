@@ -45,6 +45,9 @@ interface IDevicePolicyManager {
 
     void setPasswordMinimumSymbols(in ComponentName who, int length);
     int getPasswordMinimumSymbols(in ComponentName who);
+
+    void setPasswordMinimumNonLetter(in ComponentName who, int length);
+    int getPasswordMinimumNonLetter(in ComponentName who);
     
     void setPasswordHistoryLength(in ComponentName who, int length);
     int getPasswordHistoryLength(in ComponentName who);
@@ -71,7 +74,8 @@ interface IDevicePolicyManager {
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
     
-    void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase, int numbers, int symbols);
+    void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,
+        int numbers, int symbols, int nonletter);
     void reportFailedPasswordAttempt();
     void reportSuccessfulPasswordAttempt();
 }

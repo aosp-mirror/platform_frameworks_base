@@ -215,9 +215,13 @@ public class DevicePolicyManager {
 
     /**
      * Constant for {@link #setPasswordQuality}: the user must have entered a
-     * password containing numeric <em>and</em> alphabetic characters,
-     * <em>and</em> special symbols. Note that quality constants are ordered so
-     * that higher values are more restrictive.
+     * password containing at least a letter, a numerical digit and a special
+     * symbol, by default. With this password quality, passwords can be
+     * restricted to contain various sets of characters, like at least an
+     * uppercase letter, etc. These are specified using various methods,
+     * like {@link #setPasswordMinimumLowerCase(ComponentName, int)}. Note
+     * that quality constants are ordered so that higher values are more
+     * restrictive.
      */
     public static final int PASSWORD_QUALITY_COMPLEX = 0x60000;
 
@@ -329,7 +333,8 @@ public class DevicePolicyManager {
      * not take place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
+     * default value is 0.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -353,7 +358,10 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of upper case letters required in the
-     * password for all admins or a particular one.
+     * password for all admins or a particular one. This is the same value as
+     * set by {#link {@link #setPasswordMinimumUpperCase(ComponentName, int)}
+     * and only applies when the password quality is
+     * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
      * @param admin The name of the admin component to check, or null to
      *            aggregate all admins.
@@ -380,7 +388,8 @@ public class DevicePolicyManager {
      * not take place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
+     * default value is 0.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -404,7 +413,10 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of lower case letters required in the
-     * password for all admins or a particular one.
+     * password for all admins or a particular one. This is the same value as
+     * set by {#link {@link #setPasswordMinimumLowerCase(ComponentName, int)}
+     * and only applies when the password quality is
+     * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
      * @param admin The name of the admin component to check, or null to
      *            aggregate all admins.
@@ -431,7 +443,8 @@ public class DevicePolicyManager {
      * place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
+     * default value is 1.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -454,7 +467,10 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of letters required in the password for all
-     * admins or a particular one.
+     * admins or a particular one. This is the same value as
+     * set by {#link {@link #setPasswordMinimumLetters(ComponentName, int)}
+     * and only applies when the password quality is
+     * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
      * @param admin The name of the admin component to check, or null to
      *            aggregate all admins.
@@ -480,7 +496,8 @@ public class DevicePolicyManager {
      * not take place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
+     * default value is 1.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -503,7 +520,10 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of numerical digits required in the password
-     * for all admins or a particular one.
+     * for all admins or a particular one. This is the same value as
+     * set by {#link {@link #setPasswordMinimumNumeric(ComponentName, int)}
+     * and only applies when the password quality is
+     * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
      * @param admin The name of the admin component to check, or null to
      *            aggregate all admins.
@@ -529,7 +549,8 @@ public class DevicePolicyManager {
      * place immediately. To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
+     * default value is 1.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -552,7 +573,10 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of symbols required in the password for all
-     * admins or a particular one.
+     * admins or a particular one. This is the same value as
+     * set by {#link {@link #setPasswordMinimumSymbols(ComponentName, int)}
+     * and only applies when the password quality is
+     * {@link #PASSWORD_QUALITY_COMPLEX}.
      *
      * @param admin The name of the admin component to check, or null to
      *            aggregate all admins.
@@ -562,6 +586,59 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getPasswordMinimumSymbols(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Called by an application that is administering the device to set the
+     * minimum number of non-letter characters (numerical digits or symbols)
+     * required in the password. After setting this, the user will not be able
+     * to enter a new password that is not at least as restrictive as what has
+     * been set. Note that the current password will remain until the user has
+     * set a new one, so the change does not take place immediately. To prompt
+     * the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} after
+     * setting this value. This constraint is only imposed if the administrator
+     * has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
+     * {@link #setPasswordQuality}. The default value is 0.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param length The new desired minimum number of letters required in the
+     *            password. A value of 0 means there is no restriction.
+     */
+    public void setPasswordMinimumNonLetter(ComponentName admin, int length) {
+        if (mService != null) {
+            try {
+                mService.setPasswordMinimumNonLetter(admin, length);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current number of non-letter characters required in the
+     * password for all admins or a particular one. This is the same value as
+     * set by {#link {@link #setPasswordMinimumNonLetter(ComponentName, int)}
+     * and only applies when the password quality is
+     * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * @param admin The name of the admin component to check, or null to
+     *            aggregate all admins.
+     * @return The minimum number of letters required in the password.
+     */
+    public int getPasswordMinimumNonLetter(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumNonLetter(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -894,11 +971,11 @@ public class DevicePolicyManager {
      * @hide
      */
     public void setActivePasswordState(int quality, int length, int letters, int uppercase,
-            int lowercase, int numbers, int symbols) {
+            int lowercase, int numbers, int symbols, int nonletter) {
         if (mService != null) {
             try {
                 mService.setActivePasswordState(quality, length, letters, uppercase, lowercase,
-                        numbers, symbols);
+                        numbers, symbols, nonletter);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
