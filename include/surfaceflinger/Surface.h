@@ -145,14 +145,12 @@ public:
         uint32_t    reserved[2];
     };
 
-    Surface(const Parcel& data);
+    static sp<Surface> readFromParcel(
+            const Parcel& data, const sp<Surface>& other);
 
     static bool isValid(const sp<Surface>& surface) {
         return (surface != 0) && surface->isValid();
     }
-
-    static bool isSameSurface(
-            const sp<Surface>& lhs, const sp<Surface>& rhs);
 
     bool        isValid();
     SurfaceID   ID() const          { return mToken; }
@@ -191,6 +189,7 @@ private:
     Surface(const Surface& rhs);
 
     Surface(const sp<SurfaceControl>& control);
+    Surface(const Parcel& data, const sp<IBinder>& ref);
     ~Surface();
 
 

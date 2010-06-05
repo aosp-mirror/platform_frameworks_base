@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Surface"
+
 #include <stdio.h>
 
 #include "android_util_Binder.h"
@@ -226,8 +228,9 @@ static void Surface_initParcel(JNIEnv* env, jobject clazz, jobject argParcel)
         doThrow(env, "java/lang/NullPointerException", NULL);
         return;
     }
-    sp<Surface> rhs = new Surface(*parcel);
-    setSurface(env, clazz, rhs);
+
+    sp<Surface> sur(Surface::readFromParcel(*parcel, 0));
+    setSurface(env, clazz, sur);
 }
 
 static jint Surface_getIdentity(JNIEnv* env, jobject clazz)
@@ -586,7 +589,7 @@ static void Surface_copyFrom(
      * a Surface and is necessary for returning the Surface reference to
      * the caller. At this point, we should only have a SurfaceControl.
      */
-    
+
     const sp<SurfaceControl>& surface = getSurfaceControl(env, clazz);
     const sp<SurfaceControl>& rhs = getSurfaceControl(env, other);
     if (!SurfaceControl::isSameSurface(surface, rhs)) {
@@ -605,13 +608,9 @@ static void Surface_readFromParcel(
         return;
     }
 
-    const sp<Surface>& control(getSurface(env, clazz));
-    sp<Surface> rhs = new Surface(*parcel);
-    if (!Surface::isSameSurface(control, rhs)) {
-        // we reassign the surface only if it's a different one
-        // otherwise we would loose our client-side state.
-        setSurface(env, clazz, rhs);
-    }
+    const sp<Surface>& curr(getSurface(env, clazz));
+    sp<Surface> sur(Surface::readFromParcel(*parcel, curr));
+    setSurface(env, clazz, sur);
 }
 
 static void Surface_writeToParcel(
