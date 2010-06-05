@@ -32,7 +32,7 @@ class LayerBlur : public LayerBaseClient
 {
 public:    
                 LayerBlur(SurfaceFlinger* flinger, DisplayID display,
-                        const sp<Client>& client, int32_t i);
+                        const sp<Client>& client);
         virtual ~LayerBlur();
 
     virtual void onDraw(const Region& clip) const;

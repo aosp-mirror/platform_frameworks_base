@@ -488,35 +488,18 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 int32_t LayerBaseClient::sIdentity = 1;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
-        const sp<Client>& client, int32_t i)
-    : LayerBase(flinger, display), client(client), mIndex(i),
+        const sp<Client>& client)
+    : LayerBase(flinger, display), client(client),
       mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
 }
 
-void LayerBaseClient::onFirstRef()
-{    
-    sp<Client> client(this->client.promote());
-    if (client != 0) {
-        client->bindLayer(this, mIndex);
-    }
-}
-
 LayerBaseClient::~LayerBaseClient()
 {
-    sp<Client> client(this->client.promote());
-    if (client != 0) {
-        client->free(mIndex);
+    sp<Client> c(client.promote());
+    if (c != 0) {
+        c->free(this);
     }
-}
-
-ssize_t LayerBaseClient::serverIndex() const
-{
-    sp<Client> client(this->client.promote());
-    if (client != 0) {
-        return (client->cid<<16)|mIndex;
-    }
-    return ssize_t(0xFFFF0000 | mIndex);
 }
 
 sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
@@ -533,7 +516,7 @@ sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
 
 sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
 {
-    return new Surface(mFlinger, clientIndex(), mIdentity,
+    return new Surface(mFlinger, mIdentity,
             const_cast<LayerBaseClient *>(this));
 }
 
@@ -544,10 +527,9 @@ void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
     sp<Client> client(this->client.promote());
     snprintf(buffer, SIZE,
             "      name=%s\n"
-            "      id=0x%08x, client=0x%08x, identity=%u\n",
+            "      client=%p, identity=%u\n",
             getName().string(),
-            clientIndex(), client.get() ? client->cid : 0,
-            getIdentity());
+            client.get(), getIdentity());
 
     result.append(buffer);
 }
@@ -556,9 +538,9 @@ void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
 
 LayerBaseClient::Surface::Surface(
         const sp<SurfaceFlinger>& flinger,
-        SurfaceID id, int identity, 
+        int identity,
         const sp<LayerBaseClient>& owner) 
-    : mFlinger(flinger), mToken(id), mIdentity(identity), mOwner(owner)
+    : mFlinger(flinger), mIdentity(identity), mOwner(owner)
 {
 }
 

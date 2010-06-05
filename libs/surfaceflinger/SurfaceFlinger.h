@@ -36,7 +36,6 @@
 
 #include "Barrier.h"
 #include "Layer.h"
-#include "Tokenizer.h"
 
 #include "MessageQueue.h"
 
@@ -48,54 +47,48 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class Client;
-class BClient;
 class DisplayHardware;
 class FreezeLock;
 class Layer;
 class LayerBuffer;
-
-typedef int32_t ClientID;
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 // ---------------------------------------------------------------------------
 
-class Client : public RefBase
+class Client : public BnSurfaceComposerClient
 {
 public:
-            Client(ClientID cid, const sp<SurfaceFlinger>& flinger);
-            ~Client();
-
-            int32_t                 generateId(int pid);
-            void                    free(int32_t id);
-            status_t                bindLayer(const sp<LayerBaseClient>& layer, int32_t id);
-
-    inline  bool                    isValid(int32_t i) const;
-    sp<LayerBaseClient>             getLayerUser(int32_t i) const;
-    
-    const Vector< wp<LayerBaseClient> >& getLayers() const { 
-        return mLayers; 
-    }
-    
-    const sp<IMemoryHeap>& getControlBlockMemory() const {
-        return mCblkHeap; 
-    }
-    
     // pointer to this client's control block
-    SharedClient*           ctrlblk;
-    ClientID                cid;
+    SharedClient* ctrlblk;
 
-    
+public:
+        Client(const sp<SurfaceFlinger>& flinger);
+        ~Client();
+
+    status_t initCheck() const;
+
+    // protected by SurfaceFlinger::mStateLock
+    ssize_t attachLayer(const sp<LayerBaseClient>& layer);
+    sp<LayerBaseClient> getLayerUser(int32_t i) const;
+    void free(LayerBaseClient const* layer);
+
 private:
-    int getClientPid() const { return mPid; }
-        
-    int                             mPid;
-    uint32_t                        mBitmap;
-    SortedVector<uint8_t>           mInUse;
-    Vector< wp<LayerBaseClient> >   mLayers;
-    sp<IMemoryHeap>                 mCblkHeap;
-    sp<SurfaceFlinger>              mFlinger;
+
+    // ISurfaceComposerClient interface
+    virtual sp<IMemoryHeap> getControlBlock() const;
+    virtual sp<ISurface> createSurface(
+            surface_data_t* params, int pid, const String8& name,
+            DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
+            uint32_t flags);
+    virtual status_t destroySurface(SurfaceID surfaceId);
+    virtual status_t setState(int32_t count, const layer_state_t* states);
+
+    uint32_t mBitmap;
+    DefaultKeyedVector< size_t, wp<LayerBaseClient> > mLayers;
+    sp<IMemoryHeap> mCblkHeap;
+    sp<SurfaceFlinger> mFlinger;
 };
 
 // ---------------------------------------------------------------------------
@@ -179,7 +172,7 @@ public:
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
     
 private:
-    friend class BClient;
+    friend class Client;
     friend class LayerBase;
     friend class LayerBuffer;
     friend class LayerBaseClient;
@@ -188,31 +181,33 @@ private:
     friend class LayerBlur;
     friend class LayerDim;
 
-    sp<ISurface> createSurface(ClientID client, int pid, const String8& name,
+    sp<ISurface> createSurface(const sp<Client>& client,
+            int pid, const String8& name,
             ISurfaceComposerClient::surface_data_t* params,
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
 
-    sp<LayerBaseClient> createNormalSurfaceLocked(
+    sp<LayerBaseClient> createNormalSurface(
             const sp<Client>& client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, uint32_t flags,
+            uint32_t w, uint32_t h, uint32_t flags,
             PixelFormat& format);
 
-    sp<LayerBaseClient> createBlurSurfaceLocked(
+    sp<LayerBaseClient> createBlurSurface(
             const sp<Client>& client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, uint32_t flags);
+            uint32_t w, uint32_t h, uint32_t flags);
 
-    sp<LayerBaseClient> createDimSurfaceLocked(
+    sp<LayerBaseClient> createDimSurface(
             const sp<Client>& client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, uint32_t flags);
+            uint32_t w, uint32_t h, uint32_t flags);
 
-    sp<LayerBaseClient> createPushBuffersSurfaceLocked(
+    sp<LayerBaseClient> createPushBuffersSurface(
             const sp<Client>& client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, uint32_t flags);
+            uint32_t w, uint32_t h, uint32_t flags);
 
-    status_t removeSurface(SurfaceID surface_id);
+    status_t removeSurface(const sp<Client>& client, SurfaceID sid);
     status_t destroySurface(const sp<LayerBaseClient>& layer);
-    status_t setClientState(ClientID cid, int32_t count, const layer_state_t* states);
+    status_t setClientState(const sp<Client>& client,
+            int32_t count, const layer_state_t* states);
 
 
     class LayerVector {
@@ -275,13 +270,11 @@ private:
             void        unlockClients();
 
 
-            void        destroyConnection(ClientID cid);
-            sp<LayerBaseClient> getLayerUser_l(SurfaceID index) const;
+            ssize_t     addClientLayer(const sp<Client>& client,
+                    const sp<LayerBaseClient>& lbc);
             status_t    addLayer_l(const sp<LayerBase>& layer);
-            status_t    addClientLayer_l(const sp<LayerBaseClient>& lbc);
             status_t    removeLayer_l(const sp<LayerBase>& layer);
             status_t    purgatorizeLayer_l(const sp<LayerBase>& layer);
-            void        free_resources_l();
 
             uint32_t    getTransactionFlags(uint32_t flags);
             uint32_t    setTransactionFlags(uint32_t flags);
@@ -324,14 +317,10 @@ private:
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
                 bool                    mResizeTransationPending;
-                
+
                 // protected by mStateLock (but we could use another lock)
-                Tokenizer                               mTokens;
-                DefaultKeyedVector<ClientID, sp<Client> >   mClientsMap;
-                DefaultKeyedVector<SurfaceID, sp<LayerBaseClient> >   mLayerMap;
-                GraphicPlane                            mGraphicPlanes[1];
-                bool                                    mLayersRemoved;
-                Vector< sp<Client> >                    mDisconnectedClients;
+                GraphicPlane                mGraphicPlanes[1];
+                bool                        mLayersRemoved;
 
                 // constant members (no synchronization needed for access)
                 sp<IMemoryHeap>             mServerHeap;
@@ -389,32 +378,6 @@ public:
     ~FreezeLock() {
         mFlinger->decFreezeCount();
     }
-};
-
-// ---------------------------------------------------------------------------
-
-class BClient : public BnSurfaceComposerClient
-{
-public:
-    BClient(SurfaceFlinger *flinger, ClientID cid,
-            const sp<IMemoryHeap>& cblk);
-    ~BClient();
-
-    // ISurfaceComposerClient interface
-    virtual sp<IMemoryHeap> getControlBlock() const;
-
-    virtual sp<ISurface> createSurface(
-            surface_data_t* params, int pid, const String8& name,
-            DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
-            uint32_t flags);
-
-    virtual status_t destroySurface(SurfaceID surfaceId);
-    virtual status_t setState(int32_t count, const layer_state_t* states);
-
-private:
-    ClientID            mId;
-    SurfaceFlinger*     mFlinger;
-    sp<IMemoryHeap>     mCblk;
 };
 
 // ---------------------------------------------------------------------------
