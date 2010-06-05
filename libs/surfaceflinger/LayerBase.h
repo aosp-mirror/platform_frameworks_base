@@ -101,7 +101,6 @@ public:
             void invalidate();
 
     virtual const char* getTypeId() const { return "LayerBase"; }
-    virtual ssize_t serverIndex() const { return -1; }
 
     /**
      * draw - performs some global clipping optimizations
@@ -269,30 +268,24 @@ class LayerBaseClient : public LayerBase
 public:
     class Surface;
 
-    LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
-            const sp<Client>& client, int32_t i);
+    const wp<Client> client;
+
+            LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
+                        const sp<Client>& client);
     virtual ~LayerBaseClient();
-    virtual void onFirstRef();
 
-    const wp<Client>    client;
-
-    inline  uint32_t    getIdentity() const { return mIdentity; }
-    inline  int32_t     clientIndex() const { return mIndex; }
-   
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
-    virtual ssize_t     serverIndex() const;
     virtual const char* getTypeId() const { return "LayerBaseClient"; }
 
-    class Surface : public BnSurface 
-    {
+    uint32_t getIdentity() const { return mIdentity; }
+
+    class Surface : public BnSurface  {
     public:
-        int32_t getToken() const { return mToken; }
         int32_t getIdentity() const { return mIdentity; }
         
     protected:
-        Surface(const sp<SurfaceFlinger>& flinger, 
-                SurfaceID id, int identity, 
+        Surface(const sp<SurfaceFlinger>& flinger, int identity,
                 const sp<LayerBaseClient>& owner);
         virtual ~Surface();
         virtual status_t onTransact(uint32_t code, const Parcel& data,
@@ -313,7 +306,6 @@ public:
     protected:
         friend class LayerBaseClient;
         sp<SurfaceFlinger>  mFlinger;
-        int32_t             mToken;
         int32_t             mIdentity;
         wp<LayerBaseClient> mOwner;
     };
@@ -324,12 +316,16 @@ protected:
     virtual void dump(String8& result, char* scratch, size_t size) const;
 
 private:
-    int32_t         mIndex;
-    mutable     Mutex           mLock;
-    mutable     wp<Surface>     mClientSurface;
+    mutable Mutex mLock;
+    mutable wp<Surface> mClientSurface;
     // only read
-    const       uint32_t        mIdentity;
-    static      int32_t         sIdentity;
+    const uint32_t mIdentity;
+    static int32_t sIdentity;
+
+    // TODO: get rid of this
+public:
+    virtual void setToken(int32_t token) { }
+    virtual int32_t getToken() const { return -1; }
 };
 
 // ---------------------------------------------------------------------------

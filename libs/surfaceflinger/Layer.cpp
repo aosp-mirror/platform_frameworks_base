@@ -47,9 +47,9 @@ template <typename T> inline T min(T a, T b) {
 
 // ---------------------------------------------------------------------------
 
-Layer::Layer(SurfaceFlinger* flinger, DisplayID display, 
-        const sp<Client>& client, int32_t i)
-    :   LayerBaseClient(flinger, display, client, i),
+Layer::Layer(SurfaceFlinger* flinger,
+        DisplayID display, const sp<Client>& client)
+    :   LayerBaseClient(flinger, display, client),
         lcblk(NULL),
         mSecure(false),
         mNeedsBlending(true),
@@ -58,13 +58,6 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
         mBufferManager(mTextureManager),
         mWidth(0), mHeight(0), mFixedSize(false)
 {
-    // no OpenGL operation is possible here, since we might not be
-    // in the OpenGL thread.
-    lcblk = new SharedBufferServer(
-            client->ctrlblk, i, mBufferManager.getDefaultBufferCount(),
-            getIdentity());
-
-   mBufferManager.setActiveBufferIndex( lcblk->getFrontBuffer() );
 }
 
 Layer::~Layer()
@@ -77,12 +70,31 @@ Layer::~Layer()
     delete lcblk;
 }
 
+// TODO: get rid of this
+void Layer::setToken(int32_t token)
+{
+    sp<Client> ourClient(client.promote());
+
+    mToken = token;
+
+    // no OpenGL operation is possible here, since we might not be
+    // in the OpenGL thread.
+    lcblk = new SharedBufferServer(
+            ourClient->ctrlblk, token, mBufferManager.getDefaultBufferCount(),
+            getIdentity());
+
+   mBufferManager.setActiveBufferIndex( lcblk->getFrontBuffer() );
+}
+
 // called with SurfaceFlinger::mStateLock as soon as the layer is entered
 // in the purgatory list
 void Layer::onRemoved()
 {
-    // wake up the condition
-    lcblk->setStatus(NO_INIT);
+    sp<Client> ourClient(client.promote());
+    if (ourClient != 0) {
+        // wake up the condition
+        lcblk->setStatus(NO_INIT);
+    }
 }
 
 sp<LayerBaseClient::Surface> Layer::createSurface() const
@@ -140,7 +152,7 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);
     mNeedsDithering = layerRedsize > displayRedSize;
 
-    mSurface = new SurfaceLayer(mFlinger, clientIndex(), this);
+    mSurface = new SurfaceLayer(mFlinger, this);
     return NO_ERROR;
 }
 
@@ -391,8 +403,11 @@ uint32_t Layer::doTransaction(uint32_t flags)
             // a buffer, it'll get the new size.
             setBufferSize(temp.requested_w, temp.requested_h);
 
-            // all buffers need reallocation
-            lcblk->reallocateAll();
+            sp<Client> ourClient(client.promote());
+            if (ourClient != 0) {
+                // all buffers need reallocation
+                lcblk->reallocateAll();
+            }
         } else {
             // record the new size
             setBufferSize(temp.requested_w, temp.requested_h);
@@ -427,6 +442,13 @@ bool Layer::isFixedSize() const {
 
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
+    sp<Client> ourClient(client.promote());
+    if (ourClient == 0) {
+        // client died
+        recomputeVisibleRegions = true;
+        return;
+    }
+
     ssize_t buf = lcblk->retireAndLock();
     if (buf == NOT_ENOUGH_DATA) {
         // NOTE: This is not an error, it simply means there is nothing to
@@ -538,9 +560,12 @@ void Layer::unlockPageFlip(
 
 void Layer::finishPageFlip()
 {
-    int buf = mBufferManager.getActiveBufferIndex();
-    status_t err = lcblk->unlock( buf );
-    LOGE_IF(err!=NO_ERROR, "layer %p, buffer=%d wasn't locked!", this, buf);
+    sp<Client> ourClient(client.promote());
+    if (ourClient != 0) {
+        int buf = mBufferManager.getActiveBufferIndex();
+        status_t err = lcblk->unlock( buf );
+        LOGE_IF(err!=NO_ERROR, "layer %p, buffer=%d wasn't locked!", this, buf);
+    }
 }
 
 
@@ -707,8 +732,8 @@ status_t Layer::BufferManager::destroyTexture(Image* tex, EGLDisplay dpy)
 // ---------------------------------------------------------------------------
 
 Layer::SurfaceLayer::SurfaceLayer(const sp<SurfaceFlinger>& flinger,
-        SurfaceID id, const sp<Layer>& owner)
-    : Surface(flinger, id, owner->getIdentity(), owner)
+        const sp<Layer>& owner)
+    : Surface(flinger, owner->getIdentity(), owner)
 {
 }
 

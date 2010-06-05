@@ -53,7 +53,7 @@ class LayerBuffer : public LayerBaseClient
 
 public:
             LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
-                    const sp<Client>& client, int32_t i);
+                    const sp<Client>& client);
         virtual ~LayerBuffer();
 
     virtual void onFirstRef();
@@ -189,7 +189,7 @@ private:
     {
     public:
         SurfaceLayerBuffer(const sp<SurfaceFlinger>& flinger,
-                        SurfaceID id, const sp<LayerBuffer>& owner);
+                        const sp<LayerBuffer>& owner);
         virtual ~SurfaceLayerBuffer();
 
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers);

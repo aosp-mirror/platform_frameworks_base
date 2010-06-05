@@ -44,8 +44,8 @@ gralloc_module_t const* LayerBuffer::sGrallocModule = 0;
 // ---------------------------------------------------------------------------
 
 LayerBuffer::LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
-        const sp<Client>& client, int32_t i)
-    : LayerBaseClient(flinger, display, client, i),
+        const sp<Client>& client)
+    : LayerBaseClient(flinger, display, client),
       mNeedsBlending(false), mBlitEngine(0)
 {
 }
@@ -60,8 +60,7 @@ LayerBuffer::~LayerBuffer()
 void LayerBuffer::onFirstRef()
 {
     LayerBaseClient::onFirstRef();
-    mSurface = new SurfaceLayerBuffer(mFlinger, clientIndex(),
-            const_cast<LayerBuffer *>(this));
+    mSurface = new SurfaceLayerBuffer(mFlinger, this);
 
     hw_module_t const* module = (hw_module_t const*)sGrallocModule;
     if (!module) {
@@ -204,9 +203,9 @@ sp<LayerBuffer::Source> LayerBuffer::clearSource() {
 // LayerBuffer::SurfaceLayerBuffer
 // ============================================================================
 
-LayerBuffer::SurfaceLayerBuffer::SurfaceLayerBuffer(const sp<SurfaceFlinger>& flinger,
-        SurfaceID id, const sp<LayerBuffer>& owner)
-    : LayerBaseClient::Surface(flinger, id, owner->getIdentity(), owner)
+LayerBuffer::SurfaceLayerBuffer::SurfaceLayerBuffer(
+        const sp<SurfaceFlinger>& flinger, const sp<LayerBuffer>& owner)
+    : LayerBaseClient::Surface(flinger, owner->getIdentity(), owner)
 {
 }
 
