@@ -50,6 +50,8 @@ class Client;
 class DisplayHardware;
 class FreezeLock;
 class Layer;
+class LayerBlur;
+class LayerDim;
 class LayerBuffer;
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
@@ -60,10 +62,6 @@ class LayerBuffer;
 class Client : public BnSurfaceComposerClient
 {
 public:
-    // pointer to this client's control block
-    SharedClient* ctrlblk;
-
-public:
         Client(const sp<SurfaceFlinger>& flinger);
         ~Client();
 
@@ -71,13 +69,14 @@ public:
 
     // protected by SurfaceFlinger::mStateLock
     ssize_t attachLayer(const sp<LayerBaseClient>& layer);
+    void detachLayer(const LayerBaseClient* layer);
     sp<LayerBaseClient> getLayerUser(int32_t i) const;
-    void free(LayerBaseClient const* layer);
 
 private:
 
     // ISurfaceComposerClient interface
     virtual sp<IMemoryHeap> getControlBlock() const;
+    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const;
     virtual sp<ISurface> createSurface(
             surface_data_t* params, int pid, const String8& name,
             DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
@@ -85,8 +84,41 @@ private:
     virtual status_t destroySurface(SurfaceID surfaceId);
     virtual status_t setState(int32_t count, const layer_state_t* states);
 
-    uint32_t mBitmap;
     DefaultKeyedVector< size_t, wp<LayerBaseClient> > mLayers;
+    sp<SurfaceFlinger> mFlinger;
+    int32_t mNameGenerator;
+};
+
+class UserClient : public BnSurfaceComposerClient
+{
+public:
+    // pointer to this client's control block
+    SharedClient* ctrlblk;
+
+public:
+        UserClient(const sp<SurfaceFlinger>& flinger);
+        ~UserClient();
+
+    status_t initCheck() const;
+
+    // protected by SurfaceFlinger::mStateLock
+    void detachLayer(const Layer* layer);
+
+private:
+
+    // ISurfaceComposerClient interface
+    virtual sp<IMemoryHeap> getControlBlock() const;
+    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const;
+    virtual sp<ISurface> createSurface(
+            surface_data_t* params, int pid, const String8& name,
+            DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
+            uint32_t flags);
+    virtual status_t destroySurface(SurfaceID surfaceId);
+    virtual status_t setState(int32_t count, const layer_state_t* states);
+
+    // atomic-ops
+    mutable volatile int32_t mBitmap;
+
     sp<IMemoryHeap> mCblkHeap;
     sp<SurfaceFlinger> mFlinger;
 };
@@ -152,6 +184,7 @@ public:
 
     // ISurfaceComposer interface
     virtual sp<ISurfaceComposerClient>  createConnection();
+    virtual sp<ISurfaceComposerClient>  createClientConnection();
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        openGlobalTransaction();
@@ -166,11 +199,12 @@ public:
 
             overlay_control_device_t* getOverlayEngine() const;
 
-            
     status_t removeLayer(const sp<LayerBase>& layer);
     status_t addLayer(const sp<LayerBase>& layer);
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
-    
+
+    sp<Layer> getLayer(const sp<ISurface>& sur) const;
+
 private:
     friend class Client;
     friend class LayerBase;
@@ -187,20 +221,20 @@ private:
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
 
-    sp<LayerBaseClient> createNormalSurface(
+    sp<Layer> createNormalSurface(
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags,
             PixelFormat& format);
 
-    sp<LayerBaseClient> createBlurSurface(
+    sp<LayerBlur> createBlurSurface(
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags);
 
-    sp<LayerBaseClient> createDimSurface(
+    sp<LayerDim> createDimSurface(
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags);
 
-    sp<LayerBaseClient> createPushBuffersSurface(
+    sp<LayerBuffer> createPushBuffersSurface(
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags);
 
@@ -307,8 +341,7 @@ private:
 
     status_t postMessageSync(const sp<MessageBase>& msg,
             nsecs_t reltime=0, uint32_t flags = 0);
-                
-                
+
                 // access must be protected by mStateLock
     mutable     Mutex                   mStateLock;
                 State                   mCurrentState;
@@ -321,6 +354,7 @@ private:
                 // protected by mStateLock (but we could use another lock)
                 GraphicPlane                mGraphicPlanes[1];
                 bool                        mLayersRemoved;
+                DefaultKeyedVector< wp<IBinder>, wp<Layer> > mLayerMap;
 
                 // constant members (no synchronization needed for access)
                 sp<IMemoryHeap>             mServerHeap;

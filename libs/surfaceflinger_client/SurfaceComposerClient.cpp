@@ -42,36 +42,26 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-class ComposerService : public Singleton<ComposerService>
-{
-    // these are constants
-    sp<ISurfaceComposer> mComposerService;
-    sp<IMemoryHeap> mServerCblkMemory;
-    surface_flinger_cblk_t volatile* mServerCblk;
-
-    ComposerService() : Singleton<ComposerService>() {
-        const String16 name("SurfaceFlinger");
-        while (getService(name, &mComposerService) != NO_ERROR) {
-            usleep(250000);
-        }
-        mServerCblkMemory = mComposerService->getCblk();
-        mServerCblk = static_cast<surface_flinger_cblk_t volatile *>(
-                mServerCblkMemory->getBase());
-    }
-
-    friend class Singleton<ComposerService>;
-
-public:
-    static sp<ISurfaceComposer> getComposerService() {
-        return ComposerService::getInstance().mComposerService;
-    }
-    static surface_flinger_cblk_t const volatile * getControlBlock() {
-        return ComposerService::getInstance().mServerCblk;
-    }
-};
-
 ANDROID_SINGLETON_STATIC_INSTANCE(ComposerService);
 
+ComposerService::ComposerService()
+: Singleton<ComposerService>() {
+    const String16 name("SurfaceFlinger");
+    while (getService(name, &mComposerService) != NO_ERROR) {
+        usleep(250000);
+    }
+    mServerCblkMemory = mComposerService->getCblk();
+    mServerCblk = static_cast<surface_flinger_cblk_t volatile *>(
+            mServerCblkMemory->getBase());
+}
+
+sp<ISurfaceComposer> ComposerService::getComposerService() {
+    return ComposerService::getInstance().mComposerService;
+}
+
+surface_flinger_cblk_t const volatile * ComposerService::getControlBlock() {
+    return ComposerService::getInstance().mServerCblk;
+}
 
 static inline sp<ISurfaceComposer> getComposerService() {
     return ComposerService::getComposerService();
@@ -554,42 +544,6 @@ status_t SurfaceComposerClient::setFreezeTint(SurfaceID id, uint32_t tint)
     s->tint = tint;
     unlockLayerState();
     return NO_ERROR;
-}
-
-// ----------------------------------------------------------------------------
-
-SurfaceClient::SurfaceClient(const sp<SurfaceComposerClient>& client)
-    : mStatus(NO_INIT), mControl(0)
-{
-    if (client != 0) {
-        sp<IBinder> conn = client->connection();
-        init(conn);
-    }
-}
-SurfaceClient::SurfaceClient(const sp<IBinder>& conn)
-    : mStatus(NO_INIT), mControl(0)
-{
-    init(conn);
-}
-void SurfaceClient::init(const sp<IBinder>& conn)
-{
-    mComposerService = getComposerService();
-    sp<ISurfaceComposerClient> sf(interface_cast<ISurfaceComposerClient>(conn));
-    if (sf != 0) {
-        mConnection = conn;
-        mControlMemory = sf->getControlBlock();
-        mControl = static_cast<SharedClient *>(mControlMemory->getBase());
-        mStatus = NO_ERROR;
-    }
-}
-status_t SurfaceClient::initCheck() const {
-    return mStatus;
-}
-SharedClient* SurfaceClient::getSharedClient() const {
-    return mControl;
-}
-void SurfaceClient::signalServer() const {
-    mComposerService->signal();
 }
 
 // ----------------------------------------------------------------------------

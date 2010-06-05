@@ -122,7 +122,8 @@ public:
     volatile int8_t index[NUM_BUFFER_MAX];
 
     int32_t     identity;       // surface's identity (const)
-    int32_t     reserved32[2];
+    int32_t     token;          // surface's token (for debugging)
+    int32_t     reserved32[1];
     Statistics  stats;
     int32_t     reserved;
     BufferData  buffers[NUM_BUFFER_MAX];     // 960 bytes

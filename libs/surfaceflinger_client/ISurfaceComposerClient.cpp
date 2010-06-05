@@ -51,6 +51,7 @@ namespace android {
 
 enum {
     GET_CBLK = IBinder::FIRST_CALL_TRANSACTION,
+    GET_TOKEN,
     CREATE_SURFACE,
     DESTROY_SURFACE,
     SET_STATE
@@ -70,6 +71,15 @@ public:
         data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
         remote()->transact(GET_CBLK, data, &reply);
         return interface_cast<IMemoryHeap>(reply.readStrongBinder());
+    }
+
+    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
+        data.writeStrongBinder(sur->asBinder());
+        remote()->transact(GET_TOKEN, data, &reply);
+        return reply.readInt32();
     }
 
     virtual sp<ISurface> createSurface( surface_data_t* params,
@@ -130,6 +140,13 @@ status_t BnSurfaceComposerClient::onTransact(
             CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             sp<IMemoryHeap> ctl(getControlBlock());
             reply->writeStrongBinder(ctl->asBinder());
+            return NO_ERROR;
+        } break;
+        case GET_TOKEN: {
+            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
+            sp<ISurface> sur = interface_cast<ISurface>(data.readStrongBinder());
+            ssize_t token = getTokenForSurface(sur);
+            reply->writeInt32(token);
             return NO_ERROR;
         } break;
     }

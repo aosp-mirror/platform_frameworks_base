@@ -38,6 +38,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class Client;
+class UserClient;
 class FreezeLock;
 
 // ---------------------------------------------------------------------------
@@ -45,21 +46,26 @@ class FreezeLock;
 class Layer : public LayerBaseClient
 {
 public:
-    // lcblk is (almost) only accessed from the main SF thread, in the places
-    // where it's not, a reference to Client must be held
-    SharedBufferServer*     lcblk;
+            Layer(SurfaceFlinger* flinger, DisplayID display,
+                    const sp<Client>& client);
 
-                 Layer(SurfaceFlinger* flinger, DisplayID display,
-                         const sp<Client>& client);
+    virtual ~Layer();
 
-        virtual ~Layer();
+    virtual const char* getTypeId() const { return "Layer"; }
 
+    // the this layer's size and format
     status_t setBuffers(uint32_t w, uint32_t h, 
             PixelFormat format, uint32_t flags=0);
 
+    // associate a UserClient to this Layer
+    status_t setToken(const sp<UserClient>& uc, SharedClient* sc, int32_t idx);
+    int32_t getToken() const;
+
+    // Set this Layer's buffers size
     void setBufferSize(uint32_t w, uint32_t h);
     bool isFixedSize() const;
 
+    // LayerBase interface
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t transactionFlags);
     virtual void lockPageFlip(bool& recomputeVisibleRegions);
@@ -72,27 +78,25 @@ public:
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
     virtual void onRemoved();
-    
-    // only for debugging
-    inline sp<GraphicBuffer> getBuffer(int i) const { return mBufferManager.getBuffer(i); }
-    // only for debugging
-    inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
-    // only for debugging
-    inline PixelFormat pixelFormat() const { return mFormat; }
 
-    virtual const char* getTypeId() const { return "Layer"; }
+    // only for debugging
+    inline sp<GraphicBuffer> getBuffer(int i) const {
+        return mBufferManager.getBuffer(i); }
+    // only for debugging
+    inline const sp<FreezeLock>&  getFreezeLock() const {
+        return mFreezeLock; }
 
 protected:
     virtual void dump(String8& result, char* scratch, size_t size) const;
 
 private:
     void reloadTexture(const Region& dirty);
-
     uint32_t getEffectiveUsage(uint32_t usage) const;
-
     sp<GraphicBuffer> requestBuffer(int bufferIdx,
             uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
     status_t setBufferCount(int bufferCount);
+
+    // -----------------------------------------------------------------------
 
     class SurfaceLayer : public LayerBaseClient::Surface {
     public:
@@ -107,93 +111,120 @@ private:
         }
     };
     friend class SurfaceLayer;
-    
-    sp<Surface>             mSurface;
 
-            bool            mSecure;
-            int32_t         mFrontBufferIndex;
-            bool            mNeedsBlending;
-            bool            mNeedsDithering;
-            Region          mPostedDirtyRegion;
-            sp<FreezeLock>  mFreezeLock;
-            PixelFormat     mFormat;
+    // -----------------------------------------------------------------------
 
-            class BufferManager {
-                static const size_t NUM_BUFFERS = 2;
-                struct BufferData {
-                    sp<GraphicBuffer>   buffer;
-                    Image               texture;
-                };
-                // this lock protect mBufferData[].buffer but since there
-                // is very little contention, we have only one like for
-                // the whole array, we also use it to protect mNumBuffers.
-                mutable Mutex mLock;
-                BufferData          mBufferData[SharedBufferStack::NUM_BUFFER_MAX];
-                size_t              mNumBuffers;
-                Texture             mFailoverTexture;
-                TextureManager&     mTextureManager;
-                ssize_t             mActiveBuffer;
-                bool                mFailover;
-                static status_t destroyTexture(Image* tex, EGLDisplay dpy);
+    class ClientRef {
+        ClientRef(const ClientRef& rhs);
+        ClientRef& operator = (const ClientRef& rhs);
+        mutable Mutex mLock;
+        // binder thread, page-flip thread
+        SharedBufferServer* lcblk;
+        wp<UserClient> mUserClient;
+        int32_t mToken;
+    public:
+        ClientRef();
+        ~ClientRef();
+        int32_t getToken() const;
+        status_t setToken(const sp<UserClient>& uc,
+                SharedBufferServer* sharedClient, int32_t token);
+        sp<UserClient> getUserClientUnsafe() const;
+        class Access {
+            Access(const Access& rhs);
+            Access& operator = (const Access& rhs);
+            sp<UserClient> mUserClientStrongRef;
+            SharedBufferServer* lcblk;
+        public:
+            Access(const ClientRef& ref);
+            inline SharedBufferServer* get() const { return lcblk; }
+        };
+        friend class Access;
+    };
 
-            public:
-                static size_t getDefaultBufferCount() { return NUM_BUFFERS; }
-                BufferManager(TextureManager& tm);
-                ~BufferManager();
+    // -----------------------------------------------------------------------
 
-                // detach/attach buffer from/to given index
-                sp<GraphicBuffer> detachBuffer(size_t index);
-                status_t attachBuffer(size_t index, const sp<GraphicBuffer>& buffer);
+    class BufferManager {
+        static const size_t NUM_BUFFERS = 2;
+        struct BufferData {
+            sp<GraphicBuffer>   buffer;
+            Image               texture;
+        };
+        // this lock protect mBufferData[].buffer but since there
+        // is very little contention, we have only one like for
+        // the whole array, we also use it to protect mNumBuffers.
+        mutable Mutex mLock;
+        BufferData          mBufferData[SharedBufferStack::NUM_BUFFER_MAX];
+        size_t              mNumBuffers;
+        Texture             mFailoverTexture;
+        TextureManager&     mTextureManager;
+        ssize_t             mActiveBuffer;
+        bool                mFailover;
+        static status_t destroyTexture(Image* tex, EGLDisplay dpy);
 
-                // resize the number of active buffers
-                status_t resize(size_t size);
+    public:
+        static size_t getDefaultBufferCount() { return NUM_BUFFERS; }
+        BufferManager(TextureManager& tm);
+        ~BufferManager();
 
-                // ----------------------------------------------
-                // must be called from GL thread
+        // detach/attach buffer from/to given index
+        sp<GraphicBuffer> detachBuffer(size_t index);
+        status_t attachBuffer(size_t index, const sp<GraphicBuffer>& buffer);
+        // resize the number of active buffers
+        status_t resize(size_t size);
 
-                // set/get active buffer index
-                status_t setActiveBufferIndex(size_t index);
-                size_t getActiveBufferIndex() const;
+        // ----------------------------------------------
+        // must be called from GL thread
 
-                // return the active buffer
-                sp<GraphicBuffer> getActiveBuffer() const;
+        // set/get active buffer index
+        status_t setActiveBufferIndex(size_t index);
+        size_t getActiveBufferIndex() const;
+        // return the active buffer
+        sp<GraphicBuffer> getActiveBuffer() const;
+        // return the active texture (or fail-over)
+        Texture getActiveTexture() const;
+        // frees resources associated with all buffers
+        status_t destroy(EGLDisplay dpy);
+        // load bitmap data into the active buffer
+        status_t loadTexture(const Region& dirty, const GGLSurface& t);
+        // make active buffer an EGLImage if needed
+        status_t initEglImage(EGLDisplay dpy,
+                const sp<GraphicBuffer>& buffer);
 
-                // return the active texture (or fail-over)
-                Texture getActiveTexture() const;
+        // ----------------------------------------------
+        // only for debugging
+        sp<GraphicBuffer> getBuffer(size_t index) const;
+    };
 
-                // frees resources associated with all buffers
-                status_t destroy(EGLDisplay dpy);
+    // -----------------------------------------------------------------------
 
-                // load bitmap data into the active buffer
-                status_t loadTexture(const Region& dirty, const GGLSurface& t);
+    // thread-safe
+    ClientRef mUserClientRef;
 
-                // make active buffer an EGLImage if needed
-                status_t initEglImage(EGLDisplay dpy,
-                        const sp<GraphicBuffer>& buffer);
+    // constants
+    sp<Surface> mSurface;
+    PixelFormat mFormat;
+    bool mNeedsBlending;
+    bool mNeedsDithering;
 
-                // ----------------------------------------------
-                // only for debugging
-                sp<GraphicBuffer> getBuffer(size_t index) const;
-            };
+    // page-flip thread (currently main thread)
+    bool mSecure;
+    Region mPostedDirtyRegion;
 
-            TextureManager mTextureManager;
-            BufferManager mBufferManager;
+    // page-flip thread and transaction thread (currently main thread)
+    sp<FreezeLock>  mFreezeLock;
 
-            // this lock protects mWidth and mHeight which are accessed from
-            // the main thread and requestBuffer's binder transaction thread.
-            mutable Mutex mLock;
-            uint32_t    mWidth;
-            uint32_t    mHeight;
-            uint32_t    mReqWidth;
-            uint32_t    mReqHeight;
-            uint32_t    mReqFormat;
-            bool        mFixedSize;
+    // see threading usage in declaration
+    TextureManager mTextureManager;
+    BufferManager mBufferManager;
 
-    // TODO: get rid of this
-private:
-    virtual void setToken(int32_t token);
-    virtual int32_t getToken() const { return mToken; }
-    int32_t mToken;
+    // binder thread, transaction thread
+    mutable Mutex mLock;
+    uint32_t mWidth;
+    uint32_t mHeight;
+    uint32_t mReqWidth;
+    uint32_t mReqHeight;
+    uint32_t mReqFormat;
+    bool mFixedSize;
 };
 
 // ---------------------------------------------------------------------------

@@ -238,14 +238,12 @@ status_t SurfaceControl::writeSurfaceToParcel(
 {
     uint32_t flags = 0;
     uint32_t format = 0;
-    SurfaceID token = -1;
     uint32_t identity = 0;
     uint32_t width = 0;
     uint32_t height = 0;
     sp<SurfaceComposerClient> client;
     sp<ISurface> sur;
     if (SurfaceControl::isValid(control)) {
-        token    = control->mToken;
         identity = control->mIdentity;
         client   = control->mClient;
         sur      = control->mSurface;
@@ -254,9 +252,7 @@ status_t SurfaceControl::writeSurfaceToParcel(
         format   = control->mFormat;
         flags    = control->mFlags;
     }
-    parcel->writeStrongBinder(client!=0  ? client->connection() : NULL);
-    parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
-    parcel->writeInt32(token);
+    parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
     parcel->writeInt32(identity);
     parcel->writeInt32(width);
     parcel->writeInt32(height);
@@ -278,31 +274,78 @@ sp<Surface> SurfaceControl::getSurface() const
 //  Surface
 // ============================================================================
 
+class SurfaceClient : public Singleton<SurfaceClient>
+{
+    // all these attributes are constants
+    sp<ISurfaceComposer> mComposerService;
+    sp<ISurfaceComposerClient> mClient;
+    status_t mStatus;
+    SharedClient* mControl;
+    sp<IMemoryHeap> mControlMemory;
+
+    SurfaceClient()
+        : Singleton<SurfaceClient>(), mStatus(NO_INIT)
+    {
+        sp<ISurfaceComposer> sf(ComposerService::getComposerService());
+        mComposerService = sf;
+        mClient = sf->createClientConnection();
+        if (mClient != NULL) {
+            mControlMemory = mClient->getControlBlock();
+            if (mControlMemory != NULL) {
+                mControl = static_cast<SharedClient *>(
+                        mControlMemory->getBase());
+                if (mControl) {
+                    mStatus = NO_ERROR;
+                }
+            }
+        }
+    }
+    friend class Singleton<SurfaceClient>;
+public:
+    status_t initCheck() const {
+        return mStatus;
+    }
+    SharedClient* getSharedClient() const {
+        return mControl;
+    }
+    ssize_t getTokenForSurface(const sp<ISurface>& sur) const {
+        // TODO: we could cache a few tokens here to avoid an IPC
+        return mClient->getTokenForSurface(sur);
+    }
+    void signalServer() const {
+        mComposerService->signal();
+    }
+};
+
+ANDROID_SINGLETON_STATIC_INSTANCE(SurfaceClient);
+
+// ---------------------------------------------------------------------------
+
 Surface::Surface(const sp<SurfaceControl>& surface)
-    : mSurface(surface->mSurface),
-      mToken(surface->mToken), mIdentity(surface->mIdentity),
-      mFormat(surface->mFormat), mFlags(surface->mFlags),
-      mBufferMapper(GraphicBufferMapper::get()), mSharedBufferClient(NULL),
+    : mBufferMapper(GraphicBufferMapper::get()),
+      mClient(SurfaceClient::getInstance()),
+      mSharedBufferClient(NULL),
       mInitCheck(NO_INIT),
+      mSurface(surface->mSurface),
+      mIdentity(surface->mIdentity),
+      mFormat(surface->mFormat), mFlags(surface->mFlags),
       mWidth(surface->mWidth), mHeight(surface->mHeight)
 {
-    mClient = new SurfaceClient(surface->mClient);
     init();
 }
 
 Surface::Surface(const Parcel& parcel)
-    :  mBufferMapper(GraphicBufferMapper::get()),
-       mSharedBufferClient(NULL), mInitCheck(NO_INIT)
+    : mBufferMapper(GraphicBufferMapper::get()),
+      mClient(SurfaceClient::getInstance()),
+      mSharedBufferClient(NULL),
+      mInitCheck(NO_INIT)
 {
-    sp<IBinder> conn = parcel.readStrongBinder();
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
-    mToken      = parcel.readInt32();
     mIdentity   = parcel.readInt32();
     mWidth      = parcel.readInt32();
     mHeight     = parcel.readInt32();
     mFormat     = parcel.readInt32();
     mFlags      = parcel.readInt32();
-    mClient = new SurfaceClient(conn);
     init();
 }
 
@@ -330,12 +373,14 @@ void Surface::init()
     mBuffers.setCapacity(2);
     mBuffers.insertAt(0, 2);
 
-    if (mClient != 0 && mClient->initCheck() == NO_ERROR) {
-        mSharedBufferClient = new SharedBufferClient(
-                mClient->getSharedClient(), mToken, 2, mIdentity);
+    if (mSurface != 0 && mClient.initCheck() == NO_ERROR) {
+        mToken = mClient.getTokenForSurface(mSurface);
+        if (mToken >= 0) {
+            mSharedBufferClient = new SharedBufferClient(
+                    mClient.getSharedClient(), mToken, 2, mIdentity);
+            mInitCheck = mClient.getSharedClient()->validate(mToken);
+        }
     }
-
-    mInitCheck = initCheck();
 }
 
 Surface::~Surface()
@@ -352,23 +397,9 @@ Surface::~Surface()
     // clear all references and trigger an IPC now, to make sure things
     // happen without delay, since these resources are quite heavy.
     mBuffers.clear();
-    mClient.clear();
     mSurface.clear();
     delete mSharedBufferClient;
     IPCThreadState::self()->flushCommands();
-}
-
-status_t Surface::initCheck() const
-{
-    if (mToken<0 || mClient==0 || mClient->initCheck() != NO_ERROR) {
-        return NO_INIT;
-    }
-    SharedClient const* cblk = mClient->getSharedClient();
-    if (cblk == 0) {
-        LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
-        return NO_INIT;
-    }
-    return cblk->validate(mToken);
 }
 
 bool Surface::isValid() {
@@ -379,8 +410,7 @@ status_t Surface::validate() const
 {
     // check that we initialized ourself properly
     if (mInitCheck != NO_ERROR) {
-        LOGE("invalid token (%d, identity=%u) or client (%p)",
-                mToken, mIdentity, mClient.get());
+        LOGE("invalid token (%d, identity=%u)", mToken, mIdentity);
         return mInitCheck;
     }
 
@@ -558,8 +588,8 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
     LOGE_IF(err, "error queuing buffer %d (%s)", bufIdx, strerror(-err));
 
     if (err == NO_ERROR) {
-        // FIXME: can we avoid this IPC if we know there is one pending?
-        mClient->signalServer();
+        // TODO: can we avoid this IPC if we know there is one pending?
+        mClient.signalServer();
     }
     return err;
 }
