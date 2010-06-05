@@ -1,0 +1,49 @@
+page.title=Technical Resources
+@jd:body
+
+<style type="text/css">
+  {@literal @import} "{@docRoot}assets/android-developer-resource-browser.css";
+</style>
+
+<script type="text/javascript" src="{@docRoot}assets/android-developer-resource-browser.js"></script>
+<script type="text/javascript" src="{@docRoot}assets/microtemplate.js"></script>
+
+<div>
+  <p style="display: none; float: right">Filter: <input id="resource-browser-keyword-filter"/></p>
+  <p id="resource-browser-search-params">Showing all technical resources:</p>
+</div>
+
+<noscript>
+  <p class="note"><strong>Error:</strong>
+    You must have JavaScript enabled to view this page. Resources are also
+    available offline in the SDK.
+  </p>
+</noscript>
+
+<div id="resource-browser-results">
+  <div class="no-results">No results.</div>
+</div>
+
+<script type="text/html" id="tmpl_resource_browser_result">
+<div class="result">
+  <h3>
+    <% if ('external' in tagsHash) { %><strong>External: </strong> <% } %>
+    <a href="<%= path %>"><%= title.en %></a>
+    <% if ('new' in tagsHash) { %><span class="new">new!</span> <% } %>
+  </h3>
+  <p class="resource-meta"><%
+    var __g = ['', ''];
+    if ('article' in tagsHash) {
+      __g = ['Article', 'about'];
+    } else if ('tutorial' in tagsHash) {
+      __g = ['Tutorial', 'on'];
+    } else if ('sample' in tagsHash) {
+      __g = ['Sample', 'for'];
+    } else if ('video' in tagsHash) {
+      __g = ['Video', 'about'];
+    }
+  %>
+  <%= __g[0] %><% if (topicsHtml) { %> <%= __g[1] %><% } %> <%= topicsHtml %></p>
+  <p><%= description.en %></p>
+</div>
+</script>
