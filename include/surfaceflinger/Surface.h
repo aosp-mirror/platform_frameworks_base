@@ -229,7 +229,6 @@ private:
      */
     void init();
     status_t validate() const;
-    status_t initCheck() const;
     sp<ISurface> getISurface() const;
 
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
@@ -264,15 +263,15 @@ private:
     };
 
     // constants
-    sp<SurfaceClient>           mClient;
+    GraphicBufferMapper&        mBufferMapper;
+    SurfaceClient&              mClient;
+    SharedBufferClient*         mSharedBufferClient;
+    status_t                    mInitCheck;
     sp<ISurface>                mSurface;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    GraphicBufferMapper&        mBufferMapper;
-    SharedBufferClient*         mSharedBufferClient;
-    status_t                    mInitCheck;
 
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;

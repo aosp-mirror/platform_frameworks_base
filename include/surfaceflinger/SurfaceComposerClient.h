@@ -22,8 +22,9 @@
 
 #include <binder/IBinder.h>
 
-#include <utils/SortedVector.h>
 #include <utils/RefBase.h>
+#include <utils/Singleton.h>
+#include <utils/SortedVector.h>
 #include <utils/threads.h>
 
 #include <ui/PixelFormat.h>
@@ -39,6 +40,22 @@ class Region;
 class SharedClient;
 class ISurfaceComposer;
 class DisplayInfo;
+class surface_flinger_cblk_t;
+
+// ---------------------------------------------------------------------------
+
+class ComposerService : public Singleton<ComposerService>
+{
+    // these are constants
+    sp<ISurfaceComposer> mComposerService;
+    sp<IMemoryHeap> mServerCblkMemory;
+    surface_flinger_cblk_t volatile* mServerCblk;
+    ComposerService();
+    friend class Singleton<ComposerService>;
+public:
+    static sp<ISurfaceComposer> getComposerService();
+    static surface_flinger_cblk_t const volatile * getControlBlock();
+};
 
 // ---------------------------------------------------------------------------
 
@@ -150,25 +167,6 @@ private:
                 // after assignment
                 status_t                    mStatus;
                 sp<ISurfaceComposerClient>  mClient;
-};
-
-// ---------------------------------------------------------------------------
-
-class SurfaceClient : public RefBase
-{
-    // all these attributes are constants
-    status_t                    mStatus;
-    SharedClient*               mControl;
-    sp<IMemoryHeap>             mControlMemory;
-    sp<IBinder>                 mConnection;
-    sp<ISurfaceComposer>        mComposerService;
-    void init(const sp<IBinder>& conn);
-public:
-    explicit SurfaceClient(const sp<IBinder>& conn);
-    explicit SurfaceClient(const sp<SurfaceComposerClient>& client);
-    status_t initCheck() const;
-    SharedClient* getSharedClient() const;
-    void signalServer() const;
 };
 
 // ---------------------------------------------------------------------------

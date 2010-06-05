@@ -58,6 +58,7 @@ public:
     };
 
     virtual sp<IMemoryHeap> getControlBlock() const = 0;
+    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const = 0;
 
     /*
      * Requires ACCESS_SURFACE_FLINGER permission

@@ -85,8 +85,11 @@ public:
     /* create connection with surface flinger, requires
      * ACCESS_SURFACE_FLINGER permission
      */
-
     virtual sp<ISurfaceComposerClient> createConnection() = 0;
+
+    /* create a client connection with surface flinger
+     */
+    virtual sp<ISurfaceComposerClient> createClientConnection() = 0;
 
     /* retrieve the control block */
     virtual sp<IMemoryHeap> getCblk() const = 0;
@@ -123,6 +126,7 @@ public:
         // Java by ActivityManagerService.
         BOOT_FINISHED = IBinder::FIRST_CALL_TRANSACTION,
         CREATE_CONNECTION,
+        CREATE_CLIENT_CONNECTION,
         GET_CBLK,
         OPEN_GLOBAL_TRANSACTION,
         CLOSE_GLOBAL_TRANSACTION,
