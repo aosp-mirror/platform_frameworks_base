@@ -334,19 +334,30 @@ Surface::Surface(const sp<SurfaceControl>& surface)
     init();
 }
 
-Surface::Surface(const Parcel& parcel)
+Surface::Surface(const Parcel& parcel, const sp<IBinder>& ref)
     : mBufferMapper(GraphicBufferMapper::get()),
       mClient(SurfaceClient::getInstance()),
       mSharedBufferClient(NULL),
       mInitCheck(NO_INIT)
 {
-    mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
+    mSurface    = interface_cast<ISurface>(ref);
     mIdentity   = parcel.readInt32();
     mWidth      = parcel.readInt32();
     mHeight     = parcel.readInt32();
     mFormat     = parcel.readInt32();
     mFlags      = parcel.readInt32();
     init();
+}
+
+sp<Surface> Surface::readFromParcel(
+        const Parcel& data, const sp<Surface>& other)
+{
+    sp<Surface> result(other);
+    sp<IBinder> binder(data.readStrongBinder());
+    if (other==0 || binder != other->mSurface->asBinder()) {
+        result = new Surface(data, binder);
+    }
+    return result;
 }
 
 void Surface::init()
@@ -441,12 +452,6 @@ status_t Surface::validate() const
     }
 
     return NO_ERROR;
-}
-
-bool Surface::isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs) {
-    if (lhs == 0 || rhs == 0)
-        return false;
-    return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
 }
 
 sp<ISurface> Surface::getISurface() const {
