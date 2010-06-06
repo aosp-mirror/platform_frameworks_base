@@ -893,6 +893,11 @@ bool AaptGroupEntry::getDensityName(const char* name,
         return true;
     }
     
+    if (strcmp(name, "xhdpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_MEDIUM*2;
+        return true;
+    }
+    
     char* c = (char*)name;
     while (*c >= '0' && *c <= '9') {
         c++;
