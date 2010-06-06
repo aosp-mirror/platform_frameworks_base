@@ -61,6 +61,7 @@ LOCAL_SRC_FILES:=                                       \
                   MtpDeviceInfo.cpp                     \
                   MtpObjectInfo.cpp                     \
                   MtpPacket.cpp                         \
+                  MtpProperty.cpp                       \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
                   MtpStorageInfo.cpp                    \

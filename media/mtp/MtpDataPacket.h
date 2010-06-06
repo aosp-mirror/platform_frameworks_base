@@ -44,6 +44,8 @@ public:
     inline int32_t      getInt32() { return (int32_t)getUInt32(); }
     uint64_t            getUInt64();
     inline int64_t      getInt64() { return (int64_t)getUInt64(); }
+    void                getUInt128(uint128_t& value);
+    inline void         getInt128(int128_t& value) { getUInt128((uint128_t&)value); }
     void                getString(MtpStringBuffer& string);
 
     Int8List*           getAInt8();
@@ -63,6 +65,8 @@ public:
     void                putUInt32(uint32_t value);
     void                putInt64(int64_t value);
     void                putUInt64(uint64_t value);
+    void                putInt128(const int128_t& value);
+    void                putUInt128(const uint128_t& value);
 
     void                putAInt8(const int8_t* values, int count);
     void                putAUInt8(const uint8_t* values, int count);

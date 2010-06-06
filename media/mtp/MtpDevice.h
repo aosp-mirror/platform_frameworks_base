@@ -36,6 +36,7 @@ private:
     struct usb_endpoint*    mEndpointOut;
     struct usb_endpoint*    mEndpointIntr;
     MtpDeviceInfo*          mDeviceInfo;
+    MtpPropertyList         mDeviceProperties;
 
     // a unique ID for the device
     int                     mID;
@@ -69,6 +70,8 @@ public:
     MtpStorageInfo*         getStorageInfo(MtpStorageID storageID);
     MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format, MtpObjectHandle parent);
     MtpObjectInfo*          getObjectInfo(MtpObjectHandle handle);
+
+    MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
 
 private:
     bool                    sendRequest(MtpOperationCode operation);

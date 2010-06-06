@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpDevice"
+#include "utils/Log.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -28,6 +31,7 @@
 #include "MtpDebug.h"
 #include "MtpDeviceInfo.h"
 #include "MtpObjectInfo.h"
+#include "MtpProperty.h"
 #include "MtpStorageInfo.h"
 #include "MtpStringBuffer.h"
 
@@ -50,6 +54,8 @@ MtpDevice::MtpDevice(struct usb_device* device, int interface,
 
 MtpDevice::~MtpDevice() {
     close();
+    for (int i = 0; i < mDeviceProperties.size(); i++)
+        delete mDeviceProperties[i];
 }
 
 void MtpDevice::initialize() {
@@ -57,6 +63,18 @@ void MtpDevice::initialize() {
     mDeviceInfo = getDeviceInfo();
     if (mDeviceInfo) {
         mDeviceInfo->print();
+
+        if (mDeviceInfo->mDeviceProperties) {
+            int count = mDeviceInfo->mDeviceProperties->size();
+            for (int i = 0; i < count; i++) {
+                MtpDeviceProperty propCode = (*mDeviceInfo->mDeviceProperties)[i];
+                MtpProperty* property = getDevicePropDesc(propCode);
+                if (property) {
+                    property->print();
+                    mDeviceProperties.push(property);
+                }
+            }
+        }
     }
 }
 
@@ -76,7 +94,6 @@ const char* MtpDevice::getDeviceName() {
 }
 
 bool MtpDevice::openSession() {
-printf("openSession\n");
     mSessionID = 0;
     mTransactionID = 0;
     MtpSessionID newSession = 1;
@@ -107,7 +124,6 @@ MtpDeviceInfo* MtpDevice::getDeviceInfo() {
     if (!readData())
         return NULL;
     MtpResponseCode ret = readResponse();
-printf("getDeviceInfo returned %04X\n", ret);
     if (ret == MTP_RESPONSE_OK) {
         MtpDeviceInfo* info = new MtpDeviceInfo;
         info->read(mData);
@@ -137,7 +153,6 @@ MtpStorageInfo* MtpDevice::getStorageInfo(MtpStorageID storageID) {
     if (!readData())
         return NULL;
     MtpResponseCode ret = readResponse();
-printf("getStorageInfo returned %04X\n", ret);
     if (ret == MTP_RESPONSE_OK) {
         MtpStorageInfo* info = new MtpStorageInfo(storageID);
         info->read(mData);
@@ -157,7 +172,6 @@ MtpObjectHandleList* MtpDevice::getObjectHandles(MtpStorageID storageID,
     if (!readData())
         return NULL;
     MtpResponseCode ret = readResponse();
-printf("getObjectHandles returned %04X\n", ret);
     if (ret == MTP_RESPONSE_OK) {
         return mData.getAUInt32();
     }
@@ -172,7 +186,6 @@ MtpObjectInfo* MtpDevice::getObjectInfo(MtpObjectHandle handle) {
     if (!readData())
         return NULL;
     MtpResponseCode ret = readResponse();
-printf("getObjectInfo returned %04X\n", ret);
     if (ret == MTP_RESPONSE_OK) {
         MtpObjectInfo* info = new MtpObjectInfo(handle);
         info->read(mData);
@@ -181,8 +194,25 @@ printf("getObjectInfo returned %04X\n", ret);
     return NULL;
 }
 
+MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
+    mRequest.reset();
+    mRequest.setParameter(1, code);
+    if (!sendRequest(MTP_OPERATION_GET_DEVICE_PROP_DESC))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+    if (ret == MTP_RESPONSE_OK) {
+        MtpProperty* property = new MtpProperty;
+        property->read(mData);
+        return property;
+    }
+    return NULL;
+}
+
+
 bool MtpDevice::sendRequest(MtpOperationCode operation) {
-    printf("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
+    LOGD("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
     mRequest.setOperationCode(operation);
     if (mTransactionID > 0)
         mRequest.setTransactionID(mTransactionID++);
@@ -192,7 +222,7 @@ bool MtpDevice::sendRequest(MtpOperationCode operation) {
 }
 
 bool MtpDevice::sendData(MtpOperationCode operation) {
-    printf("sendData\n");
+    LOGD("sendData\n");
     mData.setOperationCode(mRequest.getOperationCode());
     mData.setTransactionID(mRequest.getTransactionID());
     int ret = mData.write(mEndpointOut);
@@ -203,26 +233,26 @@ bool MtpDevice::sendData(MtpOperationCode operation) {
 bool MtpDevice::readData() {
     mData.reset();
     int ret = mData.read(mEndpointIn);
-    printf("readData returned %d\n", ret);
+    LOGD("readData returned %d\n", ret);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mData.dump();
         return true;
     }
     else {
-        printf("readResponse failed\n");
+        LOGD("readResponse failed\n");
         return false;
     }
 }
 
 MtpResponseCode MtpDevice::readResponse() {
-    printf("readResponse\n");
+    LOGD("readResponse\n");
     int ret = mResponse.read(mEndpointIn);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mResponse.dump();
         return mResponse.getResponseCode();
     }
     else {
-        printf("readResponse failed\n");
+        LOGD("readResponse failed\n");
         return -1;
     }
 }

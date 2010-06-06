@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
+#define LOG_TAG "MtpObjectInfo"
+#include "utils/Log.h"
 
 #include "MtpDataPacket.h"
 #include "MtpObjectInfo.h"
@@ -90,7 +91,7 @@ void MtpObjectInfo::read(MtpDataPacket& packet) {
 }
 
 void MtpObjectInfo::print() {
-    printf("MtpObject Info %08X: %s\n", mHandle, mName);
+    LOGD("MtpObject Info %08X: %s\n", mHandle, mName);
 }
 
 }  // namespace android

@@ -23,19 +23,38 @@
 
 namespace android {
 
+typedef int32_t int128_t[4];
+typedef uint32_t uint128_t[4];
+
 typedef uint16_t MtpOperationCode;
 typedef uint16_t MtpResponseCode;
 typedef uint32_t MtpSessionID;
 typedef uint32_t MtpStorageID;
 typedef uint32_t MtpTransactionID;
-typedef uint16_t MtpDeviceProperty;
+typedef uint16_t MtpPropertyCode;
+typedef uint16_t MtpDataType;
 typedef uint16_t MtpObjectFormat;
-typedef uint16_t MtpObjectProperty;
+typedef MtpPropertyCode MtpDeviceProperty;
+typedef MtpPropertyCode MtpObjectProperty;
 
 // object handles are unique across all storage but only within a single session.
 // object handles cannot be reused after an object is deleted.
 // values 0x00000000 and 0xFFFFFFFF are reserved for special purposes.
 typedef uint32_t MtpObjectHandle;
+
+typedef union MtpPropertyValue {
+    int8_t          i8;
+    uint8_t         u8;
+    int16_t         i16;
+    uint16_t        u16;
+    int32_t         i32;
+    uint32_t        u32;
+    int64_t         i64;
+    uint64_t        u64;
+    int128_t        i128;
+    uint128_t       u128;
+    char*           str;
+};
 
 // Special values
 #define MTP_PARENT_ROOT         0xFFFFFFFF       // parent is root of the storage
@@ -53,16 +72,18 @@ typedef uint32_t MtpObjectHandle;
 
 class MtpStorage;
 class MtpDevice;
+class MtpProperty;
 
 typedef Vector<MtpStorage *> MtpStorageList;
 typedef Vector<MtpDevice*> MtpDeviceList;
+typedef Vector<MtpProperty*> MtpPropertyList;
 
 typedef Vector<uint8_t> UInt8List;
-typedef Vector<uint32_t> UInt16List;
+typedef Vector<uint16_t> UInt16List;
 typedef Vector<uint32_t> UInt32List;
 typedef Vector<uint64_t> UInt64List;
 typedef Vector<int8_t> Int8List;
-typedef Vector<int32_t> Int16List;
+typedef Vector<int16_t> Int16List;
 typedef Vector<int32_t> Int32List;
 typedef Vector<int64_t> Int64List;
 

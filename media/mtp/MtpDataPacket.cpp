@@ -70,6 +70,13 @@ uint64_t MtpDataPacket::getUInt64() {
     return result;
 }
 
+void MtpDataPacket::getUInt128(uint128_t& value) {
+    value[0] = getUInt32();
+    value[1] = getUInt32();
+    value[2] = getUInt32();
+    value[3] = getUInt32();
+}
+
 void MtpDataPacket::getString(MtpStringBuffer& string)
 {
     string.readFromPacket(this);
@@ -215,6 +222,20 @@ void MtpDataPacket::putUInt64(uint64_t value) {
     mBuffer[mOffset++] = (uint8_t)((value >> 56) & 0xFF);
     if (mPacketSize < mOffset)
         mPacketSize = mOffset;
+}
+
+void MtpDataPacket::putInt128(const int128_t& value) {
+    putInt32(value[0]);
+    putInt32(value[1]);
+    putInt32(value[2]);
+    putInt32(value[3]);
+}
+
+void MtpDataPacket::putUInt128(const uint128_t& value) {
+    putUInt32(value[0]);
+    putUInt32(value[1]);
+    putUInt32(value[2]);
+    putUInt32(value[3]);
 }
 
 void MtpDataPacket::putAInt8(const int8_t* values, int count) {

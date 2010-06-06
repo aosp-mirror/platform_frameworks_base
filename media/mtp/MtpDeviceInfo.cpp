@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
+#define LOG_TAG "MtpDeviceInfo"
+#include "utils/Log.h"
 
 #include "MtpDataPacket.h"
 #include "MtpDeviceInfo.h"
@@ -87,9 +88,9 @@ void MtpDeviceInfo::read(MtpDataPacket& packet) {
 }
 
 void MtpDeviceInfo::print() {
-    printf("Device Info:\n\tmStandardVersion: %d\n\tmVendorExtensionID: %d\n\tmVendorExtensionVersiony: %d\n",
+    LOGD("Device Info:\n\tmStandardVersion: %d\n\tmVendorExtensionID: %d\n\tmVendorExtensionVersiony: %d\n",
             mStandardVersion, mVendorExtensionID, mVendorExtensionVersion);
-    printf("\tmVendorExtensionDesc: %s\n\tmFunctionalCode: %d\n\tmManufacturer: %s\n\tmModel: %s\n\tmVersion: %s\n\tmSerial: %s\n",
+    LOGD("\tmVendorExtensionDesc: %s\n\tmFunctionalCode: %d\n\tmManufacturer: %s\n\tmModel: %s\n\tmVersion: %s\n\tmSerial: %s\n",
             mVendorExtensionDesc, mFunctionalCode, mManufacturer, mModel, mVersion, mSerial);
 }
 

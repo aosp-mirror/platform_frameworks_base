@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
+#define LOG_TAG "MtpStorageInfo"
+#include "utils/Log.h"
 
 #include "MtpDataPacket.h"
 #include "MtpStorageInfo.h"
@@ -60,11 +61,11 @@ void MtpStorageInfo::read(MtpDataPacket& packet) {
 }
 
 void MtpStorageInfo::print() {
-    printf("Storage Info %08X:\n\tmStorageType: %d\n\tmFileSystemType: %d\n\tmAccessCapability: %d\n",
+    LOGD("Storage Info %08X:\n\tmStorageType: %d\n\tmFileSystemType: %d\n\tmAccessCapability: %d\n",
             mStorageID, mStorageType, mFileSystemType, mAccessCapability);
-    printf("\tmMaxCapacity: %lld\n\tmFreeSpaceBytes: %lld\n\tmFreeSpaceObjects: %d\n",
+    LOGD("\tmMaxCapacity: %lld\n\tmFreeSpaceBytes: %lld\n\tmFreeSpaceObjects: %d\n",
             mMaxCapacity, mFreeSpaceBytes, mFreeSpaceObjects);
-    printf("\tmStorageDescription: %s\n\tmVolumeIdentifier: %s\n",
+    LOGD("\tmStorageDescription: %s\n\tmVolumeIdentifier: %s\n",
             mStorageDescription, mVolumeIdentifier);
 }
 
