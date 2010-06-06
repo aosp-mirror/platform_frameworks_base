@@ -39,6 +39,8 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,6 +52,9 @@ public class Watchdog extends Thread {
 
     // Set this to true to use debug default values.
     static final boolean DB = false;
+
+    // Set this to true to have the watchdog record kernel thread stacks when it fires
+    static final boolean RECORD_KERNEL_THREADS = true;
 
     static final int MONITOR = 2718;
     static final int GLOBAL_PSS = 2719;
@@ -850,6 +855,11 @@ public class Watchdog extends Thread {
             // The system's been hanging for a minute, another second or two won't hurt much.
             SystemClock.sleep(2000);
 
+            // Pull our own kernel thread stacks as well if we're configured for that
+            if (RECORD_KERNEL_THREADS) {
+                dumpKernelStackTraces();
+            }
+
             mActivity.addErrorToDropBox("watchdog", null, null, null, name, null, stack, null);
 
             // Only kill the process if the debugger is not attached.
@@ -864,4 +874,16 @@ public class Watchdog extends Thread {
             waitedHalf = false;
         }
     }
+
+    private File dumpKernelStackTraces() {
+        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
+        if (tracesPath == null || tracesPath.length() == 0) {
+            return null;
+        }
+
+        native_dumpKernelStacks(tracesPath);
+        return new File(tracesPath);
+    }
+
+    private native void native_dumpKernelStacks(String tracesPath);
 }
