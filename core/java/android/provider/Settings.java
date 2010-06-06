@@ -2368,6 +2368,24 @@ public final class Settings {
         public static final String TETHER_SUPPORTED = "tether_supported";
 
         /**
+         * Used to require DUN APN on the device or not - defaults to a build config value
+         * which defaults to false
+         * @hide
+         */
+        public static final String TETHER_DUN_REQUIRED = "tether_dun_required";
+
+        /**
+         * Used to hold a gservices-provisioned apn value for DUN.  If set, or the
+         * corresponding build config values are set it will override the APN DB
+         * values.
+         * Consists of a comma seperated list of strings:
+         * "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
+         * note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
+         * @hide
+         */
+        public static final String TETHER_DUN_APN = "tether_dun_apn";
+
+        /**
          * No longer supported.
          */
         public static final String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
