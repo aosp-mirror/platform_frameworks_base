@@ -19,6 +19,7 @@
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
 #include "include/OggExtractor.h"
+#include "include/MPEG2TSExtractor.h"
 
 #include "matroska/MatroskaExtractor.h"
 
@@ -97,6 +98,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffWAV);
     RegisterSniffer(SniffOgg);
     RegisterSniffer(SniffMatroska);
+    RegisterSniffer(SniffMPEG2TS);
 }
 
 // static
