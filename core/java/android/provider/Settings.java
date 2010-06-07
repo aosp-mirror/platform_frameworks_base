@@ -355,6 +355,21 @@ public final class Settings {
             "android.settings.MANAGE_APPLICATIONS_SETTINGS";
 
     /**
+     * Activity Action: Show screen of details about a particular application.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: The Intent's data URI specifies the application package name
+     * to be shown, with the "package" scheme.  That is "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_DETAILS_SETTINGS =
+            "android.settings.APPLICATION_DETAILS_SETTINGS";
+
+    /**
      * Activity Action: Show settings for system update functionality.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
