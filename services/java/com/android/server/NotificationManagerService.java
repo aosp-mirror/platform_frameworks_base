@@ -17,7 +17,7 @@
 package com.android.server;
 
 import com.android.internal.statusbar.StatusBarNotification;
-import com.android.server.status.StatusBarManagerService;
+import com.android.server.StatusBarManagerService;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.server;
 
 import android.app.PendingIntent;
 import android.app.StatusBarManager;

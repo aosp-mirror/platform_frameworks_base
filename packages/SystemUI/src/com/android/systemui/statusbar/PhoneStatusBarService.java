@@ -434,11 +434,10 @@ public class PhoneStatusBarService extends StatusBarService {
 
         // create the row view
         LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event,
-                parent, false);
+        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
 
         // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
+        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = n.contentIntent;
