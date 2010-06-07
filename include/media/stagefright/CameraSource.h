@@ -51,6 +51,7 @@ private:
     friend class CameraSourceListener;
 
     sp<Camera> mCamera;
+    sp<MetaData> mMeta;
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
@@ -59,7 +60,6 @@ private:
     List<sp<IMemory> > mFramesBeingEncoded;
     List<int64_t> mFrameTimes;
 
-    int mWidth, mHeight;
     int64_t mFirstFrameTimeUs;
     int64_t mLastFrameTimestampUs;
     int32_t mNumFramesReceived;
