@@ -1119,7 +1119,7 @@ public class PhoneNumberUtils
                 && text.charAt(2) == '1') {
                 formatType = FORMAT_JAPAN;
             } else {
-                return;
+                formatType = FORMAT_UNKNOWN;
             }
         }
 
@@ -1129,6 +1129,9 @@ public class PhoneNumberUtils
                 return;
             case FORMAT_JAPAN:
                 formatJapaneseNumber(text);
+                return;
+            case FORMAT_UNKNOWN:
+                removeDashes(text);
                 return;
         }
     }
@@ -1165,14 +1168,7 @@ public class PhoneNumberUtils
         CharSequence saved = text.subSequence(0, length);
 
         // Strip the dashes first, as we're going to add them back
-        int p = 0;
-        while (p < text.length()) {
-            if (text.charAt(p) == '-') {
-                text.delete(p, p + 1);
-            } else {
-                p++;
-            }
-        }
+        removeDashes(text);
         length = text.length();
 
         // When scanning the number we record where dashes need to be added,
@@ -1274,6 +1270,22 @@ public class PhoneNumberUtils
      */
     public static void formatJapaneseNumber(Editable text) {
         JapanesePhoneNumberFormatter.format(text);
+    }
+
+    /**
+     * Removes all dashes from the number.
+     *
+     * @param text the number to clear from dashes
+     */
+    private static void removeDashes(Editable text) {
+        int p = 0;
+        while (p < text.length()) {
+            if (text.charAt(p) == '-') {
+                text.delete(p, p + 1);
+           } else {
+                p++;
+           }
+        }
     }
 
     // Three and four digit phone numbers for either special services,
