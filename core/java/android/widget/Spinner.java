@@ -51,6 +51,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public static final int MODE_DROPDOWN = 1;
     
     private SpinnerPopup mPopup;
+    private DropDownAdapter mTempAdapter;
     
     public Spinner(Context context) {
         this(context, null);
@@ -96,12 +97,24 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         mPopup.setPromptText(a.getString(com.android.internal.R.styleable.Spinner_prompt));
 
         a.recycle();
+
+        // Base constructor can call setAdapter before we initialize mPopup.
+        // Finish setting things up if this happened.
+        if (mTempAdapter != null) {
+            mPopup.setAdapter(mTempAdapter);
+            mTempAdapter = null;
+        }
     }
     
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
-        mPopup.setAdapter(new DropDownAdapter(adapter));
+
+        if (mPopup != null) {
+            mPopup.setAdapter(new DropDownAdapter(adapter));
+        } else {
+            mTempAdapter = new DropDownAdapter(adapter);
+        }
     }
 
     @Override
