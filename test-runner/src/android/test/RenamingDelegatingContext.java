@@ -21,6 +21,7 @@ import com.google.android.collect.Sets;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.ContentProvider;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
 import android.util.Log;
@@ -145,6 +146,17 @@ public class RenamingDelegatingContext extends ContextWrapper {
             mFileContext.deleteDatabase(internalName);
         }
         return mFileContext.openOrCreateDatabase(internalName, mode, factory);
+    }
+
+    @Override
+    public SQLiteDatabase openOrCreateDatabase(String name,
+            int mode, SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
+        final String internalName = renamedFileName(name);
+        if (!mDatabaseNames.contains(name)) {
+            mDatabaseNames.add(name);
+            mFileContext.deleteDatabase(internalName);
+        }
+        return mFileContext.openOrCreateDatabase(internalName, mode, factory, errorHandler);
     }
 
     @Override
