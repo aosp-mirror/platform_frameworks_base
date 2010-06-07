@@ -80,11 +80,13 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_matroska \
         libstagefright_vpxdec \
         libvpx \
+        libstagefright_mpeg2ts \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
         libstagefright_enc_common \
-        libstagefright_avc_common
+        libstagefright_avc_common \
+        libstagefright_foundation \
 
 ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
