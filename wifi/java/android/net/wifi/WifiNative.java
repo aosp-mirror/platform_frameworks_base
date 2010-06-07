@@ -41,6 +41,8 @@ public class WifiNative {
     public native static String getErrorString(int errorCode);
 
     public native static boolean loadDriver();
+
+    public native static boolean isDriverLoaded();
     
     public native static boolean unloadDriver();
 

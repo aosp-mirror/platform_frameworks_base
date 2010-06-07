@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package com.android.server;
 
-import static android.net.wifi.WifiManager.WIFI_STATE_DISABLED;
-import static android.net.wifi.WifiManager.WIFI_STATE_DISABLING;
-import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
-import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
-import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
-
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLING;
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothA2dp;
@@ -41,7 +29,6 @@ import android.content.pm.PackageManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiNative;
 import android.net.wifi.WifiStateTracker;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -51,56 +38,43 @@ import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
-import android.net.NetworkUtils;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
-import android.os.Looper;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Slog;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.net.UnknownHostException;
 
 import com.android.internal.app.IBatteryStats;
-import android.app.backup.IBackupManager;
 import com.android.server.am.BatteryStatsService;
 import com.android.internal.R;
 
 /**
  * WifiService handles remote WiFi operation requests by implementing
- * the IWifiManager interface. It also creates a WifiMonitor to listen
- * for Wifi-related events.
+ * the IWifiManager interface.
  *
  * @hide
  */
+//TODO: Clean up multiple locks and implement WifiService
+// as a SM to track soft AP/client/adhoc bring up based
+// on device idle state, airplane mode and boot.
+
 public class WifiService extends IWifiManager.Stub {
     private static final String TAG = "WifiService";
-    private static final boolean DBG = false;
-    private static final Pattern scanResultPattern = Pattern.compile("\t+");
+    private static final boolean DBG = true;
+
     private final WifiStateTracker mWifiStateTracker;
-    /* TODO: fetch a configurable interface */
-    private static final String SOFTAP_IFACE = "wl0.1";
 
     private Context mContext;
-    private int mWifiApState;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mIdleIntent;
@@ -109,10 +83,8 @@ public class WifiService extends IWifiManager.Stub {
     private boolean mDeviceIdle;
     private int mPluggedType;
 
-    private enum DriverAction {DRIVER_UNLOAD, NO_DRIVER_UNLOAD};
-
     // true if the user enabled Wifi while in airplane mode
-    private boolean mAirplaneModeOverwridden;
+    private AtomicBoolean mAirplaneModeOverwridden = new AtomicBoolean(false);
 
     private final LockList mLocks = new LockList();
     // some wifi lock statistics
@@ -128,9 +100,7 @@ public class WifiService extends IWifiManager.Stub {
 
     private final IBatteryStats mBatteryStats;
 
-    private INetworkManagementService nwService;
     ConnectivityManager mCm;
-    private WifiWatchdogService mWifiWatchdogService = null;
     private String[] mWifiRegexs;
 
     /**
@@ -142,46 +112,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     private static final long DEFAULT_IDLE_MILLIS = 15 * 60 * 1000; /* 15 minutes */
 
-    private static final String WAKELOCK_TAG = "WifiService";
-
-    // Wake lock used by other operations
-    private static PowerManager.WakeLock sWakeLock;
-
-    private static final int MESSAGE_ENABLE_WIFI        = 0;
-    private static final int MESSAGE_DISABLE_WIFI       = 1;
-    private static final int MESSAGE_STOP_WIFI          = 2;
-    private static final int MESSAGE_START_WIFI         = 3;
-    private static final int MESSAGE_UPDATE_STATE       = 5;
-    private static final int MESSAGE_START_ACCESS_POINT = 6;
-    private static final int MESSAGE_STOP_ACCESS_POINT  = 7;
-    private static final int MESSAGE_SET_CHANNELS       = 8;
-
-
-    private final  WifiHandler mWifiHandler;
-
-    /*
-     * Cache of scan results objects (size is somewhat arbitrary)
-     */
-    private static final int SCAN_RESULT_CACHE_SIZE = 80;
-    private final LinkedHashMap<String, ScanResult> mScanResultCache;
-
-    /*
-     * Character buffer used to parse scan results (optimization)
-     */
-    private static final int SCAN_RESULT_BUFFER_SIZE = 512;
-    private boolean mNeedReconfig;
-
-    /*
-     * Last UID that asked to enable WIFI.
-     */
-    private int mLastEnableUid = Process.myUid();
-
-    /*
-     * Last UID that asked to enable WIFI AP.
-     */
-    private int mLastApEnableUid = Process.myUid();
-
-
     /**
      * Number of allowed radio frequency channels in various regulatory domains.
      * This list is sufficient for 802.11b/g networks (2.4GHz range).
@@ -191,46 +121,27 @@ public class WifiService extends IWifiManager.Stub {
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
 
+    private boolean mIsReceiverRegistered = false;
+
     WifiService(Context context, WifiStateTracker tracker) {
         mContext = context;
         mWifiStateTracker = tracker;
         mWifiStateTracker.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
 
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        nwService = INetworkManagementService.Stub.asInterface(b);
-
-        mScanResultCache = new LinkedHashMap<String, ScanResult>(
-            SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
-                /*
-                 * Limit the cache size by SCAN_RESULT_CACHE_SIZE
-                 * elements
-                 */
-                public boolean removeEldestEntry(Map.Entry eldest) {
-                    return SCAN_RESULT_CACHE_SIZE < this.size();
-                }
-            };
-
-        HandlerThread wifiThread = new HandlerThread("WifiService");
-        wifiThread.start();
-        mWifiHandler = new WifiHandler(wifiThread.getLooper());
-
-        mWifiStateTracker.setWifiState(WIFI_STATE_DISABLED);
-        mWifiApState = WIFI_AP_STATE_DISABLED;
-
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
         mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
 
-        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+        HandlerThread wifiThread = new HandlerThread("WifiService");
+        wifiThread.start();
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         // clear our flag indicating the user has overwridden airplane mode
-                        mAirplaneModeOverwridden = false;
+                        mAirplaneModeOverwridden.set(false);
                         // on airplane disable, restore Wifi if the saved state indicates so
                         if (!isAirplaneModeOn() && testAndClearWifiSavedState()) {
                             persistWifiEnabled(true);
@@ -245,11 +156,11 @@ public class WifiService extends IWifiManager.Stub {
                 @Override
                 public void onReceive(Context context, Intent intent) {
 
-                  ArrayList<String> available = intent.getStringArrayListExtra(
-                          ConnectivityManager.EXTRA_AVAILABLE_TETHER);
-                  ArrayList<String> active = intent.getStringArrayListExtra(
-                          ConnectivityManager.EXTRA_ACTIVE_TETHER);
-                  updateTetherState(available, active);
+                    ArrayList<String> available = intent.getStringArrayListExtra(
+                            ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+                    ArrayList<String> active = intent.getStringArrayListExtra(
+                            ConnectivityManager.EXTRA_ACTIVE_TETHER);
+                    updateTetherState(available, active);
 
                 }
             },new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
@@ -301,17 +212,14 @@ public class WifiService extends IWifiManager.Stub {
                         }
                     } catch (Exception e) {
                         Slog.e(TAG, "Error configuring interface " + intf + ", :" + e);
-                        try {
-                            nwService.stopAccessPoint();
-                        } catch (Exception ee) {
-                            Slog.e(TAG, "Could not stop AP, :" + ee);
-                        }
-                        setWifiApEnabledState(WIFI_AP_STATE_FAILED, 0, DriverAction.DRIVER_UNLOAD);
+                        setWifiApEnabled(null, false);
                         return;
                     }
 
                     if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                        Slog.e(TAG, "Error tethering "+intf);
+                        Slog.e(TAG, "Error tethering on " + intf);
+                        setWifiApEnabled(null, false);
+                        return;
                     }
                     break;
                 }
@@ -353,12 +261,11 @@ public class WifiService extends IWifiManager.Stub {
 
     /**
      * see {@link android.net.wifi.WifiManager#pingSupplicant()}
-     * @return {@code true} if the operation succeeds
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
     public boolean pingSupplicant() {
-        enforceChangePermission();
-
-        return mWifiStateTracker.ping();
+        enforceAccessPermission();
+        return mWifiStateTracker.pingSupplicant();
     }
 
     /**
@@ -367,170 +274,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean startScan(boolean forceActive) {
         enforceChangePermission();
-
-        switch (mWifiStateTracker.getSupplicantState()) {
-            case DISCONNECTED:
-            case INACTIVE:
-            case SCANNING:
-            case DORMANT:
-                break;
-            default:
-                mWifiStateTracker.setScanResultHandling(
-                        WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
-                break;
-        }
-        return mWifiStateTracker.scan(forceActive);
-    }
-
-    /**
-     * see {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)}
-     * @param enable {@code true} to enable, {@code false} to disable.
-     * @return {@code true} if the enable/disable operation was
-     *         started or is already in the queue.
-     */
-    public boolean setWifiEnabled(boolean enable) {
-        enforceChangePermission();
-        if (mWifiHandler == null) return false;
-
-        synchronized (mWifiHandler) {
-            // caller may not have WAKE_LOCK permission - it's not required here
-            long ident = Binder.clearCallingIdentity();
-            sWakeLock.acquire();
-            Binder.restoreCallingIdentity(ident);
-
-            mLastEnableUid = Binder.getCallingUid();
-            // set a flag if the user is enabling Wifi while in airplane mode
-            mAirplaneModeOverwridden = (enable && isAirplaneModeOn() && isAirplaneToggleable());
-            sendEnableMessage(enable, true, Binder.getCallingUid());
-        }
-
-        return true;
-    }
-
-    /**
-     * Enables/disables Wi-Fi synchronously.
-     * @param enable {@code true} to turn Wi-Fi on, {@code false} to turn it off.
-     * @param persist {@code true} if the setting should be persisted.
-     * @param uid The UID of the process making the request.
-     * @return {@code true} if the operation succeeds (or if the existing state
-     *         is the same as the requested state)
-     */
-    private boolean setWifiEnabledBlocking(boolean enable, boolean persist, int uid) {
-        final int eventualWifiState = enable ? WIFI_STATE_ENABLED : WIFI_STATE_DISABLED;
-        final int wifiState = mWifiStateTracker.getWifiState();
-
-        if (wifiState == eventualWifiState) {
-            return true;
-        }
-        if (enable && isAirplaneModeOn() && !mAirplaneModeOverwridden) {
-            return false;
-        }
-
-        /**
-         * Multiple calls to unregisterReceiver() cause exception and a system crash.
-         * This can happen if a supplicant is lost (or firmware crash occurs) and user indicates
-         * disable wifi at the same time.
-         * Avoid doing a disable when the current Wifi state is UNKNOWN
-         * TODO: Handle driver load fail and supplicant lost as seperate states
-         */
-        if ((wifiState == WIFI_STATE_UNKNOWN) && !enable) {
-            return false;
-        }
-
-        /**
-         * Fail Wifi if AP is enabled
-         * TODO: Deprecate WIFI_STATE_UNKNOWN and rename it
-         * WIFI_STATE_FAILED
-         */
-        if ((mWifiApState == WIFI_AP_STATE_ENABLED) && enable) {
-            setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-            return false;
-        }
-
-        setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING, uid);
-
-        if (enable) {
-            if (!mWifiStateTracker.loadDriver()) {
-                Slog.e(TAG, "Failed to load Wi-Fi driver.");
-                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                return false;
-            }
-            if (!mWifiStateTracker.startSupplicant()) {
-                mWifiStateTracker.unloadDriver();
-                Slog.e(TAG, "Failed to start supplicant daemon.");
-                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                return false;
-            }
-
-            registerForBroadcasts();
-            mWifiStateTracker.startEventLoop();
-
-        } else {
-
-            mContext.unregisterReceiver(mReceiver);
-           // Remove notification (it will no-op if it isn't visible)
-            mWifiStateTracker.setNotificationVisible(false, 0, false, 0);
-
-            boolean failedToStopSupplicantOrUnloadDriver = false;
-
-            if (!mWifiStateTracker.stopSupplicant()) {
-                Slog.e(TAG, "Failed to stop supplicant daemon.");
-                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                failedToStopSupplicantOrUnloadDriver = true;
-            }
-
-            /**
-             * Reset connections and disable interface
-             * before we unload the driver
-             */
-            mWifiStateTracker.resetConnections(true);
-
-            if (!mWifiStateTracker.unloadDriver()) {
-                Slog.e(TAG, "Failed to unload Wi-Fi driver.");
-                if (!failedToStopSupplicantOrUnloadDriver) {
-                    setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                    failedToStopSupplicantOrUnloadDriver = true;
-                }
-            }
-
-            if (failedToStopSupplicantOrUnloadDriver) {
-                return false;
-            }
-        }
-
-        // Success!
-
-        if (persist) {
-            persistWifiEnabled(enable);
-        }
-        setWifiEnabledState(eventualWifiState, uid);
-        return true;
-    }
-
-    private void setWifiEnabledState(int wifiState, int uid) {
-        final int previousWifiState = mWifiStateTracker.getWifiState();
-
-        long ident = Binder.clearCallingIdentity();
-        try {
-            if (wifiState == WIFI_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn(uid);
-            } else if (wifiState == WIFI_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff(uid);
-            }
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-
-        // Update state
-        mWifiStateTracker.setWifiState(wifiState);
-
-        // Broadcast
-        final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(WifiManager.EXTRA_WIFI_STATE, wifiState);
-        intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, previousWifiState);
-        mContext.sendStickyBroadcast(intent);
+        return mWifiStateTracker.startScan(forceActive);
     }
 
     private void enforceAccessPermission() {
@@ -551,6 +295,40 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
+     * see {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)}
+     * @param enable {@code true} to enable, {@code false} to disable.
+     * @return {@code true} if the enable/disable operation was
+     *         started or is already in the queue.
+     */
+    public synchronized boolean setWifiEnabled(boolean enable) {
+        enforceChangePermission();
+
+        if (DBG) {
+            Slog.e(TAG, "Invoking mWifiStateTracker.setWifiEnabled\n");
+        }
+
+        // set a flag if the user is enabling Wifi while in airplane mode
+        if (enable && isAirplaneModeOn() && isAirplaneToggleable()) {
+            mAirplaneModeOverwridden.set(true);
+        }
+
+        mWifiStateTracker.setWifiEnabled(enable);
+        persistWifiEnabled(enable);
+
+        if (enable) {
+            if (!mIsReceiverRegistered) {
+                registerForBroadcasts();
+                mIsReceiverRegistered = true;
+            }
+        } else if (mIsReceiverRegistered){
+            mContext.unregisterReceiver(mReceiver);
+            mIsReceiverRegistered = false;
+        }
+
+        return true;
+    }
+
+    /**
      * see {@link WifiManager#getWifiState()}
      * @return One of {@link WifiManager#WIFI_STATE_DISABLED},
      *         {@link WifiManager#WIFI_STATE_DISABLING},
@@ -564,62 +342,49 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
-     * see {@link android.net.wifi.WifiManager#disconnect()}
-     * @return {@code true} if the operation succeeds
-     */
-    public boolean disconnect() {
-        enforceChangePermission();
-
-        return mWifiStateTracker.disconnect();
-    }
-
-    /**
-     * see {@link android.net.wifi.WifiManager#reconnect()}
-     * @return {@code true} if the operation succeeds
-     */
-    public boolean reconnect() {
-        enforceChangePermission();
-
-        return mWifiStateTracker.reconnectCommand();
-    }
-
-    /**
-     * see {@link android.net.wifi.WifiManager#reassociate()}
-     * @return {@code true} if the operation succeeds
-     */
-    public boolean reassociate() {
-        enforceChangePermission();
-
-        return mWifiStateTracker.reassociate();
-    }
-
-    /**
      * see {@link android.net.wifi.WifiManager#setWifiApEnabled(WifiConfiguration, boolean)}
      * @param wifiConfig SSID, security and channel details as
      *        part of WifiConfiguration
-     * @param enabled, true to enable and false to disable
+     * @param enabled true to enable and false to disable
      * @return {@code true} if the start operation was
      *         started or is already in the queue.
      */
-    public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
+    public synchronized boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         enforceChangePermission();
-        if (mWifiHandler == null) return false;
 
-        synchronized (mWifiHandler) {
-
-            long ident = Binder.clearCallingIdentity();
-            sWakeLock.acquire();
-            Binder.restoreCallingIdentity(ident);
-
-            mLastApEnableUid = Binder.getCallingUid();
-            sendAccessPointMessage(enabled, wifiConfig, Binder.getCallingUid());
+        if (enabled) {
+            /* Use default config if there is no existing config */
+            if (wifiConfig == null && ((wifiConfig = getWifiApConfiguration()) == null)) {
+                wifiConfig = new WifiConfiguration();
+                wifiConfig.SSID = mContext.getString(R.string.wifi_tether_configure_ssid_default);
+                wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+            }
+            setWifiApConfiguration(wifiConfig);
         }
+
+        mWifiStateTracker.setWifiApEnabled(wifiConfig, enabled);
 
         return true;
     }
 
-    public WifiConfiguration getWifiApConfiguration() {
+    /**
+     * see {@link WifiManager#getWifiApState()}
+     * @return One of {@link WifiManager#WIFI_AP_STATE_DISABLED},
+     *         {@link WifiManager#WIFI_AP_STATE_DISABLING},
+     *         {@link WifiManager#WIFI_AP_STATE_ENABLED},
+     *         {@link WifiManager#WIFI_AP_STATE_ENABLING},
+     *         {@link WifiManager#WIFI_AP_STATE_FAILED}
+     */
+    public int getWifiApEnabledState() {
         enforceAccessPermission();
+        return mWifiStateTracker.getWifiApState();
+    }
+
+    /**
+     * see {@link WifiManager#getWifiApConfiguration()}
+     * @return soft access point configuration
+     */
+    public synchronized WifiConfiguration getWifiApConfiguration() {
         final ContentResolver cr = mContext.getContentResolver();
         WifiConfiguration wifiConfig = new WifiConfiguration();
         int authType;
@@ -637,7 +402,11 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void setWifiApConfiguration(WifiConfiguration wifiConfig) {
+    /**
+     * see {@link WifiManager#setWifiApConfiguration(WifiConfiguration)}
+     * @param wifiConfig WifiConfiguration details for soft access point
+     */
+    public synchronized void setWifiApConfiguration(WifiConfiguration wifiConfig) {
         enforceChangePermission();
         final ContentResolver cr = mContext.getContentResolver();
         boolean isWpa;
@@ -653,143 +422,30 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
-     * Enables/disables Wi-Fi AP synchronously. The driver is loaded
-     * and soft access point configured as a single operation.
-     * @param enable {@code true} to turn Wi-Fi on, {@code false} to turn it off.
-     * @param uid The UID of the process making the request.
-     * @param wifiConfig The WifiConfiguration for AP
-     * @return {@code true} if the operation succeeds (or if the existing state
-     *         is the same as the requested state)
+     * see {@link android.net.wifi.WifiManager#disconnect()}
+     * @return {@code true} if the operation succeeds
      */
-    private boolean setWifiApEnabledBlocking(boolean enable,
-                                int uid, WifiConfiguration wifiConfig) {
-        final int eventualWifiApState = enable ? WIFI_AP_STATE_ENABLED : WIFI_AP_STATE_DISABLED;
-
-        if (mWifiApState == eventualWifiApState) {
-            /* Configuration changed on a running access point */
-            if(enable && (wifiConfig != null)) {
-                try {
-                    nwService.setAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName(),
-                                             SOFTAP_IFACE);
-                    setWifiApConfiguration(wifiConfig);
-                    return true;
-                } catch(Exception e) {
-                    Slog.e(TAG, "Exception in nwService during AP restart");
-                    try {
-                        nwService.stopAccessPoint();
-                    } catch (Exception ee) {
-                        Slog.e(TAG, "Could not stop AP, :" + ee);
-                    }
-                    setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
-                    return false;
-                }
-            } else {
-                return true;
-            }
-        }
-
-        /**
-         * Fail AP if Wifi is enabled
-         */
-        if ((mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLED) && enable) {
-            setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
-            return false;
-        }
-
-        setWifiApEnabledState(enable ? WIFI_AP_STATE_ENABLING :
-                                       WIFI_AP_STATE_DISABLING, uid, DriverAction.NO_DRIVER_UNLOAD);
-
-        if (enable) {
-
-            /* Use default config if there is no existing config */
-            if (wifiConfig == null && ((wifiConfig = getWifiApConfiguration()) == null)) {
-                wifiConfig = new WifiConfiguration();
-                wifiConfig.SSID = mContext.getString(R.string.wifi_tether_configure_ssid_default);
-                wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
-            }
-
-            if (!mWifiStateTracker.loadDriver()) {
-                Slog.e(TAG, "Failed to load Wi-Fi driver for AP mode");
-                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
-                return false;
-            }
-
-            try {
-                nwService.startAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName(),
-                                           SOFTAP_IFACE);
-            } catch(Exception e) {
-                Slog.e(TAG, "Exception in startAccessPoint()");
-                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
-                return false;
-            }
-
-            setWifiApConfiguration(wifiConfig);
-
-        } else {
-
-            try {
-                nwService.stopAccessPoint();
-            } catch(Exception e) {
-                Slog.e(TAG, "Exception in stopAccessPoint()");
-                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
-                return false;
-            }
-
-            if (!mWifiStateTracker.unloadDriver()) {
-                Slog.e(TAG, "Failed to unload Wi-Fi driver for AP mode");
-                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
-                return false;
-            }
-        }
-
-        setWifiApEnabledState(eventualWifiApState, uid, DriverAction.NO_DRIVER_UNLOAD);
-        return true;
+    public boolean disconnect() {
+        enforceChangePermission();
+        return mWifiStateTracker.disconnectCommand();
     }
 
     /**
-     * see {@link WifiManager#getWifiApState()}
-     * @return One of {@link WifiManager#WIFI_AP_STATE_DISABLED},
-     *         {@link WifiManager#WIFI_AP_STATE_DISABLING},
-     *         {@link WifiManager#WIFI_AP_STATE_ENABLED},
-     *         {@link WifiManager#WIFI_AP_STATE_ENABLING},
-     *         {@link WifiManager#WIFI_AP_STATE_FAILED}
+     * see {@link android.net.wifi.WifiManager#reconnect()}
+     * @return {@code true} if the operation succeeds
      */
-    public int getWifiApEnabledState() {
-        enforceAccessPermission();
-        return mWifiApState;
+    public boolean reconnect() {
+        enforceChangePermission();
+        return mWifiStateTracker.reconnectCommand();
     }
 
-    private void setWifiApEnabledState(int wifiAPState, int uid, DriverAction flag) {
-        final int previousWifiApState = mWifiApState;
-
-        /**
-         * Unload the driver if going to a failed state
-         */
-        if ((mWifiApState == WIFI_AP_STATE_FAILED) && (flag == DriverAction.DRIVER_UNLOAD)) {
-            mWifiStateTracker.unloadDriver();
-        }
-
-        long ident = Binder.clearCallingIdentity();
-        try {
-            if (wifiAPState == WIFI_AP_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn(uid);
-            } else if (wifiAPState == WIFI_AP_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff(uid);
-            }
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-
-        // Update state
-        mWifiApState = wifiAPState;
-
-        // Broadcast
-        final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(WifiManager.EXTRA_WIFI_AP_STATE, wifiAPState);
-        intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_AP_STATE, previousWifiApState);
-        mContext.sendStickyBroadcast(intent);
+    /**
+     * see {@link android.net.wifi.WifiManager#reassociate()}
+     * @return {@code true} if the operation succeeds
+     */
+    public boolean reassociate() {
+        enforceChangePermission();
+        return mWifiStateTracker.reassociateCommand();
     }
 
     /**
@@ -798,217 +454,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<WifiConfiguration> getConfiguredNetworks() {
         enforceAccessPermission();
-        String listStr;
-
-        /*
-         * We don't cache the list, because we want to allow
-         * for the possibility that the configuration file
-         * has been modified through some external means,
-         * such as the wpa_cli command line program.
-         */
-        listStr = mWifiStateTracker.listNetworks();
-
-        List<WifiConfiguration> networks =
-            new ArrayList<WifiConfiguration>();
-        if (listStr == null)
-            return networks;
-
-        String[] lines = listStr.split("\n");
-        // Skip the first line, which is a header
-       for (int i = 1; i < lines.length; i++) {
-           String[] result = lines[i].split("\t");
-           // network-id | ssid | bssid | flags
-           WifiConfiguration config = new WifiConfiguration();
-           try {
-               config.networkId = Integer.parseInt(result[0]);
-           } catch(NumberFormatException e) {
-               continue;
-           }
-           if (result.length > 3) {
-               if (result[3].indexOf("[CURRENT]") != -1)
-                   config.status = WifiConfiguration.Status.CURRENT;
-               else if (result[3].indexOf("[DISABLED]") != -1)
-                   config.status = WifiConfiguration.Status.DISABLED;
-               else
-                   config.status = WifiConfiguration.Status.ENABLED;
-           } else {
-               config.status = WifiConfiguration.Status.ENABLED;
-           }
-           readNetworkVariables(config);
-           networks.add(config);
-       }
-
-        return networks;
-    }
-
-    /**
-     * Read the variables from the supplicant daemon that are needed to
-     * fill in the WifiConfiguration object.
-     * <p/>
-     * The caller must hold the synchronization monitor.
-     * @param config the {@link WifiConfiguration} object to be filled in.
-     */
-    private void readNetworkVariables(WifiConfiguration config) {
-
-        int netId = config.networkId;
-        if (netId < 0)
-            return;
-
-        /*
-         * TODO: maybe should have a native method that takes an array of
-         * variable names and returns an array of values. But we'd still
-         * be doing a round trip to the supplicant daemon for each variable.
-         */
-        String value;
-
-        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.ssidVarName);
-        if (!TextUtils.isEmpty(value)) {
-            config.SSID = value;
-        } else {
-            config.SSID = null;
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.bssidVarName);
-        if (!TextUtils.isEmpty(value)) {
-            config.BSSID = value;
-        } else {
-            config.BSSID = null;
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.priorityVarName);
-        config.priority = -1;
-        if (!TextUtils.isEmpty(value)) {
-            try {
-                config.priority = Integer.parseInt(value);
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.hiddenSSIDVarName);
-        config.hiddenSSID = false;
-        if (!TextUtils.isEmpty(value)) {
-            try {
-                config.hiddenSSID = Integer.parseInt(value) != 0;
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.wepTxKeyIdxVarName);
-        config.wepTxKeyIndex = -1;
-        if (!TextUtils.isEmpty(value)) {
-            try {
-                config.wepTxKeyIndex = Integer.parseInt(value);
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        /*
-         * Get up to 4 WEP keys. Note that the actual keys are not passed back,
-         * just a "*" if the key is set, or the null string otherwise.
-         */
-        for (int i = 0; i < 4; i++) {
-            value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.wepKeyVarNames[i]);
-            if (!TextUtils.isEmpty(value)) {
-                config.wepKeys[i] = value;
-            } else {
-                config.wepKeys[i] = null;
-            }
-        }
-
-        /*
-         * Get the private shared key. Note that the actual keys are not passed back,
-         * just a "*" if the key is set, or the null string otherwise.
-         */
-        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.pskVarName);
-        if (!TextUtils.isEmpty(value)) {
-            config.preSharedKey = value;
-        } else {
-            config.preSharedKey = null;
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(config.networkId,
-                WifiConfiguration.Protocol.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.Protocol.strings);
-                if (0 <= index) {
-                    config.allowedProtocols.set(index);
-                }
-            }
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(config.networkId,
-                WifiConfiguration.KeyMgmt.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.KeyMgmt.strings);
-                if (0 <= index) {
-                    config.allowedKeyManagement.set(index);
-                }
-            }
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(config.networkId,
-                WifiConfiguration.AuthAlgorithm.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.AuthAlgorithm.strings);
-                if (0 <= index) {
-                    config.allowedAuthAlgorithms.set(index);
-                }
-            }
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(config.networkId,
-                WifiConfiguration.PairwiseCipher.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.PairwiseCipher.strings);
-                if (0 <= index) {
-                    config.allowedPairwiseCiphers.set(index);
-                }
-            }
-        }
-
-        value = mWifiStateTracker.getNetworkVariable(config.networkId,
-                WifiConfiguration.GroupCipher.varName);
-        if (!TextUtils.isEmpty(value)) {
-            String vals[] = value.split(" ");
-            for (String val : vals) {
-                int index =
-                    lookupString(val, WifiConfiguration.GroupCipher.strings);
-                if (0 <= index) {
-                    config.allowedGroupCiphers.set(index);
-                }
-            }
-        }
-
-        for (WifiConfiguration.EnterpriseField field :
-                config.enterpriseFields) {
-            value = mWifiStateTracker.getNetworkVariable(netId,
-                    field.varName());
-            if (!TextUtils.isEmpty(value)) {
-                if (field != config.eap) value = removeDoubleQuotes(value);
-                field.setValue(value);
-            }
-        }
-    }
-
-    private static String removeDoubleQuotes(String string) {
-        if (string.length() <= 2) return "";
-        return string.substring(1, string.length() - 1);
-    }
-
-    private static String convertToQuotedString(String string) {
-        return "\"" + string + "\"";
+        return mWifiStateTracker.getConfiguredNetworks();
     }
 
     /**
@@ -1018,280 +464,10 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
-
-        /*
-         * If the supplied networkId is -1, we create a new empty
-         * network configuration. Otherwise, the networkId should
-         * refer to an existing configuration.
-         */
-        int netId = config.networkId;
-        boolean newNetwork = netId == -1;
-        boolean doReconfig = false;
-        // networkId of -1 means we want to create a new network
-        synchronized (mWifiStateTracker) {
-            if (newNetwork) {
-                netId = mWifiStateTracker.addNetwork();
-                if (netId < 0) {
-                    if (DBG) {
-                        Slog.d(TAG, "Failed to add a network!");
-                    }
-                    return -1;
-                }
-                doReconfig = true;
-            }
-            mNeedReconfig = mNeedReconfig || doReconfig;
-        }
-
-        setVariables: {
-            /*
-             * Note that if a networkId for a non-existent network
-             * was supplied, then the first setNetworkVariable()
-             * will fail, so we don't bother to make a separate check
-             * for the validity of the ID up front.
-             */
-            if (config.SSID != null &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.ssidVarName,
-                        config.SSID)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set SSID: "+config.SSID);
-                }
-                break setVariables;
-            }
-
-            if (config.BSSID != null &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.bssidVarName,
-                        config.BSSID)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set BSSID: "+config.BSSID);
-                }
-                break setVariables;
-            }
-
-            String allowedKeyManagementString =
-                makeString(config.allowedKeyManagement, WifiConfiguration.KeyMgmt.strings);
-            if (config.allowedKeyManagement.cardinality() != 0 &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.KeyMgmt.varName,
-                        allowedKeyManagementString)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set key_mgmt: "+
-                            allowedKeyManagementString);
-                }
-                break setVariables;
-            }
-
-            String allowedProtocolsString =
-                makeString(config.allowedProtocols, WifiConfiguration.Protocol.strings);
-            if (config.allowedProtocols.cardinality() != 0 &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.Protocol.varName,
-                        allowedProtocolsString)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set proto: "+
-                            allowedProtocolsString);
-                }
-                break setVariables;
-            }
-
-            String allowedAuthAlgorithmsString =
-                makeString(config.allowedAuthAlgorithms, WifiConfiguration.AuthAlgorithm.strings);
-            if (config.allowedAuthAlgorithms.cardinality() != 0 &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.AuthAlgorithm.varName,
-                        allowedAuthAlgorithmsString)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set auth_alg: "+
-                            allowedAuthAlgorithmsString);
-                }
-                break setVariables;
-            }
-
-            String allowedPairwiseCiphersString =
-                makeString(config.allowedPairwiseCiphers, WifiConfiguration.PairwiseCipher.strings);
-            if (config.allowedPairwiseCiphers.cardinality() != 0 &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.PairwiseCipher.varName,
-                        allowedPairwiseCiphersString)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set pairwise: "+
-                            allowedPairwiseCiphersString);
-                }
-                break setVariables;
-            }
-
-            String allowedGroupCiphersString =
-                makeString(config.allowedGroupCiphers, WifiConfiguration.GroupCipher.strings);
-            if (config.allowedGroupCiphers.cardinality() != 0 &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.GroupCipher.varName,
-                        allowedGroupCiphersString)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set group: "+
-                            allowedGroupCiphersString);
-                }
-                break setVariables;
-            }
-
-            // Prevent client screw-up by passing in a WifiConfiguration we gave it
-            // by preventing "*" as a key.
-            if (config.preSharedKey != null && !config.preSharedKey.equals("*") &&
-                    !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.pskVarName,
-                        config.preSharedKey)) {
-                if (DBG) {
-                    Slog.d(TAG, "failed to set psk: "+config.preSharedKey);
-                }
-                break setVariables;
-            }
-
-            boolean hasSetKey = false;
-            if (config.wepKeys != null) {
-                for (int i = 0; i < config.wepKeys.length; i++) {
-                    // Prevent client screw-up by passing in a WifiConfiguration we gave it
-                    // by preventing "*" as a key.
-                    if (config.wepKeys[i] != null && !config.wepKeys[i].equals("*")) {
-                        if (!mWifiStateTracker.setNetworkVariable(
-                                    netId,
-                                    WifiConfiguration.wepKeyVarNames[i],
-                                    config.wepKeys[i])) {
-                            if (DBG) {
-                                Slog.d(TAG,
-                                        "failed to set wep_key"+i+": " +
-                                        config.wepKeys[i]);
-                            }
-                            break setVariables;
-                        }
-                        hasSetKey = true;
-                    }
-                }
-            }
-
-            if (hasSetKey) {
-                if (!mWifiStateTracker.setNetworkVariable(
-                            netId,
-                            WifiConfiguration.wepTxKeyIdxVarName,
-                            Integer.toString(config.wepTxKeyIndex))) {
-                    if (DBG) {
-                        Slog.d(TAG,
-                                "failed to set wep_tx_keyidx: "+
-                                config.wepTxKeyIndex);
-                    }
-                    break setVariables;
-                }
-            }
-
-            if (!mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.priorityVarName,
-                        Integer.toString(config.priority))) {
-                if (DBG) {
-                    Slog.d(TAG, config.SSID + ": failed to set priority: "
-                            +config.priority);
-                }
-                break setVariables;
-            }
-
-            if (config.hiddenSSID && !mWifiStateTracker.setNetworkVariable(
-                        netId,
-                        WifiConfiguration.hiddenSSIDVarName,
-                        Integer.toString(config.hiddenSSID ? 1 : 0))) {
-                if (DBG) {
-                    Slog.d(TAG, config.SSID + ": failed to set hiddenSSID: "+
-                            config.hiddenSSID);
-                }
-                break setVariables;
-            }
-
-            for (WifiConfiguration.EnterpriseField field
-                    : config.enterpriseFields) {
-                String varName = field.varName();
-                String value = field.value();
-                if (value != null) {
-                    if (field != config.eap) {
-                        value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
-                    }
-                    if (!mWifiStateTracker.setNetworkVariable(
-                                netId,
-                                varName,
-                                value)) {
-                        if (DBG) {
-                            Slog.d(TAG, config.SSID + ": failed to set " + varName +
-                                    ": " + value);
-                        }
-                        break setVariables;
-                    }
-                }
-            }
-            return netId;
-        }
-
-        /*
-         * For an update, if one of the setNetworkVariable operations fails,
-         * we might want to roll back all the changes already made. But the
-         * chances are that if anything is going to go wrong, it'll happen
-         * the first time we try to set one of the variables.
-         */
-        if (newNetwork) {
-            removeNetwork(netId);
-            if (DBG) {
-                Slog.d(TAG,
-                        "Failed to set a network variable, removed network: "
-                        + netId);
-            }
-        }
-        return -1;
+        return mWifiStateTracker.addOrUpdateNetwork(config);
     }
 
-    private static String makeString(BitSet set, String[] strings) {
-        StringBuffer buf = new StringBuffer();
-        int nextSetBit = -1;
-
-        /* Make sure all set bits are in [0, strings.length) to avoid
-         * going out of bounds on strings.  (Shouldn't happen, but...) */
-        set = set.get(0, strings.length);
-
-        while ((nextSetBit = set.nextSetBit(nextSetBit + 1)) != -1) {
-            buf.append(strings[nextSetBit].replace('_', '-')).append(' ');
-        }
-
-        // remove trailing space
-        if (set.cardinality() > 0) {
-            buf.setLength(buf.length() - 1);
-        }
-
-        return buf.toString();
-    }
-
-    private static int lookupString(String string, String[] strings) {
-        int size = strings.length;
-
-        string = string.replace('-', '_');
-
-        for (int i = 0; i < size; i++)
-            if (string.equals(strings[i]))
-                return i;
-
-        if (DBG) {
-            // if we ever get here, we should probably add the
-            // value to WifiConfiguration to reflect that it's
-            // supported by the WPA supplicant
-            Slog.w(TAG, "Failed to look-up a string: " + string);
-        }
-
-        return -1;
-    }
-
-    /**
+     /**
      * See {@link android.net.wifi.WifiManager#removeNetwork(int)}
      * @param netId the integer that identifies the network configuration
      * to the supplicant
@@ -1299,7 +475,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean removeNetwork(int netId) {
         enforceChangePermission();
-
         return mWifiStateTracker.removeNetwork(netId);
     }
 
@@ -1312,14 +487,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
-
-        String ifname = mWifiStateTracker.getInterfaceName();
-        NetworkUtils.enableInterface(ifname);
-        boolean result = mWifiStateTracker.enableNetwork(netId, disableOthers);
-        if (!result) {
-            NetworkUtils.disableInterface(ifname);
-        }
-        return result;
+        return mWifiStateTracker.enableNetwork(netId, disableOthers);
     }
 
     /**
@@ -1330,7 +498,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
-
         return mWifiStateTracker.disableNetwork(netId);
     }
 
@@ -1354,180 +521,19 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<ScanResult> getScanResults() {
         enforceAccessPermission();
-        String reply;
-
-        reply = mWifiStateTracker.scanResults();
-        if (reply == null) {
-            return null;
-        }
-
-        List<ScanResult> scanList = new ArrayList<ScanResult>();
-
-        int lineCount = 0;
-
-        int replyLen = reply.length();
-        // Parse the result string, keeping in mind that the last line does
-        // not end with a newline.
-        for (int lineBeg = 0, lineEnd = 0; lineEnd <= replyLen; ++lineEnd) {
-            if (lineEnd == replyLen || reply.charAt(lineEnd) == '\n') {
-                ++lineCount;
-                /*
-                 * Skip the first line, which is a header
-                 */
-                if (lineCount == 1) {
-                    lineBeg = lineEnd + 1;
-                    continue;
-                }
-                if (lineEnd > lineBeg) {
-                    String line = reply.substring(lineBeg, lineEnd);
-                    ScanResult scanResult = parseScanResult(line);
-                    if (scanResult != null) {
-                        scanList.add(scanResult);
-                    } else if (DBG) {
-                        Slog.w(TAG, "misformatted scan result for: " + line);
-                    }
-                }
-                lineBeg = lineEnd + 1;
-            }
-        }
-        mWifiStateTracker.setScanResultsList(scanList);
-        return scanList;
-    }
-
-    /**
-     * Parse the scan result line passed to us by wpa_supplicant (helper).
-     * @param line the line to parse
-     * @return the {@link ScanResult} object
-     */
-    private ScanResult parseScanResult(String line) {
-        ScanResult scanResult = null;
-        if (line != null) {
-            /*
-             * Cache implementation (LinkedHashMap) is not synchronized, thus,
-             * must synchronized here!
-             */
-            synchronized (mScanResultCache) {
-                String[] result = scanResultPattern.split(line);
-                if (3 <= result.length && result.length <= 5) {
-                    String bssid = result[0];
-                    // bssid | frequency | level | flags | ssid
-                    int frequency;
-                    int level;
-                    try {
-                        frequency = Integer.parseInt(result[1]);
-                        level = Integer.parseInt(result[2]);
-                        /* some implementations avoid negative values by adding 256
-                         * so we need to adjust for that here.
-                         */
-                        if (level > 0) level -= 256;
-                    } catch (NumberFormatException e) {
-                        frequency = 0;
-                        level = 0;
-                    }
-
-                    /*
-                     * The formatting of the results returned by
-                     * wpa_supplicant is intended to make the fields
-                     * line up nicely when printed,
-                     * not to make them easy to parse. So we have to
-                     * apply some heuristics to figure out which field
-                     * is the SSID and which field is the flags.
-                     */
-                    String ssid;
-                    String flags;
-                    if (result.length == 4) {
-                        if (result[3].charAt(0) == '[') {
-                            flags = result[3];
-                            ssid = "";
-                        } else {
-                            flags = "";
-                            ssid = result[3];
-                        }
-                    } else if (result.length == 5) {
-                        flags = result[3];
-                        ssid = result[4];
-                    } else {
-                        // Here, we must have 3 fields: no flags and ssid
-                        // set
-                        flags = "";
-                        ssid = "";
-                    }
-
-                    // bssid + ssid is the hash key
-                    String key = bssid + ssid;
-                    scanResult = mScanResultCache.get(key);
-                    if (scanResult != null) {
-                        scanResult.level = level;
-                        scanResult.SSID = ssid;
-                        scanResult.capabilities = flags;
-                        scanResult.frequency = frequency;
-                    } else {
-                        // Do not add scan results that have no SSID set
-                        if (0 < ssid.trim().length()) {
-                            scanResult =
-                                new ScanResult(
-                                    ssid, bssid, flags, level, frequency);
-                            mScanResultCache.put(key, scanResult);
-                        }
-                    }
-                } else {
-                    Slog.w(TAG, "Misformatted scan result text with " +
-                          result.length + " fields: " + line);
-                }
-            }
-        }
-
-        return scanResult;
-    }
-
-    /**
-     * Parse the "flags" field passed back in a scan result by wpa_supplicant,
-     * and construct a {@code WifiConfiguration} that describes the encryption,
-     * key management, and authenticaion capabilities of the access point.
-     * @param flags the string returned by wpa_supplicant
-     * @return the {@link WifiConfiguration} object, filled in
-     */
-    WifiConfiguration parseScanFlags(String flags) {
-        WifiConfiguration config = new WifiConfiguration();
-
-        if (flags.length() == 0) {
-            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        }
-        // ... to be implemented
-        return config;
+        return mWifiStateTracker.getScanResultsList();
     }
 
     /**
      * Tell the supplicant to persist the current list of configured networks.
      * @return {@code true} if the operation succeeded
+     *
+     * TODO: deprecate this
      */
     public boolean saveConfiguration() {
-        boolean result;
+        boolean result = true;
         enforceChangePermission();
-
-        synchronized (mWifiStateTracker) {
-            result = mWifiStateTracker.saveConfig();
-            if (result && mNeedReconfig) {
-                mNeedReconfig = false;
-                result = mWifiStateTracker.reloadConfig();
-
-                if (result) {
-                    Intent intent = new Intent(WifiManager.NETWORK_IDS_CHANGED_ACTION);
-                    mContext.sendBroadcast(intent);
-                }
-            }
-        }
-        // Inform the backup manager about a data change
-        IBackupManager ibm = IBackupManager.Stub.asInterface(
-                ServiceManager.getService(Context.BACKUP_SERVICE));
-        if (ibm != null) {
-            try {
-                ibm.dataChanged("com.android.providers.settings");
-            } catch (Exception e) {
-                // Try again later
-            }
-        }
-        return result;
+        return mWifiStateTracker.saveConfig();
     }
 
     /**
@@ -1542,7 +548,7 @@ public class WifiService extends IWifiManager.Stub {
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
      * {@code numChannels} is outside the valid range.
      */
-    public boolean setNumAllowedChannels(int numChannels, boolean persist) {
+    public synchronized boolean setNumAllowedChannels(int numChannels, boolean persist) {
         Slog.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
                 " with persist set to "+persist);
         enforceChangePermission();
@@ -1564,28 +570,15 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
-        if (mWifiHandler == null) return false;
-
-        Message.obtain(mWifiHandler,
-                MESSAGE_SET_CHANNELS, numChannels, (persist ? 1 : 0)).sendToTarget();
-
-        return true;
-    }
-
-    /**
-     * sets the number of allowed radio frequency channels synchronously
-     * @param numChannels the number of allowed channels. Must be greater than 0
-     * and less than or equal to 16.
-     * @param persist {@code true} if the setting should be remembered.
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    private boolean setNumAllowedChannelsBlocking(int numChannels, boolean persist) {
         if (persist) {
             Settings.Secure.putInt(mContext.getContentResolver(),
                     Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
                     numChannels);
         }
-        return mWifiStateTracker.setNumAllowedChannels(numChannels);
+
+        mWifiStateTracker.setNumAllowedChannels(numChannels);
+
+        return true;
     }
 
     /**
@@ -1663,8 +656,8 @@ public class WifiService extends IWifiManager.Stub {
                     WifiInfo info = mWifiStateTracker.requestConnectionInfo();
                     if (info.getSupplicantState() != SupplicantState.COMPLETED) {
                         // we used to go to sleep immediately, but this caused some race conditions
-                        // we don't have time to track down for this release.  Delay instead, but not
-                        // as long as we would if connected (below)
+                        // we don't have time to track down for this release.  Delay instead,
+                        // but not as long as we would if connected (below)
                         // TODO - fix the race conditions and switch back to the immediate turn-off
                         long triggerTime = System.currentTimeMillis() + (2*60*1000); // 2 min
                         Slog.d(TAG, "setting ACTION_DEVICE_IDLE timer for 120,000 ms");
@@ -1763,31 +756,9 @@ public class WifiService extends IWifiManager.Stub {
         }
     };
 
-    private void sendEnableMessage(boolean enable, boolean persist, int uid) {
-        Message msg = Message.obtain(mWifiHandler,
-                                     (enable ? MESSAGE_ENABLE_WIFI : MESSAGE_DISABLE_WIFI),
-                                     (persist ? 1 : 0), uid);
-        msg.sendToTarget();
-    }
-
-    private void sendStartMessage(boolean scanOnlyMode) {
-        Message.obtain(mWifiHandler, MESSAGE_START_WIFI, scanOnlyMode ? 1 : 0, 0).sendToTarget();
-    }
-
-    private void sendAccessPointMessage(boolean enable, WifiConfiguration wifiConfig, int uid) {
-        Message.obtain(mWifiHandler,
-                (enable ? MESSAGE_START_ACCESS_POINT : MESSAGE_STOP_ACCESS_POINT),
-                uid, 0, wifiConfig).sendToTarget();
-    }
-
     private void updateWifiState() {
-        // send a message so it's all serialized
-        Message.obtain(mWifiHandler, MESSAGE_UPDATE_STATE, 0, 0).sendToTarget();
-    }
-
-    private void doUpdateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
-        boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden;
+        boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden.get();
         boolean lockHeld = mLocks.hasLocks();
         int strongestLockMode;
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
@@ -1798,36 +769,23 @@ public class WifiService extends IWifiManager.Stub {
             strongestLockMode = WifiManager.WIFI_MODE_FULL;
         }
 
-        synchronized (mWifiHandler) {
-            if ((mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLING) && !airplaneMode) {
-                return;
-            }
+        /* Disable tethering when airplane mode is enabled */
+        if (airplaneMode) {
+            mWifiStateTracker.setWifiApEnabled(null, false);
+        }
 
-            /* Disable tethering when airplane mode is enabled */
-            if (airplaneMode &&
-                (mWifiApState == WIFI_AP_STATE_ENABLING || mWifiApState == WIFI_AP_STATE_ENABLED)) {
-                sWakeLock.acquire();
-                sendAccessPointMessage(false, null, mLastApEnableUid);
-            }
-
-            if (wifiShouldBeEnabled) {
-                if (wifiShouldBeStarted) {
-                    sWakeLock.acquire();
-                    sendEnableMessage(true, false, mLastEnableUid);
-                    sWakeLock.acquire();
-                    sendStartMessage(strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
-                } else if (!mWifiStateTracker.isDriverStopped()) {
-                    if (mCm == null) {
-                        mCm = (ConnectivityManager)mContext.
-                                getSystemService(Context.CONNECTIVITY_SERVICE);
-                    }
-                    mCm.requestNetworkTransitionWakelock(TAG);
-                    mWifiHandler.sendEmptyMessage(MESSAGE_STOP_WIFI);
-                }
+        if (wifiShouldBeEnabled) {
+            if (wifiShouldBeStarted) {
+                mWifiStateTracker.setWifiEnabled(true);
+                mWifiStateTracker.setScanOnlyMode(
+                        strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
+                mWifiStateTracker.startWifi(true);
             } else {
-                sWakeLock.acquire();
-                sendEnableMessage(false, false, mLastEnableUid);
+                mWifiStateTracker.requestCmWakeLock();
+                mWifiStateTracker.disconnectAndStop();
             }
+        } else {
+            mWifiStateTracker.setWifiEnabled(false);
         }
     }
 
@@ -1865,71 +823,6 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.System.AIRPLANE_MODE_ON, 0) == 1;
     }
 
-    /**
-     * Handler that allows posting to the WifiThread.
-     */
-    private class WifiHandler extends Handler {
-        public WifiHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-
-                case MESSAGE_ENABLE_WIFI:
-                    setWifiEnabledBlocking(true, msg.arg1 == 1, msg.arg2);
-                    if (mWifiWatchdogService == null) {
-                        mWifiWatchdogService = new WifiWatchdogService(mContext, mWifiStateTracker);
-                    }
-                    sWakeLock.release();
-                    break;
-
-                case MESSAGE_START_WIFI:
-                    mWifiStateTracker.setScanOnlyMode(msg.arg1 != 0);
-                    mWifiStateTracker.restart();
-                    sWakeLock.release();
-                    break;
-
-                case MESSAGE_UPDATE_STATE:
-                    doUpdateWifiState();
-                    break;
-
-                case MESSAGE_DISABLE_WIFI:
-                    // a non-zero msg.arg1 value means the "enabled" setting
-                    // should be persisted
-                    setWifiEnabledBlocking(false, msg.arg1 == 1, msg.arg2);
-                    mWifiWatchdogService = null;
-                    sWakeLock.release();
-                    break;
-
-                case MESSAGE_STOP_WIFI:
-                    mWifiStateTracker.disconnectAndStop();
-                    // don't release wakelock
-                    break;
-
-                case MESSAGE_START_ACCESS_POINT:
-                    setWifiApEnabledBlocking(true,
-                                             msg.arg1,
-                                             (WifiConfiguration) msg.obj);
-                    sWakeLock.release();
-                    break;
-
-                case MESSAGE_STOP_ACCESS_POINT:
-                    setWifiApEnabledBlocking(false,
-                                             msg.arg1,
-                                             (WifiConfiguration) msg.obj);
-                    sWakeLock.release();
-                    break;
-
-                case MESSAGE_SET_CHANNELS:
-                    setNumAllowedChannelsBlocking(msg.arg1, msg.arg2 == 1);
-                    break;
-
-            }
-        }
-    }
-
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -1939,7 +832,7 @@ public class WifiService extends IWifiManager.Stub {
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        pw.println("Wi-Fi is " + stateName(mWifiStateTracker.getWifiState()));
+        pw.println("Wi-Fi is " + mWifiStateTracker.getWifiStateByName());
         pw.println("Stay-awake conditions: " +
                 Settings.System.getInt(mContext.getContentResolver(),
                                        Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0));
@@ -1969,23 +862,6 @@ public class WifiService extends IWifiManager.Stub {
         pw.println();
         pw.println("Locks held:");
         mLocks.dump(pw);
-    }
-
-    private static String stateName(int wifiState) {
-        switch (wifiState) {
-            case WIFI_STATE_DISABLING:
-                return "disabling";
-            case WIFI_STATE_DISABLED:
-                return "disabled";
-            case WIFI_STATE_ENABLING:
-                return "enabling";
-            case WIFI_STATE_ENABLED:
-                return "enabled";
-            case WIFI_STATE_UNKNOWN:
-                return "unknown state";
-            default:
-                return "[invalid state]";
-        }
     }
 
     private class WifiLock extends DeathRecipient {

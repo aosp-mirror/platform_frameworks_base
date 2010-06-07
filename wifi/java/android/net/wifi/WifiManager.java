@@ -165,7 +165,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_DISABLING = 0;
+    public static final int WIFI_AP_STATE_DISABLING = 10;
     /**
      * Wi-Fi AP is disabled.
      *
@@ -174,7 +174,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_DISABLED = 1;
+    public static final int WIFI_AP_STATE_DISABLED = 11;
     /**
      * Wi-Fi AP is currently being enabled. The state will change to
      * {@link #WIFI_AP_STATE_ENABLED} if it finishes successfully.
@@ -184,7 +184,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_ENABLING = 2;
+    public static final int WIFI_AP_STATE_ENABLING = 12;
     /**
      * Wi-Fi AP is enabled.
      *
@@ -193,7 +193,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_ENABLED = 3;
+    public static final int WIFI_AP_STATE_ENABLED = 13;
     /**
      * Wi-Fi AP is in a failed state. This state will occur when an error occurs during
      * enabling or disabling
@@ -203,7 +203,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_FAILED = 4;
+    public static final int WIFI_AP_STATE_FAILED = 14;
 
     /**
      * Broadcast intent action indicating that a connection to the supplicant has

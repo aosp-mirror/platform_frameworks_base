@@ -275,12 +275,13 @@ public class WifiWatchdogService {
     /**
      * Unregister broadcasts and quit the watchdog thread
      */
-    private void quit() {
-        unregisterForWifiBroadcasts();
-        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
-        mHandler.removeAllActions();
-        mHandler.getLooper().quit();
-    }
+    //TODO: Change back to running WWS when needed
+//    private void quit() {
+//        unregisterForWifiBroadcasts();
+//        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
+//        mHandler.removeAllActions();
+//        mHandler.getLooper().quit();
+//    }
 
     /**
      * Waits for the main watchdog thread to create the handler.
@@ -751,7 +752,7 @@ public class WifiWatchdogService {
         // Black list this "bad" AP, this will cause an attempt to connect to another
         blacklistAp(ap.bssid);
         // Initiate an association to an alternate AP
-        mWifiStateTracker.reassociate();
+        mWifiStateTracker.reassociateCommand();
     }
 
     private void blacklistAp(String bssid) {
@@ -762,10 +763,7 @@ public class WifiWatchdogService {
         // Before taking action, make sure we should not cancel our processing
         if (shouldCancel()) return;
         
-        if (!mWifiStateTracker.addToBlacklist(bssid)) {
-            // There's a known bug where this method returns failure on success
-            //Slog.e(TAG, "Blacklisting " + bssid + " failed");
-        }
+        mWifiStateTracker.addToBlacklist(bssid);
 
         if (D) {
             myLogD("Blacklisting " + bssid);
@@ -860,10 +858,7 @@ public class WifiWatchdogService {
              * (and blacklisted them). Clear the blacklist so the AP with best
              * signal is chosen.
              */
-            if (!mWifiStateTracker.clearBlacklist()) {
-                // There's a known bug where this method returns failure on success
-                //Slog.e(TAG, "Clearing blacklist failed");
-            }
+            mWifiStateTracker.clearBlacklist();
             
             if (V) {
                 myLogV("handleSleep: Set state to SLEEP and cleared blacklist");
@@ -1151,7 +1146,7 @@ public class WifiWatchdogService {
 
         private void handleWifiStateChanged(int wifiState) {
             if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
-                quit();
+                onDisconnected();
             } else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
                 onEnabled();
             }

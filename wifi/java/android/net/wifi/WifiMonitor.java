@@ -155,7 +155,7 @@ public class WifiMonitor {
         public MonitorThread() {
             super("WifiMonitor");
         }
-        
+
         public void run() {
 
             if (connectToSupplicant()) {
@@ -272,7 +272,7 @@ public class WifiMonitor {
             int connectTries = 0;
 
             while (true) {
-                if (mWifiStateTracker.connectToSupplicant()) {
+                if (WifiNative.connectToSupplicant()) {
                     return true;
                 }
                 if (connectTries++ < 3) {
@@ -375,7 +375,7 @@ public class WifiMonitor {
             if (newSupplicantState == SupplicantState.INVALID) {
                 Log.w(TAG, "Invalid supplicant state: " + newState);
             }
-            mWifiStateTracker.notifyStateChange(networkId, BSSID, newSupplicantState);
+            mWifiStateTracker.notifySupplicantStateChange(networkId, BSSID, newSupplicantState);
         }
     }
 
@@ -395,7 +395,7 @@ public class WifiMonitor {
                 }
             }
         }
-        mWifiStateTracker.notifyStateChange(newState, BSSID, networkId);
+        mWifiStateTracker.notifyNetworkStateChange(newState, BSSID, networkId);
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,21 @@ import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
 import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 
+/**
+ * TODO: Add soft AP states as part of WIFI_STATE_XXX
+ * Retain WIFI_STATE_ENABLING that indicates driver is loading
+ * Add WIFI_STATE_AP_ENABLED to indicate soft AP has started
+ * and WIFI_STATE_FAILED for failure
+ * Deprecate WIFI_STATE_UNKNOWN
+ *
+ * Doing this will simplify the logic for sending broadcasts
+ */
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLING;
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
+
 import android.app.ActivityManagerNative;
 import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
@@ -31,21 +46,25 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
 import android.net.NetworkProperties;
+import android.os.Binder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.INetworkManagementService;
+import android.os.PowerManager;
 import android.os.SystemProperties;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Config;
+import android.util.Slog;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.backup.IBackupManager;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothA2dp;
@@ -54,15 +73,22 @@ import android.content.Intent;
 import android.content.Context;
 import android.database.ContentObserver;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.HierarchicalState;
+import com.android.internal.util.HierarchicalStateMachine;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * Track the state of Wifi connectivity. All event handling is done here,
@@ -70,165 +96,61 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @hide
  */
-public class WifiStateTracker extends Handler implements NetworkStateTracker {
+//TODO: we still need frequent scanning for the case when
+// we issue disconnect but need scan results for open network notification
+public class WifiStateTracker extends HierarchicalStateMachine implements NetworkStateTracker {
 
-    private static final boolean LOCAL_LOGD = Config.LOGD || false;
-    
     private static final String TAG = "WifiStateTracker";
+    private static final String NETWORKTYPE = "WIFI";
+    private static final boolean DBG = false;
 
-    // Event log tags (must be in sync with event-log-tags)
-    private static final int EVENTLOG_NETWORK_STATE_CHANGED = 50021;
-    private static final int EVENTLOG_SUPPLICANT_STATE_CHANGED = 50022;
-    private static final int EVENTLOG_DRIVER_STATE_CHANGED = 50023;
-    private static final int EVENTLOG_INTERFACE_CONFIGURATION_STATE_CHANGED = 50024;
-    private static final int EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED = 50025;
-
-    // Event codes
-    private static final int EVENT_SUPPLICANT_CONNECTION             = 1;
-    private static final int EVENT_SUPPLICANT_DISCONNECT             = 2;
-    private static final int EVENT_SUPPLICANT_STATE_CHANGED          = 3;
-    private static final int EVENT_NETWORK_STATE_CHANGED             = 4;
-    private static final int EVENT_SCAN_RESULTS_AVAILABLE            = 5;
-    private static final int EVENT_INTERFACE_CONFIGURATION_SUCCEEDED = 6;
-    private static final int EVENT_INTERFACE_CONFIGURATION_FAILED    = 7;
-    private static final int EVENT_POLL_INTERVAL                     = 8;
-    private static final int EVENT_DHCP_START                        = 9;
-    private static final int EVENT_DEFERRED_DISCONNECT               = 10;
-    private static final int EVENT_DEFERRED_RECONNECT                = 11;
-    /**
-     * The driver is started or stopped. The object will be the state: true for
-     * started, false for stopped.
-     */
-    private static final int EVENT_DRIVER_STATE_CHANGED              = 12;
-    private static final int EVENT_PASSWORD_KEY_MAY_BE_INCORRECT     = 13;
-    private static final int EVENT_MAYBE_START_SCAN_POST_DISCONNECT  = 14;
-
-    /**
-     * The driver state indication.
-     */
-    private static final int DRIVER_STARTED                          = 0;
-    private static final int DRIVER_STOPPED                          = 1;
-    private static final int DRIVER_HUNG                             = 2;
-
-    /**
-     * Interval in milliseconds between polling for connection
-     * status items that are not sent via asynchronous events.
-     * An example is RSSI (signal strength).
-     */
-    private static final int POLL_STATUS_INTERVAL_MSECS = 3000;
-
-    /**
-     * The max number of the WPA supplicant loop iterations before we
-     * decide that the loop should be terminated:
-     */
-    private static final int MAX_SUPPLICANT_LOOP_ITERATIONS = 4;
-
-    /**
-     * When a DISCONNECT event is received, we defer handling it to
-     * allow for the possibility that the DISCONNECT is about to
-     * be followed shortly by a CONNECT to the same network we were
-     * just connected to. In such a case, we don't want to report
-     * the network as down, nor do we want to reconfigure the network
-     * interface, etc. If we get a CONNECT event for another network
-     * within the delay window, we immediately handle the pending
-     * disconnect before processing the CONNECT.<p/>
-     * The five second delay is chosen somewhat arbitrarily, but is
-     * meant to cover most of the cases where a DISCONNECT/CONNECT
-     * happens to a network.
-     */
-    private static final int DISCONNECT_DELAY_MSECS = 5000;
-    /**
-     * When the supplicant goes idle after we do an explicit disconnect
-     * following a DHCP failure, we need to kick the supplicant into
-     * trying to associate with access points.
-     */
-    private static final int RECONNECT_DELAY_MSECS = 2000;
-
-    /**
-     * When the supplicant disconnects from an AP it sometimes forgets
-     * to restart scanning.  Wait this delay before asking it to start
-     * scanning (in case it forgot).  15 sec is the standard delay between
-     * scans.
-     */
-    private static final int KICKSTART_SCANNING_DELAY_MSECS = 15000;
-
-    /**
-     * The maximum number of times we will retry a connection to an access point
-     * for which we have failed in acquiring an IP address from DHCP. A value of
-     * N means that we will make N+1 connection attempts in all.
-     * <p>
-     * See {@link Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT}. This is the default
-     * value if a Settings value is not present.
-     */
-    private static final int DEFAULT_MAX_DHCP_RETRIES = 9;
-
-    private static final int DRIVER_POWER_MODE_AUTO = 0;
-    private static final int DRIVER_POWER_MODE_ACTIVE = 1;
-
-    /**
-     * The current WPA supplicant loop state (used to detect looping behavior):
-     */
-    private SupplicantState mSupplicantLoopState = SupplicantState.DISCONNECTED;
-
-    /**
-     * The current number of WPA supplicant loop iterations:
-     */
-    private int mNumSupplicantLoopIterations = 0;
-
-    /**
-     * The current number of supplicant state changes.  This is used to determine
-     * if we've received any new info since we found out it was DISCONNECTED or
-     * INACTIVE.  If we haven't for X ms, we then request a scan - it should have
-     * done that automatically, but sometimes some firmware does not.
-     */
-    private int mNumSupplicantStateChanges = 0;
-
-    /**
-     * True if we received an event that that a password-key may be incorrect.
-     * If the next incoming supplicant state change event is DISCONNECT,
-     * broadcast a message that we have a possible password error and disable
-     * the network.
-     */
-    private boolean mPasswordKeyMayBeIncorrect = false;
-
-    public static final int SUPPL_SCAN_HANDLING_NORMAL = 1;
-    public static final int SUPPL_SCAN_HANDLING_LIST_ONLY = 2;
+    /* TODO: fetch a configurable interface */
+    private static final String SOFTAP_IFACE = "wl0.1";
 
     private WifiMonitor mWifiMonitor;
-    private WifiInfo mWifiInfo;
+    private INetworkManagementService nwService;
+    private ConnectivityManager mCm;
+
+    /* Scan results handling */
     private List<ScanResult> mScanResults;
-    private WifiManager mWM;
-    private boolean mHaveIpAddress;
-    private boolean mObtainingIpAddress;
-    private boolean mTornDownByConnMgr;
-    private NetworkInfo mNetworkInfo;
-    private boolean mTeardownRequested = false;
-    /**
-     * A DISCONNECT event has been received, but processing it
-     * is being deferred.
-     */
-    private boolean mDisconnectPending;
-    /**
-     * An operation has been performed as a result of which we expect the next event
-     * will be a DISCONNECT.
-     */
-    private boolean mDisconnectExpected;
-    private DhcpHandler mDhcpTarget;
-    private DhcpInfo mDhcpInfo;
-    private NetworkProperties mNetworkProperties;
+    private static final Pattern scanResultPattern = Pattern.compile("\t+");
+    private static final int SCAN_RESULT_CACHE_SIZE = 80;
+    private final LinkedHashMap<String, ScanResult> mScanResultCache;
+
+    private String mInterfaceName;
+    private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
+    private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
+    private AtomicInteger mDefaultGatewayAddr = new AtomicInteger(0);
+    private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
+
+    private int mNumAllowedChannels = 0;
     private int mLastSignalLevel = -1;
     private String mLastBssid;
-    private String mLastSsid;
-    private int mLastNetworkId = -1;
+    private int mLastNetworkId;
+    private boolean mEnableRssiPolling = false;
+    private boolean mPasswordKeyMayBeIncorrect = false;
     private boolean mUseStaticIp = false;
-    private int mReconnectCount;
+    private int mReconnectCount = 0;
+    private boolean mIsScanMode = false;
 
-    // used to store the (non-persisted) num determined during device boot 
-    // (from mcc or other phone info) before the driver is started.
-    private int mNumAllowedChannels = 0;
+    /**
+     * Instance of the bluetooth headset helper. This needs to be created
+     * early because there is a delay before it actually 'connects', as
+     * noted by its javadoc. If we check before it is connected, it will be
+     * in an error state and we will not disable coexistence.
+     */
+    private BluetoothHeadset mBluetoothHeadset;
+
+    private BluetoothA2dp mBluetoothA2dp;
+
+    /**
+     * Observes the static IP address settings.
+     */
+    private SettingsObserver mSettingsObserver;
+    private NetworkProperties mNetworkProperties;
+
 
     // Variables relating to the 'available networks' notification
-    
     /**
      * The icon to show in the 'available networks' notification. This will also
      * be the ID of the Notification given to the NotificationManager.
@@ -276,13 +198,230 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
      * something other than scanning, we reset this to 0.
      */
     private int mNumScansSinceNetworkStateChange;
-    /**
-     * Observes the static IP address settings.
+
+    // Held during driver load and unload
+    private static PowerManager.WakeLock sWakeLock;
+
+    /* For sending events to connectivity service handler */
+    private Handler mCsHandler;
+    private Context mContext;
+
+    private DhcpInfo mDhcpInfo;
+    private WifiInfo mWifiInfo;
+    private NetworkInfo mNetworkInfo;
+    private SupplicantStateTracker mSupplicantStateTracker;
+
+    // Event log tags (must be in sync with event-log-tags)
+    private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
+    private static final int EVENTLOG_WIFI_EVENT_HANDLED        = 50022;
+    private static final int EVENTLOG_SUPPLICANT_STATE_CHANGED  = 50023;
+
+    /* Load the driver */
+    private static final int CMD_LOAD_DRIVER                      = 1;
+    /* Unload the driver */
+    private static final int CMD_UNLOAD_DRIVER                    = 2;
+    /* Indicates driver load succeeded */
+    private static final int CMD_LOAD_DRIVER_SUCCESS              = 3;
+    /* Indicates driver load failed */
+    private static final int CMD_LOAD_DRIVER_FAILURE              = 4;
+    /* Indicates driver unload succeeded */
+    private static final int CMD_UNLOAD_DRIVER_SUCCESS            = 5;
+    /* Indicates driver unload failed */
+    private static final int CMD_UNLOAD_DRIVER_FAILURE            = 6;
+
+    /* Start the supplicant */
+    private static final int CMD_START_SUPPLICANT                 = 11;
+    /* Stop the supplicant */
+    private static final int CMD_STOP_SUPPLICANT                  = 12;
+    /* Start the driver */
+    private static final int CMD_START_DRIVER                     = 13;
+    /* Start the driver */
+    private static final int CMD_STOP_DRIVER                      = 14;
+    /* Indicates DHCP succeded */
+    private static final int CMD_IP_CONFIG_SUCCESS                = 15;
+    /* Indicates DHCP failed */
+    private static final int CMD_IP_CONFIG_FAILURE                = 16;
+    /* Re-configure interface */
+    private static final int CMD_RECONFIGURE_IP                   = 17;
+
+
+    /* Start the soft access point */
+    private static final int CMD_START_AP                         = 21;
+    /* Stop the soft access point */
+    private static final int CMD_STOP_AP                          = 22;
+
+
+    /* Supplicant events */
+    /* Connection to supplicant established */
+    private static final int SUP_CONNECTION_EVENT                 = 31;
+    /* Connection to supplicant lost */
+    private static final int SUP_DISCONNECTION_EVENT              = 32;
+    /* Driver start completed */
+    private static final int DRIVER_START_EVENT                   = 33;
+    /* Driver stop completed */
+    private static final int DRIVER_STOP_EVENT                    = 34;
+    /* Network connection completed */
+    private static final int NETWORK_CONNECTION_EVENT             = 36;
+    /* Network disconnection completed */
+    private static final int NETWORK_DISCONNECTION_EVENT          = 37;
+    /* Scan results are available */
+    private static final int SCAN_RESULTS_EVENT                   = 38;
+    /* Supplicate state changed */
+    private static final int SUPPLICANT_STATE_CHANGE_EVENT        = 39;
+    /* Password may be incorrect */
+    private static final int PASSWORD_MAY_BE_INCORRECT_EVENT      = 40;
+
+    /* Supplicant commands */
+    /* Is supplicant alive ? */
+    private static final int CMD_PING_SUPPLICANT                  = 51;
+    /* Add/update a network configuration */
+    private static final int CMD_ADD_OR_UPDATE_NETWORK            = 52;
+    /* Delete a network */
+    private static final int CMD_REMOVE_NETWORK                   = 53;
+    /* Enable a network. The device will attempt a connection to the given network. */
+    private static final int CMD_ENABLE_NETWORK                   = 54;
+    /* Disable a network. The device does not attempt a connection to the given network. */
+    private static final int CMD_DISABLE_NETWORK                  = 55;
+    /* Blacklist network. De-prioritizes the given BSSID for connection. */
+    private static final int CMD_BLACKLIST_NETWORK                = 56;
+    /* Clear the blacklist network list */
+    private static final int CMD_CLEAR_BLACKLIST                  = 57;
+    /* Get the configured networks */
+    private static final int CMD_GET_NETWORK_CONFIG               = 58;
+    /* Save configuration */
+    private static final int CMD_SAVE_CONFIG                      = 59;
+    /* Connection status */
+    private static final int CMD_CONNECTION_STATUS                = 60;
+
+    /* Supplicant commands after driver start*/
+    /* Initiate a scan */
+    private static final int CMD_START_SCAN                       = 71;
+    /* Set scan mode. CONNECT_MODE or SCAN_ONLY_MODE */
+    private static final int CMD_SET_SCAN_MODE                    = 72;
+    /* Set scan type. SCAN_ACTIVE or SCAN_PASSIVE */
+    private static final int CMD_SET_SCAN_TYPE                    = 73;
+    /* Disconnect from a network */
+    private static final int CMD_DISCONNECT                       = 74;
+    /* Reconnect to a network */
+    private static final int CMD_RECONNECT                        = 75;
+    /* Reassociate to a network */
+    private static final int CMD_REASSOCIATE                      = 76;
+    /* Set power mode
+     * POWER_MODE_ACTIVE
+     * POWER_MODE_AUTO
      */
-    private SettingsObserver mSettingsObserver;
-    
-    private boolean mIsScanModeActive;
-    private boolean mEnableRssiPolling;
+    private static final int CMD_SET_POWER_MODE                   = 77;
+    /* Set bluetooth co-existence
+     * BLUETOOTH_COEXISTENCE_MODE_ENABLED
+     * BLUETOOTH_COEXISTENCE_MODE_DISABLED
+     * BLUETOOTH_COEXISTENCE_MODE_SENSE
+     */
+    private static final int CMD_SET_BLUETOOTH_COEXISTENCE        = 78;
+    /* Enable/disable bluetooth scan mode
+     * true(1)
+     * false(0)
+     */
+    private static final int CMD_SET_BLUETOOTH_SCAN_MODE          = 79;
+    /* Set number of allowed channels */
+    private static final int CMD_SET_NUM_ALLOWED_CHANNELS         = 80;
+    /* Request connectivity manager wake lock before driver stop */
+    private static final int CMD_REQUEST_CM_WAKELOCK              = 81;
+    /* Enables RSSI poll */
+    private static final int CMD_ENABLE_RSSI_POLL                 = 82;
+    /* RSSI poll */
+    private static final int CMD_RSSI_POLL                        = 83;
+    /* Get current RSSI */
+    private static final int CMD_GET_RSSI                         = 84;
+    /* Get approx current RSSI */
+    private static final int CMD_GET_RSSI_APPROX                  = 85;
+    /* Get link speed on connection */
+    private static final int CMD_GET_LINK_SPEED                   = 86;
+    /* Radio mac address */
+    private static final int CMD_GET_MAC_ADDR                     = 87;
+    /* Set up packet filtering */
+    private static final int CMD_START_PACKET_FILTERING           = 88;
+    /* Clear packet filter */
+    private static final int CMD_STOP_PACKET_FILTERING            = 89;
+
+    /* Connectivity service commands */
+    /* Bring down wifi connection */
+    private static final int CM_CMD_TEARDOWN                      = 110;
+    /* Reconnect to wifi */
+    private static final int CM_CMD_RECONNECT                     = 111;
+
+    /**
+     * Interval in milliseconds between polling for connection
+     * status items that are not sent via asynchronous events.
+     * An example is RSSI (signal strength).
+     */
+    private static final int POLL_RSSI_INTERVAL_MSECS = 3000;
+
+    private static final int CONNECT_MODE   = 1;
+    private static final int SCAN_ONLY_MODE = 2;
+
+    private static final int SCAN_ACTIVE = 1;
+    private static final int SCAN_PASSIVE = 2;
+
+    /**
+     * The maximum number of times we will retry a connection to an access point
+     * for which we have failed in acquiring an IP address from DHCP. A value of
+     * N means that we will make N+1 connection attempts in all.
+     * <p>
+     * See {@link Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT}. This is the default
+     * value if a Settings value is not present.
+     */
+    private static final int DEFAULT_MAX_DHCP_RETRIES = 9;
+
+    private static final int DRIVER_POWER_MODE_ACTIVE = 1;
+    private static final int DRIVER_POWER_MODE_AUTO = 0;
+
+    /* Default parent state */
+    private HierarchicalState mDefaultState = new DefaultState();
+    /* Temporary initial state */
+    private HierarchicalState mInitialState = new InitialState();
+    /* Unloading the driver */
+    private HierarchicalState mDriverUnloadingState = new DriverUnloadingState();
+    /* Loading the driver */
+    private HierarchicalState mDriverUnloadedState = new DriverUnloadedState();
+    /* Driver load/unload failed */
+    private HierarchicalState mDriverFailedState = new DriverFailedState();
+    /* Driver loading */
+    private HierarchicalState mDriverLoadingState = new DriverLoadingState();
+    /* Driver loaded */
+    private HierarchicalState mDriverLoadedState = new DriverLoadedState();
+    /* Driver loaded, waiting for supplicant to start */
+    private HierarchicalState mWaitForSupState = new WaitForSupState();
+
+    /* Driver loaded and supplicant ready */
+    private HierarchicalState mDriverSupReadyState = new DriverSupReadyState();
+    /* Driver start issued, waiting for completed event */
+    private HierarchicalState mDriverStartingState = new DriverStartingState();
+    /* Driver started */
+    private HierarchicalState mDriverStartedState = new DriverStartedState();
+    /* Driver stopping */
+    private HierarchicalState mDriverStoppingState = new DriverStoppingState();
+    /* Driver stopped */
+    private HierarchicalState mDriverStoppedState = new DriverStoppedState();
+    /* Scan for networks, no connection will be established */
+    private HierarchicalState mScanModeState = new ScanModeState();
+    /* Connecting to an access point */
+    private HierarchicalState mConnectModeState = new ConnectModeState();
+    /* Fetching IP after network connection (assoc+auth complete) */
+    private HierarchicalState mConnectingState = new ConnectingState();
+    /* Connected with IP addr */
+    private HierarchicalState mConnectedState = new ConnectedState();
+    /* disconnect issued, waiting for network disconnect confirmation */
+    private HierarchicalState mDisconnectingState = new DisconnectingState();
+    /* Network is not connected, supplicant assoc+auth is not complete */
+    private HierarchicalState mDisconnectedState = new DisconnectedState();
+
+    /* Soft Ap is running */
+    private HierarchicalState mSoftApStartedState = new SoftApStartedState();
+
+    /* Argument for Message object to indicate a synchronous call */
+    private static final int SYNCHRONOUS_CALL = 1;
+    private static final int ASYNCHRONOUS_CALL = 0;
+
 
     /**
      * One of  {@link WifiManager#WIFI_STATE_DISABLED},
@@ -291,242 +430,153 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
      *         {@link WifiManager#WIFI_STATE_ENABLING},
      *         {@link WifiManager#WIFI_STATE_UNKNOWN}
      *
-     * getWifiState() is not synchronized to make sure it's always fast,
-     * even when the instance lock is held on other slow operations.
-     * Use a atomic variable for state.
      */
-    private final AtomicInteger mWifiState = new AtomicInteger(WIFI_STATE_UNKNOWN);
+    private final AtomicInteger mWifiState = new AtomicInteger(WIFI_STATE_DISABLED);
 
-    // Wi-Fi run states:
-    private static final int RUN_STATE_STARTING = 1;
-    private static final int RUN_STATE_RUNNING  = 2;
-    private static final int RUN_STATE_STOPPING = 3;
-    private static final int RUN_STATE_STOPPED  = 4;
+    /**
+     * One of  {@link WifiManager#WIFI_AP_STATE_DISABLED},
+     *         {@link WifiManager#WIFI_AP_STATE_DISABLING},
+     *         {@link WifiManager#WIFI_AP_STATE_ENABLED},
+     *         {@link WifiManager#WIFI_AP_STATE_ENABLING},
+     *         {@link WifiManager#WIFI_AP_STATE_FAILED}
+     *
+     */
+    private final AtomicInteger mWifiApState = new AtomicInteger(WIFI_AP_STATE_DISABLED);
 
-    private static final String mRunStateNames[] = {
-            "Starting",
-            "Running",
-            "Stopping",
-            "Stopped"
-    };
-    private int mRunState;
+    private final AtomicInteger mLastEnableUid = new AtomicInteger(Process.myUid());
+    private final AtomicInteger mLastApEnableUid = new AtomicInteger(Process.myUid());
 
     private final IBatteryStats mBatteryStats;
 
-    private boolean mIsScanOnly;
-
-    private BluetoothA2dp mBluetoothA2dp;
-
-    private String mInterfaceName;
-    private static String LS = System.getProperty("line.separator");
-
-    private Handler mTarget;
-    private Context mContext;
-    private boolean mPrivateDnsRouteSet = false;
-    private int mDefaultGatewayAddr = 0;
-    private boolean mDefaultRouteSet = false;
-
-    /**
-     * A structure for supplying information about a supplicant state
-     * change in the STATE_CHANGE event message that comes from the
-     * WifiMonitor
-     * thread.
-     */
-    private static class SupplicantStateChangeResult {
-        SupplicantStateChangeResult(int networkId, String BSSID, SupplicantState state) {
-            this.state = state;
-            this.BSSID = BSSID;
-            this.networkId = networkId;
-        }
-        int networkId;
-        String BSSID;
-        SupplicantState state;
-    }
-
-    /**
-     * A structure for supplying information about a connection in
-     * the CONNECTED event message that comes from the WifiMonitor
-     * thread.
-     */
-    private static class NetworkStateChangeResult {
-        NetworkStateChangeResult(DetailedState state, String BSSID, int networkId) {
-            this.state = state;
-            this.BSSID = BSSID;
-            this.networkId = networkId;
-        }
-        DetailedState state;
-        String BSSID;
-        int networkId;
-    }
-
     public WifiStateTracker(Context context, Handler target) {
-        mTarget = target;
+        super(NETWORKTYPE);
+
+        mCsHandler = target;
         mContext = context;
-        mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, "WIFI", "");
-        mWifiInfo = new WifiInfo();
+
+        mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, NETWORKTYPE, "");
+        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
+
+        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        nwService = INetworkManagementService.Stub.asInterface(b);
+
         mWifiMonitor = new WifiMonitor(this);
-        mHaveIpAddress = false;
-        mObtainingIpAddress = false;
-        setTornDownByConnMgr(false);
-        mDisconnectPending = false;
-        mScanResults = new ArrayList<ScanResult>();
-        // Allocate DHCP info object once, and fill it in on each request
         mDhcpInfo = new DhcpInfo();
-        mRunState = RUN_STATE_STARTING;
+        mWifiInfo = new WifiInfo();
+        mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
+        mSupplicantStateTracker = new SupplicantStateTracker(context, getHandler());
+
+        mBluetoothHeadset = new BluetoothHeadset(mContext, null);
+        mNetworkProperties = new NetworkProperties();
+
+        mNetworkInfo.setIsAvailable(false);
+        mNetworkProperties.clear();
+        resetNotificationTimer();
+        setTeardownRequested(false);
+        mLastBssid = null;
+        mLastNetworkId = -1;
+        mLastSignalLevel = -1;
+
+        mScanResultCache = new LinkedHashMap<String, ScanResult>(
+            SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
+                /*
+                 * Limit the cache size by SCAN_RESULT_CACHE_SIZE
+                 * elements
+                 */
+                @Override
+                public boolean removeEldestEntry(Map.Entry eldest) {
+                    return SCAN_RESULT_CACHE_SIZE < this.size();
+                }
+        };
 
         // Setting is in seconds
-        NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(), 
+        NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
-        mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
+        mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(target);
         mNotificationEnabledSettingObserver.register();
 
         mSettingsObserver = new SettingsObserver(new Handler());
 
-        mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
-        mNetworkProperties = new NetworkProperties();
-        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
+        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
+        addState(mDefaultState);
+            addState(mInitialState, mDefaultState);
+            addState(mDriverUnloadingState, mDefaultState);
+            addState(mDriverUnloadedState, mDefaultState);
+                addState(mDriverFailedState, mDriverUnloadedState);
+            addState(mDriverLoadingState, mDefaultState);
+            addState(mDriverLoadedState, mDefaultState);
+                addState(mWaitForSupState, mDriverLoadedState);
+            addState(mDriverSupReadyState, mDefaultState);
+                addState(mDriverStartingState, mDriverSupReadyState);
+                addState(mDriverStartedState, mDriverSupReadyState);
+                    addState(mScanModeState, mDriverStartedState);
+                    addState(mConnectModeState, mDriverStartedState);
+                        addState(mConnectingState, mConnectModeState);
+                        addState(mConnectedState, mConnectModeState);
+                        addState(mDisconnectingState, mConnectModeState);
+                        addState(mDisconnectedState, mConnectModeState);
+                addState(mDriverStoppingState, mDriverSupReadyState);
+                addState(mDriverStoppedState, mDriverSupReadyState);
+            addState(mSoftApStartedState, mDefaultState);
+
+        setInitialState(mInitialState);
+
+        if (DBG) setDbg(true);
+
+        //start the state machine
+        start();
     }
 
-    /**
-     * Helper method: sets the supplicant state and keeps the network
-     * info updated.
-     * @param state the new state
-     */
-    private void setSupplicantState(SupplicantState state) {
-        mWifiInfo.setSupplicantState(state);
-        updateNetworkInfo();
-        checkPollTimer();
-    }
 
-    public SupplicantState getSupplicantState() {
-        return mWifiInfo.getSupplicantState();
-    }
-
-    /**
-     * Helper method: sets the supplicant state and keeps the network
-     * info updated (string version).
-     * @param stateName the string name of the new state
-     */
-    private void setSupplicantState(String stateName) {
-        mWifiInfo.setSupplicantState(stateName);
-        updateNetworkInfo();
-        checkPollTimer();
-    }
-
-    /**
-     * Record the detailed state of a network, and if it is a
-     * change from the previous state, send a notification to
-     * any listeners.
-     * @param state the new @{code DetailedState}
-     */
-    private void setDetailedState(NetworkInfo.DetailedState state) {
-        setDetailedState(state, null, null);
-    }
-
-    /**
-     * Record the detailed state of a network, and if it is a
-     * change from the previous state, send a notification to
-     * any listeners.
-     * @param state the new @{code DetailedState}
-     * @param reason a {@code String} indicating a reason for the state change,
-     * if one was supplied. May be {@code null}.
-     * @param extraInfo optional {@code String} providing extra information about the state change
-     */
-    private void setDetailedState(NetworkInfo.DetailedState state, String reason, String extraInfo) {
-        if (LOCAL_LOGD) Log.d(TAG, "setDetailed state, old ="
-                + mNetworkInfo.getDetailedState() + " and new state=" + state);
-        if (state != mNetworkInfo.getDetailedState()) {
-            boolean wasConnecting = (mNetworkInfo.getState() == NetworkInfo.State.CONNECTING);
-            String lastReason = mNetworkInfo.getReason();
-            /*
-             * If a reason was supplied when the CONNECTING state was entered, and no
-             * reason was supplied for entering the CONNECTED state, then retain the
-             * reason that was supplied when going to CONNECTING.
-             */
-            if (wasConnecting && state == NetworkInfo.DetailedState.CONNECTED && reason == null
-                    && lastReason != null)
-                reason = lastReason;
-            mNetworkInfo.setDetailedState(state, reason, extraInfo);
-            Message msg = mTarget.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
-            msg.sendToTarget();
-        }
-    }
-
-    private void setDetailedStateInternal(NetworkInfo.DetailedState state) {
-        mNetworkInfo.setDetailedState(state, null, null);
-    }
+    /*********************************************************
+     * NetworkStateTracker interface implementation
+     ********************************************************/
 
     public void setTeardownRequested(boolean isRequested) {
-        mTeardownRequested = isRequested;
+        mTeardownRequested.set(isRequested);
     }
 
     public boolean isTeardownRequested() {
-        return mTeardownRequested;
+        return mTeardownRequested.get();
     }
 
     /**
-     * Helper method: sets the boolean indicating that the connection
-     * manager asked the network to be torn down (and so only the connection
-     * manager can set it up again).
-     * network info updated.
-     * @param flag {@code true} if explicitly disabled.
+     * Begin monitoring wifi connectivity
+     * @deprecated
+     *
+     * TODO: remove this from callers
      */
-    private void setTornDownByConnMgr(boolean flag) {
-        mTornDownByConnMgr = flag;
-        updateNetworkInfo();
-    }
-
-    /**
-     * Return the name of our WLAN network interface.
-     * @return the name of our interface.
-     */
-    public String getInterfaceName() {
-        return mInterfaceName;
-    }
-
-    public boolean isPrivateDnsRouteSet() {
-        return mPrivateDnsRouteSet;
-    }
-
-    public void privateDnsRouteSet(boolean enabled) {
-        mPrivateDnsRouteSet = enabled;
-    }
-
-    public NetworkInfo getNetworkInfo() {
-        return mNetworkInfo;
-    }
-
-    public int getDefaultGatewayAddr() {
-        return mDefaultGatewayAddr;
-    }
-
-    public boolean isDefaultRouteSet() {
-        return mDefaultRouteSet;
-    }
-
-    public void defaultRouteSet(boolean enabled) {
-        mDefaultRouteSet = enabled;
-    }
-
-    /**
-     * Return the system properties name associated with the tcp buffer sizes
-     * for this network.
-     */
-    public String getTcpBufferSizesPropName() {
-        return "net.tcp.buffersize.wifi";
-    }
-
     public void startMonitoring() {
-        /*
-         * Get a handle on the WifiManager. This cannot be done in our
-         * constructor, because the Wifi service is not yet registered.
-         */
-        mWM = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
     }
 
-    public void startEventLoop() {
-        mWifiMonitor.startMonitoring();
+    /**
+     * Disable connectivity to a network
+     * TODO: do away with return value after making MobileDataStateTracker async
+     */
+    public boolean teardown() {
+        sendMessage(CM_CMD_TEARDOWN);
+        return true;
+    }
+
+    /**
+     * Re-enable connectivity to a network after a {@link #teardown()}.
+     * TODO: do away with return value after making MobileDataStateTracker async
+     */
+    public boolean reconnect() {
+        sendMessage(CM_CMD_RECONNECT);
+        return true;
+    }
+
+    /**
+     * Turn the wireless radio off for a network.
+     * @param turnOn {@code true} to turn the radio on, {@code false}
+     * TODO: do away with return value after making MobileDataStateTracker async
+     */
+    public boolean setRadio(boolean turnOn) {
+        setWifiEnabled(turnOn);
+        return true;
     }
 
     /**
@@ -538,753 +588,896 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
      * unavailable.
      * @return {@code true} if Wi-Fi connections are possible
      */
-    public synchronized boolean isAvailable() {
-        /*
-         * TODO: Need to also look at scan results to see whether we're
-         * in range of any access points. If we have scan results that
-         * are no more than N seconds old, use those, otherwise, initiate
-         * a scan and wait for the results. This only matters if we
-         * allow mobile to be the preferred network.
-         */
-        SupplicantState suppState = mWifiInfo.getSupplicantState();
-        return suppState != SupplicantState.UNINITIALIZED &&
-                suppState != SupplicantState.INACTIVE &&
-                (mTornDownByConnMgr || !isDriverStopped());
+    public boolean isAvailable() {
+        return mNetworkInfo.isAvailable();
     }
 
     /**
-     * {@inheritDoc}
-     * There are currently no defined Wi-Fi subtypes.
+     * Tells the underlying networking system that the caller wants to
+     * begin using the named feature. The interpretation of {@code feature}
+     * is completely up to each networking implementation.
+     * @param feature the name of the feature to be used
+     * @param callingPid the process ID of the process that is issuing this request
+     * @param callingUid the user ID of the process that is issuing this request
+     * @return an integer value representing the outcome of the request.
+     * The interpretation of this value is specific to each networking
+     * implementation+feature combination, except that the value {@code -1}
+     * always indicates failure.
+     * TODO: needs to go away
      */
-    public int getNetworkSubtype() {
-        return 0;
+    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
+        return -1;
     }
 
     /**
-     * Helper method: updates the network info object to keep it in sync with
-     * the Wi-Fi state tracker.
+     * Tells the underlying networking system that the caller is finished
+     * using the named feature. The interpretation of {@code feature}
+     * is completely up to each networking implementation.
+     * @param feature the name of the feature that is no longer needed.
+     * @param callingPid the process ID of the process that is issuing this request
+     * @param callingUid the user ID of the process that is issuing this request
+     * @return an integer value representing the outcome of the request.
+     * The interpretation of this value is specific to each networking
+     * implementation+feature combination, except that the value {@code -1}
+     * always indicates failure.
+     * TODO: needs to go away
      */
-    private void updateNetworkInfo() {
-        mNetworkInfo.setIsAvailable(isAvailable());
+    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
+        return -1;
+    }
+
+    /* TODO: will go away.
+     * Notifications are directly handled in WifiStateTracker at checkAndSetNotification()
+     */
+    public void interpretScanResultsAvailable() {
+
     }
 
     /**
-     * Report whether the Wi-Fi connection is fully configured for data.
-     * @return {@code true} if the {@link SupplicantState} is
-     * {@link android.net.wifi.SupplicantState#COMPLETED COMPLETED}.
+     * Return the name of our WLAN network interface.
+     * @return the name of our interface.
      */
-    public boolean isConnectionCompleted() {
-        return mWifiInfo.getSupplicantState() == SupplicantState.COMPLETED;
+    public String getInterfaceName() {
+        return mInterfaceName;
     }
 
     /**
-     * Report whether the Wi-Fi connection has successfully acquired an IP address.
-     * @return {@code true} if the Wi-Fi connection has been assigned an IP address.
+     * Check if private DNS route is set for the network
      */
-    public boolean hasIpAddress() {
-        return mHaveIpAddress;
+    public boolean isPrivateDnsRouteSet() {
+        return mPrivateDnsRouteSet.get();
     }
 
     /**
-     * Send the tracker a notification that a user-entered password key
-     * may be incorrect (i.e., caused authentication to fail).
+     * Set a flag indicating private DNS route is set
      */
-    void notifyPasswordKeyMayBeIncorrect() {
-        sendEmptyMessage(EVENT_PASSWORD_KEY_MAY_BE_INCORRECT);
+    public void privateDnsRouteSet(boolean enabled) {
+        mPrivateDnsRouteSet.set(enabled);
     }
 
     /**
-     * Send the tracker a notification that a connection to the supplicant
-     * daemon has been established.
+     * Fetch NetworkInfo for the network
      */
-    void notifySupplicantConnection() {
-        sendEmptyMessage(EVENT_SUPPLICANT_CONNECTION);
+    public NetworkInfo getNetworkInfo() {
+        return mNetworkInfo;
     }
 
     /**
-     * Send the tracker a notification that the state of the supplicant
-     * has changed.
-     * @param networkId the configured network on which the state change occurred
-     * @param newState the new {@code SupplicantState}
+     * Fetch NetworkProperties for the network
      */
-    void notifyStateChange(int networkId, String BSSID, SupplicantState newState) {
-        Message msg = Message.obtain(
-            this, EVENT_SUPPLICANT_STATE_CHANGED,
-            new SupplicantStateChangeResult(networkId, BSSID, newState));
-        msg.sendToTarget();
+    public NetworkProperties getNetworkProperties() {
+        return mNetworkProperties;
     }
 
     /**
-     * Send the tracker a notification that the state of Wifi connectivity
-     * has changed.
-     * @param networkId the configured network on which the state change occurred
-     * @param newState the new network state
-     * @param BSSID when the new state is {@link DetailedState#CONNECTED
-     * NetworkInfo.DetailedState.CONNECTED},
-     * this is the MAC address of the access point. Otherwise, it
-     * is {@code null}.
+     * Fetch default gateway address for the network
      */
-    void notifyStateChange(DetailedState newState, String BSSID, int networkId) {
-        Message msg = Message.obtain(
-            this, EVENT_NETWORK_STATE_CHANGED,
-            new NetworkStateChangeResult(newState, BSSID, networkId));
-        msg.sendToTarget();
+    public int getDefaultGatewayAddr() {
+        return mDefaultGatewayAddr.get();
     }
 
     /**
-     * Send the tracker a notification that a scan has completed, and results
-     * are available.
+     * Check if default route is set
      */
-    void notifyScanResultsAvailable() {
-        // reset the supplicant's handling of scan results to "normal" mode
-        setScanResultHandling(SUPPL_SCAN_HANDLING_NORMAL);
-        sendEmptyMessage(EVENT_SCAN_RESULTS_AVAILABLE);
+    public boolean isDefaultRouteSet() {
+        return mDefaultRouteSet.get();
     }
 
     /**
-     * Send the tracker a notification that we can no longer communicate with
-     * the supplicant daemon.
+     * Set a flag indicating default route is set for the network
      */
-    void notifySupplicantLost() {
-        sendEmptyMessage(EVENT_SUPPLICANT_DISCONNECT);
+    public void defaultRouteSet(boolean enabled) {
+        mDefaultRouteSet.set(enabled);
     }
 
     /**
-     * Send the tracker a notification that the Wi-Fi driver has been stopped.
+     * Return the system properties name associated with the tcp buffer sizes
+     * for this network.
      */
-    void notifyDriverStopped() {
-        mRunState = RUN_STATE_STOPPED;
+    public String getTcpBufferSizesPropName() {
+        return "net.tcp.buffersize.wifi";
+    }
 
-        // Send a driver stopped message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_STOPPED, 0).sendToTarget();
+
+    /*********************************************************
+     * Methods exposed for public use
+     ********************************************************/
+
+    /**
+     * TODO: doc
+     */
+    public boolean pingSupplicant() {
+        return sendSyncMessage(CMD_PING_SUPPLICANT).boolValue;
     }
 
     /**
-     * Send the tracker a notification that the Wi-Fi driver has been restarted after
-     * having been stopped.
+     * TODO: doc
      */
-    void notifyDriverStarted() {
-        // Send a driver started message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_STARTED, 0).sendToTarget();
+    public boolean startScan(boolean forceActive) {
+        return sendSyncMessage(obtainMessage(CMD_START_SCAN, forceActive ?
+                SCAN_ACTIVE : SCAN_PASSIVE, 0)).boolValue;
     }
 
     /**
-     * Send the tracker a notification that the Wi-Fi driver has hung and needs restarting.
+     * TODO: doc
      */
-    void notifyDriverHung() {
-        // Send a driver hanged message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_HUNG, 0).sendToTarget();
-    }
-
-    /**
-     * Set the interval timer for polling connection information
-     * that is not delivered asynchronously.
-     */
-    private synchronized void checkPollTimer() {
-        if (mEnableRssiPolling &&
-                mWifiInfo.getSupplicantState() == SupplicantState.COMPLETED &&
-                !hasMessages(EVENT_POLL_INTERVAL)) {
-            sendEmptyMessageDelayed(EVENT_POLL_INTERVAL, POLL_STATUS_INTERVAL_MSECS);
+    public void setWifiEnabled(boolean enable) {
+        mLastEnableUid.set(Binder.getCallingUid());
+        if (enable) {
+            /* Argument is the state that is entered prior to load */
+            sendMessage(obtainMessage(CMD_LOAD_DRIVER, WIFI_STATE_ENABLING, 0));
+            sendMessage(CMD_START_SUPPLICANT);
+        } else {
+            sendMessage(CMD_STOP_SUPPLICANT);
+            /* Argument is the state that is entered upon success */
+            sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_DISABLED, 0));
         }
     }
 
     /**
-     * TODO: mRunState is not synchronized in some places
-     * address this as part of re-architect.
+     * TODO: doc
+     */
+    public void setWifiApEnabled(WifiConfiguration wifiConfig, boolean enable) {
+        mLastApEnableUid.set(Binder.getCallingUid());
+        if (enable) {
+            /* Argument is the state that is entered prior to load */
+            sendMessage(obtainMessage(CMD_LOAD_DRIVER, WIFI_AP_STATE_ENABLING, 0));
+            sendMessage(obtainMessage(CMD_START_AP, wifiConfig));
+        } else {
+            sendMessage(CMD_STOP_AP);
+            /* Argument is the state that is entered upon success */
+            sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_DISABLED, 0));
+        }
+    }
+
+    /**
+     * TODO: doc
+     */
+    public int getWifiState() {
+        return mWifiState.get();
+    }
+
+    /**
+     * TODO: doc
+     */
+    public String getWifiStateByName() {
+        switch (mWifiState.get()) {
+            case WIFI_STATE_DISABLING:
+                return "disabling";
+            case WIFI_STATE_DISABLED:
+                return "disabled";
+            case WIFI_STATE_ENABLING:
+                return "enabling";
+            case WIFI_STATE_ENABLED:
+                return "enabled";
+            case WIFI_STATE_UNKNOWN:
+                return "unknown state";
+            default:
+                return "[invalid state]";
+        }
+    }
+
+    /**
+     * TODO: doc
+     */
+    public int getWifiApState() {
+        return mWifiApState.get();
+    }
+
+    /**
+     * TODO: doc
+     */
+    public String getWifiApStateByName() {
+        switch (mWifiApState.get()) {
+            case WIFI_AP_STATE_DISABLING:
+                return "disabling";
+            case WIFI_AP_STATE_DISABLED:
+                return "disabled";
+            case WIFI_AP_STATE_ENABLING:
+                return "enabling";
+            case WIFI_AP_STATE_ENABLED:
+                return "enabled";
+            case WIFI_AP_STATE_FAILED:
+                return "failed";
+            default:
+                return "[invalid state]";
+        }
+    }
+
+    /**
+     * Get status information for the current connection, if any.
+     * @return a {@link WifiInfo} object containing information about the current connection
      *
-     * TODO: We are exposing an additional public synchronized call
-     * for a wakelock optimization in WifiService. Remove it
-     * when we handle the wakelock in ConnectivityService.
      */
-    public synchronized boolean isDriverStopped() {
-        return mRunState == RUN_STATE_STOPPED || mRunState == RUN_STATE_STOPPING;
+    public WifiInfo requestConnectionInfo() {
+        return mWifiInfo;
     }
 
-    private void noteRunState() {
+    public DhcpInfo getDhcpInfo() {
+        return mDhcpInfo;
+    }
+
+    /**
+     * TODO: doc
+     */
+    public void startWifi(boolean enable) {
+      if (enable) {
+          sendMessage(CMD_START_DRIVER);
+      } else {
+          sendMessage(CMD_STOP_DRIVER);
+      }
+    }
+
+    /**
+     * TODO: doc
+     */
+    public void disconnectAndStop() {
+        sendMessage(CMD_DISCONNECT);
+        sendMessage(CMD_STOP_DRIVER);
+    }
+
+    /**
+     * TODO: doc
+     */
+    public void setScanOnlyMode(boolean enable) {
+      if (enable) {
+          sendMessage(obtainMessage(CMD_SET_SCAN_MODE, SCAN_ONLY_MODE, 0));
+      } else {
+          sendMessage(obtainMessage(CMD_SET_SCAN_MODE, CONNECT_MODE, 0));
+      }
+    }
+
+    /**
+     * TODO: doc
+     */
+    public void setScanType(boolean active) {
+      if (active) {
+          sendMessage(obtainMessage(CMD_SET_SCAN_TYPE, SCAN_ACTIVE, 0));
+      } else {
+          sendMessage(obtainMessage(CMD_SET_SCAN_TYPE, SCAN_PASSIVE, 0));
+      }
+    }
+
+    /**
+     * TODO: doc
+     */
+    public List<ScanResult> getScanResultsList() {
+        return mScanResults;
+    }
+
+    /**
+     * Disconnect from Access Point
+     */
+    public boolean disconnectCommand() {
+        return sendSyncMessage(CMD_DISCONNECT).boolValue;
+    }
+
+    /**
+     * Initiate a reconnection to AP
+     */
+    public boolean reconnectCommand() {
+        return sendSyncMessage(CMD_RECONNECT).boolValue;
+    }
+
+    /**
+     * Initiate a re-association to AP
+     */
+    public boolean reassociateCommand() {
+        return sendSyncMessage(CMD_REASSOCIATE).boolValue;
+    }
+
+    /**
+     * Add a network synchronously
+     *
+     * @return network id of the new network
+     */
+    public int addOrUpdateNetwork(WifiConfiguration config) {
+        return sendSyncMessage(CMD_ADD_OR_UPDATE_NETWORK, config).intValue;
+    }
+
+    public List<WifiConfiguration> getConfiguredNetworks() {
+        return sendSyncMessage(CMD_GET_NETWORK_CONFIG).configList;
+    }
+
+    /**
+     * Delete a network
+     *
+     * @param networkId id of the network to be removed
+     */
+    public boolean removeNetwork(int networkId) {
+        return sendSyncMessage(obtainMessage(CMD_REMOVE_NETWORK, networkId, 0)).boolValue;
+    }
+
+    private class EnableNetParams {
+        private int netId;
+        private boolean disableOthers;
+        EnableNetParams(int n, boolean b) {
+            netId = n;
+            disableOthers = b;
+        }
+    }
+    /**
+     * Enable a network
+     *
+     * @param netId network id of the network
+     * @param disableOthers true, if all other networks have to be disabled
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
+    public boolean enableNetwork(int netId, boolean disableOthers) {
+        return sendSyncMessage(CMD_ENABLE_NETWORK,
+                new EnableNetParams(netId, disableOthers)).boolValue;
+    }
+
+    /**
+     * Disable a network
+     *
+     * @param netId network id of the network
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
+    public boolean disableNetwork(int netId) {
+        return sendSyncMessage(obtainMessage(CMD_DISABLE_NETWORK, netId, 0)).boolValue;
+    }
+
+    /**
+     * Blacklist a BSSID. This will avoid the AP if there are
+     * alternate APs to connect
+     *
+     * @param bssid BSSID of the network
+     */
+    public void addToBlacklist(String bssid) {
+        sendMessage(obtainMessage(CMD_BLACKLIST_NETWORK, bssid));
+    }
+
+    /**
+     * Clear the blacklist list
+     *
+     */
+    public void clearBlacklist() {
+        sendMessage(obtainMessage(CMD_CLEAR_BLACKLIST));
+    }
+
+    /**
+     * Get detailed status of the connection
+     *
+     * @return Example status result
+     *  bssid=aa:bb:cc:dd:ee:ff
+     *  ssid=TestNet
+     *  id=3
+     *  pairwise_cipher=NONE
+     *  group_cipher=NONE
+     *  key_mgmt=NONE
+     *  wpa_state=COMPLETED
+     *  ip_address=X.X.X.X
+     */
+    public String status() {
+        return sendSyncMessage(CMD_CONNECTION_STATUS).stringValue;
+    }
+
+    public void enableRssiPolling(boolean enabled) {
+       sendMessage(obtainMessage(CMD_ENABLE_RSSI_POLL, enabled ? 1 : 0, 0));
+    }
+    /**
+     * Get RSSI to currently connected network
+     *
+     * @return RSSI value, -1 on failure
+     */
+    public int getRssi() {
+        return sendSyncMessage(CMD_GET_RSSI).intValue;
+    }
+
+    /**
+     * Get approx RSSI to currently connected network
+     *
+     * @return RSSI value, -1 on failure
+     */
+    public int getRssiApprox() {
+        return sendSyncMessage(CMD_GET_RSSI_APPROX).intValue;
+    }
+
+    /**
+     * Get link speed to currently connected network
+     *
+     * @return link speed, -1 on failure
+     */
+    public int getLinkSpeed() {
+        return sendSyncMessage(CMD_GET_LINK_SPEED).intValue;
+    }
+
+    /**
+     * Get MAC address of radio
+     *
+     * @return MAC address, null on failure
+     */
+    public String getMacAddress() {
+        return sendSyncMessage(CMD_GET_MAC_ADDR).stringValue;
+    }
+
+    /**
+     * Start packet filtering
+     */
+    public void startPacketFiltering() {
+        sendMessage(CMD_START_PACKET_FILTERING);
+    }
+
+    /**
+     * Stop packet filtering
+     */
+    public void stopPacketFiltering() {
+        sendMessage(CMD_STOP_PACKET_FILTERING);
+    }
+
+    /**
+     * Set power mode
+     * @param mode
+     *     DRIVER_POWER_MODE_AUTO
+     *     DRIVER_POWER_MODE_ACTIVE
+     */
+    public void setPowerMode(int mode) {
+        sendMessage(obtainMessage(CMD_SET_POWER_MODE, mode, 0));
+    }
+
+    /**
+     * Set the number of allowed radio frequency channels from the system
+     * setting value, if any.
+     */
+    public void setNumAllowedChannels() {
         try {
-            if (mRunState == RUN_STATE_RUNNING) {
-                mBatteryStats.noteWifiRunning();
-            } else if (mRunState == RUN_STATE_STOPPED) {
-                mBatteryStats.noteWifiStopped();
+            setNumAllowedChannels(
+                    Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
+        } catch (Settings.SettingNotFoundException e) {
+            if (mNumAllowedChannels != 0) {
+                setNumAllowedChannels(mNumAllowedChannels);
             }
-        } catch (RemoteException ignore) {
+            // otherwise, use the driver default
         }
     }
 
     /**
-     * Set the run state to either "normal" or "scan-only".
-     * @param scanOnlyMode true if the new mode should be scan-only.
+     * Set the number of radio frequency channels that are allowed to be used
+     * in the current regulatory domain.
+     * @param numChannels the number of allowed channels. Must be greater than 0
+     * and less than or equal to 16.
      */
-    public synchronized void setScanOnlyMode(boolean scanOnlyMode) {
-        // do nothing unless scan-only mode is changing
-        if (mIsScanOnly != scanOnlyMode) {
-            int scanType = (scanOnlyMode ?
-                    SUPPL_SCAN_HANDLING_LIST_ONLY : SUPPL_SCAN_HANDLING_NORMAL);
-            if (LOCAL_LOGD) Log.v(TAG, "Scan-only mode changing to " + scanOnlyMode + " scanType=" + scanType);
-            if (setScanResultHandling(scanType)) {
-                mIsScanOnly = scanOnlyMode;
-                if (!isDriverStopped()) {
-                    if (scanOnlyMode) {
-                        disconnect();
-                    } else {
-                        reconnectCommand();
-                    }
-                }
-            }
-        }
+    public void setNumAllowedChannels(int numChannels) {
+        sendMessage(obtainMessage(CMD_SET_NUM_ALLOWED_CHANNELS, numChannels, 0));
     }
 
-
-    private void checkIsBluetoothPlaying() {
-        boolean isBluetoothPlaying = false;
-        Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedSinks();
-
-        for (BluetoothDevice device : connected) {
-            if (mBluetoothA2dp.getSinkState(device) == BluetoothA2dp.STATE_PLAYING) {
-                isBluetoothPlaying = true;
-                break;
-            }
-        }
-        setBluetoothScanMode(isBluetoothPlaying);
+    /**
+     * Get number of allowed channels
+     *
+     * @return channel count, -1 on failure
+     *
+     * TODO: this is not a public API and needs to be removed in favor
+     * of asynchronous reporting. unused for now.
+     */
+    public int getNumAllowedChannels() {
+        return -1;
     }
 
-    public void enableRssiPolling(boolean enable) {
-        if (mEnableRssiPolling != enable) {
-            mEnableRssiPolling = enable;
-            checkPollTimer();
+    /**
+     * Set bluetooth coex mode:
+     *
+     * @param mode
+     *  BLUETOOTH_COEXISTENCE_MODE_ENABLED
+     *  BLUETOOTH_COEXISTENCE_MODE_DISABLED
+     *  BLUETOOTH_COEXISTENCE_MODE_SENSE
+     */
+    public void setBluetoothCoexistenceMode(int mode) {
+        sendMessage(obtainMessage(CMD_SET_BLUETOOTH_COEXISTENCE, mode, 0));
+    }
+
+    /**
+     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
+     * some of the low-level scan parameters used by the driver are changed to
+     * reduce interference with A2DP streaming.
+     *
+     * @param isBluetoothPlaying whether to enable or disable this mode
+     */
+    public void setBluetoothScanMode(boolean isBluetoothPlaying) {
+        sendMessage(obtainMessage(CMD_SET_BLUETOOTH_SCAN_MODE, isBluetoothPlaying ? 1 : 0, 0));
+    }
+
+    /**
+     * Save configuration on supplicant
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     *
+     * TODO: deprecate this
+     */
+    public boolean saveConfig() {
+        return sendSyncMessage(CMD_SAVE_CONFIG).boolValue;
+    }
+
+    /**
+     * TODO: doc
+     */
+    public void requestCmWakeLock() {
+        sendMessage(CMD_REQUEST_CM_WAKELOCK);
+    }
+
+    /*********************************************************
+     * Internal private functions
+     ********************************************************/
+
+    class SyncReturn {
+        boolean boolValue;
+        int intValue;
+        String stringValue;
+        Object objValue;
+        List<WifiConfiguration> configList;
+    }
+
+    class SyncParams {
+        Object mParameter;
+        SyncReturn mSyncReturn;
+        SyncParams() {
+            mSyncReturn = new SyncReturn();
+        }
+        SyncParams(Object p) {
+            mParameter = p;
+            mSyncReturn = new SyncReturn();
         }
     }
 
     /**
-     * Tracks the WPA supplicant states to detect "loop" situations.
-     * @param newSupplicantState The new WPA supplicant state.
-     * @return {@code true} if the supplicant loop should be stopped
-     * and {@code false} if it should continue.
+     * message.arg2 is reserved to indicate synchronized
+     * message.obj is used to store SyncParams
      */
-    private boolean isSupplicantLooping(SupplicantState newSupplicantState) {
-        if (SupplicantState.ASSOCIATING.ordinal() <= newSupplicantState.ordinal()
-            && newSupplicantState.ordinal() < SupplicantState.COMPLETED.ordinal()) {
-            if (mSupplicantLoopState != newSupplicantState) {
-                if (newSupplicantState.ordinal() < mSupplicantLoopState.ordinal()) {
-                    ++mNumSupplicantLoopIterations;
-                }
-
-                mSupplicantLoopState = newSupplicantState;
+    private SyncReturn syncedSend(Message msg) {
+        SyncParams syncParams = (SyncParams) msg.obj;
+        msg.arg2 = SYNCHRONOUS_CALL;
+        synchronized(syncParams) {
+            if (DBG) Log.d(TAG, "syncedSend " + msg);
+            sendMessage(msg);
+            try {
+                syncParams.wait();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "sendSyncMessage: unexpected interruption of wait()");
+                return null;
             }
-        } else if (newSupplicantState == SupplicantState.COMPLETED) {
-            resetSupplicantLoopState();
+        }
+        return syncParams.mSyncReturn;
+    }
+
+    private SyncReturn sendSyncMessage(Message msg) {
+        SyncParams syncParams = new SyncParams();
+        msg.obj = syncParams;
+        return syncedSend(msg);
+    }
+
+    private SyncReturn sendSyncMessage(int what, Object param) {
+        SyncParams syncParams = new SyncParams(param);
+        Message msg = obtainMessage(what, syncParams);
+        return syncedSend(msg);
+    }
+
+
+    private SyncReturn sendSyncMessage(int what) {
+        return sendSyncMessage(obtainMessage(what));
+    }
+
+    private void notifyOnMsgObject(Message msg) {
+        SyncParams syncParams = (SyncParams) msg.obj;
+        if (syncParams != null) {
+            synchronized(syncParams) {
+                if (DBG) Log.d(TAG, "notifyOnMsgObject " + msg);
+                syncParams.notify();
+            }
+        }
+        else {
+            Log.e(TAG, "Error! syncParams in notifyOnMsgObject is null");
+        }
+    }
+
+    private void setWifiState(int wifiState) {
+        final int previousWifiState = mWifiState.get();
+
+        try {
+            if (wifiState == WIFI_STATE_ENABLED) {
+                mBatteryStats.noteWifiOn(mLastEnableUid.get());
+            } else if (wifiState == WIFI_STATE_DISABLED) {
+                mBatteryStats.noteWifiOff(mLastEnableUid.get());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to note battery stats in wifi");
         }
 
-        return mNumSupplicantLoopIterations >= MAX_SUPPLICANT_LOOP_ITERATIONS;
+        mWifiState.set(wifiState);
+
+        if (DBG) Log.d(TAG, "setWifiState: " + getWifiStateByName());
+
+        if (!ActivityManagerNative.isSystemReady()) return;
+
+        final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(WifiManager.EXTRA_WIFI_STATE, wifiState);
+        intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, previousWifiState);
+        mContext.sendStickyBroadcast(intent);
+    }
+
+    private void setWifiApState(int wifiApState) {
+        final int previousWifiApState = mWifiApState.get();
+
+        try {
+            if (wifiApState == WIFI_AP_STATE_ENABLED) {
+                mBatteryStats.noteWifiOn(mLastApEnableUid.get());
+            } else if (wifiApState == WIFI_AP_STATE_DISABLED) {
+                mBatteryStats.noteWifiOff(mLastApEnableUid.get());
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to note battery stats in wifi");
+        }
+
+        // Update state
+        mWifiApState.set(wifiApState);
+
+        if (DBG) Log.d(TAG, "setWifiApState: " + getWifiApStateByName());
+
+        // Broadcast
+        if (!ActivityManagerNative.isSystemReady()) return;
+        final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(WifiManager.EXTRA_WIFI_AP_STATE, wifiApState);
+        intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_AP_STATE, previousWifiApState);
+        mContext.sendStickyBroadcast(intent);
     }
 
     /**
-     * Resets the WPA supplicant loop state.
+     * Parse the scan result line passed to us by wpa_supplicant (helper).
+     * @param line the line to parse
+     * @return the {@link ScanResult} object
      */
-    private void resetSupplicantLoopState() {
-        mNumSupplicantLoopIterations = 0;
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-        Intent intent;
-
-        switch (msg.what) {
-            case EVENT_SUPPLICANT_CONNECTION:
-                mRunState = RUN_STATE_RUNNING;
-                noteRunState();
-                checkUseStaticIp();
-                /* Reset notification state on new connection */
-                resetNotificationTimer();
-                /*
-                 * DHCP requests are blocking, so run them in a separate thread.
-                 */
-                HandlerThread dhcpThread = new HandlerThread("DHCP Handler Thread");
-                dhcpThread.start();
-                mDhcpTarget = new DhcpHandler(dhcpThread.getLooper(), this);
-                mIsScanModeActive = true;
-                mTornDownByConnMgr = false;
-                mLastBssid = null;
-                mLastSsid = null;
-                requestConnectionInfo();
-                SupplicantState supplState = mWifiInfo.getSupplicantState();
-                /**
-                 * The MAC address isn't going to change, so just request it
-                 * once here.
-                 */
-                String macaddr = getMacAddress();
-
-                if (macaddr != null) {
-                    mWifiInfo.setMacAddress(macaddr);
-                }
-                if (LOCAL_LOGD) Log.v(TAG, "Connection to supplicant established, state=" +
-                    supplState);
-                // Wi-Fi supplicant connection state changed:
-                // [31- 2] Reserved for future use
-                // [ 1- 0] Connected to supplicant (1), disconnected from supplicant (0) ,
-                //         or supplicant died (2)
-                EventLog.writeEvent(EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED, 1);
-                /*
-                 * The COMPLETED state change from the supplicant may have occurred
-                 * in between polling for supplicant availability, in which case
-                 * we didn't perform a DHCP request to get an IP address.
-                 */
-                if (supplState == SupplicantState.COMPLETED) {
-                    mLastBssid = mWifiInfo.getBSSID();
-                    mLastSsid = mWifiInfo.getSSID();
-                    configureInterface();
-                }
-                if (ActivityManagerNative.isSystemReady()) {
-                    intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-                    intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, true);
-                    mContext.sendBroadcast(intent);
-                }
-                if (supplState == SupplicantState.COMPLETED && mHaveIpAddress) {
-                    setDetailedState(DetailedState.CONNECTED);
-                } else {
-                    setDetailedState(WifiInfo.getDetailedStateOf(supplState));
-                }
-                /*
-                 * Filter out multicast packets. This saves battery power, since
-                 * the CPU doesn't have to spend time processing packets that
-                 * are going to end up being thrown away.
-                 */
-                mWM.initializeMulticastFiltering();
-
-                if (mBluetoothA2dp == null) {
-                    mBluetoothA2dp = new BluetoothA2dp(mContext);
-                }
-                checkIsBluetoothPlaying();
-
-                // initialize this after the supplicant is alive
-                setNumAllowedChannels();
-                break;
-
-            case EVENT_SUPPLICANT_DISCONNECT:
-                mRunState = RUN_STATE_STOPPED;
-                noteRunState();
-                boolean died = mWifiState.get() != WIFI_STATE_DISABLED &&
-                               mWifiState.get() != WIFI_STATE_DISABLING;
-                if (died) {
-                    if (LOCAL_LOGD) Log.v(TAG, "Supplicant died unexpectedly");
-                } else {
-                    if (LOCAL_LOGD) Log.v(TAG, "Connection to supplicant lost");
-                }
-                // Wi-Fi supplicant connection state changed:
-                // [31- 2] Reserved for future use
-                // [ 1- 0] Connected to supplicant (1), disconnected from supplicant (0) ,
-                //         or supplicant died (2)
-                EventLog.writeEvent(EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED, died ? 2 : 0);
-                closeSupplicantConnection();
-
-                if (died) {
-                    resetConnections(true);
-                }
-                // When supplicant dies, kill the DHCP thread
-                if (mDhcpTarget != null) {
-                    mDhcpTarget.getLooper().quit();
-                    mDhcpTarget = null;
-                }
-                mContext.removeStickyBroadcast(new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-                if (ActivityManagerNative.isSystemReady()) {
-                    intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-                    intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
-                    mContext.sendBroadcast(intent);
-                }
-                setDetailedState(DetailedState.DISCONNECTED);
-                setSupplicantState(SupplicantState.UNINITIALIZED);
-                mNetworkProperties.clear();
-                mHaveIpAddress = false;
-                mObtainingIpAddress = false;
-                if (died) {
-                    mWM.setWifiEnabled(false);
-                }
-                break;
-
-            case EVENT_MAYBE_START_SCAN_POST_DISCONNECT:
-                // Only do this if we haven't gotten a new supplicant status since the timer
-                // started
-                if (mNumSupplicantStateChanges == msg.arg1) {
-                    scan(false); // do a passive scan
-                }
-                break;
-
-            case EVENT_SUPPLICANT_STATE_CHANGED:
-                mNumSupplicantStateChanges++;
-                SupplicantStateChangeResult supplicantStateResult =
-                    (SupplicantStateChangeResult) msg.obj;
-                SupplicantState newState = supplicantStateResult.state;
-                SupplicantState currentState = mWifiInfo.getSupplicantState();
-
-                // Wi-Fi supplicant state changed:
-                // [31- 6] Reserved for future use
-                // [ 5- 0] Supplicant state ordinal (as defined by SupplicantState)
-                int eventLogParam = (newState.ordinal() & 0x3f);
-                EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, eventLogParam);
-
-                if (LOCAL_LOGD) Log.v(TAG, "Changing supplicant state: "
-                                      + currentState +
-                                      " ==> " + newState);
-
-                int networkId = supplicantStateResult.networkId;
-
-                /**
-                 * The SupplicantState BSSID value is valid in ASSOCIATING state only.
-                 * The NetworkState BSSID value comes upon a successful connection.
-                 */
-                if (supplicantStateResult.state == SupplicantState.ASSOCIATING) {
-                    mLastBssid = supplicantStateResult.BSSID;
-                }
-                /*
-                 * If we get disconnect or inactive we need to start our
-                 * watchdog timer to start a scan
-                 */
-                if (newState == SupplicantState.DISCONNECTED ||
-                        newState == SupplicantState.INACTIVE) {
-                    sendMessageDelayed(obtainMessage(EVENT_MAYBE_START_SCAN_POST_DISCONNECT,
-                            mNumSupplicantStateChanges, 0), KICKSTART_SCANNING_DELAY_MSECS);
-                }
-
-
-                /*
-                 * Did we get to DISCONNECTED state due to an
-                 * authentication (password) failure?
-                 */
-                boolean failedToAuthenticate = false;
-                if (newState == SupplicantState.DISCONNECTED) {
-                    failedToAuthenticate = mPasswordKeyMayBeIncorrect;
-                }
-                mPasswordKeyMayBeIncorrect = false;
-
-                /*
-                 * Keep track of the supplicant state and check if we should
-                 * disable the network
-                 */
-                boolean disabledNetwork = false;
-                if (isSupplicantLooping(newState)) {
-                    if (LOCAL_LOGD) {
-                        Log.v(TAG,
-                              "Stop WPA supplicant loop and disable network");
-                    }
-                    disabledNetwork = wifiManagerDisableNetwork(networkId);
-                }
-
-                if (disabledNetwork) {
-                    /*
-                     * Reset the loop state if we disabled the network
-                     */
-                    resetSupplicantLoopState();
-                } else if (newState != currentState ||
-                        (newState == SupplicantState.DISCONNECTED && isDriverStopped())) {
-                    setSupplicantState(newState);
-                    if (newState == SupplicantState.DORMANT) {
-                        DetailedState newDetailedState;
-                        Message reconnectMsg = obtainMessage(EVENT_DEFERRED_RECONNECT, mLastBssid);
-                        if (mIsScanOnly || mRunState == RUN_STATE_STOPPING) {
-                            newDetailedState = DetailedState.IDLE;
-                        } else {
-                            newDetailedState = DetailedState.FAILED;
-                        }
-                        handleDisconnectedState(newDetailedState, true);
-                        /**
-                         * If we were associated with a network (networkId != -1),
-                         * assume we reached this state because of a failed attempt
-                         * to acquire an IP address, and attempt another connection
-                         * and IP address acquisition in RECONNECT_DELAY_MSECS
-                         * milliseconds.
+    private ScanResult parseScanResult(String line) {
+        ScanResult scanResult = null;
+        if (line != null) {
+            /*
+             * Cache implementation (LinkedHashMap) is not synchronized, thus,
+             * must synchronized here!
+             */
+            synchronized (mScanResultCache) {
+                String[] result = scanResultPattern.split(line);
+                if (3 <= result.length && result.length <= 5) {
+                    String bssid = result[0];
+                    // bssid | frequency | level | flags | ssid
+                    int frequency;
+                    int level;
+                    try {
+                        frequency = Integer.parseInt(result[1]);
+                        level = Integer.parseInt(result[2]);
+                        /* some implementations avoid negative values by adding 256
+                         * so we need to adjust for that here.
                          */
-                        if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly && networkId != -1) {
-                            sendMessageDelayed(reconnectMsg, RECONNECT_DELAY_MSECS);
-                        } else if (mRunState == RUN_STATE_STOPPING) {
-                            stopDriver();
-                        } else if (mRunState == RUN_STATE_STARTING && !mIsScanOnly) {
-                            reconnectCommand();
-                        }
-                    } else if (newState == SupplicantState.DISCONNECTED) {
-                        mNetworkProperties.clear();
-                        mHaveIpAddress = false;
-                        if (isDriverStopped() || mDisconnectExpected) {
-                            handleDisconnectedState(DetailedState.DISCONNECTED, true);
+                        if (level > 0) level -= 256;
+                    } catch (NumberFormatException e) {
+                        frequency = 0;
+                        level = 0;
+                    }
+
+                    /*
+                     * The formatting of the results returned by
+                     * wpa_supplicant is intended to make the fields
+                     * line up nicely when printed,
+                     * not to make them easy to parse. So we have to
+                     * apply some heuristics to figure out which field
+                     * is the SSID and which field is the flags.
+                     */
+                    String ssid;
+                    String flags;
+                    if (result.length == 4) {
+                        if (result[3].charAt(0) == '[') {
+                            flags = result[3];
+                            ssid = "";
                         } else {
-                            scheduleDisconnect();
+                            flags = "";
+                            ssid = result[3];
                         }
-                    } else if (newState != SupplicantState.COMPLETED && !mDisconnectPending) {
-                        /**
-                         * Ignore events that don't change the connectivity state,
-                         * such as WPA rekeying operations.
-                         */
-                        if (!(currentState == SupplicantState.COMPLETED &&
-                               (newState == SupplicantState.ASSOCIATING ||
-                                newState == SupplicantState.ASSOCIATED ||
-                                newState == SupplicantState.FOUR_WAY_HANDSHAKE ||
-                                newState == SupplicantState.GROUP_HANDSHAKE))) {
-                            setDetailedState(WifiInfo.getDetailedStateOf(newState));
-                        }
-                    }
-
-                    mDisconnectExpected = false;
-                    intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                            | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                    intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)newState);
-                    if (failedToAuthenticate) {
-                        if (LOCAL_LOGD) Log.d(TAG, "Failed to authenticate, disabling network " + networkId);
-                        wifiManagerDisableNetwork(networkId);
-                        intent.putExtra(
-                            WifiManager.EXTRA_SUPPLICANT_ERROR,
-                            WifiManager.ERROR_AUTHENTICATING);
-                    }
-                    mContext.sendStickyBroadcast(intent);
-                }
-                break;
-
-            case EVENT_NETWORK_STATE_CHANGED:
-                /*
-                 * Each CONNECT or DISCONNECT generates a pair of events.
-                 * One is a supplicant state change event, and the other
-                 * is a network state change event. For connects, the
-                 * supplicant event always arrives first, followed by
-                 * the network state change event. Only the latter event
-                 * has the BSSID, which we are interested in capturing.
-                 * For disconnects, the order is the opposite -- the
-                 * network state change event comes first, followed by
-                 * the supplicant state change event.
-                 */
-                NetworkStateChangeResult result =
-                    (NetworkStateChangeResult) msg.obj;
-
-                // Wi-Fi network state changed:
-                // [31- 6] Reserved for future use
-                // [ 5- 0] Detailed state ordinal (as defined by NetworkInfo.DetailedState)   
-                eventLogParam = (result.state.ordinal() & 0x3f);
-                EventLog.writeEvent(EVENTLOG_NETWORK_STATE_CHANGED, eventLogParam);
-                
-                if (LOCAL_LOGD) Log.v(TAG, "New network state is " + result.state);
-                /*
-                 * If we're in scan-only mode, don't advance the state machine, and
-                 * don't report the state change to clients.
-                 */
-                if (mIsScanOnly) {
-                    if (LOCAL_LOGD) Log.v(TAG, "Dropping event in scan-only mode");
-                    break;
-                }
-                if (result.state != DetailedState.SCANNING) {
-                    /*
-                     * Reset the scan count since there was a network state
-                     * change. This could be from supplicant trying to associate
-                     * with a network.
-                     */
-                    mNumScansSinceNetworkStateChange = 0;
-                }
-                /*
-                 * If the supplicant sent us a CONNECTED event, we don't
-                 * want to send out an indication of overall network
-                 * connectivity until we have our IP address. If the
-                 * supplicant sent us a DISCONNECTED event, we delay
-                 * sending a notification in case a reconnection to
-                 * the same access point occurs within a short time.
-                 */
-                if (result.state == DetailedState.DISCONNECTED) {
-                    if (mWifiInfo.getSupplicantState() != SupplicantState.DORMANT) {
-                        scheduleDisconnect();
-                    }
-                    break;
-                }
-                requestConnectionStatus(mWifiInfo);
-                if (!(result.state == DetailedState.CONNECTED &&
-                        (!mHaveIpAddress || mDisconnectPending))) {
-                    setDetailedState(result.state);
-                }
-
-                if (result.state == DetailedState.CONNECTED) {
-                    /*
-                     * Remove the 'available networks' notification when we
-                     * successfully connect to a network.
-                     */
-                    setNotificationVisible(false, 0, false, 0);
-                    boolean wasDisconnectPending = mDisconnectPending;
-                    cancelDisconnect();
-                    /*
-                     * The connection is fully configured as far as link-level
-                     * connectivity is concerned, but we may still need to obtain
-                     * an IP address.
-                     */
-                    if (wasDisconnectPending) {
-                        DetailedState saveState = getNetworkInfo().getDetailedState();
-                        handleDisconnectedState(DetailedState.DISCONNECTED, false);
-                        setDetailedStateInternal(saveState);
-                    }
-
-                    configureInterface();
-                    mLastBssid = result.BSSID;
-                    mLastSsid = mWifiInfo.getSSID();
-                    mLastNetworkId = result.networkId;
-                    if (mHaveIpAddress) {
-                        setDetailedState(DetailedState.CONNECTED);
+                    } else if (result.length == 5) {
+                        flags = result[3];
+                        ssid = result[4];
                     } else {
-                        setDetailedState(DetailedState.OBTAINING_IPADDR);
+                        // Here, we must have 3 fields: no flags and ssid
+                        // set
+                        flags = "";
+                        ssid = "";
                     }
-                }
-                sendNetworkStateChangeBroadcast(mWifiInfo.getBSSID());
-                break;
 
-            case EVENT_SCAN_RESULTS_AVAILABLE:
-                if (ActivityManagerNative.isSystemReady()) {
-                    mContext.sendBroadcast(new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-                }
-                sendScanResultsAvailable();
-                /**
-                 * On receiving the first scan results after connecting to
-                 * the supplicant, switch scan mode over to passive.
-                 */
-                setScanMode(false);
-                break;
-
-            case EVENT_POLL_INTERVAL:
-                if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    requestPolledInfo(mWifiInfo, true);
-                    checkPollTimer();
-                }
-                break;
-            
-            case EVENT_DEFERRED_DISCONNECT:
-                if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    handleDisconnectedState(DetailedState.DISCONNECTED, true);
-                }
-                break;
-
-            case EVENT_DEFERRED_RECONNECT:
-                /**
-                 * mLastBssid can be null when there is a reconnect
-                 * request on the first BSSID we connect to
-                 */
-                String BSSID = (msg.obj != null) ? msg.obj.toString() : null;
-                /**
-                 * If we've exceeded the maximum number of retries for reconnecting
-                 * to a given network, disable the network
-                 */
-                if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    if (++mReconnectCount > getMaxDhcpRetries()) {
-                        if (LOCAL_LOGD) {
-                            Log.d(TAG, "Failed reconnect count: " +
-                                    mReconnectCount + " Disabling " + BSSID);
+                    // bssid + ssid is the hash key
+                    String key = bssid + ssid;
+                    scanResult = mScanResultCache.get(key);
+                    if (scanResult != null) {
+                        scanResult.level = level;
+                        scanResult.SSID = ssid;
+                        scanResult.capabilities = flags;
+                        scanResult.frequency = frequency;
+                    } else {
+                        // Do not add scan results that have no SSID set
+                        if (0 < ssid.trim().length()) {
+                            scanResult =
+                                new ScanResult(
+                                    ssid, bssid, flags, level, frequency);
+                            mScanResultCache.put(key, scanResult);
                         }
-                        mWM.disableNetwork(mLastNetworkId);
                     }
-                    reconnectCommand();
-                }
-                break;
-
-            case EVENT_INTERFACE_CONFIGURATION_SUCCEEDED:
-                /**
-                 * Since this event is sent from another thread, it might have been
-                 * sent after we closed our connection to the supplicant in the course
-                 * of disabling Wi-Fi. In that case, we should just ignore the event.
-                 */
-                if (mWifiInfo.getSupplicantState() == SupplicantState.UNINITIALIZED) {
-                    break;
-                }
-                mReconnectCount = 0;
-                mHaveIpAddress = true;
-                configureNetworkProperties();
-                mObtainingIpAddress = false;
-                mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
-                mLastSignalLevel = -1; // force update of signal strength
-                if (mNetworkInfo.getDetailedState() != DetailedState.CONNECTED) {
-                    setDetailedState(DetailedState.CONNECTED);
-                    sendNetworkStateChangeBroadcast(mWifiInfo.getBSSID());
                 } else {
-                    mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
+                    Log.w(TAG, "Misformatted scan result text with " +
+                          result.length + " fields: " + line);
                 }
-                if (LOCAL_LOGD) Log.v(TAG, "IP configuration: " + mDhcpInfo);
-                // Wi-Fi interface configuration state changed:
-                // [31- 1] Reserved for future use
-                // [ 0- 0] Interface configuration succeeded (1) or failed (0)   
-                EventLog.writeEvent(EVENTLOG_INTERFACE_CONFIGURATION_STATE_CHANGED, 1);
+            }
+        }
 
-                // We've connected successfully, so allow the notification again in the future
-                resetNotificationTimer();
-                break;
+        return scanResult;
+    }
 
-            case EVENT_INTERFACE_CONFIGURATION_FAILED:
-                if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    // Wi-Fi interface configuration state changed:
-                    // [31- 1] Reserved for future use
-                    // [ 0- 0] Interface configuration succeeded (1) or failed (0)
-                    EventLog.writeEvent(EVENTLOG_INTERFACE_CONFIGURATION_STATE_CHANGED, 0);
-                    mNetworkProperties.clear();
-                    mHaveIpAddress = false;
-                    mWifiInfo.setIpAddress(0);
-                    mObtainingIpAddress = false;
-                    disconnect();
+    /**
+     * scanResults input format
+     * 00:bb:cc:dd:cc:ee       2427    166     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net1
+     * 00:bb:cc:dd:cc:ff       2412    165     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net2
+     */
+    private void setScanResults(String scanResults) {
+        if (scanResults == null) {
+            return;
+        }
+
+        List<ScanResult> scanList = new ArrayList<ScanResult>();
+
+        int lineCount = 0;
+
+        int scanResultsLen = scanResults.length();
+        // Parse the result string, keeping in mind that the last line does
+        // not end with a newline.
+        for (int lineBeg = 0, lineEnd = 0; lineEnd <= scanResultsLen; ++lineEnd) {
+            if (lineEnd == scanResultsLen || scanResults.charAt(lineEnd) == '\n') {
+                ++lineCount;
+
+                if (lineCount == 1) {
+                    lineBeg = lineEnd + 1;
+                    continue;
                 }
-                break;
-
-            case EVENT_DRIVER_STATE_CHANGED:
-                // Wi-Fi driver state changed:
-                // 0 STARTED
-                // 1 STOPPED
-                // 2 HUNG
-                EventLog.writeEvent(EVENTLOG_DRIVER_STATE_CHANGED, msg.arg1);
-
-                switch (msg.arg1) {
-                case DRIVER_STARTED:
-                    /**
-                     * Set the number of allowed radio channels according
-                     * to the system setting, since it gets reset by the
-                     * driver upon changing to the STARTED state.
-                     */
-                    setNumAllowedChannels();
-                    synchronized (this) {
-                        if (mRunState == RUN_STATE_STARTING) {
-                            mRunState = RUN_STATE_RUNNING;
-                            if (!mIsScanOnly) {
-                                reconnectCommand();
-                            } else {
-                                // In some situations, supplicant needs to be kickstarted to
-                                // start the background scanning
-                                scan(true);
-                            }
-                        }
+                if (lineEnd > lineBeg) {
+                    String line = scanResults.substring(lineBeg, lineEnd);
+                    ScanResult scanResult = parseScanResult(line);
+                    if (scanResult != null) {
+                        scanList.add(scanResult);
+                    } else {
+                        Log.w(TAG, "misformatted scan result for: " + line);
                     }
-                    break;
-                case DRIVER_HUNG:
-                    Log.e(TAG, "Wifi Driver reports HUNG - reloading.");
-                    /**
-                     * restart the driver - toggle off and on
-                     */
-                    mWM.setWifiEnabled(false);
-                    mWM.setWifiEnabled(true);
-                    break;
                 }
-                noteRunState();
-                break;
-
-            case EVENT_PASSWORD_KEY_MAY_BE_INCORRECT:
-                mPasswordKeyMayBeIncorrect = true;
-                break;
+                lineBeg = lineEnd + 1;
+            }
         }
+
+        mScanResults = scanList;
     }
 
-    private boolean wifiManagerDisableNetwork(int networkId) {
-        boolean disabledNetwork = false;
-        if (0 <= networkId) {
-            disabledNetwork = mWM.disableNetwork(networkId);
-            if (LOCAL_LOGD) {
-                if (disabledNetwork) {
-                    Log.v(TAG, "Disabled network: " + networkId);
+    private void checkAndSetNotification() {
+        // If we shouldn't place a notification on available networks, then
+        // don't bother doing any of the following
+        if (!mNotificationEnabled) return;
+
+        State state = mNetworkInfo.getState();
+        if ((state == NetworkInfo.State.DISCONNECTED)
+                || (state == NetworkInfo.State.UNKNOWN)) {
+            // Look for an open network
+            List<ScanResult> scanResults = mScanResults;
+            if (scanResults != null) {
+                int numOpenNetworks = 0;
+                for (int i = scanResults.size() - 1; i >= 0; i--) {
+                    ScanResult scanResult = scanResults.get(i);
+
+                    if (TextUtils.isEmpty(scanResult.capabilities)) {
+                        numOpenNetworks++;
+                    }
+                }
+
+                if (numOpenNetworks > 0) {
+                    if (++mNumScansSinceNetworkStateChange >= NUM_SCANS_BEFORE_ACTUALLY_SCANNING) {
+                        /*
+                         * We've scanned continuously at least
+                         * NUM_SCANS_BEFORE_NOTIFICATION times. The user
+                         * probably does not have a remembered network in range,
+                         * since otherwise supplicant would have tried to
+                         * associate and thus resetting this counter.
+                         */
+                        setNotificationVisible(true, numOpenNetworks, false, 0);
+                    }
+                    return;
                 }
             }
         }
-        if (LOCAL_LOGD) {
-            if (!disabledNetwork) {
-                Log.e(TAG, "Failed to disable network:" +
-                      " invalid network id: " + networkId);
-            }
-        }
-        return disabledNetwork;
+
+        // No open networks in range, remove the notification
+        setNotificationVisible(false, 0, false, 0);
     }
 
+    /**
+     * Display or don't display a notification that there are open Wi-Fi networks.
+     * @param visible {@code true} if notification should be visible, {@code false} otherwise
+     * @param numNetworks the number networks seen
+     * @param force {@code true} to force notification to be shown/not-shown,
+     * even if it is already shown/not-shown.
+     * @param delay time in milliseconds after which the notification should be made
+     * visible or invisible.
+     */
+    private void setNotificationVisible(boolean visible, int numNetworks, boolean force,
+            int delay) {
+
+        // Since we use auto cancel on the notification, when the
+        // mNetworksAvailableNotificationShown is true, the notification may
+        // have actually been canceled.  However, when it is false we know
+        // for sure that it is not being shown (it will not be shown any other
+        // place than here)
+
+        // If it should be hidden and it is already hidden, then noop
+        if (!visible && !mNotificationShown && !force) {
+            return;
+        }
+
+        Message message;
+        if (visible) {
+
+            // Not enough time has passed to show the notification again
+            if (System.currentTimeMillis() < mNotificationRepeatTime) {
+                return;
+            }
+
+            if (mNotification == null) {
+                // Cache the Notification mainly so we can remove the
+                // EVENT_NOTIFICATION_CHANGED message with this Notification from
+                // the queue later
+                mNotification = new Notification();
+                mNotification.when = 0;
+                mNotification.icon = ICON_NETWORKS_AVAILABLE;
+                mNotification.flags = Notification.FLAG_AUTO_CANCEL;
+                mNotification.contentIntent = PendingIntent.getActivity(mContext, 0,
+                        new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK), 0);
+            }
+
+            CharSequence title = mContext.getResources().getQuantityText(
+                    com.android.internal.R.plurals.wifi_available, numNetworks);
+            CharSequence details = mContext.getResources().getQuantityText(
+                    com.android.internal.R.plurals.wifi_available_detailed, numNetworks);
+            mNotification.tickerText = title;
+            mNotification.setLatestEventInfo(mContext, title, details, mNotification.contentIntent);
+
+            mNotificationRepeatTime = System.currentTimeMillis() + NOTIFICATION_REPEAT_DELAY_MS;
+
+            message = mCsHandler.obtainMessage(EVENT_NOTIFICATION_CHANGED, 1,
+                    ICON_NETWORKS_AVAILABLE, mNotification);
+
+        } else {
+
+            // Remove any pending messages to show the notification
+            mCsHandler.removeMessages(EVENT_NOTIFICATION_CHANGED, mNotification);
+
+            message = mCsHandler.obtainMessage(EVENT_NOTIFICATION_CHANGED, 0,
+                    ICON_NETWORKS_AVAILABLE);
+        }
+
+        mCsHandler.sendMessageDelayed(message, delay);
+
+        mNotificationShown = visible;
+    }
 
     private void configureNetworkProperties() {
         try {
@@ -1328,1146 +1521,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         // TODO - add proxy info
     }
 
-    private void configureInterface() {
-        checkPollTimer();
-        mLastSignalLevel = -1;
-        if (!mUseStaticIp) {
-            if (!mHaveIpAddress && !mObtainingIpAddress) {
-                mObtainingIpAddress = true;
-                mDhcpTarget.sendEmptyMessage(EVENT_DHCP_START);
-            }
-        } else {
-            int event;
-            if (NetworkUtils.configureInterface(mInterfaceName, mDhcpInfo)) {
-                event = EVENT_INTERFACE_CONFIGURATION_SUCCEEDED;
-                if (LOCAL_LOGD) Log.v(TAG, "Static IP configuration succeeded");
-            } else {
-                event = EVENT_INTERFACE_CONFIGURATION_FAILED;
-                if (LOCAL_LOGD) Log.v(TAG, "Static IP configuration failed");
-            }
-            sendEmptyMessage(event);
-        }
-    }
 
-    /**
-     * Reset our IP state and send out broadcasts following a disconnect.
-     * @param newState the {@code DetailedState} to set. Should be either
-     * {@code DISCONNECTED} or {@code FAILED}.
-     * @param disableInterface indicates whether the interface should
-     * be disabled
-     */
-    private void handleDisconnectedState(DetailedState newState, boolean disableInterface) {
-        if (mDisconnectPending) {
-            cancelDisconnect();
-        }
-        mDisconnectExpected = false;
-        resetConnections(disableInterface);
-        setDetailedState(newState);
-        sendNetworkStateChangeBroadcast(mLastBssid);
-        mWifiInfo.setBSSID(null);
-        mLastBssid = null;
-        mLastSsid = null;
-        mDisconnectPending = false;
-    }
-
-    /**
-     * Resets the Wi-Fi Connections by clearing any state, resetting any sockets
-     * using the interface, stopping DHCP, and disabling the interface.
-     */
-    public void resetConnections(boolean disableInterface) {
-        if (LOCAL_LOGD) Log.d(TAG, "Reset connections and stopping DHCP");
-        mNetworkProperties.clear();
-        mHaveIpAddress = false;
-        mObtainingIpAddress = false;
-        mWifiInfo.setIpAddress(0);
-
-        /*
-         * Reset connection depends on both the interface and the IP assigned,
-         * so it should be done before any chance of the IP being lost.
-         */
-        NetworkUtils.resetConnections(mInterfaceName);
-
-        // Stop DHCP
-        if (mDhcpTarget != null) {
-            mDhcpTarget.setCancelCallback(true);
-            mDhcpTarget.removeMessages(EVENT_DHCP_START);
-        }
-        if (!NetworkUtils.stopDhcp(mInterfaceName)) {
-            Log.e(TAG, "Could not stop DHCP");
-        }
-
-        /**
-         * Interface is re-enabled in the supplicant
-         * when moving out of ASSOCIATING state
-         */
-        if(disableInterface) {
-            if (LOCAL_LOGD) Log.d(TAG, "Disabling interface");
-            NetworkUtils.disableInterface(mInterfaceName);
-        }
-    }
-
-    /**
-     * The supplicant is reporting that we are disconnected from the current
-     * access point. Often, however, a disconnect will be followed very shortly
-     * by a reconnect to the same access point. Therefore, we delay resetting
-     * the connection's IP state for a bit.
-     */
-    private void scheduleDisconnect() {
-        mDisconnectPending = true;
-        if (!hasMessages(EVENT_DEFERRED_DISCONNECT)) {
-            sendEmptyMessageDelayed(EVENT_DEFERRED_DISCONNECT, DISCONNECT_DELAY_MSECS);
-        }
-    }
-
-    private void cancelDisconnect() {
-        mDisconnectPending = false;
-        removeMessages(EVENT_DEFERRED_DISCONNECT);
-    }
-
-    public DhcpInfo getDhcpInfo() {
-        return mDhcpInfo;
-    }
-
-    public synchronized List<ScanResult> getScanResultsList() {
-        return mScanResults;
-    }
-
-    public synchronized void setScanResultsList(List<ScanResult> scanList) {
-        mScanResults = scanList;
-    }
-
-    /**
-     * Get status information for the current connection, if any.
-     * @return a {@link WifiInfo} object containing information about the current connection
-     */
-    public WifiInfo requestConnectionInfo() {
-        requestConnectionStatus(mWifiInfo);
-        requestPolledInfo(mWifiInfo, false);
-        return mWifiInfo;
-    }
-
-    private void requestConnectionStatus(WifiInfo info) {
-        String reply = status();
-        if (reply == null) {
-            return;
-        }
-        /*
-         * Parse the reply from the supplicant to the status command, and update
-         * local state accordingly. The reply is a series of lines of the form
-         * "name=value".
-         */
-        String SSID = null;
-        String BSSID = null;
-        String suppState = null;
-        int netId = -1;
-        String[] lines = reply.split("\n");
-        for (String line : lines) {
-            String[] prop = line.split(" *= *", 2);
-            if (prop.length < 2)
-                continue;
-            String name = prop[0];
-            String value = prop[1];
-            if (name.equalsIgnoreCase("id"))
-                netId = Integer.parseInt(value);
-            else if (name.equalsIgnoreCase("ssid"))
-                SSID = value;
-            else if (name.equalsIgnoreCase("bssid"))
-                BSSID = value;
-            else if (name.equalsIgnoreCase("wpa_state"))
-                suppState = value;
-        }
-        info.setNetworkId(netId);
-        info.setSSID(SSID);
-        info.setBSSID(BSSID);
-        /*
-         * We only set the supplicant state if the previous state was
-         * UNINITIALIZED. This should only happen when we first connect to
-         * the supplicant. Once we're connected, we should always receive
-         * an event upon any state change, but in this case, we want to
-         * make sure any listeners are made aware of the state change.
-         */
-        if (mWifiInfo.getSupplicantState() == SupplicantState.UNINITIALIZED && suppState != null)
-            setSupplicantState(suppState);
-    }
-
-    /**
-     * Get the dynamic information that is not reported via events.
-     * @param info the object into which the information should be captured.
-     */
-    private synchronized void requestPolledInfo(WifiInfo info, boolean polling)
-    {
-        int newRssi = (polling ? getRssiApprox() : getRssi());
-        if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
-            /* some implementations avoid negative values by adding 256
-             * so we need to adjust for that here.
-             */
-            if (newRssi > 0) newRssi -= 256;
-            info.setRssi(newRssi);
-            /*
-             * Rather then sending the raw RSSI out every time it
-             * changes, we precalculate the signal level that would
-             * be displayed in the status bar, and only send the
-             * broadcast if that much more coarse-grained number
-             * changes. This cuts down greatly on the number of
-             * broadcasts, at the cost of not informing others
-             * interested in RSSI of all the changes in signal
-             * level.
-             */
-            // TODO: The second arg to the call below needs to be a symbol somewhere, but
-            // it's actually the size of an array of icons that's private
-            // to StatusBar Policy.
-            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
-            if (newSignalLevel != mLastSignalLevel) {
-                sendRssiChangeBroadcast(newRssi);
-            }
-            mLastSignalLevel = newSignalLevel;
-        } else {
-            info.setRssi(-200);
-        }
-        int newLinkSpeed = getLinkSpeed();
-        if (newLinkSpeed != -1) {
-            info.setLinkSpeed(newLinkSpeed);
-        }
-    }
-
-    private void sendRssiChangeBroadcast(final int newRssi) {
-        if (ActivityManagerNative.isSystemReady()) {
-            Intent intent = new Intent(WifiManager.RSSI_CHANGED_ACTION);
-            intent.putExtra(WifiManager.EXTRA_NEW_RSSI, newRssi);
-            mContext.sendBroadcast(intent);
-        }
-    }
-
-    private void sendNetworkStateChangeBroadcast(String bssid) {
-        Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
-        if (bssid != null)
-            intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
-        mContext.sendStickyBroadcast(intent);
-    }
-
-    /**
-     * Disable Wi-Fi connectivity by stopping the driver.
-     */
-    public boolean teardown() {
-        if (!mTornDownByConnMgr) {
-            if (disconnectAndStop()) {
-                setTornDownByConnMgr(true);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Reenable Wi-Fi connectivity by restarting the driver.
-     */
-    public boolean reconnect() {
-        if (mTornDownByConnMgr) {
-            if (restart()) {
-                setTornDownByConnMgr(false);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * We want to stop the driver, but if we're connected to a network,
-     * we first want to disconnect, so that the supplicant is always in
-     * a known state (DISCONNECTED) when the driver is stopped.
-     * @return {@code true} if the operation succeeds, which means that the
-     * disconnect or stop command was initiated.
-     */
-    public synchronized boolean disconnectAndStop() {
-        boolean ret = true;;
-        if (mRunState != RUN_STATE_STOPPING && mRunState != RUN_STATE_STOPPED) {
-            // Take down any open network notifications
-            setNotificationVisible(false, 0, false, 0);
-
-            if (mWifiInfo.getSupplicantState() == SupplicantState.DORMANT) {
-                ret = stopDriver();
-            } else {
-                ret = disconnect();
-            }
-            mRunState = RUN_STATE_STOPPING;
-        }
-        return ret;
-    }
-
-    public synchronized boolean restart() {
-        if (mRunState == RUN_STATE_STOPPED) {
-            mRunState = RUN_STATE_STARTING;
-            resetConnections(true);
-            return startDriver();
-        } else if (mRunState == RUN_STATE_STOPPING) {
-            mRunState = RUN_STATE_STARTING;
-        }
-        return true;
-    }
-
-    public int getWifiState() {
-        return mWifiState.get();
-    }
-
-    public void setWifiState(int wifiState) {
-        mWifiState.set(wifiState);
-    }
-
-   /**
-     * The WifiNative interface functions are listed below.
-     * The only native call that is not synchronized on
-     * WifiStateTracker is waitForEvent() which waits on a
-     * seperate monitor channel.
-     *
-     * All supplicant commands need the wifi to be in an
-     * enabled state. This can be done by checking the
-     * mWifiState to be WIFI_STATE_ENABLED.
-     *
-     * All commands that can cause commands to driver
-     * initiated need the driver state to be started.
-     * This is done by checking isDriverStopped() to
-     * be false.
-     */
-
-    /**
-     * Load the driver and firmware
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean loadDriver() {
-        return WifiNative.loadDriver();
-    }
-
-    /**
-     * Unload the driver and firmware
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean unloadDriver() {
-        return WifiNative.unloadDriver();
-    }
-
-    /**
-     * Check the supplicant config and
-     * start the supplicant daemon
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean startSupplicant() {
-        return WifiNative.startSupplicant();
-    }
-
-    /**
-     * Stop the supplicant daemon
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean stopSupplicant() {
-        return WifiNative.stopSupplicant();
-    }
-
-    /**
-     * Establishes two channels - control channel for commands
-     * and monitor channel for notifying WifiMonitor
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean connectToSupplicant() {
-        return WifiNative.connectToSupplicant();
-    }
-
-    /**
-     * Close the control/monitor channels to supplicant
-     */
-    public synchronized void closeSupplicantConnection() {
-        WifiNative.closeSupplicantConnection();
-    }
-
-    /**
-     * Check if the supplicant is alive
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean ping() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.pingCommand();
-    }
-
-    /**
-     * initiate an active or passive scan
-     *
-     * @param forceActive true if it is a active scan
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean scan(boolean forceActive) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.scanCommand(forceActive);
-    }
-
-    /**
-     * Specifies whether the supplicant or driver
-     * take care of initiating scan and doing AP selection
-     *
-     * @param mode
-     *    SUPPL_SCAN_HANDLING_NORMAL
-     *    SUPPL_SCAN_HANDLING_LIST_ONLY
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean setScanResultHandling(int mode) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.setScanResultHandlingCommand(mode);
-    }
-
-    /**
-     * Fetch the scan results from the supplicant
-     *
-     * @return example result string
-     * 00:bb:cc:dd:cc:ee       2427    166     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net1
-     * 00:bb:cc:dd:cc:ff       2412    165     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net2
-     */
-    public synchronized String scanResults() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return null;
-        }
-        return WifiNative.scanResultsCommand();
-    }
-
-    /**
-     * Set the scan mode - active or passive
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean setScanMode(boolean isScanModeActive) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        if (mIsScanModeActive != isScanModeActive) {
-            return WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
-        }
-        return true;
-    }
-
-    /**
-     * Disconnect from Access Point
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean disconnect() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.disconnectCommand();
-    }
-
-    /**
-     * Initiate a reconnection to AP
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean reconnectCommand() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.reconnectCommand();
-    }
-
-    /**
-     * Add a network
-     *
-     * @return network id of the new network
-     */
-    public synchronized int addNetwork() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return -1;
-        }
-        return WifiNative.addNetworkCommand();
-    }
-
-    /**
-     * Delete a network
-     *
-     * @param networkId id of the network to be removed
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean removeNetwork(int networkId) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return mDisconnectExpected = WifiNative.removeNetworkCommand(networkId);
-    }
-
-    /**
-     * Enable a network
-     *
-     * @param netId network id of the network
-     * @param disableOthers true, if all other networks have to be disabled
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean enableNetwork(int netId, boolean disableOthers) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.enableNetworkCommand(netId, disableOthers);
-    }
-
-    /**
-     * Disable a network
-     *
-     * @param netId network id of the network
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean disableNetwork(int netId) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.disableNetworkCommand(netId);
-    }
-
-    /**
-     * Initiate a re-association in supplicant
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean reassociate() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.reassociateCommand();
-    }
-
-    /**
-     * Blacklist a BSSID. This will avoid the AP if there are
-     * alternate APs to connect
-     *
-     * @param bssid BSSID of the network
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean addToBlacklist(String bssid) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.addToBlacklistCommand(bssid);
-    }
-
-    /**
-     * Clear the blacklist list
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean clearBlacklist() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.clearBlacklistCommand();
-    }
-
-    /**
-     * List all configured networks
-     *
-     * @return list of networks or null on failure
-     */
-    public synchronized String listNetworks() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return null;
-        }
-        return WifiNative.listNetworksCommand();
-    }
-
-    /**
-     * Get network setting by name
-     *
-     * @param netId network id of the network
-     * @param name network variable key
-     * @return value corresponding to key
-     */
-    public synchronized String getNetworkVariable(int netId, String name) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return null;
-        }
-        return WifiNative.getNetworkVariableCommand(netId, name);
-    }
-
-    /**
-     * Set network setting by name
-     *
-     * @param netId network id of the network
-     * @param name network variable key
-     * @param value network variable value
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean setNetworkVariable(int netId, String name, String value) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.setNetworkVariableCommand(netId, name, value);
-    }
-
-    /**
-     * Get detailed status of the connection
-     *
-     * @return Example status result
-     *  bssid=aa:bb:cc:dd:ee:ff
-     *  ssid=TestNet
-     *  id=3
-     *  pairwise_cipher=NONE
-     *  group_cipher=NONE
-     *  key_mgmt=NONE
-     *  wpa_state=COMPLETED
-     *  ip_address=X.X.X.X
-     */
-    public synchronized String status() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return null;
-        }
-        return WifiNative.statusCommand();
-    }
-
-    /**
-     * Get RSSI to currently connected network
-     *
-     * @return RSSI value, -1 on failure
-     */
-    public synchronized int getRssi() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return -1;
-        }
-        return WifiNative.getRssiApproxCommand();
-    }
-
-    /**
-     * Get approx RSSI to currently connected network
-     *
-     * @return RSSI value, -1 on failure
-     */
-    public synchronized int getRssiApprox() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return -1;
-        }
-        return WifiNative.getRssiApproxCommand();
-    }
-
-    /**
-     * Get link speed to currently connected network
-     *
-     * @return link speed, -1 on failure
-     */
-    public synchronized int getLinkSpeed() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return -1;
-        }
-        return WifiNative.getLinkSpeedCommand();
-    }
-
-    /**
-     * Get MAC address of radio
-     *
-     * @return MAC address, null on failure
-     */
-    public synchronized String getMacAddress() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return null;
-        }
-        return WifiNative.getMacAddressCommand();
-    }
-
-    /**
-     * Start driver
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean startDriver() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.startDriverCommand();
-    }
-
-    /**
-     * Stop driver
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean stopDriver() {
-        /* Driver stop should not happen only when supplicant event
-         * DRIVER_STOPPED has already been handled */
-        if (mWifiState.get() != WIFI_STATE_ENABLED || mRunState == RUN_STATE_STOPPED) {
-            return false;
-        }
-        return WifiNative.stopDriverCommand();
-    }
-
-    /**
-     * Start packet filtering
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean startPacketFiltering() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.startPacketFiltering();
-    }
-
-    /**
-     * Stop packet filtering
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean stopPacketFiltering() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.stopPacketFiltering();
-    }
-
-    /**
-     * Get power mode
-     * @return power mode
-     */
-    public synchronized int getPowerMode() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED && !isDriverStopped()) {
-            return -1;
-        }
-        return WifiNative.getPowerModeCommand();
-    }
-
-    /**
-     * Set power mode
-     * @param mode
-     *     DRIVER_POWER_MODE_AUTO
-     *     DRIVER_POWER_MODE_ACTIVE
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean setPowerMode(int mode) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.setPowerModeCommand(mode);
-    }
-
-    /**
-     * Set the number of allowed radio frequency channels from the system
-     * setting value, if any.
-     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
-     * the number of channels is invalid.
-     */
-    public synchronized boolean setNumAllowedChannels() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        try {
-            return setNumAllowedChannels(
-                    Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
-        } catch (Settings.SettingNotFoundException e) {
-            if (mNumAllowedChannels != 0) {
-                WifiNative.setNumAllowedChannelsCommand(mNumAllowedChannels);
-            }
-            // otherwise, use the driver default
-        }
-        return true;
-    }
-
-    /**
-     * Set the number of radio frequency channels that are allowed to be used
-     * in the current regulatory domain.
-     * @param numChannels the number of allowed channels. Must be greater than 0
-     * and less than or equal to 16.
-     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
-     * {@code numChannels} is outside the valid range.
-     */
-    public synchronized boolean setNumAllowedChannels(int numChannels) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        mNumAllowedChannels = numChannels;
-        return WifiNative.setNumAllowedChannelsCommand(numChannels);
-    }
-
-    /**
-     * Get number of allowed channels
-     *
-     * @return channel count, -1 on failure
-     */
-    public synchronized int getNumAllowedChannels() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return -1;
-        }
-        return WifiNative.getNumAllowedChannelsCommand();
-    }
-
-    /**
-     * Set bluetooth coex mode:
-     *
-     * @param mode
-     *  BLUETOOTH_COEXISTENCE_MODE_ENABLED
-     *  BLUETOOTH_COEXISTENCE_MODE_DISABLED
-     *  BLUETOOTH_COEXISTENCE_MODE_SENSE
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean setBluetoothCoexistenceMode(int mode) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return false;
-        }
-        return WifiNative.setBluetoothCoexistenceModeCommand(mode);
-    }
-
-    /**
-     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
-     * some of the low-level scan parameters used by the driver are changed to
-     * reduce interference with A2DP streaming.
-     *
-     * @param isBluetoothPlaying whether to enable or disable this mode
-     */
-    public synchronized void setBluetoothScanMode(boolean isBluetoothPlaying) {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return;
-        }
-        WifiNative.setBluetoothCoexistenceScanModeCommand(isBluetoothPlaying);
-    }
-
-    /**
-     * Save configuration on supplicant
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean saveConfig() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.saveConfigCommand();
-    }
-
-    /**
-     * Reload the configuration from file
-     *
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
-     */
-    public synchronized boolean reloadConfig() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED) {
-            return false;
-        }
-        return WifiNative.reloadConfigCommand();
-    }
-
-    public boolean setRadio(boolean turnOn) {
-        return mWM.setWifiEnabled(turnOn);
-    }
-
-    /**
-     * {@inheritDoc}
-     * There are currently no Wi-Fi-specific features supported.
-     * @param feature the name of the feature
-     * @return {@code -1} indicating failure, always
-     */
-    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     * There are currently no Wi-Fi-specific features supported.
-     * @param feature the name of the feature
-     * @return {@code -1} indicating failure, always
-     */
-    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    public void interpretScanResultsAvailable() {
-
-        // If we shouldn't place a notification on available networks, then
-        // don't bother doing any of the following
-        if (!mNotificationEnabled) return;
-
-        NetworkInfo networkInfo = getNetworkInfo();
-
-        State state = networkInfo.getState();
-        if ((state == NetworkInfo.State.DISCONNECTED)
-                || (state == NetworkInfo.State.UNKNOWN)) {
-
-            // Look for an open network
-            List<ScanResult> scanResults = getScanResultsList();
-            if (scanResults != null) {
-                int numOpenNetworks = 0;
-                for (int i = scanResults.size() - 1; i >= 0; i--) {
-                    ScanResult scanResult = scanResults.get(i);
-
-                    if (TextUtils.isEmpty(scanResult.capabilities)) {
-                        numOpenNetworks++;
-                    }
-                }
-            
-                if (numOpenNetworks > 0) {
-                    if (++mNumScansSinceNetworkStateChange >= NUM_SCANS_BEFORE_ACTUALLY_SCANNING) {
-                        /*
-                         * We've scanned continuously at least
-                         * NUM_SCANS_BEFORE_NOTIFICATION times. The user
-                         * probably does not have a remembered network in range,
-                         * since otherwise supplicant would have tried to
-                         * associate and thus resetting this counter.
-                         */
-                        setNotificationVisible(true, numOpenNetworks, false, 0);
-                    }
-                    return;
-                }
-            }
-        }
-        
-        // No open networks in range, remove the notification
-        setNotificationVisible(false, 0, false, 0);
-    }
-
-    /**
-     * Send a  notification that the results of a scan for network access
-     * points has completed, and results are available.
-     */
-    private void sendScanResultsAvailable() {
-        Message msg = mTarget.obtainMessage(EVENT_SCAN_RESULTS_AVAILABLE, mNetworkInfo);
-        msg.sendToTarget();
-    }
-
-    /**
-     * Display or don't display a notification that there are open Wi-Fi networks.
-     * @param visible {@code true} if notification should be visible, {@code false} otherwise
-     * @param numNetworks the number networks seen
-     * @param force {@code true} to force notification to be shown/not-shown,
-     * even if it is already shown/not-shown.
-     * @param delay time in milliseconds after which the notification should be made
-     * visible or invisible.
-     */
-    public void setNotificationVisible(boolean visible, int numNetworks, boolean force, int delay) {
-        
-        // Since we use auto cancel on the notification, when the
-        // mNetworksAvailableNotificationShown is true, the notification may
-        // have actually been canceled.  However, when it is false we know
-        // for sure that it is not being shown (it will not be shown any other
-        // place than here)
-        
-        // If it should be hidden and it is already hidden, then noop
-        if (!visible && !mNotificationShown && !force) {
-            return;
-        }
-
-        Message message;
-        if (visible) {
-            
-            // Not enough time has passed to show the notification again
-            if (System.currentTimeMillis() < mNotificationRepeatTime) {
-                return;
-            }
-            
-            if (mNotification == null) {
-                // Cache the Notification mainly so we can remove the
-                // EVENT_NOTIFICATION_CHANGED message with this Notification from
-                // the queue later
-                mNotification = new Notification();
-                mNotification.when = 0;
-                mNotification.icon = ICON_NETWORKS_AVAILABLE;
-                mNotification.flags = Notification.FLAG_AUTO_CANCEL;
-                mNotification.contentIntent = PendingIntent.getActivity(mContext, 0,
-                        new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK), 0);
-            }
-
-            CharSequence title = mContext.getResources().getQuantityText(
-                    com.android.internal.R.plurals.wifi_available, numNetworks);
-            CharSequence details = mContext.getResources().getQuantityText(
-                    com.android.internal.R.plurals.wifi_available_detailed, numNetworks);
-            mNotification.tickerText = title;
-            mNotification.setLatestEventInfo(mContext, title, details, mNotification.contentIntent);
-            
-            mNotificationRepeatTime = System.currentTimeMillis() + NOTIFICATION_REPEAT_DELAY_MS;
-
-            message = mTarget.obtainMessage(EVENT_NOTIFICATION_CHANGED, 1,
-                    ICON_NETWORKS_AVAILABLE, mNotification);
-            
-        } else {
-
-            // Remove any pending messages to show the notification
-            mTarget.removeMessages(EVENT_NOTIFICATION_CHANGED, mNotification);
-            
-            message = mTarget.obtainMessage(EVENT_NOTIFICATION_CHANGED, 0, ICON_NETWORKS_AVAILABLE);
-        }
-
-        mTarget.sendMessageDelayed(message, delay);
-        
-        mNotificationShown = visible;
-    }
-
-    /**
-     * Clears variables related to tracking whether a notification has been
-     * shown recently.
-     * <p>
-     * After calling this method, the timer that prevents notifications from
-     * being shown too often will be cleared.
-     */
-    private void resetNotificationTimer() {
-        mNotificationRepeatTime = 0;
-        mNumScansSinceNetworkStateChange = 0;
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        sb.append(mNetworkProperties.toString());
-        sb.append(" runState=");
-        if (mRunState >= 1 && mRunState <= mRunStateNames.length) {
-            sb.append(mRunStateNames[mRunState-1]);
-        } else {
-            sb.append(mRunState);
-        }
-        sb.append(LS).append(mWifiInfo).append(LS);
-        sb.append(mDhcpInfo).append(LS);
-        sb.append("haveIpAddress=").append(mHaveIpAddress).
-                append(", obtainingIpAddress=").append(mObtainingIpAddress).
-                append(", scanModeActive=").append(mIsScanModeActive).append(LS).
-                append("lastSignalLevel=").append(mLastSignalLevel).
-                append(", explicitlyDisabled=").append(mTornDownByConnMgr);
-        return sb.toString();
-    }
-
-    private class DhcpHandler extends Handler {
-
-        private Handler mTarget;
-        
-        /**
-         * Whether to skip the DHCP result callback to the target. For example,
-         * this could be set if the network we were requesting an IP for has
-         * since been disconnected.
-         * <p>
-         * Note: There is still a chance where the client's intended DHCP
-         * request not being canceled. For example, we are request for IP on
-         * A, and he queues request for IP on B, and then cancels the request on
-         * B while we're still requesting from A.
-         */
-        private boolean mCancelCallback;
-
-        /**
-         * Instance of the bluetooth headset helper. This needs to be created
-         * early because there is a delay before it actually 'connects', as
-         * noted by its javadoc. If we check before it is connected, it will be
-         * in an error state and we will not disable coexistence.
-         */
-        private BluetoothHeadset mBluetoothHeadset;
-        
-        public DhcpHandler(Looper looper, Handler target) {
-            super(looper);
-            mTarget = target;
-            
-            mBluetoothHeadset = new BluetoothHeadset(mContext, null);
-        }
-
-        public void handleMessage(Message msg) {
-            int event;
-
-            switch (msg.what) {
-                case EVENT_DHCP_START:
-                    
-                    boolean modifiedBluetoothCoexistenceMode = false;
-                    int powerMode = DRIVER_POWER_MODE_AUTO;
-
-                    if (shouldDisableCoexistenceMode()) {
-                        /*
-                         * There are problems setting the Wi-Fi driver's power
-                         * mode to active when bluetooth coexistence mode is
-                         * enabled or sense.
-                         * <p>
-                         * We set Wi-Fi to active mode when
-                         * obtaining an IP address because we've found
-                         * compatibility issues with some routers with low power
-                         * mode.
-                         * <p>
-                         * In order for this active power mode to properly be set,
-                         * we disable coexistence mode until we're done with
-                         * obtaining an IP address.  One exception is if we
-                         * are currently connected to a headset, since disabling
-                         * coexistence would interrupt that connection.
-                         */
-                        modifiedBluetoothCoexistenceMode = true;
-
-                        // Disable the coexistence mode
-                        setBluetoothCoexistenceMode(
-                                WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
-                    }
-
-                    powerMode = getPowerMode();
-                    if (powerMode < 0) {
-                      // Handle the case where supplicant driver does not support
-                      // getPowerModeCommand.
-                        powerMode = DRIVER_POWER_MODE_AUTO;
-                    }
-                    if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
-                        setPowerMode(DRIVER_POWER_MODE_ACTIVE);
-                    }
-
-                    synchronized (this) {
-                        // A new request is being made, so assume we will callback
-                        mCancelCallback = false;
-                    }
-                    Log.d(TAG, "DhcpHandler: DHCP request started");
-                    if (NetworkUtils.runDhcp(mInterfaceName, mDhcpInfo)) {
-                        event = EVENT_INTERFACE_CONFIGURATION_SUCCEEDED;
-                        if (LOCAL_LOGD) Log.v(TAG, "DhcpHandler: DHCP request succeeded");
-                    } else {
-                        event = EVENT_INTERFACE_CONFIGURATION_FAILED;
-                        Log.i(TAG, "DhcpHandler: DHCP request failed: " +
-                            NetworkUtils.getDhcpError());
-                    }
-
-                    if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
-                        setPowerMode(powerMode);
-                    }
-
-                    if (modifiedBluetoothCoexistenceMode) {
-                        // Set the coexistence mode back to its default value
-                        setBluetoothCoexistenceMode(
-                                WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
-                    }
-
-                    synchronized (this) {
-                        if (!mCancelCallback) {
-                            mTarget.sendEmptyMessage(event);
-                        }
-                    }
-                    break;
-            }
-        }
-
-        public synchronized void setCancelCallback(boolean cancelCallback) {
-            mCancelCallback = cancelCallback;
-        }
-
-        /**
-         * Whether to disable coexistence mode while obtaining IP address. This
-         * logic will return true only if the current bluetooth
-         * headset/handsfree state is disconnected. This means if it is in an
-         * error state, we will NOT disable coexistence mode to err on the side
-         * of safety.
-         * 
-         * @return Whether to disable coexistence mode.
-         */
-        private boolean shouldDisableCoexistenceMode() {
-            int state = mBluetoothHeadset.getState(mBluetoothHeadset.getCurrentHeadset());
-            return state == BluetoothHeadset.STATE_DISCONNECTED;
-        }
-    }
-    
     private void checkUseStaticIp() {
         mUseStaticIp = false;
         final ContentResolver cr = mContext.getContentResolver();
@@ -2558,6 +1612,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                 Settings.System.WIFI_STATIC_DNS2), false, this);
         }
 
+        @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
 
@@ -2587,11 +1642,2300 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
                         oDns2 != mDhcpInfo.dns2));
 
             if (changed) {
-                resetConnections(true);
-                configureInterface();
+                sendMessage(CMD_RECONFIGURE_IP);
                 if (mUseStaticIp) {
-                    mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
+                    mCsHandler.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
                 }
+            }
+        }
+    }
+
+
+    /**
+     * Clears variables related to tracking whether a notification has been
+     * shown recently.
+     * <p>
+     * After calling this method, the timer that prevents notifications from
+     * being shown too often will be cleared.
+     */
+    private void resetNotificationTimer() {
+        mNotificationRepeatTime = 0;
+        mNumScansSinceNetworkStateChange = 0;
+    }
+
+
+    /**
+     * Whether to disable coexistence mode while obtaining IP address. This
+     * logic will return true only if the current bluetooth
+     * headset/handsfree state is disconnected. This means if it is in an
+     * error state, we will NOT disable coexistence mode to err on the side
+     * of safety.
+     *
+     * @return Whether to disable coexistence mode.
+     */
+    private boolean shouldDisableCoexistenceMode() {
+        int state = mBluetoothHeadset.getState(mBluetoothHeadset.getCurrentHeadset());
+        return state == BluetoothHeadset.STATE_DISCONNECTED;
+    }
+
+    private void checkIsBluetoothPlaying() {
+        boolean isBluetoothPlaying = false;
+        Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedSinks();
+
+        for (BluetoothDevice device : connected) {
+            if (mBluetoothA2dp.getSinkState(device) == BluetoothA2dp.STATE_PLAYING) {
+                isBluetoothPlaying = true;
+                break;
+            }
+        }
+        setBluetoothScanMode(isBluetoothPlaying);
+    }
+
+    private void sendScanResultsAvailableBroadcast() {
+        if (!ActivityManagerNative.isSystemReady()) return;
+
+        mContext.sendBroadcast(new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+    }
+
+    private void sendRssiChangeBroadcast(final int newRssi) {
+        if (!ActivityManagerNative.isSystemReady()) return;
+
+        Intent intent = new Intent(WifiManager.RSSI_CHANGED_ACTION);
+        intent.putExtra(WifiManager.EXTRA_NEW_RSSI, newRssi);
+        mContext.sendBroadcast(intent);
+    }
+
+    private void sendNetworkStateChangeBroadcast(String bssid) {
+        if (!ActivityManagerNative.isSystemReady()) return;
+
+        Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
+        if (bssid != null)
+            intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
+        mContext.sendStickyBroadcast(intent);
+    }
+
+    private void sendSupplicantStateChangedBroadcast(StateChangeResult sc, boolean failedAuth) {
+        if (!ActivityManagerNative.isSystemReady()) return;
+
+        Intent intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)sc.state);
+        if (failedAuth) {
+            intent.putExtra(
+                WifiManager.EXTRA_SUPPLICANT_ERROR,
+                WifiManager.ERROR_AUTHENTICATING);
+        }
+        mContext.sendStickyBroadcast(intent);
+    }
+
+    private void sendSupplicantConnectionChangedBroadcast(boolean connected) {
+        if (!ActivityManagerNative.isSystemReady()) return;
+
+        Intent intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, connected);
+        mContext.sendBroadcast(intent);
+    }
+
+    /**
+     * Record the detailed state of a network, and if it is a
+     * change from the previous state, send a notification to
+     * any listeners.
+     * @param state the new @{code DetailedState}
+     */
+    private void setDetailedState(NetworkInfo.DetailedState state) {
+        Log.d(TAG, "setDetailed state, old ="
+                + mNetworkInfo.getDetailedState() + " and new state=" + state);
+        if (state != mNetworkInfo.getDetailedState()) {
+            mNetworkInfo.setDetailedState(state, null, null);
+            Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
+            msg.sendToTarget();
+        }
+    }
+
+    private static String removeDoubleQuotes(String string) {
+      if (string.length() <= 2) return "";
+      return string.substring(1, string.length() - 1);
+    }
+
+    private static String convertToQuotedString(String string) {
+        return "\"" + string + "\"";
+    }
+
+    private static String makeString(BitSet set, String[] strings) {
+        StringBuffer buf = new StringBuffer();
+        int nextSetBit = -1;
+
+        /* Make sure all set bits are in [0, strings.length) to avoid
+         * going out of bounds on strings.  (Shouldn't happen, but...) */
+        set = set.get(0, strings.length);
+
+        while ((nextSetBit = set.nextSetBit(nextSetBit + 1)) != -1) {
+            buf.append(strings[nextSetBit].replace('_', '-')).append(' ');
+        }
+
+        // remove trailing space
+        if (set.cardinality() > 0) {
+            buf.setLength(buf.length() - 1);
+        }
+
+        return buf.toString();
+    }
+
+    private static int lookupString(String string, String[] strings) {
+        int size = strings.length;
+
+        string = string.replace('-', '_');
+
+        for (int i = 0; i < size; i++)
+            if (string.equals(strings[i]))
+                return i;
+
+        // if we ever get here, we should probably add the
+        // value to WifiConfiguration to reflect that it's
+        // supported by the WPA supplicant
+        Log.w(TAG, "Failed to look-up a string: " + string);
+
+        return -1;
+    }
+
+    private int addOrUpdateNetworkNative(WifiConfiguration config) {
+        /*
+         * If the supplied networkId is -1, we create a new empty
+         * network configuration. Otherwise, the networkId should
+         * refer to an existing configuration.
+         */
+        int netId = config.networkId;
+        boolean newNetwork = netId == -1;
+        // networkId of -1 means we want to create a new network
+
+        if (newNetwork) {
+            netId = WifiNative.addNetworkCommand();
+            if (netId < 0) {
+                Log.e(TAG, "Failed to add a network!");
+                return -1;
+          }
+        }
+
+        setVariables: {
+
+            if (config.SSID != null &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.ssidVarName,
+                        config.SSID)) {
+                Log.d(TAG, "failed to set SSID: "+config.SSID);
+                break setVariables;
+            }
+
+            if (config.BSSID != null &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.bssidVarName,
+                        config.BSSID)) {
+                Log.d(TAG, "failed to set BSSID: "+config.BSSID);
+                break setVariables;
+            }
+
+            String allowedKeyManagementString =
+                makeString(config.allowedKeyManagement, WifiConfiguration.KeyMgmt.strings);
+            if (config.allowedKeyManagement.cardinality() != 0 &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.KeyMgmt.varName,
+                        allowedKeyManagementString)) {
+                Log.d(TAG, "failed to set key_mgmt: "+
+                        allowedKeyManagementString);
+                break setVariables;
+            }
+
+            String allowedProtocolsString =
+                makeString(config.allowedProtocols, WifiConfiguration.Protocol.strings);
+            if (config.allowedProtocols.cardinality() != 0 &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.Protocol.varName,
+                        allowedProtocolsString)) {
+                Log.d(TAG, "failed to set proto: "+
+                        allowedProtocolsString);
+                break setVariables;
+            }
+
+            String allowedAuthAlgorithmsString =
+                makeString(config.allowedAuthAlgorithms, WifiConfiguration.AuthAlgorithm.strings);
+            if (config.allowedAuthAlgorithms.cardinality() != 0 &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.AuthAlgorithm.varName,
+                        allowedAuthAlgorithmsString)) {
+                Log.d(TAG, "failed to set auth_alg: "+
+                        allowedAuthAlgorithmsString);
+                break setVariables;
+            }
+
+            String allowedPairwiseCiphersString =
+                    makeString(config.allowedPairwiseCiphers,
+                    WifiConfiguration.PairwiseCipher.strings);
+            if (config.allowedPairwiseCiphers.cardinality() != 0 &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.PairwiseCipher.varName,
+                        allowedPairwiseCiphersString)) {
+                Log.d(TAG, "failed to set pairwise: "+
+                        allowedPairwiseCiphersString);
+                break setVariables;
+            }
+
+            String allowedGroupCiphersString =
+                makeString(config.allowedGroupCiphers, WifiConfiguration.GroupCipher.strings);
+            if (config.allowedGroupCiphers.cardinality() != 0 &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.GroupCipher.varName,
+                        allowedGroupCiphersString)) {
+                Log.d(TAG, "failed to set group: "+
+                        allowedGroupCiphersString);
+                break setVariables;
+            }
+
+            // Prevent client screw-up by passing in a WifiConfiguration we gave it
+            // by preventing "*" as a key.
+            if (config.preSharedKey != null && !config.preSharedKey.equals("*") &&
+                    !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.pskVarName,
+                        config.preSharedKey)) {
+                Log.d(TAG, "failed to set psk: "+config.preSharedKey);
+                break setVariables;
+            }
+
+            boolean hasSetKey = false;
+            if (config.wepKeys != null) {
+                for (int i = 0; i < config.wepKeys.length; i++) {
+                    // Prevent client screw-up by passing in a WifiConfiguration we gave it
+                    // by preventing "*" as a key.
+                    if (config.wepKeys[i] != null && !config.wepKeys[i].equals("*")) {
+                        if (!WifiNative.setNetworkVariableCommand(
+                                    netId,
+                                    WifiConfiguration.wepKeyVarNames[i],
+                                    config.wepKeys[i])) {
+                            Log.d(TAG,
+                                    "failed to set wep_key"+i+": " +
+                                    config.wepKeys[i]);
+                            break setVariables;
+                        }
+                        hasSetKey = true;
+                    }
+                }
+            }
+
+            if (hasSetKey) {
+                if (!WifiNative.setNetworkVariableCommand(
+                            netId,
+                            WifiConfiguration.wepTxKeyIdxVarName,
+                            Integer.toString(config.wepTxKeyIndex))) {
+                    Log.d(TAG,
+                            "failed to set wep_tx_keyidx: "+
+                            config.wepTxKeyIndex);
+                    break setVariables;
+                }
+            }
+
+            if (!WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.priorityVarName,
+                        Integer.toString(config.priority))) {
+                Log.d(TAG, config.SSID + ": failed to set priority: "
+                        +config.priority);
+                break setVariables;
+            }
+
+            if (config.hiddenSSID && !WifiNative.setNetworkVariableCommand(
+                        netId,
+                        WifiConfiguration.hiddenSSIDVarName,
+                        Integer.toString(config.hiddenSSID ? 1 : 0))) {
+                Log.d(TAG, config.SSID + ": failed to set hiddenSSID: "+
+                        config.hiddenSSID);
+                break setVariables;
+            }
+
+            for (WifiConfiguration.EnterpriseField field
+                    : config.enterpriseFields) {
+                String varName = field.varName();
+                String value = field.value();
+                if (value != null) {
+                    if (field != config.eap) {
+                        value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
+                    }
+                    if (!WifiNative.setNetworkVariableCommand(
+                                netId,
+                                varName,
+                                value)) {
+                        Log.d(TAG, config.SSID + ": failed to set " + varName +
+                                ": " + value);
+                        break setVariables;
+                    }
+                }
+            }
+            return netId;
+        }
+
+        if (newNetwork) {
+            WifiNative.removeNetworkCommand(netId);
+            Log.d(TAG,
+                    "Failed to set a network variable, removed network: "
+                    + netId);
+        }
+
+        return -1;
+    }
+
+    private List<WifiConfiguration> getConfiguredNetworksNative() {
+        String listStr = WifiNative.listNetworksCommand();
+
+        List<WifiConfiguration> networks =
+            new ArrayList<WifiConfiguration>();
+        if (listStr == null)
+            return networks;
+
+        String[] lines = listStr.split("\n");
+        // Skip the first line, which is a header
+        for (int i = 1; i < lines.length; i++) {
+            String[] result = lines[i].split("\t");
+            // network-id | ssid | bssid | flags
+            WifiConfiguration config = new WifiConfiguration();
+            try {
+                config.networkId = Integer.parseInt(result[0]);
+            } catch(NumberFormatException e) {
+                continue;
+            }
+            if (result.length > 3) {
+                if (result[3].indexOf("[CURRENT]") != -1)
+                    config.status = WifiConfiguration.Status.CURRENT;
+                else if (result[3].indexOf("[DISABLED]") != -1)
+                    config.status = WifiConfiguration.Status.DISABLED;
+                else
+                    config.status = WifiConfiguration.Status.ENABLED;
+            } else {
+                config.status = WifiConfiguration.Status.ENABLED;
+            }
+            readNetworkVariables(config);
+            networks.add(config);
+        }
+        return networks;
+    }
+
+    /**
+     * Read the variables from the supplicant daemon that are needed to
+     * fill in the WifiConfiguration object.
+     *
+     * @param config the {@link WifiConfiguration} object to be filled in.
+     */
+    private void readNetworkVariables(WifiConfiguration config) {
+
+        int netId = config.networkId;
+        if (netId < 0)
+            return;
+
+        /*
+         * TODO: maybe should have a native method that takes an array of
+         * variable names and returns an array of values. But we'd still
+         * be doing a round trip to the supplicant daemon for each variable.
+         */
+        String value;
+
+        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.ssidVarName);
+        if (!TextUtils.isEmpty(value)) {
+            config.SSID = removeDoubleQuotes(value);
+        } else {
+            config.SSID = null;
+        }
+
+        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.bssidVarName);
+        if (!TextUtils.isEmpty(value)) {
+            config.BSSID = value;
+        } else {
+            config.BSSID = null;
+        }
+
+        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.priorityVarName);
+        config.priority = -1;
+        if (!TextUtils.isEmpty(value)) {
+            try {
+                config.priority = Integer.parseInt(value);
+            } catch (NumberFormatException ignore) {
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.hiddenSSIDVarName);
+        config.hiddenSSID = false;
+        if (!TextUtils.isEmpty(value)) {
+            try {
+                config.hiddenSSID = Integer.parseInt(value) != 0;
+            } catch (NumberFormatException ignore) {
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.wepTxKeyIdxVarName);
+        config.wepTxKeyIndex = -1;
+        if (!TextUtils.isEmpty(value)) {
+            try {
+                config.wepTxKeyIndex = Integer.parseInt(value);
+            } catch (NumberFormatException ignore) {
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            value = WifiNative.getNetworkVariableCommand(netId,
+                    WifiConfiguration.wepKeyVarNames[i]);
+            if (!TextUtils.isEmpty(value)) {
+                config.wepKeys[i] = value;
+            } else {
+                config.wepKeys[i] = null;
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.pskVarName);
+        if (!TextUtils.isEmpty(value)) {
+            config.preSharedKey = value;
+        } else {
+            config.preSharedKey = null;
+        }
+
+        value = WifiNative.getNetworkVariableCommand(config.networkId,
+                WifiConfiguration.Protocol.varName);
+        if (!TextUtils.isEmpty(value)) {
+            String vals[] = value.split(" ");
+            for (String val : vals) {
+                int index =
+                    lookupString(val, WifiConfiguration.Protocol.strings);
+                if (0 <= index) {
+                    config.allowedProtocols.set(index);
+                }
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(config.networkId,
+                WifiConfiguration.KeyMgmt.varName);
+        if (!TextUtils.isEmpty(value)) {
+            String vals[] = value.split(" ");
+            for (String val : vals) {
+                int index =
+                    lookupString(val, WifiConfiguration.KeyMgmt.strings);
+                if (0 <= index) {
+                    config.allowedKeyManagement.set(index);
+                }
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(config.networkId,
+                WifiConfiguration.AuthAlgorithm.varName);
+        if (!TextUtils.isEmpty(value)) {
+            String vals[] = value.split(" ");
+            for (String val : vals) {
+                int index =
+                    lookupString(val, WifiConfiguration.AuthAlgorithm.strings);
+                if (0 <= index) {
+                    config.allowedAuthAlgorithms.set(index);
+                }
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(config.networkId,
+                WifiConfiguration.PairwiseCipher.varName);
+        if (!TextUtils.isEmpty(value)) {
+            String vals[] = value.split(" ");
+            for (String val : vals) {
+                int index =
+                    lookupString(val, WifiConfiguration.PairwiseCipher.strings);
+                if (0 <= index) {
+                    config.allowedPairwiseCiphers.set(index);
+                }
+            }
+        }
+
+        value = WifiNative.getNetworkVariableCommand(config.networkId,
+                WifiConfiguration.GroupCipher.varName);
+        if (!TextUtils.isEmpty(value)) {
+            String vals[] = value.split(" ");
+            for (String val : vals) {
+                int index =
+                    lookupString(val, WifiConfiguration.GroupCipher.strings);
+                if (0 <= index) {
+                    config.allowedGroupCiphers.set(index);
+                }
+            }
+        }
+
+        for (WifiConfiguration.EnterpriseField field :
+                config.enterpriseFields) {
+            value = WifiNative.getNetworkVariableCommand(netId,
+                    field.varName());
+            if (!TextUtils.isEmpty(value)) {
+                if (field != config.eap) value = removeDoubleQuotes(value);
+                field.setValue(value);
+            }
+        }
+
+    }
+
+    /**
+     * Poll for info not reported via events
+     * RSSI & Linkspeed
+     */
+    private void requestPolledInfo() {
+        int newRssi = WifiNative.getRssiCommand();
+        if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
+            /* some implementations avoid negative values by adding 256
+             * so we need to adjust for that here.
+             */
+            if (newRssi > 0) newRssi -= 256;
+            mWifiInfo.setRssi(newRssi);
+            /*
+             * Rather then sending the raw RSSI out every time it
+             * changes, we precalculate the signal level that would
+             * be displayed in the status bar, and only send the
+             * broadcast if that much more coarse-grained number
+             * changes. This cuts down greatly on the number of
+             * broadcasts, at the cost of not mWifiInforming others
+             * interested in RSSI of all the changes in signal
+             * level.
+             */
+            // TODO: The second arg to the call below needs to be a symbol somewhere, but
+            // it's actually the size of an array of icons that's private
+            // to StatusBar Policy.
+            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
+            if (newSignalLevel != mLastSignalLevel) {
+                sendRssiChangeBroadcast(newRssi);
+            }
+            mLastSignalLevel = newSignalLevel;
+        } else {
+            mWifiInfo.setRssi(-200);
+        }
+        int newLinkSpeed = WifiNative.getLinkSpeedCommand();
+        if (newLinkSpeed != -1) {
+            mWifiInfo.setLinkSpeed(newLinkSpeed);
+        }
+    }
+
+    /**
+     * Resets the Wi-Fi Connections by clearing any state, resetting any sockets
+     * using the interface, stopping DHCP & disabling interface
+     */
+    private void handleNetworkDisconnect() {
+        Log.d(TAG, "Reset connections and stopping DHCP");
+
+        /*
+         * Reset connections & stop DHCP
+         */
+        NetworkUtils.resetConnections(mInterfaceName);
+
+        if (!NetworkUtils.stopDhcp(mInterfaceName)) {
+            Log.e(TAG, "Could not stop DHCP");
+        }
+
+        /* Disable interface */
+        NetworkUtils.disableInterface(mInterfaceName);
+
+        /* send event to CM & network change broadcast */
+        setDetailedState(DetailedState.DISCONNECTED);
+        sendNetworkStateChangeBroadcast(mLastBssid);
+
+        /* Reset data structures */
+        mWifiInfo.setIpAddress(0);
+        mWifiInfo.setBSSID(null);
+        mWifiInfo.setSSID(null);
+        mWifiInfo.setNetworkId(-1);
+
+        /* Clear network properties */
+        mNetworkProperties.clear();
+
+        mLastBssid= null;
+        mLastNetworkId = -1;
+
+    }
+
+
+    /*********************************************************
+     * Notifications from WifiMonitor
+     ********************************************************/
+
+    /**
+     * A structure for supplying information about a supplicant state
+     * change in the STATE_CHANGE event message that comes from the
+     * WifiMonitor
+     * thread.
+     */
+    private static class StateChangeResult {
+        StateChangeResult(int networkId, String BSSID, Object state) {
+            this.state = state;
+            this.BSSID = BSSID;
+            this.networkId = networkId;
+        }
+        int networkId;
+        String BSSID;
+        Object state;
+    }
+
+    /**
+     * Send the tracker a notification that a user-entered password key
+     * may be incorrect (i.e., caused authentication to fail).
+     */
+    void notifyPasswordKeyMayBeIncorrect() {
+        sendMessage(PASSWORD_MAY_BE_INCORRECT_EVENT);
+    }
+
+    /**
+     * Send the tracker a notification that a connection to the supplicant
+     * daemon has been established.
+     */
+    void notifySupplicantConnection() {
+        sendMessage(SUP_CONNECTION_EVENT);
+    }
+
+    /**
+     * Send the tracker a notification that a connection to the supplicant
+     * daemon has been established.
+     */
+    void notifySupplicantLost() {
+        sendMessage(SUP_DISCONNECTION_EVENT);
+    }
+
+    /**
+     * Send the tracker a notification that the state of Wifi connectivity
+     * has changed.
+     * @param networkId the configured network on which the state change occurred
+     * @param newState the new network state
+     * @param BSSID when the new state is {@link DetailedState#CONNECTED
+     * NetworkInfo.DetailedState.CONNECTED},
+     * this is the MAC address of the access point. Otherwise, it
+     * is {@code null}.
+     */
+    void notifyNetworkStateChange(DetailedState newState, String BSSID, int networkId) {
+        if (newState == NetworkInfo.DetailedState.CONNECTED) {
+            sendMessage(obtainMessage(NETWORK_CONNECTION_EVENT,
+                    new StateChangeResult(networkId, BSSID, newState)));
+        } else {
+            sendMessage(obtainMessage(NETWORK_DISCONNECTION_EVENT,
+                    new StateChangeResult(networkId, BSSID, newState)));
+        }
+    }
+
+    /**
+     * Send the tracker a notification that the state of the supplicant
+     * has changed.
+     * @param networkId the configured network on which the state change occurred
+     * @param newState the new {@code SupplicantState}
+     */
+    void notifySupplicantStateChange(int networkId, String BSSID, SupplicantState newState) {
+        sendMessage(obtainMessage(SUPPLICANT_STATE_CHANGE_EVENT,
+                new StateChangeResult(networkId, BSSID, newState)));
+    }
+
+    /**
+     * Send the tracker a notification that a scan has completed, and results
+     * are available.
+     */
+    void notifyScanResultsAvailable() {
+        /**
+         * Switch scan mode over to passive.
+         * Turning off scan-only mode happens only in "Connect" mode
+         */
+        setScanType(false);
+        sendMessage(SCAN_RESULTS_EVENT);
+    }
+
+    void notifyDriverStarted() {
+        sendMessage(DRIVER_START_EVENT);
+    }
+
+    void notifyDriverStopped() {
+        sendMessage(DRIVER_STOP_EVENT);
+    }
+
+    void notifyDriverHung() {
+        setWifiEnabled(false);
+        setWifiEnabled(true);
+    }
+
+
+    /********************************************************
+     * HSM states
+     *******************************************************/
+
+    class DefaultState extends HierarchicalState {
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            SyncParams syncParams;
+            switch (message.what) {
+                    /* Synchronous call returns */
+                case CMD_PING_SUPPLICANT:
+                case CMD_START_SCAN:
+                case CMD_DISCONNECT:
+                case CMD_RECONNECT:
+                case CMD_REASSOCIATE:
+                case CMD_REMOVE_NETWORK:
+                case CMD_ENABLE_NETWORK:
+                case CMD_DISABLE_NETWORK:
+                case CMD_ADD_OR_UPDATE_NETWORK:
+                case CMD_GET_RSSI:
+                case CMD_GET_RSSI_APPROX:
+                case CMD_GET_LINK_SPEED:
+                case CMD_GET_MAC_ADDR:
+                case CMD_SAVE_CONFIG:
+                case CMD_CONNECTION_STATUS:
+                case CMD_GET_NETWORK_CONFIG:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = false;
+                        syncParams.mSyncReturn.intValue = -1;
+                        syncParams.mSyncReturn.stringValue = null;
+                        syncParams.mSyncReturn.configList = null;
+                        notifyOnMsgObject(message);
+                    }
+                    break;
+                case CM_CMD_TEARDOWN:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    mTeardownRequested.set(true);
+                    sendMessage(CMD_DISCONNECT);
+                    sendMessage(CMD_STOP_DRIVER);
+                    /* Mark wifi available when CM tears down */
+                    mNetworkInfo.setIsAvailable(true);
+                    break;
+                case CM_CMD_RECONNECT:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    mTeardownRequested.set(false);
+                    sendMessage(CMD_START_DRIVER);
+                    sendMessage(CMD_RECONNECT);
+                    break;
+                case CMD_ENABLE_RSSI_POLL:
+                    mEnableRssiPolling = (message.arg1 == 1);
+                    mSupplicantStateTracker.sendMessage(CMD_ENABLE_RSSI_POLL);
+                    break;
+                default:
+                    if (DBG) Log.w(TAG, "Unhandled " + message);
+                    break;
+            }
+            return HANDLED;
+        }
+    }
+
+    class InitialState extends HierarchicalState {
+        @Override
+        //TODO: could move logging into a common class
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            // [31-8] Reserved for future use
+            // [7 - 0] HSM state change
+            // 50021 wifi_state_changed (custom|1|5)
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            if (WifiNative.isDriverLoaded()) {
+                transitionTo(mDriverLoadedState);
+            }
+            else {
+                transitionTo(mDriverUnloadedState);
+            }
+        }
+    }
+
+    class DriverLoadingState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            final Message message = new Message();
+            message.copyFrom(getCurrentMessage());
+            new Thread(new Runnable() {
+                public void run() {
+                    sWakeLock.acquire();
+                    //enabling state
+                    switch(message.arg1) {
+                        case WIFI_STATE_ENABLING:
+                            setWifiState(WIFI_STATE_ENABLING);
+                            break;
+                        case WIFI_AP_STATE_ENABLING:
+                            setWifiApState(WIFI_AP_STATE_ENABLING);
+                            break;
+                    }
+
+                    if(WifiNative.loadDriver()) {
+                        Log.d(TAG, "Driver load successful");
+                        sendMessage(CMD_LOAD_DRIVER_SUCCESS);
+                    } else {
+                        Log.e(TAG, "Failed to load driver!");
+                        switch(message.arg1) {
+                            case WIFI_STATE_ENABLING:
+                                setWifiState(WIFI_STATE_UNKNOWN);
+                                break;
+                            case WIFI_AP_STATE_ENABLING:
+                                setWifiApState(WIFI_AP_STATE_FAILED);
+                                break;
+                        }
+                        sendMessage(CMD_LOAD_DRIVER_FAILURE);
+                    }
+                    sWakeLock.release();
+                }
+            }).start();
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_LOAD_DRIVER_SUCCESS:
+                    transitionTo(mDriverLoadedState);
+                    break;
+                case CMD_LOAD_DRIVER_FAILURE:
+                    transitionTo(mDriverFailedState);
+                    break;
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_POWER_MODE:
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverLoadedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case CMD_UNLOAD_DRIVER:
+                    transitionTo(mDriverUnloadingState);
+                    break;
+                case CMD_START_SUPPLICANT:
+                    if(WifiNative.startSupplicant()) {
+                        Log.d(TAG, "Supplicant start successful");
+                        mWifiMonitor.startMonitoring();
+                        setWifiState(WIFI_STATE_ENABLED);
+                        transitionTo(mWaitForSupState);
+                    } else {
+                        Log.e(TAG, "Failed to start supplicant!");
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
+                    }
+                    break;
+                case CMD_START_AP:
+                    try {
+                        nwService.startAccessPoint((WifiConfiguration) message.obj,
+                                    mInterfaceName,
+                                    SOFTAP_IFACE);
+                    } catch(Exception e) {
+                        Log.e(TAG, "Exception in startAccessPoint()");
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
+                        break;
+                    }
+                    Log.d(TAG, "Soft AP start successful");
+                    setWifiApState(WIFI_AP_STATE_ENABLED);
+                    transitionTo(mSoftApStartedState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverUnloadingState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            final Message message = new Message();
+            message.copyFrom(getCurrentMessage());
+            new Thread(new Runnable() {
+                public void run() {
+                    if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+                    sWakeLock.acquire();
+                    if(WifiNative.unloadDriver()) {
+                        Log.d(TAG, "Driver unload successful");
+                        sendMessage(CMD_UNLOAD_DRIVER_SUCCESS);
+
+                        switch(message.arg1) {
+                            case WIFI_STATE_DISABLED:
+                            case WIFI_STATE_UNKNOWN:
+                                setWifiState(message.arg1);
+                                break;
+                            case WIFI_AP_STATE_DISABLED:
+                            case WIFI_AP_STATE_FAILED:
+                                setWifiApState(message.arg1);
+                                break;
+                        }
+                    } else {
+                        Log.e(TAG, "Failed to unload driver!");
+                        sendMessage(CMD_UNLOAD_DRIVER_FAILURE);
+
+                        switch(message.arg1) {
+                            case WIFI_STATE_DISABLED:
+                            case WIFI_STATE_UNKNOWN:
+                                setWifiState(WIFI_STATE_UNKNOWN);
+                                break;
+                            case WIFI_AP_STATE_DISABLED:
+                            case WIFI_AP_STATE_FAILED:
+                                setWifiApState(WIFI_AP_STATE_FAILED);
+                                break;
+                        }
+                    }
+                    sWakeLock.release();
+                }
+            }).start();
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_UNLOAD_DRIVER_SUCCESS:
+                    transitionTo(mDriverUnloadedState);
+                    break;
+                case CMD_UNLOAD_DRIVER_FAILURE:
+                    transitionTo(mDriverFailedState);
+                    break;
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_POWER_MODE:
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverUnloadedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_LOAD_DRIVER:
+                    transitionTo(mDriverLoadingState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverFailedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            Log.e(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            return NOT_HANDLED;
+        }
+    }
+
+
+    class WaitForSupState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case SUP_CONNECTION_EVENT:
+                    Log.d(TAG, "Supplicant connection established");
+                    mSupplicantStateTracker.resetSupplicantState();
+                    /* Initialize data structures */
+                    resetNotificationTimer();
+                    setTeardownRequested(false);
+                    mLastBssid = null;
+                    mLastNetworkId = -1;
+                    mLastSignalLevel = -1;
+
+                    mWifiInfo.setMacAddress(WifiNative.getMacAddressCommand());
+
+                    //TODO: initialize and fix multicast filtering
+                    //mWM.initializeMulticastFiltering();
+
+                    if (mBluetoothA2dp == null) {
+                        mBluetoothA2dp = new BluetoothA2dp(mContext);
+                    }
+                    checkIsBluetoothPlaying();
+
+                    checkUseStaticIp();
+                    sendSupplicantConnectionChangedBroadcast(true);
+                    transitionTo(mDriverSupReadyState);
+                    break;
+                case CMD_STOP_SUPPLICANT:
+                    Log.d(TAG, "Stop supplicant received");
+                    WifiNative.stopSupplicant();
+                    transitionTo(mDriverLoadedState);
+                    break;
+                    /* Fail soft ap when waiting for supplicant start */
+                case CMD_START_AP:
+                    Log.d(TAG, "Failed to start soft AP with a running supplicant");
+                    setWifiApState(WIFI_AP_STATE_FAILED);
+                    break;
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_POWER_MODE:
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
+                    break;
+                case CMD_STOP_AP:
+                case CMD_START_SUPPLICANT:
+                case CMD_UNLOAD_DRIVER:
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverSupReadyState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            /* Initialize for connect mode operation at start */
+            mIsScanMode = false;
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            SyncParams syncParams;
+            switch(message.what) {
+                case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
+                    Log.d(TAG, "Stop supplicant received");
+                    WifiNative.stopSupplicant();
+                    //$FALL-THROUGH$
+                case SUP_DISCONNECTION_EVENT:  /* Supplicant died */
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    //Remove any notifications on disconnection
+                    setNotificationVisible(false, 0, false, 0);
+                    WifiNative.closeSupplicantConnection();
+                    handleNetworkDisconnect();
+                    sendSupplicantConnectionChangedBroadcast(false);
+                    mSupplicantStateTracker.resetSupplicantState();
+                    transitionTo(mDriverLoadedState);
+
+                    /* When supplicant dies, unload driver and enter failed state */
+                    //TODO: consider bringing up supplicant again
+                    if (message.what == SUP_DISCONNECTION_EVENT) {
+                        Log.d(TAG, "Supplicant died, unloading driver");
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
+                    }
+                    break;
+                case CMD_START_DRIVER:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    WifiNative.startDriverCommand();
+                    transitionTo(mDriverStartingState);
+                    break;
+                case SCAN_RESULTS_EVENT:
+                    setScanResults(WifiNative.scanResultsCommand());
+                    sendScanResultsAvailableBroadcast();
+                    checkAndSetNotification();
+                    break;
+                case CMD_PING_SUPPLICANT:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.boolValue = WifiNative.pingCommand();
+                    notifyOnMsgObject(message);
+                    break;
+                case CMD_ADD_OR_UPDATE_NETWORK:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    syncParams = (SyncParams) message.obj;
+                    WifiConfiguration config = (WifiConfiguration) syncParams.mParameter;
+                    syncParams.mSyncReturn.intValue = addOrUpdateNetworkNative(config);
+                    notifyOnMsgObject(message);
+                    break;
+                case CMD_REMOVE_NETWORK:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.removeNetworkCommand(
+                                message.arg1);
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.removeNetworkCommand(message.arg1);
+                    }
+                    break;
+                case CMD_ENABLE_NETWORK:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        EnableNetParams enableNetParams = (EnableNetParams) syncParams.mParameter;
+                        syncParams.mSyncReturn.boolValue = WifiNative.enableNetworkCommand(
+                                enableNetParams.netId, enableNetParams.disableOthers);
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.enableNetworkCommand(message.arg1, message.arg2 == 1);
+                    }
+                    break;
+                case CMD_DISABLE_NETWORK:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.disableNetworkCommand(
+                                message.arg1);
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.disableNetworkCommand(message.arg1);
+                    }
+                    break;
+                case CMD_BLACKLIST_NETWORK:
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    WifiNative.addToBlacklistCommand((String)message.obj);
+                    break;
+                case CMD_CLEAR_BLACKLIST:
+                    WifiNative.clearBlacklistCommand();
+                    break;
+                case CMD_GET_NETWORK_CONFIG:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.configList = getConfiguredNetworksNative();
+                    notifyOnMsgObject(message);
+                    break;
+                case CMD_SAVE_CONFIG:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.saveConfigCommand();
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.saveConfigCommand();
+                    }
+                    // Inform the backup manager about a data change
+                    IBackupManager ibm = IBackupManager.Stub.asInterface(
+                            ServiceManager.getService(Context.BACKUP_SERVICE));
+                    if (ibm != null) {
+                        try {
+                            ibm.dataChanged("com.android.providers.settings");
+                        } catch (Exception e) {
+                            // Try again later
+                        }
+                    }
+                    break;
+                case CMD_CONNECTION_STATUS:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.stringValue = WifiNative.statusCommand();
+                    notifyOnMsgObject(message);
+                    break;
+                case CMD_GET_MAC_ADDR:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.stringValue = WifiNative.getMacAddressCommand();
+                    notifyOnMsgObject(message);
+                    break;
+                    /* Cannot start soft AP while in client mode */
+                case CMD_START_AP:
+                    Log.d(TAG, "Failed to start soft AP with a running supplicant");
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    setWifiApState(WIFI_AP_STATE_FAILED);
+                    break;
+                case CMD_SET_SCAN_MODE:
+                    mIsScanMode = (message.arg1 == SCAN_ONLY_MODE);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
+    class DriverStartingState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case DRIVER_START_EVENT:
+                    transitionTo(mDriverStartedState);
+                    break;
+                    /* Queue driver commands & connection events */
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case NETWORK_CONNECTION_EVENT:
+                case NETWORK_DISCONNECTION_EVENT:
+                case PASSWORD_MAY_BE_INCORRECT_EVENT:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_POWER_MODE:
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
+                    break;
+                    /* Queue the asynchronous version of these commands */
+                case CMD_START_SCAN:
+                case CMD_DISCONNECT:
+                case CMD_REASSOCIATE:
+                case CMD_RECONNECT:
+                    if (message.arg2 != SYNCHRONOUS_CALL) {
+                        deferMessage(message);
+                    }
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverStartedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            try {
+                mBatteryStats.noteWifiRunning();
+            } catch (RemoteException ignore) {}
+
+            /* Initialize channel count */
+            setNumAllowedChannels();
+
+            if (mIsScanMode) {
+                WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
+                WifiNative.disconnectCommand();
+                transitionTo(mScanModeState);
+            } else {
+                WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
+                WifiNative.reconnectCommand();
+                transitionTo(mConnectModeState);
+            }
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            SyncParams syncParams;
+            switch(message.what) {
+                case CMD_SET_SCAN_TYPE:
+                    if (message.arg1 == SCAN_ACTIVE) {
+                        WifiNative.setScanModeCommand(true);
+                    } else {
+                        WifiNative.setScanModeCommand(false);
+                    }
+                    break;
+                case CMD_SET_POWER_MODE:
+                    WifiNative.setPowerModeCommand(message.arg1);
+                    break;
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                    WifiNative.setBluetoothCoexistenceModeCommand(message.arg1);
+                    break;
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                    WifiNative.setBluetoothCoexistenceScanModeCommand(message.arg1 == 1);
+                    break;
+                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                    mNumAllowedChannels = message.arg1;
+                    WifiNative.setNumAllowedChannelsCommand(message.arg1);
+                    break;
+                case CMD_START_DRIVER:
+                    /* Ignore another driver start */
+                    break;
+                case CMD_STOP_DRIVER:
+                    WifiNative.stopDriverCommand();
+                    transitionTo(mDriverStoppingState);
+                    break;
+                case CMD_REQUEST_CM_WAKELOCK:
+                    if (mCm == null) {
+                        mCm = (ConnectivityManager)mContext.getSystemService(
+                                Context.CONNECTIVITY_SERVICE);
+                    }
+                    mCm.requestNetworkTransitionWakelock(TAG);
+                    break;
+                case CMD_START_PACKET_FILTERING:
+                    WifiNative.startPacketFiltering();
+                    break;
+                case CMD_STOP_PACKET_FILTERING:
+                    WifiNative.stopPacketFiltering();
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+        @Override
+        public void exit() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            try {
+                mBatteryStats.noteWifiStopped();
+            } catch (RemoteException ignore) { }
+        }
+    }
+
+    class DriverStoppingState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case DRIVER_STOP_EVENT:
+                    transitionTo(mDriverStoppedState);
+                    break;
+                    /* Queue driver commands */
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_POWER_MODE:
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
+                    break;
+                    /* Queue the asynchronous version of these commands */
+                case CMD_START_SCAN:
+                case CMD_DISCONNECT:
+                case CMD_REASSOCIATE:
+                case CMD_RECONNECT:
+                    if (message.arg2 != SYNCHRONOUS_CALL) {
+                        deferMessage(message);
+                    }
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DriverStoppedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            // Take down any open network notifications on driver stop
+            setNotificationVisible(false, 0, false, 0);
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            return NOT_HANDLED;
+        }
+    }
+
+    class ScanModeState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            SyncParams syncParams;
+            switch(message.what) {
+                case CMD_SET_SCAN_MODE:
+                    if (message.arg1 == SCAN_ONLY_MODE) {
+                        /* Ignore */
+                        return HANDLED;
+                    } else {
+                        WifiNative.setScanResultHandlingCommand(message.arg1);
+                        WifiNative.reconnectCommand();
+                        mIsScanMode = false;
+                        transitionTo(mDisconnectedState);
+                    }
+                    break;
+                case CMD_START_SCAN:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.scanCommand(
+                                message.arg1 == SCAN_ACTIVE);
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                    }
+                    break;
+                    /* Ignore */
+                case CMD_DISCONNECT:
+                case CMD_RECONNECT:
+                case CMD_REASSOCIATE:
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case NETWORK_CONNECTION_EVENT:
+                case NETWORK_DISCONNECTION_EVENT:
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class ConnectModeState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            SyncParams syncParams;
+            StateChangeResult stateChangeResult;
+            switch(message.what) {
+                case PASSWORD_MAY_BE_INCORRECT_EVENT:
+                    mPasswordKeyMayBeIncorrect = true;
+                    break;
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                    stateChangeResult = (StateChangeResult) message.obj;
+                    mSupplicantStateTracker.handleEvent(stateChangeResult);
+                    break;
+                case CMD_START_SCAN:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = true;
+                        notifyOnMsgObject(message);
+                    }
+                    /* We need to set scan type in completed state */
+                    Message newMsg = obtainMessage();
+                    newMsg.copyFrom(message);
+                    mSupplicantStateTracker.sendMessage(newMsg);
+                    break;
+                    /* Do a redundant disconnect without transition */
+                case CMD_DISCONNECT:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.disconnectCommand();
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.disconnectCommand();
+                    }
+                    break;
+                case CMD_RECONNECT:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.reconnectCommand();
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.reconnectCommand();
+                    }
+                    break;
+                case CMD_REASSOCIATE:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.reassociateCommand();
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.reassociateCommand();
+                    }
+                    break;
+                case SCAN_RESULTS_EVENT:
+                    /* Set the scan setting back to "connect" mode */
+                    WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
+                    /* Handle scan results */
+                    return NOT_HANDLED;
+                case NETWORK_CONNECTION_EVENT:
+                    Log.d(TAG,"Network connection established");
+                    stateChangeResult = (StateChangeResult) message.obj;
+
+                    /* Remove any notifications */
+                    setNotificationVisible(false, 0, false, 0);
+                    resetNotificationTimer();
+
+                    mWifiInfo.setBSSID(mLastBssid = stateChangeResult.BSSID);
+                    mWifiInfo.setNetworkId(stateChangeResult.networkId);
+                    mLastNetworkId = stateChangeResult.networkId;
+
+                    /* send event to CM & network change broadcast */
+                    setDetailedState(DetailedState.OBTAINING_IPADDR);
+                    sendNetworkStateChangeBroadcast(mLastBssid);
+
+                    transitionTo(mConnectingState);
+                    break;
+                case NETWORK_DISCONNECTION_EVENT:
+                    Log.d(TAG,"Network connection lost");
+                    handleNetworkDisconnect();
+                    transitionTo(mDisconnectedState);
+                    break;
+                case CMD_GET_RSSI:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.intValue = WifiNative.getRssiCommand();
+                    notifyOnMsgObject(message);
+                    break;
+                case CMD_GET_RSSI_APPROX:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.intValue = WifiNative.getRssiApproxCommand();
+                    notifyOnMsgObject(message);
+                    break;
+                case CMD_GET_LINK_SPEED:
+                    syncParams = (SyncParams) message.obj;
+                    syncParams.mSyncReturn.intValue = WifiNative.getLinkSpeedCommand();
+                    notifyOnMsgObject(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class ConnectingState extends HierarchicalState {
+        boolean modifiedBluetoothCoexistenceMode;
+        int powerMode;
+        Thread mDhcpThread;
+
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            if (!mUseStaticIp) {
+
+                mDhcpThread = null;
+                modifiedBluetoothCoexistenceMode = false;
+                powerMode = DRIVER_POWER_MODE_AUTO;
+
+                if (shouldDisableCoexistenceMode()) {
+                    /*
+                     * There are problems setting the Wi-Fi driver's power
+                     * mode to active when bluetooth coexistence mode is
+                     * enabled or sense.
+                     * <p>
+                     * We set Wi-Fi to active mode when
+                     * obtaining an IP address because we've found
+                     * compatibility issues with some routers with low power
+                     * mode.
+                     * <p>
+                     * In order for this active power mode to properly be set,
+                     * we disable coexistence mode until we're done with
+                     * obtaining an IP address.  One exception is if we
+                     * are currently connected to a headset, since disabling
+                     * coexistence would interrupt that connection.
+                     */
+                    modifiedBluetoothCoexistenceMode = true;
+
+                    // Disable the coexistence mode
+                    WifiNative.setBluetoothCoexistenceModeCommand(
+                            WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
+                }
+
+                powerMode =  WifiNative.getPowerModeCommand();
+                if (powerMode < 0) {
+                  // Handle the case where supplicant driver does not support
+                  // getPowerModeCommand.
+                    powerMode = DRIVER_POWER_MODE_AUTO;
+                }
+                if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
+                    WifiNative.setPowerModeCommand(DRIVER_POWER_MODE_ACTIVE);
+                }
+
+                Log.d(TAG, "DHCP request started");
+                mDhcpThread = new Thread(new Runnable() {
+                    public void run() {
+                        if (NetworkUtils.runDhcp(mInterfaceName, mDhcpInfo)) {
+                            Log.d(TAG, "DHCP request succeeded");
+                            sendMessage(CMD_IP_CONFIG_SUCCESS);
+                        } else {
+                            Log.d(TAG, "DHCP request failed: " +
+                                    NetworkUtils.getDhcpError());
+                            sendMessage(CMD_IP_CONFIG_FAILURE);
+                        }
+                    }
+                });
+                mDhcpThread.start();
+            } else {
+                if (NetworkUtils.configureInterface(mInterfaceName, mDhcpInfo)) {
+                    Log.v(TAG, "Static IP configuration succeeded");
+                    sendMessage(CMD_IP_CONFIG_SUCCESS);
+                } else {
+                    Log.v(TAG, "Static IP configuration failed");
+                    sendMessage(CMD_IP_CONFIG_FAILURE);
+                }
+            }
+         }
+      @Override
+      public boolean processMessage(Message message) {
+          if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+
+          switch(message.what) {
+              case CMD_IP_CONFIG_SUCCESS:
+                  mReconnectCount = 0;
+                  mLastSignalLevel = -1; // force update of signal strength
+                  mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
+                  Log.d(TAG, "IP configuration: " + mDhcpInfo);
+                  configureNetworkProperties();
+                  setDetailedState(DetailedState.CONNECTED);
+                  sendNetworkStateChangeBroadcast(mLastBssid);
+                  transitionTo(mConnectedState);
+                  break;
+              case CMD_IP_CONFIG_FAILURE:
+                  mWifiInfo.setIpAddress(0);
+
+                  Log.e(TAG, "IP configuration failed");
+                  /**
+                   * If we've exceeded the maximum number of retries for DHCP
+                   * to a given network, disable the network
+                   */
+                  if (++mReconnectCount > getMaxDhcpRetries()) {
+                          Log.e(TAG, "Failed " +
+                                  mReconnectCount + " times, Disabling " + mLastNetworkId);
+                      WifiNative.disableNetworkCommand(mLastNetworkId);
+                  }
+
+                  /* DHCP times out after about 30 seconds, we do a
+                   * disconnect and an immediate reconnect to try again
+                   */
+                  WifiNative.disconnectCommand();
+                  WifiNative.reconnectCommand();
+                  transitionTo(mDisconnectingState);
+                  break;
+              case CMD_DISCONNECT:
+                  if (message.arg2 == SYNCHRONOUS_CALL) {
+                      SyncParams syncParams = (SyncParams) message.obj;
+                      syncParams.mSyncReturn.boolValue = WifiNative.disconnectCommand();
+                      notifyOnMsgObject(message);
+                  } else {
+                      /* asynchronous handling */
+                      WifiNative.disconnectCommand();
+                  }
+                  transitionTo(mDisconnectingState);
+                  break;
+                  /* Ignore */
+              case NETWORK_CONNECTION_EVENT:
+                  break;
+              case CMD_STOP_DRIVER:
+                  sendMessage(CMD_DISCONNECT);
+                  deferMessage(message);
+                  break;
+              case CMD_SET_SCAN_MODE:
+                  if (message.arg1 == SCAN_ONLY_MODE) {
+                      sendMessage(CMD_DISCONNECT);
+                      deferMessage(message);
+                  }
+                  break;
+              case CMD_RECONFIGURE_IP:
+                  deferMessage(message);
+                  break;
+              default:
+                return NOT_HANDLED;
+          }
+          EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+          return HANDLED;
+      }
+
+      @Override
+      public void exit() {
+          /* reset power state & bluetooth coexistence if on DHCP */
+          if (!mUseStaticIp) {
+              if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
+                  WifiNative.setPowerModeCommand(powerMode);
+              }
+
+              if (modifiedBluetoothCoexistenceMode) {
+                  // Set the coexistence mode back to its default value
+                  WifiNative.setBluetoothCoexistenceModeCommand(
+                          WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
+              }
+          }
+
+      }
+    }
+
+    class ConnectedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_DISCONNECT:
+                    if (message.arg2 == SYNCHRONOUS_CALL) {
+                        SyncParams syncParams = (SyncParams) message.obj;
+                        syncParams.mSyncReturn.boolValue = WifiNative.disconnectCommand();
+                        notifyOnMsgObject(message);
+                    } else {
+                        /* asynchronous handling */
+                        WifiNative.disconnectCommand();
+                    }
+                    transitionTo(mDisconnectingState);
+                    break;
+                case CMD_RECONFIGURE_IP:
+                    Log.d(TAG,"Reconfiguring IP on connection");
+                    NetworkUtils.resetConnections(mInterfaceName);
+                    transitionTo(mConnectingState);
+                    break;
+                case CMD_STOP_DRIVER:
+                    sendMessage(CMD_DISCONNECT);
+                    deferMessage(message);
+                    break;
+                case CMD_SET_SCAN_MODE:
+                    if (message.arg1 == SCAN_ONLY_MODE) {
+                        sendMessage(CMD_DISCONNECT);
+                        deferMessage(message);
+                    }
+                    break;
+                    /* Ignore */
+                case NETWORK_CONNECTION_EVENT:
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DisconnectingState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_STOP_DRIVER: /* Stop driver only after disconnect handled */
+                    deferMessage(message);
+                    break;
+                case CMD_SET_SCAN_MODE:
+                    if (message.arg1 == SCAN_ONLY_MODE) {
+                        deferMessage(message);
+                    }
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class DisconnectedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_SET_SCAN_MODE:
+                    if (message.arg1 == SCAN_ONLY_MODE) {
+                        WifiNative.setScanResultHandlingCommand(message.arg1);
+                        //Supplicant disconnect to prevent further connects
+                        WifiNative.disconnectCommand();
+                        mIsScanMode = true;
+                        transitionTo(mScanModeState);
+                    }
+                    break;
+                    /* Ignore network disconnect */
+                case NETWORK_DISCONNECTION_EVENT:
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class SoftApStartedState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case CMD_STOP_AP:
+                    Log.d(TAG,"Stopping Soft AP");
+                    setWifiApState(WIFI_AP_STATE_DISABLING);
+                    try {
+                        nwService.stopAccessPoint();
+                    } catch(Exception e) {
+                        Log.e(TAG, "Exception in stopAccessPoint()");
+                    }
+                    transitionTo(mDriverLoadedState);
+                    break;
+                case CMD_START_AP:
+                    Log.d(TAG,"SoftAP set on a running access point");
+                    try {
+                        nwService.setAccessPoint((WifiConfiguration) message.obj,
+                                    mInterfaceName,
+                                    SOFTAP_IFACE);
+                    } catch(Exception e) {
+                        Log.e(TAG, "Exception in nwService during soft AP set");
+                        try {
+                            nwService.stopAccessPoint();
+                        } catch (Exception ee) {
+                            Slog.e(TAG, "Could not stop AP, :" + ee);
+                        }
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
+                    }
+                    break;
+                /* Fail client mode operation when soft AP is enabled */
+                case CMD_START_SUPPLICANT:
+                    Log.e(TAG,"Cannot start supplicant with a running soft AP");
+                    setWifiState(WIFI_STATE_UNKNOWN);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+
+    class SupplicantStateTracker extends HierarchicalStateMachine {
+
+        private int mRssiPollToken = 0;
+
+        /**
+         * The max number of the WPA supplicant loop iterations before we
+         * decide that the loop should be terminated:
+         */
+        private static final int MAX_SUPPLICANT_LOOP_ITERATIONS = 4;
+        private int mLoopDetectIndex = 0;
+        private int mLoopDetectCount = 0;
+
+        /**
+         *  Supplicant state change commands follow
+         *  the ordinal values defined in SupplicantState.java
+         */
+        private static final int DISCONNECTED           = 0;
+        private static final int INACTIVE               = 1;
+        private static final int SCANNING               = 2;
+        private static final int ASSOCIATING            = 3;
+        private static final int ASSOCIATED             = 4;
+        private static final int FOUR_WAY_HANDSHAKE     = 5;
+        private static final int GROUP_HANDSHAKE        = 6;
+        private static final int COMPLETED              = 7;
+        private static final int DORMANT                = 8;
+        private static final int UNINITIALIZED          = 9;
+        private static final int INVALID                = 10;
+
+        private HierarchicalState mUninitializedState;
+        private HierarchicalState mInitializedState;
+        private HierarchicalState mInactiveState;
+        private HierarchicalState mDisconnectState;
+        private HierarchicalState mScanState;
+        private HierarchicalState mConnectState;
+        private HierarchicalState mHandshakeState;
+        private HierarchicalState mCompletedState;
+        private HierarchicalState mDormantState;
+
+
+        public SupplicantStateTracker(Context context, Handler target) {
+            super(TAG, target.getLooper());
+
+            mUninitializedState = new UninitializedState();
+            mInitializedState = new InitializedState();
+            mInactiveState = new InactiveState();
+            mDisconnectState = new DisconnectedState();
+            mScanState = new ScanState();
+            mConnectState = new ConnectState();
+            mHandshakeState = new HandshakeState();
+            mCompletedState = new CompletedState();
+            mDormantState = new DormantState();
+
+
+            addState(mUninitializedState);
+            addState(mInitializedState);
+                addState(mInactiveState, mInitializedState);
+                addState(mDisconnectState, mInitializedState);
+                addState(mScanState, mInitializedState);
+                addState(mConnectState, mInitializedState);
+                    addState(mHandshakeState, mConnectState);
+                    addState(mCompletedState, mConnectState);
+                addState(mDormantState, mInitializedState);
+
+            setInitialState(mUninitializedState);
+
+            //start the state machine
+            start();
+        }
+
+        public void handleEvent(StateChangeResult stateChangeResult) {
+            SupplicantState newState = (SupplicantState) stateChangeResult.state;
+
+            // Supplicant state change
+            // [31-13] Reserved for future use
+            // [8 - 0] Supplicant state (as defined in SupplicantState.java)
+            // 50023 supplicant_state_changed (custom|1|5)
+            EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, newState.ordinal());
+
+            sendMessage(obtainMessage(newState.ordinal(), stateChangeResult));
+        }
+
+        public void resetSupplicantState() {
+            transitionTo(mUninitializedState);
+        }
+
+        private void resetLoopDetection() {
+            mLoopDetectCount = 0;
+            mLoopDetectIndex = 0;
+        }
+
+        private boolean handleTransition(Message msg) {
+            if (DBG) Log.d(TAG, getName() + msg.toString() + "\n");
+            switch (msg.what) {
+                case DISCONNECTED:
+                    transitionTo(mDisconnectState);
+                    break;
+                case SCANNING:
+                    transitionTo(mScanState);
+                    break;
+                case ASSOCIATING:
+                    StateChangeResult stateChangeResult = (StateChangeResult) msg.obj;
+                    /* BSSID is valid only in ASSOCIATING state */
+                    mWifiInfo.setBSSID(stateChangeResult.BSSID);
+                    //$FALL-THROUGH$
+                case ASSOCIATED:
+                case FOUR_WAY_HANDSHAKE:
+                case GROUP_HANDSHAKE:
+                    transitionTo(mHandshakeState);
+                    break;
+                case COMPLETED:
+                    transitionTo(mCompletedState);
+                    break;
+                case DORMANT:
+                    transitionTo(mDormantState);
+                    break;
+                case INACTIVE:
+                    transitionTo(mInactiveState);
+                    break;
+                case UNINITIALIZED:
+                case INVALID:
+                    transitionTo(mUninitializedState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            StateChangeResult stateChangeResult = (StateChangeResult) msg.obj;
+            SupplicantState supState = (SupplicantState) stateChangeResult.state;
+            setDetailedState(WifiInfo.getDetailedStateOf(supState));
+            mWifiInfo.setSupplicantState(supState);
+            mWifiInfo.setNetworkId(stateChangeResult.networkId);
+            //TODO: Modify WifiMonitor to report SSID on events
+            //mWifiInfo.setSSID()
+            return HANDLED;
+        }
+
+        /********************************************************
+         * HSM states
+         *******************************************************/
+
+        class InitializedState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+                switch (message.what) {
+                    case CMD_START_SCAN:
+                        WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                        break;
+                    default:
+                        if (DBG) Log.w(TAG, "Ignoring " + message);
+                        break;
+                }
+                return HANDLED;
+            }
+        }
+
+        class UninitializedState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 mNetworkInfo.setIsAvailable(false);
+                 resetLoopDetection();
+                 mPasswordKeyMayBeIncorrect = false;
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                switch(message.what) {
+                    default:
+                        if (!handleTransition(message)) {
+                            if (DBG) Log.w(TAG, "Ignoring " + message);
+                        }
+                        break;
+                }
+                return HANDLED;
+            }
+        }
+
+        class InactiveState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 Message message = getCurrentMessage();
+                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+
+                 mNetworkInfo.setIsAvailable(false);
+                 resetLoopDetection();
+                 mPasswordKeyMayBeIncorrect = false;
+
+                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                return handleTransition(message);
+            }
+        }
+
+
+        class DisconnectedState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 Message message = getCurrentMessage();
+                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+
+                 mNetworkInfo.setIsAvailable(true);
+                 resetLoopDetection();
+
+                 /* If a disconnect event happens after a password key failure
+                  * event, disable the network
+                  */
+                 if (mPasswordKeyMayBeIncorrect) {
+                     Log.d(TAG, "Failed to authenticate, disabling network " +
+                             mWifiInfo.getNetworkId());
+                     WifiNative.disableNetworkCommand(mWifiInfo.getNetworkId());
+                     mPasswordKeyMayBeIncorrect = false;
+                     sendSupplicantStateChangedBroadcast(stateChangeResult, true);
+                 }
+                 else {
+                     sendSupplicantStateChangedBroadcast(stateChangeResult, false);
+                 }
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                return handleTransition(message);
+            }
+        }
+
+        class ScanState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 Message message = getCurrentMessage();
+                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+
+                 mNetworkInfo.setIsAvailable(true);
+                 mPasswordKeyMayBeIncorrect = false;
+                 resetLoopDetection();
+                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                return handleTransition(message);
+            }
+        }
+
+        class ConnectState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                switch (message.what) {
+                    case CMD_START_SCAN:
+                        WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
+                        WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                        break;
+                    default:
+                        return NOT_HANDLED;
+                }
+                return HANDLED;
+            }
+        }
+
+        class HandshakeState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 final Message message = getCurrentMessage();
+                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+
+                 mNetworkInfo.setIsAvailable(true);
+
+                 if (mLoopDetectIndex > message.what) {
+                     mLoopDetectCount++;
+                 }
+                 if (mLoopDetectCount > MAX_SUPPLICANT_LOOP_ITERATIONS) {
+                     WifiNative.disableNetworkCommand(stateChangeResult.networkId);
+                     mLoopDetectCount = 0;
+                 }
+
+                 mLoopDetectIndex = message.what;
+
+                 mPasswordKeyMayBeIncorrect = false;
+                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                return handleTransition(message);
+            }
+        }
+
+        class CompletedState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 Message message = getCurrentMessage();
+                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+
+                 mNetworkInfo.setIsAvailable(true);
+
+                 mRssiPollToken++;
+                 if (mEnableRssiPolling) {
+                     sendMessageDelayed(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0),
+                             POLL_RSSI_INTERVAL_MSECS);
+                 }
+
+                 resetLoopDetection();
+
+                 mPasswordKeyMayBeIncorrect = false;
+                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                switch(message.what) {
+                    case ASSOCIATING:
+                    case ASSOCIATED:
+                    case FOUR_WAY_HANDSHAKE:
+                    case GROUP_HANDSHAKE:
+                    case COMPLETED:
+                        break;
+                    case CMD_RSSI_POLL:
+                        if (message.arg1 == mRssiPollToken) {
+                            // Get Info and continue polling
+                            requestPolledInfo();
+                            sendMessageDelayed(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0),
+                                    POLL_RSSI_INTERVAL_MSECS);
+                        } else {
+                            // Polling has completed
+                        }
+                        break;
+                    case CMD_ENABLE_RSSI_POLL:
+                        mRssiPollToken++;
+                        if (mEnableRssiPolling) {
+                            // first poll
+                            requestPolledInfo();
+                            sendMessageDelayed(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0),
+                                    POLL_RSSI_INTERVAL_MSECS);
+                        }
+                        break;
+                    default:
+                        return handleTransition(message);
+                }
+                return HANDLED;
+            }
+        }
+
+        class DormantState extends HierarchicalState {
+            @Override
+             public void enter() {
+                 if (DBG) Log.d(TAG, getName() + "\n");
+                 Message message = getCurrentMessage();
+                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+
+                 mNetworkInfo.setIsAvailable(true);
+                 resetLoopDetection();
+                 mPasswordKeyMayBeIncorrect = false;
+
+                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
+
+                 /* TODO: reconnect is now being handled at DHCP failure handling
+                  * If we run into issues with staying in Dormant state, might
+                  * need a reconnect here
+                  */
+             }
+            @Override
+            public boolean processMessage(Message message) {
+                return handleTransition(message);
             }
         }
     }
@@ -2626,9 +3970,5 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
             return Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;
         }
-    }
-
-    public NetworkProperties getNetworkProperties() {
-        return mNetworkProperties;
     }
 }

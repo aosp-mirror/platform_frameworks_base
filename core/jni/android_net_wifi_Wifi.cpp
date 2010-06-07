@@ -98,6 +98,11 @@ static jstring doStringCommand(JNIEnv *env, const char *cmd)
     }
 }
 
+static jboolean android_net_wifi_isDriverLoaded(JNIEnv* env, jobject clazz)
+{
+    return (jboolean)(::is_wifi_driver_loaded() == 1);
+}
+
 static jboolean android_net_wifi_loadDriver(JNIEnv* env, jobject clazz)
 {
     return (jboolean)(::wifi_load_driver() == 0);
@@ -524,6 +529,7 @@ static JNINativeMethod gWifiMethods[] = {
     /* name, signature, funcPtr */
 
     { "loadDriver", "()Z",  (void *)android_net_wifi_loadDriver },
+    { "isDriverLoaded", "()Z",  (void *)android_net_wifi_isDriverLoaded},
     { "unloadDriver", "()Z",  (void *)android_net_wifi_unloadDriver },
     { "startSupplicant", "()Z",  (void *)android_net_wifi_startSupplicant },
     { "stopSupplicant", "()Z",  (void *)android_net_wifi_stopSupplicant },
