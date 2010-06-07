@@ -715,8 +715,8 @@ public class ProgressBar extends View {
             mAnimation.setDuration(mDuration);
             mAnimation.setInterpolator(mInterpolator);
             mAnimation.setStartTime(Animation.START_ON_FIRST_FRAME);
-            postInvalidate();
         }
+        postInvalidate();
     }
 
     /**
@@ -729,6 +729,7 @@ public class ProgressBar extends View {
             ((Animatable) mIndeterminateDrawable).stop();
             mShouldStartAnimationDrawable = false;
         }
+        postInvalidate();
     }
 
     /**
