@@ -35,7 +35,7 @@ interface IStatusBarService
     // You need the STATUS_BAR_SERVICE permission
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
             out List<IBinder> notificationKeys, out List<StatusBarNotification> notifications);
-    void visibilityChanged(boolean visible);
+    void onPanelRevealed();
     void onNotificationClick(String pkg, String tag, int id);
     void onNotificationError(String pkg, String tag, int id, String message);
     void onClearAllNotifications();

@@ -153,6 +153,7 @@ public class PhoneStatusBarService extends StatusBarService {
     TrackingView mTrackingView;
     WindowManager.LayoutParams mTrackingParams;
     int mTrackingPosition; // the position of the top of the tracking view.
+    private boolean mPanelSlightlyVisible;
 
     // ticker
     private Ticker mTicker;
@@ -1297,8 +1298,15 @@ public class PhoneStatusBarService extends StatusBarService {
                 // because the window itself extends below the content view.
                 mExpandedParams.y = -disph;
             }
-            visibilityChanged(visible);
             mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+
+            // As long as this isn't just a repositioning that's not supposed to affect
+            // the user's perception of what's showing, call to say that the visibility
+            // has changed. (Otherwise, someone else will call to do that).
+            if (expandedPosition != EXPANDED_LEAVE_ALONE) {
+                Slog.d(TAG, "updateExpandedViewPos visibilityChanged(" + visible + ")");
+                visibilityChanged(visible);
+            }
         }
 
         if (SPEW) {
@@ -1328,12 +1336,11 @@ public class PhoneStatusBarService extends StatusBarService {
      * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
      * this is what he wants. (see bug 1131461)
      */
-    private boolean mPanelSlightlyVisible;
     void visibilityChanged(boolean visible) {
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
             try {
-                mBarService.visibilityChanged(visible);
+                mBarService.onPanelRevealed();
             } catch (RemoteException ex) {
                 // Won't fail unless the world has ended.
             }
