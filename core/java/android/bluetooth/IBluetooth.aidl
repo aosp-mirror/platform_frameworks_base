@@ -68,4 +68,8 @@ interface IBluetooth
 
     int addRfcommServiceRecord(in String serviceName, in ParcelUuid uuid, int channel, IBinder b);
     void removeServiceRecord(int handle);
+
+    boolean connectHeadset(String address);
+    boolean disconnectHeadset(String address);
+    boolean notifyIncomingConnection(String address);
 }
