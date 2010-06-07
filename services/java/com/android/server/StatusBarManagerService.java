@@ -95,7 +95,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mContext = context;
 
         final Resources res = context.getResources();
-        mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.status_bar_icon_order));
+        mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
     }
 
     public void setNotificationCallbacks(NotificationCallbacks listener) {

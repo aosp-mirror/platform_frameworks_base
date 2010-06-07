@@ -116,7 +116,6 @@ public class PhoneStatusBarService extends StatusBarService {
     Object mQueueLock = new Object();
     
     // icons
-    String[] mRightIconSlots;
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
     LinearLayout mStatusIcons;
@@ -202,7 +201,6 @@ public class PhoneStatusBarService extends StatusBarService {
     // ================================================================================
     private void makeStatusBarView(Context context) {
         Resources res = context.getResources();
-        mRightIconSlots = res.getStringArray(R.array.status_bar_icon_order);
 
         mHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mIconWidth = mHeight;
