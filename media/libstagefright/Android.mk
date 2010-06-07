@@ -81,6 +81,7 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_vpxdec \
         libvpx \
         libstagefright_mpeg2ts \
+        libstagefright_httplive \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \

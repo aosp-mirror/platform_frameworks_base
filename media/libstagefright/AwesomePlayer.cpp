@@ -39,6 +39,8 @@
 
 #include <surfaceflinger/ISurface.h>
 
+#include "include/LiveSource.h"
+
 namespace android {
 
 struct AwesomeEvent : public TimedEventQueue::Event {
@@ -261,6 +263,16 @@ status_t AwesomePlayer::setDataSource_l(
 
 status_t AwesomePlayer::setDataSource(
         int fd, int64_t offset, int64_t length) {
+#if 0
+    // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/nasatv/nasatv_96.m3u8");
+    // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/nasatv/nasatv_1500.m3u8");
+    return setDataSource("httplive://iphone.video.hsn.com/iPhone_high.m3u8");
+    // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/iphonewebcast/webcast090209_all/webcast090209_all.m3u8");
+    // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/usat/tt_062209_iphone/hi/prog_index.m3u8");
+    // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/usat/tt_googmaps/hi/prog_index.m3u8");
+    // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/mtv/ni_spo_25a_rt74137_clip_syn/hi/prog_index.m3u8");
+#endif
+
     Mutex::Autolock autoLock(mLock);
 
     reset_l();
@@ -438,11 +450,11 @@ void AwesomePlayer::onBufferingUpdate() {
         durationUs = mDurationUs;
     }
 
+    int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
+
+    LOGI("cache holds %.2f secs worth of data.", cachedDurationUs / 1E6);
+
     if (durationUs >= 0) {
-        int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
-
-        LOGV("cache holds %.2f secs worth of data.", cachedDurationUs / 1E6);
-
         int64_t positionUs;
         getPosition(&positionUs);
 
@@ -453,7 +465,8 @@ void AwesomePlayer::onBufferingUpdate() {
 
         postBufferingEvent_l();
     } else {
-        LOGE("Not sending buffering status because duration is unknown.");
+        // LOGE("Not sending buffering status because duration is unknown.");
+        postBufferingEvent_l();
     }
 }
 
@@ -1123,6 +1136,20 @@ status_t AwesomePlayer::finishSetDataSource_l() {
                 mConnectingDataSource, 64 * 1024, 10);
 
         mConnectingDataSource.clear();
+    } else if (!strncasecmp(mUri.string(), "httplive://", 11)) {
+        String8 uri("http://");
+        uri.append(mUri.string() + 11);
+
+        dataSource = new LiveSource(uri.string());
+
+        if (dataSource->flags() & DataSource::kWantsPrefetching) {
+            mPrefetcher = new Prefetcher;
+        }
+
+        sp<MediaExtractor> extractor =
+            MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+
+        return setDataSource_l(extractor);
     } else {
         dataSource = DataSource::CreateFromURI(mUri.string(), &mUriHeaders);
     }
