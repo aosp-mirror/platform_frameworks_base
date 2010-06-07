@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Intent;
 import android.os.Message;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -47,6 +48,11 @@ public abstract class MockAccessibilityService extends AccessibilityService {
      * Flag if the mock is currently replaying.
      */
     private boolean mReplaying;
+
+    /**
+     * Flag if the system is bound as a client to this service.
+     */
+    private boolean mIsSystemBoundAsClient;
 
     /**
      * Creates an {@link AccessibilityServiceInfo} populated with default
@@ -143,6 +149,26 @@ public abstract class MockAccessibilityService extends AccessibilityService {
         }
 
         mExpectedInterrupt = false;
+    }
+
+    @Override
+    protected void onServiceConnected() {
+        mIsSystemBoundAsClient = true;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        mIsSystemBoundAsClient = false;
+        return false;
+    }
+
+    /**
+     * Returns if the system is bound as client to this service.
+     *
+     * @return True if the system is bound, false otherwise.
+     */
+    public boolean isSystemBoundAsClient() {
+        return mIsSystemBoundAsClient;
     }
 
     /**
