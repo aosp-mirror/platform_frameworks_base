@@ -24,10 +24,10 @@ import android.bluetooth.BluetoothDevice;
  * {@hide}
  */
 interface IBluetoothHeadset {
-    int getState();
+    int getState(in BluetoothDevice device);
     BluetoothDevice getCurrentHeadset();
     boolean connectHeadset(in BluetoothDevice device);
-    void disconnectHeadset();
+    void disconnectHeadset(in BluetoothDevice device);
     boolean isConnected(in BluetoothDevice device);
     boolean startVoiceRecognition();
     boolean stopVoiceRecognition();
