@@ -1858,7 +1858,7 @@ public class BluetoothService extends IBluetooth.Stub {
         // Rather not do this from here, but no-where else and I need this
         // dump
         pw.println("\n--Headset Service--");
-        switch (headset.getState()) {
+        switch (headset.getState(headset.getCurrentHeadset())) {
         case BluetoothHeadset.STATE_DISCONNECTED:
             pw.println("getState() = STATE_DISCONNECTED");
             break;
