@@ -14188,7 +14188,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                         .REASON_SERVICE_IN_USE;
                                 app.adjSource = cr.binding.client;
-                                app.adjTarget = s.serviceInfo.name;
+                                app.adjTarget = s.name;
                             }
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
                                 if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
@@ -14210,7 +14210,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_SERVICE_IN_USE;
                             app.adjSource = a;
-                            app.adjTarget = s.serviceInfo.name;
+                            app.adjTarget = s.name;
                         }
                     }
                 }
@@ -14262,7 +14262,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_PROVIDER_IN_USE;
                             app.adjSource = client;
-                            app.adjTarget = cpr.info.name;
+                            app.adjTarget = cpr.name;
                         }
                         if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
                             schedGroup = Process.THREAD_GROUP_DEFAULT;
@@ -14278,7 +14278,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         schedGroup = Process.THREAD_GROUP_DEFAULT;
                         app.hidden = false;
                         app.adjType = "provider";
-                        app.adjTarget = cpr.info.name;
+                        app.adjTarget = cpr.name;
                     }
                 }
             }

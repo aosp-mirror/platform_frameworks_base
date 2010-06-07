@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.IActivityManager.ContentProviderHolder;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.os.Process;
@@ -29,6 +30,7 @@ class ContentProviderRecord extends ContentProviderHolder {
     final HashSet<ProcessRecord> clients = new HashSet<ProcessRecord>();
     final int uid;
     final ApplicationInfo appInfo;
+    final ComponentName name;
     int externals;     // number of non-framework processes supported by this provider
     ProcessRecord app; // if non-null, hosting application
     ProcessRecord launchingApp; // if non-null, waiting for this app to be launched.
@@ -38,6 +40,7 @@ class ContentProviderRecord extends ContentProviderHolder {
         super(_info);
         uid = ai.uid;
         appInfo = ai;
+        name = new ComponentName(_info.packageName, _info.name);
         noReleaseNeeded = uid == 0 || uid == Process.SYSTEM_UID;
     }
 
@@ -45,6 +48,7 @@ class ContentProviderRecord extends ContentProviderHolder {
         super(cpr.info);
         uid = cpr.uid;
         appInfo = cpr.appInfo;
+        name = cpr.name;
         noReleaseNeeded = cpr.noReleaseNeeded;
     }
 
