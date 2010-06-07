@@ -19,6 +19,7 @@ package com.android.server.status;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -54,9 +55,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 {
     static final String TAG = "StatusBarManagerService";
     static final boolean SPEW = true;
-
-    public static final String ACTION_STATUSBAR_START
-            = "com.android.internal.policy.statusbar.START";
 
     final Context mContext;
     Handler mHandler = new Handler();
@@ -112,9 +110,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     public void systemReady2() {
-        // Start the status bar app
-        Intent intent = new Intent(ACTION_STATUSBAR_START);
-        mContext.sendBroadcast(intent /** permission  **/);
+        ComponentName cn = ComponentName.unflattenFromString(
+                mContext.getString(com.android.internal.R.string.config_statusBarComponent));
+        Intent intent = new Intent();
+        intent.setComponent(cn);
+        Slog.i(TAG, "Starting service: " + cn);
+        mContext.startService(intent);
     }
 
     // ================================================================================

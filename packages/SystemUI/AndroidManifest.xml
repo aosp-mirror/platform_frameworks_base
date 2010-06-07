@@ -9,13 +9,6 @@
         android:label="@string/app_label"
         android:icon="@drawable/ic_launcher_settings">
                  
-        <receiver
-            android:name=".statusbar.StatusBarStarter"
-            >
-            <intent-filter>
-                <action android:name="com.android.internal.policy.statusbar.START" />
-            </intent-filter>
-        </receiver>
         <service
             android:name=".statusbar.PhoneStatusBarService"
             android:exported="false"

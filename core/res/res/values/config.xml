@@ -20,6 +20,10 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
+    <!-- Component to be used as the status bar service.  Must implement the IStatusBar
+         interface.  This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_statusBarComponent">com.android.systemui/com.android.systemui.statusbar.PhoneStatusBarService</string>
+
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
          manager will disable alpha trasformation in animations where not
