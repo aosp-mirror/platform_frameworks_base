@@ -166,11 +166,10 @@ private:
             OMX_COLOR_FORMATTYPE colorFormat);
 
     void setVideoInputFormat(
-            const char *mime, OMX_U32 width, OMX_U32 height,
-            OMX_U32 frameRate, OMX_U32 bitRate);
+            const char *mime, const sp<MetaData>& meta);
 
-    status_t setupMPEG4EncoderParameters();
-    status_t setupAVCEncoderParameters();
+    status_t setupMPEG4EncoderParameters(const sp<MetaData>& meta);
+    status_t setupAVCEncoderParameters(const sp<MetaData>& meta);
 
     status_t setVideoOutputFormat(
             const char *mime, OMX_U32 width, OMX_U32 height);

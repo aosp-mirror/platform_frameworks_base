@@ -75,6 +75,7 @@ private:
     int32_t mAudioChannels;
     int32_t mSampleRate;
     int32_t mInterleaveDurationUs;
+    int32_t mIFramesInterval;
     int64_t mMaxFileSizeBytes;
     int64_t mMaxFileDurationUs;
 
@@ -92,6 +93,7 @@ private:
     status_t setParamAudioNumberOfChannels(int32_t channles);
     status_t setParamAudioSamplingRate(int32_t sampleRate);
     status_t setParamInterleaveDuration(int32_t durationUs);
+    status_t setParamIFramesInterval(int32_t interval);
     status_t setParamMaxDurationOrFileSize(int64_t limit, bool limit_is_duration);
 
     StagefrightRecorder(const StagefrightRecorder &);
