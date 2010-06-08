@@ -4432,18 +4432,19 @@ void ResTable::print(bool inclValues) const
                                 print_value(pkg, value);
                             } else if (bagPtr != NULL) {
                                 const int N = dtohl(bagPtr->count);
-                                const ResTable_map* mapPtr = (const ResTable_map*)
-                                        (((const uint8_t*)ent) + esize);
+                                const uint8_t* baseMapPtr = (const uint8_t*)ent;
+                                size_t mapOffset = esize;
+                                const ResTable_map* mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
                                 printf("          Parent=0x%08x, Count=%d\n",
                                     dtohl(bagPtr->parent.ident), N);
-                                for (int i=0; i<N && (thisOffset+sizeof(ResTable_map)) < typeSize; i++) {
+                                for (int i=0; i<N && mapOffset < (typeSize-sizeof(ResTable_map)); i++) {
                                     printf("          #%i (Key=0x%08x): ",
                                         i, dtohl(mapPtr->name.ident));
                                     value.copyFrom_dtoh(mapPtr->value);
                                     print_value(pkg, value);
                                     const size_t size = dtohs(mapPtr->value.size);
-                                    thisOffset += size + sizeof(*mapPtr)-sizeof(mapPtr->value);
-                                    mapPtr = (ResTable_map*)(((const uint8_t*)mapPtr)+thisOffset);
+                                    mapOffset += size + sizeof(*mapPtr)-sizeof(mapPtr->value);
+                                    mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
                                 }
                             }
                         }
