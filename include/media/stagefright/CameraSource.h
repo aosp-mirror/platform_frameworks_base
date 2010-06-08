@@ -65,6 +65,7 @@ private:
     int32_t mNumFramesReceived;
     int32_t mNumFramesEncoded;
     int32_t mNumFramesDropped;
+    bool mCollectStats;
     bool mStarted;
 
     CameraSource(const sp<Camera> &camera);

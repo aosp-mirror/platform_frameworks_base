@@ -51,6 +51,12 @@ private:
     AudioRecord *mRecord;
     status_t mInitCheck;
     bool mStarted;
+
+    bool mCollectStats;
+    int64_t mTotalReadTimeUs;
+    int64_t mTotalReadBytes;
+    int64_t mTotalReads;
+
     MediaBufferGroup *mGroup;
 
     AudioSource(const AudioSource &);

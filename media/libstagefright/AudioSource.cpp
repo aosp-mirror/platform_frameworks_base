@@ -25,6 +25,9 @@
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
+#include <cutils/properties.h>
+#include <sys/time.h>
+#include <time.h>
 
 namespace android {
 
@@ -34,6 +37,10 @@ AudioSource::AudioSource(
                 inputSource, sampleRate, AudioSystem::PCM_16_BIT, channels)),
       mInitCheck(mRecord->initCheck()),
       mStarted(false),
+      mCollectStats(false),
+      mTotalReadTimeUs(0),
+      mTotalReadBytes(0),
+      mTotalReads(0),
       mGroup(NULL) {
 }
 
@@ -55,6 +62,11 @@ status_t AudioSource::start(MetaData *params) {
         return UNKNOWN_ERROR;
     }
 
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.record-stats", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        mCollectStats = true;
+    }
     status_t err = mRecord->start();
 
     if (err == OK) {
@@ -79,6 +91,13 @@ status_t AudioSource::stop() {
 
     mStarted = false;
 
+    if (mCollectStats) {
+        LOGI("%lld reads: %.2f bps in %lld us",
+                mTotalReads,
+                (mTotalReadBytes * 8000000.0) / mTotalReadTimeUs,
+                mTotalReadTimeUs);
+    }
+
     return OK;
 }
 
@@ -95,6 +114,7 @@ sp<MetaData> AudioSource::getFormat() {
 status_t AudioSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
+    ++mTotalReads;
 
     MediaBuffer *buffer;
     CHECK_EQ(mGroup->acquire_buffer(&buffer), OK);
@@ -107,7 +127,20 @@ status_t AudioSource::read(
             (1000000ll * numFramesRecorded) / mRecord->getSampleRate()
             - mRecord->latency() * 1000);
 
-    ssize_t n = mRecord->read(buffer->data(), buffer->size());
+    ssize_t n = 0;
+    if (mCollectStats) {
+        struct timeval tv_start, tv_end;
+        gettimeofday(&tv_start, NULL);
+        n = mRecord->read(buffer->data(), buffer->size());
+        gettimeofday(&tv_end, NULL);
+        mTotalReadTimeUs += ((1000000LL * (tv_end.tv_sec - tv_start.tv_sec))
+                + (tv_end.tv_usec - tv_start.tv_usec));
+        if (n >= 0) {
+            mTotalReadBytes += n;
+        }
+    } else {
+        n = mRecord->read(buffer->data(), buffer->size());
+    }
 
     if (n < 0) {
         buffer->release();
