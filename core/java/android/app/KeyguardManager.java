@@ -53,6 +53,9 @@ public class KeyguardManager {
          *
          * A good place to call this is from {@link android.app.Activity#onResume()}
          *
+         * Note: This call has no effect while any {@link DevicePolicyManager} is enabled
+         * that requires a password.
+         *
          * @see #reenableKeyguard()
          */
         public void disableKeyguard() {
@@ -66,7 +69,10 @@ public class KeyguardManager {
          * Reenable the keyguard.  The keyguard will reappear if the previous
          * call to {@link #disableKeyguard()} caused it it to be hidden.
          *
-         * A good place to call this is from {@link android.app.Activity#onPause()} 
+         * A good place to call this is from {@link android.app.Activity#onPause()}
+         *
+         * Note: This call has no effect while any {@link DevicePolicyManager} is enabled
+         * that requires a password.
          *
          * @see #disableKeyguard()
          */
