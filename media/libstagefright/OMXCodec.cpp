@@ -347,6 +347,9 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
 
         quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
+        if (!strncmp(componentName, "OMX.TI.video.encoder", 20)) {
+            quirks |= kAvoidMemcopyInputRecordingFrames;
+        }
     }
 
     if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
@@ -574,7 +577,10 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(success);
 
         if (mIsEncoder) {
-            setVideoInputFormat(mMIME, width, height);
+            int32_t frameRate = 25;  // XXX
+            int32_t bitRate = 3000000;  // bit rate
+            //success = success && meta->findInt32(kKeySampleRate, &frameRate);
+            setVideoInputFormat(mMIME, width, height, frameRate, bitRate);
         } else {
             status_t err = setVideoOutputFormat(
                     mMIME, width, height);
@@ -739,7 +745,8 @@ static size_t getFrameSize(
 }
 
 void OMXCodec::setVideoInputFormat(
-        const char *mime, OMX_U32 width, OMX_U32 height) {
+        const char *mime, OMX_U32 width, OMX_U32 height,
+        OMX_U32 frameRate, OMX_U32 bitRate) {
     CODEC_LOGV("setVideoInputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
@@ -769,6 +776,7 @@ void OMXCodec::setVideoInputFormat(
     CHECK_EQ(setVideoPortFormatType(
             kPortIndexInput, OMX_VIDEO_CodingUnused,
             colorFormat), OK);
+
     InitOMXParams(&def);
     def.nPortIndex = kPortIndexInput;
 
@@ -782,10 +790,9 @@ void OMXCodec::setVideoInputFormat(
 
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
+    video_def->xFramerate = (frameRate << 16);  // Q16 format
     video_def->eCompressionFormat = OMX_VIDEO_CodingUnused;
     video_def->eColorFormat = colorFormat;
-
-    video_def->xFramerate = (24 << 16);  // Q16 format
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
@@ -806,7 +813,8 @@ void OMXCodec::setVideoInputFormat(
 
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
-
+    video_def->xFramerate = (frameRate << 16);  // Q16 format
+    video_def->nBitrate = bitRate;  // Q16 format
     video_def->eCompressionFormat = compressionFormat;
     video_def->eColorFormat = OMX_COLOR_FormatUnused;
 
@@ -928,6 +936,7 @@ status_t OMXCodec::setupAVCEncoderParameters() {
 
     h264type.nSliceHeaderSpacing = 0;
     h264type.nBFrames = 0;
+    h264type.nPFrames = 24;  // XXX
     h264type.bUseHadamard = OMX_TRUE;
     h264type.nRefFrames = 1;
     h264type.nRefIdx10ActiveMinus1 = 0;
@@ -960,7 +969,7 @@ status_t OMXCodec::setupAVCEncoderParameters() {
     CHECK_EQ(err, OK);
 
     bitrateType.eControlRate = OMX_Video_ControlRateVariable;
-    bitrateType.nTargetBitrate = 3000000;
+    bitrateType.nTargetBitrate = 3000000;  // XXX
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoBitrate,
@@ -2049,9 +2058,15 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             break;
         }
 
-        memcpy((uint8_t *)info->mData + offset,
-               (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
-               srcBuffer->range_length());
+        if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
+            CHECK(mOMXLivesLocally && offset == 0);
+            OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *) info->mBuffer;
+            header->pBuffer = (OMX_U8 *) srcBuffer->data() + srcBuffer->range_offset();
+        } else {
+            memcpy((uint8_t *)info->mData + offset,
+                    (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
+                    srcBuffer->range_length());
+        }
 
         int64_t lastBufferTimeUs;
         CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));

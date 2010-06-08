@@ -705,6 +705,7 @@ void MPEG4Writer::Track::threadEntry() {
     int64_t lastDuration = 0;   // Time spacing between the previous two samples
     int32_t sampleCount = 1;    // Sample count in the current stts table entry
     uint32_t previousSampleSize = 0;  // Size of the previous sample
+    sp<MetaData> meta_data;
 
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
@@ -825,35 +826,46 @@ void MPEG4Writer::Track::threadEntry() {
             continue;
         }
 
-        if (is_avc) StripStartcode(buffer);
+        // Make a deep copy of the MediaBuffer and Metadata and release
+        // the original as soon as we can
+        MediaBuffer *copy = new MediaBuffer(buffer->range_length());
+        memcpy(copy->data(), (uint8_t *)buffer->data() + buffer->range_offset(),
+                buffer->range_length());
+        copy->set_range(0, buffer->range_length());
+        meta_data = new MetaData(*buffer->meta_data().get());
+        buffer->release();
+        buffer = NULL;
+
+        if (is_avc) StripStartcode(copy);
 
         SampleInfo info;
         info.size = is_avc
 #if USE_NALLEN_FOUR
-                ? buffer->range_length() + 4
+                ? copy->range_length() + 4
 #else
-                ? buffer->range_length() + 2
+                ? copy->range_length() + 2
 #endif
-                : buffer->range_length();
+                : copy->range_length();
 
         // Max file size or duration handling
         mEstimatedTrackSizeBytes += info.size;
         if (mOwner->exceedsFileSizeLimit()) {
-            buffer->release();
-            buffer = NULL;
             mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED, 0);
             break;
         }
         if (mOwner->exceedsFileDurationLimit()) {
-            buffer->release();
-            buffer = NULL;
             mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_DURATION_REACHED, 0);
             break;
         }
 
 
+        int32_t isSync = false;
+        meta_data->findInt32(kKeyIsSyncFrame, &isSync);
+
         int64_t timestampUs;
-        CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
+        CHECK(meta_data->findInt64(kKeyTime, &timestampUs));
+
+////////////////////////////////////////////////////////////////////////////////
         if (mSampleInfos.empty()) {
             mOwner->setStartTimestamp(timestampUs);
             mStartTimestampUs = (timestampUs - mOwner->getStartTimestamp());
@@ -884,12 +896,10 @@ void MPEG4Writer::Track::threadEntry() {
         lastDuration = info.timestamp - lastTimestamp;
         lastTimestamp = info.timestamp;
 
-////////////////////////////////////////////////////////////////////////////////
-        // Make a deep copy of the MediaBuffer less Metadata
-        MediaBuffer *copy = new MediaBuffer(buffer->range_length());
-        memcpy(copy->data(), (uint8_t *)buffer->data() + buffer->range_offset(),
-                buffer->range_length());
-        copy->set_range(0, buffer->range_length());
+        if (isSync != 0) {
+            mStssTableEntries.push_back(mSampleInfos.size());
+        }
+
 
         mChunkSamples.push_back(copy);
         if (interleaveDurationUs == 0) {
@@ -915,14 +925,6 @@ void MPEG4Writer::Track::threadEntry() {
             }
         }
 
-        int32_t isSync = false;
-        if (buffer->meta_data()->findInt32(kKeyIsSyncFrame, &isSync) &&
-            isSync != 0) {
-            mStssTableEntries.push_back(mSampleInfos.size());
-        }
-
-        buffer->release();
-        buffer = NULL;
     }
 
     if (mSampleInfos.empty()) {
