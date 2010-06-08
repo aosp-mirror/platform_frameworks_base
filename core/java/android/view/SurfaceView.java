@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.util.DisplayMetrics;
 import com.android.internal.view.BaseIWindow;
 
 import android.content.Context;
@@ -211,6 +212,46 @@ public class SurfaceView extends View {
         mViewVisibility = visibility == VISIBLE;
         mRequestedVisible = mWindowVisibility && mViewVisibility;
         updateWindow(false);
+    }
+
+    /**
+     * This method is not intended for general use. It was created
+     * temporarily to improve performance of 3D layers in Launcher
+     * and should be removed and fixed properly.
+     * 
+     * Do not call this method. Ever.
+     * 
+     * @hide
+     */
+    protected void showSurface() {
+        if (mSession != null) {
+            updateWindow(true);
+        }
+    }
+
+    /**
+     * This method is not intended for general use. It was created
+     * temporarily to improve performance of 3D layers in Launcher
+     * and should be removed and fixed properly.
+     * 
+     * Do not call this method. Ever.
+     * 
+     * @hide
+     */
+    protected void hideSurface() {
+        if (mSession != null && mWindow != null) {
+            mSurfaceLock.lock();
+            try {
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                mLayout.x = metrics.widthPixels * 3;
+                mSession.relayout(mWindow, mLayout, mWidth, mHeight, VISIBLE, false,
+                        mWinFrame, mContentInsets, mVisibleInsets, mConfiguration, mSurface);
+            } catch (RemoteException e) {
+                // Ignore
+            } finally {
+                mSurfaceLock.unlock();
+            }
+        }
     }
     
     @Override
