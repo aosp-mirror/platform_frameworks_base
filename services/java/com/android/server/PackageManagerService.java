@@ -6593,15 +6593,11 @@ class PackageManagerService extends IPackageManager.Stub {
 
 
     public void addPackageToPreferred(String packageName) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        Slog.w(TAG, "addPackageToPreferred: no longer implemented");
+        Slog.w(TAG, "addPackageToPreferred: this is now a no-op");
     }
 
     public void removePackageFromPreferred(String packageName) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        Slog.w(TAG, "removePackageFromPreferred: no longer implemented");
+        Slog.w(TAG, "removePackageFromPreferred: this is now a no-op");
     }
 
     public List<PackageInfo> getPreferredPackages(int flags) {
