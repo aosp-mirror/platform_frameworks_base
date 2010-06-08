@@ -128,7 +128,7 @@ CameraSource::CameraSource(const sp<Camera> &camera)
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
 
-    int32_t width, height;
+    int32_t width, height, stride, sliceHeight;
     CameraParameters params(s);
     params.getPreviewSize(&width, &height);
 
@@ -136,11 +136,19 @@ CameraSource::CameraSource(const sp<Camera> &camera)
     CHECK(colorFormatStr != NULL);
     int32_t colorFormat = getColorFormat(colorFormatStr);
 
+    // XXX: query camera for the stride and slice height
+    // when the capability becomes available.
+    stride = width;
+    sliceHeight = height;
+
     mMeta = new MetaData;
     mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
     mMeta->setInt32(kKeyColorFormat, colorFormat);
     mMeta->setInt32(kKeyWidth, width);
     mMeta->setInt32(kKeyHeight, height);
+    mMeta->setInt32(kKeyStride, stride);
+    mMeta->setInt32(kKeySliceHeight, sliceHeight);
+
 }
 
 CameraSource::~CameraSource() {

@@ -30,10 +30,13 @@ namespace android {
 // The following keys map to int32_t data unless indicated otherwise.
 enum {
     kKeyMIMEType          = 'mime',  // cstring
-    kKeyWidth             = 'widt',
-    kKeyHeight            = 'heig',
-    kKeyChannelCount      = '#chn',
-    kKeySampleRate        = 'srte',
+    kKeyWidth             = 'widt',  // int32_t
+    kKeyHeight            = 'heig',  // int32_t
+    kKeyIFramesInterval   = 'ifiv',  // int32_t
+    kKeyStride            = 'strd',  // int32_t
+    kKeySliceHeight       = 'slht',  // int32_t
+    kKeyChannelCount      = '#chn',  // int32_t
+    kKeySampleRate        = 'srte',  // int32_t
     kKeyBitRate           = 'brte',  // int32_t (bps)
     kKeyESDS              = 'esds',  // raw data
     kKeyAVCC              = 'avcc',  // raw data
