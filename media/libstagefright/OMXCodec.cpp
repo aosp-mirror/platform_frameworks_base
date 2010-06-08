@@ -571,17 +571,14 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
     }
 
     if (!strncasecmp(mMIME, "video/", 6)) {
-        int32_t width, height;
-        bool success = meta->findInt32(kKeyWidth, &width);
-        success = success && meta->findInt32(kKeyHeight, &height);
-        CHECK(success);
 
         if (mIsEncoder) {
-            int32_t frameRate = 25;  // XXX
-            int32_t bitRate = 3000000;  // bit rate
-            //success = success && meta->findInt32(kKeySampleRate, &frameRate);
-            setVideoInputFormat(mMIME, width, height, frameRate, bitRate);
+            setVideoInputFormat(mMIME, meta);
         } else {
+            int32_t width, height;
+            bool success = meta->findInt32(kKeyWidth, &width);
+            success = success && meta->findInt32(kKeyHeight, &height);
+            CHECK(success);
             status_t err = setVideoOutputFormat(
                     mMIME, width, height);
 
@@ -745,9 +742,17 @@ static size_t getFrameSize(
 }
 
 void OMXCodec::setVideoInputFormat(
-        const char *mime, OMX_U32 width, OMX_U32 height,
-        OMX_U32 frameRate, OMX_U32 bitRate) {
-    CODEC_LOGV("setVideoInputFormat width=%ld, height=%ld", width, height);
+        const char *mime, const sp<MetaData>& meta) {
+
+    int32_t width, height, frameRate, bitRate, stride, sliceHeight;
+    bool success = meta->findInt32(kKeyWidth, &width);
+    success = success && meta->findInt32(kKeyHeight, &height);
+    success = success && meta->findInt32(kKeySampleRate, &frameRate);
+    success = success && meta->findInt32(kKeyBitRate, &bitRate);
+    success = success && meta->findInt32(kKeyStride, &stride);
+    success = success && meta->findInt32(kKeySliceHeight, &sliceHeight);
+    CHECK(success);
+    CHECK(stride != 0);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
     if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
@@ -766,8 +771,6 @@ void OMXCodec::setVideoInputFormat(
         colorFormat = OMX_COLOR_FormatYCbYCr;
     }
 
-
-
     status_t err;
     OMX_PARAM_PORTDEFINITIONTYPE def;
     OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
@@ -784,12 +787,15 @@ void OMXCodec::setVideoInputFormat(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
 
-    def.nBufferSize = getFrameSize(colorFormat, width, height);
+    def.nBufferSize = getFrameSize(colorFormat,
+            stride > 0? stride: -stride, sliceHeight);
 
     CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
 
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
+    video_def->nStride = stride;
+    video_def->nSliceHeight = sliceHeight;
     video_def->xFramerate = (frameRate << 16);  // Q16 format
     video_def->eCompressionFormat = OMX_VIDEO_CodingUnused;
     video_def->eColorFormat = colorFormat;
@@ -826,7 +832,7 @@ void OMXCodec::setVideoInputFormat(
     switch (compressionFormat) {
         case OMX_VIDEO_CodingMPEG4:
         {
-            CHECK_EQ(setupMPEG4EncoderParameters(), OK);
+            CHECK_EQ(setupMPEG4EncoderParameters(meta), OK);
             break;
         }
 
@@ -835,7 +841,7 @@ void OMXCodec::setVideoInputFormat(
 
         case OMX_VIDEO_CodingAVC:
         {
-            CHECK_EQ(setupAVCEncoderParameters(), OK);
+            CHECK_EQ(setupAVCEncoderParameters(meta), OK);
             break;
         }
 
@@ -845,7 +851,23 @@ void OMXCodec::setVideoInputFormat(
     }
 }
 
-status_t OMXCodec::setupMPEG4EncoderParameters() {
+static OMX_U32 setPFramesSpacing(int32_t iFramesInterval, int32_t frameRate) {
+    if (iFramesInterval < 0) {
+        return 0xFFFFFFFF;
+    } else if (iFramesInterval == 0) {
+        return 0;
+    }
+    OMX_U32 ret = frameRate * iFramesInterval;
+    CHECK(ret > 1);
+    return ret;
+}
+
+status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
+    int32_t iFramesInterval, frameRate, bitRate;
+    bool success = meta->findInt32(kKeyBitRate, &bitRate);
+    success = success && meta->findInt32(kKeySampleRate, &frameRate);
+    success = success && meta->findInt32(kKeyIFramesInterval, &iFramesInterval);
+    CHECK(success);
     OMX_VIDEO_PARAM_MPEG4TYPE mpeg4type;
     InitOMXParams(&mpeg4type);
     mpeg4type.nPortIndex = kPortIndexOutput;
@@ -861,9 +883,11 @@ status_t OMXCodec::setupMPEG4EncoderParameters() {
     mpeg4type.nAllowedPictureTypes =
         OMX_VIDEO_PictureTypeI | OMX_VIDEO_PictureTypeP;
 
-    mpeg4type.nPFrames = 23;
+    mpeg4type.nPFrames = setPFramesSpacing(iFramesInterval, frameRate);
+    if (mpeg4type.nPFrames == 0) {
+        mpeg4type.nAllowedPictureTypes = OMX_VIDEO_PictureTypeI;
+    }
     mpeg4type.nBFrames = 0;
-
     mpeg4type.nIDCVLCThreshold = 0;
     mpeg4type.bACPred = OMX_TRUE;
     mpeg4type.nMaxPacketSize = 256;
@@ -890,7 +914,7 @@ status_t OMXCodec::setupMPEG4EncoderParameters() {
     CHECK_EQ(err, OK);
 
     bitrateType.eControlRate = OMX_Video_ControlRateVariable;
-    bitrateType.nTargetBitrate = 1000000;
+    bitrateType.nTargetBitrate = bitRate;
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoBitrate,
@@ -922,7 +946,13 @@ status_t OMXCodec::setupMPEG4EncoderParameters() {
     return OK;
 }
 
-status_t OMXCodec::setupAVCEncoderParameters() {
+status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
+    int32_t iFramesInterval, frameRate, bitRate;
+    bool success = meta->findInt32(kKeyBitRate, &bitRate);
+    success = success && meta->findInt32(kKeySampleRate, &frameRate);
+    success = success && meta->findInt32(kKeyIFramesInterval, &iFramesInterval);
+    CHECK(success);
+
     OMX_VIDEO_PARAM_AVCTYPE h264type;
     InitOMXParams(&h264type);
     h264type.nPortIndex = kPortIndexOutput;
@@ -935,8 +965,11 @@ status_t OMXCodec::setupAVCEncoderParameters() {
         OMX_VIDEO_PictureTypeI | OMX_VIDEO_PictureTypeP;
 
     h264type.nSliceHeaderSpacing = 0;
-    h264type.nBFrames = 0;
-    h264type.nPFrames = 24;  // XXX
+    h264type.nBFrames = 0;   // No B frames support yet
+    h264type.nPFrames = setPFramesSpacing(iFramesInterval, frameRate);
+    if (h264type.nPFrames == 0) {
+        h264type.nAllowedPictureTypes = OMX_VIDEO_PictureTypeI;
+    }
     h264type.bUseHadamard = OMX_TRUE;
     h264type.nRefFrames = 1;
     h264type.nRefIdx10ActiveMinus1 = 0;
@@ -969,7 +1002,7 @@ status_t OMXCodec::setupAVCEncoderParameters() {
     CHECK_EQ(err, OK);
 
     bitrateType.eControlRate = OMX_Video_ControlRateVariable;
-    bitrateType.nTargetBitrate = 3000000;  // XXX
+    bitrateType.nTargetBitrate = bitRate;
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoBitrate,

@@ -287,11 +287,29 @@ status_t StagefrightRecorder::setParamMaxDurationOrFileSize(int64_t limit,
 
 status_t StagefrightRecorder::setParamInterleaveDuration(int32_t durationUs) {
     LOGV("setParamInterleaveDuration: %d", durationUs);
-    if (durationUs <= 20000) {  // XXX: 20 ms
+    if (durationUs <= 500000) {           //  500 ms
+        // If interleave duration is too small, it is very inefficient to do
+        // interleaving since the metadata overhead will count for a significant
+        // portion of the saved contents
         LOGE("Audio/video interleave duration is too small: %d us", durationUs);
+        return BAD_VALUE;
+    } else if (durationUs >= 10000000) {  // 10 seconds
+        // If interleaving duration is too large, it can cause the recording
+        // session to use too much memory since we have to save the output
+        // data before we write them out
+        LOGE("Audio/video interleave duration is too large: %d us", durationUs);
         return BAD_VALUE;
     }
     mInterleaveDurationUs = durationUs;
+    return OK;
+}
+
+// If interval <  0, only the first frame is I frame, and rest are all P frames
+// If interval == 0, all frames are encoded as I frames. No P frames
+// If interval >  0, it is the time spacing between 2 neighboring I frames
+status_t StagefrightRecorder::setParamIFramesInterval(int32_t interval) {
+    LOGV("setParamIFramesInterval: %d seconds", interval);
+    mIFramesInterval = interval;
     return OK;
 }
 
@@ -334,6 +352,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t durationUs;
         if (safe_strtoi32(value.string(), &durationUs)) {
             return setParamInterleaveDuration(durationUs);
+        }
+    } else if (key == "param-i-frames-interval") {
+        int32_t interval;
+        if (safe_strtoi32(value.string(), &interval)) {
+            return setParamIFramesInterval(interval);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -619,12 +642,17 @@ status_t StagefrightRecorder::startMPEG4Recording() {
 
         sp<MetaData> meta = cameraSource->getFormat();
 
-        int32_t width, height;
+        int32_t width, height, stride, sliceHeight;
         CHECK(meta->findInt32(kKeyWidth, &width));
         CHECK(meta->findInt32(kKeyHeight, &height));
+        CHECK(meta->findInt32(kKeyStride, &stride));
+        CHECK(meta->findInt32(kKeySliceHeight, &sliceHeight));
 
         enc_meta->setInt32(kKeyWidth, width);
         enc_meta->setInt32(kKeyHeight, height);
+        enc_meta->setInt32(kKeyIFramesInterval, mIFramesInterval);
+        enc_meta->setInt32(kKeyStride, stride);
+        enc_meta->setInt32(kKeySliceHeight, sliceHeight);
 
         OMXClient client;
         CHECK_EQ(client.connect(), OK);
@@ -702,6 +730,7 @@ status_t StagefrightRecorder::reset() {
     mAudioChannels = 1;
     mAudioBitRate  = 12200;
     mInterleaveDurationUs = 0;
+    mIFramesInterval = 1;
 
     mOutputFd = -1;
     mFlags = 0;
