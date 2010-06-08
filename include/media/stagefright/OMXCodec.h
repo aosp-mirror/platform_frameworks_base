@@ -98,6 +98,7 @@ private:
         kDecoderLiesAboutNumberOfChannels     = 256,
         kInputBufferSizesAreBogus             = 512,
         kSupportsMultipleFramesPerInputBuffer = 1024,
+        kAvoidMemcopyInputRecordingFrames     = 2048,
     };
 
     struct BufferInfo {
@@ -165,7 +166,8 @@ private:
             OMX_COLOR_FORMATTYPE colorFormat);
 
     void setVideoInputFormat(
-            const char *mime, OMX_U32 width, OMX_U32 height);
+            const char *mime, OMX_U32 width, OMX_U32 height,
+            OMX_U32 frameRate, OMX_U32 bitRate);
 
     status_t setupMPEG4EncoderParameters();
     status_t setupAVCEncoderParameters();
