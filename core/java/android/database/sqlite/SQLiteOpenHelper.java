@@ -28,6 +28,12 @@ import android.util.Log;
  * Transactions are used to make sure the database is always in a sensible state.
  * <p>For an example, see the NotePadProvider class in the NotePad sample application,
  * in the <em>samples/</em> directory of the SDK.</p>
+ *
+ * <p class="note"><strong>Note:</strong> this class assumes
+ * monotonically increasing version numbers for upgrades.  Also, there
+ * is no concept of a database downgrade; installing a new version of
+ * your app which uses a lower version number than a
+ * previously-installed version will result in undefined behavior.</p>
  */
 public abstract class SQLiteOpenHelper {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();
@@ -105,6 +111,10 @@ public abstract class SQLiteOpenHelper {
                     if (version == 0) {
                         onCreate(db);
                     } else {
+                        if (version > mNewVersion) {
+                            Log.wtf(TAG, "Can't downgrade read-only database from version " +
+                                    version + " to " + mNewVersion + ": " + db.getPath());
+                        }
                         onUpgrade(db, version, mNewVersion);
                     }
                     db.setVersion(mNewVersion);

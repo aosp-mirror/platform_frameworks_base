@@ -88,6 +88,21 @@ public final class Log {
         TerribleFailure(String msg, Throwable cause) { super(msg, cause); }
     }
 
+    /**
+     * Interface to handle terrible failures from {@link #wtf()}.
+     *
+     * @hide
+     */
+    public interface TerribleFailureHandler {
+        void onTerribleFailure(String tag, TerribleFailure what);
+    }
+
+    private static TerribleFailureHandler sWtfHandler = new TerribleFailureHandler() {
+            public void onTerribleFailure(String tag, TerribleFailure what) {
+                RuntimeInit.wtf(tag, what);
+            }
+        };
+
     private Log() {
     }
 
@@ -257,10 +272,26 @@ public final class Log {
      * @param tr An exception to log.  May be null.
      */
     public static int wtf(String tag, String msg, Throwable tr) {
-        tr = new TerribleFailure(msg, tr);
+        TerribleFailure what = new TerribleFailure(msg, tr);
         int bytes = println_native(LOG_ID_MAIN, ASSERT, tag, getStackTraceString(tr));
-        RuntimeInit.wtf(tag, tr);
+        sWtfHandler.onTerribleFailure(tag, what);
         return bytes;
+    }
+
+    /**
+     * Sets the terrible failure handler, for testing.
+     *
+     * @return the old handler
+     *
+     * @hide
+     */
+    public static TerribleFailureHandler setWtfHandler(TerribleFailureHandler handler) {
+        if (handler == null) {
+            throw new NullPointerException("handler == null");
+        }
+        TerribleFailureHandler oldHandler = sWtfHandler;
+        sWtfHandler = handler;
+        return oldHandler;
     }
 
     /**
