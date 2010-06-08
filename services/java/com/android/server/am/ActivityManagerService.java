@@ -5788,7 +5788,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // See if the top visible activity is waiting to run in this process...
         HistoryRecord hr = topRunningActivityLocked(null);
-        if (hr != null) {
+        if (hr != null && normalMode) {
             if (hr.app == null && app.info.uid == hr.info.applicationInfo.uid
                     && processName.equals(hr.processName)) {
                 try {
