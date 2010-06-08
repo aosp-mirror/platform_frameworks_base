@@ -367,6 +367,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             out.endDocument();
             stream.close();
             journal.commit();
+            sendChangedNotification();
         } catch (IOException e) {
             try {
                 if (stream != null) {
@@ -377,6 +378,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             journal.rollback();
         }
+    }
+
+    private void sendChangedNotification() {
+        Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcast(intent);
     }
 
     private void loadSettingsLocked() {
