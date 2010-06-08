@@ -18,6 +18,7 @@
 #define _MTP_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #define MTP_STANDARD_VERSION            100
 
