@@ -91,8 +91,18 @@
     <string-array translatable="false" name="config_tether_upstream_regexs">
     </string-array>
 
-    <!-- Boolean indicating if we require the use of DUN on mobile for tethering -->
-    <bool translatable="false" name="config_tether_dun_required">true</bool>
+    <!-- Boolean indicating if we require the use of DUN on mobile for tethering.
+         Note that this defaults to false so that if you move to a carrier that
+         hasn't configured anything tethering will still work.  If you'd rather
+         make the device untetherable on unconfigured devices, set to true -->
+    <bool translatable="false" name="config_tether_dun_required">false</bool>
+
+    <!-- String containing the apn value for tethering.  May be overriden by secure settings
+         TETHER_DUN_APN.  Value is a comma separated series of strings:
+         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
+         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
+    <string translatable="false" name="config_tether_apndata"></string>
+
 
     <!-- Flag indicating whether the keyguard should be bypassed when
          the slider is open.  This can be set or unset depending how easily

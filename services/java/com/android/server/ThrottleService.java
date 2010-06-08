@@ -123,7 +123,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     private boolean mNtpActive;
 
     public ThrottleService(Context context) {
-        if (DBG) Slog.d(TAG, "Starting ThrottleService");
+        if (VDBG) Slog.v(TAG, "Starting ThrottleService");
         mContext = context;
 
         mNtpActive = false;
@@ -288,7 +288,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     }
 
     void systemReady() {
-        if (DBG) Slog.d(TAG, "systemReady");
+        if (VDBG) Slog.v(TAG, "systemReady");
         mContext.registerReceiver(
             new BroadcastReceiver() {
                 @Override
@@ -371,7 +371,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         private void onRebootRecovery() {
-            if (DBG) Slog.d(TAG, "onRebootRecovery");
+            if (VDBG) Slog.v(TAG, "onRebootRecovery");
             // check for sim change TODO
             // reregister for notification of policy change
 
@@ -437,10 +437,12 @@ public class ThrottleService extends IThrottleManager.Stub {
             mMaxNtpCacheAgeSec = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC, MAX_NTP_CACHE_AGE_SEC);
 
-            Slog.d(TAG, "onPolicyChanged testing=" + testing +", period=" + mPolicyPollPeriodSec +
-                    ", threshold=" + mPolicyThreshold + ", value=" + mPolicyThrottleValue +
-                    ", resetDay=" + mPolicyResetDay + ", noteType=" +
-                    mPolicyNotificationsAllowedMask + ", maxNtpCacheAge=" + mMaxNtpCacheAgeSec);
+            if (VDBG || (mPolicyThreshold != 0)) {
+                Slog.d(TAG, "onPolicyChanged testing=" + testing +", period=" +
+                        mPolicyPollPeriodSec + ", threshold=" + mPolicyThreshold + ", value=" +
+                        mPolicyThrottleValue + ", resetDay=" + mPolicyResetDay + ", noteType=" +
+                        mPolicyNotificationsAllowedMask + ", maxNtpCacheAge=" + mMaxNtpCacheAgeSec);
+            }
 
             // force updates
             mThrottleIndex = THROTTLE_INDEX_UNINITIALIZED;
@@ -485,7 +487,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             long periodRx = mRecorder.getPeriodRx(0);
             long periodTx = mRecorder.getPeriodTx(0);
             long total = periodRx + periodTx;
-            if (DBG) {
+            if (VDBG || (mPolicyThreshold != 0)) {
                 Slog.d(TAG, "onPollAlarm - roaming =" + roaming +
                         ", read =" + incRead + ", written =" + incWrite + ", new total =" + total);
             }
@@ -502,7 +504,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             mContext.sendStickyBroadcast(broadcast);
 
             mAlarmManager.cancel(mPendingPollIntent);
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, next, mPendingPollIntent);
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mPendingPollIntent);
         }
 
         private void onIfaceUp() {
@@ -685,7 +687,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         private void onResetAlarm() {
-            if (DBG) {
+            if (VDBG || (mPolicyThreshold != 0)) {
                 Slog.d(TAG, "onResetAlarm - last period had " + mRecorder.getPeriodRx(0) +
                         " bytes read and " + mRecorder.getPeriodTx(0) + " written");
             }
@@ -703,11 +705,11 @@ public class ThrottleService extends IThrottleManager.Stub {
                 mAlarmManager.cancel(mPendingResetIntent);
                 long offset = end.getTimeInMillis() - now;
                 // use Elapsed realtime so clock changes don't fool us.
-                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME,
                         SystemClock.elapsedRealtime() + offset,
                         mPendingResetIntent);
             } else {
-                if (DBG) Slog.d(TAG, "no authoritative time - not resetting period");
+                if (VDBG) Slog.d(TAG, "no authoritative time - not resetting period");
             }
         }
     }
@@ -741,7 +743,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                 cachedNtpTimestamp = SystemClock.elapsedRealtime();
                 if (!mNtpActive) {
                     mNtpActive = true;
-                    if (DBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
+                    if (VDBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
                     mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
                 }
                 if (VDBG) Slog.v(TAG, "using Authoritative time: " + cachedNtp);
@@ -800,13 +802,13 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             if (start.equals(mPeriodStart) && end.equals(mPeriodEnd)) {
                 // same endpoints - keep collecting
-                if (DBG) {
+                if (VDBG) {
                     Slog.d(TAG, "same period (" + start.getTimeInMillis() + "," +
                             end.getTimeInMillis() +") - ammending data");
                 }
                 startNewPeriod = false;
             } else {
-                if (DBG) {
+                if (VDBG) {
                     if(start.equals(mPeriodEnd) || start.after(mPeriodEnd)) {
                         Slog.d(TAG, "next period (" + start.getTimeInMillis() + "," +
                                 end.getTimeInMillis() + ") - old end was " +
@@ -910,7 +912,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             mImsi = mTelephonyManager.getSubscriberId();
             if (mImsi == null) return;
 
-            if (DBG) Slog.d(TAG, "finally have imsi - retreiving data");
+            if (VDBG) Slog.d(TAG, "finally have imsi - retreiving data");
             retrieve();
         }
 
@@ -1038,7 +1040,8 @@ public class ThrottleService extends IThrottleManager.Stub {
 
                 mPeriodCount = Integer.parseInt(parsed[parsedUsed++]);
                 if (parsed.length != 5 + (2 * mPeriodCount)) {
-                    Slog.e(TAG, "reading data file with bad length ("+parsed.length+" != "+(5 + (2*mPeriodCount))+") - ignoring");
+                    Slog.e(TAG, "reading data file with bad length (" + parsed.length +
+                            " != " + (5+(2*mPeriodCount)) + ") - ignoring");
                     return;
                 }
 
