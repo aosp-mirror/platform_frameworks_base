@@ -78,6 +78,15 @@ public class DevicePolicyManager {
             = "android.app.action.ADD_DEVICE_ADMIN";
 
     /**
+     * Activity action: send when any policy admin changes a policy.
+     * This is generally used to find out when a new policy is in effect.
+     * 
+     * @hide
+     */
+    public static final String ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+            = "android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED";
+
+    /**
      * The ComponentName of the administrator component.
      *
      * @see #ACTION_ADD_DEVICE_ADMIN
