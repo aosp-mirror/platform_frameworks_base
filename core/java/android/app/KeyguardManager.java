@@ -53,8 +53,8 @@ public class KeyguardManager {
          *
          * A good place to call this is from {@link android.app.Activity#onResume()}
          *
-         * Note: This call has no effect while any {@link DevicePolicyManager} is enabled
-         * that requires a password.
+         * Note: This call has no effect while any {@link android.app.admin.DevicePolicyManager} 
+         * is enabled that requires a password.
          *
          * @see #reenableKeyguard()
          */
@@ -71,8 +71,8 @@ public class KeyguardManager {
          *
          * A good place to call this is from {@link android.app.Activity#onPause()}
          *
-         * Note: This call has no effect while any {@link DevicePolicyManager} is enabled
-         * that requires a password.
+         * Note: This call has no effect while any {@link android.app.admin.DevicePolicyManager}
+         * is enabled that requires a password.
          *
          * @see #disableKeyguard()
          */
