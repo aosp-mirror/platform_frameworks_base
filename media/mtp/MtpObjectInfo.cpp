@@ -64,7 +64,7 @@ void MtpObjectInfo::read(MtpDataPacket& packet) {
     mProtectionStatus = packet.getUInt16();
     mCompressedSize = packet.getUInt32();
     mThumbFormat = packet.getUInt16();
-    mCompressedSize = packet.getUInt32();
+    mThumbCompressedSize = packet.getUInt32();
     mThumbPixWidth = packet.getUInt32();
     mThumbPixHeight = packet.getUInt32();
     mImagePixWidth = packet.getUInt32();
@@ -92,6 +92,17 @@ void MtpObjectInfo::read(MtpDataPacket& packet) {
 
 void MtpObjectInfo::print() {
     LOGD("MtpObject Info %08X: %s\n", mHandle, mName);
+    LOGD("  mStorageID: %08X mFormat: %04X mProtectionStatus: %d\n",
+            mStorageID, mFormat, mProtectionStatus);
+    LOGD("  mCompressedSize: %d mThumbFormat: %04X mThumbCompressedSize: %d\n",
+            mCompressedSize, mFormat, mThumbCompressedSize);
+    LOGD("  mThumbPixWidth: %d mThumbPixHeight: %d\n", mThumbPixWidth, mThumbPixHeight);
+    LOGD("  mImagePixWidth: %d mImagePixHeight: %d mImagePixDepth: %d\n",
+            mImagePixWidth, mImagePixHeight, mImagePixDepth);
+    LOGD("  mParent: %08X mAssociationType: %04X mAssociationDesc: %04X\n",
+            mParent, mAssociationType, mAssociationDesc);
+    LOGD("  mSequenceNumber: %d mDateCreated: %d mDateModified: %d mKeywords: %s\n",
+            mSequenceNumber, mDateCreated, mDateModified, mKeywords);
 }
 
 }  // namespace android

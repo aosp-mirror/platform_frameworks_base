@@ -29,18 +29,39 @@
 namespace android {
 
 /* Device Column IDs */
+/* These must match the values in MtpCursor.java */
 #define DEVICE_ROW_ID           1
 #define DEVICE_MANUFACTURER     2
 #define DEVICE_MODEL            3
 
 /* Storage Column IDs */
+/* These must match the values in MtpCursor.java */
 #define STORAGE_ROW_ID          101
 #define STORAGE_IDENTIFIER      102
 #define STORAGE_DESCRIPTION     103
 
 /* Object Column IDs */
-#define OBJECT_ROW_ID           201
-#define OBJECT_NAME             202
+/* These must match the values in MtpCursor.java */
+#define OBJECT_ROW_ID               201
+#define OBJECT_STORAGE_ID           202
+#define OBJECT_FORMAT               203
+#define OBJECT_PROTECTION_STATUS    204
+#define OBJECT_SIZE                 205
+#define OBJECT_THUMB_FORMAT         206
+#define OBJECT_THUMB_SIZE           207
+#define OBJECT_THUMB_WIDTH          208
+#define OBJECT_THUMB_HEIGHT         209
+#define OBJECT_IMAGE_WIDTH          210
+#define OBJECT_IMAGE_HEIGHT         211
+#define OBJECT_IMAGE_DEPTH          212
+#define OBJECT_PARENT               213
+#define OBJECT_ASSOCIATION_TYPE     214
+#define OBJECT_ASSOCIATION_DESC     215
+#define OBJECT_SEQUENCE_NUMBER      216
+#define OBJECT_NAME                 217
+#define OBJECT_DATE_CREATED         218
+#define OBJECT_DATE_MODIFIED        219
+#define OBJECT_KEYWORDS             220
 
 MtpCursor::MtpCursor(MtpClient* client, int queryType, int deviceID,
                 int storageID, int objectID, int columnCount, int* columns)
@@ -252,11 +273,10 @@ fail:
 bool MtpCursor::fillObject(CursorWindow* window, MtpDevice* device,
         MtpObjectHandle objectID, int row) {
 
-LOGD("fillObject %d\n", objectID);
-
     MtpObjectInfo* objectInfo = device->getObjectInfo(objectID);
     if (!objectInfo)
         return false;
+    // objectInfo->print();
     if (!prepareRow(window)) {
         delete objectInfo;
         return false;
@@ -268,8 +288,80 @@ LOGD("fillObject %d\n", objectID);
                 if (!putLong(window, objectID, row, i))
                     goto fail;
                  break;
+            case OBJECT_STORAGE_ID:
+                if (!putLong(window, objectInfo->mStorageID, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_FORMAT:
+                if (!putLong(window, objectInfo->mFormat, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_PROTECTION_STATUS:
+                if (!putLong(window, objectInfo->mProtectionStatus, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_SIZE:
+                if (!putLong(window, objectInfo->mCompressedSize, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_THUMB_FORMAT:
+                if (!putLong(window, objectInfo->mThumbFormat, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_THUMB_SIZE:
+                if (!putLong(window, objectInfo->mThumbCompressedSize, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_THUMB_WIDTH:
+                if (!putLong(window, objectInfo->mThumbPixWidth, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_THUMB_HEIGHT:
+                if (!putLong(window, objectInfo->mThumbPixHeight, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_IMAGE_WIDTH:
+                if (!putLong(window, objectInfo->mImagePixWidth, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_IMAGE_HEIGHT:
+                if (!putLong(window, objectInfo->mImagePixHeight, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_IMAGE_DEPTH:
+                if (!putLong(window, objectInfo->mImagePixDepth, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_PARENT:
+                if (!putLong(window, objectInfo->mParent, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_ASSOCIATION_TYPE:
+                if (!putLong(window, objectInfo->mAssociationType, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_ASSOCIATION_DESC:
+                if (!putLong(window, objectInfo->mAssociationDesc, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_SEQUENCE_NUMBER:
+                if (!putLong(window, objectInfo->mSequenceNumber, row, i))
+                    goto fail;
+                 break;
             case OBJECT_NAME:
                 if (!putString(window, objectInfo->mName, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_DATE_CREATED:
+                if (!putLong(window, objectInfo->mDateCreated, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_DATE_MODIFIED:
+                if (!putLong(window, objectInfo->mDateModified, row, i))
+                    goto fail;
+                 break;
+            case OBJECT_KEYWORDS:
+                if (!putString(window, objectInfo->mKeywords, row, i))
                     goto fail;
                  break;
             default:
@@ -278,7 +370,7 @@ LOGD("fillObject %d\n", objectID);
         }
     }
 
-   delete objectInfo;
+    delete objectInfo;
     return true;
 
 fail:
