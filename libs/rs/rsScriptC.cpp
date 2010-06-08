@@ -196,32 +196,9 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
     setupScript(rsc);
     Script * oldTLS = setTLS(this);
 
-    const uint32_t * dPtr = (const uint32_t *)data;
-    switch(len) {
-    case 0:
-        mEnviroment.mInvokeFunctions[slot]();
-        break;
-    case 4:
-        ((void (*)(uint32_t))
-         mEnviroment.mInvokeFunctions[slot])(dPtr[0]);
-        break;
-    case 8:
-        ((void (*)(uint32_t, uint32_t))
-         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1]);
-        break;
-    case 12:
-        ((void (*)(uint32_t, uint32_t, uint32_t))
-         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2]);
-        break;
-    case 16:
-        ((void (*)(uint32_t, uint32_t, uint32_t, uint32_t))
-         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2], dPtr[3]);
-        break;
-    case 20:
-        ((void (*)(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t))
-         mEnviroment.mInvokeFunctions[slot])(dPtr[0], dPtr[1], dPtr[2], dPtr[3], dPtr[4]);
-        break;
-    }
+    ((void (*)(const void *, uint32_t))
+        mEnviroment.mInvokeFunctions[slot])(data, len);
+
     setTLS(oldTLS);
 }
 

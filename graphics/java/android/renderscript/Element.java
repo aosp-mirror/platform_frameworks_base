@@ -72,12 +72,6 @@ public class Element extends BaseObj {
 
     public enum DataKind {
         USER (0),
-        COLOR (1),
-        POSITION (2),
-        TEXTURE (3),
-        NORMAL (4),
-        INDEX (5),
-        POINT_SIZE(6),
 
         PIXEL_L (7),
         PIXEL_A (8),
@@ -103,6 +97,20 @@ public class Element extends BaseObj {
             rs.mElement_I8 = createUser(rs, DataType.SIGNED_8);
         }
         return rs.mElement_I8;
+    }
+
+    public static Element U16(RenderScript rs) {
+        if(rs.mElement_U16 == null) {
+            rs.mElement_U16 = createUser(rs, DataType.UNSIGNED_16);
+        }
+        return rs.mElement_U16;
+    }
+
+    public static Element I16(RenderScript rs) {
+        if(rs.mElement_I16 == null) {
+            rs.mElement_I16 = createUser(rs, DataType.SIGNED_16);
+        }
+        return rs.mElement_I16;
     }
 
     public static Element U32(RenderScript rs) {
@@ -239,13 +247,6 @@ public class Element extends BaseObj {
         return rs.mElement_RGBA_8888;
     }
 
-    public static Element INDEX_16(RenderScript rs) {
-        if(rs.mElement_INDEX_16 == null) {
-            rs.mElement_INDEX_16 = createIndex(rs);
-        }
-        return rs.mElement_INDEX_16;
-    }
-
     public static Element F32_2(RenderScript rs) {
         if(rs.mElement_FLOAT_2 == null) {
             rs.mElement_FLOAT_2 = createVector(rs, DataType.FLOAT_32, 2);
@@ -312,10 +313,6 @@ public class Element extends BaseObj {
             throw new IllegalArgumentException("Bad size");
         }
         return new Element(rs, dt, DataKind.USER, false, size);
-    }
-
-    public static Element createIndex(RenderScript rs) {
-        return new Element(rs, DataType.UNSIGNED_16, DataKind.INDEX, false, 1);
     }
 
     public static Element createPixel(RenderScript rs, DataType dt, DataKind dk) {

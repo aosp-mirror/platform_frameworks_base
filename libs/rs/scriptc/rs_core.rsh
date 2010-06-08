@@ -1,8 +1,6 @@
 #ifndef __RS_CORE_RSH__
 #define __RS_CORE_RSH__
 
-//uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b);
-//uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a);
 
 static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b)
 {
@@ -24,8 +22,6 @@ static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, 
     return c;
 }
 
-
-/*
 static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3 color)
 {
     color *= 255.f;
@@ -51,10 +47,11 @@ static float4 rsUnpackColor8888(uchar4 c)
     return ret;
 }
 
-extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float r, float g, float b);
-extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float3);
-extern float4 rsUnpackColor565(uchar4);
-*/
+//extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float r, float g, float b);
+//extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float3);
+//extern float4 rsUnpackColor565(uchar4);
+
+
 
 
 #endif

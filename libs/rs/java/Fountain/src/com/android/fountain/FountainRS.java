@@ -34,7 +34,7 @@ public class FountainRS {
         mRS = rs;
         mRes = res;
 
-        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
+        ScriptField_Point_s points = new ScriptField_Point_s(mRS, PART_COUNT);
 
         SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
         int vtxSlot = smb.addVertexType(points.getType());
@@ -59,7 +59,7 @@ public class FountainRS {
                 tmpColor.z = mRand.nextFloat();
                 mScript.set_partColor(tmpColor);
             }
-            mScript.invokable_addParticles(rate, x, y);
+            mScript.invoke_addParticles(rate, x, y);
             holdingColor = true;
         } else {
             holdingColor = false;

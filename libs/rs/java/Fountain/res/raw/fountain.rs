@@ -40,17 +40,7 @@ int root() {
     return 1;
 }
 
-// Putting the overloadable attribute on this function breaks rendering
-// appears to be a bug.
-static uchar4 /*__attribute__((overloadable))*/ pack(float r, float g, float b)
-{
-    uchar4 c;
-    c.x = (uchar)(r * 255.f);
-    c.y = (uchar)(g * 255.f);
-    c.z = (uchar)(b * 255.f);
-    c.w = 255;
-    return c;
-}
+#pragma rs export_func(addParticles)
 
 void addParticles(int rate, int x, int y)
 {
@@ -63,10 +53,7 @@ void addParticles(int rate, int x, int y)
     float rMax = ((float)rate) * 0.005f;
     int size = rsAllocationGetDimX(rsGetAllocation(point));
 
-    //uchar4 c = rsPackColorTo8888(partColor.x, partColor.y, partColor.z);
-    uchar4 c = pack(partColor.x, partColor.y, partColor.z);
-    c.x = 255;
-    c.w = 255;
+    uchar4 c = rsPackColorTo8888(partColor.x, partColor.y, partColor.z);
 
     //rsDebug("color ", ((int *)&c)[0]);
     Point_t * np = &point[newPart];
