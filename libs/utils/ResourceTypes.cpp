@@ -1878,6 +1878,12 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
         outName->type = grp->basePackage->typeStrings.stringAt(t, &outName->typeLen);
         outName->name = grp->basePackage->keyStrings.stringAt(
             dtohl(entry->key.index), &outName->nameLen);
+
+        // If we have a bad index for some reason, we should abort.
+        if (outName->type == NULL || outName->name == NULL) {
+            return false;
+        }
+
         return true;
     }
 
@@ -4145,13 +4151,16 @@ void ResTable::print(bool inclValues) const
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
                         resource_name resName;
-                        this->getResourceName(resID, &resName);
-                        printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
-                            resID,
-                            CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                            CHAR16_TO_CSTR(resName.type, resName.typeLen),
-                            CHAR16_TO_CSTR(resName.name, resName.nameLen),
-                            dtohl(typeConfigs->typeSpecFlags[entryIndex]));
+                        if (this->getResourceName(resID, &resName)) {
+                            printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
+                                resID,
+                                CHAR16_TO_CSTR(resName.package, resName.packageLen),
+                                CHAR16_TO_CSTR(resName.type, resName.typeLen),
+                                CHAR16_TO_CSTR(resName.name, resName.nameLen),
+                                dtohl(typeConfigs->typeSpecFlags[entryIndex]));
+                        } else {
+                            printf("      INVALID TYPE CONFIG FOR RESOURCE 0x%08x\n", resID);
+                        }
                     }
                 }
                 for (size_t configIndex=0; configIndex<NTC; configIndex++) {
@@ -4358,11 +4367,14 @@ void ResTable::print(bool inclValues) const
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
                         resource_name resName;
-                        this->getResourceName(resID, &resName);
-                        printf("        resource 0x%08x %s:%s/%s: ", resID,
-                                CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                                CHAR16_TO_CSTR(resName.type, resName.typeLen),
-                                CHAR16_TO_CSTR(resName.name, resName.nameLen));
+                        if (this->getResourceName(resID, &resName)) {
+                            printf("        resource 0x%08x %s:%s/%s: ", resID,
+                                    CHAR16_TO_CSTR(resName.package, resName.packageLen),
+                                    CHAR16_TO_CSTR(resName.type, resName.typeLen),
+                                    CHAR16_TO_CSTR(resName.name, resName.nameLen));
+                        } else {
+                            printf("        INVALID RESOURCE 0x%08x: ", resID);
+                        }
                         if ((thisOffset&0x3) != 0) {
                             printf("NON-INTEGER OFFSET: %p\n", (void*)thisOffset);
                             continue;
@@ -4424,14 +4436,14 @@ void ResTable::print(bool inclValues) const
                                         (((const uint8_t*)ent) + esize);
                                 printf("          Parent=0x%08x, Count=%d\n",
                                     dtohl(bagPtr->parent.ident), N);
-                                for (int i=0; i<N; i++) {
+                                for (int i=0; i<N && (thisOffset+sizeof(ResTable_map)) < typeSize; i++) {
                                     printf("          #%i (Key=0x%08x): ",
                                         i, dtohl(mapPtr->name.ident));
                                     value.copyFrom_dtoh(mapPtr->value);
                                     print_value(pkg, value);
                                     const size_t size = dtohs(mapPtr->value.size);
-                                    mapPtr = (ResTable_map*)(((const uint8_t*)mapPtr)
-                                            + size + sizeof(*mapPtr)-sizeof(mapPtr->value));
+                                    thisOffset += size + sizeof(*mapPtr)-sizeof(mapPtr->value);
+                                    mapPtr = (ResTable_map*)(((const uint8_t*)mapPtr)+thisOffset);
                                 }
                             }
                         }
