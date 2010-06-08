@@ -96,6 +96,7 @@ public class FileFilter {
         ignoreResultList.add("storage/statement-success-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/transaction-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/transaction-error-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
+        ignoreResultList.add("storage/transaction-success-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
 
         // Expected failures due to unsupported features.
         ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
