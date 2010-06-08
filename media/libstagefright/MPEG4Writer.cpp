@@ -32,6 +32,7 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/Utils.h>
 #include <media/mediarecorder.h>
+#include <cutils/properties.h>
 
 namespace android {
 
@@ -82,6 +83,7 @@ private:
     List<StscTableEntry> mStscTableEntries;
 
     List<int32_t> mStssTableEntries;
+    List<int64_t> mChunkDurations;
 
     struct SttsTableEntry {
 
@@ -106,6 +108,9 @@ private:
     status_t makeAVCCodecSpecificData(
             const uint8_t *data, size_t size);
     void writeOneChunk(bool isAvc);
+    void logStatisticalData(bool isAudio);
+    void findMinMaxFrameRates(float *minFps, float *maxFps);
+    void findMinMaxChunkDurations(int64_t *min, int64_t *max);
 
     Track(const Track &);
     Track &operator=(const Track &);
@@ -912,6 +917,7 @@ void MPEG4Writer::Track::threadEntry() {
             } else {
                 if (timestampUs - chunkTimestampUs > interleaveDurationUs) {
                     ++nChunks;
+                    mChunkDurations.push_back(timestampUs - chunkTimestampUs);
                     if (nChunks == 1 ||  // First chunk
                         (--(mStscTableEntries.end()))->samplesPerChunk !=
                          mChunkSamples.size()) {
@@ -952,6 +958,88 @@ void MPEG4Writer::Track::threadEntry() {
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames - %s",
             count, nZeroLengthFrames, mSampleInfos.size(), is_audio? "audio": "video");
+
+    logStatisticalData(is_audio);
+}
+
+void MPEG4Writer::Track::findMinMaxFrameRates(float *minFps, float *maxFps) {
+    int32_t minSampleDuration = 0x7FFFFFFF;
+    int32_t maxSampleDuration = 0;
+    for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
+        it != mSttsTableEntries.end(); ++it) {
+        int32_t sampleDuration = static_cast<int32_t>(it->sampleDuration);
+        if (sampleDuration > maxSampleDuration) {
+            maxSampleDuration = sampleDuration;
+        } else if (sampleDuration < minSampleDuration) {
+            minSampleDuration = sampleDuration;
+        }
+    }
+    CHECK(minSampleDuration != 0 && maxSampleDuration != 0);
+    *minFps = 1000.0 / maxSampleDuration;
+    *maxFps = 1000.0 / minSampleDuration;
+}
+
+// Don't count the last duration
+void MPEG4Writer::Track::findMinMaxChunkDurations(int64_t *min, int64_t *max) {
+    int64_t duration = mOwner->interleaveDuration();
+    int64_t minChunkDuration = duration;
+    int64_t maxChunkDuration = duration;
+    if (mChunkDurations.size() > 1) {
+        for (List<int64_t>::iterator it = mChunkDurations.begin();
+            it != --mChunkDurations.end(); ++it) {
+            if (minChunkDuration > (*it)) {
+                minChunkDuration = (*it);
+            } else if (maxChunkDuration < (*it)) {
+                maxChunkDuration = (*it);
+            }
+        }
+    }
+    *min = minChunkDuration;
+    *max = maxChunkDuration;
+}
+
+void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
+    if (mMaxTimeStampUs <= 0 || mSampleInfos.empty()) {
+        LOGI("nothing is recorded");
+        return;
+    }
+
+    bool collectStats = false;
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.record-stats", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        collectStats = true;
+    }
+
+    if (collectStats) {
+        if (isAudio) {
+            LOGI("audio track - duration %lld us", mMaxTimeStampUs);
+        } else {
+            float fps = (mSampleInfos.size() * 1000000.0) / mMaxTimeStampUs;
+            float minFps;
+            float maxFps;
+            findMinMaxFrameRates(&minFps, &maxFps);
+            LOGI("video track - duration %lld us", mMaxTimeStampUs);
+            LOGI("min/avg/max frame rate (fps): %.2f/%.2f/%.2f",
+                minFps, fps, maxFps);
+        }
+
+        int64_t totalBytes = 0;
+        for (List<SampleInfo>::iterator it = mSampleInfos.begin();
+            it != mSampleInfos.end(); ++it) {
+            totalBytes += it->size;
+        }
+        float bitRate = (totalBytes * 8000000.0) / mMaxTimeStampUs;
+        LOGI("avg bit rate (bps): %.2f", bitRate);
+
+        int64_t duration = mOwner->interleaveDuration();
+        if (duration != 0) {  // If interleaving is enabled
+            int64_t minChunk, maxChunk;
+            findMinMaxChunkDurations(&minChunk, &maxChunk);
+            LOGI("min/avg/max chunk duration (ms): %lld/%lld/%lld",
+                minChunk, duration, maxChunk);
+        }
+    }
 }
 
 void MPEG4Writer::Track::writeOneChunk(bool isAvc) {

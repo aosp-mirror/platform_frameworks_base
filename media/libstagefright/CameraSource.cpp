@@ -28,6 +28,7 @@
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
 #include <utils/String8.h>
+#include <cutils/properties.h>
 
 namespace android {
 
@@ -122,6 +123,7 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mNumFramesReceived(0),
       mNumFramesEncoded(0),
       mNumFramesDropped(0),
+      mCollectStats(false),
       mStarted(false) {
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
@@ -151,6 +153,11 @@ status_t CameraSource::start(MetaData *) {
     LOGV("start");
     CHECK(!mStarted);
 
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.record-stats", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        mCollectStats = true;
+    }
     mCamera->setListener(new CameraSourceListener(this));
     CHECK_EQ(OK, mCamera->startRecording());
 
@@ -163,19 +170,23 @@ status_t CameraSource::stop() {
     Mutex::Autolock autoLock(mLock);
     mStarted = false;
     mFrameAvailableCondition.signal();
+
     mCamera->setListener(NULL);
     mCamera->stopRecording();
 
     releaseQueuedFrames();
 
     while (!mFramesBeingEncoded.empty()) {
-        LOGI("Number of outstanding frames is being encoded: %d", mFramesBeingEncoded.size());
+        LOGI("Waiting for outstanding frames being encoded: %d",
+                mFramesBeingEncoded.size());
         mFrameCompleteCondition.wait(mLock);
     }
 
-    LOGI("Frames received/encoded/dropped: %d/%d/%d, timestamp (us) last/first: %lld/%lld",
-            mNumFramesReceived, mNumFramesEncoded, mNumFramesDropped,
-            mLastFrameTimestampUs, mFirstFrameTimeUs);
+    if (mCollectStats) {
+        LOGI("Frames received/encoded/dropped: %d/%d/%d in %lld us",
+                mNumFramesReceived, mNumFramesEncoded, mNumFramesDropped,
+                mLastFrameTimestampUs - mFirstFrameTimeUs);
+    }
 
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
     return OK;
@@ -252,7 +263,6 @@ status_t CameraSource::read(
 void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
         int32_t msgType, const sp<IMemory> &data) {
     LOGV("dataCallbackTimestamp: timestamp %lld us", timestampUs);
-    mLastFrameTimestampUs = timestampUs;
     Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
         mCamera->releaseRecordingFrame(data);
@@ -261,6 +271,7 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
         return;
     }
 
+    mLastFrameTimestampUs = timestampUs;
     if (mNumFramesReceived == 0) {
         mFirstFrameTimeUs = timestampUs;
     }
