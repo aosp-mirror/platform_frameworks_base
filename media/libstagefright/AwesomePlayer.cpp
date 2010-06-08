@@ -20,7 +20,9 @@
 
 #include <dlfcn.h>
 
+#include "include/ARTSPController.h"
 #include "include/AwesomePlayer.h"
+#include "include/LiveSource.h"
 #include "include/Prefetcher.h"
 #include "include/SoftwareRenderer.h"
 
@@ -39,7 +41,7 @@
 
 #include <surfaceflinger/ISurface.h>
 
-#include "include/LiveSource.h"
+#include <media/stagefright/foundation/ALooper.h>
 
 namespace android {
 
@@ -392,6 +394,8 @@ void AwesomePlayer::reset_l() {
         mVideoBuffer->release();
         mVideoBuffer = NULL;
     }
+
+    mRTSPController.clear();
 
     if (mVideoSource != NULL) {
         mVideoSource->stop();
@@ -1148,7 +1152,22 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
         sp<MediaExtractor> extractor =
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+    } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
+        if (mLooper == NULL) {
+            mLooper = new ALooper;
+            mLooper->start();
+        }
+        mRTSPController = new ARTSPController(mLooper);
+        status_t err = mRTSPController->connect(mUri.string());
 
+        LOGI("ARTSPController::connect returned %d", err);
+
+        if (err != OK) {
+            mRTSPController.clear();
+            return err;
+        }
+
+        sp<MediaExtractor> extractor = mRTSPController.get();
         return setDataSource_l(extractor);
     } else {
         dataSource = DataSource::CreateFromURI(mUri.string(), &mUriHeaders);

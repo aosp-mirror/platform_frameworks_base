@@ -36,6 +36,9 @@ struct MediaSource;
 struct Prefetcher;
 struct TimeSource;
 
+struct ALooper;
+struct ARTSPController;
+
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
 
@@ -168,6 +171,9 @@ private:
 
     sp<Prefetcher> mPrefetcher;
     sp<HTTPDataSource> mConnectingDataSource;
+
+    sp<ALooper> mLooper;
+    sp<ARTSPController> mRTSPController;
 
     struct SuspensionState {
         String8 mUri;

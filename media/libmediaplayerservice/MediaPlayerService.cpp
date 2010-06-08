@@ -771,9 +771,14 @@ player_type getPlayerType(const char* url)
         }
     }
 
-    // Use PV_PLAYER for rtsp for now
     if (!strncasecmp(url, "rtsp://", 7)) {
-        return PV_PLAYER;
+        char value[PROPERTY_VALUE_MAX];
+        if (!property_get("media.stagefright.enable-rtsp", value, NULL)
+            || (strcmp(value, "1") && strcasecmp(value, "true"))) {
+            // For now, we're going to use PV for rtsp-based playback
+            // by default until we can clear up a few more issues.
+            return PV_PLAYER;
+        }
     }
 
     return getDefaultPlayerType();
