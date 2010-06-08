@@ -54,6 +54,7 @@ import com.android.server.am.BatteryStatsService;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -86,6 +87,7 @@ import android.os.TokenWatcher;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.Display;
@@ -4170,13 +4172,31 @@ public class WindowManagerService extends IWindowManager.Stub
     // Misc IWindowSession methods
     // -------------------------------------------------------------
 
+    private boolean allowDisableKeyguard()
+    {
+        // We fail safe if this gets called before the service has started.
+        boolean allow = false;
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+            allow = dpm.getPasswordQuality(null)
+                    == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+        }
+        return allow;
+    }
+
     public void disableKeyguard(IBinder token, String tag) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        synchronized (mKeyguardTokenWatcher) {
-            mKeyguardTokenWatcher.acquire(token, tag);
+
+        if (allowDisableKeyguard()) {
+            synchronized (mKeyguardTokenWatcher) {
+                mKeyguardTokenWatcher.acquire(token, tag);
+            }
+        } else {
+            Log.w(TAG, tag + ": disableKeyguard() ignored while DevicePolicyAmin is enabled.");
         }
     }
 
@@ -4185,25 +4205,30 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        synchronized (mKeyguardTokenWatcher) {
-            mKeyguardTokenWatcher.release(token);
 
-            if (!mKeyguardTokenWatcher.isAcquired()) {
-                // If we are the last one to reenable the keyguard wait until
-                // we have actaully finished reenabling until returning.
-                // It is possible that reenableKeyguard() can be called before
-                // the previous disableKeyguard() is handled, in which case
-                // neither mKeyguardTokenWatcher.acquired() or released() would
-                // be called.  In that case mKeyguardDisabled will be false here
-                // and we have nothing to wait for.
-                while (mKeyguardDisabled) {
-                    try {
-                        mKeyguardTokenWatcher.wait();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+        if (allowDisableKeyguard()) {
+            synchronized (mKeyguardTokenWatcher) {
+                mKeyguardTokenWatcher.release(token);
+
+                if (!mKeyguardTokenWatcher.isAcquired()) {
+                    // If we are the last one to reenable the keyguard wait until
+                    // we have actaully finished reenabling until returning.
+                    // It is possible that reenableKeyguard() can be called before
+                    // the previous disableKeyguard() is handled, in which case
+                    // neither mKeyguardTokenWatcher.acquired() or released() would
+                    // be called.  In that case mKeyguardDisabled will be false here
+                    // and we have nothing to wait for.
+                    while (mKeyguardDisabled) {
+                        try {
+                            mKeyguardTokenWatcher.wait();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
                 }
             }
+        } else {
+            Log.w(TAG, "reenableKeyguard() ignored while DevicePolicyAmin is enabled.");
         }
     }
 
