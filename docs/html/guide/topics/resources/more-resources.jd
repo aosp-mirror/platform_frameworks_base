@@ -12,6 +12,9 @@ parent.link=available-resources.html
     <dd>XML resource that carries a color value (a hexadecimal color).</dd>
   <dt><a href="#Dimension">Dimension</a></dt>
     <dd>XML resource that carries a dimension value (with a unit of measure).</dd>
+  <dt><a href="#Id">ID</a></dt>
+    <dd>XML resource that provides a unique identifier for application resources and
+components.</dd>
   <dt><a href="#Integer">Integer</a></dt>
     <dd>XML resource that carries an integer value.</dd>
   <dt><a href="#IntegerArray">Integer Array</a></dt>
@@ -111,8 +114,8 @@ boolean screenIsSmall = res.{@link android.content.res.Resources#getBoolean(int)
 <h2 id="Color">Color</h2>
 
 <p>A color value defined in XML.
-The color is specified with an RGB value and alpha channel. A color resource can be used
-any place that expects a hexadecimal color value.</p>
+The color is specified with an RGB value and alpha channel. You can use color resource
+any place that accepts a hexadecimal color value.</p>
 
 <p>The value always begins with a pound (#) character and then followed by the
 Alpha-Red-Green-Blue information in one of the following formats:</p>
@@ -318,6 +321,118 @@ float fontSize = res.{@link android.content.res.Resources#getDimension(int) getD
 
 
 
+<h2 id="Id">ID</h2>
+
+<p>A unique resource ID defined in XML. Using the name you provide in the {@code &lt;item&gt;}
+element, the Android developer tools create a unique integer in your project's {@code
+R.java} class, which you can use as an
+identifier for an application resources (for example, a {@link android.view.View} in your UI layout)
+or a unique integer for use in your application code (for example, as an ID for a dialog or a
+result code).</p>
+
+<p class="note"><strong>Note:</strong> An ID is a simple resource that is referenced
+using the value provided in the {@code name} attribute (not the name of the XML file). As
+such, you can combine ID resources with other simple resources in the one XML file,
+under one {@code &lt;resources&gt;} element. Also, remember that an ID resources does not reference
+an actual resource item; it is simply a unique ID that you can attach to other resources or use
+as a unique integer in your application.</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/values/<em>filename.xml</em></code><br/>
+The filename is arbitrary.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.id.<em>name</em></code><br/>
+In XML: <code>@[<em>package</em>:]id/<em>name</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#id-resources-element">resources</a>&gt;
+    &lt;<a href="#id-item-element">item</a>
+        type="id"
+        name="<em>id_name</em>" /&gt;
+&lt;/resources&gt;
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+
+  <dt id="integer-resources-element"><code>&lt;resources&gt;</code></dt>
+    <dd><strong>Required.</strong> This must be the root node.
+      <p>No attributes.</p>
+    </dd>
+  <dt id="integer-element"><code>&lt;integer&gt;</code></dt>
+    <dd>Defines a unique ID. Takes no value, only attributes.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>type</code></dt>
+        <dd>Must be "id".</dd>
+        <dt><code>name</code></dt>
+        <dd><em>String</em>. A unique name for the ID.</dd>
+      </dl>
+    </dd>
+
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+  <p>XML file saved at <code>res/values/ids.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;item type="id" name="button_ok" /&gt;
+    &lt;item type="id" name="dialog_exit" /&gt;
+&lt;/resources>
+</pre>
+
+    <p>Then, this layout snippet uses the "button_ok" ID for a Button widget:</p>
+<pre>
+&lt;Button android:id="<b>@id/button_ok</b>"
+    style="@style/button_style" /&gt;
+</pre>
+
+    <p>Notice that the {@code android:id} value does not include the plus sign in the ID reference,
+because the ID already exists, as defined in the {@code ids.xml} example above. (When you specify an
+ID to an XML resource using the plus sign&mdash;in the format {@code
+android:id="@+id/name"}&mdash;it means that the "name" ID does not exist and should be created.)</p>
+
+  <p>As another example, the following code snippet uses the "dialog_exit" ID as a unique identifier
+for a dialog:</p>
+<pre>
+{@link android.app.Activity#showDialog(int) showDialog}(<b>R.id.dialog_exit</b>);
+</pre>
+  <p>In the same application, the "dialog_exit" ID is compared when creating a dialog:</p>
+<pre>
+protected Dialog {@link android.app.Activity#onCreateDialog(int)}(int id) {
+    Dialog dialog;
+    switch(id) {
+    case <b>R.id.dialog_exit</b>:
+        ...
+        break;
+    default:
+        dialog = null;
+    }
+    return dialog;
+}
+</pre>
+</dd> <!-- end example -->
+
+
+</dl>
+
+
+
+
+
 <h2 id="Integer">Integer</h2>
 
 <p>An integer defined in XML.</p>
@@ -347,7 +462,7 @@ In XML: <code>@[<em>package</em>:]integer/<em>integer_name</em></code>
 &lt;<a href="#integer-resources-element">resources</a>>
     &lt;<a href="#integer-element">integer</a>
         name="<em>integer_name</em>"
-        &gt;<em>integer</em>&lt;/dimen&gt;
+        &gt;<em>integer</em>&lt;/integer&gt;
 &lt;/resources&gt;
 </pre>
 </dd>
@@ -379,8 +494,8 @@ In XML: <code>@[<em>package</em>:]integer/<em>integer_name</em></code>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
-    &lt;integer name="max_speed">75&lt;/dimen>
-    &lt;integer name="min_speed">5&lt;/dimen>
+    &lt;integer name="max_speed">75&lt;/integer>
+    &lt;integer name="min_speed">5&lt;/integer>
 &lt;/resources>
 </pre>
     <p>This application code retrieves an integer:</p>

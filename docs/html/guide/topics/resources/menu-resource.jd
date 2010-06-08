@@ -35,7 +35,7 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;<a href="#menu-element">menu</a> xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;<a href="#item-element">item</a> android:id="@+id/<em>id_name</em>"
+    &lt;<a href="#item-element">item</a> android:id="@[+][<em>package</em>:]id/<em>resource_name</em>"
           android:menuCategory=["container" | "system" | "secondary" | "alternative"]
           android:orderInCategory="<em>integer</em>"
           android:title="<em>string</em>"
@@ -46,7 +46,7 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
           android:checkable=["true" | "false"]
           android:visible=["visible" | "invisible" | "gone"]
           android:enabled=["enabled" | "disabled"] /&gt;
-    &lt;<a href="#group-element">group</a> android:id="<em>resource ID</em>"
+    &lt;<a href="#group-element">group</a> android:id="@[+][<em>package</em>:]id/<em>resource name</em>"
            android:menuCategory=["container" | "system" | "secondary" | "alternative"]
            android:orderInCategory="<em>integer</em>"
            android:checkableBehavior=["none" | "all" | "single"]
@@ -84,8 +84,8 @@ child of a <code>&lt;menu&gt;</code> element.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:id</code></dt>
-        <dd><em>Resource name</em>. A unique resource name. The value takes the form:
-<code>"@+id/<em>name</em>"</code>.</dd>
+        <dd><em>Resource ID</em>. A unique resource ID. To create a new resource ID for this item, use the form:
+<code>"@+id/<em>name</em>"</code>. The plus symbol indicates that this should be created as a new ID.</dd>
         <dt><code>android:menuCategory</code></dt>
           <dd><em>Keyword</em>. Value corresponding to {@link android.view.Menu} {@code CATEGORY_*}
           constants, which define the group's priority. Valid values:
@@ -124,8 +124,8 @@ on the data that is currently displayed.</td></tr>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:id</code></dt>
-        <dd><em>Resource name</em>. A unique resource name. The value takes the form:
-<code>"@+id/<em>name</em>"</code>.</dd>
+        <dd><em>Resource ID</em>. A unique resource ID. To create a new resource ID for this item, use the form:
+<code>"@+id/<em>name</em>"</code>. The plus symbol indicates that this should be created as a new ID.</dd>
         <dt><code>android:menuCategory</code></dt>
           <dd><em>Keyword</em>. Value corresponding to {@link android.view.Menu} {@code CATEGORY_*}
           constants, which define the item's priority. Valid values:

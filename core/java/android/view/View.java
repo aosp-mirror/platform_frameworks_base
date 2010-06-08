@@ -7890,7 +7890,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * without resorting to another data structure.
      *
      * The specified key should be an id declared in the resources of the
-     * application to ensure it is unique. Keys identified as belonging to
+     * application to ensure it is unique (see the <a
+     * href={@docRoot}guide/topics/resources/more-resources.html#Id">ID resource type</a>).
+     * Keys identified as belonging to
      * the Android framework or not associated with any package will cause
      * an {@link IllegalArgumentException} to be thrown.
      *
