@@ -317,6 +317,12 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
             mStringPoolSize =
                 (mHeader->header.size-mHeader->stringsStart)/charSize;
         } else {
+            // check invariant: styles starts before end of data
+            if (mHeader->stylesStart >= (mHeader->header.size-sizeof(uint16_t))) {
+                LOGW("Bad style block: style block starts at %d past data size of %d\n",
+                    (int)mHeader->stylesStart, (int)mHeader->header.size);
+                return (mError=BAD_TYPE);
+            }
             // check invariant: styles follow the strings
             if (mHeader->stylesStart <= mHeader->stringsStart) {
                 LOGW("Bad style block: style block starts at %d, before strings at %d\n",
