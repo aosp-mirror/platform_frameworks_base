@@ -103,19 +103,12 @@ enum RsDataType {
 
 enum RsDataKind {
     RS_KIND_USER,
-    RS_KIND_COLOR,
-    RS_KIND_POSITION,
-    RS_KIND_TEXTURE,
-    RS_KIND_NORMAL,
-    RS_KIND_INDEX,
-    RS_KIND_POINT_SIZE,
 
-    RS_KIND_PIXEL_L,
+    RS_KIND_PIXEL_L = 7,
     RS_KIND_PIXEL_A,
     RS_KIND_PIXEL_LA,
     RS_KIND_PIXEL_RGB,
     RS_KIND_PIXEL_RGBA,
-
 };
 
 enum RsSamplerParam {

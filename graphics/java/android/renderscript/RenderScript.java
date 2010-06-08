@@ -223,7 +223,6 @@ public class RenderScript {
     Element mElement_RGBA_4444;
     Element mElement_RGBA_8888;
 
-    Element mElement_INDEX_16;
     Element mElement_FLOAT_2;
     Element mElement_FLOAT_3;
     Element mElement_FLOAT_4;
