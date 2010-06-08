@@ -1749,7 +1749,8 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
             name = NO_MEMORY;
     } while(name >= 0);
 
-    //LOGD("getTokenForSurface(%p) => %d", sur->asBinder().get(), name);
+    //LOGD("getTokenForSurface(%p) => %d (client=%p, bitmap=%08lx)",
+    //        sur->asBinder().get(), name, this, mBitmap);
     return name;
 }
 
