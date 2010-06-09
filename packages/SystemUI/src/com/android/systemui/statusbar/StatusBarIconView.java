@@ -32,7 +32,6 @@ public class StatusBarIconView extends AnimatedImageView {
 
     private StatusBarIcon mIcon;
     @ViewDebug.ExportedProperty private String mSlot;
-    @ViewDebug.ExportedProperty private boolean mError;
 
     public StatusBarIconView(Context context, String slot) {
         super(context);
@@ -52,39 +51,33 @@ public class StatusBarIconView extends AnimatedImageView {
         return a.equals(b);
     }
 
-    public void set(StatusBarIcon icon) {
-        error: {
-            final boolean iconEquals = !mError
-                    && mIcon != null
-                    && streq(mIcon.iconPackage, icon.iconPackage)
-                    && mIcon.iconId == icon.iconId;
-            final boolean levelEquals = !mError
-                    && iconEquals
-                    && mIcon.iconLevel == icon.iconLevel;
-            final boolean visibilityEquals = !mError
-                    && mIcon != null
-                    && mIcon.visible == icon.visible;
-            mError = false;
-            if (!iconEquals) {
-                Drawable drawable = getIcon(icon);
-                if (drawable == null) {
-                    mError = true;
-                    Slog.w(PhoneStatusBarService.TAG, "No icon ID for slot " + mSlot);
-                    break error;
-                }
-                setImageDrawable(drawable);
+    /**
+     * Returns whether the set succeeded.
+     */
+    public boolean set(StatusBarIcon icon) {
+        final boolean iconEquals = mIcon != null
+                && streq(mIcon.iconPackage, icon.iconPackage)
+                && mIcon.iconId == icon.iconId;
+        final boolean levelEquals = iconEquals
+                && mIcon.iconLevel == icon.iconLevel;
+        final boolean visibilityEquals = mIcon != null
+                && mIcon.visible == icon.visible;
+        if (!iconEquals) {
+            Drawable drawable = getIcon(icon);
+            if (drawable == null) {
+                Slog.w(PhoneStatusBarService.TAG, "No icon for slot " + mSlot);
+                return false;
             }
-            if (!levelEquals) {
-                setImageLevel(icon.iconLevel);
-            }
-            if (!visibilityEquals) {
-                setVisibility(icon.visible ? VISIBLE : GONE);
-            }
-            mIcon = icon.clone();
+            setImageDrawable(drawable);
         }
-        if (mError) {
-            setVisibility(GONE);
+        if (!levelEquals) {
+            setImageLevel(icon.iconLevel);
         }
+        if (!visibilityEquals) {
+            setVisibility(icon.visible ? VISIBLE : GONE);
+        }
+        mIcon = icon.clone();
+        return true;
     }
 
     private Drawable getIcon(StatusBarIcon icon) {
@@ -106,7 +99,7 @@ public class StatusBarIconView extends AnimatedImageView {
             try {
                 r = context.getPackageManager().getResourcesForApplication(icon.iconPackage);
             } catch (PackageManager.NameNotFoundException ex) {
-                Slog.e(PhoneStatusBarService.TAG, "Icon package not found: "+icon.iconPackage, ex);
+                Slog.e(PhoneStatusBarService.TAG, "Icon package not found: " + icon.iconPackage);
                 return null;
             }
         } else {

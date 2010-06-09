@@ -17,7 +17,7 @@
 package com.android.server;
 
 import com.android.internal.statusbar.StatusBarNotification;
-import com.android.server.status.StatusBarManagerService;
+import com.android.server.StatusBarManagerService;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -302,6 +302,12 @@ class NotificationManagerService extends INotificationManager.Stub
                 mLedNotification = null;
                 updateLightsLocked();
             }
+        }
+
+        public void onNotificationError(String pkg, String tag, int id, String message) {
+            Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id);
+            cancelNotification(pkg, tag, id, 0, 0);
+            // TODO: Tell the activity manager.
         }
     };
 

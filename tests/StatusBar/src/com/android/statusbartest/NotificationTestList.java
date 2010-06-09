@@ -123,28 +123,48 @@ public class NotificationTestList extends TestActivity
             }
         },
 
-        new Test("Bad Icon") {
+        new Test("Bad Icon #1 (when=create)") {
             public void run() {
-                mNM.notify(1, new Notification(NotificationTestList.this,
-                            R.layout.chrono_notification, /* not a drawable! */
-                            null, System.currentTimeMillis()-(1000*60*60*24),
-                            "(453) 123-2328",
-                            "", null));
+                Notification n = new Notification(R.layout.chrono_notification /* not an icon */,
+                        null, mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is the same notification!!!", makeIntent());
+                mNM.notify(1, n);
             }
         },
 
-        new Test("Bad resource #2") {
-            public void run()
-            {
-                Notification n = new Notification(NotificationTestList.this,
-                            R.drawable.ic_statusbar_missedcall,
-                            null, System.currentTimeMillis()-(1000*60*60*24),
-                            "(453) 123-2328",
-                            "", null);
-                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
-                mNM.notify(2, n);
+        new Test("Bad Icon #1 (when=now)") {
+            public void run() {
+                Notification n = new Notification(R.layout.chrono_notification /* not an icon */,
+                        null, System.currentTimeMillis());
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is the same notification!!!", makeIntent());
+                mNM.notify(1, n);
             }
         },
+
+        new Test("Bad resource #1 (when=create)") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon2,
+                        null, mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is the same notification!!!", makeIntent());
+                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Bad resource #1 (when=now)") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon2,
+                        null, System.currentTimeMillis());
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is the same notification!!!", makeIntent());
+                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
+                mNM.notify(1, n);
+            }
+        },
+
 
         new Test("Bad resource #3") {
             public void run()

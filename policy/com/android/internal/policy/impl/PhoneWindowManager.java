@@ -957,12 +957,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int prepareAddWindowLw(WindowState win, WindowManager.LayoutParams attrs) {
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "PhoneWindowManager");
+                // TODO: Need to handle the race condition of the status bar proc
+                // dying and coming back before the removeWindowLw cleanup has happened.
                 if (mStatusBar != null) {
                     return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
                 }
                 mStatusBar = win;
                 break;
             case TYPE_STATUS_BAR_PANEL:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "PhoneWindowManager");
                 mStatusBarPanels.add(win);
                 break;
             case TYPE_KEYGUARD:

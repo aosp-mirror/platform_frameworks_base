@@ -916,6 +916,13 @@
         android:description="@string/permdesc_statusBar"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to be the status bar.  Currently used only by SystemUI.apk
+    @hide -->
+    <permission android:name="android.permission.STATUS_BAR_SERVICE"
+        android:label="@string/permlab_statusBarService"
+        android:description="@string/permdesc_statusBarService"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to force a BACK operation on whatever is the
          top activity. -->
     <permission android:name="android.permission.FORCE_BACK"
