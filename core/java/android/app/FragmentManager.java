@@ -23,6 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -81,6 +84,8 @@ public class FragmentManager {
     
     int mCurState = Fragment.INITIALIZING;
     Activity mActivity;
+    
+    boolean mNeedMenuInvalidate;
     
     // Temporary vars for state save and restore.
     Bundle mStateBundle = null;
@@ -362,6 +367,9 @@ public class FragmentManager {
         mAdded.add(fragment);
         makeActive(fragment);
         fragment.mAdded = true;
+        if (fragment.mHasMenu) {
+            mNeedMenuInvalidate = true;
+        }
         if (moveToStateNow) {
             moveToState(fragment, mCurState, 0, 0);
         }
@@ -373,6 +381,9 @@ public class FragmentManager {
         final boolean inactive = fragment.mBackStackNesting <= 0;
         if (inactive) {
             makeInactive(fragment);
+        }
+        if (fragment.mHasMenu) {
+            mNeedMenuInvalidate = true;
         }
         fragment.mAdded = false;
         moveToState(fragment, inactive ? Fragment.INITIALIZING : Fragment.CREATED,
@@ -391,6 +402,9 @@ public class FragmentManager {
                 }
                 fragment.mView.setVisibility(View.GONE);
             }
+            if (fragment.mAdded && fragment.mHasMenu) {
+                mNeedMenuInvalidate = true;
+            }
             fragment.onHiddenChanged(true);
         }
     }
@@ -406,6 +420,9 @@ public class FragmentManager {
                     fragment.mView.setAnimation(anim);
                 }
                 fragment.mView.setVisibility(View.VISIBLE);
+            }
+            if (fragment.mAdded && fragment.mHasMenu) {
+                mNeedMenuInvalidate = true;
             }
             fragment.onHiddenChanged(false);
         }
@@ -673,6 +690,7 @@ public class FragmentManager {
                             "No instantiated fragment for index #" + fms.mAdded[i]);
                 }
                 f.mAdded = true;
+                f.mImmediateActivity = mActivity;
                 mAdded.add(f);
             }
         } else {
@@ -719,6 +737,59 @@ public class FragmentManager {
     public void dispatchDestroy() {
         moveToState(Fragment.INITIALIZING, false);
         mActivity = null;
+    }
+    
+    public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        boolean show = false;
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null && !f.mHidden && f.mHasMenu) {
+                    show = true;
+                    f.onCreateOptionsMenu(menu, inflater);
+                }
+            }
+        }
+        return show;
+    }
+    
+    public boolean dispatchPrepareOptionsMenu(Menu menu) {
+        boolean show = false;
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null && !f.mHidden && f.mHasMenu) {
+                    show = true;
+                    f.onPrepareOptionsMenu(menu);
+                }
+            }
+        }
+        return show;
+    }
+    
+    public boolean dispatchOptionsItemSelected(MenuItem item) {
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null && !f.mHidden && f.mHasMenu) {
+                    if (f.onOptionsItemSelected(item)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public void dispatchOptionsMenuClosed(Menu menu) {
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null && !f.mHidden && f.mHasMenu) {
+                    f.onOptionsMenuClosed(menu);
+                }
+            }
+        }
     }
     
     public static int reverseTransit(int transit) {

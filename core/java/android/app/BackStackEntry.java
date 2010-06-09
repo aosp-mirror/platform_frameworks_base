@@ -100,9 +100,10 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     
     static final int OP_NULL = 0;
     static final int OP_ADD = 1;
-    static final int OP_REMOVE = 2;
-    static final int OP_HIDE = 3;
-    static final int OP_SHOW = 4;
+    static final int OP_REPLACE = 2;
+    static final int OP_REMOVE = 3;
+    static final int OP_HIDE = 4;
+    static final int OP_SHOW = 5;
     
     static final class Op {
         Op next;
@@ -111,6 +112,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         Fragment fragment;
         int enterAnim;
         int exitAnim;
+        ArrayList<Fragment> removed;
     }
     
     Op mHead;
@@ -142,17 +144,25 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     }
         
     public FragmentTransaction add(Fragment fragment, String tag) {
-        return add(0, fragment, tag);
+        doAddOp(0, fragment, tag, OP_ADD);
+        return this;
     }
 
     public FragmentTransaction add(int containerViewId, Fragment fragment) {
-        return add(containerViewId, fragment, null);
+        doAddOp(containerViewId, fragment, null, OP_ADD);
+        return this;
     }
 
     public FragmentTransaction add(int containerViewId, Fragment fragment, String tag) {
-        if (fragment.mActivity != null) {
+        doAddOp(containerViewId, fragment, tag, OP_ADD);
+        return this;
+    }
+
+    private void doAddOp(int containerViewId, Fragment fragment, String tag, int opcmd) {
+        if (fragment.mImmediateActivity != null) {
             throw new IllegalStateException("Fragment already added: " + fragment);
         }
+        fragment.mImmediateActivity = mManager.mActivity;
         
         if (tag != null) {
             if (fragment.mTag != null && !tag.equals(fragment.mTag)) {
@@ -173,11 +183,9 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         }
         
         Op op = new Op();
-        op.cmd = OP_ADD;
+        op.cmd = opcmd;
         op.fragment = fragment;
         addOp(op);
-        
-        return this;
     }
 
     public FragmentTransaction replace(int containerViewId, Fragment fragment) {
@@ -188,21 +196,16 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         if (containerViewId == 0) {
             throw new IllegalArgumentException("Must use non-zero containerViewId");
         }
-        if (mManager.mAdded != null) {
-            for (int i=0; i<mManager.mAdded.size(); i++) {
-                Fragment old = mManager.mAdded.get(i);
-                if (old.mContainerId == containerViewId) {
-                    remove(old);
-                }
-            }
-        }
-        return add(containerViewId, fragment, tag);
+        
+        doAddOp(containerViewId, fragment, tag, OP_REPLACE);
+        return this;
     }
     
     public FragmentTransaction remove(Fragment fragment) {
-        if (fragment.mActivity == null) {
+        if (fragment.mImmediateActivity == null) {
             throw new IllegalStateException("Fragment not added: " + fragment);
         }
+        fragment.mImmediateActivity = null;
         
         Op op = new Op();
         op.cmd = OP_REMOVE;
@@ -213,7 +216,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     }
 
     public FragmentTransaction hide(Fragment fragment) {
-        if (fragment.mActivity == null) {
+        if (fragment.mImmediateActivity == null) {
             throw new IllegalStateException("Fragment not added: " + fragment);
         }
         
@@ -226,7 +229,7 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     }
     
     public FragmentTransaction show(Fragment fragment) {
-        if (fragment.mActivity == null) {
+        if (fragment.mImmediateActivity == null) {
             throw new IllegalStateException("Fragment not added: " + fragment);
         }
         
@@ -278,6 +281,30 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     f.mNextAnim = op.enterAnim;
                     mManager.addFragment(f, false);
                 } break;
+                case OP_REPLACE: {
+                    Fragment f = op.fragment;
+                    if (mManager.mAdded != null) {
+                        for (int i=0; i<mManager.mAdded.size(); i++) {
+                            Fragment old = mManager.mAdded.get(i);
+                            if (old.mContainerId == f.mContainerId) {
+                                if (op.removed == null) {
+                                    op.removed = new ArrayList<Fragment>();
+                                }
+                                op.removed.add(old);
+                                if (mAddToBackStack) {
+                                    old.mBackStackNesting++;
+                                }
+                                old.mNextAnim = op.exitAnim;
+                                mManager.removeFragment(old, mTransition, mTransitionStyle);
+                            }
+                        }
+                    }
+                    if (mAddToBackStack) {
+                        f.mBackStackNesting++;
+                    }
+                    f.mNextAnim = op.enterAnim;
+                    mManager.addFragment(f, false);
+                } break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
                     if (mAddToBackStack) {
@@ -312,6 +339,11 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         
         mManager.moveToState(mManager.mCurState, mTransition,
                 mTransitionStyle, true);
+        if (mManager.mNeedMenuInvalidate && mManager.mActivity != null) {
+            mManager.mActivity.invalidateOptionsMenu();
+            mManager.mNeedMenuInvalidate = false;
+        }
+        
         if (mAddToBackStack) {
             mManager.addBackStackState(this);
         }
@@ -329,6 +361,24 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     mManager.removeFragment(f,
                             FragmentManager.reverseTransit(mTransition),
                             mTransitionStyle);
+                } break;
+                case OP_REPLACE: {
+                    Fragment f = op.fragment;
+                    if (mAddToBackStack) {
+                        f.mBackStackNesting--;
+                    }
+                    mManager.removeFragment(f,
+                            FragmentManager.reverseTransit(mTransition),
+                            mTransitionStyle);
+                    if (op.removed != null) {
+                        for (int i=0; i<op.removed.size(); i++) {
+                            Fragment old = op.removed.get(i);
+                            if (mAddToBackStack) {
+                                old.mBackStackNesting--;
+                            }
+                            mManager.addFragment(old, false);
+                        }
+                    }
                 } break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
@@ -363,6 +413,10 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
         
         mManager.moveToState(mManager.mCurState,
                 FragmentManager.reverseTransit(mTransition), mTransitionStyle, true);
+        if (mManager.mNeedMenuInvalidate && mManager.mActivity != null) {
+            mManager.mActivity.invalidateOptionsMenu();
+            mManager.mNeedMenuInvalidate = false;
+        }
     }
     
     public String getName() {

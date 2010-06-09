@@ -25,6 +25,9 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -157,6 +160,10 @@ public class Fragment implements ComponentCallbacks {
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
     
+    // Set as soon as a fragment is added to a transaction (or removed),
+    // to be able to do validation.
+    Activity mImmediateActivity;
+    
     // Activity this fragment is attached to.
     Activity mActivity;
     
@@ -183,6 +190,9 @@ public class Fragment implements ComponentCallbacks {
     
     // If set this fragment is being retained across the current config change.
     boolean mRetaining;
+    
+    // If set this fragment has menu items to contribute.
+    boolean mHasMenu;
     
     // Used to verify that subclasses call through to super class.
     boolean mCalled;
@@ -270,28 +280,28 @@ public class Fragment implements ComponentCallbacks {
      * the android:id value supplied in a layout or the container view ID
      * supplied when adding the fragment.
      */
-    public int getId() {
+    final public int getId() {
         return mFragmentId;
     }
     
     /**
      * Get the tag name of the fragment, if specified.
      */
-    public String getTag() {
+    final public String getTag() {
         return mTag;
     }
     
     /**
      * Return the Activity this fragment is currently associated with.
      */
-    public Activity getActivity() {
+    final public Activity getActivity() {
         return mActivity;
     }
     
     /**
      * Return true if the fragment is currently added to its activity.
      */
-    public boolean isAdded() {
+    final public boolean isAdded() {
         return mActivity != null && mActivity.mFragments.mAdded.contains(this);
     }
     
@@ -300,7 +310,7 @@ public class Fragment implements ComponentCallbacks {
      * it: (1) has been added, (2) has its view attached to the window, and 
      * (3) is not hidden.
      */
-    public boolean isVisible() {
+    final public boolean isVisible() {
         return isAdded() && !isHidden() && mView != null
                 && mView.getWindowToken() != null && mView.getVisibility() == View.VISIBLE;
     }
@@ -312,7 +322,7 @@ public class Fragment implements ComponentCallbacks {
      * to other states -- that is, to be visible to the user, a fragment
      * must be both started and not hidden.
      */
-    public boolean isHidden() {
+    final public boolean isHidden() {
         return mHidden;
     }
     
@@ -344,8 +354,24 @@ public class Fragment implements ComponentCallbacks {
         mRetainInstance = retain;
     }
     
-    public boolean getRetainInstance() {
+    final public boolean getRetainInstance() {
         return mRetainInstance;
+    }
+    
+    /**
+     * Report that this fragment would like to participate in populating
+     * the options menu by receiving a call to {@link #onCreateOptionsMenu(Menu)}
+     * and related methods.
+     * 
+     * @param hasMenu If true, the fragment has menu items to contribute.
+     */
+    public void setHasOptionsMenu(boolean hasMenu) {
+        if (mHasMenu != hasMenu) {
+            mHasMenu = hasMenu;
+            if (isAdded() && !isHidden()) {
+                mActivity.invalidateOptionsMenu();
+            }
+        }
     }
     
     /**
@@ -525,5 +551,70 @@ public class Fragment implements ComponentCallbacks {
      */
     public void onDetach() {
         mCalled = true;
+    }
+    
+    /**
+     * Initialize the contents of the Activity's standard options menu.  You
+     * should place your menu items in to <var>menu</var>.  For this method
+     * to be called, you must have first called {@link #setHasMenu}.  See
+     * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
+     * for more information.
+     * 
+     * @param menu The options menu in which you place your items.
+     * 
+     * @see #setHasMenu
+     * @see #onPrepareOptionsMenu
+     * @see #onOptionsItemSelected
+     */
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    }
+
+    /**
+     * Prepare the Screen's standard options menu to be displayed.  This is
+     * called right before the menu is shown, every time it is shown.  You can
+     * use this method to efficiently enable/disable items or otherwise
+     * dynamically modify the contents.  See
+     * {@link Activity#onPrepareOptionsMenu(Menu) Activity.onPrepareOptionsMenu}
+     * for more information.
+     * 
+     * @param menu The options menu as last shown or first initialized by
+     *             onCreateOptionsMenu().
+     * 
+     * @see #setHasMenu
+     * @see #onCreateOptionsMenu
+     */
+    public void onPrepareOptionsMenu(Menu menu) {
+    }
+
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     * 
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.
+     * 
+     * @param item The menu item that was selected.
+     * 
+     * @return boolean Return false to allow normal menu processing to
+     *         proceed, true to consume it here.
+     * 
+     * @see #onCreateOptionsMenu
+     */
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return false;
+    }
+
+    /**
+     * This hook is called whenever the options menu is being closed (either by the user canceling
+     * the menu with the back/menu button, or when an item is selected).
+     *  
+     * @param menu The options menu as last shown or first initialized by
+     *             onCreateOptionsMenu().
+     */
+    public void onOptionsMenuClosed(Menu menu) {
     }
 }
