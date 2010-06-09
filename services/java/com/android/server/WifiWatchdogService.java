@@ -1217,8 +1217,9 @@ public class WifiWatchdogService {
         private static Random sRandom = new Random();
         
         static boolean isDnsReachable(int dns, int timeout) {
+            DatagramSocket socket = null;
             try {
-                DatagramSocket socket = new DatagramSocket();
+                socket = new DatagramSocket();
                 
                 // Set some socket properties
                 socket.setSoTimeout(timeout);
@@ -1271,6 +1272,10 @@ public class WifiWatchdogService {
                     Slog.d(TAG, "DnsPinger.isReachable got an unknown exception", e);
                 }
                 return false;
+            } finally {
+                if (socket != null) {
+                    socket.close();
+                }
             }
         }
         
