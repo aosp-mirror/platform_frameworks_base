@@ -65,11 +65,11 @@ class ZoomManager {
     static float DEFAULT_MIN_ZOOM_SCALE;
 
     // actual scale limits, which can be set through a webpage viewport meta tag
-    float mMaxZoomScale;
-    float mMinZoomScale;
+    private float mMaxZoomScale;
+    private float mMinZoomScale;
 
     // locks the minimum ZoomScale to the value currently set in mMinZoomScale
-    boolean mMinZoomScaleFixed = true;
+    private boolean mMinZoomScaleFixed = true;
 
     // while in the zoom overview mode, the page's width is fully fit to the
     // current window. The page is alive, in another words, you can click to
@@ -128,7 +128,6 @@ class ZoomManager {
 
     // use the framework's ScaleGestureDetector to handle multi-touch
     private ScaleGestureDetector mScaleDetector;
-
     private boolean mPinchToZoomAnimating = false;
 
     public ZoomManager(WebView webView, CallbackProxy callbackProxy) {
@@ -175,6 +174,19 @@ class ZoomManager {
 
     public void setInitialScaleInPercent(int scaleInPercent) {
         mInitialScale = scaleInPercent * 0.01f;
+    }
+
+    public float computeScaleWithLimits(float scale) {
+        if (scale < mMinZoomScale) {
+            scale = mMinZoomScale;
+        } else if (scale > mMaxZoomScale) {
+            scale = mMaxZoomScale;
+        }
+        return scale;
+    }
+
+    public boolean isZoomScaleFixed() {
+        return mMinZoomScale >= mMaxZoomScale;
     }
 
     public static final boolean exceedsMinScaleIncrement(float scaleA, float scaleB) {
