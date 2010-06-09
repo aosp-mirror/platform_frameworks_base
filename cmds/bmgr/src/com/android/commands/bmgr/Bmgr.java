@@ -175,6 +175,11 @@ public final class Bmgr {
     private void doTransport() {
         try {
             String which = nextArg();
+            if (which == null) {
+                showUsage();
+                return;
+            }
+
             String old = mBmgr.selectBackupTransport(which);
             if (old == null) {
                 System.out.println("Unknown transport '" + which
@@ -318,6 +323,11 @@ public final class Bmgr {
 
     private void doRestore() {
         String arg = nextArg();
+        if (arg == null) {
+            showUsage();
+            return;
+        }
+
         if (arg.indexOf('.') >= 0) {
             // it's a package name
             doRestorePackage(arg);
