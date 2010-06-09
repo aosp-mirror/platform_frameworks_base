@@ -295,8 +295,6 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private Runnable mReleaseWakeLockCallback;
 
-    private static String[] sDnsPropNames;
-
     /**
      * A structure for supplying information about a supplicant state
      * change in the STATE_CHANGE event message that comes from the
@@ -351,9 +349,9 @@ public class WifiStateTracker extends NetworkStateTracker {
         mSettingsObserver = new SettingsObserver(new Handler());
 
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
-        sDnsPropNames = new String[] {
-            "dhcp." + mInterfaceName + ".dns1",
-            "dhcp." + mInterfaceName + ".dns2"
+        mDnsPropNames = new String[] {
+            "net." + mInterfaceName + ".dns1",
+            "net." + mInterfaceName + ".dns2"
         };
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
 
@@ -395,15 +393,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     private void setTornDownByConnMgr(boolean flag) {
         mTornDownByConnMgr = flag;
         updateNetworkInfo();
-    }
-
-    /**
-     * Return the IP addresses of the DNS servers available for the WLAN
-     * network interface.
-     * @return a list of DNS addresses, with no holes.
-     */
-    public String[] getNameServers() {
-        return getNameServerList(sDnsPropNames);
     }
 
     /**

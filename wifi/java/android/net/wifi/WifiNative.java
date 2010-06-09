@@ -16,8 +16,6 @@
 
 package android.net.wifi;
 
-import android.net.DhcpInfo;
-
 /**
  * Native calls for sending requests to the supplicant daemon, and for
  * receiving asynchronous events. All methods of the form "xxxxCommand()"
@@ -141,10 +139,6 @@ public class WifiNative {
     public native static boolean addToBlacklistCommand(String bssid);
 
     public native static boolean clearBlacklistCommand();
-
-    public native static boolean doDhcpRequest(DhcpInfo results);
-
-    public native static String getDhcpError();
 
     /**
      * Wait for the supplicant to send an event, returning the event string.
