@@ -43,9 +43,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.ArrayList;
 
 
 /**
@@ -400,8 +400,7 @@ public abstract class ContentResolver {
     /**
      * Open a raw file descriptor to access data under a "content:" URI.  This
      * interacts with the underlying {@link ContentProvider#openAssetFile}
-     * ContentProvider.openAssetFile()} method of the provider associated with the
-     * given URI, to retrieve any file stored there.
+     * method of the provider associated with the given URI, to retrieve any file stored there.
      *
      * <h5>Accepts the following URI schemes:</h5>
      * <ul>
@@ -1341,7 +1340,7 @@ public abstract class ContentResolver {
     }
 
     private final class CursorWrapperInner extends CursorWrapper {
-        private IContentProvider mContentProvider;
+        private final IContentProvider mContentProvider;
         public static final String TAG="CursorWrapperInner";
         private boolean mCloseFlag = false;
 
@@ -1370,7 +1369,7 @@ public abstract class ContentResolver {
     }
 
     private final class ParcelFileDescriptorInner extends ParcelFileDescriptor {
-        private IContentProvider mContentProvider;
+        private final IContentProvider mContentProvider;
         public static final String TAG="ParcelFileDescriptorInner";
         private boolean mReleaseProviderFlag = false;
 

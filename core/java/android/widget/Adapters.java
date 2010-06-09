@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,16 +31,12 @@ import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.View;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static com.android.internal.R.*;
 
 /**
  * <p>This class can be used to load {@link android.widget.Adapter adapters} defined in
@@ -80,7 +79,8 @@ import static com.android.internal.R.*;
  *  {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}.
  *  This attribute is optional.</li>
  *  <li><code>android:uri</code>: URI of the content provider to query to retrieve a cursor.
- *  Specifying this attribute is equivalent to calling {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}.
+ *  Specifying this attribute is equivalent to calling
+ *  {@link android.widget.Adapters#loadCursorAdapter(android.content.Context, int, String, Object[])}.
  *  If you call this method, the value of the XML attribute is ignored. This attribute is
  *  optional.</li>
  * </ul>
@@ -102,7 +102,7 @@ import static com.android.internal.R.*;
  *  <li><code>android:column</code>: Name of the column to select in the cursor during the
  *  query operation</li>
  * </ul>
- * <p><strong>Note:</strong> The column named <code>_id</code> is always implicitely
+ * <p><strong>Note:</strong> The column named <code>_id</code> is always implicitly
  * selected.</p>
  * 
  * <a name="xml-cursor-adapter-bind-tag" />
@@ -123,14 +123,15 @@ import static com.android.internal.R.*;
  * <p>The <code>&lt;bind /&gt;</code> tag supports the following attributes:</p>
  * <ul>
  *  <li><code>android:from</code>: The name of the column to bind from.
- *  This attribute is mandatory.</li>
+ *  This attribute is mandatory. Note that <code>@</code> which are not used to reference resources
+ *  should be backslash protected as in <code>\@</code>.</li>
  *  <li><code>android:to</code>: The id of the view to bind to. This attribute is mandatory.</li>
  *  <li><code>android:as</code>: The <a href="#xml-cursor-adapter-bind-data-types">data type</a>
  *  of the binding. This attribute is mandatory.</li>
  * </ul>
  * 
  * <p>In addition, a <code>&lt;bind /&gt;</code> can contain zero or more instances of
- * <a href="#xml-cursor-adapter-bind-data-transformation">data transformations</a> chilren
+ * <a href="#xml-cursor-adapter-bind-data-transformation">data transformations</a> children
  * tags.</p>
  *
  * <a name="xml-cursor-adapter-bind-data-types" />
@@ -146,11 +147,14 @@ import static com.android.internal.R.*;
  *  and must be bound to an {@link android.widget.ImageView}</li>
  *  <li><code>drawable</code>: The content of the column is interpreted as a resource id to a
  *  drawable and must be bound to an {@link android.widget.ImageView}</li>
+ *  <li><code>tag</code>: The content of the column is interpreted as a string and will be set as
+ *  the tag (using {@link View#setTag(Object)} of the associated View. This can be used to
+ *  associate meta-data to your view, that can be used for instance by a listener.</li>
  *  <li>A fully qualified class name: The name of a class corresponding to an implementation of
  *  {@link android.widget.Adapters.CursorBinder}. Cursor binders can be used to provide
  *  bindings not supported by default. Custom binders cannot be used with
  *  {@link android.content.Context#isRestricted() restricted contexts}, for instance in an
- *  app widget</li>
+ *  application widget</li>
  * </ul>
  * 
  * <a name="xml-cursor-adapter-bind-transformation" />
@@ -193,7 +197,7 @@ import static com.android.internal.R.*;
  *  is specified</li>
  *  <li><code>android:withClass</code>: A fully qualified class name corresponding to an
  *  implementation of {@link android.widget.Adapters.CursorTransformation}. Custom
- *  transformationscannot be used with
+ *  transformations cannot be used with
  *  {@link android.content.Context#isRestricted() restricted contexts}, for instance in
  *  an app widget This attribute is mandatory if <code>android:withExpression</code> is
  *  not specified</li>
@@ -409,7 +413,7 @@ public class Adapters {
 
         return adapter;
     }
-    
+
     /**
      * <p>Loads the {@link android.widget.CursorAdapter} defined in the specified
      * XML resource. The content of the adapter is loaded from the specified cursor.
@@ -488,7 +492,7 @@ public class Adapters {
      * @return An instance of {@link android.widget.BaseAdapter}.
      */
     private static BaseAdapter loadAdapter(Context context, int id, String assertName,
-                Object... parameters) {
+            Object... parameters) {
 
         XmlResourceParser parser = null;
         try {
@@ -498,13 +502,13 @@ public class Adapters {
         } catch (XmlPullParserException ex) {
             Resources.NotFoundException rnf = new Resources.NotFoundException(
                     "Can't load adapter resource ID " +
-                            context.getResources().getResourceEntryName(id));
+                    context.getResources().getResourceEntryName(id));
             rnf.initCause(ex);
             throw rnf;
         } catch (IOException ex) {
             Resources.NotFoundException rnf = new Resources.NotFoundException(
                     "Can't load adapter resource ID " +
-                            context.getResources().getResourceEntryName(id));
+                    context.getResources().getResourceEntryName(id));
             rnf.initCause(ex);
             throw rnf;
         } finally {
@@ -524,9 +528,9 @@ public class Adapters {
     private static BaseAdapter createAdapterFromXml(Context c,
             XmlPullParser parser, AttributeSet attrs, int id, Object[] parameters,
             String assertName) throws XmlPullParserException, IOException {
-        
+
         BaseAdapter adapter = null;
- 
+
         // Make sure we are on a start tag.
         int type;
         int depth = parser.getDepth();
@@ -543,7 +547,7 @@ public class Adapters {
                 throw new IllegalArgumentException("The adapter defined in " +
                         c.getResources().getResourceEntryName(id) + " must be a <" + name + " />");
             }
-    
+
             if (ADAPTER_CURSOR.equals(name)) {
                 adapter = createCursorAdapter(c, parser, attrs, id, parameters);
             } else {
@@ -551,7 +555,7 @@ public class Adapters {
                         " in " + c.getResources().getResourceEntryName(id));
             }
         }
-    
+
         return adapter;
 
     }
@@ -575,6 +579,7 @@ public class Adapters {
         private static final String ADAPTER_CURSOR_SELECT = "select";
         private static final String ADAPTER_CURSOR_AS_STRING = "string";
         private static final String ADAPTER_CURSOR_AS_IMAGE = "image";
+        private static final String ADAPTER_CURSOR_AS_TAG = "tag";
         private static final String ADAPTER_CURSOR_AS_IMAGE_URI = "image-uri";
         private static final String ADAPTER_CURSOR_AS_DRAWABLE = "drawable";
         private static final String ADAPTER_CURSOR_MAP = "map";
@@ -605,45 +610,45 @@ public class Adapters {
         }
 
         public XmlCursorAdapter parse(Object[] parameters)
-                throws IOException, XmlPullParserException {
+               throws IOException, XmlPullParserException {
 
             Resources resources = mResources;
-            TypedArray a = resources.obtainAttributes(mAttrs, styleable.CursorAdapter);
-            
-            String uri = a.getString(styleable.CursorAdapter_uri);
-            String selection = a.getString(styleable.CursorAdapter_selection);
-            String sortOrder = a.getString(styleable.CursorAdapter_sortOrder);
-            int layout = a.getResourceId(styleable.CursorAdapter_layout, 0);
+            TypedArray a = resources.obtainAttributes(mAttrs, android.R.styleable.CursorAdapter);
+
+            String uri = a.getString(android.R.styleable.CursorAdapter_uri);
+            String selection = a.getString(android.R.styleable.CursorAdapter_selection);
+            String sortOrder = a.getString(android.R.styleable.CursorAdapter_sortOrder);
+            int layout = a.getResourceId(android.R.styleable.CursorAdapter_layout, 0);
             if (layout == 0) {
                 throw new IllegalArgumentException("The layout specified in " +
                         resources.getResourceEntryName(mId) + " does not exist");
             }
 
             a.recycle();
-    
+
             XmlPullParser parser = mParser;
             int type;
             int depth = parser.getDepth();
-    
+
             while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth) &&
                     type != XmlPullParser.END_DOCUMENT) {
-    
+
                 if (type != XmlPullParser.START_TAG) {
                     continue;
                 }
-                
+
                 String name = parser.getName();
-                
+
                 if (ADAPTER_CURSOR_BIND.equals(name)) {
                     parseBindTag();
                 } else if (ADAPTER_CURSOR_SELECT.equals(name)) {
                     parseSelectTag();
                 } else {
                     throw new RuntimeException("Unknown tag name " + parser.getName() + " in " +
-                        resources.getResourceEntryName(mId));
+                            resources.getResourceEntryName(mId));
                 }
             }
-    
+
             String[] fromArray = mFrom.toArray(new String[mFrom.size()]);
             int[] toArray = new int[mTo.size()];
             for (int i = 0; i < toArray.length; i++) {
@@ -661,70 +666,73 @@ public class Adapters {
             return new XmlCursorAdapter(mContext, layout, uri, fromArray, toArray, selection,
                     selectionArgs, sortOrder, mBinders);
         }
-    
+
         private void parseSelectTag() {
-            TypedArray a = mResources.obtainAttributes(mAttrs, styleable.CursorAdapter_SelectItem);
-    
-            String fromName = a.getString(styleable.CursorAdapter_SelectItem_column);
+            TypedArray a = mResources.obtainAttributes(mAttrs,
+                    android.R.styleable.CursorAdapter_SelectItem);
+
+            String fromName = a.getString(android.R.styleable.CursorAdapter_SelectItem_column);
             if (fromName == null) {
                 throw new IllegalArgumentException("A select item in " +
-                    mResources.getResourceEntryName(mId) + " does not have a 'column' attribute");
+                        mResources.getResourceEntryName(mId) +
+                        " does not have a 'column' attribute");
             }
-            
+
             a.recycle();
-            
+
             mFrom.add(fromName);
             mTo.add(View.NO_ID);
         }
-    
+
         private void parseBindTag() throws IOException, XmlPullParserException {
             Resources resources = mResources;
-            TypedArray a = resources.obtainAttributes(mAttrs, styleable.CursorAdapter_BindItem);
-    
-            String fromName = a.getString(styleable.CursorAdapter_BindItem_from);
+            TypedArray a = resources.obtainAttributes(mAttrs,
+                    android.R.styleable.CursorAdapter_BindItem);
+
+            String fromName = a.getString(android.R.styleable.CursorAdapter_BindItem_from);
             if (fromName == null) {
                 throw new IllegalArgumentException("A bind item in " +
-                    resources.getResourceEntryName(mId) + " does not have a 'from' attribute");
+                        resources.getResourceEntryName(mId) + " does not have a 'from' attribute");
             }
-    
-            int toName = a.getResourceId(styleable.CursorAdapter_BindItem_to, 0);
+
+            int toName = a.getResourceId(android.R.styleable.CursorAdapter_BindItem_to, 0);
             if (toName == 0) {
                 throw new IllegalArgumentException("A bind item in " +
-                    resources.getResourceEntryName(mId) + " does not have a 'to' attribute");
+                        resources.getResourceEntryName(mId) + " does not have a 'to' attribute");
             }
-            
-            String asType = a.getString(styleable.CursorAdapter_BindItem_as);
+
+            String asType = a.getString(android.R.styleable.CursorAdapter_BindItem_as);
             if (asType == null) {
                 throw new IllegalArgumentException("A bind item in " +
-                    resources.getResourceEntryName(mId) + " does not have an 'as' attribute");
+                        resources.getResourceEntryName(mId) + " does not have an 'as' attribute");
             }
-    
+
             mFrom.add(fromName);
             mTo.add(toName);
             mBinders.put(fromName, findBinder(asType));
-    
+
             a.recycle();
         }
-    
+
         private CursorBinder findBinder(String type) throws IOException, XmlPullParserException {
             final XmlPullParser parser = mParser;
             final Context context = mContext;
             CursorTransformation transformation = mIdentity;
-    
+
             int tagType;
             int depth = parser.getDepth();
-            
+
             final boolean isDrawable = ADAPTER_CURSOR_AS_DRAWABLE.equals(type);            
-    
+
             while (((tagType = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
                     && tagType != XmlPullParser.END_DOCUMENT) {
-    
+
                 if (tagType != XmlPullParser.START_TAG) {
                     continue;
                 }
 
                 String name = parser.getName();
-                
+
                 if (ADAPTER_CURSOR_TRANSFORM.equals(name)) {
                     transformation = findTransformation();
                 } else if (ADAPTER_CURSOR_MAP.equals(name)) {
@@ -734,12 +742,14 @@ public class Adapters {
                     findMap(((MapTransformation) transformation), isDrawable);
                 } else {
                     throw new RuntimeException("Unknown tag name " + parser.getName() + " in " +
-                        context.getResources().getResourceEntryName(mId));
+                            context.getResources().getResourceEntryName(mId));
                 }
             }
-            
+
             if (ADAPTER_CURSOR_AS_STRING.equals(type)) {
                 return new StringBinder(context, transformation);
+            } else if (ADAPTER_CURSOR_AS_TAG.equals(type)) {
+                return new TagBinder(context, transformation);
             } else if (ADAPTER_CURSOR_AS_IMAGE.equals(type)) {
                 return new ImageBinder(context, transformation);            
             } else if (ADAPTER_CURSOR_AS_IMAGE_URI.equals(type)) {
@@ -763,19 +773,19 @@ public class Adapters {
                 }
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Cannot instanciate binder type in " +
-                    mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
+                        mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
             } catch (NoSuchMethodException e) {
                 throw new IllegalArgumentException("Cannot instanciate binder type in " +
-                    mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
+                        mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
             } catch (InvocationTargetException e) {
                 throw new IllegalArgumentException("Cannot instanciate binder type in " +
-                    mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
+                        mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
             } catch (InstantiationException e) {
                 throw new IllegalArgumentException("Cannot instanciate binder type in " +
-                    mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
+                        mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
             } catch (IllegalAccessException e) {
                 throw new IllegalArgumentException("Cannot instanciate binder type in " +
-                    mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
+                        mContext.getResources().getResourceEntryName(mId) + ": " + type, e);
             }
 
             return null;
@@ -784,26 +794,30 @@ public class Adapters {
         private void findMap(MapTransformation transformation, boolean drawable) {
             Resources resources = mResources;
 
-            TypedArray a = resources.obtainAttributes(mAttrs, styleable.CursorAdapter_MapItem);
+            TypedArray a = resources.obtainAttributes(mAttrs,
+                    android.R.styleable.CursorAdapter_MapItem);
 
-            String from = a.getString(styleable.CursorAdapter_MapItem_fromValue);
+            String from = a.getString(android.R.styleable.CursorAdapter_MapItem_fromValue);
             if (from == null) {
                 throw new IllegalArgumentException("A map item in " +
-                    resources.getResourceEntryName(mId) + " does not have a 'fromValue' attribute");
+                        resources.getResourceEntryName(mId) +
+                        " does not have a 'fromValue' attribute");
             }
 
             if (!drawable) {
-                String to = a.getString(styleable.CursorAdapter_MapItem_toValue);
+                String to = a.getString(android.R.styleable.CursorAdapter_MapItem_toValue);
                 if (to == null) {
                     throw new IllegalArgumentException("A map item in " +
-                        resources.getResourceEntryName(mId) + " does not have a 'toValue' attribute");
+                            resources.getResourceEntryName(mId) +
+                            " does not have a 'toValue' attribute");
                 }
                 transformation.addStringMapping(from, to);
             } else {
-                int to = a.getResourceId(styleable.CursorAdapter_MapItem_toValue, 0);
+                int to = a.getResourceId(android.R.styleable.CursorAdapter_MapItem_toValue, 0);
                 if (to == 0) {
                     throw new IllegalArgumentException("A map item in " +
-                        resources.getResourceEntryName(mId) + " does not have a 'toValue' attribute");
+                            resources.getResourceEntryName(mId) +
+                            " does not have a 'toValue' attribute");
                 }
                 transformation.addResourceMapping(from, to);
             }
@@ -814,40 +828,41 @@ public class Adapters {
         private CursorTransformation findTransformation() {
             Resources resources = mResources;
             CursorTransformation transformation = null;
-            TypedArray a = resources.obtainAttributes(mAttrs, styleable.CursorAdapter_TransformItem);
-            
-            String className = a.getString(styleable.CursorAdapter_TransformItem_withClass);
+            TypedArray a = resources.obtainAttributes(mAttrs,
+                    android.R.styleable.CursorAdapter_TransformItem);
+
+            String className = a.getString(android.R.styleable.CursorAdapter_TransformItem_withClass);
             if (className == null) {
                 String expression = a.getString(
-                        styleable.CursorAdapter_TransformItem_withExpression);
+                        android.R.styleable.CursorAdapter_TransformItem_withExpression);
                 transformation = createExpressionTransformation(expression);
             } else if (!mContext.isRestricted()) {
                 try {
-                    final Class<?> klass = Class.forName(className, true, mContext.getClassLoader());
-                    if (CursorTransformation.class.isAssignableFrom(klass)) {
-                        final Constructor<?> c = klass.getDeclaredConstructor(Context.class);
+                    final Class<?> klas = Class.forName(className, true, mContext.getClassLoader());
+                    if (CursorTransformation.class.isAssignableFrom(klas)) {
+                        final Constructor<?> c = klas.getDeclaredConstructor(Context.class);
                         transformation = (CursorTransformation) c.newInstance(mContext);
                     }
                 } catch (ClassNotFoundException e) {
                     throw new IllegalArgumentException("Cannot instanciate transform type in " +
-                        mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
+                           mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
                 } catch (NoSuchMethodException e) {
                     throw new IllegalArgumentException("Cannot instanciate transform type in " +
-                        mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
+                           mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
                 } catch (InvocationTargetException e) {
                     throw new IllegalArgumentException("Cannot instanciate transform type in " +
-                        mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
+                           mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
                 } catch (InstantiationException e) {
                     throw new IllegalArgumentException("Cannot instanciate transform type in " +
-                        mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
+                           mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
                 } catch (IllegalAccessException e) {
                     throw new IllegalArgumentException("Cannot instanciate transform type in " +
-                        mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
+                           mContext.getResources().getResourceEntryName(mId) + ": " + className, e);
                 }
             }
 
             a.recycle();
-            
+
             if (transformation == null) {
                 throw new IllegalArgumentException("A transform item in " +
                     resources.getResourceEntryName(mId) + " must have a 'withClass' or " +
@@ -877,7 +892,6 @@ public class Adapters {
      * of a SimpleCursorAdapter. The main difference is the ability to handle CursorBinders.
      */
     private static class XmlCursorAdapter extends SimpleCursorAdapter implements ManagedAdapter {
-        private final Context mContext;
         private String mUri;
         private final String mSelection;
         private final String[] mSelectionArgs;
@@ -911,14 +925,14 @@ public class Adapters {
                 mBinders[i] = binder;
             }
         }
-        
+
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             final int count = mTo.length;
             final int[] from = mFrom;
             final int[] to = mTo;
             final CursorBinder[] binders = mBinders;
-    
+
             for (int i = 0; i < count; i++) {
                 final View v = view.findViewById(to[i]);
                 if (v != null) {
@@ -926,7 +940,7 @@ public class Adapters {
                 }
             }
         }
-        
+
         public void load() {
             if (mUri != null) {
                 mLoadTask = new QueryTask().execute();
@@ -984,16 +998,16 @@ public class Adapters {
 
     /**
      * An expression transformation is a simple template based replacement utility.
-     * In an expression, each segment of the form <code>{(^[}]+)}</code> is replaced
+     * In an expression, each segment of the form <code>{([^}]+)}</code> is replaced
      * with the value of the column of name $1.
      */
     private static class ExpressionTransformation extends CursorTransformation {
         private final ExpressionNode mFirstNode = new ConstantExpressionNode("");
         private final StringBuilder mBuilder = new StringBuilder();
-        
+
         public ExpressionTransformation(Context context, String expression) {
             super(context);
-            
+
             parse(expression);
         }
 
@@ -1033,7 +1047,7 @@ public class Adapters {
         public String transform(Cursor cursor, int columnIndex) {
             final StringBuilder builder = mBuilder;
             builder.delete(0, builder.length());
-            
+
             ExpressionNode node = mFirstNode;
             // Skip the first node
             while ((node = node.next) != null) {
@@ -1042,13 +1056,13 @@ public class Adapters {
 
             return builder.toString();
         }
-        
+
         static abstract class ExpressionNode {
             public ExpressionNode next;
 
             public abstract String asString(Cursor cursor);
         }
-        
+
         static class ConstantExpressionNode extends ExpressionNode {
             private final String mConstant;
 
@@ -1061,7 +1075,7 @@ public class Adapters {
                 return mConstant;
             }
         }
-        
+
         static class ColumnExpressionNode extends ExpressionNode {
             private final String mColumnName;
             private Cursor mSignature;
@@ -1134,8 +1148,12 @@ public class Adapters {
 
         @Override
         public boolean bind(View view, Cursor cursor, int columnIndex) {
-            ((TextView) view).setText(mTransformation.transform(cursor, columnIndex));
-            return true;
+            if (view instanceof TextView) {
+                final String text = mTransformation.transform(cursor, columnIndex);
+                ((TextView) view).setText(text);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -1149,8 +1167,25 @@ public class Adapters {
 
         @Override
         public boolean bind(View view, Cursor cursor, int columnIndex) {
-            final byte[] data = cursor.getBlob(columnIndex);
-            ((ImageView) view).setImageBitmap(BitmapFactory.decodeByteArray(data, 0, data.length));
+            if (view instanceof ImageView) {
+                final byte[] data = cursor.getBlob(columnIndex);
+                ((ImageView) view).setImageBitmap(BitmapFactory.decodeByteArray(data, 0,
+                        data.length));
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private static class TagBinder extends CursorBinder {
+        public TagBinder(Context context, CursorTransformation transformation) {
+            super(context, transformation);
+        }
+
+        @Override
+        public boolean bind(View view, Cursor cursor, int columnIndex) {
+            final String text = mTransformation.transform(cursor, columnIndex);
+            view.setTag(text);
             return true;
         }
     }
@@ -1165,9 +1200,12 @@ public class Adapters {
 
         @Override
         public boolean bind(View view, Cursor cursor, int columnIndex) {
-            ((ImageView) view).setImageURI(Uri.parse(
-                    mTransformation.transform(cursor, columnIndex)));
-            return true;
+            if (view instanceof ImageView) {
+                ((ImageView) view).setImageURI(Uri.parse(
+                        mTransformation.transform(cursor, columnIndex)));
+                return true;
+            }
+            return false;
         }
     }
 
@@ -1181,11 +1219,14 @@ public class Adapters {
 
         @Override
         public boolean bind(View view, Cursor cursor, int columnIndex) {
-            final int resource = mTransformation.transformToResource(cursor, columnIndex);
-            if (resource == 0) return false;
+            if (view instanceof ImageView) {
+                final int resource = mTransformation.transformToResource(cursor, columnIndex);
+                if (resource == 0) return false;
 
-            ((ImageView) view).setImageResource(resource);
-            return true;
+                ((ImageView) view).setImageResource(resource);
+                return true;
+            }
+            return false;
         }
     }
 }
