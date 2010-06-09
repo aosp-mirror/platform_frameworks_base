@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.systemui.usb;
 
 import com.android.internal.R;
 import android.app.Activity;

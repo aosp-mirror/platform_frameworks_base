@@ -18,5 +18,10 @@
             android:name=".statusbar.PhoneStatusBarService"
             android:exported="false"
             />
+
+        <activity android:name=".usb.UsbStorageActivity"
+                android:excludeFromRecents="true">
+        </activity>
+
     </application>
 </manifest>

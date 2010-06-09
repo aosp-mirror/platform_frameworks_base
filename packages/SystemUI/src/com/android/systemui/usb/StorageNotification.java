@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.systemui.usb;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -80,9 +80,10 @@ public class StorageNotification extends StorageEventListener {
         mContext = context;
 
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
-        mUmsAvailable = mStorageManager.isUsbMassStorageConnected();
+        final boolean connected = mStorageManager.isUsbMassStorageConnected();
         Slog.d(TAG, String.format( "Startup with UMS connection %s (media state %s)", mUmsAvailable,
                 Environment.getExternalStorageState()));
+        onUsbMassStorageConnectionChanged(connected);
     }
 
     /*
@@ -122,7 +123,7 @@ public class StorageNotification extends StorageEventListener {
              * for stopping UMS.
              */
             Intent intent = new Intent();
-            intent.setClass(mContext, com.android.server.status.UsbStorageActivity.class);
+            intent.setClass(mContext, com.android.systemui.usb.UsbStorageActivity.class);
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
             setUsbStorageNotification(
                     com.android.internal.R.string.usb_storage_stop_notification_title,
@@ -240,7 +241,7 @@ public class StorageNotification extends StorageEventListener {
 
         if (available) {
             Intent intent = new Intent();
-            intent.setClass(mContext, com.android.server.status.UsbStorageActivity.class);
+            intent.setClass(mContext, com.android.systemui.usb.UsbStorageActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             final boolean adbOn = 1 == Settings.Secure.getInt(

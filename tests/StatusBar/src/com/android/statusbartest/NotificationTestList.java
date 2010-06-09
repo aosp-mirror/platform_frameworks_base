@@ -44,6 +44,7 @@ public class NotificationTestList extends TestActivity
     Vibrator mVibrator = new Vibrator();
     Handler mHandler = new Handler();
 
+    long mActivityCreateTime = System.currentTimeMillis();
     long mChronometerBase = 0;
 
     @Override
@@ -421,7 +422,7 @@ public class NotificationTestList extends TestActivity
         new Test("Persistent #1") {
             public void run() {
                 Notification n = new Notification(R.drawable.icon1, "tick tick tick",
-                        System.currentTimeMillis());
+                        mActivityCreateTime);
                 n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
                             "This is a notification!!!", makeIntent());
                 mNM.notify(1, n);
@@ -478,6 +479,16 @@ public class NotificationTestList extends TestActivity
                             "Notify me!!!", makeIntent());
                 n.defaults = Notification.DEFAULT_VIBRATE;
                 mNM.notify(2, n);
+            }
+        },
+
+        new Test("Persistent #1 - different icon") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon2, null,
+                        mActivityCreateTime);
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is the same notification!!!", makeIntent());
+                mNM.notify(1, n);
             }
         },
 

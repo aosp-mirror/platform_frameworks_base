@@ -85,13 +85,6 @@ public class PhoneStatusBarService extends StatusBarService {
     private static final int MSG_ANIMATE = 1000;
     private static final int MSG_ANIMATE_REVEAL = 1001;
 
-    public interface NotificationCallbacks {
-        void onSetDisabled(int status);
-        void onClearAll();
-        void onNotificationClick(String pkg, String tag, int id);
-        void onPanelRevealed();
-    }
-
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
             super(context, com.android.internal.R.style.Theme_Light_NoTitleBar);
@@ -348,6 +341,16 @@ public class PhoneStatusBarService extends StatusBarService {
         final RemoteViews oldContentView = oldNotification.notification.contentView;
 
         final RemoteViews contentView = notification.notification.contentView;
+
+        if (false) {
+            Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " expanded=" + oldEntry.expanded
+                    + " contentView=" + oldContentView);
+            Slog.d(TAG, "new notification: when=" + notification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " contentView=" + contentView);
+        }
 
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
