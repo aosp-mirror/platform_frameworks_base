@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.status;
+package com.android.server;
 
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -55,9 +56,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     static final String TAG = "StatusBarManagerService";
     static final boolean SPEW = true;
 
-    public static final String ACTION_STATUSBAR_START
-            = "com.android.internal.policy.statusbar.START";
-
     final Context mContext;
     Handler mHandler = new Handler();
     NotificationCallbacks mNotificationCallbacks;
@@ -87,6 +85,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         void onClearAll();
         void onNotificationClick(String pkg, String tag, int id);
         void onPanelRevealed();
+        void onNotificationError(String pkg, String tag, int id, String message);
     }
 
     /**
@@ -96,7 +95,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mContext = context;
 
         final Resources res = context.getResources();
-        mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.status_bar_icon_order));
+        mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
     }
 
     public void setNotificationCallbacks(NotificationCallbacks listener) {
@@ -111,9 +110,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     public void systemReady2() {
-        // Start the status bar app
-        Intent intent = new Intent(ACTION_STATUSBAR_START);
-        mContext.sendBroadcast(intent /** permission  **/);
+        ComponentName cn = ComponentName.unflattenFromString(
+                mContext.getString(com.android.internal.R.string.config_statusBarComponent));
+        Intent intent = new Intent();
+        intent.setComponent(cn);
+        Slog.i(TAG, "Starting service: " + cn);
+        mContext.startService(intent);
     }
 
     // ================================================================================
@@ -248,12 +250,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 "StatusBarManagerService");
     }
 
+    private void enforceStatusBarService() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                "StatusBarManagerService");
+    }
+
 
     // ================================================================================
     // Callbacks from the status bar service.
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications) {
+        enforceStatusBarService();
+
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         synchronized (mIcons) {
@@ -268,18 +277,32 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     /**
-     * The status bar service should call this when the user changes whether
-     * the status bar is visible or not.
+     * The status bar service should call this each time the user brings the panel from
+     * invisible to visible in order to clear the notification light.
      */
-    public void visibilityChanged(boolean visible) {
-        //Slog.d(TAG, "visibilityChanged visible=" + visible);
+    public void onPanelRevealed() {
+        enforceStatusBarService();
+
+        // tell the notification manager to turn off the lights.
+        mNotificationCallbacks.onPanelRevealed();
     }
 
     public void onNotificationClick(String pkg, String tag, int id) {
+        enforceStatusBarService();
+
         mNotificationCallbacks.onNotificationClick(pkg, tag, id);
     }
 
+    public void onNotificationError(String pkg, String tag, int id, String message) {
+        enforceStatusBarService();
+
+        // WARNING: this will call back into us to do the remove.  Don't hold any locks.
+        mNotificationCallbacks.onNotificationError(pkg, tag, id, message);
+    }
+
     public void onClearAllNotifications() {
+        enforceStatusBarService();
+
         mNotificationCallbacks.onClearAll();
     }
 
@@ -419,24 +442,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 DisableRecord tok = mDisableRecords.get(i);
                 pw.println("    [" + i + "] what=0x" + Integer.toHexString(tok.what)
                                 + " pkg=" + tok.pkg + " token=" + tok.token);
-            }
-        }
-    }
-
-    /**
-     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
-     * This was added last-minute and is inconsistent with the way the rest of the notifications
-     * are handled, because the notification isn't really cancelled.  The lights are just
-     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
-     * this is what he wants. (see bug 1131461)
-     */
-    private boolean mPanelSlightlyVisible;
-    void panelSlightlyVisible(boolean visible) {
-        if (mPanelSlightlyVisible != visible) {
-            mPanelSlightlyVisible = visible;
-            if (visible) {
-                // tell the notification manager to turn off the lights.
-                mNotificationCallbacks.onPanelRevealed();
             }
         }
     }

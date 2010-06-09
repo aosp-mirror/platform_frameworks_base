@@ -17,7 +17,6 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
-import com.android.server.status.StatusBarManagerService;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 
