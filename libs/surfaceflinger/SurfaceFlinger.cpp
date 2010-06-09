@@ -1718,7 +1718,10 @@ void UserClient::detachLayer(const Layer* layer)
 {
     int32_t name = layer->getToken();
     if (name >= 0) {
-        android_atomic_and(~(1LU<<name), &mBitmap);
+        int32_t mask = 1LU<<name;
+        if ((android_atomic_and(~mask, &mBitmap) & mask) == 0) {
+            LOGW("token %d wasn't marked as used %08x", name, int(mBitmap));
+        }
     }
 }
 
@@ -1732,17 +1735,23 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
     sp<Layer> layer(mFlinger->getLayer(sur));
     if (layer == 0) return name;
 
-    // this layer already has a token, just return it
-    // FIXME: we should check that this token is for the same client
+    // if this layer already has a token, just return it
     name = layer->getToken();
-    if (name >= 0) return name;
+    if ((name >= 0) && (layer->getClient() == this))
+        return name;
 
     name = 0;
     do {
         int32_t mask = 1LU<<name;
         if ((android_atomic_or(mask, &mBitmap) & mask) == 0) {
             // we found and locked that name
-            layer->setToken(const_cast<UserClient*>(this), ctrlblk, name);
+            status_t err = layer->setToken(
+                    const_cast<UserClient*>(this), ctrlblk, name);
+            if (err != NO_ERROR) {
+                // free the name
+                android_atomic_and(~mask, &mBitmap);
+                name = err;
+            }
             break;
         }
         if (++name > 31)

@@ -60,7 +60,6 @@ public:
     static bool isSameSurface(
             const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs);
         
-    SurfaceID   ID() const      { return mToken; }
     uint32_t    getFlags() const { return mFlags; }
     uint32_t    getIdentity() const { return mIdentity; }
 
@@ -145,6 +144,9 @@ public:
         uint32_t    reserved[2];
     };
 
+    static status_t writeToParcel(
+            const sp<Surface>& control, Parcel* parcel);
+
     static sp<Surface> readFromParcel(
             const Parcel& data, const sp<Surface>& other);
 
@@ -153,7 +155,6 @@ public:
     }
 
     bool        isValid();
-    SurfaceID   ID() const          { return mToken; }
     uint32_t    getFlags() const    { return mFlags; }
     uint32_t    getIdentity() const { return mIdentity; }
 
@@ -267,7 +268,6 @@ private:
     SharedBufferClient*         mSharedBufferClient;
     status_t                    mInitCheck;
     sp<ISurface>                mSurface;
-    SurfaceID                   mToken;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;

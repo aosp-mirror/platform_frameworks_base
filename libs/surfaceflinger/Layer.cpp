@@ -76,15 +76,18 @@ Layer::~Layer()
 status_t Layer::setToken(const sp<UserClient>& userClient,
         SharedClient* sharedClient, int32_t token)
 {
-    SharedBufferServer* lcblk = new SharedBufferServer(
+    sp<SharedBufferServer> lcblk = new SharedBufferServer(
             sharedClient, token, mBufferManager.getDefaultBufferCount(),
             getIdentity());
 
     status_t err = mUserClientRef.setToken(userClient, lcblk, token);
-    if (err != NO_ERROR) {
-        LOGE("ClientRef::setToken(%p, %p, %u) failed",
-                userClient.get(), lcblk, token);
-        delete lcblk;
+
+    LOGE_IF(err != NO_ERROR,
+            "ClientRef::setToken(%p, %p, %u) failed",
+            userClient.get(), lcblk.get(), token);
+
+    if (err == NO_ERROR) {
+        // we need to free the buffers associated with this surface
     }
 
     return err;
@@ -93,6 +96,11 @@ status_t Layer::setToken(const sp<UserClient>& userClient,
 int32_t Layer::getToken() const
 {
     return mUserClientRef.getToken();
+}
+
+sp<UserClient> Layer::getClient() const
+{
+    return mUserClientRef.getClient();
 }
 
 // called with SurfaceFlinger::mStateLock as soon as the layer is entered
@@ -626,11 +634,10 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
 // ---------------------------------------------------------------------------
 
 Layer::ClientRef::ClientRef()
-    : mToken(-1) {
+    : mControlBlock(0), mToken(-1) {
 }
 
 Layer::ClientRef::~ClientRef() {
-    delete lcblk;
 }
 
 int32_t Layer::ClientRef::getToken() const {
@@ -638,14 +645,25 @@ int32_t Layer::ClientRef::getToken() const {
     return mToken;
 }
 
-status_t Layer::ClientRef::setToken(const sp<UserClient>& uc,
-        SharedBufferServer* sharedClient, int32_t token) {
+sp<UserClient> Layer::ClientRef::getClient() const {
     Mutex::Autolock _l(mLock);
-    if (mToken >= 0)
-        return INVALID_OPERATION;
+    return mUserClient.promote();
+}
+
+status_t Layer::ClientRef::setToken(const sp<UserClient>& uc,
+        const sp<SharedBufferServer>& sharedClient, int32_t token) {
+    Mutex::Autolock _l(mLock);
+
+    { // scope for strong mUserClient reference
+        sp<UserClient> userClient(mUserClient.promote());
+        if (mUserClient != 0 && mControlBlock != 0) {
+            mControlBlock->setStatus(NO_INIT);
+        }
+    }
+
     mUserClient = uc;
     mToken = token;
-    lcblk = sharedClient;
+    mControlBlock = sharedClient;
     return NO_ERROR;
 }
 
@@ -657,12 +675,16 @@ sp<UserClient> Layer::ClientRef::getUserClientUnsafe() const {
 // it makes sure the UserClient (and its associated shared memory)
 // won't go away while we're accessing it.
 Layer::ClientRef::Access::Access(const ClientRef& ref)
-    : lcblk(0)
+    : mControlBlock(0)
 {
     Mutex::Autolock _l(ref.mLock);
     mUserClientStrongRef = ref.mUserClient.promote();
     if (mUserClientStrongRef != 0)
-        lcblk = ref.lcblk;
+        mControlBlock = ref.mControlBlock;
+}
+
+Layer::ClientRef::Access::~Access()
+{
 }
 
 // ---------------------------------------------------------------------------

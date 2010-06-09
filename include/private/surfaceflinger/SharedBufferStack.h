@@ -43,15 +43,6 @@ namespace android {
  * unless they are in use by the server, which is only the case for the last 
  * dequeue-able buffer. When these various conditions are not met, the caller
  * waits until the condition is met.
- *
- * 
- * CAVEATS:
- * 
- * In the current implementation there are several limitations:
- * - buffers must be locked in the same order they've been dequeued
- * - buffers must be enqueued in the same order they've been locked
- * - dequeue() is not reentrant
- * - no error checks are done on the condition above
  * 
  */
 
@@ -269,7 +260,9 @@ private:
 
 // ----------------------------------------------------------------------------
 
-class SharedBufferServer : public SharedBufferBase
+class SharedBufferServer
+    : public SharedBufferBase,
+      public LightRefBase<SharedBufferServer>
 {
 public:
     SharedBufferServer(SharedClient* sharedClient, int surface, int num,
@@ -290,6 +283,9 @@ public:
     
 
 private:
+    friend class LightRefBase<SharedBufferServer>;
+    ~SharedBufferServer();
+
     /*
      * BufferList is basically a fixed-capacity sorted-vector of
      * unsigned 5-bits ints using a 32-bits int as storage.
