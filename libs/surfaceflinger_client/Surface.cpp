@@ -236,17 +236,15 @@ status_t SurfaceControl::validate() const
 status_t SurfaceControl::writeSurfaceToParcel(
         const sp<SurfaceControl>& control, Parcel* parcel)
 {
-    uint32_t flags = 0;
-    uint32_t format = 0;
+    sp<ISurface> sur;
     uint32_t identity = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    sp<SurfaceComposerClient> client;
-    sp<ISurface> sur;
+    uint32_t format = 0;
+    uint32_t flags = 0;
     if (SurfaceControl::isValid(control)) {
-        identity = control->mIdentity;
-        client   = control->mClient;
         sur      = control->mSurface;
+        identity = control->mIdentity;
         width    = control->mWidth;
         height   = control->mHeight;
         format   = control->mFormat;
@@ -349,6 +347,33 @@ Surface::Surface(const Parcel& parcel, const sp<IBinder>& ref)
     init();
 }
 
+status_t Surface::writeToParcel(
+        const sp<Surface>& surface, Parcel* parcel)
+{
+    sp<ISurface> sur;
+    uint32_t identity = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t format = 0;
+    uint32_t flags = 0;
+    if (Surface::isValid(surface)) {
+        sur      = surface->mSurface;
+        identity = surface->mIdentity;
+        width    = surface->mWidth;
+        height   = surface->mHeight;
+        format   = surface->mFormat;
+        flags    = surface->mFlags;
+    }
+    parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
+    parcel->writeInt32(identity);
+    parcel->writeInt32(width);
+    parcel->writeInt32(height);
+    parcel->writeInt32(format);
+    parcel->writeInt32(flags);
+    return NO_ERROR;
+
+}
+
 sp<Surface> Surface::readFromParcel(
         const Parcel& data, const sp<Surface>& other)
 {
@@ -385,11 +410,11 @@ void Surface::init()
     mBuffers.insertAt(0, 2);
 
     if (mSurface != 0 && mClient.initCheck() == NO_ERROR) {
-        mToken = mClient.getTokenForSurface(mSurface);
-        if (mToken >= 0) {
+        int32_t token = mClient.getTokenForSurface(mSurface);
+        if (token >= 0) {
             mSharedBufferClient = new SharedBufferClient(
-                    mClient.getSharedClient(), mToken, 2, mIdentity);
-            mInitCheck = mClient.getSharedClient()->validate(mToken);
+                    mClient.getSharedClient(), token, 2, mIdentity);
+            mInitCheck = mClient.getSharedClient()->validate(token);
         }
     }
 }
@@ -421,7 +446,7 @@ status_t Surface::validate() const
 {
     // check that we initialized ourself properly
     if (mInitCheck != NO_ERROR) {
-        LOGE("invalid token (%d, identity=%u)", mToken, mIdentity);
+        LOGE("invalid token (identity=%u)", mIdentity);
         return mInitCheck;
     }
 
@@ -437,17 +462,17 @@ status_t Surface::validate() const
     }
 
     if (mIdentity != identity) {
-        LOGE("[Surface] using an invalid surface id=%d, "
+        LOGE("[Surface] using an invalid surface, "
                 "identity=%u should be %d",
-                mToken, mIdentity, identity);
+                mIdentity, identity);
         return NO_INIT;
     }
 
     // check the surface didn't become invalid
     status_t err = mSharedBufferClient->getStatus();
     if (err != NO_ERROR) {
-        LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
-                mToken, mIdentity, err, strerror(-err));
+        LOGE("surface (identity=%u) is invalid, err=%d (%s)",
+                mIdentity, err, strerror(-err));
         return err;
     }
 

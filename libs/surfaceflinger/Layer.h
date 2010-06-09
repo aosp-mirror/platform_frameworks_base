@@ -60,6 +60,7 @@ public:
     // associate a UserClient to this Layer
     status_t setToken(const sp<UserClient>& uc, SharedClient* sc, int32_t idx);
     int32_t getToken() const;
+    sp<UserClient> getClient() const;
 
     // Set this Layer's buffers size
     void setBufferSize(uint32_t w, uint32_t h);
@@ -119,24 +120,26 @@ private:
         ClientRef& operator = (const ClientRef& rhs);
         mutable Mutex mLock;
         // binder thread, page-flip thread
-        SharedBufferServer* lcblk;
+        sp<SharedBufferServer> mControlBlock;
         wp<UserClient> mUserClient;
         int32_t mToken;
     public:
         ClientRef();
         ~ClientRef();
         int32_t getToken() const;
+        sp<UserClient> getClient() const;
         status_t setToken(const sp<UserClient>& uc,
-                SharedBufferServer* sharedClient, int32_t token);
+                const sp<SharedBufferServer>& sharedClient, int32_t token);
         sp<UserClient> getUserClientUnsafe() const;
         class Access {
             Access(const Access& rhs);
             Access& operator = (const Access& rhs);
             sp<UserClient> mUserClientStrongRef;
-            SharedBufferServer* lcblk;
+            sp<SharedBufferServer> mControlBlock;
         public:
             Access(const ClientRef& ref);
-            inline SharedBufferServer* get() const { return lcblk; }
+            ~Access();
+            inline SharedBufferServer* get() const { return mControlBlock.get(); }
         };
         friend class Access;
     };
