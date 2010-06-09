@@ -494,6 +494,10 @@ SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
     }
 }
 
+SharedBufferServer::~SharedBufferServer()
+{
+}
+
 ssize_t SharedBufferServer::retireAndLock()
 {
     RWLock::AutoRLock _l(mLock);
