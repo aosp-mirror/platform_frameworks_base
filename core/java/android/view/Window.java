@@ -817,6 +817,8 @@ public abstract class Window {
 
     public abstract void togglePanel(int featureId, KeyEvent event);
 
+    public abstract void invalidatePanelMenu(int featureId);
+    
     public abstract boolean performPanelShortcut(int featureId,
                                                  int keyCode,
                                                  KeyEvent event,

@@ -77,9 +77,6 @@ import android.widget.LinearLayout;
 import com.android.internal.app.SplitActionBar;
 import com.android.internal.policy.PolicyManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
  * activities interact with the user, so the Activity class takes care of
@@ -2242,7 +2239,9 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onCreatePanelMenu(int featureId, Menu menu) {
         if (featureId == Window.FEATURE_OPTIONS_PANEL) {
-            return onCreateOptionsMenu(menu);
+            boolean show = onCreateOptionsMenu(menu);
+            show |= mFragments.dispatchCreateOptionsMenu(menu, getMenuInflater());
+            return show;
         }
         return false;
     }
@@ -2259,6 +2258,7 @@ public class Activity extends ContextThemeWrapper
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
         if (featureId == Window.FEATURE_OPTIONS_PANEL && menu != null) {
             boolean goforit = onPrepareOptionsMenu(menu);
+            goforit |= mFragments.dispatchPrepareOptionsMenu(menu);
             return goforit && menu.hasVisibleItems();
         }
         return true;
@@ -2289,7 +2289,10 @@ public class Activity extends ContextThemeWrapper
                 // doesn't call through to superclass's implmeentation of each
                 // of these methods below
                 EventLog.writeEvent(50000, 0, item.getTitleCondensed());
-                return onOptionsItemSelected(item);
+                if (onOptionsItemSelected(item)) {
+                    return true;
+                }
+                return mFragments.dispatchOptionsItemSelected(item);
                 
             case Window.FEATURE_CONTEXT_MENU:
                 EventLog.writeEvent(50000, 1, item.getTitleCondensed());
@@ -2312,6 +2315,7 @@ public class Activity extends ContextThemeWrapper
     public void onPanelClosed(int featureId, Menu menu) {
         switch (featureId) {
             case Window.FEATURE_OPTIONS_PANEL:
+                mFragments.dispatchOptionsMenuClosed(menu);
                 onOptionsMenuClosed(menu);
                 break;
                 
@@ -2321,6 +2325,15 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * Declare that the options menu has changed, so should be recreated.
+     * The {@link #onCreateOptionsMenu(Menu)} method will be called the next
+     * time it needs to be displayed.
+     */
+    public void invalidateOptionsMenu() {
+        mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+    }
+    
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.
@@ -3887,6 +3900,7 @@ public class Activity extends ContextThemeWrapper
                 fragment.mFromLayout = true;
                 fragment.mFragmentId = id;
                 fragment.mTag = tag;
+                fragment.mImmediateActivity = this;
                 mFragments.addFragment(fragment, true);
             }
             // If this fragment is newly instantiated (either right now, or
