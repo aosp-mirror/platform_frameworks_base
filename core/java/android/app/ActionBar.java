@@ -20,6 +20,8 @@ import android.graphics.drawable.Drawable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.SpinnerAdapter;
 
 /**
  * This is the public interface to the contextual ActionBar.
@@ -29,12 +31,12 @@ import android.view.View;
  */
 public abstract class ActionBar {
     /**
-     * Normal/standard navigation mode. Consists of either a logo or icon
+     * Standard navigation mode. Consists of either a logo or icon
      * and title text with an optional subtitle. Clicking any of these elements
      * will dispatch onActionItemSelected to the registered Callback with
      * a MenuItem with item ID android.R.id.home.
      */
-    public static final int NAVIGATION_MODE_NORMAL = 0;
+    public static final int NAVIGATION_MODE_STANDARD = 0;
     
     /**
      * Dropdown list navigation mode. Instead of static title text this mode
@@ -74,49 +76,52 @@ public abstract class ActionBar {
     public abstract void setCallback(Callback callback);
     
     /**
-     * Set a custom navigation view.
+     * Set the action bar into custom navigation mode, supplying a view
+     * for custom navigation.
      * 
      * Custom navigation views appear between the application icon and
      * any action buttons and may use any space available there. Common
-     * use cases for custom navigation views might include an address bar
-     * for a browser or other navigation mechanisms that do not translate
-     * well to provided navigation modes.
-     * 
-     * Setting a non-null custom navigation view will also set the
-     * navigation mode to NAVMODE_CUSTOM.
+     * use cases for custom navigation views might include an auto-suggesting
+     * address bar for a browser or other navigation mechanisms that do not
+     * translate well to provided navigation modes.
      * 
      * @param view Custom navigation view to place in the ActionBar.
      */
-    public abstract void setCustomNavigationView(View view);
+    public abstract void setCustomNavigationMode(View view);
     
     /**
-     * Set the ActionBar's title.
+     * Set the action bar into dropdown navigation mode and supply an adapter
+     * that will provide views for navigation choices.
      * 
-     * This is set automatically to the name of your Activity,
-     * but may be changed here.
-     * 
-     * @param title Title text
+     * @param adapter An adapter that will provide views both to display
+     *                the current navigation selection and populate views
+     *                within the dropdown navigation menu.
      */
-    public abstract void setTitle(CharSequence title);
-    
+    public abstract void setDropdownNavigationMode(SpinnerAdapter adapter);
+
     /**
-     * Set the ActionBar's subtitle.
+     * Set the action bar into standard navigation mode, supplying a title and subtitle.
      * 
-     * The subtitle is usually displayed as a second line of text
-     * under the title. Good for extended descriptions of activity state.
-     * 
-     * @param subtitle Subtitle text. 
-     */
-    public abstract void setSubtitle(CharSequence subtitle);
-    
-    /**
-     * Set the navigation mode.
+     * Standard navigation mode is default. The title is automatically set to the
+     * name of your Activity. Subtitles are displayed underneath the title, usually
+     * in a smaller font or otherwise less prominently than the title. Subtitles are
+     * good for extended descriptions of activity state.
      *
-     * @param mode One of {@link #NAVIGATION_MODE_NORMAL}, {@link #NAVIGATION_MODE_DROPDOWN_LIST},
-     * {@link #NAVIGATION_MODE_TABS}, or {@link #NAVIGATION_MODE_CUSTOM}.
+     * @param title The action bar's title. null is treated as an empty string.
+     * @param subtitle The action bar's subtitle. null is treated as an empty string.
      */
-    public abstract void setNavigationMode(int mode);
-    
+    public abstract void setStandardNavigationMode(CharSequence title, CharSequence subtitle);
+
+    /**
+     * Set the action bar into standard navigation mode, supplying a title and subtitle.
+     * 
+     * Standard navigation mode is default. The title is automatically set to the
+     * name of your Activity.
+     *
+     * @param title The action bar's title. null is treated as an empty string.
+     */
+    public abstract void setStandardNavigationMode(CharSequence title);
+
     /**
      * Set display options. This changes all display option bits at once. To change
      * a limited subset of display options, see {@link #setDisplayOptions(int, int)}.
@@ -161,17 +166,38 @@ public abstract class ActionBar {
     public abstract View getCustomNavigationView();
     
     /**
-     * @return The current ActionBar title.
+     * Returns the current ActionBar title in standard mode.
+     * Returns null if {@link #getNavigationMode()} would not return
+     * {@link #NAVIGATION_MODE_STANDARD}. 
+     *
+     * @return The current ActionBar title or null.
      */
     public abstract CharSequence getTitle();
     
     /**
-     * @return The current ActionBar subtitle.
+     * Returns the current ActionBar subtitle in standard mode.
+     * Returns null if {@link #getNavigationMode()} would not return
+     * {@link #NAVIGATION_MODE_STANDARD}. 
+     *
+     * @return The current ActionBar subtitle or null.
      */
     public abstract CharSequence getSubtitle();
     
     /**
+     * Returns the current navigation mode. The result will be one of:
+     * <ul>
+     * <li>{@link #NAVIGATION_MODE_STANDARD}</li>
+     * <li>{@link #NAVIGATION_MODE_DROPDOWN_LIST}</li>
+     * <li>{@link #NAVIGATION_MODE_TABS}</li>
+     * <li>{@link #NAVIGATION_MODE_CUSTOM}</li>
+     * </ul>
+     *
      * @return The current navigation mode.
+     * 
+     * @see #setStandardNavigationMode(CharSequence)
+     * @see #setStandardNavigationMode(CharSequence, CharSequence)
+     * @see #setDropdownNavigationMode(SpinnerAdapter)
+     * @see #setCustomNavigationMode(View)
      */
     public abstract int getNavigationMode();
     
@@ -201,7 +227,7 @@ public abstract class ActionBar {
          * @return You must return true for actions to be displayed;
          *         if you return false they will not be shown.
          *
-         * @see #onActionItemSelected(MenuItem)
+         * @see #onActionItemClicked(MenuItem)
          */
         public boolean onCreateActionMenu(Menu menu);
 
@@ -215,7 +241,7 @@ public abstract class ActionBar {
         public boolean onUpdateActionMenu(Menu menu);
 
         /**
-         * This hook is called whenever an item in your action bar is selected.
+         * This hook is called whenever an action item in your action bar is clicked.
          * The default implementation simply returns false to have the normal
          * processing happen (sending a message to its handler). You can use this
          * method for any items for which you would like to do processing without
@@ -225,14 +251,24 @@ public abstract class ActionBar {
          * @return boolean Return false to allow normal menu processing to proceed,
          *         true to consume it here.
          */
-        public boolean onActionItemSelected(MenuItem item);
-
+        public boolean onActionItemClicked(MenuItem item);
+        
+        /**
+         * This method is called whenever a navigation item in your action bar
+         * is selected.
+         *    
+         * @param itemPosition Position of the item clicked.
+         * @param itemId ID of the item clicked.
+         * @return True if the event was handled, false otherwise.
+         */
+        public boolean onNavigationItemSelected(int itemPosition, long itemId);
+        
         /*
          * In progress
          */
         public boolean onCreateContextMode(int modeId, Menu menu);
         public boolean onPrepareContextMode(int modeId, Menu menu);
-        public boolean onContextItemSelected(int modeId, MenuItem item);
+        public boolean onContextItemClicked(int modeId, MenuItem item);
     }
     
     /**
@@ -248,7 +284,7 @@ public abstract class ActionBar {
             return false;
         }
         
-        public boolean onActionItemSelected(MenuItem item) {
+        public boolean onActionItemClicked(MenuItem item) {
             return false;
         }
         
@@ -260,7 +296,11 @@ public abstract class ActionBar {
             return false;
         }
         
-        public boolean onContextItemSelected(int modeId, MenuItem item) {
+        public boolean onContextItemClicked(int modeId, MenuItem item) {
+            return false;
+        }
+
+        public boolean onNavigationItemSelected(int itemPosition, long itemId) {
             return false;
         }
     }

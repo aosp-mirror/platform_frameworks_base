@@ -31,7 +31,10 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -78,12 +81,12 @@ public class ActionBarView extends ViewGroup {
     private ImageView mLogoView;
     private TextView mTitleView;
     private TextView mSubtitleView;
-    private View mNavigationView;
+    private Spinner mSpinner;
+    private View mCustomNavView;
     
     private boolean mShowMenu;
 
     private ActionMenuItem mLogoNavItem;
-    private ActionMenu mNavMenu;
     private ActionMenu mActionMenu;
     private ActionMenu mOptionsMenu;
     
@@ -97,9 +100,21 @@ public class ActionBarView extends ViewGroup {
             ActionView av = (ActionView) v;
             ActionMenuItem item = (ActionMenuItem) av.menuItem;
 
-            if (!mCallback.onActionItemSelected(item)) {
+            if (mCallback == null || !mCallback.onActionItemClicked(item)) {
                 item.invoke();
             }
+        }
+    };
+
+    private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
+            new AdapterView.OnItemSelectedListener() {
+        public void onItemSelected(AdapterView parent, View view, int position, long id) {
+            if (mCallback != null) {
+                mCallback.onNavigationItemSelected(position, id);
+            }
+        }
+        public void onNothingSelected(AdapterView parent) {
+            // Do nothing
         }
     };
 
@@ -123,7 +138,7 @@ public class ActionBarView extends ViewGroup {
 
         ApplicationInfo info = context.getApplicationInfo();
         PackageManager pm = context.getPackageManager();
-        mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode, ActionBar.NAVIGATION_MODE_NORMAL);
+        mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode, ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = a.getText(R.styleable.ActionBar_title);
         mSubtitle = a.getText(R.styleable.ActionBar_subtitle);
         mDisplayOptions = a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT);
@@ -146,7 +161,7 @@ public class ActionBarView extends ViewGroup {
         final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
         if (customNavId != 0) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            mNavigationView = (View) inflater.inflate(customNavId, null);
+            mCustomNavView = (View) inflater.inflate(customNavId, null);
             mNavigationMode = ActionBar.NAVIGATION_MODE_CUSTOM;
         }
 
@@ -164,7 +179,7 @@ public class ActionBarView extends ViewGroup {
             mHomeClickListener = new OnClickListener() {
                 public void onClick(View v) {
                     if (mCallback != null) {
-                        mCallback.onActionItemSelected(mLogoNavItem);
+                        mCallback.onActionItemClicked(mLogoNavItem);
                     }
                 }
             };
@@ -201,7 +216,7 @@ public class ActionBarView extends ViewGroup {
     }
     
     public void setCustomNavigationView(View view) {
-        mNavigationView = view;
+        mCustomNavView = view;
         if (view != null) {
             setNavigationMode(ActionBar.NAVIGATION_MODE_CUSTOM);
         }
@@ -258,25 +273,38 @@ public class ActionBarView extends ViewGroup {
         final int oldMode = mNavigationMode;
         if (mode != oldMode) {
             switch (oldMode) {
-            case ActionBar.NAVIGATION_MODE_NORMAL:
+            case ActionBar.NAVIGATION_MODE_STANDARD:
                 if (mTitleView != null) {
                     removeView(mTitleView);
                     mTitleView = null;
                 }
                 break;
-            case ActionBar.NAVIGATION_MODE_CUSTOM:
-                if (mNavigationView != null) {
-                    removeView(mNavigationView);
-                    mNavigationView = null;
+            case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+                if (mSpinner != null) {
+                    removeView(mSpinner);
+                    mSpinner = null;
                 }
+                break;
+            case ActionBar.NAVIGATION_MODE_CUSTOM:
+                if (mCustomNavView != null) {
+                    removeView(mCustomNavView);
+                    mCustomNavView = null;
+                }
+                break;
             }
             
             switch (mode) {
-            case ActionBar.NAVIGATION_MODE_NORMAL:
+            case ActionBar.NAVIGATION_MODE_STANDARD:
                 initTitle();
                 break;
+            case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+                mSpinner = new Spinner(mContext, null,
+                        com.android.internal.R.attr.dropDownSpinnerStyle);
+                mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
+                addView(mSpinner);
+                break;
             case ActionBar.NAVIGATION_MODE_CUSTOM:
-                addView(mNavigationView);
+                addView(mCustomNavView);
                 break;
             }
             mNavigationMode = mode;
@@ -284,8 +312,12 @@ public class ActionBarView extends ViewGroup {
         }
     }
     
+    public void setDropdownAdapter(SpinnerAdapter adapter) {
+        mSpinner.setAdapter(adapter);
+    }
+    
     public View getCustomNavigationView() {
-        return mNavigationView;
+        return mCustomNavView;
     }
     
     public int getNavigationMode() {
@@ -451,7 +483,7 @@ public class ActionBarView extends ViewGroup {
         }
 
         switch (mNavigationMode) {
-        case ActionBar.NAVIGATION_MODE_NORMAL:
+        case ActionBar.NAVIGATION_MODE_STANDARD:
             if (mLogoView == null) {
                 initTitle();
             }
@@ -459,15 +491,15 @@ public class ActionBarView extends ViewGroup {
             
         case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
             throw new UnsupportedOperationException(
-                    "Dropdown list navigation isn't supported yet!");
+                    "Inflating dropdown list navigation isn't supported yet!");
             
         case ActionBar.NAVIGATION_MODE_TABS:
             throw new UnsupportedOperationException(
                     "Tab navigation isn't supported yet!");
             
         case ActionBar.NAVIGATION_MODE_CUSTOM:
-            if (mNavigationView != null) {
-                addView(mNavigationView);
+            if (mCustomNavView != null) {
+                addView(mCustomNavView);
             }
             break;
         }
@@ -520,14 +552,21 @@ public class ActionBarView extends ViewGroup {
         }
         
         switch (mNavigationMode) {
-        case ActionBar.NAVIGATION_MODE_NORMAL:
+        case ActionBar.NAVIGATION_MODE_STANDARD:
             if (mTitleView != null) {
                 measureChildView(mTitleView, availableWidth, childSpecHeight, mSpacing);
             }
             break;
+        case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+            if (mSpinner != null) {
+                mSpinner.measure(
+                        MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            }
+            break;
         case ActionBar.NAVIGATION_MODE_CUSTOM:
-            if (mNavigationView != null) {
-                mNavigationView.measure(
+            if (mCustomNavView != null) {
+                mCustomNavView.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             }
@@ -561,15 +600,19 @@ public class ActionBarView extends ViewGroup {
         }
         
         switch (mNavigationMode) {
-        case ActionBar.NAVIGATION_MODE_NORMAL:
+        case ActionBar.NAVIGATION_MODE_STANDARD:
             if (mTitleView != null) {
                 x += positionChild(mTitleView, x, y, contentHeight) + mSpacing;
             }
             break;
-            
+        case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+            if (mSpinner != null) {
+                x += positionChild(mSpinner, x, y, contentHeight) + mSpacing;
+            }
+            break;
         case ActionBar.NAVIGATION_MODE_CUSTOM:
-            if (mNavigationView != null) {
-                x += positionChild(mNavigationView, x, y, contentHeight) + mSpacing;
+            if (mCustomNavView != null) {
+                x += positionChild(mCustomNavView, x, y, contentHeight) + mSpacing;
             }
             break;
         }

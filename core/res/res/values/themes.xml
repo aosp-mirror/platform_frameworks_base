@@ -169,6 +169,7 @@
         <item name="scrollViewStyle">@android:style/Widget.ScrollView</item>
         <item name="horizontalScrollViewStyle">@android:style/Widget.HorizontalScrollView</item>
         <item name="spinnerStyle">@android:style/Widget.Spinner</item>
+        <item name="dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>

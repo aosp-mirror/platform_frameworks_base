@@ -251,8 +251,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return child;
     }
 
-
-
     /**
      * Helper for makeAndAddView to set the position of a view
      * and fill out its layout paramters.
@@ -340,32 +338,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public CharSequence getPrompt() {
         return mPopup.getHintText();
     }
-    
-    /*
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mPopup.onKeyDown(keyCode, event)) {
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-    
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mPopup.onKeyUp(keyCode, event)) {
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-    
-    @Override
-    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        if (mPopup.onKeyPreIme(keyCode, event)) {
-            return true;
-        }
-        return super.onKeyPreIme(keyCode, event);
-    }
-    */
     
     /**
      * <p>Wrapper class for an Adapter. Transforms the embedded Adapter instance
