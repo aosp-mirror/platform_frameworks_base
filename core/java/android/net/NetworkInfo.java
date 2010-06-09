@@ -121,7 +121,10 @@ public class NetworkInfo implements Parcelable {
      */
     public NetworkInfo(int type) {}
 
-    NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
+    /**
+     * @hide
+     */
+    public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
         if (!ConnectivityManager.isNetworkTypeValid(type)) {
             throw new IllegalArgumentException("Invalid network type: " + type);
         }
@@ -281,8 +284,9 @@ public class NetworkInfo implements Parcelable {
      * if one was supplied. May be {@code null}.
      * @param extraInfo an optional {@code String} providing addditional network state
      * information passed up from the lower networking layers.
+     * @hide
      */
-    void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
+    public void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
         this.mDetailedState = detailedState;
         this.mState = stateMap.get(detailedState);
         this.mReason = reason;

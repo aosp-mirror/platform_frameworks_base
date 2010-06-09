@@ -22,11 +22,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.RemoteException;
 import android.os.Handler;
+import android.os.Message;
 import android.os.ServiceManager;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.text.TextUtils;
@@ -38,7 +40,7 @@ import android.text.TextUtils;
  *
  * {@hide}
  */
-public class MobileDataStateTracker extends NetworkStateTracker {
+public class MobileDataStateTracker implements NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
     private static final boolean DBG = true;
@@ -48,6 +50,15 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
     private String mApnType;
     private BroadcastReceiver mStateReceiver;
+    private static String[] sDnsPropNames;
+    private NetworkInfo mNetworkInfo;
+    private boolean mTeardownRequested = false;
+    private Handler mTarget;
+    private Context mContext;
+    private String mInterfaceName;
+    private boolean mPrivateDnsRouteSet = false;
+    private int mDefaultGatewayAddr = 0;
+    private boolean mDefaultRouteSet = false;
 
     /**
      * Create a new MobileDataStateTracker
@@ -58,14 +69,16 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * @param tag the name of this network
      */
     public MobileDataStateTracker(Context context, Handler target, int netType, String tag) {
-        super(context, target, netType,
+        mTarget = target;
+        mContext = context;
+        mNetworkInfo = new NetworkInfo(netType,
                 TelephonyManager.getDefault().getNetworkType(), tag,
                 TelephonyManager.getDefault().getNetworkTypeName());
         mApnType = networkTypeToApnType(netType);
 
         mPhoneService = null;
 
-        mDnsPropNames = new String[] {
+        sDnsPropNames = new String[] {
                 "net.rmnet0.dns1",
                 "net.rmnet0.dns2",
                 "net.eth0.dns1",
@@ -80,6 +93,53 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     }
 
     /**
+     * Return the IP addresses of the DNS servers available for the mobile data
+     * network interface.
+     * @return a list of DNS addresses, with no holes.
+     */
+    public String[] getDnsPropNames() {
+        return sDnsPropNames;
+    }
+
+    /**
+     * Return the name of our network interface.
+     * @return the name of our interface.
+     */
+    public String getInterfaceName() {
+        return mInterfaceName;
+    }
+
+    public boolean isPrivateDnsRouteSet() {
+        return mPrivateDnsRouteSet;
+    }
+
+    public void privateDnsRouteSet(boolean enabled) {
+        mPrivateDnsRouteSet = enabled;
+    }
+
+    public NetworkInfo getNetworkInfo() {
+        return mNetworkInfo;
+    }
+
+    public int getDefaultGatewayAddr() {
+        return mDefaultGatewayAddr;
+    }
+
+    public boolean isDefaultRouteSet() {
+        return mDefaultRouteSet;
+    }
+
+    public void defaultRouteSet(boolean enabled) {
+        mDefaultRouteSet = enabled;
+    }
+
+    /**
+     * This is not implemented.
+     */
+    public void releaseWakeLock() {
+    }
+
+    /**
      * Begin monitoring mobile data connectivity.
      */
     public void startMonitoring() {
@@ -91,6 +151,32 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         mStateReceiver = new MobileDataStateReceiver();
         mContext.registerReceiver(mStateReceiver, filter);
         mMobileDataState = Phone.DataState.DISCONNECTED;
+    }
+
+    /**
+     * Record the roaming status of the device, and if it is a change from the previous
+     * status, send a notification to any listeners.
+     * @param isRoaming {@code true} if the device is now roaming, {@code false}
+     * if it is no longer roaming.
+     */
+    private void setRoamingStatus(boolean isRoaming) {
+        if (isRoaming != mNetworkInfo.isRoaming()) {
+            mNetworkInfo.setRoaming(isRoaming);
+            Message msg = mTarget.obtainMessage(EVENT_ROAMING_CHANGED, mNetworkInfo);
+            msg.sendToTarget();
+        }
+    }
+
+    private void setSubtype(int subtype, String subtypeName) {
+        if (mNetworkInfo.isConnected()) {
+            int oldSubtype = mNetworkInfo.getSubtype();
+            if (subtype != oldSubtype) {
+                mNetworkInfo.setSubtype(subtype, subtypeName);
+                Message msg = mTarget.obtainMessage(
+                        EVENT_NETWORK_SUBTYPE_CHANGED, oldSubtype, 0, mNetworkInfo);
+                msg.sendToTarget();
+            }
+        }
     }
 
     private class MobileDataStateReceiver extends BroadcastReceiver {
@@ -260,10 +346,60 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * mobile data connections.
      * TODO - make async and return nothing?
      */
-    @Override
     public boolean teardown() {
         setTeardownRequested(true);
         return (setEnableApn(mApnType, false) != Phone.APN_REQUEST_FAILED);
+    }
+
+    /**
+     * Record the detailed state of a network, and if it is a
+     * change from the previous state, send a notification to
+     * any listeners.
+     * @param state the new @{code DetailedState}
+     */
+    private void setDetailedState(NetworkInfo.DetailedState state) {
+        setDetailedState(state, null, null);
+    }
+
+    /**
+     * Record the detailed state of a network, and if it is a
+     * change from the previous state, send a notification to
+     * any listeners.
+     * @param state the new @{code DetailedState}
+     * @param reason a {@code String} indicating a reason for the state change,
+     * if one was supplied. May be {@code null}.
+     * @param extraInfo optional {@code String} providing extra information about the state change
+     */
+    private void setDetailedState(NetworkInfo.DetailedState state, String reason, String extraInfo) {
+        if (DBG) Log.d(TAG, "setDetailed state, old ="
+                + mNetworkInfo.getDetailedState() + " and new state=" + state);
+        if (state != mNetworkInfo.getDetailedState()) {
+            boolean wasConnecting = (mNetworkInfo.getState() == NetworkInfo.State.CONNECTING);
+            String lastReason = mNetworkInfo.getReason();
+            /*
+             * If a reason was supplied when the CONNECTING state was entered, and no
+             * reason was supplied for entering the CONNECTED state, then retain the
+             * reason that was supplied when going to CONNECTING.
+             */
+            if (wasConnecting && state == NetworkInfo.DetailedState.CONNECTED && reason == null
+                    && lastReason != null)
+                reason = lastReason;
+            mNetworkInfo.setDetailedState(state, reason, extraInfo);
+            Message msg = mTarget.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
+            msg.sendToTarget();
+        }
+    }
+
+    private void setDetailedStateInternal(NetworkInfo.DetailedState state) {
+        mNetworkInfo.setDetailedState(state, null, null);
+    }
+
+    public void setTeardownRequested(boolean isRequested) {
+        mTeardownRequested = isRequested;
+    }
+
+    public boolean isTeardownRequested() {
+        return mTeardownRequested;
     }
 
     /**
@@ -322,23 +458,50 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Ensure that a network route exists to deliver traffic to the specified
-     * host via the mobile data network.
-     * @param hostAddress the IP address of the host to which the route is desired,
-     * in network byte order.
-     * @return {@code true} on success, {@code false} on failure
+     * Tells the phone sub-system that the caller wants to
+     * begin using the named feature. The only supported features at
+     * this time are {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
+     * to specify that it wants to send and/or receive MMS data, and
+     * {@code Phone.FEATURE_ENABLE_SUPL}, which is used for Assisted GPS.
+     * @param feature the name of the feature to be used
+     * @param callingPid the process ID of the process that is issuing this request
+     * @param callingUid the user ID of the process that is issuing this request
+     * @return an integer value representing the outcome of the request.
+     * The interpretation of this value is feature-specific.
+     * specific, except that the value {@code -1}
+     * always indicates failure. For {@code Phone.FEATURE_ENABLE_MMS},
+     * the other possible return values are
+     * <ul>
+     * <li>{@code Phone.APN_ALREADY_ACTIVE}</li>
+     * <li>{@code Phone.APN_REQUEST_STARTED}</li>
+     * <li>{@code Phone.APN_TYPE_NOT_AVAILABLE}</li>
+     * <li>{@code Phone.APN_REQUEST_FAILED}</li>
+     * </ul>
      */
-    @Override
-    public boolean requestRouteToHost(int hostAddress) {
-        if (DBG) {
-            Log.d(TAG, "Requested host route to " + Integer.toHexString(hostAddress) +
-                    " for " + mApnType + "(" + mInterfaceName + ")");
-        }
-        if (mInterfaceName != null && hostAddress != -1) {
-            return NetworkUtils.addHostRoute(mInterfaceName, hostAddress) == 0;
-        } else {
-            return false;
-        }
+    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
+        return -1;
+    }
+
+    /**
+     * Tells the phone sub-system that the caller is finished
+     * using the named feature. The only supported feature at
+     * this time is {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
+     * to specify that it wants to send and/or receive MMS data.
+     * @param feature the name of the feature that is no longer needed
+     * @param callingPid the process ID of the process that is issuing this request
+     * @param callingUid the user ID of the process that is issuing this request
+     * @return an integer value representing the outcome of the request.
+     * The interpretation of this value is feature-specific, except that
+     * the value {@code -1} always indicates failure.
+     */
+    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
+        return -1;
+    }
+
+    /**
+     * This is not supported.
+     */
+    public void interpretScanResultsAvailable() {
     }
 
     @Override
