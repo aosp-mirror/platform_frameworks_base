@@ -1,3 +1,6 @@
+#ifndef __RS_GRAPHICS_RSH__
+#define __RS_GRAPHICS_RSH__
+
 #include "rs_math.rsh"
 
 
@@ -41,5 +44,5 @@ extern void hsb(float, float, float, float);
 extern void hsbToRgb(float, float, float, float*);
 extern int hsbToAbgr(float, float, float, float);
 
-
+#endif
 
