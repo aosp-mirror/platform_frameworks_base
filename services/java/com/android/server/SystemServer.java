@@ -16,34 +16,34 @@
 
 package com.android.server;
 
-import com.android.server.am.ActivityManagerService;
-import com.android.server.status.StatusBarManagerService;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.server.am.ActivityManagerService;
+import com.android.server.status.StatusBarService;
 
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
 
+import android.accounts.AccountManagerService;
 import android.app.ActivityManagerNative;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentService;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.media.AudioService;
-import android.os.*;
-import android.provider.Contacts.People;
+import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Slog;
-import android.accounts.AccountManagerService;
 
 import java.io.File;
 import java.util.Timer;
@@ -51,11 +51,8 @@ import java.util.TimerTask;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
-    private final static boolean INCLUDE_DEMO = false;
 
-    private static final int LOG_BOOT_PROGRESS_SYSTEM_RUN = 3010;
-
-    private ContentResolver mContentResolver;
+    ContentResolver mContentResolver;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -329,11 +326,6 @@ class ServerThread extends Thread {
                 Slog.e(TAG, "Failure starting Search Service", e);
             }
 
-            if (INCLUDE_DEMO) {
-                Slog.i(TAG, "Installing demo data...");
-                (new DemoThread(context)).start();
-            }
-
             try {
                 Slog.i(TAG, "DropBox Service");
                 ServiceManager.addService(Context.DROPBOX_SERVICE,
@@ -504,37 +496,7 @@ class ServerThread extends Thread {
     }
 }
 
-class DemoThread extends Thread
-{
-    DemoThread(Context context)
-    {
-        mContext = context;
-    }
-
-    @Override
-    public void run()
-    {
-        try {
-            Cursor c = mContext.getContentResolver().query(People.CONTENT_URI, null, null, null, null);
-            boolean hasData = c != null && c.moveToFirst();
-            if (c != null) {
-                c.deactivate();
-            }
-            if (!hasData) {
-                DemoDataSet dataset = new DemoDataSet();
-                dataset.add(mContext);
-            }
-        } catch (Throwable e) {
-            Slog.e("SystemServer", "Failure installing demo data", e);
-        }
-
-    }
-
-    Context mContext;
-}
-
-public class SystemServer
-{
+public class SystemServer {
     private static final String TAG = "SystemServer";
 
     public static final int FACTORY_TEST_OFF = 0;
