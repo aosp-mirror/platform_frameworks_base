@@ -157,5 +157,22 @@ public class StatusBarTest extends TestActivity
                     }, 3000);
             }
         },
+        new Test("More icons") {
+            public void run() {
+                for (String slot: new String[] {
+                            "sync_failing",
+                            "gps",
+                            "bluetooth",
+                            "tty",
+                            "speakerphone",
+                            "mute",
+                            "wifi",
+                            "alarm_clock",
+                            "secure",
+                        }) {
+                    mStatusBarManager.setIconVisibility(slot, true);
+                }
+            }
+        },
     };
 }

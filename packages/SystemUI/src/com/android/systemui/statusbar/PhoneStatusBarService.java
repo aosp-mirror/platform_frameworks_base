@@ -116,7 +116,6 @@ public class PhoneStatusBarService extends StatusBarService {
     Object mQueueLock = new Object();
     
     // icons
-    String[] mRightIconSlots;
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
     LinearLayout mStatusIcons;
@@ -153,6 +152,7 @@ public class PhoneStatusBarService extends StatusBarService {
     TrackingView mTrackingView;
     WindowManager.LayoutParams mTrackingParams;
     int mTrackingPosition; // the position of the top of the tracking view.
+    private boolean mPanelSlightlyVisible;
 
     // ticker
     private Ticker mTicker;
@@ -201,7 +201,6 @@ public class PhoneStatusBarService extends StatusBarService {
     // ================================================================================
     private void makeStatusBarView(Context context) {
         Resources res = context.getResources();
-        mRightIconSlots = res.getStringArray(R.array.status_bar_icon_order);
 
         mHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mIconWidth = mHeight;
@@ -373,6 +372,14 @@ public class PhoneStatusBarService extends StatusBarService {
                     oldEntry.content.setOnClickListener(new Launcher(contentIntent,
                                 notification.pkg, notification.tag, notification.id));
                 }
+                // Update the icon.
+                final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                        notification.notification.icon, notification.notification.iconLevel,
+                        notification.notification.number);
+                if (!oldEntry.icon.set(ic)) {
+                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
+                    return;
+                }
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
@@ -380,9 +387,6 @@ public class PhoneStatusBarService extends StatusBarService {
                 removeNotificationViews(key);
                 addNotificationViews(key, notification);
             }
-            // Update the icon.
-            oldEntry.icon.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
-                    notification.notification.iconLevel, notification.notification.number));
         } else {
             Slog.d(TAG, "not reusing notification");
             removeNotificationViews(key);
@@ -429,11 +433,10 @@ public class PhoneStatusBarService extends StatusBarService {
 
         // create the row view
         LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(com.android.internal.R.layout.status_bar_latest_event,
-                parent, false);
+        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
 
         // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(com.android.internal.R.id.content);
+        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = n.contentIntent;
@@ -451,8 +454,9 @@ public class PhoneStatusBarService extends StatusBarService {
             exception = e;
         }
         if (expanded == null) {
-            Slog.e(TAG, "couldn't inflate view for package " + notification.pkg, exception);
-            row.setVisibility(View.GONE);
+            String ident = notification.pkg + "/0x" + Integer.toHexString(notification.id);
+            Slog.e(TAG, "couldn't inflate view for notification " + ident);
+            return null;
         } else {
             content.addView(expanded);
             row.setDrawingCacheEnabled(true);
@@ -474,14 +478,23 @@ public class PhoneStatusBarService extends StatusBarService {
         }
         // Construct the expanded view.
         final View[] views = makeNotificationView(notification, parent);
+        if (views == null) {
+            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
+                    + notification);
+            return;
+        }
         final View row = views[0];
         final View content = views[1];
         final View expanded = views[2];
         // Construct the icon.
-        StatusBarIconView iconView = new StatusBarIconView(this,
+        final StatusBarIconView iconView = new StatusBarIconView(this,
                 notification.pkg + "/0x" + Integer.toHexString(notification.id));
-        iconView.set(new StatusBarIcon(notification.pkg, notification.notification.icon,
-                    notification.notification.iconLevel, notification.notification.number));
+        final StatusBarIcon ic = new StatusBarIcon(notification.pkg, notification.notification.icon,
+                    notification.notification.iconLevel, notification.notification.number);
+        if (!iconView.set(ic)) {
+            handleNotificationError(key, notification, "Coulding create icon: " + ic);
+            return;
+        }
         // Add the expanded view.
         final int viewIndex = list.add(key, notification, row, content, expanded, iconView);
         parent.addView(row, viewIndex);
@@ -967,6 +980,21 @@ public class PhoneStatusBarService extends StatusBarService {
         }
     }
 
+    /**
+     * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
+     * about the failure.
+     *
+     * WARNING: this will call back into us.  Don't hold any locks.
+     */
+    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
+        removeNotification(key);
+        try {
+            mBarService.onNotificationError(n.pkg, n.tag, n.id, message);
+        } catch (RemoteException ex) {
+            // The end is nigh.
+        }
+    }
+
     private class MyTicker extends Ticker {
         MyTicker(Context context, StatusBarView sb) {
             super(context, sb);
@@ -1268,8 +1296,15 @@ public class PhoneStatusBarService extends StatusBarService {
                 // because the window itself extends below the content view.
                 mExpandedParams.y = -disph;
             }
-            visibilityChanged(visible);
             mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+
+            // As long as this isn't just a repositioning that's not supposed to affect
+            // the user's perception of what's showing, call to say that the visibility
+            // has changed. (Otherwise, someone else will call to do that).
+            if (expandedPosition != EXPANDED_LEAVE_ALONE) {
+                Slog.d(TAG, "updateExpandedViewPos visibilityChanged(" + visible + ")");
+                visibilityChanged(visible);
+            }
         }
 
         if (SPEW) {
@@ -1299,12 +1334,11 @@ public class PhoneStatusBarService extends StatusBarService {
      * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
      * this is what he wants. (see bug 1131461)
      */
-    private boolean mPanelSlightlyVisible;
     void visibilityChanged(boolean visible) {
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
             try {
-                mBarService.visibilityChanged(visible);
+                mBarService.onPanelRevealed();
             } catch (RemoteException ex) {
                 // Won't fail unless the world has ended.
             }
