@@ -48,12 +48,6 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
     CommandQueue mCommandQueue;
     IStatusBarService mBarService;
 
-    /* TODO
-    H mHandler = new H();
-    Object mQueueLock = new Object();
-    NotificationCallbacks mNotificationCallbacks;
-    */
-
     @Override
     public void onCreate() {
         // Connect in to the status bar manager service
