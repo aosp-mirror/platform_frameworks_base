@@ -38,12 +38,8 @@ static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4 color)
 
 static float4 rsUnpackColor8888(uchar4 c)
 {
-    float4 ret = {
-        c.x * (1.f / 255.f),
-        c.y * (1.f / 255.f),
-        c.z * (1.f / 255.f),
-        c.w * (1.f / 255.f),
-    };
+    float4 ret = (float4)0.0039156862745f;
+    ret *= convert_float4(c);
     return ret;
 }
 
