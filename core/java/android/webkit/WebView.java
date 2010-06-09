@@ -3322,8 +3322,7 @@ public class WebView extends AbsoluteLayout
             if (!animateScroll) {
                 extras = DRAW_EXTRAS_FIND;
             }
-        } else if (mShiftIsPressed
-                && !nativePageShouldHandleShiftAndArrows()) {
+        } else if (mShiftIsPressed && !nativePageShouldHandleShiftAndArrows()) {
             if (!mZoomManager.isZoomAnimating()) {
                 extras = DRAW_EXTRAS_SELECTION;
                 nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
@@ -4454,7 +4453,7 @@ public class WebView extends AbsoluteLayout
         if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1) {
 
             // if the page disallows zoom, then skip multi-pointer action
-            if (mZoomManager.mMinZoomScale >= mZoomManager.mMaxZoomScale) {
+            if (mZoomManager.isZoomScaleFixed()) {
                 return true;
             }
 
@@ -5604,11 +5603,7 @@ public class WebView extends AbsoluteLayout
         int viewHeight = getViewHeightWithTitle();
         float scale = Math.min((float) viewWidth / view.width,
                 (float) viewHeight / view.height);
-        if (scale < mZoomManager.mMinZoomScale) {
-            scale = mZoomManager.mMinZoomScale;
-        } else if (scale > mZoomManager.mMaxZoomScale) {
-            scale = mZoomManager.mMaxZoomScale;
-        }
+        scale = mZoomManager.computeScaleWithLimits(scale);
         if (!mZoomManager.willScaleTriggerZoom(scale)) {
             if (contentToViewX(view.x) >= mScrollX
                     && contentToViewX(view.x + view.width) <= mScrollX
@@ -5633,11 +5628,7 @@ public class WebView extends AbsoluteLayout
         int viewHeight = getViewHeightWithTitle();
         float scale = Math.min((float) viewWidth / docWidth, (float) viewHeight
                 / docHeight);
-        if (scale < mZoomManager.mMinZoomScale) {
-            scale = mZoomManager.mMinZoomScale;
-        } else if (scale > mZoomManager.mMaxZoomScale) {
-            scale = mZoomManager.mMaxZoomScale;
-        }
+        scale = mZoomManager.computeScaleWithLimits(scale);
         if (!mZoomManager.willScaleTriggerZoom(scale)) {
             pinScrollTo(contentToViewX(docX + docWidth / 2) - viewWidth / 2,
                     contentToViewY(docY + docHeight / 2) - viewHeight / 2,

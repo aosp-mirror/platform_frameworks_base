@@ -36,8 +36,7 @@ class ZoomControlEmbedded implements ZoomControlBase {
     }
 
     public void show() {
-        if (!getControls().isVisible()
-                && mZoomManager.mMinZoomScale < mZoomManager.mMaxZoomScale) {
+        if (!getControls().isVisible() && !mZoomManager.isZoomScaleFixed()) {
 
             mZoomButtonsController.setVisible(true);
 
