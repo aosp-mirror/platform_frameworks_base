@@ -42,6 +42,7 @@ import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -53,6 +54,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
@@ -4130,6 +4132,20 @@ public final class ActivityThread {
         Resources.getSystem().updateConfiguration(mConfiguration, null);
 
         data.info = getPackageInfoNoCheck(data.appInfo);
+
+        /**
+         * For system applications on userdebug/eng builds, log stack
+         * traces of disk and network access to dropbox for analysis.
+         */
+        if ((data.appInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0 &&
+            !"user".equals(Build.TYPE)) {
+            StrictMode.setDropBoxManager(ContextImpl.createDropBoxManager());
+            StrictMode.setThreadBlockingPolicy(
+                StrictMode.DISALLOW_DISK_WRITE |
+                StrictMode.DISALLOW_DISK_READ |
+                StrictMode.DISALLOW_NETWORK |
+                StrictMode.PENALTY_DROPBOX);
+        }
 
         /**
          * Switch this process to density compatibility mode if needed.
