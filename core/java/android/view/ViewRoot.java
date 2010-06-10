@@ -56,10 +56,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import javax.microedition.khronos.egl.*;
-import javax.microedition.khronos.opengles.*;
-import static javax.microedition.khronos.opengles.GL10.*;
-
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
  * and the WindowManager.  This is for the most part an internal implementation
@@ -264,9 +260,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
 
         // Try to enable hardware acceleration if requested
-        if ((context.getApplicationInfo().flags &
-                ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
-            mHwRenderer = new HardwareRenderer();
+        if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            mHwRenderer = HardwareRenderer.createGlRenderer(1);
         }
     }
 
@@ -615,8 +610,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         boolean viewVisibilityChanged = mViewVisibility != viewVisibility
                 || mNewSurfaceNeeded;
 
-        float appScale = mAttachInfo.mApplicationScale;
-
         WindowManager.LayoutParams params = null;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
@@ -665,7 +658,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
                 if (mHwRenderer != null) {
-                    mHwRenderer.destroyGL();
+                    mHwRenderer.destroy();
                 }
             }
             if (viewVisibility == View.GONE) {
@@ -873,7 +866,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         mPreviousTransparentRegion.setEmpty();
 
                         if (mHwRenderer != null) {
-                            hwIntialized = mHwRenderer.initialize();
+                            hwIntialized = mHwRenderer.initialize(mHolder);
                         }
                     }
                 } else if (!mSurface.isValid()) {
@@ -952,7 +945,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
             
             if (hwIntialized) {
-                mHwRenderer.setup(appScale);
+                mHwRenderer.setup(mWidth, mHeight, mAttachInfo);
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -1248,9 +1241,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             return;
         }
         
-        if (mHwRenderer != null && mHwRenderer.mEnabled) {
+        if (mHwRenderer != null && mHwRenderer.isEnabled()) {
             if (!dirty.isEmpty()) {
-                mHwRenderer.draw(yoff, scalingRequired);
+                mHwRenderer.draw(mView, mAttachInfo, mTranslator, yoff, scalingRequired);
             }
 
             if (scrolling) {
@@ -1578,7 +1571,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo.mSurface = null;
 
         if (mHwRenderer != null) {
-            mHwRenderer.destroyGL();
+            mHwRenderer.destroy();
         }
         mSurface.release();
 
@@ -1842,7 +1835,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     ensureTouchModeLocally(inTouchMode);
 
                     if (mHwRenderer != null) {
-                        mHwRenderer.initializeAndSetup();
+                        mHwRenderer.initializeIfNeeded(mWidth, mHeight, mAttachInfo, mHolder);
                     }
                 }
 
@@ -3313,183 +3306,5 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
     }
 
-    class HardwareRenderer {
-        private EGL10 mEgl;
-        private EGLDisplay mEglDisplay;
-        private EGLContext mEglContext;
-        private EGLSurface mEglSurface;
-        private GL11 mGL;
-
-        private Canvas mGlCanvas;
-
-        boolean mEnabled;
-        boolean mRequested = true;
-
-        private void initializeGL() {
-            initializeGLInner();
-            int err = mEgl.eglGetError();
-            if (err != EGL10.EGL_SUCCESS) {
-                destroyGL();
-                mRequested = false;
-            }
-        }
-
-        private void initializeGLInner() {
-            final EGL10 egl = (EGL10) EGLContext.getEGL();
-            mEgl = egl;
-    
-            final EGLDisplay eglDisplay = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-            mEglDisplay = eglDisplay;
-    
-            int[] version = new int[2];
-            egl.eglInitialize(eglDisplay, version);
-    
-            final int[] configSpec = {
-                    EGL10.EGL_RED_SIZE,      8,
-                    EGL10.EGL_GREEN_SIZE,    8,
-                    EGL10.EGL_BLUE_SIZE,     8,
-                    EGL10.EGL_DEPTH_SIZE,    0,
-                    EGL10.EGL_NONE
-            };
-            final EGLConfig[] configs = new EGLConfig[1];
-            final int[] numConfig = new int[1];
-            egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, numConfig);
-            final EGLConfig config = configs[0];
-
-            /*
-             * Create an OpenGL ES context. This must be done only once, an
-             * OpenGL context is a somewhat heavy object.
-             */
-            final EGLContext context = egl.eglCreateContext(eglDisplay, config,
-                    EGL10.EGL_NO_CONTEXT, null);
-            mEglContext = context;
-    
-            /*
-             * Create an EGL surface we can render into.
-             */
-            EGLSurface surface = egl.eglCreateWindowSurface(eglDisplay, config, mHolder, null);
-            mEglSurface = surface;
-    
-            /*
-             * Before we can issue GL commands, we need to make sure
-             * the context is current and bound to a surface.
-             */
-            egl.eglMakeCurrent(eglDisplay, surface, surface, context);
-    
-            /*
-             * Get to the appropriate GL interface.
-             * This is simply done by casting the GL context to either
-             * GL10 or GL11.
-             */
-            final GL11 gl = (GL11) context.getGL();
-            mGL = gl;
-            mGlCanvas = new Canvas(gl);
-            mEnabled = true;
-        }
-
-        void destroyGL() {
-            if (!mEnabled) return;
-            
-            // inform skia that the context is gone
-            nativeAbandonGlCaches();
-    
-            mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
-                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
-            mEgl.eglDestroyContext(mEglDisplay, mEglContext);
-            mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
-            mEgl.eglTerminate(mEglDisplay);
-
-            mEglContext = null;
-            mEglSurface = null;
-            mEglDisplay = null;
-            mEgl = null;
-            mGlCanvas = null;
-            mGL = null;
-
-            mEnabled = false;
-        }
-    
-        private void checkErrors() {
-            if (mEnabled) {
-                int err = mEgl.eglGetError();
-                if (err != EGL10.EGL_SUCCESS) {
-                    // something bad has happened revert to
-                    // normal rendering.
-                    destroyGL();
-                    if (err != EGL11.EGL_CONTEXT_LOST) {
-                        // we'll try again if it was context lost
-                        mRequested = false;
-                    }
-                }
-            }
-        }
-
-        boolean initialize() {
-            if (mRequested && !mEnabled) {
-                initializeGL();
-                return mGlCanvas != null;
-            }
-            return false;
-        }
-
-        void setup(float appScale) {
-            mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
-                    (int) (mHeight * appScale + 0.5f));
-        }
-
-        void draw(int yoff, boolean scalingRequired) {
-            Canvas canvas = mGlCanvas;
-            if (mGL != null && canvas != null) {
-                mGL.glDisable(GL_SCISSOR_TEST);
-                mGL.glClearColor(0, 0, 0, 0);
-                mGL.glClear(GL_COLOR_BUFFER_BIT);
-                mGL.glEnable(GL_SCISSOR_TEST);
-    
-                mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
-                mAttachInfo.mIgnoreDirtyState = true;
-                mView.mPrivateFlags |= View.DRAWN;
-    
-                int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
-                try {
-                    canvas.translate(0, -yoff);
-                    if (mTranslator != null) {
-                        mTranslator.translateCanvas(canvas);
-                    }
-                    canvas.setScreenDensity(scalingRequired ?
-                            DisplayMetrics.DENSITY_DEVICE : 0);
-    
-                    mView.draw(canvas);
-    
-                } finally {
-                    canvas.restoreToCount(saveCount);
-                }
-    
-                mAttachInfo.mIgnoreDirtyState = false;
-    
-                mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
-                checkErrors();
-            }
-        }
-
-        void initializeAndSetup() {
-            if (mRequested) {
-                checkErrors();
-                // we lost the gl context, so recreate it.
-                if (mRequested && !mEnabled) {
-                    initializeGL();
-                    if (mGlCanvas != null) {
-                        float appScale = mAttachInfo.mApplicationScale;
-                        mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
-                                (int) (mHeight * appScale + 0.5f));
-                    }
-                }
-            }
-        }
-    }
-    
     private static native void nativeShowFPS(Canvas canvas, int durationMillis);
-
-    // inform skia to just abandon its texture cache IDs
-    // doesn't call glDeleteTextures
-    private static native void nativeAbandonGlCaches();
 }

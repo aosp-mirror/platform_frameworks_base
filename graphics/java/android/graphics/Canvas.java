@@ -117,16 +117,33 @@ public class Canvas {
      * 
      * <p>The initial target density of the canvas is the same as the initial
      * density of bitmaps as per {@link Bitmap#getDensity() Bitmap.getDensity()}.
+     * 
+     * @deprecated This constructor is not supported and should not be invoked.
      */
     public Canvas(GL gl) {
         mNativeCanvas = initGL();
         mGL = gl;
         mDensity = Bitmap.getDefaultDensity();
     }
+
+    /**
+     * Indicates whether this Canvas uses hardware acceleration.
+     * 
+     * Note that this method does not define what type of hardware acceleration
+     * may or may not be used.
+     * 
+     * @return True if drawing operations are hardware accelerated,
+     *         false otherwise.
+     */
+    public boolean isHardwareAccelerated() {
+        return mGL != null;
+    }
     
     /**
      * Return the GL object associated with this canvas, or null if it is not
      * backed by GL.
+     * 
+     * @deprecated This method is not supported and should not be invoked.
      */
     public GL getGL() {
         return mGL;
@@ -136,6 +153,8 @@ public class Canvas {
      * Call this to free up OpenGL resources that may be cached or allocated
      * on behalf of the Canvas. Any subsequent drawing with a GL-backed Canvas
      * will have to recreate those resources.
+     * 
+     * @deprecated This method is not supported and should not be invoked.
      */
     public static void freeGlCaches() {
         freeCaches();
@@ -168,8 +187,10 @@ public class Canvas {
      * Set the viewport dimensions if this canvas is GL based. If it is not,
      * this method is ignored and no exception is thrown.
      *
-     *  @param width    The width of the viewport
-     *  @param height   The height of the viewport
+     *  @param width The width of the viewport
+     *  @param height The height of the viewport
+     * 
+     * @deprecated This method is not supported and should not be invoked.
      */
     public void setViewport(int width, int height) {
         if (mGL != null) {
@@ -1339,8 +1360,8 @@ public class Canvas {
      *            position (start + length) can be used for shaping context.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
-     * @param dir the run direction, either {@link DIRECTION_LTR} or 
-     *            {@link DIRECTION_RTL}.
+     * @param dir the run direction, either {@link #DIRECTION_LTR} or 
+     *            {@link #DIRECTION_RTL}.
      * @param paint the paint
      * @hide
      */

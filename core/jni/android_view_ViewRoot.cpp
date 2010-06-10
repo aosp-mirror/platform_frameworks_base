@@ -76,10 +76,6 @@ static void android_view_ViewRoot_showFPS(JNIEnv* env, jobject, jobject jcanvas,
     canvas->restore();
 }
 
-static void android_view_ViewRoot_abandonGlCaches(JNIEnv* env, jobject) {
-    SkGLCanvas::AbandonAllTextures();
-}
-
 static jintArray android_view_ViewRoot_makeInputChannel(JNIEnv* env, jobject) {
     int fd[2];
     jint* arrayData = NULL;
@@ -120,8 +116,6 @@ const char* const kClassPathName = "android/view/ViewRoot";
 static JNINativeMethod gMethods[] = {
     {   "nativeShowFPS", "(Landroid/graphics/Canvas;I)V",
                                         (void*)android_view_ViewRoot_showFPS },
-    {   "nativeAbandonGlCaches", "()V", 
-                                (void*)android_view_ViewRoot_abandonGlCaches },
     {   "makeInputChannel", "()[I",
                                         (void*)android_view_ViewRoot_makeInputChannel }
 };
