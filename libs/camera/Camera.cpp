@@ -107,6 +107,13 @@ int32_t Camera::getNumberOfCameras()
     return cs->getNumberOfCameras();
 }
 
+status_t Camera::getCameraInfo(int cameraId,
+                               struct CameraInfo* cameraInfo) {
+    const sp<ICameraService>& cs = getCameraService();
+    if (cs == 0) return UNKNOWN_ERROR;
+    return cs->getCameraInfo(cameraId, cameraInfo);
+}
+
 sp<Camera> Camera::connect(int cameraId)
 {
     LOGV("connect");

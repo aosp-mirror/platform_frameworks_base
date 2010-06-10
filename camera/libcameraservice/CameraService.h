@@ -40,6 +40,8 @@ public:
     virtual             ~CameraService();
 
     virtual int32_t     getNumberOfCameras();
+    virtual status_t    getCameraInfo(int cameraId,
+                                      struct CameraInfo* cameraInfo);
     virtual sp<ICamera> connect(const sp<ICameraClient>& cameraClient, int cameraId);
     virtual void        removeClient(const sp<ICameraClient>& cameraClient);
     virtual sp<Client>  getClientById(int cameraId);
@@ -61,6 +63,7 @@ public:
 private:
     Mutex               mServiceLock;
     wp<Client>          mClient[MAX_CAMERAS];  // protected by mServiceLock
+    int                 mNumberOfCameras;
 
     // atomics to record whether the hardware is allocated to some client.
     volatile int32_t    mBusy[MAX_CAMERAS];
