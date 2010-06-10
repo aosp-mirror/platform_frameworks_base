@@ -114,25 +114,27 @@ status_t StagefrightRecorder::setVideoFrameRate(int frames_per_second) {
 }
 
 status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
-    LOGV("setCamera: pid %d pid %d", IPCThreadState::self()->getCallingPid(), getpid());
+    LOGV("setCamera");
     if (camera == 0) {
         LOGE("camera is NULL");
         return UNKNOWN_ERROR;
     }
 
-    mFlags &= ~ FLAGS_SET_CAMERA | FLAGS_HOT_CAMERA;
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    mFlags &= ~FLAGS_HOT_CAMERA;
     mCamera = Camera::create(camera);
     if (mCamera == 0) {
         LOGE("Unable to connect to camera");
+        IPCThreadState::self()->restoreCallingIdentity(token);
         return UNKNOWN_ERROR;
     }
 
     LOGV("Connected to camera");
-    mFlags |= FLAGS_SET_CAMERA;
     if (mCamera->previewEnabled()) {
         LOGV("camera is hot");
         mFlags |= FLAGS_HOT_CAMERA;
     }
+    IPCThreadState::self()->restoreCallingIdentity(token);
 
     return OK;
 }
@@ -584,7 +586,12 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
-        CHECK(mCamera != NULL);
+
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
+        if (mCamera == 0) {
+            mCamera = Camera::connect(0);
+            mCamera->lock();
+        }
 
         // Set the actual video recording frame size
         CameraParameters params(mCamera->getParameters());
@@ -601,6 +608,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
             frameHeight < 0 || frameHeight != mVideoHeight) {
             LOGE("Failed to set the video frame size to %dx%d",
                     mVideoWidth, mVideoHeight);
+            IPCThreadState::self()->restoreCallingIdentity(token);
             return UNKNOWN_ERROR;
         }
 
@@ -612,6 +620,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         }
 
         CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
+        IPCThreadState::self()->restoreCallingIdentity(token);
 
         sp<CameraSource> cameraSource =
             CameraSource::CreateFromCamera(mCamera);
@@ -698,14 +707,14 @@ status_t StagefrightRecorder::close() {
     stop();
 
     if (mCamera != 0) {
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
         if ((mFlags & FLAGS_HOT_CAMERA) == 0) {
             LOGV("Camera was cold when we started, stopping preview");
             mCamera->stopPreview();
         }
-        if (mFlags & FLAGS_SET_CAMERA) {
-            LOGV("Unlocking camera");
-            mCamera->unlock();
-        }
+        mCamera->unlock();
+        mCamera = NULL;
+        IPCThreadState::self()->restoreCallingIdentity(token);
         mFlags = 0;
     }
     return OK;

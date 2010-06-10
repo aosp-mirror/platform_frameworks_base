@@ -19,7 +19,7 @@
 #include <utils/Log.h>
 
 #include <OMX_Component.h>
-
+#include <binder/IPCThreadState.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -125,7 +125,11 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mNumFramesDropped(0),
       mCollectStats(false),
       mStarted(false) {
+
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
+    IPCThreadState::self()->restoreCallingIdentity(token);
+
     printf("params: \"%s\"\n", s.string());
 
     int32_t width, height, stride, sliceHeight;
@@ -166,8 +170,11 @@ status_t CameraSource::start(MetaData *) {
         && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
         mCollectStats = true;
     }
+
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mCamera->setListener(new CameraSourceListener(this));
     CHECK_EQ(OK, mCamera->startRecording());
+    IPCThreadState::self()->restoreCallingIdentity(token);
 
     mStarted = true;
     return OK;
@@ -179,16 +186,17 @@ status_t CameraSource::stop() {
     mStarted = false;
     mFrameAvailableCondition.signal();
 
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mCamera->setListener(NULL);
     mCamera->stopRecording();
-
     releaseQueuedFrames();
-
     while (!mFramesBeingEncoded.empty()) {
         LOGI("Waiting for outstanding frames being encoded: %d",
                 mFramesBeingEncoded.size());
         mFrameCompleteCondition.wait(mLock);
     }
+    mCamera = NULL;
+    IPCThreadState::self()->restoreCallingIdentity(token);
 
     if (mCollectStats) {
         LOGI("Frames received/encoded/dropped: %d/%d/%d in %lld us",
@@ -219,7 +227,11 @@ void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
     for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
          it != mFramesBeingEncoded.end(); ++it) {
         if ((*it)->pointer() ==  buffer->data()) {
+
+            int64_t token = IPCThreadState::self()->clearCallingIdentity();
             mCamera->releaseRecordingFrame((*it));
+            IPCThreadState::self()->restoreCallingIdentity(token);
+
             mFramesBeingEncoded.erase(it);
             ++mNumFramesEncoded;
             buffer->setObserver(0);
@@ -273,7 +285,9 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     LOGV("dataCallbackTimestamp: timestamp %lld us", timestampUs);
     Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
         mCamera->releaseRecordingFrame(data);
+        IPCThreadState::self()->restoreCallingIdentity(token);
         ++mNumFramesReceived;
         ++mNumFramesDropped;
         return;
