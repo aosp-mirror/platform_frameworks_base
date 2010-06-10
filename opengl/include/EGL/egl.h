@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 8; -*- */
 /* vi: set sw=4 ts=8: */
 /* Reference version of egl.h for EGL 1.4.
- * $Revision: 7244 $ on $Date: 2009-01-20 17:06:59 -0800 (Tue, 20 Jan 2009) $
+ * $Revision: 9356 $ on $Date: 2009-10-21 02:52:25 -0700 (Wed, 21 Oct 2009) $
  */
 
 /*
@@ -109,7 +109,6 @@ typedef void *EGLClientBuffer;
 #define EGL_NATIVE_RENDERABLE		0x302D
 #define EGL_NATIVE_VISUAL_ID		0x302E
 #define EGL_NATIVE_VISUAL_TYPE		0x302F
-#define EGL_PRESERVED_RESOURCES		0x3030
 #define EGL_SAMPLES			0x3031
 #define EGL_SAMPLE_BUFFERS		0x3032
 #define EGL_SURFACE_TYPE		0x3033
