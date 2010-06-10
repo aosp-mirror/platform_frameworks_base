@@ -42,7 +42,7 @@ class ZoomControlEmbedded implements ZoomControlBase {
 
             WebSettings settings = mWebView.getSettings();
             int count = settings.getDoubleTapToastCount();
-            if (mZoomManager.mInZoomOverview && count > 0) {
+            if (mZoomManager.isInZoomOverview() && count > 0) {
                 settings.setDoubleTapToastCount(--count);
                 Toast.makeText(mWebView.getContext(),
                         com.android.internal.R.string.double_tap_toast,
@@ -67,7 +67,7 @@ class ZoomControlEmbedded implements ZoomControlBase {
         }
 
         boolean canZoomIn = mZoomManager.canZoomIn();
-        boolean canZoomOut = mZoomManager.canZoomOut() && !mZoomManager.mInZoomOverview;
+        boolean canZoomOut = mZoomManager.canZoomOut() && !mZoomManager.isInZoomOverview();
         if (!canZoomIn && !canZoomOut) {
             // Hide the zoom in and out buttons if the page cannot zoom
             mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
