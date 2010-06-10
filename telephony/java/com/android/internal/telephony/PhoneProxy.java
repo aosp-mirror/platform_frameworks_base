@@ -172,7 +172,11 @@ public class PhoneProxy extends Handler implements Phone {
     }
 
     public DataState getDataConnectionState() {
-        return mActivePhone.getDataConnectionState();
+        return mActivePhone.getDataConnectionState(Phone.APN_TYPE_DEFAULT);
+    }
+
+    public DataState getDataConnectionState(String apnType) {
+        return mActivePhone.getDataConnectionState(apnType);
     }
 
     public DataActivityState getDataActivityState() {

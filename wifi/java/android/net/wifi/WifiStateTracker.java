@@ -2051,26 +2051,6 @@ public class WifiStateTracker extends NetworkStateTracker {
         return mWM.setWifiEnabled(turnOn);
     }
 
-    /**
-     * {@inheritDoc}
-     * There are currently no Wi-Fi-specific features supported.
-     * @param feature the name of the feature
-     * @return {@code -1} indicating failure, always
-     */
-    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     * There are currently no Wi-Fi-specific features supported.
-     * @param feature the name of the feature
-     * @return {@code -1} indicating failure, always
-     */
-    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
     @Override
     public void interpretScanResultsAvailable() {
 

@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.Phone;
+
 /**
  * Stub class used for unit tests
  */
@@ -32,7 +34,7 @@ public class TestPhoneNotifier implements PhoneNotifier {
 
     public void notifyCellLocation(Phone sender) {
     }
-    
+
     public void notifySignalStrength(Phone sender) {
     }
 
@@ -42,10 +44,14 @@ public class TestPhoneNotifier implements PhoneNotifier {
     public void notifyCallForwardingChanged(Phone sender) {
     }
 
-    public void notifyDataConnection(Phone sender, String reason) {
+    public void notifyDataConnection(Phone sender, String reason, String apnType) {
     }
 
-    public void notifyDataConnectionFailed(Phone sender, String reason) {
+    public void notifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+    }
+
+    public void notifyDataConnectionFailed(Phone sender, String reason, String apnType) {
     }
 
     public void notifyDataActivity(Phone sender) {

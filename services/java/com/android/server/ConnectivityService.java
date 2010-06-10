@@ -597,15 +597,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 network.reconnect();
                 return Phone.APN_REQUEST_STARTED;
             } else {
-                synchronized(this) {
-                    mFeatureUsers.add(f);
-                }
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                        NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK,
-                        f), getRestoreDefaultNetworkDelay());
-
-                return network.startUsingNetworkFeature(feature,
-                        getCallingPid(), getCallingUid());
+                return -1;
             }
         }
         return Phone.APN_TYPE_NOT_AVAILABLE;
@@ -724,8 +716,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             tracker.teardown();
             return 1;
         } else {
-            // do it the old fashioned way
-            return tracker.stopUsingNetworkFeature(feature, pid, uid);
+            return -1;
         }
     }
 

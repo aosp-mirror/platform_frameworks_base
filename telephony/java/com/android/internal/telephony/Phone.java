@@ -99,7 +99,7 @@ public interface Phone {
     static final String PHONE_NAME_KEY = "phoneName";
     static final String FAILURE_REASON_KEY = "reason";
     static final String STATE_CHANGE_REASON_KEY = "reason";
-    static final String DATA_APN_TYPES_KEY = "apnType";
+    static final String DATA_APN_TYPE_KEY = "apnType";
     static final String DATA_APN_KEY = "apn";
 
     static final String DATA_IFACE_NAME_KEY = "iface";
@@ -241,11 +241,19 @@ public interface Phone {
     CellLocation getCellLocation();
 
     /**
-     * Get the current DataState. No change notification exists at this
-     * interface -- use
+     * Get the current for the default apn DataState. No change notification
+     * exists at this interface -- use
      * {@link android.telephony.PhoneStateListener} instead.
      */
     DataState getDataConnectionState();
+
+    /**
+     * Get the current DataState. No change notification exists at this
+     * interface -- use
+     * {@link android.telephony.PhoneStateListener} instead.
+     * @param apnType specify for which apn to get connection state info.
+     */
+    DataState getDataConnectionState(String apnType);
 
     /**
      * Get the current DataActivityState. No change notification exists at this

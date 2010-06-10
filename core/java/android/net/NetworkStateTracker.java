@@ -348,6 +348,7 @@ public abstract class NetworkStateTracker extends Handler {
 
     /**
      * Reenable connectivity to a network after a {@link #teardown()}.
+     * @return {@code true} if we're connected or expect to be connected
      */
     public abstract boolean reconnect();
 
@@ -363,34 +364,6 @@ public abstract class NetworkStateTracker extends Handler {
      * condition prevents connectivity to this network.
      */
     public abstract boolean isAvailable();
-
-    /**
-     * Tells the underlying networking system that the caller wants to
-     * begin using the named feature. The interpretation of {@code feature}
-     * is completely up to each networking implementation.
-     * @param feature the name of the feature to be used
-     * @param callingPid the process ID of the process that is issuing this request
-     * @param callingUid the user ID of the process that is issuing this request
-     * @return an integer value representing the outcome of the request.
-     * The interpretation of this value is specific to each networking
-     * implementation+feature combination, except that the value {@code -1}
-     * always indicates failure.
-     */
-    public abstract int startUsingNetworkFeature(String feature, int callingPid, int callingUid);
-
-    /**
-     * Tells the underlying networking system that the caller is finished
-     * using the named feature. The interpretation of {@code feature}
-     * is completely up to each networking implementation.
-     * @param feature the name of the feature that is no longer needed.
-     * @param callingPid the process ID of the process that is issuing this request
-     * @param callingUid the user ID of the process that is issuing this request
-     * @return an integer value representing the outcome of the request.
-     * The interpretation of this value is specific to each networking
-     * implementation+feature combination, except that the value {@code -1}
-     * always indicates failure.
-     */
-    public abstract int stopUsingNetworkFeature(String feature, int callingPid, int callingUid);
 
     /**
      * Ensure that a network route exists to deliver traffic to the specified
