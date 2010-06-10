@@ -259,9 +259,15 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
 
-        // Try to enable hardware acceleration if requested
-        if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
-            mHwRenderer = HardwareRenderer.createGlRenderer(1);
+        // Only enable hardware acceleration if we are not in the system process
+        // The window manager creates ViewRoots to display animated preview windows
+        // of launching apps and we don't want those to be hardware accelerated
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            // Try to enable hardware acceleration if requested
+            if ((context.getApplicationInfo().flags &
+                    ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+                mHwRenderer = HardwareRenderer.createGlRenderer(1);
+            }
         }
     }
 
