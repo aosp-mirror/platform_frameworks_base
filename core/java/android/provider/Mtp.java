@@ -152,6 +152,12 @@ public final class Mtp
         public static final String THUMB_HEIGHT = "thumb_height";
 
         /**
+         * The object's thumbnail.
+         * <P>Type: BLOB</P>
+         */
+        public static final String THUMB = "thumb";
+
+        /**
          * The width of the object in pixels.
          * <P>Type: INTEGER</P>
          */

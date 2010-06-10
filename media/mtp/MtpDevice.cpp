@@ -194,6 +194,20 @@ MtpObjectInfo* MtpDevice::getObjectInfo(MtpObjectHandle handle) {
     return NULL;
 }
 
+void* MtpDevice::getThumbnail(MtpObjectHandle handle, int& outLength) {
+    mRequest.reset();
+    mRequest.setParameter(1, handle);
+    if (sendRequest(MTP_OPERATION_GET_THUMB) && readData()) {
+        MtpResponseCode ret = readResponse();
+        if (ret == MTP_RESPONSE_OK) {
+            return mData.getData(outLength);
+        }
+    }
+    outLength = 0;
+    return NULL;
+
+}
+
 MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     mRequest.reset();
     mRequest.setParameter(1, code);

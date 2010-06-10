@@ -18,11 +18,14 @@ package com.android.camerabrowser;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Mtp;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Date;
@@ -52,6 +55,7 @@ public class ObjectViewer extends Activity {
                         Mtp.Object.DATE_CREATED,
                         Mtp.Object.DATE_MODIFIED,
                         Mtp.Object.KEYWORDS,
+                        Mtp.Object.THUMB,
                         };
 
     @Override
@@ -100,6 +104,20 @@ public class ObjectViewer extends Activity {
             view.setText(date.toString());
             view = (TextView)findViewById(R.id.keywords);
             view.setText(c.getString(12));
+            byte[] thumbnail = c.getBlob(13);
+            if (thumbnail != null) {
+                Log.d(TAG, "got thumbnail, length: " + thumbnail.length);
+                for (int i = 0; i < 50; i++) {
+                    Log.d(TAG, "    " + Integer.toHexString(thumbnail[i]));
+                }
+
+                ImageView thumbView = (ImageView)findViewById(R.id.thumbnail);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(thumbnail, 0, thumbnail.length);
+                Log.d(TAG, "bitmap: " + bitmap);
+                if (bitmap != null) {
+                    thumbView.setImageBitmap(bitmap);
+                }
+            }
         }
     }
 }

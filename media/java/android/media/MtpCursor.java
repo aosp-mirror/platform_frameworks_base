@@ -159,6 +159,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
     private static final int OBJECT_DATE_CREATED        = 218;
     private static final int OBJECT_DATE_MODIFIED       = 219;
     private static final int OBJECT_KEYWORDS            = 220;
+    private static final int OBJECT_THUMB               = 221;
 
     private static HashMap<String, Integer> sDeviceProjectionMap;
     private static HashMap<String, Integer> sStorageProjectionMap;
@@ -196,6 +197,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
         sObjectProjectionMap.put(Mtp.Object.DATE_CREATED, new Integer(OBJECT_DATE_CREATED));
         sObjectProjectionMap.put(Mtp.Object.DATE_MODIFIED, new Integer(OBJECT_DATE_MODIFIED));
         sObjectProjectionMap.put(Mtp.Object.KEYWORDS, new Integer(OBJECT_KEYWORDS));
+        sObjectProjectionMap.put(Mtp.Object.THUMB, new Integer(OBJECT_THUMB));
 
         sObjectProjectionMap.put(Mtp.Object.NAME, new Integer(OBJECT_NAME));
     }

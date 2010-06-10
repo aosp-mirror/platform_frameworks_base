@@ -99,6 +99,7 @@ public:
 #endif
 
     inline bool         hasData() const { return mPacketSize > MTP_CONTAINER_HEADER_SIZE; }
+    void*               getData(int& outLength) const;
 };
 
 }; // namespace android

@@ -68,6 +68,7 @@ private:
     bool        prepareRow(CursorWindow* window);
     bool        putLong(CursorWindow* window, int value, int row, int column);
     bool        putString(CursorWindow* window, const char* text, int row, int column);
+    bool        putThumbnail(CursorWindow* window, int objectID, int row, int column);
 };
 
 }; // namespace android
