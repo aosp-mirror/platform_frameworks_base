@@ -37,6 +37,7 @@ struct AMRWriter : public MediaWriter {
     virtual bool reachedEOS();
     virtual status_t start();
     virtual void stop();
+    virtual void pause();
 
 protected:
     virtual ~AMRWriter();
@@ -46,6 +47,8 @@ private:
     status_t mInitCheck;
     sp<MediaSource> mSource;
     bool mStarted;
+    volatile bool mPaused;
+    volatile bool mResumed;
     volatile bool mDone;
     volatile bool mReachedEOS;
     pthread_t mThread;

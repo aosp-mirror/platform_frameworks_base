@@ -43,6 +43,7 @@ public:
 
     status_t start();
     void stop();
+    void pause();
     bool reachedEOS();
 
     int64_t getDurationUs() const;
@@ -54,6 +55,8 @@ private:
     sp<MetaData> mMeta;
     sp<MediaSource> mSource;
     volatile bool mDone;
+    volatile bool mPaused;
+    volatile bool mResumed;
     int64_t mMaxTimeStampUs;
     int64_t mEstimatedTrackSizeBytes;
 
@@ -120,6 +123,8 @@ private:
 
 MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
+      mPaused(false),
+      mStarted(false),
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
@@ -129,6 +134,8 @@ MPEG4Writer::MPEG4Writer(const char *filename)
 
 MPEG4Writer::MPEG4Writer(int fd)
     : mFile(fdopen(fd, "wb")),
+      mPaused(false),
+      mStarted(false),
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
@@ -153,9 +160,34 @@ status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {
     return OK;
 }
 
+status_t MPEG4Writer::startTracks() {
+    for (List<Track *>::iterator it = mTracks.begin();
+         it != mTracks.end(); ++it) {
+        status_t err = (*it)->start();
+
+        if (err != OK) {
+            for (List<Track *>::iterator it2 = mTracks.begin();
+                 it2 != it; ++it2) {
+                (*it2)->stop();
+            }
+
+            return err;
+        }
+    }
+    return OK;
+}
+
 status_t MPEG4Writer::start() {
     if (mFile == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    if (mStarted) {
+        if (mPaused) {
+            mPaused = false;
+            return startTracks();
+        }
+        return OK;
     }
 
     mStartTimestampUs = 0;
@@ -186,21 +218,24 @@ status_t MPEG4Writer::start() {
     mOffset = mMdatOffset;
     fseeko(mFile, mMdatOffset, SEEK_SET);
     write("\x00\x00\x00\x01mdat????????", 16);
+
+    status_t err = startTracks();
+    if (err != OK) {
+        return err;
+    }
+    mStarted = true;
+    return OK;
+}
+
+void MPEG4Writer::pause() {
+    if (mFile == NULL) {
+        return;
+    }
+    mPaused = true;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
-        status_t err = (*it)->start();
-
-        if (err != OK) {
-            for (List<Track *>::iterator it2 = mTracks.begin();
-                 it2 != it; ++it2) {
-                (*it2)->stop();
-            }
-
-            return err;
-        }
+        (*it)->pause();
     }
-
-    return OK;
 }
 
 void MPEG4Writer::stop() {
@@ -298,6 +333,7 @@ void MPEG4Writer::stop() {
     fflush(mFile);
     fclose(mFile);
     mFile = NULL;
+    mStarted = false;
 }
 
 status_t MPEG4Writer::setInterleaveDuration(uint32_t durationUs) {
@@ -528,6 +564,8 @@ MPEG4Writer::Track::Track(
       mMeta(source->getFormat()),
       mSource(source),
       mDone(false),
+      mPaused(false),
+      mResumed(false),
       mMaxTimeStampUs(0),
       mEstimatedTrackSizeBytes(0),
       mSamplesHaveSameSize(true),
@@ -547,6 +585,11 @@ MPEG4Writer::Track::~Track() {
 }
 
 status_t MPEG4Writer::Track::start() {
+    if (!mDone && mPaused) {
+        mPaused = false;
+        mResumed = true;
+        return OK;
+    }
     status_t err = mSource->start();
 
     if (err != OK) {
@@ -567,6 +610,10 @@ status_t MPEG4Writer::Track::start() {
     pthread_attr_destroy(&attr);
 
     return OK;
+}
+
+void MPEG4Writer::Track::pause() {
+    mPaused = true;
 }
 
 void MPEG4Writer::Track::stop() {
@@ -710,6 +757,7 @@ void MPEG4Writer::Track::threadEntry() {
     int64_t lastDuration = 0;   // Time spacing between the previous two samples
     int32_t sampleCount = 1;    // Sample count in the current stts table entry
     uint32_t previousSampleSize = 0;  // Size of the previous sample
+    int64_t previousPausedDurationUs = 0;
     sp<MetaData> meta_data;
 
     MediaBuffer *buffer;
@@ -718,6 +766,15 @@ void MPEG4Writer::Track::threadEntry() {
             buffer->release();
             buffer = NULL;
             ++nZeroLengthFrames;
+            continue;
+        }
+
+        // If the codec specific data has not been received yet, delay pause.
+        // After the codec specific data is received, discard what we received
+        // when the track is to be paused.
+        if (mPaused && !mResumed) {
+            buffer->release();
+            buffer = NULL;
             continue;
         }
 
@@ -831,6 +888,10 @@ void MPEG4Writer::Track::threadEntry() {
             continue;
         }
 
+        if (!mGotAllCodecSpecificData) {
+            mGotAllCodecSpecificData = true;
+        }
+
         // Make a deep copy of the MediaBuffer and Metadata and release
         // the original as soon as we can
         MediaBuffer *copy = new MediaBuffer(buffer->range_length());
@@ -876,6 +937,14 @@ void MPEG4Writer::Track::threadEntry() {
             mStartTimestampUs = (timestampUs - mOwner->getStartTimestamp());
         }
 
+        if (mResumed) {
+            previousPausedDurationUs += (timestampUs - mMaxTimeStampUs - 1000 * lastDuration);
+            mResumed = false;
+        }
+
+        timestampUs -= previousPausedDurationUs;
+        LOGV("time stamp: %lld and previous paused duration %lld",
+                timestampUs, previousPausedDurationUs);
         if (timestampUs > mMaxTimeStampUs) {
             mMaxTimeStampUs = timestampUs;
         }

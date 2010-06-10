@@ -121,11 +121,13 @@ status_t AudioSource::read(
 
     uint32_t numFramesRecorded;
     mRecord->getPosition(&numFramesRecorded);
+    int64_t latency = mRecord->latency() * 1000;
+    uint32_t sampleRate = mRecord->getSampleRate();
+    int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate - latency;
+    LOGV("latency: %lld, sample rate: %d, timestamp: %lld",
+            latency, sampleRate, timestampUs);
 
-    buffer->meta_data()->setInt64(
-            kKeyTime,
-            (1000000ll * numFramesRecorded) / mRecord->getSampleRate()
-            - mRecord->latency() * 1000);
+    buffer->meta_data()->setInt64(kKeyTime, timestampUs);
 
     ssize_t n = 0;
     if (mCollectStats) {

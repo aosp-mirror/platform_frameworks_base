@@ -692,6 +692,14 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     return OK;
 }
 
+status_t StagefrightRecorder::pause() {
+    if (mWriter == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    mWriter->pause();
+    return OK;
+}
+
 status_t StagefrightRecorder::stop() {
     if (mWriter == NULL) {
         return UNKNOWN_ERROR;
