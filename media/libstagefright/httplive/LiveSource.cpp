@@ -18,12 +18,10 @@
 #include <utils/Log.h>
 
 #include "include/LiveSource.h"
-
-#include "include/HTTPStream.h"
 #include "include/M3UParser.h"
+#include "include/NuHTTPDataSource.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
-#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDebug.h>
 
 namespace android {
@@ -33,6 +31,7 @@ LiveSource::LiveSource(const char *url)
       mInitCheck(NO_INIT),
       mPlaylistIndex(0),
       mLastFetchTimeUs(-1),
+      mSource(new NuHTTPDataSource),
       mSourceSize(0),
       mOffsetBias(0) {
     if (switchToNext()) {
@@ -115,8 +114,7 @@ bool LiveSource::switchToNext() {
     CHECK(mPlaylist->itemAt(mPlaylistIndex, &uri));
     LOGI("switching to %s", uri.c_str());
 
-    mSource = new HTTPDataSource(uri.c_str());
-    if (mSource->connect() != OK
+    if (mSource->connect(uri.c_str()) != OK
             || mSource->getSize(&mSourceSize) != OK) {
         return false;
     }
@@ -156,8 +154,7 @@ ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
 status_t LiveSource::fetchM3U(const char *url, sp<ABuffer> *out) {
     *out = NULL;
 
-    mSource = new HTTPDataSource(url);
-    status_t err = mSource->connect();
+    status_t err = mSource->connect(url);
 
     if (err != OK) {
         return err;
