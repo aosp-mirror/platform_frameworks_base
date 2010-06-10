@@ -20,6 +20,7 @@
 
 #include <sys/types.h>
 
+#include <media/stagefright/MediaErrors.h>
 #include <utils/RefBase.h>
 
 namespace android {
@@ -82,6 +83,13 @@ struct MediaSource : public RefBase {
         int64_t mSeekTimeUs;
         int64_t mLatenessUs;
     };
+
+    // Causes this source to suspend pulling data from its upstream source
+    // until a subsequent read-with-seek. Currently only supported by
+    // OMXCodec.
+    virtual status_t pause() {
+        return ERROR_UNSUPPORTED;
+    }
 
 protected:
     virtual ~MediaSource();

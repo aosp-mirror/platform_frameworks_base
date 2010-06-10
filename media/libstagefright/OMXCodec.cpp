@@ -1145,7 +1145,8 @@ OMXCodec::OMXCodec(
       mNoMoreOutputData(false),
       mOutputPortSettingsHaveChanged(false),
       mSeekTimeUs(-1),
-      mLeftOverBuffer(NULL) {
+      mLeftOverBuffer(NULL),
+      mPaused(false) {
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
 
@@ -1735,6 +1736,9 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                     CODEC_LOGV("Finished flushing both ports, now continuing from"
                          " seek-time.");
 
+                    // We implicitly resume pulling on our upstream source.
+                    mPaused = false;
+
                     drainInputBuffers();
                     fillOutputBuffers();
                 }
@@ -2031,6 +2035,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         info->mOwnedByComponent = true;
 
         ++mCodecSpecificDataIndex;
+        return;
+    }
+
+    if (mPaused) {
         return;
     }
 
@@ -2554,6 +2562,7 @@ status_t OMXCodec::start(MetaData *) {
     mOutputPortSettingsHaveChanged = false;
     mSeekTimeUs = -1;
     mFilledBuffers.clear();
+    mPaused = false;
 
     return init();
 }
@@ -2660,6 +2669,7 @@ status_t OMXCodec::read(
             // There's no reason to trigger the code below, there's
             // nothing to flush yet.
             seeking = false;
+            mPaused = false;
         }
 
         drainInputBuffers();
@@ -3218,6 +3228,14 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             break;
         }
     }
+}
+
+status_t OMXCodec::pause() {
+    Mutex::Autolock autoLock(mLock);
+
+    mPaused = true;
+
+    return OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
