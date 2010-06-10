@@ -62,6 +62,7 @@ namespace android {
 #define OBJECT_DATE_CREATED         218
 #define OBJECT_DATE_MODIFIED        219
 #define OBJECT_KEYWORDS             220
+#define OBJECT_THUMB                221
 
 MtpCursor::MtpCursor(MtpClient* client, int queryType, int deviceID,
                 int storageID, int objectID, int columnCount, int* columns)
@@ -364,6 +365,10 @@ bool MtpCursor::fillObject(CursorWindow* window, MtpDevice* device,
                 if (!putString(window, objectInfo->mKeywords, row, i))
                     goto fail;
                  break;
+            case OBJECT_THUMB:
+                if (!putThumbnail(window, objectID, row, i))
+                    goto fail;
+                break;
             default:
                 LOGE("fillStorage: unknown column %d\n", mColumns[i]);
                 goto fail;
@@ -416,6 +421,30 @@ bool MtpCursor::putString(CursorWindow* window, const char* text, int row, int c
     // may move the field around in the window
     field_slot_t * fieldSlot = window->getFieldSlot(row, column);
     fieldSlot->type = FIELD_TYPE_STRING;
+    fieldSlot->data.buffer.offset = offset;
+    fieldSlot->data.buffer.size = size;
+    return true;
+}
+
+bool MtpCursor::putThumbnail(CursorWindow* window, int objectID, int row, int column) {
+    MtpDevice* device = mClient->getDevice(mDeviceID);
+    int size;
+    void* thumbnail = device->getThumbnail(objectID, size);
+
+    LOGD("putThumbnail: %p, size: %d\n", thumbnail, size);
+    int offset = window->alloc(size);
+    if (!offset) {
+        window->freeLastRow();
+        LOGE("Failed allocating %u bytes for thumbnail", size);
+        return false;
+    }
+    if (size > 0)
+        window->copyIn(offset, (const uint8_t*)thumbnail, size);
+
+    // This must be updated after the call to alloc(), since that
+    // may move the field around in the window
+    field_slot_t * fieldSlot = window->getFieldSlot(row, column);
+    fieldSlot->type = FIELD_TYPE_BLOB;
     fieldSlot->data.buffer.offset = offset;
     fieldSlot->data.buffer.size = size;
     return true;

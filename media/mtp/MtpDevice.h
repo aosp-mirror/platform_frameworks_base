@@ -70,6 +70,7 @@ public:
     MtpStorageInfo*         getStorageInfo(MtpStorageID storageID);
     MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format, MtpObjectHandle parent);
     MtpObjectInfo*          getObjectInfo(MtpObjectHandle handle);
+    void*                   getThumbnail(MtpObjectHandle handle, int& outLength);
 
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
 

@@ -361,11 +361,24 @@ int MtpDataPacket::writeDataHeader(int fd, uint32_t length) {
 #ifdef MTP_HOST
 int MtpDataPacket::read(struct usb_endpoint *ep) {
     // first read the header
-    int ret = transfer(ep, mBuffer, mBufferSize);
-printf("MtpDataPacket::transfer returned %d\n", ret);
-    if (ret >= 0)
-        mPacketSize = ret;
-    return ret;
+    int length = transfer(ep, mBuffer, mBufferSize);
+    if (length > MTP_CONTAINER_HEADER_SIZE) {
+        // look at the length field to see if the data spans multiple packets
+        uint32_t totalLength = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
+        while (totalLength > length) {
+            allocate(length + mAllocationIncrement);
+            int ret = transfer(ep, mBuffer + length, mAllocationIncrement);
+            if (ret >= 0)
+                length += ret;
+            else {
+                length = ret;
+                break;
+            }
+        }
+    }
+    if (length >= 0)
+        mPacketSize = length;
+    return length;
 }
 
 int MtpDataPacket::write(struct usb_endpoint *ep) {
@@ -381,5 +394,19 @@ int MtpDataPacket::write(struct usb_endpoint *ep) {
 }
 
 #endif // MTP_HOST
+
+void* MtpDataPacket::getData(int& outLength) const {
+    int length = mPacketSize - MTP_CONTAINER_HEADER_SIZE;
+    if (length > 0) {
+        void* result = malloc(length);
+        if (result) {
+            memcpy(result, mBuffer + MTP_CONTAINER_HEADER_SIZE, length);
+            outLength = length;
+            return result;
+        }
+    }
+    outLength = 0;
+    return NULL;
+}
 
 }  // namespace android
