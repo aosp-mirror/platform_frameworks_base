@@ -259,7 +259,7 @@ void API_ENTRY(glGetLightxv)(GLenum light, GLenum pname, GLfixed *params) {
 void API_ENTRY(glGetMaterialxv)(GLenum face, GLenum pname, GLfixed *params) {
     CALL_GL_API(glGetMaterialxv, face, pname, params);
 }
-void API_ENTRY(glGetPointerv)(GLenum pname, void **params) {
+void API_ENTRY(glGetPointerv)(GLenum pname, GLvoid **params) {
     CALL_GL_API(glGetPointerv, pname, params);
 }
 const GLubyte * API_ENTRY(glGetString)(GLenum name) {

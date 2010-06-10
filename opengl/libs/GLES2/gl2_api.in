@@ -4,7 +4,7 @@ void API_ENTRY(glActiveTexture)(GLenum texture) {
 void API_ENTRY(glAttachShader)(GLuint program, GLuint shader) {
     CALL_GL_API(glAttachShader, program, shader);
 }
-void API_ENTRY(glBindAttribLocation)(GLuint program, GLuint index, const char* name) {
+void API_ENTRY(glBindAttribLocation)(GLuint program, GLuint index, const GLchar* name) {
     CALL_GL_API(glBindAttribLocation, program, index, name);
 }
 void API_ENTRY(glBindBuffer)(GLenum target, GLuint buffer) {
@@ -34,10 +34,10 @@ void API_ENTRY(glBlendFunc)(GLenum sfactor, GLenum dfactor) {
 void API_ENTRY(glBlendFuncSeparate)(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
     CALL_GL_API(glBlendFuncSeparate, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
-void API_ENTRY(glBufferData)(GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
+void API_ENTRY(glBufferData)(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
     CALL_GL_API(glBufferData, target, size, data, usage);
 }
-void API_ENTRY(glBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, const void* data) {
+void API_ENTRY(glBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) {
     CALL_GL_API(glBufferSubData, target, offset, size, data);
 }
 GLenum API_ENTRY(glCheckFramebufferStatus)(GLenum target) {
@@ -61,10 +61,10 @@ void API_ENTRY(glColorMask)(GLboolean red, GLboolean green, GLboolean blue, GLbo
 void API_ENTRY(glCompileShader)(GLuint shader) {
     CALL_GL_API(glCompileShader, shader);
 }
-void API_ENTRY(glCompressedTexImage2D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void* data) {
+void API_ENTRY(glCompressedTexImage2D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data) {
     CALL_GL_API(glCompressedTexImage2D, target, level, internalformat, width, height, border, imageSize, data);
 }
-void API_ENTRY(glCompressedTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void* data) {
+void API_ENTRY(glCompressedTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data) {
     CALL_GL_API(glCompressedTexSubImage2D, target, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 void API_ENTRY(glCopyTexImage2D)(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border) {
@@ -121,7 +121,7 @@ void API_ENTRY(glDisableVertexAttribArray)(GLuint index) {
 void API_ENTRY(glDrawArrays)(GLenum mode, GLint first, GLsizei count) {
     CALL_GL_API(glDrawArrays, mode, first, count);
 }
-void API_ENTRY(glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) {
+void API_ENTRY(glDrawElements)(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
     CALL_GL_API(glDrawElements, mode, count, type, indices);
 }
 void API_ENTRY(glEnable)(GLenum cap) {
@@ -160,16 +160,16 @@ void API_ENTRY(glGenRenderbuffers)(GLsizei n, GLuint* renderbuffers) {
 void API_ENTRY(glGenTextures)(GLsizei n, GLuint* textures) {
     CALL_GL_API(glGenTextures, n, textures);
 }
-void API_ENTRY(glGetActiveAttrib)(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, char* name) {
+void API_ENTRY(glGetActiveAttrib)(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
     CALL_GL_API(glGetActiveAttrib, program, index, bufsize, length, size, type, name);
 }
-void API_ENTRY(glGetActiveUniform)(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, char* name) {
+void API_ENTRY(glGetActiveUniform)(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
     CALL_GL_API(glGetActiveUniform, program, index, bufsize, length, size, type, name);
 }
 void API_ENTRY(glGetAttachedShaders)(GLuint program, GLsizei maxcount, GLsizei* count, GLuint* shaders) {
     CALL_GL_API(glGetAttachedShaders, program, maxcount, count, shaders);
 }
-int API_ENTRY(glGetAttribLocation)(GLuint program, const char* name) {
+int API_ENTRY(glGetAttribLocation)(GLuint program, const GLchar* name) {
     CALL_GL_API_RETURN(glGetAttribLocation, program, name);
 }
 void API_ENTRY(glGetBooleanv)(GLenum pname, GLboolean* params) {
@@ -193,7 +193,7 @@ void API_ENTRY(glGetIntegerv)(GLenum pname, GLint* params) {
 void API_ENTRY(glGetProgramiv)(GLuint program, GLenum pname, GLint* params) {
     CALL_GL_API(glGetProgramiv, program, pname, params);
 }
-void API_ENTRY(glGetProgramInfoLog)(GLuint program, GLsizei bufsize, GLsizei* length, char* infolog) {
+void API_ENTRY(glGetProgramInfoLog)(GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog) {
     CALL_GL_API(glGetProgramInfoLog, program, bufsize, length, infolog);
 }
 void API_ENTRY(glGetRenderbufferParameteriv)(GLenum target, GLenum pname, GLint* params) {
@@ -202,13 +202,13 @@ void API_ENTRY(glGetRenderbufferParameteriv)(GLenum target, GLenum pname, GLint*
 void API_ENTRY(glGetShaderiv)(GLuint shader, GLenum pname, GLint* params) {
     CALL_GL_API(glGetShaderiv, shader, pname, params);
 }
-void API_ENTRY(glGetShaderInfoLog)(GLuint shader, GLsizei bufsize, GLsizei* length, char* infolog) {
+void API_ENTRY(glGetShaderInfoLog)(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog) {
     CALL_GL_API(glGetShaderInfoLog, shader, bufsize, length, infolog);
 }
 void API_ENTRY(glGetShaderPrecisionFormat)(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision) {
     CALL_GL_API(glGetShaderPrecisionFormat, shadertype, precisiontype, range, precision);
 }
-void API_ENTRY(glGetShaderSource)(GLuint shader, GLsizei bufsize, GLsizei* length, char* source) {
+void API_ENTRY(glGetShaderSource)(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source) {
     CALL_GL_API(glGetShaderSource, shader, bufsize, length, source);
 }
 const GLubyte* API_ENTRY(glGetString)(GLenum name) {
@@ -226,7 +226,7 @@ void API_ENTRY(glGetUniformfv)(GLuint program, GLint location, GLfloat* params) 
 void API_ENTRY(glGetUniformiv)(GLuint program, GLint location, GLint* params) {
     CALL_GL_API(glGetUniformiv, program, location, params);
 }
-int API_ENTRY(glGetUniformLocation)(GLuint program, const char* name) {
+int API_ENTRY(glGetUniformLocation)(GLuint program, const GLchar* name) {
     CALL_GL_API_RETURN(glGetUniformLocation, program, name);
 }
 void API_ENTRY(glGetVertexAttribfv)(GLuint index, GLenum pname, GLfloat* params) {
@@ -235,7 +235,7 @@ void API_ENTRY(glGetVertexAttribfv)(GLuint index, GLenum pname, GLfloat* params)
 void API_ENTRY(glGetVertexAttribiv)(GLuint index, GLenum pname, GLint* params) {
     CALL_GL_API(glGetVertexAttribiv, index, pname, params);
 }
-void API_ENTRY(glGetVertexAttribPointerv)(GLuint index, GLenum pname, void** pointer) {
+void API_ENTRY(glGetVertexAttribPointerv)(GLuint index, GLenum pname, GLvoid** pointer) {
     CALL_GL_API(glGetVertexAttribPointerv, index, pname, pointer);
 }
 void API_ENTRY(glHint)(GLenum target, GLenum mode) {
@@ -274,7 +274,7 @@ void API_ENTRY(glPixelStorei)(GLenum pname, GLint param) {
 void API_ENTRY(glPolygonOffset)(GLfloat factor, GLfloat units) {
     CALL_GL_API(glPolygonOffset, factor, units);
 }
-void API_ENTRY(glReadPixels)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void* pixels) {
+void API_ENTRY(glReadPixels)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels) {
     CALL_GL_API(glReadPixels, x, y, width, height, format, type, pixels);
 }
 void API_ENTRY(glReleaseShaderCompiler)(void) {
@@ -289,10 +289,10 @@ void API_ENTRY(glSampleCoverage)(GLclampf value, GLboolean invert) {
 void API_ENTRY(glScissor)(GLint x, GLint y, GLsizei width, GLsizei height) {
     CALL_GL_API(glScissor, x, y, width, height);
 }
-void API_ENTRY(glShaderBinary)(GLsizei n, const GLuint* shaders, GLenum binaryformat, const void* binary, GLsizei length) {
+void API_ENTRY(glShaderBinary)(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length) {
     CALL_GL_API(glShaderBinary, n, shaders, binaryformat, binary, length);
 }
-void API_ENTRY(glShaderSource)(GLuint shader, GLsizei count, const char** string, const GLint* length) {
+void API_ENTRY(glShaderSource)(GLuint shader, GLsizei count, const GLchar** string, const GLint* length) {
     CALL_GL_API(glShaderSource, shader, count, string, length);
 }
 void API_ENTRY(glStencilFunc)(GLenum func, GLint ref, GLuint mask) {
@@ -313,7 +313,7 @@ void API_ENTRY(glStencilOp)(GLenum fail, GLenum zfail, GLenum zpass) {
 void API_ENTRY(glStencilOpSeparate)(GLenum face, GLenum fail, GLenum zfail, GLenum zpass) {
     CALL_GL_API(glStencilOpSeparate, face, fail, zfail, zpass);
 }
-void API_ENTRY(glTexImage2D)(GLenum target, GLint level, GLint internalformat,  GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
+void API_ENTRY(glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
     CALL_GL_API(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels);
 }
 void API_ENTRY(glTexParameterf)(GLenum target, GLenum pname, GLfloat param) {
@@ -328,7 +328,7 @@ void API_ENTRY(glTexParameteri)(GLenum target, GLenum pname, GLint param) {
 void API_ENTRY(glTexParameteriv)(GLenum target, GLenum pname, const GLint* params) {
     CALL_GL_API(glTexParameteriv, target, pname, params);
 }
-void API_ENTRY(glTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels) {
+void API_ENTRY(glTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels) {
     CALL_GL_API(glTexSubImage2D, target, level, xoffset, yoffset, width, height, format, type, pixels);
 }
 void API_ENTRY(glUniform1f)(GLint location, GLfloat x) {
@@ -418,7 +418,7 @@ void API_ENTRY(glVertexAttrib4f)(GLuint indx, GLfloat x, GLfloat y, GLfloat z, G
 void API_ENTRY(glVertexAttrib4fv)(GLuint indx, const GLfloat* values) {
     CALL_GL_API(glVertexAttrib4fv, indx, values);
 }
-void API_ENTRY(glVertexAttribPointer)(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* ptr) {
+void API_ENTRY(glVertexAttribPointer)(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr) {
     CALL_GL_API(glVertexAttribPointer, indx, size, type, normalized, stride, ptr);
 }
 void API_ENTRY(glViewport)(GLint x, GLint y, GLsizei width, GLsizei height) {
