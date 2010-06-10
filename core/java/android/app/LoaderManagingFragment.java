@@ -174,7 +174,23 @@ public abstract class LoaderManagingFragment<D> extends Fragment
         }
     }
 
-    /** 
+    /**
+     * Stops and removes the loader with the given ID.
+     */
+    public void stopLoading(int id) {
+        if (mLoaders != null) {
+            LoaderInfo<D> info = mLoaders.remove(id);
+            if (info != null) {
+                Loader<D> loader = info.loader;
+                if (loader != null) {
+                    loader.unregisterListener(this);
+                    loader.destroy();
+                }
+            }
+        }
+    }
+
+    /**
      * @return the Loader with the given id or null if no matching Loader
      * is found.
      */
