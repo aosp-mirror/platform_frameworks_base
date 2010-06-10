@@ -301,8 +301,9 @@ void String8::setTo(const String8& other)
 
 status_t String8::setTo(const char* other)
 {
+    const char *newString = allocFromUTF8(other, strlen(other));
     SharedBuffer::bufferFromData(mString)->release();
-    mString = allocFromUTF8(other, strlen(other));
+    mString = newString;
     if (mString) return NO_ERROR;
 
     mString = getEmptyString();
@@ -311,8 +312,9 @@ status_t String8::setTo(const char* other)
 
 status_t String8::setTo(const char* other, size_t len)
 {
+    const char *newString = allocFromUTF8(other, len);
     SharedBuffer::bufferFromData(mString)->release();
-    mString = allocFromUTF8(other, len);
+    mString = newString;
     if (mString) return NO_ERROR;
 
     mString = getEmptyString();
@@ -321,8 +323,9 @@ status_t String8::setTo(const char* other, size_t len)
 
 status_t String8::setTo(const char16_t* other, size_t len)
 {
+    const char *newString = allocFromUTF16(other, len);
     SharedBuffer::bufferFromData(mString)->release();
-    mString = allocFromUTF16(other, len);
+    mString = newString;
     if (mString) return NO_ERROR;
 
     mString = getEmptyString();
@@ -331,8 +334,9 @@ status_t String8::setTo(const char16_t* other, size_t len)
 
 status_t String8::setTo(const char32_t* other, size_t len)
 {
+    const char *newString = allocFromUTF32(other, len);
     SharedBuffer::bufferFromData(mString)->release();
-    mString = allocFromUTF32(other, len);
+    mString = newString;
     if (mString) return NO_ERROR;
 
     mString = getEmptyString();
