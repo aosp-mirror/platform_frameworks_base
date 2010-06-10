@@ -788,7 +788,7 @@
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Slå av USB-lagring"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Velg for å slå av USB-lagring."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-lagring er i bruk"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Før du slår av USB-lagring, må du kontrollere at du har løst ut SD-kortet fra Android-telefonen fra datamaskinen."</string>
+    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Før du slår av USB-lagring, sjekk at du har avmontert telefonen på datamaskinen."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå av USB-lagring"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Det oppstod et problem ved deaktivering av USB-lagring. Kontroller at du har demontert USB-verten, og prøv på nytt."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Slå på USB-lagring"</string>
