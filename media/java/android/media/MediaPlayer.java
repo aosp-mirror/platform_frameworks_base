@@ -1523,6 +1523,15 @@ public class MediaPlayer
      */
     public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
 
+    /** MediaPlayer is temporarily pausing playback internally in order to
+     * buffer more data.
+     */
+    public static final int MEDIA_INFO_BUFFERING_START = 701;
+
+    /** MediaPlayer is resuming playback after filling buffers.
+     */
+    public static final int MEDIA_INFO_BUFFERING_END = 702;
+
     /** Bad interleaving means that a media has been improperly interleaved or
      * not interleaved at all, e.g has all the video samples first then all the
      * audio ones. Video is playing but a lot of disk seeks may be happening.

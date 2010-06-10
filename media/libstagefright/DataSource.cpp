@@ -20,13 +20,13 @@
 #include "include/WAVExtractor.h"
 #include "include/OggExtractor.h"
 #include "include/MPEG2TSExtractor.h"
+#include "include/NuCachedSource2.h"
+#include "include/NuHTTPDataSource.h"
 
 #include "matroska/MatroskaExtractor.h"
 
-#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
-#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaErrors.h>
 #include <utils/String8.h>
 
@@ -108,11 +108,11 @@ sp<DataSource> DataSource::CreateFromURI(
     if (!strncasecmp("file://", uri, 7)) {
         source = new FileSource(uri + 7);
     } else if (!strncasecmp("http://", uri, 7)) {
-        sp<HTTPDataSource> httpSource = new HTTPDataSource(uri, headers);
-        if (httpSource->connect() != OK) {
+        sp<NuHTTPDataSource> httpSource = new NuHTTPDataSource;
+        if (httpSource->connect(uri /* , headers */) != OK) {
             return NULL;
         }
-        source = new CachingDataSource(httpSource, 64 * 1024, 10);
+        source = new NuCachedSource2(httpSource);
     } else {
         // Assume it's a filename.
         source = new FileSource(uri);

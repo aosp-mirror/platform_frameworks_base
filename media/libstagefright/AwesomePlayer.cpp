@@ -23,12 +23,12 @@
 #include "include/ARTSPController.h"
 #include "include/AwesomePlayer.h"
 #include "include/LiveSource.h"
-#include "include/Prefetcher.h"
 #include "include/SoftwareRenderer.h"
+#include "include/NuCachedSource2.h"
+#include "include/ThrottledSource.h"
 
 #include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioPlayer.h>
-#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBuffer.h>
@@ -354,11 +354,7 @@ void AwesomePlayer::reset_l() {
 
     cancelPlayerEvents();
 
-    if (mPrefetcher != NULL) {
-        CHECK_EQ(mPrefetcher->getStrongCount(), 1);
-    }
-    mPrefetcher.clear();
-
+    mCachedSource.clear();
     mAudioTrack.clear();
     mVideoTrack.clear();
 
@@ -448,30 +444,45 @@ void AwesomePlayer::onBufferingUpdate() {
     }
     mBufferingEventPending = false;
 
-    int64_t durationUs;
-    {
-        Mutex::Autolock autoLock(mMiscStateLock);
-        durationUs = mDurationUs;
+    if (mCachedSource == NULL) {
+        return;
     }
 
-    int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
+    size_t lowWatermark = 400000;
+    size_t highWatermark = 1000000;
 
-    LOGI("cache holds %.2f secs worth of data.", cachedDurationUs / 1E6);
+    off_t size;
+    if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
+        int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
 
-    if (durationUs >= 0) {
-        int64_t positionUs;
-        getPosition(&positionUs);
+        size_t cachedSize = mCachedSource->cachedSize();
+        int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
 
-        cachedDurationUs += positionUs;
+        double percentage = (double)cachedDurationUs / mDurationUs;
 
-        double percentage = (double)cachedDurationUs / durationUs;
         notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage * 100.0);
 
-        postBufferingEvent_l();
-    } else {
-        // LOGE("Not sending buffering status because duration is unknown.");
-        postBufferingEvent_l();
+        lowWatermark = 2 * bitrate / 8;  // 2 secs
+        highWatermark = 10 * bitrate / 8;  // 10 secs
     }
+
+    bool eos;
+    size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&eos);
+
+    if ((mFlags & PLAYING) && !eos && (cachedDataRemaining < lowWatermark)) {
+        LOGI("cache is running low (< %d) , pausing.", lowWatermark);
+        mFlags |= CACHE_UNDERRUN;
+        pause_l();
+        notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
+    } else if ((mFlags & CACHE_UNDERRUN)
+            && (eos || cachedDataRemaining > highWatermark)) {
+        LOGI("cache has filled up (> %d), resuming.", highWatermark);
+        mFlags &= ~CACHE_UNDERRUN;
+        play_l();
+        notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_END);
+    }
+
+    postBufferingEvent_l();
 }
 
 void AwesomePlayer::onStreamDone() {
@@ -508,6 +519,9 @@ void AwesomePlayer::onStreamDone() {
 
 status_t AwesomePlayer::play() {
     Mutex::Autolock autoLock(mLock);
+
+    mFlags &= ~CACHE_UNDERRUN;
+
     return play_l();
 }
 
@@ -632,6 +646,9 @@ void AwesomePlayer::initRenderer_l() {
 
 status_t AwesomePlayer::pause() {
     Mutex::Autolock autoLock(mLock);
+
+    mFlags &= ~CACHE_UNDERRUN;
+
     return pause_l();
 }
 
@@ -652,7 +669,7 @@ status_t AwesomePlayer::pause_l() {
 }
 
 bool AwesomePlayer::isPlaying() const {
-    return mFlags & PLAYING;
+    return (mFlags & PLAYING) || (mFlags & CACHE_UNDERRUN);
 }
 
 void AwesomePlayer::setISurface(const sp<ISurface> &isurface) {
@@ -719,6 +736,11 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
 }
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
+    if (mFlags & CACHE_UNDERRUN) {
+        mFlags &= ~CACHE_UNDERRUN;
+        play_l();
+    }
+
     mSeeking = true;
     mSeekNotificationSent = false;
     mSeekTimeUs = timeUs;
@@ -763,10 +785,6 @@ status_t AwesomePlayer::getVideoDimensions(
 
 void AwesomePlayer::setAudioSource(sp<MediaSource> source) {
     CHECK(source != NULL);
-
-    if (mPrefetcher != NULL) {
-        source = mPrefetcher->addSource(source);
-    }
 
     mAudioTrack = source;
 }
@@ -813,10 +831,6 @@ status_t AwesomePlayer::initAudioDecoder() {
 
 void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
     CHECK(source != NULL);
-
-    if (mPrefetcher != NULL) {
-        source = mPrefetcher->addSource(source);
-    }
 
     mVideoTrack = source;
 }
@@ -868,6 +882,21 @@ void AwesomePlayer::onVideoEvent() {
         if (mVideoBuffer) {
             mVideoBuffer->release();
             mVideoBuffer = NULL;
+        }
+
+        if (mCachedSource != NULL && mAudioSource != NULL) {
+            // We're going to seek the video source first, followed by
+            // the audio source.
+            // In order to avoid jumps in the DataSource offset caused by
+            // the audio codec prefetching data from the old locations
+            // while the video codec is already reading data from the new
+            // locations, we'll "pause" the audio source, causing it to
+            // stop reading input data until a subsequent seek.
+
+            if (mAudioPlayer != NULL) {
+                mAudioPlayer->pause();
+            }
+            mAudioSource->pause();
         }
     }
 
@@ -925,6 +954,7 @@ void AwesomePlayer::onVideoEvent() {
             LOGV("seeking audio to %lld us (%.2f secs).", timeUs, timeUs / 1E6);
 
             mAudioPlayer->seekTo(timeUs);
+            mAudioPlayer->resume();
             mWatchForAudioSeekComplete = true;
             mWatchForAudioEOS = true;
         } else if (!mSeekNotificationSent) {
@@ -1012,10 +1042,6 @@ void AwesomePlayer::postStreamDoneEvent_l(status_t status) {
 }
 
 void AwesomePlayer::postBufferingEvent_l() {
-    if (mPrefetcher == NULL) {
-        return;
-    }
-
     if (mBufferingEventPending) {
         return;
     }
@@ -1123,10 +1149,10 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     sp<DataSource> dataSource;
 
     if (!strncasecmp("http://", mUri.string(), 7)) {
-        mConnectingDataSource = new HTTPDataSource(mUri, &mUriHeaders);
+        mConnectingDataSource = new NuHTTPDataSource;
 
         mLock.unlock();
-        status_t err = mConnectingDataSource->connect();
+        status_t err = mConnectingDataSource->connect(mUri/*, mUriHeaders */);
         mLock.lock();
 
         if (err != OK) {
@@ -1136,22 +1162,29 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             return err;
         }
 
-        dataSource = new CachingDataSource(
-                mConnectingDataSource, 64 * 1024, 10);
-
+#if 0
+        mCachedSource = new NuCachedSource2(
+                new ThrottledSource(
+                    mConnectingDataSource, 50 * 1024 /* bytes/sec */));
+#else
+        mCachedSource = new NuCachedSource2(mConnectingDataSource);
+#endif
         mConnectingDataSource.clear();
+
+        dataSource = mCachedSource;
     } else if (!strncasecmp(mUri.string(), "httplive://", 11)) {
         String8 uri("http://");
         uri.append(mUri.string() + 11);
 
         dataSource = new LiveSource(uri.string());
 
-        if (dataSource->flags() & DataSource::kWantsPrefetching) {
-            mPrefetcher = new Prefetcher;
-        }
+        mCachedSource = new NuCachedSource2(dataSource);
+        dataSource = mCachedSource;
 
         sp<MediaExtractor> extractor =
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+
+        return setDataSource_l(extractor);
     } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;
@@ -1183,10 +1216,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         return UNKNOWN_ERROR;
     }
 
-    if (dataSource->flags() & DataSource::kWantsPrefetching) {
-        mPrefetcher = new Prefetcher;
-    }
-
     return setDataSource_l(extractor);
 }
 
@@ -1211,8 +1240,6 @@ bool AwesomePlayer::ContinuePreparation(void *cookie) {
 }
 
 void AwesomePlayer::onPrepareAsyncEvent() {
-    sp<Prefetcher> prefetcher;
-
     {
         Mutex::Autolock autoLock(mLock);
 
@@ -1247,39 +1274,6 @@ void AwesomePlayer::onPrepareAsyncEvent() {
                 abortPrepare(err);
                 return;
             }
-        }
-
-        prefetcher = mPrefetcher;
-    }
-
-    if (prefetcher != NULL) {
-        {
-            Mutex::Autolock autoLock(mLock);
-            if (mFlags & PREPARE_CANCELLED) {
-                LOGI("prepare was cancelled before preparing the prefetcher");
-
-                prefetcher.clear();
-                abortPrepare(UNKNOWN_ERROR);
-                return;
-            }
-        }
-
-        LOGI("calling prefetcher->prepare()");
-        status_t result =
-            prefetcher->prepare(&AwesomePlayer::ContinuePreparation, this);
-
-        prefetcher.clear();
-
-        if (result == OK) {
-            LOGI("prefetcher is done preparing");
-        } else {
-            Mutex::Autolock autoLock(mLock);
-
-            CHECK_EQ(result, -EINTR);
-
-            LOGI("prefetcher->prepare() was cancelled early.");
-            abortPrepare(UNKNOWN_ERROR);
-            return;
         }
     }
 
