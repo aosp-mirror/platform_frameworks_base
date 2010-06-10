@@ -671,6 +671,8 @@ public class InputDevice {
                         System.arraycopy(lastData, i*MotionEvent.NUM_SAMPLE_DATA,
                                 lastData, (i+1)*MotionEvent.NUM_SAMPLE_DATA,
                                 (lastNumPointers-i)*MotionEvent.NUM_SAMPLE_DATA);
+                        System.arraycopy(next2Last, i, next2Last,
+                                i+1, lastNumPointers-i);
                         break;
                     }
                     i++;
