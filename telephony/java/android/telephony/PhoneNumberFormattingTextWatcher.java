@@ -16,83 +16,198 @@
 
 package android.telephony;
 
+import com.google.i18n.phonenumbers.AsYouTypeFormatter;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+
+import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextWatcher;
-import android.widget.TextView;
 
 import java.util.Locale;
 
 /**
- * Watches a {@link TextView} and if a phone number is entered will format it using
- * {@link PhoneNumberUtils#formatNumber(Editable, int)}. The formatting is based on
- * the current system locale when this object is created and future locale changes
- * may not take effect on this instance.
+ * Watches a {@link TextView} and if a phone number is entered will format it.
+ * <p>
+ * Stop formatting when the user
+ * <ul>
+ * <li>Inputs non-dialable characters</li>
+ * <li>Removes the separator in the middle of string.</li>
+ * </ul>
+ * <p>
+ * The formatting will be restarted once the text is cleared.
  */
 public class PhoneNumberFormattingTextWatcher implements TextWatcher {
+    /**
+     * One or more characters were removed from the end.
+     */
+    private final static int STATE_REMOVE_LAST = 0;
 
-    static private int sFormatType;
-    static private Locale sCachedLocale;
-    private boolean mFormatting;
-    private boolean mDeletingHyphen;
-    private int mHyphenStart;
-    private boolean mDeletingBackward;
+    /**
+     * One or more characters were appended.
+     */
+    private final static int STATE_APPEND = 1;
 
+    /**
+     * One or more digits were changed in the beginning or the middle of text.
+     */
+    private final static int STATE_MODIFY_DIGITS = 2;
+
+    /**
+     * The changes other than the above.
+     */
+    private final static int STATE_OTHER = 3;
+
+    /**
+     * The state of this change could be one value of the above
+     */
+    private int mState;
+
+    /**
+     * Indicates the change was caused by ourselves.
+     */
+    private boolean mSelfChange = false;
+
+    /**
+     * Indicates the formatting has been stopped.
+     */
+    private boolean mStopFormatting;
+
+    private AsYouTypeFormatter mFormatter;
+
+    /**
+     * The formatting is based on the current system locale and future locale changes
+     * may not take effect on this instance.
+     */
     public PhoneNumberFormattingTextWatcher() {
-        if (sCachedLocale == null || sCachedLocale != Locale.getDefault()) {
-            sCachedLocale = Locale.getDefault();
-            sFormatType = PhoneNumberUtils.getFormatTypeForLocale(sCachedLocale);
-        }
+        this (Locale.getDefault() != null ? Locale.getDefault().getCountry() : "US");
     }
 
-    public synchronized void afterTextChanged(Editable text) {
-        // Make sure to ignore calls to afterTextChanged caused by the work done below
-        if (!mFormatting) {
-            mFormatting = true;
-
-            // If deleting the hyphen, also delete the char before or after that
-            if (mDeletingHyphen && mHyphenStart > 0) {
-                if (mDeletingBackward) {
-                    if (mHyphenStart - 1 < text.length()) {
-                        text.delete(mHyphenStart - 1, mHyphenStart);
-                    }
-                } else if (mHyphenStart < text.length()) {
-                    text.delete(mHyphenStart, mHyphenStart + 1);
-                }
-            }
-
-            PhoneNumberUtils.formatNumber(text, sFormatType);
-
-            mFormatting = false;
-        }
+    /**
+     * The formatting is based on the given <code>countryCode</code>.
+     *
+     * @param countryCode the ISO 3166-1 two-letter country code that indicates the country/region
+     * where the phone number is being entered.
+     *
+     * @hide
+     */
+    public PhoneNumberFormattingTextWatcher(String countryCode) {
+        mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
     }
 
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        // Check if the user is deleting a hyphen
-        if (!mFormatting) {
-            // Make sure user is deleting one char, without a selection
-            final int selStart = Selection.getSelectionStart(s);
-            final int selEnd = Selection.getSelectionEnd(s);
-            if (s.length() > 1 // Can delete another character
-                    && count == 1 // Deleting only one character
-                    && after == 0 // Deleting
-                    && s.charAt(start) == '-' // a hyphen
-                    && selStart == selEnd) { // no selection
-                mDeletingHyphen = true;
-                mHyphenStart = start;
-                // Check if the user is deleting forward or backward
-                if (selStart == start + 1) {
-                    mDeletingBackward = true;
-                } else {
-                    mDeletingBackward = false;
-                }
-            } else {
-                mDeletingHyphen = false;
-            }
+    public void beforeTextChanged(CharSequence s, int start, int count,
+            int after) {
+        if (mSelfChange || mStopFormatting) {
+            return;
+        }
+        if (count == 0 && s.length() == start) {
+            // Append one or more new chars
+            mState = STATE_APPEND;
+        } else if (after == 0 && start + count == s.length() && count > 0) {
+            // Remove one or more chars from the end of string.
+            mState = STATE_REMOVE_LAST;
+        } else if (count > 0 && !hasSeparator(s, start, count)) {
+            // Remove the dialable chars in the begin or middle of text.
+            mState = STATE_MODIFY_DIGITS;
+        } else {
+            mState = STATE_OTHER;
         }
     }
 
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        // Does nothing
+        if (mSelfChange || mStopFormatting) {
+            return;
+        }
+        if (mState == STATE_OTHER) {
+            if (count > 0 && !hasSeparator(s, start, count)) {
+                // User inserted the dialable characters in the middle of text.
+                mState = STATE_MODIFY_DIGITS;
+            }
+        }
+        // Check whether we should stop formatting.
+        if (mState == STATE_APPEND && count > 0 && hasSeparator(s, start, count)) {
+            // User appended the non-dialable character, stop formatting.
+            stopFormatting();
+        } else if (mState == STATE_OTHER) {
+            // User must insert or remove the non-dialable characters in the begin or middle of
+            // number, stop formatting. 
+            stopFormatting();
+        }
+    }
+
+    public synchronized void afterTextChanged(Editable s) {
+        if (mStopFormatting) {
+            // Restart the formatting when all texts were clear.
+            mStopFormatting = !(s.length() == 0);
+            return;
+        }
+        if (mSelfChange) {
+            // Ignore the change caused by s.replace().
+            return;
+        }
+        String formatted = reformat(s, Selection.getSelectionEnd(s));
+        if (formatted != null) {
+            int rememberedPos = mFormatter.getRememberedPosition();
+            mSelfChange = true;
+            s.replace(0, s.length(), formatted, 0, formatted.length());
+            // The text could be changed by other TextWatcher after we changed it. If we found the
+            // text is not the one we were expecting, just give up calling setSelection().
+            if (formatted.equals(s.toString())) {
+                Selection.setSelection(s, rememberedPos);
+            }
+            mSelfChange = false;
+        }
+    }
+
+    /**
+     * Generate the formatted number by ignoring all non-dialable chars and stick the cursor to the
+     * nearest dialable char to the left. For instance, if the number is  (650) 123-45678 and '4' is
+     * removed then the cursor should be behind '3' instead of '-'.
+     */
+    private String reformat(CharSequence s, int cursor) {
+        // The index of char to the leftward of the cursor.
+        int curIndex = cursor - 1;
+        String formatted = null;
+        mFormatter.clear();
+        char lastNonSeparator = 0;
+        boolean hasCursor = false;
+        int len = s.length();
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if (PhoneNumberUtils.isNonSeparator(c)) {
+                if (lastNonSeparator != 0) {
+                    formatted = getFormattedNumber(lastNonSeparator, hasCursor);
+                    hasCursor = false;
+                }
+                lastNonSeparator = c;
+            }
+            if (i == curIndex) {
+                hasCursor = true;
+            }
+        }
+        if (lastNonSeparator != 0) {
+            formatted = getFormattedNumber(lastNonSeparator, hasCursor);
+        }
+        return formatted;
+    }
+
+    private String getFormattedNumber(char lastNonSeparator, boolean hasCursor) {
+        return hasCursor ? mFormatter.inputDigitAndRememberPosition(lastNonSeparator)
+                : mFormatter.inputDigit(lastNonSeparator);
+    }
+
+    private void stopFormatting() {
+        mStopFormatting = true;
+        mFormatter.clear();
+    }
+
+    private boolean hasSeparator(final CharSequence s, final int start, final int count) {
+        for (int i = start; i < start + count; i++) {
+            char c = s.charAt(i);
+            if (!PhoneNumberUtils.isNonSeparator(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
