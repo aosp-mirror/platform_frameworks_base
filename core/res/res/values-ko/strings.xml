@@ -134,8 +134,8 @@
     <string name="power_off" msgid="4266614107412865048">"종료"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"종료 중..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"휴대전화가 종료됩니다."</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"최근 작업"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"최신 응용프로그램이 아닙니다."</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"최근 사용한 앱"</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"최근에 사용한 앱이 없습니다."</string>
     <string name="global_actions" msgid="2406416831541615258">"휴대전화 옵션"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"화면 잠금"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"종료"</string>
@@ -582,7 +582,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"충전기를 연결하세요."</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"배터리 전원이 부족합니다."</string>
     <string name="battery_low_percent_format" msgid="696154104579022959">"잔여 배터리가 <xliff:g id="NUMBER">%d%%</xliff:g> 이하입니다."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"배터리 사용"</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"배터리 사용량"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"출고 테스트 불합격"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST 작업은 /system/app 디렉토리에 설치된 패키지에 대해서만 지원됩니다."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST 작업을 제공하는 패키지가 없습니다."</string>
