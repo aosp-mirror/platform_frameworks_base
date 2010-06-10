@@ -52,6 +52,8 @@ struct OMXCodec : public MediaSource,
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
+    virtual status_t pause();
+
     void on_message(const omx_message &msg);
 
     // from MediaBufferObserver
@@ -143,6 +145,8 @@ private:
 
     Mutex mLock;
     Condition mAsyncCompletion;
+
+    bool mPaused;
 
     // A list of indices into mPortStatus[kPortIndexOutput] filled with data.
     List<size_t> mFilledBuffers;
