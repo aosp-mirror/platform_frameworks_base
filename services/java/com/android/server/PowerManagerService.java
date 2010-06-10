@@ -1342,10 +1342,13 @@ class PowerManagerService extends IPowerManager.Stub
     public void setScreenBrightnessOverride(int brightness) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
+        if (mSpew) Slog.d(TAG, "setScreenBrightnessOverride " + brightness);
         synchronized (mLocks) {
             if (mScreenBrightnessOverride != brightness) {
                 mScreenBrightnessOverride = brightness;
-                updateLightsLocked(mPowerState, SCREEN_ON_BIT);
+                if (isScreenOn()) {
+                    updateLightsLocked(mPowerState, SCREEN_ON_BIT);
+                }
             }
         }
     }
@@ -1353,10 +1356,13 @@ class PowerManagerService extends IPowerManager.Stub
     public void setButtonBrightnessOverride(int brightness) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
+        if (mSpew) Slog.d(TAG, "setButtonBrightnessOverride " + brightness);
          synchronized (mLocks) {
            if (mButtonBrightnessOverride != brightness) {
                 mButtonBrightnessOverride = brightness;
-                updateLightsLocked(mPowerState, BUTTON_BRIGHT_BIT | KEYBOARD_BRIGHT_BIT);
+                if (isScreenOn()) {
+                    updateLightsLocked(mPowerState, BUTTON_BRIGHT_BIT | KEYBOARD_BRIGHT_BIT);
+                }
             }
         }
     }
