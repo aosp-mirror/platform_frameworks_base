@@ -28,6 +28,7 @@ import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
 import android.net.wifi.WifiStateTracker;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +47,8 @@ import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
 
 import java.io.FileDescriptor;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -743,7 +746,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             return false;
         }
-        return tracker.requestRouteToHost(hostAddress);
+        return addHostRoute(tracker, hostAddress);
+    }
+
+    /**
+     * Ensure that a network route exists to deliver traffic to the specified
+     * host via the mobile data network.
+     * @param hostAddress the IP address of the host to which the route is desired,
+     * in network byte order.
+     * @return {@code true} on success, {@code false} on failure
+     */
+    private boolean addHostRoute(NetworkStateTracker nt, int hostAddress) {
+        if (nt.getNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI) {
+            return false;
+        }
+
+        String interfaceName = nt.getInterfaceName();
+
+        if (DBG) {
+            Slog.d(TAG, "Requested host route to " + Integer.toHexString(hostAddress) +
+                     "(" + interfaceName + ")");
+        }
+        if (interfaceName != null && hostAddress != -1) {
+            return NetworkUtils.addHostRoute(interfaceName, hostAddress) == 0;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -1133,7 +1161,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mActiveDefaultNetwork = type;
         }
         thisNet.setTeardownRequested(false);
-        thisNet.updateNetworkSettings();
+        updateNetworkSettings(thisNet);
         handleConnectivityChange();
         sendConnectedBroadcast(info);
     }
@@ -1183,19 +1211,184 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (int netType : mPriorityList) {
             if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
                 if (mNetAttributes[netType].isDefault()) {
-                    mNetTrackers[netType].addDefaultRoute();
+                    addDefaultRoute(mNetTrackers[netType]);
                 } else {
-                    mNetTrackers[netType].addPrivateDnsRoutes();
+                    addPrivateDnsRoutes(mNetTrackers[netType]);
                 }
             } else {
                 if (mNetAttributes[netType].isDefault()) {
-                    mNetTrackers[netType].removeDefaultRoute();
+                    removeDefaultRoute(mNetTrackers[netType]);
                 } else {
-                    mNetTrackers[netType].removePrivateDnsRoutes();
+                    removePrivateDnsRoutes(mNetTrackers[netType]);
                 }
             }
         }
     }
+
+    private void addPrivateDnsRoutes(NetworkStateTracker nt) {
+        String interfaceName = nt.getInterfaceName();
+        boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
+
+        if (DBG) {
+            Slog.d(TAG, "addPrivateDnsRoutes for " + nt +
+                    "(" + interfaceName + ") - mPrivateDnsRouteSet = " + privateDnsRouteSet);
+        }
+        String[] dnsList = getNameServerList(nt.getDnsPropNames());
+        if (interfaceName != null && !privateDnsRouteSet) {
+            for (String addrString : dnsList) {
+                int addr = NetworkUtils.lookupHost(addrString);
+                if (addr != -1 && addr != 0) {
+                    if (DBG) Slog.d(TAG, "  adding "+addrString+" ("+addr+")");
+                    NetworkUtils.addHostRoute(interfaceName, addr);
+                }
+            }
+            nt.privateDnsRouteSet(true);
+        }
+    }
+
+    private void removePrivateDnsRoutes(NetworkStateTracker nt) {
+        // TODO - we should do this explicitly but the NetUtils api doesnt
+        // support this yet - must remove all.  No worse than before
+        String interfaceName = nt.getInterfaceName();
+        boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
+        if (interfaceName != null && privateDnsRouteSet) {
+            if (DBG) {
+                Slog.d(TAG, "removePrivateDnsRoutes for " + nt.getNetworkInfo().getTypeName() +
+                        " (" + interfaceName + ")");
+            }
+            NetworkUtils.removeHostRoutes(interfaceName);
+            nt.privateDnsRouteSet(false);
+        }
+    }
+
+    /**
+     * Return the IP addresses of the DNS servers available for this
+     * network interface.
+     * @param propertyNames the names of the system properties whose values
+     * give the IP addresses. Properties with no values are skipped.
+     * @return an array of {@code String}s containing the IP addresses
+     * of the DNS servers, in dot-notation. This may have fewer
+     * non-null entries than the list of names passed in, since
+     * some of the passed-in names may have empty values.
+     */
+    String[] getNameServerList(String[] propertyNames) {
+        String[] dnsAddresses = new String[propertyNames.length];
+        int i, j;
+
+        for (i = 0, j = 0; i < propertyNames.length; i++) {
+            String value = SystemProperties.get(propertyNames[i]);
+            // The GSM layer sometimes sets a bogus DNS server address of
+            // 0.0.0.0
+            if (!TextUtils.isEmpty(value) && !TextUtils.equals(value, "0.0.0.0")) {
+                dnsAddresses[j++] = value;
+            }
+        }
+        return dnsAddresses;
+    }
+
+    private void addDefaultRoute(NetworkStateTracker nt) {
+        String interfaceName = nt.getInterfaceName();
+        int defaultGatewayAddr = nt.getDefaultGatewayAddr();
+        boolean defaultRouteSet = nt.isDefaultRouteSet();
+        NetworkInfo networkInfo = nt.getNetworkInfo();
+
+        if ((interfaceName != null) && (defaultGatewayAddr != 0) &&
+                defaultRouteSet == false) {
+            if (DBG) {
+                Slog.d(TAG, "addDefaultRoute for " + networkInfo.getTypeName() +
+                        " (" + interfaceName + "), GatewayAddr=" + defaultGatewayAddr);
+            }
+            NetworkUtils.setDefaultRoute(interfaceName, defaultGatewayAddr);
+            nt.defaultRouteSet(true);
+        }
+    }
+
+
+    public void removeDefaultRoute(NetworkStateTracker nt) {
+        String interfaceName = nt.getInterfaceName();
+        boolean defaultRouteSet = nt.isDefaultRouteSet();
+        NetworkInfo networkInfo = nt.getNetworkInfo();
+
+        if (interfaceName != null && defaultRouteSet == true) {
+            if (DBG) {
+                Slog.d(TAG, "removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
+                        interfaceName + ")");
+            }
+            NetworkUtils.removeDefaultRoute(interfaceName);
+            nt.defaultRouteSet(false);
+        }
+    }
+
+   /**
+     * Reads the network specific TCP buffer sizes from SystemProperties
+     * net.tcp.buffersize.[default|wifi|umts|edge|gprs] and set them for system
+     * wide use
+     */
+   public void updateNetworkSettings(NetworkStateTracker nt) {
+        String key = nt.getTcpBufferSizesPropName();
+        String bufferSizes = SystemProperties.get(key);
+
+        if (bufferSizes.length() == 0) {
+            Slog.e(TAG, key + " not found in system properties. Using defaults");
+
+            // Setting to default values so we won't be stuck to previous values
+            key = "net.tcp.buffersize.default";
+            bufferSizes = SystemProperties.get(key);
+        }
+
+        // Set values in kernel
+        if (bufferSizes.length() != 0) {
+            if (DBG) {
+                Slog.v(TAG, "Setting TCP values: [" + bufferSizes
+                        + "] which comes from [" + key + "]");
+            }
+            setBufferSize(bufferSizes);
+        }
+    }
+
+   /**
+     * Writes TCP buffer sizes to /sys/kernel/ipv4/tcp_[r/w]mem_[min/def/max]
+     * which maps to /proc/sys/net/ipv4/tcp_rmem and tcpwmem
+     *
+     * @param bufferSizes in the format of "readMin, readInitial, readMax,
+     *        writeMin, writeInitial, writeMax"
+     */
+    private void setBufferSize(String bufferSizes) {
+        try {
+            String[] values = bufferSizes.split(",");
+
+            if (values.length == 6) {
+              final String prefix = "/sys/kernel/ipv4/tcp_";
+                stringToFile(prefix + "rmem_min", values[0]);
+                stringToFile(prefix + "rmem_def", values[1]);
+                stringToFile(prefix + "rmem_max", values[2]);
+                stringToFile(prefix + "wmem_min", values[3]);
+                stringToFile(prefix + "wmem_def", values[4]);
+                stringToFile(prefix + "wmem_max", values[5]);
+            } else {
+                Slog.e(TAG, "Invalid buffersize string: " + bufferSizes);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Can't set tcp buffer sizes:" + e);
+        }
+    }
+
+   /**
+     * Writes string to file. Basically same as "echo -n $string > $filename"
+     *
+     * @param filename
+     * @param string
+     * @throws IOException
+     */
+    private void stringToFile(String filename, String string) throws IOException {
+        FileWriter out = new FileWriter(filename);
+        try {
+            out.write(string);
+        } finally {
+            out.close();
+        }
+    }
+
 
     /**
      * Adjust the per-process dns entries (net.dns<x>.<pid>) based
@@ -1216,7 +1409,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 for (int j=0; j<pids.size(); j++) {
                     Integer pid = (Integer)pids.get(j);
                     if (pid.intValue() == myPid) {
-                        String[] dnsList = nt.getNameServers();
+                        String[] dnsList = getNameServerList(nt.getDnsPropNames());
                         writePidDns(dnsList, myPid);
                         if (doBump) {
                             bumpDns();
@@ -1270,7 +1463,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkStateTracker nt = mNetTrackers[netType];
             if (nt != null && nt.getNetworkInfo().isConnected() &&
                     !nt.isTeardownRequested()) {
-                String[] dnsList = nt.getNameServers();
+                String[] dnsList = getNameServerList(nt.getDnsPropNames());
                 if (mNetAttributes[netType].isDefault()) {
                     int j = 1;
                     for (String dns : dnsList) {
