@@ -22,19 +22,18 @@ LOCAL_SRC_FILES +=                \
         AudioPlayer.cpp           \
         AudioSource.cpp           \
         AwesomePlayer.cpp         \
-        CachingDataSource.cpp     \
         CameraSource.cpp          \
         DataSource.cpp            \
         FileSource.cpp            \
-        HTTPDataSource.cpp        \
         HTTPStream.cpp            \
         JPEGSource.cpp            \
         MP3Extractor.cpp          \
         MPEG4Extractor.cpp        \
         MPEG4Writer.cpp           \
         MediaExtractor.cpp        \
+        NuCachedSource2.cpp       \
+        NuHTTPDataSource.cpp      \
         OggExtractor.cpp          \
-        Prefetcher.cpp            \
         SampleIterator.cpp        \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \

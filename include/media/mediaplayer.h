@@ -93,6 +93,11 @@ enum media_info_type {
     // The video is too complex for the decoder: it can't decode frames fast
     // enough. Possibly only the audio plays fine at this stage.
     MEDIA_INFO_VIDEO_TRACK_LAGGING = 700,
+    // MediaPlayer is temporarily pausing playback internally in order to
+    // buffer more data.
+    MEDIA_INFO_BUFFERING_START = 701,
+    // MediaPlayer is resuming playback after filling buffers.
+    MEDIA_INFO_BUFFERING_END = 702,
     // 8xx
     // Bad interleaving means that a media has been improperly interleaved or not
     // interleaved at all, e.g has all the video samples first then all the audio

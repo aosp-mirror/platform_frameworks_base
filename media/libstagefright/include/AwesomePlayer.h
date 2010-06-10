@@ -18,11 +18,11 @@
 
 #define AWESOME_PLAYER_H_
 
+#include "NuHTTPDataSource.h"
 #include "TimedEventQueue.h"
 
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <utils/threads.h>
 
@@ -33,8 +33,8 @@ struct DataSource;
 struct MediaBuffer;
 struct MediaExtractor;
 struct MediaSource;
-struct Prefetcher;
 struct TimeSource;
+struct NuCachedSource2;
 
 struct ALooper;
 struct ARTSPController;
@@ -101,6 +101,7 @@ private:
         PREPARED            = 16,
         AT_EOS              = 32,
         PREPARE_CANCELLED   = 64,
+        CACHE_UNDERRUN      = 128,
     };
 
     mutable Mutex mLock;
@@ -169,8 +170,8 @@ private:
     MediaBuffer *mLastVideoBuffer;
     MediaBuffer *mVideoBuffer;
 
-    sp<Prefetcher> mPrefetcher;
-    sp<HTTPDataSource> mConnectingDataSource;
+    sp<NuHTTPDataSource> mConnectingDataSource;
+    sp<NuCachedSource2> mCachedSource;
 
     sp<ALooper> mLooper;
     sp<ARTSPController> mRTSPController;
