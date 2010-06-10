@@ -140,5 +140,8 @@
         <TextView android:id="@+id/keywords"
             style="@style/info_value" />
     </TableRow>
+    <TableRow>
+        <ImageView android:id="@+id/thumbnail" />
+    </TableRow>
 </TableLayout>
 
