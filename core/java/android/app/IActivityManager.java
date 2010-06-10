@@ -256,7 +256,9 @@ public interface IActivityManager extends IInterface {
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
     public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
-    
+    public void handleApplicationStrictModeViolation(IBinder app,
+            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
+
     /*
      * This will deliver the specified signal to all the persistent processes. Currently only 
      * SIGUSR1 is delivered. All others are ignored.
@@ -516,4 +518,5 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITY_WITH_CONFIG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+106;
     int GET_RUNNING_EXTERNAL_APPLICATIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+107;
     int FINISH_HEAVY_WEIGHT_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+108;
+    int HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+109;
 }

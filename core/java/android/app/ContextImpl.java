@@ -1168,12 +1168,16 @@ class ContextImpl extends Context {
         return mAudioManager;
     }
 
+    /* package */ static DropBoxManager createDropBoxManager() {
+        IBinder b = ServiceManager.getService(DROPBOX_SERVICE);
+        IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
+        return new DropBoxManager(service);
+    }
+
     private DropBoxManager getDropBoxManager() {
         synchronized (mSync) {
             if (mDropBoxManager == null) {
-                IBinder b = ServiceManager.getService(DROPBOX_SERVICE);
-                IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
-                mDropBoxManager = new DropBoxManager(service);
+                mDropBoxManager = createDropBoxManager();
             }
         }
         return mDropBoxManager;

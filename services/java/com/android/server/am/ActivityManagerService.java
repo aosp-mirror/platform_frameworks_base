@@ -1023,6 +1023,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int FINALIZE_PENDING_INTENT_MSG = 23;
     static final int POST_HEAVY_NOTIFICATION_MSG = 24;
     static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
+    static final int SHOW_STRICT_MODE_VIOLATION_MSG = 26;
 
     AlertDialog mUidAlert;
 
@@ -1074,6 +1075,31 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     proc.anrDialog = d;
                 }
                 
+                ensureBootCompleted();
+            } break;
+            case SHOW_STRICT_MODE_VIOLATION_MSG: {
+                HashMap<String, Object> data = (HashMap<String, Object>) msg.obj;
+                synchronized (ActivityManagerService.this) {
+                    ProcessRecord proc = (ProcessRecord) data.get("app");
+                    if (proc == null) {
+                        Slog.e(TAG, "App not found when showing strict mode dialog.");
+                        break;
+                    }
+                    if (proc.crashDialog != null) {
+                        Slog.e(TAG, "App already has strict mode dialog: " + proc);
+                        return;
+                    }
+                    AppErrorResult res = (AppErrorResult) data.get("result");
+                    if (!mSleeping && !mShuttingDown) {
+                        Dialog d = new StrictModeViolationDialog(mContext, res, proc);
+                        d.show();
+                        proc.crashDialog = d;
+                    } else {
+                        // The device is asleep, so just pretend that the user
+                        // saw a crash dialog and hit "force quit".
+                        res.set(0);
+                    }
+                }
                 ensureBootCompleted();
             } break;
             case SHOW_FACTORY_ERROR_MSG: {
@@ -9309,6 +9335,30 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         addErrorToDropBox("crash", r, null, null, null, null, null, crashInfo);
 
         crashApplication(r, crashInfo);
+    }
+
+    public void handleApplicationStrictModeViolation(
+        IBinder app, ApplicationErrorReport.CrashInfo crashInfo) {
+        ProcessRecord r = findAppProcess(app);
+        // TODO: implement
+        Log.w(TAG, "handleApplicationStrictModeViolation.");
+
+        AppErrorResult result = new AppErrorResult();
+        synchronized (this) {
+            final long origId = Binder.clearCallingIdentity();
+
+            Message msg = Message.obtain();
+            msg.what = SHOW_STRICT_MODE_VIOLATION_MSG;
+            HashMap<String, Object> data = new HashMap<String, Object>();
+            data.put("result", result);
+            data.put("app", r);
+            msg.obj = data;
+            mHandler.sendMessage(msg);
+
+            Binder.restoreCallingIdentity(origId);
+        }
+        int res = result.get();
+        Log.w(TAG, "handleApplicationStrictModeViolation; res=" + res);
     }
 
     /**

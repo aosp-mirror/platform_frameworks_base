@@ -1943,7 +1943,7 @@
     <string name="noApplications">No applications can perform this action.</string>
     <!-- Title of the alert when an application has crashed. -->
     <string name="aerr_title">Sorry!</string>
-    <!-- Text of the alert that is displayed when an application is not responding. -->
+    <!-- Text of the alert that is displayed when an application has crashed. -->
     <string name="aerr_application">The application <xliff:g id="application">%1$s</xliff:g>
         (process <xliff:g id="process">%2$s</xliff:g>) has stopped unexpectedly. Please try again.</string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
@@ -1965,6 +1965,13 @@
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
+
+    <!-- Text of the alert that is displayed when an application has violated StrictMode. -->
+    <string name="smv_application">The application <xliff:g id="application">%1$s</xliff:g>
+        (process <xliff:g id="process">%2$s</xliff:g>) has violated its self-enforced StrictMode policy.</string>
+    <!-- Text of the alert that is displayed when an application has violated StrictMode. -->
+    <string name="smv_process">The process <xliff:g id="process">%1$s</xliff:g> has
+      has violated its self-enforced StrictMode policy.</string>
 
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>

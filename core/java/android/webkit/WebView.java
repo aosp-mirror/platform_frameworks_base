@@ -233,7 +233,7 @@ import junit.framework.Assert;
  *
  * <p>The screen density of a device is based on the screen resolution. A screen with low density
  * has fewer available pixels per inch, where a screen with high density
- * has more - sometimes significantly more - pixels per inch. The density of a
+ * has more &mdash; sometimes significantly more &mdash; pixels per inch. The density of a
  * screen is important because, other things being equal, a UI element (such as a button) whose
  * height and width are defined in terms of screen pixels will appear larger on the lower density
  * screen and smaller on the higher density screen.

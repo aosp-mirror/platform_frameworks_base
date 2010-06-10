@@ -1062,6 +1062,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder app = data.readStrongBinder();
+            ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
+            handleApplicationStrictModeViolation(app, ci);
+            reply.writeNoException();
+            return true;
+        }
+
         case SIGNAL_PERSISTENT_PROCESSES_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int sig = data.readInt();
@@ -2523,6 +2532,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
     }
+
     public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
     {
@@ -2538,6 +2548,20 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return res;
+    }
+
+    public void handleApplicationStrictModeViolation(IBinder app,
+            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(app);
+        crashInfo.writeToParcel(data, 0);
+        mRemote.transact(HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
     }
 
     public void signalPersistentProcesses(int sig) throws RemoteException {

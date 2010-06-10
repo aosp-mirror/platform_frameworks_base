@@ -342,6 +342,10 @@ public class RuntimeInit {
         mApplicationObject = app;
     }
 
+    public static final IBinder getApplicationObject() {
+        return mApplicationObject;
+    }
+
     /**
      * Enable debugging features.
      */
