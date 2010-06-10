@@ -205,7 +205,7 @@ void* API_ENTRY(glMapBufferOES)(GLenum target, GLenum access) {
 GLboolean API_ENTRY(glUnmapBufferOES)(GLenum target) {
     CALL_GL_API_RETURN(glUnmapBufferOES, target);
 }
-void API_ENTRY(glGetBufferPointervOES)(GLenum target, GLenum pname, void** params) {
+void API_ENTRY(glGetBufferPointervOES)(GLenum target, GLenum pname, GLvoid ** params) {
     CALL_GL_API(glGetBufferPointervOES, target, pname, params);
 }
 void API_ENTRY(glCurrentPaletteMatrixOES)(GLuint matrixpaletteindex) {
@@ -267,4 +267,112 @@ void API_ENTRY(glGetTexGenivOES)(GLenum coord, GLenum pname, GLint *params) {
 }
 void API_ENTRY(glGetTexGenxvOES)(GLenum coord, GLenum pname, GLfixed *params) {
     CALL_GL_API(glGetTexGenxvOES, coord, pname, params);
+}
+void API_ENTRY(glBindVertexArrayOES)(GLuint array) {
+    CALL_GL_API(glBindVertexArrayOES, array);
+}
+void API_ENTRY(glDeleteVertexArraysOES)(GLsizei n, const GLuint *arrays) {
+    CALL_GL_API(glDeleteVertexArraysOES, n, arrays);
+}
+void API_ENTRY(glGenVertexArraysOES)(GLsizei n, GLuint *arrays) {
+    CALL_GL_API(glGenVertexArraysOES, n, arrays);
+}
+GLboolean API_ENTRY(glIsVertexArrayOES)(GLuint array) {
+    CALL_GL_API_RETURN(glIsVertexArrayOES, array);
+}
+void API_ENTRY(glDiscardFramebufferEXT)(GLenum target, GLsizei numAttachments, const GLenum *attachments) {
+    CALL_GL_API(glDiscardFramebufferEXT, target, numAttachments, attachments);
+}
+void API_ENTRY(glMultiDrawArraysEXT)(GLenum mode, GLint *first, GLsizei *count, GLsizei primcount) {
+    CALL_GL_API(glMultiDrawArraysEXT, mode, first, count, primcount);
+}
+void API_ENTRY(glMultiDrawElementsEXT)(GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount) {
+    CALL_GL_API(glMultiDrawElementsEXT, mode, count, type, indices, primcount);
+}
+void API_ENTRY(glClipPlanefIMG)(GLenum p, const GLfloat *eqn) {
+    CALL_GL_API(glClipPlanefIMG, p, eqn);
+}
+void API_ENTRY(glClipPlanexIMG)(GLenum p, const GLfixed *eqn) {
+    CALL_GL_API(glClipPlanexIMG, p, eqn);
+}
+void API_ENTRY(glRenderbufferStorageMultisampleIMG)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
+    CALL_GL_API(glRenderbufferStorageMultisampleIMG, target, samples, internalformat, width, height);
+}
+void API_ENTRY(glFramebufferTexture2DMultisampleIMG)(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples) {
+    CALL_GL_API(glFramebufferTexture2DMultisampleIMG, target, attachment, textarget, texture, level, samples);
+}
+void API_ENTRY(glDeleteFencesNV)(GLsizei n, const GLuint *fences) {
+    CALL_GL_API(glDeleteFencesNV, n, fences);
+}
+void API_ENTRY(glGenFencesNV)(GLsizei n, GLuint *fences) {
+    CALL_GL_API(glGenFencesNV, n, fences);
+}
+GLboolean API_ENTRY(glIsFenceNV)(GLuint fence) {
+    CALL_GL_API_RETURN(glIsFenceNV, fence);
+}
+GLboolean API_ENTRY(glTestFenceNV)(GLuint fence) {
+    CALL_GL_API_RETURN(glTestFenceNV, fence);
+}
+void API_ENTRY(glGetFenceivNV)(GLuint fence, GLenum pname, GLint *params) {
+    CALL_GL_API(glGetFenceivNV, fence, pname, params);
+}
+void API_ENTRY(glFinishFenceNV)(GLuint fence) {
+    CALL_GL_API(glFinishFenceNV, fence);
+}
+void API_ENTRY(glSetFenceNV)(GLuint fence, GLenum condition) {
+    CALL_GL_API(glSetFenceNV, fence, condition);
+}
+void API_ENTRY(glGetDriverControlsQCOM)(GLint *num, GLsizei size, GLuint *driverControls) {
+    CALL_GL_API(glGetDriverControlsQCOM, num, size, driverControls);
+}
+void API_ENTRY(glGetDriverControlStringQCOM)(GLuint driverControl, GLsizei bufSize, GLsizei *length, GLchar *driverControlString) {
+    CALL_GL_API(glGetDriverControlStringQCOM, driverControl, bufSize, length, driverControlString);
+}
+void API_ENTRY(glEnableDriverControlQCOM)(GLuint driverControl) {
+    CALL_GL_API(glEnableDriverControlQCOM, driverControl);
+}
+void API_ENTRY(glDisableDriverControlQCOM)(GLuint driverControl) {
+    CALL_GL_API(glDisableDriverControlQCOM, driverControl);
+}
+void API_ENTRY(glExtGetTexturesQCOM)(GLuint *textures, GLint maxTextures, GLint *numTextures) {
+    CALL_GL_API(glExtGetTexturesQCOM, textures, maxTextures, numTextures);
+}
+void API_ENTRY(glExtGetBuffersQCOM)(GLuint *buffers, GLint maxBuffers, GLint *numBuffers) {
+    CALL_GL_API(glExtGetBuffersQCOM, buffers, maxBuffers, numBuffers);
+}
+void API_ENTRY(glExtGetRenderbuffersQCOM)(GLuint *renderbuffers, GLint maxRenderbuffers, GLint *numRenderbuffers) {
+    CALL_GL_API(glExtGetRenderbuffersQCOM, renderbuffers, maxRenderbuffers, numRenderbuffers);
+}
+void API_ENTRY(glExtGetFramebuffersQCOM)(GLuint *framebuffers, GLint maxFramebuffers, GLint *numFramebuffers) {
+    CALL_GL_API(glExtGetFramebuffersQCOM, framebuffers, maxFramebuffers, numFramebuffers);
+}
+void API_ENTRY(glExtGetTexLevelParameterivQCOM)(GLuint texture, GLenum face, GLint level, GLenum pname, GLint *params) {
+    CALL_GL_API(glExtGetTexLevelParameterivQCOM, texture, face, level, pname, params);
+}
+void API_ENTRY(glExtTexObjectStateOverrideiQCOM)(GLenum target, GLenum pname, GLint param) {
+    CALL_GL_API(glExtTexObjectStateOverrideiQCOM, target, pname, param);
+}
+void API_ENTRY(glExtGetTexSubImageQCOM)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLvoid *texels) {
+    CALL_GL_API(glExtGetTexSubImageQCOM, target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, texels);
+}
+void API_ENTRY(glExtGetBufferPointervQCOM)(GLenum target, GLvoid **params) {
+    CALL_GL_API(glExtGetBufferPointervQCOM, target, params);
+}
+void API_ENTRY(glExtGetShadersQCOM)(GLuint *shaders, GLint maxShaders, GLint *numShaders) {
+    CALL_GL_API(glExtGetShadersQCOM, shaders, maxShaders, numShaders);
+}
+void API_ENTRY(glExtGetProgramsQCOM)(GLuint *programs, GLint maxPrograms, GLint *numPrograms) {
+    CALL_GL_API(glExtGetProgramsQCOM, programs, maxPrograms, numPrograms);
+}
+GLboolean API_ENTRY(glExtIsProgramBinaryQCOM)(GLuint program) {
+    CALL_GL_API_RETURN(glExtIsProgramBinaryQCOM, program);
+}
+void API_ENTRY(glExtGetProgramBinarySourceQCOM)(GLuint program, GLenum shadertype, GLchar *source, GLint *length) {
+    CALL_GL_API(glExtGetProgramBinarySourceQCOM, program, shadertype, source, length);
+}
+void API_ENTRY(glStartTilingQCOM)(GLuint x, GLuint y, GLuint width, GLuint height, GLbitfield preserveMask) {
+    CALL_GL_API(glStartTilingQCOM, x, y, width, height, preserveMask);
+}
+void API_ENTRY(glEndTilingQCOM)(GLbitfield preserveMask) {
+    CALL_GL_API(glEndTilingQCOM, preserveMask);
 }
