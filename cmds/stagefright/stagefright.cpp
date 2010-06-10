@@ -26,12 +26,11 @@
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/AudioPlayer.h>
-#include <media/stagefright/CachingDataSource.h>
-#include <media/stagefright/FileSource.h>
-#include <media/stagefright/HTTPDataSource.h>
+#include <media/stagefright/DataSource.h>
 #include <media/stagefright/JPEGSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
@@ -482,17 +481,7 @@ int main(int argc, char **argv) {
     for (int k = 0; k < argc; ++k) {
         const char *filename = argv[k];
 
-        sp<DataSource> dataSource;
-        if (!strncasecmp("http://", filename, 7)) {
-            dataSource = new HTTPDataSource(filename);
-            if (((HTTPDataSource *)dataSource.get())->connect() != OK) {
-                fprintf(stderr, "failed to connect to HTTP server.\n");
-                return -1;
-            }
-            dataSource = new CachingDataSource(dataSource, 32 * 1024, 20);
-        } else {
-            dataSource = new FileSource(filename);
-        }
+        sp<DataSource> dataSource = DataSource::CreateFromURI(filename);
 
         if (dataSource == NULL) {
             fprintf(stderr, "Unable to create data source.\n");
