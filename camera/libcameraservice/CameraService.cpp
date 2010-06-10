@@ -371,10 +371,7 @@ CameraService::Client::~Client() {
 status_t CameraService::Client::checkPid() const {
     int callingPid = getCallingPid();
     if (callingPid == mClientPid) return NO_ERROR;
-    if (callingPid == getpid()) {
-        LOGW("FIXME: use camera from mediaserver without permission.");
-        return NO_ERROR;
-    }
+
     LOGW("attempt to use a locked camera from a different process"
          " (old pid %d, new pid %d)", mClientPid, callingPid);
     return EBUSY;
