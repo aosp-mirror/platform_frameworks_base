@@ -19,11 +19,16 @@ package android.webkit;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
+import android.graphics.Picture;
 import android.graphics.Point;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 /**
  * The ZoomManager is responsible for maintaining the WebView's current zoom
@@ -50,25 +55,21 @@ class ZoomManager {
     private final WebView mWebView;
     private final CallbackProxy mCallbackProxy;
 
-    // manages the on-screen zoom functions of the WebView
+    // Widgets responsible for the on-screen zoom functions of the WebView.
     private ZoomControlEmbedded mEmbeddedZoomControl;
-
     private ZoomControlExternal mExternalZoomControl;
 
-    /*
-     * TODO: clean up the visibility of the class variables when the zoom
-     * refactoring is complete
-     */
+    // The default scale limits, which are dependent on the display density.
+    private static float DEFAULT_MAX_ZOOM_SCALE;
 
-    // default scale limits, which are dependent on the display density
-    static float DEFAULT_MAX_ZOOM_SCALE;
-    static float DEFAULT_MIN_ZOOM_SCALE;
+    private static float DEFAULT_MIN_ZOOM_SCALE;
 
-    // actual scale limits, which can be set through a webpage viewport meta tag
+    // The actual scale limits, which can be set through a webpage's viewport
+    // meta-tag.
     private float mMaxZoomScale;
     private float mMinZoomScale;
 
-    // locks the minimum ZoomScale to the value currently set in mMinZoomScale
+    // Locks the minimum ZoomScale to the value currently set in mMinZoomScale.
     private boolean mMinZoomScaleFixed = true;
 
     /*
@@ -79,15 +80,17 @@ class ZoomManager {
      * mode, but this value should only be modified by changes to the zoom
      * scale.
      */
-    boolean mInZoomOverview = false;
+    private boolean mInZoomOverview = false;
     private int mZoomOverviewWidth;
     private float mInvZoomOverviewWidth;
 
-    // These keep track of the center point of the zoom and they are used to
-    // determine the point around which we should zoom. They are stored in view
-    // coordinates.
-    float mZoomCenterX;
-    float mZoomCenterY;
+    /*
+     * These variables track the center point of the zoom and they are used to
+     * determine the point around which we should zoom. They are stored in view
+     * coordinates.
+     */
+    private float mZoomCenterX;
+    private float mZoomCenterY;
 
     /*
      * These values represent the point around which the screen should be
@@ -100,18 +103,21 @@ class ZoomManager {
     private int mAnchorX;
     private int mAnchorY;
 
-    float mTextWrapScale;
+    // The scale factor that is used to determine the column width for text
+    private float mTextWrapScale;
 
-    // the default zoom scale. This value will is initially set based on the
-    // display density, but can be changed at any time via the WebSettings.
+    /*
+     * The default zoom scale is the scale factor used when the user triggers a
+     * zoom in by double tapping on the WebView. The value is initially set
+     * based on the display density, but can be changed at any time via the
+     * WebSettings.
+     */
     private float mDefaultScale;
     private float mInvDefaultScale;
 
-    private static float MINIMUM_SCALE_INCREMENT = 0.01f;
-
     // the current computed zoom scale and its inverse.
-    float mActualScale;
-    float mInvActualScale;
+    private float mActualScale;
+    private float mInvActualScale;
     
     /*
      * The initial scale for the WebView. 0 means default. If initial scale is
@@ -122,6 +128,8 @@ class ZoomManager {
      * multiplying the value by 100.
      */
     private float mInitialScale;
+
+    private static float MINIMUM_SCALE_INCREMENT = 0.01f;
 
     /*
      * The following member variables are only to be used for animating zoom. If
@@ -135,7 +143,8 @@ class ZoomManager {
     private int mInitialScrollX;
     private int mInitialScrollY;
     private long mZoomStart;
-    static final int ZOOM_ANIMATION_LENGTH = 500;
+
+    private static final int ZOOM_ANIMATION_LENGTH = 500;
 
     // whether support multi-touch
     private boolean mSupportMultiTouch;
@@ -184,32 +193,48 @@ class ZoomManager {
         DEFAULT_MIN_ZOOM_SCALE = 0.25f * defaultScale;
     }
 
-    public float getDefaultScale() {
+    public final float getScale() {
+        return mActualScale;
+    }
+
+    public final float getInvScale() {
+        return mInvActualScale;
+    }
+
+    public final float getTextWrapScale() {
+        return mTextWrapScale;
+    }
+
+    public final float getDefaultScale() {
         return mDefaultScale;
     }
 
-    public int getDocumentAnchorX() {
+    public final int getDocumentAnchorX() {
         return mAnchorX;
     }
 
-    public int getDocumentAnchorY() {
+    public final int getDocumentAnchorY() {
         return mAnchorY;
     }
 
-    public void clearDocumentAnchor() {
+    public final void clearDocumentAnchor() {
         mAnchorX = mAnchorY = 0;
     }
 
-    public void setZoomCenter(float x, float y) {
+    public final void setZoomCenter(float x, float y) {
         mZoomCenterX = x;
         mZoomCenterY = y;
     }
 
-    public void setInitialScaleInPercent(int scaleInPercent) {
+    public final void setInitialScaleInPercent(int scaleInPercent) {
         mInitialScale = scaleInPercent * 0.01f;
     }
 
-    public float computeScaleWithLimits(float scale) {
+    public static final float getDefaultMinZoomScale() {
+        return DEFAULT_MIN_ZOOM_SCALE;
+    }
+
+    public final float computeScaleWithLimits(float scale) {
         if (scale < mMinZoomScale) {
             scale = mMinZoomScale;
         } else if (scale > mMaxZoomScale) {
@@ -218,7 +243,7 @@ class ZoomManager {
         return scale;
     }
 
-    public boolean isZoomScaleFixed() {
+    public final boolean isZoomScaleFixed() {
         return mMinZoomScale >= mMaxZoomScale;
     }
 
@@ -230,11 +255,11 @@ class ZoomManager {
         return exceedsMinScaleIncrement(scale, mActualScale);
     }
 
-    public boolean canZoomIn() {
+    public final boolean canZoomIn() {
         return mMaxZoomScale - mActualScale > MINIMUM_SCALE_INCREMENT;
     }
 
-    public boolean canZoomOut() {
+    public final boolean canZoomOut() {
         return mActualScale - mMinZoomScale > MINIMUM_SCALE_INCREMENT;
     }
 
@@ -744,6 +769,22 @@ class ZoomManager {
             // update the zoom buttons as the scale can be changed
             updateZoomPicker();
         }
+    }
+
+    public void saveZoomState(Bundle b) {
+        b.putFloat("scale", mActualScale);
+        b.putFloat("textwrapScale", mTextWrapScale);
+        b.putBoolean("overview", mInZoomOverview);
+    }
+
+    public void restoreZoomState(Bundle b) {
+        // as getWidth() / getHeight() of the view are not available yet, set up
+        // mActualScale, so that when onSizeChanged() is called, the rest will
+        // be set correctly
+        mActualScale = b.getFloat("scale", 1.0f);
+        mInvActualScale = 1 / mActualScale;
+        mTextWrapScale = b.getFloat("textwrapScale", mActualScale);
+        mInZoomOverview = b.getBoolean("overview");
     }
 
     private ZoomControlBase getCurrentZoomControl() {
