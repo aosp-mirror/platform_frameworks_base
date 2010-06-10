@@ -26,7 +26,7 @@
 namespace android {
 
 struct ABuffer;
-struct HTTPDataSource;
+struct NuHTTPDataSource;
 struct M3UParser;
 
 struct LiveSource : public DataSource {
@@ -52,7 +52,7 @@ private:
     size_t mPlaylistIndex;
     int64_t mLastFetchTimeUs;
 
-    sp<HTTPDataSource> mSource;
+    sp<NuHTTPDataSource> mSource;
     off_t mSourceSize;
     off_t mOffsetBias;
 
