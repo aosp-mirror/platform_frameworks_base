@@ -2782,8 +2782,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void drawTextRun(Canvas c, int start, int end,
-                float x, float y, int flags, Paint p) {
-            c.drawTextRun(mChars, start + mStart, end - start, x, y, flags, p);
+                int contextStart, int contextEnd, float x, float y, int flags, Paint p) {
+            int count = end - start;
+            int contextCount = contextEnd - contextStart;
+            c.drawTextRun(mChars, start + mStart, count, contextStart + mStart,
+                    contextCount, x, y, flags, p);
         }
 
         public float measureText(int start, int end, Paint p) {
@@ -2792,6 +2795,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public int getTextWidths(int start, int end, float[] widths, Paint p) {
             return p.getTextWidths(mChars, start + mStart, end - start, widths);
+        }
+
+        public float getTextRunAdvances(int start, int end, int contextStart,
+                int contextEnd, int flags, float[] advances, int advancesIndex,
+                Paint p) {
+            int count = end - start;
+            int contextCount = contextEnd - contextStart;
+            return p.getTextRunAdvances(mChars, start + mStart, count,
+                    contextStart + mStart, contextCount, flags, advances,
+                    advancesIndex);
+        }
+
+        public int getTextRunCursor(int contextStart, int contextEnd, int flags,
+                int offset, int cursorOpt, Paint p) {
+            int contextCount = contextEnd - contextStart;
+            return p.getTextRunCursor(mChars, contextStart + mStart,
+                    contextCount, flags, offset + mStart, cursorOpt);
         }
     }
 

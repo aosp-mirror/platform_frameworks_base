@@ -1055,35 +1055,27 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         }
     }
 
+
     /**
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
     public void drawTextRun(Canvas c, int start, int end,
-                         float x, float y, int flags, Paint p) {
+            int contextStart, int contextEnd,
+            float x, float y, int flags, Paint p) {
         checkRange("drawTextRun", start, end);
 
-        // Assume context requires no more than 8 chars on either side.
-        // This is ample, only decomposed U+FDFA falls into this
-        // category, and no one should put a style break within it 
-        // anyway.
-        int cstart = start - 8;
-        if (cstart < 0) {
-            cstart = 0;
-        }
-        int cend = end + 8;
-        int max = length();
-        if (cend > max) {
-            cend = max;
-        }
-        if (cend <= mGapStart) {
-            c.drawTextRun(mText, start, end - start, x, y, flags, p);
-        } else if (cstart >= mGapStart) {
-            c.drawTextRun(mText, start + mGapLength, end - start, x, y, flags, p);
+        int contextLen = contextEnd - contextStart;
+        int len = end - start;
+        if (contextEnd <= mGapStart) {
+            c.drawTextRun(mText, start, len, contextStart, contextLen, x, y, flags, p);
+        } else if (contextStart >= mGapStart) {
+            c.drawTextRun(mText, start + mGapLength, len, contextStart + mGapLength,
+                    contextLen, x, y, flags, p);
         } else {
-            char[] buf = TextUtils.obtain(cend - cstart);
-            getChars(cstart, cend, buf, 0);
-            c.drawTextRun(buf, start - cstart, end - start, x, y, flags, p);
+            char[] buf = TextUtils.obtain(contextLen);
+            getChars(contextStart, contextEnd, buf, 0);
+            c.drawTextRun(buf, start - contextStart, len, 0, contextLen, x, y, flags, p);
             TextUtils.recycle(buf);
         }
     }
@@ -1131,6 +1123,58 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
 
             getChars(start, end, buf, 0);
             ret = p.getTextWidths(buf, 0, end - start, widths);
+            TextUtils.recycle(buf);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Don't call this yourself -- exists for Paint to use internally.
+     * {@hide}
+     */
+    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
+            float[] advances, int advancesPos, Paint p) {
+
+        float ret;
+
+        int contextLen = contextEnd - contextStart;
+        int len = end - start;
+
+        if (end <= mGapStart) {
+            ret = p.getTextRunAdvances(mText, start, len, contextStart, contextLen,
+                    flags, advances, advancesPos);
+        } else if (start >= mGapStart) {
+            ret = p.getTextRunAdvances(mText, start + mGapLength, len,
+                    contextStart + mGapLength, contextLen, flags, advances, advancesPos);
+        } else {
+            char[] buf = TextUtils.obtain(contextLen);
+            getChars(contextStart, contextEnd, buf, 0);
+            ret = p.getTextRunAdvances(buf, start - contextStart, len,
+                    0, contextLen, flags, advances, advancesPos);
+            TextUtils.recycle(buf);
+        }
+
+        return ret;
+    }
+
+    public int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
+            int cursorOpt, Paint p) {
+
+        int ret;
+
+        int contextLen = contextEnd - contextStart;
+        if (contextEnd <= mGapStart) {
+            ret = p.getTextRunCursor(mText, contextStart, contextLen,
+                    flags, offset, cursorOpt);
+        } else if (contextStart >= mGapStart) {
+            ret = p.getTextRunCursor(mText, contextStart + mGapLength, contextLen,
+                    flags, offset + mGapLength, cursorOpt);
+        } else {
+            char[] buf = TextUtils.obtain(contextLen);
+            getChars(contextStart, contextEnd, buf, 0);
+            ret = p.getTextRunCursor(buf, 0, contextLen,
+                    flags, offset - contextStart, cursorOpt) + contextStart;
             TextUtils.recycle(buf);
         }
 

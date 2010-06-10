@@ -37,17 +37,30 @@ extends CharSequence
      * Just like {@link Canvas#drawTextRun}.
      * {@hide}
      */
-    void drawTextRun(Canvas c, int start, int end,
-                         float x, float y, int flags, Paint p);
+    void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
+            float x, float y, int flags, Paint p);
 
    /**
      * Just like {@link Paint#measureText}.
      */
     float measureText(int start, int end, Paint p);
 
-
     /**
      * Just like {@link Paint#getTextWidths}.
      */
     public int getTextWidths(int start, int end, float[] widths, Paint p);
+
+    /**
+     * Just like {@link Paint#getTextRunAdvances}.
+     * @hide
+     */
+    float getTextRunAdvances(int start, int end, int contextStart, int contextEnd,
+            int flags, float[] advances, int advancesIndex, Paint paint);
+
+    /**
+     * Just like {@link Paint#getTextRunCursor}.
+     * @hide
+     */
+    int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
+            int cursorOpt, Paint p);
 }
