@@ -1566,7 +1566,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean scalingRequired = false;
         Bitmap cache = null;
-        if (canvas.getGL() == null &&
+        if (!canvas.isHardwareAccelerated() &&
                 (flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
             cache = child.getDrawingCache(true);
