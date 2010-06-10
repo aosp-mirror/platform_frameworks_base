@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.camerabrowser">
+
+    <application android:label="@string/app_label">
+        <activity android:name="CameraBrowser" android:label="Camera Browser">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="StorageBrowser" />
+        <activity android:name="ObjectBrowser" />
+        <activity android:name="ObjectViewer" />
+    </application>
+
+
+</manifest>
