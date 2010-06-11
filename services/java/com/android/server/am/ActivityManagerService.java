@@ -288,6 +288,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // system/rootdir/init.rc on startup.
     static final int SECONDARY_SERVER_ADJ;
 
+    // This is a process with a heavy-weight application.  It is in the
+    // background, but we want to try to avoid killing it.  Value set in
+    // system/rootdir/init.rc on startup.
+    static final int HEAVY_WEIGHT_APP_ADJ;
+
+    // This is a process only hosting components that are perceptible to the
+    // user, and we really want to avoid killing them, but they are not
+    // immediately visible. An example is background music playback.  Value set in
+    // system/rootdir/init.rc on startup.
+    static final int PERCEPTIBLE_APP_ADJ;
+
     // This is a process only hosting activities that are visible to the
     // user, so we'd prefer they don't disappear. Value set in
     // system/rootdir/init.rc on startup.
@@ -313,6 +324,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int HOME_APP_MEM;
     static final int BACKUP_APP_MEM;
     static final int SECONDARY_SERVER_MEM;
+    static final int HEAVY_WEIGHT_APP_MEM;
+    static final int PERCEPTIBLE_APP_MEM;
     static final int VISIBLE_APP_MEM;
     static final int FOREGROUND_APP_MEM;
 
@@ -333,37 +346,40 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // been idle for less than 120 seconds.
     static final long EMPTY_APP_IDLE_OFFSET = 120*1000;
     
+    static int getIntProp(String name, boolean allowZero) {
+        String str = SystemProperties.get(name);
+        if (str == null) {
+            throw new IllegalArgumentException("Property not defined: " + name);
+        }
+        int val = Integer.valueOf(str);
+        if (val == 0 && !allowZero) {
+            throw new IllegalArgumentException("Property must not be zero: " + name);
+        }
+        return val;
+    }
+    
     static {
         // These values are set in system/rootdir/init.rc on startup.
-        FOREGROUND_APP_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.FOREGROUND_APP_ADJ"));
-        VISIBLE_APP_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_ADJ"));
-        SECONDARY_SERVER_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_ADJ"));
-        BACKUP_APP_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_ADJ"));
-        HOME_APP_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.HOME_APP_ADJ"));
-        HIDDEN_APP_MIN_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.HIDDEN_APP_MIN_ADJ"));
-        EMPTY_APP_ADJ =
-            Integer.valueOf(SystemProperties.get("ro.EMPTY_APP_ADJ"));
-        HIDDEN_APP_MAX_ADJ = EMPTY_APP_ADJ-1;
-        FOREGROUND_APP_MEM =
-            Integer.valueOf(SystemProperties.get("ro.FOREGROUND_APP_MEM"))*PAGE_SIZE;
-        VISIBLE_APP_MEM =
-            Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_MEM"))*PAGE_SIZE;
-        SECONDARY_SERVER_MEM =
-            Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_MEM"))*PAGE_SIZE;
-        BACKUP_APP_MEM =
-            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_MEM"))*PAGE_SIZE;
-        HOME_APP_MEM =
-            Integer.valueOf(SystemProperties.get("ro.HOME_APP_MEM"))*PAGE_SIZE;
-        HIDDEN_APP_MEM =
-            Integer.valueOf(SystemProperties.get("ro.HIDDEN_APP_MEM"))*PAGE_SIZE;
-        EMPTY_APP_MEM =
-            Integer.valueOf(SystemProperties.get("ro.EMPTY_APP_MEM"))*PAGE_SIZE;
+        FOREGROUND_APP_ADJ = getIntProp("ro.FOREGROUND_APP_ADJ", true);
+        VISIBLE_APP_ADJ = getIntProp("ro.VISIBLE_APP_ADJ", true);
+        PERCEPTIBLE_APP_ADJ = getIntProp("ro.PERCEPTIBLE_APP_ADJ", true);
+        HEAVY_WEIGHT_APP_ADJ = getIntProp("ro.HEAVY_WEIGHT_APP_ADJ", true);
+        SECONDARY_SERVER_ADJ = getIntProp("ro.SECONDARY_SERVER_ADJ", true);
+        BACKUP_APP_ADJ = getIntProp("ro.BACKUP_APP_ADJ", true);
+        HOME_APP_ADJ = getIntProp("ro.HOME_APP_ADJ", true);
+        HIDDEN_APP_MIN_ADJ = getIntProp("ro.HIDDEN_APP_MIN_ADJ", true);
+        EMPTY_APP_ADJ = getIntProp("ro.EMPTY_APP_ADJ", true);
+        // These days we use the last empty slot for hidden apps as well.
+        HIDDEN_APP_MAX_ADJ = EMPTY_APP_ADJ;
+        FOREGROUND_APP_MEM = getIntProp("ro.FOREGROUND_APP_MEM", false)*PAGE_SIZE;
+        VISIBLE_APP_MEM = getIntProp("ro.VISIBLE_APP_MEM", false)*PAGE_SIZE;
+        PERCEPTIBLE_APP_MEM = getIntProp("ro.PERCEPTIBLE_APP_MEM", false)*PAGE_SIZE;
+        HEAVY_WEIGHT_APP_MEM = getIntProp("ro.HEAVY_WEIGHT_APP_MEM", false)*PAGE_SIZE;
+        SECONDARY_SERVER_MEM = getIntProp("ro.SECONDARY_SERVER_MEM", false)*PAGE_SIZE;
+        BACKUP_APP_MEM = getIntProp("ro.BACKUP_APP_MEM", false)*PAGE_SIZE;
+        HOME_APP_MEM = getIntProp("ro.HOME_APP_MEM", false)*PAGE_SIZE;
+        HIDDEN_APP_MEM = getIntProp("ro.HIDDEN_APP_MEM", false)*PAGE_SIZE;
+        EMPTY_APP_MEM = getIntProp("ro.EMPTY_APP_MEM", false)*PAGE_SIZE;
     }
     
     static final int MY_PID = Process.myPid();
@@ -4974,8 +4990,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 (rec.lastLowMemory+GC_MIN_INTERVAL) <= now) {
                             // The low memory report is overriding any current
                             // state for a GC request.  Make sure to do
-                            // visible/foreground processes first.
-                            if (rec.setAdj <= VISIBLE_APP_ADJ) {
+                            // heavy/important/visible/foreground processes first.
+                            if (rec.setAdj <= HEAVY_WEIGHT_APP_ADJ) {
                                 rec.lastRequestedGc = 0;
                             } else {
                                 rec.lastRequestedGc = rec.lastLowMemory;
@@ -8102,8 +8118,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         r.conProviders.put(cpr, new Integer(cnt.intValue()+1));
                     }
                     cpr.clients.add(r);
-                    if (cpr.app != null && r.setAdj >= VISIBLE_APP_ADJ) {
-                        // If this is a visible app accessing the provider,
+                    if (cpr.app != null && r.setAdj <= PERCEPTIBLE_APP_ADJ) {
+                        // If this is a perceptible app accessing the provider,
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
                         // content providers are often expensive to start.
@@ -9741,10 +9757,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         currApp.lru = 0;
                     } else if (adj >= SECONDARY_SERVER_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
+                    } else if (adj >= HEAVY_WEIGHT_APP_ADJ) {
+                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_HEAVY_WEIGHT;
+                    } else if (adj >= PERCEPTIBLE_APP_ADJ) {
+                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
                     } else if (adj >= VISIBLE_APP_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
-                    } else if (app == mHeavyWeightProcess) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_HEAVY_WEIGHT;
                     } else {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
                     }
@@ -10006,7 +10024,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             needSep = true;
             pw.println("  Running processes (most recent first):");
             dumpProcessList(pw, this, mLruProcesses, "    ",
-                    "App ", "PERS", true);
+                    "Proc", "PERS", true);
             needSep = true;
         }
 
@@ -10502,7 +10520,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             String prefix, String normalLabel, String persistentLabel,
             boolean inclOomAdj) {
         int numPers = 0;
-        for (int i=list.size()-1; i>=0; i--) {
+        final int N = list.size()-1;
+        for (int i=N; i>=0; i--) {
             ProcessRecord r = (ProcessRecord)list.get(i);
             if (false) {
                 pw.println(prefix + (r.persistent ? persistentLabel : normalLabel)
@@ -10520,6 +10539,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     oomAdj = buildOomTag("svc", "  ", r.setAdj, SECONDARY_SERVER_ADJ);
                 } else if (r.setAdj >= BACKUP_APP_ADJ) {
                     oomAdj = buildOomTag("bckup", null, r.setAdj, BACKUP_APP_ADJ);
+                } else if (r.setAdj >= HEAVY_WEIGHT_APP_ADJ) {
+                    oomAdj = buildOomTag("hvy  ", null, r.setAdj, HEAVY_WEIGHT_APP_ADJ);
+                } else if (r.setAdj >= PERCEPTIBLE_APP_ADJ) {
+                    oomAdj = buildOomTag("prcp ", null, r.setAdj, PERCEPTIBLE_APP_ADJ);
                 } else if (r.setAdj >= VISIBLE_APP_ADJ) {
                     oomAdj = buildOomTag("vis  ", null, r.setAdj, VISIBLE_APP_ADJ);
                 } else if (r.setAdj >= FOREGROUND_APP_ADJ) {
@@ -10545,10 +10568,27 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 pw.println(String.format("%s%s #%2d: adj=%s/%s %s (%s)",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
-                        i, oomAdj, schedGroup, r.toShortString(), r.adjType));
+                        N-i, oomAdj, schedGroup, r.toShortString(), r.adjType));
                 if (r.adjSource != null || r.adjTarget != null) {
-                    pw.println(prefix + "          " + r.adjTarget
-                            + "<=" + r.adjSource);
+                    pw.print(prefix);
+                    pw.print("          ");
+                    if (r.adjTarget instanceof ComponentName) {
+                        pw.print(((ComponentName)r.adjTarget).flattenToShortString());
+                    } else if (r.adjTarget != null) {
+                        pw.print(r.adjTarget.toString());
+                    } else {
+                        pw.print("{null}");
+                    }
+                    pw.print("<=");
+                    if (r.adjSource instanceof ProcessRecord) {
+                        pw.print("Proc{");
+                        pw.print(((ProcessRecord)r.adjSource).toShortString());
+                        pw.println("}");
+                    } else if (r.adjSource != null) {
+                        pw.println(r.adjSource.toString());
+                    } else {
+                        pw.println("{null}");
+                    }
                 }
             } else {
                 pw.println(String.format("%s%s #%2d: %s",
@@ -14092,11 +14132,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             adj = FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
-        } else if (app == mHeavyWeightProcess) {
-            // We don't want to kill the current heavy-weight process.
-            adj = FOREGROUND_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_DEFAULT;
-            app.adjType = "heavy";
         } else if (app.persistentActivities > 0) {
             // Special persistent activities...  shouldn't be used these days.
             adj = FOREGROUND_APP_ADJ;
@@ -14117,15 +14152,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app.adjType = "exec-service";
         } else if (app.foregroundServices) {
             // The user is aware of this app, so make it visible.
-            adj = VISIBLE_APP_ADJ;
+            adj = PERCEPTIBLE_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "foreground-service";
         } else if (app.forcingToForeground != null) {
             // The user is aware of this app, so make it visible.
-            adj = VISIBLE_APP_ADJ;
+            adj = PERCEPTIBLE_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "force-foreground";
             app.adjSource = app.forcingToForeground;
+        } else if (app == mHeavyWeightProcess) {
+            // We don't want to kill the current heavy-weight process.
+            adj = HEAVY_WEIGHT_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
+            app.adjType = "heavy";
         } else if (app == mHomeProcess) {
             // This process is hosting what we currently consider to be the
             // home app, so we don't want to let it go into the background.
@@ -14220,7 +14260,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             ProcessRecord client = cr.binding.client;
                             int myHiddenAdj = hiddenAdj;
                             if (myHiddenAdj > client.hiddenAdj) {
-                                if (client.hiddenAdj > VISIBLE_APP_ADJ) {
+                                if (client.hiddenAdj >= VISIBLE_APP_ADJ) {
                                     myHiddenAdj = client.hiddenAdj;
                                 } else {
                                     myHiddenAdj = VISIBLE_APP_ADJ;
@@ -14229,7 +14269,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             int clientAdj = computeOomAdjLocked(
                                 client, myHiddenAdj, TOP_APP, true);
                             if (adj > clientAdj) {
-                                adj = clientAdj > VISIBLE_APP_ADJ
+                                adj = clientAdj >= VISIBLE_APP_ADJ
                                         ? clientAdj : VISIBLE_APP_ADJ;
                                 if (!client.hidden) {
                                     app.hidden = false;
@@ -14340,7 +14380,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         //      " adj=" + adj + " curAdj=" + app.curAdj + " maxAdj=" + app.maxAdj);
         if (adj > app.maxAdj) {
             adj = app.maxAdj;
-            if (app.maxAdj <= VISIBLE_APP_ADJ) {
+            if (app.maxAdj <= PERCEPTIBLE_APP_ADJ) {
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             }
         }
@@ -14392,7 +14432,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (canGcNowLocked()) {
             while (mProcessesToGc.size() > 0) {
                 ProcessRecord proc = mProcessesToGc.remove(0);
-                if (proc.curRawAdj > VISIBLE_APP_ADJ || proc.reportLowMemory) {
+                if (proc.curRawAdj > PERCEPTIBLE_APP_ADJ || proc.reportLowMemory) {
                     if ((proc.lastRequestedGc+GC_MIN_INTERVAL)
                             <= SystemClock.uptimeMillis()) {
                         // To avoid spamming the system, we will GC processes one
