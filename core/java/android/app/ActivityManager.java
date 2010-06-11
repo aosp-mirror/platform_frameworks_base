@@ -726,16 +726,24 @@ public class ActivityManager {
         public static final int IMPORTANCE_FOREGROUND = 100;
         
         /**
-         * Constant for {@link #importance}: this process is running a
-         * heavy-weight application and thus should not be killed.
+         * Constant for {@link #importance}: this process is running something
+         * that is actively visible to the user, though not in the immediate
+         * foreground.
          */
-        public static final int IMPORTANCE_HEAVY_WEIGHT = 150;
+        public static final int IMPORTANCE_VISIBLE = 200;
         
         /**
          * Constant for {@link #importance}: this process is running something
-         * that is considered to be actively visible to the user.
+         * that is considered to be actively perceptible to the user.  An
+         * example would be an application performing background music playback.
          */
-        public static final int IMPORTANCE_VISIBLE = 200;
+        public static final int IMPORTANCE_PERCEPTIBLE = 130;
+        
+        /**
+         * Constant for {@link #importance}: this process is running a
+         * heavy-weight application and thus should not be killed.
+         */
+        public static final int IMPORTANCE_HEAVY_WEIGHT = 170;
         
         /**
          * Constant for {@link #importance}: this process is contains services

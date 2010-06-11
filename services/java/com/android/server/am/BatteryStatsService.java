@@ -96,6 +96,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void noteStartWakelock(int uid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
+            Slog.i("battery", "Start wake lock: " + uid + " " + name);
             mStats.getUidStatsLocked(uid).noteStartWakeLocked(name, type);
         }
     }
@@ -103,6 +104,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void noteStopWakelock(int uid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
+            Slog.i("battery", "Stop wake lock: " + uid + " " + name);
             mStats.getUidStatsLocked(uid).noteStopWakeLocked(name, type);
         }
     }
