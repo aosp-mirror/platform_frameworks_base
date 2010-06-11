@@ -4,6 +4,7 @@
 
 #include "include/NuHTTPDataSource.h"
 
+#include <cutils/properties.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 
@@ -72,18 +73,33 @@ NuHTTPDataSource::NuHTTPDataSource()
 NuHTTPDataSource::~NuHTTPDataSource() {
 }
 
-status_t NuHTTPDataSource::connect(const char *uri, off_t offset) {
+status_t NuHTTPDataSource::connect(
+        const char *uri,
+        const KeyedVector<String8, String8> *overrides,
+        off_t offset) {
+    String8 headers;
+    MakeFullHeaders(overrides, &headers);
+
+    return connect(uri, headers, offset);
+}
+
+status_t NuHTTPDataSource::connect(
+        const char *uri,
+        const String8 &headers,
+        off_t offset) {
     String8 host, path;
     unsigned port;
     if (!ParseURL(uri, &host, &port, &path)) {
         return ERROR_MALFORMED;
     }
 
-    return connect(host, port, path, offset);
+    return connect(host, port, path, headers, offset);
 }
 
 status_t NuHTTPDataSource::connect(
-        const char *host, unsigned port, const char *path, off_t offset) {
+        const char *host, unsigned port, const char *path,
+        const String8 &headers,
+        off_t offset) {
     LOGI("connect to %s:%u%s @%ld", host, port, path, offset);
 
     bool needsToReconnect = true;
@@ -99,6 +115,7 @@ status_t NuHTTPDataSource::connect(
     mHost = host;
     mPort = port;
     mPath = path;
+    mHeaders = headers;
 
     status_t err = OK;
 
@@ -133,6 +150,7 @@ status_t NuHTTPDataSource::connect(
             request.append(rangeHeader);
         }
 
+        request.append(mHeaders);
         request.append("\r\n");
 
         int httpStatus;
@@ -151,10 +169,17 @@ status_t NuHTTPDataSource::connect(
 
             mHTTP.disconnect();
 
-            return connect(value.c_str());
+            return connect(value.c_str(), headers, offset);
         }
 
-        CHECK(httpStatus >= 200 && httpStatus < 300);
+        if (httpStatus < 200 || httpStatus >= 300) {
+            mState = DISCONNECTED;
+            mHTTP.disconnect();
+
+            return ERROR_IO;
+        }
+
+        applyTimeoutResponse();
 
         if (offset == 0) {
             string value;
@@ -200,7 +225,8 @@ ssize_t NuHTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     if (offset != mOffset) {
         String8 host = mHost;
         String8 path = mPath;
-        status_t err = connect(host, mPort, path, offset);
+        String8 headers = mHeaders;
+        status_t err = connect(host, mPort, path, headers, offset);
 
         if (err != OK) {
             return err;
@@ -260,6 +286,53 @@ status_t NuHTTPDataSource::getSize(off_t *size) {
 
 uint32_t NuHTTPDataSource::flags() {
     return kWantsPrefetching;
+}
+
+// static
+void NuHTTPDataSource::MakeFullHeaders(
+        const KeyedVector<String8, String8> *overrides, String8 *headers) {
+    headers->setTo("");
+
+    headers->append("User-Agent: stagefright/1.1 (Linux;Android ");
+
+#if (PROPERTY_VALUE_MAX < 8)
+#error "PROPERTY_VALUE_MAX must be at least 8"
+#endif
+
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.build.version.release", value, "Unknown");
+    headers->append(value);
+    headers->append(")\r\n");
+
+    if (overrides == NULL) {
+        return;
+    }
+
+    for (size_t i = 0; i < overrides->size(); ++i) {
+        String8 line;
+        line.append(overrides->keyAt(i));
+        line.append(": ");
+        line.append(overrides->valueAt(i));
+        line.append("\r\n");
+
+        headers->append(line);
+    }
+}
+
+void NuHTTPDataSource::applyTimeoutResponse() {
+    string timeout;
+    if (mHTTP.find_header_value("X-SocketTimeout", &timeout)) {
+        const char *s = timeout.c_str();
+        char *end;
+        long tmp = strtol(s, &end, 10);
+        if (end == s || *end != '\0') {
+            LOGW("Illegal X-SocketTimeout value given.");
+            return;
+        }
+
+        LOGI("overriding default timeout, new timeout is %ld seconds", tmp);
+        mHTTP.setReceiveTimeout(tmp);
+    }
 }
 
 }  // namespace android
