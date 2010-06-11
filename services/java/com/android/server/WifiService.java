@@ -679,9 +679,9 @@ public class WifiService extends IWifiManager.Stub {
             /* Configuration changed on a running access point */
             if(enable && (wifiConfig != null)) {
                 try {
-                    persistApConfiguration(wifiConfig);
                     nwService.setAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName(),
                                              SOFTAP_IFACE);
+                    persistApConfiguration(wifiConfig);
                     return true;
                 } catch(Exception e) {
                     Slog.e(TAG, "Exception in nwService during AP restart");
@@ -717,7 +717,6 @@ public class WifiService extends IWifiManager.Stub {
                 wifiConfig.SSID = mContext.getString(R.string.wifi_tether_configure_ssid_default);
                 wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
             }
-            persistApConfiguration(wifiConfig);
 
             if (!mWifiStateTracker.loadDriver()) {
                 Slog.e(TAG, "Failed to load Wi-Fi driver for AP mode");
@@ -733,6 +732,8 @@ public class WifiService extends IWifiManager.Stub {
                 setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
                 return false;
             }
+
+            persistApConfiguration(wifiConfig);
 
         } else {
 
