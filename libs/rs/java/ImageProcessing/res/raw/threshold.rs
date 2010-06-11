@@ -26,17 +26,19 @@ float gamma;
 
 float saturation;
 
-float inWMinInB;
-float outWMinOutB;
+static float inWMinInB;
+static float outWMinOutB;
+static float overInWMinInB;
+//static float3 gammaV;
 
 #pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel, inBlack, outBlack, inWhite, outWhite, gamma, saturation)
-#pragma rs export_func(filter, processNoBlur, computeColorMatrix, computeGaussianWeights);
+#pragma rs export_func(filter, filterBenchmark);
 
 // Store our coefficients here
-float gaussian[MAX_RADIUS * 2 + 1];
-float colorMat[4][4];
+static float gaussian[MAX_RADIUS * 2 + 1];
+static float colorMat[4][4];
 
-void computeColorMatrix() {
+static void computeColorMatrix() {
     // Saturation
     // Linear weights
     //float rWeight = 0.3086f;
@@ -64,9 +66,10 @@ void computeColorMatrix() {
 
     inWMinInB = inWhite - inBlack;
     outWMinOutB = outWhite - outBlack;
+    overInWMinInB = 1.f / inWMinInB;
 }
 
-void computeGaussianWeights() {
+static void computeGaussianWeights() {
     // Compute gaussian weights for the blur
     // e is the euler's number
     float e = 2.718281828459045f;
@@ -107,40 +110,53 @@ void computeGaussianWeights() {
 }
 
 // This needs to be inline
-void levelsSaturation(float4 *currentPixel) {
+static float4 levelsSaturation(float4 currentPixel) {
+#if 0
     // Color matrix multiply
-    float tempX = colorMat[0][0] * currentPixel->x + colorMat[1][0] * currentPixel->y + colorMat[2][0] * currentPixel->z;
-    float tempY = colorMat[0][1] * currentPixel->x + colorMat[1][1] * currentPixel->y + colorMat[2][1] * currentPixel->z;
-    float tempZ = colorMat[0][2] * currentPixel->x + colorMat[1][2] * currentPixel->y + colorMat[2][2] * currentPixel->z;
+    float tempX = colorMat[0][0] * currentPixel.x + colorMat[1][0] * currentPixel.y + colorMat[2][0] * currentPixel.z;
+    float tempY = colorMat[0][1] * currentPixel.x + colorMat[1][1] * currentPixel.y + colorMat[2][1] * currentPixel.z;
+    float tempZ = colorMat[0][2] * currentPixel.x + colorMat[1][2] * currentPixel.y + colorMat[2][2] * currentPixel.z;
 
-    currentPixel->x = tempX;
-    currentPixel->y = tempY;
-    currentPixel->z = tempZ;
+    currentPixel.x = tempX;
+    currentPixel.y = tempY;
+    currentPixel.z = tempZ;
 
     // Clamp to 0..255
     // Inline the code here to avoid funciton calls
-    currentPixel->x = currentPixel->x > 255.0f ? 255.0f : currentPixel->x;
-    currentPixel->y = currentPixel->y > 255.0f ? 255.0f : currentPixel->y;
-    currentPixel->z = currentPixel->z > 255.0f ? 255.0f : currentPixel->z;
+    currentPixel.x = currentPixel.x > 255.0f ? 255.0f : currentPixel.x;
+    currentPixel.y = currentPixel.y > 255.0f ? 255.0f : currentPixel.y;
+    currentPixel.z = currentPixel.z > 255.0f ? 255.0f : currentPixel.z;
 
-    currentPixel->x = currentPixel->x <= 0.0f ? 0.1f : currentPixel->x;
-    currentPixel->y = currentPixel->y <= 0.0f ? 0.1f : currentPixel->y;
-    currentPixel->z = currentPixel->z <= 0.0f ? 0.1f : currentPixel->z;
+    currentPixel.x = currentPixel.x <= 0.0f ? 0.1f : currentPixel.x;
+    currentPixel.y = currentPixel.y <= 0.0f ? 0.1f : currentPixel.y;
+    currentPixel.z = currentPixel.z <= 0.0f ? 0.1f : currentPixel.z;
 
-    currentPixel->x = pow( (currentPixel->x - inBlack) / (inWMinInB), gamma) * (outWMinOutB) + outBlack;
-    currentPixel->y = pow( (currentPixel->y - inBlack) / (inWMinInB), gamma) * (outWMinOutB) + outBlack;
-    currentPixel->z = pow( (currentPixel->z - inBlack) / (inWMinInB), gamma) * (outWMinOutB) + outBlack;
+    currentPixel.x = pow( (currentPixel.x - inBlack) * overInWMinInB, gamma) * outWMinOutB + outBlack;
+    currentPixel.y = pow( (currentPixel.y - inBlack) * overInWMinInB, gamma) * outWMinOutB + outBlack;
+    currentPixel.z = pow( (currentPixel.z - inBlack) * overInWMinInB, gamma) * outWMinOutB + outBlack;
 
-    currentPixel->x = currentPixel->x > 255.0f ? 255.0f : currentPixel->x;
-    currentPixel->y = currentPixel->y > 255.0f ? 255.0f : currentPixel->y;
-    currentPixel->z = currentPixel->z > 255.0f ? 255.0f : currentPixel->z;
+    currentPixel.x = currentPixel.x > 255.0f ? 255.0f : currentPixel.x;
+    currentPixel.y = currentPixel.y > 255.0f ? 255.0f : currentPixel.y;
+    currentPixel.z = currentPixel.z > 255.0f ? 255.0f : currentPixel.z;
 
-    currentPixel->x = currentPixel->x <= 0.0f ? 0.1f : currentPixel->x;
-    currentPixel->y = currentPixel->y <= 0.0f ? 0.1f : currentPixel->y;
-    currentPixel->z = currentPixel->z <= 0.0f ? 0.1f : currentPixel->z;
+    currentPixel.x = currentPixel.x <= 0.0f ? 0.1f : currentPixel.x;
+    currentPixel.y = currentPixel.y <= 0.0f ? 0.1f : currentPixel.y;
+    currentPixel.z = currentPixel.z <= 0.0f ? 0.1f : currentPixel.z;
+#else
+    float3 temp;
+    // Color matrix multiply
+    temp.x = colorMat[0][0] * currentPixel.x + colorMat[1][0] * currentPixel.y + colorMat[2][0] * currentPixel.z;
+    temp.y = colorMat[0][1] * currentPixel.x + colorMat[1][1] * currentPixel.y + colorMat[2][1] * currentPixel.z;
+    temp.z = colorMat[0][2] * currentPixel.x + colorMat[1][2] * currentPixel.y + colorMat[2][2] * currentPixel.z;
+    temp = (clamp(temp, 0.1f, 255.f) - inBlack) * overInWMinInB;
+    temp = pow(temp, (float3)gamma);
+    currentPixel.xyz = clamp(temp * outWMinOutB + outBlack, 0.1f, 255.f);
+#endif
+
+    return currentPixel;
 }
 
-void processNoBlur() {
+static void processNoBlur() {
     int w, h, r;
     int count = 0;
 
@@ -156,7 +172,7 @@ void processNoBlur() {
             currentPixel.y = (float)(input->g);
             currentPixel.z = (float)(input->b);
 
-            levelsSaturation(&currentPixel);
+            currentPixel = levelsSaturation(currentPixel);
 
             c4u_t *output = OutPixel + h*width + w;
             output->r = (uint8_t)currentPixel.x;
@@ -168,7 +184,7 @@ void processNoBlur() {
     rsSendToClient(&count, 1, 4, 0);
 }
 
-void horizontalBlur() {
+static void horizontalBlur() {
     float4 blurredPixel = 0;
     float4 currentPixel = 0;
     // Horizontal blur
@@ -209,7 +225,7 @@ void horizontalBlur() {
     }
 }
 
-void horizontalBlurLevels() {
+static void horizontalBlurLevels() {
     float4 blurredPixel = 0;
     float4 currentPixel = 0;
     // Horizontal blur
@@ -241,7 +257,7 @@ void horizontalBlurLevels() {
                 blurredPixel += currentPixel*weight;
             }
 
-            levelsSaturation(&blurredPixel);
+            blurredPixel = levelsSaturation(blurredPixel);
 
             c4u_t *output = ScratchPixel + h*width + w;
             output->r = (uint8_t)blurredPixel.x;
@@ -252,7 +268,7 @@ void horizontalBlurLevels() {
     }
 }
 
-void verticalBlur() {
+static void verticalBlur() {
     float4 blurredPixel = 0;
     float4 currentPixel = 0;
     // Vertical blur
