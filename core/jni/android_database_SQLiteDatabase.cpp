@@ -531,6 +531,7 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
             exceptionClass = "android/database/sqlite/SQLiteDiskIOException";
             break;
         case SQLITE_CORRUPT:
+        case SQLITE_NOTADB: // treat "unsupported file format" error as corruption also
             exceptionClass = "android/database/sqlite/SQLiteDatabaseCorruptException";
             break;
         case SQLITE_CONSTRAINT:
