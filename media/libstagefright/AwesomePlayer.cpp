@@ -1152,7 +1152,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         mConnectingDataSource = new NuHTTPDataSource;
 
         mLock.unlock();
-        status_t err = mConnectingDataSource->connect(mUri/*, mUriHeaders */);
+        status_t err = mConnectingDataSource->connect(mUri, &mUriHeaders);
         mLock.lock();
 
         if (err != OK) {

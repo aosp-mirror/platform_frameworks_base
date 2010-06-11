@@ -13,10 +13,9 @@ namespace android {
 struct NuHTTPDataSource : public DataSource {
     NuHTTPDataSource();
 
-    status_t connect(const char *uri, off_t offset = 0);
-
     status_t connect(
-            const char *host, unsigned port, const char *path,
+            const char *uri,
+            const KeyedVector<String8, String8> *headers = NULL,
             off_t offset = 0);
 
     void disconnect();
@@ -44,11 +43,26 @@ private:
     String8 mHost;
     unsigned mPort;
     String8 mPath;
+    String8 mHeaders;
 
     HTTPStream mHTTP;
     off_t mOffset;
     off_t mContentLength;
     bool mContentLengthValid;
+
+    status_t connect(
+            const char *uri, const String8 &headers, off_t offset);
+
+    status_t connect(
+            const char *host, unsigned port, const char *path,
+            const String8 &headers,
+            off_t offset);
+
+    void applyTimeoutResponse();
+
+    static void MakeFullHeaders(
+            const KeyedVector<String8, String8> *overrides,
+            String8 *headers);
 
     NuHTTPDataSource(const NuHTTPDataSource &);
     NuHTTPDataSource &operator=(const NuHTTPDataSource &);

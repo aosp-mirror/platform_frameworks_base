@@ -109,7 +109,7 @@ sp<DataSource> DataSource::CreateFromURI(
         source = new FileSource(uri + 7);
     } else if (!strncasecmp("http://", uri, 7)) {
         sp<NuHTTPDataSource> httpSource = new NuHTTPDataSource;
-        if (httpSource->connect(uri /* , headers */) != OK) {
+        if (httpSource->connect(uri, headers) != OK) {
             return NULL;
         }
         source = new NuCachedSource2(httpSource);
