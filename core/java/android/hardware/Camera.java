@@ -969,21 +969,18 @@ public class Camera {
         /**
          * The camera determines the exposure by giving more weight to the
          * central part of the scene.
-         * @hide
          */
         public static final String METERING_MODE_CENTER_WEIGHTED = "center-weighted";
 
         /**
          * The camera determines the exposure by averaging the entire scene,
          * giving no weighting to any particular area.
-         * @hide
          */
         public static final String METERING_MODE_FRAME_AVERAGE = "frame-average";
 
         /**
          * The camera determines the exposure by a very small area of the scene,
          * typically the center.
-         * @hide
          */
         public static final String METERING_MODE_SPOT = "spot";
 
@@ -1957,7 +1954,6 @@ public class Camera {
          * @return a list of supported metering modes. null if metering mode
          *         setting is not supported.
          * @see #getMeteringMode()
-         * @hide
          */
         public List<String> getSupportedMeteringModes() {
             String str = get(KEY_METERING_MODE + SUPPORTED_VALUES_SUFFIX);
@@ -1973,7 +1969,6 @@ public class Camera {
          * @see #METERING_MODE_CENTER_WEIGHTED
          * @see #METERING_MODE_FRAME_AVERAGE
          * @see #METERING_MODE_SPOT
-         * @hide
          */
         public String getMeteringMode() {
             return get(KEY_METERING_MODE);
@@ -1984,7 +1979,6 @@ public class Camera {
          *
          * @param value metering mode.
          * @see #getMeteringMode()
-         * @hide
          */
         public void setMeteringMode(String value) {
             set(KEY_METERING_MODE, value);
