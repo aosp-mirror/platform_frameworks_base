@@ -256,7 +256,12 @@ public interface IActivityManager extends IInterface {
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
     public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
-    public void handleApplicationStrictModeViolation(IBinder app,
+
+    // A StrictMode violation to be handled.  The violationMask is a
+    // subset of the original StrictMode policy bitmask, with only the
+    // bit violated and penalty bits to be executed by the
+    // ActivityManagerService remaining set.
+    public void handleApplicationStrictModeViolation(IBinder app, int violationMask,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
 
     /*

@@ -4139,7 +4139,6 @@ public final class ActivityThread {
          */
         if ((data.appInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0 &&
             !"user".equals(Build.TYPE)) {
-            StrictMode.setDropBoxManager(ContextImpl.createDropBoxManager());
             StrictMode.setThreadBlockingPolicy(
                 StrictMode.DISALLOW_DISK_WRITE |
                 StrictMode.DISALLOW_DISK_READ |

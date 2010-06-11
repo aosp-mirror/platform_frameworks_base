@@ -97,6 +97,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -9354,27 +9355,34 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public void handleApplicationStrictModeViolation(
-        IBinder app, ApplicationErrorReport.CrashInfo crashInfo) {
+        IBinder app, int violationMask, ApplicationErrorReport.CrashInfo crashInfo) {
         ProcessRecord r = findAppProcess(app);
         // TODO: implement
         Log.w(TAG, "handleApplicationStrictModeViolation.");
 
-        AppErrorResult result = new AppErrorResult();
-        synchronized (this) {
-            final long origId = Binder.clearCallingIdentity();
-
-            Message msg = Message.obtain();
-            msg.what = SHOW_STRICT_MODE_VIOLATION_MSG;
-            HashMap<String, Object> data = new HashMap<String, Object>();
-            data.put("result", result);
-            data.put("app", r);
-            msg.obj = data;
-            mHandler.sendMessage(msg);
-
-            Binder.restoreCallingIdentity(origId);
+        if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
+            Integer crashFingerprint = crashInfo.stackTrace.hashCode();
+            Log.d(TAG, "supposed to drop box for fingerprint " + crashFingerprint);
         }
-        int res = result.get();
-        Log.w(TAG, "handleApplicationStrictModeViolation; res=" + res);
+
+        if ((violationMask & StrictMode.PENALTY_DIALOG) != 0) {
+            AppErrorResult result = new AppErrorResult();
+            synchronized (this) {
+                final long origId = Binder.clearCallingIdentity();
+
+                Message msg = Message.obtain();
+                msg.what = SHOW_STRICT_MODE_VIOLATION_MSG;
+                HashMap<String, Object> data = new HashMap<String, Object>();
+                data.put("result", result);
+                data.put("app", r);
+                msg.obj = data;
+                mHandler.sendMessage(msg);
+
+                Binder.restoreCallingIdentity(origId);
+            }
+            int res = result.get();
+            Log.w(TAG, "handleApplicationStrictModeViolation; res=" + res);
+        }
     }
 
     /**
