@@ -32,6 +32,7 @@ struct MediaWriter : public RefBase {
     virtual bool reachedEOS() = 0;
     virtual status_t start() = 0;
     virtual void stop() = 0;
+    virtual void pause() = 0;
     virtual void setMaxFileSize(int64_t bytes) { mMaxFileSizeLimitBytes = bytes; }
     virtual void setMaxFileDuration(int64_t durationUs) { mMaxFileDurationLimitUs = durationUs; }
     virtual void setListener(const sp<IMediaPlayerClient>& listener) {

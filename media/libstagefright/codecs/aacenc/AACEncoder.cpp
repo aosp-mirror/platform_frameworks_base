@@ -205,13 +205,15 @@ status_t AACEncoder::read(
         buffer->set_range(0, 2);
         buffer->meta_data()->setInt32(kKeyIsCodecConfig, true);
         *out = buffer;
-        ++mFrameCount;
         mInputBuffer = NULL;
+        ++mFrameCount;
         return OK;
-    } else {
+    } else if (mFrameCount == 1) {
         buffer->meta_data()->setInt32(kKeyIsCodecConfig, false);
     }
 
+    // XXX: We assume that the input buffer contains at least
+    // (actually, exactly) 1024 PCM samples. This needs to be fixed.
     if (mInputBuffer == NULL) {
         if (mSource->read(&mInputBuffer, options) != OK) {
             LOGE("failed to read from input audio source");
@@ -252,9 +254,10 @@ status_t AACEncoder::read(
     }
 
     buffer->set_range(0, outputLength);
-    ++mFrameCount;
-    int64_t timestampUs = (mFrameCount * 1000000LL * 1024) / mSampleRate;
 
+    // Each output frame compresses 1024 input PCM samples.
+    int64_t timestampUs = ((mFrameCount - 1) * 1000000LL * 1024) / mSampleRate;
+    ++mFrameCount;
     buffer->meta_data()->setInt64(kKeyTime, timestampUs);
 
     *out = buffer;
