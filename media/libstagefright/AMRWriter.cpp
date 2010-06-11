@@ -29,13 +29,17 @@ namespace android {
 AMRWriter::AMRWriter(const char *filename)
     : mFile(fopen(filename, "wb")),
       mInitCheck(mFile != NULL ? OK : NO_INIT),
-      mStarted(false) {
+      mStarted(false),
+      mPaused(false),
+      mResumed(false) {
 }
 
 AMRWriter::AMRWriter(int fd)
     : mFile(fdopen(fd, "wb")),
       mInitCheck(mFile != NULL ? OK : NO_INIT),
-      mStarted(false) {
+      mStarted(false),
+      mPaused(false),
+      mResumed(false) {
 }
 
 AMRWriter::~AMRWriter() {
@@ -98,8 +102,17 @@ status_t AMRWriter::start() {
         return mInitCheck;
     }
 
-    if (mStarted || mSource == NULL) {
+    if (mSource == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    if (mStarted && mPaused) {
+        mPaused = false;
+        mResumed = true;
+        return OK;
+    } else if (mStarted) {
+        // Already started, does nothing
+        return OK;
     }
 
     status_t err = mSource->start();
@@ -121,6 +134,13 @@ status_t AMRWriter::start() {
     mStarted = true;
 
     return OK;
+}
+
+void AMRWriter::pause() {
+    if (!mStarted) {
+        return;
+    }
+    mPaused = true;
 }
 
 void AMRWriter::stop() {
@@ -163,12 +183,21 @@ void AMRWriter::threadFunc() {
     mEstimatedDurationUs = 0;
     mEstimatedSizeBytes = 0;
     bool stoppedPrematurely = true;
+    int64_t previousPausedDurationUs = 0;
+    int64_t maxTimestampUs = 0;
+
     while (!mDone) {
         MediaBuffer *buffer;
         status_t err = mSource->read(&buffer);
 
         if (err != OK) {
             break;
+        }
+
+        if (mPaused) {
+            buffer->release();
+            buffer = NULL;
+            continue;
         }
 
         mEstimatedSizeBytes += buffer->range_length();
@@ -184,6 +213,17 @@ void AMRWriter::threadFunc() {
         if (timestampUs > mEstimatedDurationUs) {
             mEstimatedDurationUs = timestampUs;
         }
+        if (mResumed) {
+            previousPausedDurationUs += (timestampUs - maxTimestampUs - 20000);
+            mResumed = false;
+        }
+        timestampUs -= previousPausedDurationUs;
+        LOGV("time stamp: %lld, previous paused duration: %lld",
+                timestampUs, previousPausedDurationUs);
+        if (timestampUs > maxTimestampUs) {
+            maxTimestampUs = timestampUs;
+        }
+
         if (exceedsFileDurationLimit()) {
             buffer->release();
             buffer = NULL;

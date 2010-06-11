@@ -39,6 +39,7 @@ public:
     virtual status_t start();
     virtual bool reachedEOS();
     virtual void stop();
+    virtual void pause();
 
     void beginBox(const char *fourcc);
     void writeInt8(int8_t x);
@@ -59,6 +60,8 @@ private:
     class Track;
 
     FILE *mFile;
+    bool mPaused;
+    bool mStarted;
     off_t mOffset;
     off_t mMdatOffset;
     uint8_t *mMoovBoxBuffer;
@@ -77,6 +80,7 @@ private:
 
     void setStartTimestamp(int64_t timeUs);
     int64_t getStartTimestamp();  // Not const
+    status_t startTracks();
 
     void lock();
     void unlock();
