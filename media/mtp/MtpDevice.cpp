@@ -179,6 +179,8 @@ MtpObjectHandleList* MtpDevice::getObjectHandles(MtpStorageID storageID,
 }
 
 MtpObjectInfo* MtpDevice::getObjectInfo(MtpObjectHandle handle) {
+    // FIXME - we might want to add some caching here
+
     mRequest.reset();
     mRequest.setParameter(1, handle);
     if (!sendRequest(MTP_OPERATION_GET_OBJECT_INFO))
@@ -205,7 +207,33 @@ void* MtpDevice::getThumbnail(MtpObjectHandle handle, int& outLength) {
     }
     outLength = 0;
     return NULL;
+}
 
+bool MtpDevice::deleteObject(MtpObjectHandle handle) {
+    mRequest.reset();
+    mRequest.setParameter(1, handle);
+    if (sendRequest(MTP_OPERATION_DELETE_OBJECT)) {
+        MtpResponseCode ret = readResponse();
+        if (ret == MTP_RESPONSE_OK)
+            return true;
+    }
+    return false;
+}
+
+MtpObjectHandle MtpDevice::getParent(MtpObjectHandle handle) {
+    MtpObjectInfo* info = getObjectInfo(handle);
+    if (info)
+        return info->mParent;
+    else
+        return -1;
+}
+
+MtpObjectHandle MtpDevice::getStorageID(MtpObjectHandle handle) {
+    MtpObjectInfo* info = getObjectInfo(handle);
+    if (info)
+        return info->mStorageID;
+    else
+        return -1;
 }
 
 MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
