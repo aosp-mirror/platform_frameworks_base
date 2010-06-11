@@ -25,6 +25,8 @@
 #include <ui/Region.h>
 #include <ui/Rect.h>
 
+#include <EGL/egl.h>
+
 #include <SkCanvas.h>
 #include <SkBitmap.h>
 #include <SkRegion.h>
@@ -175,6 +177,11 @@ static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
         }
     }
     return result;
+}
+
+EGLNativeWindowType android_Surface_getEGLNativeWindow(
+        JNIEnv* env, jobject clazz) {
+    return getSurface(env, clazz).get();
 }
 
 static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
