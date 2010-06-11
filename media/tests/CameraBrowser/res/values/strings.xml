@@ -16,6 +16,8 @@
 
 <resources>
     <string name="app_label">Camera Browser</string>
+
+    <!-- for object info -->
     <string name="name_label">Name: </string>
     <string name="size_label">Size: </string>
     <string name="thumb_width_label">Thumb Width: </string>
@@ -28,4 +30,12 @@
     <string name="created_label">Created: </string>
     <string name="modified_label">Modified: </string>
     <string name="keywords_label">Keywords: </string>
+
+    <!-- menu items -->
+    <string name="delete_item">Delete</string>
+
+    <!-- toasts -->
+    <string name="object_deleted_message">Object deleted</string>
+    <string name="delete_failed_message">Could not delete object</string>
+
 </resources>
