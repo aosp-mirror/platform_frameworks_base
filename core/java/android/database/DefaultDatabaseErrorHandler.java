@@ -47,14 +47,7 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             // make the application crash on database open operation. To avoid this problem,
             // the application should provide its own {@link DatabaseErrorHandler} impl class
             // to delete ALL files of the database (including the attached databases).
-            if (!dbObj.getPath().equalsIgnoreCase(":memory:")) {
-                // not memory database.
-                try {
-                    new File(dbObj.getPath()).delete();
-                } catch (Exception e) {
-                    /* ignore */
-                }
-            }
+            deleteDatabaseFile(dbObj.getPath());
             return;
         }
 
@@ -62,8 +55,8 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
         try {
             // Close the database, which will cause subsequent operations to fail.
             // before that, get the attached database list first.
-            attachedDbs = dbObj.getAttachedDbs();
             try {
+                attachedDbs = dbObj.getAttachedDbs();
                 dbObj.close();
             } catch (SQLiteException e) {
                 /* ignore */
@@ -72,18 +65,25 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             // Delete all files of this corrupt database and/or attached databases
             if (attachedDbs != null) {
                 for (Pair<String, String> p : attachedDbs) {
-                    // delete file if it is a non-memory database file
-                    if (p.second.equalsIgnoreCase(":memory:") || p.second.trim().length() == 0) {
-                        continue;
-                    }
-                    Log.e(TAG, "deleting the database file: " + p.second);
-                    try {
-                        new File(p.second).delete();
-                    } catch (Exception e) {
-                        /* ignore */
-                    }
+                    deleteDatabaseFile(p.second);
                 }
+            } else {
+                // attachedDbs = null is possible when the database is so corrupt that even
+                // "PRAGMA database_list;" also fails. delete the main database file
+                deleteDatabaseFile(dbObj.getPath());
             }
+        }
+    }
+
+    private void deleteDatabaseFile(String fileName) {
+        if (fileName.equalsIgnoreCase(":memory:") || fileName.trim().length() == 0) {
+            return;
+        }
+        Log.e(TAG, "deleting the database file: " + fileName);
+        try {
+            new File(fileName).delete();
+        } catch (Exception e) {
+            /* ignore */
         }
     }
 }
