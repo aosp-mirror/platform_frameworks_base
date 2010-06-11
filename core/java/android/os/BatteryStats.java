@@ -51,50 +51,36 @@ public abstract class BatteryStats implements Parcelable {
     
     /**
      * A constant indicating a sensor timer.
-     * 
-     * {@hide}
      */
     public static final int SENSOR = 3;
     
     /**
      * A constant indicating a a wifi turn on timer
-     *
-     * {@hide}
      */
     public static final int WIFI_TURNED_ON = 4;
     
     /**
      * A constant indicating a full wifi lock timer
-     *
-     * {@hide}
      */
     public static final int FULL_WIFI_LOCK = 5;
     
     /**
      * A constant indicating a scan wifi lock timer
-     *
-     * {@hide}
      */
     public static final int SCAN_WIFI_LOCK = 6;
 
      /**
       * A constant indicating a wifi multicast timer
-      *
-      * {@hide}
       */
      public static final int WIFI_MULTICAST_ENABLED = 7;
 
     /**
      * A constant indicating an audio turn on timer
-     *
-     * {@hide}
      */
     public static final int AUDIO_TURNED_ON = 7;
 
     /**
      * A constant indicating a video turn on timer
-     *
-     * {@hide}
      */
     public static final int VIDEO_TURNED_ON = 8;
 
@@ -391,6 +377,61 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    public final class BatteryHistoryRecord implements Parcelable {
+        public BatteryHistoryRecord next;
+        
+        public long time;
+        public byte batteryLevel;
+        
+        public static final int STATE_SCREEN_MASK = 0x000000f;
+        public static final int STATE_SCREEN_SHIFT = 0;
+        public static final int STATE_SIGNAL_STRENGTH_MASK = 0x00000f0;
+        public static final int STATE_SIGNAL_STRENGTH_SHIFT = 4;
+        public static final int STATE_PHONE_STATE_MASK = 0x0000f00;
+        public static final int STATE_PHONE_STATE_SHIFT = 8;
+        public static final int STATE_DATA_CONNECTION_MASK = 0x000f000;
+        public static final int STATE_DATA_CONNECTION_SHIFT = 12;
+        
+        public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<30;
+        public static final int STATE_SCREEN_ON_FLAG = 1<<29;
+        public static final int STATE_GPS_ON_FLAG = 1<<28;
+        public static final int STATE_PHONE_ON_FLAG = 1<<27;
+        public static final int STATE_WIFI_ON_FLAG = 1<<26;
+        public static final int STATE_WIFI_RUNNING_FLAG = 1<<25;
+        public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<24;
+        public static final int STATE_WIFI_SCAN_LOCK_FLAG = 1<<23;
+        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<22;
+        public static final int STATE_BLUETOOTH_ON_FLAG = 1<<21;
+        public static final int STATE_AUDIO_ON_FLAG = 1<<20;
+        public static final int STATE_VIDEO_ON_FLAG = 1<<19;
+        
+        public int states;
+
+        public BatteryHistoryRecord() {
+        }
+        
+        public BatteryHistoryRecord(long time, Parcel src) {
+            this.time = time;
+            batteryLevel = (byte)src.readInt();
+            states = src.readInt();
+        }
+        
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(time);
+            dest.writeInt(batteryLevel);
+            dest.writeInt(states);
+        }
+    }
+    
+    /**
+     * Return the current history of battery state changes.
+     */
+    public abstract BatteryHistoryRecord getHistory();
+    
     /**
      * Returns the number of times the device has been started.
      */
@@ -1443,6 +1484,20 @@ public abstract class BatteryStats implements Parcelable {
      */
     @SuppressWarnings("unused")
     public void dumpLocked(PrintWriter pw) {
+        BatteryHistoryRecord rec = getHistory();
+        if (rec != null) {
+            pw.println("Battery History:");
+            while (rec != null) {
+                pw.print("  ");
+                pw.print(rec.time);
+                pw.print(" ");
+                pw.print(rec.batteryLevel);
+                pw.print(" ");
+                pw.println(Integer.toHexString(rec.states));
+                rec = rec.next;
+            }
+        }
+        
         pw.println("Total Statistics (Current and Historic):");
         pw.println("  System starts: " + getStartCount()
                 + ", currently on battery: " + getIsOnBattery());
