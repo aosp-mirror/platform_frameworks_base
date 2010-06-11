@@ -267,6 +267,7 @@ void NuCachedSource2::onFetch() {
             mFetching = false;
         }
     } else {
+        Mutex::Autolock autoLock(mLock);
         restartPrefetcherIfNecessary_l();
     }
 
