@@ -128,8 +128,6 @@ private:
     int                 mCurrentPreviewFrame;
 };
 
-extern "C" sp<CameraHardwareInterface> openCameraHardwareStub();
-
 }; // namespace android
 
 #endif

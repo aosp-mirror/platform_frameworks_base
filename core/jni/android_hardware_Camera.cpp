@@ -34,6 +34,8 @@ using namespace android;
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
+    jfieldID    facing;
+    jfieldID    orientation;
     jmethodID   post_event;
 };
 
@@ -291,6 +293,20 @@ void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env)
 static jint android_hardware_Camera_getNumberOfCameras(JNIEnv *env, jobject thiz)
 {
     return Camera::getNumberOfCameras();
+}
+
+static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
+    jint cameraId, jobject info_obj)
+{
+    CameraInfo cameraInfo;
+    status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
+    if (rc != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "Fail to get camera info");
+        return;
+    }
+    env->SetIntField(info_obj, fields.facing, cameraInfo.facing);
+    env->SetIntField(info_obj, fields.orientation, cameraInfo.orientation);
 }
 
 // connect to camera service
@@ -575,6 +591,9 @@ static JNINativeMethod camMethods[] = {
   { "getNumberOfCameras",
     "()I",
     (void *)android_hardware_Camera_getNumberOfCameras },
+  { "getCameraInfo",
+    "(ILandroid/hardware/Camera$CameraInfo;)V",
+    (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
     "(Ljava/lang/Object;I)V",
     (void*)android_hardware_Camera_native_setup },
@@ -668,7 +687,9 @@ int register_android_hardware_Camera(JNIEnv *env)
 {
     field fields_to_find[] = {
         { "android/hardware/Camera", "mNativeContext",   "I", &fields.context },
-        { "android/view/Surface",    ANDROID_VIEW_SURFACE_JNI_ID, "I", &fields.surface }
+        { "android/view/Surface",    ANDROID_VIEW_SURFACE_JNI_ID, "I", &fields.surface },
+        { "android/hardware/Camera$CameraInfo", "mFacing",   "I", &fields.facing },
+        { "android/hardware/Camera$CameraInfo", "mOrientation",   "I", &fields.orientation },
     };
 
     if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)

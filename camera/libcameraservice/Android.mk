@@ -7,15 +7,11 @@ ifneq ($(filter sooner generic sim,$(TARGET_DEVICE)),)
   USE_CAMERA_STUB:=true
 endif
 
-ifeq ($(USE_CAMERA_STUB),true)
-  INCLUDE_CAMERA_STUB:=true
-  INCLUDE_CAMERA_HARDWARE:=false
-else
-  INCLUDE_CAMERA_STUB:=true  # set this to true temporarily for testing
-  INCLUDE_CAMERA_HARDWARE:=true
+ifeq ($(USE_CAMERA_STUB),)
+  USE_CAMERA_STUB:=false
 endif
 
-ifeq ($(INCLUDE_CAMERA_STUB),true)
+ifeq ($(USE_CAMERA_STUB),true)
 #
 # libcamerastub
 #
@@ -35,7 +31,7 @@ endif
 LOCAL_SHARED_LIBRARIES:= libui
 
 include $(BUILD_STATIC_LIBRARY)
-endif # INCLUDE_CAMERA_STUB
+endif # USE_CAMERA_STUB
 
 #
 # libcameraservice
@@ -61,13 +57,9 @@ ifeq ($(TARGET_SIMULATOR),true)
 LOCAL_CFLAGS += -DSINGLE_PROCESS
 endif
 
-ifeq ($(INCLUDE_CAMERA_STUB), true)
+ifeq ($(USE_CAMERA_STUB), true)
 LOCAL_STATIC_LIBRARIES += libcamerastub
-LOCAL_CFLAGS += -DINCLUDE_CAMERA_STUB
-endif
-
-ifeq ($(INCLUDE_CAMERA_HARDWARE),true)
-LOCAL_CFLAGS += -DINCLUDE_CAMERA_HARDWARE
+else
 LOCAL_SHARED_LIBRARIES += libcamera 
 endif
 
