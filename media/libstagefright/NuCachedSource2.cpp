@@ -416,7 +416,7 @@ ssize_t NuCachedSource2::readInternal(off_t offset, void *data, size_t size) {
             return mFinalStatus;
         }
 
-        size_t avail = mCache->totalSize() - offset;
+        size_t avail = mCache->totalSize() - delta;
         mCache->copy(delta, data, avail);
 
         return avail;
