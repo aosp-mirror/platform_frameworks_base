@@ -182,13 +182,51 @@ android_media_MtpClient_wait_for_event(JNIEnv *env, jobject thiz)
     client->waitForEvent(env);
 }
 
+static jboolean
+android_media_MtpClient_delete_object(JNIEnv *env, jobject thiz,
+        jint device_id, jint object_id)
+{
+    MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
+    MtpDevice* device = client->getDevice(device_id);
+    if (device)
+        return device->deleteObject(object_id);
+    else
+        return NULL;
+}
+
+static jint
+android_media_MtpClient_get_parent(JNIEnv *env, jobject thiz,
+        jint device_id, jint object_id)
+{
+    MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
+    MtpDevice* device = client->getDevice(device_id);
+    if (device)
+        return device->getParent(object_id);
+    else
+        return -1;
+}
+
+static jint
+android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
+        jint device_id, jint object_id)
+{
+    MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
+    MtpDevice* device = client->getDevice(device_id);
+    if (device)
+        return device->getStorageID(object_id);
+    else
+        return -1;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
     {"native_setup",            "()V",  (void *)android_media_MtpClient_setup},
     {"native_finalize",         "()V",  (void *)android_media_MtpClient_finalize},
     {"native_wait_for_event",   "()V",  (void *)android_media_MtpClient_wait_for_event},
-
+    {"native_delete_object",   "(II)Z", (void *)android_media_MtpClient_delete_object},
+    {"native_get_parent",      "(II)I", (void *)android_media_MtpClient_get_parent},
+    {"native_get_storage_id",  "(II)I", (void *)android_media_MtpClient_get_storage_id},
 };
 
 static const char* const kClassPathName = "android/media/MtpClient";

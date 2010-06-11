@@ -108,6 +108,16 @@ public final class MtpCursor extends AbstractWindowedCursor {
         return mCount;
     }
 
+    @Override
+    public boolean requery() {
+        Log.d(TAG, "requery");
+        mCount = NO_COUNT;
+        if (mWindow != null) {
+            mWindow.clear();
+        }
+        return super.requery();
+    }
+
     private void fillWindow(int startPos) {
         if (mWindow == null) {
             // If there isn't a window set already it will only be accessed locally

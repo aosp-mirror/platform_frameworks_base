@@ -63,6 +63,10 @@ public final class Mtp
             return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID + "/storage");
         }
 
+        public static Uri getContentUri(int deviceID, int storageID) {
+            return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID + "/storage/" + storageID);
+        }
+
         /**
          * Storage unit identifier
          * <P>Type: TEXT</P>

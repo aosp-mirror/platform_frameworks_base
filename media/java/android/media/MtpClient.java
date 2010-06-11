@@ -43,6 +43,18 @@ public class MtpClient {
         mEventThread.start();
     }
 
+    public boolean deleteObject(int deviceID, int objectID) {
+        return native_delete_object(deviceID, objectID);
+    }
+
+    public int getParent(int deviceID, int objectID) {
+        return native_get_parent(deviceID, objectID);
+    }
+
+    public int getStorageID(int deviceID, int objectID) {
+        return native_get_storage_id(deviceID, objectID);
+    }
+
     private class MtpEventThread extends Thread {
 
         private boolean mDone;
@@ -77,4 +89,7 @@ public class MtpClient {
     private native final void native_setup();
     private native final void native_finalize();
     private native void native_wait_for_event();
+    private native boolean native_delete_object(int deviceID, int objectID);
+    private native int native_get_parent(int deviceID, int objectID);
+    private native int native_get_storage_id(int deviceID, int objectID);
 }
