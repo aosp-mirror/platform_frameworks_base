@@ -16,7 +16,10 @@
 
 package android.view;
 
-import java.util.ArrayList;
+import com.android.internal.R;
+import com.android.internal.view.menu.ActionMenu;
+import com.android.internal.view.menu.ActionMenuItem;
+import com.android.internal.view.menu.MenuBuilder;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -36,10 +39,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-
-import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenu;
-import com.android.internal.view.menu.ActionMenuItem;
 
 /**
  * @hide
@@ -75,7 +74,6 @@ public class ActionBarView extends ViewGroup {
     private CharSequence mSubtitle;
     private Drawable mIcon;
     private Drawable mLogo;
-    private Drawable mDivider;
 
     private ImageView mIconView;
     private ImageView mLogoView;
@@ -86,25 +84,14 @@ public class ActionBarView extends ViewGroup {
     
     private boolean mShowMenu;
 
+    private MenuBuilder mOptionsMenu;
+    private View mMenuView;
+    
     private ActionMenuItem mLogoNavItem;
-    private ActionMenu mActionMenu;
-    private ActionMenu mOptionsMenu;
     
     private SparseArray<ActionMenu> mContextMenus;
     
     private Callback mCallback;
-    
-    private final ArrayList<ActionView> mActions = new ArrayList<ActionView>();
-    private final OnClickListener mActionClickHandler = new OnClickListener() {
-        public void onClick(View v) {
-            ActionView av = (ActionView) v;
-            ActionMenuItem item = (ActionMenuItem) av.menuItem;
-
-            if (mCallback == null || !mCallback.onActionItemClicked(item)) {
-                item.invoke();
-            }
-        }
-    };
 
     private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
             new AdapterView.OnItemSelectedListener() {
@@ -151,7 +138,6 @@ public class ActionBarView extends ViewGroup {
         if (mIcon == null) {
             mIcon = info.loadIcon(pm);
         }
-        mDivider = a.getDrawable(R.styleable.ActionBar_divider);
         
         Drawable background = a.getDrawable(R.styleable.ActionBar_background);
         if (background != null) {
@@ -178,8 +164,10 @@ public class ActionBarView extends ViewGroup {
             mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
             mHomeClickListener = new OnClickListener() {
                 public void onClick(View v) {
-                    if (mCallback != null) {
-                        mCallback.onActionItemClicked(mLogoNavItem);
+                    Context context = getContext();
+                    if (context instanceof Activity) {
+                        Activity activity = (Activity) context;
+                        activity.onOptionsItemSelected(mLogoNavItem);
                     }
                 }
             };
@@ -188,31 +176,22 @@ public class ActionBarView extends ViewGroup {
         mContextMenus = new SparseArray<ActionMenu>();
     }
     
-    private boolean initOptionsMenu() {
-        final Context context = getContext();
-        if (!(context instanceof Activity)) {
-            return false;
-        }
-        
-        final Activity activity = (Activity) context;
-        ActionMenu optionsMenu = new ActionMenu(context);
-        if (activity.onCreateOptionsMenu(optionsMenu)) {
-            mOptionsMenu = optionsMenu;
-            return true;
-        }
-        
-        return false;
+    public void setCallback(Callback callback) {
+        mCallback = callback;
     }
     
-    public void setCallback(Callback callback) {
-        final Context context = getContext();
-        mCallback = callback;
-        
-        ActionMenu actionMenu = new ActionMenu(context);
-        if (callback.onCreateActionMenu(actionMenu)) {
-            mActionMenu = actionMenu;
-            performUpdateActionMenu();
+    public void setMenu(Menu menu) {
+        MenuBuilder builder = (MenuBuilder) menu;
+        mOptionsMenu = builder;
+        if (mMenuView != null) {
+            removeView(mMenuView);
         }
+        final View menuView = builder.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, null);
+        final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT);
+        menuView.setLayoutParams(layoutParams);
+        addView(menuView);
+        mMenuView = menuView;
     }
     
     public void setCustomNavigationView(View view) {
@@ -220,10 +199,6 @@ public class ActionBarView extends ViewGroup {
         if (view != null) {
             setNavigationMode(ActionBar.NAVIGATION_MODE_CUSTOM);
         }
-    }
-    
-    public void setDividerDrawable(Drawable d) {
-        mDivider = d;
     }
     
     public CharSequence getTitle() {
@@ -301,9 +276,13 @@ public class ActionBarView extends ViewGroup {
                 mSpinner = new Spinner(mContext, null,
                         com.android.internal.R.attr.dropDownSpinnerStyle);
                 mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
+                mSpinner.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT));
                 addView(mSpinner);
                 break;
             case ActionBar.NAVIGATION_MODE_CUSTOM:
+                mCustomNavView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT));
                 addView(mCustomNavView);
                 break;
             }
@@ -326,18 +305,6 @@ public class ActionBarView extends ViewGroup {
     
     public int getDisplayOptions() {
         return mDisplayOptions;
-    }
-    
-    private ActionView findActionViewForItem(MenuItem item) {
-        final ArrayList<ActionView> actions = mActions;
-        final int actionCount = actions.size();
-        for (int i = 0; i < actionCount; i++) {
-            ActionView av = actions.get(i);
-            if (av.menuItem.equals(item)) {
-                return av;
-            }
-        }
-        return null;
     }
     
     public void setContextMode(int mode) {
@@ -368,92 +335,6 @@ public class ActionBarView extends ViewGroup {
         // TODO Turn off context mode; go back to normal.
     }
     
-    public void updateActionMenu() {
-        final ActionMenu menu = mActionMenu;
-        if (menu == null || mCallback == null || !mCallback.onUpdateActionMenu(menu)) {
-            return;
-        }
-        performUpdateActionMenu();
-    }
-    
-    private void performUpdateActionMenu() {
-        final ActionMenu menu = mActionMenu;
-        if (menu == null) {
-            return;
-        }
-        final Context context = getContext();
-
-        int childCount = getChildCount();
-        int childIndex = 0;
-        while (childIndex < childCount) {
-            View v = getChildAt(childIndex);
-            if (v instanceof ActionView) {
-                detachViewFromParent(childIndex);
-                childCount--;
-            } else {
-                childIndex++;
-            }
-        }
-        
-        ArrayList<ActionView> detachedViews = new ArrayList<ActionView>(mActions); 
-        final int itemCount = menu.size();
-        for (int i = 0; i < itemCount; i++) {
-            final MenuItem item = menu.getItem(i);
-            
-            boolean newView = false;
-            ActionView actionView = findActionViewForItem(item);
-            if (actionView == null) {
-                actionView = new ActionView(context);
-                newView = true;
-            }
-            actionView.actionId = item.getItemId();
-            actionView.menuItem = item;
-            actionView.actionLabel = item.getTitle();
-            actionView.setAdjustViewBounds(true);
-            actionView.setImageDrawable(item.getIcon());
-            actionView.setFocusable(true);
-            actionView.setOnClickListener(mActionClickHandler);
-            
-            LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.MATCH_PARENT, LayoutParams.ITEM_TYPE_ACTION);
-            actionView.setLayoutParams(layoutParams);
-            
-            if (newView) {
-                addView(actionView);
-                mActions.add(actionView);
-            } else {
-                attachViewToParent(actionView, -1, layoutParams);
-                detachedViews.remove(actionView);
-                actionView.invalidate();
-            }
-        }
-        
-        final int detachedCount = detachedViews.size();
-        for (int i = 0; i < detachedCount; i++) {
-            removeDetachedView(detachedViews.get(i), false);
-        }
-        
-        requestLayout();
-    }
-
-    public void addAction(int id, Drawable icon, CharSequence label, OnActionListener listener) {
-        ActionView actionView = new ActionView(getContext());
-        actionView.actionId = id;
-        actionView.actionLabel = label;
-        actionView.actionListener = listener;
-        actionView.setAdjustViewBounds(true);
-        actionView.setImageDrawable(icon);
-        actionView.setOnClickListener(mActionClickHandler);
-
-        actionView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.MATCH_PARENT, LayoutParams.ITEM_TYPE_ACTION));
-
-        addView(actionView);
-        mActions.add(actionView);
-        
-        requestLayout();
-    }
-    
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -463,7 +344,7 @@ public class ActionBarView extends ViewGroup {
                 mLogoView = new ImageView(getContext());
                 mLogoView.setAdjustViewBounds(true);
                 mLogoView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.MATCH_PARENT, LayoutParams.ITEM_TYPE_ICON));
+                        LayoutParams.MATCH_PARENT));
                 mLogoView.setImageDrawable(mLogo);
                 mLogoView.setClickable(true);
                 mLogoView.setFocusable(true);
@@ -473,7 +354,7 @@ public class ActionBarView extends ViewGroup {
                 mIconView = new ImageView(getContext());
                 mIconView.setAdjustViewBounds(true);
                 mIconView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.MATCH_PARENT, LayoutParams.ITEM_TYPE_ICON));
+                        LayoutParams.MATCH_PARENT));
                 mIconView.setImageDrawable(mIcon);
                 mIconView.setClickable(true);
                 mIconView.setFocusable(true);
@@ -508,8 +389,8 @@ public class ActionBarView extends ViewGroup {
     private void initTitle() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         mTitleView = (TextView) inflater.inflate(R.layout.action_bar_title_item, null);
-        mTitleView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT, LayoutParams.ITEM_TYPE_TITLE));
+        mTitleView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT));
         if (mTitle != null) {
             mTitleView.setText(mTitle);
         }
@@ -542,12 +423,9 @@ public class ActionBarView extends ViewGroup {
         if (mIconView != null && mIconView.getVisibility() != GONE) {
             availableWidth = measureChildView(mIconView, availableWidth, childSpecHeight, mSpacing);
         }
-
-        final ArrayList<ActionView> actions = mActions;
-        final int actionCount = actions.size();
-        for (int i = 0; i < actionCount; i++) {
-            ActionView action = actions.get(i);
-            availableWidth = measureChildView(action, availableWidth,
+        
+        if (mMenuView != null) {
+            availableWidth = measureChildView(mMenuView, availableWidth,
                     childSpecHeight, mActionSpacing);
         }
         
@@ -619,10 +497,9 @@ public class ActionBarView extends ViewGroup {
 
         x = r - l - getPaddingRight();
 
-        final int count = mActions.size();
-        for (int i = count - 1; i >= 0; i--) {
-            ActionView action = mActions.get(i);
-            x -= (positionChildInverse(action, x, y, contentHeight) + mActionSpacing);
+
+        if (mMenuView != null) {
+            x -= positionChildInverse(mMenuView, x, y, contentHeight) + mActionSpacing;
         }
     }
 
@@ -644,59 +521,5 @@ public class ActionBarView extends ViewGroup {
         child.layout(x - childWidth, childTop, x, childTop + childHeight);
 
         return childWidth;
-    }
-
-    @Override
-    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new ViewGroup.LayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        return p != null && p instanceof LayoutParams;
-    }
-
-    private static class LayoutParams extends ViewGroup.LayoutParams {
-        static final int ITEM_TYPE_UNKNOWN = -1;
-        static final int ITEM_TYPE_ICON = 0;
-        static final int ITEM_TYPE_TITLE = 1;
-        static final int ITEM_TYPE_CUSTOM_NAV = 2;
-        static final int ITEM_TYPE_ACTION = 3;
-        static final int ITEM_TYPE_MORE = 4;
-
-        int type = ITEM_TYPE_UNKNOWN;
-
-        public LayoutParams(Context c, AttributeSet attrs) {
-            super(c, attrs);
-        }
-
-        public LayoutParams(int width, int height) {
-            super(width, height);
-        }
-        
-        public LayoutParams(int width, int height, int type) {
-            this(width, height);
-            this.type = type;
-        }
-        
-
-        public LayoutParams(ViewGroup.LayoutParams source) {
-            super(source);
-        }
-    }
-
-    public interface OnActionListener {
-        void onAction(int id);
-    }
-    
-    private static class ActionView extends ImageView {
-        int actionId;
-        CharSequence actionLabel;
-        OnActionListener actionListener;
-        MenuItem menuItem;
-
-        public ActionView(Context context) {
-            super(context);
-        }
     }
 }

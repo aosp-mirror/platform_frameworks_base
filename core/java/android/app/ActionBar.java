@@ -20,7 +20,6 @@ import android.graphics.drawable.Drawable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.SpinnerAdapter;
 
 /**
@@ -154,13 +153,6 @@ public abstract class ActionBar {
     public abstract void setBackgroundDrawable(Drawable d);
     
     /**
-     * Set a drawable to use as a divider between sections of the ActionBar.
-     * 
-     * @param d Divider drawable
-     */
-    public abstract void setDividerDrawable(Drawable d);
-    
-    /**
      * @return The current custom navigation view.
      */
     public abstract View getCustomNavigationView();
@@ -207,52 +199,9 @@ public abstract class ActionBar {
     public abstract int getDisplayOptions();
     
     /**
-     * Request an update of the items in the action menu.
-     * This will result in a call to Callback.onUpdateActionMenu(Menu)
-     * and the ActionBar will update based on any changes made there.
-     */
-    public abstract void updateActionMenu();
-    
-    /**
      * Callback interface for ActionBar events. 
      */
     public interface Callback {
-        /**
-         * Initialize the always-visible contents of the action bar.
-         * You should place your menu items into <var>menu</var>.
-         * 
-         * <p>This is only called once, the first time the action bar is displayed.
-         *
-         * @param menu The action menu in which to place your items.
-         * @return You must return true for actions to be displayed;
-         *         if you return false they will not be shown.
-         *
-         * @see #onActionItemClicked(MenuItem)
-         */
-        public boolean onCreateActionMenu(Menu menu);
-
-        /**
-         * Update the action bar. This is called in response to {@link #updateActionMenu()}
-         * calls, which may be application-initiated or the result of changing fragment state.
-         * 
-         * @return true if the action bar should update based on altered menu contents,
-         *         false if no changes are necessary.
-         */
-        public boolean onUpdateActionMenu(Menu menu);
-
-        /**
-         * This hook is called whenever an action item in your action bar is clicked.
-         * The default implementation simply returns false to have the normal
-         * processing happen (sending a message to its handler). You can use this
-         * method for any items for which you would like to do processing without
-         * those other facilities.
-         * 
-         * @param item The action bar item that was selected.
-         * @return boolean Return false to allow normal menu processing to proceed,
-         *         true to consume it here.
-         */
-        public boolean onActionItemClicked(MenuItem item);
-        
         /**
          * This method is called whenever a navigation item in your action bar
          * is selected.
@@ -276,18 +225,6 @@ public abstract class ActionBar {
      * Extend this if you only need a subset of Callback functionality.
      */
     public static class SimpleCallback implements Callback {
-        public boolean onCreateActionMenu(Menu menu) {
-            return false;
-        }
-        
-        public boolean onUpdateActionMenu(Menu menu) {
-            return false;
-        }
-        
-        public boolean onActionItemClicked(MenuItem item) {
-            return false;
-        }
-        
         public boolean onCreateContextMode(int modeId, Menu menu) {
             return false;
         }

@@ -27,16 +27,17 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -54,7 +55,7 @@ public class MenuBuilder implements Menu {
     private static final String LOGTAG = "MenuBuilder";
     
     /** The number of different menu types */
-    public static final int NUM_TYPES = 3;
+    public static final int NUM_TYPES = 4;
     /** The menu type that represents the icon menu view */
     public static final int TYPE_ICON = 0;
     /** The menu type that represents the expanded menu view */
@@ -65,6 +66,11 @@ public class MenuBuilder implements Menu {
      * have an ItemView.
      */
     public static final int TYPE_DIALOG = 2;
+    
+    /**
+     * The menu type that represents a button in the application's action bar.
+     */
+    public static final int TYPE_ACTION_BUTTON = 3;
 
     private static final String VIEWS_TAG = "android:views";
     
@@ -73,6 +79,7 @@ public class MenuBuilder implements Menu {
         com.android.internal.R.style.Theme_IconMenu,
         com.android.internal.R.style.Theme_ExpandedMenu,
         0,
+        0,
     };
     
     // Order must be the same order as the TYPE_*
@@ -80,6 +87,7 @@ public class MenuBuilder implements Menu {
         com.android.internal.R.layout.icon_menu_layout,
         com.android.internal.R.layout.expanded_menu_layout,
         0,
+        com.android.internal.R.layout.action_menu_layout,
     };
 
     // Order must be the same order as the TYPE_*
@@ -87,6 +95,7 @@ public class MenuBuilder implements Menu {
         com.android.internal.R.layout.icon_menu_item_layout,
         com.android.internal.R.layout.list_menu_item_layout,
         com.android.internal.R.layout.list_menu_item_layout,
+        com.android.internal.R.layout.action_menu_item_layout,
     };
 
     private static final int[]  sCategoryToOrder = new int[] {
@@ -130,6 +139,24 @@ public class MenuBuilder implements Menu {
      * fetched from {@link #getVisibleItems()}
      */ 
     private boolean mIsVisibleItemsStale;
+    
+    /**
+     * Contains only the items that should appear in the Action Bar, if present.
+     */
+    private ArrayList<MenuItemImpl> mActionItems;
+    /**
+     * Contains items that should NOT appear in the Action Bar, if present.
+     */
+    private ArrayList<MenuItemImpl> mNonActionItems;
+    /**
+     * The number of visible action buttons permitted in this menu
+     */
+    private int mMaxActionItems;
+    /**
+     * Whether or not the items (or any one item's action state) has changed since it was
+     * last fetched.
+     */
+    private boolean mIsActionItemsStale;
 
     /**
      * Current use case is Context Menus: As Views populate the context menu, each one has
@@ -280,6 +307,10 @@ public class MenuBuilder implements Menu {
         
         mVisibleItems = new ArrayList<MenuItemImpl>();
         mIsVisibleItemsStale = true;
+        
+        mActionItems = new ArrayList<MenuItemImpl>();
+        mNonActionItems = new ArrayList<MenuItemImpl>();
+        mIsActionItemsStale = true;
         
         mShortcutsVisible =
                 (mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
@@ -900,6 +931,7 @@ public class MenuBuilder implements Menu {
     private void onItemsChanged(boolean cleared) {
         if (!mPreventDispatchingItemsChanged) {
             if (mIsVisibleItemsStale == false) mIsVisibleItemsStale = true;
+            if (mIsActionItemsStale == false) mIsActionItemsStale = true;
             
             MenuType[] menuTypes = mMenuTypes;
             for (int i = 0; i < NUM_TYPES; i++) {
@@ -920,6 +952,15 @@ public class MenuBuilder implements Menu {
         onItemsChanged(false);
     }
     
+    /**
+     * Called by {@link MenuItemImpl} when its action request status is changed.
+     * @param item The item that has gone through a change in action request status.
+     */
+    void onItemActionRequestChanged(MenuItemImpl item) {
+        // Notify of items being changed
+        onItemsChanged(false);
+    }
+    
     ArrayList<MenuItemImpl> getVisibleItems() {
         if (!mIsVisibleItemsStale) return mVisibleItems;
         
@@ -934,8 +975,63 @@ public class MenuBuilder implements Menu {
         }
         
         mIsVisibleItemsStale = false;
+        mIsActionItemsStale = true;
         
         return mVisibleItems;
+    }
+    
+    private void flagActionItems() {
+        if (!mIsActionItemsStale) {
+            return;
+        }
+        
+        final ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
+        final int itemsSize = visibleItems.size();
+        int maxActions = mMaxActionItems;
+        
+        for (int i = 0; i < itemsSize; i++) {
+            MenuItemImpl item = visibleItems.get(i);
+            if (item.requiresActionButton()) {
+                maxActions--;
+            }
+        }
+        
+        // Flag as many more requested items as will fit.
+        for (int i = 0; i < itemsSize; i++) {
+            MenuItemImpl item = visibleItems.get(i);
+            if (item.requestsActionButton()) {
+                item.setIsActionButton(maxActions > 0);
+                maxActions--;
+            }
+        }
+        
+        mActionItems.clear();
+        mNonActionItems.clear();
+        for (int i = 0; i < itemsSize; i++) {
+            MenuItemImpl item = visibleItems.get(i);
+            if (item.isActionButton()) {
+                mActionItems.add(item);
+            } else {
+                mNonActionItems.add(item);
+            }
+        }
+        
+        mIsActionItemsStale = false;
+    }
+    
+    ArrayList<MenuItemImpl> getActionItems() {
+        flagActionItems();
+        return mActionItems;
+    }
+    
+    ArrayList<MenuItemImpl> getNonActionItems() {
+        flagActionItems();
+        return mNonActionItems;
+    }
+    
+    void setMaxActionItems(int maxActionItems) {
+        mMaxActionItems = maxActionItems;
+        mIsActionItemsStale = true;
     }
 
     public void clearHeader() {

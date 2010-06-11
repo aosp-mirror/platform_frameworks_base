@@ -873,4 +873,7 @@
         <item name="android:displayOptions">useLogo</item>
         <item name="android:divider">@android:drawable/action_bar_divider</item>
     </style>
+
+    <style name="Widget.ActionButton">
+    </style>
 </resources>
