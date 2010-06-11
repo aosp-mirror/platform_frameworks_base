@@ -174,7 +174,13 @@ public abstract class Animation implements Cloneable {
      * Desired Z order mode during animation.
      */
     private int mZAdjustment;
-    
+
+    /**
+     * scalefactor to apply to pivot points, etc. during animation. Subclasses retrieve the
+     * value via getScaleFactor().
+     */
+    private float mScaleFactor = 1f;
+
     /**
      * Don't animate the wallpaper.
      */
@@ -553,6 +559,19 @@ public abstract class Animation implements Cloneable {
     }
     
     /**
+     * The scale factor is set by the call to <code>getTransformation</code>. Overrides of 
+     * {@link #getTransformation(long, Transformation, float)} will get this value
+     * directly. Overrides of {@link #applyTransformation(float, Transformation)} can
+     * call this method to get the value.
+     * 
+     * @return float The scale factor that should be applied to pre-scaled values in
+     * an Animation such as the pivot points in {@link ScaleAnimation} and {@link RotateAnimation}.
+     */
+    protected float getScaleFactor() {
+        return mScaleFactor;
+    }
+
+    /**
      * If detachWallpaper is true, and this is a window animation of a window
      * that has a wallpaper background, then the window will be detached from
      * the wallpaper while it runs.  That is, the animation will only be applied
@@ -735,6 +754,7 @@ public abstract class Animation implements Cloneable {
      * @return True if the animation is still running
      */
     public boolean getTransformation(long currentTime, Transformation outTransformation) {
+
         if (mStartTime == -1) {
             mStartTime = currentTime;
         }
@@ -805,6 +825,24 @@ public abstract class Animation implements Cloneable {
         }
 
         return mMore;
+    }
+    
+    /**
+     * Gets the transformation to apply at a specified point in time. Implementations of this
+     * method should always replace the specified Transformation or document they are doing
+     * otherwise.
+     *
+     * @param currentTime Where we are in the animation. This is wall clock time.
+     * @param outTransformation A tranformation object that is provided by the
+     *        caller and will be filled in by the animation.
+     * @param scale Scaling factor to apply to any inputs to the transform operation, such
+     *        pivot points being rotated or scaled around.
+     * @return True if the animation is still running
+     */
+    public boolean getTransformation(long currentTime, Transformation outTransformation,
+            float scale) {
+        mScaleFactor = scale;
+        return getTransformation(currentTime, outTransformation);
     }
 
     /**

@@ -161,6 +161,7 @@ public class ScaleAnimation extends Animation {
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         float sx = 1.0f;
         float sy = 1.0f;
+        float scale = getScaleFactor();
 
         if (mFromX != 1.0f || mToX != 1.0f) {
             sx = mFromX + ((mToX - mFromX) * interpolatedTime);
@@ -172,7 +173,7 @@ public class ScaleAnimation extends Animation {
         if (mPivotX == 0 && mPivotY == 0) {
             t.getMatrix().setScale(sx, sy);
         } else {
-            t.getMatrix().setScale(sx, sy, mPivotX, mPivotY);
+            t.getMatrix().setScale(sx, sy, scale * mPivotX, scale * mPivotY);
         }
     }
 

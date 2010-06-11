@@ -86,9 +86,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // The view contained within this ViewGroup that has or contains focus.
     private View mFocused;
 
-    // The current transformation to apply on the child being drawn
-    private Transformation mChildTransformation;
+    /**
+     * A Transformation used when drawing children, to
+     * apply on the child being drawn.
+     */
+    private final Transformation mChildTransformation = new Transformation();
+
+    /**
+     * Used to track the current invalidation region.
+     */
     private RectF mInvalidateRegion;
+
+    /**
+     * A Transformation used to calculate a correct
+     * invalidation area when the application is autoscaled.
+     */
+    private Transformation mInvalidationTransformation;
 
     // Target of Motion events
     private View mMotionTarget;
@@ -1482,21 +1495,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int flags = mGroupFlags;
 
         if ((flags & FLAG_CLEAR_TRANSFORMATION) == FLAG_CLEAR_TRANSFORMATION) {
-            if (mChildTransformation != null) {
-                mChildTransformation.clear();
-            }
+            mChildTransformation.clear();
             mGroupFlags &= ~FLAG_CLEAR_TRANSFORMATION;
         }
 
         Transformation transformToApply = null;
+        Transformation invalidationTransform;
         final Animation a = child.getAnimation();
         boolean concatMatrix = false;
 
+        boolean scalingRequired = false;
+        boolean caching = false;
+        if (!canvas.isHardwareAccelerated() &&
+                (flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
+                (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
+            caching = true;
+            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
+        }
+
         if (a != null) {
-            if (mInvalidateRegion == null) {
-                mInvalidateRegion = new RectF();
-            }
-            final RectF region = mInvalidateRegion;
 
             final boolean initialized = a.isInitialized();
             if (!initialized) {
@@ -1505,10 +1522,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 child.onAnimationStart();
             }
 
-            if (mChildTransformation == null) {
-                mChildTransformation = new Transformation();
+            more = a.getTransformation(drawingTime, mChildTransformation,
+                    scalingRequired ? mAttachInfo.mApplicationScale : 1f);
+            if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
+                if (mInvalidationTransformation == null) {
+                    mInvalidationTransformation = new Transformation();
+                }
+                invalidationTransform = mInvalidationTransformation;
+                a.getTransformation(drawingTime, invalidationTransform, 1f);
+            } else {
+                invalidationTransform = mChildTransformation;
             }
-            more = a.getTransformation(drawingTime, mChildTransformation);
             transformToApply = mChildTransformation;
 
             concatMatrix = a.willChangeTransformationMatrix();
@@ -1525,7 +1549,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         invalidate(cl, ct, cr, cb);
                     }
                 } else {
-                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, transformToApply);
+                    if (mInvalidateRegion == null) {
+                        mInvalidateRegion = new RectF();
+                    }
+                    final RectF region = mInvalidateRegion;
+                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, invalidationTransform);
 
                     // The child need to draw an animation, potentially offscreen, so
                     // make sure we do not cancel invalidate requests
@@ -1538,9 +1566,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
                 FLAG_SUPPORT_STATIC_TRANSFORMATIONS) {
-            if (mChildTransformation == null) {
-                mChildTransformation = new Transformation();
-            }
             final boolean hasTransform = getChildStaticTransformation(child, mChildTransformation);
             if (hasTransform) {
                 final int transformType = mChildTransformation.getTransformationType();
@@ -1564,13 +1589,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int sx = child.mScrollX;
         final int sy = child.mScrollY;
 
-        boolean scalingRequired = false;
         Bitmap cache = null;
-        if (!canvas.isHardwareAccelerated() &&
-                (flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
-                (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
+        if (caching) {
             cache = child.getDrawingCache(true);
-            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         }
 
         final boolean hasNoCache = cache == null;

@@ -312,7 +312,7 @@ public class AnimationSet extends Animation {
             final Animation a = animations.get(i);
 
             temp.clear();
-            more = a.getTransformation(currentTime, temp) || more;
+            more = a.getTransformation(currentTime, temp, getScaleFactor()) || more;
             t.compose(temp);
 
             started = started || a.hasStarted();
