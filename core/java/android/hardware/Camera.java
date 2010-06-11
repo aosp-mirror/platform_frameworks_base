@@ -90,8 +90,44 @@ public class Camera {
     public native static int getNumberOfCameras();
 
     /**
+     * Returns the information about the camera.
+     * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
+     * @hide
+     */
+    public native static void getCameraInfo(int cameraId, CameraInfo cameraInfo);
+
+    /**
+     * Information about a camera
+     * @hide
+     */
+    public static class CameraInfo {
+        public static final int CAMERA_FACING_BACK = 0;
+        public static final int CAMERA_FACING_FRONT = 1;
+
+        /**
+         * The direction that the camera faces to. It should be
+         * CAMERA_FACING_BACK or CAMERA_FACING_FRONT.
+         */
+        public int mFacing;
+
+        /**
+         * The orientation of the camera image. The value is the angle that the
+         * camera image needs to be rotated clockwise so it shows correctly on
+         * the display in its natural orientation. It should be 0, 90, 180, or 270.
+         *
+         * For example, suppose a device has a naturally tall screen, but the camera
+         * sensor is mounted in landscape. If the top side of the camera sensor is
+         * aligned with the right edge of the display in natural orientation, the
+         * value should be 90.
+         *
+         * @see #setDisplayOrientation(int)
+         */
+        public int mOrientation;
+    };
+
+    /**
      * Returns a new Camera object.
-     * If {@link #getNumberOfCameras()} returns N, the valid is is 0 to N-1.
+     * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
      * The id 0 is the default camera.
      * @hide
      */
@@ -100,10 +136,16 @@ public class Camera {
     }
 
     /**
+     * The id for the default camera.
+     * @hide
+     */
+    public static int CAMERA_ID_DEFAULT = 0;
+
+    /**
      * Returns a new Camera object. This returns the default camera.
      */
     public static Camera open() {
-        return new Camera(0);
+        return new Camera(CAMERA_ID_DEFAULT);
     }
 
     Camera(int cameraId) {
@@ -581,6 +623,18 @@ public class Camera {
      * {@link PreviewCallback#onPreviewFrame}. This method is not allowed to
      * be called during preview.
      *
+     * If you want to make the camera image show in the same orientation as
+     * the display, you can use <p>
+     * <pre>
+     *    android.view.Display display;
+     *    android.hardware.Camera.CameraInfo cameraInfo;
+     *
+     *    int rotation = getWindowManager().getDefaultDisplay().getRotation();
+     *    android.hardware.Camera.getCameraInfo(id, cameraInfo);
+     *    int degrees = (cameraInfo.mOrientation - rotation + 360) % 360;
+     *
+     *    setDisplayOrientation(degrees);
+     * </pre>
      * @param degrees the angle that the picture will be rotated clockwise.
      *                Valid values are 0, 90, 180, and 270. The starting
      *                position is 0 (landscape).

@@ -93,6 +93,32 @@ enum {
     CAMERA_ERROR_SERVER_DIED = 100
 };
 
+enum {
+    CAMERA_FACING_BACK = 0,
+    CAMERA_FACING_FRONT = 1 /* The camera faces to the user */
+};
+
+struct CameraInfo {
+
+    /**
+     * The direction that the camera faces to. It should be
+     * CAMERA_FACING_BACK or CAMERA_FACING_FRONT.
+     */
+    int facing;
+
+    /**
+     * The orientation of the camera image. The value is the angle that the
+     * camera image needs to be rotated clockwise so it shows correctly on
+     * the display in its natural orientation. It should be 0, 90, 180, or 270.
+     *
+     * For example, suppose a device has a naturally tall screen, but the camera
+     * sensor is mounted in landscape. If the top side of the camera sensor is
+     * aligned with the right edge of the display in natural orientation, the
+     * value should be 90.
+     */
+    int orientation;
+};
+
 class ICameraService;
 class ICamera;
 class Surface;
@@ -114,6 +140,8 @@ public:
             // construct a camera client from an existing remote
     static  sp<Camera>  create(const sp<ICamera>& camera);
     static  int32_t     getNumberOfCameras();
+    static  status_t    getCameraInfo(int cameraId,
+                                      struct CameraInfo* cameraInfo);
     static  sp<Camera>  connect(int cameraId);
                         ~Camera();
             void        init();

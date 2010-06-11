@@ -37,36 +37,8 @@
 #include <utils/String16.h>
 
 #include "CameraService.h"
-#ifdef INCLUDE_CAMERA_STUB
-#include "CameraHardwareStub.h"
-#endif
 
 namespace android {
-
-/* This determines the number of cameras available */
-#if defined(INCLUDE_CAMERA_HARDWARE) && defined(INCLUDE_CAMERA_STUB)
-  #define NUM_CAMERAS 2
-#elif defined(INCLUDE_CAMERA_HARDWARE) || defined(INCLUDE_CAMERA_STUB)
-  #define NUM_CAMERAS 1
-#else
-  #error "Should have at least one camera"
-#endif
-
-/* Make sure we have enough array space allocated */
-#if NUM_CAMERAS > MAX_CAMERAS
-  #error "Need to increase MAX_CAMERAS"
-#endif
-
-/* This defines the "open" function for each camera */
-extern "C" typedef sp<CameraHardwareInterface> (*OpenCameraHardwareFunction)();
-static OpenCameraHardwareFunction sOpenCameraTable[] = {
-#ifdef INCLUDE_CAMERA_HARDWARE
-    &openCameraHardware,
-#endif
-#ifdef INCLUDE_CAMERA_STUB
-    &openCameraHardwareStub,
-#endif
-};
 
 // ----------------------------------------------------------------------------
 // Logging support -- this is for debugging only
@@ -101,7 +73,14 @@ CameraService::CameraService()
 {
     LOGI("CameraService started (pid=%d)", getpid());
 
-    for (int i = 0; i < NUM_CAMERAS; i++) {
+    mNumberOfCameras = HAL_getNumberOfCameras();
+    if (mNumberOfCameras > MAX_CAMERAS) {
+        LOGE("Number of cameras(%d) > MAX_CAMERAS(%d).",
+             mNumberOfCameras, MAX_CAMERAS);
+        mNumberOfCameras = MAX_CAMERAS;
+    }
+
+    for (int i = 0; i < mNumberOfCameras; i++) {
         setCameraFree(i);
     }
 
@@ -109,7 +88,7 @@ CameraService::CameraService()
 }
 
 CameraService::~CameraService() {
-    for (int i = 0; i < NUM_CAMERAS; i++) {
+    for (int i = 0; i < mNumberOfCameras; i++) {
         if (mBusy[i]) {
             LOGE("camera %d is still in use in destructor!", i);
         }
@@ -119,7 +98,17 @@ CameraService::~CameraService() {
 }
 
 int32_t CameraService::getNumberOfCameras() {
-    return NUM_CAMERAS;
+    return mNumberOfCameras;
+}
+
+status_t CameraService::getCameraInfo(int cameraId,
+                                      struct CameraInfo* cameraInfo) {
+    if (cameraId < 0 || cameraId >= mNumberOfCameras) {
+        return BAD_VALUE;
+    }
+
+    HAL_getCameraInfo(cameraId, cameraInfo);
+    return OK;
 }
 
 sp<ICamera> CameraService::connect(
@@ -128,7 +117,7 @@ sp<ICamera> CameraService::connect(
     LOG1("CameraService::connect E (pid %d, id %d)", callingPid, cameraId);
 
     sp<Client> client;
-    if (cameraId < 0 || cameraId >= NUM_CAMERAS) {
+    if (cameraId < 0 || cameraId >= mNumberOfCameras) {
         LOGE("CameraService::connect X (pid %d) rejected (invalid cameraId %d).",
             callingPid, cameraId);
         return NULL;
@@ -167,7 +156,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient) {
     int callingPid = getCallingPid();
     LOG1("CameraService::removeClient E (pid %d)", callingPid);
 
-    for (int i = 0; i < NUM_CAMERAS; i++) {
+    for (int i = 0; i < mNumberOfCameras; i++) {
         // Declare this before the lock to make absolutely sure the
         // destructor won't be called with the lock held.
         sp<Client> client;
@@ -199,7 +188,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient) {
 }
 
 sp<CameraService::Client> CameraService::getClientById(int cameraId) {
-    if (cameraId < 0 || cameraId >= NUM_CAMERAS) return NULL;
+    if (cameraId < 0 || cameraId >= mNumberOfCameras) return NULL;
     return mClient[cameraId].promote();
 }
 
@@ -311,7 +300,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mCameraId = cameraId;
     mClientPid = clientPid;
 
-    mHardware = sOpenCameraTable[cameraId]();
+    mHardware = HAL_openCameraHardware(cameraId);
     mUseOverlay = mHardware->useOverlay();
     mMsgEnabled = 0;
 
@@ -1246,7 +1235,7 @@ status_t CameraService::dump(int fd, const Vector<String16>& args) {
         }
 
         bool hasClient = false;
-        for (int i = 0; i < NUM_CAMERAS; i++) {
+        for (int i = 0; i < mNumberOfCameras; i++) {
             sp<Client> client = mClient[i].promote();
             if (client == 0) continue;
             hasClient = true;
