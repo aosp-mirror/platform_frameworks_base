@@ -259,6 +259,12 @@ public class FragmentManager {
                     if (newState < Fragment.CONTENT) {
                         if (DEBUG) Log.v(TAG, "movefrom CONTENT: " + f);
                         if (f.mView != null) {
+                            f.mCalled = false;
+                            f.onDestroyView();
+                            if (!f.mCalled) {
+                                throw new SuperNotCalledException("Fragment " + f
+                                        + " did not call through to super.onDestroyedView()");
+                            }
                             // Need to save the current view state if not
                             // done already.
                             if (!mActivity.isFinishing() && f.mSavedFragmentState == null) {
@@ -773,6 +779,20 @@ public class FragmentManager {
                 Fragment f = mAdded.get(i);
                 if (f != null && !f.mHidden && f.mHasMenu) {
                     if (f.onOptionsItemSelected(item)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean dispatchContextItemSelected(MenuItem item) {
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null && !f.mHidden) {
+                    if (f.onContextItemSelected(item)) {
                         return true;
                     }
                 }

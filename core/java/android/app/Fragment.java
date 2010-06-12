@@ -24,13 +24,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.animation.Animation;
+import android.widget.AdapterView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -129,7 +133,7 @@ final class FragmentState implements Parcelable {
  * A Fragment is a piece of an application's user interface or behavior
  * that can be placed in an {@link Activity}.
  */
-public class Fragment implements ComponentCallbacks {
+public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener {
     private static final HashMap<String, Class> sClassMap =
             new HashMap<String, Class>();
     
@@ -456,6 +460,9 @@ public class Fragment implements ComponentCallbacks {
      * is the default implementation).  This will be called between
      * {@link #onCreate(Bundle)} and {@link #onReady(Bundle)}.
      * 
+     * <p>If you return a View from here, you will later be called in
+     * {@link #onDestroyView} when the view is being released.
+     * 
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
      * @param container If non-null, this is the parent view that the fragment's
@@ -479,7 +486,7 @@ public class Fragment implements ComponentCallbacks {
      * Called when the activity is ready for the fragment to run.  This is
      * most useful for fragments that use {@link #setRetainInstance(boolean)}
      * instance, as this tells the fragment when it is fully associated with
-     * the new activity instance.  This is called after {@link #onCreate(Bundle)}
+     * the new activity instance.  This is called after {@link #onCreateView}
      * and before {@link #onStart()}.
      * 
      * @param savedInstanceState If the fragment is being re-created from
@@ -538,6 +545,17 @@ public class Fragment implements ComponentCallbacks {
     }
     
     /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.  The next time the fragment needs
+     * to be displayed, a new view will be created.  This is called
+     * after {@link #onStop()} and before {@link #onDestroy()}; it is only
+     * called if {@link #onCreateView} returns a non-null View.
+     */
+    public void onDestroyView() {
+        mCalled = true;
+    }
+    
+    /**
      * Called when the fragment is no longer in use.  This is called
      * after {@link #onStop()} and before {@link #onDetach()}.
      */
@@ -556,8 +574,9 @@ public class Fragment implements ComponentCallbacks {
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.  For this method
-     * to be called, you must have first called {@link #setHasOptionsMenu}.
-     * See {@link Activity#onCreateOptionsMenu} for more information.
+     * to be called, you must have first called {@link #setHasOptionsMenu}.  See
+     * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
+     * for more information.
      * 
      * @param menu The options menu in which you place your items.
      * 
@@ -615,5 +634,72 @@ public class Fragment implements ComponentCallbacks {
      *             onCreateOptionsMenu().
      */
     public void onOptionsMenuClosed(Menu menu) {
+    }
+    
+    /**
+     * Called when a context menu for the {@code view} is about to be shown.
+     * Unlike {@link #onCreateOptionsMenu}, this will be called every
+     * time the context menu is about to be shown and should be populated for
+     * the view (or item inside the view for {@link AdapterView} subclasses,
+     * this can be found in the {@code menuInfo})).
+     * <p>
+     * Use {@link #onContextItemSelected(android.view.MenuItem)} to know when an
+     * item has been selected.
+     * <p>
+     * The default implementation calls up to
+     * {@link Activity#onCreateContextMenu Activity.onCreateContextMenu}, though
+     * you can not call this implementation if you don't want that behavior.
+     * <p>
+     * It is not safe to hold onto the context menu after this method returns.
+     * {@inheritDoc}
+     */
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        getActivity().onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    /**
+     * Registers a context menu to be shown for the given view (multiple views
+     * can show the context menu). This method will set the
+     * {@link OnCreateContextMenuListener} on the view to this fragment, so
+     * {@link #onCreateContextMenu(ContextMenu, View, ContextMenuInfo)} will be
+     * called when it is time to show the context menu.
+     * 
+     * @see #unregisterForContextMenu(View)
+     * @param view The view that should show a context menu.
+     */
+    public void registerForContextMenu(View view) {
+        view.setOnCreateContextMenuListener(this);
+    }
+    
+    /**
+     * Prevents a context menu to be shown for the given view. This method will
+     * remove the {@link OnCreateContextMenuListener} on the view.
+     * 
+     * @see #registerForContextMenu(View)
+     * @param view The view that should stop showing a context menu.
+     */
+    public void unregisterForContextMenu(View view) {
+        view.setOnCreateContextMenuListener(null);
+    }
+    
+    /**
+     * This hook is called whenever an item in a context menu is selected. The
+     * default implementation simply returns false to have the normal processing
+     * happen (calling the item's Runnable or sending a message to its Handler
+     * as appropriate). You can use this method for any items for which you
+     * would like to do processing without those other facilities.
+     * <p>
+     * Use {@link MenuItem#getMenuInfo()} to get extra information set by the
+     * View that added this menu item.
+     * <p>
+     * Derived classes should call through to the base class for it to perform
+     * the default menu handling.
+     * 
+     * @param item The context menu item that was selected.
+     * @return boolean Return false to allow normal context menu processing to
+     *         proceed, true to consume it here.
+     */
+    public boolean onContextItemSelected(MenuItem item) {
+        return false;
     }
 }

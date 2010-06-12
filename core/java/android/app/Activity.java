@@ -2296,7 +2296,10 @@ public class Activity extends ContextThemeWrapper
                 
             case Window.FEATURE_CONTEXT_MENU:
                 EventLog.writeEvent(50000, 1, item.getTitleCondensed());
-                return onContextItemSelected(item);
+                if (onContextItemSelected(item)) {
+                    return true;
+                }
+                return mFragments.dispatchContextItemSelected(item);
                 
             default:
                 return false;

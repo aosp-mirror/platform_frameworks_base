@@ -27,7 +27,8 @@ import android.text.TextWatcher;
 import java.util.Locale;
 
 /**
- * Watches a TextView and if a phone number is entered will format it.
+ * Watches a {@link android.widget.TextView} and if a phone number is entered
+ * will format it.
  * <p>
  * Stop formatting when the user
  * <ul>
