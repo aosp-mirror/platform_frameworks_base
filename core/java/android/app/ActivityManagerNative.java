@@ -1065,8 +1065,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder app = data.readStrongBinder();
+            int violationMask = data.readInt();
             ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
-            handleApplicationStrictModeViolation(app, ci);
+            handleApplicationStrictModeViolation(app, violationMask, ci);
             reply.writeNoException();
             return true;
         }
@@ -2551,12 +2552,14 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public void handleApplicationStrictModeViolation(IBinder app,
+            int violationMask,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(app);
+        data.writeInt(violationMask);
         crashInfo.writeToParcel(data, 0);
         mRemote.transact(HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION, data, reply, 0);
         reply.readException();

@@ -52,7 +52,6 @@ public class ApplicationErrorReport implements Parcelable {
     // System property defining default error report receiver
     static final String DEFAULT_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.default";
 
-    
     /**
      * Uninitialized error report.
      */
@@ -72,6 +71,11 @@ public class ApplicationErrorReport implements Parcelable {
      * An error report about an application that's consuming too much battery.
      */
     public static final int TYPE_BATTERY = 3;
+
+    /**
+     * An error report about a StrictMode violation.
+     */
+    public static final int TYPE_STRICT_MODE_VIOLATION = 4;
 
     /**
      * Type of this report. Can be one of {@link #TYPE_NONE},
