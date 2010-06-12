@@ -23,12 +23,20 @@ import com.android.internal.os.RuntimeInit;
 
 import dalvik.system.BlockGuard;
 
+import java.util.HashMap;
+
 /**
  * <p>StrictMode lets you impose stricter rules under which your
  * application runs.</p>
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";
+
+    // Only log a duplicate stack trace to the logs every second.
+    private static final long MIN_LOG_INTERVAL_MS = 1000;
+
+    // Only show an annoying dialog at most every 30 seconds
+    private static final long MIN_DIALOG_INTERVAL_MS = 30000;
 
     private StrictMode() {}
 
@@ -73,6 +81,10 @@ public final class StrictMode {
      * @param policyMask a bitmask of DISALLOW_* and PENALTY_* values.
      */
     public static void setThreadBlockingPolicy(final int policyMask) {
+        if (policyMask == 0) {
+            BlockGuard.setThreadPolicy(BlockGuard.LAX_POLICY);
+            return;
+        }
         BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
         if (!(policy instanceof AndroidBlockGuardPolicy)) {
             BlockGuard.setThreadPolicy(new AndroidBlockGuardPolicy(policyMask));
@@ -91,19 +103,13 @@ public final class StrictMode {
         return BlockGuard.getThreadPolicy().getPolicyMask();
     }
 
-    /** @hide */
-    public static void setDropBoxManager(DropBoxManager dropBoxManager) {
-        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
-        if (!(policy instanceof AndroidBlockGuardPolicy)) {
-            policy = new AndroidBlockGuardPolicy(0);
-            BlockGuard.setThreadPolicy(policy);
-        }
-        ((AndroidBlockGuardPolicy) policy).setDropBoxManager(dropBoxManager);
-    }
-
     private static class AndroidBlockGuardPolicy implements BlockGuard.Policy {
         private int mPolicyMask;
-        private DropBoxManager mDropBoxManager = null;
+
+        // Map from violation stacktrace hashcode -> uptimeMillis of
+        // last violation.  No locking needed, as this is only
+        // accessed by the same thread.
+        private final HashMap<Integer, Long> mLastViolationTime = new HashMap<Integer, Long>();
 
         public AndroidBlockGuardPolicy(final int policyMask) {
             mPolicyMask = policyMask;
@@ -142,10 +148,6 @@ public final class StrictMode {
             mPolicyMask = policyMask;
         }
 
-        public void setDropBoxManager(DropBoxManager dropBoxManager) {
-            mDropBoxManager = dropBoxManager;
-        }
-
         private void handleViolation(int violationBit) {
             final BlockGuard.BlockGuardPolicyException violation =
                     new BlockGuard.BlockGuardPolicyException(mPolicyMask, violationBit);
@@ -182,7 +184,23 @@ public final class StrictMode {
             // the old policy here.
             int policy = violation.getPolicy();
 
-            if ((policy & PENALTY_LOG) != 0) {
+            // Not _really_ a Crash, but we use the same data structure...
+            ApplicationErrorReport.CrashInfo crashInfo =
+                    new ApplicationErrorReport.CrashInfo(violation);
+
+            // Not perfect, but fast and good enough for dup suppression.
+            Integer crashFingerprint = crashInfo.stackTrace.hashCode();
+            long lastViolationTime = 0;
+            if (mLastViolationTime.containsKey(crashFingerprint)) {
+                lastViolationTime = mLastViolationTime.get(crashFingerprint);
+            }
+            long now = SystemClock.uptimeMillis();
+            mLastViolationTime.put(crashFingerprint, now);
+            long timeSinceLastViolationMillis = lastViolationTime == 0 ?
+                    Long.MAX_VALUE : (now - lastViolationTime);
+
+            if ((policy & PENALTY_LOG) != 0 &&
+                timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
                 if (durationMillis != -1) {
                     Log.d(TAG, "StrictMode policy violation; ~duration=" + durationMillis + " ms",
                           violation);
@@ -191,22 +209,31 @@ public final class StrictMode {
                 }
             }
 
-            if ((policy & PENALTY_DIALOG) != 0) {
-                // Currently this is just used for the dialog.
+            // The violationMask, passed to ActivityManager, is a
+            // subset of the original StrictMode policy bitmask, with
+            // only the bit violated and penalty bits to be executed
+            // by the ActivityManagerService remaining set.
+            int violationMask = 0;
+
+            if ((policy & PENALTY_DIALOG) != 0 &&
+                timeSinceLastViolationMillis > MIN_DIALOG_INTERVAL_MS) {
+                violationMask |= PENALTY_DIALOG;
+            }
+
+            if ((policy & PENALTY_DROPBOX) != 0 && lastViolationTime == 0) {
+                violationMask |= PENALTY_DROPBOX;
+            }
+
+            if (violationMask != 0) {
+                violationMask |= violation.getPolicyViolation();
                 try {
                     ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
                         RuntimeInit.getApplicationObject(),
+                        violationMask,
                         new ApplicationErrorReport.CrashInfo(violation));
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException trying to open strict mode dialog", e);
+                    Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
                 }
-            }
-
-            if ((policy & PENALTY_DROPBOX) != 0) {
-                // TODO: call into ActivityManagerNative to do the dropboxing.
-                // But do the first-layer signature dup-checking first client-side.
-                // This conditional should be combined with the above, too, along
-                // with PENALTY_DEATH below.
             }
 
             if ((policy & PENALTY_DEATH) != 0) {

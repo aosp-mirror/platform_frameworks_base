@@ -80,9 +80,6 @@ class AppErrorDialog extends BaseErrorDialog {
                 DISMISS_TIMEOUT);
     }
 
-    public void onStop() {
-    }
-
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             synchronized (mProc) {
