@@ -360,7 +360,7 @@ public class Fragment implements ComponentCallbacks {
     
     /**
      * Report that this fragment would like to participate in populating
-     * the options menu by receiving a call to {@link #onCreateOptionsMenu(Menu)}
+     * the options menu by receiving a call to {@link #onCreateOptionsMenu}
      * and related methods.
      * 
      * @param hasMenu If true, the fragment has menu items to contribute.
@@ -556,13 +556,12 @@ public class Fragment implements ComponentCallbacks {
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.  For this method
-     * to be called, you must have first called {@link #setHasMenu}.  See
-     * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
-     * for more information.
+     * to be called, you must have first called {@link #setHasOptionsMenu}.
+     * See {@link Activity#onCreateOptionsMenu} for more information.
      * 
      * @param menu The options menu in which you place your items.
      * 
-     * @see #setHasMenu
+     * @see #setHasOptionsMenu
      * @see #onPrepareOptionsMenu
      * @see #onOptionsItemSelected
      */
@@ -580,7 +579,7 @@ public class Fragment implements ComponentCallbacks {
      * @param menu The options menu as last shown or first initialized by
      *             onCreateOptionsMenu().
      * 
-     * @see #setHasMenu
+     * @see #setHasOptionsMenu
      * @see #onCreateOptionsMenu
      */
     public void onPrepareOptionsMenu(Menu menu) {

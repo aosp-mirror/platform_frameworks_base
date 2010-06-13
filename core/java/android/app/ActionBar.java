@@ -52,7 +52,7 @@ public abstract class ActionBar {
     
     /**
      * Custom navigation mode. This navigation mode is set implicitly whenever
-     * a custom navigation view is set. See {@link #setCustomNavigationView(View)}.
+     * a custom navigation view is set. See {@link #setCustomNavigationMode(View)}.
      */
     public static final int NAVIGATION_MODE_CUSTOM = 3;
 
