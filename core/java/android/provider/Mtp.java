@@ -41,6 +41,10 @@ public final class Mtp
 
         public static final Uri CONTENT_URI = Uri.parse(CONTENT_AUTHORITY_SLASH + "device");
 
+        public static Uri getContentUri(int deviceID) {
+            return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID);
+        }
+
         /**
          * The manufacturer of the device
          * <P>Type: TEXT</P>

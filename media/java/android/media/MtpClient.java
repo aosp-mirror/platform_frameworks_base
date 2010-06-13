@@ -25,12 +25,18 @@ public class MtpClient {
 
     private static final String TAG = "MtpClient";
 
+    private final Listener mListener;
+
     static {
         System.loadLibrary("media_jni");
     }
 
-    public MtpClient() {
+    public MtpClient(Listener listener) {
         native_setup();
+        if (listener == null) {
+            throw new NullPointerException("MtpClient: listener is null");
+        }
+        mListener = listener;
     }
 
     @Override
@@ -73,12 +79,24 @@ public class MtpClient {
         }
     }
 
-    private void deviceAdded(int id) {
-        Log.d(TAG, "deviceAdded " + id);
+    public interface Listener {
+        // called when a new MTP device has been discovered
+        void deviceAdded(int id);
+
+        // called when an MTP device has been removed
+        void deviceRemoved(int id);
     }
 
+    // called from native code
+    private void deviceAdded(int id) {
+        Log.d(TAG, "deviceAdded " + id);
+        mListener.deviceAdded(id);
+    }
+
+    // called from native code
     private void deviceRemoved(int id) {
         Log.d(TAG, "deviceRemoved " + id);
+        mListener.deviceRemoved(id);
     }
 
     private MtpEventThread mEventThread;
