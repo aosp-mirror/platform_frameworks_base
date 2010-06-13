@@ -17,10 +17,13 @@
 package com.android.camerabrowser;
 
 import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Mtp;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +39,23 @@ public class CameraBrowser extends ListActivity {
     private static final String TAG = "CameraBrowser";
 
     private ListAdapter mAdapter;
+    private ContentResolver mResolver;
+    private DeviceObserver mDeviceObserver;
+    private Cursor mCursor;
+
+    private class DeviceObserver extends ContentObserver {
+        DeviceObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            Log.d(TAG, "DeviceObserver.onChange");
+            if (mCursor != null) {
+                mCursor.requery();
+            }
+        }
+    }
 
     private static final String[] DEVICE_COLUMNS =
          new String[] { Mtp.Device._ID, Mtp.Device.MANUFACTURER, Mtp.Device.MODEL };
@@ -43,6 +63,8 @@ public class CameraBrowser extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mResolver = getContentResolver();
+        mDeviceObserver = new DeviceObserver(new Handler());
     }
 
     @Override
@@ -53,6 +75,7 @@ public class CameraBrowser extends ListActivity {
                 DEVICE_COLUMNS, null, null, null);
         Log.d(TAG, "query returned " + c);
         startManagingCursor(c);
+        mCursor = c;
 
         // Map Cursor columns to views defined in simple_list_item_2.xml
         mAdapter = new SimpleCursorAdapter(this,
@@ -60,6 +83,15 @@ public class CameraBrowser extends ListActivity {
                         new String[] { Mtp.Device.MANUFACTURER, Mtp.Device.MODEL },
                         new int[] { android.R.id.text1, android.R.id.text2 });
         setListAdapter(mAdapter);
+
+        // register for changes to the device list
+        mResolver.registerContentObserver(Mtp.Device.CONTENT_URI, true, mDeviceObserver);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mResolver.unregisterContentObserver(mDeviceObserver);
     }
 
     @Override
