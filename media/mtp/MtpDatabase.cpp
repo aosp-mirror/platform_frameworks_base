@@ -122,6 +122,7 @@ static bool getPropertyInfo(MtpObjectProperty property, int& type, const char*& 
 
 MtpDatabase::MtpDatabase()
     :   mFileIdQuery(NULL),
+        mFilePathQuery(NULL),
         mObjectInfoQuery(NULL),
         mFileInserter(NULL),
         mFileDeleter(NULL),
