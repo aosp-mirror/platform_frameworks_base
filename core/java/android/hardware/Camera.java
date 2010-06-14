@@ -624,16 +624,26 @@ public class Camera {
      * be called during preview.
      *
      * If you want to make the camera image show in the same orientation as
-     * the display, you can use <p>
+     * the display, you can use the following code.<p>
      * <pre>
-     *    android.view.Display display;
-     *    android.hardware.Camera.CameraInfo cameraInfo;
+     * public static void setCameraDisplayOrientation(Activity activity,
+     *         int cameraId, android.hardware.Camera camera) {
+     *     android.hardware.Camera.CameraInfo info =
+     *             new android.hardware.Camera.CameraInfo();
+     *     android.hardware.Camera.getCameraInfo(cameraId, info);
+     *     int rotation = activity.getWindowManager().getDefaultDisplay()
+     *             .getRotation();
+     *     int degrees = 0;
+     *     switch (rotation) {
+     *         case Surface.ROTATION_0: degrees = 0; break;
+     *         case Surface.ROTATION_90: degrees = 90; break;
+     *         case Surface.ROTATION_180: degrees = 180; break;
+     *         case Surface.ROTATION_270: degrees = 270; break;
+     *     }
      *
-     *    int rotation = getWindowManager().getDefaultDisplay().getRotation();
-     *    android.hardware.Camera.getCameraInfo(id, cameraInfo);
-     *    int degrees = (cameraInfo.mOrientation - rotation + 360) % 360;
-     *
-     *    setDisplayOrientation(degrees);
+     *     int result = (info.mOrientation - degrees + 360) % 360;
+     *     camera.setDisplayOrientation(result);
+     * }
      * </pre>
      * @param degrees the angle that the picture will be rotated clockwise.
      *                Valid values are 0, 90, 180, and 270. The starting
