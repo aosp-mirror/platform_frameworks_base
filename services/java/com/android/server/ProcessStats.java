@@ -687,7 +687,7 @@ public class ProcessStats {
                         break;
                     }
                 }
-                return new String(mBuffer, 0, 0, i);
+                return new String(mBuffer, 0, i);
             }
         } catch (java.io.FileNotFoundException e) {
         } catch (java.io.IOException e) {
