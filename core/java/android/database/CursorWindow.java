@@ -224,8 +224,6 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         return getType(row, col) == Cursor.FIELD_TYPE_NULL;
     }
     
-    private native boolean isNull_native(int row, int col);
-    
     /**
      * Returns a byte array for the given field.
      *
@@ -280,7 +278,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     @Deprecated
     public boolean isBlob(int row, int col) {
-        return getType(row, col) == Cursor.FIELD_TYPE_BLOB;
+        int type = getType(row, col);
+        return type == Cursor.FIELD_TYPE_BLOB || type == Cursor.FIELD_TYPE_NULL;
     }
 
     /**
@@ -319,13 +318,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     @Deprecated
     public boolean isString(int row, int col) {
-        return getType(row, col) == Cursor.FIELD_TYPE_STRING;
+        int type = getType(row, col);
+        return type == Cursor.FIELD_TYPE_STRING || type == Cursor.FIELD_TYPE_NULL;
     }
 
-    private native boolean isBlob_native(int row, int col);
-    private native boolean isString_native(int row, int col);
-    private native boolean isInteger_native(int row, int col);
-    private native boolean isFloat_native(int row, int col);
     private native int getType_native(int row, int col);
 
     /**
