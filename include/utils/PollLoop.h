@@ -20,7 +20,7 @@
 #include <utils/Vector.h>
 #include <utils/threads.h>
 
-#include <poll.h>
+#include <sys/poll.h>
 
 namespace android {
 
