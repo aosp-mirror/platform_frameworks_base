@@ -648,6 +648,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             = new HashMap<PendingIntentRecord.Key, WeakReference<PendingIntentRecord>>();
 
     /**
+     * Fingerprints (String.hashCode()) of stack traces that we've
+     * already logged DropBox entries for.  Guarded by itself.  If
+     * something (rogue user app) forces this over
+     * MAX_DUP_SUPPRESSED_STACKS entries, the contents are cleared.
+     */
+    private final HashSet<Integer> mAlreadyLoggedViolatedStacks = new HashSet<Integer>();
+    private static final int MAX_DUP_SUPPRESSED_STACKS = 5000;
+
+    /**
      * Intent broadcast that we have tried to start, but are
      * waiting for its application's process to be created.  We only
      * need one (instead of a list) because we always process broadcasts
@@ -9357,12 +9366,29 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public void handleApplicationStrictModeViolation(
         IBinder app, int violationMask, ApplicationErrorReport.CrashInfo crashInfo) {
         ProcessRecord r = findAppProcess(app);
-        // TODO: implement
-        Log.w(TAG, "handleApplicationStrictModeViolation.");
 
         if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
-            Integer crashFingerprint = crashInfo.stackTrace.hashCode();
-            Log.d(TAG, "supposed to drop box for fingerprint " + crashFingerprint);
+            Integer stackFingerprint = crashInfo.stackTrace.hashCode();
+            boolean logIt = true;
+            synchronized (mAlreadyLoggedViolatedStacks) {
+                if (mAlreadyLoggedViolatedStacks.contains(stackFingerprint)) {
+                    logIt = false;
+                    // TODO: sub-sample into EventLog for these, with
+                    // the crashInfo.durationMillis?  Then we'd get
+                    // the relative pain numbers, without logging all
+                    // the stack traces repeatedly.  We'd want to do
+                    // likewise in the client code, which also does
+                    // dup suppression, before the Binder call.
+                } else {
+                    if (mAlreadyLoggedViolatedStacks.size() >= MAX_DUP_SUPPRESSED_STACKS) {
+                        mAlreadyLoggedViolatedStacks.clear();
+                    }
+                    mAlreadyLoggedViolatedStacks.add(stackFingerprint);
+                }
+            }
+            if (logIt) {
+                addErrorToDropBox("strictmode", r, null, null, null, null, null, crashInfo);
+            }
         }
 
         if ((violationMask & StrictMode.PENALTY_DIALOG) != 0) {
@@ -9375,6 +9401,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 HashMap<String, Object> data = new HashMap<String, Object>();
                 data.put("result", result);
                 data.put("app", r);
+                data.put("violationMask", violationMask);
+                data.put("crashInfo", crashInfo);
                 msg.obj = data;
                 mHandler.sendMessage(msg);
 
@@ -9510,6 +9538,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             sb.append("Subject: ").append(subject).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+        if (crashInfo.durationMillis != -1) {
+            sb.append("Duration-Millis: ").append(crashInfo.durationMillis).append("\n");
+        }
         sb.append("\n");
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
