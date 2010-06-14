@@ -127,6 +127,7 @@ public class KeyEvent implements Parcelable {
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
+    //  native/include/android/keycodes.h
     //  frameworks/base/include/ui/KeycodeLabels.h
     //  tools/puppet_master/PuppetMaster/nav_keys.py
     //  frameworks/base/core/res/res/values/attrs.xml
@@ -162,7 +163,7 @@ public class KeyEvent implements Parcelable {
      * key code is not {#link {@link #KEYCODE_UNKNOWN} then the
      * {#link {@link #getRepeatCount()} method returns the number of times
      * the given key code should be executed.
-     * Otherwise, if the key code {@link #KEYCODE_UNKNOWN}, then
+     * Otherwise, if the key code is {@link #KEYCODE_UNKNOWN}, then
      * this is a sequence of characters as returned by {@link #getCharacters}.
      */
     public static final int ACTION_MULTIPLE         = 2;
@@ -330,7 +331,7 @@ public class KeyEvent implements Parcelable {
     private int mMetaState;
     private int mAction;
     private int mKeyCode;
-    private int mScancode;
+    private int mScanCode;
     private int mRepeatCount;
     private int mDeviceId;
     private int mFlags;
@@ -480,7 +481,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = repeat;
         mMetaState = metaState;
         mDeviceId = device;
-        mScancode = scancode;
+        mScanCode = scancode;
     }
 
     /**
@@ -510,7 +511,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = repeat;
         mMetaState = metaState;
         mDeviceId = device;
-        mScancode = scancode;
+        mScanCode = scancode;
         mFlags = flags;
     }
 
@@ -547,7 +548,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = origEvent.mRepeatCount;
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
-        mScancode = origEvent.mScancode;
+        mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
     }
@@ -572,7 +573,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = newRepeat;
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
-        mScancode = origEvent.mScancode;
+        mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
     }
@@ -625,7 +626,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = origEvent.mRepeatCount;
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
-        mScancode = origEvent.mScancode;
+        mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         // Don't copy mCharacters, since one way or the other we'll lose it
         // when changing the action.
@@ -859,7 +860,7 @@ public class KeyEvent implements Parcelable {
      * Mostly this is here for debugging purposes.
      */
     public final int getScanCode() {
-        return mScancode;
+        return mScanCode;
     }
 
     /**
@@ -1183,7 +1184,7 @@ public class KeyEvent implements Parcelable {
     public String toString() {
         return "KeyEvent{action=" + mAction + " code=" + mKeyCode
             + " repeat=" + mRepeatCount
-            + " meta=" + mMetaState + " scancode=" + mScancode
+            + " meta=" + mMetaState + " scancode=" + mScanCode
             + " mFlags=" + mFlags + "}";
     }
 
@@ -1208,7 +1209,7 @@ public class KeyEvent implements Parcelable {
         out.writeInt(mRepeatCount);
         out.writeInt(mMetaState);
         out.writeInt(mDeviceId);
-        out.writeInt(mScancode);
+        out.writeInt(mScanCode);
         out.writeInt(mFlags);
         out.writeLong(mDownTime);
         out.writeLong(mEventTime);
@@ -1220,7 +1221,7 @@ public class KeyEvent implements Parcelable {
         mRepeatCount = in.readInt();
         mMetaState = in.readInt();
         mDeviceId = in.readInt();
-        mScancode = in.readInt();
+        mScanCode = in.readInt();
         mFlags = in.readInt();
         mDownTime = in.readLong();
         mEventTime = in.readLong();

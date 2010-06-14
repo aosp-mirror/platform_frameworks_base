@@ -21,6 +21,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -33,6 +34,9 @@ import android.view.Surface;
  */
 interface IWindowSession {
     int add(IWindow window, in WindowManager.LayoutParams attrs,
+            in int viewVisibility, out Rect outContentInsets,
+            out InputChannel outInputChannel);
+    int addWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets);
     void remove(IWindow window);
     

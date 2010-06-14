@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
+import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.KeyEvent;
@@ -990,12 +991,20 @@ public final class Bridge implements ILayoutBridge {
     private static final class WindowSession implements IWindowSession {
 
         @SuppressWarnings("unused")
-        public int add(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3)
+        public int add(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3,
+                InputChannel outInputchannel)
                 throws RemoteException {
             // pass for now.
             return 0;
         }
 
+        @SuppressWarnings("unused")
+        public int addWithoutInputChannel(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3)
+                throws RemoteException {
+            // pass for now.
+            return 0;
+        }
+        
         @SuppressWarnings("unused")
         public void finishDrawing(IWindow arg0) throws RemoteException {
             // pass for now.

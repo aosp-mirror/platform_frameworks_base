@@ -80,38 +80,6 @@ static void android_view_ViewRoot_abandonGlCaches(JNIEnv* env, jobject) {
     SkGLCanvas::AbandonAllTextures();
 }
 
-static jintArray android_view_ViewRoot_makeInputChannel(JNIEnv* env, jobject) {
-    int fd[2];
-    jint* arrayData = NULL;
-
-    // Create the pipe
-    int err = socketpair(AF_LOCAL, SOCK_STREAM, 0, fd);
-    if (err != 0) {
-        fprintf(stderr, "socketpair() failed: %d\n", errno);
-        doThrow(env, "java/lang/RuntimeException", "Unable to create pipe");
-        return NULL;
-    }
-
-    // Set up the return array
-    jintArray array = env->NewIntArray(2);
-    if (env->ExceptionCheck()) {
-        fprintf(stderr, "Exception allocating fd array");
-        goto bail;
-    }
-
-    arrayData = env->GetIntArrayElements(array, 0);
-    arrayData[0] = fd[0];
-    arrayData[1] = fd[1];
-    env->ReleaseIntArrayElements(array, arrayData, 0);
-
-    return array;
-
-bail:
-    env->DeleteLocalRef(array);
-    close(fd[0]);
-    close(fd[1]);
-    return NULL;
-}
 
 // ----------------------------------------------------------------------------
 
@@ -121,9 +89,7 @@ static JNINativeMethod gMethods[] = {
     {   "nativeShowFPS", "(Landroid/graphics/Canvas;I)V",
                                         (void*)android_view_ViewRoot_showFPS },
     {   "nativeAbandonGlCaches", "()V", 
-                                (void*)android_view_ViewRoot_abandonGlCaches },
-    {   "makeInputChannel", "()[I",
-                                        (void*)android_view_ViewRoot_makeInputChannel }
+                                (void*)android_view_ViewRoot_abandonGlCaches }
 };
 
 int register_android_view_ViewRoot(JNIEnv* env) {
