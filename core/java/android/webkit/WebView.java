@@ -3675,6 +3675,16 @@ public class WebView extends AbsoluteLayout
             }
         }
 
+        if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
+            pageUp(false);
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
+            pageDown(false);
+            return true;
+        }
+
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
