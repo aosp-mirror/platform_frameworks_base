@@ -26,7 +26,6 @@ commonSources:= \
 	Debug.cpp \
 	FileMap.cpp \
 	Flattenable.cpp \
-	PollLoop.cpp \
 	Pool.cpp \
 	RefBase.cpp \
 	ResourceTypes.cpp \
@@ -41,7 +40,7 @@ commonSources:= \
 	Threads.cpp \
 	Timers.cpp \
 	VectorImpl.cpp \
-    ZipFileCRO.cpp \
+	ZipFileCRO.cpp \
 	ZipFileRO.cpp \
 	ZipUtils.cpp \
 	misc.cpp
@@ -78,8 +77,9 @@ include $(CLEAR_VARS)
 # we have the common sources, plus some device-specific stuff
 LOCAL_SRC_FILES:= \
 	$(commonSources) \
-    BackupData.cpp \
-	BackupHelpers.cpp
+	BackupData.cpp \
+	BackupHelpers.cpp \
+	PollLoop.cpp
 
 ifeq ($(TARGET_OS),linux)
 LOCAL_LDLIBS += -lrt -ldl
