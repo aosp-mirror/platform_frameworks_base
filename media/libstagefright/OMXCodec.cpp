@@ -347,7 +347,7 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
 
         quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
-        if (!strncmp(componentName, "OMX.TI.video.encoder", 20)) {
+        if (!strncmp(componentName, "OMX.TI.Video.encoder", 20)) {
             quirks |= kAvoidMemcopyInputRecordingFrames;
         }
     }
