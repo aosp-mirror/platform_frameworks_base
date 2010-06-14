@@ -65,4 +65,5 @@ LOCAL_MODULE:= libmedia_jni
 include $(BUILD_SHARED_LIBRARY)
 
 # build libsoundpool.so
-include $(LOCAL_PATH)/soundpool/Android.mk
+# build libaudioeffect_jni.so
+include $(call all-makefiles-under,$(LOCAL_PATH))
