@@ -242,7 +242,7 @@ public class DropBoxManager {
         if (file == null) throw new NullPointerException();
         Entry entry = new Entry(tag, 0, file, flags);
         try {
-            mService.add(new Entry(tag, 0, file, flags));
+            mService.add(entry);
         } catch (RemoteException e) {
             // ignore
         } finally {
