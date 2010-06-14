@@ -153,6 +153,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     CompatibilityInfo.Translator mTranslator;
 
     final View.AttachInfo mAttachInfo;
+    InputChannel mInputChannel;
 
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
@@ -219,7 +220,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     AudioManager mAudioManager;
 
     private final int mDensity;
-
+    
     public static IWindowSession getWindowSession(Looper mainLooper) {
         synchronized (mStaticInit) {
             if (!mInitialized) {
@@ -434,9 +435,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
-    // fd [0] is the receiver, [1] is the sender
-    private native int[] makeInputChannel();
-
     /**
      * We have one child
      */
@@ -488,25 +486,20 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mAdded = true;
                 int res; /* = WindowManagerImpl.ADD_OKAY; */
 
-                // Set up the input event channel
-                if (false) {
-                int[] fds = makeInputChannel();
-                if (DEBUG_INPUT) {
-                    Log.v(TAG, "makeInputChannel() returned " + fds);
-                }
-                }
-
                 // Schedule the first layout -before- adding to the window
                 // manager, to make sure we do the relayout before receiving
                 // any other events from the system.
                 requestLayout();
+                mInputChannel = new InputChannel();
                 try {
                     res = sWindowSession.add(mWindow, mWindowAttributes,
-                            getHostVisibility(), mAttachInfo.mContentInsets);
+                            getHostVisibility(), mAttachInfo.mContentInsets,
+                            mInputChannel);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
                     mAttachInfo.mRootView = null;
+                    mInputChannel = null;
                     unscheduleTraversals();
                     throw new RuntimeException("Adding window failed", e);
                 } finally {
@@ -514,7 +507,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                         attrs.restore();
                     }
                 }
-
+                
                 if (mTranslator != null) {
                     mTranslator.translateRectInScreenToAppWindow(mAttachInfo.mContentInsets);
                 }
@@ -560,6 +553,12 @@ public final class ViewRoot extends Handler implements ViewParent,
                     throw new RuntimeException(
                         "Unable to add window -- unknown error code " + res);
                 }
+
+                if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+                    InputQueue.registerInputChannel(mInputChannel, mInputHandler,
+                            Looper.myQueue());
+                }
+                
                 view.assignParent(this);
                 mAddedTouchMode = (res&WindowManagerImpl.ADD_FLAG_IN_TOUCH_MODE) != 0;
                 mAppVisible = (res&WindowManagerImpl.ADD_FLAG_APP_VISIBLE) != 0;
@@ -1735,6 +1734,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         mSurface.release();
 
+        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+            if (mInputChannel != null) {
+                InputQueue.unregisterInputChannel(mInputChannel);
+                mInputChannel.dispose();
+                mInputChannel = null;
+            }
+        }
+        
         try {
             sWindowSession.remove(mWindow);
         } catch (RemoteException e) {
@@ -1841,19 +1848,16 @@ public final class ViewRoot extends Handler implements ViewParent,
             boolean callWhenDone = msg.arg1 != 0;
             
             if (event == null) {
-                try {
-                    long timeBeforeGettingEvents;
-                    if (MEASURE_LATENCY) {
-                        timeBeforeGettingEvents = System.nanoTime();
-                    }
+                long timeBeforeGettingEvents;
+                if (MEASURE_LATENCY) {
+                    timeBeforeGettingEvents = System.nanoTime();
+                }
 
-                    event = sWindowSession.getPendingPointerMove(mWindow);
+                event = getPendingPointerMotionEvent();
 
-                    if (MEASURE_LATENCY && event != null) {
-                        lt.sample("9 Client got events      ", System.nanoTime() - event.getEventTimeNano());
-                        lt.sample("8 Client getting events  ", timeBeforeGettingEvents - event.getEventTimeNano());
-                    }
-                } catch (RemoteException e) {
+                if (MEASURE_LATENCY && event != null) {
+                    lt.sample("9 Client got events      ", System.nanoTime() - event.getEventTimeNano());
+                    lt.sample("8 Client getting events  ", timeBeforeGettingEvents - event.getEventTimeNano());
                 }
                 callWhenDone = false;
             }
@@ -1928,14 +1932,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             } finally {
                 if (callWhenDone) {
-                    try {
-                        sWindowSession.finishKey(mWindow);
-                    } catch (RemoteException e) {
-                    }
+                    finishMotionEvent();
                 }
-                if (event != null) {
-                    event.recycle();
-                }
+                recycleMotionEvent(event);
                 if (LOCAL_LOGV || WATCH_POINTER) Log.i(TAG, "Done dispatching!");
                 // Let the exception fall through -- the looper will catch
                 // it and take care of the bad app for us.
@@ -2075,7 +2074,63 @@ public final class ViewRoot extends Handler implements ViewParent,
         } break;
         }
     }
+    
+    private void finishKeyEvent(KeyEvent event) {
+        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+            if (mFinishedCallback != null) {
+                mFinishedCallback.run();
+                mFinishedCallback = null;
+            }
+        } else {
+            try {
+                sWindowSession.finishKey(mWindow);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+    
+    private void finishMotionEvent() {
+        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+            throw new IllegalStateException("Should not be reachable with native input dispatch.");
+        }
+        
+        try {
+            sWindowSession.finishKey(mWindow);
+        } catch (RemoteException e) {
+        }
+    }
 
+    private void recycleMotionEvent(MotionEvent event) {
+        if (event != null) {
+            event.recycle();
+        }
+    }
+    
+    private MotionEvent getPendingPointerMotionEvent() {
+        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+            throw new IllegalStateException("Should not be reachable with native input dispatch.");
+        }
+        
+        try {
+            return sWindowSession.getPendingPointerMove(mWindow);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    private MotionEvent getPendingTrackballMotionEvent() {
+        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+            throw new IllegalStateException("Should not be reachable with native input dispatch.");
+        }
+        
+        try {
+            return sWindowSession.getPendingTrackballMove(mWindow);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+    
+    
     /**
      * Something in the current window tells us we need to change the touch mode.  For
      * example, we are not in touch mode, and the user touches the screen.
@@ -2200,10 +2255,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private void deliverTrackballEvent(MotionEvent event, boolean callWhenDone) {
         if (event == null) {
-            try {
-                event = sWindowSession.getPendingTrackballMove(mWindow);
-            } catch (RemoteException e) {
-            }
+            event = getPendingTrackballMotionEvent();
             callWhenDone = false;
         }
 
@@ -2223,14 +2275,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         } finally {
             if (handled) {
                 if (callWhenDone) {
-                    try {
-                        sWindowSession.finishKey(mWindow);
-                    } catch (RemoteException e) {
-                    }
+                    finishMotionEvent();
                 }
-                if (event != null) {
-                    event.recycle();
-                }
+                recycleMotionEvent(event);
                 // If we reach this, we delivered a trackball event to mView and
                 // mView consumed it. Because we will not translate the trackball
                 // event into a key event, touch mode will not exit, so we exit
@@ -2339,13 +2386,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         } finally {
             if (callWhenDone) {
-                try {
-                    sWindowSession.finishKey(mWindow);
-                } catch (RemoteException e) {
-                }
-                if (event != null) {
-                    event.recycle();
-                }
+                finishMotionEvent();
+                recycleMotionEvent(event);
             }
             // Let the exception fall through -- the looper will catch
             // it and take care of the bad app for us.
@@ -2503,10 +2545,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
                     "ViewRoot", "Telling window manager key is finished");
-                try {
-                    sWindowSession.finishKey(mWindow);
-                } catch (RemoteException e) {
-                }
+                finishKeyEvent(event);
             }
             return;
         }
@@ -2539,10 +2578,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             } else if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
                         "ViewRoot", "Telling window manager key is finished");
-                try {
-                    sWindowSession.finishKey(mWindow);
-                } catch (RemoteException e) {
-                }
+                finishKeyEvent(event);
             } else {
                 Log.w("ViewRoot", "handleFinishedEvent(seq=" + seq
                         + " handled=" + handled + " ev=" + event
@@ -2617,10 +2653,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (sendDone) {
                 if (LOCAL_LOGV) Log.v(
                     "ViewRoot", "Telling window manager key is finished");
-                try {
-                    sWindowSession.finishKey(mWindow);
-                } catch (RemoteException e) {
-                }
+                finishKeyEvent(event);
             }
             // Let the exception fall through -- the looper will catch
             // it and take care of the bad app for us.
@@ -2798,6 +2831,53 @@ public final class ViewRoot extends Handler implements ViewParent,
         msg.obj = ri;
         sendMessage(msg);
     }
+    
+    private Runnable mFinishedCallback;
+    
+    private final InputHandler mInputHandler = new InputHandler() {
+        public void handleKey(KeyEvent event, Runnable finishedCallback) {
+            mFinishedCallback = finishedCallback;
+            
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                //noinspection ConstantConditions
+                if (false && event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
+                    if (Config.LOGD) Log.d("keydisp",
+                            "===================================================");
+                    if (Config.LOGD) Log.d("keydisp", "Focused view Hierarchy is:");
+                    debug();
+
+                    if (Config.LOGD) Log.d("keydisp",
+                            "===================================================");
+                }
+            }
+
+            Message msg = obtainMessage(DISPATCH_KEY);
+            msg.obj = event;
+
+            if (LOCAL_LOGV) Log.v(
+                "ViewRoot", "sending key " + event + " to " + mView);
+
+            sendMessageAtTime(msg, event.getEventTime());
+        }
+
+        public void handleTouch(MotionEvent event, Runnable finishedCallback) {
+            finishedCallback.run();
+            
+            Message msg = obtainMessage(DISPATCH_POINTER);
+            msg.obj = event;
+            msg.arg1 = 0;
+            sendMessageAtTime(msg, event.getEventTime());
+        }
+
+        public void handleTrackball(MotionEvent event, Runnable finishedCallback) {
+            finishedCallback.run();
+            
+            Message msg = obtainMessage(DISPATCH_TRACKBALL);
+            msg.obj = event;
+            msg.arg1 = 0;
+            sendMessageAtTime(msg, event.getEventTime());
+        }
+    };
 
     public void dispatchKey(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -2968,7 +3048,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
-    static class EventCompletion extends Handler {
+    class EventCompletion extends Handler {
         final IWindow mWindow;
         final KeyEvent mKeyEvent;
         final boolean mIsPointer;
@@ -2987,40 +3067,25 @@ public final class ViewRoot extends Handler implements ViewParent,
         @Override
         public void handleMessage(Message msg) {
             if (mKeyEvent != null) {
-                try {
-                    sWindowSession.finishKey(mWindow);
-                 } catch (RemoteException e) {
-                 }
+                finishKeyEvent(mKeyEvent);
            } else if (mIsPointer) {
                 boolean didFinish;
                 MotionEvent event = mMotionEvent;
                 if (event == null) {
-                    try {
-                        event = sWindowSession.getPendingPointerMove(mWindow);
-                    } catch (RemoteException e) {
-                    }
+                    event = getPendingPointerMotionEvent();
                     didFinish = true;
                 } else {
                     didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
                 }
                 if (!didFinish) {
-                    try {
-                        sWindowSession.finishKey(mWindow);
-                     } catch (RemoteException e) {
-                     }
+                    finishMotionEvent();
                 }
             } else {
                 MotionEvent event = mMotionEvent;
                 if (event == null) {
-                    try {
-                        event = sWindowSession.getPendingTrackballMove(mWindow);
-                    } catch (RemoteException e) {
-                    }
+                    event = getPendingTrackballMotionEvent();
                 } else {
-                    try {
-                        sWindowSession.finishKey(mWindow);
-                     } catch (RemoteException e) {
-                     }
+                    finishMotionEvent();
                 }
             }
         }
@@ -3050,7 +3115,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 viewRoot.dispatchKey(event);
             } else {
                 Log.w("ViewRoot.W", "Key event " + event + " but no ViewRoot available!");
-                new EventCompletion(mMainLooper, this, event, false, null);
+                viewRoot.new EventCompletion(mMainLooper, this, event, false, null);
             }
         }
 
@@ -3064,7 +3129,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 viewRoot.dispatchPointer(event, eventTime, callWhenDone);
             } else {
-                new EventCompletion(mMainLooper, this, null, true, event);
+                viewRoot.new EventCompletion(mMainLooper, this, null, true, event);
             }
         }
 
@@ -3074,7 +3139,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (viewRoot != null) {
                 viewRoot.dispatchTrackball(event, eventTime, callWhenDone);
             } else {
-                new EventCompletion(mMainLooper, this, null, false, event);
+                viewRoot.new EventCompletion(mMainLooper, this, null, false, event);
             }
         }
 

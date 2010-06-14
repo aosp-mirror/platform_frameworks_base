@@ -37,6 +37,8 @@ public:
         const char* name() const;
         nsecs_t     lap();
         nsecs_t     elapsedTime() const;
+
+        void        reset();
         
 private:
     const char*     mName;
