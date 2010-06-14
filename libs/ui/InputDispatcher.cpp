@@ -27,10 +27,8 @@
 
 #include <stddef.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
-#include <poll.h>
 
 namespace android {
 
