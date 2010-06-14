@@ -179,10 +179,22 @@ public class Build {
          */
         public static final int ECLAIR_MR1 = 7;
         
+        /**
+         * June 2010: Android 2.2
+         */
         public static final int FROYO = 8;
         
-        public static final int KRAKEN = CUR_DEVELOPMENT;
-        
+        /**
+         * Next version of Android.
+         * 
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> The status bar is now dark.  Targeting this version allows
+         * the platform to perform performing compatibility on status bar
+         * graphics to ensure they look okay on a dark background.
+         * </ul>
+         */
         public static final int GINGERBREAD = CUR_DEVELOPMENT;
     }
     
