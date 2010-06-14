@@ -254,6 +254,10 @@ public class ApplicationErrorReport implements Parcelable {
 
     /**
      * Describes an application crash.
+     *
+     * <p>This is also used to marshal around stack traces of ANRs and
+     * StrictMode violations which aren't necessarily crashes, but have
+     * a lot in common.
      */
     public static class CrashInfo {
         /**
@@ -290,6 +294,12 @@ public class ApplicationErrorReport implements Parcelable {
          * Stack trace.
          */
         public String stackTrace;
+
+        /**
+         * For StrictMode violations, the wall time duration of the
+         * violation, when known.
+         */
+        public long durationMillis = -1;
 
         /**
          * Create an uninitialized instance of CrashInfo.
@@ -334,6 +344,7 @@ public class ApplicationErrorReport implements Parcelable {
             throwMethodName = in.readString();
             throwLineNumber = in.readInt();
             stackTrace = in.readString();
+            durationMillis = in.readLong();
         }
 
         /**
@@ -347,6 +358,7 @@ public class ApplicationErrorReport implements Parcelable {
             dest.writeString(throwMethodName);
             dest.writeInt(throwLineNumber);
             dest.writeString(stackTrace);
+            dest.writeLong(durationMillis);
         }
 
         /**
@@ -360,6 +372,9 @@ public class ApplicationErrorReport implements Parcelable {
             pw.println(prefix + "throwMethodName: " + throwMethodName);
             pw.println(prefix + "throwLineNumber: " + throwLineNumber);
             pw.println(prefix + "stackTrace: " + stackTrace);
+            if (durationMillis != -1) {
+                pw.println(prefix + "durationMillis: " + durationMillis);
+            }
         }
     }
 
