@@ -365,7 +365,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     @Override
     protected void onAllReferencesReleased() {
         if (isOpen()) {
-            dbclose();
+            // close the database which will close all pending statements to be finalized also
+            close();
         }
     }
 
@@ -1042,7 +1043,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             // finalize ALL statements queued up so far
             closePendingStatements();
             // close this database instance - regardless of its reference count value
-            onAllReferencesReleased();
+            dbclose();
             if (mConnectionPool != null) {
                 mConnectionPool.close();
             }
