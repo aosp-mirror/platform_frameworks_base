@@ -35,6 +35,8 @@
     <!-- devices with an autofocus camera and/or flash must include either
          android.hardware.camera.autofocus.xml or 
          android.hardware.camera.autofocus-flash.xml -->
+    <!-- devices with a front facing camera must include
+         android.hardware.camera.front.xml -->
     <!-- devices with WiFi must also include android.hardware.wifi.xml -->
     <!-- devices with limited/gestural multitouch must also include
          android.hardware.touchscreen.multitouch.xml -->

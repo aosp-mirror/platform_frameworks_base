@@ -85,20 +85,17 @@ public class Camera {
 
     /**
      * Returns the number of Cameras available.
-     * @hide
      */
     public native static int getNumberOfCameras();
 
     /**
      * Returns the information about the camera.
      * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
-     * @hide
      */
     public native static void getCameraInfo(int cameraId, CameraInfo cameraInfo);
 
     /**
      * Information about a camera
-     * @hide
      */
     public static class CameraInfo {
         public static final int CAMERA_FACING_BACK = 0;
@@ -129,7 +126,6 @@ public class Camera {
      * Returns a new Camera object.
      * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
      * The id 0 is the default camera.
-     * @hide
      */
     public static Camera open(int cameraId) {
         return new Camera(cameraId);
@@ -137,7 +133,6 @@ public class Camera {
 
     /**
      * The id for the default camera.
-     * @hide
      */
     public static int CAMERA_ID_DEFAULT = 0;
 
