@@ -16,13 +16,11 @@
 
 package android.os;
 
-import java.util.ArrayList;
-
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.Log;
 
-import com.android.internal.os.RuntimeInit;
+import java.util.ArrayList;
 
 /**
  * Low-level class holding the list of messages to be dispatched by a
@@ -34,10 +32,17 @@ import com.android.internal.os.RuntimeInit;
  */
 public class MessageQueue {
     Message mMessages;
-    private final ArrayList mIdleHandlers = new ArrayList();
+    private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
     private boolean mQuiting = false;
-    private int mObject = 0;    // used by native code
     boolean mQuitAllowed = true;
+
+    @SuppressWarnings("unused")
+    private int mPtr; // used by native code
+    
+    private native void nativeInit();
+    private native void nativeDestroy();
+    private native boolean nativePollOnce(int timeoutMillis);
+    private native void nativeWake();
 
     /**
      * Callback interface for discovering when a thread is going to block
@@ -85,55 +90,39 @@ public class MessageQueue {
             mIdleHandlers.remove(handler);
         }
     }
-
-    // Add an input pipe to the set being selected over.  If token is
-    // negative, remove 'handler's entry from the current set and forget
-    // about it.
-    void setInputToken(int token, int region, Handler handler) {
-        if (token >= 0) nativeRegisterInputStream(token, region, handler);
-        else nativeUnregisterInputStream(token);
-    }
-
+    
     MessageQueue() {
         nativeInit();
     }
-    private native void nativeInit();
-
-    /**
-     * @param token fd of the readable end of the input stream
-     * @param region fd of the ashmem region used for data transport alongside the 'token' fd
-     * @param handler Handler from which to make input messages based on data read from the fd
-     */
-    private native void nativeRegisterInputStream(int token, int region, Handler handler);
-    private native void nativeUnregisterInputStream(int token);
-    private native void nativeSignal();
-
-    /**
-     * Wait until the designated time for new messages to arrive.
-     *
-     * @param when Timestamp in SystemClock.uptimeMillis() base of the next message in the queue.
-     *    If 'when' is zero, the method will check for incoming messages without blocking.  If
-     *    'when' is negative, the method will block forever waiting for the next message.
-     * @return
-     */
-    private native int nativeWaitForNext(long when);
+    
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            nativeDestroy();
+        } finally {
+            super.finalize();
+        }
+    }
 
     final Message next() {
         boolean tryIdle = true;
         // when we start out, we'll just touch the input pipes and then go from there
-        long timeToNextEventMillis = 0;
+        int timeToNextEventMillis = 0;
 
         while (true) {
             long now;
             Object[] idlers = null;
 
-            nativeWaitForNext(timeToNextEventMillis);
+            boolean dispatched = nativePollOnce(timeToNextEventMillis);
 
             // Try to retrieve the next message, returning if found.
             synchronized (this) {
                 now = SystemClock.uptimeMillis();
                 Message msg = pullNextLocked(now);
-                if (msg != null) return msg;
+                if (msg != null) {
+                    return msg;
+                }
+                
                 if (tryIdle && mIdleHandlers.size() > 0) {
                     idlers = mIdleHandlers.toArray();
                 }
@@ -170,9 +159,14 @@ public class MessageQueue {
             synchronized (this) {
                 // No messages, nobody to tell about it...  time to wait!
                 if (mMessages != null) {
-                    if (mMessages.when - now > 0) {
+                    long longTimeToNextEventMillis = mMessages.when - now;
+                    
+                    if (longTimeToNextEventMillis > 0) {
                         Binder.flushPendingCommands();
-                        timeToNextEventMillis = mMessages.when - now;
+                        timeToNextEventMillis = (int) Math.min(longTimeToNextEventMillis,
+                                Integer.MAX_VALUE);
+                    } else {
+                        timeToNextEventMillis = 0;
                     }
                 } else {
                     Binder.flushPendingCommands();
@@ -230,7 +224,7 @@ public class MessageQueue {
                 msg.next = prev.next;
                 prev.next = msg;
             }
-            nativeSignal();
+            nativeWake();
         }
         return true;
     }
@@ -351,7 +345,7 @@ public class MessageQueue {
     void poke()
     {
         synchronized (this) {
-            nativeSignal();
+            nativeWake();
         }
     }
 }

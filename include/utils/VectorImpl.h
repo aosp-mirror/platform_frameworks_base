@@ -76,7 +76,7 @@ public:
             void            push();
             void            push(const void* item);
             ssize_t         add();
-            ssize_t         add(const void* item);
+            ssize_t         add(const void* item, size_t numItems = 1);
             ssize_t         replaceAt(size_t index);
             ssize_t         replaceAt(const void* item, size_t index);
 
@@ -184,6 +184,8 @@ private:
             void            push(const void* item);
             ssize_t         insertVectorAt(const VectorImpl& vector, size_t index);
             ssize_t         appendVector(const VectorImpl& vector);
+            ssize_t         insertArrayAt(const void* array, size_t index, size_t numItems);
+            ssize_t         appendArray(const void* array, size_t numItems);
             ssize_t         insertAt(size_t where, size_t numItems = 1);
             ssize_t         insertAt(const void* item, size_t where, size_t numItems = 1);
             ssize_t         replaceAt(size_t index);

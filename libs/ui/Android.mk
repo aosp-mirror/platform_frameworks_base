@@ -11,6 +11,11 @@ LOCAL_SRC_FILES:= \
 	GraphicBufferMapper.cpp \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
+	Input.cpp \
+	InputDispatcher.cpp \
+	InputManager.cpp \
+	InputReader.cpp \
+	InputTransport.cpp \
 	IOverlay.cpp \
 	Overlay.cpp \
 	PixelFormat.cpp \

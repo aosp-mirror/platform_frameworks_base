@@ -1,0 +1,124 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define LOG_TAG "KeyEvent-JNI"
+
+#include "JNIHelp.h"
+
+#include <android_runtime/AndroidRuntime.h>
+#include <utils/Log.h>
+#include <ui/Input.h>
+#include "android_view_KeyEvent.h"
+
+namespace android {
+
+// ----------------------------------------------------------------------------
+
+static struct {
+    jclass clazz;
+
+    jmethodID ctor;
+
+    jfieldID mMetaState;
+    jfieldID mAction;
+    jfieldID mKeyCode;
+    jfieldID mScanCode;
+    jfieldID mRepeatCount;
+    jfieldID mDeviceId;
+    jfieldID mFlags;
+    jfieldID mDownTime;
+    jfieldID mEventTime;
+    jfieldID mCharacters;
+} gKeyEventClassInfo;
+
+// ----------------------------------------------------------------------------
+
+jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
+    return env->NewObject(gKeyEventClassInfo.clazz, gKeyEventClassInfo.ctor,
+            nanoseconds_to_milliseconds(event->getDownTime()),
+            nanoseconds_to_milliseconds(event->getEventTime()),
+            event->getAction(),
+            event->getKeyCode(),
+            event->getRepeatCount(),
+            event->getMetaState(),
+            event->getDeviceId(),
+            event->getScanCode(),
+            event->getFlags());
+}
+
+void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj, int32_t nature,
+        KeyEvent* event) {
+    jint metaState = env->GetIntField(eventObj, gKeyEventClassInfo.mMetaState);
+    jint action = env->GetIntField(eventObj, gKeyEventClassInfo.mAction);
+    jint keyCode = env->GetIntField(eventObj, gKeyEventClassInfo.mKeyCode);
+    jint scanCode = env->GetIntField(eventObj, gKeyEventClassInfo.mScanCode);
+    jint repeatCount = env->GetIntField(eventObj, gKeyEventClassInfo.mRepeatCount);
+    jint deviceId = env->GetIntField(eventObj, gKeyEventClassInfo.mDeviceId);
+    jint flags = env->GetIntField(eventObj, gKeyEventClassInfo.mFlags);
+    jlong downTime = env->GetLongField(eventObj, gKeyEventClassInfo.mDownTime);
+    jlong eventTime = env->GetLongField(eventObj, gKeyEventClassInfo.mEventTime);
+
+    event->initialize(deviceId, nature, action, flags, keyCode, scanCode, metaState, repeatCount,
+            milliseconds_to_nanoseconds(downTime),
+            milliseconds_to_nanoseconds(eventTime));
+}
+
+// ----------------------------------------------------------------------------
+
+#define FIND_CLASS(var, className) \
+        var = env->FindClass(className); \
+        LOG_FATAL_IF(! var, "Unable to find class " className); \
+        var = jclass(env->NewGlobalRef(var));
+
+#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
+        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
+        LOG_FATAL_IF(! var, "Unable to find method" methodName);
+
+#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
+        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
+        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
+
+int register_android_view_KeyEvent(JNIEnv* env) {
+    FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
+
+    GET_METHOD_ID(gKeyEventClassInfo.ctor, gKeyEventClassInfo.clazz,
+            "<init>", "(JJIIIIIII)V");
+
+    GET_FIELD_ID(gKeyEventClassInfo.mMetaState, gKeyEventClassInfo.clazz,
+            "mMetaState", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mAction, gKeyEventClassInfo.clazz,
+            "mAction", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mKeyCode, gKeyEventClassInfo.clazz,
+            "mKeyCode", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mScanCode, gKeyEventClassInfo.clazz,
+            "mScanCode", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mRepeatCount, gKeyEventClassInfo.clazz,
+            "mRepeatCount", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mDeviceId, gKeyEventClassInfo.clazz,
+            "mDeviceId", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mFlags, gKeyEventClassInfo.clazz,
+            "mFlags", "I");
+    GET_FIELD_ID(gKeyEventClassInfo.mDownTime, gKeyEventClassInfo.clazz,
+            "mDownTime", "J");
+    GET_FIELD_ID(gKeyEventClassInfo.mEventTime, gKeyEventClassInfo.clazz,
+            "mEventTime", "J");
+    GET_FIELD_ID(gKeyEventClassInfo.mCharacters, gKeyEventClassInfo.clazz,
+            "mCharacters", "Ljava/lang/String;");
+
+    return 0;
+}
+
+} // namespace android

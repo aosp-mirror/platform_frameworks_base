@@ -44,6 +44,11 @@ LOCAL_SRC_FILES:= \
 	android_view_Display.cpp \
 	android_view_Surface.cpp \
 	android_view_ViewRoot.cpp \
+	android_view_InputChannel.cpp \
+	android_view_InputQueue.cpp \
+	android_view_InputTarget.cpp \
+	android_view_KeyEvent.cpp \
+	android_view_MotionEvent.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
 	android_text_KeyCharacterMap.cpp \

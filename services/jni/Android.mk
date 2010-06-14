@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
     com_android_server_AlarmManagerService.cpp \
     com_android_server_BatteryService.cpp \
     com_android_server_KeyInputQueue.cpp \
+    com_android_server_InputManager.cpp \
     com_android_server_LightsService.cpp \
     com_android_server_SensorService.cpp \
     com_android_server_SystemServer.cpp \
@@ -16,6 +17,7 @@ LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE)
 
 LOCAL_SHARED_LIBRARIES := \
+    libandroid_runtime \
 	libcutils \
 	libhardware \
 	libhardware_legacy \

@@ -165,6 +165,11 @@ extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
 extern int register_android_backup_BackupHelperDispatcher(JNIEnv *env);
 extern int register_android_app_NativeActivity(JNIEnv *env);
+extern int register_android_view_InputChannel(JNIEnv* env);
+extern int register_android_view_InputQueue(JNIEnv* env);
+extern int register_android_view_InputTarget(JNIEnv* env);
+extern int register_android_view_KeyEvent(JNIEnv* env);
+extern int register_android_view_MotionEvent(JNIEnv* env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -1294,6 +1299,11 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_backup_BackupHelperDispatcher),
     
     REG_JNI(register_android_app_NativeActivity),
+    REG_JNI(register_android_view_InputChannel),
+    REG_JNI(register_android_view_InputQueue),
+    REG_JNI(register_android_view_InputTarget),
+    REG_JNI(register_android_view_KeyEvent),
+    REG_JNI(register_android_view_MotionEvent),
 };
 
 /*

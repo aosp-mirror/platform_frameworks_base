@@ -156,7 +156,7 @@ android_server_KeyInputQueue_getSwitchState(JNIEnv* env, jobject clazz,
 {
     jint st = -1;
     gLock.lock();
-    if (gHub != NULL) st = gHub->getSwitchState(sw);
+    if (gHub != NULL) st = gHub->getSwitchState(-1, -1, sw);
     gLock.unlock();
     
     return st;
@@ -168,7 +168,7 @@ android_server_KeyInputQueue_getSwitchStateDevice(JNIEnv* env, jobject clazz,
 {
     jint st = -1;
     gLock.lock();
-    if (gHub != NULL) st = gHub->getSwitchState(deviceId, sw);
+    if (gHub != NULL) st = gHub->getSwitchState(deviceId, -1, sw);
     gLock.unlock();
     
     return st;
@@ -180,7 +180,7 @@ android_server_KeyInputQueue_getScancodeState(JNIEnv* env, jobject clazz,
 {
     jint st = -1;
     gLock.lock();
-    if (gHub != NULL) st = gHub->getScancodeState(sw);
+    if (gHub != NULL) st = gHub->getScanCodeState(0, -1, sw);
     gLock.unlock();
     
     return st;
@@ -192,7 +192,7 @@ android_server_KeyInputQueue_getScancodeStateDevice(JNIEnv* env, jobject clazz,
 {
     jint st = -1;
     gLock.lock();
-    if (gHub != NULL) st = gHub->getScancodeState(deviceId, sw);
+    if (gHub != NULL) st = gHub->getScanCodeState(deviceId, -1, sw);
     gLock.unlock();
     
     return st;
@@ -204,7 +204,7 @@ android_server_KeyInputQueue_getKeycodeState(JNIEnv* env, jobject clazz,
 {
     jint st = -1;
     gLock.lock();
-    if (gHub != NULL) st = gHub->getKeycodeState(sw);
+    if (gHub != NULL) st = gHub->getKeyCodeState(0, -1, sw);
     gLock.unlock();
     
     return st;
@@ -216,7 +216,7 @@ android_server_KeyInputQueue_getKeycodeStateDevice(JNIEnv* env, jobject clazz,
 {
     jint st = -1;
     gLock.lock();
-    if (gHub != NULL) st = gHub->getKeycodeState(deviceId, sw);
+    if (gHub != NULL) st = gHub->getKeyCodeState(deviceId,-1, sw);
     gLock.unlock();
     
     return st;
@@ -247,7 +247,7 @@ android_server_KeyInputQueue_hasKeys(JNIEnv* env, jobject clazz,
 
     int32_t* codes = env->GetIntArrayElements(keyCodes, NULL);
     uint8_t* flags = env->GetBooleanArrayElements(outFlags, NULL);
-    size_t numCodes = env->GetArrayLength(keyCodes);
+    jsize numCodes = env->GetArrayLength(keyCodes);
     if (numCodes == env->GetArrayLength(outFlags)) {
         gLock.lock();
         if (gHub != NULL) ret = gHub->hasKeys(numCodes, codes, flags);

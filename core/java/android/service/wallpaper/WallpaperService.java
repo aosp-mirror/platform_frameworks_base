@@ -18,6 +18,7 @@ package android.service.wallpaper;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.BaseIWindow;
+import com.android.internal.view.BaseInputHandler;
 import com.android.internal.view.BaseSurfaceHolder;
 
 import android.annotation.SdkConstant;
@@ -39,6 +40,10 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.view.Gravity;
 import android.view.IWindowSession;
+import android.view.InputChannel;
+import android.view.InputHandler;
+import android.view.InputQueue;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -46,6 +51,7 @@ import android.view.ViewGroup;
 import android.view.ViewRoot;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.view.WindowManagerPolicy;
 
 import java.util.ArrayList;
 
@@ -146,6 +152,7 @@ public abstract class WallpaperService extends Service {
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
         IWindowSession mSession;
+        InputChannel mInputChannel;
 
         final Object mLock = new Object();
         boolean mOffsetMessageEnqueued;
@@ -203,6 +210,30 @@ public abstract class WallpaperService extends Service {
                         "Wallpapers do not support keep screen on");
             }
             
+        };
+        
+        final InputHandler mInputHandler = new BaseInputHandler() {
+            @Override
+            public void handleTouch(MotionEvent event, Runnable finishedCallback) {
+                try {
+                    synchronized (mLock) {
+                        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                            if (mPendingMove != null) {
+                                mCaller.removeMessages(MSG_TOUCH_EVENT, mPendingMove);
+                                mPendingMove.recycle();
+                            }
+                            mPendingMove = event;
+                        } else {
+                            mPendingMove = null;
+                        }
+                        Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT,
+                                event);
+                        mCaller.sendMessage(msg);
+                    }
+                } finally {
+                    finishedCallback.run();
+                }
+            }
         };
         
         final BaseIWindow mWindow = new BaseIWindow() {
@@ -487,8 +518,15 @@ public abstract class WallpaperService extends Service {
                         mLayout.setTitle(WallpaperService.this.getClass().getName());
                         mLayout.windowAnimations =
                                 com.android.internal.R.style.Animation_Wallpaper;
-                        mSession.add(mWindow, mLayout, View.VISIBLE, mContentInsets);
+                        mInputChannel = new InputChannel();
+                        mSession.add(mWindow, mLayout, View.VISIBLE, mContentInsets,
+                                mInputChannel);
                         mCreated = true;
+
+                        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+                            InputQueue.registerInputChannel(mInputChannel, mInputHandler,
+                                    Looper.myQueue());
+                        }
                     }
                     
                     mSurfaceHolder.mSurfaceLock.lock();
@@ -587,6 +625,7 @@ public abstract class WallpaperService extends Service {
             mSurfaceHolder.setSizeFromLayout();
             mInitializing = true;
             mSession = ViewRoot.getWindowSession(getMainLooper());
+            
             mWindow.setSession(mSession);
             
             IntentFilter filter = new IntentFilter();
@@ -730,6 +769,15 @@ public abstract class WallpaperService extends Service {
                 try {
                     if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
                             + mSurfaceHolder.getSurface() + " of: " + this);
+                    
+                    if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+                        if (mInputChannel != null) {
+                            InputQueue.unregisterInputChannel(mInputChannel);
+                            mInputChannel.dispose();
+                            mInputChannel = null;
+                        }
+                    }
+                    
                     mSession.remove(mWindow);
                 } catch (RemoteException e) {
                 }

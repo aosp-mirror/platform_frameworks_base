@@ -78,6 +78,12 @@ public interface WindowManagerPolicy {
     public final static int FLAG_BRIGHT_HERE = 0x20000000;
 
     public final static boolean WATCH_POINTER = false;
+    
+    /**
+     * Temporary flag added during the transition to the new native input dispatcher.
+     * This will be removed when the old input dispatch code is deleted.
+     */
+    public final static boolean ENABLE_NATIVE_INPUT_DISPATCH = false;
 
     // flags for interceptKeyTq
     /**
@@ -707,6 +713,8 @@ public interface WindowManagerPolicy {
      * further processing to occur; return false for normal processing.
      */
     public boolean preprocessInputEventTq(RawInputEvent event);
+    
+    public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
     
     /**
      * Determine whether a given key code is used to cause an app switch

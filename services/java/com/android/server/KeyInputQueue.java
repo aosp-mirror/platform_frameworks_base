@@ -298,7 +298,9 @@ public abstract class KeyInputQueue {
         
         mHapticFeedbackCallback = hapticFeedbackCallback;
         
-        readExcludedDevices();
+        if (! WindowManagerService.ENABLE_NATIVE_INPUT_DISPATCH) {
+            readExcludedDevices();
+        }
         
         PowerManager pm = (PowerManager)context.getSystemService(
                                                         Context.POWER_SERVICE);
@@ -311,7 +313,9 @@ public abstract class KeyInputQueue {
         mFirst.next = mLast;
         mLast.prev = mFirst;
 
-        mThread.start();
+        if (! WindowManagerService.ENABLE_NATIVE_INPUT_DISPATCH) {
+            mThread.start();
+        }
     }
 
     public void setDisplay(Display display) {

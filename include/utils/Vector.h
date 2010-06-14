@@ -114,6 +114,12 @@ public:
             ssize_t         appendVector(const Vector<TYPE>& vector);
 
 
+    //! insert an array at a given index
+            ssize_t         insertArrayAt(const TYPE* array, size_t index, size_t numItems);
+
+    //! append an array at the end of this vector
+            ssize_t         appendArray(const TYPE* array, size_t numItems);
+
             /*! 
              * add/insert/replace items
              */
@@ -256,6 +262,16 @@ ssize_t Vector<TYPE>::insertVectorAt(const Vector<TYPE>& vector, size_t index) {
 template<class TYPE> inline
 ssize_t Vector<TYPE>::appendVector(const Vector<TYPE>& vector) {
     return VectorImpl::appendVector(reinterpret_cast<const VectorImpl&>(vector));
+}
+
+template<class TYPE> inline
+ssize_t Vector<TYPE>::insertArrayAt(const TYPE* array, size_t index, size_t numItems) {
+    return VectorImpl::insertAt(array, index, numItems);
+}
+
+template<class TYPE> inline
+ssize_t Vector<TYPE>::appendArray(const TYPE* array, size_t numItems) {
+    return VectorImpl::add(array, numItems);
 }
 
 template<class TYPE> inline
