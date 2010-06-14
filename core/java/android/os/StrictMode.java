@@ -187,6 +187,7 @@ public final class StrictMode {
             // Not _really_ a Crash, but we use the same data structure...
             ApplicationErrorReport.CrashInfo crashInfo =
                     new ApplicationErrorReport.CrashInfo(violation);
+            crashInfo.durationMillis = durationMillis;
 
             // Not perfect, but fast and good enough for dup suppression.
             Integer crashFingerprint = crashInfo.stackTrace.hashCode();
