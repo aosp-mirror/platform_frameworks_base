@@ -1250,7 +1250,16 @@
   
   <public-padding type="id" name="kraken_resource_pad" end="0x01020040" />
   <public-padding type="anim" name="kraken_resource_pad" end="0x010a0020" />
+
+  <!-- presence drawables for videochat or audiochat capable contacts -->
+  <public type="drawable" name="presence_video_away" id="0x010800ac" />
+  <public type="drawable" name="presence_video_busy" id="0x010800ad" />
+  <public type="drawable" name="presence_video_online" id="0x010800ae" />
+  <public type="drawable" name="presence_audio_away" id="0x010800af" />
+  <public type="drawable" name="presence_audio_busy" id="0x010800b0" />
+  <public type="drawable" name="presence_audio_online" id="0x010800b1" />  
   <public-padding type="drawable" name="kraken_resource_pad" end="0x01080100" />
+  
   <public-padding type="style" name="kraken_resource_pad" end="0x01030090" />
   <public-padding type="string" name="kraken_resource_pad" end="0x01040020" />
   <public-padding type="integer" name="kraken_resource_pad" end="0x010e0010" />
