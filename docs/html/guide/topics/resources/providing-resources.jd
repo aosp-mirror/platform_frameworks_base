@@ -9,6 +9,7 @@ parent.link=index.html
   <ul>
     <li>Different types of resources belong in different subdirectories of {@code res/}</li>
     <li>Alternative resources provide configuration-specific resource files</li>
+    <li>Always include default resources so your app does not depend on specific configurations</li>
   </ul>
   <h2>In this document</h2>
   <ol>
@@ -19,7 +20,9 @@ parent.link=index.html
         <li><a href="#AliasResources">Creating alias resources</a></li>
       </ol>
     </li>
+    <li><a href="#Compatibility">Providing the Best Device Compatibility with Resources</a></li>
     <li><a href="#BestMatch">How Android Finds the Best-matching Resource</a></li>
+    <li><a href="#KnownIssues">Known Issues</a></li>
   </ol>
 
   <h2>See also</h2>
@@ -35,13 +38,14 @@ Screens</a></li>
 <p>You should always externalize application resources such as images and strings from your
 code, so that you can maintain them independently. You can also provide alternative resources for
 specific device configurations, by grouping them in specially-named resource directories. Android
-will then automatically apply the appropriate resource based on the current configuration. For
+then applies the appropriate resource based on the current configuration. For
 instance, you might want to provide a different UI layout depending on the screen size.</p>
 
-<p>Once you save your resources external to your application code, you can access them
+<p>Once you externalize your application resources, you can access them
 using resource IDs that are generated in your project's {@code R} class. How to use
 resources in your application is discussed in <a href="accessing-resources.html">Accessing
-Resources</a>.</p>
+Resources</a>. This document shows you how to group your resources in your Android project and
+provide alternative resources for specific device configurations.</p>
 
 
 <h2 id="ResourceTypes">Grouping Resource Types</h2>
@@ -63,9 +67,9 @@ MyProject/
             strings.xml  </span>
 </pre>
 
-<p>The {@code res/} directory contains all the resources (in subdirectories): an image resource, two
-layout resources, and a string resource file. The resource directory names are important and are
-described in table 1.</p>
+<p>As you can see in this example, the {@code res/} directory contains all the resources (in
+subdirectories): an image resource, two layout resources, and a string resource file. The resource
+directory names are important and are described in table 1.</p>
 
 <p class="table-caption" id="table1"><strong>Table 1.</strong> Resource directories
 supported inside project {@code res/} directory.</p>
@@ -96,9 +100,9 @@ are compiled into the following drawable resource subtypes:</p>
         <li>Bitmap files</li>
         <li>Nine-Patches (re-sizable bitmaps)</li>
         <li>State lists</li>
-        <li>Color drawables</li>
         <li>Shapes</li>
         <li>Animation drawables</li>
+        <li>Other drawables</li>
       </ul>
       <p>See <a href="drawable-resource.html">Drawable Resources</a>.</p>
     </td>
@@ -168,16 +172,21 @@ href="{@docRoot}guide/topics/search/searchable-config.html">searchable configura
   </tr>
 </table>
 
-<p class="note"><strong>Note:</strong> You should never save resource files directly inside the
-{@code res/} directory.</p>
+<p class="caution"><strong>Caution:</strong> Never save resource files directly inside the
+{@code res/} directory&mdash;it will cause a compiler error.</p>
 
 <p>For more information about certain types of resources, see the <a
 href="available-resources.html">Resource Types</a> documentation.</p>
 
-<p>How to access resources in the {@code res/} subdirectories is discussed in <a
-href="accessing-resources.html">Accessing Resources</a>.
-</p>
-
+<p>The resources that you save in the subdirectories defined in table 1 are your "default"
+resources. That is, these resources define the default design and content for your application.
+However, different types of Android-powered devices might call for different types of resources.
+For example, if a device has a larger than normal screen, then you should provide
+different layout resources that take advantage of the extra screen space. Or, if a device has a
+different language setting, then you should provide different string resources that translate the
+text in your user interface. To provide these different resources for different device
+configurations, you need to provide "alternative" resources, in addition to your default
+resources.</p>
 
 
 <h2 id="AlternativeResources">Providing Alternative Resources</h2>
@@ -192,8 +201,8 @@ href="accessing-resources.html">Accessing Resources</a>.
 <p>Almost every application should provide alternative resources to support specific device
 configurations. For instance, you should include alternative drawable resources for different
 screen densities and alternative string resources for different languages. At runtime, Android
-automatically detects the current device configuration and loads the appropriate
-resources.</p>
+detects the current device configuration and loads the appropriate
+resources for your application.</p>
 
 <p>To specify configuration-specific alternatives for a set of resources:</p>
 <ol>
@@ -201,15 +210,15 @@ resources.</p>
 <em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}.
     <ul>
       <li><em>{@code &lt;resources_name&gt;}</em> is the directory name of the corresponding default
-resources.</li>
+resources (defined in table 1).</li>
       <li><em>{@code &lt;config_qualifier&gt;}</em> is a name that specifies a configuration
-for which these resources are to be used.</li>
+for which these resources are to be used (defined in table 2).</li>
     </ul>
     <p>You can append more than one <em>{@code &lt;config_qualifier&gt;}</em>. Separate each
 one with a dash.</p>
   </li>
-  <li>Save your alternative resources in this new directory. The resource files must be named
-exactly the same as the default resource files.</li>
+  <li>Save the respective alternative resources in this new directory. The resource files must be
+named exactly the same as the default resource files.</li>
 </ol>
 
 <p>For example, here are some default and alternative resources:</p>
@@ -225,18 +234,24 @@ res/
 </pre>
 
 <p>The {@code hdpi} qualifier indicates that the resources in that directory are for devices with a
-high-density screen. While the images in each drawable directory are sized for a specific screen
-density, the filenames are
+high-density screen. The images in each of these drawable directories are sized for a specific
+screen density, but the filenames are exactly
 the same. This way, the resource ID that you use to reference the {@code icon.png} or {@code
 background.png} image is always the same, but Android selects the
-version of that drawable that best matches the current device configuration.</p>
+version of each resource that best matches the current device, by comparing the device
+configuration information with the qualifiers in the alternative resource directory name.</p>
 
 <p>Android supports several configuration qualifiers and you can
 add multiple qualifiers to one directory name, by separating each qualifier with a dash. Table 2
 lists the valid configuration qualifiers, in order of precedence&mdash;if you use multiple
-qualifiers, they must be added to the directory name in the order they are listed in the
-table.</p>
+qualifiers for one resource directory, they must be added to the directory name in the order they
+are listed in the table.</p>
 
+<p class="note"><strong>Note:</strong> Some resource qualifiers were added after Android 1.0, so not
+all versions of Android support all the qualifiers listed in table 2. New qualifiers
+indicate the version in which they were added. To avoid any issues, always include a set of default
+resources for resources that your application uses. For more information, see the section about <a
+href="#Compatibility">Providing the Best Device Compatibility with Resources</a>.</p>
 
 <p class="table-caption" id="table2"><strong>Table 2.</strong> Alternative resource qualifier
 names.</p>
@@ -246,7 +261,7 @@ names.</p>
         <th>Values</th>
         <th>Description</th>
     </tr>
-    <tr>
+    <tr id="MccQualifier">
       <td>MCC and MNC</td>
       <td>Examples:<br/>
         <code>mcc310</code><br/>
@@ -272,7 +287,7 @@ android.content.res.Configuration#mnc}, which indicate the current mobile countr
 and mobile network code, respectively.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="LocaleQualifier">
       <td>Language and region</td>
       <td>Examples:<br/>
         <code>en</code><br/>
@@ -297,12 +312,12 @@ of your application if the user changes his or her language in the system settin
 href="runtime-changes.html">Handling Runtime Changes</a> for information about
 how this can affect your application during runtime.</p>
         <p>See <a href="localization.html">Localization</a> for a complete guide to localizing
-your application for other langauges.</p>
+your application for other languages.</p>
         <p>Also see the {@link android.content.res.Configuration#locale} configuration field, which
 indicates the current locale.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="ScreenSizeQualifier">
       <td>Screen size</td>
       <td>
         <code>small</code><br/>
@@ -326,6 +341,7 @@ indicates the current locale.</p>
         available space in both width and height than an HVGA display.
         Examples are VGA and WVGA medium density screens.</li>
         </ul>
+        <p><em>Added in API Level 4.</em></p>
         <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a> for more information.</p>
         <p>Also see the {@link android.content.res.Configuration#screenLayout} configuration field,
@@ -333,7 +349,7 @@ which indicates whether the screen is small, normal,
 or large.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="ScreenLongQualifier">
       <td>Wider/taller screens</td>
       <td>
         <code>long</code><br/>
@@ -344,13 +360,14 @@ or large.</p>
           <li>{@code long}: Long screens, such as WQVGA, WVGA, FWVGA</li>
           <li>{@code notlong}: Not long screens, such as QVGA, HVGA, and VGA</li>
         </ul>
+        <p><em>Added in API Level 4.</em></p>
         <p>This is based purely on the aspect ratio of the screen (a "long" screen is wider). This
 is not related to the screen orientation.</p>
         <p>Also see the {@link android.content.res.Configuration#screenLayout} configuration field,
 which indicates whether the screen is long.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="OrientationQualifier">
       <td>Screen orientation</td>
       <td>
         <code>port</code><br/>
@@ -370,7 +387,7 @@ how this affects your application during runtime.</p>
 which indicates the current device orientation.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="DockQualifier">
       <td>Dock mode</td>
       <td>
         <code>car</code><br/>
@@ -383,12 +400,12 @@ which indicates the current device orientation.</p>
         </ul>
         <p><em>Added in API Level 8.</em></p>
         <p>This can change during the life of your application if the user places the device in a
-dock. You can eneable or disable this mode using {@link
+dock. You can enable or disable this mode using {@link
 android.app.UiModeManager}. See <a href="runtime-changes.html">Handling Runtime Changes</a> for
 information about how this affects your application during runtime.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="NightQualifier">
       <td>Night mode</td>
       <td>
         <code>night</code><br/>
@@ -401,13 +418,13 @@ information about how this affects your application during runtime.</p>
         </ul>
         <p><em>Added in API Level 8.</em></p>
         <p>This can change during the life of your application if night mode is left in
-auto mode (default), in which case the mode changes based on the time of day.  You can eneable
+auto mode (default), in which case the mode changes based on the time of day.  You can enable
 or disable this mode using {@link android.app.UiModeManager}. See <a
 href="runtime-changes.html">Handling Runtime Changes</a> for information about how this affects your
 application during runtime.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="DensityQualifier">
       <td>Screen pixel density (dpi)</td>
       <td>
         <code>ldpi</code><br/>
@@ -424,6 +441,7 @@ application during runtime.</p>
           <li>{@code nodpi}: This can be used for bitmap resources that you do not want to be scaled
 to match the device density.</li>
         </ul>
+        <p><em>Added in API Level 4.</em></p>
         <p>There is thus a 4:3 scaling factor between each density, so a 9x9 bitmap
          in ldpi is 12x12 in mdpi and 16x16 in hdpi.</p>
         <p>When Android selects which resource files to use,
@@ -439,7 +457,7 @@ Screens</a> for more information about how to handle screen sizes and how Androi
 your bitmaps.</p>
        </td>
     </tr>
-    <tr>
+    <tr id="TouchscreenQualifier">
       <td>Touchscreen type</td>
       <td>
         <code>notouch</code><br/>
@@ -457,7 +475,7 @@ stylus.</li>
 which indicates the type of touchscreen on the device.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="KeyboardAvailQualifier">
       <td>Keyboard availability</td>
       <td>
         <code>keysexposed</code><br/>
@@ -487,7 +505,7 @@ android.content.res.Configuration#keyboardHidden}, which indicate the visibility
 keyboard and and the visibility of any kind of keyboard (including software), respectively.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="ImeQualifier">
       <td>Primary text input method</td>
       <td>
         <code>nokeys</code><br/>
@@ -497,7 +515,8 @@ keyboard and and the visibility of any kind of keyboard (including software), re
       <td>
         <ul class="nolist">
           <li>{@code nokeys}: Device has no hardware keys for text input.</li>
-          <li>{@code qwert}: Device has a hardware qwerty keyboard, whether it's visible to the user
+          <li>{@code qwerty}: Device has a hardware qwerty keyboard, whether it's visible to the
+user
 or not.</li>
           <li>{@code 12key}: Device has a hardware 12-key keyboard, whether it's visible to the user
 or not.</li>
@@ -506,7 +525,7 @@ or not.</li>
 which indicates the primary text input method available.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="NavAvailQualifier">
       <td>Navigation key availability</td>
       <td>
         <code>navexposed</code><br/>
@@ -525,7 +544,7 @@ information about how this affects your application during runtime.</p>
 field, which indicates whether navigation keys are hidden.</p>
       </td>
     </tr>
-    <tr>
+    <tr id="TouchQualifier">
       <td>Primary non-touch navigation method</td>
       <td>
         <code>nonav</code><br/>
@@ -560,19 +579,22 @@ orientation" described above.</p>
       </td>
     </tr>
 -->
-    <tr>
-      <td>API Level</td>
+    <tr id="VersionQualifier">
+      <td>System Version (API Level)</td>
       <td>Examples:<br/>
+        <code>v3</code><br/>
         <code>v4</code><br/>
-        <code>v5</code><br/>
-        <code>v6</code><br/>
         <code>v7</code><br/>
         etc.</td>
       <td>
-        <p>The API Level supported by the device, for example <code>v1</code> for API Level 1
-(Android 1.0) or <code>v5</code> for API Level 5 (Android 2.0). See the <a
+        <p>The API Level supported by the device. For example, <code>v1</code> for API Level
+1 (devices with Android 1.0 or higher) and <code>v4</code> for API Level 4 (devices with Android
+1.6 or higher). See the <a
 href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a> document for more information
 about these values.</p>
+        <p class="caution"><strong>Caution:</strong> Android 1.5 and 1.6 only match resources
+with this qualifier when it exactly matches the system version. See the section below about <a
+href="#KnownIssues">Known Issues</a> for more information.</p>
       </td>
     </tr>
 </table>
@@ -702,6 +724,54 @@ same way. For example, a color:</p>
 
 
 
+<h2 id="Compatibility">Providing the Best Device Compatibility with Resources</h2>
+
+<p>In order for your application to support multiple device configurations, it's very important that
+you always provide default resources for each type of resource that your application uses.</p>
+
+<p>For example, if your application supports several languages, always include a {@code
+values/} directory (in which your strings are saved) <em>without</em> a <a
+href="#LocalQualifier">language and region qualifier</a>. If you instead put all your string files
+in directories that have a language and region qualifier, then your application will crash when run
+on a device set to a language that your strings do not support. But, as long as you provide default
+{@code values/} resources, then your application will run properly (even if the user doesn't
+understand that language&mdash;it's better than crashing).</p>
+
+<p>Likewise, if you provide different layout resources based on the screen orientation, you should
+pick one orientation as your default. For example, instead of providing layout resources in {@code
+layout-land/} for landscape and {@code layout-port/} for portrait, leave one as the default, such as
+{@code layout/} for landscape and {@code layout-port/} for portrait.</p>
+
+<p>Providing default resources is important not only because your application might run on a
+configuration you had not anticipated, but also because new versions of Android sometimes add
+resource qualifiers that older versions do not support. If you use a new resource qualifier,
+but maintain code compatibility with older versions of Android, then when an older version of
+Android runs your application, it will crash if you do not provide default resources, because it
+cannot use the resources named with the new qualifier. For example, if your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> is set to 4, and you qualify all of your drawable resources using <a
+href="NightQualifier">night mode</a> ({@code night} or {@code notnight}, which were added in API
+Level 8), then an API Level 4 device cannot access your drawable resources and will crash. In this
+case, you probably want {@code notnight} to be your default resources, so you should exclude that
+qualifier so your drawable resources are in either {@code drawable/} or {@code drawable-night/}.</p>
+
+<p>The bottom line is: For every type of resource your application uses,
+provide a set of default resources that allow your application to perform well, then create
+variations of those resources for specific device configurations.</p>
+
+<p>There is one exception to this rule: If your application's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> is 4 or
+greater, you <em>do not</em> need default drawable resources when you provide alternative drawable
+resources with the <a href="#DensityQualifier">screen density</a> qualifier. Even without default
+drawable resources, Android can find the best match among the alternative screen densities and scale
+the bitmaps as necessary. However, for the best experience on all types of devices, you should
+provide alternative drawables for all three types of density. (If your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> is
+<em>less than</em> 4, see the section below about <a href="#KnownIssues">known issues</a> for
+information about how to support multiple screen densities.)</p>
+
+
+
 
 <h2 id="BestMatch">How Android Finds the Best-matching Resource</h2>
 
@@ -818,5 +888,84 @@ type, and input method), while <code>drawable-en</code> has only one parameter t
 
 <p>To learn more about how to use resources in your application, continue to <a
 href="accessing-resources.html">Accessing Resources</a>.</p>
+
+
+
+
+<h2 id="KnownIssues">Known Issues</h2>
+
+<p>The following are known issues in terms of how Android finds the best-matching resource on
+certain versions of Android.</p>
+
+<h3>Android 1.5 (and lower)</h3>
+
+<h4>Density and screen size qualifiers are not supported</h4>
+
+<p>Android 1.5 (and lower) does not support the following resource qualifers:</p>
+<dl>
+  <dt><a href="#DensityQualifier">Density</a></dt>
+    <dd>{@code ldpi}, {@code mdpi}, {@code ldpi}, and {@code nodpi}</dd>
+  <dt><a href="#ScreenSizeQualifier">Screen size</a></dt>
+    <dd>{@code small}, {@code normal}, and {@code large}</dd>
+  <dt><a href="#ScreenLongQualifier">Screen length</a></dt>
+    <dd>{@code long} and {@code notlong}</dd>
+</dl>
+
+<p>These resource qualifiers were introduced in Android 1.6, so Android 1.5 (API Level 3) and lower
+does not support them. If your application supports Android 1.5 and includes drawable resources for
+each density type ({@code drawable-ldpi/}, {@code drawable-mdpi/}, and {@code drawable-ldpi/}), then
+an Android 1.5 device might use any one of them, because it doesn't support the density qualifier,
+will ignore it, and will use which ever otherwise-matching drawable resource it finds first. This
+caveat applies the same to screen size and screen length resources.<p>
+
+<p><b>The fix:</b> Ensure that your <a href="{@docRoot}sdk/tools-notes.html">SDK Tools</a> version
+is r6 or greater and provide default drawable resources. For example, to support Android 1.5
+while providing resources for all screen densities, include a set of drawable resources that does
+not use the screen density qualifier. In fact, because all Android 1.5 devices have a medium-density
+screen, you can remove the {@code mdpi} qualifer and put all medium density images in {@code
+drawable/} (instead of {@code drawable-mdpi/}). For the screen size, put your {@code normal} size
+resources in the default resource directory, and for the screen length, put your {@code notlong}
+resources in the default resource directory (because all Android 1.5 devices have medium-density,
+normal, not-long screens).</p>
+
+<p>You need SDK Tools, Revision 6 (or greater), because it includes a new packaging tool that
+automatically applies an appropriate <a href="#VersionQualifier">version qualifier</a> to any
+resource directory named with a qualifier that did not exist in Android 1.0. For example, because
+the density qualifier was introduced in Android 1.6 (API Level 4), when the packaging tool
+encounters a resource directory using the density qualifier, it adds {@code v4} to the directory
+name to ensure that older versions do not use those resources (only API Level 4 and higher support
+that qualifier). Thus, by putting your medium-density resources in a directory <em>without</em> the
+{@code mdpi} qualifier, they are still accessible by Android 1.5, and any device that supports the
+density qualifer and has a medium-density screen also uses these resources because they are the best
+match for the device (instead of using the {@code ldpi} or {@code hdpi} resources).</p>
+
+<p class="note"><strong>Note:</strong> Later versions of Android, such as API Level 8,
+introduce other resource qualifiers that older version do not support. To provide the best
+compatibility, you should always include a set of default resources for each type of resource
+that your application uses. See the section about <a href="#Compatibility">Providing the Best Device
+Compatibility with Resources</a> for more information.</p>
+
+
+
+<h3>Android 1.5 and 1.6</h3>
+
+<h4>Version qualifier performs exact match, instead of best match</h4>
+
+<p>The correct behavior is for the system to match resources marked with a <a
+href="#VersionQualifier">version qualifier</a> equal
+to or less than the system version on the device, but on Android 1.5 and 1.6, (API Level 3 and 4),
+there is a bug that causes the system to match resources marked with the version qualifier
+only when it exactly matches the version on the device.</p>
+
+<p><b>The fix:</b> To provide version-specific resources, abide by this behavior. However, because
+this bug is fixed in versions of Android available after 1.6, if
+you need to differentiate resources between Android 1.5, 1.6, and later versions, then you only need
+to apply the version qualifier to the 1.6 resources and one to match all later versions. Thus, this
+is effectively a non-issue.</p>
+
+<p>For example, if you want drawable resources that are different on each Android 1.5, 1.6,
+and 2.0.1 (and later), create three drawable directories: {@code drawable/} (for 1.5 and lower),
+{@code drawable-v4} (for 1.6), and {@code drawable-v6} (for 2.0.1 and later&mdash;version 2.0, v5,
+is no longer available).</p>
 
 
