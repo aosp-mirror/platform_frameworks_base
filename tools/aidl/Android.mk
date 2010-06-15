@@ -2,6 +2,9 @@
 #
 # Copies files into the directory structure described by a manifest
 
+# This tool is prebuilt if we're doing an app-only build.
+ifeq ($(TARGET_BUILD_APPS),)
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -21,4 +24,4 @@ LOCAL_MODULE := aidl
 
 include $(BUILD_HOST_EXECUTABLE)
 
-
+endif # TARGET_BUILD_APPS
