@@ -129,6 +129,13 @@ status_t MediaScanner::doProcessDirectory(
             continue;
         }
 
+        int nameLength = strlen(name);
+        if (nameLength + 1 > pathRemaining) {
+            // path too long!
+            continue;
+        }
+        strcpy(fileSpot, name);
+
         int type = entry->d_type;
         if (type == DT_UNKNOWN) {
             // If the type is unknown, stat() the file instead.
@@ -146,16 +153,7 @@ status_t MediaScanner::doProcessDirectory(
             }
         }
         if (type == DT_REG || type == DT_DIR) {
-            int nameLength = strlen(name);
-            bool isDirectory = (type == DT_DIR);
-
-            if (nameLength > pathRemaining || (isDirectory && nameLength + 1 > pathRemaining)) {
-                // path too long!
-                continue;
-            }
-
-            strcpy(fileSpot, name);
-            if (isDirectory) {
+            if (type == DT_DIR) {
                 // ignore directories with a name that starts with '.'
                 // for example, the Mac ".Trashes" directory
                 if (name[0] == '.') continue;
