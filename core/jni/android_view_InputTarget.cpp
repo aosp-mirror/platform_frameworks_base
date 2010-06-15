@@ -19,7 +19,7 @@
 #include "JNIHelp.h"
 
 #include <utils/Log.h>
-#include <ui/InputDispatchPolicy.h>
+#include <ui/InputDispatcher.h>
 #include <ui/InputTransport.h>
 #include "android_view_InputTarget.h"
 #include "android_view_InputChannel.h"

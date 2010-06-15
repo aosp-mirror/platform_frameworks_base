@@ -27,6 +27,22 @@
 #include <errno.h>
 #include <limits.h>
 
+/** Amount that trackball needs to move in order to generate a key event. */
+#define TRACKBALL_MOVEMENT_THRESHOLD 6
+
+/* Slop distance for jumpy pointer detection.
+ * The vertical range of the screen divided by this is our epsilon value. */
+#define JUMPY_EPSILON_DIVISOR 212
+
+/* Number of jumpy points to drop for touchscreens that need it. */
+#define JUMPY_TRANSITION_DROPS 3
+#define JUMPY_DROP_LIMIT 3
+
+/* Maximum squared distance for averaging.
+ * If moving farther than this, turn of averaging to avoid lag in response. */
+#define AVERAGING_DISTANCE_LIMIT (75 * 75)
+
+
 namespace android {
 
 // --- Static Functions ---
@@ -89,7 +105,7 @@ static const int keyCodeRotationMapSize =
         sizeof(keyCodeRotationMap) / sizeof(keyCodeRotationMap[0]);
 
 int32_t rotateKeyCode(int32_t keyCode, int32_t orientation) {
-    if (orientation != InputDispatchPolicyInterface::ROTATION_0) {
+    if (orientation != InputReaderPolicyInterface::ROTATION_0) {
         for (int i = 0; i < keyCodeRotationMapSize; i++) {
             if (keyCode == keyCodeRotationMap[i][0]) {
                 return keyCodeRotationMap[i][orientation];
@@ -677,12 +693,13 @@ void InputDevice::MultiTouchScreenState::reset() {
 // --- InputReader ---
 
 InputReader::InputReader(const sp<EventHubInterface>& eventHub,
-        const sp<InputDispatchPolicyInterface>& policy,
+        const sp<InputReaderPolicyInterface>& policy,
         const sp<InputDispatcherInterface>& dispatcher) :
         mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher) {
+    configureExcludedDevices();
     resetGlobalMetaState();
     resetDisplayProperties();
-    updateGlobalVirtualKeyState();
+    updateExportedVirtualKeyState();
 }
 
 InputReader::~InputReader() {
@@ -925,7 +942,7 @@ void InputReader::handleSwitch(const RawEvent* rawEvent) {
     InputDevice* device = getNonIgnoredDevice(rawEvent->deviceId);
     if (! device) return;
 
-    onSwitch(rawEvent->when, device, rawEvent->value != 0, rawEvent->scanCode);
+    onSwitch(rawEvent->when, device, rawEvent->scanCode, rawEvent->value);
 }
 
 void InputReader::onKey(nsecs_t when, InputDevice* device,
@@ -974,7 +991,7 @@ void InputReader::onKey(nsecs_t when, InputDevice* device,
     }
 
     int32_t keyEventFlags = KEY_EVENT_FLAG_FROM_SYSTEM;
-    if (policyActions & InputDispatchPolicyInterface::ACTION_WOKE_HERE) {
+    if (policyActions & InputReaderPolicyInterface::ACTION_WOKE_HERE) {
         keyEventFlags = keyEventFlags | KEY_EVENT_FLAG_WOKE_HERE;
     }
 
@@ -984,12 +1001,12 @@ void InputReader::onKey(nsecs_t when, InputDevice* device,
             device->keyboard.current.downTime);
 }
 
-void InputReader::onSwitch(nsecs_t when, InputDevice* device, bool down,
-        int32_t code) {
-    switch (code) {
-    case SW_LID:
-        mDispatcher->notifyLidSwitchChanged(when, ! down);
-    }
+void InputReader::onSwitch(nsecs_t when, InputDevice* device, int32_t switchCode,
+        int32_t switchValue) {
+    int32_t policyActions = mPolicy->interceptSwitch(when, switchCode, switchValue);
+
+    uint32_t policyFlags = 0;
+    applyStandardInputDispatchPolicyActions(when, policyActions, & policyFlags);
 }
 
 void InputReader::onMultiTouchScreenStateChanged(nsecs_t when,
@@ -1256,7 +1273,7 @@ void InputReader::dispatchVirtualKey(nsecs_t when,
     nsecs_t downTime = device->touchScreen.currentVirtualKey.downTime;
     int32_t metaState = globalMetaState();
 
-    updateGlobalVirtualKeyState();
+    updateExportedVirtualKeyState();
 
     mPolicy->virtualKeyFeedback(when, device->id, keyEventAction, keyEventFlags,
             keyCode, scanCode, metaState, downTime);
@@ -1333,8 +1350,8 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         int32_t motionEventAction) {
     int32_t orientedWidth, orientedHeight;
     switch (mDisplayOrientation) {
-    case InputDispatchPolicyInterface::ROTATION_90:
-    case InputDispatchPolicyInterface::ROTATION_270:
+    case InputReaderPolicyInterface::ROTATION_90:
+    case InputReaderPolicyInterface::ROTATION_270:
         orientedWidth = mDisplayHeight;
         orientedHeight = mDisplayWidth;
         break;
@@ -1369,18 +1386,18 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
                 * device->touchScreen.precalculated.sizeScale;
 
         switch (mDisplayOrientation) {
-        case InputDispatchPolicyInterface::ROTATION_90: {
+        case InputReaderPolicyInterface::ROTATION_90: {
             float xTemp = x;
             x = y;
             y = mDisplayHeight - xTemp;
             break;
         }
-        case InputDispatchPolicyInterface::ROTATION_180: {
+        case InputReaderPolicyInterface::ROTATION_180: {
             x = mDisplayWidth - x;
             y = mDisplayHeight - y;
             break;
         }
-        case InputDispatchPolicyInterface::ROTATION_270: {
+        case InputReaderPolicyInterface::ROTATION_270: {
             float xTemp = x;
             x = mDisplayWidth - y;
             y = xTemp;
@@ -1483,18 +1500,18 @@ void InputReader::onTrackballStateChanged(nsecs_t when,
 
     float temp;
     switch (mDisplayOrientation) {
-    case InputDispatchPolicyInterface::ROTATION_90:
+    case InputReaderPolicyInterface::ROTATION_90:
         temp = pointerCoords.x;
         pointerCoords.x = pointerCoords.y;
         pointerCoords.y = - temp;
         break;
 
-    case InputDispatchPolicyInterface::ROTATION_180:
+    case InputReaderPolicyInterface::ROTATION_180:
         pointerCoords.x = - pointerCoords.x;
         pointerCoords.y = - pointerCoords.y;
         break;
 
-    case InputDispatchPolicyInterface::ROTATION_270:
+    case InputReaderPolicyInterface::ROTATION_270:
         temp = pointerCoords.x;
         pointerCoords.x = - pointerCoords.y;
         pointerCoords.y = temp;
@@ -1514,51 +1531,30 @@ void InputReader::onConfigurationChanged(nsecs_t when) {
     resetGlobalMetaState();
 
     // Reset virtual keys, just in case.
-    updateGlobalVirtualKeyState();
+    updateExportedVirtualKeyState();
+
+    // Update input configuration.
+    updateExportedInputConfiguration();
 
     // Enqueue configuration changed.
-    // XXX This stuff probably needs to be tracked elsewhere in an input device registry
-    //     of some kind that can be asynchronously updated and queried.  (Same as above?)
-    int32_t touchScreenConfig = InputDispatchPolicyInterface::TOUCHSCREEN_NOTOUCH;
-    int32_t keyboardConfig = InputDispatchPolicyInterface::KEYBOARD_NOKEYS;
-    int32_t navigationConfig = InputDispatchPolicyInterface::NAVIGATION_NONAV;
-
-    for (size_t i = 0; i < mDevices.size(); i++) {
-        InputDevice* device = mDevices.valueAt(i);
-        int32_t deviceClasses = device->classes;
-
-        if (deviceClasses & INPUT_DEVICE_CLASS_TOUCHSCREEN) {
-            touchScreenConfig = InputDispatchPolicyInterface::TOUCHSCREEN_FINGER;
-        }
-        if (deviceClasses & INPUT_DEVICE_CLASS_ALPHAKEY) {
-            keyboardConfig = InputDispatchPolicyInterface::KEYBOARD_QWERTY;
-        }
-        if (deviceClasses & INPUT_DEVICE_CLASS_TRACKBALL) {
-            navigationConfig = InputDispatchPolicyInterface::NAVIGATION_TRACKBALL;
-        } else if (deviceClasses & INPUT_DEVICE_CLASS_DPAD) {
-            navigationConfig = InputDispatchPolicyInterface::NAVIGATION_DPAD;
-        }
-    }
-
-    mDispatcher->notifyConfigurationChanged(when, touchScreenConfig,
-            keyboardConfig, navigationConfig);
+    mDispatcher->notifyConfigurationChanged(when);
 }
 
 bool InputReader::applyStandardInputDispatchPolicyActions(nsecs_t when,
         int32_t policyActions, uint32_t* policyFlags) {
-    if (policyActions & InputDispatchPolicyInterface::ACTION_APP_SWITCH_COMING) {
+    if (policyActions & InputReaderPolicyInterface::ACTION_APP_SWITCH_COMING) {
         mDispatcher->notifyAppSwitchComing(when);
     }
 
-    if (policyActions & InputDispatchPolicyInterface::ACTION_WOKE_HERE) {
+    if (policyActions & InputReaderPolicyInterface::ACTION_WOKE_HERE) {
         *policyFlags |= POLICY_FLAG_WOKE_HERE;
     }
 
-    if (policyActions & InputDispatchPolicyInterface::ACTION_BRIGHT_HERE) {
+    if (policyActions & InputReaderPolicyInterface::ACTION_BRIGHT_HERE) {
         *policyFlags |= POLICY_FLAG_BRIGHT_HERE;
     }
 
-    return policyActions & InputDispatchPolicyInterface::ACTION_DISPATCH;
+    return policyActions & InputReaderPolicyInterface::ACTION_DISPATCH;
 }
 
 void InputReader::resetDisplayProperties() {
@@ -1706,7 +1702,7 @@ void InputReader::configureDeviceForCurrentDisplaySize(InputDevice* device) {
 void InputReader::configureVirtualKeys(InputDevice* device) {
     device->touchScreen.virtualKeys.clear();
 
-    Vector<InputDispatchPolicyInterface::VirtualKeyDefinition> virtualKeyDefinitions;
+    Vector<InputReaderPolicyInterface::VirtualKeyDefinition> virtualKeyDefinitions;
     mPolicy->getVirtualKeyDefinitions(device->name, virtualKeyDefinitions);
     if (virtualKeyDefinitions.size() == 0) {
         return;
@@ -1720,7 +1716,7 @@ void InputReader::configureVirtualKeys(InputDevice* device) {
     int32_t touchScreenHeight = device->touchScreen.parameters.yAxis.range;
 
     for (size_t i = 0; i < virtualKeyDefinitions.size(); i++) {
-        const InputDispatchPolicyInterface::VirtualKeyDefinition& virtualKeyDefinition =
+        const InputReaderPolicyInterface::VirtualKeyDefinition& virtualKeyDefinition =
                 virtualKeyDefinitions[i];
 
         device->touchScreen.virtualKeys.add();
@@ -1779,6 +1775,15 @@ void InputReader::configureAbsoluteAxisInfo(InputDevice* device,
     LOGI("  %s: unknown axis values, setting to zero", name);
 }
 
+void InputReader::configureExcludedDevices() {
+    Vector<String8> excludedDeviceNames;
+    mPolicy->getExcludedDeviceNames(excludedDeviceNames);
+
+    for (size_t i = 0; i < excludedDeviceNames.size(); i++) {
+        mEventHub->addExcludedDevice(excludedDeviceNames[i]);
+    }
+}
+
 void InputReader::resetGlobalMetaState() {
     mGlobalMetaState = -1;
 }
@@ -1796,7 +1801,7 @@ int32_t InputReader::globalMetaState() {
     return mGlobalMetaState;
 }
 
-void InputReader::updateGlobalVirtualKeyState() {
+void InputReader::updateExportedVirtualKeyState() {
     int32_t keyCode = -1, scanCode = -1;
 
     for (size_t i = 0; i < mDevices.size(); i++) {
@@ -1809,20 +1814,96 @@ void InputReader::updateGlobalVirtualKeyState() {
         }
     }
 
-    {
+    { // acquire exported state lock
         AutoMutex _l(mExportedStateLock);
 
-        mGlobalVirtualKeyCode = keyCode;
-        mGlobalVirtualScanCode = scanCode;
-    }
+        mExportedVirtualKeyCode = keyCode;
+        mExportedVirtualScanCode = scanCode;
+    } // release exported state lock
 }
 
 bool InputReader::getCurrentVirtualKey(int32_t* outKeyCode, int32_t* outScanCode) const {
-    AutoMutex _l(mExportedStateLock);
+    { // acquire exported state lock
+        AutoMutex _l(mExportedStateLock);
 
-    *outKeyCode = mGlobalVirtualKeyCode;
-    *outScanCode = mGlobalVirtualScanCode;
-    return mGlobalVirtualKeyCode != -1;
+        *outKeyCode = mExportedVirtualKeyCode;
+        *outScanCode = mExportedVirtualScanCode;
+        return mExportedVirtualKeyCode != -1;
+    } // release exported state lock
+}
+
+void InputReader::updateExportedInputConfiguration() {
+    int32_t touchScreenConfig = InputConfiguration::TOUCHSCREEN_NOTOUCH;
+    int32_t keyboardConfig = InputConfiguration::KEYBOARD_NOKEYS;
+    int32_t navigationConfig = InputConfiguration::NAVIGATION_NONAV;
+
+    for (size_t i = 0; i < mDevices.size(); i++) {
+        InputDevice* device = mDevices.valueAt(i);
+        int32_t deviceClasses = device->classes;
+
+        if (deviceClasses & INPUT_DEVICE_CLASS_TOUCHSCREEN) {
+            touchScreenConfig = InputConfiguration::TOUCHSCREEN_FINGER;
+        }
+        if (deviceClasses & INPUT_DEVICE_CLASS_ALPHAKEY) {
+            keyboardConfig = InputConfiguration::KEYBOARD_QWERTY;
+        }
+        if (deviceClasses & INPUT_DEVICE_CLASS_TRACKBALL) {
+            navigationConfig = InputConfiguration::NAVIGATION_TRACKBALL;
+        } else if (deviceClasses & INPUT_DEVICE_CLASS_DPAD) {
+            navigationConfig = InputConfiguration::NAVIGATION_DPAD;
+        }
+    }
+
+    { // acquire exported state lock
+        AutoMutex _l(mExportedStateLock);
+
+        mExportedInputConfiguration.touchScreen = touchScreenConfig;
+        mExportedInputConfiguration.keyboard = keyboardConfig;
+        mExportedInputConfiguration.navigation = navigationConfig;
+    } // release exported state lock
+}
+
+void InputReader::getCurrentInputConfiguration(InputConfiguration* outConfiguration) const {
+    { // acquire exported state lock
+        AutoMutex _l(mExportedStateLock);
+
+        *outConfiguration = mExportedInputConfiguration;
+    } // release exported state lock
+}
+
+int32_t InputReader::getCurrentScanCodeState(int32_t deviceId, int32_t deviceClasses,
+        int32_t scanCode) const {
+    { // acquire exported state lock
+        AutoMutex _l(mExportedStateLock);
+
+        if (mExportedVirtualScanCode == scanCode) {
+            return KEY_STATE_VIRTUAL;
+        }
+    } // release exported state lock
+
+    return mEventHub->getScanCodeState(deviceId, deviceClasses, scanCode);
+}
+
+int32_t InputReader::getCurrentKeyCodeState(int32_t deviceId, int32_t deviceClasses,
+        int32_t keyCode) const {
+    { // acquire exported state lock
+        AutoMutex _l(mExportedStateLock);
+
+        if (mExportedVirtualKeyCode == keyCode) {
+            return KEY_STATE_VIRTUAL;
+        }
+    } // release exported state lock
+
+    return mEventHub->getKeyCodeState(deviceId, deviceClasses, keyCode);
+}
+
+int32_t InputReader::getCurrentSwitchState(int32_t deviceId, int32_t deviceClasses,
+        int32_t sw) const {
+    return mEventHub->getSwitchState(deviceId, deviceClasses, sw);
+}
+
+bool InputReader::hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const {
+    return mEventHub->hasKeys(numCodes, keyCodes, outFlags);
 }
 
 

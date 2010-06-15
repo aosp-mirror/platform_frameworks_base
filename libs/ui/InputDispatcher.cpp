@@ -19,6 +19,9 @@
 // Log debug messages about the dispatch cycle.
 #define DEBUG_DISPATCH_CYCLE 1
 
+// Log debug messages about registrations.
+#define DEBUG_REGISTRATION 1
+
 // Log debug messages about performance statistics.
 #define DEBUG_PERFORMANCE_STATISTICS 1
 
@@ -42,7 +45,7 @@ static inline bool isMovementKey(int32_t keyCode) {
 
 // --- InputDispatcher ---
 
-InputDispatcher::InputDispatcher(const sp<InputDispatchPolicyInterface>& policy) :
+InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& policy) :
     mPolicy(policy) {
     mPollLoop = new PollLoop();
 
@@ -55,6 +58,8 @@ InputDispatcher::InputDispatcher(const sp<InputDispatchPolicyInterface>& policy)
     mInboundQueue.tail.eventTime = LONG_LONG_MAX;
 
     mKeyRepeatState.lastKeyEntry = NULL;
+
+    mCurrentInputTargetsValid = false;
 }
 
 InputDispatcher::~InputDispatcher() {
@@ -72,8 +77,9 @@ InputDispatcher::~InputDispatcher() {
 }
 
 void InputDispatcher::dispatchOnce() {
-    bool allowKeyRepeat = mPolicy->allowKeyRepeat();
+    nsecs_t keyRepeatTimeout = mPolicy->getKeyRepeatTimeout();
 
+    bool skipPoll = false;
     nsecs_t currentTime;
     nsecs_t nextWakeupTime = LONG_LONG_MAX;
     { // acquire lock
@@ -84,7 +90,7 @@ void InputDispatcher::dispatchOnce() {
         // is not a key.  This is to ensure that we abort a key repeat if the device is just coming
         // out of sleep.
         // XXX we should handle resetting input state coming out of sleep more generally elsewhere
-        if (! allowKeyRepeat) {
+        if (keyRepeatTimeout < 0) {
             resetKeyRepeatLocked();
         }
 
@@ -121,8 +127,8 @@ void InputDispatcher::dispatchOnce() {
             if (mInboundQueue.isEmpty()) {
                 if (mKeyRepeatState.lastKeyEntry) {
                     if (currentTime >= mKeyRepeatState.nextRepeatTime) {
-                        processKeyRepeatLocked(currentTime);
-                        return; // dispatched once
+                        processKeyRepeatLockedInterruptible(currentTime, keyRepeatTimeout);
+                        skipPoll = true;
                     } else {
                         if (mKeyRepeatState.nextRepeatTime < nextWakeupTime) {
                             nextWakeupTime = mKeyRepeatState.nextRepeatTime;
@@ -130,31 +136,30 @@ void InputDispatcher::dispatchOnce() {
                     }
                 }
             } else {
-                // Inbound queue has at least one entry.  Dequeue it and begin dispatching.
-                // Note that we do not hold the lock for this process because dispatching may
-                // involve making many callbacks.
-                EventEntry* entry = mInboundQueue.dequeueAtHead();
+                // Inbound queue has at least one entry.
+                // Start processing it but leave it on the queue until later so that the
+                // input reader can keep appending samples onto a motion event between the
+                // time we started processing it and the time we finally enqueue dispatch
+                // entries for it.
+                EventEntry* entry = mInboundQueue.head.next;
 
                 switch (entry->type) {
                 case EventEntry::TYPE_CONFIGURATION_CHANGED: {
                     ConfigurationChangedEntry* typedEntry =
                             static_cast<ConfigurationChangedEntry*>(entry);
-                    processConfigurationChangedLocked(currentTime, typedEntry);
-                    mAllocator.releaseConfigurationChangedEntry(typedEntry);
+                    processConfigurationChangedLockedInterruptible(currentTime, typedEntry);
                     break;
                 }
 
                 case EventEntry::TYPE_KEY: {
                     KeyEntry* typedEntry = static_cast<KeyEntry*>(entry);
-                    processKeyLocked(currentTime, typedEntry);
-                    mAllocator.releaseKeyEntry(typedEntry);
+                    processKeyLockedInterruptible(currentTime, typedEntry, keyRepeatTimeout);
                     break;
                 }
 
                 case EventEntry::TYPE_MOTION: {
                     MotionEntry* typedEntry = static_cast<MotionEntry*>(entry);
-                    processMotionLocked(currentTime, typedEntry);
-                    mAllocator.releaseMotionEntry(typedEntry);
+                    processMotionLockedInterruptible(currentTime, typedEntry);
                     break;
                 }
 
@@ -162,10 +167,23 @@ void InputDispatcher::dispatchOnce() {
                     assert(false);
                     break;
                 }
-                return; // dispatched once
+
+                // Dequeue and release the event entry that we just processed.
+                mInboundQueue.dequeue(entry);
+                mAllocator.releaseEventEntry(entry);
+                skipPoll = true;
             }
         }
+
+        // Run any deferred commands.
+        skipPoll |= runCommandsLockedInterruptible();
     } // release lock
+
+    // If we dispatched anything, don't poll just now.  Wait for the next iteration.
+    // Contents may have shifted during flight.
+    if (skipPoll) {
+        return;
+    }
 
     // Wait for callback or timeout or wake.
     nsecs_t timeout = nanoseconds_to_milliseconds(nextWakeupTime - currentTime);
@@ -173,19 +191,43 @@ void InputDispatcher::dispatchOnce() {
     mPollLoop->pollOnce(timeoutMillis);
 }
 
-void InputDispatcher::processConfigurationChangedLocked(nsecs_t currentTime,
-        ConfigurationChangedEntry* entry) {
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("processConfigurationChanged - eventTime=%lld, touchScreenConfig=%d, "
-            "keyboardConfig=%d, navigationConfig=%d", entry->eventTime,
-            entry->touchScreenConfig, entry->keyboardConfig, entry->navigationConfig);
-#endif
+bool InputDispatcher::runCommandsLockedInterruptible() {
+    if (mCommandQueue.isEmpty()) {
+        return false;
+    }
 
-    mPolicy->notifyConfigurationChanged(entry->eventTime, entry->touchScreenConfig,
-            entry->keyboardConfig, entry->navigationConfig);
+    do {
+        CommandEntry* commandEntry = mCommandQueue.dequeueAtHead();
+
+        Command command = commandEntry->command;
+        (this->*command)(commandEntry); // commands are implicitly 'LockedInterruptible'
+
+        mAllocator.releaseCommandEntry(commandEntry);
+    } while (! mCommandQueue.isEmpty());
+    return true;
 }
 
-void InputDispatcher::processKeyLocked(nsecs_t currentTime, KeyEntry* entry) {
+InputDispatcher::CommandEntry* InputDispatcher::postCommandLocked(Command command) {
+    CommandEntry* commandEntry = mAllocator.obtainCommandEntry(command);
+    mCommandQueue.enqueueAtTail(commandEntry);
+    return commandEntry;
+}
+
+void InputDispatcher::processConfigurationChangedLockedInterruptible(
+        nsecs_t currentTime, ConfigurationChangedEntry* entry) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+    LOGD("processConfigurationChanged - eventTime=%lld", entry->eventTime);
+#endif
+
+    mLock.unlock();
+
+    mPolicy->notifyConfigurationChanged(entry->eventTime);
+
+    mLock.lock();
+}
+
+void InputDispatcher::processKeyLockedInterruptible(
+        nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
     LOGD("processKey - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, action=0x%x, "
             "flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, downTime=%lld",
@@ -209,7 +251,7 @@ void InputDispatcher::processKeyLocked(nsecs_t currentTime, KeyEntry* entry) {
         } else {
             // Not a repeat.  Save key down state in case we do see a repeat later.
             resetKeyRepeatLocked();
-            mKeyRepeatState.nextRepeatTime = entry->eventTime + mPolicy->getKeyRepeatTimeout();
+            mKeyRepeatState.nextRepeatTime = entry->eventTime + keyRepeatTimeout;
         }
         mKeyRepeatState.lastKeyEntry = entry;
         entry->refCount += 1;
@@ -217,10 +259,11 @@ void InputDispatcher::processKeyLocked(nsecs_t currentTime, KeyEntry* entry) {
         resetKeyRepeatLocked();
     }
 
-    identifyInputTargetsAndDispatchKeyLocked(currentTime, entry);
+    identifyInputTargetsAndDispatchKeyLockedInterruptible(currentTime, entry);
 }
 
-void InputDispatcher::processKeyRepeatLocked(nsecs_t currentTime) {
+void InputDispatcher::processKeyRepeatLockedInterruptible(
+        nsecs_t currentTime, nsecs_t keyRepeatTimeout) {
     // TODO Old WindowManagerServer code sniffs the input queue for following key up
     //      events and drops the repeat if one is found.  We should do something similar.
     //      One good place to do it is in notifyKey as soon as the key up enters the
@@ -252,7 +295,7 @@ void InputDispatcher::processKeyRepeatLocked(nsecs_t currentTime) {
     entry->downTime = currentTime;
     entry->policyFlags = 0;
 
-    mKeyRepeatState.nextRepeatTime = currentTime + mPolicy->getKeyRepeatTimeout();
+    mKeyRepeatState.nextRepeatTime = currentTime + keyRepeatTimeout;
 
 #if DEBUG_OUTBOUND_EVENT_DETAILS
     LOGD("processKeyRepeat - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, "
@@ -263,10 +306,11 @@ void InputDispatcher::processKeyRepeatLocked(nsecs_t currentTime) {
             entry->repeatCount, entry->downTime);
 #endif
 
-    identifyInputTargetsAndDispatchKeyLocked(currentTime, entry);
+    identifyInputTargetsAndDispatchKeyLockedInterruptible(currentTime, entry);
 }
 
-void InputDispatcher::processMotionLocked(nsecs_t currentTime, MotionEntry* entry) {
+void InputDispatcher::processMotionLockedInterruptible(
+        nsecs_t currentTime, MotionEntry* entry) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
     LOGD("processMotion - eventTime=%lld, deviceId=0x%x, nature=0x%x, policyFlags=0x%x, action=0x%x, "
             "metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, downTime=%lld",
@@ -296,14 +340,18 @@ void InputDispatcher::processMotionLocked(nsecs_t currentTime, MotionEntry* entr
     }
 #endif
 
-    identifyInputTargetsAndDispatchMotionLocked(currentTime, entry);
+    identifyInputTargetsAndDispatchMotionLockedInterruptible(currentTime, entry);
 }
 
-void InputDispatcher::identifyInputTargetsAndDispatchKeyLocked(
+void InputDispatcher::identifyInputTargetsAndDispatchKeyLockedInterruptible(
         nsecs_t currentTime, KeyEntry* entry) {
 #if DEBUG_DISPATCH_CYCLE
     LOGD("identifyInputTargetsAndDispatchKey");
 #endif
+
+    entry->dispatchInProgress = true;
+    mCurrentInputTargetsValid = false;
+    mLock.unlock();
 
     mReusableKeyEvent.initialize(entry->deviceId, entry->nature, entry->action, entry->flags,
             entry->keyCode, entry->scanCode, entry->metaState, entry->repeatCount,
@@ -313,14 +361,21 @@ void InputDispatcher::identifyInputTargetsAndDispatchKeyLocked(
     mPolicy->getKeyEventTargets(& mReusableKeyEvent, entry->policyFlags,
             mCurrentInputTargets);
 
+    mLock.lock();
+    mCurrentInputTargetsValid = true;
+
     dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
 }
 
-void InputDispatcher::identifyInputTargetsAndDispatchMotionLocked(
+void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
         nsecs_t currentTime, MotionEntry* entry) {
 #if DEBUG_DISPATCH_CYCLE
     LOGD("identifyInputTargetsAndDispatchMotion");
 #endif
+
+    entry->dispatchInProgress = true;
+    mCurrentInputTargetsValid = false;
+    mLock.unlock();
 
     mReusableMotionEvent.initialize(entry->deviceId, entry->nature, entry->action,
             entry->edgeFlags, entry->metaState,
@@ -333,16 +388,21 @@ void InputDispatcher::identifyInputTargetsAndDispatchMotionLocked(
     mPolicy->getMotionEventTargets(& mReusableMotionEvent, entry->policyFlags,
             mCurrentInputTargets);
 
+    mLock.lock();
+    mCurrentInputTargetsValid = true;
+
     dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
 }
 
 void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTime,
         EventEntry* eventEntry, bool resumeWithAppendedMotionSample) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("dispatchEventToCurrentInputTargets, "
+    LOGD("dispatchEventToCurrentInputTargets - "
             "resumeWithAppendedMotionSample=%s",
             resumeWithAppendedMotionSample ? "true" : "false");
 #endif
+
+    assert(eventEntry->dispatchInProgress); // should already have been set to true
 
     for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
         const InputTarget& inputTarget = mCurrentInputTargets.itemAt(i);
@@ -365,7 +425,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime, Connection
         EventEntry* eventEntry, const InputTarget* inputTarget,
         bool resumeWithAppendedMotionSample) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ prepareDispatchCycle, flags=%d, timeout=%lldns, "
+    LOGD("channel '%s' ~ prepareDispatchCycle - flags=%d, timeout=%lldns, "
             "xOffset=%f, yOffset=%f, resumeWithAppendedMotionSample=%s",
             connection->getInputChannelName(), inputTarget->flags, inputTarget->timeout,
             inputTarget->xOffset, inputTarget->yOffset,
@@ -377,7 +437,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime, Connection
     // not responding.
     if (connection->status != Connection::STATUS_NORMAL) {
         LOGV("channel '%s' ~ Dropping event because the channel status is %s",
-                connection->status == Connection::STATUS_BROKEN ? "BROKEN" : "NOT RESPONDING");
+                connection->getStatusLabel());
         return;
     }
 
@@ -631,14 +691,15 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime, Connection* 
 
 void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime, Connection* connection) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ finishDispatchCycle: %01.1fms since event, "
+    LOGD("channel '%s' ~ finishDispatchCycle - %01.1fms since event, "
             "%01.1fms since dispatch",
             connection->getInputChannelName(),
             connection->getEventLatencyMillis(currentTime),
             connection->getDispatchLatencyMillis(currentTime));
 #endif
 
-    if (connection->status == Connection::STATUS_BROKEN) {
+    if (connection->status == Connection::STATUS_BROKEN
+            || connection->status == Connection::STATUS_ZOMBIE) {
         return;
     }
 
@@ -722,34 +783,37 @@ bool InputDispatcher::timeoutDispatchCycleLocked(nsecs_t currentTime, Connection
 bool InputDispatcher::abortDispatchCycleLocked(nsecs_t currentTime, Connection* connection,
         bool broken) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ abortDispatchCycle, broken=%s",
+    LOGD("channel '%s' ~ abortDispatchCycle - broken=%s",
             connection->getInputChannelName(), broken ? "true" : "false");
 #endif
-
-    if (connection->status == Connection::STATUS_BROKEN) {
-        return false;
-    }
 
     // Clear the pending timeout.
     connection->nextTimeoutTime = LONG_LONG_MAX;
 
     // Clear the outbound queue.
-    while (! connection->outboundQueue.isEmpty()) {
-        DispatchEntry* dispatchEntry = connection->outboundQueue.dequeueAtHead();
-        mAllocator.releaseDispatchEntry(dispatchEntry);
-    }
+    bool deactivated = ! connection->outboundQueue.isEmpty();
+    if (deactivated) {
+        do {
+            DispatchEntry* dispatchEntry = connection->outboundQueue.dequeueAtHead();
+            mAllocator.releaseDispatchEntry(dispatchEntry);
+        } while (! connection->outboundQueue.isEmpty());
 
-    // Outbound queue is empty, deactivate the connection.
-    deactivateConnectionLocked(connection);
+        deactivateConnectionLocked(connection);
+    }
 
     // Handle the case where the connection appears to be unrecoverably broken.
+    // Ignore already broken or zombie connections.
     if (broken) {
-        connection->status = Connection::STATUS_BROKEN;
+        if (connection->status == Connection::STATUS_NORMAL
+                || connection->status == Connection::STATUS_NOT_RESPONDING) {
+            connection->status = Connection::STATUS_BROKEN;
 
-        // Notify other system components.
-        onDispatchCycleBrokenLocked(currentTime, connection);
+            // Notify other system components.
+            onDispatchCycleBrokenLocked(currentTime, connection);
+        }
     }
-    return true; /*deactivated*/
+
+    return deactivated;
 }
 
 bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data) {
@@ -772,6 +836,7 @@ bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* dat
             LOGE("channel '%s' ~ Consumer closed input channel or an error occurred.  "
                     "events=0x%x", connection->getInputChannelName(), events);
             d->abortDispatchCycleLocked(currentTime, connection.get(), true /*broken*/);
+            d->runCommandsLockedInterruptible();
             return false; // remove the callback
         }
 
@@ -786,20 +851,19 @@ bool InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* dat
             LOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
                     connection->getInputChannelName(), status);
             d->abortDispatchCycleLocked(currentTime, connection.get(), true /*broken*/);
+            d->runCommandsLockedInterruptible();
             return false; // remove the callback
         }
 
         d->finishDispatchCycleLocked(currentTime, connection.get());
+        d->runCommandsLockedInterruptible();
         return true;
     } // release lock
 }
 
-void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime, int32_t touchScreenConfig,
-        int32_t keyboardConfig, int32_t navigationConfig) {
+void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyConfigurationChanged - eventTime=%lld, touchScreenConfig=%d, "
-            "keyboardConfig=%d, navigationConfig=%d", eventTime,
-            touchScreenConfig, keyboardConfig, navigationConfig);
+    LOGD("notifyConfigurationChanged - eventTime=%lld", eventTime);
 #endif
 
     bool wasEmpty;
@@ -808,9 +872,6 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime, int32_t touc
 
         ConfigurationChangedEntry* newEntry = mAllocator.obtainConfigurationChangedEntry();
         newEntry->eventTime = eventTime;
-        newEntry->touchScreenConfig = touchScreenConfig;
-        newEntry->keyboardConfig = keyboardConfig;
-        newEntry->navigationConfig = navigationConfig;
 
         wasEmpty = mInboundQueue.isEmpty();
         mInboundQueue.enqueueAtTail(newEntry);
@@ -819,16 +880,6 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime, int32_t touc
     if (wasEmpty) {
         mPollLoop->wake();
     }
-}
-
-void InputDispatcher::notifyLidSwitchChanged(nsecs_t eventTime, bool lidOpen) {
-#if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyLidSwitchChanged - eventTime=%lld, open=%s", eventTime,
-            lidOpen ? "true" : "false");
-#endif
-
-    // Send lid switch notification immediately and synchronously.
-    mPolicy->notifyLidSwitchChanged(eventTime, lidOpen);
 }
 
 void InputDispatcher::notifyAppSwitchComing(nsecs_t eventTime) {
@@ -949,13 +1000,25 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
                 }
 
                 // The last motion event is a move and is compatible for appending.
-                // Do the batching magic and exit.
+                // Do the batching magic.
                 mAllocator.appendMotionSample(motionEntry, eventTime, pointerCount, pointerCoords);
 #if DEBUG_BATCHING
                 LOGD("Appended motion sample onto batch for most recent "
                         "motion event for this device in the inbound queue.");
 #endif
-                return; // done
+
+                // Sanity check for special case because dispatch is interruptible.
+                // The dispatch logic is partially interruptible and releases its lock while
+                // identifying targets.  However, as soon as the targets have been identified,
+                // the dispatcher proceeds to write a dispatch entry into all relevant outbound
+                // queues and then promptly removes the motion entry from the queue.
+                //
+                // Consequently, we should never observe the case where the inbound queue contains
+                // an in-progress motion entry unless the current input targets are invalid
+                // (currently being computed).  Check for this!
+                assert(! (motionEntry->dispatchInProgress && mCurrentInputTargetsValid));
+
+                return; // done!
             }
 
             // STREAMING CASE
@@ -977,34 +1040,38 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
             // Note: This code crucially depends on the invariant that an outbound queue always
             //       contains at most one synchronous event and it is always last (but it might
             //       not be first!).
-            for (size_t i = 0; i < mActiveConnections.size(); i++) {
-                Connection* connection = mActiveConnections.itemAt(i);
-                if (! connection->outboundQueue.isEmpty()) {
-                    DispatchEntry* dispatchEntry = connection->outboundQueue.tail.prev;
-                    if (dispatchEntry->targetFlags & InputTarget::FLAG_SYNC) {
-                        if (dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION) {
-                            goto NoBatchingOrStreaming;
-                        }
+            if (mCurrentInputTargetsValid) {
+                for (size_t i = 0; i < mActiveConnections.size(); i++) {
+                    Connection* connection = mActiveConnections.itemAt(i);
+                    if (! connection->outboundQueue.isEmpty()) {
+                        DispatchEntry* dispatchEntry = connection->outboundQueue.tail.prev;
+                        if (dispatchEntry->targetFlags & InputTarget::FLAG_SYNC) {
+                            if (dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION) {
+                                goto NoBatchingOrStreaming;
+                            }
 
-                        MotionEntry* syncedMotionEntry = static_cast<MotionEntry*>(
-                                dispatchEntry->eventEntry);
-                        if (syncedMotionEntry->action != MOTION_EVENT_ACTION_MOVE
-                                || syncedMotionEntry->deviceId != deviceId
-                                || syncedMotionEntry->pointerCount != pointerCount) {
-                            goto NoBatchingOrStreaming;
-                        }
+                            MotionEntry* syncedMotionEntry = static_cast<MotionEntry*>(
+                                    dispatchEntry->eventEntry);
+                            if (syncedMotionEntry->action != MOTION_EVENT_ACTION_MOVE
+                                    || syncedMotionEntry->deviceId != deviceId
+                                    || syncedMotionEntry->pointerCount != pointerCount) {
+                                goto NoBatchingOrStreaming;
+                            }
 
-                        // Found synced move entry.  Append sample and resume dispatch.
-                        mAllocator.appendMotionSample(syncedMotionEntry, eventTime,
-                                pointerCount, pointerCoords);
-#if DEBUG_BATCHING
-                        LOGD("Appended motion sample onto batch for most recent synchronously "
-                                "dispatched motion event for this device in the outbound queues.");
-#endif
-                        nsecs_t currentTime = systemTime(SYSTEM_TIME_MONOTONIC);
-                        dispatchEventToCurrentInputTargetsLocked(currentTime, syncedMotionEntry,
-                                true /*resumeWithAppendedMotionSample*/);
-                        return; // done!
+                            // Found synced move entry.  Append sample and resume dispatch.
+                            mAllocator.appendMotionSample(syncedMotionEntry, eventTime,
+                                    pointerCount, pointerCoords);
+    #if DEBUG_BATCHING
+                            LOGD("Appended motion sample onto batch for most recent synchronously "
+                                    "dispatched motion event for this device in the outbound queues.");
+    #endif
+                            nsecs_t currentTime = systemTime(SYSTEM_TIME_MONOTONIC);
+                            dispatchEventToCurrentInputTargetsLocked(currentTime, syncedMotionEntry,
+                                    true /*resumeWithAppendedMotionSample*/);
+
+                            runCommandsLockedInterruptible();
+                            return; // done!
+                        }
                     }
                 }
             }
@@ -1049,6 +1116,10 @@ void InputDispatcher::resetKeyRepeatLocked() {
 }
 
 status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChannel) {
+#if DEBUG_REGISTRATION
+    LOGD("channel '%s' - Registered", inputChannel->getName().string());
+#endif
+
     int receiveFd;
     { // acquire lock
         AutoMutex _l(mLock);
@@ -1069,6 +1140,8 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
         }
 
         mConnectionsByReceiveFd.add(receiveFd, connection);
+
+        runCommandsLockedInterruptible();
     } // release lock
 
     mPollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
@@ -1076,6 +1149,10 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
 }
 
 status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputChannel) {
+#if DEBUG_REGISTRATION
+    LOGD("channel '%s' - Unregistered", inputChannel->getName().string());
+#endif
+
     int32_t receiveFd;
     { // acquire lock
         AutoMutex _l(mLock);
@@ -1095,6 +1172,8 @@ status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputCh
 
         nsecs_t currentTime = systemTime(SYSTEM_TIME_MONOTONIC);
         abortDispatchCycleLocked(currentTime, connection.get(), true /*broken*/);
+
+        runCommandsLockedInterruptible();
     } // release lock
 
     mPollLoop->removeCallback(receiveFd);
@@ -1123,11 +1202,12 @@ void InputDispatcher::deactivateConnectionLocked(Connection* connection) {
     }
 }
 
-void InputDispatcher::onDispatchCycleStartedLocked(nsecs_t currentTime, Connection* connection) {
+void InputDispatcher::onDispatchCycleStartedLocked(
+        nsecs_t currentTime, Connection* connection) {
 }
 
-void InputDispatcher::onDispatchCycleFinishedLocked(nsecs_t currentTime,
-        Connection* connection, bool recoveredFromANR) {
+void InputDispatcher::onDispatchCycleFinishedLocked(
+        nsecs_t currentTime, Connection* connection, bool recoveredFromANR) {
     if (recoveredFromANR) {
         LOGI("channel '%s' ~ Recovered from ANR.  %01.1fms since event, "
                 "%01.1fms since dispatch, %01.1fms since ANR",
@@ -1136,25 +1216,64 @@ void InputDispatcher::onDispatchCycleFinishedLocked(nsecs_t currentTime,
                 connection->getDispatchLatencyMillis(currentTime),
                 connection->getANRLatencyMillis(currentTime));
 
-        // TODO tell framework
+        CommandEntry* commandEntry = postCommandLocked(
+                & InputDispatcher::doNotifyInputChannelRecoveredFromANRLockedInterruptible);
+        commandEntry->inputChannel = connection->inputChannel;
     }
 }
 
-void InputDispatcher::onDispatchCycleANRLocked(nsecs_t currentTime, Connection* connection) {
+void InputDispatcher::onDispatchCycleANRLocked(
+        nsecs_t currentTime, Connection* connection) {
     LOGI("channel '%s' ~ Not responding!  %01.1fms since event, %01.1fms since dispatch",
             connection->getInputChannelName(),
             connection->getEventLatencyMillis(currentTime),
             connection->getDispatchLatencyMillis(currentTime));
 
-    // TODO tell framework
+    CommandEntry* commandEntry = postCommandLocked(
+            & InputDispatcher::doNotifyInputChannelANRLockedInterruptible);
+    commandEntry->inputChannel = connection->inputChannel;
 }
 
-void InputDispatcher::onDispatchCycleBrokenLocked(nsecs_t currentTime, Connection* connection) {
+void InputDispatcher::onDispatchCycleBrokenLocked(
+        nsecs_t currentTime, Connection* connection) {
     LOGE("channel '%s' ~ Channel is unrecoverably broken and will be disposed!",
             connection->getInputChannelName());
 
-    // TODO tell framework
+    CommandEntry* commandEntry = postCommandLocked(
+            & InputDispatcher::doNotifyInputChannelBrokenLockedInterruptible);
+    commandEntry->inputChannel = connection->inputChannel;
 }
+
+void InputDispatcher::doNotifyInputChannelBrokenLockedInterruptible(
+        CommandEntry* commandEntry) {
+    mLock.unlock();
+
+    mPolicy->notifyInputChannelBroken(commandEntry->inputChannel);
+    commandEntry->inputChannel.clear();
+
+    mLock.lock();
+}
+
+void InputDispatcher::doNotifyInputChannelANRLockedInterruptible(
+        CommandEntry* commandEntry) {
+    mLock.unlock();
+
+    mPolicy->notifyInputChannelANR(commandEntry->inputChannel);
+    commandEntry->inputChannel.clear();
+
+    mLock.lock();
+}
+
+void InputDispatcher::doNotifyInputChannelRecoveredFromANRLockedInterruptible(
+        CommandEntry* commandEntry) {
+    mLock.unlock();
+
+    mPolicy->notifyInputChannelRecoveredFromANR(commandEntry->inputChannel);
+    commandEntry->inputChannel.clear();
+
+    mLock.lock();
+}
+
 
 // --- InputDispatcher::Allocator ---
 
@@ -1166,6 +1285,7 @@ InputDispatcher::Allocator::obtainConfigurationChangedEntry() {
     ConfigurationChangedEntry* entry = mConfigurationChangeEntryPool.alloc();
     entry->refCount = 1;
     entry->type = EventEntry::TYPE_CONFIGURATION_CHANGED;
+    entry->dispatchInProgress = false;
     return entry;
 }
 
@@ -1173,6 +1293,7 @@ InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry() {
     KeyEntry* entry = mKeyEntryPool.alloc();
     entry->refCount = 1;
     entry->type = EventEntry::TYPE_KEY;
+    entry->dispatchInProgress = false;
     return entry;
 }
 
@@ -1181,6 +1302,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry() {
     entry->refCount = 1;
     entry->type = EventEntry::TYPE_MOTION;
     entry->firstSample.next = NULL;
+    entry->dispatchInProgress = false;
     return entry;
 }
 
@@ -1189,6 +1311,12 @@ InputDispatcher::DispatchEntry* InputDispatcher::Allocator::obtainDispatchEntry(
     DispatchEntry* entry = mDispatchEntryPool.alloc();
     entry->eventEntry = eventEntry;
     eventEntry->refCount += 1;
+    return entry;
+}
+
+InputDispatcher::CommandEntry* InputDispatcher::Allocator::obtainCommandEntry(Command command) {
+    CommandEntry* entry = mCommandEntryPool.alloc();
+    entry->command = command;
     return entry;
 }
 
@@ -1231,7 +1359,11 @@ void InputDispatcher::Allocator::releaseKeyEntry(KeyEntry* entry) {
 void InputDispatcher::Allocator::releaseMotionEntry(MotionEntry* entry) {
     entry->refCount -= 1;
     if (entry->refCount == 0) {
-        freeMotionSampleList(entry->firstSample.next);
+        for (MotionSample* sample = entry->firstSample.next; sample != NULL; ) {
+            MotionSample* next = sample->next;
+            mMotionSamplePool.free(sample);
+            sample = next;
+        }
         mMotionEntryPool.free(entry);
     } else {
         assert(entry->refCount > 0);
@@ -1241,6 +1373,10 @@ void InputDispatcher::Allocator::releaseMotionEntry(MotionEntry* entry) {
 void InputDispatcher::Allocator::releaseDispatchEntry(DispatchEntry* entry) {
     releaseEventEntry(entry->eventEntry);
     mDispatchEntryPool.free(entry);
+}
+
+void InputDispatcher::Allocator::releaseCommandEntry(CommandEntry* entry) {
+    mCommandEntryPool.free(entry);
 }
 
 void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
@@ -1254,18 +1390,6 @@ void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
     sample->next = NULL;
     motionEntry->lastSample->next = sample;
     motionEntry->lastSample = sample;
-}
-
-void InputDispatcher::Allocator::freeMotionSample(MotionSample* sample) {
-    mMotionSamplePool.free(sample);
-}
-
-void InputDispatcher::Allocator::freeMotionSampleList(MotionSample* head) {
-    while (head) {
-        MotionSample* next = head->next;
-        mMotionSamplePool.free(head);
-        head = next;
-    }
 }
 
 // --- InputDispatcher::Connection ---
@@ -1284,6 +1408,25 @@ status_t InputDispatcher::Connection::initialize() {
     return inputPublisher.initialize();
 }
 
+const char* InputDispatcher::Connection::getStatusLabel() const {
+    switch (status) {
+    case STATUS_NORMAL:
+        return "NORMAL";
+
+    case STATUS_BROKEN:
+        return "BROKEN";
+
+    case STATUS_NOT_RESPONDING:
+        return "NOT_RESPONDING";
+
+    case STATUS_ZOMBIE:
+        return "ZOMBIE";
+
+    default:
+        return "UNKNOWN";
+    }
+}
+
 InputDispatcher::DispatchEntry* InputDispatcher::Connection::findQueuedDispatchEntryForEvent(
         const EventEntry* eventEntry) const {
     for (DispatchEntry* dispatchEntry = outboundQueue.tail.prev;
@@ -1293,6 +1436,14 @@ InputDispatcher::DispatchEntry* InputDispatcher::Connection::findQueuedDispatchE
         }
     }
     return NULL;
+}
+
+// --- InputDispatcher::CommandEntry ---
+
+InputDispatcher::CommandEntry::CommandEntry() {
+}
+
+InputDispatcher::CommandEntry::~CommandEntry() {
 }
 
 
