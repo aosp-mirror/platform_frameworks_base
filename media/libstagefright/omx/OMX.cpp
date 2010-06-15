@@ -43,7 +43,7 @@ namespace android {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct OMX::CallbackDispatcher : public RefBase {
-    CallbackDispatcher(OMX *owner);
+    CallbackDispatcher(OMXNodeInstance *owner);
 
     void post(const omx_message &msg);
 
@@ -53,7 +53,7 @@ protected:
 private:
     Mutex mLock;
 
-    OMX *mOwner;
+    OMXNodeInstance *mOwner;
     bool mDone;
     Condition mQueueChanged;
     List<omx_message> mQueue;
@@ -69,7 +69,7 @@ private:
     CallbackDispatcher &operator=(const CallbackDispatcher &);
 };
 
-OMX::CallbackDispatcher::CallbackDispatcher(OMX *owner)
+OMX::CallbackDispatcher::CallbackDispatcher(OMXNodeInstance *owner)
     : mOwner(owner),
       mDone(false) {
     pthread_attr_t attr;
@@ -101,12 +101,11 @@ void OMX::CallbackDispatcher::post(const omx_message &msg) {
 }
 
 void OMX::CallbackDispatcher::dispatch(const omx_message &msg) {
-    OMXNodeInstance *instance = mOwner->findInstance(msg.node);
-    if (instance == NULL) {
+    if (mOwner == NULL) {
         LOGV("Would have dispatched a message to a node that's already gone.");
         return;
     }
-    instance->onMessage(msg);
+    mOwner->onMessage(msg);
 }
 
 // static
@@ -145,7 +144,6 @@ void OMX::CallbackDispatcher::threadEntry() {
 
 OMX::OMX()
     : mMaster(new OMXMaster),
-      mDispatcher(new CallbackDispatcher(this)),
       mNodeCounter(0) {
 }
 
@@ -226,6 +224,7 @@ status_t OMX::allocateNode(
     }
 
     *node = makeNodeID(instance);
+    mDispatchers.add(*node, new CallbackDispatcher(instance));
 
     instance->setHandle(*node, handle);
 
@@ -341,7 +340,7 @@ OMX_ERRORTYPE OMX::OnEvent(
     msg.u.event_data.data1 = nData1;
     msg.u.event_data.data2 = nData2;
 
-    mDispatcher->post(msg);
+    findDispatcher(node)->post(msg);
 
     return OMX_ErrorNone;
 }
@@ -355,7 +354,7 @@ OMX_ERRORTYPE OMX::OnEmptyBufferDone(
     msg.node = node;
     msg.u.buffer_data.buffer = pBuffer;
 
-    mDispatcher->post(msg);
+    findDispatcher(node)->post(msg);
 
     return OMX_ErrorNone;
 }
@@ -375,7 +374,7 @@ OMX_ERRORTYPE OMX::OnFillBufferDone(
     msg.u.extended_buffer_data.platform_private = pBuffer->pPlatformPrivate;
     msg.u.extended_buffer_data.data_ptr = pBuffer->pBuffer;
 
-    mDispatcher->post(msg);
+    findDispatcher(node)->post(msg);
 
     return OMX_ErrorNone;
 }
@@ -395,6 +394,14 @@ OMXNodeInstance *OMX::findInstance(node_id node) {
     ssize_t index = mNodeIDToInstance.indexOfKey(node);
 
     return index < 0 ? NULL : mNodeIDToInstance.valueAt(index);
+}
+
+sp<OMX::CallbackDispatcher> OMX::findDispatcher(node_id node) {
+    Mutex::Autolock autoLock(mLock);
+
+    ssize_t index = mDispatchers.indexOfKey(node);
+
+    return index < 0 ? NULL : mDispatchers.valueAt(index);
 }
 
 void OMX::invalidateNodeID(node_id node) {
