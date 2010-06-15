@@ -1,4 +1,7 @@
 
+ContextFinish {
+	handcodeApi
+	}
 
 ContextBindRootScript {
 	param RsScript sampler
@@ -259,12 +262,6 @@ ScriptSetTimeZone {
 ScriptInvoke {
 	param RsScript s
 	param uint32_t slot
-	}
-
-ScriptInvokeData {
-	param RsScript s
-	param uint32_t slot
-	param void * data
 	}
 
 ScriptInvokeV {

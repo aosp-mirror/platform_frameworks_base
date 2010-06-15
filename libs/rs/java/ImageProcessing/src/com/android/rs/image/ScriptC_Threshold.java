@@ -104,12 +104,12 @@ public class ScriptC_Threshold
 
     private final static int mInvokableIndex_Filter = 4;
     public void invokable_Filter() {
-        invokeData(mInvokableIndex_Filter);
+        invoke(mInvokableIndex_Filter);
     }
 
     private final static int mInvokableIndex_FilterBenchmark = 5;
     public void invokable_FilterBenchmark() {
-        invokeData(mInvokableIndex_FilterBenchmark);
+        invoke(mInvokableIndex_FilterBenchmark);
     }
 }
 

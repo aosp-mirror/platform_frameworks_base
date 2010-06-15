@@ -260,16 +260,24 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         s->mProgram.mInit();
     }
 
-    s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t *)calloc(100, sizeof(void *));
-    BCCchar **labels = new char*[100];
-    bccGetFunctions(s->mBccScript, (BCCsizei *)&s->mEnviroment.mInvokeFunctionCount,
-                    100, (BCCchar **)labels);
-    //LOGE("func count %i", s->mEnviroment.mInvokeFunctionCount);
-    for (uint32_t i=0; i < s->mEnviroment.mInvokeFunctionCount; i++) {
-        BCCsizei length;
-        bccGetFunctionBinary(s->mBccScript, labels[i], (BCCvoid **)&(s->mEnviroment.mInvokeFunctions[i]), &length);
-        //LOGE("func %i %p", i, s->mEnviroment.mInvokeFunctions[i]);
+    bccGetExportFuncs(s->mBccScript, (BCCsizei*) &s->mEnviroment.mInvokeFunctionCount, 0, NULL);
+    if(s->mEnviroment.mInvokeFunctionCount <= 0)
+        s->mEnviroment.mInvokeFunctions = NULL;
+    else {
+        s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t*) calloc(s->mEnviroment.mInvokeFunctionCount, sizeof(Script::InvokeFunc_t));
+        bccGetExportFuncs(s->mBccScript, NULL, s->mEnviroment.mInvokeFunctionCount, (BCCvoid **) s->mEnviroment.mInvokeFunctions);
     }
+
+//    s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t *)calloc(100, sizeof(void *));
+//    BCCchar **labels = new char*[100];
+//    bccGetFunctions(s->mBccScript, (BCCsizei *)&s->mEnviroment.mInvokeFunctionCount,
+//                    100, (BCCchar **)labels);
+    //LOGE("func count %i", s->mEnviroment.mInvokeFunctionCount);
+//    for (uint32_t i=0; i < s->mEnviroment.mInvokeFunctionCount; i++) {
+//        BCCsizei length;
+//        bccGetFunctionBinary(s->mBccScript, labels[i], (BCCvoid **)&(s->mEnviroment.mInvokeFunctions[i]), &length);
+        //LOGE("func %i %p", i, s->mEnviroment.mInvokeFunctions[i]);
+  //  }
 
     s->mEnviroment.mFieldAddress = (void **)calloc(100, sizeof(void *));
     bccGetExportVars(s->mBccScript, (BCCsizei *)&s->mEnviroment.mFieldCount,

@@ -68,6 +68,7 @@ public class RenderScript {
     native void nContextSetSurface(int w, int h, Surface sur);
     native void nContextSetPriority(int p);
     native void nContextDump(int bits);
+    native void nContextFinish();
 
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
@@ -141,7 +142,6 @@ public class RenderScript {
     native void nScriptBindAllocation(int script, int alloc, int slot);
     native void nScriptSetTimeZone(int script, byte[] timeZone);
     native void nScriptInvoke(int id, int slot);
-    native void nScriptInvokeData(int id, int slot);
     native void nScriptInvokeV(int id, int slot, byte[] params);
     native void nScriptSetVarI(int id, int slot, int val);
     native void nScriptSetVarF(int id, int slot, float val);
@@ -321,6 +321,10 @@ public class RenderScript {
     public void contextDump(int bits) {
         validate();
         nContextDump(bits);
+    }
+
+    public void finish() {
+        nContextFinish();
     }
 
     public void destroy() {

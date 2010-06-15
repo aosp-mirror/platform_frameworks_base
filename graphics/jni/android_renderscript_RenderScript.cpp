@@ -85,6 +85,14 @@ static void nInitElements(JNIEnv *_env, jobject _this, jint a8, jint rgba4444, j
 // ---------------------------------------------------------------------------
 
 static void
+nContextFinish(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextFinish, con(%p)", con);
+    rsContextFinish(con);
+}
+
+static void
 nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -960,15 +968,6 @@ nScriptInvoke(JNIEnv *_env, jobject _this, jint obj, jint slot)
 }
 
 static void
-nScriptInvokeData(JNIEnv *_env, jobject _this, jint obj, jint slot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptInvokeData, con(%p), script(%p)", con, (void *)obj);
-    rsScriptInvokeData(con, (RsScript)obj, slot, 0);
-}
-
-
-static void
 nScriptInvokeV(JNIEnv *_env, jobject _this, jint script, jint slot, jbyteArray data)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1381,6 +1380,7 @@ static JNINativeMethod methods[] = {
 {"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
 {"nContextCreate",                 "(II)I",                                (void*)nContextCreate },
 {"nContextCreateGL",               "(IIZ)I",                               (void*)nContextCreateGL },
+{"nContextFinish",                 "()V",                                  (void*)nContextFinish },
 {"nContextSetPriority",            "(I)V",                                 (void*)nContextSetPriority },
 {"nContextSetSurface",             "(IILandroid/view/Surface;)V",          (void*)nContextSetSurface },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
@@ -1442,7 +1442,6 @@ static JNINativeMethod methods[] = {
 {"nScriptBindAllocation",          "(III)V",                               (void*)nScriptBindAllocation },
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
 {"nScriptInvoke",                  "(II)V",                                (void*)nScriptInvoke },
-{"nScriptInvokeData",              "(II)V",                                (void*)nScriptInvokeData },
 {"nScriptInvokeV",                 "(II[B)V",                              (void*)nScriptInvokeV },
 {"nScriptSetVarI",                 "(III)V",                               (void*)nScriptSetVarI },
 {"nScriptSetVarF",                 "(IIF)V",                               (void*)nScriptSetVarF },

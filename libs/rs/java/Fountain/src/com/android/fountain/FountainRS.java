@@ -34,7 +34,7 @@ public class FountainRS {
         mRS = rs;
         mRes = res;
 
-        ScriptField_Point_s points = new ScriptField_Point_s(mRS, PART_COUNT);
+        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
 
         SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
         int vtxSlot = smb.addVertexType(points.getType());
@@ -42,7 +42,7 @@ public class FountainRS {
         SimpleMesh sm = smb.create();
         sm.bindVertexAllocation(points.getAllocation(), vtxSlot);
 
-        mScript = new ScriptC_Fountain(mRS, mRes, true);
+        mScript = new ScriptC_Fountain(mRS, mRes, R.raw.fountain_bc, true);
         mScript.set_partMesh(sm);
         mScript.bind_point(points);
         mRS.contextBindRootScript(mScript);

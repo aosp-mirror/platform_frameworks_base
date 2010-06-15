@@ -20,7 +20,7 @@ import android.renderscript.*;
 import android.content.res.Resources;
 import android.util.Log;
 
-public class ScriptField_Point_s extends android.renderscript.Script.FieldBase {
+public class ScriptField_Point extends android.renderscript.Script.FieldBase {
     static public class Item {
         public static final int sizeof = 20;
 
@@ -38,7 +38,7 @@ public class ScriptField_Point_s extends android.renderscript.Script.FieldBase {
 
     private Item mItemArray[];
     private FieldPacker mIOBuffer;
-    public  ScriptField_Point_s(RenderScript rs, int count) {
+    public  ScriptField_Point(RenderScript rs, int count) {
         mItemArray = null;
         mIOBuffer = null;
         {
