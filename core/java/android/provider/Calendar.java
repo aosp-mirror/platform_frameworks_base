@@ -1127,7 +1127,7 @@ public final class Calendar {
         public static final String MAX_EVENTDAYS = "maxEventDays";
     }
 
-    public static final class CalendarMetaData implements CalendarMetaDataColumns {
+    public static final class CalendarMetaData implements CalendarMetaDataColumns, BaseColumns {
     }
 
     public interface EventDaysColumns {
@@ -1524,5 +1524,44 @@ public final class Calendar {
          */
         public static final Uri CONTENT_URI =
                 Uri.withAppendedPath(Calendar.CONTENT_URI, CONTENT_DIRECTORY);
+    }
+
+    /**
+     * Columns from the EventsRawTimes table
+     */
+    public interface EventsRawTimesColumns {
+        /**
+         * The corresponding event id
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String EVENT_ID = "event_id";
+
+        /**
+         * The RFC2445 compliant time the event starts
+         * <P>Type: TEXT</P>
+         */
+        public static final String DTSTART_2445 = "dtstart2445";
+
+        /**
+         * The RFC2445 compliant time the event ends
+         * <P>Type: TEXT</P>
+         */
+        public static final String DTEND_2445 = "dtend2445";
+
+        /**
+         * The RFC2445 compliant original instance time of the recurring event for which this
+         * event is an exception.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ORIGINAL_INSTANCE_TIME_2445 = "originalInstanceTime2445";
+
+        /**
+         * The RFC2445 compliant last date this event repeats on, or NULL if it never ends
+         * <P>Type: TEXT</P>
+         */
+        public static final String LAST_DATE_2445 = "lastDate2445";
+    }
+
+    public static final class EventsRawTimes implements BaseColumns, EventsRawTimesColumns {
     }
 }
