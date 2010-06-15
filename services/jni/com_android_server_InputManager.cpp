@@ -16,9 +16,20 @@
 
 #define LOG_TAG "InputManager-JNI"
 
+//#define LOG_NDEBUG 0
+
+// Log debug messages about InputReaderPolicy
+#define DEBUG_INPUT_READER_POLICY 1
+
+// Log debug messages about InputDispatcherPolicy
+#define DEBUG_INPUT_DISPATCHER_POLICY 1
+
+
 #include "JNIHelp.h"
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
+#include <ui/InputReader.h>
+#include <ui/InputDispatcher.h>
 #include <ui/InputManager.h>
 #include <ui/InputTransport.h>
 #include <utils/Log.h>
@@ -30,73 +41,7 @@
 
 namespace android {
 
-class InputDispatchPolicy : public InputDispatchPolicyInterface {
-public:
-    InputDispatchPolicy(JNIEnv* env, jobject callbacks);
-    virtual ~InputDispatchPolicy();
-
-    void setDisplaySize(int32_t displayId, int32_t width, int32_t height);
-    void setDisplayOrientation(int32_t displayId, int32_t orientation);
-
-    virtual bool getDisplayInfo(int32_t displayId,
-            int32_t* width, int32_t* height, int32_t* orientation);
-
-    virtual void notifyConfigurationChanged(nsecs_t when,
-            int32_t touchScreenConfig, int32_t keyboardConfig, int32_t navigationConfig);
-
-    virtual void notifyLidSwitchChanged(nsecs_t when, bool lidOpen);
-
-    virtual void virtualKeyFeedback(nsecs_t when, int32_t deviceId,
-            int32_t action, int32_t flags, int32_t keyCode,
-            int32_t scanCode, int32_t metaState, nsecs_t downTime);
-
-    virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
-            bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags);
-    virtual int32_t interceptTrackball(nsecs_t when, bool buttonChanged, bool buttonDown,
-            bool rolled);
-    virtual int32_t interceptTouch(nsecs_t when);
-
-    virtual bool filterTouchEvents();
-    virtual bool filterJumpyTouchEvents();
-    virtual void getVirtualKeyDefinitions(const String8& deviceName,
-            Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions);
-    virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
-
-    virtual bool allowKeyRepeat();
-    virtual nsecs_t getKeyRepeatTimeout();
-
-    virtual void getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
-            Vector<InputTarget>& outTargets);
-    virtual void getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
-            Vector<InputTarget>& outTargets);
-
-private:
-    bool isScreenOn();
-    bool isScreenBright();
-
-private:
-    jobject mCallbacks;
-
-    int32_t mFilterTouchEvents;
-    int32_t mFilterJumpyTouchEvents;
-
-    Mutex mDisplayLock;
-    int32_t mDisplayWidth, mDisplayHeight;
-    int32_t mDisplayOrientation;
-
-    inline JNIEnv* threadEnv() const {
-        return AndroidRuntime::getJNIEnv();
-    }
-};
-
-
-// globals
-
-static sp<EventHub> gEventHub;
-static sp<InputDispatchPolicy> gInputDispatchPolicy;
-static sp<InputManager> gInputManager;
-
-// JNI
+// ----------------------------------------------------------------------------
 
 static struct {
     jclass clazz;
@@ -128,8 +73,498 @@ static struct {
     jfieldID height;
 } gVirtualKeyDefinitionClassInfo;
 
+// ----------------------------------------------------------------------------
+
+class NativeInputManager : public virtual RefBase,
+    public virtual InputReaderPolicyInterface,
+    public virtual InputDispatcherPolicyInterface {
+protected:
+    virtual ~NativeInputManager();
+
+public:
+    NativeInputManager(jobject callbacksObj);
+
+    inline sp<InputManager> getInputManager() const { return mInputManager; }
+
+    void setDisplaySize(int32_t displayId, int32_t width, int32_t height);
+    void setDisplayOrientation(int32_t displayId, int32_t orientation);
+
+    /* --- InputReaderPolicyInterface implementation --- */
+
+    virtual bool getDisplayInfo(int32_t displayId,
+            int32_t* width, int32_t* height, int32_t* orientation);
+    virtual void virtualKeyFeedback(nsecs_t when, int32_t deviceId,
+            int32_t action, int32_t flags, int32_t keyCode,
+            int32_t scanCode, int32_t metaState, nsecs_t downTime);
+    virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
+            bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags);
+    virtual int32_t interceptTrackball(nsecs_t when, bool buttonChanged, bool buttonDown,
+            bool rolled);
+    virtual int32_t interceptTouch(nsecs_t when);
+    virtual int32_t interceptSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue);
+    virtual bool filterTouchEvents();
+    virtual bool filterJumpyTouchEvents();
+    virtual void getVirtualKeyDefinitions(const String8& deviceName,
+            Vector<InputReaderPolicyInterface::VirtualKeyDefinition>& outVirtualKeyDefinitions);
+    virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
+
+    /* --- InputDispatcherPolicyInterface implementation --- */
+
+    virtual void notifyConfigurationChanged(nsecs_t when);
+    virtual void notifyInputChannelBroken(const sp<InputChannel>& inputChannel);
+    virtual void notifyInputChannelANR(const sp<InputChannel>& inputChannel);
+    virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel);
+    virtual nsecs_t getKeyRepeatTimeout();
+    virtual void getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+            Vector<InputTarget>& outTargets);
+    virtual void getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+            Vector<InputTarget>& outTargets);
+
+private:
+    sp<InputManager> mInputManager;
+
+    jobject mCallbacksObj;
+
+    // Cached filtering policies.
+    int32_t mFilterTouchEvents;
+    int32_t mFilterJumpyTouchEvents;
+
+    // Cached display state.  (lock mDisplayLock)
+    Mutex mDisplayLock;
+    int32_t mDisplayWidth, mDisplayHeight;
+    int32_t mDisplayOrientation;
+
+    // Callbacks.
+    bool isScreenOn();
+    bool isScreenBright();
+
+    static inline JNIEnv* jniEnv() {
+        return AndroidRuntime::getJNIEnv();
+    }
+
+    static bool isAppSwitchKey(int32_t keyCode);
+    static bool checkExceptionFromCallback(JNIEnv* env, const char* methodName);
+};
+
+// ----------------------------------------------------------------------------
+
+NativeInputManager::NativeInputManager(jobject callbacksObj) :
+    mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1),
+    mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(-1) {
+    JNIEnv* env = jniEnv();
+
+    mCallbacksObj = env->NewGlobalRef(callbacksObj);
+
+    sp<EventHub> eventHub = new EventHub();
+    mInputManager = new InputManager(eventHub, this, this);
+}
+
+NativeInputManager::~NativeInputManager() {
+    JNIEnv* env = jniEnv();
+
+    env->DeleteGlobalRef(mCallbacksObj);
+}
+
+bool NativeInputManager::isAppSwitchKey(int32_t keyCode) {
+    return keyCode == KEYCODE_HOME || keyCode == KEYCODE_ENDCALL;
+}
+
+bool NativeInputManager::checkExceptionFromCallback(JNIEnv* env, const char* methodName) {
+    if (env->ExceptionCheck()) {
+        LOGE("An exception was thrown by callback '%s'.", methodName);
+        LOGE_EX(env);
+        env->ExceptionClear();
+        return true;
+    }
+    return false;
+}
+
+void NativeInputManager::setDisplaySize(int32_t displayId, int32_t width, int32_t height) {
+    if (displayId == 0) {
+        AutoMutex _l(mDisplayLock);
+
+        mDisplayWidth = width;
+        mDisplayHeight = height;
+    }
+}
+
+void NativeInputManager::setDisplayOrientation(int32_t displayId, int32_t orientation) {
+    if (displayId == 0) {
+        AutoMutex _l(mDisplayLock);
+
+        mDisplayOrientation = orientation;
+    }
+}
+
+bool NativeInputManager::getDisplayInfo(int32_t displayId,
+        int32_t* width, int32_t* height, int32_t* orientation) {
+    bool result = false;
+    if (displayId == 0) {
+        AutoMutex _l(mDisplayLock);
+
+        if (mDisplayWidth > 0) {
+            *width = mDisplayWidth;
+            *height = mDisplayHeight;
+            *orientation = mDisplayOrientation;
+            result = true;
+        }
+    }
+    return result;
+}
+
+bool NativeInputManager::isScreenOn() {
+    JNIEnv* env = jniEnv();
+
+    jboolean result = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.isScreenOn);
+    if (checkExceptionFromCallback(env, "isScreenOn")) {
+        return true;
+    }
+    return result;
+}
+
+bool NativeInputManager::isScreenBright() {
+    JNIEnv* env = jniEnv();
+
+    jboolean result = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.isScreenBright);
+    if (checkExceptionFromCallback(env, "isScreenBright")) {
+        return true;
+    }
+    return result;
+}
+
+void NativeInputManager::virtualKeyFeedback(nsecs_t when, int32_t deviceId,
+        int32_t action, int32_t flags, int32_t keyCode,
+        int32_t scanCode, int32_t metaState, nsecs_t downTime) {
+#if DEBUG_INPUT_READER_POLICY
+    LOGD("virtualKeyFeedback - when=%lld, deviceId=%d, action=%d, flags=%d, keyCode=%d, "
+            "scanCode=%d, metaState=%d, downTime=%lld",
+            when, deviceId, action, flags, keyCode, scanCode, metaState, downTime);
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyFeedback,
+            when, deviceId, action, flags, keyCode, scanCode, metaState, downTime);
+    checkExceptionFromCallback(env, "virtualKeyFeedback");
+}
+
+int32_t NativeInputManager::interceptKey(nsecs_t when,
+        int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags) {
+#if DEBUG_INPUT_READER_POLICY
+    LOGD("interceptKey - when=%lld, deviceId=%d, down=%d, keyCode=%d, scanCode=%d, "
+            "policyFlags=%d",
+            when, deviceId, down, keyCode, scanCode, policyFlags);
+#endif
+
+    const int32_t WM_ACTION_PASS_TO_USER = 1;
+    const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
+    const int32_t WM_ACTION_GO_TO_SLEEP = 4;
+
+    JNIEnv* env = jniEnv();
+
+    bool isScreenOn = this->isScreenOn();
+    bool isScreenBright = this->isScreenBright();
+
+    jint wmActions = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.hackInterceptKey,
+            deviceId, EV_KEY, scanCode, keyCode, policyFlags, down ? 1 : 0, when, isScreenOn);
+    if (checkExceptionFromCallback(env, "hackInterceptKey")) {
+        wmActions = 0;
+    }
+
+    int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
+    if (! isScreenOn) {
+        // Key presses and releases wake the device.
+        actions |= InputReaderPolicyInterface::ACTION_WOKE_HERE;
+    }
+
+    if (! isScreenBright) {
+        // Key presses and releases brighten the screen if dimmed.
+        actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+    }
+
+    if (wmActions & WM_ACTION_GO_TO_SLEEP) {
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.goToSleep, when);
+        checkExceptionFromCallback(env, "goToSleep");
+    }
+
+    if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.pokeUserActivityForKey, when);
+        checkExceptionFromCallback(env, "pokeUserActivityForKey");
+    }
+
+    if (wmActions & WM_ACTION_PASS_TO_USER) {
+        actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
+    }
+
+    if (! (wmActions & WM_ACTION_PASS_TO_USER)) {
+        if (down && isAppSwitchKey(keyCode)) {
+            env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyAppSwitchComing);
+            checkExceptionFromCallback(env, "notifyAppSwitchComing");
+
+            actions |= InputReaderPolicyInterface::ACTION_APP_SWITCH_COMING;
+        }
+    }
+    return actions;
+}
+
+int32_t NativeInputManager::interceptTouch(nsecs_t when) {
+#if DEBUG_INPUT_READER_POLICY
+    LOGD("interceptTouch - when=%lld", when);
+#endif
+
+    if (! isScreenOn()) {
+        // Touch events do not wake the device.
+        return InputReaderPolicyInterface::ACTION_NONE;
+    }
+
+    return InputReaderPolicyInterface::ACTION_DISPATCH;
+}
+
+int32_t NativeInputManager::interceptTrackball(nsecs_t when,
+        bool buttonChanged, bool buttonDown, bool rolled) {
+#if DEBUG_INPUT_READER_POLICY
+    LOGD("interceptTrackball - when=%lld, buttonChanged=%d, buttonDown=%d, rolled=%d",
+            when, buttonChanged, buttonDown, rolled);
+#endif
+
+    if (! isScreenOn()) {
+        // Trackball motions and button presses do not wake the device.
+        return InputReaderPolicyInterface::ACTION_NONE;
+    }
+
+    return InputReaderPolicyInterface::ACTION_DISPATCH;
+}
+
+int32_t NativeInputManager::interceptSwitch(nsecs_t when, int32_t switchCode,
+        int32_t switchValue) {
+#if DEBUG_INPUT_READER_POLICY
+    LOGD("interceptSwitch - when=%lld, switchCode=%d, switchValue=%d",
+            when, switchCode, switchValue);
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    switch (switchCode) {
+    case SW_LID:
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyLidSwitchChanged,
+                when, switchValue == 0);
+        checkExceptionFromCallback(env, "notifyLidSwitchChanged");
+        break;
+    }
+
+    return InputReaderPolicyInterface::ACTION_NONE;
+}
+
+bool NativeInputManager::filterTouchEvents() {
+    if (mFilterTouchEvents < 0) {
+        JNIEnv* env = jniEnv();
+
+        jboolean result = env->CallBooleanMethod(mCallbacksObj,
+                gCallbacksClassInfo.filterTouchEvents);
+        if (checkExceptionFromCallback(env, "filterTouchEvents")) {
+            result = false;
+        }
+
+        mFilterTouchEvents = result ? 1 : 0;
+    }
+    return mFilterTouchEvents;
+}
+
+bool NativeInputManager::filterJumpyTouchEvents() {
+    if (mFilterJumpyTouchEvents < 0) {
+        JNIEnv* env = jniEnv();
+
+        jboolean result = env->CallBooleanMethod(mCallbacksObj,
+                gCallbacksClassInfo.filterJumpyTouchEvents);
+        if (checkExceptionFromCallback(env, "filterJumpyTouchEvents")) {
+            result = false;
+        }
+
+        mFilterJumpyTouchEvents = result ? 1 : 0;
+    }
+    return mFilterJumpyTouchEvents;
+}
+
+void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
+        Vector<InputReaderPolicyInterface::VirtualKeyDefinition>& outVirtualKeyDefinitions) {
+    JNIEnv* env = jniEnv();
+
+    jstring deviceNameStr = env->NewStringUTF(deviceName.string());
+    if (! checkExceptionFromCallback(env, "getVirtualKeyDefinitions")) {
+        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
+                gCallbacksClassInfo.getVirtualKeyDefinitions, deviceNameStr));
+        if (! checkExceptionFromCallback(env, "getVirtualKeyDefinitions") && result) {
+            jsize length = env->GetArrayLength(result);
+            for (jsize i = 0; i < length; i++) {
+                jobject item = env->GetObjectArrayElement(result, i);
+
+                outVirtualKeyDefinitions.add();
+                outVirtualKeyDefinitions.editTop().scanCode =
+                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.scanCode));
+                outVirtualKeyDefinitions.editTop().centerX =
+                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.centerX));
+                outVirtualKeyDefinitions.editTop().centerY =
+                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.centerY));
+                outVirtualKeyDefinitions.editTop().width =
+                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.width));
+                outVirtualKeyDefinitions.editTop().height =
+                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.height));
+
+                env->DeleteLocalRef(item);
+            }
+            env->DeleteLocalRef(result);
+        }
+        env->DeleteLocalRef(deviceNameStr);
+    }
+}
+
+void NativeInputManager::getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
+    JNIEnv* env = jniEnv();
+
+    jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
+            gCallbacksClassInfo.getExcludedDeviceNames));
+    if (! checkExceptionFromCallback(env, "getExcludedDeviceNames") && result) {
+        jsize length = env->GetArrayLength(result);
+        for (jsize i = 0; i < length; i++) {
+            jstring item = jstring(env->GetObjectArrayElement(result, i));
+
+            const char* deviceNameChars = env->GetStringUTFChars(item, NULL);
+            outExcludedDeviceNames.add(String8(deviceNameChars));
+            env->ReleaseStringUTFChars(item, deviceNameChars);
+
+            env->DeleteLocalRef(item);
+        }
+        env->DeleteLocalRef(result);
+    }
+}
+
+void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifyConfigurationChanged - when=%lld", when);
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    InputConfiguration config;
+    mInputManager->getInputConfiguration(& config);
+
+    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyConfigurationChanged,
+            when, config.touchScreen, config.keyboard, config.navigation);
+    checkExceptionFromCallback(env, "notifyConfigurationChanged");
+}
+
+void NativeInputManager::notifyInputChannelBroken(const sp<InputChannel>& inputChannel) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifyInputChannelBroken - inputChannel='%s'", inputChannel->getName().string());
+#endif
+
+    // TODO
+}
+
+void NativeInputManager::notifyInputChannelANR(const sp<InputChannel>& inputChannel) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifyInputChannelANR - inputChannel='%s'",
+            inputChannel->getName().string());
+#endif
+
+    // TODO
+}
+
+void NativeInputManager::notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifyInputChannelRecoveredFromANR - inputChannel='%s'",
+            inputChannel->getName().string());
+#endif
+
+    // TODO
+}
+
+nsecs_t NativeInputManager::getKeyRepeatTimeout() {
+    if (! isScreenOn()) {
+        // Disable key repeat when the screen is off.
+        return -1;
+    } else {
+        // TODO use ViewConfiguration.getLongPressTimeout()
+        return milliseconds_to_nanoseconds(500);
+    }
+}
+
+void NativeInputManager::getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+        Vector<InputTarget>& outTargets) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("getKeyEventTargets - policyFlags=%d", policyFlags);
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+    if (! keyEventObj) {
+        LOGE("Could not obtain DVM KeyEvent object to get key event targets.");
+    } else {
+        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
+                gCallbacksClassInfo.getKeyEventTargets,
+                keyEventObj, jint(keyEvent->getNature()), jint(policyFlags)));
+        if (! checkExceptionFromCallback(env, "getKeyEventTargets") && result) {
+            jsize length = env->GetArrayLength(result);
+            for (jsize i = 0; i < length; i++) {
+                jobject item = env->GetObjectArrayElement(result, i);
+                if (! item) {
+                    break; // found null element indicating end of used portion of the array
+                }
+
+                outTargets.add();
+                android_view_InputTarget_toNative(env, item, & outTargets.editTop());
+
+                env->DeleteLocalRef(item);
+            }
+            env->DeleteLocalRef(result);
+        }
+        env->DeleteLocalRef(keyEventObj);
+    }
+}
+
+void NativeInputManager::getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+        Vector<InputTarget>& outTargets) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("getMotionEventTargets - policyFlags=%d", policyFlags);
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    jobject motionEventObj = android_view_MotionEvent_fromNative(env, motionEvent);
+    if (! motionEventObj) {
+        LOGE("Could not obtain DVM MotionEvent object to get key event targets.");
+    } else {
+        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
+                gCallbacksClassInfo.getMotionEventTargets,
+                motionEventObj, jint(motionEvent->getNature()), jint(policyFlags)));
+        if (! checkExceptionFromCallback(env, "getMotionEventTargets") && result) {
+            jsize length = env->GetArrayLength(result);
+            for (jsize i = 0; i < length; i++) {
+                jobject item = env->GetObjectArrayElement(result, i);
+                if (! item) {
+                    break; // found null element indicating end of used portion of the array
+                }
+
+                outTargets.add();
+                android_view_InputTarget_toNative(env, item, & outTargets.editTop());
+
+                env->DeleteLocalRef(item);
+            }
+            env->DeleteLocalRef(result);
+        }
+        android_view_MotionEvent_recycle(env, motionEventObj);
+        env->DeleteLocalRef(motionEventObj);
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+
+static sp<NativeInputManager> gNativeInputManager;
+
 static bool checkInputManagerUnitialized(JNIEnv* env) {
-    if (gInputManager == NULL) {
+    if (gNativeInputManager == NULL) {
         LOGE("Input manager not initialized.");
         jniThrowRuntimeException(env, "Input manager not initialized.");
         return true;
@@ -139,16 +574,11 @@ static bool checkInputManagerUnitialized(JNIEnv* env) {
 
 static void android_server_InputManager_nativeInit(JNIEnv* env, jclass clazz,
         jobject callbacks) {
-    if (gEventHub == NULL) {
-        gEventHub = new EventHub();
-    }
-
-    if (gInputDispatchPolicy == NULL) {
-        gInputDispatchPolicy = new InputDispatchPolicy(env, callbacks);
-    }
-
-    if (gInputManager == NULL) {
-        gInputManager = new InputManager(gEventHub, gInputDispatchPolicy);
+    if (gNativeInputManager == NULL) {
+        gNativeInputManager = new NativeInputManager(callbacks);
+    } else {
+        LOGE("Input manager already initialized.");
+        jniThrowRuntimeException(env, "Input manager already initialized.");
     }
 }
 
@@ -157,7 +587,7 @@ static void android_server_InputManager_nativeStart(JNIEnv* env, jclass clazz) {
         return;
     }
 
-    status_t result = gInputManager->start();
+    status_t result = gNativeInputManager->getInputManager()->start();
     if (result) {
         jniThrowRuntimeException(env, "Input manager could not be started.");
     }
@@ -173,7 +603,7 @@ static void android_server_InputManager_nativeSetDisplaySize(JNIEnv* env, jclass
     // to be passed in like this, not sure which is better but leaving it like this
     // keeps the window manager in direct control of when display transitions propagate down
     // to the input dispatcher
-    gInputDispatchPolicy->setDisplaySize(displayId, width, height);
+    gNativeInputManager->setDisplaySize(displayId, width, height);
 }
 
 static void android_server_InputManager_nativeSetDisplayOrientation(JNIEnv* env, jclass clazz,
@@ -182,7 +612,7 @@ static void android_server_InputManager_nativeSetDisplayOrientation(JNIEnv* env,
         return;
     }
 
-    gInputDispatchPolicy->setDisplayOrientation(displayId, orientation);
+    gNativeInputManager->setDisplayOrientation(displayId, orientation);
 }
 
 static jint android_server_InputManager_nativeGetScanCodeState(JNIEnv* env, jclass clazz,
@@ -191,7 +621,8 @@ static jint android_server_InputManager_nativeGetScanCodeState(JNIEnv* env, jcla
         return KEY_STATE_UNKNOWN;
     }
 
-    return gInputManager->getScanCodeState(deviceId, deviceClasses, scanCode);
+    return gNativeInputManager->getInputManager()->getScanCodeState(
+            deviceId, deviceClasses, scanCode);
 }
 
 static jint android_server_InputManager_nativeGetKeyCodeState(JNIEnv* env, jclass clazz,
@@ -200,7 +631,8 @@ static jint android_server_InputManager_nativeGetKeyCodeState(JNIEnv* env, jclas
         return KEY_STATE_UNKNOWN;
     }
 
-    return gInputManager->getKeyCodeState(deviceId, deviceClasses, keyCode);
+    return gNativeInputManager->getInputManager()->getKeyCodeState(
+            deviceId, deviceClasses, keyCode);
 }
 
 static jint android_server_InputManager_nativeGetSwitchState(JNIEnv* env, jclass clazz,
@@ -209,7 +641,7 @@ static jint android_server_InputManager_nativeGetSwitchState(JNIEnv* env, jclass
         return KEY_STATE_UNKNOWN;
     }
 
-    return gInputManager->getSwitchState(deviceId, deviceClasses, sw);
+    return gNativeInputManager->getInputManager()->getSwitchState(deviceId, deviceClasses, sw);
 }
 
 static jboolean android_server_InputManager_nativeHasKeys(JNIEnv* env, jclass clazz,
@@ -223,7 +655,7 @@ static jboolean android_server_InputManager_nativeHasKeys(JNIEnv* env, jclass cl
     jsize numCodes = env->GetArrayLength(keyCodes);
     jboolean result;
     if (numCodes == env->GetArrayLength(outFlags)) {
-        result = gInputManager->hasKeys(numCodes, codes, flags);
+        result = gNativeInputManager->getInputManager()->hasKeys(numCodes, codes, flags);
     } else {
         result = JNI_FALSE;
     }
@@ -243,7 +675,9 @@ static void android_server_InputManager_handleInputChannelDisposed(JNIEnv* env,
     LOGW("Input channel object '%s' was disposed without first being unregistered with "
             "the input manager!", inputChannel->getName().string());
 
-    gInputManager->unregisterInputChannel(inputChannel);
+    if (gNativeInputManager != NULL) {
+        gNativeInputManager->getInputManager()->unregisterInputChannel(inputChannel);
+    }
 }
 
 static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, jclass clazz,
@@ -259,7 +693,7 @@ static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, 
         return;
     }
 
-    status_t status = gInputManager->registerInputChannel(inputChannel);
+    status_t status = gNativeInputManager->getInputManager()->registerInputChannel(inputChannel);
     if (status) {
         jniThrowRuntimeException(env, "Failed to register input channel.  "
                 "Check logs for details.");
@@ -285,12 +719,14 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj, NULL, NULL);
 
-    status_t status = gInputManager->unregisterInputChannel(inputChannel);
+    status_t status = gNativeInputManager->getInputManager()->unregisterInputChannel(inputChannel);
     if (status) {
         jniThrowRuntimeException(env, "Failed to unregister input channel.  "
                 "Check logs for details.");
     }
 }
+
+// ----------------------------------------------------------------------------
 
 static JNINativeMethod gInputManagerMethods[] = {
     /* name, signature, funcPtr */
@@ -334,7 +770,7 @@ int register_android_server_InputManager(JNIEnv* env) {
             gInputManagerMethods, NELEM(gInputManagerMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
-    // Policy
+    // Callbacks
 
     FIND_CLASS(gCallbacksClassInfo.clazz, "com/android/server/InputManager$Callbacks");
 
@@ -405,342 +841,6 @@ int register_android_server_InputManager(JNIEnv* env) {
             "height", "I");
 
     return 0;
-}
-
-// static functions
-
-static bool isAppSwitchKey(int32_t keyCode) {
-    return keyCode == KEYCODE_HOME || keyCode == KEYCODE_ENDCALL;
-}
-
-static bool checkException(JNIEnv* env, const char* methodName) {
-    if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by an InputDispatchPolicy callback '%s'.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-        return true;
-    }
-    return false;
-}
-
-
-// InputDispatchPolicy implementation
-
-InputDispatchPolicy::InputDispatchPolicy(JNIEnv* env, jobject callbacks) :
-        mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1),
-        mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(-1) {
-    mCallbacks = env->NewGlobalRef(callbacks);
-}
-
-InputDispatchPolicy::~InputDispatchPolicy() {
-    JNIEnv* env = threadEnv();
-
-    env->DeleteGlobalRef(mCallbacks);
-}
-
-void InputDispatchPolicy::setDisplaySize(int32_t displayId, int32_t width, int32_t height) {
-    if (displayId == 0) {
-        AutoMutex _l(mDisplayLock);
-
-        mDisplayWidth = width;
-        mDisplayHeight = height;
-    }
-}
-
-void InputDispatchPolicy::setDisplayOrientation(int32_t displayId, int32_t orientation) {
-    if (displayId == 0) {
-        AutoMutex _l(mDisplayLock);
-
-        mDisplayOrientation = orientation;
-    }
-}
-
-bool InputDispatchPolicy::getDisplayInfo(int32_t displayId,
-        int32_t* width, int32_t* height, int32_t* orientation) {
-    bool result = false;
-    if (displayId == 0) {
-        AutoMutex _l(mDisplayLock);
-
-        if (mDisplayWidth > 0) {
-            *width = mDisplayWidth;
-            *height = mDisplayHeight;
-            *orientation = mDisplayOrientation;
-            result = true;
-        }
-    }
-    return result;
-}
-
-bool InputDispatchPolicy::isScreenOn() {
-    JNIEnv* env = threadEnv();
-
-    jboolean result = env->CallBooleanMethod(mCallbacks, gCallbacksClassInfo.isScreenOn);
-    if (checkException(env, "isScreenOn")) {
-        return true;
-    }
-    return result;
-}
-
-bool InputDispatchPolicy::isScreenBright() {
-    JNIEnv* env = threadEnv();
-
-    jboolean result = env->CallBooleanMethod(mCallbacks, gCallbacksClassInfo.isScreenBright);
-    if (checkException(env, "isScreenBright")) {
-        return true;
-    }
-    return result;
-}
-
-void InputDispatchPolicy::notifyConfigurationChanged(nsecs_t when,
-        int32_t touchScreenConfig, int32_t keyboardConfig, int32_t navigationConfig) {
-    JNIEnv* env = threadEnv();
-
-    env->CallVoidMethod(mCallbacks, gCallbacksClassInfo.notifyConfigurationChanged,
-            when, touchScreenConfig, keyboardConfig, navigationConfig);
-    checkException(env, "notifyConfigurationChanged");
-}
-
-void InputDispatchPolicy::notifyLidSwitchChanged(nsecs_t when, bool lidOpen) {
-    JNIEnv* env = threadEnv();
-    env->CallVoidMethod(mCallbacks, gCallbacksClassInfo.notifyLidSwitchChanged,
-            when, lidOpen);
-    checkException(env, "notifyLidSwitchChanged");
-}
-
-void InputDispatchPolicy::virtualKeyFeedback(nsecs_t when, int32_t deviceId,
-        int32_t action, int32_t flags, int32_t keyCode,
-        int32_t scanCode, int32_t metaState, nsecs_t downTime) {
-    JNIEnv* env = threadEnv();
-
-    env->CallVoidMethod(mCallbacks, gCallbacksClassInfo.virtualKeyFeedback,
-            when, deviceId, action, flags, keyCode, scanCode, metaState, downTime);
-    checkException(env, "virtualKeyFeedback");
-}
-
-int32_t InputDispatchPolicy::interceptKey(nsecs_t when,
-        int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags) {
-    const int32_t WM_ACTION_PASS_TO_USER = 1;
-    const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
-    const int32_t WM_ACTION_GO_TO_SLEEP = 4;
-
-    JNIEnv* env = threadEnv();
-
-    bool isScreenOn = this->isScreenOn();
-    bool isScreenBright = this->isScreenBright();
-
-    jint wmActions = env->CallIntMethod(mCallbacks, gCallbacksClassInfo.hackInterceptKey,
-            deviceId, EV_KEY, scanCode, keyCode, policyFlags, down ? 1 : 0, when, isScreenOn);
-    if (checkException(env, "hackInterceptKey")) {
-        wmActions = 0;
-    }
-
-    int32_t actions = ACTION_NONE;
-    if (! isScreenOn) {
-        // Key presses and releases wake the device.
-        actions |= ACTION_WOKE_HERE;
-    }
-
-    if (! isScreenBright) {
-        // Key presses and releases brighten the screen if dimmed.
-        actions |= ACTION_BRIGHT_HERE;
-    }
-
-    if (wmActions & WM_ACTION_GO_TO_SLEEP) {
-        env->CallVoidMethod(mCallbacks, gCallbacksClassInfo.goToSleep, when);
-        checkException(env, "goToSleep");
-    }
-
-    if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
-        env->CallVoidMethod(mCallbacks, gCallbacksClassInfo.pokeUserActivityForKey, when);
-        checkException(env, "pokeUserActivityForKey");
-    }
-
-    if (wmActions & WM_ACTION_PASS_TO_USER) {
-        actions |= ACTION_DISPATCH;
-    }
-
-    if (! (wmActions & WM_ACTION_PASS_TO_USER)) {
-        if (down && isAppSwitchKey(keyCode)) {
-            env->CallVoidMethod(mCallbacks, gCallbacksClassInfo.notifyAppSwitchComing);
-            checkException(env, "notifyAppSwitchComing");
-
-            actions |= ACTION_APP_SWITCH_COMING;
-        }
-    }
-    return actions;
-}
-
-int32_t InputDispatchPolicy::interceptTouch(nsecs_t when) {
-    if (! isScreenOn()) {
-        // Touch events do not wake the device.
-        return ACTION_NONE;
-    }
-
-    return ACTION_DISPATCH;
-}
-
-int32_t InputDispatchPolicy::interceptTrackball(nsecs_t when,
-        bool buttonChanged, bool buttonDown, bool rolled) {
-    if (! isScreenOn()) {
-        // Trackball motions and button presses do not wake the device.
-        return ACTION_NONE;
-    }
-
-    return ACTION_DISPATCH;
-}
-
-bool InputDispatchPolicy::filterTouchEvents() {
-    if (mFilterTouchEvents < 0) {
-        JNIEnv* env = threadEnv();
-
-        jboolean result = env->CallBooleanMethod(mCallbacks,
-                gCallbacksClassInfo.filterTouchEvents);
-        if (checkException(env, "filterTouchEvents")) {
-            result = false;
-        }
-
-        mFilterTouchEvents = result ? 1 : 0;
-    }
-    return mFilterTouchEvents;
-}
-
-bool InputDispatchPolicy::filterJumpyTouchEvents() {
-    if (mFilterJumpyTouchEvents < 0) {
-        JNIEnv* env = threadEnv();
-
-        jboolean result = env->CallBooleanMethod(mCallbacks,
-                gCallbacksClassInfo.filterJumpyTouchEvents);
-        if (checkException(env, "filterJumpyTouchEvents")) {
-            result = false;
-        }
-
-        mFilterJumpyTouchEvents = result ? 1 : 0;
-    }
-    return mFilterJumpyTouchEvents;
-}
-
-void InputDispatchPolicy::getVirtualKeyDefinitions(const String8& deviceName,
-        Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) {
-    JNIEnv* env = threadEnv();
-
-    jstring deviceNameStr = env->NewStringUTF(deviceName.string());
-    if (! checkException(env, "getVirtualKeyDefinitions")) {
-        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacks,
-                gCallbacksClassInfo.getVirtualKeyDefinitions, deviceNameStr));
-        if (! checkException(env, "getVirtualKeyDefinitions") && result) {
-            jsize length = env->GetArrayLength(result);
-            for (jsize i = 0; i < length; i++) {
-                jobject item = env->GetObjectArrayElement(result, i);
-
-                outVirtualKeyDefinitions.add();
-                outVirtualKeyDefinitions.editTop().scanCode =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.scanCode));
-                outVirtualKeyDefinitions.editTop().centerX =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.centerX));
-                outVirtualKeyDefinitions.editTop().centerY =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.centerY));
-                outVirtualKeyDefinitions.editTop().width =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.width));
-                outVirtualKeyDefinitions.editTop().height =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.height));
-
-                env->DeleteLocalRef(item);
-            }
-            env->DeleteLocalRef(result);
-        }
-        env->DeleteLocalRef(deviceNameStr);
-    }
-}
-
-void InputDispatchPolicy::getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
-    JNIEnv* env = threadEnv();
-
-    jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacks,
-            gCallbacksClassInfo.getExcludedDeviceNames));
-    if (! checkException(env, "getExcludedDeviceNames") && result) {
-        jsize length = env->GetArrayLength(result);
-        for (jsize i = 0; i < length; i++) {
-            jstring item = jstring(env->GetObjectArrayElement(result, i));
-
-            const char* deviceNameChars = env->GetStringUTFChars(item, NULL);
-            outExcludedDeviceNames.add(String8(deviceNameChars));
-            env->ReleaseStringUTFChars(item, deviceNameChars);
-
-            env->DeleteLocalRef(item);
-        }
-        env->DeleteLocalRef(result);
-    }
-}
-
-bool InputDispatchPolicy::allowKeyRepeat() {
-    // Disable key repeat when the screen is off.
-    return isScreenOn();
-}
-
-nsecs_t InputDispatchPolicy::getKeyRepeatTimeout() {
-    // TODO use ViewConfiguration.getLongPressTimeout()
-    return milliseconds_to_nanoseconds(500);
-}
-
-void InputDispatchPolicy::getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
-        Vector<InputTarget>& outTargets) {
-    JNIEnv* env = threadEnv();
-
-    jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
-    if (! keyEventObj) {
-        LOGE("Could not obtain DVM KeyEvent object to get key event targets.");
-    } else {
-        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacks,
-                gCallbacksClassInfo.getKeyEventTargets,
-                keyEventObj, jint(keyEvent->getNature()), jint(policyFlags)));
-        if (! checkException(env, "getKeyEventTargets") && result) {
-            jsize length = env->GetArrayLength(result);
-            for (jsize i = 0; i < length; i++) {
-                jobject item = env->GetObjectArrayElement(result, i);
-                if (! item) {
-                    break; // found null element indicating end of used portion of the array
-                }
-
-                outTargets.add();
-                android_view_InputTarget_toNative(env, item, & outTargets.editTop());
-
-                env->DeleteLocalRef(item);
-            }
-            env->DeleteLocalRef(result);
-        }
-        env->DeleteLocalRef(keyEventObj);
-    }
-}
-
-void InputDispatchPolicy::getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
-        Vector<InputTarget>& outTargets) {
-    JNIEnv* env = threadEnv();
-
-    jobject motionEventObj = android_view_MotionEvent_fromNative(env, motionEvent);
-    if (! motionEventObj) {
-        LOGE("Could not obtain DVM MotionEvent object to get key event targets.");
-    } else {
-        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacks,
-                gCallbacksClassInfo.getMotionEventTargets,
-                motionEventObj, jint(motionEvent->getNature()), jint(policyFlags)));
-        if (! checkException(env, "getMotionEventTargets") && result) {
-            jsize length = env->GetArrayLength(result);
-            for (jsize i = 0; i < length; i++) {
-                jobject item = env->GetObjectArrayElement(result, i);
-                if (! item) {
-                    break; // found null element indicating end of used portion of the array
-                }
-
-                outTargets.add();
-                android_view_InputTarget_toNative(env, item, & outTargets.editTop());
-
-                env->DeleteLocalRef(item);
-            }
-            env->DeleteLocalRef(result);
-        }
-        android_view_MotionEvent_recycle(env, motionEventObj);
-        env->DeleteLocalRef(motionEventObj);
-    }
 }
 
 } /* namespace android */

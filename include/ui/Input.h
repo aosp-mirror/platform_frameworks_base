@@ -73,7 +73,7 @@ enum {
     POLICY_FLAG_MENU = 0x00000040,
     POLICY_FLAG_LAUNCHER = 0x00000080,
 
-    /* These flags are set by the input dispatch policy as it intercepts each event. */
+    /* These flags are set by the input reader policy as it intercepts each event. */
 
     // Indicates that the screen was off when the event was received and the event
     // should wake the device.
@@ -82,6 +82,37 @@ enum {
     // Indicates that the screen was dim when the event was received and the event
     // should brighten the device.
     POLICY_FLAG_BRIGHT_HERE = 0x20000000,
+};
+
+/*
+ * Describes the basic configuration of input devices that are present.
+ */
+struct InputConfiguration {
+    enum {
+        TOUCHSCREEN_UNDEFINED = 0,
+        TOUCHSCREEN_NOTOUCH = 1,
+        TOUCHSCREEN_STYLUS = 2,
+        TOUCHSCREEN_FINGER = 3
+    };
+
+    enum {
+        KEYBOARD_UNDEFINED = 0,
+        KEYBOARD_NOKEYS = 1,
+        KEYBOARD_QWERTY = 2,
+        KEYBOARD_12KEY = 3
+    };
+
+    enum {
+        NAVIGATION_UNDEFINED = 0,
+        NAVIGATION_NONAV = 1,
+        NAVIGATION_DPAD = 2,
+        NAVIGATION_TRACKBALL = 3,
+        NAVIGATION_WHEEL = 4
+    };
+
+    int32_t touchScreen;
+    int32_t keyboard;
+    int32_t navigation;
 };
 
 /*

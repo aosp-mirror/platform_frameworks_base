@@ -21,6 +21,9 @@
 // Log debug messages about the dispatch cycle.
 #define DEBUG_DISPATCH_CYCLE 1
 
+// Log debug messages about registrations.
+#define DEBUG_REGISTRATION 1
+
 
 #include "JNIHelp.h"
 
@@ -51,7 +54,7 @@ static struct {
 class NativeInputQueue {
 public:
     NativeInputQueue();
-    virtual ~NativeInputQueue();
+    ~NativeInputQueue();
 
     status_t registerInputChannel(JNIEnv* env, jobject inputChannelObj,
             jobject inputHandlerObj, jobject messageQueueObj);
@@ -75,7 +78,7 @@ private:
 
         Connection(const sp<InputChannel>& inputChannel, const sp<PollLoop>& pollLoop);
 
-        inline const char* getInputChannelName() { return inputChannel->getName().string(); }
+        inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
         Status status;
 
@@ -125,6 +128,10 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
         return BAD_VALUE;
     }
 
+#if DEBUG_REGISTRATION
+    LOGD("channel '%s' - Registered", inputChannel->getName().string());
+#endif
+
     sp<PollLoop> pollLoop = android_os_MessageQueue_getPollLoop(env, messageQueueObj);
 
     int receiveFd;
@@ -154,7 +161,7 @@ status_t NativeInputQueue::registerInputChannel(JNIEnv* env, jobject inputChanne
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
             handleInputChannelDisposed, this);
 
-    pollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, NULL);
+    pollLoop->setCallback(receiveFd, POLLIN, handleReceiveCallback, this);
     return OK;
 }
 
@@ -165,6 +172,10 @@ status_t NativeInputQueue::unregisterInputChannel(JNIEnv* env, jobject inputChan
         LOGW("Input channel is not initialized.");
         return BAD_VALUE;
     }
+
+#if DEBUG_REGISTRATION
+    LOGD("channel '%s' - Unregistered", inputChannel->getName().string());
+#endif
 
     int32_t receiveFd;
     sp<Connection> connection;
