@@ -31,11 +31,13 @@ import android.view.animation.AnimationUtils;
  *
  * @attr ref android.R.styleable#ViewAnimator_inAnimation
  * @attr ref android.R.styleable#ViewAnimator_outAnimation
+ * @attr ref android.R.styleable#ViewAnimator_animateFirstView
  */
 public class ViewAnimator extends FrameLayout {
 
     int mWhichChild = 0;
     boolean mFirstTime = true;
+
     boolean mAnimateFirstTime = true;
 
     Animation mInAnimation;
@@ -59,6 +61,10 @@ public class ViewAnimator extends FrameLayout {
         if (resource > 0) {
             setOutAnimation(context, resource);
         }
+
+        boolean flag = a.getBoolean(com.android.internal.R.styleable.ViewAnimator_animateFirstView, true);
+        setAnimateFirstView(flag);
+
         a.recycle();
 
         initViewAnimator(context, attrs);
@@ -84,10 +90,10 @@ public class ViewAnimator extends FrameLayout {
         setMeasureAllChildren(measureAllChildren);
         a.recycle();
     }
-    
+
     /**
      * Sets which child view will be displayed.
-     * 
+     *
      * @param whichChild the index of the child view to display
      */
     public void setDisplayedChild(int whichChild) {
@@ -105,14 +111,14 @@ public class ViewAnimator extends FrameLayout {
             requestFocus(FOCUS_FORWARD);
         }
     }
-    
+
     /**
      * Returns the index of the currently displayed child view.
      */
     public int getDisplayedChild() {
         return mWhichChild;
     }
-    
+
     /**
      * Manually shows the next child.
      */
@@ -128,6 +134,35 @@ public class ViewAnimator extends FrameLayout {
     }
 
     /**
+     * Shows only the specified child. The other displays Views exit the screen,
+     * optionally with the with the {@link #getOutAnimation() out animation} and
+     * the specified child enters the screen, optionally with the
+     * {@link #getInAnimation() in animation}.
+     *
+     * @param childIndex The index of the child to be shown.
+     * @param animate Whether or not to use the in and out animations, defaults
+     *            to true.
+     */
+    void showOnly(int childIndex, boolean animate) {
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (i == childIndex) {
+                if (animate && mInAnimation != null) {
+                    child.startAnimation(mInAnimation);
+                }
+                child.setVisibility(View.VISIBLE);
+                mFirstTime = false;
+            } else {
+                if (animate && mOutAnimation != null && child.getVisibility() == View.VISIBLE) {
+                    child.startAnimation(mOutAnimation);
+                } else if (child.getAnimation() == mInAnimation)
+                    child.clearAnimation();
+                child.setVisibility(View.GONE);
+            }
+        }
+    }
+    /**
      * Shows only the specified child. The other displays Views exit the screen
      * with the {@link #getOutAnimation() out animation} and the specified child
      * enters the screen with the {@link #getInAnimation() in animation}.
@@ -135,24 +170,8 @@ public class ViewAnimator extends FrameLayout {
      * @param childIndex The index of the child to be shown.
      */
     void showOnly(int childIndex) {
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            final boolean checkForFirst = (!mFirstTime || mAnimateFirstTime);
-            if (i == childIndex) {
-                if (checkForFirst && mInAnimation != null) {
-                    child.startAnimation(mInAnimation);
-                }
-                child.setVisibility(View.VISIBLE);
-                mFirstTime = false;
-            } else {
-                if (checkForFirst && mOutAnimation != null && child.getVisibility() == View.VISIBLE) {
-                    child.startAnimation(mOutAnimation);
-                } else if (child.getAnimation() == mInAnimation)
-                    child.clearAnimation();
-                child.setVisibility(View.GONE);
-            }
-        }
+        final boolean animate = (!mFirstTime || mAnimateFirstTime);
+        showOnly(childIndex, animate);
     }
 
     @Override

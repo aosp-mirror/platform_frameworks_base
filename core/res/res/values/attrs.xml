@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 
-<!-- Formatting note: terminate all comments with a period, to avoid breaking 
-     the documentation output. To suppress comment lines from the documentation 
+<!-- Formatting note: terminate all comments with a period, to avoid breaking
+     the documentation output. To suppress comment lines from the documentation
      output, insert an eat-comment element after the comment lines.
 -->
 
@@ -985,7 +985,7 @@
         <attr name="windowShowAnimation" format="reference" />
         <!-- The animation used when a window is going from VISIBLE to INVISIBLE. -->
         <attr name="windowHideAnimation" format="reference" />
-        
+
         <!--  When opening a new activity, this is the animation that is
               run on the next activity (which is entering the screen). -->
         <attr name="activityOpenEnterAnimation" format="reference" />
@@ -1026,7 +1026,7 @@
               animation that is run on the top activity of the current task
               (which is exiting the screen). -->
         <attr name="taskToBackExitAnimation" format="reference" />
-        
+
         <!--  When opening a new activity that shows the wallpaper, while
               currently not showing the wallpaper, this is the animation that
               is run on the new wallpaper activity (which is entering the screen). -->
@@ -1043,7 +1043,7 @@
               currently showing the wallpaper, this is the animation that
               is run on the old wallpaper activity (which is exiting the screen). -->
         <attr name="wallpaperCloseExitAnimation" format="reference" />
-        
+
         <!--  When opening a new activity that is on top of the wallpaper
               when the current activity is also on top of the wallpaper,
               this is the animation that is run on the new activity
@@ -2152,7 +2152,7 @@
         <attr name="dropDownAnchor" format="reference" />
         <!-- Specifies the basic width of the dropdown. Its value may
              be a dimension (such as "12dip") for a constant width,
-             fill_parent or match_parent to match the width of the 
+             fill_parent or match_parent to match the width of the
              screen, or wrap_content to match the width of
              the anchored view. -->
         <attr name="dropDownWidth" format="dimension">
@@ -2188,8 +2188,13 @@
         <attr name="popupBackground" format="reference|color" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
+        <!-- Identifier for the animation to use when a view is shown. -->
         <attr name="inAnimation" format="reference" />
+        <!-- Identifier for the animation to use when a view is hidden. -->
         <attr name="outAnimation" format="reference" />
+        <!-- Defines whether to animate the current View when the ViewAnimation
+             is first displayed. -->
+        <attr name="animateFirstView" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewFlipper">
         <attr name="flipInterval" format="integer" min="0" />
@@ -3545,7 +3550,7 @@
     <!-- AppWidget package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Use <code>appwidget-provider</code> as the root tag of the XML resource that
          describes an AppWidget provider.  See {@link android.appwidget android.appwidget}
          package for more info.
@@ -3568,7 +3573,7 @@
     <!-- App package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- ============================= -->
     <!-- View package class attributes -->
     <!-- ============================= -->
@@ -3581,7 +3586,7 @@
     <declare-styleable name="Fragment">
         <!-- Supply the name of the fragment class to instantiate. -->
         <attr name="name" />
-        
+
         <!-- Supply an identifier name for the top-level view, to later retrieve it
              with {@link android.view.View#findViewById View.findViewById()} or
              {@link android.app.Activity#findViewById Activity.findViewById()}.
@@ -3641,7 +3646,7 @@
     <!-- Accounts package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
          describes an account authenticator.
      -->
@@ -3662,7 +3667,7 @@
     <!-- Accounts package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
          describes an account authenticator.
      -->
@@ -3678,7 +3683,7 @@
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- TODO: remove this deprecated styleable. -->
     <eat-comment />
     <declare-styleable name="Icon">
@@ -3737,12 +3742,12 @@
     <declare-styleable name="RecognitionService">
         <attr name="settingsActivity" />
     </declare-styleable>
-    
+
     <!-- =============================== -->
     <!-- Adapters attributes             -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Adapter used to bind cursors. -->
     <declare-styleable name="CursorAdapter">
         <!-- URI to get the cursor from. Optional. -->
@@ -3754,7 +3759,7 @@
         <!-- Layout resource used to display each row from the cursor. Mandatory. -->
         <attr name="layout" />
     </declare-styleable>
-    
+
     <!-- Attributes used in bind items for XML cursor adapters. -->
     <declare-styleable name="CursorAdapter_BindItem">
         <!-- The name of the column to bind from. Mandatory. -->
@@ -3763,7 +3768,7 @@
         <attr name="to" format="reference" />
         <!-- The type of binding. If this value is not specified, the type will be
              inferred from the type of the "to" target view. Mandatory.
-             
+
              The type can be one of:
              <ul>
              <li>string, The content of the column is interpreted as a string.</li>
@@ -3776,7 +3781,7 @@
          -->
         <attr name="as" format="string" />
     </declare-styleable>
-    
+
     <!-- Attributes used in select items for XML cursor adapters. -->
     <declare-styleable name="CursorAdapter_SelectItem">
         <!-- The name of the column to select. Mandatory. -->
@@ -3790,7 +3795,7 @@
         <!-- The new value from the column. Mandatory. -->
         <attr name="toValue" format="string" />
     </declare-styleable>
-    
+
     <!-- Attributes used to map values to new values in XML cursor adapters' bind items. -->
     <declare-styleable name="CursorAdapter_TransformItem">
         <!-- The transformation expression. Mandatory if "withClass" is not specified. -->
