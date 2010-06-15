@@ -685,7 +685,7 @@ public interface WindowManager extends ViewManager {
         /** Adjustment option for {@link #softInputMode}: set to allow the
          * window to be resized when an input
          * method is shown, so that its contents are not covered by the input
-         * method.  This can <em>not<em> be combined with
+         * method.  This can <em>not</em> be combined with
          * {@link #SOFT_INPUT_ADJUST_PAN}; if
          * neither of these are set, then the system will try to pick one or
          * the other depending on the contents of the window.
@@ -696,7 +696,7 @@ public interface WindowManager extends ViewManager {
          * pan when an input method is
          * shown, so it doesn't need to deal with resizing but just panned
          * by the framework to ensure the current input focus is visible.  This
-         * can <em>not<em> be combined with {@link #SOFT_INPUT_ADJUST_RESIZE}; if
+         * can <em>not</em> be combined with {@link #SOFT_INPUT_ADJUST_RESIZE}; if
          * neither of these are set, then the system will try to pick one or
          * the other depending on the contents of the window.
          */
