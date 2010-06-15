@@ -59,7 +59,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
         synchronized (mStats) {
-            mStats.writeLocked();
+            mStats.shutdownLocked();
         }
     }
     
@@ -96,7 +96,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void noteStartWakelock(int uid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            Slog.i("battery", "Start wake lock: " + uid + " " + name);
             mStats.getUidStatsLocked(uid).noteStartWakeLocked(name, type);
         }
     }
@@ -104,7 +103,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void noteStopWakelock(int uid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            Slog.i("battery", "Stop wake lock: " + uid + " " + name);
             mStats.getUidStatsLocked(uid).noteStopWakeLocked(name, type);
         }
     }
@@ -126,14 +124,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void noteStartGps(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartGps(uid);
+            mStats.noteStartGpsLocked(uid);
         }
     }
     
     public void noteStopGps(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStopGps(uid);
+            mStats.noteStopGpsLocked(uid);
         }
     }
         
@@ -323,14 +321,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         return mStats.isOnBattery();
     }
     
-    public void setOnBattery(boolean onBattery, int level) {
+    public void setBatteryState(int status, int health, int plugType, int level,
+            int temp, int volt) {
         enforceCallingPermission();
-        mStats.setOnBattery(onBattery, level);
-    }
-    
-    public void recordCurrentLevel(int level) {
-        enforceCallingPermission();
-        mStats.recordCurrentLevel(level);
+        mStats.setBatteryState(status, health, plugType, level, temp, volt);
     }
     
     public long getAwakeTimeBattery() {
@@ -361,7 +355,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                 for (String arg : args) {
                     if ("--checkin".equals(arg)) {
                         isCheckin = true;
-                        break;
+                    } else if ("--reset".equals(arg)) {
+                        mStats.resetAllStatsLocked();
                     }
                 }
             }
