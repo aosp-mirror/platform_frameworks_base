@@ -294,7 +294,7 @@ int MtpMediaScanner::scanDirectory(const char* path, MtpObjectHandle parent)
         memset(&statbuf, 0, sizeof(statbuf));
         stat(buffer, &statbuf);
 
-        if (entry->d_type == DT_DIR) {
+        if (S_ISDIR(statbuf.st_mode)) {
             MtpObjectHandle handle = mDatabase->getObjectHandle(buffer);
             if (handle) {
                 markFile(handle);
@@ -303,7 +303,7 @@ int MtpMediaScanner::scanDirectory(const char* path, MtpObjectHandle parent)
                         parent, mStorageID, 0, statbuf.st_mtime);
             }
             scanDirectory(buffer, handle);
-        } else if (entry->d_type == DT_REG) {
+        } else if (S_ISREG(statbuf.st_mode)) {
             scanFile(buffer, parent, statbuf);
         }
     }
