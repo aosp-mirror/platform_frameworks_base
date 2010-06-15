@@ -1357,7 +1357,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         int netId = -1;
         String[] lines = reply.split("\n");
         for (String line : lines) {
-            String[] prop = line.split(" *= *");
+            String[] prop = line.split(" *= *", 2);
             if (prop.length < 2)
                 continue;
             String name = prop[0];
