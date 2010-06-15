@@ -485,13 +485,13 @@ void egl_window_surface_v2_t::copyBlt(
     copybit_device_t* const copybit = blitengine;
     if (copybit)  {
         copybit_image_t simg;
-        simg.w = src->width;
+        simg.w = src->stride;
         simg.h = src->height;
         simg.format = src->format;
         simg.handle = const_cast<native_handle_t*>(src->handle);
 
         copybit_image_t dimg;
-        dimg.w = dst->width;
+        dimg.w = dst->stride;
         dimg.h = dst->height;
         dimg.format = dst->format;
         dimg.handle = const_cast<native_handle_t*>(dst->handle);
