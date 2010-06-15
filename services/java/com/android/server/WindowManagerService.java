@@ -621,6 +621,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mInputThread.start();
+        mQueue.start();
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
