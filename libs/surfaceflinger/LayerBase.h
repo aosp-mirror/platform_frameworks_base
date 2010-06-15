@@ -260,7 +260,6 @@ protected:
 
 private:
     LayerBase(const LayerBase& rhs);
-    void validateTexture(GLint textureName) const;
 };
 
 

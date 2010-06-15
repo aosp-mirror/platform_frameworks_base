@@ -324,16 +324,6 @@ void LayerBase::draw(const Region& inClip) const
     glEnable(GL_SCISSOR_TEST);
 
     onDraw(clip);
-
-    /*
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_DITHER);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4x(0, 0x8000, 0, 0x10000);
-    drawRegion(transparentRegionScreen);
-    glDisable(GL_BLEND);
-    */
 }
 
 void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
@@ -343,7 +333,9 @@ void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
     glColor4f(red,green,blue,alpha);
-    glDisable(GL_TEXTURE_2D);
+
+    TextureManager::deactivateTextures();
+
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
 
@@ -371,11 +363,9 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     const State& s(drawingState());
     
     // bind our texture
-    validateTexture(texture.name);
+    TextureManager::activateTexture(texture, needsFiltering());
     uint32_t width  = texture.width; 
     uint32_t height = texture.height;
-    
-    glEnable(GL_TEXTURE_2D);
 
     GLenum src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
     if (UNLIKELY(s.alpha < 0xFF)) {
@@ -431,6 +421,12 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         glScalef(texture.wScale, texture.hScale, 1.0f);
     }
 
+    if (needsDithering()) {
+        glEnable(GL_DITHER);
+    } else {
+        glDisable(GL_DITHER);
+    }
+
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glVertexPointer(2, GL_FLOAT, 0, mVertices);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
@@ -442,26 +438,6 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-}
-
-void LayerBase::validateTexture(GLint textureName) const
-{
-    glBindTexture(GL_TEXTURE_2D, textureName);
-    // TODO: reload the texture if needed
-    // this is currently done in loadTexture() below
-    if (needsFiltering()) {
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    } else {
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    }
-
-    if (needsDithering()) {
-        glEnable(GL_DITHER);
-    } else {
-        glDisable(GL_DITHER);
-    }
 }
 
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
