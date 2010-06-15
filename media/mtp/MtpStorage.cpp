@@ -71,7 +71,7 @@ uint64_t MtpStorage::getFreeSpace() {
 }
 
 const char* MtpStorage::getDescription() const {
-    return "Phone Storage";
+    return "Device Storage";
 }
 
 bool MtpStorage::scanFiles() {
