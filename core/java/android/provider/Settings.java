@@ -3577,7 +3577,7 @@ public final class Settings {
             ContentValues values = new ContentValues();
             if (title != null) values.put(TITLE, title);
             if (folder != null) values.put(FOLDER, folder);
-            values.put(INTENT, intent.toURI());
+            values.put(INTENT, intent.toUri(0));
             if (shortcut != 0) values.put(SHORTCUT, (int) shortcut);
             values.put(ORDERING, ordering);
             return cr.insert(CONTENT_URI, values);
