@@ -55,8 +55,8 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         boolean isLockPatternEnabled = true;
         public boolean isPermanentlyLocked = false;
 
-        public MockLockPatternUtils() {
-            super(null);
+        public MockLockPatternUtils(Context context) {
+            super(context);
         }
 
         @Override
@@ -149,7 +149,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         @Override
         View createUnlockScreenFor(UnlockMode unlockMode) {
             final MockKeyguardScreen newView = new MockKeyguardScreen(getContext());
-            if (mInjectedUnlockScreens == null)  mInjectedUnlockScreens = Lists.newArrayList();
+            if (mInjectedUnlockScreens == null) mInjectedUnlockScreens = Lists.newArrayList();
             mInjectedUnlockScreens.add(newView);
             return newView;
         }
@@ -197,7 +197,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mUpdateMonitor = new MockUpdateMonitor(getContext());
-        mLockPatternUtils = new MockLockPatternUtils();
+        mLockPatternUtils = new MockLockPatternUtils(getContext());
 
         mLPKV = new TestableLockPatternKeyguardView(getContext(), mUpdateMonitor,
                 mLockPatternUtils, new KeyguardWindowController() {
