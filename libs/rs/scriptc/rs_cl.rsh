@@ -373,10 +373,10 @@ extern float __attribute__((overloadable)) round(float);
 DEF_FUNC_1(round)
 
 extern float __attribute__((overloadable)) sqrt(float);
-static float __attribute__((overloadable)) rsqrt(float v) {
+/*static float __attribute__((overloadable)) rsqrt(float v) {
     return 1.f / sqrt(v);
 }
-DEF_FUNC_1(rsqrt)
+DEF_FUNC_1(rsqrt)*/
 
 extern float __attribute__((overloadable)) sin(float);
 DEF_FUNC_1(sin)
