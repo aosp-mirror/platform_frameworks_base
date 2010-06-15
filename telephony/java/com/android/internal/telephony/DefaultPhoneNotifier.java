@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.net.NetworkProperties;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -107,13 +108,17 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         // use apnType as the key to which connection we're talking about.
         // pass apnType back up to fetch particular for this one.
         TelephonyManager telephony = TelephonyManager.getDefault();
+        NetworkProperties networkProperties = null;
+        if (state == Phone.DataState.CONNECTED) {
+            networkProperties = sender.getNetworkProperties(apnType);
+        }
         try {
             mRegistry.notifyDataConnection(
                     convertDataState(state),
                     sender.isDataConnectivityPossible(), reason,
                     sender.getActiveApn(),
                     apnType,
-                    sender.getInterfaceName(null),
+                    networkProperties,
                     ((telephony!=null) ? telephony.getNetworkType() :
                     TelephonyManager.NETWORK_TYPE_UNKNOWN));
         } catch (RemoteException ex) {

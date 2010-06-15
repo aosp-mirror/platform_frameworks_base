@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
+import android.net.NetworkProperties;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
@@ -26,6 +27,10 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
@@ -190,6 +195,9 @@ public abstract class DataConnectionTracker extends Handler {
 
     /** indication of our availability (preconditions to trysetupData are met) **/
     protected boolean mAvailability = false;
+
+    /** all our network properties (dns, gateway, ip, etc) */
+    protected NetworkProperties mNetworkProperties;
 
     /**
      * Default constructor
@@ -423,6 +431,15 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract String[] getDnsServers(String apnType);
 
     protected abstract void setState(State s);
+
+    protected NetworkProperties getNetworkProperties(String apnType) {
+        int id = apnTypeToId(apnType);
+        if (isApnIdEnabled(id)) {
+            return mNetworkProperties;
+        } else {
+            return null;
+        }
+    }
 
     // tell all active apns of the current condition
     protected void notifyDataConnection(String reason) {
@@ -668,5 +685,43 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
+    protected NetworkProperties makeNetworkProperties(DataConnection connection) {
+        NetworkProperties properties = new NetworkProperties();
+        try {
+            properties.setInterface(NetworkInterface.getByName(connection.getInterface()));
+        } catch (SocketException e) {
+            Log.e(LOG_TAG, "SocketException creating NetworkInterface: " + e);
+        } catch (NullPointerException e) {
+            Log.e(LOG_TAG, "NPE trying to makeNetworkProperties: " + e);
+        }
 
+        try {
+            properties.addAddress(InetAddress.getByName(connection.getIpAddress()));
+        } catch (UnknownHostException e) {
+            Log.e(LOG_TAG, "UnknownHostException setting IpAddress: " + e);
+        } catch (SecurityException e) {
+            Log.e(LOG_TAG, "SecurityException setting IpAddress: " + e);
+        }
+
+        try {
+            properties.setGateway(InetAddress.getByName(connection.getGatewayAddress()));
+        } catch (UnknownHostException e) {
+            Log.e(LOG_TAG, "UnknownHostException setting GatewayAddress: " + e);
+        } catch (SecurityException e) {
+            Log.e(LOG_TAG, "SecurityException setting GatewayAddress: " + e);
+        }
+
+        try {
+            String[] dnsStrings = connection.getDnsServers();
+            for (int i = 0; i<dnsStrings.length; i++) {
+                properties.addDns(InetAddress.getByName(dnsStrings[i]));
+            }
+        } catch (UnknownHostException e) {
+            Log.e(LOG_TAG, "UnknownHostException setting DnsAddress: " + e);
+        } catch (SecurityException e) {
+            Log.e(LOG_TAG, "SecurityException setting DnsAddress: " + e);
+        }
+        // TODO - set Proxy info
+        return properties;
+    }
 }

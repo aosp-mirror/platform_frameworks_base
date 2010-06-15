@@ -222,10 +222,10 @@ static JNINativeMethod gNetworkUtilMethods[] = {
 
     { "enableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_enableInterface },
     { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
-    { "addHostRoute", "(Ljava/lang/String;I)I",  (void *)android_net_utils_addHostRoute },
+    { "addHostRouteNative", "(Ljava/lang/String;I)I",  (void *)android_net_utils_addHostRoute },
     { "removeHostRoutes", "(Ljava/lang/String;)I",  (void *)android_net_utils_removeHostRoutes },
-    { "setDefaultRoute", "(Ljava/lang/String;I)I",  (void *)android_net_utils_setDefaultRoute },
-    { "getDefaultRoute", "(Ljava/lang/String;)I",  (void *)android_net_utils_getDefaultRoute },
+    { "setDefaultRouteNative", "(Ljava/lang/String;I)I",  (void *)android_net_utils_setDefaultRoute },
+    { "getDefaultRouteNative", "(Ljava/lang/String;)I",  (void *)android_net_utils_getDefaultRoute },
     { "removeDefaultRoute", "(Ljava/lang/String;)I",  (void *)android_net_utils_removeDefaultRoute },
     { "resetConnections", "(Ljava/lang/String;)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpInfo;)Z",  (void *)android_net_utils_runDhcp },

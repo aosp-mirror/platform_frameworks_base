@@ -29,6 +29,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo;
+import android.net.NetworkProperties;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.text.TextUtils;
@@ -55,7 +56,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private boolean mTeardownRequested = false;
     private Handler mTarget;
     private Context mContext;
-    private String mInterfaceName;
+    private NetworkProperties mNetworkProperties;
     private boolean mPrivateDnsRouteSet = false;
     private int mDefaultGatewayAddr = 0;
     private boolean mDefaultRouteSet = false;
@@ -99,14 +100,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      */
     public String[] getDnsPropNames() {
         return sDnsPropNames;
-    }
-
-    /**
-     * Return the name of our network interface.
-     * @return the name of our interface.
-     */
-    public String getInterfaceName() {
-        return mInterfaceName;
     }
 
     public boolean isPrivateDnsRouteSet() {
@@ -211,9 +204,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                                 }
 
                                 setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
-                                if (mInterfaceName != null) {
-                                    NetworkUtils.resetConnections(mInterfaceName);
+                                if (mNetworkProperties != null) {
+                                    NetworkUtils.resetConnections(mNetworkProperties.getInterface().
+                                            getName());
                                 }
+                                // TODO - check this
                                 // can't do this here - ConnectivityService needs it to clear stuff
                                 // it's ok though - just leave it to be refreshed next time
                                 // we connect.
@@ -229,9 +224,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                                 setDetailedState(DetailedState.SUSPENDED, reason, apnName);
                                 break;
                             case CONNECTED:
-                                mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
-                                if (mInterfaceName == null) {
-                                    Log.d(TAG, "CONNECTED event did not supply interface name.");
+                                mNetworkProperties = intent.getParcelableExtra(
+                                        Phone.DATA_NETWORK_PROPERTIES_KEY);
+                                if (mNetworkProperties == null) {
+                                    Log.d(TAG,
+                                            "CONNECTED event did not supply network properties.");
                                 }
                                 setDetailedState(DetailedState.CONNECTED, reason, apnName);
                                 break;
@@ -564,5 +561,9 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 Log.e(TAG, "Error mapping networkType " + netType + " to apnType.");
                 return null;
         }
+    }
+
+    public NetworkProperties getNetworkProperties() {
+        return mNetworkProperties;
     }
 }

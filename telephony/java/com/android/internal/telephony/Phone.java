@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.NetworkProperties;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -101,6 +102,7 @@ public interface Phone {
     static final String STATE_CHANGE_REASON_KEY = "reason";
     static final String DATA_APN_TYPE_KEY = "apnType";
     static final String DATA_APN_KEY = "apn";
+    static final String DATA_NETWORK_PROPERTIES_KEY = "dataProperties";
 
     static final String DATA_IFACE_NAME_KEY = "iface";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
@@ -317,6 +319,11 @@ public interface Phone {
      *  @return The string name.
      */
     String getActiveApn();
+
+    /**
+     * Return the NetworkProperties for the named apn or null if not available
+     */
+    NetworkProperties getNetworkProperties(String apnType);
 
     /**
      * Get current signal strength. No change notification available on this

@@ -21,6 +21,7 @@ import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.NetworkProperties;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
@@ -209,6 +210,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public String[] getActiveApnTypes() {
         return mActivePhone.getActiveApnTypes();
+    }
+
+    public NetworkProperties getNetworkProperties(String apnType) {
+        return mActivePhone.getNetworkProperties(apnType);
     }
 
     public String getActiveApn() {

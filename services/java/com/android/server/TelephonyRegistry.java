@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.NetworkProperties;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -34,6 +35,7 @@ import android.util.Slog;
 import java.util.ArrayList;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.net.NetworkInterface;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -90,7 +92,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private ArrayList<String> mConnectedApns;
 
-    private String mDataConnectionInterfaceName = "";
+    private NetworkProperties mDataConnectionProperties;
 
     private Bundle mCellLocation = new Bundle();
 
@@ -353,7 +355,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String reason, String apn, String apnType, String interfaceName, int networkType) {
+            String reason, String apn, String apnType, NetworkProperties networkProperties,
+            int networkType) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
@@ -380,7 +383,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionPossible = isDataConnectivityPossible;
             mDataConnectionReason = reason;
             mDataConnectionApn = apn;
-            mDataConnectionInterfaceName = interfaceName;
+            mDataConnectionProperties = networkProperties;
             if (mDataConnectionNetworkType != networkType) {
                 mDataConnectionNetworkType = networkType;
                 modified = true;
@@ -400,7 +403,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                apnType, interfaceName);
+                apnType, networkProperties);
     }
 
     public void notifyDataConnectionFailed(String reason, String apnType) {
@@ -487,7 +490,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionPossible=" + mDataConnectionPossible);
             pw.println("  mDataConnectionReason=" + mDataConnectionReason);
             pw.println("  mDataConnectionApn=" + mDataConnectionApn);
-            pw.println("  mDataConnectionInterfaceName=" + mDataConnectionInterfaceName);
+            pw.println("  mDataConnectionProperties=" + mDataConnectionProperties);
             pw.println("  mCellLocation=" + mCellLocation);
             pw.println("registrations: count=" + recordCount);
             for (Record r : mRecords) {
@@ -561,7 +564,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastDataConnectionStateChanged(int state,
             boolean isDataConnectivityPossible,
-            String reason, String apn, String apnType, String interfaceName) {
+            String reason, String apn, String apnType, NetworkProperties networkProperties) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -574,9 +577,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (reason != null) {
             intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, reason);
         }
+        if (networkProperties != null) {
+            intent.putExtra(Phone.DATA_NETWORK_PROPERTIES_KEY, networkProperties);
+            NetworkInterface iface = networkProperties.getInterface();
+            if (iface != null) {
+                intent.putExtra(Phone.DATA_IFACE_NAME_KEY, iface.getName());
+            }
+        }
         intent.putExtra(Phone.DATA_APN_KEY, apn);
         intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);
-        intent.putExtra(Phone.DATA_IFACE_NAME_KEY, interfaceName);
         mContext.sendStickyBroadcast(intent);
     }
 

@@ -46,20 +46,15 @@ public interface NetworkStateTracker {
     public NetworkInfo getNetworkInfo();
 
     /**
+     * Fetch NetworkProperties for the network
+     */
+    public NetworkProperties getNetworkProperties();
+
+    /**
      * Return the system properties name associated with the tcp buffer sizes
      * for this network.
      */
     public String getTcpBufferSizesPropName();
-
-    /**
-     * Return the DNS property names for this network.
-     */
-    public String[] getDnsPropNames();
-
-    /**
-     * Fetch interface name of the interface
-     */
-    public String getInterfaceName();
 
     /**
      * Check if private DNS route is set for the network
