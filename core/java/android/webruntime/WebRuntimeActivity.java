@@ -25,7 +25,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
+import android.view.Menu;
+import android.view.KeyEvent;
+import android.view.Window;
+
 import com.android.internal.R;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * The runtime used to display installed web applications.
@@ -35,7 +44,8 @@ public class WebRuntimeActivity extends Activity
 {
     private final static String LOGTAG = "WebRuntimeActivity";
 
-    WebView webView;
+    private WebView mWebView;
+    private URL mBaseUrl;
 
     /** Called when the activity is first created. */
     @Override
@@ -70,13 +80,62 @@ public class WebRuntimeActivity extends Activity
             return;
         }
 
+        try {
+            mBaseUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            Log.d(LOGTAG, "Invalid URL");
+        }
+
+        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.web_runtime);
-        webView = (WebView) findViewById(R.id.webview);
-        webView.loadUrl(url);
+        mWebView = (WebView) findViewById(R.id.webview);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                try {
+                    URL newOrigin = new URL(url);
+                    if (newOrigin.getHost().equals(mBaseUrl.getHost())) {
+                        // If simple same origin test passes, load in the webview.
+                        // FIXME: We should do a more robust SOP check.
+                        return false;
+                    }
+                } catch(MalformedURLException e) {
+                    // Don't load anything if this wasn't a proper URL.
+                    return true;
+                }
+
+                // Otherwise this is a URL that is not same origin so pass it to the
+                // Browser to load.
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                return true;
+            }
+        });
 
         String title = metaData.getString("android.webruntime.title");
+        // We turned off the title bar to go full screen so display the
+        // webapp's title as a toast.
         if (title != null) {
-            setTitle(title);
+            Toast.makeText(this, title, Toast.LENGTH_SHORT).show();
         }
+
+        // Load the webapp's base URL.
+        mWebView.loadUrl(url);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && mWebView.canGoBack()) {
+            mWebView.goBack();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, 0, 0, "Menu item 1");
+        menu.add(0, 1, 0, "Menu item 2");
+        return true;
     }
 }
