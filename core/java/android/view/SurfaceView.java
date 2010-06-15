@@ -724,6 +724,12 @@ public class SurfaceView extends View {
         }
 
         public void setFormat(int format) {
+
+            // for backward compatibility reason, OPAQUE always
+            // means 565 for SurfaceView
+            if (format == PixelFormat.OPAQUE)
+                format = PixelFormat.RGB_565;
+
             mRequestedFormat = format;
             if (mWindow != null) {
                 updateWindow(false);
