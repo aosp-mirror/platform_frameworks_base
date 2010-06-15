@@ -14,29 +14,30 @@
 
 namespace android {
 
-InputManager::InputManager(const sp<EventHubInterface>& eventHub,
-        const sp<InputDispatchPolicyInterface>& policy) :
-        mEventHub(eventHub), mPolicy(policy) {
-    mDispatcher = new InputDispatcher(policy);
-    mReader = new InputReader(eventHub, policy, mDispatcher);
+InputManager::InputManager(
+        const sp<EventHubInterface>& eventHub,
+        const sp<InputReaderPolicyInterface>& readerPolicy,
+        const sp<InputDispatcherPolicyInterface>& dispatcherPolicy) {
+    mDispatcher = new InputDispatcher(dispatcherPolicy);
+    mReader = new InputReader(eventHub, readerPolicy, mDispatcher);
+    initialize();
+}
 
-    mDispatcherThread = new InputDispatcherThread(mDispatcher);
-    mReaderThread = new InputReaderThread(mReader);
-
-    configureExcludedDevices();
+InputManager::InputManager(
+        const sp<InputReaderInterface>& reader,
+        const sp<InputDispatcherInterface>& dispatcher) :
+        mReader(reader),
+        mDispatcher(dispatcher) {
+    initialize();
 }
 
 InputManager::~InputManager() {
     stop();
 }
 
-void InputManager::configureExcludedDevices() {
-    Vector<String8> excludedDeviceNames;
-    mPolicy->getExcludedDeviceNames(excludedDeviceNames);
-
-    for (size_t i = 0; i < excludedDeviceNames.size(); i++) {
-        mEventHub->addExcludedDevice(excludedDeviceNames[i]);
-    }
+void InputManager::initialize() {
+    mReaderThread = new InputReaderThread(mReader);
+    mDispatcherThread = new InputDispatcherThread(mDispatcher);
 }
 
 status_t InputManager::start() {
@@ -79,36 +80,26 @@ status_t InputManager::unregisterInputChannel(const sp<InputChannel>& inputChann
     return mDispatcher->unregisterInputChannel(inputChannel);
 }
 
-int32_t InputManager::getScanCodeState(int32_t deviceId, int32_t deviceClasses, int32_t scanCode)
-    const {
-    int32_t vkKeyCode, vkScanCode;
-    if (mReader->getCurrentVirtualKey(& vkKeyCode, & vkScanCode)) {
-        if (vkScanCode == scanCode) {
-            return KEY_STATE_VIRTUAL;
-        }
-    }
-
-    return mEventHub->getScanCodeState(deviceId, deviceClasses, scanCode);
+void InputManager::getInputConfiguration(InputConfiguration* outConfiguration) const {
+    mReader->getCurrentInputConfiguration(outConfiguration);
 }
 
-int32_t InputManager::getKeyCodeState(int32_t deviceId, int32_t deviceClasses, int32_t keyCode)
-    const {
-    int32_t vkKeyCode, vkScanCode;
-    if (mReader->getCurrentVirtualKey(& vkKeyCode, & vkScanCode)) {
-        if (vkKeyCode == keyCode) {
-            return KEY_STATE_VIRTUAL;
-        }
-    }
+int32_t InputManager::getScanCodeState(int32_t deviceId, int32_t deviceClasses,
+        int32_t scanCode) const {
+    return mReader->getCurrentScanCodeState(deviceId, deviceClasses, scanCode);
+}
 
-    return mEventHub->getKeyCodeState(deviceId, deviceClasses, keyCode);
+int32_t InputManager::getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
+        int32_t keyCode) const {
+    return mReader->getCurrentKeyCodeState(deviceId, deviceClasses, keyCode);
 }
 
 int32_t InputManager::getSwitchState(int32_t deviceId, int32_t deviceClasses, int32_t sw) const {
-    return mEventHub->getSwitchState(deviceId, deviceClasses, sw);
+    return mReader->getCurrentSwitchState(deviceId, deviceClasses, sw);
 }
 
 bool InputManager::hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const {
-    return mEventHub->hasKeys(numCodes, keyCodes, outFlags);
+    return mReader->hasKeys(numCodes, keyCodes, outFlags);
 }
 
 } // namespace android

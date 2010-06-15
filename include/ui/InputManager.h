@@ -23,7 +23,6 @@
 
 #include <ui/EventHub.h>
 #include <ui/Input.h>
-#include <ui/InputDispatchPolicy.h>
 #include <utils/Errors.h>
 #include <utils/Vector.h>
 #include <utils/Timers.h>
@@ -32,9 +31,14 @@
 
 namespace android {
 
-class InputReader;
-class InputDispatcher;
+class InputChannel;
+
+class InputReaderInterface;
+class InputReaderPolicyInterface;
 class InputReaderThread;
+
+class InputDispatcherInterface;
+class InputDispatcherPolicyInterface;
 class InputDispatcherThread;
 
 /*
@@ -74,8 +78,11 @@ public:
     /* Unregisters an input channel. */
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) = 0;
 
+    /* Gets input device configuration. */
+    virtual void getInputConfiguration(InputConfiguration* outConfiguration) const = 0;
+
     /*
-     * Query current input state.
+     * Queries current input state.
      *   deviceId may be -1 to search for the device automatically, filtered by class.
      *   deviceClasses may be -1 to ignore device class while searching.
      */
@@ -86,7 +93,7 @@ public:
     virtual int32_t getSwitchState(int32_t deviceId, int32_t deviceClasses,
             int32_t sw) const = 0;
 
-    /* Determine whether physical keys exist for the given framework-domain key codes. */
+    /* Determines whether physical keys exist for the given framework-domain key codes. */
     virtual bool hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const = 0;
 };
 
@@ -95,12 +102,15 @@ protected:
     virtual ~InputManager();
 
 public:
-    /*
-     * Creates an input manager that reads events from the given
-     * event hub and applies the given input dispatch policy.
-     */
-    InputManager(const sp<EventHubInterface>& eventHub,
-            const sp<InputDispatchPolicyInterface>& policy);
+    InputManager(
+            const sp<EventHubInterface>& eventHub,
+            const sp<InputReaderPolicyInterface>& readerPolicy,
+            const sp<InputDispatcherPolicyInterface>& dispatcherPolicy);
+
+    // (used for testing purposes)
+    InputManager(
+            const sp<InputReaderInterface>& reader,
+            const sp<InputDispatcherInterface>& dispatcher);
 
     virtual status_t start();
     virtual status_t stop();
@@ -108,6 +118,7 @@ public:
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
 
+    virtual void getInputConfiguration(InputConfiguration* outConfiguration) const;
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,
             int32_t scanCode) const;
     virtual int32_t getKeyCodeState(int32_t deviceId, int32_t deviceClasses,
@@ -117,16 +128,13 @@ public:
     virtual bool hasKeys(size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) const;
 
 private:
-    sp<EventHubInterface> mEventHub;
-    sp<InputDispatchPolicyInterface> mPolicy;
-
-    sp<InputDispatcher> mDispatcher;
-    sp<InputDispatcherThread> mDispatcherThread;
-
-    sp<InputReader> mReader;
+    sp<InputReaderInterface> mReader;
     sp<InputReaderThread> mReaderThread;
 
-    void configureExcludedDevices();
+    sp<InputDispatcherInterface> mDispatcher;
+    sp<InputDispatcherThread> mDispatcherThread;
+
+    void initialize();
 };
 
 } // namespace android
