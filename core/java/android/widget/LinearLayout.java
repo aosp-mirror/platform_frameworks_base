@@ -40,6 +40,13 @@ import android.widget.RemoteViews.RemoteView;
  * <p>
  * Also see {@link LinearLayout.LayoutParams android.widget.LinearLayout.LayoutParams}
  * for layout attributes </p>
+ *
+ * @attr ref android.R.styleable#LinearLayout_baselineAligned
+ * @attr ref android.R.styleable#LinearLayout_baselineAlignedChildIndex
+ * @attr ref android.R.styleable#LinearLayout_gravity
+ * @attr ref android.R.styleable#LinearLayout_measureWithLargestChild
+ * @attr ref android.R.styleable#LinearLayout_orientation
+ * @attr ref android.R.styleable#LinearLayout_weightSum
  */
 @RemoteView
 public class LinearLayout extends ViewGroup {
@@ -112,7 +119,11 @@ public class LinearLayout extends ViewGroup {
     }
 
     public LinearLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
+    }
+    
+    public LinearLayout(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
 
         TypedArray a = 
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.LinearLayout);
@@ -137,8 +148,7 @@ public class LinearLayout extends ViewGroup {
         mBaselineAlignedChildIndex =
                 a.getInt(com.android.internal.R.styleable.LinearLayout_baselineAlignedChildIndex, -1);
 
-        // TODO: Better name, add Java APIs, make it public
-        mUseLargestChild = a.getBoolean(R.styleable.LinearLayout_useLargestChild, false);
+        mUseLargestChild = a.getBoolean(R.styleable.LinearLayout_measureWithLargestChild, false);
 
         a.recycle();
     }
@@ -165,6 +175,33 @@ public class LinearLayout extends ViewGroup {
     @android.view.RemotableViewMethod
     public void setBaselineAligned(boolean baselineAligned) {
         mBaselineAligned = baselineAligned;
+    }
+
+    /**
+     * When true, all children with a weight will be considered having
+     * the minimum size of the largest child. If false, all children are
+     * measured normally.
+     * 
+     * @return True to measure children with a weight using the minimum
+     *         size of the largest child, false otherwise.
+     */
+    public boolean isMeasureWithLargestChildEnabled() {
+        return mUseLargestChild;
+    }
+
+    /**
+     * When set to true, all children with a weight will be considered having
+     * the minimum size of the largest child. If false, all children are
+     * measured normally.
+     * 
+     * Disabled by default.
+     * 
+     * @param enabled True to measure children with a weight using the
+     *        minimum size of the largest child, false otherwise.
+     */
+    @android.view.RemotableViewMethod
+    public void setMeasureWithLargestChildEnabled(boolean enabled) {
+        mUseLargestChild = enabled;
     }
 
     @Override

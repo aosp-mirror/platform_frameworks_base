@@ -1728,7 +1728,7 @@
         <!-- When set to true, all children with a weight will be considered having
              the minimum size of the largest child. If false, all children are
              measured normally. -->
-        <attr name="useLargestChild" format="boolean" />
+        <attr name="measureWithLargestChild" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ListView">
         <!-- Reference to an array resource that will populate the ListView.  For static content,

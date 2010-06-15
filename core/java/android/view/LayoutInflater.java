@@ -379,7 +379,7 @@ public abstract class LayoutInflater {
                                 + "ViewGroup root and attachToRoot=true");
                     }
 
-                    rInflate(parser, root, attrs);
+                    rInflate(parser, root, attrs, false);
                 } else {
                     // Temp is the root view that was found in the xml
                     View temp = createViewFromTag(name, attrs);
@@ -404,7 +404,7 @@ public abstract class LayoutInflater {
                         System.out.println("-----> start inflating children");
                     }
                     // Inflate all children under temp
-                    rInflate(parser, temp, attrs);
+                    rInflate(parser, temp, attrs, true);
                     if (DEBUG) {
                         System.out.println("-----> done inflating children");
                     }
@@ -590,8 +590,8 @@ public abstract class LayoutInflater {
      * Recursive method used to descend down the xml hierarchy and instantiate
      * views, instantiate their children, and then call onFinishInflate().
      */
-    private void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs)
-            throws XmlPullParserException, IOException {
+    private void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs,
+            boolean finishInflate) throws XmlPullParserException, IOException {
 
         final int depth = parser.getDepth();
         int type;
@@ -618,12 +618,12 @@ public abstract class LayoutInflater {
                 final View view = createViewFromTag(name, attrs);
                 final ViewGroup viewGroup = (ViewGroup) parent;
                 final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
-                rInflate(parser, view, attrs);
+                rInflate(parser, view, attrs, true);
                 viewGroup.addView(view, params);
             }
         }
 
-        parent.onFinishInflate();
+        if (finishInflate) parent.onFinishInflate();
     }
 
     private void parseRequestFocus(XmlPullParser parser, View parent)
@@ -674,7 +674,7 @@ public abstract class LayoutInflater {
 
                     if (TAG_MERGE.equals(childName)) {
                         // Inflate all children.
-                        rInflate(childParser, parent, childAttrs);
+                        rInflate(childParser, parent, childAttrs, false);
                     } else {
                         final View view = createViewFromTag(childName, childAttrs);
                         final ViewGroup group = (ViewGroup) parent;
@@ -699,7 +699,7 @@ public abstract class LayoutInflater {
                         }
 
                         // Inflate all children.
-                        rInflate(childParser, view, childAttrs);
+                        rInflate(childParser, view, childAttrs, true);
 
                         // Attempt to override the included layout's android:id with the
                         // one set on the <include /> tag itself.

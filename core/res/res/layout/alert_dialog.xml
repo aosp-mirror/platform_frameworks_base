@@ -112,7 +112,7 @@
             android:paddingTop="4dip"
             android:paddingLeft="2dip"
             android:paddingRight="2dip"
-            android:useLargestChild="true">
+            android:measureWithLargestChild="true">
             <LinearLayout android:id="@+id/leftSpacer"
                 android:layout_weight="0.25"
                 android:layout_width="0dip"

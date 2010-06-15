@@ -1240,9 +1240,9 @@
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
     
 <!-- ===============================================================
-     Resources introduced in kraken.
+     Resources introduced in Gingerbread.
      =============================================================== -->
-     
+  <eat-comment />
   <public type="attr" name="logo" id="0x010102be" />
   <public type="attr" name="xlargeScreens" id="0x010102bf" />
   <public type="attr" name="heavyWeight" id="0x010102c0" />
@@ -1260,7 +1260,7 @@
   <public-padding type="array" name="kraken_resource_pad" end="0x01070010" />
 
 <!-- ===============================================================
-     Resources proposed for Gingerbread.
+     Resources proposed for Honeycomb.
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="adapter" />
@@ -1283,6 +1283,7 @@
   <public type="attr" name="subtitle" />
   <public type="attr" name="customNavigationLayout" />
   <public type="attr" name="hardwareAccelerated" />
+  <public type="attr" name="measureWithLargestChild" />
 
   <public type="id" name="home" />
 
