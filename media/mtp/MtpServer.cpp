@@ -22,6 +22,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <cutils/properties.h>
+
 #include "MtpDebug.h"
 #include "MtpServer.h"
 #include "MtpStorage.h"
@@ -288,6 +290,7 @@ bool MtpServer::handleRequest() {
 
 MtpResponseCode MtpServer::doGetDeviceInfo() {
     MtpStringBuffer   string;
+    char prop_value[PROPERTY_VALUE_MAX];
 
     // fill in device info
     mData.putUInt16(MTP_STANDARD_VERSION);
@@ -306,11 +309,15 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
     // FIXME
     string.set("Google, Inc.");
     mData.putString(string);   // Manufacturer
-    string.set("Just an Ordinary MTP Device");
+
+    property_get("ro.product.model", prop_value, "MTP Device");
+    string.set(prop_value);
     mData.putString(string);   // Model
     string.set("1.0");
     mData.putString(string);   // Device Version
-    string.set("123456789012345678AA");
+
+    property_get("ro.serialno", prop_value, "????????");
+    string.set(prop_value);
     mData.putString(string);   // Serial Number
 
     return MTP_RESPONSE_OK;
