@@ -102,7 +102,7 @@ public:
             OMX_IN OMX_U32 nData1,
             OMX_IN OMX_U32 nData2,
             OMX_IN OMX_PTR pEventData);
-        
+
     OMX_ERRORTYPE OnEmptyBufferDone(
             node_id node, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer);
 
@@ -115,20 +115,19 @@ protected:
     virtual ~OMX();
 
 private:
-    Mutex mLock;
-
-    OMXMaster *mMaster;
-
     struct CallbackDispatcher;
-    sp<CallbackDispatcher> mDispatcher;
 
+    Mutex mLock;
+    OMXMaster *mMaster;
     int32_t mNodeCounter;
 
     KeyedVector<wp<IBinder>, OMXNodeInstance *> mLiveNodes;
     KeyedVector<node_id, OMXNodeInstance *> mNodeIDToInstance;
+    KeyedVector<node_id, sp<CallbackDispatcher> > mDispatchers;
 
     node_id makeNodeID(OMXNodeInstance *instance);
     OMXNodeInstance *findInstance(node_id node);
+    sp<CallbackDispatcher> findDispatcher(node_id node);
 
     void invalidateNodeID_l(node_id node);
 
