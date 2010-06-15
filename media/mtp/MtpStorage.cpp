@@ -36,6 +36,7 @@ MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, MtpDatabase* db)
         mDatabase(db),
         mMaxCapacity(0)
 {
+    printf("MtpStorage id: %d path: %s\n", id, filePath);
 }
 
 MtpStorage::~MtpStorage() {
