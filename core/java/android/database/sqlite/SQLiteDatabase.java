@@ -2355,7 +2355,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         int i = mConnectionPool.getMaxPoolSize();
         if (size < i) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                     "cannot set max pool size to a value less than the current max value(=" +
                     i + ")");
         }
