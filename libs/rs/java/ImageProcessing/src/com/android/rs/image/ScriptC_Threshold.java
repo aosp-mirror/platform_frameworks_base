@@ -102,12 +102,12 @@ public class ScriptC_Threshold
         setVar(mFieldIndex_hue, v);
     }
 
-    private final static int mInvokableIndex_Filter = 2;
+    private final static int mInvokableIndex_Filter = 4;
     public void invokable_Filter() {
         invokeData(mInvokableIndex_Filter);
     }
 
-    private final static int mInvokableIndex_FilterBenchmark = 3;
+    private final static int mInvokableIndex_FilterBenchmark = 5;
     public void invokable_FilterBenchmark() {
         invokeData(mInvokableIndex_FilterBenchmark);
     }
