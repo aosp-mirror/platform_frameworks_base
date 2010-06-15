@@ -38,6 +38,7 @@ public interface NetworkStateTracker {
     public static final int EVENT_ROAMING_CHANGED = 5;
     public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 6;
     public static final int EVENT_RESTORE_DEFAULT_NETWORK = 7;
+    public static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 8;
 
     /**
      * Fetch NetworkInfo for the network
@@ -94,12 +95,6 @@ public interface NetworkStateTracker {
      * Check if tear down was requested
      */
     public boolean isTeardownRequested();
-
-    /**
-     * Release the wakelock, if any, that may be held while handling a
-     * disconnect operation.
-     */
-    public void releaseWakeLock();
 
     public void startMonitoring();
 

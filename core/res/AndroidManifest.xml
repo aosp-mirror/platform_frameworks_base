@@ -344,6 +344,13 @@
         android:description="@string/permdesc_accountManagerService"
         android:label="@string/permlab_accountManagerService" />
 
+    <!-- Allows an internal user to use privaledged ConnectivityManager
+    APIs.
+        @hide -->
+    <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
