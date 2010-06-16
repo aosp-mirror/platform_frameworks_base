@@ -20,21 +20,30 @@ import android.os.AsyncTask;
 
 /**
  * Abstract Loader that provides an {@link AsyncTask} to do the work.
- * 
+ *
  * @param <D> the data type to be loaded.
  */
 public abstract class AsyncTaskLoader<D> extends Loader<D> {
     final class LoadTask extends AsyncTask<Void, Void, D> {
+
+        private D result;
+
         /* Runs on a worker thread */
         @Override
         protected D doInBackground(Void... params) {
-            return AsyncTaskLoader.this.loadInBackground();
+            result = AsyncTaskLoader.this.loadInBackground();
+            return result;
         }
 
         /* Runs on the UI thread */
         @Override
         protected void onPostExecute(D data) {
             AsyncTaskLoader.this.dispatchOnLoadComplete(data);
+        }
+
+        @Override
+        protected void onCancelled() {
+            AsyncTaskLoader.this.onCancelled(result);
         }
     }
 
@@ -50,6 +59,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      */
     @Override
     public void forceLoad() {
+        cancelLoad();
         mTask = new LoadTask();
         mTask.execute((Void[]) null);
     }
@@ -65,11 +75,20 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      */
     public boolean cancelLoad() {
         if (mTask != null) {
-            return mTask.cancel(false);
+            boolean cancelled = mTask.cancel(false);
+            mTask = null;
+            return cancelled;
         }
         return false;
     }
-    
+
+    /**
+     * Called if the task was canceled before it was completed.  Gives the class a chance
+     * to properly dispose of the result.
+     */
+    public void onCancelled(D data) {
+    }
+
     void dispatchOnLoadComplete(D data) {
         mTask = null;
         deliverResult(data);
@@ -78,7 +97,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     /**
      * Called on a worker thread to perform the actual load. Implementations should not deliver the
      * results directly, but should return them from this method, which will eventually end up
-     * calling deliverResult on the UI thread. If implementations need to process 
+     * calling deliverResult on the UI thread. If implementations need to process
      * the results on the UI thread they may override deliverResult and do so
      * there.
      *
