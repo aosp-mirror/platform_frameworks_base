@@ -172,6 +172,19 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Returns the generation ID of this bitmap. The generation ID changes
+     * whenever the bitmap is modified. This can be used as an efficient way to
+     * check if a bitmap has changed.
+     * 
+     * @return The current generation ID for this bitmap.
+     * 
+     * @hide
+     */
+    public int getGenerationId() {
+        return nativeGenerationId(mNativeBitmap);
+    }
+    
+    /**
      * This is called by methods that want to throw an exception if the bitmap
      * has already been recycled.
      */
@@ -1041,6 +1054,7 @@ public final class Bitmap implements Parcelable {
     private static native void nativeCopyPixelsToBuffer(int nativeBitmap,
                                                         Buffer dst);
     private static native void nativeCopyPixelsFromBuffer(int nb, Buffer src);
+    private static native int nativeGenerationId(int nativeBitmap);
 
     private static native Bitmap nativeCreateFromParcel(Parcel p);
     // returns true on success
