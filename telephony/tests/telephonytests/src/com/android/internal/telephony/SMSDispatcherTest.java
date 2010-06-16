@@ -102,4 +102,25 @@ public class SMSDispatcherTest extends AndroidTestCase {
        sms = SmsMessage.createFromEfRecord(1, data);
        assertNotNull(sms.getMessageBody());
     }
+
+    @MediumTest
+    public void testEfRecordKorean() throws Exception {
+        if (SimRegionCache.getRegion() == SimRegionCache.MCC_KOREAN) {
+            SmsMessage sms;
+
+            String s = "01089128010099010259040ba11000000000f00095013091900563008c4142"
+                     + "434445b0a1b3aab4d9b6f3b8b631323334354142434445b0a1b3aab4d9b6f3"
+                     + "b8b631323334354142434445b0a1b3aab4d9b6f3b8b6313233343541424344"
+                     + "45b0a1b3aab4d9b6f3b8b63132333435000000000000000000000000000000"
+                     + "00000000000000000000000000000000000000000000000000000000000000"
+                     + "0000000000000000000000000000ffffffffffffff";
+
+
+           byte[] data = IccUtils.hexStringToBytes(s);
+
+           sms = SmsMessage.createFromEfRecord(1, data);
+           assertNotNull(sms.getMessageBody());
+           assertTrue(sms.getMessageBody().startsWith("ABCDE\uAC00\uB098\uB2E4\uB77C\uB9C812345ABCDE"));
+        }
+    }
 }
