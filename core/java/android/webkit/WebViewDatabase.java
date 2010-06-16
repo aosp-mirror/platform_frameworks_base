@@ -173,112 +173,140 @@ public class WebViewDatabase {
 
     private static int mCacheTransactionRefcount;
 
-    private WebViewDatabase() {
+    // Initially true until the background thread completes.
+    private boolean mInitialized = false;
+
+    private WebViewDatabase(final Context context) {
+        new Thread() {
+            @Override
+            public void run() {
+                init(context);
+            }
+        }.start();
+
         // Singleton only, use getInstance()
     }
 
     public static synchronized WebViewDatabase getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new WebViewDatabase();
-            try {
-                mDatabase = context
-                        .openOrCreateDatabase(DATABASE_FILE, 0, null);
-            } catch (SQLiteException e) {
-                // try again by deleting the old db and create a new one
-                if (context.deleteDatabase(DATABASE_FILE)) {
-                    mDatabase = context.openOrCreateDatabase(DATABASE_FILE, 0,
-                            null);
-                }
-            }
+            mInstance = new WebViewDatabase(context);
+        }
+        return mInstance;
+    }
 
-            // mDatabase should not be null, 
-            // the only case is RequestAPI test has problem to create db 
-            if (mDatabase != null && mDatabase.getVersion() != DATABASE_VERSION) {
-                mDatabase.beginTransaction();
-                try {
-                    upgradeDatabase();
-                    mDatabase.setTransactionSuccessful();
-                } finally {
-                    mDatabase.endTransaction();
-                }
-            }
+    private synchronized void init(Context context) {
+        if (mInitialized) {
+            return;
+        }
 
-            if (mDatabase != null) {
-                // use per table Mutex lock, turn off database lock, this
-                // improves performance as database's ReentrantLock is expansive
-                mDatabase.setLockingEnabled(false);
-            }
-
-            try {
-                mCacheDatabase = context.openOrCreateDatabase(
-                        CACHE_DATABASE_FILE, 0, null);
-            } catch (SQLiteException e) {
-                // try again by deleting the old db and create a new one
-                if (context.deleteDatabase(CACHE_DATABASE_FILE)) {
-                    mCacheDatabase = context.openOrCreateDatabase(
-                            CACHE_DATABASE_FILE, 0, null);
-                }
-            }
-
-            // mCacheDatabase should not be null, 
-            // the only case is RequestAPI test has problem to create db 
-            if (mCacheDatabase != null
-                    && mCacheDatabase.getVersion() != CACHE_DATABASE_VERSION) {
-                mCacheDatabase.beginTransaction();
-                try {
-                    upgradeCacheDatabase();
-                    bootstrapCacheDatabase();
-                    mCacheDatabase.setTransactionSuccessful();
-                } finally {
-                    mCacheDatabase.endTransaction();
-                }
-                // Erase the files from the file system in the 
-                // case that the database was updated and the 
-                // there were existing cache content
-                CacheManager.removeAllCacheFiles();
-            }
-
-            if (mCacheDatabase != null) {
-                // use read_uncommitted to speed up READ
-                mCacheDatabase.execSQL("PRAGMA read_uncommitted = true;");
-                // as only READ can be called in the non-WebViewWorkerThread,
-                // and read_uncommitted is used, we can turn off database lock
-                // to use transaction.
-                mCacheDatabase.setLockingEnabled(false);
-
-                // use InsertHelper for faster insertion
-                mCacheInserter = new DatabaseUtils.InsertHelper(mCacheDatabase,
-                        "cache");
-                mCacheUrlColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_URL_COL);
-                mCacheFilePathColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_FILE_PATH_COL);
-                mCacheLastModifyColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_LAST_MODIFY_COL);
-                mCacheETagColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_ETAG_COL);
-                mCacheExpiresColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_EXPIRES_COL);
-                mCacheExpiresStringColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_EXPIRES_STRING_COL);
-                mCacheMimeTypeColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_MIMETYPE_COL);
-                mCacheEncodingColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_ENCODING_COL);
-                mCacheHttpStatusColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_HTTP_STATUS_COL);
-                mCacheLocationColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_LOCATION_COL);
-                mCacheContentLengthColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_CONTENTLENGTH_COL);
-                mCacheContentDispositionColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
-                mCacheCrossDomainColIndex = mCacheInserter
-                        .getColumnIndex(CACHE_CROSSDOMAIN_COL);
+        try {
+            mDatabase = context.openOrCreateDatabase(DATABASE_FILE, 0, null);
+        } catch (SQLiteException e) {
+            // try again by deleting the old db and create a new one
+            if (context.deleteDatabase(DATABASE_FILE)) {
+                mDatabase = context.openOrCreateDatabase(DATABASE_FILE, 0,
+                        null);
             }
         }
 
-        return mInstance;
+        // mDatabase should not be null,
+        // the only case is RequestAPI test has problem to create db
+        if (mDatabase == null) {
+            mInitialized = true;
+            notify();
+            return;
+        }
+
+        if (mDatabase.getVersion() != DATABASE_VERSION) {
+            mDatabase.beginTransaction();
+            try {
+                upgradeDatabase();
+                mDatabase.setTransactionSuccessful();
+            } finally {
+                mDatabase.endTransaction();
+            }
+        }
+
+        // use per table Mutex lock, turn off database lock, this
+        // improves performance as database's ReentrantLock is
+        // expansive
+        mDatabase.setLockingEnabled(false);
+
+        try {
+            mCacheDatabase = context.openOrCreateDatabase(
+                    CACHE_DATABASE_FILE, 0, null);
+        } catch (SQLiteException e) {
+            // try again by deleting the old db and create a new one
+            if (context.deleteDatabase(CACHE_DATABASE_FILE)) {
+                mCacheDatabase = context.openOrCreateDatabase(
+                        CACHE_DATABASE_FILE, 0, null);
+            }
+        }
+
+        // mCacheDatabase should not be null,
+        // the only case is RequestAPI test has problem to create db
+        if (mCacheDatabase == null) {
+            mInitialized = true;
+            notify();
+            return;
+        }
+
+        if (mCacheDatabase.getVersion() != CACHE_DATABASE_VERSION) {
+            mCacheDatabase.beginTransaction();
+            try {
+                upgradeCacheDatabase();
+                bootstrapCacheDatabase();
+                mCacheDatabase.setTransactionSuccessful();
+            } finally {
+                mCacheDatabase.endTransaction();
+            }
+            // Erase the files from the file system in the
+            // case that the database was updated and the
+            // there were existing cache content
+            CacheManager.removeAllCacheFiles();
+        }
+
+        // use read_uncommitted to speed up READ
+        mCacheDatabase.execSQL("PRAGMA read_uncommitted = true;");
+        // as only READ can be called in the
+        // non-WebViewWorkerThread, and read_uncommitted is used,
+        // we can turn off database lock to use transaction.
+        mCacheDatabase.setLockingEnabled(false);
+
+        // use InsertHelper for faster insertion
+        mCacheInserter =
+                new DatabaseUtils.InsertHelper(mCacheDatabase,
+                        "cache");
+        mCacheUrlColIndex = mCacheInserter
+                            .getColumnIndex(CACHE_URL_COL);
+        mCacheFilePathColIndex = mCacheInserter
+                .getColumnIndex(CACHE_FILE_PATH_COL);
+        mCacheLastModifyColIndex = mCacheInserter
+                .getColumnIndex(CACHE_LAST_MODIFY_COL);
+        mCacheETagColIndex = mCacheInserter
+                .getColumnIndex(CACHE_ETAG_COL);
+        mCacheExpiresColIndex = mCacheInserter
+                .getColumnIndex(CACHE_EXPIRES_COL);
+        mCacheExpiresStringColIndex = mCacheInserter
+                .getColumnIndex(CACHE_EXPIRES_STRING_COL);
+        mCacheMimeTypeColIndex = mCacheInserter
+                .getColumnIndex(CACHE_MIMETYPE_COL);
+        mCacheEncodingColIndex = mCacheInserter
+                .getColumnIndex(CACHE_ENCODING_COL);
+        mCacheHttpStatusColIndex = mCacheInserter
+                .getColumnIndex(CACHE_HTTP_STATUS_COL);
+        mCacheLocationColIndex = mCacheInserter
+                .getColumnIndex(CACHE_LOCATION_COL);
+        mCacheContentLengthColIndex = mCacheInserter
+                .getColumnIndex(CACHE_CONTENTLENGTH_COL);
+        mCacheContentDispositionColIndex = mCacheInserter
+                .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
+        mCacheCrossDomainColIndex = mCacheInserter
+                .getColumnIndex(CACHE_CROSSDOMAIN_COL);
+
+        // Thread done, notify.
+        mInitialized = true;
+        notify();
     }
 
     private static void upgradeDatabase() {
@@ -391,8 +419,25 @@ public class WebViewDatabase {
         }
     }
 
+    // Wait for the background initialization thread to complete and check the
+    // database creation status.
+    private boolean checkInitialized() {
+        synchronized (this) {
+            while (!mInitialized) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Log.e(LOGTAG, "Caught exception while checking " +
+                                  "initialization");
+                    Log.e(LOGTAG, Log.getStackTraceString(e));
+                }
+            }
+        }
+        return mDatabase != null;
+    }
+
     private boolean hasEntries(int tableId) {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return false;
         }
 
@@ -422,7 +467,7 @@ public class WebViewDatabase {
      */
     ArrayList<Cookie> getCookiesForDomain(String domain) {
         ArrayList<Cookie> list = new ArrayList<Cookie>();
-        if (domain == null || mDatabase == null) {
+        if (domain == null || !checkInitialized()) {
             return list;
         }
 
@@ -481,7 +526,7 @@ public class WebViewDatabase {
      *            deleted.
      */
     void deleteCookies(String domain, String path, String name) {
-        if (domain == null || mDatabase == null) {
+        if (domain == null || !checkInitialized()) {
             return;
         }
 
@@ -501,7 +546,7 @@ public class WebViewDatabase {
      */
     void addCookie(Cookie cookie) {
         if (cookie.domain == null || cookie.path == null || cookie.name == null
-                || mDatabase == null) {
+                || !checkInitialized()) {
             return;
         }
 
@@ -534,7 +579,7 @@ public class WebViewDatabase {
      * Clear cookie database
      */
     void clearCookies() {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
@@ -547,7 +592,7 @@ public class WebViewDatabase {
      * Clear session cookies, which means cookie doesn't have EXPIRES.
      */
     void clearSessionCookies() {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
@@ -564,7 +609,7 @@ public class WebViewDatabase {
      * @param now Time for now
      */
     void clearExpiredCookies(long now) {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
@@ -620,7 +665,7 @@ public class WebViewDatabase {
      * @return CacheResult The CacheManager.CacheResult
      */
     CacheResult getCache(String url) {
-        if (url == null || mCacheDatabase == null) {
+        if (url == null || !checkInitialized()) {
             return null;
         }
 
@@ -660,7 +705,7 @@ public class WebViewDatabase {
      * @param url The url
      */
     void removeCache(String url) {
-        if (url == null || mCacheDatabase == null) {
+        if (url == null || !checkInitialized()) {
             return;
         }
 
@@ -674,7 +719,7 @@ public class WebViewDatabase {
      * @param c The CacheManager.CacheResult
      */
     void addCache(String url, CacheResult c) {
-        if (url == null || mCacheDatabase == null) {
+        if (url == null || !checkInitialized()) {
             return;
         }
 
@@ -700,7 +745,7 @@ public class WebViewDatabase {
      * Clear cache database
      */
     void clearCache() {
-        if (mCacheDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
@@ -708,7 +753,7 @@ public class WebViewDatabase {
     }
 
     boolean hasCache() {
-        if (mCacheDatabase == null) {
+        if (!checkInitialized()) {
             return false;
         }
 
@@ -831,7 +876,7 @@ public class WebViewDatabase {
      */
     void setUsernamePassword(String schemePlusHost, String username,
                 String password) {
-        if (schemePlusHost == null || mDatabase == null) {
+        if (schemePlusHost == null || !checkInitialized()) {
             return;
         }
 
@@ -853,7 +898,7 @@ public class WebViewDatabase {
      *         String[1] is password. Return null if it can't find anything.
      */
     String[] getUsernamePassword(String schemePlusHost) {
-        if (schemePlusHost == null || mDatabase == null) {
+        if (schemePlusHost == null || !checkInitialized()) {
             return null;
         }
 
@@ -899,7 +944,7 @@ public class WebViewDatabase {
      * Clear password database
      */
     public void clearUsernamePassword() {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
@@ -924,7 +969,7 @@ public class WebViewDatabase {
      */
     void setHttpAuthUsernamePassword(String host, String realm, String username,
             String password) {
-        if (host == null || realm == null || mDatabase == null) {
+        if (host == null || realm == null || !checkInitialized()) {
             return;
         }
 
@@ -949,7 +994,7 @@ public class WebViewDatabase {
      *         String[1] is password. Return null if it can't find anything.
      */
     String[] getHttpAuthUsernamePassword(String host, String realm) {
-        if (host == null || realm == null || mDatabase == null){
+        if (host == null || realm == null || !checkInitialized()){
             return null;
         }
 
@@ -996,7 +1041,7 @@ public class WebViewDatabase {
      * Clear HTTP authentication password database
      */
     public void clearHttpAuthUsernamePassword() {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
@@ -1017,7 +1062,7 @@ public class WebViewDatabase {
      * @param formdata The form data in HashMap
      */
     void setFormData(String url, HashMap<String, String> formdata) {
-        if (url == null || formdata == null || mDatabase == null) {
+        if (url == null || formdata == null || !checkInitialized()) {
             return;
         }
 
@@ -1066,7 +1111,7 @@ public class WebViewDatabase {
      */
     ArrayList<String> getFormData(String url, String name) {
         ArrayList<String> values = new ArrayList<String>();
-        if (url == null || name == null || mDatabase == null) {
+        if (url == null || name == null || !checkInitialized()) {
             return values;
         }
 
@@ -1126,7 +1171,7 @@ public class WebViewDatabase {
      * Clear form database
      */
     public void clearFormData() {
-        if (mDatabase == null) {
+        if (!checkInitialized()) {
             return;
         }
 
