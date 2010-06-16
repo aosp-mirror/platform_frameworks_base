@@ -148,6 +148,9 @@ private:
     int32_t mNature;
 };
 
+/*
+ * Key events.
+ */
 class KeyEvent : public InputEvent {
 public:
     virtual ~KeyEvent() { }
@@ -193,6 +196,9 @@ private:
     nsecs_t mEventTime;
 };
 
+/*
+ * Motion events.
+ */
 class MotionEvent : public InputEvent {
 public:
     virtual ~MotionEvent() { }
@@ -204,6 +210,10 @@ public:
     inline int32_t getEdgeFlags() const { return mEdgeFlags; }
 
     inline int32_t getMetaState() const { return mMetaState; }
+
+    inline float getXOffset() const { return mXOffset; }
+
+    inline float getYOffset() const { return mYOffset; }
 
     inline float getXPrecision() const { return mXPrecision; }
 
@@ -217,16 +227,20 @@ public:
 
     inline nsecs_t getEventTime() const { return mSampleEventTimes[getHistorySize()]; }
 
-    inline float getRawX() const { return mRawX; }
-
-    inline float getRawY() const { return mRawY; }
-
-    inline float getX(size_t pointerIndex) const {
+    inline float getRawX(size_t pointerIndex) const {
         return getCurrentPointerCoords(pointerIndex).x;
     }
 
-    inline float getY(size_t pointerIndex) const {
+    inline float getRawY(size_t pointerIndex) const {
         return getCurrentPointerCoords(pointerIndex).y;
+    }
+
+    inline float getX(size_t pointerIndex) const {
+        return getRawX(pointerIndex) + mXOffset;
+    }
+
+    inline float getY(size_t pointerIndex) const {
+        return getRawY(pointerIndex) + mYOffset;
     }
 
     inline float getPressure(size_t pointerIndex) const {
@@ -243,12 +257,20 @@ public:
         return mSampleEventTimes[historicalIndex];
     }
 
-    inline float getHistoricalX(size_t pointerIndex, size_t historicalIndex) const {
+    inline float getHistoricalRawX(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalPointerCoords(pointerIndex, historicalIndex).x;
     }
 
-    inline float getHistoricalY(size_t pointerIndex, size_t historicalIndex) const {
+    inline float getHistoricalRawY(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalPointerCoords(pointerIndex, historicalIndex).y;
+    }
+
+    inline float getHistoricalX(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalRawX(pointerIndex, historicalIndex) + mXOffset;
+    }
+
+    inline float getHistoricalY(size_t pointerIndex, size_t historicalIndex) const {
+        return getHistoricalRawY(pointerIndex, historicalIndex) + mYOffset;
     }
 
     inline float getHistoricalPressure(size_t pointerIndex, size_t historicalIndex) const {
@@ -265,8 +287,8 @@ public:
             int32_t action,
             int32_t edgeFlags,
             int32_t metaState,
-            float rawX,
-            float rawY,
+            float xOffset,
+            float yOffset,
             float xPrecision,
             float yPrecision,
             nsecs_t downTime,
@@ -281,12 +303,19 @@ public:
 
     void offsetLocation(float xOffset, float yOffset);
 
+    // Low-level accessors.
+    inline const int32_t* getPointerIds() const { return mPointerIds.array(); }
+    inline const nsecs_t* getSampleEventTimes() const { return mSampleEventTimes.array(); }
+    inline const PointerCoords* getSamplePointerCoords() const {
+            return mSamplePointerCoords.array();
+    }
+
 private:
     int32_t mAction;
     int32_t mEdgeFlags;
     int32_t mMetaState;
-    float mRawX;
-    float mRawY;
+    float mXOffset;
+    float mYOffset;
     float mXPrecision;
     float mYPrecision;
     nsecs_t mDownTime;

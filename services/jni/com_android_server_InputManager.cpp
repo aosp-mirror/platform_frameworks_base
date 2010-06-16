@@ -294,9 +294,7 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
 
     if (wmActions & WM_ACTION_PASS_TO_USER) {
         actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
-    }
 
-    if (! (wmActions & WM_ACTION_PASS_TO_USER)) {
         if (down && isAppSwitchKey(keyCode)) {
             env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyAppSwitchComing);
             checkExceptionFromCallback(env, "notifyAppSwitchComing");
@@ -312,12 +310,18 @@ int32_t NativeInputManager::interceptTouch(nsecs_t when) {
     LOGD("interceptTouch - when=%lld", when);
 #endif
 
-    if (! isScreenOn()) {
-        // Touch events do not wake the device.
-        return InputReaderPolicyInterface::ACTION_NONE;
+    int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
+    if (isScreenOn()) {
+        // Only dispatch touch events when the device is awake.
+        actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
     }
 
-    return InputReaderPolicyInterface::ACTION_DISPATCH;
+    if (! isScreenBright()) {
+        // Brighten the screen if dimmed.
+        actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+    }
+
+    return actions;
 }
 
 int32_t NativeInputManager::interceptTrackball(nsecs_t when,
@@ -327,12 +331,18 @@ int32_t NativeInputManager::interceptTrackball(nsecs_t when,
             when, buttonChanged, buttonDown, rolled);
 #endif
 
-    if (! isScreenOn()) {
-        // Trackball motions and button presses do not wake the device.
-        return InputReaderPolicyInterface::ACTION_NONE;
+    int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
+    if (isScreenOn()) {
+        // Only dispatch trackball events when the device is awake.
+        actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
     }
 
-    return InputReaderPolicyInterface::ACTION_DISPATCH;
+    if (! isScreenBright()) {
+        // Brighten the screen if dimmed.
+        actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+    }
+
+    return actions;
 }
 
 int32_t NativeInputManager::interceptSwitch(nsecs_t when, int32_t switchCode,

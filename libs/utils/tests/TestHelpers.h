@@ -21,6 +21,41 @@
 
 namespace android {
 
+class Pipe {
+public:
+    int sendFd;
+    int receiveFd;
+
+    Pipe() {
+        int fds[2];
+        ::pipe(fds);
+
+        receiveFd = fds[0];
+        sendFd = fds[1];
+    }
+
+    ~Pipe() {
+        if (sendFd != -1) {
+            ::close(sendFd);
+        }
+
+        if (receiveFd != -1) {
+            ::close(receiveFd);
+        }
+    }
+
+    status_t writeSignal() {
+        ssize_t nWritten = ::write(sendFd, "*", 1);
+        return nWritten == 1 ? 0 : -errno;
+    }
+
+    status_t readSignal() {
+        char buf[1];
+        ssize_t nRead = ::read(receiveFd, buf, 1);
+        return nRead == 1 ? 0 : nRead == 0 ? -EPIPE : -errno;
+    }
+};
+
 class DelayedTask : public Thread {
     int mDelayMillis;
 

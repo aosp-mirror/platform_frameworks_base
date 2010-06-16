@@ -27,6 +27,7 @@ import android.util.Log;
  * it is being used for.
  */
 public final class MotionEvent implements Parcelable {
+    private static final long MS_PER_NS = 1000000;
     static final boolean DEBUG_POINTERS = false;
     
     /**
@@ -218,31 +219,32 @@ public final class MotionEvent implements Parcelable {
     static private int gRecyclerUsed = 0;
     static private MotionEvent gRecyclerTop = null;
 
-    private long mDownTime;
-    private long mEventTimeNano;
+    private long mDownTimeNano;
     private int mAction;
-    private float mRawX;
-    private float mRawY;
+    private float mXOffset;
+    private float mYOffset;
     private float mXPrecision;
     private float mYPrecision;
     private int mDeviceId;
     private int mEdgeFlags;
     private int mMetaState;
     
-    // Here is the actual event data.  Note that the order of the array
-    // is a little odd: the first entry is the most recent, and the ones
-    // following it are the historical data from oldest to newest.  This
-    // allows us to easily retrieve the most recent data, without having
-    // to copy the arrays every time a new sample is added.
-    
     private int mNumPointers;
     private int mNumSamples;
+    
+    private int mLastDataSampleIndex;
+    private int mLastEventTimeNanoSampleIndex;
+    
     // Array of mNumPointers size of identifiers for each pointer of data.
     private int[] mPointerIdentifiers;
+    
     // Array of (mNumSamples * mNumPointers * NUM_SAMPLE_DATA) size of event data.
+    // Samples are ordered from oldest to newest.
     private float[] mDataSamples;
-    // Array of mNumSamples size of time stamps.
-    private long[] mTimeSamples;
+    
+    // Array of mNumSamples size of event time stamps in nanoseconds.
+    // Samples are ordered from oldest to newest.
+    private long[] mEventTimeNanoSamples;
 
     private MotionEvent mNext;
     private RuntimeException mRecycledLocation;
@@ -251,26 +253,9 @@ public final class MotionEvent implements Parcelable {
     private MotionEvent(int pointerCount, int sampleCount) {
         mPointerIdentifiers = new int[pointerCount];
         mDataSamples = new float[pointerCount * sampleCount * NUM_SAMPLE_DATA];
-        mTimeSamples = new long[sampleCount];
+        mEventTimeNanoSamples = new long[sampleCount];
     }
 
-    static private MotionEvent obtain() {
-        final MotionEvent ev;
-        synchronized (gRecyclerLock) {
-            if (gRecyclerTop == null) {
-                return new MotionEvent(BASE_AVAIL_POINTERS, BASE_AVAIL_SAMPLES);
-            }
-            ev = gRecyclerTop;
-            gRecyclerTop = ev.mNext;
-            gRecyclerUsed--;
-        }
-        ev.mRecycledLocation = null;
-        ev.mRecycled = false;
-        ev.mNext = null;
-        return ev;
-    }
-    
-    @SuppressWarnings("unused") // used by native code
     static private MotionEvent obtain(int pointerCount, int sampleCount) {
         final MotionEvent ev;
         synchronized (gRecyclerLock) {
@@ -285,7 +270,7 @@ public final class MotionEvent implements Parcelable {
             }
             ev = gRecyclerTop;
             gRecyclerTop = ev.mNext;
-            gRecyclerUsed--;
+            gRecyclerUsed -= 1;
         }
         ev.mRecycledLocation = null;
         ev.mRecycled = false;
@@ -295,20 +280,18 @@ public final class MotionEvent implements Parcelable {
             ev.mPointerIdentifiers = new int[pointerCount];
         }
         
-        final int timeSamplesLength = ev.mTimeSamples.length;
-        if (timeSamplesLength < sampleCount) {
-            ev.mTimeSamples = new long[sampleCount];
+        if (ev.mEventTimeNanoSamples.length < sampleCount) {
+            ev.mEventTimeNanoSamples = new long[sampleCount];
         }
         
-        final int dataSamplesLength = ev.mDataSamples.length;
         final int neededDataSamplesLength = pointerCount * sampleCount * NUM_SAMPLE_DATA;
-        if (dataSamplesLength < neededDataSamplesLength) {
+        if (ev.mDataSamples.length < neededDataSamplesLength) {
             ev.mDataSamples = new float[neededDataSamplesLength];
         }
         
         return ev;
     }
-
+    
     /**
      * Create a new MotionEvent, filling in all of the basic values that
      * define the motion.
@@ -342,45 +325,39 @@ public final class MotionEvent implements Parcelable {
     static public MotionEvent obtainNano(long downTime, long eventTime, long eventTimeNano,
             int action, int pointers, int[] inPointerIds, float[] inData, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
-        MotionEvent ev = obtain();
+        MotionEvent ev = obtain(pointers, 1);
         ev.mDeviceId = deviceId;
         ev.mEdgeFlags = edgeFlags;
-        ev.mDownTime = downTime;
-        ev.mEventTimeNano = eventTimeNano;
+        ev.mDownTimeNano = downTime * MS_PER_NS;
         ev.mAction = action;
         ev.mMetaState = metaState;
-        ev.mRawX = inData[SAMPLE_X];
-        ev.mRawY = inData[SAMPLE_Y];
+        ev.mXOffset = 0;
+        ev.mYOffset = 0;
         ev.mXPrecision = xPrecision;
         ev.mYPrecision = yPrecision;
+        
         ev.mNumPointers = pointers;
         ev.mNumSamples = 1;
         
-        int[] pointerIdentifiers = ev.mPointerIdentifiers;
-        if (pointerIdentifiers.length < pointers) {
-            ev.mPointerIdentifiers = pointerIdentifiers = new int[pointers];
-        }
-        System.arraycopy(inPointerIds, 0, pointerIdentifiers, 0, pointers);
+        ev.mLastDataSampleIndex = 0;
+        ev.mLastEventTimeNanoSampleIndex = 0;
         
-        final int ND = pointers * NUM_SAMPLE_DATA;
-        float[] dataSamples = ev.mDataSamples;
-        if (dataSamples.length < ND) {
-            ev.mDataSamples = dataSamples = new float[ND];
-        }
-        System.arraycopy(inData, 0, dataSamples, 0, ND);
+        System.arraycopy(inPointerIds, 0, ev.mPointerIdentifiers, 0, pointers);
         
-        ev.mTimeSamples[0] = eventTime;
+        ev.mEventTimeNanoSamples[0] = eventTimeNano;
+        
+        System.arraycopy(inData, 0, ev.mDataSamples, 0, pointers * NUM_SAMPLE_DATA);
 
         if (DEBUG_POINTERS) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("New:");
-            for (int i=0; i<pointers; i++) {
+            for (int i = 0; i < pointers; i++) {
                 sb.append(" #");
-                sb.append(ev.mPointerIdentifiers[i]);
+                sb.append(ev.getPointerId(i));
                 sb.append("(");
-                sb.append(ev.mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_X]);
+                sb.append(ev.getX(i));
                 sb.append(",");
-                sb.append(ev.mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_Y]);
+                sb.append(ev.getY(i));
                 sb.append(")");
             }
             Log.v("MotionEvent", sb.toString());
@@ -423,27 +400,32 @@ public final class MotionEvent implements Parcelable {
     static public MotionEvent obtain(long downTime, long eventTime, int action,
             float x, float y, float pressure, float size, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
-        MotionEvent ev = obtain();
+        MotionEvent ev = obtain(1, 1);
         ev.mDeviceId = deviceId;
         ev.mEdgeFlags = edgeFlags;
-        ev.mDownTime = downTime;
-        ev.mEventTimeNano = eventTime * 1000000;
+        ev.mDownTimeNano = downTime * MS_PER_NS;
         ev.mAction = action;
         ev.mMetaState = metaState;
+        ev.mXOffset = 0;
+        ev.mYOffset = 0;
         ev.mXPrecision = xPrecision;
         ev.mYPrecision = yPrecision;
-
+        
         ev.mNumPointers = 1;
         ev.mNumSamples = 1;
-        int[] pointerIds = ev.mPointerIdentifiers;
-        pointerIds[0] = 0;
-        float[] data = ev.mDataSamples;
-        data[SAMPLE_X] = ev.mRawX = x;
-        data[SAMPLE_Y] = ev.mRawY = y;
-        data[SAMPLE_PRESSURE] = pressure;
-        data[SAMPLE_SIZE] = size;
-        ev.mTimeSamples[0] = eventTime;
-
+        
+        ev.mLastDataSampleIndex = 0;
+        ev.mLastEventTimeNanoSampleIndex = 0;
+        
+        ev.mPointerIdentifiers[0] = 0;
+        
+        ev.mEventTimeNanoSamples[0] = eventTime * MS_PER_NS;
+        
+        float[] dataSamples = ev.mDataSamples;
+        dataSamples[SAMPLE_X] = x;
+        dataSamples[SAMPLE_Y] = y;
+        dataSamples[SAMPLE_PRESSURE] = pressure;
+        dataSamples[SAMPLE_SIZE] = size;
         return ev;
     }
 
@@ -478,33 +460,16 @@ public final class MotionEvent implements Parcelable {
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, where touched by this
      * MotionEvent.
+     * 
+     * @deprecated Use {@link #obtain(long, long, int, float, float, float, float, int, float, float, int, int)}
+     * instead.
      */
+    @Deprecated
     static public MotionEvent obtain(long downTime, long eventTime, int action,
             int pointers, float x, float y, float pressure, float size, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
-        MotionEvent ev = obtain();
-        ev.mDeviceId = deviceId;
-        ev.mEdgeFlags = edgeFlags;
-        ev.mDownTime = downTime;
-        ev.mEventTimeNano = eventTime * 1000000;
-        ev.mAction = action;
-        ev.mNumPointers = pointers;
-        ev.mMetaState = metaState;
-        ev.mXPrecision = xPrecision;
-        ev.mYPrecision = yPrecision;
-
-        ev.mNumPointers = 1;
-        ev.mNumSamples = 1;
-        int[] pointerIds = ev.mPointerIdentifiers;
-        pointerIds[0] = 0;
-        float[] data = ev.mDataSamples;
-        data[SAMPLE_X] = ev.mRawX = x;
-        data[SAMPLE_Y] = ev.mRawY = y;
-        data[SAMPLE_PRESSURE] = pressure;
-        data[SAMPLE_SIZE] = size;
-        ev.mTimeSamples[0] = eventTime;
-
-        return ev;
+        return obtain(downTime, eventTime, action, x, y, pressure, size,
+                metaState, xPrecision, yPrecision, deviceId, edgeFlags);
     }
 
     /**
@@ -526,89 +491,36 @@ public final class MotionEvent implements Parcelable {
      */
     static public MotionEvent obtain(long downTime, long eventTime, int action,
             float x, float y, int metaState) {
-        MotionEvent ev = obtain();
-        ev.mDeviceId = 0;
-        ev.mEdgeFlags = 0;
-        ev.mDownTime = downTime;
-        ev.mEventTimeNano = eventTime * 1000000;
-        ev.mAction = action;
-        ev.mNumPointers = 1;
-        ev.mMetaState = metaState;
-        ev.mXPrecision = 1.0f;
-        ev.mYPrecision = 1.0f;
-
-        ev.mNumPointers = 1;
-        ev.mNumSamples = 1;
-        int[] pointerIds = ev.mPointerIdentifiers;
-        pointerIds[0] = 0;
-        float[] data = ev.mDataSamples;
-        data[SAMPLE_X] = ev.mRawX = x;
-        data[SAMPLE_Y] = ev.mRawY = y;
-        data[SAMPLE_PRESSURE] = 1.0f;
-        data[SAMPLE_SIZE] = 1.0f;
-        ev.mTimeSamples[0] = eventTime;
-
-        return ev;
-    }
-
-    /**
-     * Scales down the coordination of this event by the given scale.
-     *
-     * @hide
-     */
-    public void scale(float scale) {
-        mRawX *= scale;
-        mRawY *= scale;
-        mXPrecision *= scale;
-        mYPrecision *= scale;
-        float[] history = mDataSamples;
-        final int length = mNumPointers * mNumSamples * NUM_SAMPLE_DATA;
-        for (int i = 0; i < length; i += NUM_SAMPLE_DATA) {
-            history[i + SAMPLE_X] *= scale;
-            history[i + SAMPLE_Y] *= scale;
-            // no need to scale pressure
-            history[i + SAMPLE_SIZE] *= scale;    // TODO: square this?
-        }
+        return obtain(downTime, eventTime, action, x, y, 1.0f, 1.0f,
+                metaState, 1.0f, 1.0f, 0, 0);
     }
 
     /**
      * Create a new MotionEvent, copying from an existing one.
      */
     static public MotionEvent obtain(MotionEvent o) {
-        MotionEvent ev = obtain();
+        MotionEvent ev = obtain(o.mNumPointers, o.mNumSamples);
         ev.mDeviceId = o.mDeviceId;
         ev.mEdgeFlags = o.mEdgeFlags;
-        ev.mDownTime = o.mDownTime;
-        ev.mEventTimeNano = o.mEventTimeNano;
+        ev.mDownTimeNano = o.mDownTimeNano;
         ev.mAction = o.mAction;
-        ev.mNumPointers = o.mNumPointers;
-        ev.mRawX = o.mRawX;
-        ev.mRawY = o.mRawY;
         ev.mMetaState = o.mMetaState;
+        ev.mXOffset = o.mXOffset;
+        ev.mYOffset = o.mYOffset;
         ev.mXPrecision = o.mXPrecision;
         ev.mYPrecision = o.mYPrecision;
+        int numPointers = ev.mNumPointers = o.mNumPointers;
+        int numSamples = ev.mNumSamples = o.mNumSamples;
         
-        final int NS = ev.mNumSamples = o.mNumSamples;
-        if (ev.mTimeSamples.length >= NS) {
-            System.arraycopy(o.mTimeSamples, 0, ev.mTimeSamples, 0, NS);
-        } else {
-            ev.mTimeSamples = (long[])o.mTimeSamples.clone();
-        }
+        ev.mLastDataSampleIndex = o.mLastDataSampleIndex;
+        ev.mLastEventTimeNanoSampleIndex = o.mLastEventTimeNanoSampleIndex;
         
-        final int NP = (ev.mNumPointers=o.mNumPointers);
-        if (ev.mPointerIdentifiers.length >= NP) {
-            System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, NP);
-        } else {
-            ev.mPointerIdentifiers = (int[])o.mPointerIdentifiers.clone();
-        }
+        System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, numPointers);
         
-        final int ND = NP * NS * NUM_SAMPLE_DATA;
-        if (ev.mDataSamples.length >= ND) {
-            System.arraycopy(o.mDataSamples, 0, ev.mDataSamples, 0, ND);
-        } else {
-            ev.mDataSamples = (float[])o.mDataSamples.clone();
-        }
+        System.arraycopy(o.mEventTimeNanoSamples, 0, ev.mEventTimeNanoSamples, 0, numSamples);
         
+        System.arraycopy(o.mDataSamples, 0, ev.mDataSamples, 0,
+                numPointers * numSamples * NUM_SAMPLE_DATA);
         return ev;
     }
 
@@ -617,36 +529,29 @@ public final class MotionEvent implements Parcelable {
      * any historical point information.
      */
     static public MotionEvent obtainNoHistory(MotionEvent o) {
-        MotionEvent ev = obtain();
+        MotionEvent ev = obtain(o.mNumPointers, 1);
         ev.mDeviceId = o.mDeviceId;
         ev.mEdgeFlags = o.mEdgeFlags;
-        ev.mDownTime = o.mDownTime;
-        ev.mEventTimeNano = o.mEventTimeNano;
+        ev.mDownTimeNano = o.mDownTimeNano;
         ev.mAction = o.mAction;
-        ev.mNumPointers = o.mNumPointers;
-        ev.mRawX = o.mRawX;
-        ev.mRawY = o.mRawY;
         ev.mMetaState = o.mMetaState;
+        ev.mXOffset = o.mXOffset;
+        ev.mYOffset = o.mYOffset;
         ev.mXPrecision = o.mXPrecision;
         ev.mYPrecision = o.mYPrecision;
         
+        int numPointers = ev.mNumPointers = o.mNumPointers;
         ev.mNumSamples = 1;
-        ev.mTimeSamples[0] = o.mTimeSamples[0];
         
-        final int NP = (ev.mNumPointers=o.mNumPointers);
-        if (ev.mPointerIdentifiers.length >= NP) {
-            System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, NP);
-        } else {
-            ev.mPointerIdentifiers = (int[])o.mPointerIdentifiers.clone();
-        }
+        ev.mLastDataSampleIndex = 0;
+        ev.mLastEventTimeNanoSampleIndex = 0;
         
-        final int ND = NP * NUM_SAMPLE_DATA;
-        if (ev.mDataSamples.length >= ND) {
-            System.arraycopy(o.mDataSamples, 0, ev.mDataSamples, 0, ND);
-        } else {
-            ev.mDataSamples = (float[])o.mDataSamples.clone();
-        }
+        System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, numPointers);
         
+        ev.mEventTimeNanoSamples[0] = o.mEventTimeNanoSamples[o.mLastEventTimeNanoSampleIndex];
+        
+        System.arraycopy(o.mDataSamples, o.mLastDataSampleIndex, ev.mDataSamples, 0,
+                numPointers * NUM_SAMPLE_DATA);
         return ev;
     }
 
@@ -654,7 +559,7 @@ public final class MotionEvent implements Parcelable {
      * Recycle the MotionEvent, to be re-used by a later caller.  After calling
      * this function you must not ever touch the event again.
      */
-    public void recycle() {
+    public final void recycle() {
         // Ensure recycle is only called once!
         if (TRACK_RECYCLED_LOCATION) {
             if (mRecycledLocation != null) {
@@ -676,6 +581,27 @@ public final class MotionEvent implements Parcelable {
                 mNext = gRecyclerTop;
                 gRecyclerTop = this;
             }
+        }
+    }
+    
+    /**
+     * Scales down the coordination of this event by the given scale.
+     *
+     * @hide
+     */
+    public final void scale(float scale) {
+        mXOffset *= scale;
+        mYOffset *= scale;
+        mXPrecision *= scale;
+        mYPrecision *= scale;
+        
+        float[] history = mDataSamples;
+        final int length = mNumPointers * mNumSamples * NUM_SAMPLE_DATA;
+        for (int i = 0; i < length; i += NUM_SAMPLE_DATA) {
+            history[i + SAMPLE_X] *= scale;
+            history[i + SAMPLE_Y] *= scale;
+            // no need to scale pressure
+            history[i + SAMPLE_SIZE] *= scale;    // TODO: square this?
         }
     }
 
@@ -719,14 +645,14 @@ public final class MotionEvent implements Parcelable {
      * a stream of position events.
      */
     public final long getDownTime() {
-        return mDownTime;
+        return mDownTimeNano / MS_PER_NS;
     }
 
     /**
      * Returns the time (in ms) when this specific event was generated.
      */
     public final long getEventTime() {
-        return mTimeSamples[0];
+        return mEventTimeNanoSamples[mLastEventTimeNanoSampleIndex] / MS_PER_NS;
     }
 
     /**
@@ -736,7 +662,7 @@ public final class MotionEvent implements Parcelable {
      * @hide
      */
     public final long getEventTimeNano() {
-        return mEventTimeNano;
+        return mEventTimeNanoSamples[mLastEventTimeNanoSampleIndex];
     }
 
     /**
@@ -744,7 +670,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getX() {
-        return mDataSamples[SAMPLE_X];
+        return mDataSamples[mLastDataSampleIndex + SAMPLE_X] + mXOffset;
     }
 
     /**
@@ -752,7 +678,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getY() {
-        return mDataSamples[SAMPLE_Y];
+        return mDataSamples[mLastDataSampleIndex + SAMPLE_Y] + mYOffset;
     }
 
     /**
@@ -760,7 +686,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getPressure() {
-        return mDataSamples[SAMPLE_PRESSURE];
+        return mDataSamples[mLastDataSampleIndex + SAMPLE_PRESSURE];
     }
 
     /**
@@ -768,7 +694,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getSize() {
-        return mDataSamples[SAMPLE_SIZE];
+        return mDataSamples[mLastDataSampleIndex + SAMPLE_SIZE];
     }
 
     /**
@@ -820,7 +746,8 @@ public final class MotionEvent implements Parcelable {
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
     public final float getX(int pointerIndex) {
-        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_X];
+        return mDataSamples[mLastDataSampleIndex
+                            + pointerIndex * NUM_SAMPLE_DATA + SAMPLE_X] + mXOffset;
     }
 
     /**
@@ -833,7 +760,8 @@ public final class MotionEvent implements Parcelable {
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
     public final float getY(int pointerIndex) {
-        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_Y];
+        return mDataSamples[mLastDataSampleIndex
+                            + pointerIndex * NUM_SAMPLE_DATA + SAMPLE_Y] + mYOffset;
     }
 
     /**
@@ -848,7 +776,8 @@ public final class MotionEvent implements Parcelable {
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
     public final float getPressure(int pointerIndex) {
-        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_PRESSURE];
+        return mDataSamples[mLastDataSampleIndex
+                            + pointerIndex * NUM_SAMPLE_DATA + SAMPLE_PRESSURE];
     }
 
     /**
@@ -864,7 +793,8 @@ public final class MotionEvent implements Parcelable {
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
     public final float getSize(int pointerIndex) {
-        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_SIZE];
+        return mDataSamples[mLastDataSampleIndex
+                            + pointerIndex * NUM_SAMPLE_DATA + SAMPLE_SIZE];
     }
 
     /**
@@ -888,7 +818,7 @@ public final class MotionEvent implements Parcelable {
      * and views.
      */
     public final float getRawX() {
-        return mRawX;
+        return mDataSamples[mLastDataSampleIndex + SAMPLE_X];
     }
 
     /**
@@ -898,7 +828,7 @@ public final class MotionEvent implements Parcelable {
      * and views.
      */
     public final float getRawY() {
-        return mRawY;
+        return mDataSamples[mLastDataSampleIndex + SAMPLE_Y];
     }
 
     /**
@@ -930,7 +860,7 @@ public final class MotionEvent implements Parcelable {
      * @return Returns the number of historical points in the event.
      */
     public final int getHistorySize() {
-        return mNumSamples - 1;
+        return mLastEventTimeNanoSampleIndex;
     }
 
     /**
@@ -944,7 +874,7 @@ public final class MotionEvent implements Parcelable {
      * @see #getEventTime
      */
     public final long getHistoricalEventTime(int pos) {
-        return mTimeSamples[pos + 1];
+        return mEventTimeNanoSamples[pos] / MS_PER_NS;
     }
 
     /**
@@ -952,7 +882,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getHistoricalX(int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_X];
+        return mDataSamples[pos * mNumPointers * NUM_SAMPLE_DATA + SAMPLE_X] + mXOffset;
     }
 
     /**
@@ -960,7 +890,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getHistoricalY(int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_Y];
+        return mDataSamples[pos * mNumPointers * NUM_SAMPLE_DATA + SAMPLE_Y] + mYOffset;
     }
 
     /**
@@ -968,7 +898,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getHistoricalPressure(int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_PRESSURE];
+        return mDataSamples[pos * mNumPointers * NUM_SAMPLE_DATA + SAMPLE_PRESSURE];
     }
 
     /**
@@ -976,7 +906,7 @@ public final class MotionEvent implements Parcelable {
      * arbitrary pointer identifier).
      */
     public final float getHistoricalSize(int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_SIZE];
+        return mDataSamples[pos * mNumPointers * NUM_SAMPLE_DATA + SAMPLE_SIZE];
     }
 
     /**
@@ -993,8 +923,8 @@ public final class MotionEvent implements Parcelable {
      * @see #getX
      */
     public final float getHistoricalX(int pointerIndex, int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
-                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_X];
+        return mDataSamples[(pos * mNumPointers + pointerIndex)
+                            * NUM_SAMPLE_DATA + SAMPLE_X] + mXOffset;
     }
 
     /**
@@ -1011,8 +941,8 @@ public final class MotionEvent implements Parcelable {
      * @see #getY
      */
     public final float getHistoricalY(int pointerIndex, int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
-                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_Y];
+        return mDataSamples[(pos * mNumPointers + pointerIndex)
+                            * NUM_SAMPLE_DATA + SAMPLE_Y] + mYOffset;
     }
 
     /**
@@ -1029,8 +959,8 @@ public final class MotionEvent implements Parcelable {
      * @see #getPressure
      */
     public final float getHistoricalPressure(int pointerIndex, int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
-                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_PRESSURE];
+        return mDataSamples[(pos * mNumPointers + pointerIndex)
+                            * NUM_SAMPLE_DATA + SAMPLE_PRESSURE];
     }
 
     /**
@@ -1047,8 +977,8 @@ public final class MotionEvent implements Parcelable {
      * @see #getSize
      */
     public final float getHistoricalSize(int pointerIndex, int pos) {
-        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
-                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_SIZE];
+        return mDataSamples[(pos * mNumPointers + pointerIndex)
+                            * NUM_SAMPLE_DATA + SAMPLE_SIZE];
     }
 
     /**
@@ -1098,12 +1028,8 @@ public final class MotionEvent implements Parcelable {
      * @param deltaY Amount to add to the current Y coordinate of the event.
      */
     public final void offsetLocation(float deltaX, float deltaY) {
-        final int N = mNumPointers*mNumSamples*4;
-        final float[] pos = mDataSamples;
-        for (int i=0; i<N; i+=NUM_SAMPLE_DATA) {
-            pos[i+SAMPLE_X] += deltaX;
-            pos[i+SAMPLE_Y] += deltaY;
-        }
+        mXOffset += deltaX;
+        mYOffset += deltaY;
     }
 
     /**
@@ -1114,11 +1040,28 @@ public final class MotionEvent implements Parcelable {
      * @param y New absolute Y location.
      */
     public final void setLocation(float x, float y) {
-        float deltaX = x-mDataSamples[SAMPLE_X];
-        float deltaY = y-mDataSamples[SAMPLE_Y];
-        if (deltaX != 0 || deltaY != 0) {
-            offsetLocation(deltaX, deltaY);
+        mXOffset = x - mDataSamples[mLastDataSampleIndex + SAMPLE_X];
+        mYOffset = y - mDataSamples[mLastDataSampleIndex + SAMPLE_Y];
+    }
+    
+    private final void incrementNumSamplesAndReserveStorage(int dataSampleStride) {
+        if (mNumSamples == mEventTimeNanoSamples.length) {
+            long[] newEventTimeNanoSamples = new long[mNumSamples + BASE_AVAIL_SAMPLES];
+            System.arraycopy(mEventTimeNanoSamples, 0, newEventTimeNanoSamples, 0, mNumSamples);
+            mEventTimeNanoSamples = newEventTimeNanoSamples;
         }
+        
+        int nextDataSampleIndex = mLastDataSampleIndex + dataSampleStride;
+        if (nextDataSampleIndex + dataSampleStride > mDataSamples.length) {
+            float[] newDataSamples = new float[nextDataSampleIndex
+                                               + BASE_AVAIL_SAMPLES * dataSampleStride];
+            System.arraycopy(mDataSamples, 0, newDataSamples, 0, nextDataSampleIndex);
+            mDataSamples = newDataSamples;
+        }
+        
+        mLastEventTimeNanoSampleIndex = mNumSamples;
+        mLastDataSampleIndex = nextDataSampleIndex;
+        mNumSamples += 1;
     }
 
     /**
@@ -1136,42 +1079,16 @@ public final class MotionEvent implements Parcelable {
      */
     public final void addBatch(long eventTime, float x, float y,
             float pressure, float size, int metaState) {
-        float[] data = mDataSamples;
-        long[] times = mTimeSamples;
+        incrementNumSamplesAndReserveStorage(NUM_SAMPLE_DATA);
         
-        final int NP = mNumPointers;
-        final int NS = mNumSamples;
-        final int NI = NP*NS;
-        final int ND = NI * NUM_SAMPLE_DATA;
-        if (data.length <= ND) {
-            final int NEW_ND = ND + (NP * (BASE_AVAIL_SAMPLES * NUM_SAMPLE_DATA));
-            float[] newData = new float[NEW_ND];
-            System.arraycopy(data, 0, newData, 0, ND);
-            mDataSamples = data = newData;
-        }
-        if (times.length <= NS) {
-            final int NEW_NS = NS + BASE_AVAIL_SAMPLES;
-            long[] newHistoryTimes = new long[NEW_NS];
-            System.arraycopy(times, 0, newHistoryTimes, 0, NS);
-            mTimeSamples = times = newHistoryTimes;
-        }
+        mEventTimeNanoSamples[mLastEventTimeNanoSampleIndex] = eventTime * MS_PER_NS;
         
-        times[NS] = times[0];
-        times[0] = eventTime;
+        float[] dataSamples = mDataSamples;
+        dataSamples[mLastDataSampleIndex + SAMPLE_X] = x - mXOffset;
+        dataSamples[mLastDataSampleIndex + SAMPLE_Y] = y - mYOffset;
+        dataSamples[mLastDataSampleIndex + SAMPLE_PRESSURE] = pressure;
+        dataSamples[mLastDataSampleIndex + SAMPLE_SIZE] = size;
         
-        final int pos = NS*NUM_SAMPLE_DATA;
-        data[pos+SAMPLE_X] = data[SAMPLE_X];
-        data[pos+SAMPLE_Y] = data[SAMPLE_Y];
-        data[pos+SAMPLE_PRESSURE] = data[SAMPLE_PRESSURE];
-        data[pos+SAMPLE_SIZE] = data[SAMPLE_SIZE];
-        data[SAMPLE_X] = x;
-        data[SAMPLE_Y] = y;
-        data[SAMPLE_PRESSURE] = pressure;
-        data[SAMPLE_SIZE] = size;
-        mNumSamples = NS+1;
-
-        mRawX = x;
-        mRawY = y;
         mMetaState |= metaState;
     }
 
@@ -1187,48 +1104,36 @@ public final class MotionEvent implements Parcelable {
      * @hide
      */
     public final void addBatch(long eventTime, float[] inData, int metaState) {
-        float[] data = mDataSamples;
-        long[] times = mTimeSamples;
+        final int numPointers = mNumPointers;
+        final int dataSampleStride = numPointers * NUM_SAMPLE_DATA;
+        incrementNumSamplesAndReserveStorage(dataSampleStride);
         
-        final int NP = mNumPointers;
-        final int NS = mNumSamples;
-        final int NI = NP*NS;
-        final int ND = NI * NUM_SAMPLE_DATA;
-        if (data.length < (ND+(NP*NUM_SAMPLE_DATA))) {
-            final int NEW_ND = ND + (NP * (BASE_AVAIL_SAMPLES * NUM_SAMPLE_DATA));
-            float[] newData = new float[NEW_ND];
-            System.arraycopy(data, 0, newData, 0, ND);
-            mDataSamples = data = newData;
-        }
-        if (times.length < (NS+1)) {
-            final int NEW_NS = NS + BASE_AVAIL_SAMPLES;
-            long[] newHistoryTimes = new long[NEW_NS];
-            System.arraycopy(times, 0, newHistoryTimes, 0, NS);
-            mTimeSamples = times = newHistoryTimes;
-        }
+        mEventTimeNanoSamples[mLastEventTimeNanoSampleIndex] = eventTime * MS_PER_NS;
         
-        times[NS] = times[0];
-        times[0] = eventTime;
-        
-        System.arraycopy(data, 0, data, ND, mNumPointers*NUM_SAMPLE_DATA);
-        System.arraycopy(inData, 0, data, 0, mNumPointers*NUM_SAMPLE_DATA);
-        
-        mNumSamples = NS+1;
+        float[] dataSamples = mDataSamples;
+        System.arraycopy(inData, 0, dataSamples, mLastDataSampleIndex, dataSampleStride);
 
-        mRawX = inData[SAMPLE_X];
-        mRawY = inData[SAMPLE_Y];
+        if (mXOffset != 0 || mYOffset != 0) {
+            int index = mLastEventTimeNanoSampleIndex;
+            for (int i = 0; i < numPointers; i++) {
+                dataSamples[index + SAMPLE_X] -= mXOffset;
+                dataSamples[index + SAMPLE_Y] -= mYOffset;
+                index += NUM_SAMPLE_DATA;
+            }
+        }
+        
         mMetaState |= metaState;
         
         if (DEBUG_POINTERS) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("Add:");
-            for (int i=0; i<mNumPointers; i++) {
+            for (int i = 0; i < mNumPointers; i++) {
                 sb.append(" #");
-                sb.append(mPointerIdentifiers[i]);
+                sb.append(getPointerId(i));
                 sb.append("(");
-                sb.append(mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_X]);
+                sb.append(getX(i));
                 sb.append(",");
-                sb.append(mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_Y]);
+                sb.append(getY(i));
                 sb.append(")");
             }
             Log.v("MotionEvent", sb.toString());
@@ -1245,8 +1150,41 @@ public final class MotionEvent implements Parcelable {
     public static final Parcelable.Creator<MotionEvent> CREATOR
             = new Parcelable.Creator<MotionEvent>() {
         public MotionEvent createFromParcel(Parcel in) {
-            MotionEvent ev = obtain();
-            ev.readFromParcel(in);
+            final int NP = in.readInt();
+            final int NS = in.readInt();
+            final int NI = NP * NS * NUM_SAMPLE_DATA;
+            
+            MotionEvent ev = obtain(NP, NS);
+            ev.mNumPointers = NP;
+            ev.mNumSamples = NS;
+            
+            ev.mDownTimeNano = in.readLong();
+            ev.mAction = in.readInt();
+            ev.mXOffset = in.readFloat();
+            ev.mYOffset = in.readFloat();
+            ev.mXPrecision = in.readFloat();
+            ev.mYPrecision = in.readFloat();
+            ev.mDeviceId = in.readInt();
+            ev.mEdgeFlags = in.readInt();
+            ev.mMetaState = in.readInt();
+            
+            final int[] pointerIdentifiers = ev.mPointerIdentifiers;
+            for (int i = 0; i < NP; i++) {
+                pointerIdentifiers[i] = in.readInt();
+            }
+            
+            final long[] eventTimeNanoSamples = ev.mEventTimeNanoSamples;
+            for (int i = 0; i < NS; i++) {
+                eventTimeNanoSamples[i] = in.readLong();
+            }
+
+            final float[] dataSamples = ev.mDataSamples;
+            for (int i = 0; i < NI; i++) {
+                dataSamples[i] = in.readFloat();
+            }
+            
+            ev.mLastEventTimeNanoSampleIndex = NS - 1;
+            ev.mLastDataSampleIndex = (NS - 1) * NP * NUM_SAMPLE_DATA;
             return ev;
         }
 
@@ -1260,79 +1198,36 @@ public final class MotionEvent implements Parcelable {
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeLong(mDownTime);
-        out.writeLong(mEventTimeNano);
-        out.writeInt(mAction);
-        out.writeInt(mMetaState);
-        out.writeFloat(mRawX);
-        out.writeFloat(mRawY);
         final int NP = mNumPointers;
-        out.writeInt(NP);
         final int NS = mNumSamples;
+        final int NI = NP * NS * NUM_SAMPLE_DATA;
+        
+        out.writeInt(NP);
         out.writeInt(NS);
-        final int NI = NP*NS;
-        if (NI > 0) {
-            int i;
-            int[] state = mPointerIdentifiers;
-            for (i=0; i<NP; i++) {
-                out.writeInt(state[i]);
-            }
-            final int ND = NI*NUM_SAMPLE_DATA;
-            float[] history = mDataSamples;
-            for (i=0; i<ND; i++) {
-                out.writeFloat(history[i]);
-            }
-            long[] times = mTimeSamples;
-            for (i=0; i<NS; i++) {
-                out.writeLong(times[i]);
-            }
-        }
+        
+        out.writeLong(mDownTimeNano);
+        out.writeInt(mAction);
+        out.writeFloat(mXOffset);
+        out.writeFloat(mYOffset);
         out.writeFloat(mXPrecision);
         out.writeFloat(mYPrecision);
         out.writeInt(mDeviceId);
         out.writeInt(mEdgeFlags);
-    }
-
-    private void readFromParcel(Parcel in) {
-        mDownTime = in.readLong();
-        mEventTimeNano = in.readLong();
-        mAction = in.readInt();
-        mMetaState = in.readInt();
-        mRawX = in.readFloat();
-        mRawY = in.readFloat();
-        final int NP = in.readInt();
-        mNumPointers = NP;
-        final int NS = in.readInt();
-        mNumSamples = NS;
-        final int NI = NP*NS;
-        if (NI > 0) {
-            int[] ids = mPointerIdentifiers;
-            if (ids.length < NP) {
-                mPointerIdentifiers = ids = new int[NP];
-            }
-            for (int i=0; i<NP; i++) {
-                ids[i] = in.readInt();
-            }
-            float[] history = mDataSamples;
-            final int ND = NI*NUM_SAMPLE_DATA;
-            if (history.length < ND) {
-                mDataSamples = history = new float[ND];
-            }
-            for (int i=0; i<ND; i++) {
-                history[i] = in.readFloat();
-            }
-            long[] times = mTimeSamples;
-            if (times == null || times.length < NS) {
-                mTimeSamples = times = new long[NS];
-            }
-            for (int i=0; i<NS; i++) {
-                times[i] = in.readLong();
-            }
+        out.writeInt(mMetaState);
+        
+        final int[] pointerIdentifiers = mPointerIdentifiers;
+        for (int i = 0; i < NP; i++) {
+            out.writeInt(pointerIdentifiers[i]);
         }
-        mXPrecision = in.readFloat();
-        mYPrecision = in.readFloat();
-        mDeviceId = in.readInt();
-        mEdgeFlags = in.readInt();
-    }
+        
+        final long[] eventTimeNanoSamples = mEventTimeNanoSamples;
+        for (int i = 0; i < NS; i++) {
+            out.writeLong(eventTimeNanoSamples[i]);
+        }
 
+        final float[] dataSamples = mDataSamples;
+        for (int i = 0; i < NI; i++) {
+            out.writeFloat(dataSamples[i]);
+        }
+    }
 }

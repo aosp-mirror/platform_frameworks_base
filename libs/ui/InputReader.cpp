@@ -19,6 +19,9 @@
 // Log debug messages about pointers.
 #define DEBUG_POINTERS 1
 
+// Log debug messages about pointer assignment calculations.
+#define DEBUG_POINTER_ASSIGNMENT 0
+
 #include <cutils/log.h>
 #include <ui/InputReader.h>
 
@@ -56,6 +59,14 @@ template<typename T>
 inline static T min(const T& a, const T& b) {
     return a < b ? a : b;
 }
+
+template<typename T>
+inline static void swap(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
 
 int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
     int32_t mask;
@@ -188,6 +199,12 @@ void InputDevice::TouchScreenState::reset() {
     jumpyTouchFilter.jumpyPointsDropped = 0;
 }
 
+struct PointerDistanceHeapElement {
+    uint32_t currentPointerIndex : 8;
+    uint32_t lastPointerIndex : 8;
+    uint64_t distance : 48; // squared distance
+};
+
 void InputDevice::TouchScreenState::calculatePointerIds() {
     uint32_t currentPointerCount = currentTouch.pointerCount;
     uint32_t lastPointerCount = lastTouch.pointerCount;
@@ -214,11 +231,7 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
         // We build a heap of squared euclidean distances between current and last pointers
         // associated with the current and last pointer indices.  Then, we find the best
         // match (by distance) for each current pointer.
-        struct {
-            uint32_t currentPointerIndex : 8;
-            uint32_t lastPointerIndex : 8;
-            uint64_t distance : 48; // squared distance
-        } heap[MAX_POINTERS * MAX_POINTERS];
+        PointerDistanceHeapElement heap[MAX_POINTERS * MAX_POINTERS];
 
         uint32_t heapSize = 0;
         for (uint32_t currentPointerIndex = 0; currentPointerIndex < currentPointerCount;
@@ -233,22 +246,44 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
                 uint64_t distance = uint64_t(deltaX * deltaX + deltaY * deltaY);
 
                 // Insert new element into the heap (sift up).
+                heap[heapSize].currentPointerIndex = currentPointerIndex;
+                heap[heapSize].lastPointerIndex = lastPointerIndex;
+                heap[heapSize].distance = distance;
                 heapSize += 1;
-                uint32_t insertionIndex = heapSize;
-                while (insertionIndex > 1) {
-                    uint32_t parentIndex = (insertionIndex - 1) / 2;
-                    if (distance < heap[parentIndex].distance) {
-                        heap[insertionIndex] = heap[parentIndex];
-                        insertionIndex = parentIndex;
-                    } else {
-                        break;
-                    }
-                }
-                heap[insertionIndex].currentPointerIndex = currentPointerIndex;
-                heap[insertionIndex].lastPointerIndex = lastPointerIndex;
-                heap[insertionIndex].distance = distance;
             }
         }
+
+        // Heapify
+        for (uint32_t startIndex = heapSize / 2; startIndex != 0; ) {
+            startIndex -= 1;
+            for (uint32_t parentIndex = startIndex; ;) {
+                uint32_t childIndex = parentIndex * 2 + 1;
+                if (childIndex >= heapSize) {
+                    break;
+                }
+
+                if (childIndex + 1 < heapSize
+                        && heap[childIndex + 1].distance < heap[childIndex].distance) {
+                    childIndex += 1;
+                }
+
+                if (heap[parentIndex].distance <= heap[childIndex].distance) {
+                    break;
+                }
+
+                swap(heap[parentIndex], heap[childIndex]);
+                parentIndex = childIndex;
+            }
+        }
+
+#if DEBUG_POINTER_ASSIGNMENT
+        LOGD("calculatePointerIds - initial distance min-heap: size=%d", heapSize);
+        for (size_t i = 0; i < heapSize; i++) {
+            LOGD("  heap[%d]: cur=%d, last=%d, distance=%lld",
+                    i, heap[i].currentPointerIndex, heap[i].lastPointerIndex,
+                    heap[i].distance);
+        }
+#endif
 
         // Pull matches out by increasing order of distance.
         // To avoid reassigning pointers that have already been matched, the loop keeps track
@@ -262,7 +297,7 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
             for (;;) {
                 if (first) {
                     // The first time through the loop, we just consume the root element of
-                    // the heap (the one with smalled distance).
+                    // the heap (the one with smallest distance).
                     first = false;
                 } else {
                     // Previous iterations consumed the root element of the heap.
@@ -270,10 +305,10 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
                     heapSize -= 1;
                     assert(heapSize > 0);
 
-                    // Sift down to find where the element at index heapSize needs to be moved.
-                    uint32_t rootIndex = 0;
-                    for (;;) {
-                        uint32_t childIndex = rootIndex * 2 + 1;
+                    // Sift down.
+                    heap[0] = heap[heapSize];
+                    for (uint32_t parentIndex = 0; ;) {
+                        uint32_t childIndex = parentIndex * 2 + 1;
                         if (childIndex >= heapSize) {
                             break;
                         }
@@ -283,14 +318,22 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
                             childIndex += 1;
                         }
 
-                        if (heap[heapSize].distance < heap[childIndex].distance) {
+                        if (heap[parentIndex].distance <= heap[childIndex].distance) {
                             break;
                         }
 
-                        heap[rootIndex] = heap[childIndex];
-                        rootIndex = childIndex;
+                        swap(heap[parentIndex], heap[childIndex]);
+                        parentIndex = childIndex;
                     }
-                    heap[rootIndex] = heap[heapSize];
+
+#if DEBUG_POINTER_ASSIGNMENT
+                    LOGD("calculatePointerIds - reduced distance min-heap: size=%d", heapSize);
+                    for (size_t i = 0; i < heapSize; i++) {
+                        LOGD("  heap[%d]: cur=%d, last=%d, distance=%lld",
+                                i, heap[i].currentPointerIndex, heap[i].lastPointerIndex,
+                                heap[i].distance);
+                    }
+#endif
                 }
 
                 uint32_t currentPointerIndex = heap[0].currentPointerIndex;
@@ -306,6 +349,11 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
                 currentTouch.pointers[currentPointerIndex].id = id;
                 currentTouch.idToIndex[id] = currentPointerIndex;
                 usedIdBits.markBit(id);
+
+#if DEBUG_POINTER_ASSIGNMENT
+                LOGD("calculatePointerIds - matched: cur=%d, last=%d, id=%d, distance=%lld",
+                        lastPointerIndex, currentPointerIndex, id, heap[0].distance);
+#endif
                 break;
             }
         }
@@ -319,6 +367,11 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
                 currentTouch.pointers[currentPointerIndex].id = id;
                 currentTouch.idToIndex[id] = currentPointerIndex;
                 usedIdBits.markBit(id);
+
+#if DEBUG_POINTER_ASSIGNMENT
+                LOGD("calculatePointerIds - assigned: cur=%d, id=%d",
+                        currentPointerIndex, id);
+#endif
 
                 if (--i == 0) break; // done
                 matchedCurrentBits.markBit(currentPointerIndex);
@@ -1208,8 +1261,10 @@ bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
 
         int32_t x = device->touchScreen.currentTouch.pointers[0].x;
         int32_t y = device->touchScreen.currentTouch.pointers[0].y;
-        if (device->touchScreen.isPointInsideDisplay(x, y)) {
-            // Pointer moved inside the display area.  Send key cancellation.
+        if (device->touchScreen.isPointInsideDisplay(x, y)
+                || device->touchScreen.currentTouch.pointerCount != 1) {
+            // Pointer moved inside the display area or another pointer also went down.
+            // Send key cancellation.
             device->touchScreen.currentVirtualKey.down = false;
 
 #if DEBUG_VIRTUAL_KEYS
@@ -1227,7 +1282,7 @@ bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
             device->touchScreen.lastTouch.clear();
             return false; // not consumed
         }
-    } else if (device->touchScreen.currentTouch.pointerCount > 0
+    } else if (device->touchScreen.currentTouch.pointerCount == 1
             && device->touchScreen.lastTouch.pointerCount == 0) {
         int32_t x = device->touchScreen.currentTouch.pointers[0].x;
         int32_t y = device->touchScreen.currentTouch.pointers[0].y;
