@@ -148,8 +148,10 @@ void Prefetcher::threadFunc() {
             if (mDone) {
                 break;
             }
+
             mCondition.waitRelative(
-                    mLock, fillingCache ? 10000000ll : 1000000000ll);
+                    mLock, fillingCache ? 1ll : 1000000000ll);
+
 
             ssize_t minIndex = -1;
             for (size_t i = 0; i < mSources.size(); ++i) {
