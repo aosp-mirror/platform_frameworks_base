@@ -22,8 +22,8 @@ import android.util.Log;
 
 public class ScriptC_Fountain extends ScriptC {
     // Constructor
-    public  ScriptC_Fountain(RenderScript rs, Resources resources, boolean isRoot) {
-        super(rs, resources, R.raw.fountain_bc, isRoot);
+    public  ScriptC_Fountain(RenderScript rs, Resources resources, int id, boolean isRoot) {
+        super(rs, resources, id, isRoot);
     }
 
     private final static int mExportVarIdx_partColor = 0;
@@ -43,9 +43,7 @@ public class ScriptC_Fountain extends ScriptC {
     private SimpleMesh mExportVar_partMesh;
     public void set_partMesh(SimpleMesh v) {
         mExportVar_partMesh = v;
-        int id = 0;
-        if (v != null) id = v.getID();
-        setVar(mExportVarIdx_partMesh, id);
+        setVar(mExportVarIdx_partMesh, (v == null) ? 0 : v.getID());
     }
 
     public SimpleMesh get_partMesh() {
@@ -53,14 +51,14 @@ public class ScriptC_Fountain extends ScriptC {
     }
 
     private final static int mExportVarIdx_point = 2;
-    private ScriptField_Point_s mExportVar_point;
-    public void bind_point(ScriptField_Point_s v) {
+    private ScriptField_Point mExportVar_point;
+    public void bind_point(ScriptField_Point v) {
         mExportVar_point = v;
         if(v == null) bindAllocation(null, mExportVarIdx_point);
         else bindAllocation(v.getAllocation(), mExportVarIdx_point);
     }
 
-    public ScriptField_Point_s get_point() {
+    public ScriptField_Point get_point() {
         return mExportVar_point;
     }
 
@@ -70,7 +68,7 @@ public class ScriptC_Fountain extends ScriptC {
         addParticles_fp.addI32(rate);
         addParticles_fp.addI32(x);
         addParticles_fp.addI32(y);
-        invokeV(mExportFuncIdx_addParticles, addParticles_fp);
+        invoke(mExportFuncIdx_addParticles, addParticles_fp);
     }
 
 }

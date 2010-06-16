@@ -286,6 +286,7 @@ public class ImageProcessingActivity extends Activity
             long t = java.lang.System.currentTimeMillis();
             if (true) {
                 mScript.invokable_Filter();
+                mRS.finish();
             } else {
                 javaFilter();
             }
@@ -355,6 +356,7 @@ public class ImageProcessingActivity extends Activity
     public void surfaceCreated(SurfaceHolder holder) {
         createScript();
         mScript.invokable_Filter();
+        mRS.finish();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -412,6 +414,7 @@ public class ImageProcessingActivity extends Activity
         long t = java.lang.System.currentTimeMillis();
 
         mScript.invokable_FilterBenchmark();
+        mRS.finish();
 
         t = java.lang.System.currentTimeMillis() - t;
         android.util.Log.v("Img", "Renderscript frame time core ms " + t);
@@ -424,5 +427,6 @@ public class ImageProcessingActivity extends Activity
         mScript.set_radius(mRadius);
 
         mScript.invokable_Filter();
+        mRS.finish();
     }
 }

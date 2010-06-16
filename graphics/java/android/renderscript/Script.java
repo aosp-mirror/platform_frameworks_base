@@ -46,12 +46,12 @@ public class Script extends BaseObj {
         mRS.nScriptInvoke(mID, slot);
     }
 
-    protected void invokeData(int slot) {
-        mRS.nScriptInvokeData(mID, slot);
-    }
-
-    protected void invokeV(int slot, FieldPacker v) {
-        mRS.nScriptInvokeV(mID, slot, v.getData());
+    protected void invoke(int slot, FieldPacker v) {
+        if (v != null) {
+            mRS.nScriptInvokeV(mID, slot, v.getData());
+        } else {
+            mRS.nScriptInvoke(mID, slot);
+        }
     }
 
 

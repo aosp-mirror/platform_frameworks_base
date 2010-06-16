@@ -761,6 +761,9 @@ void Context::dumpDebug() const
 namespace android {
 namespace renderscript {
 
+void rsi_ContextFinish(Context *rsc)
+{
+}
 
 void rsi_ContextBindRootScript(Context *rsc, RsScript vs)
 {

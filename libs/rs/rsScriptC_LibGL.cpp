@@ -477,6 +477,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     { "_Z18rsgUploadToTextureii", (void *)&SC_uploadToTexture2 },
     { "_Z18rsgUploadToTexturei", (void *)&SC_uploadToTexture },
+    { "_Z18rsgUploadToTexture13rs_allocationi", (void *)&SC_uploadToTexture2 },
+    { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture },
     { "rsgUploadToBufferObject", (void *)&SC_uploadToBufferObject },
 
     { "rsgDrawRect", (void *)&SC_drawRect },
@@ -487,6 +489,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgDrawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped },
     { "rsgDrawLine", (void *)&SC_drawLine },
     { "rsgDrawPoint", (void *)&SC_drawPoint },
+    { "_Z17rsgDrawSimpleMesh7rs_mesh", (void *)&SC_drawSimpleMesh },
+    { "_Z17rsgDrawSimpleMesh7rs_meshii", (void *)&SC_drawSimpleMeshRange },
     { "_Z17rsgDrawSimpleMeshi", (void *)&SC_drawSimpleMesh },
     { "_Z17rsgDrawSimpleMeshiii", (void *)&SC_drawSimpleMeshRange },
 

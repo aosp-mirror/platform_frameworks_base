@@ -1,6 +1,8 @@
 // Fountain test script
 #pragma version(1)
 
+#pragma rs java_package_name(com.android.fountain)
+
 #include "../../../../scriptc/rs_types.rsh"
 #include "../../../../scriptc/rs_math.rsh"
 #include "../../../../scriptc/rs_graphics.rsh"
@@ -10,7 +12,7 @@ static int newPart = 0;
 float4 partColor;
 rs_mesh partMesh;
 
-typedef struct __attribute__((packed, aligned(4))) Point_s {
+typedef struct __attribute__((packed, aligned(4))) Point {
     float2 delta;
     float2 position;
     uchar4 color;
