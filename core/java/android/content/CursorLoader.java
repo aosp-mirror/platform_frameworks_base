@@ -71,7 +71,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     /**
      * Starts an asynchronous load of the contacts list data. When the result is ready the callbacks
      * will be called on the UI thread. If a previous load has been completed and is still valid
-     * the result may be passed to the callbacks immediately. 
+     * the result may be passed to the callbacks immediately.
      *
      * Must be called from the UI thread
      */
@@ -101,6 +101,13 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
 
         // Make sure that any outstanding loads clean themselves up properly
         mStopped = true;
+    }
+
+    @Override
+    public void onCancelled(Cursor cursor) {
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
     }
 
     @Override

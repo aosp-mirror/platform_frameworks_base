@@ -187,6 +187,17 @@ public abstract class AsyncTask<Params, Progress, Result> {
         };
 
         mFuture = new FutureTask<Result>(mWorker) {
+
+            @Override
+            protected void set(Result v) {
+                super.set(v);
+                if (isCancelled()) {
+                    Message message = sHandler.obtainMessage(MESSAGE_POST_CANCEL,
+                            new AsyncTaskResult<Result>(AsyncTask.this, (Result[]) null));
+                    message.sendToTarget();
+                }
+            }
+
             @Override
             protected void done() {
                 Message message;
@@ -401,7 +412,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * publish updates on the UI thread while the background computation is
      * still running. Each call to this method will trigger the execution of
      * {@link #onProgressUpdate} on the UI thread.
-     * 
+     *
      * {@link #onProgressUpdate} will note be called if the task has been
      * canceled.
      *
