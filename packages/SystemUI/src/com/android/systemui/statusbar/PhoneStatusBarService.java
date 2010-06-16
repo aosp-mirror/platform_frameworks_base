@@ -105,7 +105,7 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     StatusBarPolicy mIconPolicy;
-    
+
     int mHeight;
     int mIconWidth;
 
@@ -114,7 +114,7 @@ public class PhoneStatusBarService extends StatusBarService {
     int mPixelFormat;
     H mHandler = new H();
     Object mQueueLock = new Object();
-    
+
     // icons
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
@@ -158,14 +158,14 @@ public class PhoneStatusBarService extends StatusBarService {
     private Ticker mTicker;
     private View mTickerView;
     private boolean mTicking;
-    
+
     // Tracking finger for opening/closing.
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
     boolean mTracking;
     VelocityTracker mVelocityTracker;
-    
+
     static final int ANIM_FRAME_DURATION = (1000/60);
-    
+
     boolean mAnimating;
     long mCurAnimationTime;
     float mDisplayHeight;
@@ -176,7 +176,7 @@ public class PhoneStatusBarService extends StatusBarService {
     boolean mAnimatingReveal = false;
     int mViewDelta;
     int[] mAbsPos = new int[2];
-    
+
     // for disabling the status bar
     int mDisabled = 0;
 
@@ -240,7 +240,7 @@ public class PhoneStatusBarService extends StatusBarService {
 
         mOngoingTitle.setVisibility(View.GONE);
         mLatestTitle.setVisibility(View.GONE);
-        
+
         mTicker = new MyTicker(context, sb);
 
         TickerView tickerView = (TickerView)sb.findViewById(R.id.tickerText);
@@ -289,8 +289,8 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
-                + " icon=" + icon);
+        if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index
+                + " viewIndex=" + viewIndex + " icon=" + icon);
         StatusBarIconView view = new StatusBarIconView(this, slot);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconWidth, mHeight));
@@ -298,14 +298,15 @@ public class PhoneStatusBarService extends StatusBarService {
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
-        Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
-                + " old=" + old + " icon=" + icon);
+        if (SPEW) Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index
+                + " viewIndex=" + viewIndex + " old=" + old + " icon=" + icon);
         StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
         view.set(icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
-        Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        if (SPEW) Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index
+                + " viewIndex=" + viewIndex);
         mStatusIcons.removeViewAt(viewIndex);
     }
 
@@ -321,7 +322,7 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
-        Slog.d(TAG, "updateNotification key=" + key + " notification=" + notification);
+        if (SPEW) Slog.d(TAG, "updateNotification key=" + key + " notification=" + notification);
 
         NotificationData oldList;
         int oldIndex = mOngoing.findEntry(key);
@@ -610,19 +611,19 @@ public class PhoneStatusBarService extends StatusBarService {
         }
         mExpandedVisible = true;
         visibilityChanged(true);
-        
+
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         mExpandedParams.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         mExpandedView.requestFocus(View.FOCUS_FORWARD);
         mTrackingView.setVisibility(View.VISIBLE);
-        
+
         if (!mTicking) {
             setDateViewVisibility(true, com.android.internal.R.anim.fade_in);
         }
     }
-    
+
     public void animateExpand() {
         if (SPEW) Slog.d(TAG, "Animate expand: expanded=" + mExpanded);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
@@ -635,7 +636,7 @@ public class PhoneStatusBarService extends StatusBarService {
         prepareTracking(0, true);
         performFling(0, 2000.0f, true);
     }
-    
+
     public void animateCollapse() {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
@@ -645,7 +646,7 @@ public class PhoneStatusBarService extends StatusBarService {
                     + " mAnimY=" + mAnimY
                     + " mAnimVel=" + mAnimVel);
         }
-        
+
         if (!mExpandedVisible) {
             return;
         }
@@ -662,7 +663,7 @@ public class PhoneStatusBarService extends StatusBarService {
         prepareTracking(y, false);
         performFling(y, -2000.0f, true);
     }
-    
+
     void performExpand() {
         if (SPEW) Slog.d(TAG, "performExpand: mExpanded=" + mExpanded);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
@@ -682,7 +683,7 @@ public class PhoneStatusBarService extends StatusBarService {
     void performCollapse() {
         if (SPEW) Slog.d(TAG, "performCollapse: mExpanded=" + mExpanded
                 + " mExpandedVisible=" + mExpandedVisible);
-        
+
         if (!mExpandedVisible) {
             return;
         }
@@ -697,7 +698,7 @@ public class PhoneStatusBarService extends StatusBarService {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
         }
         setDateViewVisibility(false, com.android.internal.R.anim.fade_out);
-        
+
         if (!mExpanded) {
             return;
         }
@@ -764,7 +765,7 @@ public class PhoneStatusBarService extends StatusBarService {
             }
         }
     }
-    
+
     void prepareTracking(int y, boolean opening) {
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
@@ -793,7 +794,7 @@ public class PhoneStatusBarService extends StatusBarService {
             updateExpandedViewPos(y + mViewDelta);
         }
     }
-    
+
     void performFling(int y, float vel, boolean always) {
         mAnimatingReveal = false;
         mDisplayHeight = mDisplay.getHeight();
@@ -853,7 +854,7 @@ public class PhoneStatusBarService extends StatusBarService {
         mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE), mCurAnimationTime);
         stopTracking();
     }
-    
+
     boolean interceptTouchEvent(MotionEvent event) {
         if (SPEW) {
             Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
@@ -863,7 +864,7 @@ public class PhoneStatusBarService extends StatusBarService {
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return false;
         }
-        
+
         final int statusBarSize = mStatusBarView.getHeight();
         final int hitSize = statusBarSize*2;
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -917,10 +918,10 @@ public class PhoneStatusBarService extends StatusBarService {
                 if (negative) {
                     vel = -vel;
                 }
-                
+
                 performFling((int)event.getRawY(), vel, false);
             }
-            
+
         }
         return false;
     }
@@ -999,7 +1000,7 @@ public class PhoneStatusBarService extends StatusBarService {
         MyTicker(Context context, StatusBarView sb) {
             super(context, sb);
         }
-        
+
         @Override
         void tickerStarting() {
             mTicking = true;
@@ -1067,7 +1068,7 @@ public class PhoneStatusBarService extends StatusBarService {
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        
+
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
             pw.println("  mExpanded=" + mExpanded
@@ -1117,7 +1118,7 @@ public class PhoneStatusBarService extends StatusBarService {
             }
         }
         */
-        
+
         if (false) {
             pw.println("see the logcat for a dump of the views we have created.");
             // must happen on ui thread
@@ -1405,7 +1406,7 @@ public class PhoneStatusBarService extends StatusBarService {
 
     /**
      * Reload some of our resources when the configuration changes.
-     * 
+     *
      * We don't reload everything when the configuration changes -- we probably
      * should, but getting that smooth is tough.  Someday we'll fix that.  In the
      * meantime, just update the things that we know change.
