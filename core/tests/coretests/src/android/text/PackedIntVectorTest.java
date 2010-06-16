@@ -16,7 +16,6 @@
 
 package android.text;
 
-import android.text.PackedIntVector;
 import junit.framework.TestCase;
 
 /**
