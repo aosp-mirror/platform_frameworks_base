@@ -9,7 +9,8 @@ parent.link=index.html
   <ul>
     <li>Different types of resources belong in different subdirectories of {@code res/}</li>
     <li>Alternative resources provide configuration-specific resource files</li>
-    <li>Always include default resources so your app does not depend on specific configurations</li>
+    <li>Always include default resources so your app does not depend on specific
+device configurations</li>
   </ul>
   <h2>In this document</h2>
   <ol>
@@ -20,7 +21,12 @@ parent.link=index.html
         <li><a href="#AliasResources">Creating alias resources</a></li>
       </ol>
     </li>
-    <li><a href="#Compatibility">Providing the Best Device Compatibility with Resources</a></li>
+    <li><a href="#Compatibility">Providing the Best Device Compatibility with Resources</a>
+      <ol>
+        <li><a href="#ScreenCompatibility">Providing screen resource compatibility for Android
+1.5</a></li>
+      </ol>
+    </li>
     <li><a href="#BestMatch">How Android Finds the Best-matching Resource</a></li>
     <li><a href="#KnownIssues">Known Issues</a></li>
   </ol>
@@ -36,10 +42,11 @@ Screens</a></li>
 </div>
 
 <p>You should always externalize application resources such as images and strings from your
-code, so that you can maintain them independently. You can also provide alternative resources for
-specific device configurations, by grouping them in specially-named resource directories. Android
-then applies the appropriate resource based on the current configuration. For
-instance, you might want to provide a different UI layout depending on the screen size.</p>
+code, so that you can maintain them independently. You should also provide alternative resources for
+specific device configurations, by grouping them in specially-named resource directories. At
+runtime, Android uses uses the appropriate resource based on the current configuration. For
+example, you might want to provide a different UI layout depending on the screen size or different
+strings depending on the language setting.</p>
 
 <p>Once you externalize your application resources, you can access them
 using resource IDs that are generated in your project's {@code R} class. How to use
@@ -185,7 +192,7 @@ For example, if a device has a larger than normal screen, then you should provid
 different layout resources that take advantage of the extra screen space. Or, if a device has a
 different language setting, then you should provide different string resources that translate the
 text in your user interface. To provide these different resources for different device
-configurations, you need to provide "alternative" resources, in addition to your default
+configurations, you need to provide alternative resources, in addition to your default
 resources.</p>
 
 
@@ -195,7 +202,7 @@ resources.</p>
 <div class="figure" style="width:421px">
 <img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="137" alt="" />
 <p class="img-caption">
-<strong>Figure 1.</strong> Two device configurations, one using alternative resources.</p>
+<strong>Figure 1.</strong> Two different devices, one using alternative resources.</p>
 </div>
 
 <p>Almost every application should provide alternative resources to support specific device
@@ -211,10 +218,10 @@ resources for your application.</p>
     <ul>
       <li><em>{@code &lt;resources_name&gt;}</em> is the directory name of the corresponding default
 resources (defined in table 1).</li>
-      <li><em>{@code &lt;config_qualifier&gt;}</em> is a name that specifies a configuration
+      <li><em>{@code &lt;qualifier&gt;}</em> is a name that specifies an individual configuration
 for which these resources are to be used (defined in table 2).</li>
     </ul>
-    <p>You can append more than one <em>{@code &lt;config_qualifier&gt;}</em>. Separate each
+    <p>You can append more than one <em>{@code &lt;qualifier&gt;}</em>. Separate each
 one with a dash.</p>
   </li>
   <li>Save the respective alternative resources in this new directory. The resource files must be
@@ -247,13 +254,14 @@ lists the valid configuration qualifiers, in order of precedence&mdash;if you us
 qualifiers for one resource directory, they must be added to the directory name in the order they
 are listed in the table.</p>
 
-<p class="note"><strong>Note:</strong> Some resource qualifiers were added after Android 1.0, so not
+<p class="note"><strong>Note:</strong> Some configuration qualifiers were added after Android 1.0,
+so not
 all versions of Android support all the qualifiers listed in table 2. New qualifiers
 indicate the version in which they were added. To avoid any issues, always include a set of default
 resources for resources that your application uses. For more information, see the section about <a
 href="#Compatibility">Providing the Best Device Compatibility with Resources</a>.</p>
 
-<p class="table-caption" id="table2"><strong>Table 2.</strong> Alternative resource qualifier
+<p class="table-caption" id="table2"><strong>Table 2.</strong> Configuration qualifier
 names.</p>
 <table>
     <tr>
@@ -349,8 +357,8 @@ which indicates whether the screen is small, normal,
 or large.</p>
       </td>
     </tr>
-    <tr id="ScreenLongQualifier">
-      <td>Wider/taller screens</td>
+    <tr id="ScreenAspectQualifier">
+      <td>Screen aspect</td>
       <td>
         <code>long</code><br/>
         <code>notlong</code>
@@ -602,7 +610,7 @@ href="#KnownIssues">Known Issues</a> for more information.</p>
 
 <h3 id="QualifierRules">Qualifier name rules</h3>
 
-<p>Here are some rules about using resource qualifier names:</p>
+<p>Here are some rules about using configuration qualifier names:</p>
 
 <ul>
     <li>You can specify multiple qualifiers for a single set of resources, separated by dashes. For
@@ -633,15 +641,19 @@ alias resources</a> below.</li>
 these qualifiers, Android automatically applies the resources in your application based on the
 current device configuration. Each time a resource is requested, Android checks for alternative
 resource directories that contain the requested resource file, then <a href="#BestMatch">finds the
-best-matching resource</a> (discussed below).</p>
+best-matching resource</a> (discussed below). If there are no alternative resources that match
+a particular device configuration, then Android uses the corresponding default resources (the
+set of resources for a particular resource type that does not include a configuration
+qualifier).</p>
 
 
 
 <h3 id="AliasResources">Creating alias resources</h3>
 
 <p>When you have a resource that you'd like to use for more than one device
-configuration (but not for all configurations), you do not need to put the same resource in
-each alternative resource directory. Instead, you can (in some cases) create an alternative
+configuration (but do not want to provide as a default resource), you do not need to put the same
+resource in more than one alternative resource directory. Instead, you can (in some cases) create an
+alternative
 resource that acts as an alias for a resource saved in your default resource directory.</p>
 
 <p class="note"><strong>Note:</strong> Not all resources offer a mechanism by which you can
@@ -723,7 +735,6 @@ same way. For example, a color:</p>
 
 
 
-
 <h2 id="Compatibility">Providing the Best Device Compatibility with Resources</h2>
 
 <p>In order for your application to support multiple device configurations, it's very important that
@@ -744,7 +755,7 @@ layout-land/} for landscape and {@code layout-port/} for portrait, leave one as 
 
 <p>Providing default resources is important not only because your application might run on a
 configuration you had not anticipated, but also because new versions of Android sometimes add
-resource qualifiers that older versions do not support. If you use a new resource qualifier,
+configuration qualifiers that older versions do not support. If you use a new resource qualifier,
 but maintain code compatibility with older versions of Android, then when an older version of
 Android runs your application, it will crash if you do not provide default resources, because it
 cannot use the resources named with the new qualifier. For example, if your <a
@@ -755,9 +766,9 @@ Level 8), then an API Level 4 device cannot access your drawable resources and w
 case, you probably want {@code notnight} to be your default resources, so you should exclude that
 qualifier so your drawable resources are in either {@code drawable/} or {@code drawable-night/}.</p>
 
-<p>The bottom line is: For every type of resource your application uses,
-provide a set of default resources that allow your application to perform well, then create
-variations of those resources for specific device configurations.</p>
+<p>So, in order to provide the best device compatibility, always provide default
+resources for the resources your application needs to perform properly. Then create alternative
+resources for specific device configurations using the configuration qualifiers.</p>
 
 <p>There is one exception to this rule: If your application's <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> is 4 or
@@ -765,11 +776,70 @@ greater, you <em>do not</em> need default drawable resources when you provide al
 resources with the <a href="#DensityQualifier">screen density</a> qualifier. Even without default
 drawable resources, Android can find the best match among the alternative screen densities and scale
 the bitmaps as necessary. However, for the best experience on all types of devices, you should
-provide alternative drawables for all three types of density. (If your <a
+provide alternative drawables for all three types of density. If your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> is
-<em>less than</em> 4, see the section below about <a href="#KnownIssues">known issues</a> for
-information about how to support multiple screen densities.)</p>
+<em>less than</em> 4 (Android 1.5 or lower), be aware that the screen size, density, and aspect
+qualifiers are not supported on Android 1.5 or lower, so you might need to perform additional
+compatibility for these versions.</p>
 
+
+<h3 id="ScreenCompatibility">Providing screen resource compatibility for Android 1.5</h3>
+
+<p>Android 1.5 (and lower) does not support the following resource qualifers:</p>
+<dl>
+  <dt><a href="#DensityQualifier">Density</a></dt>
+    <dd>{@code ldpi}, {@code mdpi}, {@code ldpi}, and {@code nodpi}</dd>
+  <dt><a href="#ScreenSizeQualifier">Screen size</a></dt>
+    <dd>{@code small}, {@code normal}, and {@code large}</dd>
+  <dt><a href="#ScreenAspectQualifier">Screen aspect</a></dt>
+    <dd>{@code long} and {@code notlong}</dd>
+</dl>
+
+<p>These resource qualifiers were introduced in Android 1.6, so Android 1.5 (API Level 3) and lower
+does not support them. If you use these configuration qualifiers and do not provide
+corresponding default resources, then an Android 1.5 device might use any one of the resource
+directories named with the above screen qualifiers, because it ignores the screen qualifiers and
+uses whichever otherwise-matching drawable resource it finds first.</p>
+
+<p>For example, if your application supports Android 1.5 and includes drawable resources for
+each density type ({@code drawable-ldpi/}, {@code drawable-mdpi/}, and {@code drawable-ldpi/}),
+and does <em>not</em> include default drawable resources ({@code drawable/}), then
+an Android 1.5 will use drawables from any one of the alternative resource directories, which
+can result in a user interface that's less than ideal.<p>
+
+<p>So, to provide compatibility with Android 1.5 (and lower) when using the screen configuration
+qualifiers:</p>
+<ol>
+  <li>Provide default resources that are for medium-density, normal, and notlong screens.
+
+    <p>Because all Android 1.5 devices have medium-density, normal, not-long screens, you can
+place these kinds of resources in the corresponding default resource directory. For example, put all
+medium density drawable resources in {@code drawable/} (instead of {@code drawable-mdpi/}),
+put {@code normal} size resources in the corresponding default resource directory, and {@code
+notlong} resources in the corresponding default resource directory.</p>
+  </li>
+
+  <li>Ensure that your <a href="{@docRoot}sdk/tools-notes.html">SDK Tools</a> version
+is r6 or greater.
+
+    <p>You need SDK Tools, Revision 6 (or greater), because it includes a new packaging tool that
+automatically applies an appropriate <a href="#VersionQualifier">version qualifier</a> to any
+resource directory named with a qualifier that does not exist in Android 1.0. For example, because
+the density qualifier was introduced in Android 1.6 (API Level 4), when the packaging tool
+encounters a resource directory using the density qualifier, it adds {@code v4} to the directory
+name to ensure that older versions do not use those resources (only API Level 4 and higher support
+that qualifier). Thus, by putting your medium-density resources in a directory <em>without</em> the
+{@code mdpi} qualifier, they are still accessible by Android 1.5, and any device that supports the
+density qualifer and has a medium-density screen also uses the default resources (which are mdpi)
+because they are the best match for the device (instead of using the {@code ldpi} or {@code hdpi}
+resources).</p>
+</li>
+</ol>
+
+<p class="note"><strong>Note:</strong> Later versions of Android, such as API Level 8,
+introduce other configuration qualifiers that older version do not support. To provide the best
+compatibility, you should always include a set of default resources for each type of resource
+that your application uses, as discussed above to provide the best device compatibility.</p>
 
 
 
@@ -894,62 +964,7 @@ href="accessing-resources.html">Accessing Resources</a>.</p>
 
 <h2 id="KnownIssues">Known Issues</h2>
 
-<p>The following are known issues in terms of how Android finds the best-matching resource on
-certain versions of Android.</p>
-
-<h3>Android 1.5 (and lower)</h3>
-
-<h4>Density and screen size qualifiers are not supported</h4>
-
-<p>Android 1.5 (and lower) does not support the following resource qualifers:</p>
-<dl>
-  <dt><a href="#DensityQualifier">Density</a></dt>
-    <dd>{@code ldpi}, {@code mdpi}, {@code ldpi}, and {@code nodpi}</dd>
-  <dt><a href="#ScreenSizeQualifier">Screen size</a></dt>
-    <dd>{@code small}, {@code normal}, and {@code large}</dd>
-  <dt><a href="#ScreenLongQualifier">Screen length</a></dt>
-    <dd>{@code long} and {@code notlong}</dd>
-</dl>
-
-<p>These resource qualifiers were introduced in Android 1.6, so Android 1.5 (API Level 3) and lower
-does not support them. If your application supports Android 1.5 and includes drawable resources for
-each density type ({@code drawable-ldpi/}, {@code drawable-mdpi/}, and {@code drawable-ldpi/}), then
-an Android 1.5 device might use any one of them, because it doesn't support the density qualifier,
-will ignore it, and will use which ever otherwise-matching drawable resource it finds first. This
-caveat applies the same to screen size and screen length resources.<p>
-
-<p><b>The fix:</b> Ensure that your <a href="{@docRoot}sdk/tools-notes.html">SDK Tools</a> version
-is r6 or greater and provide default drawable resources. For example, to support Android 1.5
-while providing resources for all screen densities, include a set of drawable resources that does
-not use the screen density qualifier. In fact, because all Android 1.5 devices have a medium-density
-screen, you can remove the {@code mdpi} qualifer and put all medium density images in {@code
-drawable/} (instead of {@code drawable-mdpi/}). For the screen size, put your {@code normal} size
-resources in the default resource directory, and for the screen length, put your {@code notlong}
-resources in the default resource directory (because all Android 1.5 devices have medium-density,
-normal, not-long screens).</p>
-
-<p>You need SDK Tools, Revision 6 (or greater), because it includes a new packaging tool that
-automatically applies an appropriate <a href="#VersionQualifier">version qualifier</a> to any
-resource directory named with a qualifier that did not exist in Android 1.0. For example, because
-the density qualifier was introduced in Android 1.6 (API Level 4), when the packaging tool
-encounters a resource directory using the density qualifier, it adds {@code v4} to the directory
-name to ensure that older versions do not use those resources (only API Level 4 and higher support
-that qualifier). Thus, by putting your medium-density resources in a directory <em>without</em> the
-{@code mdpi} qualifier, they are still accessible by Android 1.5, and any device that supports the
-density qualifer and has a medium-density screen also uses these resources because they are the best
-match for the device (instead of using the {@code ldpi} or {@code hdpi} resources).</p>
-
-<p class="note"><strong>Note:</strong> Later versions of Android, such as API Level 8,
-introduce other resource qualifiers that older version do not support. To provide the best
-compatibility, you should always include a set of default resources for each type of resource
-that your application uses. See the section about <a href="#Compatibility">Providing the Best Device
-Compatibility with Resources</a> for more information.</p>
-
-
-
-<h3>Android 1.5 and 1.6</h3>
-
-<h4>Version qualifier performs exact match, instead of best match</h4>
+<h3>Android 1.5 and 1.6: Version qualifier performs exact match, instead of best match</h3>
 
 <p>The correct behavior is for the system to match resources marked with a <a
 href="#VersionQualifier">version qualifier</a> equal
@@ -957,8 +972,8 @@ to or less than the system version on the device, but on Android 1.5 and 1.6, (A
 there is a bug that causes the system to match resources marked with the version qualifier
 only when it exactly matches the version on the device.</p>
 
-<p><b>The fix:</b> To provide version-specific resources, abide by this behavior. However, because
-this bug is fixed in versions of Android available after 1.6, if
+<p><b>The workaround:</b> To provide version-specific resources, abide by this behavior. However,
+because this bug is fixed in versions of Android available after 1.6, if
 you need to differentiate resources between Android 1.5, 1.6, and later versions, then you only need
 to apply the version qualifier to the 1.6 resources and one to match all later versions. Thus, this
 is effectively a non-issue.</p>
