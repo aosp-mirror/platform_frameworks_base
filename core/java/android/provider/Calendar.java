@@ -269,7 +269,6 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_MARK);
 
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.URL);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SELF_URL);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.EDIT_URL);
@@ -849,7 +848,8 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.URL);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.EVENTS_URL);
 
                 Entity entity = new Entity(cv);
                 Cursor subCursor;
