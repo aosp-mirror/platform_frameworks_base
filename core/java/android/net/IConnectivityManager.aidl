@@ -72,4 +72,6 @@ interface IConnectivityManager
     String[] getTetherableUsbRegexs();
 
     String[] getTetherableWifiRegexs();
+
+    void requestNetworkTransitionWakelock(in String forWhom);
 }

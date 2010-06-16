@@ -764,21 +764,6 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
     }
 
     /**
-     * We release the wakelock in WifiService
-     * using a timer.
-     *
-     * TODO:
-     * Releasing wakelock using both timer and
-     * a call from ConnectivityService requires
-     * a rethink. We had problems where WifiService
-     * could keep a wakelock forever if we delete
-     * messages in the asynchronous call
-     * from ConnectivityService
-     */
-    public void releaseWakeLock() {
-    }
-
-    /**
      * Tracks the WPA supplicant states to detect "loop" situations.
      * @param newSupplicantState The new WPA supplicant state.
      * @return {@code true} if the supplicant loop should be stopped

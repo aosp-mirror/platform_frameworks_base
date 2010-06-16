@@ -144,19 +144,6 @@ public class WifiService extends IWifiManager.Stub {
 
     private static final String WAKELOCK_TAG = "WifiService";
 
-    /**
-     * The maximum amount of time to hold the wake lock after a disconnect
-     * caused by stopping the driver. Establishing an EDGE connection has been
-     * observed to take about 5 seconds under normal circumstances. This
-     * provides a bit of extra margin.
-     * <p>
-     * See {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}.
-     * This is the default value if a Settings.Secure value is not present.
-     */
-    private static final int DEFAULT_WAKELOCK_TIMEOUT = 8000;
-
-    // Wake lock used by driver-stop operation
-    private static PowerManager.WakeLock sDriverStopWakeLock;
     // Wake lock used by other operations
     private static PowerManager.WakeLock sWakeLock;
 
@@ -164,7 +151,6 @@ public class WifiService extends IWifiManager.Stub {
     private static final int MESSAGE_DISABLE_WIFI       = 1;
     private static final int MESSAGE_STOP_WIFI          = 2;
     private static final int MESSAGE_START_WIFI         = 3;
-    private static final int MESSAGE_RELEASE_WAKELOCK   = 4;
     private static final int MESSAGE_UPDATE_STATE       = 5;
     private static final int MESSAGE_START_ACCESS_POINT = 6;
     private static final int MESSAGE_STOP_ACCESS_POINT  = 7;
@@ -238,7 +224,6 @@ public class WifiService extends IWifiManager.Stub {
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-        sDriverStopWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -293,7 +278,10 @@ public class WifiService extends IWifiManager.Stub {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
 
-        mCm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (mCm == null) {
+            mCm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        }
+
         mWifiRegexs = mCm.getTetherableWifiRegexs();
 
         for (String intf : available) {
@@ -1827,19 +1815,12 @@ public class WifiService extends IWifiManager.Stub {
                     sWakeLock.acquire();
                     sendStartMessage(strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
                 } else if (!mWifiStateTracker.isDriverStopped()) {
-                    int wakeLockTimeout =
-                            Settings.Secure.getInt(
-                                    mContext.getContentResolver(),
-                                    Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
-                                    DEFAULT_WAKELOCK_TIMEOUT);
-                    /*
-                     * We are assuming that ConnectivityService can make
-                     * a transition to cellular data within wakeLockTimeout time.
-                     * The wakelock is released by the delayed message.
-                     */
-                    sDriverStopWakeLock.acquire();
+                    if (mCm == null) {
+                        mCm = (ConnectivityManager)mContext.
+                                getSystemService(Context.CONNECTIVITY_SERVICE);
+                    }
+                    mCm.requestNetworkTransitionWakelock(TAG);
                     mWifiHandler.sendEmptyMessage(MESSAGE_STOP_WIFI);
-                    mWifiHandler.sendEmptyMessageDelayed(MESSAGE_RELEASE_WAKELOCK, wakeLockTimeout);
                 }
             } else {
                 sWakeLock.acquire();
@@ -1923,10 +1904,6 @@ public class WifiService extends IWifiManager.Stub {
                 case MESSAGE_STOP_WIFI:
                     mWifiStateTracker.disconnectAndStop();
                     // don't release wakelock
-                    break;
-
-                case MESSAGE_RELEASE_WAKELOCK:
-                    sDriverStopWakeLock.release();
                     break;
 
                 case MESSAGE_START_ACCESS_POINT:
