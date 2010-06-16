@@ -321,6 +321,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         this(context, attrs, com.android.internal.R.attr.textViewStyle);
     }
 
+    @SuppressWarnings("deprecation")
     public TextView(Context context,
                     AttributeSet attrs,
                     int defStyle) {
@@ -714,7 +715,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (inputMethod != null) {
-            Class c;
+            Class<?> c;
 
             try {
                 c = Class.forName(inputMethod.toString());
@@ -2335,6 +2336,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return str + "}";
         }
 
+        @SuppressWarnings("hiding")
         public static final Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
@@ -2756,6 +2758,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mChars[off + mStart];
         }
 
+        @Override
         public String toString() {
             return new String(mChars, mStart, mLength);
         }
@@ -3223,7 +3226,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param create If true, the extras will be created if they don't already
      * exist.  Otherwise, null will be returned if none have been created.
-     * @see #setInputExtras(int)View
+     * @see #setInputExtras(int)
      * @see EditorInfo#extras
      * @attr ref android.R.styleable#TextView_editorExtras
      */
@@ -3337,7 +3340,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private static class ErrorPopup extends PopupWindow {
         private boolean mAbove = false;
-        private TextView mView;
+        private final TextView mView;
 
         ErrorPopup(TextView v, int width, int height) {
             super(v, width, height);
@@ -5966,7 +5969,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private final WeakReference<TextView> mView;
 
         private byte mStatus = MARQUEE_STOPPED;
-        private float mScrollUnit;
+        private final float mScrollUnit;
         private float mMaxScroll;
         float mMaxFadeScroll;
         private float mGhostStart;
@@ -5978,7 +5981,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Marquee(TextView v) {
             final float density = v.getContext().getResources().getDisplayMetrics().density;
-            mScrollUnit = (MARQUEE_PIXELS_PER_SECOND * density) / (float) MARQUEE_RESOLUTION;
+            mScrollUnit = (MARQUEE_PIXELS_PER_SECOND * density) / MARQUEE_RESOLUTION;
             mView = new WeakReference<TextView>(v);
         }
 
@@ -6570,6 +6573,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             super(getHandler());
         }
         
+        @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             if (resultCode != InputMethodManager.RESULT_SHOWN) {
                 final int len = mText.length();
@@ -6688,7 +6692,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private static class Blink extends Handler implements Runnable {
-        private WeakReference<TextView> mView;
+        private final WeakReference<TextView> mView;
         private boolean mCancelled;
 
         public Blink(TextView v) {
@@ -7322,6 +7326,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    @Override
     public boolean performLongClick() {
         if (super.performLongClick()) {
             mEatTouchRelease = true;
@@ -7349,9 +7354,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ArrayList<TextWatcher>  mListeners = null;
 
     // display attributes
-    private TextPaint               mTextPaint;
+    private final TextPaint               mTextPaint;
     private boolean                 mUserSetTextScaleX;
-    private Paint                   mHighlightPaint;
+    private final Paint                   mHighlightPaint;
     private int                     mHighlightColor = 0xFFBBDDFF;
     private Layout                  mLayout;
 
