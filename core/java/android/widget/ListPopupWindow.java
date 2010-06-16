@@ -202,7 +202,7 @@ public class ListPopupWindow {
         if (mObserver == null) {
             mObserver = new PopupDataSetObserver();
         } else if (mAdapter != null) {
-            adapter.unregisterDataSetObserver(mObserver);
+            mAdapter.unregisterDataSetObserver(mObserver);
         }
         mAdapter = adapter;
         if (mAdapter != null) {
