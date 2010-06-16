@@ -72,6 +72,8 @@ class BrowserFrame extends Handler {
     // queue has been cleared,they are ignored.
     private boolean mBlockMessages = false;
 
+    private static String sDataDirectory = "";
+
     // Is this frame the main frame?
     private boolean mIsMainFrame;
 
@@ -223,6 +225,11 @@ class BrowserFrame extends Handler {
 
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
+
+        if (sDataDirectory.length() == 0) {
+            String dir = appContext.getFilesDir().getAbsolutePath();
+            sDataDirectory =  dir.substring(0, dir.lastIndexOf('/'));
+        }
 
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
@@ -614,6 +621,14 @@ class BrowserFrame extends Handler {
             size = 0;
         }
         return size;
+    }
+
+    /**
+     * Called by JNI. Gets the applications data directory
+     * @return String The applications data directory
+     */
+    private static String getDataDirectory() {
+        return sDataDirectory;
     }
 
     /**
