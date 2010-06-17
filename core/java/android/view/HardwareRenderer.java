@@ -110,15 +110,16 @@ abstract class HardwareRenderer {
      * Creates a hardware renderer using OpenGL.
      * 
      * @param glVersion The version of OpenGL to use (1 for OpenGL 1, 11 for OpenGL 1.1, etc.)
+     * @param translucent True if the surface is translucent, false otherwise
      * 
      * @return A hardware renderer backed by OpenGL.
      */
-    static HardwareRenderer createGlRenderer(int glVersion) {
+    static HardwareRenderer createGlRenderer(int glVersion, boolean translucent) {
         switch (glVersion) {
             case 1:
-                return new Gl10Renderer();
+                return new Gl10Renderer(translucent);
             case 2:
-                return new Gl20Renderer();
+                return new Gl20Renderer(translucent);
         }
         throw new IllegalArgumentException("Unknown GL version: " + glVersion);
     }
@@ -174,10 +175,12 @@ abstract class HardwareRenderer {
         GL mGl;
         Canvas mCanvas;
 
-        int mGlVersion;
+        final int mGlVersion;
+        final boolean mTranslucent;
 
-        GlRenderer(int glVersion) {
+        GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
+            mTranslucent = translucent;
         }
 
         /**
@@ -362,7 +365,7 @@ abstract class HardwareRenderer {
          * @param glVersion
          */
         EglConfigChooser getConfigChooser(int glVersion) {
-            return new ComponentSizeChooser(glVersion, 8, 8, 8, 0, 0, 0);
+            return new ComponentSizeChooser(glVersion, 8, 8, 8, mTranslucent ? 8 : 0, 0, 0);
         }
 
         @Override
@@ -520,13 +523,20 @@ abstract class HardwareRenderer {
      * Hardware renderer using OpenGL ES 2.0.
      */
     static class Gl20Renderer extends GlRenderer {
-        Gl20Renderer() {
-            super(2);
+        private GLES20Canvas mGlCanvas;
+
+        Gl20Renderer(boolean translucent) {
+            super(2, translucent);
         }
 
         @Override
         Canvas createCanvas() {
-            return null;
+            return mGlCanvas = new GLES20Canvas(mGl, mTranslucent);
+        }
+
+        @Override
+        void onPreDraw() {
+            mGlCanvas.onPreDraw();
         }        
     }
 
@@ -535,8 +545,8 @@ abstract class HardwareRenderer {
      */
     @SuppressWarnings({"deprecation"})
     static class Gl10Renderer extends GlRenderer {
-        Gl10Renderer() {
-            super(1);
+        Gl10Renderer(boolean translucent) {
+            super(1, translucent);
         }
 
         @Override
