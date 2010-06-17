@@ -36,11 +36,10 @@ static struct {
     jmethodID obtain;
     jmethodID recycle;
 
-    jfieldID mDownTime;
-    jfieldID mEventTimeNano;
+    jfieldID mDownTimeNano;
     jfieldID mAction;
-    jfieldID mRawX;
-    jfieldID mRawY;
+    jfieldID mXOffset;
+    jfieldID mYOffset;
     jfieldID mXPrecision;
     jfieldID mYPrecision;
     jfieldID mDeviceId;
@@ -50,7 +49,9 @@ static struct {
     jfieldID mNumSamples;
     jfieldID mPointerIdentifiers;
     jfieldID mDataSamples;
-    jfieldID mTimeSamples;
+    jfieldID mEventTimeNanoSamples;
+    jfieldID mLastDataSampleIndex;
+    jfieldID mLastEventTimeNanoSampleIndex;
 } gMotionEventClassInfo;
 
 // ----------------------------------------------------------------------------
@@ -69,22 +70,14 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
         return NULL;
     }
 
-    // MotionEvent.mEventTimeNano is the time of the oldest sample because
-    // MotionEvent.addBatch does not update it as successive samples are added.
-    jlong eventTimeNano = numHistoricalSamples != 0
-            ? event->getHistoricalEventTime(0)
-            : event->getEventTime();
-
-    env->SetLongField(eventObj, gMotionEventClassInfo.mDownTime,
-            nanoseconds_to_milliseconds(event->getDownTime()));
-    env->SetLongField(eventObj, gMotionEventClassInfo.mEventTimeNano,
-            eventTimeNano);
+    env->SetLongField(eventObj, gMotionEventClassInfo.mDownTimeNano,
+            event->getDownTime());
     env->SetIntField(eventObj, gMotionEventClassInfo.mAction,
             event->getAction());
-    env->SetFloatField(eventObj, gMotionEventClassInfo.mRawX,
-            event->getRawX());
-    env->SetFloatField(eventObj, gMotionEventClassInfo.mRawY,
-            event->getRawY());
+    env->SetFloatField(eventObj, gMotionEventClassInfo.mXOffset,
+            event->getXOffset());
+    env->SetFloatField(eventObj, gMotionEventClassInfo.mYOffset,
+            event->getYOffset());
     env->SetFloatField(eventObj, gMotionEventClassInfo.mXPrecision,
             event->getXPrecision());
     env->SetFloatField(eventObj, gMotionEventClassInfo.mYPrecision,
@@ -99,65 +92,62 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
             numPointers);
     env->SetIntField(eventObj, gMotionEventClassInfo.mNumSamples,
             numSamples);
+    env->SetIntField(eventObj, gMotionEventClassInfo.mLastDataSampleIndex,
+            (numSamples - 1) * numPointers * NUM_SAMPLE_DATA);
+    env->SetIntField(eventObj, gMotionEventClassInfo.mLastEventTimeNanoSampleIndex,
+            numSamples - 1);
 
     jintArray pointerIdentifierArray = jintArray(env->GetObjectField(eventObj,
             gMotionEventClassInfo.mPointerIdentifiers));
     jfloatArray dataSampleArray = jfloatArray(env->GetObjectField(eventObj,
             gMotionEventClassInfo.mDataSamples));
-    jlongArray timeSampleArray = jlongArray(env->GetObjectField(eventObj,
-            gMotionEventClassInfo.mTimeSamples));
+    jlongArray eventTimeNanoSampleArray = jlongArray(env->GetObjectField(eventObj,
+            gMotionEventClassInfo.mEventTimeNanoSamples));
 
     jint* pointerIdentifiers = (jint*)env->GetPrimitiveArrayCritical(pointerIdentifierArray, NULL);
     jfloat* dataSamples = (jfloat*)env->GetPrimitiveArrayCritical(dataSampleArray, NULL);
-    jlong* timeSamples = (jlong*)env->GetPrimitiveArrayCritical(timeSampleArray, NULL);
+    jlong* eventTimeNanoSamples = (jlong*)env->GetPrimitiveArrayCritical(
+            eventTimeNanoSampleArray, NULL);
 
+    const int32_t* srcPointerIdentifiers = event->getPointerIds();
+    jint* destPointerIdentifiers = pointerIdentifiers;
     for (jint i = 0; i < numPointers; i++) {
-        pointerIdentifiers[i] = event->getPointerId(i);
+        *(destPointerIdentifiers++) = *(srcPointerIdentifiers++);
     }
 
-    // Most recent data is in first slot of the DVM array, followed by the oldest,
-    // and then all others are in order.
-
-    jfloat* currentDataSample = dataSamples;
-    jlong* currentTimeSample = timeSamples;
-
-    *(currentTimeSample++) = nanoseconds_to_milliseconds(event->getEventTime());
-    for (jint j = 0; j < numPointers; j++) {
-        *(currentDataSample++) = event->getX(j);
-        *(currentDataSample++) = event->getY(j);
-        *(currentDataSample++) = event->getPressure(j);
-        *(currentDataSample++) = event->getSize(j);
+    const nsecs_t* srcSampleEventTimes = event->getSampleEventTimes();
+    jlong* destEventTimeNanoSamples = eventTimeNanoSamples;
+    for (jint i = 0; i < numSamples; i++) {
+        *(destEventTimeNanoSamples++) = *(srcSampleEventTimes++);
     }
 
-    for (jint i = 0; i < numHistoricalSamples; i++) {
-        *(currentTimeSample++) = nanoseconds_to_milliseconds(event->getHistoricalEventTime(i));
-        for (jint j = 0; j < numPointers; j++) {
-            *(currentDataSample++) = event->getHistoricalX(j, i);
-            *(currentDataSample++) = event->getHistoricalY(j, i);
-            *(currentDataSample++) = event->getHistoricalPressure(j, i);
-            *(currentDataSample++) = event->getHistoricalSize(j, i);
-        }
+    const PointerCoords* srcSamplePointerCoords = event->getSamplePointerCoords();
+    jfloat* destDataSamples = dataSamples;
+    jint numItems = numSamples * numPointers;
+    for (jint i = 0; i < numItems; i++) {
+        *(destDataSamples++) = srcSamplePointerCoords->x;
+        *(destDataSamples++) = srcSamplePointerCoords->y;
+        *(destDataSamples++) = srcSamplePointerCoords->pressure;
+        *(destDataSamples++) = srcSamplePointerCoords->size;
+        srcSamplePointerCoords += 1;
     }
 
     env->ReleasePrimitiveArrayCritical(pointerIdentifierArray, pointerIdentifiers, 0);
     env->ReleasePrimitiveArrayCritical(dataSampleArray, dataSamples, 0);
-    env->ReleasePrimitiveArrayCritical(timeSampleArray, timeSamples, 0);
+    env->ReleasePrimitiveArrayCritical(eventTimeNanoSampleArray, eventTimeNanoSamples, 0);
 
     env->DeleteLocalRef(pointerIdentifierArray);
     env->DeleteLocalRef(dataSampleArray);
-    env->DeleteLocalRef(timeSampleArray);
+    env->DeleteLocalRef(eventTimeNanoSampleArray);
     return eventObj;
 }
 
 void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj, int32_t nature,
         MotionEvent* event) {
-    // MotionEvent.mEventTimeNano is the time of the oldest sample because
-    // MotionEvent.addBatch does not update it as successive samples are added.
-    jlong downTime = env->GetLongField(eventObj, gMotionEventClassInfo.mDownTime);
-    jlong eventTimeNano = env->GetLongField(eventObj, gMotionEventClassInfo.mEventTimeNano);
+    jlong downTimeNano = env->GetLongField(eventObj, gMotionEventClassInfo.mDownTimeNano);
     jint action = env->GetIntField(eventObj, gMotionEventClassInfo.mAction);
-    jfloat rawX = env->GetFloatField(eventObj, gMotionEventClassInfo.mRawX);
-    jfloat rawY = env->GetFloatField(eventObj, gMotionEventClassInfo.mRawY);
+    jfloat xOffset = env->GetFloatField(eventObj, gMotionEventClassInfo.mXOffset);
+    jfloat yOffset = env->GetFloatField(eventObj, gMotionEventClassInfo.mYOffset);
     jfloat xPrecision = env->GetFloatField(eventObj, gMotionEventClassInfo.mXPrecision);
     jfloat yPrecision = env->GetFloatField(eventObj, gMotionEventClassInfo.mYPrecision);
     jint deviceId = env->GetIntField(eventObj, gMotionEventClassInfo.mDeviceId);
@@ -169,72 +159,51 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj, int32_t na
             gMotionEventClassInfo.mPointerIdentifiers));
     jfloatArray dataSampleArray = jfloatArray(env->GetObjectField(eventObj,
             gMotionEventClassInfo.mDataSamples));
-    jlongArray timeSampleArray = jlongArray(env->GetObjectField(eventObj,
-            gMotionEventClassInfo.mTimeSamples));
+    jlongArray eventTimeNanoSampleArray = jlongArray(env->GetObjectField(eventObj,
+            gMotionEventClassInfo.mEventTimeNanoSamples));
 
     LOG_FATAL_IF(numPointers == 0, "numPointers was zero");
     LOG_FATAL_IF(numSamples == 0, "numSamples was zero");
 
     jint* pointerIdentifiers = (jint*)env->GetPrimitiveArrayCritical(pointerIdentifierArray, NULL);
     jfloat* dataSamples = (jfloat*)env->GetPrimitiveArrayCritical(dataSampleArray, NULL);
-    jlong* timeSamples = (jlong*)env->GetPrimitiveArrayCritical(timeSampleArray, NULL);
+    jlong* eventTimeNanoSamples = (jlong*)env->GetPrimitiveArrayCritical(
+            eventTimeNanoSampleArray, NULL);
 
-    // Most recent data is in first slot of the DVM array, followed by the oldest,
-    // and then all others are in order.  eventTimeNano is the time of the oldest sample
-    // since MotionEvent.addBatch does not update it.
+    jfloat* srcDataSamples = dataSamples;
+    jlong* srcEventTimeNanoSamples = eventTimeNanoSamples;
 
-    jint numHistoricalSamples = numSamples - 1;
-    jint dataSampleStride = numPointers * NUM_SAMPLE_DATA;
-
-    const jfloat* currentDataSample;
-    const jlong* currentTimeSample;
-    if (numHistoricalSamples == 0) {
-        currentDataSample = dataSamples;
-        currentTimeSample = timeSamples;
-    } else {
-        currentDataSample = dataSamples + dataSampleStride;
-        currentTimeSample = timeSamples + 1;
-    }
-
-    PointerCoords pointerCoords[MAX_POINTERS];
+    jlong sampleEventTime = *(srcEventTimeNanoSamples++);
+    PointerCoords samplePointerCoords[MAX_POINTERS];
     for (jint j = 0; j < numPointers; j++) {
-        pointerCoords[j].x = *(currentDataSample++);
-        pointerCoords[j].y = *(currentDataSample++);
-        pointerCoords[j].pressure = *(currentDataSample++);
-        pointerCoords[j].size = *(currentDataSample++);
+        samplePointerCoords[j].x = *(srcDataSamples++);
+        samplePointerCoords[j].y = *(srcDataSamples++);
+        samplePointerCoords[j].pressure = *(srcDataSamples++);
+        samplePointerCoords[j].size = *(srcDataSamples++);
     }
 
     event->initialize(deviceId, nature, action, edgeFlags, metaState,
-            rawX, rawY, xPrecision, yPrecision,
-            milliseconds_to_nanoseconds(downTime), eventTimeNano,
-            numPointers, pointerIdentifiers, pointerCoords);
+            xOffset, yOffset, xPrecision, yPrecision, downTimeNano, sampleEventTime,
+            numPointers, pointerIdentifiers, samplePointerCoords);
 
-    while (numHistoricalSamples > 0) {
-        numHistoricalSamples -= 1;
-        if (numHistoricalSamples == 0) {
-            currentDataSample = dataSamples;
-            currentTimeSample = timeSamples;
-        }
-
-        nsecs_t sampleEventTime = milliseconds_to_nanoseconds(*(currentTimeSample++));
-
+    for (jint i = 1; i < numSamples; i++) {
+        sampleEventTime = *(srcEventTimeNanoSamples++);
         for (jint j = 0; j < numPointers; j++) {
-            pointerCoords[j].x = *(currentDataSample++);
-            pointerCoords[j].y = *(currentDataSample++);
-            pointerCoords[j].pressure = *(currentDataSample++);
-            pointerCoords[j].size = *(currentDataSample++);
+            samplePointerCoords[j].x = *(srcDataSamples++);
+            samplePointerCoords[j].y = *(srcDataSamples++);
+            samplePointerCoords[j].pressure = *(srcDataSamples++);
+            samplePointerCoords[j].size = *(srcDataSamples++);
         }
-
-        event->addSample(sampleEventTime, pointerCoords);
+        event->addSample(sampleEventTime, samplePointerCoords);
     }
 
     env->ReleasePrimitiveArrayCritical(pointerIdentifierArray, pointerIdentifiers, JNI_ABORT);
     env->ReleasePrimitiveArrayCritical(dataSampleArray, dataSamples, JNI_ABORT);
-    env->ReleasePrimitiveArrayCritical(timeSampleArray, timeSamples, JNI_ABORT);
+    env->ReleasePrimitiveArrayCritical(eventTimeNanoSampleArray, eventTimeNanoSamples, JNI_ABORT);
 
     env->DeleteLocalRef(pointerIdentifierArray);
     env->DeleteLocalRef(dataSampleArray);
-    env->DeleteLocalRef(timeSampleArray);
+    env->DeleteLocalRef(eventTimeNanoSampleArray);
 }
 
 void android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
@@ -273,16 +242,14 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     GET_METHOD_ID(gMotionEventClassInfo.recycle, gMotionEventClassInfo.clazz,
             "recycle", "()V");
 
-    GET_FIELD_ID(gMotionEventClassInfo.mDownTime, gMotionEventClassInfo.clazz,
-            "mDownTime", "J");
-    GET_FIELD_ID(gMotionEventClassInfo.mEventTimeNano, gMotionEventClassInfo.clazz,
-            "mEventTimeNano", "J");
+    GET_FIELD_ID(gMotionEventClassInfo.mDownTimeNano, gMotionEventClassInfo.clazz,
+            "mDownTimeNano", "J");
     GET_FIELD_ID(gMotionEventClassInfo.mAction, gMotionEventClassInfo.clazz,
             "mAction", "I");
-    GET_FIELD_ID(gMotionEventClassInfo.mRawX, gMotionEventClassInfo.clazz,
-            "mRawX", "F");
-    GET_FIELD_ID(gMotionEventClassInfo.mRawY, gMotionEventClassInfo.clazz,
-            "mRawY", "F");
+    GET_FIELD_ID(gMotionEventClassInfo.mXOffset, gMotionEventClassInfo.clazz,
+            "mXOffset", "F");
+    GET_FIELD_ID(gMotionEventClassInfo.mYOffset, gMotionEventClassInfo.clazz,
+            "mYOffset", "F");
     GET_FIELD_ID(gMotionEventClassInfo.mXPrecision, gMotionEventClassInfo.clazz,
             "mXPrecision", "F");
     GET_FIELD_ID(gMotionEventClassInfo.mYPrecision, gMotionEventClassInfo.clazz,
@@ -301,8 +268,12 @@ int register_android_view_MotionEvent(JNIEnv* env) {
             "mPointerIdentifiers", "[I");
     GET_FIELD_ID(gMotionEventClassInfo.mDataSamples, gMotionEventClassInfo.clazz,
             "mDataSamples", "[F");
-    GET_FIELD_ID(gMotionEventClassInfo.mTimeSamples, gMotionEventClassInfo.clazz,
-            "mTimeSamples", "[J");
+    GET_FIELD_ID(gMotionEventClassInfo.mEventTimeNanoSamples, gMotionEventClassInfo.clazz,
+            "mEventTimeNanoSamples", "[J");
+    GET_FIELD_ID(gMotionEventClassInfo.mLastDataSampleIndex, gMotionEventClassInfo.clazz,
+            "mLastDataSampleIndex", "I");
+    GET_FIELD_ID(gMotionEventClassInfo.mLastEventTimeNanoSampleIndex, gMotionEventClassInfo.clazz,
+            "mLastEventTimeNanoSampleIndex", "I");
 
     return 0;
 }

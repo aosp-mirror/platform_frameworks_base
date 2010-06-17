@@ -379,8 +379,7 @@ void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
 
     mReusableMotionEvent.initialize(entry->deviceId, entry->nature, entry->action,
             entry->edgeFlags, entry->metaState,
-            entry->firstSample.pointerCoords[0].x, entry->firstSample.pointerCoords[0].y,
-            entry->xPrecision, entry->yPrecision,
+            0, 0, entry->xPrecision, entry->yPrecision,
             entry->downTime, entry->eventTime, entry->pointerCount, entry->pointerIds,
             entry->firstSample.pointerCoords);
 

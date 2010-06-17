@@ -121,9 +121,9 @@ static jobjectArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv*
     String8 name(nameChars);
     env->ReleaseStringUTFChars(nameObj, nameChars);
 
-    InputChannel* serverChannel;
-    InputChannel* clientChannel;
-    status_t result = InputChannel::openInputChannelPair(name, & serverChannel, & clientChannel);
+    sp<InputChannel> serverChannel;
+    sp<InputChannel> clientChannel;
+    status_t result = InputChannel::openInputChannelPair(name, serverChannel, clientChannel);
 
     if (result) {
         LOGE("Could not open input channel pair.  status=%d", result);

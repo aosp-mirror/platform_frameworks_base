@@ -12,8 +12,7 @@ public:
 };
 
 TEST_F(InputDispatcherTest, Dummy) {
-    SCOPED_TRACE("Trace");
-    ASSERT_FALSE(true);
+    // TODO
 }
 
 } // namespace android

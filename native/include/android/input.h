@@ -394,6 +394,18 @@ int64_t motion_event_get_down_time(const input_event_t* motion_event);
  * in the java.lang.System.nanoTime() time base. */
 int64_t motion_event_get_event_time(const input_event_t* motion_event);
 
+/* Get the X coordinate offset.
+ * For touch events on the screen, this is the delta that was added to the raw
+ * screen coordinates to adjust for the absolute position of the containing windows
+ * and views. */
+float motion_event_get_x_offset(const input_event_t* motion_event);
+
+/* Get the precision of the Y coordinates being reported.
+ * For touch events on the screen, this is the delta that was added to the raw
+ * screen coordinates to adjust for the absolute position of the containing windows
+ * and views. */
+float motion_event_get_y_offset(const input_event_t* motion_event);
+
 /* Get the precision of the X coordinates being reported.
  * You can multiply this number with an X coordinate sample to find the
  * actual hardware value of the X coordinate. */
@@ -414,17 +426,17 @@ size_t motion_event_get_pointer_count(const input_event_t* motion_event);
  * going up and down since the start of the current gesture. */
 int32_t motion_event_get_pointer_id(const input_event_t* motion_event, size_t pointer_index);
 
-/* Get the original raw X coordinate of this event.  For touch
- * events on the screen, this is the original location of the event
+/* Get the original raw X coordinate of this event.
+ * For touch events on the screen, this is the original location of the event
  * on the screen, before it had been adjusted for the containing window
  * and views. */
-float motion_event_get_raw_x(const input_event_t* motion_event);
+float motion_event_get_raw_x(const input_event_t* motion_event, size_t pointer_index);
 
-/* Get the original raw X coordinate of this event.  For touch
- * events on the screen, this is the original location of the event
+/* Get the original raw X coordinate of this event.
+ * For touch events on the screen, this is the original location of the event
  * on the screen, before it had been adjusted for the containing window
  * and views. */
-float motion_event_get_raw_y(const input_event_t* motion_event);
+float motion_event_get_raw_y(const input_event_t* motion_event, size_t pointer_index);
 
 /* Get the current X coordinate of this event for the given pointer index.
  * Whole numbers are pixels; the value may have a fraction for input devices
@@ -460,6 +472,24 @@ size_t motion_event_get_history_size(const input_event_t* motion_event);
  * the previous event, in the java.lang.System.nanoTime() time base. */
 int64_t motion_event_get_historical_event_time(input_event_t* motion_event,
         size_t history_index);
+
+/* Get the historical raw X coordinate of this event for the given pointer index that
+ * occurred between this event and the previous motion event.
+ * For touch events on the screen, this is the original location of the event
+ * on the screen, before it had been adjusted for the containing window
+ * and views.
+ * Whole numbers are pixels; the value may have a fraction for input devices
+ * that are sub-pixel precise. */
+float motion_event_get_historical_raw_x(const input_event_t* motion_event, size_t pointer_index);
+
+/* Get the historical raw Y coordinate of this event for the given pointer index that
+ * occurred between this event and the previous motion event.
+ * For touch events on the screen, this is the original location of the event
+ * on the screen, before it had been adjusted for the containing window
+ * and views.
+ * Whole numbers are pixels; the value may have a fraction for input devices
+ * that are sub-pixel precise. */
+float motion_event_get_historical_raw_y(const input_event_t* motion_event, size_t pointer_index);
 
 /* Get the historical X coordinate of this event for the given pointer index that
  * occurred between this event and the previous motion event.
