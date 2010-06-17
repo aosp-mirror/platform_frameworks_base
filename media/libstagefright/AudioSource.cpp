@@ -33,15 +33,25 @@ namespace android {
 
 AudioSource::AudioSource(
         int inputSource, uint32_t sampleRate, uint32_t channels)
-    : mRecord(new AudioRecord(
-                inputSource, sampleRate, AudioSystem::PCM_16_BIT, channels)),
-      mInitCheck(mRecord->initCheck()),
-      mStarted(false),
+    : mStarted(false),
       mCollectStats(false),
       mTotalReadTimeUs(0),
       mTotalReadBytes(0),
       mTotalReads(0),
       mGroup(NULL) {
+
+    LOGV("sampleRate: %d, channels: %d", sampleRate, channels);
+    uint32_t flags = AudioRecord::RECORD_AGC_ENABLE |
+                     AudioRecord::RECORD_NS_ENABLE  |
+                     AudioRecord::RECORD_IIR_ENABLE;
+
+    mRecord = new AudioRecord(
+                inputSource, sampleRate, AudioSystem::PCM_16_BIT,
+                channels > 1? AudioSystem::CHANNEL_IN_STEREO: AudioSystem::CHANNEL_IN_MONO,
+                4 * kMaxBufferSize / sizeof(int16_t), /* Enable ping-pong buffers */
+                flags);
+
+    mInitCheck = mRecord->initCheck();
 }
 
 AudioSource::~AudioSource() {
