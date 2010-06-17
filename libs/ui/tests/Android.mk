@@ -3,7 +3,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 test_src_files := \
-    InputDispatcher_test.cpp
+    InputChannel_test.cpp \
+    InputDispatcher_test.cpp \
+    InputPublisherAndConsumer_test.cpp
 
 shared_libraries := \
 	libcutils \

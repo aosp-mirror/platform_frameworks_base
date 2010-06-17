@@ -50,8 +50,8 @@ void MotionEvent::initialize(
         int32_t action,
         int32_t edgeFlags,
         int32_t metaState,
-        float rawX,
-        float rawY,
+        float xOffset,
+        float yOffset,
         float xPrecision,
         float yPrecision,
         nsecs_t downTime,
@@ -63,8 +63,8 @@ void MotionEvent::initialize(
     mAction = action;
     mEdgeFlags = edgeFlags;
     mMetaState = metaState;
-    mRawX = rawX;
-    mRawY = rawY;
+    mXOffset = xOffset;
+    mYOffset = yOffset;
     mXPrecision = xPrecision;
     mYPrecision = yPrecision;
     mDownTime = downTime;
@@ -83,13 +83,8 @@ void MotionEvent::addSample(
 }
 
 void MotionEvent::offsetLocation(float xOffset, float yOffset) {
-    if (xOffset != 0 || yOffset != 0) {
-        for (size_t i = 0; i < mSamplePointerCoords.size(); i++) {
-            PointerCoords& pointerCoords = mSamplePointerCoords.editItemAt(i);
-            pointerCoords.x += xOffset;
-            pointerCoords.y += yOffset;
-        }
-    }
+    mXOffset += xOffset;
+    mYOffset += yOffset;
 }
 
 } // namespace android
@@ -163,6 +158,14 @@ int64_t motion_event_get_event_time(const input_event_t* motion_event) {
     return reinterpret_cast<const MotionEvent*>(motion_event)->getEventTime();
 }
 
+float motion_event_get_x_offset(const input_event_t* motion_event) {
+    return reinterpret_cast<const MotionEvent*>(motion_event)->getXOffset();
+}
+
+float motion_event_get_y_offset(const input_event_t* motion_event) {
+    return reinterpret_cast<const MotionEvent*>(motion_event)->getYOffset();
+}
+
 float motion_event_get_x_precision(const input_event_t* motion_event) {
     return reinterpret_cast<const MotionEvent*>(motion_event)->getXPrecision();
 }
@@ -179,12 +182,12 @@ int32_t motion_event_get_pointer_id(const input_event_t* motion_event, size_t po
     return reinterpret_cast<const MotionEvent*>(motion_event)->getPointerId(pointer_index);
 }
 
-float motion_event_get_raw_x(const input_event_t* motion_event) {
-    return reinterpret_cast<const MotionEvent*>(motion_event)->getRawX();
+float motion_event_get_raw_x(const input_event_t* motion_event, size_t pointer_index) {
+    return reinterpret_cast<const MotionEvent*>(motion_event)->getRawX(pointer_index);
 }
 
-float motion_event_get_raw_y(const input_event_t* motion_event) {
-    return reinterpret_cast<const MotionEvent*>(motion_event)->getRawY();
+float motion_event_get_raw_y(const input_event_t* motion_event, size_t pointer_index) {
+    return reinterpret_cast<const MotionEvent*>(motion_event)->getRawY(pointer_index);
 }
 
 float motion_event_get_x(const input_event_t* motion_event, size_t pointer_index) {
@@ -211,6 +214,18 @@ int64_t motion_event_get_historical_event_time(input_event_t* motion_event,
         size_t history_index) {
     return reinterpret_cast<const MotionEvent*>(motion_event)->getHistoricalEventTime(
             history_index);
+}
+
+float motion_event_get_historical_raw_x(input_event_t* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return reinterpret_cast<const MotionEvent*>(motion_event)->getHistoricalRawX(
+            pointer_index, history_index);
+}
+
+float motion_event_get_historical_raw_y(input_event_t* motion_event, size_t pointer_index,
+        size_t history_index) {
+    return reinterpret_cast<const MotionEvent*>(motion_event)->getHistoricalRawY(
+            pointer_index, history_index);
 }
 
 float motion_event_get_historical_x(input_event_t* motion_event, size_t pointer_index,

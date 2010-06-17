@@ -8,13 +8,13 @@
 //#define LOG_NDEBUG 0
 
 // Log debug messages about channel signalling (send signal, receive signal)
-#define DEBUG_CHANNEL_SIGNALS 1
+#define DEBUG_CHANNEL_SIGNALS 0
 
 // Log debug messages whenever InputChannel objects are created/destroyed
-#define DEBUG_CHANNEL_LIFECYCLE 1
+#define DEBUG_CHANNEL_LIFECYCLE 0
 
 // Log debug messages about transport actions (initialize, reset, publish, ...)
-#define DEBUG_TRANSPORT_ACTIONS 1
+#define DEBUG_TRANSPORT_ACTIONS 0
 
 
 #include <cutils/ashmem.h>
@@ -70,7 +70,7 @@ InputChannel::~InputChannel() {
 }
 
 status_t InputChannel::openInputChannelPair(const String8& name,
-        InputChannel** outServerChannel, InputChannel** outClientChannel) {
+        sp<InputChannel>& outServerChannel, sp<InputChannel>& outClientChannel) {
     status_t result;
 
     int serverAshmemFd = ashmem_create_region(name.string(), DEFAULT_MESSAGE_BUFFER_SIZE);
@@ -107,12 +107,12 @@ status_t InputChannel::openInputChannelPair(const String8& name,
                     } else {
                         String8 serverChannelName = name;
                         serverChannelName.append(" (server)");
-                        *outServerChannel = new InputChannel(serverChannelName,
+                        outServerChannel = new InputChannel(serverChannelName,
                                 serverAshmemFd, reverse[0], forward[1]);
 
                         String8 clientChannelName = name;
                         clientChannelName.append(" (client)");
-                        *outClientChannel = new InputChannel(clientChannelName,
+                        outClientChannel = new InputChannel(clientChannelName,
                                 clientAshmemFd, forward[0], reverse[1]);
                         return OK;
                     }
@@ -125,8 +125,8 @@ status_t InputChannel::openInputChannelPair(const String8& name,
         ::close(serverAshmemFd);
     }
 
-    *outServerChannel = NULL;
-    *outClientChannel = NULL;
+    outServerChannel.clear();
+    outClientChannel.clear();
     return result;
 }
 
@@ -153,6 +153,13 @@ status_t InputChannel::receiveSignal(char* outSignal) {
         LOGD("channel '%s' ~ received signal '%c'", mName.string(), *outSignal);
 #endif
         return OK;
+    }
+
+    if (nRead == 0) { // check for EOF
+#if DEBUG_CHANNEL_SIGNALS
+        LOGD("channel '%s' ~ receive signal failed because peer was closed", mName.string());
+#endif
+        return DEAD_OBJECT;
     }
 
     if (errno == EAGAIN) {
@@ -535,13 +542,13 @@ status_t InputConsumer::initialize() {
     return OK;
 }
 
-status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent** event) {
+status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent** outEvent) {
 #if DEBUG_TRANSPORT_ACTIONS
     LOGD("channel '%s' consumer ~ consume",
             mChannel->getName().string());
 #endif
 
-    *event = NULL;
+    *outEvent = NULL;
 
     int ashmemFd = mChannel->getAshmemFd();
     int result = ashmem_pin_region(ashmemFd, 0, 0);
@@ -583,7 +590,7 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent*
 
         populateKeyEvent(keyEvent);
 
-        *event = keyEvent;
+        *outEvent = keyEvent;
         break;
     }
 
@@ -593,7 +600,7 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent*
 
         populateMotionEvent(motionEvent);
 
-        *event = motionEvent;
+        *outEvent = motionEvent;
         break;
     }
 
@@ -655,8 +662,8 @@ void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
             mSharedMessage->motion.action,
             mSharedMessage->motion.edgeFlags,
             mSharedMessage->motion.metaState,
-            mSharedMessage->motion.sampleData[0].coords[0].x,
-            mSharedMessage->motion.sampleData[0].coords[0].y,
+            mSharedMessage->motion.xOffset,
+            mSharedMessage->motion.yOffset,
             mSharedMessage->motion.xPrecision,
             mSharedMessage->motion.yPrecision,
             mSharedMessage->motion.downTime,
@@ -676,9 +683,6 @@ void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
             motionEvent->addSample(sampleData->eventTime, sampleData->coords);
         }
     }
-
-    motionEvent->offsetLocation(mSharedMessage->motion.xOffset,
-            mSharedMessage->motion.yOffset);
 }
 
 } // namespace android

@@ -11,7 +11,7 @@
 #define DEBUG_POLL_AND_WAKE 0
 
 // Debugs callback registration and invocation.
-#define DEBUG_CALLBACKS 1
+#define DEBUG_CALLBACKS 0
 
 #include <cutils/log.h>
 #include <utils/PollLoop.h>
@@ -22,7 +22,7 @@
 namespace android {
 
 PollLoop::PollLoop() :
-        mPolling(false) {
+        mPolling(false), mWaiters(0) {
     openWakePipe();
 }
 
@@ -68,6 +68,9 @@ void PollLoop::closeWakePipe() {
 
 bool PollLoop::pollOnce(int timeoutMillis) {
     mLock.lock();
+    while (mWaiters != 0) {
+        mResume.wait(mLock);
+    }
     mPolling = true;
     mLock.unlock();
 
@@ -156,7 +159,9 @@ bool PollLoop::pollOnce(int timeoutMillis) {
 Done:
     mLock.lock();
     mPolling = false;
-    mAwake.broadcast();
+    if (mWaiters != 0) {
+        mAwake.broadcast();
+    }
     mLock.unlock();
 
     if (result) {
@@ -258,9 +263,14 @@ ssize_t PollLoop::getRequestIndexLocked(int fd) {
 
 void PollLoop::wakeAndLock() {
     mLock.lock();
+    mWaiters += 1;
     while (mPolling) {
         wake();
         mAwake.wait(mLock);
+    }
+    mWaiters -= 1;
+    if (mWaiters == 0) {
+        mResume.signal();
     }
 }
 

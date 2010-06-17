@@ -16,34 +16,6 @@
 
 namespace android {
 
-class Pipe {
-public:
-    int sendFd;
-    int receiveFd;
-
-    Pipe() {
-        int fds[2];
-        ::pipe(fds);
-
-        receiveFd = fds[0];
-        sendFd = fds[1];
-    }
-
-    ~Pipe() {
-        ::close(sendFd);
-        ::close(receiveFd);
-    }
-
-    bool writeSignal() {
-        return ::write(sendFd, "*", 1) == 1;
-    }
-
-    bool readSignal() {
-        char buf[1];
-        return ::read(receiveFd, buf, 1) == 1;
-    }
-};
-
 class DelayedWake : public DelayedTask {
     sp<PollLoop> mPollLoop;
 
@@ -195,7 +167,7 @@ TEST_F(PollLoopTest, PollOnce_WhenZeroTimeoutAndSignalledFD_ImmediatelyInvokesCa
     Pipe pipe;
     StubCallbackHandler handler(true);
 
-    ASSERT_TRUE(pipe.writeSignal());
+    ASSERT_EQ(OK, pipe.writeSignal());
     handler.setCallback(mPollLoop, pipe.receiveFd, POLL_IN);
 
     StopWatch stopWatch("pollOnce");
@@ -243,7 +215,7 @@ TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndSignalledFDBeforeWaiting_Imme
     bool result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
-    ASSERT_TRUE(pipe.readSignal())
+    ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should be approx. zero";
@@ -269,7 +241,7 @@ TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndSignalledFDWhileWaiting_Promp
     bool result = mPollLoop->pollOnce(1000);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
-    ASSERT_TRUE(pipe.readSignal())
+    ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal signal delay";
@@ -295,7 +267,7 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackAddedThenRemoved_CallbackShouldNotBeIn
     bool result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
-    ASSERT_TRUE(pipe.readSignal())
+    ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal timeout because FD was no longer registered";
@@ -318,7 +290,7 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackReturnsFalse_CallbackShouldNotBeInvoke
     bool result = mPollLoop->pollOnce(0);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
-    ASSERT_TRUE(pipe.readSignal())
+    ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal zero because FD was already signalled";
@@ -334,7 +306,7 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackReturnsFalse_CallbackShouldNotBeInvoke
     result = mPollLoop->pollOnce(0);
     elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
-    ASSERT_TRUE(pipe.readSignal())
+    ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal zero because timeout was zero";
@@ -382,7 +354,7 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackAddedTwice_OnlySecondCallbackShouldBeI
     bool result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
-    ASSERT_TRUE(pipe.readSignal())
+    ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. zero because FD was already signalled";

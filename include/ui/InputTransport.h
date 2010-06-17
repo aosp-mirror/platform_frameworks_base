@@ -62,7 +62,7 @@ public:
      * Returns OK on success.
      */
     static status_t openInputChannelPair(const String8& name,
-            InputChannel** outServerChannel, InputChannel** outClientChannel);
+            sp<InputChannel>& outServerChannel, sp<InputChannel>& outClientChannel);
 
     inline String8 getName() const { return mName; }
     inline int32_t getAshmemFd() const { return mAshmemFd; }
@@ -72,7 +72,8 @@ public:
     /* Sends a signal to the other endpoint.
      *
      * Returns OK on success.
-     * Errors probably indicate that the channel is broken.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
+     * Other errors probably indicate that the channel is broken.
      */
     status_t sendSignal(char signal);
 
@@ -81,6 +82,7 @@ public:
      *
      * Returns OK on success.
      * Returns WOULD_BLOCK if there is no signal present.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
      * Other errors probably indicate that the channel is broken.
      */
     status_t receiveSignal(char* outSignal);
@@ -298,7 +300,7 @@ public:
      * Returns INVALID_OPERATION if there is no currently published event.
      * Returns NO_MEMORY if the event could not be created.
      */
-    status_t consume(InputEventFactoryInterface* factory, InputEvent** event);
+    status_t consume(InputEventFactoryInterface* factory, InputEvent** outEvent);
 
     /* Sends a finished signal to the publisher to inform it that the current message is
      * finished processing.

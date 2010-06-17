@@ -114,8 +114,10 @@ private:
     };
 
     Mutex mLock;
-    Condition mAwake;
     bool mPolling;
+    uint32_t mWaiters;
+    Condition mAwake;
+    Condition mResume;
 
     int mWakeReadPipeFd;
     int mWakeWritePipeFd;
