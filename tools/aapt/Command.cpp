@@ -1000,7 +1000,7 @@ int doDump(Bundle* bundle)
             }
 
             // Bluetooth-related compatibility logic
-            if (!specBluetoothFeature && hasBluetoothPermission) {
+            if (!specBluetoothFeature && hasBluetoothPermission && (targetSdk > 4)) {
                 // if app takes a Bluetooth permission but does not request the Bluetooth
                 // feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.bluetooth'\n");
