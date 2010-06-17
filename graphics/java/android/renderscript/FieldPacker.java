@@ -40,6 +40,10 @@ public class FieldPacker {
         mPos = i;
     }
 
+    public void skip(int i) {
+        mPos += i;
+    }
+
     public void addI8(byte v) {
         mData[mPos++] = v;
     }

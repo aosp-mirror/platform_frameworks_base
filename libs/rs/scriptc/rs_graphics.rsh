@@ -40,9 +40,6 @@ extern void rsgClearDepth(float);
 ///////////////////////////////////////////////////////
 // misc
 extern void color(float, float, float, float);
-extern void hsb(float, float, float, float);
-extern void hsbToRgb(float, float, float, float*);
-extern int hsbToAbgr(float, float, float, float);
 
 #endif
 
