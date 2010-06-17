@@ -97,7 +97,8 @@ public abstract class LayoutInflater {
          * 
          * @return True if this class is allowed to be inflated, or false otherwise
          */
-        boolean onLoadClass(Class<?> clazz);
+        @SuppressWarnings("unchecked")
+        boolean onLoadClass(Class clazz);
     }
     
     public interface Factory {

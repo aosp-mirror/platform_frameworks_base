@@ -990,7 +990,7 @@ public class RemoteViews implements Parcelable, Filter {
      * 
      * @see android.view.LayoutInflater.Filter#onLoadClass(java.lang.Class)
      */
-    public boolean onLoadClass(Class<?> clazz) {
+    public boolean onLoadClass(Class clazz) {
         return clazz.isAnnotationPresent(RemoteView.class);
     }
     

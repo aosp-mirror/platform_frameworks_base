@@ -58,7 +58,7 @@ public class AppWidgetHostView extends FrameLayout {
     // When we're inflating the initialLayout for a AppWidget, we only allow
     // views that are allowed in RemoteViews.
     static final LayoutInflater.Filter sInflaterFilter = new LayoutInflater.Filter() {
-        public boolean onLoadClass(Class<?> clazz) {
+        public boolean onLoadClass(Class clazz) {
             return clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
         }
     };
