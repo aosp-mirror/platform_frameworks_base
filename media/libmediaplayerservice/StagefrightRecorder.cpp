@@ -30,6 +30,7 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
+#include <media/MediaProfiles.h>
 #include <camera/ICamera.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
@@ -561,6 +562,74 @@ status_t StagefrightRecorder::startAMRRecording() {
     return OK;
 }
 
+void StagefrightRecorder::clipVideoFrameRate() {
+    LOGV("clipVideoFrameRate: encoder %d", mVideoEncoder);
+    int minFrameRate = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.fps.min", mVideoEncoder);
+    int maxFrameRate = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.fps.max", mVideoEncoder);
+    if (mFrameRate < minFrameRate) {
+        LOGW("Intended video encoding frame rate (%d fps) is too small"
+             " and will be set to (%d fps)", mFrameRate, minFrameRate);
+        mFrameRate = minFrameRate;
+    } else if (mFrameRate > maxFrameRate) {
+        LOGW("Intended video encoding frame rate (%d fps) is too large"
+             " and will be set to (%d fps)", mFrameRate, maxFrameRate);
+        mFrameRate = maxFrameRate;
+    }
+}
+
+void StagefrightRecorder::clipVideoBitRate() {
+    LOGV("clipVideoBitRate: encoder %d", mVideoEncoder);
+    int minBitRate = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.bps.min", mVideoEncoder);
+    int maxBitRate = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.bps.max", mVideoEncoder);
+    if (mVideoBitRate < minBitRate) {
+        LOGW("Intended video encoding bit rate (%d bps) is too small"
+             " and will be set to (%d bps)", mVideoBitRate, minBitRate);
+        mVideoBitRate = minBitRate;
+    } else if (mVideoBitRate > maxBitRate) {
+        LOGW("Intended video encoding bit rate (%d bps) is too large"
+             " and will be set to (%d bps)", mVideoBitRate, maxBitRate);
+        mVideoBitRate = maxBitRate;
+    }
+}
+
+void StagefrightRecorder::clipVideoFrameWidth() {
+    LOGV("clipVideoFrameWidth: encoder %d", mVideoEncoder);
+    int minFrameWidth = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.width.min", mVideoEncoder);
+    int maxFrameWidth = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.width.max", mVideoEncoder);
+    if (mVideoWidth < minFrameWidth) {
+        LOGW("Intended video encoding frame width (%d) is too small"
+             " and will be set to (%d)", mVideoWidth, minFrameWidth);
+        mVideoWidth = minFrameWidth;
+    } else if (mVideoWidth > maxFrameWidth) {
+        LOGW("Intended video encoding frame width (%d) is too large"
+             " and will be set to (%d)", mVideoWidth, maxFrameWidth);
+        mVideoWidth = maxFrameWidth;
+    }
+}
+
+void StagefrightRecorder::clipVideoFrameHeight() {
+    LOGV("clipVideoFrameHeight: encoder %d", mVideoEncoder);
+    int minFrameHeight = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.height.min", mVideoEncoder);
+    int maxFrameHeight = mEncoderProfiles->getVideoEncoderParamByName(
+                        "enc.vid.height.max", mVideoEncoder);
+    if (mVideoHeight < minFrameHeight) {
+        LOGW("Intended video encoding frame height (%d) is too small"
+             " and will be set to (%d)", mVideoHeight, minFrameHeight);
+        mVideoHeight = minFrameHeight;
+    } else if (mVideoHeight > maxFrameHeight) {
+        LOGW("Intended video encoding frame height (%d) is too large"
+             " and will be set to (%d)", mVideoHeight, maxFrameHeight);
+        mVideoHeight = maxFrameHeight;
+    }
+}
+
 status_t StagefrightRecorder::startMPEG4Recording() {
     mWriter = new MPEG4Writer(dup(mOutputFd));
 
@@ -586,6 +655,11 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
+
+        clipVideoBitRate();
+        clipVideoFrameRate();
+        clipVideoFrameWidth();
+        clipVideoFrameHeight();
 
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         if (mCamera == 0) {
@@ -748,6 +822,7 @@ status_t StagefrightRecorder::reset() {
     mAudioBitRate  = 12200;
     mInterleaveDurationUs = 0;
     mIFramesInterval = 1;
+    mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;
     mFlags = 0;
