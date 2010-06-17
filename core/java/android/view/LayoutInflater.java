@@ -16,14 +16,14 @@
 
 package android.view;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -71,11 +71,11 @@ public abstract class LayoutInflater {
 
     private final Object[] mConstructorArgs = new Object[2];
 
-    private static final Class[] mConstructorSignature = new Class[] {
+    private static final Class<?>[] mConstructorSignature = new Class[] {
             Context.class, AttributeSet.class};
 
-    private static final HashMap<String, Constructor> sConstructorMap =
-            new HashMap<String, Constructor>();
+    private static final HashMap<String, Constructor<? extends View>> sConstructorMap =
+            new HashMap<String, Constructor<? extends View>>();
     
     private HashMap<String, Boolean> mFilterMap;
 
@@ -97,7 +97,7 @@ public abstract class LayoutInflater {
          * 
          * @return True if this class is allowed to be inflated, or false otherwise
          */
-        boolean onLoadClass(Class clazz);
+        boolean onLoadClass(Class<?> clazz);
     }
     
     public interface Factory {
@@ -453,18 +453,18 @@ public abstract class LayoutInflater {
      * @param name The full name of the class to be instantiated.
      * @param attrs The XML attributes supplied for this instance.
      * 
-     * @return View The newly instantied view, or null.
+     * @return View The newly instantiated view, or null.
      */
     public final View createView(String name, String prefix, AttributeSet attrs)
             throws ClassNotFoundException, InflateException {
-        Constructor constructor = sConstructorMap.get(name);
-        Class clazz = null;
+        Constructor<? extends View> constructor = sConstructorMap.get(name);
+        Class<? extends View> clazz = null;
 
         try {
             if (constructor == null) {
                 // Class not found in the cache, see if it's real, and try to add it
                 clazz = mContext.getClassLoader().loadClass(
-                        prefix != null ? (prefix + name) : name);
+                        prefix != null ? (prefix + name) : name).asSubclass(View.class);
                 
                 if (mFilter != null && clazz != null) {
                     boolean allowed = mFilter.onLoadClass(clazz);
@@ -482,7 +482,7 @@ public abstract class LayoutInflater {
                     if (allowedState == null) {
                         // New class -- remember whether it is allowed
                         clazz = mContext.getClassLoader().loadClass(
-                                prefix != null ? (prefix + name) : name);
+                                prefix != null ? (prefix + name) : name).asSubclass(View.class);
                         
                         boolean allowed = clazz != null && mFilter.onLoadClass(clazz);
                         mFilterMap.put(name, allowed);
@@ -497,7 +497,7 @@ public abstract class LayoutInflater {
 
             Object[] args = mConstructorArgs;
             args[1] = attrs;
-            return (View) constructor.newInstance(args);
+            return constructor.newInstance(args);
 
         } catch (NoSuchMethodException e) {
             InflateException ie = new InflateException(attrs.getPositionDescription()
@@ -506,6 +506,13 @@ public abstract class LayoutInflater {
             ie.initCause(e);
             throw ie;
 
+        } catch (ClassCastException e) {
+            // If loaded class is not a View subclass
+            InflateException ie = new InflateException(attrs.getPositionDescription()
+                    + ": Class is not a View "
+                    + (prefix != null ? (prefix + name) : name));
+            ie.initCause(e);
+            throw ie;
         } catch (ClassNotFoundException e) {
             // If loadClass fails, we should propagate the exception.
             throw e;
@@ -519,7 +526,7 @@ public abstract class LayoutInflater {
     }
 
     /**
-     * Throw an excpetion because the specified class is not allowed to be inflated.
+     * Throw an exception because the specified class is not allowed to be inflated.
      */
     private void failNotAllowed(String name, String prefix, AttributeSet attrs) {
         InflateException ie = new InflateException(attrs.getPositionDescription()

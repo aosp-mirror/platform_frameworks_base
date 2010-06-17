@@ -23,9 +23,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.SystemClock;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -58,7 +58,7 @@ public class AppWidgetHostView extends FrameLayout {
     // When we're inflating the initialLayout for a AppWidget, we only allow
     // views that are allowed in RemoteViews.
     static final LayoutInflater.Filter sInflaterFilter = new LayoutInflater.Filter() {
-        public boolean onLoadClass(Class clazz) {
+        public boolean onLoadClass(Class<?> clazz) {
             return clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
         }
     };
@@ -276,6 +276,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
+    @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (CROSSFADE) {
             int alpha;

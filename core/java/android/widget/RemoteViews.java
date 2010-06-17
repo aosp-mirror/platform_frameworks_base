@@ -60,12 +60,12 @@ public class RemoteViews implements Parcelable, Filter {
      * The package name of the package containing the layout 
      * resource. (Added to the parcel)
      */
-    private String mPackage;
+    private final String mPackage;
     
     /**
      * The resource ID of the layout file. (Added to the parcel)
      */
-    private int mLayoutId;
+    private final int mLayoutId;
 
     /**
      * An array of actions to perform on the view tree once it has been
@@ -569,6 +569,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    @Override
     public RemoteViews clone() {
         final RemoteViews that = new RemoteViews(mPackage, mLayoutId);
         if (mActions != null) {
@@ -989,7 +990,7 @@ public class RemoteViews implements Parcelable, Filter {
      * 
      * @see android.view.LayoutInflater.Filter#onLoadClass(java.lang.Class)
      */
-    public boolean onLoadClass(Class clazz) {
+    public boolean onLoadClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(RemoteView.class);
     }
     
