@@ -83,10 +83,6 @@ public class SplitActionBar extends ActionBar {
         mActionView.setBackgroundDrawable(d);
     }
 
-    public void setDividerDrawable(Drawable d) {
-        mActionView.setDividerDrawable(d);
-    }
-
     public View getCustomNavigationView() {
         return mActionView.getCustomNavigationView();
     }
@@ -106,9 +102,4 @@ public class SplitActionBar extends ActionBar {
     public int getDisplayOptions() {
         return mActionView.getDisplayOptions();
     }
-
-    public void updateActionMenu() {
-        mActionView.updateActionMenu();
-    }
-
 }

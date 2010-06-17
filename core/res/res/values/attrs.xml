@@ -397,8 +397,12 @@
         <attr name="horizontalScrollViewStyle" format="reference" />
         <!-- Default Spinner style. -->
         <attr name="spinnerStyle" format="reference" />
-        <!-- Dropdown Spinner style. -->
+        <!-- Default dropdown Spinner style. -->
         <attr name="dropDownSpinnerStyle" format="reference" />
+        <!-- Default ActionBar dropdown style. -->
+        <attr name="actionDropDownStyle" format="reference" />
+        <!-- Default action button style. -->
+        <attr name="actionButtonStyle" format="reference" />
         <!-- Default Star style. -->
         <attr name="starStyle" format="reference" />
         <!-- Default TabWidget style. -->
@@ -3286,6 +3290,13 @@
         <!-- Name of a method on the Context used to inflate the menu that will be
              called when the item is clicked. -->
         <attr name="onClick" />
+
+        <!-- How this item should display in the Action Bar, if present. -->
+        <attr name="showAsAction" format="enum">
+            <enum name="never" value="0" />
+            <enum name="ifRoom" value="1" />
+            <enum name="always" value="2" />
+        </attr>
 
     </declare-styleable>
 

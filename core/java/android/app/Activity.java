@@ -936,6 +936,10 @@ public class Activity extends ContextThemeWrapper
             mTitleReady = true;
             onTitleChanged(getTitle(), getTitleColor());
         }
+        if (mWindow != null && mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
+            // Invalidate the action bar menu so that it can initialize properly. 
+            mWindow.invalidatePanelMenu(Window.FEATURE_ACTION_BAR);
+        }
         mCalled = true;
     }
 

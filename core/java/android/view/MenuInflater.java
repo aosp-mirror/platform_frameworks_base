@@ -241,6 +241,14 @@ public class MenuInflater {
         private boolean itemVisible;
         private boolean itemEnabled;
         
+        /**
+         * Sync to attrs.xml enum:
+         * - 0: never
+         * - 1: ifRoom
+         * - 2: always
+         */
+        private int itemShowAsAction;
+        
         private String itemListenerMethodName;
         
         private static final int defaultGroupId = NO_ID;
@@ -314,6 +322,7 @@ public class MenuInflater {
             itemChecked = a.getBoolean(com.android.internal.R.styleable.MenuItem_checked, defaultItemChecked);
             itemVisible = a.getBoolean(com.android.internal.R.styleable.MenuItem_visible, groupVisible);
             itemEnabled = a.getBoolean(com.android.internal.R.styleable.MenuItem_enabled, groupEnabled);
+            itemShowAsAction = a.getInt(com.android.internal.R.styleable.MenuItem_showAsAction, 0);
             itemListenerMethodName = a.getString(com.android.internal.R.styleable.MenuItem_onClick);
             
             a.recycle();
@@ -344,8 +353,12 @@ public class MenuInflater {
                         new InflatedOnMenuItemClickListener(mContext, itemListenerMethodName));
             }
 
-            if (itemCheckable >= 2 && item instanceof MenuItemImpl) {
-                ((MenuItemImpl) item).setExclusiveCheckable(true);
+            if (item instanceof MenuItemImpl) {
+                MenuItemImpl impl = (MenuItemImpl) item;
+                if (itemCheckable >= 2) {
+                    impl.setExclusiveCheckable(true);
+                }
+                impl.setShowAsAction(itemShowAsAction);
             }
         }
         

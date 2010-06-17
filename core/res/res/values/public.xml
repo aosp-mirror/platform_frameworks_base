@@ -1294,10 +1294,15 @@
   <public type="attr" name="hardwareAccelerated" />
   <public type="attr" name="measureWithLargestChild" />
   <public type="attr" name="animateFirstView" />
+  <public type="attr" name="dropDownSpinnerStyle" />
+  <public type="attr" name="actionDropDownStyle" />
+  <public type="attr" name="actionButtonStyle" />
+  <public type="attr" name="showAsAction" />
 
   <public type="id" name="home" />
 
   <public type="style" name="Theme.WithActionBar" />
   <public type="style" name="Widget.Spinner.DropDown" />
+  <public type="style" name="Widget.ActionButton" />
 
 </resources>
