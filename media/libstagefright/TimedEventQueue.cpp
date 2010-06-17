@@ -22,11 +22,13 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "TimedEventQueue"
 #include <utils/Log.h>
+#include <utils/threads.h>
 
 #include "include/TimedEventQueue.h"
 
 #include <sys/prctl.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 
 #include <media/stagefright/MediaDebug.h>
 
@@ -206,6 +208,7 @@ void *TimedEventQueue::ThreadWrapper(void *me) {
     vm->AttachCurrentThread(&env, NULL);
 #endif
 
+    setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_FOREGROUND);
     static_cast<TimedEventQueue *>(me)->threadEntry();
 
 #ifdef ANDROID_SIMULATOR
