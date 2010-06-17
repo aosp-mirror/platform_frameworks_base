@@ -54,7 +54,7 @@ class TextLine {
     private char[] mChars;
     private boolean mCharsValid;
     private Spanned mSpanned;
-    private TextPaint mWorkPaint = new TextPaint();
+    private final TextPaint mWorkPaint = new TextPaint();
 
     private static TextLine[] cached = new TextLine[3];
 
@@ -658,7 +658,7 @@ class TextLine {
                     flags, offset, cursorOpt);
         } else {
             return wp.getTextRunCursor(mText, mStart + spanStart,
-                    mStart + spanLimit, flags, mStart + offset, cursorOpt);
+                    mStart + spanLimit, flags, mStart + offset, cursorOpt) - mStart;
         }
     }
 
