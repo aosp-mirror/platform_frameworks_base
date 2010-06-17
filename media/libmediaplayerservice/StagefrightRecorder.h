@@ -26,6 +26,7 @@ namespace android {
 class Camera;
 struct MediaSource;
 struct MediaWriter;
+class MediaProfiles;
 
 struct StagefrightRecorder : public MediaRecorderBase {
     StagefrightRecorder();
@@ -84,6 +85,8 @@ private:
     int mOutputFd;
     int32_t mFlags;
 
+    MediaProfiles *mEncoderProfiles;
+
     status_t startMPEG4Recording();
     status_t startAMRRecording();
     status_t startAACRecording();
@@ -96,6 +99,10 @@ private:
     status_t setParamInterleaveDuration(int32_t durationUs);
     status_t setParamIFramesInterval(int32_t interval);
     status_t setParamMaxDurationOrFileSize(int64_t limit, bool limit_is_duration);
+    void clipVideoBitRate();
+    void clipVideoFrameRate();
+    void clipVideoFrameWidth();
+    void clipVideoFrameHeight();
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);
