@@ -78,7 +78,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         try {
             mDatabase.setConnectionPoolSize(0);
             fail("IllegalStateException expected");
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("less than the current max value"));
         }
         // set pool size to a valid value
@@ -88,7 +88,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         try {
             mDatabase.setConnectionPoolSize(1);
             fail("IllegalStateException expected");
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("less than the current max value"));
         }
     }
