@@ -440,7 +440,7 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
         new AudioSource(
                 mAudioSource,
                 mSampleRate,
-                AudioSystem::CHANNEL_IN_MONO);
+                mAudioChannels);
 
     status_t err = audioSource->initCheck();
 
