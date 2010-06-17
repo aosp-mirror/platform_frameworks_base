@@ -41,9 +41,11 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Class that lets you access the device's sensors. Get an instance of this
- * class by calling {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with an argument of {@link android.content.Context#SENSOR_SERVICE}.
+ * SensorManager lets you access the device's {@link android.hardware.Sensor
+ * sensors}. Get an instance of this class by calling
+ * {@link android.content.Context#getSystemService(java.lang.String)
+ * Context.getSystemService()} with the argument
+ * {@link android.content.Context#SENSOR_SERVICE}.
  */
 public class SensorManager
 {
@@ -53,172 +55,220 @@ public class SensorManager
     /* NOTE: sensor IDs must be a power of 2 */
 
     /**
-     * A constant describing an orientation sensor.
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing an orientation sensor. See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_ORIENTATION = 1 << 0;
 
     /**
-     * A constant describing an accelerometer.
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing an accelerometer. See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_ACCELEROMETER = 1 << 1;
 
     /**
-     * A constant describing a temperature sensor
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing a temperature sensor See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_TEMPERATURE = 1 << 2;
 
     /**
-     * A constant describing a magnetic sensor
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing a magnetic sensor See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_MAGNETIC_FIELD = 1 << 3;
 
     /**
-     * A constant describing an ambient light sensor
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing an ambient light sensor See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_LIGHT = 1 << 4;
 
     /**
-     * A constant describing a proximity sensor
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing a proximity sensor See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_PROXIMITY = 1 << 5;
 
     /**
-     * A constant describing a Tricorder
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing a Tricorder See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_TRICORDER = 1 << 6;
 
     /**
-     * A constant describing an orientation sensor.
-     * See {@link android.hardware.SensorListener SensorListener} for more details.
+     * A constant describing an orientation sensor. See
+     * {@link android.hardware.SensorListener SensorListener} for more details.
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_ORIENTATION_RAW = 1 << 7;
 
-    /** A constant that includes all sensors
+    /**
+     * A constant that includes all sensors
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_ALL = 0x7F;
 
-    /** Smallest sensor ID 
+    /**
+     * Smallest sensor ID
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_MIN = SENSOR_ORIENTATION;
 
-    /** Largest sensor ID
+    /**
+     * Largest sensor ID
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int SENSOR_MAX = ((SENSOR_ALL + 1)>>1);
 
 
-    /** Index of the X value in the array returned by
+    /**
+     * Index of the X value in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int DATA_X = 0;
-    /** Index of the Y value in the array returned by
+
+    /**
+     * Index of the Y value in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int DATA_Y = 1;
-    /** Index of the Z value in the array returned by
+
+    /**
+     * Index of the Z value in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int DATA_Z = 2;
 
-    /** Offset to the untransformed values in the array returned by
+    /**
+     * Offset to the untransformed values in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int RAW_DATA_INDEX = 3;
 
-    /** Index of the untransformed X value in the array returned by
+    /**
+     * Index of the untransformed X value in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int RAW_DATA_X = 3;
-    /** Index of the untransformed Y value in the array returned by
+
+    /**
+     * Index of the untransformed Y value in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int RAW_DATA_Y = 4;
-    /** Index of the untransformed Z value in the array returned by
+
+    /**
+     * Index of the untransformed Z value in the array returned by
      * {@link android.hardware.SensorListener#onSensorChanged}
+     * 
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
     public static final int RAW_DATA_Z = 5;
 
-
     /** Standard gravity (g) on Earth. This value is equivalent to 1G */
     public static final float STANDARD_GRAVITY = 9.80665f;
 
-    /** values returned by the accelerometer in various locations in the universe.
-     * all values are in SI units (m/s^2) */
+    /** Sun's gravity in SI units (m/s^2) */
     public static final float GRAVITY_SUN             = 275.0f;
+    /** Mercury's gravity in SI units (m/s^2) */
     public static final float GRAVITY_MERCURY         = 3.70f;
+    /** Venus' gravity in SI units (m/s^2) */
     public static final float GRAVITY_VENUS           = 8.87f;
+    /** Earth's gravity in SI units (m/s^2) */
     public static final float GRAVITY_EARTH           = 9.80665f;
+    /** The Moon's gravity in SI units (m/s^2) */
     public static final float GRAVITY_MOON            = 1.6f;
+    /** Mars' gravity in SI units (m/s^2) */
     public static final float GRAVITY_MARS            = 3.71f;
+    /** Jupiter's gravity in SI units (m/s^2) */
     public static final float GRAVITY_JUPITER         = 23.12f;
+    /** Saturn's gravity in SI units (m/s^2) */
     public static final float GRAVITY_SATURN          = 8.96f;
+    /** Uranus' gravity in SI units (m/s^2) */
     public static final float GRAVITY_URANUS          = 8.69f;
+    /** Neptune's gravity in SI units (m/s^2) */
     public static final float GRAVITY_NEPTUNE         = 11.0f;
+    /** Pluto's gravity in SI units (m/s^2) */
     public static final float GRAVITY_PLUTO           = 0.6f;
+    /** Gravity (estimate) on the first Death Star in Empire units (m/s^2) */
     public static final float GRAVITY_DEATH_STAR_I    = 0.000000353036145f;
+    /** Gravity on the island */
     public static final float GRAVITY_THE_ISLAND      = 4.815162342f;
 
 
     /** Maximum magnetic field on Earth's surface */
     public static final float MAGNETIC_FIELD_EARTH_MAX = 60.0f;
-
     /** Minimum magnetic field on Earth's surface */
     public static final float MAGNETIC_FIELD_EARTH_MIN = 30.0f;
 
-
-    /** Various luminance values during the day (lux) */
+    
+    /** Maximum luminance of sunlight in lux */
     public static final float LIGHT_SUNLIGHT_MAX = 120000.0f;
+    /** luminance of sunlight in lux */
     public static final float LIGHT_SUNLIGHT     = 110000.0f;
+    /** luminance in shade in lux */
     public static final float LIGHT_SHADE        = 20000.0f;
+    /** luminance under an overcast sky in lux */
     public static final float LIGHT_OVERCAST     = 10000.0f;
+    /** luminance at sunrise in lux */
     public static final float LIGHT_SUNRISE      = 400.0f;
+    /** luminance under a cloudy sky in lux */
     public static final float LIGHT_CLOUDY       = 100.0f;
-    /** Various luminance values during the night (lux) */
+    /** luminance at night with full moon in lux */
     public static final float LIGHT_FULLMOON     = 0.25f;
+    /** luminance at night with no moon in lux*/
     public static final float LIGHT_NO_MOON      = 0.001f;
 
+    
     /** get sensor data as fast as possible */
     public static final int SENSOR_DELAY_FASTEST = 0;
     /** rate suitable for games */
@@ -229,16 +279,22 @@ public class SensorManager
     public static final int SENSOR_DELAY_NORMAL = 3;
 
 
-    /** The values returned by this sensor cannot be trusted, calibration
-     * is needed or the environment doesn't allow readings */
+    /**
+     * The values returned by this sensor cannot be trusted, calibration is
+     * needed or the environment doesn't allow readings
+     */
     public static final int SENSOR_STATUS_UNRELIABLE = 0;
 
-    /** This sensor is reporting data with low accuracy, calibration with the
-     * environment is needed */
+    /**
+     * This sensor is reporting data with low accuracy, calibration with the
+     * environment is needed
+     */
     public static final int SENSOR_STATUS_ACCURACY_LOW = 1;
 
-    /** This sensor is reporting data with an average level of accuracy,
-     * calibration with the environment may improve the readings */
+    /**
+     * This sensor is reporting data with an average level of accuracy,
+     * calibration with the environment may improve the readings
+     */
     public static final int SENSOR_STATUS_ACCURACY_MEDIUM = 2;
 
     /** This sensor is reporting data with maximum accuracy */
@@ -586,9 +642,10 @@ public class SensorManager
         return 0;
     }
 
-    /** @return available sensors.
+    /**
+     * @return available sensors.
      * @deprecated This method is deprecated, use
-     * {@link SensorManager#getSensorList(int)} instead
+     *             {@link SensorManager#getSensorList(int)} instead
      */
     @Deprecated
     public int getSensors() {
@@ -612,12 +669,14 @@ public class SensorManager
     }
 
     /**
-     * Use this method to get the list of available sensors of a certain
-     * type. Make multiple calls to get sensors of different types or use
-     * {@link android.hardware.Sensor#TYPE_ALL Sensor.TYPE_ALL} to get all
-     * the sensors.
-     *
-     * @param type of sensors requested
+     * Use this method to get the list of available sensors of a certain type.
+     * Make multiple calls to get sensors of different types or use
+     * {@link android.hardware.Sensor#TYPE_ALL Sensor.TYPE_ALL} to get all the
+     * sensors.
+     * 
+     * @param type
+     *        of sensors requested
+     * 
      * @return a list of sensors matching the asked type.
      */
     public List<Sensor> getSensorList(int type) {
@@ -644,13 +703,14 @@ public class SensorManager
     }
 
     /**
-     * Use this method to get the default sensor for a given type. Note that
-     * the returned sensor could be a composite sensor, and its data could be
+     * Use this method to get the default sensor for a given type. Note that the
+     * returned sensor could be a composite sensor, and its data could be
      * averaged or filtered. If you need to access the raw sensors use
      * {@link SensorManager#getSensorList(int) getSensorList}.
-     *
-     *
-     * @param type of sensors requested
+     * 
+     * @param type
+     *        of sensors requested
+     * 
      * @return the default sensors matching the asked type.
      */
     public Sensor getDefaultSensor(int type) {
@@ -659,17 +719,21 @@ public class SensorManager
         return l.isEmpty() ? null : l.get(0);
     }
 
-
     /**
      * Registers a listener for given sensors.
+     * 
      * @deprecated This method is deprecated, use
-     * {@link SensorManager#registerListener(SensorEventListener, Sensor, int)}
-     * instead.
-     *
-     * @param listener sensor listener object
-     * @param sensors a bit masks of the sensors to register to
-     *
-     * @return true if the sensor is supported and successfully enabled
+     *             {@link SensorManager#registerListener(SensorEventListener, Sensor, int)}
+     *             instead.
+     * 
+     * @param listener
+     *        sensor listener object
+     * 
+     * @param sensors
+     *        a bit masks of the sensors to register to
+     * 
+     * @return <code>true</code> if the sensor is supported and successfully
+     *         enabled
      */
     @Deprecated
     public boolean registerListener(SensorListener listener, int sensors) {
@@ -678,18 +742,26 @@ public class SensorManager
 
     /**
      * Registers a SensorListener for given sensors.
+     * 
      * @deprecated This method is deprecated, use
-     * {@link SensorManager#registerListener(SensorEventListener, Sensor, int)}
-     * instead.
-     *
-     * @param listener sensor listener object
-     * @param sensors a bit masks of the sensors to register to
-     * @param rate rate of events. This is only a hint to the system. events
-     * may be received faster or slower than the specified rate. Usually events
-     * are received faster. The value must be one of {@link #SENSOR_DELAY_NORMAL},
-     * {@link #SENSOR_DELAY_UI}, {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
-     *
-     * @return true if the sensor is supported and successfully enabled
+     *             {@link SensorManager#registerListener(SensorEventListener, Sensor, int)}
+     *             instead.
+     * 
+     * @param listener
+     *        sensor listener object
+     * 
+     * @param sensors
+     *        a bit masks of the sensors to register to
+     * 
+     * @param rate
+     *        rate of events. This is only a hint to the system. events may be
+     *        received faster or slower than the specified rate. Usually events
+     *        are received faster. The value must be one of
+     *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
+     *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
+     * 
+     * @return <code>true</code> if the sensor is supported and successfully
+     *         enabled
      */
     @Deprecated
     public boolean registerListener(SensorListener listener, int sensors, int rate) {
@@ -747,12 +819,16 @@ public class SensorManager
 
     /**
      * Unregisters a listener for the sensors with which it is registered.
+     * 
      * @deprecated This method is deprecated, use
-     * {@link SensorManager#unregisterListener(SensorEventListener, Sensor)}
-     * instead.
-     *
-     * @param listener a SensorListener object
-     * @param sensors a bit masks of the sensors to unregister from
+     *             {@link SensorManager#unregisterListener(SensorEventListener, Sensor)}
+     *             instead.
+     * 
+     * @param listener
+     *        a SensorListener object
+     * 
+     * @param sensors
+     *        a bit masks of the sensors to unregister from
      */
     @Deprecated
     public void unregisterListener(SensorListener listener, int sensors) {
@@ -815,11 +891,13 @@ public class SensorManager
 
     /**
      * Unregisters a listener for all sensors.
+     * 
      * @deprecated This method is deprecated, use
-     * {@link SensorManager#unregisterListener(SensorEventListener)}
-     * instead.
-     *
-     * @param listener a SensorListener object
+     *             {@link SensorManager#unregisterListener(SensorEventListener)}
+     *             instead.
+     * 
+     * @param listener
+     *        a SensorListener object
      */
     @Deprecated
     public void unregisterListener(SensorListener listener) {
@@ -828,10 +906,12 @@ public class SensorManager
 
     /**
      * Unregisters a listener for the sensors with which it is registered.
-     *
-     * @param listener a SensorEventListener object
-     * @param sensor the sensor to unregister from
-     *
+     * 
+     * @param listener
+     *        a SensorEventListener object
+     * @param sensor
+     *        the sensor to unregister from
+     * 
      */
     public void unregisterListener(SensorEventListener listener, Sensor sensor) {
         unregisterListener((Object)listener, sensor);
@@ -839,50 +919,68 @@ public class SensorManager
 
     /**
      * Unregisters a listener for all sensors.
-     *
-     * @param listener a SensorListener object
-     *
+     * 
+     * @param listener
+     *        a SensorListener object
+     * 
      */
     public void unregisterListener(SensorEventListener listener) {
         unregisterListener((Object)listener);
     }
 
-
     /**
-     * Registers a {@link android.hardware.SensorEventListener SensorEventListener}
-     * for the given sensor.
-     *
-     * @param listener A {@link android.hardware.SensorEventListener SensorEventListener} object.
-     * @param sensor The {@link android.hardware.Sensor Sensor} to register to.
-     * @param rate The rate {@link android.hardware.SensorEvent sensor events} are delivered at.
-     * This is only a hint to the system. Events may be received faster or
-     * slower than the specified rate. Usually events are received faster. The value must be
-     * one of {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI}, {@link #SENSOR_DELAY_GAME},
-     * or {@link #SENSOR_DELAY_FASTEST}.
-     *
-     * @return true if the sensor is supported and successfully enabled.
-     *
+     * Registers a {@link android.hardware.SensorEventListener
+     * SensorEventListener} for the given sensor.
+     * 
+     * @param listener
+     *        A {@link android.hardware.SensorEventListener SensorEventListener}
+     *        object.
+     * 
+     * @param sensor
+     *        The {@link android.hardware.Sensor Sensor} to register to.
+     * 
+     * @param rate
+     *        The rate {@link android.hardware.SensorEvent sensor events} are
+     *        delivered at. This is only a hint to the system. Events may be
+     *        received faster or slower than the specified rate. Usually events
+     *        are received faster. The value must be one of
+     *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
+     *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
+     * 
+     * @return <code>true</code> if the sensor is supported and successfully
+     *         enabled.
+     * 
      */
     public boolean registerListener(SensorEventListener listener, Sensor sensor, int rate) {
         return registerListener(listener, sensor, rate, null);
     }
 
     /**
-     * Registers a {@link android.hardware.SensorEventListener SensorEventListener}
-     * for the given sensor.
-     *
-     * @param listener A {@link android.hardware.SensorEventListener SensorEventListener} object.
-     * @param sensor The {@link android.hardware.Sensor Sensor} to register to.
-     * @param rate The rate {@link android.hardware.SensorEvent sensor events} are delivered at.
-     * This is only a hint to the system. Events may be received faster or
-     * slower than the specified rate. Usually events are received faster. The value must be one
-     * of {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI}, {@link #SENSOR_DELAY_GAME}, or
-     * {@link #SENSOR_DELAY_FASTEST}.
-     * @param handler The {@link android.os.Handler Handler} the
-     * {@link android.hardware.SensorEvent sensor events} will be delivered to.
-     *
+     * Registers a {@link android.hardware.SensorEventListener
+     * SensorEventListener} for the given sensor.
+     * 
+     * @param listener
+     *        A {@link android.hardware.SensorEventListener SensorEventListener}
+     *        object.
+     * 
+     * @param sensor
+     *        The {@link android.hardware.Sensor Sensor} to register to.
+     * 
+     * @param rate
+     *        The rate {@link android.hardware.SensorEvent sensor events} are
+     *        delivered at. This is only a hint to the system. Events may be
+     *        received faster or slower than the specified rate. Usually events
+     *        are received faster. The value must be one of
+     *        {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
+     *        {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
+     * 
+     * @param handler
+     *        The {@link android.os.Handler Handler} the
+     *        {@link android.hardware.SensorEvent sensor events} will be
+     *        delivered to.
+     * 
      * @return true if the sensor is supported and successfully enabled.
-     *
+     * 
      */
     public boolean registerListener(SensorEventListener listener, Sensor sensor, int rate,
             Handler handler) {
@@ -1003,95 +1101,126 @@ public class SensorManager
     }
 
     /**
-     * Computes the inclination matrix <b>I</b> as well as the rotation
-     * matrix <b>R</b> transforming a vector from the
-     * device coordinate system to the world's coordinate system which is
-     * defined as a direct orthonormal basis, where:
+     * <p>
+     * Computes the inclination matrix <b>I</b> as well as the rotation matrix
+     * <b>R</b> transforming a vector from the device coordinate system to the
+     * world's coordinate system which is defined as a direct orthonormal basis,
+     * where:
+     * </p>
      * 
+     * <ul>
      * <li>X is defined as the vector product <b>Y.Z</b> (It is tangential to
      * the ground at the device's current location and roughly points East).</li>
      * <li>Y is tangential to the ground at the device's current location and
      * points towards the magnetic North Pole.</li>
      * <li>Z points towards the sky and is perpendicular to the ground.</li>
+     * </ul>
      * <p>
      * <hr>
-     * <p>By definition:
-     * <p>[0 0 g] = <b>R</b> * <b>gravity</b> (g = magnitude of gravity)
-     * <p>[0 m 0] = <b>I</b> * <b>R</b> * <b>geomagnetic</b>
-     * (m = magnitude of geomagnetic field)
-     * <p><b>R</b> is the identity matrix when the device is aligned with the
+     * <p>
+     * By definition:
+     * <p>
+     * [0 0 g] = <b>R</b> * <b>gravity</b> (g = magnitude of gravity)
+     * <p>
+     * [0 m 0] = <b>I</b> * <b>R</b> * <b>geomagnetic</b> (m = magnitude of
+     * geomagnetic field)
+     * <p>
+     * <b>R</b> is the identity matrix when the device is aligned with the
      * world's coordinate system, that is, when the device's X axis points
      * toward East, the Y axis points to the North Pole and the device is facing
      * the sky.
-     *
-     * <p><b>I</b> is a rotation matrix transforming the geomagnetic
-     * vector into the same coordinate space as gravity (the world's coordinate
-     * space). <b>I</b> is a simple rotation around the X axis.
-     * The inclination angle in radians can be computed with
-     * {@link #getInclination}.
+     * 
+     * <p>
+     * <b>I</b> is a rotation matrix transforming the geomagnetic vector into
+     * the same coordinate space as gravity (the world's coordinate space).
+     * <b>I</b> is a simple rotation around the X axis. The inclination angle in
+     * radians can be computed with {@link #getInclination}.
      * <hr>
      * 
-     * <p> Each matrix is returned either as a 3x3 or 4x4 row-major matrix
-     * depending on the length of the passed array:
-     * <p><u>If the array length is 16:</u>
+     * <p>
+     * Each matrix is returned either as a 3x3 or 4x4 row-major matrix depending
+     * on the length of the passed array:
+     * <p>
+     * <u>If the array length is 16:</u>
+     * 
      * <pre>
      *   /  M[ 0]   M[ 1]   M[ 2]   M[ 3]  \
      *   |  M[ 4]   M[ 5]   M[ 6]   M[ 7]  |
      *   |  M[ 8]   M[ 9]   M[10]   M[11]  |
      *   \  M[12]   M[13]   M[14]   M[15]  /
      *</pre>
-     * This matrix is ready to be used by OpenGL ES's 
-     * {@link javax.microedition.khronos.opengles.GL10#glLoadMatrixf(float[], int) 
-     * glLoadMatrixf(float[], int)}. 
-     * <p>Note that because OpenGL matrices are column-major matrices you must
-     * transpose the matrix before using it. However, since the matrix is a 
+     * 
+     * This matrix is ready to be used by OpenGL ES's
+     * {@link javax.microedition.khronos.opengles.GL10#glLoadMatrixf(float[], int)
+     * glLoadMatrixf(float[], int)}.
+     * <p>
+     * Note that because OpenGL matrices are column-major matrices you must
+     * transpose the matrix before using it. However, since the matrix is a
      * rotation matrix, its transpose is also its inverse, conveniently, it is
      * often the inverse of the rotation that is needed for rendering; it can
      * therefore be used with OpenGL ES directly.
      * <p>
      * Also note that the returned matrices always have this form:
+     * 
      * <pre>
      *   /  M[ 0]   M[ 1]   M[ 2]   0  \
      *   |  M[ 4]   M[ 5]   M[ 6]   0  |
      *   |  M[ 8]   M[ 9]   M[10]   0  |
      *   \      0       0       0   1  /
      *</pre>
-     * <p><u>If the array length is 9:</u>
+     * 
+     * <p>
+     * <u>If the array length is 9:</u>
+     * 
      * <pre>
      *   /  M[ 0]   M[ 1]   M[ 2]  \
      *   |  M[ 3]   M[ 4]   M[ 5]  |
      *   \  M[ 6]   M[ 7]   M[ 8]  /
      *</pre>
-     *
+     * 
      * <hr>
-     * <p>The inverse of each matrix can be computed easily by taking its
+     * <p>
+     * The inverse of each matrix can be computed easily by taking its
      * transpose.
-     *
-     * <p>The matrices returned by this function are meaningful only when the
-     * device is not free-falling and it is not close to the magnetic north.
-     * If the device is accelerating, or placed into a strong magnetic field,
-     * the returned matrices may be inaccurate.
-     *
-     * @param R is an array of 9 floats holding the rotation matrix <b>R</b>
-     * when this function returns. R can be null.<p>
-     * @param I is an array of 9 floats holding the rotation matrix <b>I</b>
-     * when this function returns. I can be null.<p>
-     * @param gravity is an array of 3 floats containing the gravity vector
-     * expressed in the device's coordinate. You can simply use the
-     * {@link android.hardware.SensorEvent#values values}
-     * returned by a {@link android.hardware.SensorEvent SensorEvent} of a
-     * {@link android.hardware.Sensor Sensor} of type
-     * {@link android.hardware.Sensor#TYPE_ACCELEROMETER TYPE_ACCELEROMETER}.<p>
-     * @param geomagnetic is an array of 3 floats containing the geomagnetic
-     * vector expressed in the device's coordinate. You can simply use the
-     * {@link android.hardware.SensorEvent#values values}
-     * returned by a {@link android.hardware.SensorEvent SensorEvent} of a
-     * {@link android.hardware.Sensor Sensor} of type
-     * {@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD TYPE_MAGNETIC_FIELD}.
-     * @return
-     *   true on success<p>
-     *   false on failure (for instance, if the device is in free fall).
-     *   On failure the output matrices are not modified.
+     * 
+     * <p>
+     * The matrices returned by this function are meaningful only when the
+     * device is not free-falling and it is not close to the magnetic north. If
+     * the device is accelerating, or placed into a strong magnetic field, the
+     * returned matrices may be inaccurate.
+     * 
+     * @param R
+     *        is an array of 9 floats holding the rotation matrix <b>R</b> when
+     *        this function returns. R can be null.
+     *        <p>
+     * 
+     * @param I
+     *        is an array of 9 floats holding the rotation matrix <b>I</b> when
+     *        this function returns. I can be null.
+     *        <p>
+     * 
+     * @param gravity
+     *        is an array of 3 floats containing the gravity vector expressed in
+     *        the device's coordinate. You can simply use the
+     *        {@link android.hardware.SensorEvent#values values} returned by a
+     *        {@link android.hardware.SensorEvent SensorEvent} of a
+     *        {@link android.hardware.Sensor Sensor} of type
+     *        {@link android.hardware.Sensor#TYPE_ACCELEROMETER
+     *        TYPE_ACCELEROMETER}.
+     *        <p>
+     * 
+     * @param geomagnetic
+     *        is an array of 3 floats containing the geomagnetic vector
+     *        expressed in the device's coordinate. You can simply use the
+     *        {@link android.hardware.SensorEvent#values values} returned by a
+     *        {@link android.hardware.SensorEvent SensorEvent} of a
+     *        {@link android.hardware.Sensor Sensor} of type
+     *        {@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD
+     *        TYPE_MAGNETIC_FIELD}.
+     * 
+     * @return <code>true</code> on success, <code>false</code> on failure (for
+     *         instance, if the device is in free fall). On failure the output
+     *         matrices are not modified.
      */
 
     public static boolean getRotationMatrix(float[] R, float[] I,
@@ -1160,7 +1289,9 @@ public class SensorManager
     /**
      * Computes the geomagnetic inclination angle in radians from the
      * inclination matrix <b>I</b> returned by {@link #getRotationMatrix}.
-     * @param I inclination matrix see {@link #getRotationMatrix}.
+     * 
+     * @param I
+     *        inclination matrix see {@link #getRotationMatrix}.
      * @return The geomagnetic inclination angle in radians.
      */
     public static float getInclination(float[] I) {
@@ -1172,52 +1303,76 @@ public class SensorManager
     }
 
     /**
-     * Rotates the supplied rotation matrix so it is expressed in a
-     * different coordinate system. This is typically used when an application
-     * needs to compute the three orientation angles of the device (see
+     * <p>
+     * Rotates the supplied rotation matrix so it is expressed in a different
+     * coordinate system. This is typically used when an application needs to
+     * compute the three orientation angles of the device (see
      * {@link #getOrientation}) in a different coordinate system.
+     * </p>
      * 
-     * <p>When the rotation matrix is used for drawing (for instance with 
-     * OpenGL ES), it usually <b>doesn't need</b> to be transformed by this 
-     * function, unless the screen is physically rotated, in which case you
-     * can use {@link android.view.Display#getRotation() Display.getRotation()}
-     * to retrieve the current rotation of the screen.  Note that because the
-     * user is generally free to rotate their screen, you often should
-     * consider the rotation in deciding the parameters to use here.
-     *
-     * <p><u>Examples:</u><p>
-     *
-     * <li>Using the camera (Y axis along the camera's axis) for an augmented 
-     * reality application where the rotation angles are needed: </li><p>
-     *
-     * <code>remapCoordinateSystem(inR, AXIS_X, AXIS_Z, outR);</code><p>
-     *
+     * <p>
+     * When the rotation matrix is used for drawing (for instance with OpenGL
+     * ES), it usually <b>doesn't need</b> to be transformed by this function,
+     * unless the screen is physically rotated, in which case you can use
+     * {@link android.view.Display#getRotation() Display.getRotation()} to
+     * retrieve the current rotation of the screen. Note that because the user
+     * is generally free to rotate their screen, you often should consider the
+     * rotation in deciding the parameters to use here.
+     * </p>
+     * 
+     * <p>
+     * <u>Examples:</u>
+     * <p>
+     * 
+     * <ul>
+     * <li>Using the camera (Y axis along the camera's axis) for an augmented
+     * reality application where the rotation angles are needed:</li>
+     * 
+     * <p>
+     * <ul>
+     * <code>remapCoordinateSystem(inR, AXIS_X, AXIS_Z, outR);</code>
+     * </ul>
+     * </p>
+     * 
      * <li>Using the device as a mechanical compass when rotation is
-     * {@link android.view.Surface#ROTATION_90 Surface.ROTATION_90}:</li><p>
-     *
-     * <code>remapCoordinateSystem(inR, AXIS_Y, AXIS_MINUS_X, outR);</code><p>
-     *
-     * Beware of the above example. This call is needed only to account for
-     * a rotation from its natural orientation when calculating the
-     * rotation angles (see {@link #getOrientation}).
-     * If the rotation matrix is also used for rendering, it may not need to 
-     * be transformed, for instance if your {@link android.app.Activity
-     * Activity} is running in landscape mode.
-     *
-     * <p>Since the resulting coordinate system is orthonormal, only two axes
-     * need to be specified.
-     *
-     * @param inR the rotation matrix to be transformed. Usually it is the
-     * matrix returned by {@link #getRotationMatrix}.
-     * @param X defines on which world axis and direction the X axis of the
-     *        device is mapped.
-     * @param Y defines on which world axis and direction the Y axis of the
-     *        device is mapped.
-     * @param outR the transformed rotation matrix. inR and outR can be the same
+     * {@link android.view.Surface#ROTATION_90 Surface.ROTATION_90}:</li>
+     * 
+     * <p>
+     * <ul>
+     * <code>remapCoordinateSystem(inR, AXIS_Y, AXIS_MINUS_X, outR);</code>
+     * </ul>
+     * </p>
+     * 
+     * Beware of the above example. This call is needed only to account for a
+     * rotation from its natural orientation when calculating the rotation
+     * angles (see {@link #getOrientation}). If the rotation matrix is also used
+     * for rendering, it may not need to be transformed, for instance if your
+     * {@link android.app.Activity Activity} is running in landscape mode.
+     * </ul>
+     * 
+     * <p>
+     * Since the resulting coordinate system is orthonormal, only two axes need
+     * to be specified.
+     * 
+     * @param inR
+     *        the rotation matrix to be transformed. Usually it is the matrix
+     *        returned by {@link #getRotationMatrix}.
+     * 
+     * @param X
+     *        defines on which world axis and direction the X axis of the device
+     *        is mapped.
+     * 
+     * @param Y
+     *        defines on which world axis and direction the Y axis of the device
+     *        is mapped.
+     * 
+     * @param outR
+     *        the transformed rotation matrix. inR and outR can be the same
      *        array, but it is not recommended for performance reason.
-     * @return true on success. false if the input parameters are incorrect, for
-     * instance if X and Y define the same axis. Or if inR and outR don't have 
-     * the same length.
+     * 
+     * @return <code>true</code> on success. <code>false</code> if the input
+     *         parameters are incorrect, for instance if X and Y define the same
+     *         axis. Or if inR and outR don't have the same length.
      */
 
     public static boolean remapCoordinateSystem(float[] inR, int X, int Y,
@@ -1301,19 +1456,24 @@ public class SensorManager
 
     /**
      * Computes the device's orientation based on the rotation matrix.
-     * <p> When it returns, the array values is filled with the result:
+     * <p>
+     * When it returns, the array values is filled with the result:
+     * <ul>
      * <li>values[0]: <i>azimuth</i>, rotation around the Z axis.</li>
      * <li>values[1]: <i>pitch</i>, rotation around the X axis.</li>
      * <li>values[2]: <i>roll</i>, rotation around the Y axis.</li>
+     * </ul>
      * <p>
      * All three angles above are in <b>radians</b> and <b>positive</b> in the
      * <b>counter-clockwise</b> direction.
-     *
-     * @param R rotation matrix see {@link #getRotationMatrix}.
-     * @param values an array of 3 floats to hold the result.
+     * 
+     * @param R
+     *        rotation matrix see {@link #getRotationMatrix}.
+     * @param values
+     *        an array of 3 floats to hold the result.
      * @return The array values passed as argument.
      */
-    public static float[] getOrientation(float[] R, float values[]) {
+   public static float[] getOrientation(float[] R, float values[]) {
         /*
          * 4x4 (length=16) case:
          *   /  R[ 0]   R[ 1]   R[ 2]   0  \
