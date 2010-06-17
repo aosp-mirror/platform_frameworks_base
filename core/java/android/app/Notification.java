@@ -83,10 +83,10 @@ public class Notification implements Parcelable
     public int icon;
 
     /**
-     * The number of events that this notification represents.  For example, if this is the
-     * new mail notification, this would be the number of unread messages.  This number is
-     * be superimposed over the icon in the status bar.  If the number is 0 or negative, it
-     * is not shown in the status bar.
+     * The number of events that this notification represents.  For example, in a new mail
+     * notification, this could be the number of unread messages.  This number is superimposed over
+     * the icon in the status bar.  If the number is 0 or negative, it is not shown in the status
+     * bar.
      */
     public int number;
 
@@ -109,13 +109,22 @@ public class Notification implements Parcelable
     public PendingIntent deleteIntent;
 
     /**
+     * An intent to launch instead of posting the notification to the status bar. Only for use with
+     * extremely high-priority notifications demanding the user's attention, such as an incoming
+     * call (handled in the core Android Phone app with a full-screen Activity).
+     * Use with {@link #FLAG_HIGH_PRIORITY} to ensure that this notification will reach the user
+     * even when other notifications are suppressed.
+     */
+    public PendingIntent fullScreenIntent;
+
+    /**
      * Text to scroll across the screen when this item is added to
      * the status bar.
      */
     public CharSequence tickerText;
 
     /**
-     * The view that shows when this notification is shown in the expanded status bar.
+     * The view that will represent this notification in the expanded status bar.
      */
     public RemoteViews contentView;
 
@@ -264,6 +273,14 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_FOREGROUND_SERVICE = 0x00000040;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be set if this notification
+     * represents a high-priority event that may be shown to the user even if notifications are
+     * otherwise unavailable (that is, when the status bar is hidden). This flag is ideally used
+     * in conjunction with {@link #fullScreenIntent}.
+     */
+    public static final int FLAG_HIGH_PRIORITY = 0x00000080;
+
     public int flags;
 
     /**
@@ -339,6 +356,10 @@ public class Notification implements Parcelable
         ledOnMS = parcel.readInt();
         ledOffMS = parcel.readInt();
         iconLevel = parcel.readInt();
+
+        if (parcel.readInt() != 0) {
+            fullScreenIntent = PendingIntent.CREATOR.createFromParcel(parcel);
+        }
     }
 
     public Notification clone() {
@@ -351,6 +372,7 @@ public class Notification implements Parcelable
         // PendingIntents are global, so there's no reason (or way) to clone them.
         that.contentIntent = this.contentIntent;
         that.deleteIntent = this.deleteIntent;
+        that.fullScreenIntent = this.fullScreenIntent;
 
         if (this.tickerText != null) {
             that.tickerText = this.tickerText.toString();
@@ -433,6 +455,13 @@ public class Notification implements Parcelable
         parcel.writeInt(ledOnMS);
         parcel.writeInt(ledOffMS);
         parcel.writeInt(iconLevel);
+
+        if (fullScreenIntent != null) {
+            parcel.writeInt(1);
+            fullScreenIntent.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
     }
 
     /**
@@ -518,6 +547,11 @@ public class Notification implements Parcelable
         }
         sb.append(",defaults=0x");
         sb.append(Integer.toHexString(this.defaults));
+        sb.append(",flags=0x");
+        sb.append(Integer.toHexString(this.flags));
+        if ((this.flags & FLAG_HIGH_PRIORITY) != 0) {
+            sb.append("!!!1!one!");
+        }
         sb.append(")");
         return sb.toString();
     }
