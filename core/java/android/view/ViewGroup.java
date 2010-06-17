@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Matrix;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -867,21 +868,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     final View child = children[i];
                     if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
                             || child.getAnimation() != null) {
-                        child.getHitRect(frame);
-                        if (frame.contains(scrolledXInt, scrolledYInt)) {
-                            // offset the event to the view's coordinate system
-                            final float xc = scrolledXFloat - child.mLeft;
-                            final float yc = scrolledYFloat - child.mTop;
-                            ev.setLocation(xc, yc);
+                        if (child.dispatchTouchEvent(ev, scrolledXFloat, scrolledYFloat)) {
                             child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
-                            if (child.dispatchTouchEvent(ev))  {
-                                // Event handled, we have a target now.
-                                mMotionTarget = child;
-                                return true;
-                            }
-                            // The event didn't get handled, try the next view.
-                            // Don't reset the event's location, it's not
-                            // necessary here.
+                            mMotionTarget = child;
+                            return true;
                         }
                     }
                 }
@@ -937,8 +927,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // finally offset the event to the target's coordinate system and
         // dispatch the event.
-        final float xc = scrolledXFloat - (float) target.mLeft;
-        final float yc = scrolledYFloat - (float) target.mTop;
+        float xc;
+        float yc;
+        Matrix m = getMatrix();
+        if (mMatrixIsIdentity || mAttachInfo == null) {
+            xc = scrolledXFloat - (float) target.mLeft;
+            yc = scrolledYFloat - (float) target.mTop;
+        } else {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = scrolledXFloat;
+            localXY[1] = scrolledYFloat;
+            getInverseMatrix().mapPoints(localXY);
+            xc = localXY[0] - (float) target.mLeft;
+            yc = localXY[1] - (float) target.mTop;
+        }
         ev.setLocation(xc, yc);
 
         if ((target.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
@@ -1609,25 +1612,36 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        float alpha = 1.0f;
+        float alpha = child.getAlpha();
+        Matrix childMatrix = child.getMatrix();
 
-        if (transformToApply != null) {
-            if (concatMatrix) {
-                int transX = 0;
-                int transY = 0;
-                if (hasNoCache) {
-                    transX = -sx;
-                    transY = -sy;
-                }
-                // Undo the scroll translation, apply the transformation matrix,
-                // then redo the scroll translate to get the correct result.
-                canvas.translate(-transX, -transY);
-                canvas.concat(transformToApply.getMatrix());
-                canvas.translate(transX, transY);
-                mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
+        if (transformToApply != null || alpha < 1.0f || !child.mMatrixIsIdentity) {
+            int transX = 0;
+            int transY = 0;
+            if (hasNoCache) {
+                transX = -sx;
+                transY = -sy;
             }
-
-            alpha = transformToApply.getAlpha();
+            if (transformToApply != null) {
+                if (concatMatrix) {
+                    // Undo the scroll translation, apply the transformation matrix,
+                    // then redo the scroll translate to get the correct result.
+                    canvas.translate(-transX, -transY);
+                    canvas.concat(transformToApply.getMatrix());
+                    canvas.translate(transX, transY);
+                    mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
+                }
+                float transformAlpha = transformToApply.getAlpha();
+                if (transformAlpha < 1.0f) {
+                    alpha *= transformToApply.getAlpha();
+                    mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
+                }
+            }
+            if (!child.mMatrixIsIdentity) {
+                canvas.translate(-transX, -transY);
+                canvas.concat(child.getMatrix());
+                canvas.translate(transX, transY);
+            }
             if (alpha < 1.0f) {
                 mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
             }
@@ -2498,6 +2512,41 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int[] location = attachInfo.mInvalidateChildLocation;
             location[CHILD_LEFT_INDEX] = child.mLeft;
             location[CHILD_TOP_INDEX] = child.mTop;
+            Matrix childMatrix = child.getMatrix();
+            if (!childMatrix.isIdentity()) {
+                float[] boundingRectPoints = attachInfo.mTmpTransformBounds;
+                boundingRectPoints[0] = dirty.left; // upper left
+                boundingRectPoints[1] = dirty.top;
+                boundingRectPoints[2] = dirty.right; // upper right
+                boundingRectPoints[3] = dirty.top;
+                boundingRectPoints[4] = dirty.right; // lower right
+                boundingRectPoints[5] = dirty.bottom;
+                boundingRectPoints[6] = dirty.left; // lower left
+                boundingRectPoints[7] = dirty.bottom;
+                childMatrix.mapPoints(boundingRectPoints);
+                // find the mind/max points to get the bounding rect
+                float left = Float.MAX_VALUE;
+                float top = Float.MAX_VALUE;
+                float right = -Float.MAX_VALUE;
+                float bottom = -Float.MAX_VALUE;
+                for (int i = 0; i < 8; i += 2) {
+                    float x = boundingRectPoints[i];
+                    float y = boundingRectPoints[i+1];
+                    if (x < left) {
+                        left = x;
+                    }
+                    if (x > right) {
+                        right = x;
+                    }
+                    if (y < top) {
+                        top = y;
+                    }
+                    if (y > bottom) {
+                        bottom = y;
+                    }
+                }
+                dirty.set((int)left, (int)top, (int)(right + .5f), (int)(bottom + .5f));
+            }
 
             // If the child is drawing an animation, we want to copy this flag onto
             // ourselves and the parent to make sure the invalidate request goes
@@ -2532,6 +2581,39 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 parent = parent.invalidateChildInParent(location, dirty);
+                Matrix m = getMatrix();
+                if (!m.isIdentity()) {
+                    float[] boundingRectPoints = {
+                            dirty.left - mLeft, dirty.top - mTop, // upper left 
+                            dirty.right - mLeft, dirty.top - mTop, // upper right
+                            dirty.right - mLeft, dirty.bottom - mTop, // lower right
+                            dirty.left - mLeft, dirty.bottom - mTop // lower left
+                    };
+                    m.mapPoints(boundingRectPoints);
+                    // find the mind/max points to get the bounding rect
+                    float left = Float.MAX_VALUE;
+                    float top = Float.MAX_VALUE;
+                    float right = Float.MIN_VALUE;
+                    float bottom = Float.MIN_VALUE;
+                    for (int i = 0; i < 8; i += 2) {
+                        float x = boundingRectPoints[i];
+                        float y = boundingRectPoints[i+1];
+                        if (x < left) {
+                            left = x;
+                        }
+                        if (x > right) {
+                            right = x;
+                        }
+                        if (y < top) {
+                            top = y;
+                        }
+                        if (y > bottom) {
+                            bottom = y;
+                        }
+                    }
+                    dirty.set((int)left + mLeft, (int)top + mTop, (int)(right + .5f) + mLeft,
+                            (int)(bottom + .5f) + mTop);
+                }
             } while (parent != null);
         }
     }

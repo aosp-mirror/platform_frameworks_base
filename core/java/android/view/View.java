@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.RectF;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 
@@ -1583,6 +1584,87 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     @ViewDebug.ExportedProperty
     int mViewFlags;
+
+    /**
+     * The transform matrix for the View. This transform is calculated internally
+     * based on the rotation, scaleX, and scaleY properties. The identity matrix
+     * is used by default. Do *not* use this variable directly; instead call
+     * getMatrix(), which will automatically recalculate the matrix if necessary
+     * to get the correct matrix based on the latest rotation and scale properties.
+     */
+    private final Matrix mMatrix = new Matrix();
+
+    /**
+     * The transform matrix for the View. This transform is calculated internally
+     * based on the rotation, scaleX, and scaleY properties. The identity matrix
+     * is used by default. Do *not* use this variable directly; instead call
+     * getMatrix(), which will automatically recalculate the matrix if necessary
+     * to get the correct matrix based on the latest rotation and scale properties.
+     */
+    private Matrix mInverseMatrix;
+
+    /**
+     * An internal variable that tracks whether we need to recalculate the
+     * transform matrix, based on whether the rotation or scaleX/Y properties
+     * have changed since the matrix was last calculated.
+     */
+    private boolean mMatrixDirty = false;
+
+    /**
+     * An internal variable that tracks whether we need to recalculate the
+     * transform matrix, based on whether the rotation or scaleX/Y properties
+     * have changed since the matrix was last calculated.
+     */
+    private boolean mInverseMatrixDirty = true;
+
+    /**
+     * A variable that tracks whether we need to recalculate the
+     * transform matrix, based on whether the rotation or scaleX/Y properties
+     * have changed since the matrix was last calculated. This variable
+     * is only valid after a call to getMatrix().
+     */
+    boolean mMatrixIsIdentity = true;
+
+    /**
+     * The degrees rotation around the pivot point.
+     */
+    @ViewDebug.ExportedProperty
+    private float mRotation = 0f;
+
+    /**
+     * The amount of scale in the x direction around the pivot point. A
+     * value of 1 means no scaling is applied.
+     */
+    @ViewDebug.ExportedProperty
+    private float mScaleX = 1f;
+
+    /**
+     * The amount of scale in the y direction around the pivot point. A
+     * value of 1 means no scaling is applied.
+     */
+    @ViewDebug.ExportedProperty
+    private float mScaleY = 1f;
+
+    /**
+     * The amount of scale in the x direction around the pivot point. A
+     * value of 1 means no scaling is applied.
+     */
+    @ViewDebug.ExportedProperty
+    private float mPivotX = 0f;
+
+    /**
+     * The amount of scale in the y direction around the pivot point. A
+     * value of 1 means no scaling is applied.
+     */
+    @ViewDebug.ExportedProperty
+    private float mPivotY = 0f;
+
+    /**
+     * The opacity of the View. This is a value from 0 to 1, where 0 means
+     * completely transparent and 1 means completely opaque.
+     */
+    @ViewDebug.ExportedProperty
+    private float mAlpha = 1f;
 
     /**
      * The distance in pixels from the left edge of this view's parent
@@ -4416,9 +4498,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     final int y = (int) event.getY();
 
                     // Be lenient about moving outside of buttons
-                    int slop = mTouchSlop;
-                    if ((x < 0 - slop) || (x >= getWidth() + slop) ||
-                            (y < 0 - slop) || (y >= getHeight() + slop)) {
+                    if (!pointInView(x, y, mTouchSlop)) {
                         // Outside button
                         removeTapCallback();
                         if ((mPrivateFlags & PRESSED) != 0) {
@@ -4764,6 +4844,234 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * The transform matrix of this view, which is calculated based on the current
+     * roation, scale, and pivot properties.
+     *
+     * @see #getRotation()
+     * @see #getScaleX()
+     * @see #getScaleY()
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The current transform matrix for the view
+     */
+    public Matrix getMatrix() {
+        if (mMatrixDirty) {
+            // transform-related properties have changed since the last time someone
+            // asked for the matrix; recalculate it with the current values
+            mMatrix.reset();
+            mMatrix.setRotate(mRotation, mPivotX, mPivotY);
+            mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
+            mMatrixDirty = false;
+            mMatrixIsIdentity = mMatrix.isIdentity();
+            mInverseMatrixDirty = true;
+        }
+        return mMatrix;
+    }
+
+    /**
+     * Utility method to retrieve the inverse of the current mMatrix property.
+     * We cache the matrix to avoid recalculating it when transform properties
+     * have not changed.
+     *
+     * @return The inverse of the current matrix of this view.
+     */
+    Matrix getInverseMatrix() {
+        if (mInverseMatrixDirty) {
+            if (mInverseMatrix == null) {
+                mInverseMatrix = new Matrix();
+            }
+            mMatrix.invert(mInverseMatrix);
+            mInverseMatrixDirty = false;
+        }
+        return mInverseMatrix;
+    }
+
+    /**
+     * The degrees that the view is rotated around the pivot point.
+     *
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The degrees of rotation.
+     */
+    public float getRotation() {
+        return mRotation;
+    }
+
+    /**
+     * Sets the degrees that the view is rotated around the pivot point.
+     *
+     * @param rotation The degrees of rotation.
+     * @see #getPivotX()
+     * @see #getPivotY()
+     */
+    public void setRotation(float rotation) {
+        if (mRotation != rotation) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mRotation = rotation;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The amount that the view is scaled in x around the pivot point, as a proportion of
+     * the view's unscaled width. A value of 1, the default, means that no scaling is applied.
+     *
+     * @default 1.0f
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The scaling factor.
+     */
+    public float getScaleX() {
+        return mScaleX;
+    }
+
+    /**
+     * Sets the amount that the view is scaled in x around the pivot point, as a proportion of
+     * the view's unscaled width. A value of 1 means that no scaling is applied.
+     *
+     * @param scaleX The scaling factor.
+     * @see #getPivotX()
+     * @see #getPivotY()
+     */
+    public void setScaleX(float scaleX) {
+        if (mScaleX != scaleX) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mScaleX = scaleX;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The amount that the view is scaled in y around the pivot point, as a proportion of
+     * the view's unscaled height. A value of 1, the default, means that no scaling is applied.
+     *
+     * @default 1.0f
+     * @see #getPivotX()
+     * @see #getPivotY()
+     * @return The scaling factor.
+     */
+    public float getScaleY() {
+        return mScaleY;
+    }
+
+    /**
+     * Sets the amount that the view is scaled in Y around the pivot point, as a proportion of
+     * the view's unscaled width. A value of 1 means that no scaling is applied.
+     *
+     * @param scaleY The scaling factor.
+     * @see #getPivotX()
+     * @see #getPivotY()
+     */
+    public void setScaleY(float scaleY) {
+        if (mScaleY != scaleY) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mScaleY = scaleY;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The x location of the point around which the view is {@link #setRotation(float) rotated}
+     * and {@link #setScaleX(float) scaled}.
+     *
+     * @see #getRotation()
+     * @see #getScaleX()
+     * @see #getScaleY()
+     * @see #getPivotY()
+     * @return The x location of the pivot point.
+     */
+    public float getPivotX() {
+        return mPivotX;
+    }
+
+    /**
+     * Sets the x location of the point around which the view is
+     * {@link #setRotation(float) rotated} and {@link #setScaleX(float) scaled}.
+     *
+     * @param pivotX The x location of the pivot point.
+     * @see #getRotation()
+     * @see #getScaleX()
+     * @see #getScaleY()
+     * @see #getPivotY()
+     */
+    public void setPivotX(float pivotX) {
+        if (mPivotX != pivotX) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mPivotX = pivotX;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The y location of the point around which the view is {@link #setRotation(float) rotated}
+     * and {@link #setScaleY(float) scaled}.
+     *
+     * @see #getRotation()
+     * @see #getScaleX()
+     * @see #getScaleY()
+     * @see #getPivotY()
+     * @return The y location of the pivot point.
+     */
+    public float getPivotY() {
+        return mPivotY;
+    }
+
+    /**
+     * Sets the y location of the point around which the view is {@link #setRotation(float) rotated}
+     * and {@link #setScaleY(float) scaled}.
+     *
+     * @param pivotY The y location of the pivot point.
+     * @see #getRotation()
+     * @see #getScaleX()
+     * @see #getScaleY()
+     * @see #getPivotY()
+     */
+    public void setPivotY(float pivotY) {
+        if (mPivotY != pivotY) {
+            // Double-invalidation is necessary to capture view's old and new areas
+            invalidate();
+            mPivotY = pivotY;
+            mMatrixDirty = true;
+            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            invalidate();
+        }
+    }
+
+    /**
+     * The opacity of the view. This is a value from 0 to 1, where 0 means the view is
+     * completely transparent and 1 means the view is completely opaque.
+     *
+     * @default 1.0f
+     * @return The opacity of the view.
+     */
+    public float getAlpha() {
+        return mAlpha;
+    }
+
+    /**
+     * Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
+     * completely transparent and 1 means the view is completely opaque.
+     *
+     * @param alpha The opacity of the view.
+     */
+    public void setAlpha(float alpha) {
+        mAlpha = alpha;
+        invalidate();
+    }
+
+    /**
      * Top position of this view relative to its parent.
      *
      * @return The top of this view, in pixels.
@@ -4771,6 +5079,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.CapturedViewProperty
     public final int getTop() {
         return mTop;
+    }
+
+    /**
+     * Sets the top position of this view relative to its parent.
+     *
+     * @param top The top of this view, in pixels.
+     */
+    public final void setTop(int top) {
+        if (top != mTop) {
+            Matrix m = getMatrix();
+            if (mMatrixIsIdentity) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final int[] location = mAttachInfo.mInvalidateChildLocation;
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int minTop = Math.min(mTop, top);
+                    location[0] = mLeft;
+                    location[1] = minTop;
+                    r.set(0, 0, mRight - mLeft, mBottom - minTop);
+                    p.invalidateChildInParent(location, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+            mTop = top;
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -4784,6 +5123,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Sets the bottom position of this view relative to its parent.
+     *
+     * @param bottom The bottom of this view, in pixels.
+     */
+    public final void setBottom(int bottom) {
+        if (bottom != mBottom) {
+            Matrix m = getMatrix();
+            if (mMatrixIsIdentity) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final int[] location = mAttachInfo.mInvalidateChildLocation;
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int maxBottom = Math.max(mBottom, bottom);
+                    location[0] = mLeft;
+                    location[1] = mTop;
+                    r.set(0, 0, mRight - mLeft, maxBottom - mTop);
+                    p.invalidateChildInParent(location, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+            mBottom = bottom;
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
+    }
+
+    /**
      * Left position of this view relative to its parent.
      *
      * @return The left edge of this view, in pixels.
@@ -4791,6 +5161,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.CapturedViewProperty
     public final int getLeft() {
         return mLeft;
+    }
+
+    /**
+     * Sets the left position of this view relative to its parent.
+     *
+     * @param left The bottom of this view, in pixels.
+     */
+    public final void setLeft(int left) {
+        if (left != mLeft) {
+            Matrix m = getMatrix();
+            if (mMatrixIsIdentity) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final int[] location = mAttachInfo.mInvalidateChildLocation;
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int minLeft = Math.min(mLeft, left);
+                    location[0] = minLeft;
+                    location[1] = mTop;
+                    r.set(0, 0, mRight - minLeft, mBottom - mTop);
+                    p.invalidateChildInParent(location, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+            mLeft = left;
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -4804,12 +5205,149 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Sets the right position of this view relative to its parent.
+     *
+     * @param right The bottom of this view, in pixels.
+     */
+    public final void setRight(int right) {
+        if (right != mRight) {
+            Matrix m = getMatrix();
+            if (mMatrixIsIdentity) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final int[] location = mAttachInfo.mInvalidateChildLocation;
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int maxRight = Math.max(mRight, right);
+                    location[0] = mLeft;
+                    location[1] = mTop;
+                    r.set(0, 0, maxRight - mLeft, mBottom - mTop);
+                    p.invalidateChildInParent(location, r);
+                }
+            } else {
+                // Double-invalidation is necessary to capture view's old and new areas
+                invalidate();
+            }
+            mRight = right;
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * The horizontal location of this view relative to its parent. This value is equivalent to the
+     * {@link #getLeft() left} property.
+     *
+     * @return The horizontal position of this view, in pixels.
+     */
+    public int getX() {
+        return mLeft;
+    }
+
+    /**
+     * Sets the horizontal location of this view relative to its parent. Setting this value will
+     * affect both the {@link #setLeft(int) left} and {@link #setRight(int) right} properties
+     * of this view.
+     *
+     * @param x The horizontal position of this view, in pixels.
+     */
+    public void setX(int x) {
+        offsetLeftAndRight(x - mLeft);
+    }
+
+    /**
+     * The vertical location of this view relative to its parent. This value is equivalent to the
+     * {@link #getTop() left} property.
+     *
+     * @return The vertical position of this view, in pixels.
+     */
+    public int getY() {
+        return mTop;
+    }
+
+    /**
+     * Sets the vertical location of this view relative to its parent. Setting this value will
+     * affect both the {@link #setTop(int) left} and {@link #setBottom(int) right} properties
+     * of this view.
+     *
+     * @param y The vertical position of this view, in pixels.
+     */
+    public void setY(int y) {
+        offsetTopAndBottom(y - mTop);
+    }
+
+    /**
      * Hit rectangle in parent's coordinates
      *
      * @param outRect The hit rectangle of the view.
      */
     public void getHitRect(Rect outRect) {
-        outRect.set(mLeft, mTop, mRight, mBottom);
+        Matrix m = getMatrix();
+        if (mMatrixIsIdentity || mAttachInfo == null) {
+            outRect.set(mLeft, mTop, mRight, mBottom);
+        } else {
+            final RectF tmpRect = mAttachInfo.mTmpTransformRect;
+            tmpRect.set(-mPivotX, -mPivotY,
+                    getWidth() - mPivotX, getHeight() - mPivotY);
+            m.mapRect(tmpRect);
+            outRect.set((int)tmpRect.left + mLeft, (int)tmpRect.top + mTop,
+                    (int)tmpRect.right + mLeft, (int)tmpRect.bottom + mTop);
+        }
+    }
+
+    /**
+     * This method detects whether the given event is inside the view and, if so,
+     * handles it via the dispatchEvent(MotionEvent) method.
+     *
+     * @param ev The event that is being dispatched.
+     * @param parentX The x location of the event in the parent's coordinates.
+     * @param parentY The y location of the event in the parent's coordinates.
+     * @return true if the event was inside this view, false otherwise.
+     */
+    boolean dispatchTouchEvent(MotionEvent ev, float parentX, float parentY) {
+        float localX = parentX - mLeft;
+        float localY = parentY - mTop;
+        Matrix m = getMatrix();
+        if (!mMatrixIsIdentity && mAttachInfo != null) {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = localX;
+            localXY[1] = localY;
+            getInverseMatrix().mapPoints(localXY);
+            localX = localXY[0];
+            localY = localXY[1];
+        }
+        if (localX >= 0 && localY >= 0 &&
+                localX < (mRight - mLeft) && localY < (mBottom - mTop)) {
+            ev.setLocation(localX, localY);
+            return dispatchTouchEvent(ev);
+        }
+        return false;
+    }
+
+    /**
+     * Utility method to determine whether the given point, in local coordinates,
+     * is inside the view, where the area of the view is expanded by the slop factor.
+     * This method is called while processing touch-move events to determine if the event
+     * is still within the view.
+     */
+    private boolean pointInView(float localX, float localY, float slop) {
+        Matrix m = getMatrix();
+        if (!mMatrixIsIdentity && mAttachInfo != null) {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = localX;
+            localXY[1] = localY;
+            getInverseMatrix().mapPoints(localXY);
+            localX = localXY[0];
+            localY = localXY[1];
+        }
+        if (localX > -slop && localY > -slop &&
+                localX < ((mRight - mLeft) + slop) && localY < ((mBottom - mTop) + slop)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -4872,8 +5410,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param offset the number of pixels to offset the view by
      */
     public void offsetTopAndBottom(int offset) {
-        mTop += offset;
-        mBottom += offset;
+        if (offset != 0) {
+            Matrix m = getMatrix();
+            if (mMatrixIsIdentity) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final int[] location = mAttachInfo.mInvalidateChildLocation;
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int minTop = offset < 0 ? mTop + offset : mTop;
+                    int maxBottom = offset < 0 ? mBottom : mBottom + offset;
+                    location[0] = mLeft;
+                    location[1] = minTop;
+                    r.set(0, 0, mRight - mLeft, maxBottom - minTop);
+                    p.invalidateChildInParent(location, r);
+                }
+            } else {
+                invalidate();
+            }
+            mTop += offset;
+            mBottom += offset;
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -4882,8 +5442,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param offset the numer of pixels to offset the view by
      */
     public void offsetLeftAndRight(int offset) {
-        mLeft += offset;
-        mRight += offset;
+        if (offset != 0) {
+            Matrix m = getMatrix();
+            if (mMatrixIsIdentity) {
+                final ViewParent p = mParent;
+                if (p != null && mAttachInfo != null) {
+                    final int[] location = mAttachInfo.mInvalidateChildLocation;
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    int minLeft = offset < 0 ? mLeft + offset : mLeft;
+                    int maxRight = offset < 0 ? mRight : mRight + offset;
+                    location[0] = minLeft;
+                    location[1] = mTop;
+                    r.set(0, 0, maxRight - minLeft, mBottom - mTop);
+                    p.invalidateChildInParent(location, r);
+                }
+            } else {
+                invalidate();
+            }
+            mLeft += offset;
+            mRight += offset;
+            if (!mMatrixIsIdentity) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -9201,6 +9783,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          */
         final int[] mInvalidateChildLocation = new int[2];
 
+
+        /**
+         * Global to the view hierarchy used as a temporary for dealing with
+         * x/y location when view is transformed.
+         */
+        final float[] mTmpTransformLocation = new float[2];
+
         /**
          * The view tree observer used to dispatch global events like
          * layout, pre-draw, touch mode change, etc.
@@ -9235,6 +9824,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * calling up the hierarchy.
          */
         final Rect mTmpInvalRect = new Rect();
+
+        /**
+         * Temporary for use in computing hit areas with transformed views
+         */
+        final RectF mTmpTransformRect = new RectF();
+
+        /**
+         * Temporary for use in computing invalidation areas with transformed views
+         */
+        final float[] mTmpTransformBounds = new float[8];
 
         /**
          * Temporary list for use in collecting focusable descendents of a view.
