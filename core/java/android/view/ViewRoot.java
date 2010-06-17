@@ -259,17 +259,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
-
-        // Only enable hardware acceleration if we are not in the system process
-        // The window manager creates ViewRoots to display animated preview windows
-        // of launching apps and we don't want those to be hardware accelerated
-        if (Process.myUid() != Process.SYSTEM_UID) {
-            // Try to enable hardware acceleration if requested
-            if ((context.getApplicationInfo().flags &
-                    ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
-                mHwRenderer = HardwareRenderer.createGlRenderer(1);
-            }
-        }
     }
 
     // For debug only
@@ -331,13 +320,15 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     /**
      * We have one child
      */
-    public void setView(View view, WindowManager.LayoutParams attrs,
-            View panelParentView) {
+    public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
         synchronized (this) {
             if (mView == null) {
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
+                
+                enableHardwareAcceleration(view, attrs);
+
                 if (view instanceof RootViewSurfaceTaker) {
                     mSurfaceHolderCallback =
                             ((RootViewSurfaceTaker)view).willYouTakeTheSurface();
@@ -455,6 +446,20 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 view.assignParent(this);
                 mAddedTouchMode = (res&WindowManagerImpl.ADD_FLAG_IN_TOUCH_MODE) != 0;
                 mAppVisible = (res&WindowManagerImpl.ADD_FLAG_APP_VISIBLE) != 0;
+            }
+        }
+    }
+
+    private void enableHardwareAcceleration(View view, WindowManager.LayoutParams attrs) {
+        // Only enable hardware acceleration if we are not in the system process
+        // The window manager creates ViewRoots to display animated preview windows
+        // of launching apps and we don't want those to be hardware accelerated
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            // Try to enable hardware acceleration if requested
+            if ((view.getContext().getApplicationInfo().flags &
+                    ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+                final boolean translucent = attrs.format != PixelFormat.OPAQUE;
+                mHwRenderer = HardwareRenderer.createGlRenderer(2, translucent);
             }
         }
     }
