@@ -16,6 +16,8 @@
 
 #define DBUS_ADAPTER_IFACE BLUEZ_DBUS_BASE_IFC ".Adapter"
 #define DBUS_DEVICE_IFACE BLUEZ_DBUS_BASE_IFC ".Device"
+#define DBUS_INPUT_IFACE BLUEZ_DBUS_BASE_IFC ".Input"
+
 #define LOG_TAG "BluetoothService.cpp"
 
 #include "android_bluetooth_common.h"
@@ -881,6 +883,43 @@ static jboolean setLinkTimeoutNative(JNIEnv *env, jobject object, jstring object
     return JNI_FALSE;
 }
 
+static jboolean connectInputDeviceNative(JNIEnv *env, jobject object, jstring path) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                                    c_path, DBUS_INPUT_IFACE, "Connect",
+                                    DBUS_TYPE_INVALID);
+
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean disconnectInputDeviceNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                                    c_path, DBUS_INPUT_IFACE, "Disconnect",
+                                    DBUS_TYPE_INVALID);
+
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"classInitNative", "()V", (void*)classInitNative},
@@ -926,6 +965,9 @@ static JNINativeMethod sMethods[] = {
     {"addRfcommServiceRecordNative", "(Ljava/lang/String;JJS)I", (void *)addRfcommServiceRecordNative},
     {"removeServiceRecordNative", "(I)Z", (void *)removeServiceRecordNative},
     {"setLinkTimeoutNative", "(Ljava/lang/String;I)Z", (void *)setLinkTimeoutNative},
+    // HID functions
+    {"connectInputDeviceNative", "(Ljava/lang/String;)Z", (void *)connectInputDeviceNative},
+    {"disconnectInputDeviceNative", "(Ljava/lang/String;)Z", (void *)disconnectInputDeviceNative},
 };
 
 int register_android_server_BluetoothService(JNIEnv *env) {
