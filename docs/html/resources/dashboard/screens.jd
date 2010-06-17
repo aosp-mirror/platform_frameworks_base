@@ -49,7 +49,7 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="460" height="250"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:1.1,58.0,40.8&chl=Small%20/%20ldpi|
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:1.1,57.8,41.0&chl=Small%20/%20ldpi|
 Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
 
 <table>
@@ -66,8 +66,8 @@ Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
 </tr> 
 <tr><th scope="row">Normal</th> 
 <td></td> 
-<td class='cent hi'>58.0%</td> 
-<td class='cent hi'>40.8%</td> 
+<td class='cent hi'>57.8%</td> 
+<td class='cent hi'>41.0%</td> 
 </tr> 
 <tr><th scope="row">Large</th> 
 <td></td> 
@@ -76,6 +76,6 @@ Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
 </tr> 
 </table>
 
-<p><em>Data collected during two weeks ending on June 15, 2010</em></p>
+<p><em>Data collected during two weeks ending on June 16, 2010</em></p>
 </div>
 
