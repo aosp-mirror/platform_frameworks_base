@@ -100,6 +100,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Log.v(LOGTAG, "message sent to WebView to dump text.");
         switch (mDumpDataType) {
             case DUMP_AS_TEXT:
+                callback.arg1 = mDumpTopFrameAsText ? 1 : 0;
+                callback.arg2 = mDumpChildFramesAsText ? 1 : 0;
                 mWebView.documentAsText(callback);
                 break;
             case EXT_REPR:
@@ -341,9 +343,19 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     // LayoutTestController Functions
     public void dumpAsText() {
         mDumpDataType = DumpDataType.DUMP_AS_TEXT;
+        mDumpTopFrameAsText = true;
         if (mWebView != null) {
             String url = mWebView.getUrl();
             Log.v(LOGTAG, "dumpAsText called: "+url);
+        }
+    }
+
+    public void dumpChildFramesAsText() {
+        mDumpDataType = DumpDataType.DUMP_AS_TEXT;
+        mDumpChildFramesAsText = true;
+        if (mWebView != null) {
+            String url = mWebView.getUrl();
+            Log.v(LOGTAG, "dumpChildFramesAsText called: "+url);
         }
     }
 
@@ -738,6 +750,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private void resetTestStatus() {
         mWaitUntilDone = false;
         mDumpDataType = mDefaultDumpDataType;
+        mDumpTopFrameAsText = false;
+        mDumpChildFramesAsText = false;
         mTimedOut = false;
         mDumpTitleChanges = false;
         mRequestedWebKitData = false;
@@ -847,6 +861,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     // Layout test controller variables.
     private DumpDataType mDumpDataType;
     private DumpDataType mDefaultDumpDataType = DumpDataType.EXT_REPR;
+    private boolean mDumpTopFrameAsText;
+    private boolean mDumpChildFramesAsText;
     private boolean mWaitUntilDone;
     private boolean mDumpTitleChanges;
     private StringBuffer mTitleChanges;

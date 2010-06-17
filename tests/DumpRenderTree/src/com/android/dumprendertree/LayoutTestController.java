@@ -19,6 +19,7 @@ package com.android.dumprendertree;
 public interface LayoutTestController {
 
 	public void dumpAsText();
+	public void dumpChildFramesAsText();
 	public void waitUntilDone();
 	public void notifyDone();
 	
