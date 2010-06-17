@@ -439,6 +439,13 @@
         <attr name="quickContactBadgeStyleSmallWindowLarge" format="reference" />
 
         <!-- =================== -->
+        <!-- Action bar styles   -->
+        <!-- =================== -->
+        <eat-comment />
+        <!-- Default amount of padding to use between action buttons. -->
+        <attr name="actionButtonPadding" format="dimension" />
+
+        <!-- =================== -->
         <!-- Preference styles   -->
         <!-- =================== -->
         <eat-comment />

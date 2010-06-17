@@ -16,7 +16,10 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -27,10 +30,11 @@ import java.util.ArrayList;
 public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
     private static final String TAG = "ActionMenuView";
     
-    // TODO: Make this a ViewConfiguration constant.
-    private static final int MAX_ACTION_ITEMS = 3;
-    
     private MenuBuilder mMenu;
+
+    private int mItemPadding;
+    private int mItemMargin;
+    private int mMaxItems;
     
     public ActionMenuView(Context context) {
         this(context, null);
@@ -38,6 +42,48 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     
     public ActionMenuView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.Theme);
+        mItemPadding = a.getDimensionPixelOffset(
+                com.android.internal.R.styleable.Theme_actionButtonPadding, 0);
+        mItemMargin = mItemPadding / 2;
+        a.recycle();
+        
+        final Resources res = getResources();
+        final int size = res.getDimensionPixelSize(com.android.internal.R.dimen.action_icon_size);
+        final int spaceAvailable = res.getDisplayMetrics().widthPixels / 2;
+        final int itemSpace = size + mItemPadding; 
+        
+        mMaxItems = spaceAvailable / (itemSpace > 0 ? itemSpace : 1);
+    }
+    
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        if (p instanceof LayoutParams) {
+            LayoutParams lp = (LayoutParams) p;
+            return lp.leftMargin == mItemMargin && lp.rightMargin == mItemMargin &&
+                    lp.width == LayoutParams.WRAP_CONTENT && lp.height == LayoutParams.WRAP_CONTENT;
+        }
+        return false;
+    }
+    
+    @Override
+    protected LayoutParams generateDefaultLayoutParams() {
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+        params.leftMargin = mItemMargin;
+        params.rightMargin = mItemMargin;
+        return params;
+    }
+    
+    @Override
+    protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return generateDefaultLayoutParams();
+    }
+    
+    public int getItemMargin() {
+        return mItemMargin;
     }
 
     public boolean invokeItem(MenuItemImpl item) {
@@ -49,7 +95,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     public void initialize(MenuBuilder menu, int menuType) {
-        menu.setMaxActionItems(MAX_ACTION_ITEMS);
+        menu.setMaxActionItems(mMaxItems);
         mMenu = menu;
         updateChildren(true);
     }

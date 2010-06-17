@@ -1298,6 +1298,7 @@
   <public type="attr" name="actionDropDownStyle" />
   <public type="attr" name="actionButtonStyle" />
   <public type="attr" name="showAsAction" />
+  <public type="attr" name="actionButtonPadding" />
 
   <public type="id" name="home" />
 

@@ -203,6 +203,9 @@
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
+
+        <!-- Action bar styles -->
+        <item name="actionButtonPadding">12dip</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->

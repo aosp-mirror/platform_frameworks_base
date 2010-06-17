@@ -25,6 +25,9 @@
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
+    <!-- The standard size (both width and height) of an action icon that will
+         be displayed in application action bars. -->
+    <dimen name="action_icon_size">48dip</dimen>
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">25dip</dimen>

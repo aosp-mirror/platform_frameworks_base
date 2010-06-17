@@ -19,6 +19,7 @@ package android.view;
 import com.android.internal.R;
 import com.android.internal.view.menu.ActionMenu;
 import com.android.internal.view.menu.ActionMenuItem;
+import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
 import android.app.ActionBar;
@@ -85,7 +86,7 @@ public class ActionBarView extends ViewGroup {
     private boolean mShowMenu;
 
     private MenuBuilder mOptionsMenu;
-    private View mMenuView;
+    private ActionMenuView mMenuView;
     
     private ActionMenuItem mLogoNavItem;
     
@@ -186,7 +187,9 @@ public class ActionBarView extends ViewGroup {
         if (mMenuView != null) {
             removeView(mMenuView);
         }
-        final View menuView = builder.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, null);
+        final ActionMenuView menuView = (ActionMenuView) builder.getMenuView(
+                MenuBuilder.TYPE_ACTION_BUTTON, null);
+        mActionSpacing = menuView.getItemMargin();
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         menuView.setLayoutParams(layoutParams);
@@ -426,7 +429,7 @@ public class ActionBarView extends ViewGroup {
         
         if (mMenuView != null) {
             availableWidth = measureChildView(mMenuView, availableWidth,
-                    childSpecHeight, mActionSpacing);
+                    childSpecHeight, 0);
         }
         
         switch (mNavigationMode) {
@@ -497,9 +500,9 @@ public class ActionBarView extends ViewGroup {
 
         x = r - l - getPaddingRight();
 
-
         if (mMenuView != null) {
-            x -= positionChildInverse(mMenuView, x, y, contentHeight) + mActionSpacing;
+            x -= positionChildInverse(mMenuView, x + mActionSpacing, y, contentHeight)
+                    - mActionSpacing;
         }
     }
 
