@@ -341,11 +341,4 @@ public class MessageQueue {
         }
     }
     */
-
-    void poke()
-    {
-        synchronized (this) {
-            nativeWake();
-        }
-    }
 }

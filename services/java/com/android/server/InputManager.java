@@ -81,6 +81,10 @@ public class InputManager {
     private static native boolean nativeHasKeys(int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(InputChannel inputChannel);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
+    private static native int nativeInjectKeyEvent(KeyEvent event, int nature,
+            int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
+    private static native int nativeInjectMotionEvent(MotionEvent event, int nature,
+            int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
     
     // Device class as defined by EventHub.
     private static final int CLASS_KEYBOARD = 0x00000001;
@@ -89,6 +93,12 @@ public class InputManager {
     private static final int CLASS_TRACKBALL = 0x00000008;
     private static final int CLASS_TOUCHSCREEN_MT = 0x00000010;
     private static final int CLASS_DPAD = 0x00000020;
+    
+    // Input event injection constants defined in InputDispatcher.h.
+    static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
+    static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
+    static final int INPUT_EVENT_INJECTION_FAILED = 2;
+    static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
     
     public InputManager(Context context,
             WindowManagerService windowManagerService,
@@ -215,37 +225,63 @@ public class InputManager {
         nativeUnregisterInputChannel(inputChannel);
     }
     
-    // TBD where this really belongs, duplicate copy in WindowManagerService
-    static final int INJECT_FAILED = 0;
-    static final int INJECT_SUCCEEDED = 1;
-    static final int INJECT_NO_PERMISSION = -1;
-    
     /**
      * Injects a key event into the event system on behalf of an application.
+     * This method may block even if sync is false because it must wait for previous events
+     * to be dispatched before it can determine whether input event injection will be
+     * permitted based on the current input focus.
      * @param event The event to inject.
      * @param nature The nature of the event.
+     * @param injectorPid The pid of the injecting application.
+     * @param injectorUid The uid of the injecting application.
      * @param sync If true, waits for the event to be completed before returning.
-     * @param pid The pid of the injecting application.
-     * @param uid The uid of the injecting application.
-     * @return INJECT_SUCCEEDED, INJECT_FAILED or INJECT_NO_PERMISSION
+     * @param timeoutMillis The injection timeout in milliseconds.
+     * @return One of the INPUT_EVENT_INJECTION_XXX constants.
      */
-    public int injectKeyEvent(KeyEvent event, int nature, boolean sync, int pid, int uid) {
-        // TODO
-        return INJECT_FAILED;
+    public int injectKeyEvent(KeyEvent event, int nature, int injectorPid, int injectorUid,
+            boolean sync, int timeoutMillis) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+        if (injectorPid < 0 || injectorUid < 0) {
+            throw new IllegalArgumentException("injectorPid and injectorUid must not be negative.");
+        }
+        if (timeoutMillis <= 0) {
+            throw new IllegalArgumentException("timeoutMillis must be positive");
+        }
+        
+        return nativeInjectKeyEvent(event, nature, injectorPid, injectorUid,
+                sync, timeoutMillis);
     }
     
     /**
      * Injects a motion event into the event system on behalf of an application.
+     * This method may block even if sync is false because it must wait for previous events
+     * to be dispatched before it can determine whether input event injection will be
+     * permitted based on the current input focus.
      * @param event The event to inject.
      * @param nature The nature of the event.
      * @param sync If true, waits for the event to be completed before returning.
-     * @param pid The pid of the injecting application.
-     * @param uid The uid of the injecting application.
-     * @return INJECT_SUCCEEDED, INJECT_FAILED or INJECT_NO_PERMISSION
+     * @param injectorPid The pid of the injecting application.
+     * @param injectorUid The uid of the injecting application.
+     * @param sync If true, waits for the event to be completed before returning.
+     * @param timeoutMillis The injection timeout in milliseconds.
+     * @return One of the INPUT_EVENT_INJECTION_XXX constants.
      */
-    public int injectMotionEvent(MotionEvent event, int nature, boolean sync, int pid, int uid) {
-        // TODO
-        return INJECT_FAILED;
+    public int injectMotionEvent(MotionEvent event, int nature, int injectorPid, int injectorUid,
+            boolean sync, int timeoutMillis) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+        if (injectorPid < 0 || injectorUid < 0) {
+            throw new IllegalArgumentException("injectorPid and injectorUid must not be negative.");
+        }
+        if (timeoutMillis <= 0) {
+            throw new IllegalArgumentException("timeoutMillis must be positive");
+        }
+        
+        return nativeInjectMotionEvent(event, nature, injectorPid, injectorUid,
+                sync, timeoutMillis);
     }
     
     public void dump(PrintWriter pw) {
@@ -270,8 +306,6 @@ public class InputManager {
         
         private static final boolean DEBUG_VIRTUAL_KEYS = false;
         private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
-        
-        private final InputTargetList mReusableInputTargetList = new InputTargetList();
         
         @SuppressWarnings("unused")
         public boolean isScreenOn() {
@@ -306,6 +340,21 @@ public class InputManager {
         @SuppressWarnings("unused")
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
             mWindowManagerPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
+        }
+        
+        @SuppressWarnings("unused")
+        public void notifyInputChannelBroken(InputChannel inputChannel) {
+            mWindowManagerService.notifyInputChannelBroken(inputChannel);
+        }
+
+        @SuppressWarnings("unused")
+        public long notifyInputChannelANR(InputChannel inputChannel) {
+            return mWindowManagerService.notifyInputChannelANR(inputChannel);
+        }
+
+        @SuppressWarnings("unused")
+        public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
+            mWindowManagerService.notifyInputChannelRecoveredFromANR(inputChannel);
         }
         
         @SuppressWarnings("unused")
@@ -437,24 +486,23 @@ public class InputManager {
             return names.toArray(new String[names.size()]);
         }
         
+        // TODO All code related to target identification should be moved down into native.
         @SuppressWarnings("unused")
-        public InputTarget[] getKeyEventTargets(KeyEvent event, int nature, int policyFlags) {
-            mReusableInputTargetList.clear();
-            
-            mWindowManagerService.getKeyEventTargets(mReusableInputTargetList,
-                    event, nature, policyFlags);
-            
-            return mReusableInputTargetList.toNullTerminatedArray();
+        public int getKeyEventTargets(InputTargetList inputTargets,
+                KeyEvent event, int nature, int policyFlags,
+                int injectorPid, int injectorUid) {
+            inputTargets.clear();
+            return mWindowManagerService.getKeyEventTargetsTd(
+                    inputTargets, event, nature, policyFlags, injectorPid, injectorUid);
         }
         
         @SuppressWarnings("unused")
-        public InputTarget[] getMotionEventTargets(MotionEvent event, int nature, int policyFlags) {
-            mReusableInputTargetList.clear();
-            
-            mWindowManagerService.getMotionEventTargets(mReusableInputTargetList,
-                    event, nature, policyFlags);
-            
-            return mReusableInputTargetList.toNullTerminatedArray();
+        public int getMotionEventTargets(InputTargetList inputTargets,
+                MotionEvent event, int nature, int policyFlags,
+                int injectorPid, int injectorUid) {
+            inputTargets.clear();
+            return mWindowManagerService.getMotionEventTargetsTd(
+                    inputTargets, event, nature, policyFlags, injectorPid, injectorUid);
         }
     }
 }

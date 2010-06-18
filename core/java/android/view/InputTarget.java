@@ -25,7 +25,7 @@ package android.view;
  * These parameters are used by the native input dispatching code.
  * @hide
  */
-public class InputTarget {
+public final class InputTarget {
     public InputChannel mInputChannel;
     public int mFlags;
     public long mTimeoutNanos;

@@ -29,7 +29,7 @@ import android.view.InputTarget;
  * 
  * @hide
  */
-public class InputTargetList {
+public final class InputTargetList {
     private InputTarget[] mArray;
     private int mCount;
     
@@ -55,7 +55,7 @@ public class InputTargetList {
             count -= 1;
             mArray[count].recycle();
         }
-        // mArray[0] could be set to null here but we do it in toNullTerminatedArray()
+        mArray[0] = null;
     }
     
     /**
@@ -91,7 +91,7 @@ public class InputTargetList {
         
         mArray[mCount] = inputTarget;
         mCount += 1;
-        // mArray[mCount] could be set to null here but we do it in toNullTerminatedArray()
+        mArray[mCount] = null;
     }
     
     /**
@@ -99,7 +99,6 @@ public class InputTargetList {
      * @return The input target array.
      */
     public InputTarget[] toNullTerminatedArray() {
-        mArray[mCount] = null;
         return mArray;
     }
 }
