@@ -160,6 +160,11 @@ void ProgramVertex::createShader()
             const Element *e = mInputElements[ct].get();
             for (uint32_t field=0; field < e->getFieldCount(); field++) {
                 const Element *f = e->getField(field);
+                const char *fn = e->getFieldName(field);
+
+                if (fn[0] == '#') {
+                    continue;
+                }
 
                 // Cannot be complex
                 rsAssert(!f->getFieldCount());
@@ -172,7 +177,7 @@ void ProgramVertex::createShader()
                     rsAssert(0);
                 }
 
-                mShader.append(e->getFieldName(field));
+                mShader.append(fn);
                 mShader.append(";\n");
             }
         }

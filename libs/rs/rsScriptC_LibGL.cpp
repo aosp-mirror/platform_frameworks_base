@@ -121,38 +121,6 @@ static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
 // Drawing
 //////////////////////////////////////////////////////////////////////////////
 
-static void SC_drawLine(float x1, float y1, float z1,
-                        float x2, float y2, float z2)
-{
-    GET_TLS();
-    if (!rsc->setupCheck()) {
-        return;
-    }
-
-    float vtx[] = { x1, y1, z1, x2, y2, z2 };
-    VertexArray va;
-    va.add(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "position");
-    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
-
-    glDrawArrays(GL_LINES, 0, 2);
-}
-
-static void SC_drawPoint(float x, float y, float z)
-{
-    GET_TLS();
-    if (!rsc->setupCheck()) {
-        return;
-    }
-
-    float vtx[] = { x, y, z };
-
-    VertexArray va;
-    va.add(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "position");
-    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
-
-    glDrawArrays(GL_POINTS, 0, 1);
-}
-
 static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float u1, float v1,
                                  float x2, float y2, float z2,
@@ -212,20 +180,7 @@ static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h
                 x,   sh - (y+h), z);
     rsc->setVertex((ProgramVertex *)tmp.get());
 }
-
-static void SC_drawSpriteScreenspaceCropped(float x, float y, float z, float w, float h,
-        float cx0, float cy0, float cx1, float cy1)
-{
-    GET_TLS();
-    if (!rsc->setupCheck()) {
-        return;
-    }
-
-    GLint crop[4] = {cx0, cy0, cx1, cy1};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glDrawTexfOES(x, y, z, w, h);
-}
-
+/*
 static void SC_drawSprite(float x, float y, float z, float w, float h)
 {
     GET_TLS();
@@ -253,7 +208,7 @@ static void SC_drawSprite(float x, float y, float z, float w, float h)
     SC_drawSpriteScreenspace(vout[0], vout[1], z, h, w);
     //rsc->setupCheck();
 }
-
+*/
 
 static void SC_drawRect(float x1, float y1,
                         float x2, float y2, float z)
@@ -300,91 +255,6 @@ static void SC_color(float r, float g, float b, float a)
     rsc->mStateVertex.color[3] = a;
     if (!rsc->checkVersion2_0()) {
         glColor4f(r, g, b, a);
-    }
-}
-
-static void SC_pointAttenuation(float a, float b, float c)
-{
-    GLfloat params[] = { a, b, c };
-    glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, params);
-}
-
-static void SC_hsbToRgb(float h, float s, float b, float* rgb)
-{
-    float red = 0.0f;
-    float green = 0.0f;
-    float blue = 0.0f;
-
-    float x = h;
-    float y = s;
-    float z = b;
-
-    float hf = (x - (int) x) * 6.0f;
-    int ihf = (int) hf;
-    float f = hf - ihf;
-    float pv = z * (1.0f - y);
-    float qv = z * (1.0f - y * f);
-    float tv = z * (1.0f - y * (1.0f - f));
-
-    switch (ihf) {
-        case 0:         // Red is the dominant color
-            red = z;
-            green = tv;
-            blue = pv;
-            break;
-        case 1:         // Green is the dominant color
-            red = qv;
-            green = z;
-            blue = pv;
-            break;
-        case 2:
-            red = pv;
-            green = z;
-            blue = tv;
-            break;
-        case 3:         // Blue is the dominant color
-            red = pv;
-            green = qv;
-            blue = z;
-            break;
-        case 4:
-            red = tv;
-            green = pv;
-            blue = z;
-            break;
-        case 5:         // Red is the dominant color
-            red = z;
-            green = pv;
-            blue = qv;
-            break;
-    }
-
-    rgb[0] = red;
-    rgb[1] = green;
-    rgb[2] = blue;
-}
-
-static int SC_hsbToAbgr(float h, float s, float b, float a)
-{
-    //LOGE("hsb a %f, %f, %f    %f", h, s, b, a);
-    float rgb[3];
-    SC_hsbToRgb(h, s, b, rgb);
-    //LOGE("rgb  %f, %f, %f ", rgb[0], rgb[1], rgb[2]);
-    return int(a      * 255.0f) << 24 |
-           int(rgb[2] * 255.0f) << 16 |
-           int(rgb[1] * 255.0f) <<  8 |
-           int(rgb[0] * 255.0f);
-}
-
-static void SC_hsb(float h, float s, float b, float a)
-{
-    GET_TLS();
-    float rgb[3];
-    SC_hsbToRgb(h, s, b, rgb);
-    if (rsc->checkVersion2_0()) {
-        glVertexAttrib4f(1, rgb[0], rgb[1], rgb[2], a);
-    } else {
-        glColor4f(rgb[0], rgb[1], rgb[2], a);
     }
 }
 
@@ -475,8 +345,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgGetWidth", (void *)&SC_getWidth },
     { "rsgGetHeight", (void *)&SC_getHeight },
 
-    { "_Z18rsgUploadToTextureii", (void *)&SC_uploadToTexture2 },
-    { "_Z18rsgUploadToTexturei", (void *)&SC_uploadToTexture },
+  { "_Z18rsgUploadToTextureii", (void *)&SC_uploadToTexture2 },
+  { "_Z18rsgUploadToTexturei", (void *)&SC_uploadToTexture },
     { "_Z18rsgUploadToTexture13rs_allocationi", (void *)&SC_uploadToTexture2 },
     { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture },
     { "rsgUploadToBufferObject", (void *)&SC_uploadToBufferObject },
@@ -486,13 +356,10 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgDrawQuadTexCoords", (void *)&SC_drawQuadTexCoords },
     //{ "drawSprite", (void *)&SC_drawSprite },
     { "rsgDrawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
-    { "rsgDrawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped },
-    { "rsgDrawLine", (void *)&SC_drawLine },
-    { "rsgDrawPoint", (void *)&SC_drawPoint },
     { "_Z17rsgDrawSimpleMesh7rs_mesh", (void *)&SC_drawSimpleMesh },
     { "_Z17rsgDrawSimpleMesh7rs_meshii", (void *)&SC_drawSimpleMeshRange },
-    { "_Z17rsgDrawSimpleMeshi", (void *)&SC_drawSimpleMesh },
-    { "_Z17rsgDrawSimpleMeshiii", (void *)&SC_drawSimpleMeshRange },
+  { "_Z17rsgDrawSimpleMeshi", (void *)&SC_drawSimpleMesh },
+  { "_Z17rsgDrawSimpleMeshiii", (void *)&SC_drawSimpleMeshRange },
 
     { "rsgClearColor", (void *)&SC_ClearColor },
     { "rsgClearDepth", (void *)&SC_ClearDepth },
@@ -505,10 +372,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     // misc
     //{ "pfClearColor", (void *)&SC_ClearColor },
     { "color", (void *)&SC_color },
-    { "hsb", (void *)&SC_hsb },
-    { "hsbToRgb", (void *)&SC_hsbToRgb },
-    { "hsbToAbgr", (void *)&SC_hsbToAbgr },
-    { "pointAttenuation", (void *)&SC_pointAttenuation },
 
     { NULL, NULL }
 };
