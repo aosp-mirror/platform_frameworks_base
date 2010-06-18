@@ -319,4 +319,6 @@ interface IPackageManager {
 
     boolean setInstallLocation(int loc);
     int getInstallLocation();
+
+    void setPackageObbPath(String packageName, String path);
 }
