@@ -785,7 +785,7 @@ compatibility for these versions.</p>
 
 <h3 id="ScreenCompatibility">Providing screen resource compatibility for Android 1.5</h3>
 
-<p>Android 1.5 (and lower) does not support the following resource qualifers:</p>
+<p>Android 1.5 (and lower) does not support the following configuration qualifers:</p>
 <dl>
   <dt><a href="#DensityQualifier">Density</a></dt>
     <dd>{@code ldpi}, {@code mdpi}, {@code ldpi}, and {@code nodpi}</dd>
@@ -795,11 +795,11 @@ compatibility for these versions.</p>
     <dd>{@code long} and {@code notlong}</dd>
 </dl>
 
-<p>These resource qualifiers were introduced in Android 1.6, so Android 1.5 (API Level 3) and lower
-does not support them. If you use these configuration qualifiers and do not provide
+<p>These configuration qualifiers were introduced in Android 1.6, so Android 1.5 (API Level 3) and
+lower does not support them. If you use these configuration qualifiers and do not provide
 corresponding default resources, then an Android 1.5 device might use any one of the resource
-directories named with the above screen qualifiers, because it ignores the screen qualifiers and
-uses whichever otherwise-matching drawable resource it finds first.</p>
+directories named with the above screen configuration qualifiers, because it ignores these
+qualifiers and uses whichever otherwise-matching drawable resource it finds first.</p>
 
 <p>For example, if your application supports Android 1.5 and includes drawable resources for
 each density type ({@code drawable-ldpi/}, {@code drawable-mdpi/}, and {@code drawable-ldpi/}),
