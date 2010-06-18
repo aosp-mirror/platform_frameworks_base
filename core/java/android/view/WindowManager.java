@@ -580,19 +580,20 @@ public interface WindowManager extends ViewManager {
          * If the keyguard is currently active and is secure (requires an
          * unlock pattern) than the user will still need to confirm it before
          * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
-         * also been set. */
+         * also been set.
+         */
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
 
         /** Window flag: This window corresponds to an immersive activity
          * that wishes not to be interrupted with notifications.  In general,
-         * applications may simply hide the status bar with {@link
-         * FLAG_FULLSCREEN} to suppress most notifications, but will still be
-         * interrupted by those with
-         * {@link android.app.Notification.fullScreenIntent} set (example: an
-         * incoming call).  Setting {@link FLAG_IMMERSIVE} will suppress the
-         * full-screen intent and show the status bar briefly for those
-         * important notifications instead.  See also
-         * {@link android.app.Notification.FLAG_HIGH_PRIORITY}.
+         * applications may simply hide the status bar with
+         * {@link #FLAG_FULLSCREEN} to suppress most notifications, but will
+         * still be interrupted by those with
+         * {@link android.app.Notification#fullScreenIntent fullScreenIntent}
+         * set (example: an incoming call). Setting {@link #FLAG_IMMERSIVE}
+         * will suppress the full-screen intent and show the status bar
+         * briefly for those important notifications instead.
+         * {@see android.app.Notification#FLAG_HIGH_PRIORITY}
          */
         public static final int FLAG_IMMERSIVE = 0x00800000;
 
