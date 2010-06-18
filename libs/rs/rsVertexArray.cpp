@@ -123,6 +123,11 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
     rsc->checkError("VertexArray::setupGL2 disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
         uint32_t slot = 0;
+
+        if (mAttribs[ct].name[0] == '#') {
+            continue;
+        }
+
         if (sc->isUserVertexProgram()) {
             slot = sc->vtxAttribSlot(ct);
         } else {
