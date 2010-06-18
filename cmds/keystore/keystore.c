@@ -149,7 +149,6 @@ static void send_message(uint8_t *message, int length)
  * are always set to zero in this implementation. */
 
 static int the_entropy = -1;
-static const char *the_storage;
 
 static struct __attribute__((packed)) {
     uint32_t reserved;
@@ -166,8 +165,6 @@ static int8_t encrypt_blob(char *name, AES_KEY *aes_key)
     uint8_t vector[AES_BLOCK_SIZE];
     int length;
     int fd;
-    char tmp_path[PATH_MAX];
-    char path[PATH_MAX];
 
     if (read(the_entropy, vector, AES_BLOCK_SIZE) != AES_BLOCK_SIZE) {
         return SYSTEM_ERROR;
@@ -186,29 +183,17 @@ static int8_t encrypt_blob(char *name, AES_KEY *aes_key)
     blob.reserved = 0;
     length += blob.encrypted - (uint8_t *)&blob;
 
-    if (snprintf(tmp_path, PATH_MAX, "%s/.tmp", the_storage) >= PATH_MAX ||
-        snprintf(path, PATH_MAX, "%s/%s", the_storage, name) >= PATH_MAX) {
-        return SYSTEM_ERROR;
-    }
-
-    fd = open(tmp_path, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
+    fd = open(".tmp", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
     length -= write(fd, &blob, length);
     close(fd);
-
-    return (length || rename(tmp_path, path)) ? SYSTEM_ERROR : NO_ERROR;
+    return (length || rename(".tmp", name)) ? SYSTEM_ERROR : NO_ERROR;
 }
 
 static int8_t decrypt_blob(char *name, AES_KEY *aes_key)
 {
-    int fd;
+    int fd = open(name, O_RDONLY);
     int length;
-    char path[PATH_MAX];
 
-    if (snprintf(path, PATH_MAX, "%s/%s", the_storage, name) >= PATH_MAX) {
-        return SYSTEM_ERROR;
-    }
-
-    fd = open(path, O_RDONLY);
     if (fd == -1) {
         return (errno == ENOENT) ? KEY_NOT_FOUND : SYSTEM_ERROR;
     }
@@ -288,24 +273,18 @@ static int8_t insert()
 
 static int8_t delete()
 {
-    char path[PATH_MAX];
-    int n = snprintf(path, PATH_MAX, "%s/%u_", the_storage, uid);
-    if (n >= PATH_MAX) {
-        return SYSTEM_ERROR;
-    }
-    encode_key(&path[n], params[0].value, params[0].length);
-    return (unlink(path) && errno != ENOENT) ? SYSTEM_ERROR : NO_ERROR;
+    char name[NAME_MAX];
+    int n = sprintf(name, "%u_", uid);
+    encode_key(&name[n], params[0].value, params[0].length);
+    return (unlink(name) && errno != ENOENT) ? SYSTEM_ERROR : NO_ERROR;
 }
 
 static int8_t exist()
 {
-    char path[PATH_MAX];
-    int n = snprintf(path, PATH_MAX, "%s/%u_", the_storage, uid);
-    if (n >= PATH_MAX) {
-        return SYSTEM_ERROR;
-    }
-    encode_key(&path[n], params[0].value, params[0].length);
-    if (access(path, R_OK) == -1) {
+    char name[NAME_MAX];
+    int n = sprintf(name, "%u_", uid);
+    encode_key(&name[n], params[0].value, params[0].length);
+    if (access(name, R_OK) == -1) {
         return (errno != ENOENT) ? SYSTEM_ERROR : KEY_NOT_FOUND;
     }
     return NO_ERROR;
@@ -313,7 +292,7 @@ static int8_t exist()
 
 static int8_t saw()
 {
-    DIR *dir = opendir(the_storage);
+    DIR *dir = opendir(".");
     struct dirent *file;
     char name[NAME_MAX];
     int n;
@@ -337,9 +316,8 @@ static int8_t saw()
 
 static int8_t reset()
 {
-    DIR *dir = opendir(the_storage);
+    DIR *dir = opendir(".");
     struct dirent *file;
-    char path[PATH_MAX];
 
     memset(&encryption_key, 0, sizeof(encryption_key));
     memset(&decryption_key, 0, sizeof(decryption_key));
@@ -350,9 +328,7 @@ static int8_t reset()
         return SYSTEM_ERROR;
     }
     while ((file = readdir(dir)) != NULL) {
-        if (snprintf(path, PATH_MAX, "%s/%s", the_storage, file->d_name) < PATH_MAX) {
-            unlink(path);
-        }
+        unlink(file->d_name);
     }
     closedir(dir);
     return NO_ERROR;
@@ -517,7 +493,10 @@ int main(int argc, char **argv)
         LOGE("A directory must be specified!");
         return 1;
     }
-    the_storage = argv[1];
+    if (chdir(argv[1]) == -1) {
+        LOGE("chdir: %s: %s", argv[1], strerror(errno));
+        return 1;
+    }
     if ((the_entropy = open(RANDOM_DEVICE, O_RDONLY)) == -1) {
         LOGE("open: %s: %s", RANDOM_DEVICE, strerror(errno));
         return 1;
