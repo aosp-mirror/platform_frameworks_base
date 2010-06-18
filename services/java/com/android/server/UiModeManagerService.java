@@ -44,6 +44,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -64,11 +65,13 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
     private static final int MSG_UPDATE_TWILIGHT = 0;
     private static final int MSG_ENABLE_LOCATION_UPDATES = 1;
+    private static final int MSG_GET_NEW_LOCATION_UPDATE = 2;
 
-    private static final long LOCATION_UPDATE_MS = 30 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long LOCATION_UPDATE_MS = 24 * DateUtils.HOUR_IN_MILLIS;
+    private static final long MIN_LOCATION_UPDATE_MS = 30 * DateUtils.MINUTE_IN_MILLIS;
     private static final float LOCATION_UPDATE_DISTANCE_METER = 1000 * 20;
     private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MIN = 5000;
-    private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MAX = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MAX = 15 * DateUtils.MINUTE_IN_MILLIS;
     private static final double FACTOR_GMT_OFFSET_LONGITUDE = 1000.0 * 360.0 / DateUtils.DAY_IN_MILLIS;
 
     private static final String ACTION_UPDATE_NIGHT_MODE = "com.android.server.action.UPDATE_NIGHT_MODE";
@@ -215,6 +218,21 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     };
 
+    private final BroadcastReceiver mUpdateLocationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())) {
+                if (!intent.getBooleanExtra("state", false)) {
+                    // Airplane mode is now off!
+                    mHandler.sendEmptyMessage(MSG_GET_NEW_LOCATION_UPDATE);
+                }
+            } else {
+                // Time zone has changed!
+                mHandler.sendEmptyMessage(MSG_GET_NEW_LOCATION_UPDATE);
+            }
+        }
+    };
+
     // A LocationListener to initialize the network location provider. The location updates
     // are handled through the passive location provider.
     private final LocationListener mEmptyLocationListener =  new LocationListener() {
@@ -304,6 +322,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 new IntentFilter(Intent.ACTION_DOCK_EVENT));
         mContext.registerReceiver(mBatteryReceiver,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        mContext.registerReceiver(mUpdateLocationReceiver, filter);
 
         PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
@@ -586,7 +607,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
         boolean mPassiveListenerEnabled;
         boolean mNetworkListenerEnabled;
-
+        boolean mDidFirstInit;
+        long mLastNetworkRegisterTime = -MIN_LOCATION_UPDATE_MS;
+        
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -599,6 +622,25 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         }
                     }
                     break;
+                case MSG_GET_NEW_LOCATION_UPDATE:
+                    if (!mNetworkListenerEnabled) {
+                        // Don't do anything -- we are still trying to get a
+                        // location.
+                        return;
+                    }
+                    if ((mLastNetworkRegisterTime+MIN_LOCATION_UPDATE_MS)
+                            >= SystemClock.elapsedRealtime()) {
+                        // Don't do anything -- it hasn't been long enough
+                        // since we last requested an update.
+                        return;
+                    }
+                    
+                    // Unregister the current location monitor, so we can
+                    // register a new one for it to get an immediate update.
+                    mNetworkListenerEnabled = false;
+                    mLocationManager.removeUpdates(mEmptyLocationListener);
+                    
+                    // Fall through to re-register listener.
                 case MSG_ENABLE_LOCATION_UPDATES:
                     // enable network provider to receive at least location updates for a given
                     // distance.
@@ -613,17 +655,21 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     }
                     if (!mNetworkListenerEnabled && networkLocationEnabled) {
                         mNetworkListenerEnabled = true;
+                        mLastNetworkRegisterTime = SystemClock.elapsedRealtime();
                         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                                 LOCATION_UPDATE_MS, 0, mEmptyLocationListener);
 
-                        if (mLocation == null) {
-                            retrieveLocation();
-                        }
-                        synchronized (mLock) {
-                            if (isDoingNightMode() && mLocation != null
-                                    && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                                updateTwilightLocked();
-                                updateLocked(0, 0);
+                        if (!mDidFirstInit) {
+                            mDidFirstInit = true;
+                            if (mLocation == null) {
+                                retrieveLocation();
+                            }
+                            synchronized (mLock) {
+                                if (isDoingNightMode() && mLocation != null
+                                        && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
+                                    updateTwilightLocked();
+                                    updateLocked(0, 0);
+                                }
                             }
                         }
                     }
