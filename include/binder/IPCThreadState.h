@@ -40,6 +40,9 @@ public:
 
             int                 getCallingPid();
             int                 getCallingUid();
+
+            void                setStrictModePolicy(int32_t policy);
+            int32_t             getStrictModePolicy() const;
             
             int64_t             clearCallingIdentity();
             void                restoreCallingIdentity(int64_t token);
@@ -109,8 +112,9 @@ private:
             status_t            mLastError;
             pid_t               mCallingPid;
             uid_t               mCallingUid;
+            int32_t             mStrictModePolicy;
 };
-    
+
 }; // namespace android
 
 // ---------------------------------------------------------------------------
