@@ -23,6 +23,8 @@
 
 #include <jni.h>
 
+#include <android/input.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -144,6 +146,19 @@ typedef struct android_activity_callbacks_t {
      * returning from here.
      */
     void (*onSurfaceDestroyed)(android_activity_t* activity, android_surface_t* surface);
+    
+    /**
+     * The input queue for this native activity's window has been created.
+     * You can use the given input queue to start retrieving input events.
+     */
+    void (*onInputQueueCreated)(android_activity_t* activity, input_queue_t* queue);
+    
+    /**
+     * The input queue for this native activity's window is being destroyed.
+     * You should no longer try to reference this object upon returning from this
+     * function.
+     */
+    void (*onInputQueueDestroyed)(android_activity_t* activity, input_queue_t* queue);
 
     /**
      * The system is running low on memory.  Use this callback to release

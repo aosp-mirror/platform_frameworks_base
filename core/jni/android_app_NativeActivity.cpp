@@ -18,8 +18,10 @@
 #include <utils/Log.h>
 
 #include "JNIHelp.h"
+#include "android_view_InputChannel.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <android/native_activity.h>
+#include <ui/InputTransport.h>
 
 #include <dlfcn.h>
 
@@ -33,9 +35,13 @@ struct NativeCode {
         dlhandle = _dlhandle;
         createActivityFunc = _createFunc;
         surface = NULL;
+        inputChannel = NULL;
+        nativeInputQueue = NULL;
     }
     
     ~NativeCode() {
+        setSurface(NULL);
+        setInputChannel(NULL);
         if (callbacks.onDestroy != NULL) {
             callbacks.onDestroy(&activity);
         }
@@ -55,6 +61,31 @@ struct NativeCode {
         }
     }
     
+    status_t setInputChannel(jobject _channel) {
+        if (inputChannel != NULL) {
+            delete nativeInputQueue;
+            activity.env->DeleteGlobalRef(inputChannel);
+        }
+        inputChannel = NULL;
+        nativeInputQueue = NULL;
+        if (_channel != NULL) {
+            inputChannel = activity.env->NewGlobalRef(_channel);
+            sp<InputChannel> ic =
+                    android_view_InputChannel_getInputChannel(activity.env, _channel);
+            if (ic != NULL) {
+                nativeInputQueue = new input_queue_t(ic);
+                if (nativeInputQueue->getConsumer().initialize() != android::OK) {
+                    delete nativeInputQueue;
+                    nativeInputQueue = NULL;
+                    return UNKNOWN_ERROR;
+                }
+            } else {
+                return UNKNOWN_ERROR;
+            }
+        }
+        return OK;
+    }
+    
     android_activity_t activity;
     android_activity_callbacks_t callbacks;
     
@@ -62,6 +93,8 @@ struct NativeCode {
     android_activity_create_t* createActivityFunc;
     
     jobject surface;
+    jobject inputChannel;
+    struct input_queue_t* nativeInputQueue;
 };
 
 static jint
@@ -217,6 +250,38 @@ onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surfa
     }
 }
 
+static void
+onInputChannelCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject channel)
+{
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        status_t err = code->setInputChannel(channel);
+        if (err != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                    "Error setting input channel");
+            return;
+        }
+        if (code->callbacks.onInputQueueCreated != NULL) {
+            code->callbacks.onInputQueueCreated(&code->activity,
+                    code->nativeInputQueue);
+        }
+    }
+}
+
+static void
+onInputChannelDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject channel)
+{
+    if (handle != 0) {
+        NativeCode* code = (NativeCode*)handle;
+        if (code->nativeInputQueue != NULL
+                && code->callbacks.onInputQueueDestroyed != NULL) {
+            code->callbacks.onInputQueueDestroyed(&code->activity,
+                    code->nativeInputQueue);
+        }
+        code->setInputChannel(NULL);
+    }
+}
+
 static const JNINativeMethod g_methods[] = {
     { "loadNativeCode", "(Ljava/lang/String;)I", (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
@@ -230,6 +295,8 @@ static const JNINativeMethod g_methods[] = {
     { "onSurfaceCreatedNative", "(ILandroid/view/SurfaceHolder;)V", (void*)onSurfaceCreated_native },
     { "onSurfaceChangedNative", "(ILandroid/view/SurfaceHolder;III)V", (void*)onSurfaceChanged_native },
     { "onSurfaceDestroyedNative", "(ILandroid/view/SurfaceHolder;)V", (void*)onSurfaceDestroyed_native },
+    { "onInputChannelCreatedNative", "(ILandroid/view/InputChannel;)V", (void*)onInputChannelCreated_native },
+    { "onInputChannelDestroyedNative", "(ILandroid/view/InputChannel;)V", (void*)onInputChannelDestroyed_native },
 };
 
 static const char* const kNativeActivityPathName = "android/app/NativeActivity";
@@ -248,4 +315,4 @@ int register_android_app_NativeActivity(JNIEnv* env)
         g_methods, NELEM(g_methods));
 }
 
-}
+} // namespace android
