@@ -41,7 +41,7 @@ public:
     Track(MPEG4Writer *owner, const sp<MediaSource> &source);
     ~Track();
 
-    status_t start();
+    status_t start(int64_t startTimeUs);
     void stop();
     void pause();
     bool reachedEOS();
@@ -161,9 +161,10 @@ status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {
 }
 
 status_t MPEG4Writer::startTracks() {
+    int64_t startTimeUs = systemTime() / 1000;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
-        status_t err = (*it)->start();
+        status_t err = (*it)->start(startTimeUs);
 
         if (err != OK) {
             for (List<Track *>::iterator it2 = mTracks.begin();
@@ -182,6 +183,7 @@ status_t MPEG4Writer::start() {
         return UNKNOWN_ERROR;
     }
 
+    mStartTimestampUs = 0;
     if (mStarted) {
         if (mPaused) {
             mPaused = false;
@@ -190,7 +192,6 @@ status_t MPEG4Writer::start() {
         return OK;
     }
 
-    mStartTimestampUs = 0;
     mStreamableFile = true;
     mWriteMoovBoxToMemory = false;
     mMoovBoxBuffer = NULL;
@@ -541,17 +542,19 @@ bool MPEG4Writer::reachedEOS() {
     return allDone;
 }
 
-void MPEG4Writer::setStartTimestamp(int64_t timeUs) {
-    LOGI("setStartTimestamp: %lld", timeUs);
+void MPEG4Writer::setStartTimestampUs(int64_t timeUs) {
+    LOGI("setStartTimestampUs: %lld", timeUs);
+    CHECK(timeUs >= 0);
     Mutex::Autolock autoLock(mLock);
-    if (mStartTimestampUs != 0) {
-        return;  // Sorry, too late
+    if (mStartTimestampUs == 0 ||
+        (mStartTimestampUs > 0 && mStartTimestampUs > timeUs)) {
+        mStartTimestampUs = timeUs;
+        LOGI("Earliest track starting time: %lld", mStartTimestampUs);
     }
-    mStartTimestampUs = timeUs;
 }
 
-int64_t MPEG4Writer::getStartTimestamp() {
-    LOGI("getStartTimestamp: %lld", mStartTimestampUs);
+int64_t MPEG4Writer::getStartTimestampUs() {
+    LOGI("getStartTimestampUs: %lld", mStartTimestampUs);
     Mutex::Autolock autoLock(mLock);
     return mStartTimestampUs;
 }
@@ -584,14 +587,16 @@ MPEG4Writer::Track::~Track() {
     }
 }
 
-status_t MPEG4Writer::Track::start() {
+status_t MPEG4Writer::Track::start(int64_t startTimeUs) {
     if (!mDone && mPaused) {
         mPaused = false;
         mResumed = true;
         return OK;
     }
-    status_t err = mSource->start();
 
+    sp<MetaData> meta = new MetaData;
+    meta->setInt64(kKeyTime, startTimeUs);
+    status_t err = mSource->start(meta.get());
     if (err != OK) {
         mDone = mReachedEOS = true;
         return err;
@@ -933,8 +938,8 @@ void MPEG4Writer::Track::threadEntry() {
 
 ////////////////////////////////////////////////////////////////////////////////
         if (mSampleInfos.empty()) {
-            mOwner->setStartTimestamp(timestampUs);
-            mStartTimestampUs = (timestampUs - mOwner->getStartTimestamp());
+            mStartTimestampUs = timestampUs;
+            mOwner->setStartTimestampUs(mStartTimestampUs);
         }
 
         if (mResumed) {
@@ -1188,13 +1193,16 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
         }
       mOwner->endBox();  // tkhd
 
-      if (mStartTimestampUs != 0) {
+      int64_t moovStartTimeUs = mOwner->getStartTimestampUs();
+      if (mStartTimestampUs != moovStartTimeUs) {
         mOwner->beginBox("edts");
           mOwner->writeInt32(0);             // version=0, flags=0
           mOwner->beginBox("elst");
             mOwner->writeInt32(0);           // version=0, flags=0
             mOwner->writeInt32(1);           // a single entry
-            mOwner->writeInt32(mStartTimestampUs / 1000);  // edit duration
+            int64_t durationMs =
+                (mStartTimestampUs - moovStartTimeUs) / 1000;
+            mOwner->writeInt32(durationMs);  // edit duration
             mOwner->writeInt32(-1);          // empty edit box to signal starting time offset
             mOwner->writeInt32(1);           // x1 rate
           mOwner->endBox();

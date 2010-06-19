@@ -2538,7 +2538,7 @@ void OMXCodec::clearCodecSpecificData() {
     mCodecSpecificDataIndex = 0;
 }
 
-status_t OMXCodec::start(MetaData *) {
+status_t OMXCodec::start(MetaData *meta) {
     Mutex::Autolock autoLock(mLock);
 
     if (mState != LOADED) {
@@ -2548,6 +2548,14 @@ status_t OMXCodec::start(MetaData *) {
     sp<MetaData> params = new MetaData;
     if (mQuirks & kWantsNALFragments) {
         params->setInt32(kKeyWantsNALFragments, true);
+    }
+    if (meta) {
+        int64_t startTimeUs = 0;
+        int64_t timeUs;
+        if (meta->findInt64(kKeyTime, &timeUs)) {
+            startTimeUs = timeUs;
+        }
+        params->setInt64(kKeyTime, startTimeUs);
     }
     status_t err = mSource->start(params.get());
 
