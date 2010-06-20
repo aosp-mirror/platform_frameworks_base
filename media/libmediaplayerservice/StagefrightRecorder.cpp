@@ -316,6 +316,13 @@ status_t StagefrightRecorder::setParamIFramesInterval(int32_t interval) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParam64BitFileOffset(bool use64Bit) {
+    LOGV("setParam64BitFileOffset: %s",
+        use64Bit? "use 64 bit file offset": "use 32 bit file offset");
+    mUse64BitFileOffset = use64Bit;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParameter(
         const String8 &key, const String8 &value) {
     LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
@@ -360,6 +367,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t interval;
         if (safe_strtoi32(value.string(), &interval)) {
             return setParamIFramesInterval(interval);
+        }
+    } else if (key == "param-use-64bit-offset") {
+        int32_t use64BitOffset;
+        if (safe_strtoi32(value.string(), &use64BitOffset)) {
+            return setParam64BitFileOffset(use64BitOffset != 0);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -633,6 +645,7 @@ void StagefrightRecorder::clipVideoFrameHeight() {
 
 status_t StagefrightRecorder::startMPEG4Recording() {
     mWriter = new MPEG4Writer(dup(mOutputFd));
+    int32_t totalBitRate = 0;
 
     // Add audio source first if it exists
     if (mAudioSource != AUDIO_SOURCE_LIST_END) {
@@ -651,7 +664,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         if (audioEncoder == NULL) {
             return UNKNOWN_ERROR;
         }
-
+        totalBitRate += mAudioBitRate;
         mWriter->addSource(audioEncoder);
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
@@ -704,7 +717,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
 
         sp<MetaData> enc_meta = new MetaData;
         enc_meta->setInt32(kKeyBitRate, mVideoBitRate);
-        enc_meta->setInt32(kKeySampleRate, mFrameRate);  // XXX: kKeySampleRate?
+        enc_meta->setInt32(kKeySampleRate, mFrameRate);
 
         switch (mVideoEncoder) {
             case VIDEO_ENCODER_H263:
@@ -747,12 +760,13 @@ status_t StagefrightRecorder::startMPEG4Recording() {
                     true /* createEncoder */, cameraSource);
 
         CHECK(mOutputFd >= 0);
+        totalBitRate += mVideoBitRate;
         mWriter->addSource(encoder);
     }
 
     {
         // MPEGWriter specific handling
-        MPEG4Writer *writer = ((MPEG4Writer *) mWriter.get());  // mWriter is an MPEGWriter
+        MPEG4Writer *writer = ((MPEG4Writer *) mWriter.get());
         writer->setInterleaveDuration(mInterleaveDurationUs);
     }
 
@@ -763,7 +777,10 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         mWriter->setMaxFileSize(mMaxFileSizeBytes);
     }
     mWriter->setListener(mListener);
-    mWriter->start();
+    sp<MetaData> meta = new MetaData;
+    meta->setInt32(kKeyBitRate, totalBitRate);
+    meta->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
+    mWriter->start(meta.get());
     return OK;
 }
 
@@ -824,6 +841,7 @@ status_t StagefrightRecorder::reset() {
     mInterleaveDurationUs = 0;
     mIFramesInterval = 1;
     mAudioSourceNode = 0;
+    mUse64BitFileOffset = false;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;

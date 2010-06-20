@@ -36,13 +36,14 @@ enum {
     kKeyStride            = 'strd',  // int32_t
     kKeySliceHeight       = 'slht',  // int32_t
     kKeyChannelCount      = '#chn',  // int32_t
-    kKeySampleRate        = 'srte',  // int32_t
+    kKeySampleRate        = 'srte',  // int32_t (also video frame rate)
     kKeyBitRate           = 'brte',  // int32_t (bps)
     kKeyESDS              = 'esds',  // raw data
     kKeyAVCC              = 'avcc',  // raw data
     kKeyVorbisInfo        = 'vinf',  // raw data
     kKeyVorbisBooks       = 'vboo',  // raw data
     kKeyWantsNALFragments = 'NALf',
+    kKey64BitFileOffset   = 'fobt',  // int32_t (bool)
     kKeyIsSyncFrame       = 'sync',  // int32_t (bool)
     kKeyIsCodecConfig     = 'conf',  // int32_t (bool)
     kKeyTime              = 'time',  // int64_t (usecs)
