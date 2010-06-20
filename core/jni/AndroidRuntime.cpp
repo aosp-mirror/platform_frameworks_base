@@ -1136,11 +1136,13 @@ static int javaDetachThread(void)
  *
  * This is called from elsewhere in the library.
  */
-/*static*/ void AndroidRuntime::createJavaThread(const char* name,
+/*static*/ android_thread_id_t AndroidRuntime::createJavaThread(const char* name,
     void (*start)(void *), void* arg)
 {
+    android_thread_id_t threadId = 0;
     javaCreateThreadEtc((android_thread_func_t) start, arg, name,
-        ANDROID_PRIORITY_DEFAULT, 0, NULL);
+        ANDROID_PRIORITY_DEFAULT, 0, &threadId);
+    return threadId;
 }
 
 #if 0
