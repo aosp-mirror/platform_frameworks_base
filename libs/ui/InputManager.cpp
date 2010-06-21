@@ -80,6 +80,11 @@ status_t InputManager::unregisterInputChannel(const sp<InputChannel>& inputChann
     return mDispatcher->unregisterInputChannel(inputChannel);
 }
 
+int32_t InputManager::injectInputEvent(const InputEvent* event,
+        int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) {
+    return mDispatcher->injectInputEvent(event, injectorPid, injectorUid, sync, timeoutMillis);
+}
+
 void InputManager::getInputConfiguration(InputConfiguration* outConfiguration) const {
     mReader->getCurrentInputConfiguration(outConfiguration);
 }

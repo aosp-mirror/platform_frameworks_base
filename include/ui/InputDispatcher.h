@@ -35,6 +35,28 @@
 namespace android {
 
 /*
+ * Constants used to report the outcome of input event injection.
+ */
+enum {
+    /* (INTERNAL USE ONLY) Specifies that injection is pending and its outcome is unknown. */
+    INPUT_EVENT_INJECTION_PENDING = -1,
+
+    /* Injection succeeded. */
+    INPUT_EVENT_INJECTION_SUCCEEDED = 0,
+
+    /* Injection failed because the injector did not have permission to inject
+     * into the application with input focus. */
+    INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1,
+
+    /* Injection failed because there were no available input targets. */
+    INPUT_EVENT_INJECTION_FAILED = 2,
+
+    /* Injection failed due to a timeout. */
+    INPUT_EVENT_INJECTION_TIMED_OUT = 3
+};
+
+
+/*
  * An input target specifies how an input event is to be dispatched to a particular window
  * including the window's input channel, control flags, a timeout, and an X / Y offset to
  * be added to input event coordinates to compensate for the absolute position of the
@@ -70,6 +92,7 @@ struct InputTarget {
     float xOffset, yOffset;
 };
 
+
 /*
  * Input dispatcher policy interface.
  *
@@ -91,8 +114,11 @@ public:
     /* Notifies the system that an input channel is unrecoverably broken. */
     virtual void notifyInputChannelBroken(const sp<InputChannel>& inputChannel) = 0;
 
-    /* Notifies the system that an input channel is not responding. */
-    virtual void notifyInputChannelANR(const sp<InputChannel>& inputChannel) = 0;
+    /* Notifies the system that an input channel is not responding.
+     * Returns true and a new timeout value if the dispatcher should keep waiting.
+     * Otherwise returns false. */
+    virtual bool notifyInputChannelANR(const sp<InputChannel>& inputChannel,
+            nsecs_t& outNewTimeout) = 0;
 
     /* Notifies the system that an input channel recovered from ANR. */
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) = 0;
@@ -100,12 +126,22 @@ public:
     /* Gets the key repeat timeout or -1 if automatic key repeating is disabled. */
     virtual nsecs_t getKeyRepeatTimeout() = 0;
 
-    /* Gets the input targets for a key event. */
-    virtual void getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+    /* Gets the input targets for a key event.
+     * If the event is being injected, injectorPid and injectorUid should specify the
+     * process id and used id of the injecting application, otherwise they should both
+     * be -1.
+     * Returns one of the INPUT_EVENT_INJECTION_XXX constants. */
+    virtual int32_t getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid,
             Vector<InputTarget>& outTargets) = 0;
 
-    /* Gets the input targets for a motion event. */
-    virtual void getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+    /* Gets the input targets for a motion event.
+     * If the event is being injected, injectorPid and injectorUid should specify the
+     * process id and used id of the injecting application, otherwise they should both
+     * be -1.
+     * Returns one of the INPUT_EVENT_INJECTION_XXX constants. */
+    virtual int32_t getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid,
             Vector<InputTarget>& outTargets) = 0;
 };
 
@@ -138,6 +174,17 @@ public:
             uint32_t policyFlags, int32_t action, int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime) = 0;
+
+    /* Injects an input event and optionally waits for sync.
+     * This method may block even if sync is false because it must wait for previous events
+     * to be dispatched before it can determine whether input event injection will be
+     * permitted based on the current input focus.
+     * Returns one of the INPUT_EVENT_INJECTION_XXX constants.
+     *
+     * This method may be called on any thread (usually by the input manager).
+     */
+    virtual int32_t injectInputEvent(const InputEvent* event,
+            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) = 0;
 
     /* Registers or unregister input channels that may be used as targets for input events.
      *
@@ -183,6 +230,9 @@ public:
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime);
 
+    virtual int32_t injectInputEvent(const InputEvent* event,
+            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis);
+
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
 
@@ -205,7 +255,13 @@ private:
         int32_t type;
         nsecs_t eventTime;
 
+        int32_t injectionResult; // initially INPUT_EVENT_INJECTION_PENDING
+        int32_t injectorPid;     // -1 if not injected
+        int32_t injectorUid;     // -1 if not injected
+
         bool dispatchInProgress; // initially false, set to true while dispatching
+
+        inline bool isInjected() { return injectorPid >= 0; }
     };
 
     struct ConfigurationChangedEntry : EventEntry {
@@ -293,6 +349,7 @@ private:
     struct CommandEntry;
     typedef void (InputDispatcher::*Command)(CommandEntry* commandEntry);
 
+    class Connection;
     struct CommandEntry : Link<CommandEntry> {
         CommandEntry();
         ~CommandEntry();
@@ -300,7 +357,7 @@ private:
         Command command;
 
         // parameters for the command (usage varies by command)
-        sp<InputChannel> inputChannel;
+        sp<Connection> connection;
     };
 
     // Generic queue implementation.
@@ -353,9 +410,16 @@ private:
     public:
         Allocator();
 
-        ConfigurationChangedEntry* obtainConfigurationChangedEntry();
-        KeyEntry* obtainKeyEntry();
-        MotionEntry* obtainMotionEntry();
+        ConfigurationChangedEntry* obtainConfigurationChangedEntry(nsecs_t eventTime);
+        KeyEntry* obtainKeyEntry(nsecs_t eventTime,
+                int32_t deviceId, int32_t nature, uint32_t policyFlags, int32_t action,
+                int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
+                int32_t repeatCount, nsecs_t downTime);
+        MotionEntry* obtainMotionEntry(nsecs_t eventTime,
+                int32_t deviceId, int32_t nature, uint32_t policyFlags, int32_t action,
+                int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
+                nsecs_t downTime, uint32_t pointerCount,
+                const int32_t* pointerIds, const PointerCoords* pointerCoords);
         DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry);
         CommandEntry* obtainCommandEntry(Command command);
 
@@ -367,7 +431,7 @@ private:
         void releaseCommandEntry(CommandEntry* entry);
 
         void appendMotionSample(MotionEntry* motionEntry,
-                nsecs_t eventTime, int32_t pointerCount, const PointerCoords* pointerCoords);
+                nsecs_t eventTime, const PointerCoords* pointerCoords);
 
     private:
         Pool<ConfigurationChangedEntry> mConfigurationChangeEntryPool;
@@ -376,6 +440,8 @@ private:
         Pool<MotionSample> mMotionSamplePool;
         Pool<DispatchEntry> mDispatchEntryPool;
         Pool<CommandEntry> mCommandEntryPool;
+
+        void initializeEventEntry(EventEntry* entry, int32_t type, nsecs_t eventTime);
     };
 
     /* Manages the dispatch state associated with a single input channel. */
@@ -439,6 +505,8 @@ private:
         }
 
         status_t initialize();
+
+        void setNextTimeoutTime(nsecs_t currentTime, nsecs_t timeout);
     };
 
     sp<InputDispatcherPolicyInterface> mPolicy;
@@ -455,7 +523,16 @@ private:
     KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
 
     // Active connections are connections that have a non-empty outbound queue.
+    // We don't use a ref-counted pointer here because we explicitly abort connections
+    // during unregistration which causes the connection's outbound queue to be cleared
+    // and the connection itself to be deactivated.
     Vector<Connection*> mActiveConnections;
+
+    // List of connections that have timed out.  Only used by dispatchOnce()
+    // We don't use a ref-counted pointer here because it is not possible for a connection
+    // to be unregistered while processing timed out connections since we hold the lock for
+    // the duration.
+    Vector<Connection*> mTimedOutConnections;
 
     // Preallocated key and motion event objects used only to ask the input dispatcher policy
     // for the targets of an event that is to be dispatched.
@@ -467,6 +544,13 @@ private:
     // remain unchanged until the dispatch has completed or been aborted.
     Vector<InputTarget> mCurrentInputTargets;
     bool mCurrentInputTargetsValid; // false while targets are being recomputed
+
+    // Event injection and synchronization.
+    Condition mInjectionResultAvailableCondition;
+    Condition mFullySynchronizedCondition;
+    bool isFullySynchronizedLocked();
+    EventEntry* createEntryFromInputEventLocked(const InputEvent* event);
+    void setInjectionResultLocked(EventEntry* entry, int32_t injectionResult);
 
     // Key repeat tracking.
     // XXX Move this up to the input reader instead.
@@ -500,13 +584,18 @@ private:
             nsecs_t currentTime, EventEntry* entry, bool resumeWithAppendedMotionSample);
 
     // Manage the dispatch cycle for a single connection.
-    void prepareDispatchCycleLocked(nsecs_t currentTime, Connection* connection,
+    // These methods are deliberately not Interruptible because doing all of the work
+    // with the mutex held makes it easier to ensure that connection invariants are maintained.
+    // If needed, the methods post commands to run later once the critical bits are done.
+    void prepareDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample);
-    void startDispatchCycleLocked(nsecs_t currentTime, Connection* connection);
-    void finishDispatchCycleLocked(nsecs_t currentTime, Connection* connection);
-    bool timeoutDispatchCycleLocked(nsecs_t currentTime, Connection* connection);
-    bool abortDispatchCycleLocked(nsecs_t currentTime, Connection* connection,
+    void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void timeoutDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void resumeAfterTimeoutDispatchCycleLocked(nsecs_t currentTime,
+            const sp<Connection>& connection, nsecs_t newTimeout);
+    void abortDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool broken);
     static bool handleReceiveCallback(int receiveFd, int events, void* data);
 
@@ -514,19 +603,17 @@ private:
     void activateConnectionLocked(Connection* connection);
     void deactivateConnectionLocked(Connection* connection);
 
-    // Outbound policy interactions.
-    void doNotifyConfigurationChangedLockedInterruptible(CommandEntry* commandEntry);
-
     // Interesting events that we might like to log or tell the framework about.
     void onDispatchCycleStartedLocked(
-            nsecs_t currentTime, Connection* connection);
+            nsecs_t currentTime, const sp<Connection>& connection);
     void onDispatchCycleFinishedLocked(
-            nsecs_t currentTime, Connection* connection, bool recoveredFromANR);
+            nsecs_t currentTime, const sp<Connection>& connection, bool recoveredFromANR);
     void onDispatchCycleANRLocked(
-            nsecs_t currentTime, Connection* connection);
+            nsecs_t currentTime, const sp<Connection>& connection);
     void onDispatchCycleBrokenLocked(
-            nsecs_t currentTime, Connection* connection);
+            nsecs_t currentTime, const sp<Connection>& connection);
 
+    // Outbound policy interactions.
     void doNotifyInputChannelBrokenLockedInterruptible(CommandEntry* commandEntry);
     void doNotifyInputChannelANRLockedInterruptible(CommandEntry* commandEntry);
     void doNotifyInputChannelRecoveredFromANRLockedInterruptible(CommandEntry* commandEntry);

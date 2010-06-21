@@ -1444,7 +1444,7 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         case InputReaderPolicyInterface::ROTATION_90: {
             float xTemp = x;
             x = y;
-            y = mDisplayHeight - xTemp;
+            y = mDisplayWidth - xTemp;
             break;
         }
         case InputReaderPolicyInterface::ROTATION_180: {
@@ -1454,7 +1454,7 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         }
         case InputReaderPolicyInterface::ROTATION_270: {
             float xTemp = x;
-            x = mDisplayWidth - y;
+            x = mDisplayHeight - y;
             y = xTemp;
             break;
         }
@@ -1510,7 +1510,7 @@ void InputReader::onTrackballStateChanged(nsecs_t when,
 
     uint32_t fields = device->trackball.accumulator.fields;
     bool downChanged = fields & InputDevice::TrackballState::Accumulator::FIELD_BTN_MOUSE;
-    bool deltaChanged = (fields & DELTA_FIELDS) == DELTA_FIELDS;
+    bool deltaChanged = fields & DELTA_FIELDS;
 
     bool down;
     if (downChanged) {
@@ -1546,10 +1546,10 @@ void InputReader::onTrackballStateChanged(nsecs_t when,
 
     int32_t pointerId = 0;
     PointerCoords pointerCoords;
-    pointerCoords.x = device->trackball.accumulator.relX
-            * device->trackball.precalculated.xScale;
-    pointerCoords.y = device->trackball.accumulator.relY
-            * device->trackball.precalculated.yScale;
+    pointerCoords.x = fields & InputDevice::TrackballState::Accumulator::FIELD_REL_X
+            ? device->trackball.accumulator.relX * device->trackball.precalculated.xScale : 0;
+    pointerCoords.y = fields & InputDevice::TrackballState::Accumulator::FIELD_REL_Y
+            ? device->trackball.accumulator.relY * device->trackball.precalculated.yScale : 0;
     pointerCoords.pressure = 1.0f; // XXX Consider making this 1.0f if down, 0 otherwise.
     pointerCoords.size = 0;
 

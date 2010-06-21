@@ -50,6 +50,9 @@ static struct {
     jmethodID isScreenBright;
     jmethodID notifyConfigurationChanged;
     jmethodID notifyLidSwitchChanged;
+    jmethodID notifyInputChannelBroken;
+    jmethodID notifyInputChannelANR;
+    jmethodID notifyInputChannelRecoveredFromANR;
     jmethodID virtualKeyFeedback;
     jmethodID hackInterceptKey;
     jmethodID goToSleep;
@@ -73,6 +76,13 @@ static struct {
     jfieldID height;
 } gVirtualKeyDefinitionClassInfo;
 
+static struct {
+    jclass clazz;
+
+    jmethodID ctor;
+    jfieldID mArray;
+} gInputTargetListClassInfo;
+
 // ----------------------------------------------------------------------------
 
 class NativeInputManager : public virtual RefBase,
@@ -88,6 +98,10 @@ public:
 
     void setDisplaySize(int32_t displayId, int32_t width, int32_t height);
     void setDisplayOrientation(int32_t displayId, int32_t orientation);
+
+    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
+            jweak inputChannelObjWeak);
+    status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -112,18 +126,20 @@ public:
 
     virtual void notifyConfigurationChanged(nsecs_t when);
     virtual void notifyInputChannelBroken(const sp<InputChannel>& inputChannel);
-    virtual void notifyInputChannelANR(const sp<InputChannel>& inputChannel);
+    virtual bool notifyInputChannelANR(const sp<InputChannel>& inputChannel,
+            nsecs_t& outNewTimeout);
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel);
     virtual nsecs_t getKeyRepeatTimeout();
-    virtual void getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
-            Vector<InputTarget>& outTargets);
-    virtual void getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
-            Vector<InputTarget>& outTargets);
+    virtual int32_t getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
+    virtual int32_t getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
 
 private:
     sp<InputManager> mInputManager;
 
     jobject mCallbacksObj;
+    jobject mReusableInputTargetListObj;
 
     // Cached filtering policies.
     int32_t mFilterTouchEvents;
@@ -138,12 +154,20 @@ private:
     bool isScreenOn();
     bool isScreenBright();
 
+    // Weak references to all currently registered input channels by receive fd.
+    Mutex mInputChannelRegistryLock;
+    KeyedVector<int, jweak> mInputChannelObjWeakByReceiveFd;
+
+    jobject getInputChannelObjLocal(JNIEnv* env, const sp<InputChannel>& inputChannel);
+
     static inline JNIEnv* jniEnv() {
         return AndroidRuntime::getJNIEnv();
     }
 
     static bool isAppSwitchKey(int32_t keyCode);
-    static bool checkExceptionFromCallback(JNIEnv* env, const char* methodName);
+    static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
+    static void populateInputTargets(JNIEnv* env, jobject inputTargetListObj,
+            Vector<InputTarget>& outTargets);
 };
 
 // ----------------------------------------------------------------------------
@@ -155,6 +179,11 @@ NativeInputManager::NativeInputManager(jobject callbacksObj) :
 
     mCallbacksObj = env->NewGlobalRef(callbacksObj);
 
+    jobject inputTargetListObj = env->NewObject(gInputTargetListClassInfo.clazz,
+            gInputTargetListClassInfo.ctor);
+    mReusableInputTargetListObj = env->NewGlobalRef(inputTargetListObj);
+    env->DeleteLocalRef(inputTargetListObj);
+
     sp<EventHub> eventHub = new EventHub();
     mInputManager = new InputManager(eventHub, this, this);
 }
@@ -163,13 +192,14 @@ NativeInputManager::~NativeInputManager() {
     JNIEnv* env = jniEnv();
 
     env->DeleteGlobalRef(mCallbacksObj);
+    env->DeleteGlobalRef(mReusableInputTargetListObj);
 }
 
 bool NativeInputManager::isAppSwitchKey(int32_t keyCode) {
     return keyCode == KEYCODE_HOME || keyCode == KEYCODE_ENDCALL;
 }
 
-bool NativeInputManager::checkExceptionFromCallback(JNIEnv* env, const char* methodName) {
+bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
         LOGE("An exception was thrown by callback '%s'.", methodName);
         LOGE_EX(env);
@@ -196,6 +226,86 @@ void NativeInputManager::setDisplayOrientation(int32_t displayId, int32_t orient
     }
 }
 
+status_t NativeInputManager::registerInputChannel(JNIEnv* env,
+        const sp<InputChannel>& inputChannel, jobject inputChannelObj) {
+    jweak inputChannelObjWeak = env->NewWeakGlobalRef(inputChannelObj);
+    if (! inputChannelObjWeak) {
+        LOGE("Could not create weak reference for input channel.");
+        LOGE_EX(env);
+        return NO_MEMORY;
+    }
+
+    status_t status;
+    {
+        AutoMutex _l(mInputChannelRegistryLock);
+
+        ssize_t index = mInputChannelObjWeakByReceiveFd.indexOfKey(
+                inputChannel->getReceivePipeFd());
+        if (index >= 0) {
+            LOGE("Input channel object '%s' has already been registered",
+                    inputChannel->getName().string());
+            status = INVALID_OPERATION;
+            goto DeleteWeakRef;
+        }
+
+        mInputChannelObjWeakByReceiveFd.add(inputChannel->getReceivePipeFd(),
+                inputChannelObjWeak);
+    }
+
+    status = mInputManager->registerInputChannel(inputChannel);
+    if (! status) {
+        return OK;
+    }
+
+    {
+        AutoMutex _l(mInputChannelRegistryLock);
+        mInputChannelObjWeakByReceiveFd.removeItem(inputChannel->getReceivePipeFd());
+    }
+
+DeleteWeakRef:
+    env->DeleteWeakGlobalRef(inputChannelObjWeak);
+    return status;
+}
+
+status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
+        const sp<InputChannel>& inputChannel) {
+    jweak inputChannelObjWeak;
+    {
+        AutoMutex _l(mInputChannelRegistryLock);
+
+        ssize_t index = mInputChannelObjWeakByReceiveFd.indexOfKey(
+                inputChannel->getReceivePipeFd());
+        if (index < 0) {
+            LOGE("Input channel object '%s' is not currently registered",
+                    inputChannel->getName().string());
+            return INVALID_OPERATION;
+        }
+
+        inputChannelObjWeak = mInputChannelObjWeakByReceiveFd.valueAt(index);
+        mInputChannelObjWeakByReceiveFd.removeItemsAt(index);
+    }
+
+    env->DeleteWeakGlobalRef(inputChannelObjWeak);
+
+    return mInputManager->unregisterInputChannel(inputChannel);
+}
+
+jobject NativeInputManager::getInputChannelObjLocal(JNIEnv* env,
+        const sp<InputChannel>& inputChannel) {
+    {
+        AutoMutex _l(mInputChannelRegistryLock);
+
+        ssize_t index = mInputChannelObjWeakByReceiveFd.indexOfKey(
+                inputChannel->getReceivePipeFd());
+        if (index < 0) {
+            return NULL;
+        }
+
+        jweak inputChannelObjWeak = mInputChannelObjWeakByReceiveFd.valueAt(index);
+        return env->NewLocalRef(inputChannelObjWeak);
+    }
+}
+
 bool NativeInputManager::getDisplayInfo(int32_t displayId,
         int32_t* width, int32_t* height, int32_t* orientation) {
     bool result = false;
@@ -216,7 +326,7 @@ bool NativeInputManager::isScreenOn() {
     JNIEnv* env = jniEnv();
 
     jboolean result = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.isScreenOn);
-    if (checkExceptionFromCallback(env, "isScreenOn")) {
+    if (checkAndClearExceptionFromCallback(env, "isScreenOn")) {
         return true;
     }
     return result;
@@ -226,7 +336,7 @@ bool NativeInputManager::isScreenBright() {
     JNIEnv* env = jniEnv();
 
     jboolean result = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.isScreenBright);
-    if (checkExceptionFromCallback(env, "isScreenBright")) {
+    if (checkAndClearExceptionFromCallback(env, "isScreenBright")) {
         return true;
     }
     return result;
@@ -245,7 +355,7 @@ void NativeInputManager::virtualKeyFeedback(nsecs_t when, int32_t deviceId,
 
     env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyFeedback,
             when, deviceId, action, flags, keyCode, scanCode, metaState, downTime);
-    checkExceptionFromCallback(env, "virtualKeyFeedback");
+    checkAndClearExceptionFromCallback(env, "virtualKeyFeedback");
 }
 
 int32_t NativeInputManager::interceptKey(nsecs_t when,
@@ -267,7 +377,7 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
 
     jint wmActions = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.hackInterceptKey,
             deviceId, EV_KEY, scanCode, keyCode, policyFlags, down ? 1 : 0, when, isScreenOn);
-    if (checkExceptionFromCallback(env, "hackInterceptKey")) {
+    if (checkAndClearExceptionFromCallback(env, "hackInterceptKey")) {
         wmActions = 0;
     }
 
@@ -284,12 +394,12 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
 
     if (wmActions & WM_ACTION_GO_TO_SLEEP) {
         env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.goToSleep, when);
-        checkExceptionFromCallback(env, "goToSleep");
+        checkAndClearExceptionFromCallback(env, "goToSleep");
     }
 
     if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
         env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.pokeUserActivityForKey, when);
-        checkExceptionFromCallback(env, "pokeUserActivityForKey");
+        checkAndClearExceptionFromCallback(env, "pokeUserActivityForKey");
     }
 
     if (wmActions & WM_ACTION_PASS_TO_USER) {
@@ -297,7 +407,7 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
 
         if (down && isAppSwitchKey(keyCode)) {
             env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyAppSwitchComing);
-            checkExceptionFromCallback(env, "notifyAppSwitchComing");
+            checkAndClearExceptionFromCallback(env, "notifyAppSwitchComing");
 
             actions |= InputReaderPolicyInterface::ACTION_APP_SWITCH_COMING;
         }
@@ -358,7 +468,7 @@ int32_t NativeInputManager::interceptSwitch(nsecs_t when, int32_t switchCode,
     case SW_LID:
         env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyLidSwitchChanged,
                 when, switchValue == 0);
-        checkExceptionFromCallback(env, "notifyLidSwitchChanged");
+        checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
         break;
     }
 
@@ -371,7 +481,7 @@ bool NativeInputManager::filterTouchEvents() {
 
         jboolean result = env->CallBooleanMethod(mCallbacksObj,
                 gCallbacksClassInfo.filterTouchEvents);
-        if (checkExceptionFromCallback(env, "filterTouchEvents")) {
+        if (checkAndClearExceptionFromCallback(env, "filterTouchEvents")) {
             result = false;
         }
 
@@ -386,7 +496,7 @@ bool NativeInputManager::filterJumpyTouchEvents() {
 
         jboolean result = env->CallBooleanMethod(mCallbacksObj,
                 gCallbacksClassInfo.filterJumpyTouchEvents);
-        if (checkExceptionFromCallback(env, "filterJumpyTouchEvents")) {
+        if (checkAndClearExceptionFromCallback(env, "filterJumpyTouchEvents")) {
             result = false;
         }
 
@@ -400,10 +510,10 @@ void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
     JNIEnv* env = jniEnv();
 
     jstring deviceNameStr = env->NewStringUTF(deviceName.string());
-    if (! checkExceptionFromCallback(env, "getVirtualKeyDefinitions")) {
+    if (! checkAndClearExceptionFromCallback(env, "getVirtualKeyDefinitions")) {
         jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
                 gCallbacksClassInfo.getVirtualKeyDefinitions, deviceNameStr));
-        if (! checkExceptionFromCallback(env, "getVirtualKeyDefinitions") && result) {
+        if (! checkAndClearExceptionFromCallback(env, "getVirtualKeyDefinitions") && result) {
             jsize length = env->GetArrayLength(result);
             for (jsize i = 0; i < length; i++) {
                 jobject item = env->GetObjectArrayElement(result, i);
@@ -433,7 +543,7 @@ void NativeInputManager::getExcludedDeviceNames(Vector<String8>& outExcludedDevi
 
     jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
             gCallbacksClassInfo.getExcludedDeviceNames));
-    if (! checkExceptionFromCallback(env, "getExcludedDeviceNames") && result) {
+    if (! checkAndClearExceptionFromCallback(env, "getExcludedDeviceNames") && result) {
         jsize length = env->GetArrayLength(result);
         for (jsize i = 0; i < length; i++) {
             jstring item = jstring(env->GetObjectArrayElement(result, i));
@@ -460,7 +570,7 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
 
     env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyConfigurationChanged,
             when, config.touchScreen, config.keyboard, config.navigation);
-    checkExceptionFromCallback(env, "notifyConfigurationChanged");
+    checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
 void NativeInputManager::notifyInputChannelBroken(const sp<InputChannel>& inputChannel) {
@@ -468,16 +578,47 @@ void NativeInputManager::notifyInputChannelBroken(const sp<InputChannel>& inputC
     LOGD("notifyInputChannelBroken - inputChannel='%s'", inputChannel->getName().string());
 #endif
 
-    // TODO
+    JNIEnv* env = jniEnv();
+
+    jobject inputChannelObjLocal = getInputChannelObjLocal(env, inputChannel);
+    if (inputChannelObjLocal) {
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyInputChannelBroken,
+                inputChannelObjLocal);
+        checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
+
+        env->DeleteLocalRef(inputChannelObjLocal);
+    }
 }
 
-void NativeInputManager::notifyInputChannelANR(const sp<InputChannel>& inputChannel) {
+bool NativeInputManager::notifyInputChannelANR(const sp<InputChannel>& inputChannel,
+        nsecs_t& outNewTimeout) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     LOGD("notifyInputChannelANR - inputChannel='%s'",
             inputChannel->getName().string());
 #endif
 
-    // TODO
+    JNIEnv* env = jniEnv();
+
+    jlong newTimeout;
+    jobject inputChannelObjLocal = getInputChannelObjLocal(env, inputChannel);
+    if (inputChannelObjLocal) {
+        newTimeout = env->CallLongMethod(mCallbacksObj,
+                gCallbacksClassInfo.notifyInputChannelANR, inputChannelObjLocal);
+        if (checkAndClearExceptionFromCallback(env, "notifyInputChannelANR")) {
+            newTimeout = -2;
+        }
+
+        env->DeleteLocalRef(inputChannelObjLocal);
+    } else {
+        newTimeout = -2;
+    }
+
+    if (newTimeout == -2) {
+        return false; // abort
+    }
+
+    outNewTimeout = newTimeout;
+    return true; // resume
 }
 
 void NativeInputManager::notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel) {
@@ -486,7 +627,16 @@ void NativeInputManager::notifyInputChannelRecoveredFromANR(const sp<InputChanne
             inputChannel->getName().string());
 #endif
 
-    // TODO
+    JNIEnv* env = jniEnv();
+
+    jobject inputChannelObjLocal = getInputChannelObjLocal(env, inputChannel);
+    if (inputChannelObjLocal) {
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyInputChannelRecoveredFromANR,
+                inputChannelObjLocal);
+        checkAndClearExceptionFromCallback(env, "notifyInputChannelRecoveredFromANR");
+
+        env->DeleteLocalRef(inputChannelObjLocal);
+    }
 }
 
 nsecs_t NativeInputManager::getKeyRepeatTimeout() {
@@ -499,73 +649,83 @@ nsecs_t NativeInputManager::getKeyRepeatTimeout() {
     }
 }
 
-void NativeInputManager::getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
-        Vector<InputTarget>& outTargets) {
+int32_t NativeInputManager::getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("getKeyEventTargets - policyFlags=%d", policyFlags);
+    LOGD("getKeyEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+            policyFlags, injectorPid, injectorUid);
 #endif
 
     JNIEnv* env = jniEnv();
 
+    jint injectionResult;
     jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
     if (! keyEventObj) {
         LOGE("Could not obtain DVM KeyEvent object to get key event targets.");
+        injectionResult = INPUT_EVENT_INJECTION_FAILED;
     } else {
-        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
-                gCallbacksClassInfo.getKeyEventTargets,
-                keyEventObj, jint(keyEvent->getNature()), jint(policyFlags)));
-        if (! checkExceptionFromCallback(env, "getKeyEventTargets") && result) {
-            jsize length = env->GetArrayLength(result);
-            for (jsize i = 0; i < length; i++) {
-                jobject item = env->GetObjectArrayElement(result, i);
-                if (! item) {
-                    break; // found null element indicating end of used portion of the array
-                }
-
-                outTargets.add();
-                android_view_InputTarget_toNative(env, item, & outTargets.editTop());
-
-                env->DeleteLocalRef(item);
-            }
-            env->DeleteLocalRef(result);
+        jint injectionResult = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.getKeyEventTargets, mReusableInputTargetListObj,
+                keyEventObj, jint(keyEvent->getNature()), jint(policyFlags),
+                jint(injectorPid), jint(injectorUid));
+        if (checkAndClearExceptionFromCallback(env, "getKeyEventTargets")) {
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+        } else {
+            populateInputTargets(env, mReusableInputTargetListObj, outTargets);
         }
         env->DeleteLocalRef(keyEventObj);
     }
+    return injectionResult;
 }
 
-void NativeInputManager::getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
-        Vector<InputTarget>& outTargets) {
+int32_t NativeInputManager::getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("getMotionEventTargets - policyFlags=%d", policyFlags);
+    LOGD("getMotionEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+            policyFlags, injectorPid, injectorUid);
 #endif
 
     JNIEnv* env = jniEnv();
 
+    jint injectionResult;
     jobject motionEventObj = android_view_MotionEvent_fromNative(env, motionEvent);
     if (! motionEventObj) {
         LOGE("Could not obtain DVM MotionEvent object to get key event targets.");
+        injectionResult = INPUT_EVENT_INJECTION_FAILED;
     } else {
-        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
-                gCallbacksClassInfo.getMotionEventTargets,
-                motionEventObj, jint(motionEvent->getNature()), jint(policyFlags)));
-        if (! checkExceptionFromCallback(env, "getMotionEventTargets") && result) {
-            jsize length = env->GetArrayLength(result);
-            for (jsize i = 0; i < length; i++) {
-                jobject item = env->GetObjectArrayElement(result, i);
-                if (! item) {
-                    break; // found null element indicating end of used portion of the array
-                }
-
-                outTargets.add();
-                android_view_InputTarget_toNative(env, item, & outTargets.editTop());
-
-                env->DeleteLocalRef(item);
-            }
-            env->DeleteLocalRef(result);
+        jint injectionResult = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.getMotionEventTargets, mReusableInputTargetListObj,
+                motionEventObj, jint(motionEvent->getNature()), jint(policyFlags),
+                jint(injectorPid), jint(injectorUid));
+        if (checkAndClearExceptionFromCallback(env, "getMotionEventTargets")) {
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+        } else {
+            populateInputTargets(env, mReusableInputTargetListObj, outTargets);
         }
         android_view_MotionEvent_recycle(env, motionEventObj);
         env->DeleteLocalRef(motionEventObj);
     }
+    return injectionResult;
+}
+
+void NativeInputManager::populateInputTargets(JNIEnv* env, jobject inputTargetListObj,
+        Vector<InputTarget>& outTargets) {
+    jobjectArray inputTargetArray = jobjectArray(env->GetObjectField(
+            inputTargetListObj, gInputTargetListClassInfo.mArray));
+
+    jsize length = env->GetArrayLength(inputTargetArray);
+    for (jsize i = 0; i < length; i++) {
+        jobject item = env->GetObjectArrayElement(inputTargetArray, i);
+        if (! item) {
+            break; // found null element indicating end of used portion of the array
+        }
+
+        outTargets.add();
+        android_view_InputTarget_toNative(env, item, & outTargets.editTop());
+
+        env->DeleteLocalRef(item);
+    }
+    env->DeleteLocalRef(inputTargetArray);
 }
 
 
@@ -686,7 +846,7 @@ static void android_server_InputManager_handleInputChannelDisposed(JNIEnv* env,
             "the input manager!", inputChannel->getName().string());
 
     if (gNativeInputManager != NULL) {
-        gNativeInputManager->getInputManager()->unregisterInputChannel(inputChannel);
+        gNativeInputManager->unregisterInputChannel(env, inputChannel);
     }
 }
 
@@ -703,7 +863,9 @@ static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, 
         return;
     }
 
-    status_t status = gNativeInputManager->getInputManager()->registerInputChannel(inputChannel);
+
+    status_t status = gNativeInputManager->registerInputChannel(
+            env, inputChannel, inputChannelObj);
     if (status) {
         jniThrowRuntimeException(env, "Failed to register input channel.  "
                 "Check logs for details.");
@@ -729,11 +891,39 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj, NULL, NULL);
 
-    status_t status = gNativeInputManager->getInputManager()->unregisterInputChannel(inputChannel);
+    status_t status = gNativeInputManager->unregisterInputChannel(env, inputChannel);
     if (status) {
         jniThrowRuntimeException(env, "Failed to unregister input channel.  "
                 "Check logs for details.");
     }
+}
+
+static jint android_server_InputManager_nativeInjectKeyEvent(JNIEnv* env, jclass clazz,
+        jobject keyEventObj, jint nature, jint injectorPid, jint injectorUid,
+        jboolean sync, jint timeoutMillis) {
+    if (checkInputManagerUnitialized(env)) {
+        return INPUT_EVENT_INJECTION_FAILED;
+    }
+
+    KeyEvent keyEvent;
+    android_view_KeyEvent_toNative(env, keyEventObj, nature, & keyEvent);
+
+    return gNativeInputManager->getInputManager()->injectInputEvent(& keyEvent,
+            injectorPid, injectorUid, sync, timeoutMillis);
+}
+
+static jint android_server_InputManager_nativeInjectMotionEvent(JNIEnv* env, jclass clazz,
+        jobject motionEventObj, jint nature, jint injectorPid, jint injectorUid,
+        jboolean sync, jint timeoutMillis) {
+    if (checkInputManagerUnitialized(env)) {
+        return INPUT_EVENT_INJECTION_FAILED;
+    }
+
+    MotionEvent motionEvent;
+    android_view_MotionEvent_toNative(env, motionEventObj, nature, & motionEvent);
+
+    return gNativeInputManager->getInputManager()->injectInputEvent(& motionEvent,
+            injectorPid, injectorUid, sync, timeoutMillis);
 }
 
 // ----------------------------------------------------------------------------
@@ -759,7 +949,11 @@ static JNINativeMethod gInputManagerMethods[] = {
     { "nativeRegisterInputChannel", "(Landroid/view/InputChannel;)V",
             (void*) android_server_InputManager_nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(Landroid/view/InputChannel;)V",
-            (void*) android_server_InputManager_nativeUnregisterInputChannel }
+            (void*) android_server_InputManager_nativeUnregisterInputChannel },
+    { "nativeInjectKeyEvent", "(Landroid/view/KeyEvent;IIIZI)I",
+            (void*) android_server_InputManager_nativeInjectKeyEvent },
+    { "nativeInjectMotionEvent", "(Landroid/view/MotionEvent;IIIZI)I",
+            (void*) android_server_InputManager_nativeInjectMotionEvent }
 };
 
 #define FIND_CLASS(var, className) \
@@ -796,6 +990,15 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.notifyLidSwitchChanged, gCallbacksClassInfo.clazz,
             "notifyLidSwitchChanged", "(JZ)V");
 
+    GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelBroken, gCallbacksClassInfo.clazz,
+            "notifyInputChannelBroken", "(Landroid/view/InputChannel;)V");
+
+    GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelANR, gCallbacksClassInfo.clazz,
+            "notifyInputChannelANR", "(Landroid/view/InputChannel;)J");
+
+    GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelRecoveredFromANR, gCallbacksClassInfo.clazz,
+            "notifyInputChannelRecoveredFromANR", "(Landroid/view/InputChannel;)V");
+
     GET_METHOD_ID(gCallbacksClassInfo.virtualKeyFeedback, gCallbacksClassInfo.clazz,
             "virtualKeyFeedback", "(JIIIIIIJ)V");
 
@@ -825,10 +1028,12 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gCallbacksClassInfo.getKeyEventTargets, gCallbacksClassInfo.clazz,
-            "getKeyEventTargets", "(Landroid/view/KeyEvent;II)[Landroid/view/InputTarget;");
+            "getKeyEventTargets",
+            "(Lcom/android/server/InputTargetList;Landroid/view/KeyEvent;IIII)I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getMotionEventTargets, gCallbacksClassInfo.clazz,
-            "getMotionEventTargets", "(Landroid/view/MotionEvent;II)[Landroid/view/InputTarget;");
+            "getMotionEventTargets",
+            "(Lcom/android/server/InputTargetList;Landroid/view/MotionEvent;IIII)I");
 
     // VirtualKeyDefinition
 
@@ -849,6 +1054,16 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.height, gVirtualKeyDefinitionClassInfo.clazz,
             "height", "I");
+
+    // InputTargetList
+
+    FIND_CLASS(gInputTargetListClassInfo.clazz, "com/android/server/InputTargetList");
+
+    GET_METHOD_ID(gInputTargetListClassInfo.ctor, gInputTargetListClassInfo.clazz,
+            "<init>", "()V");
+
+    GET_FIELD_ID(gInputTargetListClassInfo.mArray, gInputTargetListClassInfo.clazz,
+            "mArray", "[Landroid/view/InputTarget;");
 
     return 0;
 }
