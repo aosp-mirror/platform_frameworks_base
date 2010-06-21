@@ -312,22 +312,6 @@ public class ThrottleService extends IThrottleManager.Stub {
                 }
             }, new IntentFilter(ACTION_RESET));
 
-        // use a new thread as we don't want to stall the system for file writes
-        mThread = new HandlerThread(TAG);
-        mThread.start();
-        mHandler = new MyHandler(mThread.getLooper());
-        mHandler.obtainMessage(EVENT_REBOOT_RECOVERY).sendToTarget();
-
-        mInterfaceObserver = new InterfaceObserver(mHandler, EVENT_IFACE_UP, mIface);
-        try {
-            mNMService.registerObserver(mInterfaceObserver);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not register InterfaceObserver " + e);
-        }
-
-        mSettingsObserver = new SettingsObserver(mHandler, EVENT_POLICY_CHANGED);
-        mSettingsObserver.observe(mContext);
-
         FileInputStream stream = null;
         try {
             Properties properties = new Properties();
@@ -344,6 +328,22 @@ public class ThrottleService extends IThrottleManager.Stub {
                 } catch (Exception e) {}
             }
         }
+
+        // use a new thread as we don't want to stall the system for file writes
+        mThread = new HandlerThread(TAG);
+        mThread.start();
+        mHandler = new MyHandler(mThread.getLooper());
+        mHandler.obtainMessage(EVENT_REBOOT_RECOVERY).sendToTarget();
+
+        mInterfaceObserver = new InterfaceObserver(mHandler, EVENT_IFACE_UP, mIface);
+        try {
+            mNMService.registerObserver(mInterfaceObserver);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not register InterfaceObserver " + e);
+        }
+
+        mSettingsObserver = new SettingsObserver(mHandler, EVENT_POLICY_CHANGED);
+        mSettingsObserver.observe(mContext);
     }
 
 
