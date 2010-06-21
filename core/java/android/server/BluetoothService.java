@@ -1265,7 +1265,7 @@ public class BluetoothService extends IBluetooth.Stub {
         if (mInputDevices.get(device) == null) {
             return BluetoothInputDevice.STATE_DISCONNECTED;
         }
-        return mInputDevices.get(device.getAddress());
+        return mInputDevices.get(device);
     }
 
     public synchronized BluetoothDevice[] getConnectedInputDevices() {

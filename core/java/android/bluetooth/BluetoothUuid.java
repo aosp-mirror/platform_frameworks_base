@@ -50,7 +50,7 @@ public final class BluetoothUuid {
     public static final ParcelUuid ObexObjectPush =
             ParcelUuid.fromString("00001105-0000-1000-8000-00805f9b34fb");
     public static final ParcelUuid Hid =
-      ParcelUuid.fromString("00000011-0000-1000-8000-00805f9b34fb");
+            ParcelUuid.fromString("00001124-0000-1000-8000-00805f9b34fb");
 
     public static final ParcelUuid[] RESERVED_UUIDS = {
         AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
