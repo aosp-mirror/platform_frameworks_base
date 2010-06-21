@@ -780,7 +780,7 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-masselagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB koblet til"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Du har koblet telefonen til datamaskinen via USB. Velg knappen nedenfor hvis du vil kopiere filer mellom datamaskinen og SD-kortet i Android-telefonen."</string>
+    <string name="usb_storage_message" msgid="4796759646167247178">"Du har koblet telefonen til datamaskinen via USB. Velg knappen nedenfor hvis du vil kopiere filer mellom datamaskinen og minnekortet i telefonen."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Slå på USB-lagring"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"Det oppsto et problem med å bruke minnekortet ditt for USB-lagring."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB tilkoblet"</string>
