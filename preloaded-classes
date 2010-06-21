@@ -684,7 +684,6 @@ com.android.internal.view.menu.ListMenuItemView
 com.android.internal.view.menu.MenuBuilder
 com.android.internal.view.menu.MenuItemImpl
 com.android.internal.view.menu.SubMenuBuilder
-com.android.internal.widget.ContactHeaderWidget
 com.android.internal.widget.DialogTitle
 com.android.internal.widget.EditableInputConnection
 com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
