@@ -956,11 +956,14 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         sqliteDatabase.setPageSize(sBlockSize);
 
-        // set journal_mode to truncate
-        String s = DatabaseUtils.stringForQuery(sqliteDatabase, "PRAGMA journal_mode=TRUNCATE",
-                null);
-        if (!s.equalsIgnoreCase("TRUNCATE")) {
-            Log.e(TAG, "setting journal_mode to TRUNCATE failed");
+        // set journal_mode to truncate for non-memory databases
+        if (!path.equalsIgnoreCase(":memory:")) {
+            String s = DatabaseUtils.stringForQuery(sqliteDatabase, "PRAGMA journal_mode=TRUNCATE",
+                    null);
+            if (!s.equalsIgnoreCase("TRUNCATE")) {
+                Log.e(TAG, "setting journal_mode to TRUNCATE failed for db: " + path +
+                        " (on pragma set journal_mode, sqlite returned:" + s);
+            }
         }
 
         // add this database to the list of databases opened in this process
