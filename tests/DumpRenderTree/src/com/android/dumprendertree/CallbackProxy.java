@@ -74,6 +74,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int LAYOUT_SET_CAN_OPEN_WINDOWS = 42;
     private static final int SET_GEOLOCATION_PERMISSION = 43;
     private static final int OVERRIDE_PREFERENCE = 44;
+    private static final int LAYOUT_DUMP_CHILD_FRAMES_TEXT = 45;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -176,6 +177,10 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
         case LAYOUT_DUMP_TEXT:
             mLayoutTestController.dumpAsText();
+            break;
+
+        case LAYOUT_DUMP_CHILD_FRAMES_TEXT:
+            mLayoutTestController.dumpChildFramesAsText();
             break;
 
         case LAYOUT_DUMP_HISTORY:
@@ -378,6 +383,10 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
     public void dumpAsText() {
         obtainMessage(LAYOUT_DUMP_TEXT).sendToTarget();
+    }
+
+    public void dumpChildFramesAsText() {
+        obtainMessage(LAYOUT_DUMP_CHILD_FRAMES_TEXT).sendToTarget();
     }
 
     public void dumpBackForwardList() {

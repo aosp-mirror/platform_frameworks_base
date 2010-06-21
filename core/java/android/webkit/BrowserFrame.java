@@ -517,12 +517,21 @@ class BrowserFrame extends Handler {
     private native String externalRepresentation();
 
     /**
-     * Retrieves the visual text of the current frame, puts it as the object for
+     * Retrieves the visual text of the frames, puts it as the object for
      * the message and sends the message.
      * @param callback the message to use to send the visual text
      */
     public void documentAsText(Message callback) {
-        callback.obj = documentAsText();;
+        StringBuilder text = new StringBuilder();
+        if (callback.arg1 != 0) {
+            // Dump top frame as text.
+            text.append(documentAsText());
+        }
+        if (callback.arg2 != 0) {
+            // Dump child frames as text.
+            text.append(childFramesAsText());
+        }
+        callback.obj = text.toString();
         callback.sendToTarget();
     }
 
@@ -530,6 +539,11 @@ class BrowserFrame extends Handler {
      * Return the text drawn on the screen as a string
      */
     private native String documentAsText();
+
+    /**
+     * Return the text drawn on the child frames as a string
+     */
+    private native String childFramesAsText();
 
     /*
      * This method is called by WebCore to inform the frame that
