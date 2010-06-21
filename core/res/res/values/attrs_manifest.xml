@@ -398,6 +398,10 @@
          participate in data synchronization. -->
     <attr name="syncable" format="boolean" />
     
+    <!-- Flag declaring this activity to be 'immersive'; immersive activities
+         should not be interrupted with other activities or notifications. -->
+    <attr name="immersive" format="boolean" />
+
     <!-- Specify the order in which content providers hosted by a process
          are instantiated when that process is created.  Not needed unless
          you have providers with dependencies between each other, to make
@@ -1200,6 +1204,7 @@
              this activity.  A value besides "unspecified" here overrides
              any value in the theme. -->
         <attr name="windowSoftInputMode" />
+        <attr name="immersive" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
