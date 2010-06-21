@@ -5662,6 +5662,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * to the user.  This will not move the cursor if it represents more than
      * one character (a selection range).  This will only work if the
      * TextView contains spannable text; otherwise it will do nothing.
+     *
+     * @return True is the cursor was actually moved, false otherwise.
      */
     public boolean moveCursorToVisibleOffset() {
         if (!(mText instanceof Spannable)) {
@@ -6566,25 +6568,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     class CommitSelectionReceiver extends ResultReceiver {
-        int mNewStart;
-        int mNewEnd;
-        
-        CommitSelectionReceiver() {
+        private final int mPrevStart, mPrevEnd;
+        private final int mNewStart, mNewEnd;
+
+        public CommitSelectionReceiver(int mPrevStart, int mPrevEnd, int mNewStart, int mNewEnd) {
             super(getHandler());
+            this.mPrevStart = mPrevStart;
+            this.mPrevEnd = mPrevEnd;
+            this.mNewStart = mNewStart;
+            this.mNewEnd = mNewEnd;
         }
-        
+
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (resultCode != InputMethodManager.RESULT_SHOWN) {
-                final int len = mText.length();
-                if (mNewStart > len) {
-                    mNewStart = len;
-                }
-                if (mNewEnd > len) {
-                    mNewEnd = len;
-                }
-                Selection.setSelection((Spannable)mText, mNewStart, mNewEnd);
+            int start = mNewStart;
+            int end = mNewEnd;
+
+            // Move the cursor to the new position, unless this tap was actually
+            // use to show the IMM. Leave cursor unchanged in that case.
+            if (resultCode == InputMethodManager.RESULT_SHOWN) {
+                start = mPrevStart;
+                end = mPrevEnd;
             }
+
+            final int len = mText.length();
+            if (start > len) {
+                start = len;
+            }
+            if (end > len) {
+                end = len;
+            }
+            Selection.setSelection((Spannable)mText, start, end);
         }
     }
     
@@ -6597,7 +6611,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mTouchFocusSelected = false;
             mScrolled = false;
         }
-        
+
         final boolean superResult = super.onTouchEvent(event);
 
         /*
@@ -6610,7 +6624,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
-        if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
+        if ((mMovement != null || onCheckIsTextEditor()) &&
+                mText instanceof Spannable && mLayout != null) {
             
             boolean handled = false;
             
@@ -6625,28 +6640,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    
-                    // This is going to be gross...  if tapping on the text view
-                    // causes the IME to be displayed, we don't want the selection
-                    // to change.  But the selection has already changed, and
-                    // we won't know right away whether the IME is getting
-                    // displayed, so...
-                    
-                    int newSelStart = Selection.getSelectionStart(mText);
-                    int newSelEnd = Selection.getSelectionEnd(mText);
-                    CommitSelectionReceiver csr = null;
+
+                    final int newSelStart = Selection.getSelectionStart(mText);
+                    final int newSelEnd = Selection.getSelectionEnd(mText);
+
                     if (newSelStart != oldSelStart || newSelEnd != oldSelEnd) {
-                        csr = new CommitSelectionReceiver();
-                        csr.mNewStart = newSelStart;
-                        csr.mNewEnd = newSelEnd;
-                    }
-                    
-                    if (imm.showSoftInput(this, 0, csr) && csr != null) {
-                        // The IME might get shown -- revert to the old
-                        // selection, and change to the new when we finally
-                        // find out of it is okay.
-                        Selection.setSelection((Spannable)mText, oldSelStart, oldSelEnd);
-                        handled = true;
+                        CommitSelectionReceiver csr = new CommitSelectionReceiver(
+                                oldSelStart, oldSelEnd, newSelStart, newSelEnd);
+                        handled = imm.showSoftInput(this, 0, csr);
                     }
                 }
             }
