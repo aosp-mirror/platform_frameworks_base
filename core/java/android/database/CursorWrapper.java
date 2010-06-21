@@ -17,20 +17,26 @@
 package android.database;
 
 import android.content.ContentResolver;
-import android.database.CharArrayBuffer;
 import android.net.Uri;
 import android.os.Bundle;
 
-import java.util.Map;
-
 /**
- * Wrapper class for Cursor that delegates all calls to the actual cursor object
+ * Wrapper class for Cursor that delegates all calls to the actual cursor object.  The primary
+ * use for this class is to extend a cursor while overriding only a subset of its methods.
  */
-
 public class CursorWrapper implements Cursor {
+
+    private final Cursor mCursor;
 
     public CursorWrapper(Cursor cursor) {
         mCursor = cursor;
+    }
+
+    /**
+     * @return the wrapped cursor
+     */
+    public Cursor getWrappedCursor() {
+        return mCursor;
     }
 
     public void close() {
@@ -189,7 +195,5 @@ public class CursorWrapper implements Cursor {
     public void unregisterDataSetObserver(DataSetObserver observer) {
         mCursor.unregisterDataSetObserver(observer);
     }
-
-    private Cursor mCursor;    
 }
 
