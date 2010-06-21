@@ -102,6 +102,17 @@ public:
 
     typedef void (*callback_t)(int event, void* user, void *info);
 
+    /* Returns the minimum frame count required for the successful creation of
+     * an AudioTrack object.
+     * Returned status (from utils/Errors.h) can be:
+     *  - NO_ERROR: successful operation
+     *  - NO_INIT: audio server or audio hardware not initialized
+     */
+
+     static status_t getMinFrameCount(int* frameCount,
+                                      int streamType      =-1,
+                                      uint32_t sampleRate = 0);
+
     /* Constructs an uninitialized AudioTrack. No connection with
      * AudioFlinger takes place.
      */

@@ -41,6 +41,35 @@
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 namespace android {
+// ---------------------------------------------------------------------------
+
+// static
+status_t AudioTrack::getMinFrameCount(
+        int* frameCount,
+        int streamType,
+        uint32_t sampleRate)
+{
+    int afSampleRate;
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+        return NO_INIT;
+    }
+    int afFrameCount;
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+        return NO_INIT;
+    }
+    uint32_t afLatency;
+    if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
+        return NO_INIT;
+    }
+
+    // Ensure that buffer depth covers at least audio hardware latency
+    uint32_t minBufCount = afLatency / ((1000 * afFrameCount) / afSampleRate);
+    if (minBufCount < 2) minBufCount = 2;
+
+    *frameCount = (sampleRate == 0) ? afFrameCount * minBufCount :
+              afFrameCount * minBufCount * sampleRate / afSampleRate;
+    return NO_ERROR;
+}
 
 // ---------------------------------------------------------------------------
 
