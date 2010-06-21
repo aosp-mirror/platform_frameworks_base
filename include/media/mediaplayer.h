@@ -172,6 +172,8 @@ public:
             status_t        getMetadata(bool update_only, bool apply_filter, Parcel *metadata);
             status_t        suspend();
             status_t        resume();
+            status_t        setAudioSessionId(int sessionId);
+            int             getAudioSessionId();
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);
@@ -198,6 +200,7 @@ private:
     float                       mRightVolume;
     int                         mVideoWidth;
     int                         mVideoHeight;
+    int                         mAudioSessionId;
 };
 
 }; // namespace android

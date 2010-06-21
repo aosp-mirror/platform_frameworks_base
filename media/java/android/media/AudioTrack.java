@@ -210,6 +210,10 @@ public class AudioTrack
      * @see AudioFormat#ENCODING_PCM_16BIT
      */
     private int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    /**
+     * Audio session ID
+     */
+    private int mSessionId = 0;
 
 
     //--------------------------------
@@ -258,6 +262,48 @@ public class AudioTrack
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
+        this(streamType, sampleRateInHz, channelConfig, audioFormat,
+                bufferSizeInBytes, mode, 0);
+    }
+
+    /**
+     * Class constructor with audio session. Use this constructor when the AudioTrack must be
+     * attached to a particular audio session. The primary use of the audio session ID is to
+     * associate audio effects to a particular instance of AudioTrack: if an audio session ID
+     * is provided when creating an AudioEffect, this effect will be applied only to audio tracks
+     * and media players in the same session and not to the output mix.
+     * When an AudioTrack is created without specifying a session, it will create its own session
+     * which can be retreived by calling the {@link #getAudioSessionId()} method.
+     * If a session ID is provided, this AudioTrack will share effects attached to this session
+     * with all other media players or audio tracks in the same session.
+     * @param streamType the type of the audio stream. See
+     *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
+     *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC} and
+     *   {@link AudioManager#STREAM_ALARM}
+     * @param sampleRateInHz the sample rate expressed in Hertz. Examples of rates are (but
+     *   not limited to) 44100, 22050 and 11025.
+     * @param channelConfig describes the configuration of the audio channels.
+     *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
+     *   {@link AudioFormat#CHANNEL_OUT_STEREO}
+     * @param audioFormat the format in which the audio data is represented.
+     *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
+     *   {@link AudioFormat#ENCODING_PCM_8BIT}
+     * @param bufferSizeInBytes the total size (in bytes) of the buffer where audio data is read
+     *   from for playback. If using the AudioTrack in streaming mode, you can write data into
+     *   this buffer in smaller chunks than this size. If using the AudioTrack in static mode,
+     *   this is the maximum size of the sound that will be played for this instance.
+     *   See {@link #getMinBufferSize(int, int, int)} to determine the minimum required buffer size
+     *   for the successful creation of an AudioTrack instance in streaming mode. Using values
+     *   smaller than getMinBufferSize() will result in an initialization failure.
+     * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
+     * @param sessionId Id of audio session the AudioTrack must be attached to
+     * @throws java.lang.IllegalArgumentException
+     // FIXME: unhide.
+     * @hide
+     */
+    public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
+            int bufferSizeInBytes, int mode, int sessionId)
+    throws IllegalArgumentException {
         mState = STATE_UNINITIALIZED;
         
         // remember which looper is associated with the AudioTrack instanciation
@@ -269,14 +315,22 @@ public class AudioTrack
 
         audioBuffSizeCheck(bufferSizeInBytes);
 
+        if (sessionId < 0) {
+            throw (new IllegalArgumentException("Invalid audio session ID: "+sessionId));
+        }
+
+        int[] session = new int[1];
+        session[0] = sessionId;
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this),
                 mStreamType, mSampleRate, mChannels, mAudioFormat,
-                mNativeBufferSizeInBytes, mDataLoadMode);
+                mNativeBufferSizeInBytes, mDataLoadMode, session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
         }
+
+        mSessionId = session[0];
 
         if (mDataLoadMode == MODE_STATIC) {
             mState = STATE_NO_STATIC_DATA;
@@ -590,6 +644,17 @@ public class AudioTrack
         }
     }
 
+    /**
+     * Returns the audio session ID.
+     *
+     * @return the ID of the audio session this AudioTrack belongs to.
+     // FIXME: unhide.
+     // FIXME: link to AudioEffect class when public.
+     * @hide
+     */
+    public int getAudioSessionId() {
+        return mSessionId;
+    }
 
     //--------------------------------------------------------------------------
     // Initialization / configuration
@@ -1012,7 +1077,7 @@ public class AudioTrack
 
     private native final int native_setup(Object audiotrack_this,
             int streamType, int sampleRate, int nbChannels, int audioFormat,
-            int buffSizeInBytes, int mode);
+            int buffSizeInBytes, int mode, int[] sessionId);
 
     private native final void native_finalize();
 
@@ -1056,6 +1121,7 @@ public class AudioTrack
     static private native final int native_get_min_buff_size(
             int sampleRateInHz, int channelConfig, int audioFormat);
 
+    private native final int native_get_session_id();
 
     //---------------------------------------------------------
     // Utility methods
