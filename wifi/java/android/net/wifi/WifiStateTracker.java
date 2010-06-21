@@ -321,6 +321,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
     private boolean mPrivateDnsRouteSet = false;
     private int mDefaultGatewayAddr = 0;
     private boolean mDefaultRouteSet = false;
+    private Runnable mReleaseWakeLockCallback;
 
     /**
      * A structure for supplying information about a supplicant state
@@ -379,9 +380,9 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         mSettingsObserver = new SettingsObserver(new Handler());
 
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
-        sDnsPropNames = new String[] {
-            "dhcp." + mInterfaceName + ".dns1",
-            "dhcp." + mInterfaceName + ".dns2"
+        mDnsPropNames = new String[] {
+            "net." + mInterfaceName + ".dns1",
+            "net." + mInterfaceName + ".dns2"
         };
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
 
@@ -474,15 +475,6 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
     private void setTornDownByConnMgr(boolean flag) {
         mTornDownByConnMgr = flag;
         updateNetworkInfo();
-    }
-
-    /**
-     * Return the IP addresses of the DNS servers available for the WLAN
-     * network interface.
-     * @return a list of DNS addresses, with no holes.
-     */
-    public String[] getDnsPropNames() {
-        return sDnsPropNames;
     }
 
     /**
@@ -1424,7 +1416,7 @@ public class WifiStateTracker extends Handler implements NetworkStateTracker {
         int netId = -1;
         String[] lines = reply.split("\n");
         for (String line : lines) {
-            String[] prop = line.split(" *= *");
+            String[] prop = line.split(" *= *", 2);
             if (prop.length < 2)
                 continue;
             String name = prop[0];
