@@ -41,43 +41,112 @@ TextureManager::TextureManager(uint32_t flags)
 {
 }
 
-GLuint TextureManager::createTexture()
+GLenum TextureManager::getTextureTarget(const Image* image) {
+#if defined(GL_OES_texture_external)
+    switch (image->target) {
+        case Texture::TEXTURE_EXTERNAL:
+            return GL_TEXTURE_EXTERNAL_OES;
+    }
+#endif
+    return GL_TEXTURE_2D;
+}
+
+status_t TextureManager::initTexture(Texture* texture)
 {
+    if (texture->name != -1UL)
+        return INVALID_OPERATION;
+
     GLuint textureName = -1;
     glGenTextures(1, &textureName);
-    glBindTexture(GL_TEXTURE_2D, textureName);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    return textureName;
+    texture->name = textureName;
+    texture->width = 0;
+    texture->height = 0;
+
+    const GLenum target = GL_TEXTURE_2D;
+    glBindTexture(target, textureName);
+    glTexParameterx(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterx(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterx(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    return NO_ERROR;
+}
+
+status_t TextureManager::initTexture(Image* pImage, int32_t format)
+{
+    if (pImage->name != -1UL)
+        return INVALID_OPERATION;
+
+    GLuint textureName = -1;
+    glGenTextures(1, &textureName);
+    pImage->name = textureName;
+    pImage->width = 0;
+    pImage->height = 0;
+
+    GLenum target = GL_TEXTURE_2D;
+#if defined(GL_OES_texture_external)
+    if (format && isSupportedYuvFormat(format)) {
+        target = GL_TEXTURE_EXTERNAL_OES;
+        pImage->target = Texture::TEXTURE_EXTERNAL;
+    }
+#endif
+
+    glBindTexture(target, textureName);
+    glTexParameterx(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterx(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterx(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    return NO_ERROR;
 }
 
 bool TextureManager::isSupportedYuvFormat(int format)
 {
+    // TODO: how to we know which YUV formats are supported by the GPU?
+
+    // Adreno 200 supports these
+    // YUVY_adreno
+    // UYVY_adreno
+    // NV21_adreno
+    // YV12_adreno
+    // Adreno 205 adds
+    // NV12_adreno_tiled
+    // NV21_adreno_tiled
+
+    // for now pretend we support them all, failure will happen when
+    // we try to use them.
+    return isYuvFormat(format);
+}
+
+bool TextureManager::isYuvFormat(int format)
+{
     switch (format) {
-        case HAL_PIXEL_FORMAT_YCbCr_422_SP:
-        case HAL_PIXEL_FORMAT_YCbCr_420_SP:
-        case HAL_PIXEL_FORMAT_YCbCr_422_P:
-        case HAL_PIXEL_FORMAT_YCbCr_420_P:
-        case HAL_PIXEL_FORMAT_YCbCr_422_I:
-        case HAL_PIXEL_FORMAT_YCbCr_420_I:
-        case HAL_PIXEL_FORMAT_YCrCb_420_SP:
-            return true;
+    case HAL_PIXEL_FORMAT_NV16:
+    case HAL_PIXEL_FORMAT_NV21:
+    case HAL_PIXEL_FORMAT_IYUV:
+    case HAL_PIXEL_FORMAT_YUV9:
+    case HAL_PIXEL_FORMAT_YUY2:
+    case HAL_PIXEL_FORMAT_UYVY:
+    case HAL_PIXEL_FORMAT_NV12:
+    case HAL_PIXEL_FORMAT_NV61:
+    case HAL_PIXEL_FORMAT_YV12:
+    case HAL_PIXEL_FORMAT_NV12_ADRENO_TILED:
+    case HAL_PIXEL_FORMAT_NV21_ADRENO_TILED:
+        return true;
     }
     return false;
 }
 
-status_t TextureManager::initEglImage(Image* texture,
+status_t TextureManager::initEglImage(Image* pImage,
         EGLDisplay dpy, const sp<GraphicBuffer>& buffer)
 {
     status_t err = NO_ERROR;
-    if (!texture->dirty) return err;
+    if (!pImage->dirty) return err;
 
     // free the previous image
-    if (texture->image != EGL_NO_IMAGE_KHR) {
-        eglDestroyImageKHR(dpy, texture->image);
-        texture->image = EGL_NO_IMAGE_KHR;
+    if (pImage->image != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(dpy, pImage->image);
+        pImage->image = EGL_NO_IMAGE_KHR;
     }
 
     // construct an EGL_NATIVE_BUFFER_ANDROID
@@ -88,29 +157,27 @@ status_t TextureManager::initEglImage(Image* texture,
             EGL_IMAGE_PRESERVED_KHR,    EGL_TRUE,
             EGL_NONE,                   EGL_NONE
     };
-    texture->image = eglCreateImageKHR(
+    pImage->image = eglCreateImageKHR(
             dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
             (EGLClientBuffer)clientBuf, attrs);
 
-    if (texture->image != EGL_NO_IMAGE_KHR) {
-        if (texture->name == -1UL) {
-            texture->name = createTexture();
-            texture->width = 0;
-            texture->height = 0;
+    if (pImage->image != EGL_NO_IMAGE_KHR) {
+        if (pImage->name == -1UL) {
+            initTexture(pImage, buffer->format);
         }
-        glBindTexture(GL_TEXTURE_2D, texture->name);
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
-                (GLeglImageOES)texture->image);
+        const GLenum target = getTextureTarget(pImage);
+        glBindTexture(target, pImage->name);
+        glEGLImageTargetTexture2DOES(target, (GLeglImageOES)pImage->image);
         GLint error = glGetError();
         if (error != GL_NO_ERROR) {
             LOGE("glEGLImageTargetTexture2DOES(%p) failed err=0x%04x",
-                    texture->image, error);
+                    pImage->image, error);
             err = INVALID_OPERATION;
         } else {
             // Everything went okay!
-            texture->dirty  = false;
-            texture->width  = clientBuf->width;
-            texture->height = clientBuf->height;
+            pImage->dirty  = false;
+            pImage->width  = clientBuf->width;
+            pImage->height = clientBuf->height;
         }
     } else {
         LOGE("eglCreateImageKHR() failed. err=0x%4x", eglGetError());
@@ -123,10 +190,13 @@ status_t TextureManager::loadTexture(Texture* texture,
         const Region& dirty, const GGLSurface& t)
 {
     if (texture->name == -1UL) {
-        texture->name = createTexture();
-        texture->width = 0;
-        texture->height = 0;
+        status_t err = initTexture(texture);
+        LOGE_IF(err, "loadTexture failed in initTexture (%s)", strerror(err));
+        return err;
     }
+
+    if (texture->target != GL_TEXTURE_2D)
+        return INVALID_OPERATION;
 
     glBindTexture(GL_TEXTURE_2D, texture->name);
 
@@ -197,7 +267,7 @@ status_t TextureManager::loadTexture(Texture* texture,
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGBA, texture->potWidth, texture->potHeight, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else if (isSupportedYuvFormat(t.format)) {
+        } else if (isYuvFormat(t.format)) {
             // just show the Y plane of YUV buffers
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_LUMINANCE, texture->potWidth, texture->potHeight, 0,
@@ -225,7 +295,7 @@ status_t TextureManager::loadTexture(Texture* texture,
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGBA, GL_UNSIGNED_BYTE,
                     t.data + bounds.top*t.stride*4);
-        } else if (isSupportedYuvFormat(t.format)) {
+        } else if (isYuvFormat(t.format)) {
             // just show the Y plane of YUV buffers
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
@@ -234,6 +304,38 @@ status_t TextureManager::loadTexture(Texture* texture,
         }
     }
     return NO_ERROR;
+}
+
+void TextureManager::activateTexture(const Texture& texture, bool filter)
+{
+    const GLenum target = getTextureTarget(&texture);
+
+    glBindTexture(target, texture.name);
+    glEnable(target);
+
+#if defined(GL_OES_texture_external)
+    if (texture.target == Texture::TEXTURE_2D) {
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+    } else {
+        glDisable(GL_TEXTURE_2D);
+    }
+#endif
+
+    if (filter) {
+        glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterx(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    } else {
+        glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterx(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
+}
+
+void TextureManager::deactivateTextures()
+{
+    glDisable(GL_TEXTURE_2D);
+#if defined(GL_OES_texture_external)
+    glDisable(GL_TEXTURE_EXTERNAL_OES);
+#endif
 }
 
 // ---------------------------------------------------------------------------

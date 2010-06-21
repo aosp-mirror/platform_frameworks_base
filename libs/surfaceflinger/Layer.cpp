@@ -232,7 +232,7 @@ void Layer::onDraw(const Region& clip) const
         // if not everything below us is covered, we plug the holes!
         Region holes(clip.subtract(under));
         if (!holes.isEmpty()) {
-            clearWithOpenGL(holes);
+            clearWithOpenGL(holes, 0, 0, 0, 1);
         }
         return;
     }
