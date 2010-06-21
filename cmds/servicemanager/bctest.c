@@ -14,6 +14,7 @@ void *svcmgr_lookup(struct binder_state *bs, void *target, const char *name)
     struct binder_io msg, reply;
 
     bio_init(&msg, iodata, sizeof(iodata), 4);
+    bio_put_uint32(&msg, 0);  // strict mode header
     bio_put_string16_x(&msg, SVC_MGR_NAME);
     bio_put_string16_x(&msg, name);
 
@@ -37,7 +38,7 @@ int svcmgr_publish(struct binder_state *bs, void *target, const char *name, void
     struct binder_io msg, reply;
 
     bio_init(&msg, iodata, sizeof(iodata), 4);
-
+    bio_put_uint32(&msg, 0);  // strict mode header
     bio_put_string16_x(&msg, SVC_MGR_NAME);
     bio_put_string16_x(&msg, name);
     bio_put_obj(&msg, ptr);
