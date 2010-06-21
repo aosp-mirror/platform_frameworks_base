@@ -5663,7 +5663,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * one character (a selection range).  This will only work if the
      * TextView contains spannable text; otherwise it will do nothing.
      *
-     * @return True is the cursor was actually moved, false otherwise.
+     * @return True if the cursor was actually moved, false otherwise.
      */
     public boolean moveCursorToVisibleOffset() {
         if (!(mText instanceof Spannable)) {
