@@ -587,7 +587,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"未发现支持 FACTORY_TEST 操作的包。"</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"重新启动"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"“<xliff:g id="TITLE">%s</xliff:g>”处的页面表明："</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"来自“<xliff:g id="TITLE">%s</xliff:g>”的提示："</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"是否从该页面导航至它处？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"选择“确定”继续，或选择“取消”留在当前页面。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"确认"</string>

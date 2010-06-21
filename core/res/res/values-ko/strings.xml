@@ -148,7 +148,7 @@
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"요금이 부과되는 서비스"</string>
-    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"응용프로그램이 요금이 부과될 수 있는 작업을 할 수 있도록 합니다."</string>
+    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"애플리케이션이 요금이 부과될 수 있는 작업을 할 수 있도록 합니다."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"메시지"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"SMS, 이메일 및 기타 메시지를 읽고 씁니다."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"개인정보"</string>
@@ -156,7 +156,7 @@
     <string name="permgrouplab_location" msgid="635149742436692049">"위치"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"실제 위치 모니터링"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"네트워크 통신"</string>
-    <string name="permgroupdesc_network" msgid="5035763698958415998">"응용프로그램이 다양한 네트워크 기능에 액세스할 수 있도록 합니다."</string>
+    <string name="permgroupdesc_network" msgid="5035763698958415998">"애플리케이션이 다양한 네트워크 기능에 액세스할 수 있도록 합니다."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"계정"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"사용 가능한 계정에 액세스합니다."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"하드웨어 제어"</string>
@@ -166,261 +166,261 @@
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"시스템 도구"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"시스템을 하위 수준에서 액세스하고 제어합니다."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"개발 도구"</string>
-    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"응용프로그램 개발자에게만 필요한 기능입니다."</string>
+    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"애플리케이션 개발자에게만 필요한 기능입니다."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
     <string name="permgroupdesc_storage" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
-    <string name="permdesc_statusBar" msgid="1365473595331989732">"응용프로그램이 상태 표시줄을 사용 중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 합니다."</string>
+    <string name="permdesc_statusBar" msgid="1365473595331989732">"애플리케이션이 상태 표시줄을 사용 중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"상태 표시줄 확장/축소"</string>
-    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"응용프로그램이 상태 표시줄을 확장하거나 축소할 수 있도록 합니다."</string>
+    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"애플리케이션이 상태 표시줄을 확장하거나 축소할 수 있도록 합니다."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"발신전화 가로채기"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"응용프로그램이 발신전화를 처리하고 전화를 걸 번호를 변경할 수 있도록 합니다. 이 경우 악성 응용프로그램이 발신전화를 모니터링하거나, 다른 방향으로 돌리거나, 중단시킬 수 있습니다."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"애플리케이션이 발신전화를 처리하고 전화를 걸 번호를 변경할 수 있도록 합니다. 이 경우 악성 애플리케이션이 발신전화를 모니터링하거나, 다른 방향으로 돌리거나, 중단시킬 수 있습니다."</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"SMS 수신"</string>
-    <string name="permdesc_receiveSms" msgid="6298292335965966117">"응용프로그램이 SMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 응용프로그램이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permdesc_receiveSms" msgid="6298292335965966117">"애플리케이션이 SMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS 수신"</string>
-    <string name="permdesc_receiveMms" msgid="4563346832000174373">"응용프로그램이 MMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 응용프로그램이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permdesc_receiveMms" msgid="4563346832000174373">"애플리케이션이 MMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"응용프로그램이 SMS 메시지를 보낼 수 있도록 합니다. 이 경우 악성 응용프로그램이 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"애플리케이션이 SMS 메시지를 보낼 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS 또는 MMS 읽기"</string>
-    <string name="permdesc_readSms" msgid="3002170087197294591">"응용프로그램이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 응용프로그램이 기밀 메시지를 읽을 수 있습니다."</string>
+    <string name="permdesc_readSms" msgid="3002170087197294591">"애플리케이션이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 기밀 메시지를 읽을 수 있습니다."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS 또는 MMS 편집"</string>
-    <string name="permdesc_writeSms" msgid="6299398896177548095">"응용프로그램이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
+    <string name="permdesc_writeSms" msgid="6299398896177548095">"애플리케이션이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP 수신"</string>
-    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"응용프로그램이 WAP 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 응용프로그램이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"실행 중인 응용프로그램 검색"</string>
-    <string name="permdesc_getTasks" msgid="7048711358713443341">"응용프로그램이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 합니다. 이 경우 악성 응용프로그램이 다른 응용프로그램에 대한 개인 정보를 검색할 수 있습니다."</string>
-    <string name="permlab_reorderTasks" msgid="5669588525059921549">"실행 중인 응용프로그램 순서 재지정"</string>
-    <string name="permdesc_reorderTasks" msgid="126252774270522835">"응용프로그램이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 합니다. 이 경우 악성 응용프로그램이 사용자의 조작 없이 앞으로 이동할 수 있습니다."</string>
-    <string name="permlab_setDebugApp" msgid="4339730312925176742">"응용프로그램 디버깅 사용"</string>
-    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"응용프로그램이 다른 응용프로그램에 대해 디버깅을 사용할 수 있도록 합니다. 이 경우 악성 응용프로그램이 다른 응용프로그램을 중지시킬 수 있습니다."</string>
+    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"애플리케이션이 WAP 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"실행 중인 애플리케이션 검색"</string>
+    <string name="permdesc_getTasks" msgid="7048711358713443341">"애플리케이션이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션에 대한 개인 정보를 검색할 수 있습니다."</string>
+    <string name="permlab_reorderTasks" msgid="5669588525059921549">"실행 중인 애플리케이션 순서 재지정"</string>
+    <string name="permdesc_reorderTasks" msgid="126252774270522835">"애플리케이션이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 조작 없이 앞으로 이동할 수 있습니다."</string>
+    <string name="permlab_setDebugApp" msgid="4339730312925176742">"애플리케이션 디버깅 사용"</string>
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"애플리케이션이 다른 애플리케이션에 대해 디버깅을 사용할 수 있도록 합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션을 중지시킬 수 있습니다."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI 설정 변경"</string>
-    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"응용프로그램이 로케일 또는 전체 글꼴 크기와 같은 현재 구성을 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"애플리케이션이 로케일 또는 전체 글꼴 크기와 같은 현재 구성을 변경할 수 있도록 합니다."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"차량 모드 사용"</string>
-    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"응용프로그램이 차량 모드를 사용할 수 있도록 합니다."</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"애플리케이션이 차량 모드를 사용할 수 있도록 합니다."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"백그라운드 프로세스 종료"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"메모리가 부족하지 않은 경우에도 응용프로그램이 다른 응용프로그램의 백그라운드 프로세스를 중단할 수 있도록 합니다."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"다른 응용프로그램 강제 종료"</string>
-    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"응용프로그램이 다른 응용프로그램을 강제로 종료할 수 있도록 합니다."</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"강제로 응용프로그램 닫기"</string>
-    <string name="permdesc_forceBack" msgid="6534109744159919013">"응용프로그램이 포그라운드에 있는 활동을 강제로 닫고 되돌아갈 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"메모리가 부족하지 않은 경우에도 애플리케이션이 다른 애플리케이션의 백그라운드 프로세스를 중단할 수 있도록 합니다."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"다른 애플리케이션 강제 종료"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"애플리케이션이 다른 애플리케이션을 강제로 종료할 수 있도록 합니다."</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"강제로 애플리케이션 닫기"</string>
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"애플리케이션이 포그라운드에 있는 활동을 강제로 닫고 되돌아갈 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"시스템 내부 상태 검색"</string>
-    <string name="permdesc_dump" msgid="2198776174276275220">"응용프로그램이 시스템의 내부 상태를 검색할 수 있도록 합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인정보와 보안정보를 검색할 수 있습니다."</string>
+    <string name="permdesc_dump" msgid="2198776174276275220">"애플리케이션이 시스템의 내부 상태를 검색할 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인정보와 보안정보를 검색할 수 있습니다."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정합니다. 전체 종료를 수행하지는 않습니다."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"응용프로그램 전환 방지"</string>
-    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"사용자가 다른 응용프로그램으로 전환하지 못하게 합니다."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"실행 중인 모든 응용프로그램 모니터링 및 제어"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"응용프로그램이 시스템에서 활동이 시작되는 방식을 모니터링하고 제어할 수 있도록 합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 휴대전화 사용 시에는 필요하지 않습니다."</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"사용자가 다른 애플리케이션으로 전환하지 못하게 합니다."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"실행 중인 모든 애플리케이션 모니터링 및 제어"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"애플리케이션이 시스템에서 활동이 시작되는 방식을 모니터링하고 제어할 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 휴대전화 사용 시에는 필요하지 않습니다."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"패키지 제거 브로드캐스트 보내기"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"응용프로그램이 응용프로그램 패키지가 삭제되었다는 알림을 브로드캐스트할 수 있도록 합니다. 이 경우 악성 응용프로그램이 실행 중인 다른 응용프로그램을 중지시킬 수 있습니다."</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"애플리케이션이 애플리케이션 패키지가 삭제되었다는 알림을 브로드캐스트할 수 있도록 합니다. 이 경우 악성 애플리케이션이 실행 중인 다른 애플리케이션을 중지시킬 수 있습니다."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS 수신 브로드캐스트 보내기"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"응용프로그램이 SMS 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 합니다. 이 경우 악성 응용프로그램이 수신된 SMS 메시지처럼 위장할 수 있습니다."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"애플리케이션이 SMS 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 합니다. 이 경우 악성 애플리케이션이 수신된 SMS 메시지처럼 위장할 수 있습니다."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-수신 브로드캐스트 보내기"</string>
-    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"응용프로그램이 WAP PUSH 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 합니다. 이 경우 악성 응용프로그램이 MMS 메시지를 받은 것처럼 위장하거나 웹페이지의 콘텐츠를 악성 변종으로 몰래 바꿀 수 있습니다."</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"애플리케이션이 WAP PUSH 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 합니다. 이 경우 악성 애플리케이션이 MMS 메시지를 받은 것처럼 위장하거나 웹페이지의 콘텐츠를 악성 변종으로 몰래 바꿀 수 있습니다."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"실행 중인 프로세스 수 제한"</string>
-    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"응용프로그램이 실행할 최대 프로세스 수를 제어할 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
-    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"모든 백그라운드 응용프로그램이 닫히도록 하기"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"응용프로그램이 백그라운드로 이동한 활동을 항상 바로 종료할지 여부를 제어할 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"애플리케이션이 실행할 최대 프로세스 수를 제어할 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
+    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"모든 백그라운드 애플리케이션이 닫히도록 하기"</string>
+    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"애플리케이션이 백그라운드로 이동한 활동을 항상 바로 종료할지 여부를 제어할 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"배터리 통계 수정"</string>
-    <string name="permdesc_batteryStats" msgid="5847319823772230560">"수집된 배터리 통계를 수정할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"수집된 배터리 통계를 수정할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_backup" msgid="470013022865453920">"시스템 백업 및 복원 관리"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"응용프로그램이 시스템의 백업 및 복원 매커니즘을 제어할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"애플리케이션이 시스템의 백업 및 복원 매커니즘을 제어할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"인증되지 않은 창 표시"</string>
-    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"내부 시스템 사용자 인터페이스에서 사용하는 창을 만들 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"내부 시스템 사용자 인터페이스에서 사용하는 창을 만들 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"시스템 수준 경고 표시"</string>
-    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"응용프로그램이 시스템 경고 창을 표시할 수 있도록 합니다. 이 경우 악성 응용프로그램이 휴대전화 화면 전체를 차지할 수 있습니다."</string>
+    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"애플리케이션이 시스템 경고 창을 표시할 수 있도록 합니다. 이 경우 악성 애플리케이션이 휴대전화 화면 전체를 차지할 수 있습니다."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"전체 애니메이션 속도 수정"</string>
-    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"응용프로그램이 언제든지 전체 애니메이션 속도를 빠르게 또는 느리게 변경할 수 있도록 합니다."</string>
-    <string name="permlab_manageAppTokens" msgid="17124341698093865">"응용프로그램 토큰 관리"</string>
-    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"응용프로그램이 일반적인 Z-순서를 무시하여 자체 토큰을 만들고 관리할 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"애플리케이션이 언제든지 전체 애니메이션 속도를 빠르게 또는 느리게 변경할 수 있도록 합니다."</string>
+    <string name="permlab_manageAppTokens" msgid="17124341698093865">"애플리케이션 토큰 관리"</string>
+    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"애플리케이션이 일반적인 Z-순서를 무시하여 자체 토큰을 만들고 관리할 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"키 및 컨트롤 버튼 누르기"</string>
-    <string name="permdesc_injectEvents" msgid="3946098050410874715">"응용프로그램이 입력 이벤트(예: 키 누름)를 다른 응용프로그램에 전달할 수 있도록 합니다. 이 경우 악성 응용프로그램이 휴대전화를 완전히 제어할 수 있습니다."</string>
+    <string name="permdesc_injectEvents" msgid="3946098050410874715">"애플리케이션이 입력 이벤트(예: 키 누름)를 다른 애플리케이션에 전달할 수 있도록 합니다. 이 경우 악성 애플리케이션이 휴대전화를 완전히 제어할 수 있습니다."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"사용자가 입력한 내용 및 수행한 작업 기록"</string>
-    <string name="permdesc_readInputState" msgid="5132879321450325445">"응용프로그램이 다른 응용프로그램과 상호작용할 때에도 사용자가 누르는 키(예: 비밀번호 입력)를 볼 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"애플리케이션이 다른 애플리케이션과 상호작용할 때에도 사용자가 누르는 키(예: 비밀번호 입력)를 볼 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"입력 방법 연결"</string>
-    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"배경화면 연결"</string>
-    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"권한을 가진 프로그램이 배경화면에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"권한을 가진 프로그램이 배경화면에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"기기 관리자와 상호 작용"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"보유자가 기기 관리자에게 인텐트를 보낼 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"보유자가 기기 관리자에게 인텐트를 보낼 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"화면 방향 변경"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"응용프로그램이 언제든지 화면 회전을 변경할 수 있도록 합니다. 일반 응용프로그램에는 절대로 필요하지 않습니다."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"응용프로그램에 Linux 시그널 보내기"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"응용프로그램이 제공된 시그널을 모든 영구 프로세스로 보내도록 요청할 수 있도록 합니다."</string>
-    <string name="permlab_persistentActivity" msgid="8659652042401085862">"응용프로그램이 항상 실행되도록 설정"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"응용프로그램이 자신의 일부 구성 요소를 지속가능으로 설정하여 다른 응용프로그램에 사용할 수 없도록 합니다."</string>
-    <string name="permlab_deletePackages" msgid="3343439331576348805">"응용프로그램 삭제"</string>
-    <string name="permdesc_deletePackages" msgid="3634943677518723314">"응용프로그램이 Android 패키지를 삭제할 수 있도록 합니다. 이 경우 악성 응용프로그램이 중요한 응용프로그램을 삭제할 수 있습니다."</string>
-    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"다른 응용프로그램의 데이터 삭제"</string>
-    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"응용프로그램이 사용자 데이터를 지울 수 있도록 합니다."</string>
-    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"다른 응용프로그램의 캐시 삭제"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"응용프로그램이 캐시 파일을 삭제할 수 있도록 합니다."</string>
-    <string name="permlab_getPackageSize" msgid="4799785352306641460">"응용프로그램 저장공간 계산"</string>
-    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"응용프로그램이 해당 코드, 데이터 및 캐시 크기를 검색할 수 있도록 합니다."</string>
-    <string name="permlab_installPackages" msgid="335800214119051089">"응용프로그램 직접 설치"</string>
-    <string name="permdesc_installPackages" msgid="526669220850066132">"응용프로그램이 새로운 또는 업데이트된 Android 패키지를 설치할 수 있도록 합니다. 이 경우 악성 응용프로그램이 임의의 강력한 권한으로 새 응용프로그램을 추가할 수 있습니다."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"모든 응용프로그램 캐시 데이터 삭제"</string>
-    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"응용프로그램이 응용프로그램 캐시 디렉토리에 있는 파일을 삭제하여 휴대전화의 저장공간을 늘릴 수 있도록 합니다. 액세스는 일반적으로 시스템 프로세스로 제한됩니다."</string>
-    <string name="permlab_movePackage" msgid="728454979946503926">"응용프로그램 리소스 이동"</string>
-    <string name="permdesc_movePackage" msgid="6323049291923925277">"응용프로그램이 응용프로그램 리소스를 내부에서 외부 미디어로 또는 그 반대로 이동할 수 있도록 합니다."</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"애플리케이션이 언제든지 화면 회전을 변경할 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"애플리케이션에 Linux 시그널 보내기"</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"애플리케이션이 제공된 시그널을 모든 영구 프로세스로 보내도록 요청할 수 있도록 합니다."</string>
+    <string name="permlab_persistentActivity" msgid="8659652042401085862">"애플리케이션이 항상 실행되도록 설정"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"애플리케이션이 자신의 일부 구성 요소를 지속가능으로 설정하여 다른 애플리케이션에 사용할 수 없도록 합니다."</string>
+    <string name="permlab_deletePackages" msgid="3343439331576348805">"애플리케이션 삭제"</string>
+    <string name="permdesc_deletePackages" msgid="3634943677518723314">"애플리케이션이 Android 패키지를 삭제할 수 있도록 합니다. 이 경우 악성 애플리케이션이 중요한 애플리케이션을 삭제할 수 있습니다."</string>
+    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"다른 애플리케이션의 데이터 삭제"</string>
+    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"애플리케이션이 사용자 데이터를 지울 수 있도록 합니다."</string>
+    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"다른 애플리케이션의 캐시 삭제"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"애플리케이션이 캐시 파일을 삭제할 수 있도록 합니다."</string>
+    <string name="permlab_getPackageSize" msgid="4799785352306641460">"애플리케이션 저장공간 계산"</string>
+    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"애플리케이션이 해당 코드, 데이터 및 캐시 크기를 검색할 수 있도록 합니다."</string>
+    <string name="permlab_installPackages" msgid="335800214119051089">"애플리케이션 직접 설치"</string>
+    <string name="permdesc_installPackages" msgid="526669220850066132">"애플리케이션이 새로운 또는 업데이트된 Android 패키지를 설치할 수 있도록 합니다. 이 경우 악성 애플리케이션이 임의의 강력한 권한으로 새 애플리케이션을 추가할 수 있습니다."</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"모든 애플리케이션 캐시 데이터 삭제"</string>
+    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"애플리케이션이 애플리케이션 캐시 디렉토리에 있는 파일을 삭제하여 휴대전화의 저장공간을 늘릴 수 있도록 합니다. 액세스는 일반적으로 시스템 프로세스로 제한됩니다."</string>
+    <string name="permlab_movePackage" msgid="728454979946503926">"애플리케이션 리소스 이동"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"애플리케이션이 애플리케이션 리소스를 내부에서 외부 미디어로 또는 그 반대로 이동할 수 있도록 합니다."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"시스템 로그 파일 읽기"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"응용프로그램이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이 경우 응용프로그램은 사용자가 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다. 하지만 로그 파일에 어떠한 개인정보도 포함되어서는 안 됩니다."</string>
+    <string name="permdesc_readLogs" msgid="2257937955580475902">"애플리케이션이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이 경우 애플리케이션은 사용자가 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다. 하지만 로그 파일에 어떠한 개인정보도 포함되어서는 안 됩니다."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
-    <string name="permdesc_diagnostic" msgid="3121238373951637049">"응용프로그램이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
-    <string name="permlab_changeComponentState" msgid="79425198834329406">"응용프로그램 구성 요소 사용 또는 사용 안함"</string>
-    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"응용프로그램이 다른 응용프로그램 구성 요소 사용 여부를 변경할 수 있도록 합니다. 이 경우 악성 응용프로그램이 중요한 휴대전화 기능을 사용하지 않도록 설정할 수 있습니다. 이 권한을 설정할 경우 응용프로그램 구성 요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
-    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"기본 응용프로그램 설정"</string>
-    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"응용프로그램이 기본 응용프로그램을 수정할 수 있도록 합니다. 이 경우 악성 응용프로그램이 사용자의 개인 정보를 수집하기 위해 기존 응용프로그램으로 위장하도록 실행되는 응용프로그램을 몰래 변경할 수 있습니다."</string>
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"애플리케이션이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
+    <string name="permlab_changeComponentState" msgid="79425198834329406">"애플리케이션 구성 요소 사용 또는 사용 안함"</string>
+    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"애플리케이션이 다른 애플리케이션 구성 요소 사용 여부를 변경할 수 있도록 합니다. 이 경우 악성 애플리케이션이 중요한 휴대전화 기능을 사용하지 않도록 설정할 수 있습니다. 이 권한을 설정할 경우 애플리케이션 구성 요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
+    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"기본 애플리케이션 설정"</string>
+    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"애플리케이션이 기본 애플리케이션을 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 개인 정보를 수집하기 위해 기존 애플리케이션으로 위장하도록 실행되는 애플리케이션을 몰래 변경할 수 있습니다."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"전체 시스템 설정 수정"</string>
-    <string name="permdesc_writeSettings" msgid="838789419871034696">"응용프로그램이 시스템의 설정 데이터를 수정할 수 있도록 합니다. 이 경우 악성 응용프로그램이 시스템 구성을 손상시킬 수 있습니다."</string>
+    <string name="permdesc_writeSettings" msgid="838789419871034696">"애플리케이션이 시스템의 설정 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 시스템 구성을 손상시킬 수 있습니다."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"보안 시스템 설정 수정"</string>
-    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"응용프로그램이 시스템의 보안 설정값 데이터를 수정할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"애플리케이션이 시스템의 보안 설정값 데이터를 수정할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google 서비스 지도 수정"</string>
-    <string name="permdesc_writeGservices" msgid="6602362746516676175">"응용프로그램이 Google 서비스 지도를 수정할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_writeGservices" msgid="6602362746516676175">"애플리케이션이 Google 서비스 지도를 수정할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"부팅할 때 자동 시작"</string>
-    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"응용프로그램이 시스템 부팅이 끝난 후 바로 시작할 수 있도록 합니다. 이 경우 휴대전화가 시작하는 데 시간이 오래 걸리고 응용프로그램이 항상 실행되어 전체 휴대전화 속도가 느려질 수 있습니다."</string>
+    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"애플리케이션이 시스템 부팅이 끝난 후 바로 시작할 수 있도록 합니다. 이 경우 휴대전화가 시작하는 데 시간이 오래 걸리고 애플리케이션이 항상 실행되어 전체 휴대전화 속도가 느려질 수 있습니다."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"스티키 브로드캐스트 보내기"</string>
-    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"응용프로그램이 브로드캐스트가 끝난 후에도 유지되는 스티키 브로드캐스트(Sticky Broadcast)를 보낼 수 있도록 합니다. 이 경우 악성 응용프로그램이 휴대전화가 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
+    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"애플리케이션이 브로드캐스트가 끝난 후에도 유지되는 스티키 브로드캐스트(Sticky Broadcast)를 보낼 수 있도록 합니다. 이 경우 악성 애플리케이션이 휴대전화가 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"연락처 데이터 읽기"</string>
-    <string name="permdesc_readContacts" msgid="3371591512896545975">"응용프로그램이 휴대전화에 저장된 모든 연락처(주소) 데이터를 읽을 수 있도록 합니다. 이 경우 악성 응용프로그램이 데이터를 다른 사람에게 보낼 수 있습니다."</string>
+    <string name="permdesc_readContacts" msgid="3371591512896545975">"애플리케이션이 휴대전화에 저장된 모든 연락처(주소) 데이터를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 데이터를 다른 사람에게 보낼 수 있습니다."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"연락처 데이터 작성"</string>
-    <string name="permdesc_writeContacts" msgid="3924383579108183601">"응용프로그램이 휴대전화에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 응용프로그램이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" msgid="3924383579108183601">"애플리케이션이 휴대전화에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permlab_writeOwnerData" msgid="4892555913849295393">"소유자 데이터 작성"</string>
-    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"응용프로그램이 휴대전화에 저장된 소유자 데이터를 수정할 수 있도록 합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 소유자 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"애플리케이션이 휴대전화에 저장된 소유자 데이터를 수정할 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 소유자 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"소유자 데이터 읽기"</string>
-    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"응용프로그램이 휴대전화에 저장된 휴대전화 소유자 데이터를 읽을 수 있도록 합니다. 이 경우 악성 응용프로그램이 휴대전화 소유자 데이터를 읽을 수 있습니다."</string>
+    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"애플리케이션이 휴대전화에 저장된 휴대전화 소유자 데이터를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 휴대전화 소유자 데이터를 읽을 수 있습니다."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"캘린더 일정 읽기"</string>
-    <string name="permdesc_readCalendar" msgid="5533029139652095734">"응용프로그램이 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 응용프로그램이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
+    <string name="permdesc_readCalendar" msgid="5533029139652095734">"애플리케이션이 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"캘린더 일정 추가/수정 및 참석자에게 이메일 전송"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"응용프로그램이 캘린더에 일정을 추가하거나 변경할 수 있도록 합니다. 이렇게 하면 참석자에게 이메일을 보낼 수 있습니다. 악성 응용프로그램이 이를 사용하여 캘린더 일정을 삭제, 수정하거나 참석자에게 이메일을 보낼 수 있습니다."</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"애플리케이션이 캘린더에 일정을 추가하거나 변경할 수 있도록 합니다. 이렇게 하면 참석자에게 이메일을 보낼 수 있습니다. 악성 애플리케이션이 이를 사용하여 캘린더 일정을 삭제, 수정하거나 참석자에게 이메일을 보낼 수 있습니다."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 정보제공자로 가장"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"테스트용 가짜 위치 정보 제공자를 만듭니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS, 네트워크 공급자 같은 실제 위치 정보제공자에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"테스트용 가짜 위치 정보 제공자를 만듭니다. 단, 악성 애플리케이션이 이 기능을 이용하여 GPS, 네트워크 공급자 같은 실제 위치 정보제공자에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"추가적인 위치 제공 명령을 사용합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"추가적인 위치 제공 명령을 사용합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"위치 정보 공급자 설치 권한"</string>
-    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"테스트용 가짜 위치 정보제공자를 만듭니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS, 네트워크 공급업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓰거나 사용자의 위치를 모니터링하여 외부 소스로 보고할 수 있습니다."</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"테스트용 가짜 위치 정보제공자를 만듭니다. 단, 악성 애플리케이션이 이 기능을 이용하여 GPS, 네트워크 공급업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓰거나 사용자의 위치를 모니터링하여 외부 소스로 보고할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"자세한 (GPS) 위치"</string>
-    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"GPS 등의 자세한 위치 정보가 사용 가능한 경우 휴대전화에서 이를 사용합니다. 이 경우 악성 응용프로그램이 사용자의 위치를 확인하고 추가 배터리 전원을 소비할 수 있습니다."</string>
+    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"GPS 등의 자세한 위치 정보가 사용 가능한 경우 휴대전화에서 이를 사용합니다. 이 경우 악성 애플리케이션이 사용자의 위치를 확인하고 추가 배터리 전원을 소비할 수 있습니다."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"네트워크 기반의 대략적인 위치"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"휴대전화의 대략적인 위치를 측정하기 위해 셀룰러 네트워크 데이터베이스와 같은 광범위한 위치 정보를 사용합니다. 이 경우 악성 응용프로그램이 사용자의 위치를 대략적으로 측정할 수 있습니다."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"휴대전화의 대략적인 위치를 측정하기 위해 셀룰러 네트워크 데이터베이스와 같은 광범위한 위치 정보를 사용합니다. 이 경우 악성 애플리케이션이 사용자의 위치를 대략적으로 측정할 수 있습니다."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger 액세스"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"응용프로그램이 SurfaceFlinger의 하위 수준 기능을 사용할 수 있도록 합니다."</string>
+    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"애플리케이션이 SurfaceFlinger의 하위 수준 기능을 사용할 수 있도록 합니다."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"프레임 버퍼 읽기"</string>
-    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"응용프로그램이 프레임 버퍼의 내용을 읽을 수 있도록 합니다."</string>
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"애플리케이션이 프레임 버퍼의 내용을 읽을 수 있도록 합니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"응용프로그램이 볼륨 및 경로 지정 같은 전체 오디오 설정을 수정할 수 있도록 합니다."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"애플리케이션이 볼륨 및 경로 지정 같은 전체 오디오 설정을 수정할 수 있도록 합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"응용프로그램이 오디오 레코드 경로에 액세스할 수 있도록 합니다."</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"애플리케이션이 오디오 레코드 경로에 액세스할 수 있도록 합니다."</string>
     <string name="permlab_camera" msgid="8059288807274039014">"사진 촬영"</string>
-    <string name="permdesc_camera" msgid="9013476258810982546">"응용프로그램이 카메라로 사진을 찍을 수 있도록 합니다. 이 경우 응용프로그램이 카메라에 보여지는 화면을 언제든지 수집할 수 있습니다."</string>
+    <string name="permdesc_camera" msgid="9013476258810982546">"애플리케이션이 카메라로 사진을 찍을 수 있도록 합니다. 이 경우 애플리케이션이 카메라에 보여지는 화면을 언제든지 수집할 수 있습니다."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"휴대전화를 영구적으로 사용 중지"</string>
-    <string name="permdesc_brick" msgid="5569526552607599221">"응용프로그램이 휴대전화를 영구적으로 사용 중지할 수 있게 합니다. 이 기능은 매우 위험합니다."</string>
+    <string name="permdesc_brick" msgid="5569526552607599221">"애플리케이션이 휴대전화를 영구적으로 사용 중지할 수 있게 합니다. 이 기능은 매우 위험합니다."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"휴대전화 강제로 다시 부팅"</string>
-    <string name="permdesc_reboot" msgid="7914933292815491782">"응용프로그램이 휴대전화를 강제로 다시 부팅할 수 있도록 합니다."</string>
+    <string name="permdesc_reboot" msgid="7914933292815491782">"애플리케이션이 휴대전화를 강제로 다시 부팅할 수 있도록 합니다."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"파일시스템 마운트 및 마운트 해제"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"응용프로그램이 이동식 저장소의 파일 시스템을 마운트하고 마운트 해제할 수 있도록 합니다."</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"애플리케이션이 이동식 저장소의 파일 시스템을 마운트하고 마운트 해제할 수 있도록 합니다."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"외부 저장소 포맷"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"응용프로그램이 이동식 저장소를 포맷할 수 있도록 합니다."</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"애플리케이션이 이동식 저장소를 포맷할 수 있도록 합니다."</string>
     <string name="permlab_asec_access" msgid="1070364079249834666">"보안 저장소에 대한 정보 가져오기"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"응용프로그램이 보안 저장소의 정보를 가져올 수 있도록 합니다."</string>
+    <string name="permdesc_asec_access" msgid="7691616292170590244">"애플리케이션이 보안 저장소의 정보를 가져올 수 있도록 합니다."</string>
     <string name="permlab_asec_create" msgid="7312078032326928899">"보안 저장소 만들기"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"응용프로그램이 보안 저장소를 만들 수 있도록 합니다."</string>
+    <string name="permdesc_asec_create" msgid="7041802322759014035">"애플리케이션이 보안 저장소를 만들 수 있도록 합니다."</string>
     <string name="permlab_asec_destroy" msgid="7787322878955261006">"보안 저장소 제거"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"응용프로그램이 보안 저장소를 제거할 수 있도록 합니다."</string>
+    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"애플리케이션이 보안 저장소를 제거할 수 있도록 합니다."</string>
     <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"보안 저장소 마운트/마운트 해제"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"응용프로그램이 보안 저장소를 마운트/마운트 해제할 수 있도록 합니다."</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"애플리케이션이 보안 저장소를 마운트/마운트 해제할 수 있도록 합니다."</string>
     <string name="permlab_asec_rename" msgid="5685344390439934495">"보안 저장소 이름 바꾸기"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"응용프로그램이 보안 저장소의 이름을 바꿀 수 있도록 합니다."</string>
+    <string name="permdesc_asec_rename" msgid="1387881770708872470">"애플리케이션이 보안 저장소의 이름을 바꿀 수 있도록 합니다."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"진동 제어"</string>
-    <string name="permdesc_vibrate" msgid="2886677177257789187">"응용프로그램이 진동을 제어할 수 있도록 합니다."</string>
+    <string name="permdesc_vibrate" msgid="2886677177257789187">"애플리케이션이 진동을 제어할 수 있도록 합니다."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"카메라 플래시 제어"</string>
-    <string name="permdesc_flashlight" msgid="6433045942283802309">"응용프로그램이 카메라 플래시를 제어할 수 있도록 합니다."</string>
+    <string name="permdesc_flashlight" msgid="6433045942283802309">"애플리케이션이 카메라 플래시를 제어할 수 있도록 합니다."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"하드웨어 테스트"</string>
-    <string name="permdesc_hardware_test" msgid="3668894686500081699">"응용프로그램이 하드웨어를 테스트할 목적으로 다양한 주변장치를 제어할 수 있도록 합니다."</string>
+    <string name="permdesc_hardware_test" msgid="3668894686500081699">"애플리케이션이 하드웨어를 테스트할 목적으로 다양한 주변장치를 제어할 수 있도록 합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"응용프로그램이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 합니다. 이 경우 악성 응용프로그램으로 인해 예상치 못한 통화 요금이 부과될 수 있습니다. 이 권한으로 응용프로그램이 비상 전화를 걸게 할 수는 없습니다."</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"애플리케이션이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 합니다. 이 경우 악성 애플리케이션으로 인해 예상치 못한 통화 요금이 부과될 수 있습니다. 이 권한으로 애플리케이션이 비상 전화를 걸게 할 수는 없습니다."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"모든 전화번호 자동 연결"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"응용프로그램이 사용자의 조작 없이 비상 번호를 포함한 전화번호로 전화를 걸 수 있도록 합니다. 이 경우 악성 응용프로그램이 응급 서비스를 불필요하게 또는 불법적으로 호출할 수 있습니다."</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"애플리케이션이 사용자의 조작 없이 비상 번호를 포함한 전화번호로 전화를 걸 수 있도록 합니다. 이 경우 악성 애플리케이션이 응급 서비스를 불필요하게 또는 불법적으로 호출할 수 있습니다."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"직접 CDMA 전화 설정 시작"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"응용프로그램이 CDMA 프로비저닝을 시작할 수 있도록 합니다. 이 경우 악성 응용프로그램이 불필요하게 CDMA 프로비저닝을 시작할 수 있습니다."</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"애플리케이션이 CDMA 프로비저닝을 시작할 수 있도록 합니다. 이 경우 악성 애플리케이션이 불필요하게 CDMA 프로비저닝을 시작할 수 있습니다."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"위치 업데이트 알림 제어"</string>
-    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"무선의 위치 업데이트 알림을 사용하거나 사용 중지할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"무선의 위치 업데이트 알림을 사용하거나 사용 중지할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"체크인 속성 액세스"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"체크인 서비스에서 업로드한 속성에 대한 읽기/쓰기 접근을 허용합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"체크인 서비스에서 업로드한 속성에 대한 읽기/쓰기 접근을 허용합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"위젯 선택"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"응용프로그램이 어떤 응용프로그램에서 어떤 위젯을 사용할 수 있는 지를 시스템에 알릴 수 있도록 합니다. 이 권한을 갖는 응용프로그램은 개인 정보에 대한 액세스 권한을 다른 응용프로그램에 부여할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"애플리케이션이 어떤 애플리케이션에서 어떤 위젯을 사용할 수 있는 지를 시스템에 알릴 수 있도록 합니다. 이 권한을 갖는 애플리케이션은 개인 정보에 대한 액세스 권한을 다른 애플리케이션에 부여할 수 있습니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"휴대전화 상태 수정"</string>
-    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"응용프로그램이 장치의 휴대전화 기능을 제어할 수 있도록 합니다. 이 권한을 갖는 응용프로그램은 사용자에게 알리지 않고 네트워크를 전환하거나 휴대전화 무선 기능을 켜고 끄는 등의 작업을 수행할 수 있습니다."</string>
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"애플리케이션이 장치의 휴대전화 기능을 제어할 수 있도록 합니다. 이 권한을 갖는 애플리케이션은 사용자에게 알리지 않고 네트워크를 전환하거나 휴대전화 무선 기능을 켜고 끄는 등의 작업을 수행할 수 있습니다."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"휴대전화 상태 및 ID 읽기"</string>
-    <string name="permdesc_readPhoneState" msgid="188877305147626781">"응용프로그램이 장치의 휴대전화 기능에 접근할 수 있도록 합니다. 이 권한을 갖는 응용프로그램은 휴대전화의 전화번호 및 일련번호, 통화가 활성인지 여부, 해당 통화가 연결된 번호 등을 확인할 수 있습니다."</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"애플리케이션이 장치의 휴대전화 기능에 접근할 수 있도록 합니다. 이 권한을 갖는 애플리케이션은 휴대전화의 전화번호 및 일련번호, 통화가 활성인지 여부, 해당 통화가 연결된 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
-    <string name="permdesc_wakeLock" msgid="7584036471227467099">"응용프로그램이 휴대전화가 절전 모드로 전환되지 않도록 합니다."</string>
+    <string name="permdesc_wakeLock" msgid="7584036471227467099">"애플리케이션이 휴대전화가 절전 모드로 전환되지 않도록 합니다."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"휴대전화 전원 켜고 끄기"</string>
-    <string name="permdesc_devicePower" msgid="4577331933252444818">"응용프로그램이 휴대전화를 켜거나 끌 수 있도록 합니다."</string>
+    <string name="permdesc_devicePower" msgid="4577331933252444818">"애플리케이션이 휴대전화를 켜거나 끌 수 있도록 합니다."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"출고 테스트 모드로 실행"</string>
     <string name="permdesc_factoryTest" msgid="8136644990319244802">"휴대전화 하드웨어에 대한 완전한 액세스를 허용하는 하위 수준의 제조업체 테스트로 실행됩니다. 휴대전화가 제조업체 테스트 모드로 실행 중일 때만 사용할 수 있습니다."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"배경화면 설정"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"응용프로그램이 시스템 배경화면을 설정할 수 있도록 합니다."</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"애플리케이션이 시스템 배경화면을 설정할 수 있도록 합니다."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"배경화면 크기 힌트 설정"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"응용프로그램이 시스템 배경화면 크기 힌트를 설정할 수 있도록 합니다."</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"애플리케이션이 시스템 배경화면 크기 힌트를 설정할 수 있도록 합니다."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"시스템을 기본값으로 재설정"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"응용프로그램이 모든 데이터, 구성 및 설치된 응용프로그램을 지워서 시스템을 완전히 초기화할 수 있도록 합니다."</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"애플리케이션이 모든 데이터, 구성 및 설치된 애플리케이션을 지워서 시스템을 완전히 초기화할 수 있도록 합니다."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"시간 설정"</string>
-    <string name="permdesc_setTime" msgid="667294309287080045">"응용프로그램이 휴대전화 시계의 시간을 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"애플리케이션이 휴대전화 시계의 시간을 변경할 수 있도록 합니다."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"표준시간대 설정"</string>
-    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"응용프로그램이 휴대전화의 표준시간대를 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"애플리케이션이 휴대전화의 표준시간대를 변경할 수 있도록 합니다."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService로 활동"</string>
-    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"응용프로그램이 AccountAuthenticators으로 전화를 걸 수 있도록 합니다."</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"애플리케이션이 AccountAuthenticators으로 전화를 걸 수 있도록 합니다."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"알려진 계정 검색"</string>
-    <string name="permdesc_getAccounts" msgid="6839262446413155394">"응용프로그램이 휴대전화에 알려진 계정 목록을 가져올 수 있도록 합니다."</string>
+    <string name="permdesc_getAccounts" msgid="6839262446413155394">"애플리케이션이 휴대전화에 알려진 계정 목록을 가져올 수 있도록 합니다."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"계정 인증자로 활동"</string>
-    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"응용프로그램이 계정 만들기, 비밀번호 가져오기 및 설정 등과 같은 AccountManager의 계정 인증자 기능을 사용할 수 있도록 합니다."</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"애플리케이션이 계정 만들기, 비밀번호 가져오기 및 설정 등과 같은 AccountManager의 계정 인증자 기능을 사용할 수 있도록 합니다."</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"계정 목록 관리"</string>
-    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"응용프로그램이 계정 추가, 삭제 및 비밀번호 삭제 등의 작업을 수행할 수 있도록 합니다."</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"애플리케이션이 계정 추가, 삭제 및 비밀번호 삭제 등의 작업을 수행할 수 있도록 합니다."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"계정의 인증 자격증명 사용"</string>
-    <string name="permdesc_useCredentials" msgid="7416570544619546974">"응용프로그램이 인증 토큰을 요청하도록 합니다."</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"애플리케이션이 인증 토큰을 요청하도록 합니다."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"네트워크 상태 보기"</string>
-    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"응용프로그램이 모든 네트워크의 상태를 볼 수 있도록 합니다."</string>
+    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"애플리케이션이 모든 네트워크의 상태를 볼 수 있도록 합니다."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"인터넷에 최대한 액세스"</string>
-    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"응용프로그램이 네트워크 소켓을 만들 수 있도록 합니다."</string>
+    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"애플리케이션이 네트워크 소켓을 만들 수 있도록 합니다."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"액세스포인트 이름(APN) 설정 쓰기"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"응용프로그램이 APN의 프록시 및 포트 같은 APN 설정을 수정할 수 있도록 합니다."</string>
+    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"애플리케이션이 APN의 프록시 및 포트 같은 APN 설정을 수정할 수 있도록 합니다."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"네트워크 연결 변경"</string>
-    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"응용프로그램이 네트워크 연결 상태를 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"애플리케이션이 네트워크 연결 상태를 변경할 수 있도록 합니다."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"테러링 연결 변경"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"응용프로그램이 테더링된 네트워크의 연결 상태를 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"애플리케이션이 테더링된 네트워크의 연결 상태를 변경할 수 있도록 합니다."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"백그라운드 데이터 사용 설정 변경"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"응용프로그램이 백그라운드 데이터 사용 설정을 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"애플리케이션이 백그라운드 데이터 사용 설정을 변경할 수 있도록 합니다."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"Wi-Fi 상태 보기"</string>
-    <string name="permdesc_accessWifiState" msgid="485796529139236346">"응용프로그램이 Wi-Fi의 상태에 대한 정보를 볼 수 있도록 합니다."</string>
+    <string name="permdesc_accessWifiState" msgid="485796529139236346">"애플리케이션이 Wi-Fi의 상태에 대한 정보를 볼 수 있도록 합니다."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"Wi-Fi 상태 변경"</string>
-    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"응용프로그램이 Wi-Fi 액세스포인트에 연결하거나 연결을 끊고, 구성된 Wi-Fi 네트워크를 변경할 수 있도록 합니다."</string>
+    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"애플리케이션이 Wi-Fi 액세스포인트에 연결하거나 연결을 끊고, 구성된 Wi-Fi 네트워크를 변경할 수 있도록 합니다."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi 멀티캐스트 수신 허용"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"응용프로그램이 휴대기기로 직접 주소가 지정되지 않은 패킷을 받을 수 있도록 합니다. 이 기능은 가까운 곳에서 제공되는 서비스를 검색할 때 유용하며 비멀티캐스트 모드보다 전원을 더 많이 소비합니다."</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"애플리케이션이 휴대기기로 직접 주소가 지정되지 않은 패킷을 받을 수 있도록 합니다. 이 기능은 가까운 곳에서 제공되는 서비스를 검색할 때 유용하며 비멀티캐스트 모드보다 전원을 더 많이 소비합니다."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth 관리"</string>
-    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"응용프로그램이 로컬 Bluetooth 휴대전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있도록 합니다."</string>
+    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"애플리케이션이 로컬 Bluetooth 휴대전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있도록 합니다."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth 연결 만들기"</string>
-    <string name="permdesc_bluetooth" msgid="762515380679392945">"응용프로그램이 로컬 Bluetooth 전화의 구성을 보고 페어링된 장치에 연결하며 연결을 수락할 수 있도록 합니다."</string>
+    <string name="permdesc_bluetooth" msgid="762515380679392945">"애플리케이션이 로컬 Bluetooth 전화의 구성을 보고 페어링된 장치에 연결하며 연결을 수락할 수 있도록 합니다."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"키 잠금 사용 중지"</string>
-    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"응용프로그램이 키 잠금 및 관련 비밀번호 보안을 사용 중지할 수 있도록 합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용 중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
+    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"애플리케이션이 키 잠금 및 관련 비밀번호 보안을 사용 중지할 수 있도록 합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용 중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
-    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"응용프로그램이 주소록에 동기화를 사용할지 여부와 같은 동기화 설정을 읽을 수 있도록 합니다."</string>
+    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"애플리케이션이 주소록에 동기화를 사용할지 여부와 같은 동기화 설정을 읽을 수 있도록 합니다."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"동기화 설정 쓰기"</string>
-    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"응용프로그램이 주소록에 대해 동기화를 사용할지 여부 등의 동기화 설정을 수정할 수 있도록 합니다."</string>
+    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"애플리케이션이 주소록에 대해 동기화를 사용할지 여부 등의 동기화 설정을 수정할 수 있도록 합니다."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"동기화 통계 읽기"</string>
-    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"응용프로그램이 동기화 통계(예: 실행된 동기화 기록)을 읽을 수 있도록 합니다."</string>
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"애플리케이션이 동기화 통계(예: 실행된 동기화 기록)을 읽을 수 있도록 합니다."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"가입된 피드 읽기"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"응용프로그램이 현재 동기화된 피드에 대한 세부정보를 가져올 수 있도록 합니다."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"애플리케이션이 현재 동기화된 피드에 대한 세부정보를 가져올 수 있도록 합니다."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"가입 피드 작성"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"응용프로그램이 현재 동기화된 피드를 수정할 수 있도록 합니다. 이 경우 악성 응용프로그램이 동기화된 피드를 변경할 수 있습니다."</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"애플리케이션이 현재 동기화된 피드를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 동기화된 피드를 변경할 수 있습니다."</string>
     <string name="permlab_readDictionary" msgid="432535716804748781">"사용자 정의 사전 읽기"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"응용프로그램이 사용자 사전에 보관되어 있는 비공개 단어, 이름 및 구문을 읽도록 합니다."</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"애플리케이션이 사용자 사전에 보관되어 있는 비공개 단어, 이름 및 구문을 읽도록 합니다."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"사용자정의 사전에 작성"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"응용프로그램이 사용자 사전에 새 단어를 입력할 수 있도록 합니다."</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"애플리케이션이 사용자 사전에 새 단어를 입력할 수 있도록 합니다."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SD 카드 콘텐츠 수정/삭제"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"응용프로그램이 SD 카드에 쓸 수 있도록 합니다."</string>
+    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"애플리케이션이 SD 카드에 쓸 수 있도록 합니다."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"캐시 파일시스템 액세스"</string>
-    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"응용프로그램이 캐시 파일시스템을 읽고 쓸 수 있도록 합니다."</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"애플리케이션이 캐시 파일시스템을 읽고 쓸 수 있도록 합니다."</string>
     <string name="policylab_limitPassword" msgid="4307861496302850201">"비밀번호 제한"</string>
     <string name="policydesc_limitPassword" msgid="1719877245692318299">"사용할 수 있는 비밀번호 유형을 제한합니다."</string>
     <string name="policylab_watchLogin" msgid="7374780712664285321">"로그인 시도 보기"</string>
@@ -593,11 +593,11 @@
     <string name="save_password_label" msgid="6860261758665825069">"확인"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"도움말: 축소/확대하려면 두 번 누릅니다."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"브라우저의 기록 및 북마크 읽기"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"응용프로그램이 브라우저로 방문한 모든 URL과 브라우저의 모든 북마크를 읽도록 허용합니다."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"애플리케이션이 브라우저로 방문한 모든 URL과 브라우저의 모든 북마크를 읽도록 허용합니다."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"브라우저의 기록 및 북마크 쓰기"</string>
-    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"응용프로그램이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 응용프로그램이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"애플리케이션이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"브라우저 위치 정보 수정 권한"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"응용프로그램이 브라우저의 위치 정보 권한을 수정할 수 있도록 합니다. 악성 응용프로그램이 이를 사용하여 임의의 웹사이트에 위치 정보를 보낼 수도 있습니다."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"애플리케이션이 브라우저의 위치 정보 권한을 수정할 수 있도록 합니다. 악성 애플리케이션이 이를 사용하여 임의의 웹사이트에 위치 정보를 보낼 수도 있습니다."</string>
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"나중에"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"저장"</string>
@@ -728,18 +728,18 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"주의"</string>
     <string name="capital_on" msgid="1544682755514494298">"사용"</string>
     <string name="capital_off" msgid="6815870386972805832">"사용 안함"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"작업을 수행할 때 사용하는 응용프로그램"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"작업을 수행할 때 사용하는 애플리케이션"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"이 작업에 대해 기본값으로 사용"</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"홈 설정 &gt; 응용프로그램 &gt; 응용프로그램 관리에서 기본값을 지웁니다."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"홈 설정 &gt; 애플리케이션 &gt; 애플리케이션 관리에서 기본값을 지웁니다."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"작업 선택"</string>
-    <string name="noApplications" msgid="1691104391758345586">"작업을 수행할 수 있는 응용프로그램이 없습니다."</string>
+    <string name="noApplications" msgid="1691104391758345586">"작업을 수행할 수 있는 애플리케이션이 없습니다."</string>
     <string name="aerr_title" msgid="653922989522758100">"죄송합니다."</string>
-    <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> 응용프로그램(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 예상치 않게 중지되었습니다. 다시 시도해 주세요."</string>
+    <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> 애플리케이션(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 예상치 않게 중지되었습니다. 다시 시도해 주세요."</string>
     <string name="aerr_process" msgid="1551785535966089511">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 예상치 않게 중지되었습니다. 다시 시도해 주세요."</string>
     <string name="anr_title" msgid="3100070910664756057">"죄송합니다."</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"<xliff:g id="APPLICATION">%2$s</xliff:g> 활동(<xliff:g id="ACTIVITY">%1$s</xliff:g> 응용프로그램)이 응답하지 않습니다."</string>
+    <string name="anr_activity_application" msgid="3538242413112507636">"<xliff:g id="APPLICATION">%2$s</xliff:g> 활동(<xliff:g id="ACTIVITY">%1$s</xliff:g> 애플리케이션)이 응답하지 않습니다."</string>
     <string name="anr_activity_process" msgid="5420826626009561014">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g> 응용프로그램(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
+    <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g> 애플리케이션(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
     <string name="anr_process" msgid="1246866008169975783">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."</string>
     <string name="force_close" msgid="3653416315450806396">"닫기"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
@@ -768,7 +768,7 @@
     <item quantity="other" msgid="7915895323644292768">"개방형 Wi-Fi 네트워크 사용 가능"</item>
   </plurals>
     <string name="select_character" msgid="3365550120617701745">"문자 삽입"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"알 수 없는 응용프로그램"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"알 수 없는 애플리케이션"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS 메시지를 보내는 중"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"여러 개의 SMS 메시지를 보내는 중입니다. 계속하려면 \'확인\'을 선택하고 전송을 중지하려면 \'취소\'를 선택하세요."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"확인"</string>
@@ -792,7 +792,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB 저장소 사용 안함"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB 저장소를 사용하지 않도록 설정하는 동안 문제가 발생했습니다. USB 호스트와 연결을 해제했는지 확인한 다음 다시 시도하세요."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB 저장소 사용"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB 저장소를 사용 설정하면 사용 중인 일부 응용프로그램이 중지되고 USB 저장소를 사용 중지할 때까지 사용할 수 없게 됩니다."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB 저장소를 사용 설정하면 사용 중인 일부 애플리케이션이 중지되고 USB 저장소를 사용 중지할 때까지 사용할 수 없게 됩니다."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB 작업 실패"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD 카드 포맷"</string>
@@ -818,9 +818,9 @@
     <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD 카드가 없습니다.  SD 카드를 넣으세요."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"일치하는 활동이 없습니다."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"구성 요소 사용 통계 업데이트"</string>
-    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"수집된 구성요소 사용 통계를 수정할 수 있는 권한을 부여합니다. 일반 응용프로그램은 이 권한을 사용하지 않습니다."</string>
-    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"기본 컨테이너 서비스를 호출하여 콘텐츠를 복사할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
-    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"기본 컨테이너 서비스를 호출하여 콘텐츠를 복사할 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
+    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"수집된 구성요소 사용 통계를 수정할 수 있는 권한을 부여합니다. 일반 애플리케이션은 이 권한을 사용하지 않습니다."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"기본 컨테이너 서비스를 호출하여 콘텐츠를 복사할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"기본 컨테이너 서비스를 호출하여 콘텐츠를 복사할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"확대/축소하려면 두 번 탭하세요."</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"위젯을 생성하는 과정(inflate)에 오류가 발생했습니다."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"이동"</string>
@@ -833,7 +833,7 @@
     <string name="create_contact_using" msgid="4947405226788104538">"전화번호부에"\n"<xliff:g id="NUMBER">%s</xliff:g> 추가"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"선택함"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"선택 안함"</string>
-    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"현재 이후로 하나 이상의 다음 응용프로그램이 계정에 대한 액세스 권한을 요청합니다."</string>
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"현재 이후로 하나 이상의 다음 애플리케이션이 계정에 대한 액세스 권한을 요청합니다."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"요청을 허용하시겠습니까?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"액세스 요청"</string>
     <string name="allow" msgid="7225948811296386551">"허용"</string>

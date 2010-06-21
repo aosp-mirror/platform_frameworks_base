@@ -132,7 +132,7 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Funk ausschalten"</string>
     <string name="screen_lock" msgid="799094655496098153">"Display-Sperre"</string>
     <string name="power_off" msgid="4266614107412865048">"Ausschalten"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"Fährt herunter..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Wird heruntergefahren..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Ihr Telefon wird heruntergefahren."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Zuletzt verwendet"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Keine zuletzt verwendeten Anwendungen"</string>
