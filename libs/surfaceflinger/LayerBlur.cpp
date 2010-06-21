@@ -146,6 +146,9 @@ void LayerBlur::onDraw(const Region& clip) const
     Region::const_iterator it = clip.begin();
     Region::const_iterator const end = clip.end();
     if (it != end) {
+#if defined(GL_OES_texture_external)
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+#endif
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mTextureName);
 

@@ -332,13 +332,6 @@ status_t SurfaceFlinger::readyToRun()
     dcblk->density      = hw.getDensity();
 
     // Initialize OpenGL|ES
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     glPixelStorei(GL_PACK_ALIGNMENT, 4); 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -918,17 +911,18 @@ void SurfaceFlinger::unlockClients()
 
 void SurfaceFlinger::debugFlashRegions()
 {
-     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-     const uint32_t flags = hw.getFlags();
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    const uint32_t flags = hw.getFlags();
 
-     if (!((flags & DisplayHardware::SWAP_RECTANGLE) ||
-             (flags & DisplayHardware::BUFFER_PRESERVED))) {
-         const Region repaint((flags & DisplayHardware::PARTIAL_UPDATES) ?
-                 mDirtyRegion.bounds() : hw.bounds());
-         composeSurfaces(repaint);
-     }
-    
-    glDisable(GL_TEXTURE_2D);
+    if (!((flags & DisplayHardware::SWAP_RECTANGLE) ||
+            (flags & DisplayHardware::BUFFER_PRESERVED))) {
+        const Region repaint((flags & DisplayHardware::PARTIAL_UPDATES) ?
+                mDirtyRegion.bounds() : hw.bounds());
+        composeSurfaces(repaint);
+    }
+
+    TextureManager::deactivateTextures();
+
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
@@ -936,9 +930,9 @@ void SurfaceFlinger::debugFlashRegions()
     static int toggle = 0;
     toggle = 1 - toggle;
     if (toggle) {
-        glColor4x(0x10000, 0, 0x10000, 0x10000);
+        glColor4f(1, 0, 1, 1);
     } else {
-        glColor4x(0x10000, 0x10000, 0, 0x10000);
+        glColor4f(1, 1, 0, 1);
     }
 
     Region::const_iterator it = mDirtyRegion.begin();
@@ -954,7 +948,7 @@ void SurfaceFlinger::debugFlashRegions()
         glVertexPointer(2, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
-    
+
     if (mInvalidRegion.isEmpty()) {
         mDirtyRegion.dump("mDirtyRegion");
         mInvalidRegion.dump("mInvalidRegion");
@@ -962,7 +956,7 @@ void SurfaceFlinger::debugFlashRegions()
     hw.flip(mInvalidRegion);
 
     if (mDebugRegion > 1)
-       usleep(mDebugRegion * 1000);
+        usleep(mDebugRegion * 1000);
 
     glEnable(GL_SCISSOR_TEST);
     //mDirtyRegion.dump("mDirtyRegion");
@@ -982,7 +976,7 @@ void SurfaceFlinger::drawWormhole() const
     glDisable(GL_DITHER);
 
     if (LIKELY(!mDebugBackground)) {
-        glClearColorx(0,0,0,0);
+        glClearColor(0,0,0,0);
         Region::const_iterator it = region.begin();
         Region::const_iterator const end = region.end();
         while (it != end) {
@@ -998,6 +992,9 @@ void SurfaceFlinger::drawWormhole() const
         glVertexPointer(2, GL_SHORT, 0, vertices);
         glTexCoordPointer(2, GL_SHORT, 0, tcoords);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+#if defined(GL_OES_texture_external)
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+#endif
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mWormholeTexName);
         glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);

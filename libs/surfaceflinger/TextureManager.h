@@ -37,31 +37,36 @@ class GraphicBuffer;
 // ---------------------------------------------------------------------------
 
 struct Image {
+    enum { TEXTURE_2D=0, TEXTURE_EXTERNAL=1 };
     Image() : name(-1U), image(EGL_NO_IMAGE_KHR), width(0), height(0),
-        transform(0), dirty(true) { }
+        transform(0), dirty(1), target(TEXTURE_2D) { }
     GLuint        name;
     EGLImageKHR   image;
     GLuint        width;
     GLuint        height;
     uint32_t      transform;
-    bool          dirty;
+    unsigned      dirty     : 1;
+    unsigned      target    : 1;
 };
 
 struct Texture : public Image {
-    Texture() : Image(), NPOTAdjust(false)  { }
-    GLuint        potWidth;
-    GLuint        potHeight;
-    GLfloat       wScale;
-    GLfloat       hScale;
-    bool          NPOTAdjust;
+    Texture() : Image(), NPOTAdjust(0) { }
+    GLuint      potWidth;
+    GLuint      potHeight;
+    GLfloat     wScale;
+    GLfloat     hScale;
+    unsigned    NPOTAdjust  : 1;
 };
 
 // ---------------------------------------------------------------------------
 
 class TextureManager {
     uint32_t mFlags;
-    GLuint createTexture();
+    static status_t initTexture(Image* texture, int32_t format);
+    static status_t initTexture(Texture* texture);
     static bool isSupportedYuvFormat(int format);
+    static bool isYuvFormat(int format);
+    static GLenum getTextureTarget(const Image* pImage);
 public:
 
     TextureManager(uint32_t flags);
@@ -73,6 +78,12 @@ public:
     // make active buffer an EGLImage if needed
     status_t initEglImage(Image* texture,
             EGLDisplay dpy, const sp<GraphicBuffer>& buffer);
+
+    // activate a texture
+    static void activateTexture(const Texture& texture, bool filter);
+
+    // deactivate a texture
+    static void deactivateTextures();
 };
 
 // ---------------------------------------------------------------------------

@@ -119,6 +119,9 @@ void LayerDim::onDraw(const Region& clip) const
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glColor4x(0, 0, 0, alpha);
         
+#if defined(GL_OES_texture_external)
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+#endif
 #if defined(DIM_WITH_TEXTURE) && defined(EGL_ANDROID_image_native_buffer)
         if (sUseTexture) {
             glBindTexture(GL_TEXTURE_2D, sTexId);
