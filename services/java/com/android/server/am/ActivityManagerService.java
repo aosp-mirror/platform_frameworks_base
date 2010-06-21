@@ -9538,7 +9538,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             sb.append("Subject: ").append(subject).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
-        if (crashInfo.durationMillis != -1) {
+        if (crashInfo != null && crashInfo.durationMillis != -1) {
             sb.append("Duration-Millis: ").append(crashInfo.durationMillis).append("\n");
         }
         sb.append("\n");
