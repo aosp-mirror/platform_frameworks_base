@@ -19,9 +19,9 @@
 
 #include "jni.h"
 
-namespace android {
+#include <ui/InputTransport.h>
 
-class InputChannel;
+namespace android {
 
 typedef void (*InputChannelObjDisposeCallback)(JNIEnv* env, jobject inputChannelObj,
         const sp<InputChannel>& inputChannel, void* data);

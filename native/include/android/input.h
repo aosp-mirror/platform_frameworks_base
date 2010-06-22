@@ -523,6 +523,42 @@ float motion_event_get_historical_pressure(input_event_t* motion_event, size_t p
 float motion_event_get_historical_size(input_event_t* motion_event, size_t pointer_index,
         size_t history_index);
 
+/*
+ * Input queue
+ *
+ * An input queue is the facility through which you retrieve input
+ * events.
+ */
+struct input_queue_t;
+typedef struct input_queue_t input_queue_t;
+
+/*
+ * Return a file descriptor for the queue, which you
+ * can use to determine if there are events available.  This
+ * is typically used with select() or poll() to multiplex
+ * with other kinds of events.
+ */
+int input_queue_get_fd(input_queue_t* queue);
+
+/*
+ * Returns true if there are one or more events available in the
+ * input queue.  Returns 1 if the queue has events; 0 if
+ * it does not have events; and a negative value if there is an error.
+ */
+int input_queue_has_events(input_queue_t* queue);
+
+/*
+ * Returns the next available event from the queue.  Returns a negative
+ * value if no events are available or an error has occurred.
+ */
+int32_t input_queue_get_event(input_queue_t* queue, input_event_t** outEvent);
+
+/*
+ * Report that dispatching has finished with the given event.
+ * This must be called after receiving an event with input_queue_get_event().
+ */
+void input_queue_finish_event(input_queue_t* queue, input_event_t* event, int handled);
+
 #ifdef __cplusplus
 }
 #endif

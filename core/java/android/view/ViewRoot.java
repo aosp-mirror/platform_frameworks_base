@@ -154,7 +154,9 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     final View.AttachInfo mAttachInfo;
     InputChannel mInputChannel;
-
+    InputConsumer.Callback mInputConsumerCallback;
+    InputConsumer mInputConsumer;
+    
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
@@ -555,8 +557,17 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
 
                 if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-                    InputQueue.registerInputChannel(mInputChannel, mInputHandler,
-                            Looper.myQueue());
+                    if (view instanceof RootViewSurfaceTaker) {
+                        mInputConsumerCallback =
+                            ((RootViewSurfaceTaker)view).willYouTakeTheInputConsumer();
+                    }
+                    if (mInputConsumerCallback != null) {
+                        mInputConsumer = new InputConsumer(mInputChannel);
+                        mInputConsumerCallback.onInputConsumerCreated(mInputConsumer);
+                    } else {
+                        InputQueue.registerInputChannel(mInputChannel, mInputHandler,
+                                Looper.myQueue());
+                    }
                 }
                 
                 view.assignParent(this);
@@ -1736,7 +1747,12 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
             if (mInputChannel != null) {
-                InputQueue.unregisterInputChannel(mInputChannel);
+                if (mInputConsumerCallback != null) {
+                    mInputConsumerCallback.onInputConsumerDestroyed(mInputConsumer);
+                    mInputConsumerCallback = null;
+                } else {
+                    InputQueue.unregisterInputChannel(mInputChannel);
+                }
                 mInputChannel.dispose();
                 mInputChannel = null;
             }
