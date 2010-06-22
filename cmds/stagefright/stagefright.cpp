@@ -483,7 +483,7 @@ int main(int argc, char **argv) {
 
         sp<DataSource> dataSource = DataSource::CreateFromURI(filename);
 
-        if (dataSource == NULL) {
+        if (strncasecmp(filename, "sine:", 5) && dataSource == NULL) {
             fprintf(stderr, "Unable to create data source.\n");
             return 1;
         }
