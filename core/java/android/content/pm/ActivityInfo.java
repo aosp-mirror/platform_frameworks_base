@@ -156,7 +156,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}
      * may still be interrupted by high-priority notifications; for example, an
      * incoming phone call may use
-     * {@link * android.app.Notification#fullScreenIntent fullScreenIntent}
+     * {@link android.app.Notification#fullScreenIntent fullScreenIntent}
      * to present a full-screen in-call activity to the user, pausing the
      * current activity as a side-effect. An activity with
      * {@link #FLAG_IMMERSIVE} set, however, will not be interrupted; the
