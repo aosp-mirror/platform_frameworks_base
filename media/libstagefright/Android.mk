@@ -23,6 +23,7 @@ LOCAL_SRC_FILES +=                \
         CachingDataSource.cpp     \
         CameraSource.cpp          \
         DataSource.cpp            \
+        DRMExtractor.cpp          \
         FileSource.cpp            \
         HTTPDataSource.cpp        \
         HTTPStream.cpp            \
@@ -61,7 +62,8 @@ LOCAL_SHARED_LIBRARIES := \
         libsonivox        \
         libvorbisidec     \
         libsurfaceflinger_client \
-        libcamera_client
+        libcamera_client \
+        libdrmframework
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \
