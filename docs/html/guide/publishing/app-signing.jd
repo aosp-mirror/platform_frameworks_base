@@ -123,14 +123,15 @@ all of your applications with the same certificate, throughout the expected
 lifespan of your applications. There are several reasons why you should do so: </p>
 
 <ul>
-<li>Application upgrade &ndash; As you release upgrades to your
-application, you will want to sign the upgrades with the same certificate, if you
-want users to upgrade seamlessly to the new version. When the system is 
-installing an update to an application, if any of the certificates in the 
-new version match any of the certificates in the old version, then the 
-system allows the update. If you sign the version without using a matching
-certificate, you will also need to assign a different package name to the 
-application &mdash; in this case, the user installs the new version as a 
+<li>Application upgrade &ndash; As you release updates to your application, you
+will want to continue to sign the updates with the same certificate or set of
+certificates, if you want users to upgrade seamlessly to the new version. When
+the system is installing an update to an application, it compares the
+certificate(s) in the new version with those in the existing version. If the
+certificates match exactly, including both the certificate data and order, then
+the system allows the update. If you sign the new version without using matching
+certificates, you will also need to assign a different package name to the
+application &mdash; in this case, the user installs the new version as a
 completely new application. </li>
 
 <li>Application modularity &ndash; The Android system allows applications that
