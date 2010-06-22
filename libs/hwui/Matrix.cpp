@@ -21,7 +21,7 @@
 
 #include <utils/Log.h>
 
-#include "UIMatrix.h"
+#include "Matrix.h"
 
 namespace android {
 

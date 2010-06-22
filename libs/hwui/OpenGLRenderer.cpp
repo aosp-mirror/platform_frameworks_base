@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "UIOpenGLRenderer"
+#define LOG_TAG "OpenGLRenderer"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -26,20 +26,22 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include "UIOpenGLRenderer.h"
-#include "UIMatrix.h"
+#include <SkXfermode.h>
+
+#include "OpenGLRenderer.h"
+#include "Matrix.h"
 
 namespace android {
 
-UIOpenGLRenderer::UIOpenGLRenderer() {
-    LOGD("Create UIOpenGLRenderer");
+OpenGLRenderer::OpenGLRenderer() {
+    LOGD("Create OpenGLRenderer");
 }
 
-UIOpenGLRenderer::~UIOpenGLRenderer() {
-    LOGD("Destroy UIOpenGLRenderer");
+OpenGLRenderer::~OpenGLRenderer() {
+    LOGD("Destroy OpenGLRenderer");
 }
 
-void UIOpenGLRenderer::setViewport(int width, int height) {
+void OpenGLRenderer::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
 
     mat4 ortho;
@@ -47,11 +49,15 @@ void UIOpenGLRenderer::setViewport(int width, int height) {
     ortho.copyTo(mOrthoMatrix);
 }
 
-void UIOpenGLRenderer::prepare() {
+void OpenGLRenderer::prepare() {
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_SCISSOR_TEST);
+}
+
+void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
+	LOGD("Drawing color");
 }
 
 }; // namespace android

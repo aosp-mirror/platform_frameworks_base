@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_OPENGL_RENDERER_H
-#define ANDROID_UI_OPENGL_RENDERER_H
+#ifndef ANDROID_OPENGL_RENDERER_H
+#define ANDROID_OPENGL_RENDERER_H
+
+#include <SkXfermode.h>
 
 namespace android {
 
-class UIOpenGLRenderer {
+class OpenGLRenderer {
 public:
-    UIOpenGLRenderer();
-    ~UIOpenGLRenderer();
+    OpenGLRenderer();
+    ~OpenGLRenderer();
 
     void setViewport(int width, int height);
     void prepare();
 
-private:
-    float mOrthoMatrix[16];
+    void drawColor(int color, SkXfermode::Mode mode);
 
+private:
+    // Matrix used for ortho projection in shaders
+    float mOrthoMatrix[16];
 };
 
 }; // namespace android
 
-#endif // ANDROID_UI_OPENGL_RENDERER_H
+#endif // ANDROID_OPENGL_RENDERER_H

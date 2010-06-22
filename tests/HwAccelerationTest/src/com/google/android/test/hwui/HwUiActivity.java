@@ -36,46 +36,21 @@ public class HwUiActivity extends Activity {
         setContentView(new DirtyBitmapView(this));
     }
     
+    @SuppressWarnings({"UnusedDeclaration"})
     static int dipToPx(Context c, int dip) {
         return (int) (c.getResources().getDisplayMetrics().density * dip + 0.5f);
     }
 
     static class DirtyBitmapView extends View {
-        private Bitmap mCache;
-
         DirtyBitmapView(Context c) {
             super(c);
-
-            final int width = dipToPx(c, 100);
-            final int height = dipToPx(c, 100);
-
-            mCache = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            logGenerationId("Dirty cache created", mCache);
-
-            Canvas canvas = new Canvas(mCache);
-            logGenerationId("Canvas cache created", mCache);
-
-            canvas.drawColor(0xffff0000);
-            logGenerationId("Cache filled", mCache);
-            
-            Paint p = new Paint();
-            p.setColor(0xff0000ff);
-
-            canvas.drawRect(width / 2.0f, height / 2.0f, width, height, p);
-            logGenerationId("Cache modified", mCache);
-        }
-
-        private static void logGenerationId(String message, Bitmap b) {
-            d(LOG_TAG, message);
-            d(LOG_TAG, "  bitmap id=" + b.getGenerationId());
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            
-            canvas.drawBitmap(mCache, 0, 0, null);
-            logGenerationId("Cache drawn", mCache);
+
+            canvas.drawRGB(255, 0, 0);
         }
     }
 }

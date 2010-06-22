@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_MATRIX_H
-#define ANDROID_UI_MATRIX_H
+#ifndef ANDROID_MATRIX_H
+#define ANDROID_MATRIX_H
 
 namespace android {
 
@@ -97,4 +97,4 @@ typedef Matrix4 mat4;
 
 }; // namespace android
 
-#endif // ANDROID_UI_MATRIX_H
+#endif // ANDROID_MATRIX_H
