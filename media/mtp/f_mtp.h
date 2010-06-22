@@ -24,10 +24,8 @@
 
 
 struct mtp_file_range {
-	/* path for file to transfer */
-	const char	*path;
-	/* strlen(path) */
-	int			path_length;
+	/* file descriptor for file to transfer */
+	int			fd;
 	/* offset in file for start of transfer */
 	loff_t  	offset;
 	/* number of bytes to transfer */

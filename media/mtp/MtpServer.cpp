@@ -413,14 +413,17 @@ MtpResponseCode MtpServer::doGetObjectInfo() {
 
 MtpResponseCode MtpServer::doGetObject() {
     MtpObjectHandle handle = mRequest.getParameter(1);
-    MtpString filePath;
+    MtpString pathBuf;
     int64_t fileLength;
-    if (!mDatabase->getObjectFilePath(handle, filePath, fileLength))
+    if (!mDatabase->getObjectFilePath(handle, pathBuf, fileLength))
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    const char* filePath = (const char *)pathBuf;
 
     mtp_file_range  mfr;
-    mfr.path = filePath;
-    mfr.path_length = strlen(mfr.path);
+    mfr.fd = open(filePath, O_RDONLY);
+    if (mfr.fd < 0) {
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
     mfr.offset = 0;
     mfr.length = fileLength;
 
@@ -431,6 +434,7 @@ MtpResponseCode MtpServer::doGetObject() {
 
     // then transfer the file
     int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
+    close(mfr.fd);
     if (ret < 0) {
         if (errno == ECANCELED)
             return MTP_RESPONSE_TRANSACTION_CANCELLED;
@@ -534,13 +538,16 @@ MtpResponseCode MtpServer::doSendObject() {
     mData.reset();
 
     mtp_file_range  mfr;
-    mfr.path = (const char*)mSendObjectFilePath;
-    mfr.path_length = strlen(mfr.path);
+    mfr.fd = open(mSendObjectFilePath, O_RDWR | O_CREAT | O_TRUNC);
+    if (mfr.fd < 0) {
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
     mfr.offset = 0;
     mfr.length = mSendObjectFileSize;
 
     // transfer the file
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
+    close(mfr.fd);
     // FIXME - we need to delete mSendObjectHandle from the database if this fails.
     printf("MTP_RECEIVE_FILE returned %d\n", ret);
     mSendObjectHandle = kInvalidObjectHandle;
