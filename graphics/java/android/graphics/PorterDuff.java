@@ -61,6 +61,10 @@ public class PorterDuff {
         Mode(int nativeInt) {
             this.nativeInt = nativeInt;
         }
-        final int nativeInt;
+
+        /**
+         * @hide
+         */
+        public final int nativeInt;
     }
 }

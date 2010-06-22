@@ -18,9 +18,11 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
-#include <UIOpenGLRenderer.h>
+#include <SkXfermode.h>
 
-#define UI ((UIOpenGLRenderer*) renderer)
+#include <OpenGLRenderer.h>
+
+#define UI ((OpenGLRenderer*) renderer)
 
 namespace android {
 
@@ -28,8 +30,8 @@ namespace android {
 // Constructors
 // ----------------------------------------------------------------------------
 
-static UIOpenGLRenderer* android_view_GLES20Renderer_createRenderer(JNIEnv* env, jobject canvas) {
-    return new UIOpenGLRenderer;
+static OpenGLRenderer* android_view_GLES20Renderer_createRenderer(JNIEnv* env, jobject canvas) {
+    return new OpenGLRenderer;
 }
 
 static void android_view_GLES20Renderer_destroyRenderer(JNIEnv* env, jobject canvas, jint renderer) {
@@ -52,6 +54,16 @@ static void android_view_GLES20Renderer_prepare(JNIEnv* env, jobject canvas, jin
 }
 
 // ----------------------------------------------------------------------------
+// Draw color
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas, jint renderer,
+        jint color, jint mode) {
+
+    UI->drawColor(color, (SkXfermode::Mode) mode);
+}
+
+// ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
@@ -62,6 +74,8 @@ static JNINativeMethod gMethods[] = {
     {   "nDestroyRenderer",   "(I)V",    (void*) android_view_GLES20Renderer_destroyRenderer },
     {   "nSetViewport",       "(III)V",  (void*) android_view_GLES20Renderer_setViewport },
     {   "nPrepare",           "(I)V",    (void*) android_view_GLES20Renderer_prepare },
+
+    {   "nDrawColor",         "(III)V",  (void*) android_view_GLES20Renderer_drawColor },
 };
 
 int register_android_view_GLES20Canvas(JNIEnv* env) {

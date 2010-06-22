@@ -332,7 +332,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawARGB(int a, int r, int g, int b) {
-        // TODO: Implement
+        drawColor((a & 0xFF) << 24 | (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF));
     }
 
     @Override
@@ -383,13 +383,15 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawColor(int color) {
-        // TODO: Implement
+        drawColor(color, PorterDuff.Mode.SRC_OVER);
     }
 
     @Override
     public void drawColor(int color, PorterDuff.Mode mode) {
-        // TODO: Implement
+        nDrawColor(mRenderer, color, mode.nativeInt);
     }
+    
+    private native void nDrawColor(int renderer, int color, int mode);
 
     @Override
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
@@ -478,7 +480,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawRGB(int r, int g, int b) {
-        // TODO: Implement
+        drawColor(0xFF000000 | (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF));
     }
 
     @Override
