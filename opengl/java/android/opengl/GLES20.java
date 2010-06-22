@@ -670,6 +670,15 @@ public class GLES20 {
         int count
     );
 
+    // C function void glDrawElements ( GLenum mode, GLsizei count, GLenum type, GLint offset )
+
+    public static native void glDrawElements(
+        int mode,
+        int count,
+        int type,
+        int offset
+    );
+
     // C function void glDrawElements ( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices )
 
     public static native void glDrawElements(
@@ -978,6 +987,22 @@ public class GLES20 {
         java.nio.IntBuffer params
     );
 
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
     // C function void glGetProgramInfoLog( GLuint program, GLsizei maxLength, GLsizei * length,
  	//     GLchar * infoLog);
 
@@ -1017,6 +1042,22 @@ public class GLES20 {
         int pname,
         java.nio.IntBuffer params
     );
+
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
     // C function void glGetShaderInfoLog( GLuint shader, GLsizei maxLength, GLsizei * length,
  	//     GLchar * infoLog);
@@ -1063,6 +1104,22 @@ public class GLES20 {
         java.nio.IntBuffer length,
         byte source
     );
+
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
     // C function const GLubyte * glGetString ( GLenum name )
 
@@ -1315,6 +1372,22 @@ public class GLES20 {
         java.nio.Buffer binary,
         int length
     );
+
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
     // C function void glShaderSource ( GLuint shader, GLsizei count, const GLchar ** string, const GLint* length )
 
@@ -1812,6 +1885,17 @@ public class GLES20 {
     public static native void glVertexAttrib4fv(
         int indx,
         java.nio.FloatBuffer values
+    );
+
+    // C function void glVertexAttribPointer ( GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLint offset )
+
+    public static native void glVertexAttribPointer(
+        int indx,
+        int size,
+        int type,
+        boolean normalized,
+        int stride,
+        int offset
     );
 
     // C function void glVertexAttribPointer ( GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *ptr )

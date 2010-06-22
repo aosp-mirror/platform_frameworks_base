@@ -695,7 +695,7 @@ public class JniCodeEmitter {
         boolean isPointerFunc = isPointerFunc(jfunc);
         boolean isVBOPointerFunc = (outName.endsWith("Pointer") ||
                 outName.endsWith("PointerOES") ||
-            outName.endsWith("DrawElements")) &&
+            outName.endsWith("DrawElements") || outName.endsWith("VertexAttribPointer")) &&
             !jfunc.getCFunc().hasPointerArg();
         if (isPointerFunc) {
             outName += "Bounds";
