@@ -1627,6 +1627,12 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_MEDIA_SERVER_STARTED:
                     Log.e(TAG, "Media server started.");
+                    // indicate to audio HAL that we start the reconfiguration phase after a media
+                    // server crash
+                    // Note that MSG_MEDIA_SERVER_STARTED message is only received when the media server
+                    // process restarts after a crash, not the first time it is started.
+                    AudioSystem.setParameters("restarting=true");
+
                     // Restore device connection states
                     Set set = mConnectedDevices.entrySet();
                     Iterator i = set.iterator();
@@ -1660,6 +1666,9 @@ public class AudioService extends IAudioService.Stub {
 
                     // Restore ringer mode
                     setRingerModeInt(getRingerMode(), false);
+
+                    // indicate the end of reconfiguration phase to audio HAL
+                    AudioSystem.setParameters("restarting=false");
                     break;
 
                 case MSG_PLAY_SOUND_EFFECT:
