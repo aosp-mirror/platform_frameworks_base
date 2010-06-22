@@ -226,8 +226,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private Handler mHandler;
     // Used to signal when our main thread has initialized everything
     private final CountDownLatch mInitializedLatch = new CountDownLatch(1);
-    // Thread for receiving events from the native code
-    private Thread mEventThread;
 
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
@@ -643,10 +641,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
             if (mC2KServerHost != null) {
                 native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
             }
-
-            // run event listener thread while we are enabled
-            mEventThread = new GpsEventThread();
-            mEventThread.start();
         } else {
             Log.w(TAG, "Failed to enable location provider");
         }
@@ -669,29 +663,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         mEnabled = false;
         stopNavigating();
-        native_disable();
-
-        // make sure our event thread exits
-        if (mEventThread != null) {
-            try {
-                mEventThread.join();
-            } catch (InterruptedException e) {
-                Log.w(TAG, "InterruptedException when joining mEventThread");
-            }
-            mEventThread = null;
-        }
 
         // do this before releasing wakelock
         native_cleanup();
-
-        // The GpsEventThread does not wait for the GPS to shutdown
-        // so we need to report the GPS_STATUS_ENGINE_OFF event here
-        if (mNavigating) {
-            reportStatus(GPS_STATUS_SESSION_END);
-        }
-        if (mEngineOn) {
-            reportStatus(GPS_STATUS_ENGINE_OFF);
-        }
     }
 
     public boolean isEnabled() {
@@ -1231,12 +1205,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     /**
      * called from native code to report NMEA data received
      */
-    private void reportNmea(int index, long timestamp) {
+    private void reportNmea(long timestamp) {
         synchronized(mListeners) {
             int size = mListeners.size();
             if (size > 0) {
                 // don't bother creating the String if we have no listeners
-                int length = native_read_nmea(index, mNmeaBuffer, mNmeaBuffer.length);
+                int length = native_read_nmea(mNmeaBuffer, mNmeaBuffer.length);
                 String nmea = new String(mNmeaBuffer, 0, length);
 
                 for (int i = 0; i < size; i++) {
@@ -1359,28 +1333,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
 		mNIHandler.handleNiNotification(notification);		
 	}
 
-    // this thread is used to receive events from the native code.
-    // native_wait_for_event() will callback to us via reportLocation(), reportStatus(), etc.
-    // this is necessary because native code cannot call Java on a thread that the JVM does
-    // not know about.
-    private final class GpsEventThread extends Thread {
-
-        public GpsEventThread() {
-            super("GpsEventThread");
-        }
-
-        public void run() {
-            if (DEBUG) Log.d(TAG, "GpsEventThread starting");
-            // Exit as soon as disable() is called instead of waiting for the GPS to stop.
-            while (mEnabled) {
-                // this will wait for an event from the GPS,
-                // which will be reported via reportLocation or reportStatus
-                native_wait_for_event();
-            }
-            if (DEBUG) Log.d(TAG, "GpsEventThread exiting");
-        }
-    }
-
     private void sendMessage(int message, int arg, Object obj) {
         // hold a wake lock while messages are pending
         synchronized (mWakeLock) {
@@ -1485,19 +1437,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static native boolean native_is_supported();
 
     private native boolean native_init();
-    private native void native_disable();
     private native void native_cleanup();
     private native boolean native_set_position_mode(int mode, int recurrence, int min_interval,
             int preferred_accuracy, int preferred_time);
     private native boolean native_start();
     private native boolean native_stop();
     private native void native_delete_aiding_data(int flags);
-    private native void native_wait_for_event();
     // returns number of SVs
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] svs, float[] snrs,
             float[] elevations, float[] azimuths, int[] masks);
-    private native int native_read_nmea(int index, byte[] buffer, int bufferSize);
+    private native int native_read_nmea(byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
     // XTRA Support

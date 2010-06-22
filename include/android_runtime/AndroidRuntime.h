@@ -87,7 +87,7 @@ public:
     virtual void onExit(int code);
 
     /** create a new thread that is visible from Java */
-    static void createJavaThread(const char* name, void (*start)(void *),
+    static android_thread_id_t createJavaThread(const char* name, void (*start)(void *),
         void* arg);
 
     /** return a pointer to the VM running in this process */
