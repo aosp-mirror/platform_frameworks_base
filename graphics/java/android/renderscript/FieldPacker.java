@@ -245,7 +245,7 @@ public class FieldPacker {
     }
 
     public void addBoolean(Boolean v) {
-        addI8(v ? 1 : 0);
+        addI8((byte)(v ? 1 : 0));
     }
 
     public final byte[] getData() {
