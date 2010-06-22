@@ -199,7 +199,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
 
     private boolean inXact = false;
     private int numXacts;
-    private static final int TIME_TO_RUN_WAL_TEST_FOR = 15; // num sec this test shoudl run
+    private static final int TIME_TO_RUN_WAL_TEST_FOR = 15; // num sec this test should run
     private int[][] counts = new int[2][2];
 
     private synchronized boolean inXact() {
@@ -334,7 +334,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
 
     /**
      * test to make sure the statement finalizations are not done right away but
-     * piggybacked onto the next sql statement execution on the same database.
+     * piggy-backed onto the next sql statement execution on the same database.
      */
     @SmallTest
     public void testStatementClose() {
@@ -356,7 +356,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         }
 
         // add one more to the cache - and the above 'stmt0Id' should fall out of cache
-        SQLiteStatement stmt1 = mDatabase.compileStatement("select * from test where i = ?;");
+        SQLiteStatement stmt1 = mDatabase.compileStatement("insert into test values(100, ?);");
         stmt1.bindLong(1, 1);
         stmt1.close();
 
@@ -372,7 +372,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
 
     /**
      * same as above - except that the statement to be finalized is from Thread # 1.
-     * and it is eventually finalized in Thread # 2 when it executes a sql statement.
+     * and it is eventually finalized in Thread # 2 when it executes a SQL statement.
      * @throws InterruptedException
      */
     @LargeTest
@@ -405,7 +405,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         Thread t2 = new Thread() {
             @Override public void run() {
                 SQLiteStatement stmt1 = mDatabase.compileStatement(
-                        "select * from test where i = ?;");
+                        "insert into test values(100, ?);");
                 stmt1.bindLong(1, 1);
                 stmt1.close();
             }
@@ -476,7 +476,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         Thread t2 = new Thread() {
             @Override public void run() {
                 SQLiteStatement stmt1 = mDatabase.compileStatement(
-                        "select * from test where i = ?;");
+                        "insert into test values(100, ?);");
                 stmt1.bindLong(1, 1);
                 stmt1.close();
             }
