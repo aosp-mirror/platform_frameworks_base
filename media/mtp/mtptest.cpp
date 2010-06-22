@@ -29,25 +29,30 @@
 
 using namespace android;
 
-static void enable_usb_function(const char* name, bool enable) {
+static bool enable_usb_function(const char* name, bool enable) {
     char    path[PATH_MAX];
 
     snprintf(path, sizeof(path), "/sys/class/usb_composite/%s/enable", name);
     int fd = open(path, O_RDWR);
     if (fd < 0) {
         fprintf(stderr, "could not open %s in enable_usb_function\n", path);
-        exit(1);
+        return false;
     }
     write(fd, enable ? "1" : "0", 2);
     close(fd);
+    return true;
 }
 
 int main(int argc, char* argv[]) {
     bool usePTP = false;
+    const char* storagePath = "/sdcard";
 
     for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-p"))
+        const char* arg = argv[i];
+        if (!strcmp(arg, "-p"))
             usePTP = true;
+        else if (arg[0] == '/')
+            storagePath = arg;
     }
 
     int fd = open("/dev/mtp_usb", O_RDWR);
@@ -71,7 +76,7 @@ int main(int argc, char* argv[]) {
     enable_usb_function("mtp", true);
 
     MtpServer   server(fd, "/data/data/mtp/mtp.db");
-    server.addStorage("/sdcard");
+    server.addStorage(storagePath);
     server.scanStorage();
     server.run();
 
