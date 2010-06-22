@@ -272,7 +272,7 @@ MediaProfiles::createEncoderOutputFileFormat(const char **atts)
 }
 
 /*static*/ MediaProfiles::CamcorderProfile*
-MediaProfiles::createCamcorderProfile(const char **atts)
+MediaProfiles::createCamcorderProfile(int cameraId, const char **atts)
 {
     CHECK(!strcmp("quality",    atts[0]) &&
           !strcmp("fileFormat", atts[2]) &&
@@ -287,16 +287,47 @@ MediaProfiles::createCamcorderProfile(const char **atts)
     CHECK(fileFormat != -1);
 
     MediaProfiles::CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
+    profile->mCameraId = cameraId;
     profile->mFileFormat = static_cast<output_format>(fileFormat);
     profile->mQuality = static_cast<camcorder_quality>(quality);
     profile->mDuration = atoi(atts[5]);
     return profile;
 }
 
-/*static*/ int
-MediaProfiles::getImageEncodingQualityLevel(const char** atts)
+MediaProfiles::ImageEncodingQualityLevels*
+MediaProfiles::findImageEncodingQualityLevels(int cameraId) const
+{
+    int n = mImageEncodingQualityLevels.size();
+    for (int i = 0; i < n; i++) {
+        ImageEncodingQualityLevels *levels = mImageEncodingQualityLevels[i];
+        if (levels->mCameraId == cameraId) {
+            return levels;
+        }
+    }
+    return NULL;
+}
+
+void MediaProfiles::addImageEncodingQualityLevel(int cameraId, const char** atts)
 {
     CHECK(!strcmp("quality", atts[0]));
+    int quality = atoi(atts[1]);
+    LOGV("%s: cameraId=%d, quality=%d\n", __func__, cameraId, quality);
+    ImageEncodingQualityLevels *levels = findImageEncodingQualityLevels(cameraId);
+
+    if (levels == NULL) {
+        levels = new ImageEncodingQualityLevels();
+        levels->mCameraId = cameraId;
+        mImageEncodingQualityLevels.add(levels);
+    }
+
+    levels->mLevels.add(quality);
+}
+
+/*static*/ int
+MediaProfiles::getCameraId(const char** atts)
+{
+    if (!atts[0]) return 0;  // default cameraId = 0
+    CHECK(!strcmp("cameraId", atts[0]));
     return atoi(atts[1]);
 }
 
@@ -322,10 +353,13 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char 
         profiles->mAudioDecoders.add(createAudioDecoderCap(atts));
     } else if (strcmp("EncoderOutputFileFormat", name) == 0) {
         profiles->mEncoderOutputFileFormats.add(createEncoderOutputFileFormat(atts));
+    } else if (strcmp("CamcorderProfiles", name) == 0) {
+        profiles->mCurrentCameraId = getCameraId(atts);
     } else if (strcmp("EncoderProfile", name) == 0) {
-        profiles->mCamcorderProfiles.add(createCamcorderProfile(atts));
+        profiles->mCamcorderProfiles.add(
+            createCamcorderProfile(profiles->mCurrentCameraId, atts));
     } else if (strcmp("ImageEncoding", name) == 0) {
-        profiles->mImageEncodingQualityLevels.add(getImageEncodingQualityLevel(atts));
+        profiles->addImageEncodingQualityLevel(profiles->mCurrentCameraId, atts);
     }
 }
 
@@ -383,7 +417,8 @@ MediaProfiles::createDefaultCamcorderHighProfile()
         new MediaProfiles::VideoCodec(VIDEO_ENCODER_H263, 360000, 352, 288, 20);
 
     AudioCodec *audioCodec = new AudioCodec(AUDIO_ENCODER_AMR_NB, 12200, 8000, 1);
-    CamcorderProfile *profile = new CamcorderProfile;
+    CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
+    profile->mCameraId = 0;
     profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
     profile->mQuality = CAMCORDER_QUALITY_HIGH;
     profile->mDuration = 60;
@@ -402,6 +437,7 @@ MediaProfiles::createDefaultCamcorderLowProfile()
         new MediaProfiles::AudioCodec(AUDIO_ENCODER_AMR_NB, 12200, 8000, 1);
 
     MediaProfiles::CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
+    profile->mCameraId = 0;
     profile->mFileFormat = OUTPUT_FORMAT_THREE_GPP;
     profile->mQuality = CAMCORDER_QUALITY_LOW;
     profile->mDuration = 30;
@@ -458,9 +494,12 @@ MediaProfiles::createDefaultAmrNBEncoderCap()
 /*static*/ void
 MediaProfiles::createDefaultImageEncodingQualityLevels(MediaProfiles *profiles)
 {
-    profiles->mImageEncodingQualityLevels.add(70);
-    profiles->mImageEncodingQualityLevels.add(80);
-    profiles->mImageEncodingQualityLevels.add(90);
+    ImageEncodingQualityLevels *levels = new ImageEncodingQualityLevels();
+    levels->mCameraId = 0;
+    levels->mLevels.add(70);
+    levels->mLevels.add(80);
+    levels->mLevels.add(90);
+    profiles->mImageEncodingQualityLevels.add(levels);
 }
 
 /*static*/ MediaProfiles*
@@ -629,19 +668,24 @@ Vector<audio_decoder> MediaProfiles::getAudioDecoders() const
     return decoders;  // copy out
 }
 
-int MediaProfiles::getCamcorderProfileParamByName(const char *name, camcorder_quality quality) const
+int MediaProfiles::getCamcorderProfileParamByName(const char *name,
+                                                  int cameraId,
+                                                  camcorder_quality quality) const
 {
-    LOGV("getCamcorderProfileParamByName: %s for quality %d", name, quality);
+    LOGV("getCamcorderProfileParamByName: %s for camera %d, quality %d",
+         name, cameraId, quality);
 
     int index = -1;
     for (size_t i = 0, n = mCamcorderProfiles.size(); i < n; ++i) {
-        if (mCamcorderProfiles[i]->mQuality == quality) {
+        if (mCamcorderProfiles[i]->mCameraId == cameraId &&
+            mCamcorderProfiles[i]->mQuality == quality) {
             index = i;
             break;
         }
     }
     if (index == -1) {
-        LOGE("The given camcorder profile quality %d is not found", quality);
+        LOGE("The given camcorder profile camera %d quality %d is not found",
+             cameraId, quality);
         return -1;
     }
 
@@ -657,13 +701,18 @@ int MediaProfiles::getCamcorderProfileParamByName(const char *name, camcorder_qu
     if (!strcmp("aud.ch", name)) return mCamcorderProfiles[index]->mAudioCodec->mChannels;
     if (!strcmp("aud.hz", name)) return mCamcorderProfiles[index]->mAudioCodec->mSampleRate;
 
-    LOGE("The given camcorder profile param name %s is not found", name);
+    LOGE("The given camcorder profile param id %d name %s is not found", cameraId, name);
     return -1;
 }
 
-Vector<int> MediaProfiles::getImageEncodingQualityLevels() const
+Vector<int> MediaProfiles::getImageEncodingQualityLevels(int cameraId) const
 {
-    return mImageEncodingQualityLevels;  // copy out
+    Vector<int> result;
+    ImageEncodingQualityLevels *levels = findImageEncodingQualityLevels(cameraId);
+    if (levels != NULL) {
+        result = levels->mLevels;  // copy out
+    }
+    return result;
 }
 
 MediaProfiles::~MediaProfiles()

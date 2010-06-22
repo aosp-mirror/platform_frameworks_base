@@ -17,6 +17,7 @@
 package android.media;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * The CameraProfile class is used to retrieve the pre-defined still image
@@ -40,36 +41,55 @@ public class CameraProfile
     /*
      * Cache the Jpeg encoding quality parameters
      */
-    private static final int[] sJpegEncodingQualityParameters;
+    private static final HashMap<Integer, int[]> sCache = new HashMap<Integer, int[]>();
 
     /**
      * Returns a pre-defined still image capture (jpeg) quality level
-     * used for the given quality level in the Camera application.
+     * used for the given quality level in the Camera application for
+     * the default camera.
      *
      * @param quality The target quality level
      */
     public static int getJpegEncodingQualityParameter(int quality) {
+        return getJpegEncodingQualityParameter(0, quality);
+    }
+
+    /**
+     * Returns a pre-defined still image capture (jpeg) quality level
+     * used for the given quality level in the Camera application for
+     * the specified camera.
+     *
+     * @param cameraId The id of the camera
+     * @param quality The target quality level
+     */
+    public static int getJpegEncodingQualityParameter(int cameraId, int quality) {
         if (quality < QUALITY_LOW || quality > QUALITY_HIGH) {
             throw new IllegalArgumentException("Unsupported quality level: " + quality);
         }
-        return sJpegEncodingQualityParameters[quality];
+        synchronized (sCache) {
+            int[] levels = sCache.get(cameraId);
+            if (levels == null) {
+                levels = getImageEncodingQualityLevels(cameraId);
+                sCache.put(cameraId, levels);
+            }
+            return levels[quality];
+        }
     }
 
     static {
         System.loadLibrary("media_jni");
         native_init();
-        sJpegEncodingQualityParameters = getImageEncodingQualityLevels();
     }
 
-    private static int[] getImageEncodingQualityLevels() {
-        int nLevels = native_get_num_image_encoding_quality_levels();
+    private static int[] getImageEncodingQualityLevels(int cameraId) {
+        int nLevels = native_get_num_image_encoding_quality_levels(cameraId);
         if (nLevels != QUALITY_HIGH + 1) {
             throw new RuntimeException("Unexpected Jpeg encoding quality levels " + nLevels);
         }
 
         int[] levels = new int[nLevels];
         for (int i = 0; i < nLevels; ++i) {
-            levels[i] = native_get_image_encoding_quality_level(i);
+            levels[i] = native_get_image_encoding_quality_level(cameraId, i);
         }
         Arrays.sort(levels);  // Lower quality level ALWAYS comes before higher one
         return levels;
@@ -77,6 +97,6 @@ public class CameraProfile
 
     // Methods implemented by JNI
     private static native final void native_init();
-    private static native final int native_get_num_image_encoding_quality_levels();
-    private static native final int native_get_image_encoding_quality_level(int index);
+    private static native final int native_get_num_image_encoding_quality_levels(int cameraId);
+    private static native final int native_get_image_encoding_quality_level(int cameraId, int index);
 }

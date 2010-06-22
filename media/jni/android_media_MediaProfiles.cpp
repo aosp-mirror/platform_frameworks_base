@@ -162,26 +162,26 @@ android_media_MediaProfiles_native_get_audio_encoder_cap(JNIEnv *env, jobject th
 }
 
 static jobject
-android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject thiz, jint quality)
+android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject thiz, jint id, jint quality)
 {
-    LOGV("native_get_camcorder_profile: %d", quality);
+    LOGV("native_get_camcorder_profile: %d %d", id, quality);
     if (quality != CAMCORDER_QUALITY_HIGH && quality != CAMCORDER_QUALITY_LOW) {
         jniThrowException(env, "java/lang/RuntimeException", "Unknown camcorder profile quality");
         return NULL;
     }
 
     camcorder_quality q = static_cast<camcorder_quality>(quality);
-    int duration         = sProfiles->getCamcorderProfileParamByName("duration", q);
-    int fileFormat       = sProfiles->getCamcorderProfileParamByName("file.format", q);
-    int videoCodec       = sProfiles->getCamcorderProfileParamByName("vid.codec",   q);
-    int videoBitRate     = sProfiles->getCamcorderProfileParamByName("vid.bps",     q);
-    int videoFrameRate   = sProfiles->getCamcorderProfileParamByName("vid.fps",     q);
-    int videoFrameWidth  = sProfiles->getCamcorderProfileParamByName("vid.width",   q);
-    int videoFrameHeight = sProfiles->getCamcorderProfileParamByName("vid.height",  q);
-    int audioCodec       = sProfiles->getCamcorderProfileParamByName("aud.codec",   q);
-    int audioBitRate     = sProfiles->getCamcorderProfileParamByName("aud.bps",     q);
-    int audioSampleRate  = sProfiles->getCamcorderProfileParamByName("aud.hz",      q);
-    int audioChannels    = sProfiles->getCamcorderProfileParamByName("aud.ch",      q);
+    int duration         = sProfiles->getCamcorderProfileParamByName("duration",    id, q);
+    int fileFormat       = sProfiles->getCamcorderProfileParamByName("file.format", id, q);
+    int videoCodec       = sProfiles->getCamcorderProfileParamByName("vid.codec",   id, q);
+    int videoBitRate     = sProfiles->getCamcorderProfileParamByName("vid.bps",     id, q);
+    int videoFrameRate   = sProfiles->getCamcorderProfileParamByName("vid.fps",     id, q);
+    int videoFrameWidth  = sProfiles->getCamcorderProfileParamByName("vid.width",   id, q);
+    int videoFrameHeight = sProfiles->getCamcorderProfileParamByName("vid.height",  id, q);
+    int audioCodec       = sProfiles->getCamcorderProfileParamByName("aud.codec",   id, q);
+    int audioBitRate     = sProfiles->getCamcorderProfileParamByName("aud.bps",     id, q);
+    int audioSampleRate  = sProfiles->getCamcorderProfileParamByName("aud.hz",      id, q);
+    int audioChannels    = sProfiles->getCamcorderProfileParamByName("aud.ch",      id, q);
 
     // Check on the values retrieved
     if (duration == -1 || fileFormat == -1 || videoCodec == -1 || audioCodec == -1 ||
@@ -253,17 +253,17 @@ android_media_MediaProfiles_native_get_audio_decoder_type(JNIEnv *env, jobject t
 }
 
 static jint
-android_media_MediaProfiles_native_get_num_image_encoding_quality_levels(JNIEnv *env, jobject thiz)
+android_media_MediaProfiles_native_get_num_image_encoding_quality_levels(JNIEnv *env, jobject thiz, jint cameraId)
 {
     LOGV("native_get_num_image_encoding_quality_levels");
-    return sProfiles->getImageEncodingQualityLevels().size();
+    return sProfiles->getImageEncodingQualityLevels(cameraId).size();
 }
 
 static jint
-android_media_MediaProfiles_native_get_image_encoding_quality_level(JNIEnv *env, jobject thiz, jint index)
+android_media_MediaProfiles_native_get_image_encoding_quality_level(JNIEnv *env, jobject thiz, jint cameraId, jint index)
 {
     LOGV("native_get_image_encoding_quality_level");
-    Vector<int> levels = sProfiles->getImageEncodingQualityLevels();
+    Vector<int> levels = sProfiles->getImageEncodingQualityLevels(cameraId);
     if (index < 0 || index >= levels.size()) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "out of array boundary");
         return -1;
@@ -287,7 +287,7 @@ static JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
 
 static JNINativeMethod gMethodsForCamcorderProfileClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
-    {"native_get_camcorder_profile",           "(I)Landroid/media/CamcorderProfile;",
+    {"native_get_camcorder_profile",           "(II)Landroid/media/CamcorderProfile;",
                                                                          (void *)android_media_MediaProfiles_native_get_camcorder_profile},
 };
 
@@ -302,8 +302,8 @@ static JNINativeMethod gMethodsForDecoderCapabilitiesClass[] = {
 static JNINativeMethod gMethodsForCameraProfileClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_image_encoding_quality_levels",
-                                               "()I",                    (void *)android_media_MediaProfiles_native_get_num_image_encoding_quality_levels},
-    {"native_get_image_encoding_quality_level","(I)I",                   (void *)android_media_MediaProfiles_native_get_image_encoding_quality_level},
+                                               "(I)I",                   (void *)android_media_MediaProfiles_native_get_num_image_encoding_quality_levels},
+    {"native_get_image_encoding_quality_level","(II)I",                   (void *)android_media_MediaProfiles_native_get_image_encoding_quality_level},
 };
 
 static const char* const kEncoderCapabilitiesClassPathName = "android/media/EncoderCapabilities";

@@ -48,8 +48,8 @@ public:
     static MediaProfiles* getInstance();
 
     /**
-     * Returns the value for the given param name at the given quality level,
-     * or -1 if error.
+     * Returns the value for the given param name for the given camera at
+     * the given quality level, or -1 if error.
      *
      * Supported param name are:
      * duration - the recording duration.
@@ -64,7 +64,8 @@ public:
      * aud.hz - audio sample rate
      * aud.ch - number of audio channels
      */
-    int getCamcorderProfileParamByName(const char *name, camcorder_quality quality) const;
+    int getCamcorderProfileParamByName(const char *name, int cameraId,
+                                       camcorder_quality quality) const;
 
     /**
      * Returns the output file formats supported.
@@ -124,12 +125,7 @@ public:
     /**
      * Returns the number of image encoding quality levels supported.
      */
-    Vector<int> getImageEncodingQualityLevels() const;
-
-    /**
-     * Returns the maximum amount of memory in bytes we can use for decoding a JPEG file.
-     */
-    int getImageDecodingMaxMemory() const;
+    Vector<int> getImageEncodingQualityLevels(int cameraId) const;
 
 private:
     MediaProfiles& operator=(const MediaProfiles&);  // Don't call me
@@ -171,7 +167,8 @@ private:
 
     struct CamcorderProfile {
         CamcorderProfile()
-            : mFileFormat(OUTPUT_FORMAT_THREE_GPP),
+            : mCameraId(0),
+              mFileFormat(OUTPUT_FORMAT_THREE_GPP),
               mQuality(CAMCORDER_QUALITY_HIGH),
               mDuration(0),
               mVideoCodec(0),
@@ -182,6 +179,7 @@ private:
             delete mAudioCodec;
         }
 
+        int mCameraId;
         output_format mFileFormat;
         camcorder_quality mQuality;
         int mDuration;
@@ -249,6 +247,11 @@ private:
         int tag;
     };
 
+    struct ImageEncodingQualityLevels {
+        int mCameraId;
+        Vector<int> mLevels;
+    };
+
     // Debug
     static void logVideoCodec(const VideoCodec& codec);
     static void logAudioCodec(const AudioCodec& codec);
@@ -267,9 +270,11 @@ private:
     static VideoDecoderCap* createVideoDecoderCap(const char **atts);
     static VideoEncoderCap* createVideoEncoderCap(const char **atts);
     static AudioEncoderCap* createAudioEncoderCap(const char **atts);
-    static CamcorderProfile* createCamcorderProfile(const char **atts);
-    static int getImageEncodingQualityLevel(const char **atts);
-    static int getImageDecodingMaxMemory(const char **atts);
+    static CamcorderProfile* createCamcorderProfile(int cameraId, const char **atts);
+    static int getCameraId(const char **atts);
+
+    ImageEncodingQualityLevels* findImageEncodingQualityLevels(int cameraId) const;
+    void addImageEncodingQualityLevel(int cameraId, const char** atts);
 
     // Customized element tag handler for parsing the xml configuration file.
     static void startElementHandler(void *userData, const char *name, const char **atts);
@@ -303,6 +308,7 @@ private:
     static bool sIsInitialized;
     static MediaProfiles *sInstance;
     static Mutex sLock;
+    int mCurrentCameraId;
 
     Vector<CamcorderProfile*> mCamcorderProfiles;
     Vector<AudioEncoderCap*>  mAudioEncoders;
@@ -310,8 +316,7 @@ private:
     Vector<AudioDecoderCap*>  mAudioDecoders;
     Vector<VideoDecoderCap*>  mVideoDecoders;
     Vector<output_format>     mEncoderOutputFileFormats;
-    Vector<int>               mImageEncodingQualityLevels;
-    int                       mImageDecodingMaxMemory;
+    Vector<ImageEncodingQualityLevels *>  mImageEncodingQualityLevels;
 };
 
 }; // namespace android
