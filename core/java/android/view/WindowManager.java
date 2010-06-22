@@ -584,19 +584,6 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
 
-        /** Window flag: This window corresponds to an immersive activity
-         * that wishes not to be interrupted with notifications.  In general,
-         * applications may simply hide the status bar with
-         * {@link #FLAG_FULLSCREEN} to suppress most notifications, but will
-         * still be interrupted by those with
-         * {@link android.app.Notification#fullScreenIntent fullScreenIntent}
-         * set (example: an incoming call). Setting {@link #FLAG_IMMERSIVE}
-         * will suppress the full-screen intent and show the status bar
-         * briefly for those important notifications instead.
-         * {@see android.app.Notification#FLAG_HIGH_PRIORITY}
-         */
-        public static final int FLAG_IMMERSIVE = 0x00800000;
-
         /** Window flag: *sigh* The lock screen wants to continue running its
          * animation while it is fading.  A kind-of hack to allow this.  Maybe
          * in the future we just make this the default behavior.
