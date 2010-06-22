@@ -232,45 +232,6 @@ const Element * Element::create(Context *rsc, size_t count, const Element **ein,
     return e;
 }
 
-String8 Element::getCStructBody(uint32_t indent) const
-{
-    String8 si;
-    for (uint32_t ct=0; ct < indent; ct++) {
-        si.append(" ");
-    }
-
-    String8 s(si);
-    s.append("{\n");
-    for (uint32_t ct = 0; ct < mFieldCount; ct++) {
-        s.append(si);
-        s.append(mFields[ct].e->getCType(indent+4));
-        s.append(" ");
-        s.append(mFields[ct].name);
-        s.append(";\n");
-    }
-    s.append(si);
-    s.append("}");
-    return s;
-}
-
-String8 Element::getCType(uint32_t indent) const
-{
-    String8 s;
-    for (uint32_t ct=0; ct < indent; ct++) {
-        s.append(" ");
-    }
-
-    if (!mFieldCount) {
-        // Basic component.
-        s.append(mComponent.getCType());
-    } else {
-        s.append("struct ");
-        s.append(getCStructBody(indent));
-    }
-
-    return s;
-}
-
 String8 Element::getGLSLType(uint32_t indent) const
 {
     String8 s;

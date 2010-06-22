@@ -47,20 +47,22 @@ public class Element extends BaseObj {
         UNSIGNED_32 (10, 4),
         //UNSIGNED_64 (11, 8),
 
-        UNSIGNED_5_6_5 (12, 2),
-        UNSIGNED_5_5_5_1 (13, 2),
-        UNSIGNED_4_4_4_4 (14, 2),
+        BOOLEAN(12, 1),
 
-        RS_ELEMENT (15, 4),
-        RS_TYPE (16, 4),
-        RS_ALLOCATION (17, 4),
-        RS_SAMPLER (18, 4),
-        RS_SCRIPT (19, 4),
-        RS_MESH (20, 4),
-        RS_PROGRAM_FRAGMENT (21, 4),
-        RS_PROGRAM_VERTEX (22, 4),
-        RS_PROGRAM_RASTER (23, 4),
-        RS_PROGRAM_STORE (24, 4);
+        UNSIGNED_5_6_5 (13, 2),
+        UNSIGNED_5_5_5_1 (14, 2),
+        UNSIGNED_4_4_4_4 (15, 2),
+
+        RS_ELEMENT (16, 4),
+        RS_TYPE (17, 4),
+        RS_ALLOCATION (18, 4),
+        RS_SAMPLER (19, 4),
+        RS_SCRIPT (20, 4),
+        RS_MESH (21, 4),
+        RS_PROGRAM_FRAGMENT (22, 4),
+        RS_PROGRAM_VERTEX (23, 4),
+        RS_PROGRAM_RASTER (24, 4),
+        RS_PROGRAM_STORE (25, 4);
 
         int mID;
         int mSize;
@@ -83,6 +85,13 @@ public class Element extends BaseObj {
         DataKind(int id) {
             mID = id;
         }
+    }
+
+    public static Element BOOLEAN(RenderScript rs) {
+        if(rs.mElement_BOOLEAN == null) {
+            rs.mElement_BOOLEAN = createUser(rs, DataType.BOOLEAN);
+        }
+        return rs.mElement_BOOLEAN;
     }
 
     public static Element U8(RenderScript rs) {

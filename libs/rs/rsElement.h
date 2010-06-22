@@ -54,8 +54,6 @@ public:
     RsDataKind getKind() const {return mComponent.getKind();}
     uint32_t getBits() const {return mBits;}
 
-    String8 getCType(uint32_t indent=0) const;
-    String8 getCStructBody(uint32_t indent=0) const;
     String8 getGLSLType(uint32_t indent=0) const;
 
     void dumpLOGV(const char *prefix) const;

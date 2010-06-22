@@ -7,15 +7,15 @@
 // Conversions
 #define CVT_FUNC_2(typeout, typein) \
 static typeout##2 __attribute__((overloadable)) convert_##typeout##2(typein##2 v) { \
-    typeout##2 r = {v.x, v.y}; \
+    typeout##2 r = {(typeout)v.x, (typeout)v.y}; \
     return r; \
 } \
 static typeout##3 __attribute__((overloadable)) convert_##typeout##3(typein##3 v) { \
-    typeout##3 r = {v.x, v.y, v.z}; \
+    typeout##3 r = {(typeout)v.x, (typeout)v.y, (typeout)v.z}; \
     return r; \
 } \
 static typeout##4 __attribute__((overloadable)) convert_##typeout##4(typein##4 v) { \
-    typeout##4 r = {v.x, v.y, v.z, v.w}; \
+    typeout##4 r = {(typeout)v.x, (typeout)v.y, (typeout)v.z, (typeout)v.w}; \
     return r; \
 }
 

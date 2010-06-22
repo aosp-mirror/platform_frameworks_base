@@ -10,13 +10,9 @@ int height;
 int width;
 int radius;
 
-typedef struct c4u_s {
-    uint8_t r, g, b, a;
-} c4u_t;
-
-c4u_t * InPixel;
-c4u_t * OutPixel;
-c4u_t * ScratchPixel;
+uchar4 * InPixel;
+uchar4 * OutPixel;
+uchar4 * ScratchPixel;
 
 float inBlack;
 float outBlack;
@@ -31,7 +27,7 @@ static float outWMinOutB;
 static float overInWMinInB;
 //static float3 gammaV;
 
-#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel, inBlack, outBlack, inWhite, outWhite, gamma, saturation)
+#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel, inBlack, outBlack, inWhite, outWhite, gamma, saturation, InPixel, OutPixel, ScratchPixel)
 #pragma rs export_func(filter, filterBenchmark);
 
 // Store our coefficients here
@@ -166,19 +162,21 @@ static void processNoBlur() {
 
     for(h = 0; h < height; h ++) {
         for(w = 0; w < width; w ++) {
-            c4u_t *input = InPixel + h*width + w;
+            uchar4 *input = InPixel + h*width + w;
 
-            currentPixel.x = (float)(input->r);
-            currentPixel.y = (float)(input->g);
-            currentPixel.z = (float)(input->b);
+            //currentPixel.xyz = convert_float3(input.xyz);
+            currentPixel.x = (float)(input->x);
+            currentPixel.y = (float)(input->y);
+            currentPixel.z = (float)(input->z);
 
             currentPixel = levelsSaturation(currentPixel);
 
-            c4u_t *output = OutPixel + h*width + w;
-            output->r = (uint8_t)currentPixel.x;
-            output->g = (uint8_t)currentPixel.y;
-            output->b = (uint8_t)currentPixel.z;
-            output->a = input->a;
+            uchar4 *output = OutPixel + h*width + w;
+            //output.xyz = convert_uchar3(currentPixel.xyz);
+            output->x = (uint8_t)currentPixel.x;
+            output->y = (uint8_t)currentPixel.y;
+            output->z = (uint8_t)currentPixel.z;
+            output->w = input->w;
         }
     }
     rsSendToClient(&count, 1, 4, 0);
@@ -205,21 +203,21 @@ static void horizontalBlur() {
                     validW = width - 1;
                 }
 
-                c4u_t *input = InPixel + h*width + validW;
+                uchar4 *input = InPixel + h*width + validW;
 
                 float weight = gaussian[r + radius];
-                currentPixel.x = (float)(input->r);
-                currentPixel.y = (float)(input->g);
-                currentPixel.z = (float)(input->b);
+                currentPixel.x = (float)(input->x);
+                currentPixel.y = (float)(input->y);
+                currentPixel.z = (float)(input->z);
                 //currentPixel.w = (float)(input->a);
 
                 blurredPixel += currentPixel*weight;
             }
 
-            c4u_t *output = ScratchPixel + h*width + w;
-            output->r = (uint8_t)blurredPixel.x;
-            output->g = (uint8_t)blurredPixel.y;
-            output->b = (uint8_t)blurredPixel.z;
+            uchar4 *output = ScratchPixel + h*width + w;
+            output->x = (uint8_t)blurredPixel.x;
+            output->y = (uint8_t)blurredPixel.y;
+            output->z = (uint8_t)blurredPixel.z;
             //output->a = (uint8_t)blurredPixel.w;
         }
     }
@@ -246,12 +244,12 @@ static void horizontalBlurLevels() {
                     validW = width - 1;
                 }
 
-                c4u_t *input = InPixel + h*width + validW;
+                uchar4 *input = InPixel + h*width + validW;
 
                 float weight = gaussian[r + radius];
-                currentPixel.x = (float)(input->r);
-                currentPixel.y = (float)(input->g);
-                currentPixel.z = (float)(input->b);
+                currentPixel.x = (float)(input->x);
+                currentPixel.y = (float)(input->y);
+                currentPixel.z = (float)(input->z);
                 //currentPixel.w = (float)(input->a);
 
                 blurredPixel += currentPixel*weight;
@@ -259,10 +257,10 @@ static void horizontalBlurLevels() {
 
             blurredPixel = levelsSaturation(blurredPixel);
 
-            c4u_t *output = ScratchPixel + h*width + w;
-            output->r = (uint8_t)blurredPixel.x;
-            output->g = (uint8_t)blurredPixel.y;
-            output->b = (uint8_t)blurredPixel.z;
+            uchar4 *output = ScratchPixel + h*width + w;
+            output->x = (uint8_t)blurredPixel.x;
+            output->y = (uint8_t)blurredPixel.y;
+            output->z = (uint8_t)blurredPixel.z;
             //output->a = (uint8_t)blurredPixel.w;
         }
     }
@@ -287,23 +285,23 @@ static void verticalBlur() {
                     validH = height - 1;
                 }
 
-                c4u_t *input = ScratchPixel + validH*width + w;
+                uchar4 *input = ScratchPixel + validH*width + w;
 
                 float weight = gaussian[r + radius];
 
-                currentPixel.x = (float)(input->r);
-                currentPixel.y = (float)(input->g);
-                currentPixel.z = (float)(input->b);
+                currentPixel.x = (float)(input->x);
+                currentPixel.y = (float)(input->y);
+                currentPixel.z = (float)(input->z);
                 //currentPixel.w = (float)(input->a);
 
                 blurredPixel += currentPixel*weight;
             }
 
-            c4u_t *output = OutPixel + h*width + w;
+            uchar4 *output = OutPixel + h*width + w;
 
-            output->r = (uint8_t)blurredPixel.x;
-            output->g = (uint8_t)blurredPixel.y;
-            output->b = (uint8_t)blurredPixel.z;
+            output->x = (uint8_t)blurredPixel.x;
+            output->y = (uint8_t)blurredPixel.y;
+            output->z = (uint8_t)blurredPixel.z;
             //output->a = (uint8_t)blurredPixel.w;
         }
     }
