@@ -81,6 +81,7 @@ private:
     void setStartTimestampUs(int64_t timeUs);
     int64_t getStartTimestampUs();  // Not const
     status_t startTracks();
+    size_t numTracks();
 
     void lock();
     void unlock();
