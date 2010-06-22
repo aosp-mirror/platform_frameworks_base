@@ -686,3 +686,22 @@ void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
 }
 
 } // namespace android
+
+// --- input_queue_t ---
+
+using android::InputEvent;
+using android::InputChannel;
+using android::InputConsumer;
+using android::sp;
+using android::status_t;
+
+input_queue_t::input_queue_t(const sp<InputChannel>& channel) :
+        mConsumer(channel) {
+}
+
+input_queue_t::~input_queue_t() {
+}
+
+status_t input_queue_t::consume(InputEvent** event) {
+    return mConsumer.consume(&mInputEventFactory, event);
+}

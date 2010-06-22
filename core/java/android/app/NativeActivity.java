@@ -6,6 +6,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.InputChannel;
+import android.view.InputConsumer;
 import android.view.SurfaceHolder;
 
 import java.io.File;
@@ -14,7 +16,8 @@ import java.io.File;
  * Convenience for implementing an activity that will be implemented
  * purely in native code.  That is, a game (or game-like thing).
  */
-public class NativeActivity extends Activity implements SurfaceHolder.Callback {
+public class NativeActivity extends Activity implements SurfaceHolder.Callback,
+        InputConsumer.Callback {
     public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     
     private int mNativeHandle;
@@ -33,6 +36,8 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback {
     private native void onSurfaceChangedNative(int handle, SurfaceHolder holder,
             int format, int width, int height);
     private native void onSurfaceDestroyedNative(int handle, SurfaceHolder holder);
+    private native void onInputChannelCreatedNative(int handle, InputChannel channel);
+    private native void onInputChannelDestroyedNative(int handle, InputChannel channel);
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback {
         ActivityInfo ai;
         
         getWindow().takeSurface(this);
+        getWindow().takeInputChannel(this);
         
         try {
             ai = getPackageManager().getActivityInfo(
@@ -137,5 +143,13 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback {
     
     public void surfaceDestroyed(SurfaceHolder holder) {
         onSurfaceDestroyedNative(mNativeHandle, holder);
+    }
+    
+    public void onInputConsumerCreated(InputConsumer consumer) {
+        onInputChannelCreatedNative(mNativeHandle, consumer.getInputChannel());
+    }
+    
+    public void onInputConsumerDestroyed(InputConsumer consumer) {
+        onInputChannelDestroyedNative(mNativeHandle, consumer.getInputChannel());
     }
 }

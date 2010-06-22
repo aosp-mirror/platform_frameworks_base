@@ -330,4 +330,24 @@ private:
 
 } // namespace android
 
+/*
+ * NDK input queue API.
+ */
+struct input_queue_t {
+public:
+    /* Creates a consumer associated with an input channel. */
+    explicit input_queue_t(const android::sp<android::InputChannel>& channel);
+
+    /* Destroys the consumer and releases its input channel. */
+    ~input_queue_t();
+
+    inline android::InputConsumer& getConsumer() { return mConsumer; }
+    
+    android::status_t consume(android::InputEvent** event);
+    
+private:
+    android::InputConsumer mConsumer;
+    android::PreallocatedInputEventFactory mInputEventFactory;
+};
+
 #endif // _UI_INPUT_TRANSPORT_H
