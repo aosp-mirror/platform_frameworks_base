@@ -1871,6 +1871,8 @@ final class WebViewCore {
         // called from UI thread while WEBKIT_DRAW is just pulled out of the
         // queue in WebCore thread to be executed. Then update won't be blocked.
         if (core != null) {
+            if (!core.getSettings().enableSmoothTransition()) return;
+
             synchronized (core) {
                 core.mDrawIsPaused = true;
                 if (core.mDrawIsScheduled) {
@@ -1883,6 +1885,10 @@ final class WebViewCore {
 
     static void resumeUpdatePicture(WebViewCore core) {
         if (core != null) {
+            // if mDrawIsPaused is true, ignore the setting, continue to resume
+            if (!core.mDrawIsPaused
+                    && !core.getSettings().enableSmoothTransition()) return;
+
             synchronized (core) {
                 core.mDrawIsPaused = false;
                 if (core.mDrawIsScheduled) {
