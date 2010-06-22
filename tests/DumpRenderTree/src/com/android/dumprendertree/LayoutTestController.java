@@ -68,4 +68,7 @@ public interface LayoutTestController {
     public void setGeolocationPermission(boolean allow);
 
     public void overridePreference(String key, boolean value);
+
+    // For XSSAuditor tests
+    public void setXSSAuditorEnabled(boolean flag);
 }

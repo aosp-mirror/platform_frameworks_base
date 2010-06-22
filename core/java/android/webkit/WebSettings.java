@@ -184,6 +184,7 @@ public class WebSettings {
     private boolean         mDomStorageEnabled = false;
     private boolean         mWorkersEnabled = false;  // only affects V8.
     private boolean         mGeolocationEnabled = true;
+    private boolean         mXSSAuditorEnabled = false;
     // HTML5 configuration parameters
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = "";
@@ -1229,6 +1230,17 @@ public class WebSettings {
     public synchronized void setGeolocationEnabled(boolean flag) {
         if (mGeolocationEnabled != flag) {
             mGeolocationEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Sets whether XSS Auditor is enabled.
+     * @param flag Whether XSS Auditor should be enabled.
+     */
+    public synchronized void setXSSAuditorEnabled(boolean flag) {
+        if (mXSSAuditorEnabled != flag) {
+            mXSSAuditorEnabled = flag;
             postSync();
         }
     }

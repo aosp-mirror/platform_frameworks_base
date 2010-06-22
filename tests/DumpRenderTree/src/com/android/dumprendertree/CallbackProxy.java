@@ -75,6 +75,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int SET_GEOLOCATION_PERMISSION = 43;
     private static final int OVERRIDE_PREFERENCE = 44;
     private static final int LAYOUT_DUMP_CHILD_FRAMES_TEXT = 45;
+    private static final int SET_XSS_AUDITOR_ENABLED = 46;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -277,6 +278,11 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
             String key = msg.getData().getString("key");
             boolean value = msg.getData().getBoolean("value");
             mLayoutTestController.overridePreference(key, value);
+            break;
+
+        case SET_XSS_AUDITOR_ENABLED:
+            mLayoutTestController.setXSSAuditorEnabled(
+                msg.arg1 == 1 ? true : false);
             break;
         }
     }
@@ -506,5 +512,9 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         message.getData().putString("key", key);
         message.getData().putBoolean("value", value);
         message.sendToTarget();
+    }
+
+    public void setXSSAuditorEnabled(boolean flag) {
+        obtainMessage(SET_XSS_AUDITOR_ENABLED, flag ? 1 : 0, 0).sendToTarget();
     }
 }

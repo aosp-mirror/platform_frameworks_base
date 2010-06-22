@@ -497,6 +497,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
     }
 
+    public void setXSSAuditorEnabled (boolean flag) {
+        mWebView.getSettings().setXSSAuditorEnabled(flag);
+    }
+
     private final WebViewClient mViewClient = new WebViewClient(){
         @Override
         public void onPageFinished(WebView view, String url) {
