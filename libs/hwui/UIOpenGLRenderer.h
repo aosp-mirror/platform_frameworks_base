@@ -26,6 +26,10 @@ public:
 
     void setViewport(int width, int height);
     void prepare();
+
+private:
+    float mOrthoMatrix[16];
+
 };
 
 }; // namespace android
