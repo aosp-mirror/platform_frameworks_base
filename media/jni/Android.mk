@@ -11,7 +11,8 @@ LOCAL_SRC_FILES:= \
     android_media_MediaScanner.cpp \
     android_media_MediaMetadataRetriever.cpp \
     android_media_ResampleInputStream.cpp \
-    android_media_MediaProfiles.cpp
+    android_media_MediaProfiles.cpp \
+    android_media_AmrInputStream.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
@@ -27,12 +28,8 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 
-LOCAL_SRC_FILES += \
-    android_media_AmrInputStream.cpp
-
 LOCAL_SHARED_LIBRARIES += \
-    libopencore_player          \
-    libomx_amrenc_sharedlibrary
+    libopencore_player
 else
     LOCAL_CFLAGS += -DNO_OPENCORE
 endif
@@ -52,6 +49,9 @@ LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/base/media/libmedia \
+    frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
+    frameworks/base/media/libstagefright/codecs/amrnb/common \
+    frameworks/base/media/libstagefright/codecs/amrnb/common/include \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)
