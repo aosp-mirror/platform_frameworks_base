@@ -102,19 +102,6 @@ status_t TextureManager::initTexture(Image* pImage, int32_t format)
 
 bool TextureManager::isSupportedYuvFormat(int format)
 {
-    // TODO: how to we know which YUV formats are supported by the GPU?
-
-    // Adreno 200 supports these
-    // YUVY_adreno
-    // UYVY_adreno
-    // NV21_adreno
-    // YV12_adreno
-    // Adreno 205 adds
-    // NV12_adreno_tiled
-    // NV21_adreno_tiled
-
-    // for now pretend we support them all, failure will happen when
-    // we try to use them.
     return isYuvFormat(format);
 }
 
@@ -129,9 +116,7 @@ bool TextureManager::isYuvFormat(int format)
     case HAL_PIXEL_FORMAT_UYVY:
     case HAL_PIXEL_FORMAT_NV12:
     case HAL_PIXEL_FORMAT_NV61:
-    case HAL_PIXEL_FORMAT_YV12:
     case HAL_PIXEL_FORMAT_NV12_ADRENO_TILED:
-    case HAL_PIXEL_FORMAT_NV21_ADRENO_TILED:
         return true;
     }
     return false;
