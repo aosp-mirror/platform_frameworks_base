@@ -341,6 +341,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     /* package */ final short mConnectionNum;
 
+    private static final String MEMORY_DB_PATH = ":memory:";
+
     /**
      * @param closable
      */
@@ -955,16 +957,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             sBlockSize = new StatFs("/data").getBlockSize();
         }
         sqliteDatabase.setPageSize(sBlockSize);
-
-        // set journal_mode to truncate for non-memory databases
-        if (!path.equalsIgnoreCase(":memory:")) {
-            String s = DatabaseUtils.stringForQuery(sqliteDatabase, "PRAGMA journal_mode=TRUNCATE",
-                    null);
-            if (!s.equalsIgnoreCase("TRUNCATE")) {
-                Log.e(TAG, "setting journal_mode to TRUNCATE failed for db: " + path +
-                        " (on pragma set journal_mode, sqlite returned:" + s);
-            }
-        }
+        sqliteDatabase.setJournalMode(path, "TRUNCATE");
 
         // add this database to the list of databases opened in this process
         ActiveDatabases.addActiveDatabase(sqliteDatabase);
@@ -1017,6 +1010,17 @@ public class SQLiteDatabase extends SQLiteClosable {
         return openDatabase(path, factory, CREATE_IF_NECESSARY, errorHandler);
     }
 
+    private void setJournalMode(final String dbPath, final String mode) {
+        // journal mode can be set only for non-memory databases
+        if (!dbPath.equalsIgnoreCase(MEMORY_DB_PATH)) {
+            String s = DatabaseUtils.stringForQuery(this, "PRAGMA journal_mode=" + mode, null);
+            if (!s.equalsIgnoreCase(mode)) {
+                Log.e(TAG, "setting journal_mode to " + mode + " failed for db: " + dbPath +
+                        " (on pragma set journal_mode, sqlite returned:" + s);
+            }
+        }
+    }
+
     /**
      * Create a memory backed SQLite database.  Its contents will be destroyed
      * when the database is closed.
@@ -1030,7 +1034,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase create(CursorFactory factory) {
         // This is a magic string with special meaning for SQLite.
-        return openDatabase(":memory:", factory, CREATE_IF_NECESSARY);
+        return openDatabase(MEMORY_DB_PATH, factory, CREATE_IF_NECESSARY);
     }
 
     /**
@@ -2300,10 +2304,12 @@ public class SQLiteDatabase extends SQLiteClosable {
      * <p>
      * If a query is part of a transaction, then it is executed on the same database handle the
      * transaction was begun.
-     *
      * <p>
      * If the database has any attached databases, then execution of queries in paralel is NOT
-     * possible. In such cases, {@link IllegalStateException} is thrown.
+     * possible. In such cases, a message is printed to logcat and false is returned.
+     * <p>
+     * This feature is not available for :memory: databases. In such cases,
+     * a message is printed to logcat and false is returned.
      * <p>
      * A typical way to use this method is the following:
      * <pre>
@@ -2318,27 +2324,25 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Non-exclusive mode allows database file to be in readable by threads executing queries.
      * </p>
      *
-     * @throws IllegalStateException thrown if the database has any attached databases.
+     * @return true if write-ahead-logging is set. false otherwise
      */
-    public synchronized void enableWriteAheadLogging() {
-        if (mConnectionPool != null) {
-            // connection pool already setup.
-            return;
+    public synchronized boolean enableWriteAheadLogging() {
+        if (mPath.equalsIgnoreCase(MEMORY_DB_PATH)) {
+            Log.i(TAG, "can't enable WAL for memory databases.");
+            return false;
         }
 
         // make sure this database has NO attached databases because sqlite's write-ahead-logging
         // doesn't work for databases with attached databases
         if (getAttachedDbs().size() > 1) {
-            throw new IllegalStateException("this database: " + mPath +
-                    " has attached databases. can't do execution of of queries in parallel.");
+            Log.i(TAG, "this database: " + mPath + " has attached databases. can't  enable WAL.");
+            return false;
         }
-        mConnectionPool = new DatabaseConnectionPool(this);
-
-        // set journal_mode to WAL
-        String s = DatabaseUtils.stringForQuery(this, "PRAGMA journal_mode=WAL", null);
-        if (!s.equalsIgnoreCase("WAL")) {
-            Log.e(TAG, "setting journal_mode to WAL failed");
+        if (mConnectionPool == null) {
+            mConnectionPool = new DatabaseConnectionPool(this);
+            setJournalMode(mPath, "WAL");
         }
+        return true;
     }
 
     /**
