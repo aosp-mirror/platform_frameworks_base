@@ -57,6 +57,10 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             // before that, get the attached database list first.
             try {
                 attachedDbs = dbObj.getAttachedDbs();
+            } catch (SQLiteException e) {
+                /* ignore */
+            }
+            try {
                 dbObj.close();
             } catch (SQLiteException e) {
                 /* ignore */
@@ -83,7 +87,8 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
         try {
             new File(fileName).delete();
         } catch (Exception e) {
-            /* ignore */
+            /* print warning and ignore exception */
+            Log.w(TAG, "delete failed: " + e.getMessage());
         }
     }
 }
