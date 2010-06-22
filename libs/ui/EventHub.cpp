@@ -57,7 +57,6 @@
 #define ID_MASK  0x0000ffff
 #define SEQ_MASK 0x7fff0000
 #define SEQ_SHIFT 16
-#define id_to_index(id)         ((id&ID_MASK)+1)
 
 #ifndef ABS_MT_TOUCH_MAJOR
 #define ABS_MT_TOUCH_MAJOR      0x30    /* Major axis of touching ellipse */
@@ -84,7 +83,7 @@ static inline int max(int v1, int v2)
 
 EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
     : id(_id), path(_path), name(name), classes(0)
-    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), next(NULL) {
+    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), fd(-1), next(NULL) {
 }
 
 EventHub::device_t::~device_t() {
@@ -143,11 +142,12 @@ int EventHub::getAbsoluteInfo(int32_t deviceId, int axis, int *outMinValue,
 
     struct input_absinfo info;
 
-    if(ioctl(mFDs[id_to_index(device->id)].fd, EVIOCGABS(axis), &info)) {
+    if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
         LOGE("Error reading absolute controller %d for device %s fd %d\n",
-             axis, device->name.string(), mFDs[id_to_index(device->id)].fd);
+             axis, device->name.string(), device->fd);
         return -1;
     }
+
     *outMinValue = info.minimum;
     *outMaxValue = info.maximum;
     *outFlat = info.flat;
@@ -178,8 +178,7 @@ int EventHub::getSwitchState(int32_t deviceId, int sw) const
     if (sw >= 0 && sw <= SW_MAX) {
         uint8_t sw_bitmask[(SW_MAX+7)/8];
         memset(sw_bitmask, 0, sizeof(sw_bitmask));
-        if (ioctl(mFDs[id_to_index(device->id)].fd,
-                   EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
+        if (ioctl(device->fd, EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
             return test_bit(sw, sw_bitmask) ? 1 : 0;
         }
     }
@@ -202,8 +201,7 @@ int EventHub::getScancodeState(int32_t deviceId, int code) const
     if (code >= 0 && code <= KEY_MAX) {
         uint8_t key_bitmask[(KEY_MAX+7)/8];
         memset(key_bitmask, 0, sizeof(key_bitmask));
-        if (ioctl(mFDs[id_to_index(device->id)].fd,
-                   EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
+        if (ioctl(device->fd, EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
             return test_bit(code, key_bitmask) ? 1 : 0;
         }
     }
@@ -227,8 +225,7 @@ int EventHub::getKeycodeState(int32_t deviceId, int code) const
     
     uint8_t key_bitmask[(KEY_MAX+7)/8];
     memset(key_bitmask, 0, sizeof(key_bitmask));
-    if (ioctl(mFDs[id_to_index(device->id)].fd,
-               EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
+    if (ioctl(device->fd, EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
         #if 0
         for (size_t i=0; i<=KEY_MAX; i++) {
             LOGI("(Scan code %d: down=%d)", i, test_bit(i, key_bitmask));
@@ -599,6 +596,7 @@ int EventHub::open_device(const char *deviceName)
         return -1;
     }
 
+    device->fd = fd;
     mFDs[mFDCount].fd = fd;
     mFDs[mFDCount].events = POLLIN;
 
