@@ -49,9 +49,13 @@ private:
     friend struct AHandlerReflector<NuCachedSource2>;
 
     enum {
-        kPageSize           = 16384,
-        kHighWaterThreshold = 3 * 1024 * 1024,
-        kLowWaterThreshold  = 512 * 1024,
+        kPageSize            = 16384,
+        kHighWaterThreshold  = 3 * 1024 * 1024,
+        kLowWaterThreshold   = 512 * 1024,
+
+        // Read data after a 15 sec timeout whether we're actively
+        // fetching or not.
+        kKeepAliveIntervalUs = 15000000,
     };
 
     enum {
@@ -73,6 +77,7 @@ private:
     off_t mLastAccessPos;
     sp<AMessage> mAsyncResult;
     bool mFetching;
+    int64_t mLastFetchTimeUs;
 
     void onMessageReceived(const sp<AMessage> &msg);
     void onFetch();
