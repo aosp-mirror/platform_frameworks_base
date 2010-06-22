@@ -345,8 +345,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgGetWidth", (void *)&SC_getWidth },
     { "rsgGetHeight", (void *)&SC_getHeight },
 
-  { "_Z18rsgUploadToTextureii", (void *)&SC_uploadToTexture2 },
-  { "_Z18rsgUploadToTexturei", (void *)&SC_uploadToTexture },
     { "_Z18rsgUploadToTexture13rs_allocationi", (void *)&SC_uploadToTexture2 },
     { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture },
     { "rsgUploadToBufferObject", (void *)&SC_uploadToBufferObject },
@@ -358,8 +356,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgDrawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
     { "_Z17rsgDrawSimpleMesh7rs_mesh", (void *)&SC_drawSimpleMesh },
     { "_Z17rsgDrawSimpleMesh7rs_meshii", (void *)&SC_drawSimpleMeshRange },
-  { "_Z17rsgDrawSimpleMeshi", (void *)&SC_drawSimpleMesh },
-  { "_Z17rsgDrawSimpleMeshiii", (void *)&SC_drawSimpleMeshRange },
 
     { "rsgClearColor", (void *)&SC_ClearColor },
     { "rsgClearDepth", (void *)&SC_ClearDepth },
@@ -370,7 +366,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "updateSimpleMesh", (void *)&SC_updateSimpleMesh },
 
     // misc
-    //{ "pfClearColor", (void *)&SC_ClearColor },
     { "color", (void *)&SC_color },
 
     { NULL, NULL }

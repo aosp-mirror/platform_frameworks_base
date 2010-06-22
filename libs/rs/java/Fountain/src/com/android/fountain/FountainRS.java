@@ -48,18 +48,10 @@ public class FountainRS {
         mRS.contextBindRootScript(mScript);
     }
 
-    Float4 tmpColor = new Float4();
     boolean holdingColor = false;
-    java.util.Random mRand = new java.util.Random();
     public void newTouchPosition(int x, int y, int rate) {
         if (rate > 0) {
-            if (!holdingColor) {
-                tmpColor.x = mRand.nextFloat() * 0.5f + 0.5f;
-                tmpColor.y = mRand.nextFloat();
-                tmpColor.z = mRand.nextFloat();
-                mScript.set_partColor(tmpColor);
-            }
-            mScript.invoke_addParticles(rate, x, y);
+            mScript.invoke_addParticles(rate, x, y, !holdingColor ? 1 : 0);
             holdingColor = true;
         } else {
             holdingColor = false;

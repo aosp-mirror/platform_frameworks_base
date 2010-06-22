@@ -9,7 +9,7 @@
 
 static int newPart = 0;
 
-float4 partColor;
+static float4 partColor;
 rs_mesh partMesh;
 
 typedef struct __attribute__((packed, aligned(4))) Point {
@@ -44,22 +44,18 @@ int root() {
 
 #pragma rs export_func(addParticles)
 
-void addParticles(int rate, int x, int y)
+void addParticles(int rate, float x, float y, int newColor)
 {
-    //rsDebug("partColor", partColor);
-    //rsDebug("partColor x", partColor.x);
-    //rsDebug("partColor y", partColor.y);
-    //rsDebug("partColor z", partColor.z);
-    //rsDebug("partColor w", partColor.w);
-
+    if (newColor) {
+        partColor.x = rsRand(0.5f, 1.0f);
+        partColor.y = rsRand(1.0f);
+        partColor.z = rsRand(1.0f);
+    }
     float rMax = ((float)rate) * 0.005f;
     int size = rsAllocationGetDimX(rsGetAllocation(point));
+    uchar4 c = rsPackColorTo8888(partColor);
 
-    uchar4 c = rsPackColorTo8888(partColor.x, partColor.y, partColor.z);
-
-    //rsDebug("color ", ((int *)&c)[0]);
     Point_t * np = &point[newPart];
-
     float2 p = {x, y};
     while (rate--) {
         float angle = rsRand(3.14f * 2.f);
