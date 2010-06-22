@@ -152,6 +152,10 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
     case RS_TYPE_UNSIGNED_64:
         mTypeBits = 64;
         break;
+
+    case RS_TYPE_BOOLEAN:
+        mTypeBits = 8;
+        break;
     }
 
     mBits = mTypeBits * mVectorSize;
@@ -192,82 +196,6 @@ uint32_t Component::getGLFormat() const
     return 0;
 }
 
-static const char * gCTypeStrings[] = {
-    0,
-    0,//"F16",
-    "float",
-    "double",
-    "char",
-    "short",
-    "int",
-    0,//"S64",
-    "char",//U8",
-    "short",//U16",
-    "int",//U32",
-    0,//"U64",
-    0,//"UP_565",
-    0,//"UP_5551",
-    0,//"UP_4444",
-    0,//"ELEMENT",
-    0,//"TYPE",
-    0,//"ALLOCATION",
-    0,//"SAMPLER",
-    0,//"SCRIPT",
-    0,//"MESH",
-    0,//"PROGRAM_FRAGMENT",
-    0,//"PROGRAM_VERTEX",
-    0,//"PROGRAM_RASTER",
-    0,//"PROGRAM_STORE",
-};
-
-static const char * gCVecTypeStrings[] = {
-    0,
-    0,//"F16",
-    "vecF32",
-    "vecF64",
-    "vecI8",
-    "vecI16",
-    "vecI32",
-    0,//"S64",
-    "vecU8",//U8",
-    "vecU16",//U16",
-    "vecU32",//U32",
-    0,//"U64",
-    0,//"UP_565",
-    0,//"UP_5551",
-    0,//"UP_4444",
-    0,//"ELEMENT",
-    0,//"TYPE",
-    0,//"ALLOCATION",
-    0,//"SAMPLER",
-    0,//"SCRIPT",
-    0,//"MESH",
-    0,//"PROGRAM_FRAGMENT",
-    0,//"PROGRAM_VERTEX",
-    0,//"PROGRAM_RASTER",
-    0,//"PROGRAM_STORE",
-};
-
-String8 Component::getCType() const
-{
-    char buf[64];
-    if (mVectorSize == 1) {
-        return String8(gCTypeStrings[mType]);
-    }
-
-    // Yuck, acc WAR
-    // Appears to have problems packing chars
-    if (mVectorSize == 4 && mType == RS_TYPE_UNSIGNED_8) {
-        return String8("int");
-    }
-
-
-    String8 s(gCVecTypeStrings[mType]);
-    sprintf(buf, "_%i_t", mVectorSize);
-    s.append(buf);
-    return s;
-}
-
 String8 Component::getGLSLType() const
 {
     if (mType == RS_TYPE_SIGNED_32) {
@@ -302,6 +230,7 @@ static const char * gTypeStrings[] = {
     "U16",
     "U32",
     "U64",
+    "BOOLEAN",
     "UP_565",
     "UP_5551",
     "UP_4444",

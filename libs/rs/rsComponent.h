@@ -35,7 +35,6 @@ public:
 
     uint32_t getGLType() const;
     uint32_t getGLFormat() const;
-    String8 getCType() const;
     String8 getGLSLType() const;
     void dumpLOGV(const char *prefix) const;
 

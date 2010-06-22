@@ -57,7 +57,7 @@ public class ModelViewerRS {
 
     private SimpleMesh mMesh;
 
-    private ScriptC_ModelViewer mScript;
+    private ScriptC_Modelviewer mScript;
 
     int mLastX;
     int mLastY;
@@ -130,7 +130,7 @@ public class ModelViewerRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_ModelViewer(mRS, mRes, true);
+        mScript = new ScriptC_Modelviewer(mRS, mRes, R.raw.modelviewer_bc, true);
 
         initPFS();
         initPF();

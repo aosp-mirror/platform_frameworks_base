@@ -204,6 +204,7 @@ public class RenderScript {
     Element mElement_U32;
     Element mElement_I32;
     Element mElement_F32;
+    Element mElement_BOOLEAN;
 
     Element mElement_ELEMENT;
     Element mElement_TYPE;

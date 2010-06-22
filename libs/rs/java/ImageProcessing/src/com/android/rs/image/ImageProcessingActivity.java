@@ -285,7 +285,7 @@ public class ImageProcessingActivity extends Activity
 
             long t = java.lang.System.currentTimeMillis();
             if (true) {
-                mScript.invokable_Filter();
+                mScript.invoke_filter();
                 mRS.finish();
             } else {
                 javaFilter();
@@ -355,7 +355,7 @@ public class ImageProcessingActivity extends Activity
 
     public void surfaceCreated(SurfaceHolder holder) {
         createScript();
-        mScript.invokable_Filter();
+        mScript.invoke_filter();
         mRS.finish();
     }
 
@@ -373,7 +373,7 @@ public class ImageProcessingActivity extends Activity
         mOutPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapOut);
         mScratchPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapScratch);
 
-        mScript = new ScriptC_Threshold(mRS, getResources(), false);
+        mScript = new ScriptC_Threshold(mRS, getResources(), R.raw.threshold_bc, false);
         mScript.set_width(mBitmapIn.getWidth());
         mScript.set_height(mBitmapIn.getHeight());
         mScript.set_radius(mRadius);
@@ -413,7 +413,7 @@ public class ImageProcessingActivity extends Activity
 
         long t = java.lang.System.currentTimeMillis();
 
-        mScript.invokable_FilterBenchmark();
+        mScript.invoke_filterBenchmark();
         mRS.finish();
 
         t = java.lang.System.currentTimeMillis() - t;
@@ -426,7 +426,7 @@ public class ImageProcessingActivity extends Activity
         mRadius = oldRadius;
         mScript.set_radius(mRadius);
 
-        mScript.invokable_Filter();
+        mScript.invoke_filter();
         mRS.finish();
     }
 }
