@@ -178,7 +178,8 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mCacheOffset(0),
       mFinalStatus(OK),
       mLastAccessPos(0),
-      mFetching(true) {
+      mFetching(true),
+      mLastFetchTimeUs(-1) {
     mLooper->registerHandler(mReflector);
     mLooper->start();
 
@@ -259,10 +260,21 @@ void NuCachedSource2::onFetch() {
         mFetching = false;
     }
 
-    if (mFetching) {
+    bool keepAlive =
+        !mFetching
+            && mFinalStatus == OK
+            && ALooper::GetNowUs() >= mLastFetchTimeUs + kKeepAliveIntervalUs;
+
+    if (mFetching || keepAlive) {
+        if (keepAlive) {
+            LOG(INFO) << "Keep alive";
+        }
+
         fetchInternal();
 
-        if (mCache->totalSize() >= kHighWaterThreshold) {
+        mLastFetchTimeUs = ALooper::GetNowUs();
+
+        if (mFetching && mCache->totalSize() >= kHighWaterThreshold) {
             LOG(INFO) << "Cache full, done prefetching for now";
             mFetching = false;
         }
