@@ -27,6 +27,7 @@
 #include <GLES2/gl2ext.h>
 
 #include "UIOpenGLRenderer.h"
+#include "UIMatrix.h"
 
 namespace android {
 
@@ -39,11 +40,18 @@ UIOpenGLRenderer::~UIOpenGLRenderer() {
 }
 
 void UIOpenGLRenderer::setViewport(int width, int height) {
-    LOGD("Setting viewport");
+    glViewport(0, 0, width, height);
+
+    mat4 ortho;
+    ortho.loadOrtho(0, width, height, 0, 0, 1);
+    ortho.copyTo(mOrthoMatrix);
 }
 
 void UIOpenGLRenderer::prepare() {
-    LOGD("Prepare");
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
 }
 
 }; // namespace android
