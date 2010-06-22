@@ -85,6 +85,10 @@ int32_t InputManager::injectInputEvent(const InputEvent* event,
     return mDispatcher->injectInputEvent(event, injectorPid, injectorUid, sync, timeoutMillis);
 }
 
+void InputManager::preemptInputDispatch() {
+    mDispatcher->preemptInputDispatch();
+}
+
 void InputManager::getInputConfiguration(InputConfiguration* outConfiguration) const {
     mReader->getCurrentInputConfiguration(outConfiguration);
 }

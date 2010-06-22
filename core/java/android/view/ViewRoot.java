@@ -1762,6 +1762,15 @@ public final class ViewRoot extends Handler implements ViewParent,
             sWindowSession.remove(mWindow);
         } catch (RemoteException e) {
         }
+        
+        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
+            // Dispose the input channel after removing the window so the Window Manager
+            // doesn't interpret the input channel being closed as an abnormal termination.
+            if (mInputChannel != null) {
+                mInputChannel.dispose();
+                mInputChannel = null;
+            }
+        }
     }
 
     void updateConfiguration(Configuration config, boolean force) {

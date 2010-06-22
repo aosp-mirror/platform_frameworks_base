@@ -126,21 +126,21 @@ public:
     /* Gets the key repeat timeout or -1 if automatic key repeating is disabled. */
     virtual nsecs_t getKeyRepeatTimeout() = 0;
 
-    /* Gets the input targets for a key event.
+    /* Waits for key event input targets to become available.
      * If the event is being injected, injectorPid and injectorUid should specify the
      * process id and used id of the injecting application, otherwise they should both
      * be -1.
      * Returns one of the INPUT_EVENT_INJECTION_XXX constants. */
-    virtual int32_t getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+    virtual int32_t waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid,
             Vector<InputTarget>& outTargets) = 0;
 
-    /* Gets the input targets for a motion event.
+    /* Waits for motion event targets to become available.
      * If the event is being injected, injectorPid and injectorUid should specify the
      * process id and used id of the injecting application, otherwise they should both
      * be -1.
      * Returns one of the INPUT_EVENT_INJECTION_XXX constants. */
-    virtual int32_t getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+    virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid,
             Vector<InputTarget>& outTargets) = 0;
 };
@@ -185,6 +185,16 @@ public:
      */
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) = 0;
+
+    /* Preempts input dispatch in progress by making pending synchronous
+     * dispatches asynchronous instead.  This method is generally called during a focus
+     * transition from one application to the next so as to enable the new application
+     * to start receiving input as soon as possible without having to wait for the
+     * old application to finish up.
+     *
+     * This method may be called on any thread (usually by the input manager).
+     */
+    virtual void preemptInputDispatch() = 0;
 
     /* Registers or unregister input channels that may be used as targets for input events.
      *
@@ -232,6 +242,8 @@ public:
 
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis);
+
+    virtual void preemptInputDispatch();
 
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
