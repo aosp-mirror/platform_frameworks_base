@@ -79,7 +79,7 @@ status_t AMRNBEncoder::start(MetaData *params) {
                 &mEncState, &mSidState, false /* dtx_enable */),
              0);
 
-    mSource->start();
+    mSource->start(params);
 
     mAnchorTimeUs = 0;
     mNumFramesOutput = 0;

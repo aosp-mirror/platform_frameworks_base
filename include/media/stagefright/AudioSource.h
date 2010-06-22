@@ -56,6 +56,7 @@ private:
     int64_t mTotalReadTimeUs;
     int64_t mTotalReadBytes;
     int64_t mTotalReads;
+    int64_t mStartTimeUs;
 
     MediaBufferGroup *mGroup;
 
