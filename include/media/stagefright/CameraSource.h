@@ -60,11 +60,14 @@ private:
     List<sp<IMemory> > mFramesBeingEncoded;
     List<int64_t> mFrameTimes;
 
+    int64_t mStartTimeUs;
     int64_t mFirstFrameTimeUs;
     int64_t mLastFrameTimestampUs;
     int32_t mNumFramesReceived;
     int32_t mNumFramesEncoded;
     int32_t mNumFramesDropped;
+    int32_t mNumGlitches;
+    int64_t mGlitchDurationThresholdUs;
     bool mCollectStats;
     bool mStarted;
 
@@ -74,6 +77,7 @@ private:
             int64_t timestampUs, int32_t msgType, const sp<IMemory> &data);
 
     void releaseQueuedFrames();
+    void releaseOneRecordingFrame(const sp<IMemory>& frame);
 
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);

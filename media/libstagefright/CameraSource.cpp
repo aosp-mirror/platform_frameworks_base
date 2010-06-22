@@ -123,6 +123,8 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mNumFramesReceived(0),
       mNumFramesEncoded(0),
       mNumFramesDropped(0),
+      mNumGlitches(0),
+      mGlitchDurationThresholdUs(200000),
       mCollectStats(false),
       mStarted(false) {
 
@@ -135,6 +137,13 @@ CameraSource::CameraSource(const sp<Camera> &camera)
     int32_t width, height, stride, sliceHeight;
     CameraParameters params(s);
     params.getPreviewSize(&width, &height);
+
+    // Calculate glitch duraton threshold based on frame rate
+    int32_t frameRate = params.getPreviewFrameRate();
+    int64_t glitchDurationUs = (1000000LL / frameRate);
+    if (glitchDurationUs > mGlitchDurationThresholdUs) {
+        mGlitchDurationThresholdUs = glitchDurationUs;
+    }
 
     const char *colorFormatStr = params.get(CameraParameters::KEY_VIDEO_FRAME_FORMAT);
     CHECK(colorFormatStr != NULL);
@@ -161,14 +170,19 @@ CameraSource::~CameraSource() {
     }
 }
 
-status_t CameraSource::start(MetaData *) {
-    LOGV("start");
+status_t CameraSource::start(MetaData *meta) {
     CHECK(!mStarted);
 
     char value[PROPERTY_VALUE_MAX];
     if (property_get("media.stagefright.record-stats", value, NULL)
         && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
         mCollectStats = true;
+    }
+
+    mStartTimeUs = 0;
+    int64_t startTimeUs;
+    if (meta && meta->findInt64(kKeyTime, &startTimeUs)) {
+        mStartTimeUs = startTimeUs;
     }
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
@@ -222,16 +236,19 @@ sp<MetaData> CameraSource::getFormat() {
     return mMeta;
 }
 
+void CameraSource::releaseOneRecordingFrame(const sp<IMemory>& frame) {
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    mCamera->releaseRecordingFrame(frame);
+    IPCThreadState::self()->restoreCallingIdentity(token);
+}
+
 void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
     LOGV("signalBufferReturned: %p", buffer->data());
     for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
          it != mFramesBeingEncoded.end(); ++it) {
         if ((*it)->pointer() ==  buffer->data()) {
 
-            int64_t token = IPCThreadState::self()->clearCallingIdentity();
-            mCamera->releaseRecordingFrame((*it));
-            IPCThreadState::self()->restoreCallingIdentity(token);
-
+            releaseOneRecordingFrame((*it));
             mFramesBeingEncoded.erase(it);
             ++mNumFramesEncoded;
             buffer->setObserver(0);
@@ -285,22 +302,41 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     LOGV("dataCallbackTimestamp: timestamp %lld us", timestampUs);
     Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
-        int64_t token = IPCThreadState::self()->clearCallingIdentity();
-        mCamera->releaseRecordingFrame(data);
-        IPCThreadState::self()->restoreCallingIdentity(token);
+        releaseOneRecordingFrame(data);
         ++mNumFramesReceived;
         ++mNumFramesDropped;
         return;
     }
 
+    if (mNumFramesReceived > 0 &&
+        timestampUs - mLastFrameTimestampUs > mGlitchDurationThresholdUs) {
+        if (mNumGlitches % 10 == 0) {  // Don't spam the log
+            LOGW("Long delay detected in video recording");
+        }
+        ++mNumGlitches;
+    }
+
     mLastFrameTimestampUs = timestampUs;
     if (mNumFramesReceived == 0) {
         mFirstFrameTimeUs = timestampUs;
+        // Initial delay
+        if (mStartTimeUs > 0) {
+            if (timestampUs < mStartTimeUs) {
+                // Frame was captured before recording was started
+                // Drop it without updating the statistical data.
+                releaseOneRecordingFrame(data);
+                return;
+            }
+            mStartTimeUs = timestampUs - mStartTimeUs;
+        }
     }
     ++mNumFramesReceived;
 
     mFramesReceived.push_back(data);
-    mFrameTimes.push_back(timestampUs - mFirstFrameTimeUs);
+    int64_t timeUs = mStartTimeUs + (timestampUs - mFirstFrameTimeUs);
+    mFrameTimes.push_back(timeUs);
+    LOGV("initial delay: %lld, current time stamp: %lld",
+        mStartTimeUs, timeUs);
     mFrameAvailableCondition.signal();
 }
 

@@ -78,8 +78,8 @@ private:
 
     List<off_t> mBoxes;
 
-    void setStartTimestamp(int64_t timeUs);
-    int64_t getStartTimestamp();  // Not const
+    void setStartTimestampUs(int64_t timeUs);
+    int64_t getStartTimestampUs();  // Not const
     status_t startTracks();
 
     void lock();
