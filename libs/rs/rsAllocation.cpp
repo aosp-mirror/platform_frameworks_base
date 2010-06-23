@@ -559,7 +559,7 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src)
     if (srcGLType == GL_UNSIGNED_BYTE &&
         srcGLFmt == GL_RGB &&
         dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
-        dstGLType == GL_RGB) {
+        dstGLFmt == GL_RGB) {
 
         return elementConverter_888_to_565;
     }
@@ -567,12 +567,16 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src)
     if (srcGLType == GL_UNSIGNED_BYTE &&
         srcGLFmt == GL_RGBA &&
         dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
-        dstGLType == GL_RGB) {
+        dstGLFmt == GL_RGB) {
 
         return elementConverter_8888_to_565;
     }
 
     LOGE("pickConverter, unsuported combo, src %p,  dst %p", src, dst);
+    LOGE("pickConverter, srcGLType = %x,  srcGLFmt = %x", srcGLType, srcGLFmt);
+    LOGE("pickConverter, dstGLType = %x,  dstGLFmt = %x", dstGLType, dstGLFmt);
+    src->dumpLOGV("SRC ");
+    dst->dumpLOGV("DST ");
     return 0;
 }
 
