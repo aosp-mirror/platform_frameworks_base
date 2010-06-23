@@ -24,12 +24,14 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.Window;
+import android.webkit.GeolocationPermissions;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
-import android.view.Menu;
-import android.view.KeyEvent;
-import android.view.Window;
 
 import com.android.internal.R;
 
@@ -43,6 +45,7 @@ import java.net.URL;
 public class WebRuntimeActivity extends Activity
 {
     private final static String LOGTAG = "WebRuntimeActivity";
+    private final static String locationPermission = "android.permission.ACCESS_FINE_LOCATION";
 
     private WebView mWebView;
     private URL mBaseUrl;
@@ -55,7 +58,7 @@ public class WebRuntimeActivity extends Activity
 
         // Can't get meta data using getApplicationInfo() as it doesn't pass GET_META_DATA
         PackageManager packageManager = getPackageManager();
-        ComponentName componentName = new ComponentName(this, "android.webruntime.WebRuntimeActivity");
+        ComponentName componentName = new ComponentName(this, getClass());
         ActivityInfo activityInfo = null;
         try {
             activityInfo = packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA);
@@ -111,6 +114,22 @@ public class WebRuntimeActivity extends Activity
                 return true;
             }
         });
+
+        // Use a custom WebChromeClient with geolocation permissions handling to always
+        // allow or deny, based on the app's permissions.
+        String packageName = componentName.getPackageName();
+        final boolean allowed = packageManager.checkPermission(locationPermission, packageName)
+                == PackageManager.PERMISSION_GRANTED;
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            public void onGeolocationPermissionsShowPrompt(
+                        String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, allowed, true);
+            }
+        });
+
+        // Set the DB location. Optional. Geolocation works without DBs.
+        mWebView.getSettings().setGeolocationDatabasePath(
+                getDir("geolocation", MODE_PRIVATE).getPath());
 
         String title = metaData.getString("android.webruntime.title");
         // We turned off the title bar to go full screen so display the
