@@ -223,8 +223,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * When set, this ViewGroup should not intercept touch events.
+     * {@hide}
      */
-    private static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
+    protected static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
 
     /**
      * Indicates which types of drawing caches are to be kept in memory.
