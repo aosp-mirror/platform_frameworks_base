@@ -3720,6 +3720,46 @@ public class Activity extends ContextThemeWrapper
         return null;
     }
 
+    /**
+     * Bit indicating that this activity is "immersive" and should not be
+     * interrupted by notifications if possible.
+     *
+     * This value is initially set by the manifest property
+     * <code>android:immersive</code> but may be changed at runtime by
+     * {@link #setImmersive}.
+     *
+     * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     */
+    public boolean isImmersive() {
+        try {
+            return ActivityManagerNative.getDefault().isImmersive(mToken);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Adjust the current immersive mode setting.
+     * 
+     * Note that changing this value will have no effect on the activity's
+     * {@link android.content.pm.ActivityInfo} structure; that is, if
+     * <code>android:immersive</code> is set to <code>true</code>
+     * in the application's manifest entry for this activity, the {@link
+     * android.content.pm.ActivityInfo#flags ActivityInfo.flags} member will
+     * always have its {@link android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     * FLAG_IMMERSIVE} bit set.
+     *
+     * @see #isImmersive
+     * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     */
+    public void setImmersive(boolean i) {
+        try {
+            ActivityManagerNative.getDefault().setImmersive(mToken, i);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
     // ------------------ Internal API ------------------
     
     final void setParent(Activity parent) {
