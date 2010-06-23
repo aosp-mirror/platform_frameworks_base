@@ -294,13 +294,11 @@ MediaRecorderClient::MediaRecorderClient(const sp<MediaPlayerService>& service, 
     LOGV("Client constructor");
     mPid = pid;
 
-#if BUILD_WITH_FULL_STAGEFRIGHT
     char value[PROPERTY_VALUE_MAX];
     if (property_get("media.stagefright.enable-record", value, NULL)
         && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
         mRecorder = new StagefrightRecorder;
     } else
-#endif
 #ifndef NO_OPENCORE
     {
         mRecorder = new PVMediaRecorder();
