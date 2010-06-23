@@ -160,6 +160,7 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     const uint32_t hwFlags = hw.getFlags();
     
     mFormat = format;
+    mReqFormat = format;
     mWidth  = w;
     mHeight = h;
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
