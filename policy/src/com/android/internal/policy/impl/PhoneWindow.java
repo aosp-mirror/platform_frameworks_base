@@ -44,7 +44,6 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -56,14 +55,13 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
-import android.view.InputConsumer;
+import android.view.InputQueue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +69,6 @@ import android.view.ViewManager;
 import android.view.VolumePanel;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.InputConsumer.Callback;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -110,7 +107,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     SurfaceHolder.Callback mTakeSurfaceCallback;
     BaseSurfaceHolder mSurfaceHolder;
     
-    InputConsumer.Callback mTakeInputChannelCallback;
+    InputQueue.Callback mTakeInputQueueCallback;
     
     private boolean mIsFloating;
 
@@ -255,8 +252,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mTakeSurfaceCallback = callback;
     }
     
-    public void takeInputChannel(InputConsumer.Callback callback) {
-        mTakeInputChannelCallback = callback;
+    public void takeInputQueue(InputQueue.Callback callback) {
+        mTakeInputQueueCallback = callback;
     }
     
     @Override
@@ -2045,8 +2042,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return mFeatureId < 0 ? mTakeSurfaceCallback : null;
         }
         
-        public InputConsumer.Callback willYouTakeTheInputConsumer() {
-            return mFeatureId < 0 ? mTakeInputChannelCallback : null;
+        public InputQueue.Callback willYouTakeTheInputQueue() {
+            return mFeatureId < 0 ? mTakeInputQueueCallback : null;
         }
         
         public void setSurfaceType(int type) {
