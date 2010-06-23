@@ -58,7 +58,7 @@ public:
 
     virtual sp<IMediaPlayer> create(
             pid_t pid, const sp<IMediaPlayerClient>& client,
-            const char* url, const KeyedVector<String8, String8> *headers) {
+            const char* url, const KeyedVector<String8, String8> *headers, int audioSessionId) {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
         data.writeInt32(pid);
@@ -75,8 +75,10 @@ public:
                 data.writeString8(headers->valueAt(i));
             }
         }
+        data.writeInt32(audioSessionId);
 
         remote()->transact(CREATE_URL, data, &reply);
+
         return interface_cast<IMediaPlayer>(reply.readStrongBinder());
     }
 
@@ -89,7 +91,8 @@ public:
         return interface_cast<IMediaRecorder>(reply.readStrongBinder());
     }
 
-    virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length)
+    virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd,
+            int64_t offset, int64_t length, int audioSessionId)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
@@ -98,8 +101,11 @@ public:
         data.writeFileDescriptor(fd);
         data.writeInt64(offset);
         data.writeInt64(length);
+        data.writeInt32(audioSessionId);
+
         remote()->transact(CREATE_FD, data, &reply);
-        return interface_cast<IMediaPlayer>(reply.readStrongBinder());
+
+        return interface_cast<IMediaPlayer>(reply.readStrongBinder());;
     }
 
     virtual sp<IMemory> decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
@@ -166,9 +172,10 @@ status_t BnMediaPlayerService::onTransact(
                 String8 value = data.readString8();
                 headers.add(key, value);
             }
+            int audioSessionId = data.readInt32();
 
             sp<IMediaPlayer> player = create(
-                    pid, client, url, numHeaders > 0 ? &headers : NULL);
+                    pid, client, url, numHeaders > 0 ? &headers : NULL, audioSessionId);
 
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
@@ -180,7 +187,9 @@ status_t BnMediaPlayerService::onTransact(
             int fd = dup(data.readFileDescriptor());
             int64_t offset = data.readInt64();
             int64_t length = data.readInt64();
-            sp<IMediaPlayer> player = create(pid, client, fd, offset, length);
+            int audioSessionId = data.readInt32();
+
+            sp<IMediaPlayer> player = create(pid, client, fd, offset, length, audioSessionId);
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;

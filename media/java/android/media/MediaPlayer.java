@@ -423,6 +423,18 @@ import java.lang.ref.WeakReference;
  *     <td>Successful invoke of this method in a valid state transfers the
  *         object to the <em>Stopped</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
+  * <tr><td>setAudioSessionId </p></td>
+ *     <td>{Idle} </p></td>
+ *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
+ *          Error} </p></td>
+ *     <td>This method must be called in idle state as the audio session ID must be known before
+ *         calling setDataSource. Calling it does not change the object state. </p></td></tr>
+ * <tr><td>getAudioSessionId </p></td>
+ *     <td>any </p></td>
+ *     <td>{} </p></td>
+ *     <td>This method can be called in any state and calling it does not change
+ *         the object state. </p></td></tr>
+ *
  * </table>
  *
  * <a name="Permissions"></a>
@@ -1157,6 +1169,38 @@ public class MediaPlayer
      * @hide
      */
     public native Bitmap getFrameAt(int msec) throws IllegalStateException;
+
+    /**
+     * Sets the audio session ID.
+     *
+     * @param sessionId: the audio session ID.
+     * The audio session ID is a system wide unique identifier for the audio stream played by
+     * this MediaPlayer instance.
+     * The primary use of the audio session ID  is to associate audio effects to a particular
+     * instance of MediaPlayer: if an audio session ID is provided when creating an audio effect,
+     * this effect will be applied only to the audio content of media players within the same
+     * audio session and not to the output mix.
+     * When created, a MediaPlayer instance automatically generates its own audio session ID.
+     * However, it is possible to force this player to be part of an already existing audio session
+     * by calling this method.
+     * This method must be called before one of the overloaded <code> setDataSource </code> methods.
+     * @throws IllegalStateException if it is called in an invalid state
+     *
+     // FIXME: unhide.
+     // FIXME: link to AudioEffect class when public.
+     * @hide
+     */
+    public native void setAudioSessionId(int sessionId)  throws IllegalArgumentException, IllegalStateException;
+
+    /**
+     * Returns the audio session ID.
+     *
+     * @return the audio session ID. {@see #setAudioSessionId(int)}.
+     * Note that the audio session ID is 0 only if a problem occured when the MediaPlayer was contructed.
+     // FIXME: unhide.
+     * @hide
+     */
+    public native int getAudioSessionId();
 
     /**
      * @param request Parcel destinated to the media player. The
