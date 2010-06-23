@@ -281,8 +281,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
             break;
 
         case SET_XSS_AUDITOR_ENABLED:
-            mLayoutTestController.setXSSAuditorEnabled(
-                msg.arg1 == 1 ? true : false);
+            mLayoutTestController.setXSSAuditorEnabled(msg.arg1 == 1);
             break;
         }
     }
