@@ -20,24 +20,32 @@ package android.hardware;
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
  * the list of available Sensors.
+ *
+ * @see SensorManager
+ * @see SensorEventListener
+ * @see SensorEvent
+ *
  */
 public class Sensor {
 
     /**
      * A constant describing an accelerometer sensor type. See
-     * {@link android.hardware.SensorEvent SensorEvent} for more details.
+     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
+     * details.
      */
     public static final int TYPE_ACCELEROMETER = 1;
 
     /**
      * A constant describing a magnetic field sensor type. See
-     * {@link android.hardware.SensorEvent SensorEvent} for more details.
+     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
+     * details.
      */
     public static final int TYPE_MAGNETIC_FIELD = 2;
 
     /**
      * A constant describing an orientation sensor type. See
-     * {@link android.hardware.SensorEvent SensorEvent} for more details.
+     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
+     * details.
      *
      * @deprecated use {@link android.hardware.SensorManager#getOrientation
      *             SensorManager.getOrientation()} instead.
@@ -50,7 +58,8 @@ public class Sensor {
 
     /**
      * A constant describing an light sensor type. See
-     * {@link android.hardware.SensorEvent SensorEvent} for more details.
+     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
+     * details.
      */
     public static final int TYPE_LIGHT = 5;
 
@@ -62,7 +71,8 @@ public class Sensor {
 
     /**
      * A constant describing an proximity sensor type. See
-     * {@link android.hardware.SensorEvent SensorEvent} for more details.
+     * {@link android.hardware.SensorEvent#values SensorEvent.values} for more
+     * details.
      */
     public static final int TYPE_PROXIMITY = 8;
 
