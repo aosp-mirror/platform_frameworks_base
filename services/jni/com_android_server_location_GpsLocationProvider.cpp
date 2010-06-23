@@ -25,12 +25,13 @@
 #include "hardware_legacy/power.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
+#include "android_runtime/AndroidRuntime.h"
 
 #include <string.h>
 #include <pthread.h>
 
-static pthread_mutex_t sEventMutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t sEventCond = PTHREAD_COND_INITIALIZER;
+static jobject mCallbacksObj = NULL;
+
 static jmethodID method_reportLocation;
 static jmethodID method_reportStatus;
 static jmethodID method_reportSvStatus;
@@ -46,140 +47,89 @@ static const AGpsInterface* sAGpsInterface = NULL;
 static const GpsNiInterface* sGpsNiInterface = NULL;
 static const GpsDebugInterface* sGpsDebugInterface = NULL;
 
-// data written to by GPS callbacks
-static GpsLocation  sGpsLocation;
-static GpsStatus    sGpsStatus;
+// temporary storage for GPS callbacks
 static GpsSvStatus  sGpsSvStatus;
-static AGpsStatus   sAGpsStatus;
-static GpsNiNotification  sGpsNiNotification;
+static const char* sNmeaString;
+static int sNmeaStringLength;
 
 #define WAKE_LOCK_NAME  "GPS"
 
-// buffer for NMEA data
-#define NMEA_SENTENCE_LENGTH    100
-#define NMEA_SENTENCE_COUNT     40
-struct NmeaSentence {
-    GpsUtcTime  timestamp;
-    char        nmea[NMEA_SENTENCE_LENGTH];
-};
-static NmeaSentence sNmeaBuffer[NMEA_SENTENCE_COUNT];
-static int mNmeaSentenceCount = 0;
-
-// a copy of the data shared by android_location_GpsLocationProvider_wait_for_event
-// and android_location_GpsLocationProvider_read_status
-static GpsLocation  sGpsLocationCopy;
-static GpsStatus    sGpsStatusCopy;
-static GpsSvStatus  sGpsSvStatusCopy;
-static AGpsStatus   sAGpsStatusCopy;
-static NmeaSentence sNmeaBufferCopy[NMEA_SENTENCE_COUNT];
-static GpsNiNotification  sGpsNiNotificationCopy;
-static uint32_t     sEngineCapabilities;
-
-
-enum CallbackType {
-    kLocation = 1,
-    kStatus = 2,
-    kSvStatus = 4,
-    kAGpsStatus = 8,
-    kXtraDownloadRequest = 16,
-    kDisableRequest = 32,
-    kNmeaAvailable = 64,
-    kNiNotification = 128,
-    kSetCapabilities = 256,
-}; 
-static int sPendingCallbacks;
-
 namespace android {
+
+static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
+    if (env->ExceptionCheck()) {
+        LOGE("An exception was thrown by callback '%s'.", methodName);
+        LOGE_EX(env);
+        env->ExceptionClear();
+    }
+}
 
 static void location_callback(GpsLocation* location)
 {
-    pthread_mutex_lock(&sEventMutex);
-
-    sPendingCallbacks |= kLocation;
-    memcpy(&sGpsLocation, location, sizeof(sGpsLocation));
-
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
+    LOGD("location_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_reportLocation, location->flags,
+            (jdouble)location->latitude, (jdouble)location->longitude,
+            (jdouble)location->altitude,
+            (jfloat)location->speed, (jfloat)location->bearing,
+            (jfloat)location->accuracy, (jlong)location->timestamp);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void status_callback(GpsStatus* status)
 {
-    pthread_mutex_lock(&sEventMutex);
-
-    sPendingCallbacks |= kStatus;
-    memcpy(&sGpsStatus, status, sizeof(sGpsStatus));
-
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
+    LOGD("status_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    LOGD("env: %p obj: %p\n", env, mCallbacksObj);
+    env->CallVoidMethod(mCallbacksObj, method_reportStatus, status->status);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void sv_status_callback(GpsSvStatus* sv_status)
 {
-    pthread_mutex_lock(&sEventMutex);
-
-    sPendingCallbacks |= kSvStatus;
-    memcpy(&sGpsSvStatus, sv_status, sizeof(GpsSvStatus));
-
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
+    LOGD("sv_status_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    memcpy(&sGpsSvStatus, sv_status, sizeof(sGpsSvStatus));
+    env->CallVoidMethod(mCallbacksObj, method_reportSvStatus);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
 {
-    pthread_mutex_lock(&sEventMutex);
-
-    if (length >= NMEA_SENTENCE_LENGTH) {
-        LOGE("NMEA data too long in nmea_callback (length = %d)\n", length);
-        length = NMEA_SENTENCE_LENGTH - 1;
-    }
-    if (mNmeaSentenceCount >= NMEA_SENTENCE_COUNT) {
-        LOGE("NMEA data overflowed buffer\n");
-        pthread_mutex_unlock(&sEventMutex);
-        return;
-    }
-
-    sPendingCallbacks |= kNmeaAvailable;
-    sNmeaBuffer[mNmeaSentenceCount].timestamp = timestamp;
-    memcpy(sNmeaBuffer[mNmeaSentenceCount].nmea, nmea, length);
-    sNmeaBuffer[mNmeaSentenceCount].nmea[length] = 0;
-    mNmeaSentenceCount++;
-
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
+    LOGD("nmea_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    // The Java code will call back to read these values
+    // We do this to avoid creating unnecessary String objects
+    sNmeaString = nmea;
+    sNmeaStringLength = length;
+    env->CallVoidMethod(mCallbacksObj, method_reportNmea, timestamp);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void set_capabilities_callback(uint32_t capabilities)
 {
-   LOGD("set_capabilities_callback: %08X", capabilities);
-
-   pthread_mutex_lock(&sEventMutex);
-
-   sPendingCallbacks |= kSetCapabilities;
-   sEngineCapabilities = capabilities;
-
-   pthread_cond_signal(&sEventCond);
-   pthread_mutex_unlock(&sEventMutex);
+    LOGD("set_capabilities_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void acquire_wakelock_callback()
 {
+    LOGD("acquire_wakelock_callback\n");
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_NAME);
 }
 
 static void release_wakelock_callback()
 {
+    LOGD("release_wakelock_callback\n");
     release_wake_lock(WAKE_LOCK_NAME);
 }
 
-static void agps_status_callback(AGpsStatus* agps_status)
+static pthread_t create_thread_callback(const char* name, void (*start)(void *), void* arg)
 {
-    pthread_mutex_lock(&sEventMutex);
-
-    sPendingCallbacks |= kAGpsStatus;
-    memcpy(&sAGpsStatus, agps_status, sizeof(AGpsStatus));
-
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
+    LOGD("create_thread_callback\n");
+    return (pthread_t)AndroidRuntime::createJavaThread(name, start, arg);
 }
 
 GpsCallbacks sGpsCallbacks = {
@@ -191,41 +141,67 @@ GpsCallbacks sGpsCallbacks = {
     set_capabilities_callback,
     acquire_wakelock_callback,
     release_wakelock_callback,
+    create_thread_callback,
 };
 
-static void
-download_request_callback()
+static void xtra_download_request_callback()
 {
-    pthread_mutex_lock(&sEventMutex);
-    sPendingCallbacks |= kXtraDownloadRequest;
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
-}
-
-static void
-gps_ni_notify_callback(GpsNiNotification *notification)
-{
-   LOGD("gps_ni_notify_callback: notif=%d", notification->notification_id);
-
-   pthread_mutex_lock(&sEventMutex);
-
-   sPendingCallbacks |= kNiNotification;
-   memcpy(&sGpsNiNotification, notification, sizeof(GpsNiNotification));
-
-   pthread_cond_signal(&sEventCond);
-   pthread_mutex_unlock(&sEventMutex);
+    LOGD("xtra_download_request_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_xtraDownloadRequest);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 GpsXtraCallbacks sGpsXtraCallbacks = {
-    download_request_callback,
+    xtra_download_request_callback,
+    create_thread_callback,
 };
+
+static void agps_status_callback(AGpsStatus* agps_status)
+{
+    LOGD("agps_status_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
+                        agps_status->type, agps_status->status);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
 
 AGpsCallbacks sAGpsCallbacks = {
     agps_status_callback,
+    create_thread_callback,
 };
+
+static void gps_ni_notify_callback(GpsNiNotification *notification)
+{
+    LOGD("gps_ni_notify_callback\n");
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring requestor_id = env->NewStringUTF(notification->requestor_id);
+    jstring text = env->NewStringUTF(notification->text);
+    jstring extras = env->NewStringUTF(notification->extras);
+
+    if (requestor_id && text && extras) {
+        env->CallVoidMethod(mCallbacksObj, method_reportNiNotification,
+            notification->notification_id, notification->ni_type,
+            notification->notify_flags, notification->timeout,
+            notification->default_response, requestor_id, text,
+            notification->requestor_id_encoding,
+            notification->text_encoding, extras);
+    } else {
+        LOGE("out of memory in gps_ni_notify_callback\n");
+    }
+
+    if (requestor_id)
+        env->DeleteLocalRef(requestor_id);
+    if (text)
+        env->DeleteLocalRef(text);
+    if (extras)
+        env->DeleteLocalRef(extras);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
 
 GpsNiCallbacks sGpsNiCallbacks = {
     gps_ni_notify_callback,
+    create_thread_callback,
 };
 
 static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
@@ -233,7 +209,7 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II)V");
-    method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(IJ)V");
+    method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification", "(IIIIILjava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
@@ -265,6 +241,12 @@ static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, j
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
 {
+    LOGD("android_location_GpsLocationProvider_init obj: %p\n", obj);
+
+    // this must be set before calling into the HAL library
+    if (!mCallbacksObj)
+        mCallbacksObj = env->NewGlobalRef(obj);
+
     if (!sGpsInterface)
         sGpsInterface = get_gps_interface();
     if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
@@ -284,14 +266,6 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
        sGpsDebugInterface = (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
 
     return true;
-}
-
-static void android_location_GpsLocationProvider_disable(JNIEnv* env, jobject obj)
-{
-    pthread_mutex_lock(&sEventMutex);
-    sPendingCallbacks |= kDisableRequest;
-    pthread_cond_signal(&sEventCond);
-    pthread_mutex_unlock(&sEventMutex);
 }
 
 static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject obj)
@@ -321,90 +295,11 @@ static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env,
     sGpsInterface->delete_aiding_data(flags);
 }
 
-static void android_location_GpsLocationProvider_wait_for_event(JNIEnv* env, jobject obj)
-{
-    pthread_mutex_lock(&sEventMutex);
-    while (sPendingCallbacks == 0) {
-        pthread_cond_wait(&sEventCond, &sEventMutex);
-    }
-
-    // copy and clear the callback flags
-    int pendingCallbacks = sPendingCallbacks;
-    sPendingCallbacks = 0;
-    int nmeaSentenceCount = mNmeaSentenceCount;
-    mNmeaSentenceCount = 0;
-    
-    // copy everything and unlock the mutex before calling into Java code to avoid the possibility
-    // of timeouts in the GPS engine.
-    if (pendingCallbacks & kLocation)
-        memcpy(&sGpsLocationCopy, &sGpsLocation, sizeof(sGpsLocationCopy));
-    if (pendingCallbacks & kStatus)
-        memcpy(&sGpsStatusCopy, &sGpsStatus, sizeof(sGpsStatusCopy));
-    if (pendingCallbacks & kSvStatus)
-        memcpy(&sGpsSvStatusCopy, &sGpsSvStatus, sizeof(sGpsSvStatusCopy));
-    if (pendingCallbacks & kAGpsStatus)
-        memcpy(&sAGpsStatusCopy, &sAGpsStatus, sizeof(sAGpsStatusCopy));
-    if (pendingCallbacks & kNmeaAvailable)
-        memcpy(&sNmeaBufferCopy, &sNmeaBuffer, nmeaSentenceCount * sizeof(sNmeaBuffer[0]));
-    if (pendingCallbacks & kNiNotification)
-        memcpy(&sGpsNiNotificationCopy, &sGpsNiNotification, sizeof(sGpsNiNotificationCopy));
-    pthread_mutex_unlock(&sEventMutex);   
-
-    if (pendingCallbacks & kLocation) {
-        env->CallVoidMethod(obj, method_reportLocation, sGpsLocationCopy.flags,
-                (jdouble)sGpsLocationCopy.latitude, (jdouble)sGpsLocationCopy.longitude,
-                (jdouble)sGpsLocationCopy.altitude,
-                (jfloat)sGpsLocationCopy.speed, (jfloat)sGpsLocationCopy.bearing,
-                (jfloat)sGpsLocationCopy.accuracy, (jlong)sGpsLocationCopy.timestamp);
-    }
-    if (pendingCallbacks & kStatus) {
-        env->CallVoidMethod(obj, method_reportStatus, sGpsStatusCopy.status);
-    }
-    if (pendingCallbacks & kSvStatus) {
-        env->CallVoidMethod(obj, method_reportSvStatus);
-    }
-    if (pendingCallbacks & kAGpsStatus) {
-        env->CallVoidMethod(obj, method_reportAGpsStatus, sAGpsStatusCopy.type, sAGpsStatusCopy.status);
-    }  
-    if (pendingCallbacks & kNmeaAvailable) {
-        for (int i = 0; i < nmeaSentenceCount; i++) {
-            env->CallVoidMethod(obj, method_reportNmea, i, sNmeaBuffer[i].timestamp);
-        }
-    }
-    if (pendingCallbacks & kXtraDownloadRequest) {
-        env->CallVoidMethod(obj, method_xtraDownloadRequest);
-    }
-    if (pendingCallbacks & kDisableRequest) {
-        // don't need to do anything - we are just poking so wait_for_event will return.
-    }
-    if (pendingCallbacks & kNiNotification) {
-       LOGD("android_location_GpsLocationProvider_wait_for_event: sent notification callback.");
-       jstring reqId = env->NewStringUTF(sGpsNiNotificationCopy.requestor_id);
-       jstring text = env->NewStringUTF(sGpsNiNotificationCopy.text);
-       jstring extras = env->NewStringUTF(sGpsNiNotificationCopy.extras);
-       env->CallVoidMethod(obj, method_reportNiNotification,
-             sGpsNiNotificationCopy.notification_id,
-             sGpsNiNotificationCopy.ni_type,
-             sGpsNiNotificationCopy.notify_flags,
-             sGpsNiNotificationCopy.timeout,
-             sGpsNiNotificationCopy.default_response,
-             reqId,
-             text,
-             sGpsNiNotificationCopy.requestor_id_encoding,
-             sGpsNiNotificationCopy.text_encoding,
-             extras
-       );
-    }
-    if (pendingCallbacks & kSetCapabilities) {
-        env->CallVoidMethod(obj, method_setEngineCapabilities, sEngineCapabilities);
-    }
-}
-
 static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, jobject obj,
         jintArray prnArray, jfloatArray snrArray, jfloatArray elevArray, jfloatArray azumArray,
         jintArray maskArray)
 {
-    // this should only be called from within a call to reportStatus, so we don't need to lock here
+    // this should only be called from within a call to reportSvStatus
 
     jint* prns = env->GetIntArrayElements(prnArray, 0);
     jfloat* snrs = env->GetFloatArrayElements(snrArray, 0);
@@ -412,16 +307,16 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
     jfloat* azim = env->GetFloatArrayElements(azumArray, 0);
     jint* mask = env->GetIntArrayElements(maskArray, 0);
 
-    int num_svs = sGpsSvStatusCopy.num_svs;
+    int num_svs = sGpsSvStatus.num_svs;
     for (int i = 0; i < num_svs; i++) {
-        prns[i] = sGpsSvStatusCopy.sv_list[i].prn;
-        snrs[i] = sGpsSvStatusCopy.sv_list[i].snr;
-        elev[i] = sGpsSvStatusCopy.sv_list[i].elevation;
-        azim[i] = sGpsSvStatusCopy.sv_list[i].azimuth;
+        prns[i] = sGpsSvStatus.sv_list[i].prn;
+        snrs[i] = sGpsSvStatus.sv_list[i].snr;
+        elev[i] = sGpsSvStatus.sv_list[i].elevation;
+        azim[i] = sGpsSvStatus.sv_list[i].azimuth;
     }
-    mask[0] = sGpsSvStatusCopy.ephemeris_mask;
-    mask[1] = sGpsSvStatusCopy.almanac_mask;
-    mask[2] = sGpsSvStatusCopy.used_in_fix_mask;
+    mask[0] = sGpsSvStatus.ephemeris_mask;
+    mask[1] = sGpsSvStatus.almanac_mask;
+    mask[2] = sGpsSvStatus.used_in_fix_mask;
 
     env->ReleaseIntArrayElements(prnArray, prns, 0);
     env->ReleaseFloatArrayElements(snrArray, snrs, 0);
@@ -431,23 +326,21 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
     return num_svs;
 }
 
-static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject obj, jint index, jbyteArray nmeaArray, jint buffer_size)
+static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject obj,
+                                            jbyteArray nmeaArray, jint buffer_size)
 {
-    // this should only be called from within a call to reportNmea, so we don't need to lock here
-
-    jbyte* nmea = env->GetByteArrayElements(nmeaArray, 0);
-
-    int length = strlen(sNmeaBufferCopy[index].nmea);
+    // this should only be called from within a call to reportNmea
+    jbyte* nmea = (jbyte *)env->GetPrimitiveArrayCritical(nmeaArray, 0);
+    int length = sNmeaStringLength;
     if (length > buffer_size)
         length = buffer_size;
-    memcpy(nmea, sNmeaBufferCopy[index].nmea, length);
-
-    env->ReleaseByteArrayElements(nmeaArray, nmea, 0);
+    memcpy(nmea, sNmeaString, length);
+    env->ReleasePrimitiveArrayCritical(nmeaArray, nmea, JNI_ABORT);
     return length;
 }
 
-static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobject obj, jlong time, 
-        jlong timeReference, jint uncertainty)
+static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobject obj,
+        jlong time, jlong timeReference, jint uncertainty)
 {
     sGpsInterface->inject_time(time, timeReference, uncertainty);
 }
@@ -476,9 +369,9 @@ static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, 
 static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, jobject obj,
         jbyteArray data, jint length)
 {
-    jbyte* bytes = env->GetByteArrayElements(data, 0);
+    jbyte* bytes = (jbyte *)env->GetPrimitiveArrayCritical(data, 0);
     sGpsXtraInterface->inject_xtra_data((char *)bytes, length);
-    env->ReleaseByteArrayElements(data, bytes, 0);
+    env->ReleasePrimitiveArrayCritical(data, bytes, JNI_ABORT);
 }
 
 static void android_location_GpsLocationProvider_agps_data_conn_open(JNIEnv* env, jobject obj, jstring apn)
@@ -558,15 +451,13 @@ static JNINativeMethod sMethods[] = {
     {"class_init_native", "()V", (void *)android_location_GpsLocationProvider_class_init_native},
     {"native_is_supported", "()Z", (void*)android_location_GpsLocationProvider_is_supported},
     {"native_init", "()Z", (void*)android_location_GpsLocationProvider_init},
-    {"native_disable", "()V", (void*)android_location_GpsLocationProvider_disable},
     {"native_cleanup", "()V", (void*)android_location_GpsLocationProvider_cleanup},
     {"native_set_position_mode", "(IIIII)Z", (void*)android_location_GpsLocationProvider_set_position_mode},
     {"native_start", "()Z", (void*)android_location_GpsLocationProvider_start},
     {"native_stop", "()Z", (void*)android_location_GpsLocationProvider_stop},
     {"native_delete_aiding_data", "(I)V", (void*)android_location_GpsLocationProvider_delete_aiding_data},
-    {"native_wait_for_event", "()V", (void*)android_location_GpsLocationProvider_wait_for_event},
     {"native_read_sv_status", "([I[F[F[F[I)I", (void*)android_location_GpsLocationProvider_read_sv_status},
-    {"native_read_nmea", "(I[BI)I", (void*)android_location_GpsLocationProvider_read_nmea},
+    {"native_read_nmea", "([BI)I", (void*)android_location_GpsLocationProvider_read_nmea},
     {"native_inject_time", "(JJI)V", (void*)android_location_GpsLocationProvider_inject_time},
     {"native_inject_location", "(DDF)V", (void*)android_location_GpsLocationProvider_inject_location},
     {"native_supports_xtra", "()Z", (void*)android_location_GpsLocationProvider_supports_xtra},
