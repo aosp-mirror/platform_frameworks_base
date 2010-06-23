@@ -80,6 +80,9 @@
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
 
+    <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
+    <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
