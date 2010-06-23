@@ -265,11 +265,13 @@ extends Layout
                         if (hasTab == false) {
                             hasTab = true;
                             hasTabOrEmoji = true;
-                            // First tab this para, check for tabstops
-                            TabStopSpan[] spans = spanned.getSpans(paraStart, 
-                                    paraEnd, TabStopSpan.class);
-                            if (spans.length > 0) {
-                                tabStops = new TabStops(TAB_INCREMENT, spans);
+                            if (spanned != null) {
+                                // First tab this para, check for tabstops
+                                TabStopSpan[] spans = spanned.getSpans(paraStart,
+                                        paraEnd, TabStopSpan.class);
+                                if (spans.length > 0) {
+                                    tabStops = new TabStops(TAB_INCREMENT, spans);
+                                }
                             }
                         }
                         if (tabStops != null) {
