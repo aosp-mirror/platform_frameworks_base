@@ -312,8 +312,45 @@ public class PhoneStatusBarService extends StatusBarService {
     public void addNotification(IBinder key, StatusBarNotification notification) {
         addNotificationViews(key, notification);
 
-        // show the ticker
-        tick(notification);
+        boolean immersive = false;
+        try {
+            immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
+            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+        } catch (RemoteException ex) {
+        }
+        if (immersive) {
+            if ((notification.notification.flags & Notification.FLAG_HIGH_PRIORITY) != 0) {
+                Slog.d(TAG, "Presenting high-priority notification in immersive activity");
+                // @@@ special new transient ticker mode
+                /*
+                // 1. Populate mAlertBarView
+
+                ImageView alertIcon = (ImageView) mAlertBarView.findViewById(R.id.alertIcon);
+                TextView alertText = (TextView) mAlertBarView.findViewById(R.id.alertText);
+                alertIcon.setImageDrawable(StatusBarIconView.getIcon(
+                    alertIcon.getContext(), 
+                    iconView.getStatusBarIcon()));
+                alertText.setText(notification.notification.tickerText);
+
+                // 2. Animate mAlertBarView in
+                mAlertBarView.setVisibility(View.VISIBLE);
+
+                // 3. Set alarm to age the notification off (TODO)
+                */
+            }
+        } else if (notification.notification.fullScreenIntent != null) {
+            // not immersive & a full-screen alert should be shown
+            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive; sending fullScreenIntent");
+            try {
+                notification.notification.fullScreenIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+            }
+        } else {
+            // usual case: status bar visible & not immersive
+
+            // show the ticker
+            tick(notification);
+        }
 
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
