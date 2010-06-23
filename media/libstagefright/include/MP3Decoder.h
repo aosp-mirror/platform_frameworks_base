@@ -42,6 +42,9 @@ protected:
 
 private:
     sp<MediaSource> mSource;
+    sp<MetaData> mMeta;
+    int32_t mNumChannels;
+
     bool mStarted;
 
     MediaBufferGroup *mBufferGroup;
@@ -49,9 +52,11 @@ private:
     tPVMP3DecoderExternal *mConfig;
     void *mDecoderBuf;
     int64_t mAnchorTimeUs;
-    int64_t mNumSamplesOutput;
+    int64_t mNumFramesOutput;
 
     MediaBuffer *mInputBuffer;
+
+    void init();
 
     MP3Decoder(const MP3Decoder &);
     MP3Decoder &operator=(const MP3Decoder &);

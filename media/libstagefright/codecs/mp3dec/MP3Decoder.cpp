@@ -27,13 +27,35 @@ namespace android {
 
 MP3Decoder::MP3Decoder(const sp<MediaSource> &source)
     : mSource(source),
+      mNumChannels(0),
       mStarted(false),
       mBufferGroup(NULL),
       mConfig(new tPVMP3DecoderExternal),
       mDecoderBuf(NULL),
       mAnchorTimeUs(0),
-      mNumSamplesOutput(0),
+      mNumFramesOutput(0),
       mInputBuffer(NULL) {
+    init();
+}
+
+void MP3Decoder::init() {
+    sp<MetaData> srcFormat = mSource->getFormat();
+
+    int32_t sampleRate;
+    CHECK(srcFormat->findInt32(kKeyChannelCount, &mNumChannels));
+    CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
+
+    mMeta = new MetaData;
+    mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
+    mMeta->setInt32(kKeyChannelCount, mNumChannels);
+    mMeta->setInt32(kKeySampleRate, sampleRate);
+
+    int64_t durationUs;
+    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
+        mMeta->setInt64(kKeyDuration, durationUs);
+    }
+
+    mMeta->setCString(kKeyDecoderComponent, "MP3Decoder");
 }
 
 MP3Decoder::~MP3Decoder() {
@@ -62,7 +84,7 @@ status_t MP3Decoder::start(MetaData *params) {
     mSource->start();
 
     mAnchorTimeUs = 0;
-    mNumSamplesOutput = 0;
+    mNumFramesOutput = 0;
     mStarted = true;
 
     return OK;
@@ -90,26 +112,7 @@ status_t MP3Decoder::stop() {
 }
 
 sp<MetaData> MP3Decoder::getFormat() {
-    sp<MetaData> srcFormat = mSource->getFormat();
-
-    int32_t numChannels;
-    int32_t sampleRate;
-    CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
-    CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
-
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
-    meta->setInt32(kKeyChannelCount, numChannels);
-    meta->setInt32(kKeySampleRate, sampleRate);
-
-    int64_t durationUs;
-    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
-        meta->setInt64(kKeyDuration, durationUs);
-    }
-
-    meta->setCString(kKeyDecoderComponent, "MP3Decoder");
-
-    return meta;
+    return mMeta;
 }
 
 status_t MP3Decoder::read(
@@ -122,7 +125,7 @@ status_t MP3Decoder::read(
     if (options && options->getSeekTo(&seekTimeUs)) {
         CHECK(seekTimeUs >= 0);
 
-        mNumSamplesOutput = 0;
+        mNumFramesOutput = 0;
 
         if (mInputBuffer) {
             mInputBuffer->release();
@@ -142,7 +145,7 @@ status_t MP3Decoder::read(
         int64_t timeUs;
         if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
             mAnchorTimeUs = timeUs;
-            mNumSamplesOutput = 0;
+            mNumFramesOutput = 0;
         } else {
             // We must have a new timestamp after seeking.
             CHECK(seekTimeUs < 0);
@@ -179,7 +182,7 @@ status_t MP3Decoder::read(
 
         // This is recoverable, just ignore the current frame and
         // play silence instead.
-        memset(buffer->data(), 0, mConfig->outputFrameSize);
+        memset(buffer->data(), 0, mConfig->outputFrameSize * sizeof(int16_t));
         mConfig->inputBufferUsedLength = mInputBuffer->range_length();
     }
 
@@ -198,9 +201,9 @@ status_t MP3Decoder::read(
     buffer->meta_data()->setInt64(
             kKeyTime,
             mAnchorTimeUs
-                + (mNumSamplesOutput * 1000000) / mConfig->samplingRate);
+                + (mNumFramesOutput * 1000000) / mConfig->samplingRate);
 
-    mNumSamplesOutput += mConfig->outputFrameSize / sizeof(int16_t);
+    mNumFramesOutput += mConfig->outputFrameSize / mNumChannels;
 
     *out = buffer;
 

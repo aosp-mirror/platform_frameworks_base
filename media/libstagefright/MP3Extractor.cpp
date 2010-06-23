@@ -634,6 +634,7 @@ status_t MP3Source::read(
     }
 
     size_t frame_size;
+    int bitrate;
     for (;;) {
         ssize_t n = mDataSource->readAt(mCurrentPos, buffer->data(), 4);
         if (n < 4) {
@@ -646,7 +647,7 @@ status_t MP3Source::read(
         uint32_t header = U32_AT((const uint8_t *)buffer->data());
 
         if ((header & kMask) == (mFixedHeader & kMask)
-            && get_mp3_frame_size(header, &frame_size)) {
+            && get_mp3_frame_size(header, &frame_size, NULL, NULL, &bitrate)) {
             break;
         }
 
@@ -683,7 +684,7 @@ status_t MP3Source::read(
     buffer->meta_data()->setInt64(kKeyTime, mCurrentTimeUs);
 
     mCurrentPos += frame_size;
-    mCurrentTimeUs += 1152 * 1000000 / 44100;
+    mCurrentTimeUs += frame_size * 8000ll / bitrate;
 
     *out = buffer;
 
