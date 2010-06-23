@@ -92,7 +92,8 @@ AudioTrack::AudioTrack(
     : mStatus(NO_INIT)
 {
     mStatus = set(streamType, sampleRate, format, channels,
-            frameCount, flags, cbf, user, notificationFrames, 0);
+            frameCount, flags, cbf, user, notificationFrames,
+            0, false, sessionId);
 }
 
 AudioTrack::AudioTrack(
@@ -109,7 +110,8 @@ AudioTrack::AudioTrack(
     : mStatus(NO_INIT)
 {
     mStatus = set(streamType, sampleRate, format, channels,
-            0, flags, cbf, user, notificationFrames, sharedBuffer);
+            0, flags, cbf, user, notificationFrames,
+            sharedBuffer, false, sessionId);
 }
 
 AudioTrack::~AudioTrack()

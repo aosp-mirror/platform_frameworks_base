@@ -55,6 +55,7 @@ MediaPlayer::MediaPlayer()
     mLeftVolume = mRightVolume = 1.0;
     mVideoWidth = mVideoHeight = 0;
     mLockThreadId = 0;
+    mAudioSessionId = AudioSystem::newAudioSessionId();
 }
 
 MediaPlayer::~MediaPlayer()
@@ -137,7 +138,7 @@ status_t MediaPlayer::setDataSource(
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
             sp<IMediaPlayer> player(
-                    service->create(getpid(), this, url, headers));
+                    service->create(getpid(), this, url, headers, mAudioSessionId));
             err = setDataSource(player);
         }
     }
@@ -150,7 +151,7 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     status_t err = UNKNOWN_ERROR;
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
-        sp<IMediaPlayer> player(service->create(getpid(), this, fd, offset, length));
+        sp<IMediaPlayer> player(service->create(getpid(), this, fd, offset, length, mAudioSessionId));
         err = setDataSource(player);
     }
     return err;
@@ -499,6 +500,27 @@ status_t MediaPlayer::setVolume(float leftVolume, float rightVolume)
         return mPlayer->setVolume(leftVolume, rightVolume);
     }
     return OK;
+}
+
+status_t MediaPlayer::setAudioSessionId(int sessionId)
+{
+    LOGV("MediaPlayer::setAudioSessionId(%d)", sessionId);
+    Mutex::Autolock _l(mLock);
+    if (!(mCurrentState & MEDIA_PLAYER_IDLE)) {
+        LOGE("setAudioSessionId called in state %d", mCurrentState);
+        return INVALID_OPERATION;
+    }
+    if (sessionId < 0) {
+        return BAD_VALUE;
+    }
+    mAudioSessionId = sessionId;
+    return NO_ERROR;
+}
+
+int MediaPlayer::getAudioSessionId()
+{
+    Mutex::Autolock _l(mLock);
+    return mAudioSessionId;
 }
 
 void MediaPlayer::notify(int msg, int ext1, int ext2)

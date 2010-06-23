@@ -292,7 +292,7 @@ static void setVideoSurface(const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz
     if (surface != NULL) {
         const sp<Surface> native_surface = get_surface(env, surface);
         LOGV("prepare: surface=%p (id=%d)",
-             native_surface.get(), native_surface->ID());
+             native_surface.get(), native_surface->getIdentity());
         mp->setVideoSurface(native_surface);
     }
 }
@@ -332,7 +332,7 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
     if (surface != NULL) {
         const sp<Surface> native_surface = get_surface(env, surface);
         LOGV("prepareAsync: surface=%p (id=%d)",
-             native_surface.get(), native_surface->ID());
+             native_surface.get(), native_surface->getIdentity());
         mp->setVideoSurface(native_surface);
     }
     process_media_player_call( env, thiz, mp->prepareAsync(), "java/io/IOException", "Prepare Async failed." );
@@ -705,6 +705,27 @@ android_media_MediaPlayer_native_suspend_resume(
     return isSuspend ? mp->suspend() : mp->resume();
 }
 
+static void android_media_MediaPlayer_set_audio_session_id(JNIEnv *env,  jobject thiz, jint sessionId) {
+    LOGV("set_session_id(): %d", sessionId);
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    process_media_player_call( env, thiz, mp->setAudioSessionId(sessionId), NULL, NULL );
+}
+
+static jint android_media_MediaPlayer_get_audio_session_id(JNIEnv *env,  jobject thiz) {
+    LOGV("get_session_id()");
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+
+    return mp->getAudioSessionId();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -738,6 +759,8 @@ static JNINativeMethod gMethods[] = {
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"snoop",               "([SI)I",                           (void *)android_media_MediaPlayer_snoop},
     {"native_suspend_resume", "(Z)I",                           (void *)android_media_MediaPlayer_native_suspend_resume},
+    {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
+    {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

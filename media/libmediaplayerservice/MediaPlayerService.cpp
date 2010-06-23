@@ -252,11 +252,12 @@ sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever(pid_t pi
 
 sp<IMediaPlayer> MediaPlayerService::create(
         pid_t pid, const sp<IMediaPlayerClient>& client, const char* url,
-        const KeyedVector<String8, String8> *headers)
+        const KeyedVector<String8, String8> *headers, int audioSessionId)
 {
     int32_t connId = android_atomic_inc(&mNextConnId);
-    sp<Client> c = new Client(this, pid, connId, client);
-    LOGV("Create new client(%d) from pid %d, url=%s, connId=%d", connId, pid, url, connId);
+    sp<Client> c = new Client(this, pid, connId, client, audioSessionId);
+    LOGV("Create new client(%d) from pid %d, url=%s, connId=%d, audioSessionId=%d",
+            connId, pid, url, connId, audioSessionId);
     if (NO_ERROR != c->setDataSource(url, headers))
     {
         c.clear();
@@ -269,12 +270,12 @@ sp<IMediaPlayer> MediaPlayerService::create(
 }
 
 sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClient>& client,
-        int fd, int64_t offset, int64_t length)
+        int fd, int64_t offset, int64_t length, int audioSessionId)
 {
     int32_t connId = android_atomic_inc(&mNextConnId);
-    sp<Client> c = new Client(this, pid, connId, client);
-    LOGV("Create new client(%d) from pid %d, fd=%d, offset=%lld, length=%lld",
-            connId, pid, fd, offset, length);
+    sp<Client> c = new Client(this, pid, connId, client, audioSessionId);
+    LOGV("Create new client(%d) from pid %d, fd=%d, offset=%lld, length=%lld, audioSessionId=%d",
+            connId, pid, fd, offset, length, audioSessionId);
     if (NO_ERROR != c->setDataSource(fd, offset, length)) {
         c.clear();
     } else {
@@ -609,7 +610,7 @@ void MediaPlayerService::removeClient(wp<Client> client)
 }
 
 MediaPlayerService::Client::Client(const sp<MediaPlayerService>& service, pid_t pid,
-        int32_t connId, const sp<IMediaPlayerClient>& client)
+        int32_t connId, const sp<IMediaPlayerClient>& client, int audioSessionId)
 {
     LOGV("Client(%d) constructor", connId);
     mPid = pid;
@@ -618,6 +619,8 @@ MediaPlayerService::Client::Client(const sp<MediaPlayerService>& service, pid_t 
     mClient = client;
     mLoop = false;
     mStatus = NO_INIT;
+    mAudioSessionId = audioSessionId;
+
 #if CALLBACK_ANTAGONIZER
     LOGD("create Antagonizer");
     mAntagonizer = new Antagonizer(notify, this);
@@ -871,7 +874,7 @@ status_t MediaPlayerService::Client::setDataSource(
         if (p == NULL) return NO_INIT;
 
         if (!p->hardwareOutput()) {
-            mAudioOutput = new AudioOutput();
+            mAudioOutput = new AudioOutput(mAudioSessionId);
             static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);
         }
 
@@ -921,7 +924,7 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
     if (p == NULL) return NO_INIT;
 
     if (!p->hardwareOutput()) {
-        mAudioOutput = new AudioOutput();
+        mAudioOutput = new AudioOutput(mAudioSessionId);
         static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);
     }
 
@@ -1412,9 +1415,11 @@ sp<IMemory> MediaPlayerService::snoop()
 
 #undef LOG_TAG
 #define LOG_TAG "AudioSink"
-MediaPlayerService::AudioOutput::AudioOutput()
+MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
     : mCallback(NULL),
-      mCallbackCookie(NULL) {
+      mCallbackCookie(NULL),
+      mSessionId(sessionId) {
+    LOGV("AudioOutput(%d)", sessionId);
     mTrack = 0;
     mStreamType = AudioSystem::MUSIC;
     mLeftVolume = 1.0;
@@ -1504,7 +1509,7 @@ status_t MediaPlayerService::AudioOutput::open(
         bufferCount = mMinBufferCount;
 
     }
-    LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
+    LOGV("open(%u, %d, %d, %d, %d)", sampleRate, channelCount, format, bufferCount,mSessionId);
     if (mTrack) close();
     int afSampleRate;
     int afFrameCount;
@@ -1529,14 +1534,21 @@ status_t MediaPlayerService::AudioOutput::open(
                 frameCount,
                 0 /* flags */,
                 CallbackWrapper,
-                this);
+                this,
+                0,
+                mSessionId);
     } else {
         t = new AudioTrack(
                 mStreamType,
                 sampleRate,
                 format,
                 (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
-                frameCount);
+                frameCount,
+                0,
+                NULL,
+                NULL,
+                0,
+                mSessionId);
     }
 
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
