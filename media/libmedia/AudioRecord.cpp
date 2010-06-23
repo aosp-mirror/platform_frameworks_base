@@ -41,6 +41,38 @@
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 namespace android {
+// ---------------------------------------------------------------------------
+
+// static
+status_t AudioRecord::getMinFrameCount(
+        int* frameCount,
+        uint32_t sampleRate,
+        int format,
+        int channelCount)
+{
+    size_t size = 0;
+    if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &size)
+            != NO_ERROR) {
+        LOGE("AudioSystem could not query the input buffer size.");
+        return NO_INIT;
+    }
+
+    if (size == 0) {
+        LOGE("Unsupported configuration: sampleRate %d, format %d, channelCount %d",
+            sampleRate, format, channelCount);
+        return BAD_VALUE;
+    }
+
+    // We double the size of input buffer for ping pong use of record buffer.
+    size <<= 1;
+
+    if (AudioSystem::isLinearPCM(format)) {
+        size /= channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
+    }
+
+    *frameCount = size;
+    return NO_ERROR;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -132,29 +164,11 @@ status_t AudioRecord::set(
     }
 
     // validate framecount
-    size_t inputBuffSizeInBytes = -1;
-    if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &inputBuffSizeInBytes)
-            != NO_ERROR) {
-        LOGE("AudioSystem could not query the input buffer size.");
-        return NO_INIT;
+    int minFrameCount = 0;
+    status_t status = getMinFrameCount(&minFrameCount, sampleRate, format, channelCount);
+    if (status != NO_ERROR) {
+        return status;
     }
-
-    if (inputBuffSizeInBytes == 0) {
-        LOGE("Recording parameters are not supported: sampleRate %d, channelCount %d, format %d",
-            sampleRate, channelCount, format);
-        return BAD_VALUE;
-    }
-
-    int frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
-    if (AudioSystem::isLinearPCM(format)) {
-        frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? sizeof(int16_t) : sizeof(int8_t));
-    } else {
-        frameSizeInBytes = sizeof(int8_t);
-    }
-
-
-    // We use 2* size of input buffer for ping pong use of record buffer.
-    int minFrameCount = 2 * inputBuffSizeInBytes / frameSizeInBytes;
     LOGV("AudioRecord::set() minFrameCount = %d", minFrameCount);
 
     if (frameCount == 0) {
@@ -170,9 +184,8 @@ status_t AudioRecord::set(
     mSessionId = sessionId;
 
     // create the IAudioRecord
-    status_t status = openRecord(sampleRate, format, channelCount,
-                                 frameCount, flags, input);
-
+    status = openRecord(sampleRate, format, channelCount,
+                        frameCount, flags, input);
     if (status != NO_ERROR) {
         return status;
     }
