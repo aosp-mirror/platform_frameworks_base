@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "OMXMaster"
+#include <utils/Log.h>
+
 #include "OMXMaster.h"
 
 #include <dlfcn.h>
