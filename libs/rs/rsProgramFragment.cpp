@@ -97,7 +97,7 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
             }
             glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
 #endif //ANDROID_RS_BUILD_FOR_HOST
-            
+
         }
         mTextures[ct]->uploadCheck(rsc);
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
@@ -153,7 +153,7 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
 
     //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
-        //return;
+        return;
     }
     state->mLast.set(this);
 
@@ -300,7 +300,7 @@ void ProgramFragment::init(Context *rsc)
 
 void ProgramFragment::serialize(OStream *stream) const
 {
-    
+
 }
 
 ProgramFragment *ProgramFragment::createFromStream(Context *rsc, IStream *stream)
