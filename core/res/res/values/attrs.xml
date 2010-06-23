@@ -3585,6 +3585,9 @@
         <!-- A class name in the AppWidget's package to be launched to configure.
              If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
+        <!-- A preview of what the AppWidget will look like after it's configured.
+       	     If not supplied, the AppWidget's icon will be used. -->
+        <attr name="previewImage" format="reference" />
     </declare-styleable>
 
     <!-- =============================== -->

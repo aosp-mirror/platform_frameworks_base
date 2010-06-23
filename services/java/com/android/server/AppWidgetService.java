@@ -741,6 +741,9 @@ class AppWidgetService extends IAppWidgetService.Stub
             }
             info.label = activityInfo.loadLabel(mPackageManager).toString();
             info.icon = ri.getIconResource();
+            info.previewImage = sa.getResourceId(
+            		com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
+
             sa.recycle();
         } catch (Exception e) {
             // Ok to catch Exception here, because anything going wrong because

@@ -110,6 +110,17 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @hide Pending API approval
      */
     public String oldName;
+    
+    /**
+     * A preview of what the AppWidget will look like after it's configured.
+     * If not supplied, the AppWidget's icon will be used.
+     *
+     * <p>This field corresponds to the <code>android:previewImage</code> attribute in
+     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     * 
+     * @hide Pending API approval
+     */
+	public int previewImage;
 
     public AppWidgetProviderInfo() {
     }
@@ -130,6 +141,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         }
         this.label = in.readString();
         this.icon = in.readInt();
+        this.previewImage = in.readInt();
     }
 
 
@@ -152,6 +164,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         }
         out.writeString(this.label);
         out.writeInt(this.icon);
+        out.writeInt(this.previewImage);
     }
 
     public int describeContents() {
