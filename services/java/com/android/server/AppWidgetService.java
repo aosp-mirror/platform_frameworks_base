@@ -1204,6 +1204,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                             // If it's currently showing, call back with the new AppWidgetProviderInfo.
                             for (int j=0; j<M; j++) {
                                 AppWidgetId id = p.instances.get(j);
+                                id.views = null;
                                 if (id.host != null && id.host.callbacks != null) {
                                     try {
                                         id.host.callbacks.providerChanged(id.appWidgetId, p.info);
