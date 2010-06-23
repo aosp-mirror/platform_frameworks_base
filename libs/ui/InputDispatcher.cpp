@@ -1440,6 +1440,7 @@ void InputDispatcher::Allocator::initializeEventEntry(EventEntry* entry, int32_t
     entry->type = type;
     entry->refCount = 1;
     entry->dispatchInProgress = false;
+    entry->eventTime = eventTime;
     entry->injectionResult = INPUT_EVENT_INJECTION_PENDING;
     entry->injectorPid = -1;
     entry->injectorUid = -1;
