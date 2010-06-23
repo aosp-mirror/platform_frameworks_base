@@ -2076,6 +2076,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
 
                 if (y != mLastY) {
+                    // We may be here after stopping a fling and continuing to scroll.
+                    // If so, we haven't disallowed intercepting touch events yet.
+                    // Make sure that we do so in case we're in a parent that can intercept.
+                    if ((mGroupFlags & FLAG_DISALLOW_INTERCEPT) == 0 &&
+                            Math.abs(deltaY) > mTouchSlop) {
+                        requestDisallowInterceptTouchEvent(true);
+                    }
+
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
                     
