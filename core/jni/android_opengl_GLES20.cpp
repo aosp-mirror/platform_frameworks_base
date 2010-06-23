@@ -823,6 +823,18 @@ android_glDrawArrays__III
     );
 }
 
+/* void glDrawElements ( GLenum mode, GLsizei count, GLenum type, GLint offset ) */
+static void
+android_glDrawElements__IIII
+  (JNIEnv *_env, jobject _this, jint mode, jint count, jint type, jint offset) {
+    glDrawElements(
+        (GLenum)mode,
+        (GLsizei)count,
+        (GLenum)type,
+        (const GLvoid *)offset
+    );
+}
+
 /* void glDrawElements ( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices ) */
 static void
 android_glDrawElements__IIILjava_nio_Buffer_2
@@ -4786,6 +4798,20 @@ android_glVertexAttrib4fv__ILjava_nio_FloatBuffer_2
     }
 }
 
+/* void glVertexAttribPointer ( GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLint offset ) */
+static void
+android_glVertexAttribPointer__IIIZII
+  (JNIEnv *_env, jobject _this, jint indx, jint size, jint type, jboolean normalized, jint stride, jint offset) {
+    glVertexAttribPointer(
+        (GLuint)indx,
+        (GLint)size,
+        (GLenum)type,
+        (GLboolean)normalized,
+        (GLsizei)stride,
+        (const GLvoid *)offset
+    );
+}
+
 /* void glVertexAttribPointer ( GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *ptr ) */
 static void
 android_glVertexAttribPointerBounds__IIIZILjava_nio_Buffer_2I
@@ -4872,6 +4898,7 @@ static JNINativeMethod methods[] = {
 {"glDisable", "(I)V", (void *) android_glDisable__I },
 {"glDisableVertexAttribArray", "(I)V", (void *) android_glDisableVertexAttribArray__I },
 {"glDrawArrays", "(III)V", (void *) android_glDrawArrays__III },
+{"glDrawElements", "(IIII)V", (void *) android_glDrawElements__IIII },
 {"glDrawElements", "(IIILjava/nio/Buffer;)V", (void *) android_glDrawElements__IIILjava_nio_Buffer_2 },
 {"glEnable", "(I)V", (void *) android_glEnable__I },
 {"glEnableVertexAttribArray", "(I)V", (void *) android_glEnableVertexAttribArray__I },
@@ -5011,6 +5038,7 @@ static JNINativeMethod methods[] = {
 {"glVertexAttrib4f", "(IFFFF)V", (void *) android_glVertexAttrib4f__IFFFF },
 {"glVertexAttrib4fv", "(I[FI)V", (void *) android_glVertexAttrib4fv__I_3FI },
 {"glVertexAttrib4fv", "(ILjava/nio/FloatBuffer;)V", (void *) android_glVertexAttrib4fv__ILjava_nio_FloatBuffer_2 },
+{"glVertexAttribPointer", "(IIIZII)V", (void *) android_glVertexAttribPointer__IIIZII },
 {"glVertexAttribPointerBounds", "(IIIZILjava/nio/Buffer;I)V", (void *) android_glVertexAttribPointerBounds__IIIZILjava_nio_Buffer_2I },
 {"glViewport", "(IIII)V", (void *) android_glViewport__IIII },
 };
