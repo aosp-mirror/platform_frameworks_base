@@ -528,7 +528,6 @@ int EventHub::open_device(const char *deviceName)
         if (strcmp(name, test) == 0) {
             LOGI("ignoring event id %s driver %s\n", deviceName, test);
             close(fd);
-            fd = -1;
             return -1;
         }
     }
@@ -735,6 +734,14 @@ int EventHub::open_device(const char *deviceName)
         
         LOGI("New keyboard: device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
                 device->id, name, propName, keylayoutFilename);
+    }
+
+    // If the device isn't recognized as something we handle, don't monitor it.
+    if (device->classes == 0) {
+        LOGV("Dropping device %s %p, id = %d\n", deviceName, device, devid);
+        close(fd);
+        delete device;
+        return -1;
     }
 
     LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",
