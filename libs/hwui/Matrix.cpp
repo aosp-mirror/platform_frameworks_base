@@ -140,10 +140,12 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
 }
 
 void Matrix4::dump() const {
-	LOGD("%f %f %f %f", mMat[0], mMat[4], mMat[ 8], mMat[12]);
-	LOGD("%f %f %f %f", mMat[1], mMat[5], mMat[ 9], mMat[13]);
-	LOGD("%f %f %f %f", mMat[2], mMat[6], mMat[10], mMat[14]);
-	LOGD("%f %f %f %f", mMat[3], mMat[7], mMat[11], mMat[15]);
+	LOGD("Matrix4[");
+	LOGD("  %f %f %f %f", mMat[0], mMat[4], mMat[ 8], mMat[12]);
+	LOGD("  %f %f %f %f", mMat[1], mMat[5], mMat[ 9], mMat[13]);
+	LOGD("  %f %f %f %f", mMat[2], mMat[6], mMat[10], mMat[14]);
+	LOGD("  %f %f %f %f", mMat[3], mMat[7], mMat[11], mMat[15]);
+	LOGD("]");
 }
 
 };

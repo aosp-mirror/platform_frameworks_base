@@ -54,7 +54,47 @@ static void android_view_GLES20Renderer_prepare(JNIEnv* env, jobject canvas, jin
 }
 
 // ----------------------------------------------------------------------------
-// Draw color
+// State
+// ----------------------------------------------------------------------------
+
+static jint android_view_GLES20Renderer_save(JNIEnv* env, jobject canvas, jint renderer,
+        jint flags) {
+
+    return UI->save(flags);
+}
+
+static jint android_view_GLES20Renderer_getSaveCount(JNIEnv* env, jobject canvas, jint renderer) {
+    return UI->getSaveCount();
+}
+
+static void android_view_GLES20Renderer_restore(JNIEnv* env, jobject canvas, jint renderer) {
+    UI->restore();
+}
+
+static void android_view_GLES20Renderer_restoreToCount(JNIEnv* env, jobject canvas, jint renderer,
+        jint saveCount) {
+
+    UI->restoreToCount(saveCount);
+}
+
+// ----------------------------------------------------------------------------
+// Clipping
+// ----------------------------------------------------------------------------
+
+static bool android_view_GLES20Renderer_clipRectF(JNIEnv* env, jobject canvas, jint renderer,
+        jfloat left, jfloat top, jfloat right, jfloat bottom) {
+
+    return UI->clipRect(left, top, right, bottom);
+}
+
+static bool android_view_GLES20Renderer_clipRect(JNIEnv* env, jobject canvas, jint renderer,
+        jint left, jint top, jint right, jint bottom) {
+
+    return UI->clipRect(float(left), float(top), float(right), float(bottom));
+}
+
+// ----------------------------------------------------------------------------
+// Drawing
 // ----------------------------------------------------------------------------
 
 static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas, jint renderer,
@@ -70,12 +110,20 @@ static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas, j
 const char* const kClassPathName = "android/view/GLES20Canvas";
 
 static JNINativeMethod gMethods[] = {
-    {   "nCreateRenderer",    "()I",     (void*) android_view_GLES20Renderer_createRenderer },
-    {   "nDestroyRenderer",   "(I)V",    (void*) android_view_GLES20Renderer_destroyRenderer },
-    {   "nSetViewport",       "(III)V",  (void*) android_view_GLES20Renderer_setViewport },
-    {   "nPrepare",           "(I)V",    (void*) android_view_GLES20Renderer_prepare },
+    {   "nCreateRenderer",    "()I",      (void*) android_view_GLES20Renderer_createRenderer },
+    {   "nDestroyRenderer",   "(I)V",     (void*) android_view_GLES20Renderer_destroyRenderer },
+    {   "nSetViewport",       "(III)V",   (void*) android_view_GLES20Renderer_setViewport },
+    {   "nPrepare",           "(I)V",     (void*) android_view_GLES20Renderer_prepare },
 
-    {   "nDrawColor",         "(III)V",  (void*) android_view_GLES20Renderer_drawColor },
+    {   "nSave",              "(II)I",    (void*) android_view_GLES20Renderer_save },
+    {   "nRestore",           "(I)V",     (void*) android_view_GLES20Renderer_restore },
+    {   "nRestoreToCount",    "(II)V",    (void*) android_view_GLES20Renderer_restoreToCount },
+    {   "nGetSaveCount",      "(I)I",     (void*) android_view_GLES20Renderer_getSaveCount },
+
+    {   "nClipRect",          "(IFFFF)Z", (void*) android_view_GLES20Renderer_clipRectF },
+    {   "nClipRect",          "(IIIII)Z", (void*) android_view_GLES20Renderer_clipRect },
+
+    {   "nDrawColor",         "(III)V",   (void*) android_view_GLES20Renderer_drawColor },
 };
 
 int register_android_view_GLES20Canvas(JNIEnv* env) {

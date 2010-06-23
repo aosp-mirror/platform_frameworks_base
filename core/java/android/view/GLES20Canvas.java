@@ -137,9 +137,10 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean clipRect(float left, float top, float right, float bottom) {
-        // TODO: Implement
-        return false;
+        return nClipRect(mRenderer, left, top, right, bottom);
     }
+    
+    private native boolean nClipRect(int renderer, float left, float top, float right, float bottom);
 
     @Override
     public boolean clipRect(float left, float top, float right, float bottom, Region.Op op) {
@@ -148,14 +149,14 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean clipRect(int left, int top, int right, int bottom) {
-        // TODO: Implement
-        return false;        
+        return nClipRect(mRenderer, left, top, right, bottom);        
     }
+    
+    private native boolean nClipRect(int renderer, int left, int top, int right, int bottom);
 
     @Override
     public boolean clipRect(Rect rect) {
-        // TODO: Implement
-        return false;        
+        return clipRect(rect.left, rect.top, rect.right, rect.bottom);        
     }
 
     @Override
@@ -165,8 +166,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean clipRect(RectF rect) {
-        // TODO: Implement
-        return false;        
+        return clipRect(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     @Override
@@ -198,14 +198,12 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean quickReject(Path path, EdgeType type) {
-        // TODO: Implement
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean quickReject(RectF rect, EdgeType type) {
-        // TODO: Implement
-        return false;
+        return quickReject(rect.left, rect.top, rect.right, rect.bottom, type);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -254,16 +252,16 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public int save() {
-        // TODO: Implement
-        return 0;
+        return nSave(mRenderer, 0);
     }
-
+    
     @Override
     public int save(int saveFlags) {
-        // TODO: Implement
-        return 0;
+        return nSave(mRenderer, saveFlags);
     }
 
+    private native int nSave(int renderer, int flags);
+    
     @Override
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
         // TODO: Implement
@@ -292,19 +290,24 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void restore() {
-        // TODO: Implement
+        nRestore(mRenderer);
     }
+    
+    private native void nRestore(int renderer);
 
     @Override
     public void restoreToCount(int saveCount) {
-        // TODO: Implement
+        nRestoreToCount(mRenderer, saveCount);
     }
 
+    private native void nRestoreToCount(int renderer, int saveCount);
+    
     @Override
     public int getSaveCount() {
-        // TODO: Implement
-        return 0;
+        return nGetSaveCount(mRenderer);
     }
+    
+    private native int nGetSaveCount(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Filtering

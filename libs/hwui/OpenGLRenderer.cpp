@@ -35,6 +35,9 @@ namespace android {
 
 OpenGLRenderer::OpenGLRenderer() {
     LOGD("Create OpenGLRenderer");
+
+    mSnapshot = new Snapshot;
+    mSaveCount = 0;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -47,13 +50,80 @@ void OpenGLRenderer::setViewport(int width, int height) {
     mat4 ortho;
     ortho.loadOrtho(0, width, height, 0, 0, 1);
     ortho.copyTo(mOrthoMatrix);
+
+    mWidth = width;
+    mHeight = height;
 }
 
 void OpenGLRenderer::prepare() {
     glDisable(GL_SCISSOR_TEST);
+
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
     glEnable(GL_SCISSOR_TEST);
+    mSnapshot->clipRect.set(0.0f, 0.0f, mWidth, mHeight);
+}
+
+int OpenGLRenderer::getSaveCount() const {
+	return mSaveCount;
+}
+
+int OpenGLRenderer::save(int flags) {
+	return saveSnapshot();
+}
+
+void OpenGLRenderer::restore() {
+	if (mSaveCount == 0) return;
+
+	if (restoreSnapshot()) {
+		setScissorFromClip();
+	}
+}
+
+void OpenGLRenderer::restoreToCount(int saveCount) {
+	if (saveCount <= 0 || saveCount > mSaveCount) return;
+
+	bool restoreClip = false;
+
+	while (mSaveCount != saveCount - 1) {
+		restoreClip |= restoreSnapshot();
+	}
+
+	if (restoreClip) {
+		setScissorFromClip();
+	}
+}
+
+int OpenGLRenderer::saveSnapshot() {
+	mSnapshot = new Snapshot(mSnapshot);
+	mSaveCount++;
+	return mSaveCount;
+}
+
+bool OpenGLRenderer::restoreSnapshot() {
+	// TODO: handle local transformations
+	bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
+
+	mSaveCount--;
+	mSnapshot = mSnapshot->previous;
+
+	return restoreClip;
+}
+
+void OpenGLRenderer::setScissorFromClip() {
+	Rect clip = mSnapshot->clipRect;
+	glScissor(clip.left, clip.top, clip.getWidth(), clip.getHeight());
+}
+
+bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) {
+	// TODO: take local translate transform into account
+	bool clipped = mSnapshot->clipRect.intersect(left, top, right, bottom);
+	if (clipped) {
+		mSnapshot->flags |= Snapshot::kFlagClipSet;
+		setScissorFromClip();
+	}
+	return clipped;
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
