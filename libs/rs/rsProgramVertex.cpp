@@ -221,7 +221,7 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
 {
     //LOGE("sgl2 vtx1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
-        //return;
+        return;
     }
 
     rsc->checkError("ProgramVertex::setupGL2 start");
