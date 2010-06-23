@@ -211,6 +211,11 @@ typedef void* GLeglImageOES;
 #define GL_VERTEX_ARRAY_BINDING_OES                             0x85B5
 #endif
 
+/* GL_OES_texture_external */
+#ifndef GL_TEXTURE_EXTERNAL_OES
+#define GL_TEXTURE_EXTERNAL_OES                                 0x8D65
+#endif
+
 /*------------------------------------------------------------------------*
  * AMD extension tokens
  *------------------------------------------------------------------------*/
@@ -775,6 +780,11 @@ typedef void (GL_APIENTRYP PFNGLBINDVERTEXARRAYOESPROC) (GLuint array);
 typedef void (GL_APIENTRYP PFNGLDELETEVERTEXARRAYSOESPROC) (GLsizei n, const GLuint *arrays);
 typedef void (GL_APIENTRYP PFNGLGENVERTEXARRAYSOESPROC) (GLsizei n, GLuint *arrays);
 typedef GLboolean (GL_APIENTRYP PFNGLISVERTEXARRAYOESPROC) (GLuint array);
+#endif
+
+/* GL_OES_texture_external */
+#ifndef GL_OES_texture_external
+#define GL_OES_texture_external 1
 #endif
 
 /*------------------------------------------------------------------------*
