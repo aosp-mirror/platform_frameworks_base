@@ -311,6 +311,10 @@ public interface IActivityManager extends IInterface {
     public boolean isUserAMonkey() throws RemoteException;
     
     public void finishHeavyWeightApp() throws RemoteException;
+
+    public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
+    public boolean isImmersive(IBinder token) throws RemoteException;
+    public boolean isTopActivityImmersive() throws RemoteException;
     
     /*
      * Private non-Binder interfaces
@@ -524,4 +528,7 @@ public interface IActivityManager extends IInterface {
     int GET_RUNNING_EXTERNAL_APPLICATIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+107;
     int FINISH_HEAVY_WEIGHT_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+108;
     int HANDLE_APPLICATION_STRICT_MODE_VIOLATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+109;
+    int IS_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+110;
+    int SET_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+111;
+    int IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+112;
 }

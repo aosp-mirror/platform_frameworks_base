@@ -8725,6 +8725,35 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public void setImmersive(IBinder token, boolean immersive) {
+        synchronized(this) {
+            int index = (token != null) ? indexOfTokenLocked(token) : -1;
+            if (index < 0) {
+                throw new IllegalArgumentException();
+            }
+            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            r.immersive = immersive;
+        }
+    }
+
+    public boolean isImmersive(IBinder token) {
+        synchronized (this) {
+            int index = (token != null) ? indexOfTokenLocked(token) : -1;
+            if (index < 0) {
+                throw new IllegalArgumentException();
+            }
+            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            return r.immersive;
+        }
+    }
+
+    public boolean isTopActivityImmersive() {
+        synchronized (this) {
+            HistoryRecord r = topRunningActivityLocked(null);
+            return (r != null) ? r.immersive : false;
+        }
+    }
+
     public final void enterSafeMode() {
         synchronized(this) {
             // It only makes sense to do this before the system is ready
