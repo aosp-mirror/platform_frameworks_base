@@ -93,6 +93,7 @@ class ServerThread extends Thread {
         BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
         DockObserver dock = null;
+        UsbObserver usb = null;
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
@@ -365,8 +366,16 @@ class ServerThread extends Thread {
             }
 
             try {
+                Slog.i(TAG, "USB Observer");
+                // Listen for USB changes
+                usb = new UsbObserver(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting UsbObserver", e);
+            }
+
+            try {
                 Slog.i(TAG, "UI Mode Manager Service");
-                // Listen for dock station changes
+                // Listen for UI mode changes
                 uiMode = new UiModeManagerService(context);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting UiModeManagerService", e);
@@ -465,6 +474,7 @@ class ServerThread extends Thread {
         final BatteryService batteryF = battery;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
+        final UsbObserver usbF = usb;
         final ThrottleService throttleF = throttle;
         final UiModeManagerService uiModeF = uiMode;
         final AppWidgetService appWidgetF = appWidget;
@@ -487,6 +497,7 @@ class ServerThread extends Thread {
                 if (batteryF != null) batteryF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
+                if (usbF != null) usbF.systemReady();
                 if (uiModeF != null) uiModeF.systemReady();
                 if (recognitionF != null) recognitionF.systemReady();
                 Watchdog.getInstance().start();
