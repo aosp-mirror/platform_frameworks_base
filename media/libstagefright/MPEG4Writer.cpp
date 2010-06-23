@@ -559,6 +559,11 @@ int64_t MPEG4Writer::getStartTimestampUs() {
     return mStartTimestampUs;
 }
 
+size_t MPEG4Writer::numTracks() {
+    Mutex::Autolock autolock(mLock);
+    return mTracks.size();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG4Writer::Track::Track(
@@ -979,6 +984,16 @@ void MPEG4Writer::Track::threadEntry() {
             mStssTableEntries.push_back(mSampleInfos.size());
         }
 
+        if (mOwner->numTracks() == 1) {
+            off_t offset = is_avc? mOwner->addLengthPrefixedSample_l(copy)
+                                 : mOwner->addSample_l(copy);
+            if (mChunkOffsets.empty()) {
+                mChunkOffsets.push_back(offset);
+            }
+            copy->release();
+            copy = NULL;
+            continue;
+        }
 
         mChunkSamples.push_back(copy);
         if (interleaveDurationUs == 0) {
@@ -1012,7 +1027,10 @@ void MPEG4Writer::Track::threadEntry() {
     }
 
     // Last chunk
-    if (!mChunkSamples.empty()) {
+    if (mOwner->numTracks() == 1) {
+        StscTableEntry stscEntry(1, mSampleInfos.size(), 1);
+        mStscTableEntries.push_back(stscEntry);
+    } else if (!mChunkSamples.empty()) {
         ++nChunks;
         StscTableEntry stscEntry(nChunks, mChunkSamples.size(), 1);
         mStscTableEntries.push_back(stscEntry);
