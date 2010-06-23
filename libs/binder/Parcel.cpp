@@ -19,6 +19,7 @@
 
 #include <binder/Parcel.h>
 
+#include <binder/IPCThreadState.h>
 #include <binder/Binder.h>
 #include <binder/BpBinder.h>
 #include <utils/Debug.h>
@@ -436,19 +437,22 @@ bool Parcel::hasFileDescriptors() const
     return mHasFds;
 }
 
+// Write RPC headers.  (previously just the interface token)
 status_t Parcel::writeInterfaceToken(const String16& interface)
 {
+    writeInt32(IPCThreadState::self()->getStrictModePolicy());
     // currently the interface identification token is just its name as a string
     return writeString16(interface);
 }
 
 bool Parcel::checkInterface(IBinder* binder) const
 {
-    return enforceInterface(binder->getInterfaceDescriptor()); 
+    return enforceInterface(binder->getInterfaceDescriptor());
 }
 
 bool Parcel::enforceInterface(const String16& interface) const
 {
+    int32_t strict_policy = readInt32();
     const String16 str(readString16());
     if (str == interface) {
         return true;
@@ -457,7 +461,7 @@ bool Parcel::enforceInterface(const String16& interface) const
                 String8(interface).string(), String8(str).string());
         return false;
     }
-} 
+}
 
 const size_t* Parcel::objects() const
 {

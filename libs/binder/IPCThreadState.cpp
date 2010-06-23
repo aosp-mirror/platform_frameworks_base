@@ -367,6 +367,16 @@ int64_t IPCThreadState::clearCallingIdentity()
     return token;
 }
 
+void IPCThreadState::setStrictModePolicy(int32_t policy)
+{
+    mStrictModePolicy = policy;
+}
+
+
+int32_t IPCThreadState::getStrictModePolicy() const {
+    return mStrictModePolicy;
+}
+
 void IPCThreadState::restoreCallingIdentity(int64_t token)
 {
     mCallingUid = (int)(token>>32);
@@ -588,7 +598,8 @@ status_t IPCThreadState::clearDeathNotification(int32_t handle, BpBinder* proxy)
 }
 
 IPCThreadState::IPCThreadState()
-    : mProcess(ProcessState::self()), mMyThreadId(androidGetTid())
+    : mProcess(ProcessState::self()), mMyThreadId(androidGetTid()),
+      mStrictModePolicy(0)
 {
     pthread_setspecific(gTLS, this);
     clearCaller();

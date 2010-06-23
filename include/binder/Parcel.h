@@ -56,9 +56,12 @@ public:
 
     bool                hasFileDescriptors() const;
 
+    // Writes the RPC header.
     status_t            writeInterfaceToken(const String16& interface);
+    // Parses the RPC header, returning true if the interface name
+    // in the header matches the expected interface from the caller.
     bool                enforceInterface(const String16& interface) const;
-    bool                checkInterface(IBinder*) const;    
+    bool                checkInterface(IBinder*) const;
 
     void                freeData();
 
