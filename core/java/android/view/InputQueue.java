@@ -21,16 +21,25 @@ import android.util.Slog;
 
 /**
  * An input queue provides a mechanism for an application to receive incoming
- * input events sent over an input channel.  Signalling is implemented by MessageQueue.
- * @hide
+ * input events.  Currently only usable from native code.
  */
 public final class InputQueue {
     private static final String TAG = "InputQueue";
     
+    public static interface Callback {
+        void onInputQueueCreated(InputQueue queue);
+        void onInputQueueDestroyed(InputQueue queue);
+    }
+
+    final InputChannel mChannel;
+    
     // Describes the interpretation of an event.
     // XXX This concept is tentative.  See comments in android/input.h.
+    /** @hide */
     public static final int INPUT_EVENT_NATURE_KEY = 1;
+    /** @hide */
     public static final int INPUT_EVENT_NATURE_TOUCH = 2;
+    /** @hide */
     public static final int INPUT_EVENT_NATURE_TRACKBALL = 3;
     
     private static Object sLock = new Object();
@@ -40,7 +49,14 @@ public final class InputQueue {
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
     private static native void nativeFinished(long finishedToken);
     
-    private InputQueue() {
+    /** @hide */
+    public InputQueue(InputChannel channel) {
+        mChannel = channel;
+    }
+    
+    /** @hide */
+    public InputChannel getInputChannel() {
+        return mChannel;
     }
     
     /**
@@ -48,6 +64,7 @@ public final class InputQueue {
      * @param inputChannel The input channel to register.
      * @param inputHandler The input handler to input events send to the target.
      * @param messageQueue The message queue on whose thread the handler should be invoked.
+     * @hide
      */
     public static void registerInputChannel(InputChannel inputChannel, InputHandler inputHandler,
             MessageQueue messageQueue) {
@@ -71,6 +88,7 @@ public final class InputQueue {
      * Unregisters an input channel.
      * Does nothing if the channel is not currently registered.
      * @param inputChannel The input channel to unregister.
+     * @hide
      */
     public static void unregisterInputChannel(InputChannel inputChannel) {
         if (inputChannel == null) {

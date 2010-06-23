@@ -7,7 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.InputChannel;
-import android.view.InputConsumer;
+import android.view.InputQueue;
 import android.view.SurfaceHolder;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.io.File;
  * purely in native code.  That is, a game (or game-like thing).
  */
 public class NativeActivity extends Activity implements SurfaceHolder.Callback,
-        InputConsumer.Callback {
+        InputQueue.Callback {
     public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     
     private int mNativeHandle;
@@ -45,7 +45,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         ActivityInfo ai;
         
         getWindow().takeSurface(this);
-        getWindow().takeInputChannel(this);
+        getWindow().takeInputQueue(this);
         
         try {
             ai = getPackageManager().getActivityInfo(
@@ -145,11 +145,11 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         onSurfaceDestroyedNative(mNativeHandle, holder);
     }
     
-    public void onInputConsumerCreated(InputConsumer consumer) {
-        onInputChannelCreatedNative(mNativeHandle, consumer.getInputChannel());
+    public void onInputQueueCreated(InputQueue queue) {
+        onInputChannelCreatedNative(mNativeHandle, queue.getInputChannel());
     }
     
-    public void onInputConsumerDestroyed(InputConsumer consumer) {
-        onInputChannelDestroyedNative(mNativeHandle, consumer.getInputChannel());
+    public void onInputQueueDestroyed(InputQueue queue) {
+        onInputChannelDestroyedNative(mNativeHandle, queue.getInputChannel());
     }
 }
