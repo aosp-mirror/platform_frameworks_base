@@ -202,6 +202,10 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Adjustment to time to perform a dim, to make it more dramatic.
      */
     static final int DIM_DURATION_MULTIPLIER = 6;
+    
+    // Maximum number of milliseconds to wait for input event injection.
+    // FIXME is this value reasonable?
+    private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
     static final int INJECT_FAILED = 0;
     static final int INJECT_SUCCEEDED = 1;
@@ -446,8 +450,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mToTopApps = new ArrayList<AppWindowToken>();
     final ArrayList<AppWindowToken> mToBottomApps = new ArrayList<AppWindowToken>();
 
-    //flag to detect fat touch events
-    boolean mFatTouch = false;
     Display mDisplay;
 
     H mH = new H();
@@ -5070,106 +5072,336 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.adjustConfigurationLw(config);
         return true;
     }
+    
+    /* Notifies the window manager about a broken input channel.
+     * 
+     * Called by the InputManager.
+     */
+    public void notifyInputChannelBroken(InputChannel inputChannel) {
+        synchronized (mWindowMap) {
+            WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
+            if (windowState == null) {
+                return; // irrelevant
+            }
+            
+            Slog.i(TAG, "WINDOW DIED " + windowState);
+            removeWindowLocked(windowState.mSession, windowState);
+        }
+    }
+    
+    /* Notifies the window manager about a broken input channel.
+     * 
+     * Called by the InputManager.
+     */
+    public long notifyInputChannelANR(InputChannel inputChannel) {
+        IApplicationToken appToken;
+        synchronized (mWindowMap) {
+            WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
+            if (windowState == null) {
+                return -2; // irrelevant, abort dispatching (-2)
+            }
+            
+            Slog.i(TAG, "Input event dispatching timed out sending to "
+                    + windowState.mAttrs.getTitle());
+            appToken = windowState.getAppToken();
+        }
+        
+        try {
+            // Notify the activity manager about the timeout and let it decide whether
+            // to abort dispatching or keep waiting.
+            boolean abort = appToken.keyDispatchingTimedOut();
+            if (abort) {
+                return -2; // abort dispatching
+            }
+            
+            // Return new timeout.
+            // We use -1 for infinite timeout to avoid clash with -2 magic number.
+            long newTimeout = appToken.getKeyDispatchingTimeout() * 1000000;
+            return newTimeout < 0 ? -1 : newTimeout;
+        } catch (RemoteException ex) {
+            return -2; // abort dispatching
+        }
+    }
+
+    /* Notifies the window manager about a broken input channel.
+     * 
+     * Called by the InputManager.
+     */
+    public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
+        // Nothing to do just now.
+        // Just wait for the user to dismiss the ANR dialog.
+        
+        // TODO We could try to automatically dismiss the ANR dialog on recovery
+        //      although that might be disorienting.
+    }
+    
+    private WindowState getWindowStateForInputChannelLocked(InputChannel inputChannel) {
+        int windowCount = mWindows.size();
+        for (int i = 0; i < windowCount; i++) {
+            WindowState windowState = (WindowState) mWindows.get(i);
+            if (windowState.mInputChannel == inputChannel) {
+                return windowState;
+            }
+        }
+        
+        return null;
+    }
 
     // -------------------------------------------------------------
     // Input Events and Focus Management
     // -------------------------------------------------------------
     
-    public void getKeyEventTargets(InputTargetList inputTargets,
-            KeyEvent event, int nature, int policyFlags) {
+    private boolean checkInjectionPermissionTd(WindowState focus,
+            int injectorPid, int injectorUid) {
+        if (injectorUid > 0 && (focus == null || injectorUid != focus.mSession.mUid)) {
+            if (mContext.checkPermission(
+                    android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Slog.w(TAG, "Permission denied: injecting key event from pid "
+                        + injectorPid + " uid " + injectorUid + " to window " + focus
+                        + " owned by uid " + focus.mSession.mUid);
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /* Gets the input targets for a key event.
+     * 
+     * Called by the InputManager on the InputDispatcher thread.
+     */
+    public int getKeyEventTargetsTd(InputTargetList inputTargets,
+            KeyEvent event, int nature, int policyFlags, int injectorPid, int injectorUid) {
         if (DEBUG_INPUT) Slog.v(TAG, "Dispatch key: " + event);
 
         // TODO what do we do with mDisplayFrozen?
         // TODO what do we do with focus.mToken.paused?
         
         WindowState focus = getFocusedWindow();
-        wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
         
-        addInputTarget(inputTargets, focus, InputTarget.FLAG_SYNC);
-    }
-    
-    // Target of Motion events
-    WindowState mTouchFocus;
-
-    // Windows above the target who would like to receive an "outside"
-    // touch event for any down events outside of them.
-    // (This is a linked list by way of WindowState.mNextOutsideTouch.)
-    WindowState mOutsideTouchTargets;
-    
-    private void clearTouchFocus() {
-        mTouchFocus = null;
-        mOutsideTouchTargets = null;
-    }
-    
-    public void getMotionEventTargets(InputTargetList inputTargets,
-            MotionEvent event, int nature, int policyFlags) {
-        if (nature == InputQueue.INPUT_EVENT_NATURE_TRACKBALL) {
-            // More or less the same as for keys...
-            WindowState focus = getFocusedWindow();
-            wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
-            
-            addInputTarget(inputTargets, focus, InputTarget.FLAG_SYNC);
-            return;
+        if (! checkInjectionPermissionTd(focus, injectorPid, injectorUid)) {
+            return InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED;
         }
         
-        int action = event.getAction();
+        if (mPolicy.interceptKeyTi(focus, event.getKeyCode(), event.getMetaState(),
+                event.getAction() == KeyEvent.ACTION_DOWN,
+                event.getRepeatCount(), event.getFlags())) {
+            // Policy consumed the event.
+            return InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
+        }
+        
+        if (focus == null) {
+            return InputManager.INPUT_EVENT_INJECTION_FAILED;
+        }
+        
+        wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
+        
+        addInputTargetTd(inputTargets, focus, InputTarget.FLAG_SYNC);
+        return InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
+    }
+    
+    /* Gets the input targets for a motion event.
+     * 
+     * Called by the InputManager on the InputDispatcher thread.
+     */
+    public int getMotionEventTargetsTd(InputTargetList inputTargets,
+            MotionEvent event, int nature, int policyFlags, int injectorPid, int injectorUid) {
+        switch (nature) {
+            case InputQueue.INPUT_EVENT_NATURE_TRACKBALL:
+                return getMotionEventTargetsForTrackballTd(inputTargets, event, policyFlags,
+                        injectorPid, injectorUid);
+                
+            case InputQueue.INPUT_EVENT_NATURE_TOUCH:
+                return getMotionEventTargetsForTouchTd(inputTargets, event, policyFlags,
+                        injectorPid, injectorUid);
+                
+            default:
+                return InputManager.INPUT_EVENT_INJECTION_FAILED;
+        }
+    }
+    
+    /* Gets the input targets for a trackball event.
+     * 
+     * Called by the InputManager on the InputDispatcher thread.
+     */
+    private int getMotionEventTargetsForTrackballTd(InputTargetList inputTargets,
+            MotionEvent event, int policyFlags, int injectorPid, int injectorUid) {
+        WindowState focus = getFocusedWindow();
+        
+        if (! checkInjectionPermissionTd(focus, injectorPid, injectorUid)) {
+            return InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+        }
+        
+        if (focus == null) {
+            return InputManager.INPUT_EVENT_INJECTION_FAILED;
+        }
+        
+        wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
+        
+        addInputTargetTd(inputTargets, focus, InputTarget.FLAG_SYNC);
+        return InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
+    }
+    
+    /* Set to true when a fat touch has been detected during the processing of a touch event.
+     * 
+     * Only used by getMotionEventTargetsForTouchTd.
+     * Set to true whenever a fat touch is detected and reset to false on ACTION_UP.
+     */
+    private boolean mFatTouch;
+    
+    /* Set to true when we think the touch event.
+     * 
+     * Only used by getMotionEventTargetsForTouchTd.
+     * Set to true on ACTION_DOWN and set to false on ACTION_UP.
+     */
+    private boolean mTouchDown;
+    
+    /* Current target of Motion events.
+     * 
+     * Only used by getMotionEventTargetsForTouchTd.
+     * Initialized on ACTION_DOWN and cleared on ACTION_UP.
+     */
+    private WindowState mTouchFocus;
 
-        // TODO detect cheek presses somewhere... either here or in native code
+    /* Windows above the target that would like to receive an "outside" touch event
+     * for any down events outside of them.
+     * 
+     * Only used by getMotionEventTargetsForTouchTd.
+     * Initialized on ACTION_DOWN and cleared immediately afterwards.
+     */
+    private ArrayList<WindowState> mOutsideTouchTargets = new ArrayList<WindowState>();
+    
+    /* Wallpaper windows that are currently receiving touch events.
+     * 
+     * Only used by getMotionEventTargetsForTouchTd.
+     * Initialized on ACTION_DOWN and cleared on ACTION_UP.
+     */
+    private ArrayList<WindowState> mWallpaperTouchTargets = new ArrayList<WindowState>();
+    
+    /* Gets the input targets for a touch event.
+     * 
+     * Called by the InputManager on the InputDispatcher thread.
+     */
+    private int getMotionEventTargetsForTouchTd(InputTargetList inputTargets,
+            MotionEvent event, int policyFlags, int injectorPid, int injectorUid) {
+        final int action = event.getAction();
+        
+        if (action == MotionEvent.ACTION_DOWN) {
+            updateTouchFocusBeforeDownTd(event, policyFlags);
+        } else {
+            updateTouchFocusBeforeNonDownTd(event, policyFlags);
+        }
+
+        boolean skipDelivery = false;
+        int touchTargetFlags = 0;
+        
+        int injectionResult = InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
+        WindowState focusedTouchTarget = mTouchFocus;
+        if (focusedTouchTarget == null) {
+            // In this case we are either dropping the event, or have received
+            // a move or up without a down.  It is common to receive move
+            // events in such a way, since this means the user is moving the
+            // pointer without actually pressing down.  All other cases should
+            // be atypical, so let's log them.
+            if (action != MotionEvent.ACTION_MOVE) {
+                Slog.w(TAG, "No window to dispatch pointer action " + action);
+                injectionResult = InputManager.INPUT_EVENT_INJECTION_FAILED;
+            }
+        } else {
+            // We have a valid focused touch target.
+            if (! checkInjectionPermissionTd(focusedTouchTarget, injectorPid, injectorUid)) {
+                return InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+            }
+            
+            wakeupIfNeeded(focusedTouchTarget, eventType(event));
+            
+            if ((focusedTouchTarget.mAttrs.flags &
+                    WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES) != 0) {
+                // Target wants to ignore fat touch events
+                boolean cheekPress = mPolicy.isCheekPressedAgainstScreen(event);
+                
+                if (cheekPress) {
+                    if ((action == MotionEvent.ACTION_DOWN)) {
+                        mFatTouch = true;
+                        skipDelivery = true;
+                    } else {
+                        if (! mFatTouch) {
+                            // cancel the earlier event
+                            touchTargetFlags |= InputTarget.FLAG_CANCEL;
+                            mFatTouch = true;
+                        } else {
+                            skipDelivery = true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (! skipDelivery) {
+            int outsideTargetCount = mOutsideTouchTargets.size();
+            for (int i = 0; i < outsideTargetCount; i++) {
+                WindowState outsideTouchTarget = mOutsideTouchTargets.get(i);
+                addInputTargetTd(inputTargets, outsideTouchTarget,
+                        InputTarget.FLAG_OUTSIDE | touchTargetFlags);
+            }
+            
+            int wallpaperTargetCount = mWallpaperTouchTargets.size();
+            for (int i = 0; i < wallpaperTargetCount; i++) {
+                WindowState wallpaperTouchTarget = mWallpaperTouchTargets.get(i);
+                addInputTargetTd(inputTargets, wallpaperTouchTarget,
+                        touchTargetFlags);
+            }
+            
+            if (focusedTouchTarget != null) {
+                addInputTargetTd(inputTargets, focusedTouchTarget,
+                        InputTarget.FLAG_SYNC | touchTargetFlags);
+            }
+        }
+
+        if (action == MotionEvent.ACTION_UP) {
+            updateTouchFocusAfterUpTd(event, policyFlags);
+        }
+        
+        return injectionResult;
+    }
+    
+    private void updateTouchFocusBeforeDownTd(MotionEvent event, int policyFlags) {
+        if (mTouchDown) {
+            // This is weird, we got a down, but we thought it was already down!
+            // XXX: We should probably send an ACTION_UP to the current target.
+            Slog.w(TAG, "Pointer down received while already down in: " + mTouchFocus);
+            updateTouchFocusAfterUpTd(event, policyFlags);
+        }
+        
+        mTouchDown = true;
+        mPowerManager.logPointerDownEvent();
         
         final boolean screenWasOff = (policyFlags & WindowManagerPolicy.FLAG_BRIGHT_HERE) != 0;
-        
-        WindowState target = mTouchFocus;
-        
-        if (action == MotionEvent.ACTION_UP) {
-            // let go of our target
-            mPowerManager.logPointerUpEvent();
-            clearTouchFocus();
-        } else if (action == MotionEvent.ACTION_DOWN) {
-            // acquire a new target
-            mPowerManager.logPointerDownEvent();
-        
-            synchronized (mWindowMap) {
-                if (mTouchFocus != null) {
-                    // this is weird, we got a pen down, but we thought it was
-                    // already down!
-                    // XXX: We should probably send an ACTION_UP to the current
-                    // target.
-                    Slog.w(TAG, "Pointer down received while already down in: "
-                            + mTouchFocus);
-                    clearTouchFocus();
+        synchronized (mWindowMap) {
+            final int x = (int) event.getX();
+            final int y = (int) event.getY();
+
+            final ArrayList windows = mWindows;
+            final int N = windows.size();
+            WindowState topErrWindow = null;
+            final Rect tmpRect = mTempRect;
+            for (int i= N - 1; i >= 0; i--) {
+                WindowState child = (WindowState) windows.get(i);
+                //Slog.i(TAG, "Checking dispatch to: " + child);
+                
+                final int flags = child.mAttrs.flags;
+                if ((flags & WindowManager.LayoutParams.FLAG_SYSTEM_ERROR) != 0) {
+                    if (topErrWindow == null) {
+                        topErrWindow = child;
+                    }
                 }
-
-                // ACTION_DOWN is special, because we need to lock next events to
-                // the window we'll land onto.
-                final int x = (int) event.getX();
-                final int y = (int) event.getY();
-
-                final ArrayList windows = mWindows;
-                final int N = windows.size();
-                WindowState topErrWindow = null;
-                final Rect tmpRect = mTempRect;
-                for (int i=N-1; i>=0; i--) {
-                    WindowState child = (WindowState)windows.get(i);
-                    //Slog.i(TAG, "Checking dispatch to: " + child);
-                    final int flags = child.mAttrs.flags;
-                    if ((flags & WindowManager.LayoutParams.FLAG_SYSTEM_ERROR) != 0) {
-                        if (topErrWindow == null) {
-                            topErrWindow = child;
-                        }
-                    }
-                    if (!child.isVisibleLw()) {
-                        //Slog.i(TAG, "Not visible!");
-                        continue;
-                    }
-                    if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                        //Slog.i(TAG, "Not touchable!");
-                        if ((flags & WindowManager.LayoutParams
-                                .FLAG_WATCH_OUTSIDE_TOUCH) != 0) {
-                            child.mNextOutsideTouch = mOutsideTouchTargets;
-                            mOutsideTouchTargets = child;
-                        }
-                        continue;
-                    }
+                
+                if (!child.isVisibleLw()) {
+                    //Slog.i(TAG, "Not visible!");
+                    continue;
+                }
+                
+                if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) == 0) {
                     tmpRect.set(child.mFrame);
                     if (child.mTouchableInsets == ViewTreeObserver
                                 .InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT) {
@@ -5195,7 +5427,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         |WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
                     if (tmpRect.contains(x, y) || touchFlags == 0) {
                         //Slog.i(TAG, "Using this target!");
-                        if (!screenWasOff || (flags &
+                        if (! screenWasOff || (flags &
                                 WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING) != 0) {
                             mTouchFocus = child;
                         } else {
@@ -5204,143 +5436,76 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         break;
                     }
-
-                    if ((flags & WindowManager.LayoutParams
-                            .FLAG_WATCH_OUTSIDE_TOUCH) != 0) {
-                        child.mNextOutsideTouch = mOutsideTouchTargets;
-                        mOutsideTouchTargets = child;
-                        //Slog.i(TAG, "Adding to outside target list: " + child);
-                    }
                 }
 
-                // if there's an error window but it's not accepting
-                // focus (typically because it is not yet visible) just
-                // wait for it -- any other focused window may in fact
-                // be in ANR state.
-                if (topErrWindow != null && mTouchFocus != topErrWindow) {
-                    mTouchFocus = null;
+                if ((flags & WindowManager.LayoutParams
+                        .FLAG_WATCH_OUTSIDE_TOUCH) != 0) {
+                    //Slog.i(TAG, "Adding to outside target list: " + child);
+                    mOutsideTouchTargets.add(child);
                 }
             }
-            
-            target = mTouchFocus;
-        }
-        
-        if (target != null) {
-            wakeupIfNeeded(target, eventType(event));
-        }
-        
-        int targetFlags = 0;
-        if (target == null) {
-            // In this case we are either dropping the event, or have received
-            // a move or up without a down.  It is common to receive move
-            // events in such a way, since this means the user is moving the
-            // pointer without actually pressing down.  All other cases should
-            // be atypical, so let's log them.
-            if (action != MotionEvent.ACTION_MOVE) {
-                Slog.w(TAG, "No window to dispatch pointer action " + action);
-            }
-        } else {
-            if ((target.mAttrs.flags &
-                    WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES) != 0) {
-                //target wants to ignore fat touch events
-                boolean cheekPress = mPolicy.isCheekPressedAgainstScreen(event);
-                //explicit flag to return without processing event further
-                boolean returnFlag = false;
-                if((action == MotionEvent.ACTION_DOWN)) {
-                    mFatTouch = false;
-                    if(cheekPress) {
-                        mFatTouch = true;
-                        returnFlag = true;
-                    }
-                } else {
-                    if(action == MotionEvent.ACTION_UP) {
-                        if(mFatTouch) {
-                            //earlier even was invalid doesnt matter if current up is cheekpress or not
-                            mFatTouch = false;
-                            returnFlag = true;
-                        } else if(cheekPress) {
-                            //cancel the earlier event
-                            targetFlags |= InputTarget.FLAG_CANCEL;
-                            action = MotionEvent.ACTION_CANCEL;
-                        }
-                    } else if(action == MotionEvent.ACTION_MOVE) {
-                        if(mFatTouch) {
-                            //two cases here
-                            //an invalid down followed by 0 or moves(valid or invalid)
-                            //a valid down,  invalid move, more moves. want to ignore till up
-                            returnFlag = true;
-                        } else if(cheekPress) {
-                            //valid down followed by invalid moves
-                            //an invalid move have to cancel earlier action
-                            targetFlags |= InputTarget.FLAG_CANCEL;
-                            action = MotionEvent.ACTION_CANCEL;
-                            if (DEBUG_INPUT) Slog.v(TAG, "Sending cancel for invalid ACTION_MOVE");
-                            //note that the subsequent invalid moves will not get here
-                            mFatTouch = true;
-                        }
-                    }
-                } //else if action
-                if(returnFlag) {
-                    return;
-                }
-            } //end if target
-        }        
-        
-        synchronized (mWindowMap) {
-            if (target != null && ! target.isVisibleLw()) {
-                target = null;
+
+            // If there's an error window but it's not accepting focus (typically because
+            // it is not yet visible) just wait for it -- any other focused window may in fact
+            // be in ANR state.
+            if (topErrWindow != null && mTouchFocus != topErrWindow) {
+                mTouchFocus = null;
             }
             
-            if (action == MotionEvent.ACTION_DOWN) {
-                while (mOutsideTouchTargets != null) {
-                    addInputTarget(inputTargets, mOutsideTouchTargets,
-                            InputTarget.FLAG_OUTSIDE | targetFlags);
-                    mOutsideTouchTargets = mOutsideTouchTargets.mNextOutsideTouch;
-                }
+            // Drop the touch focus if the window is not visible.
+            if (mTouchFocus != null && ! mTouchFocus.isVisibleLw()) {
+                mTouchFocus = null;
             }
             
-            // If we sent an initial down to the wallpaper, then continue
-            // sending events until the final up.
-            // Alternately if we are on top of the wallpaper, then the wallpaper also
-            // gets to see this movement.
-            if (mSendingPointersToWallpaper ||
-                    (target != null && action == MotionEvent.ACTION_DOWN
-                            && mWallpaperTarget == target
-                            && target.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD)) {
+            // Determine wallpaper targets.
+            if (mTouchFocus != null
+                    && mTouchFocus == mWallpaperTarget
+                    && mTouchFocus.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
                 int curTokenIndex = mWallpaperTokens.size();
                 while (curTokenIndex > 0) {
                     curTokenIndex--;
                     WindowToken token = mWallpaperTokens.get(curTokenIndex);
+                    
                     int curWallpaperIndex = token.windows.size();
                     while (curWallpaperIndex > 0) {
                         curWallpaperIndex--;
                         WindowState wallpaper = token.windows.get(curWallpaperIndex);
                         if ((wallpaper.mAttrs.flags &
-                                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                            continue;
+                                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) == 0) {
+                            mWallpaperTouchTargets.add(wallpaper);
                         }
-                        
-                        switch (action) {
-                            case MotionEvent.ACTION_DOWN:
-                                mSendingPointersToWallpaper = true;
-                                break;
-                            case MotionEvent.ACTION_UP:
-                                mSendingPointersToWallpaper = false;
-                                break;
-                        }
-                        
-                        addInputTarget(inputTargets, wallpaper, targetFlags);
                     }
                 }
             }
-            
-            if (target != null) {
-                addInputTarget(inputTargets, target, InputTarget.FLAG_SYNC | targetFlags);
+        }
+    }
+
+    private void updateTouchFocusBeforeNonDownTd(MotionEvent event, int policyFlags) {
+        synchronized (mWindowMap) {
+            // Drop the touch focus if the window is not visible.
+            if (mTouchFocus != null && ! mTouchFocus.isVisibleLw()) {
+                mTouchFocus = null;
+                mWallpaperTouchTargets.clear();
             }
         }
     }
     
-    private void addInputTarget(InputTargetList inputTargets, WindowState window, int flags) {
+    private void updateTouchFocusAfterUpTd(MotionEvent event, int policyFlags) {
+        mFatTouch = false;
+        mTouchDown = false;
+        mTouchFocus = null;
+        mOutsideTouchTargets.clear();
+        mWallpaperTouchTargets.clear();
+        
+        mPowerManager.logPointerUpEvent();
+    }
+
+    /* Adds a window to a list of input targets.
+     * Do NOT call this method while holding any locks because the call to
+     * appToken.getKeyDispatchingTimeout() can potentially call into the ActivityManager
+     * and create a deadlock hazard.
+     */
+    private void addInputTargetTd(InputTargetList inputTargets, WindowState window, int flags) {
         if (window.mInputChannel == null) {
             return;
         }
@@ -5877,8 +6042,8 @@ public class WindowManagerService extends IWindowManager.Stub
         
         final int result;
         if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            result = mInputManager.injectKeyEvent(newEvent,
-                    InputQueue.INPUT_EVENT_NATURE_KEY, sync, pid, uid);
+            result = mInputManager.injectKeyEvent(newEvent, InputQueue.INPUT_EVENT_NATURE_KEY,
+                    pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         } else {
             result = dispatchKey(newEvent, pid, uid);
             if (sync) {
@@ -5887,14 +6052,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         Binder.restoreCallingIdentity(ident);
-        switch (result) {
-            case INJECT_NO_PERMISSION:
-                throw new SecurityException(
-                        "Injecting to another application requires INJECT_EVENTS permission");
-            case INJECT_SUCCEEDED:
-                return true;
-        }
-        return false;
+        return reportInjectionResult(result);
     }
 
     /**
@@ -5913,8 +6071,8 @@ public class WindowManagerService extends IWindowManager.Stub
         
         final int result;
         if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            result = mInputManager.injectMotionEvent(ev,
-                    InputQueue.INPUT_EVENT_NATURE_TOUCH, sync, pid, uid);
+            result = mInputManager.injectMotionEvent(ev, InputQueue.INPUT_EVENT_NATURE_TOUCH,
+                    pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         } else {
             result = dispatchPointer(null, ev, pid, uid);
             if (sync) {
@@ -5923,14 +6081,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         Binder.restoreCallingIdentity(ident);
-        switch (result) {
-            case INJECT_NO_PERMISSION:
-                throw new SecurityException(
-                        "Injecting to another application requires INJECT_EVENTS permission");
-            case INJECT_SUCCEEDED:
-                return true;
-        }
-        return false;
+        return reportInjectionResult(result);
     }
 
     /**
@@ -5949,8 +6100,8 @@ public class WindowManagerService extends IWindowManager.Stub
         
         final int result;
         if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            result = mInputManager.injectMotionEvent(ev,
-                    InputQueue.INPUT_EVENT_NATURE_TRACKBALL, sync, pid, uid);
+            result = mInputManager.injectMotionEvent(ev, InputQueue.INPUT_EVENT_NATURE_TRACKBALL,
+                    pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         } else {
             result = dispatchTrackball(null, ev, pid, uid);
             if (sync) {
@@ -5959,14 +6110,37 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         Binder.restoreCallingIdentity(ident);
-        switch (result) {
-            case INJECT_NO_PERMISSION:
-                throw new SecurityException(
-                        "Injecting to another application requires INJECT_EVENTS permission");
-            case INJECT_SUCCEEDED:
-                return true;
+        return reportInjectionResult(result);
+    }
+    
+    private boolean reportInjectionResult(int result) {
+        if (ENABLE_NATIVE_INPUT_DISPATCH) {
+            switch (result) {
+                case InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+                    Slog.w(TAG, "Input event injection permission denied.");
+                    throw new SecurityException(
+                            "Injecting to another application requires INJECT_EVENTS permission");
+                case InputManager.INPUT_EVENT_INJECTION_SUCCEEDED:
+                    Slog.v(TAG, "Input event injection succeeded.");
+                    return true;
+                case InputManager.INPUT_EVENT_INJECTION_TIMED_OUT:
+                    Slog.w(TAG, "Input event injection timed out.");
+                    return false;
+                case InputManager.INPUT_EVENT_INJECTION_FAILED:
+                default:
+                    Slog.w(TAG, "Input event injection failed.");
+                    return false;
+            }
+        } else {
+            switch (result) {
+                case INJECT_NO_PERMISSION:
+                    throw new SecurityException(
+                            "Injecting to another application requires INJECT_EVENTS permission");
+                case INJECT_SUCCEEDED:
+                    return true;
+            }
+            return false;
         }
-        return false;
     }
 
     private WindowState getFocusedWindow() {

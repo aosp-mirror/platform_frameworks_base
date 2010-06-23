@@ -78,6 +78,15 @@ public:
     /* Unregisters an input channel. */
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) = 0;
 
+    /* Injects an input event and optionally waits for sync.
+     * This method may block even if sync is false because it must wait for previous events
+     * to be dispatched before it can determine whether input event injection will be
+     * permitted based on the current input focus.
+     * Returns one of the INPUT_EVENT_INJECTION_XXX constants.
+     */
+    virtual int32_t injectInputEvent(const InputEvent* event,
+            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) = 0;
+
     /* Gets input device configuration. */
     virtual void getInputConfiguration(InputConfiguration* outConfiguration) const = 0;
 
@@ -117,6 +126,9 @@ public:
 
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
+
+    virtual int32_t injectInputEvent(const InputEvent* event,
+            int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis);
 
     virtual void getInputConfiguration(InputConfiguration* outConfiguration) const;
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,

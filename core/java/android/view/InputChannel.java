@@ -26,7 +26,7 @@ import android.util.Slog;
  * to the ViewRoot through a Binder transaction as part of registering the Window.
  * @hide
  */
-public class InputChannel implements Parcelable {
+public final class InputChannel implements Parcelable {
     private static final String TAG = "InputChannel";
     
     public static final Parcelable.Creator<InputChannel> CREATOR

@@ -58,8 +58,6 @@ struct RawEvent {
 /*
  * Flags that flow alongside events in the input dispatch system to help with certain
  * policy decisions such as waking from device sleep.
- *
- * TODO This enumeration should probably be split up or relabeled for clarity.
  */
 enum {
     /* These flags originate in RawEvents and are generally set in the key map. */
@@ -72,6 +70,8 @@ enum {
     POLICY_FLAG_ALT_GR = 0x00000020,
     POLICY_FLAG_MENU = 0x00000040,
     POLICY_FLAG_LAUNCHER = 0x00000080,
+
+    POLICY_FLAG_RAW_MASK = 0x0000ffff,
 
     /* These flags are set by the input reader policy as it intercepts each event. */
 
