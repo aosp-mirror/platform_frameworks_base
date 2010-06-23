@@ -838,6 +838,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setDatabasePath(getDir("databases",0).getAbsolutePath());
         settings.setDomStorageEnabled(true);
         settings.setWorkersEnabled(false);
+        settings.setXSSAuditorEnabled(false);
     }
 
     private WebView mWebView;
