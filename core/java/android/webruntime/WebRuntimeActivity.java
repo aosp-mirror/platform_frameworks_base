@@ -16,22 +16,25 @@
 
 package android.webruntime;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.Manifest;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.View;
 import android.view.Window;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -49,6 +52,7 @@ public class WebRuntimeActivity extends Activity
 
     private WebView mWebView;
     private URL mBaseUrl;
+    private ImageView mSplashScreen;
 
     /** Called when the activity is first created. */
     @Override
@@ -92,6 +96,9 @@ public class WebRuntimeActivity extends Activity
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.web_runtime);
         mWebView = (WebView) findViewById(R.id.webview);
+        mSplashScreen = (ImageView) findViewById(R.id.splashscreen);
+        mSplashScreen.setImageResource(
+                getResources().getIdentifier("splash_screen", "drawable", getPackageName()));
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
@@ -112,6 +119,14 @@ public class WebRuntimeActivity extends Activity
                 // Browser to load.
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                 return true;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (mSplashScreen.getVisibility() == View.VISIBLE) {
+                    mSplashScreen.setVisibility(View.GONE);
+                    mSplashScreen = null;
+                }
             }
         });
 
