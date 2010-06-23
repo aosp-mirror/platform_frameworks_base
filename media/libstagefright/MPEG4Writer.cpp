@@ -48,7 +48,7 @@ public:
 
     int64_t getDurationUs() const;
     int64_t getEstimatedTrackSizeBytes() const;
-    void writeTrackHeader(int32_t trackID);
+    void writeTrackHeader(int32_t trackID, bool use32BitOffset = true);
 
 private:
     MPEG4Writer *mOwner;
@@ -123,6 +123,7 @@ private:
 
 MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
+      mUse32BitOffset(true),
       mPaused(false),
       mStarted(false),
       mOffset(0),
@@ -134,6 +135,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
 
 MPEG4Writer::MPEG4Writer(int fd)
     : mFile(fdopen(fd, "wb")),
+      mUse32BitOffset(true),
       mPaused(false),
       mStarted(false),
       mOffset(0),
@@ -218,7 +220,11 @@ status_t MPEG4Writer::start() {
     mMdatOffset = mFreeBoxOffset + mEstimatedMoovBoxSize;
     mOffset = mMdatOffset;
     fseeko(mFile, mMdatOffset, SEEK_SET);
-    write("\x00\x00\x00\x01mdat????????", 16);
+    if (mUse32BitOffset) {
+        write("????mdat", 8);
+    } else {
+        write("\x00\x00\x00\x01mdat????????", 16);
+    }
 
     status_t err = startTracks();
     if (err != OK) {
@@ -257,10 +263,16 @@ void MPEG4Writer::stop() {
 
 
     // Fix up the size of the 'mdat' chunk.
-    fseeko(mFile, mMdatOffset + 8, SEEK_SET);
-    int64_t size = mOffset - mMdatOffset;
-    size = hton64(size);
-    fwrite(&size, 1, 8, mFile);
+    if (mUse32BitOffset) {
+        fseeko(mFile, mMdatOffset, SEEK_SET);
+        int32_t size = htonl(static_cast<int32_t>(mOffset - mMdatOffset));
+        fwrite(&size, 1, 4, mFile);
+    } else {
+        fseeko(mFile, mMdatOffset + 8, SEEK_SET);
+        int64_t size = mOffset - mMdatOffset;
+        size = hton64(size);
+        fwrite(&size, 1, 8, mFile);
+    }
     fseeko(mFile, mOffset, SEEK_SET);
 
     time_t now = time(NULL);
@@ -269,6 +281,8 @@ void MPEG4Writer::stop() {
     mMoovBoxBuffer = (uint8_t *) malloc(mEstimatedMoovBoxSize);
     mMoovBoxBufferOffset = 0;
     CHECK(mMoovBoxBuffer != NULL);
+    int32_t timeScale = 1000;
+    int32_t duration = max_duration / timeScale;
 
     beginBox("moov");
 
@@ -276,9 +290,9 @@ void MPEG4Writer::stop() {
         writeInt32(0);             // version=0, flags=0
         writeInt32(now);           // creation time
         writeInt32(now);           // modification time
-        writeInt32(1000);          // timescale
-        writeInt32(max_duration / 1000);
-        writeInt32(0x10000);       // rate
+        writeInt32(timeScale);          // timescale
+        writeInt32(duration);
+        writeInt32(0x10000);       // rate: 1.0
         writeInt16(0x100);         // volume
         writeInt16(0);             // reserved
         writeInt32(0);             // reserved
@@ -304,7 +318,7 @@ void MPEG4Writer::stop() {
       int32_t id = 1;
       for (List<Track *>::iterator it = mTracks.begin();
            it != mTracks.end(); ++it, ++id) {
-          (*it)->writeTrackHeader(id);
+          (*it)->writeTrackHeader(id, mUse32BitOffset);
       }
     endBox();  // moov
 
@@ -415,7 +429,8 @@ size_t MPEG4Writer::write(
 
     const size_t bytes = size * nmemb;
     if (mWriteMoovBoxToMemory) {
-        if (8 + mMoovBoxBufferOffset + bytes > mEstimatedMoovBoxSize) {
+        off_t moovBoxSize = 8 + mMoovBoxBufferOffset + bytes;
+        if (moovBoxSize > mEstimatedMoovBoxSize) {
             for (List<off_t>::iterator it = mBoxes.begin();
                  it != mBoxes.end(); ++it) {
                 (*it) += mOffset;
@@ -1162,24 +1177,29 @@ int64_t MPEG4Writer::Track::getEstimatedTrackSizeBytes() const {
     return mEstimatedTrackSizeBytes;
 }
 
-void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
+void MPEG4Writer::Track::writeTrackHeader(
+        int32_t trackID, bool use32BitOffset) {
     const char *mime;
     bool success = mMeta->findCString(kKeyMIMEType, &mime);
     CHECK(success);
 
     bool is_audio = !strncasecmp(mime, "audio/", 6);
+    int32_t timeScale = 1000;
+    int32_t duration = getDurationUs() / timeScale;
 
     time_t now = time(NULL);
 
     mOwner->beginBox("trak");
 
       mOwner->beginBox("tkhd");
-        mOwner->writeInt32(0);             // version=0, flags=0
+        // Flags = 7 to indicate that the track is enabled, and
+        // part of the presentation
+        mOwner->writeInt32(0x07);          // version=0, flags=7
         mOwner->writeInt32(now);           // creation time
         mOwner->writeInt32(now);           // modification time
         mOwner->writeInt32(trackID);
         mOwner->writeInt32(0);             // reserved
-        mOwner->writeInt32(getDurationUs() / 1000);
+        mOwner->writeInt32(duration);
         mOwner->writeInt32(0);             // reserved
         mOwner->writeInt32(0);             // reserved
         mOwner->writeInt16(0);             // layer
@@ -1214,15 +1234,17 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
       int64_t moovStartTimeUs = mOwner->getStartTimestampUs();
       if (mStartTimestampUs != moovStartTimeUs) {
         mOwner->beginBox("edts");
-          mOwner->writeInt32(0);             // version=0, flags=0
           mOwner->beginBox("elst");
-            mOwner->writeInt32(0);           // version=0, flags=0
-            mOwner->writeInt32(1);           // a single entry
+            mOwner->writeInt32(0);           // version=0, flags=0: 32-bit time
+            mOwner->writeInt32(2);           // never ends with an empty list
             int64_t durationMs =
                 (mStartTimestampUs - moovStartTimeUs) / 1000;
             mOwner->writeInt32(durationMs);  // edit duration
             mOwner->writeInt32(-1);          // empty edit box to signal starting time offset
-            mOwner->writeInt32(1);           // x1 rate
+            mOwner->writeInt32(1 << 16);     // x1 rate
+            mOwner->writeInt32(duration);
+            mOwner->writeInt32(0);
+            mOwner->writeInt32(1 << 16);
           mOwner->endBox();
         mOwner->endBox();
       }
@@ -1233,9 +1255,14 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
           mOwner->writeInt32(0);             // version=0, flags=0
           mOwner->writeInt32(now);           // creation time
           mOwner->writeInt32(now);           // modification time
-          mOwner->writeInt32(1000);          // timescale
-          mOwner->writeInt32(getDurationUs() / 1000);
-          mOwner->writeInt16(0);             // language code XXX
+          mOwner->writeInt32(timeScale);     // timescale
+          mOwner->writeInt32(duration);      // duration
+          // Language follows the three letter standard ISO-639-2/T
+          // 'e', 'n', 'g' for "English", for instance.
+          // Each character is packed as the difference between its ASCII value and 0x60.
+          // For "English", these are 00101, 01110, 00111.
+          // XXX: Where is the padding bit located: 0x15C7?
+          mOwner->writeInt16(0);             // language code
           mOwner->writeInt16(0);             // predefined
         mOwner->endBox();
 
@@ -1246,7 +1273,8 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
           mOwner->writeInt32(0);             // reserved
           mOwner->writeInt32(0);             // reserved
           mOwner->writeInt32(0);             // reserved
-          mOwner->writeCString(is_audio ? "SoundHandler": "");  // name
+          // Removing "r" for the name string just makes the string 4 byte aligned
+          mOwner->writeCString(is_audio ? "SoundHandle": "VideoHandle");  // name
         mOwner->endBox();
 
         mOwner->beginBox("minf");
@@ -1258,7 +1286,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
               mOwner->endBox();
           } else {
               mOwner->beginBox("vmhd");
-              mOwner->writeInt32(0x00000001);  // version=0, flags=1
+              mOwner->writeInt32(0x01);        // version=0, flags=1
               mOwner->writeInt16(0);           // graphics mode
               mOwner->writeInt16(0);           // opcolor
               mOwner->writeInt16(0);
@@ -1269,14 +1297,14 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
           mOwner->beginBox("dinf");
             mOwner->beginBox("dref");
               mOwner->writeInt32(0);  // version=0, flags=0
-              mOwner->writeInt32(1);
+              mOwner->writeInt32(1);  // entry count (either url or urn)
+              // The table index here refers to the sample description index
+              // in the sample table entries.
               mOwner->beginBox("url ");
-                mOwner->writeInt32(1);  // version=0, flags=1
+                mOwner->writeInt32(1);  // version=0, flags=1 (self-contained)
               mOwner->endBox();  // url
             mOwner->endBox();  // dref
           mOwner->endBox();  // dinf
-
-       mOwner->endBox();  // minf
 
         mOwner->beginBox("stbl");
 
@@ -1361,7 +1389,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
                   mOwner->writeInt32(0);           // reserved
                   mOwner->writeInt16(0);           // reserved
-                  mOwner->writeInt16(0);           // data ref index
+                  mOwner->writeInt16(1);           // data ref index
                   mOwner->writeInt16(0);           // predefined
                   mOwner->writeInt16(0);           // reserved
                   mOwner->writeInt32(0);           // predefined
@@ -1435,6 +1463,11 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                       mOwner->endBox();  // avcC
                   }
 
+                  mOwner->beginBox("pasp");
+                    // This is useful if the pixel is not square
+                    mOwner->writeInt32(1 << 16);  // hspacing
+                    mOwner->writeInt32(1 << 16);  // vspacing
+                  mOwner->endBox();  // pasp
                 mOwner->endBox();  // mp4v, s263 or avc1
             }
           mOwner->endBox();  // stsd
@@ -1487,17 +1520,21 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                 mOwner->writeInt32(it->sampleDescriptionId);
             }
           mOwner->endBox();  // stsc
-
-          mOwner->beginBox("co64");
+          mOwner->beginBox(use32BitOffset? "stco": "co64");
             mOwner->writeInt32(0);  // version=0, flags=0
             mOwner->writeInt32(mChunkOffsets.size());
             for (List<off_t>::iterator it = mChunkOffsets.begin();
                  it != mChunkOffsets.end(); ++it) {
-                mOwner->writeInt64((*it));
+                if (use32BitOffset) {
+                    mOwner->writeInt32(static_cast<int32_t>(*it));
+                } else {
+                    mOwner->writeInt64((*it));
+                }
             }
           mOwner->endBox();  // co64
 
         mOwner->endBox();  // stbl
+       mOwner->endBox();  // minf
       mOwner->endBox();  // mdia
     mOwner->endBox();  // trak
 }

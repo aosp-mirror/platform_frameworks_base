@@ -60,6 +60,7 @@ private:
     class Track;
 
     FILE *mFile;
+    bool mUse32BitOffset;
     bool mPaused;
     bool mStarted;
     off_t mOffset;
