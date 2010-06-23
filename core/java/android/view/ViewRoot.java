@@ -154,8 +154,8 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     final View.AttachInfo mAttachInfo;
     InputChannel mInputChannel;
-    InputConsumer.Callback mInputConsumerCallback;
-    InputConsumer mInputConsumer;
+    InputQueue.Callback mInputQueueCallback;
+    InputQueue mInputQueue;
     
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
@@ -558,12 +558,12 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                 if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
                     if (view instanceof RootViewSurfaceTaker) {
-                        mInputConsumerCallback =
-                            ((RootViewSurfaceTaker)view).willYouTakeTheInputConsumer();
+                        mInputQueueCallback =
+                            ((RootViewSurfaceTaker)view).willYouTakeTheInputQueue();
                     }
-                    if (mInputConsumerCallback != null) {
-                        mInputConsumer = new InputConsumer(mInputChannel);
-                        mInputConsumerCallback.onInputConsumerCreated(mInputConsumer);
+                    if (mInputQueueCallback != null) {
+                        mInputQueue = new InputQueue(mInputChannel);
+                        mInputQueueCallback.onInputQueueCreated(mInputQueue);
                     } else {
                         InputQueue.registerInputChannel(mInputChannel, mInputHandler,
                                 Looper.myQueue());
@@ -1747,9 +1747,9 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
             if (mInputChannel != null) {
-                if (mInputConsumerCallback != null) {
-                    mInputConsumerCallback.onInputConsumerDestroyed(mInputConsumer);
-                    mInputConsumerCallback = null;
+                if (mInputQueueCallback != null) {
+                    mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
+                    mInputQueueCallback = null;
                 } else {
                     InputQueue.unregisterInputChannel(mInputChannel);
                 }

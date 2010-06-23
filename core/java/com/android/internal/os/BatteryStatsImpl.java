@@ -3892,6 +3892,17 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryBaseTime = rec.time;
             }
         }
+        
+        long oldnow = SystemClock.elapsedRealtime() - (5*60*100);
+        if (oldnow > 0) {
+            // If the system process has restarted, but not the entire
+            // system, then the mHistoryBaseTime already accounts for
+            // much of the elapsed time.  We thus want to adjust it back,
+            // to avoid large gaps in the data.  We determine we are
+            // in this case by arbitrarily saying it is so if at this
+            // point in boot the elapsed time is already more than 5 seconds.
+            mHistoryBaseTime -= oldnow;
+        }
     }
     
     void writeHistory(Parcel out) {

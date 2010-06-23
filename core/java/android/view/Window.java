@@ -481,11 +481,11 @@ public abstract class Window {
     public abstract void takeSurface(SurfaceHolder.Callback callback);
     
     /**
-     * Take ownership of this window's InputChannel.  The window will no
-     * longer read and dispatch input events from the channel; it is your
+     * Take ownership of this window's InputQueue.  The window will no
+     * longer read and dispatch input events from the queue; it is your
      * responsibility to do so.
      */
-    public abstract void takeInputChannel(InputConsumer.Callback callback);
+    public abstract void takeInputQueue(InputQueue.Callback callback);
     
     /**
      * Return whether this window is being displayed with a floating style
