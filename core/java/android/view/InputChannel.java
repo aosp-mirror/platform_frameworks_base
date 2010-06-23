@@ -22,8 +22,9 @@ import android.util.Slog;
 
 /**
  * An input channel specifies the file descriptors used to send input events to
- * a window in another process.  It is Parcelable so that it can be transmitted
- * to the ViewRoot through a Binder transaction as part of registering the Window.
+ * a window in another process.  It is Parcelable so that it can be sent
+ * to the process that is to receive events.  Only one thread should be reading
+ * from an InputChannel at a time.
  * @hide
  */
 public final class InputChannel implements Parcelable {

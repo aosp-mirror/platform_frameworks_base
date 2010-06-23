@@ -56,6 +56,7 @@ import android.util.SparseArray;
 import android.view.ActionBarView;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InputConsumer;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -69,6 +70,7 @@ import android.view.ViewManager;
 import android.view.VolumePanel;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.InputConsumer.Callback;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -106,6 +108,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     SurfaceHolder.Callback mTakeSurfaceCallback;
     BaseSurfaceHolder mSurfaceHolder;
+    
+    InputConsumer.Callback mTakeInputChannelCallback;
     
     private boolean mIsFloating;
 
@@ -250,6 +254,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void takeSurface(SurfaceHolder.Callback callback) {
         mTakeSurfaceCallback = callback;
+    }
+    
+    public void takeInputChannel(InputConsumer.Callback callback) {
+        mTakeInputChannelCallback = callback;
     }
     
     @Override
@@ -2064,6 +2072,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         public android.view.SurfaceHolder.Callback willYouTakeTheSurface() {
             return mFeatureId < 0 ? mTakeSurfaceCallback : null;
+        }
+        
+        public InputConsumer.Callback willYouTakeTheInputConsumer() {
+            return mFeatureId < 0 ? mTakeInputChannelCallback : null;
         }
         
         public void setSurfaceType(int type) {

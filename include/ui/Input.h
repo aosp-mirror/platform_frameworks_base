@@ -40,6 +40,11 @@ enum {
  */
 #define MAX_POINTERS 10
 
+/*
+ * Declare a concrete type for the NDK's input event forward declaration.
+ */
+struct input_event_t { };
+
 namespace android {
 
 /*
@@ -128,8 +133,6 @@ struct PointerCoords {
 /*
  * Input events.
  */
-struct input_event_t { };
-
 class InputEvent : public input_event_t {
 public:
     virtual ~InputEvent() { }

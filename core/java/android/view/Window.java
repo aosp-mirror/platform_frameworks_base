@@ -488,6 +488,13 @@ public abstract class Window {
     public abstract void takeSurface(SurfaceHolder.Callback callback);
     
     /**
+     * Take ownership of this window's InputChannel.  The window will no
+     * longer read and dispatch input events from the channel; it is your
+     * responsibility to do so.
+     */
+    public abstract void takeInputChannel(InputConsumer.Callback callback);
+    
+    /**
      * Return whether this window is being displayed with a floating style
      * (based on the {@link android.R.attr#windowIsFloating} attribute in
      * the style/theme).
