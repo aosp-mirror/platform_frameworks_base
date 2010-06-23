@@ -21,8 +21,8 @@ import com.android.internal.util.ArrayUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
+import android.graphics.RectF;
 import android.text.Layout.Directions;
 import android.text.Layout.TabStops;
 import android.text.style.CharacterStyle;
@@ -583,7 +583,7 @@ class TextLine {
     /**
      * Returns the next valid offset within this directional run, skipping
      * conjuncts and zero-width characters.  This should not be called to walk
-     * off the end of the line, since the the returned values might not be valid
+     * off the end of the line, since the returned values might not be valid
      * on neighboring lines.  If the returned offset is less than zero or
      * greater than the line length, the offset should be recomputed on the
      * preceding or following line, respectively.

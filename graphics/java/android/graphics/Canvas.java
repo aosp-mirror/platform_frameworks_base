@@ -126,6 +126,7 @@ public class Canvas {
      * 
      * @deprecated This constructor is not supported and should not be invoked.
      */
+    @Deprecated
     public Canvas(GL gl) {
         mNativeCanvas = initGL();
         mGL = gl;
@@ -151,6 +152,7 @@ public class Canvas {
      * 
      * @deprecated This method is not supported and should not be invoked.
      */
+    @Deprecated
     public GL getGL() {
         return mGL;
     }
@@ -162,6 +164,7 @@ public class Canvas {
      * 
      * @deprecated This method is not supported and should not be invoked.
      */
+    @Deprecated
     public static void freeGlCaches() {
         freeCaches();
     }
@@ -198,6 +201,7 @@ public class Canvas {
      * 
      * @deprecated This method is not supported and should not be invoked.
      */
+    @Deprecated
     public void setViewport(int width, int height) {
         if (mGL != null) {
             nativeSetViewport(mNativeCanvas, width, height);
@@ -415,8 +419,8 @@ public class Canvas {
      *
      * @param sx The amount to scale in X
      * @param sy The amount to scale in Y
-     * @param px The x-coord for the pivot point (unchanged by the rotation)
-     * @param py The y-coord for the pivot point (unchanged by the rotation)
+     * @param px The x-coord for the pivot point (unchanged by the scale)
+     * @param py The y-coord for the pivot point (unchanged by the scale)
      */
     public final void scale(float sx, float sy, float px, float py) {
         translate(px, py);
@@ -1585,6 +1589,7 @@ public class Canvas {
         restore();
     }
     
+    @Override
     protected void finalize() throws Throwable {
         super.finalize();
         // If the constructor threw an exception before setting mNativeCanvas, the native finalizer
