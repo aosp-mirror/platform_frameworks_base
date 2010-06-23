@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "MediaScanner"
+#include <utils/Log.h>
+
 #include <media/mediascanner.h>
 
 #include <sys/stat.h>
