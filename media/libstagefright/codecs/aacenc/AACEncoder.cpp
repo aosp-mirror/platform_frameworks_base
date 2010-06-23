@@ -140,7 +140,7 @@ status_t AACEncoder::start(MetaData *params) {
     CHECK_EQ(OK, initCheck());
 
     mFrameCount = 0;
-    mSource->start();
+    mSource->start(params);
 
     mStarted = true;
 

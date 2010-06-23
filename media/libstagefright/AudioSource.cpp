@@ -77,6 +77,12 @@ status_t AudioSource::start(MetaData *params) {
         && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
         mCollectStats = true;
     }
+
+    mStartTimeUs = 0;
+    int64_t startTimeUs;
+    if (params && params->findInt64(kKeyTime, &startTimeUs)) {
+        mStartTimeUs = startTimeUs;
+    }
     status_t err = mRecord->start();
 
     if (err == OK) {
@@ -132,21 +138,22 @@ status_t AudioSource::read(
     uint32_t numFramesRecorded;
     mRecord->getPosition(&numFramesRecorded);
     int64_t latency = mRecord->latency() * 1000;
-    uint32_t sampleRate = mRecord->getSampleRate();
-    int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate - latency;
-    LOGV("latency: %lld, sample rate: %d, timestamp: %lld",
-            latency, sampleRate, timestampUs);
 
-    buffer->meta_data()->setInt64(kKeyTime, timestampUs);
+    int64_t readTime = systemTime() / 1000;
+    if (numFramesRecorded == 0) {
+        // Initial delay
+        if (mStartTimeUs > 0) {
+            mStartTimeUs = readTime - mStartTimeUs;
+        } else {
+            mStartTimeUs += latency;
+        }
+    }
 
     ssize_t n = 0;
     if (mCollectStats) {
-        struct timeval tv_start, tv_end;
-        gettimeofday(&tv_start, NULL);
         n = mRecord->read(buffer->data(), buffer->size());
-        gettimeofday(&tv_end, NULL);
-        mTotalReadTimeUs += ((1000000LL * (tv_end.tv_sec - tv_start.tv_sec))
-                + (tv_end.tv_usec - tv_start.tv_usec));
+        int64_t endTime = systemTime() / 1000;
+        mTotalReadTimeUs += (endTime - readTime);
         if (n >= 0) {
             mTotalReadBytes += n;
         }
@@ -160,6 +167,12 @@ status_t AudioSource::read(
 
         return (status_t)n;
     }
+
+    uint32_t sampleRate = mRecord->getSampleRate();
+    int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate + mStartTimeUs;
+    buffer->meta_data()->setInt64(kKeyTime, timestampUs);
+    LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
+            mStartTimeUs, sampleRate, timestampUs);
 
     buffer->set_range(0, n);
 

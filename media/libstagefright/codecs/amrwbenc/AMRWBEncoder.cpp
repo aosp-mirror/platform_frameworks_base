@@ -134,7 +134,7 @@ status_t AMRWBEncoder::start(MetaData *params) {
     CHECK_EQ(OK, initCheck());
 
     mNumFramesOutput = 0;
-    mSource->start();
+    mSource->start(params);
 
     mStarted = true;
 
