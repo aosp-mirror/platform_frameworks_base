@@ -15,6 +15,8 @@ page.title=Data Backup
   <h2>In this document</h2>
   <ol>
     <li><a href="#Basics">The Basics</a></li>
+    <li><a href="#BackupManifest">Declaring the Backup Agent in Your Manifest</a></li>
+    <li><a href="#BackupKey">Registering for Android Backup Service</a></li>
     <li><a href="#BackupAgent">Extending BackupAgent</a>
       <ol>
         <li><a href="#RequiredMethods">Required Methods</a></li>
@@ -45,32 +47,53 @@ page.title=Data Backup
 </div>
 
 <p>Android's {@link android.app.backup backup} service allows you to copy your persistent
-application data to a remote "cloud" storage, in order to provide a restore point for the
+application data to remote "cloud" storage, in order to provide a restore point for the
 application data and settings. If a user performs a factory reset or converts to a new
 Android-powered device, the system automatically restores your backup data when the application
-is re-installed. This way, your users are not required to reproduce their previous data or
+is re-installed. This way, your users don't need to reproduce their previous data or
 application settings. This process is completely transparent to the user and does not affect the
 functionality or user experience in your application.</p>
 
-<p>Android-powered devices that support the backup service provide a cloud storage area that
-saves your backup data and a backup transport that delivers your data to
-the storage area and back to the device. During a backup
-operation, Android's Backup Manager requests backup data from your application, then delivers it to
-the cloud storage using the backup transport. During a restore operation, the Backup Manager
-retrieves the backup data from the backup transport and returns it to your application
-so it can restore the data to the device. The backup service is <em>not</em> designed for data
-synchronization (you do not have access the backup data, except during a restore operation on the
-device).</p>
+<p>During a backup operation (which your application can request), Android's Backup Manager ({@link
+android.app.backup.BackupManager}) queries your application for backup data, then hands it to
+a backup transport, which then delivers the data to the cloud storage. During a
+restore operation, the Backup Manager retrieves the backup data from the backup transport and
+returns it to your application so your application can restore the data to the device. It's
+possible for your application to request a restore, but that shouldn't be necessary&mdash;Android
+automatically performs a restore operation when your application is installed and there exists
+backup data associated with the user. The primary scenario in which backup data is restored is when
+a user resets their device or upgrades to a new device and their previously installed
+applications are re-installed.</p>
 
-<p>The cloud storage used for backup won't necessarily be the same on all Android-powered devices.
-The cloud storage and backup transport may differ between devices and service providers.
-Where the backup data is stored is transparent to your application, but you are assured that your
-application data cannot be read by other applications.</p>
+<p class="note"><strong>Note:</strong> The backup service is <em>not</em> designed for
+synchronizing application data with other clients or saving data that you'd like to access during
+the normal application lifecycle. You cannot read or write backup data on demand and cannot access
+it in any way other than through the APIs provided by the Backup Manager.</p>
+
+<p>The backup transport is the client-side component of Android's backup framework, which is
+customizable by
+the device manufacturer and service provider. The backup transport may differ from device to device
+and which backup transport is available on any given device is transparent to your application. The
+Backup Manager APIs isolate your application from the actual backup transport available on a given
+device&mdash;your application communicates with the Backup Manager through a fixed set of APIs,
+regardless of the underlying transport.</p>
+
+<p>Data backup is <em>not</em> guaranteed to be available on all Android-powered
+devices. However, your application is not adversely affected in the event
+that a device does not provide a backup transport. If you believe that users will benefit from data
+backup in your application, then you can implement it as described in this document, test it, then
+publish your application without any concern about which devices actually perform backup. When your
+application runs on a device that does not provide a backup transport, your application operates
+normally, but will not receive callbacks from the Backup Manager to backup data.</p>
+
+<p>Although you cannot know what the current transport is, you are always assured that your
+backup data cannot be read by other applications on the device. Only the Backup Manager and backup
+transport have access to the data you provide during a backup operation.</p>
 
 <p class="caution"><strong>Caution:</strong> Because the cloud storage and transport service can
 differ from device to device, Android makes no guarantees about the security of your data while
-using backup. You should be cautious about using backup to store sensitive data, such as usernames
-and passwords.</p>
+using backup. You should always be cautious about using backup to store sensitive data, such as
+usernames and passwords.</p>
 
 
 <h2 id="Basics">The Basics</h2>
@@ -78,8 +101,8 @@ and passwords.</p>
 <p>To backup your application data, you need to implement a backup agent. Your backup
 agent is called by the Backup Manager to provide the data you want to back up. It is also called
 to restore your backup data when the application is re-installed. The Backup Manager handles all
-your data transactions with the cloud storage and your backup agent handles all your data
-transactions on the device.</p>
+your data transactions with the cloud storage (using the backup transport) and your backup agent
+handles all your data transactions on the device.</p>
 
 <p>To implement a backup agent, you must:</p>
 
@@ -87,6 +110,11 @@ transactions on the device.</p>
   <li>Declare your backup agent in your manifest file with the <a
 href="{@docRoot}guide/topics/manifest/application-element.html#agent">{@code
 android:backupAgent}</a> attribute.</li>
+  <li>Register your application with a backup service. Google offers <a
+href="http://code.google.com/android/backup/index.html">Android Backup Service</a> as a backup
+service for most Android-powered devices, which requires that you register your application in
+order for it to work. Any other backup services available might also require you to register
+in order to store your data on their servers.</li>
   <li>Define a backup agent by either:</p>
     <ol type="a">
       <li><a href="#backupAgent">Extending BackupAgent</a>
@@ -115,7 +143,6 @@ href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal stor
     </ol>
   </li>
 </ol>
-
 
 
 
@@ -157,6 +184,50 @@ href="{@docRoot}resources/articles/backward-compatibility.html">backward compati
 your application, you can support this feature for devices running API Level 8 or greater, while
 remaining compatible with older devices.</p>
 
+
+
+
+<h2 id="BackupKey">Registering for Android Backup Service</h2>
+
+<p>Google provides a backup transport with <a
+href="http://code.google.com/android/backup/index.html">Android Backup Service</a> for most
+Android-powered devices running Android 2.2 or greater.</p>
+
+<p>In order for you application to perform backup using Android Backup Service, you must
+register your application with the service to receive a Backup Service Key, then
+declare the Backup Service Key in your Android manifest.</p>
+
+<p>To get your Backup Service Key, <a
+href="http://code.google.com/android/backup/signup.html">register for Android Backup Service</a>.
+When you register, you will be provided a Backup Service Key and the appropriate {@code
+&lt;meta-data&gt;} XML code for your Android manifest file, which you must include as a child of the
+{@code &lt;application&gt;} element. For example:</p>
+
+<pre>
+&lt;application android:label="MyApplication"
+             android:backupAgent="MyBackupAgent"&gt;
+    ...
+    &lt;meta-data android:name="com.google.android.backup.api_key"
+        android:value="AEdPqrEAAAAIDaYEVgU6DJnyJdBmU7KLH3kszDXLv_4DIsEIyQ" /&gt;
+&lt;/application&gt;
+</pre>
+
+<p>The <code>android:name</code> must be <code>"com.google.android.backup.api_key"</code> and
+the <code>android:value</code> must be the Backup Service Key received from the Android Backup
+Service registration.</p>
+
+<p>If you have multiple applications, you must register each one, using the respective package
+name.</p>
+
+<p class="note"><strong>Note:</strong> The backup transport provided by Android Backup Service is
+not guaranteed to be available
+on all Android-powered devices that support backup. Some devices might support backup
+using a different transport, some devices might not support backup at all, and there is no way for
+your application to know what transport is used on the device. However, if you implement backup for
+your application, you should always include a Backup Service Key for Android Backup Service so
+your application can perform backup when the device uses the Android Backup Service transport. If
+the device does not use Android Backup Service, then the {@code &lt;meta-data&gt;} element with the
+Backup Service Key is ignored.</p>
 
 
 
