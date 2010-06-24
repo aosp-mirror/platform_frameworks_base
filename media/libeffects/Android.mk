@@ -1,5 +1,8 @@
 LOCAL_PATH:= $(call my-dir)
 
+#
+TEST_EFFECT_LIBRARIES := true
+
 # Effect factory library
 include $(CLEAR_VARS)
 
@@ -25,7 +28,8 @@ LOCAL_C_INCLUDES := \
 include $(BUILD_SHARED_LIBRARY)
 
 
-# Default Reverb library
+ifeq ($(TEST_EFFECT_LIBRARIES),true)
+# Test Reverb library
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -54,7 +58,7 @@ LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
 
-# Default Equalizer library
+# Test Equalizer library
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -88,3 +92,5 @@ LOCAL_C_INCLUDES := \
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
+
+endif

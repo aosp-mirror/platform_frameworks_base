@@ -24,8 +24,6 @@
 #include "EffectReverb.h"
 #include "EffectsMath.h"
 
-static int gEffectIndex;
-
 // effect_interface_t interface implementation for reverb effect
 const struct effect_interface_s gReverbInterface = {
         Reverb_Process,
@@ -37,7 +35,10 @@ static const effect_descriptor_t gAuxEnvReverbDescriptor = {
         {0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, {0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e}},
         {0x1f0ae2e0, 0x4ef7, 0x11df, 0xbc09, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
-        EFFECT_FLAG_TYPE_AUXILIARY,
+        // flags other than EFFECT_FLAG_TYPE_AUXILIARY set for test purpose
+        EFFECT_FLAG_TYPE_AUXILIARY | EFFECT_FLAG_DEVICE_IND | EFFECT_FLAG_AUDIO_MODE_IND,
+        0, // TODO
+        33,
         "Aux Environmental Reverb",
         "Google Inc."
 };
@@ -48,6 +49,8 @@ static const effect_descriptor_t gInsertEnvReverbDescriptor = {
         {0xaa476040, 0x6342, 0x11df, 0x91a4, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
+        0, // TODO
+        33,
         "Insert Environmental reverb",
         "Google Inc."
 };
@@ -58,6 +61,8 @@ static const effect_descriptor_t gAuxPresetReverbDescriptor = {
         {0x63909320, 0x53a6, 0x11df, 0xbdbd, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
+        0, // TODO
+        33,
         "Aux Preset Reverb",
         "Google Inc."
 };
@@ -68,6 +73,8 @@ static const effect_descriptor_t gInsertPresetReverbDescriptor = {
         {0xd93dc6a0, 0x6342, 0x11df, 0xb128, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
+        0, // TODO
+        33,
         "Insert Preset Reverb",
         "Google Inc."
 };
@@ -77,8 +84,7 @@ static const effect_descriptor_t * const gDescriptors[] = {
         &gAuxEnvReverbDescriptor,
         &gInsertEnvReverbDescriptor,
         &gAuxPresetReverbDescriptor,
-        &gInsertPresetReverbDescriptor,
-        NULL
+        &gInsertPresetReverbDescriptor
 };
 
 /*----------------------------------------------------------------------------
@@ -88,25 +94,25 @@ static const effect_descriptor_t * const gDescriptors[] = {
 /*--- Effect Library Interface Implementation ---*/
 
 int EffectQueryNumberEffects(uint32_t *pNumEffects) {
-    *pNumEffects = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *)
-            - 1;
-    gEffectIndex = 0;
+    *pNumEffects = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
     return 0;
 }
 
-int EffectQueryNext(effect_descriptor_t *pDescriptor) {
+int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor) {
     if (pDescriptor == NULL) {
         return -EINVAL;
     }
-    if (gDescriptors[gEffectIndex] == NULL) {
-        return -ENOENT;
+    if (index >= sizeof(gDescriptors) / sizeof(const effect_descriptor_t *)) {
+        return -EINVAL;
     }
-    memcpy(pDescriptor, gDescriptors[gEffectIndex++],
+    memcpy(pDescriptor, gDescriptors[index],
             sizeof(effect_descriptor_t));
     return 0;
 }
 
 int EffectCreate(effect_uuid_t *uuid,
+        int32_t sessionId,
+        int32_t ioId,
         effect_interface_t *pInterface) {
     int ret;
     int i;
@@ -152,7 +158,7 @@ int EffectCreate(effect_uuid_t *uuid,
 
     *pInterface = (effect_interface_t) module;
 
-    LOGV("EffectLibCreateEffect %p", module);
+    LOGV("EffectLibCreateEffect %p ,size %d", module, sizeof(reverb_module_t));
 
     return 0;
 }
@@ -191,8 +197,23 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
 
     //if bypassed or the preset forces the signal to be completely dry
     if (pReverb->m_bBypass) {
-        if (inBuffer->raw != outBuffer->raw && !pReverb->m_Aux) {
-            memcpy(outBuffer->raw, inBuffer->raw, outBuffer->frameCount * NUM_OUTPUT_CHANNELS * sizeof(int16_t));
+        if (inBuffer->raw != outBuffer->raw) {
+            int16_t smp;
+            pSrc = inBuffer->s16;
+            pDst = outBuffer->s16;
+            size_t count = inBuffer->frameCount;
+            if (pRvbModule->config.inputCfg.channels == pRvbModule->config.outputCfg.channels) {
+                count *= 2;
+                while (count--) {
+                    *pDst++ = *pSrc++;
+                }
+            } else {
+                while (count--) {
+                    smp = *pSrc++;
+                    *pDst++ = smp;
+                    *pDst++ = smp;
+                }
+            }
         }
         return 0;
     }
@@ -226,10 +247,11 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
 
         numSamples -= processedSamples;
         if (pReverb->m_Aux) {
-            pDst += processedSamples;
+            pSrc += processedSamples;
         } else {
             pSrc += processedSamples * NUM_OUTPUT_CHANNELS;
         }
+        pDst += processedSamples * NUM_OUTPUT_CHANNELS;
     }
 
     return 0;
@@ -292,6 +314,35 @@ static int Reverb_Command(effect_interface_t self, int cmdCode, int cmdSize,
         *(int *)pReplyData = Reverb_setParameter(pReverb, *(int32_t *)cmd->data,
                 cmd->vsize, cmd->data + sizeof(int32_t));
         break;
+    case EFFECT_CMD_ENABLE:
+    case EFFECT_CMD_DISABLE:
+        if (pReplyData == NULL || *replySize != sizeof(int)) {
+            return -EINVAL;
+        }
+        *(int *)pReplyData = 0;
+        break;
+    case EFFECT_CMD_SET_DEVICE:
+        if (pCmdData == NULL || cmdSize != (int)sizeof(uint32_t)) {
+            return -EINVAL;
+        }
+        LOGV("Reverb_Command EFFECT_CMD_SET_DEVICE: 0x%08x", *(uint32_t *)pCmdData);
+        break;
+    case EFFECT_CMD_SET_VOLUME: {
+        // audio output is always stereo => 2 channel volumes
+        if (pCmdData == NULL || cmdSize != (int)sizeof(uint32_t) * 2) {
+            return -EINVAL;
+        }
+        float left = (float)(*(uint32_t *)pCmdData) / (1 << 24);
+        float right = (float)(*((uint32_t *)pCmdData + 1)) / (1 << 24);
+        LOGV("Reverb_Command EFFECT_CMD_SET_VOLUME: left %f, right %f ", left, right);
+        break;
+        }
+    case EFFECT_CMD_SET_AUDIO_MODE:
+        if (pCmdData == NULL || cmdSize != (int)sizeof(uint32_t)) {
+            return -EINVAL;
+        }
+        LOGV("Reverb_Command EFFECT_CMD_SET_AUDIO_MODE: %d", *(uint32_t *)pCmdData);
+        break;
     default:
         LOGW("Reverb_Command invalid command %d",cmdCode);
         return -EINVAL;
@@ -339,7 +390,7 @@ int Reverb_Init(reverb_module_t *pRvbModule, int aux, int preset) {
     } else {
         pRvbModule->config.inputCfg.channels = CHANNEL_STEREO;
     }
-    pRvbModule->config.inputCfg.format = PCM_FORMAT_S15;
+    pRvbModule->config.inputCfg.format = SAMPLE_FORMAT_PCM_S15;
     pRvbModule->config.inputCfg.bufferProvider.getBuffer = NULL;
     pRvbModule->config.inputCfg.bufferProvider.releaseBuffer = NULL;
     pRvbModule->config.inputCfg.bufferProvider.cookie = NULL;
@@ -347,7 +398,7 @@ int Reverb_Init(reverb_module_t *pRvbModule, int aux, int preset) {
     pRvbModule->config.inputCfg.mask = EFFECT_CONFIG_ALL;
     pRvbModule->config.outputCfg.samplingRate = 44100;
     pRvbModule->config.outputCfg.channels = CHANNEL_STEREO;
-    pRvbModule->config.outputCfg.format = PCM_FORMAT_S15;
+    pRvbModule->config.outputCfg.format = SAMPLE_FORMAT_PCM_S15;
     pRvbModule->config.outputCfg.bufferProvider.getBuffer = NULL;
     pRvbModule->config.outputCfg.bufferProvider.releaseBuffer = NULL;
     pRvbModule->config.outputCfg.bufferProvider.cookie = NULL;
@@ -391,8 +442,8 @@ int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
     if (pConfig->inputCfg.samplingRate
         != pConfig->outputCfg.samplingRate
         || pConfig->outputCfg.channels != OUTPUT_CHANNELS
-        || pConfig->inputCfg.format != PCM_FORMAT_S15
-        || pConfig->outputCfg.format != PCM_FORMAT_S15) {
+        || pConfig->inputCfg.format != SAMPLE_FORMAT_PCM_S15
+        || pConfig->outputCfg.format != SAMPLE_FORMAT_PCM_S15) {
         LOGV("Reverb_Configure invalid config");
         return -EINVAL;
     }
@@ -1033,6 +1084,7 @@ int Reverb_setParameter(reverb_object_t *pReverb, int32_t param, size_t size,
         // Convert milliseconds to => m_nRvbLpfFwd (function of m_nRvbLpfFbk)
         // convert ms to samples
         value32 = (value32 * pReverb->m_nSamplingRate) / 1000;
+
         // calculate valid decay time range as a function of current reverb delay and
         // max feed back gain. Min value <=> -40dB in one pass, Max value <=> feedback gain = -1 dB
         // Calculate attenuation for each round in late reverb given a total attenuation of -6000 millibels.
@@ -1833,7 +1885,6 @@ static int ReverbUpdateRoom(reverb_object_t *pReverb, bool fullUpdate) {
     pReverb->m_nXfadeInterval = (uint16_t) temp;
     //gsReverbObject.m_nXfadeInterval = pPreset->m_nXfadeInterval;
     pReverb->m_nXfadeCounter = pReverb->m_nXfadeInterval + 1; // force update on first iteration
-
 
     pReverb->m_nCurrentRoom = pReverb->m_nNextRoom;
 

@@ -20,7 +20,7 @@
 #include <cutils/log.h>
 #include <pthread.h>
 #include <dirent.h>
-#include <media/EffectFactoryApi.h>
+#include <media/EffectsFactoryApi.h>
 
 
 #if __cplusplus
@@ -35,6 +35,7 @@ typedef struct list_elem_s {
 typedef struct lib_entry_s {
     char path[PATH_MAX];
     void *handle;
+    int id;
     effect_CreateEffect_t createFx;
     effect_ReleaseEffect_t releaseFx;
     list_elem_t *effects; //list of effect_descriptor_t
