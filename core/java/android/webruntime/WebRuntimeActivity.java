@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,7 +46,6 @@ import java.net.URL;
 public class WebRuntimeActivity extends Activity
 {
     private final static String LOGTAG = "WebRuntimeActivity";
-    private final static String locationPermission = "android.permission.ACCESS_FINE_LOCATION";
 
     private WebView mWebView;
     private URL mBaseUrl;
@@ -118,7 +118,8 @@ public class WebRuntimeActivity extends Activity
         // Use a custom WebChromeClient with geolocation permissions handling to always
         // allow or deny, based on the app's permissions.
         String packageName = componentName.getPackageName();
-        final boolean allowed = packageManager.checkPermission(locationPermission, packageName)
+        final boolean allowed = packageManager.checkPermission(
+                Manifest.permission.ACCESS_FINE_LOCATION, packageName)
                 == PackageManager.PERMISSION_GRANTED;
         mWebView.setWebChromeClient(new WebChromeClient() {
             public void onGeolocationPermissionsShowPrompt(
