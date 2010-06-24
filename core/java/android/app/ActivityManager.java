@@ -717,7 +717,22 @@ public class ActivityManager {
          */
         public int uid;
         
+        /**
+         * All packages that have been loaded into the process.
+         */
         public String pkgList[];
+        
+        /**
+         * Constant for {@link #flags}: this is a heavy-weight process,
+         * meaning it will not be killed while in the background.
+         */
+        public static final int FLAG_HEAVY_WEIGHT = 1<<0;
+        
+        /**
+         * Flags of information.  May be any of
+         * {@link #FLAG_HEAVY_WEIGHT}.
+         */
+        public int flags;
         
         /**
          * Constant for {@link #importance}: this process is running the
@@ -846,6 +861,7 @@ public class ActivityManager {
             dest.writeInt(pid);
             dest.writeInt(uid);
             dest.writeStringArray(pkgList);
+            dest.writeInt(this.flags);
             dest.writeInt(importance);
             dest.writeInt(lru);
             dest.writeInt(importanceReasonCode);
@@ -858,6 +874,7 @@ public class ActivityManager {
             pid = source.readInt();
             uid = source.readInt();
             pkgList = source.readStringArray();
+            flags = source.readInt();
             importance = source.readInt();
             lru = source.readInt();
             importanceReasonCode = source.readInt();
