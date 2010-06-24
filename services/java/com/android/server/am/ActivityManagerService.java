@@ -9814,6 +9814,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
                     currApp.uid = app.info.uid;
+                    if (mHeavyWeightProcess == app) {
+                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_HEAVY_WEIGHT;
+                    }
                     int adj = app.curAdj;
                     if (adj >= EMPTY_APP_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;
