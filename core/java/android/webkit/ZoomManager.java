@@ -55,10 +55,16 @@ class ZoomManager {
     private ZoomControlEmbedded mEmbeddedZoomControl;
     private ZoomControlExternal mExternalZoomControl;
 
-    // The default scale limits, which are dependent on the display density.
-    private static float DEFAULT_MAX_ZOOM_SCALE;
+    /*
+     * The scale factors that determine the upper and lower bounds for the
+     * default zoom scale.
+     */
+    protected static final float DEFAULT_MAX_ZOOM_SCALE_FACTOR = 4.00f;
+    protected static final float DEFAULT_MIN_ZOOM_SCALE_FACTOR = 0.25f;
 
-    private static float DEFAULT_MIN_ZOOM_SCALE;
+    // The default scale limits, which are dependent on the display density.
+    private float mDefaultMaxZoomScale;
+    private float mDefaultMinZoomScale;
 
     // The actual scale limits, which can be set through a webpage's viewport
     // meta-tag.
@@ -170,32 +176,49 @@ class ZoomManager {
         setZoomOverviewWidth(WebView.DEFAULT_VIEWPORT_WIDTH);
     }
 
+    /**
+     * Initialize both the default and actual zoom scale to the given density.
+     *
+     * @param density The logical density of the display. This is a scaling factor
+     * for the Density Independent Pixel unit, where one DIP is one pixel on an
+     * approximately 160 dpi screen (see android.util.DisplayMetrics.density).
+     */
     public void init(float density) {
+        assert density > 0;
+
         setDefaultZoomScale(density);
-        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-        mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
         mActualScale = density;
         mInvActualScale = 1 / density;
         mTextWrapScale = density;
     }
 
+    /**
+     * Update the default zoom scale using the given density. It will also reset
+     * the current min and max zoom scales to the default boundaries as well as
+     * ensure that the actual scale falls within those boundaries.
+     *
+     * @param density The logical density of the display. This is a scaling factor
+     * for the Density Independent Pixel unit, where one DIP is one pixel on an
+     * approximately 160 dpi screen (see android.util.DisplayMetrics.density).
+     */
     public void updateDefaultZoomDensity(float density) {
+        assert density > 0;
+
         if (Math.abs(density - mDefaultScale) > MINIMUM_SCALE_INCREMENT) {
-            float scaleFactor = density * mInvDefaultScale;
             // set the new default density
             setDefaultZoomScale(density);
-            // adjust the limits
-            mMaxZoomScale *= scaleFactor;
-            mMinZoomScale *= scaleFactor;
-            setZoomScale(mActualScale * scaleFactor, true);
+            // adjust the scale if it falls outside the new zoom bounds
+            setZoomScale(mActualScale, true);
         }
     }
 
     private void setDefaultZoomScale(float defaultScale) {
         mDefaultScale = defaultScale;
         mInvDefaultScale = 1 / defaultScale;
-        DEFAULT_MAX_ZOOM_SCALE = 4.0f * defaultScale;
-        DEFAULT_MIN_ZOOM_SCALE = 0.25f * defaultScale;
+        mDefaultMaxZoomScale = defaultScale * DEFAULT_MAX_ZOOM_SCALE_FACTOR;
+        mDefaultMinZoomScale = defaultScale * DEFAULT_MIN_ZOOM_SCALE_FACTOR;
+        mMaxZoomScale = mDefaultMaxZoomScale;
+        mMinZoomScale = mDefaultMinZoomScale;
     }
 
     public final float getScale() {
@@ -210,8 +233,28 @@ class ZoomManager {
         return mTextWrapScale;
     }
 
+    public final float getMaxZoomScale() {
+        return mMaxZoomScale;
+    }
+
+    public final float getMinZoomScale() {
+        return mMinZoomScale;
+    }
+
     public final float getDefaultScale() {
         return mDefaultScale;
+    }
+
+    public final float getInvDefaultScale() {
+        return mInvDefaultScale;
+    }
+
+    public final float getDefaultMaxZoomScale() {
+        return mDefaultMaxZoomScale;
+    }
+
+    public final float getDefaultMinZoomScale() {
+        return mDefaultMinZoomScale;
     }
 
     public final int getDocumentAnchorX() {
@@ -233,10 +276,6 @@ class ZoomManager {
 
     public final void setInitialScaleInPercent(int scaleInPercent) {
         mInitialScale = scaleInPercent * 0.01f;
-    }
-
-    public static final float getDefaultMinZoomScale() {
-        return DEFAULT_MIN_ZOOM_SCALE;
     }
 
     public final float computeScaleWithLimits(float scale) {
@@ -693,7 +732,7 @@ class ZoomManager {
                     mMinZoomScaleFixed = true;
                 }
             } else {
-                mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                mMinZoomScale = mDefaultMinZoomScale;
                 mMinZoomScaleFixed = false;
             }
         } else {
@@ -701,7 +740,7 @@ class ZoomManager {
             mMinZoomScaleFixed = true;
         }
         if (restoreState.mMaxScale == 0) {
-            mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+            mMaxZoomScale = mDefaultMaxZoomScale;
         } else {
             mMaxZoomScale = restoreState.mMaxScale;
         }
