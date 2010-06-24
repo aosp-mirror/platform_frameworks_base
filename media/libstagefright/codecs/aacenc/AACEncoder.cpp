@@ -139,6 +139,8 @@ status_t AACEncoder::start(MetaData *params) {
 
     CHECK_EQ(OK, initCheck());
 
+    mNumInputSamples = 0;
+    mAnchorTimeUs = 0;
     mFrameCount = 0;
     mSource->start(params);
 
@@ -205,33 +207,65 @@ status_t AACEncoder::read(
         buffer->set_range(0, 2);
         buffer->meta_data()->setInt32(kKeyIsCodecConfig, true);
         *out = buffer;
-        mInputBuffer = NULL;
         ++mFrameCount;
         return OK;
     } else if (mFrameCount == 1) {
         buffer->meta_data()->setInt32(kKeyIsCodecConfig, false);
     }
 
-    // XXX: We assume that the input buffer contains at least
-    // (actually, exactly) 1024 PCM samples. This needs to be fixed.
-    if (mInputBuffer == NULL) {
-        if (mSource->read(&mInputBuffer, options) != OK) {
-            LOGE("failed to read from input audio source");
-            return UNKNOWN_ERROR;
+    while (mNumInputSamples < kNumSamplesPerFrame) {
+        if (mInputBuffer == NULL) {
+            if (mSource->read(&mInputBuffer, options) != OK) {
+                if (mNumInputSamples == 0) {
+                    return ERROR_END_OF_STREAM;
+                }
+                memset(&mInputFrame[mNumInputSamples],
+                       0,
+                       sizeof(int16_t) * (kNumSamplesPerFrame - mNumInputSamples));
+                mNumInputSamples = 0;
+                break;
+            }
+
+            size_t align = mInputBuffer->range_length() % sizeof(int16_t);
+            CHECK_EQ(align, 0);
+
+            int64_t timeUs;
+            if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
+                mAnchorTimeUs = timeUs;
+            }
         }
+        size_t copy =
+            (kNumSamplesPerFrame - mNumInputSamples) * sizeof(int16_t);
+
+        if (copy > mInputBuffer->range_length()) {
+            copy = mInputBuffer->range_length();
+        }
+
+        memcpy(&mInputFrame[mNumInputSamples],
+               (const uint8_t *) mInputBuffer->data()
+                    + mInputBuffer->range_offset(),
+               copy);
+
+        mInputBuffer->set_range(
+               mInputBuffer->range_offset() + copy,
+               mInputBuffer->range_length() - copy);
+
         if (mInputBuffer->range_length() == 0) {
             mInputBuffer->release();
             mInputBuffer = NULL;
-            return ERROR_END_OF_STREAM;
         }
-        VO_CODECBUFFER inputData;
-        memset(&inputData, 0, sizeof(inputData));
-        inputData.Buffer = (unsigned char*) mInputBuffer->data();
-        inputData.Length = mInputBuffer->range_length();
-        CHECK(VO_ERR_NONE == mApiHandle->SetInputData(mEncoderHandle,&inputData));
+        mNumInputSamples += copy / sizeof(int16_t);
+        if (mNumInputSamples >= kNumSamplesPerFrame) {
+            mNumInputSamples %= kNumSamplesPerFrame;
+            break;
+        }
     }
 
-    CHECK(mInputBuffer != NULL);
+    VO_CODECBUFFER inputData;
+    memset(&inputData, 0, sizeof(inputData));
+    inputData.Buffer = (unsigned char*) mInputFrame;
+    inputData.Length = kNumSamplesPerFrame * sizeof(int16_t);
+    CHECK(VO_ERR_NONE == mApiHandle->SetInputData(mEncoderHandle,&inputData));
 
     VO_CODECBUFFER outputData;
     memset(&outputData, 0, sizeof(outputData));
@@ -239,24 +273,14 @@ status_t AACEncoder::read(
     memset(&outputInfo, 0, sizeof(outputInfo));
 
     VO_U32 ret = VO_ERR_NONE;
-    int32_t outputLength = 0;
     outputData.Buffer = outPtr;
     outputData.Length = buffer->size();
     ret = mApiHandle->GetOutputData(mEncoderHandle, &outputData, &outputInfo);
-    if (ret == VO_ERR_NONE || ret == VO_ERR_INPUT_BUFFER_SMALL) {
-        outputLength += outputData.Length;
-        if (ret == VO_ERR_INPUT_BUFFER_SMALL) {  // All done
-            mInputBuffer->release();
-            mInputBuffer = NULL;
-        }
-    } else {
-        LOGE("failed to encode the input data 0x%lx", ret);
-    }
+    CHECK(ret == VO_ERR_NONE || ret == VO_ERR_INPUT_BUFFER_SMALL);
+    CHECK(outputData.Length != 0);
+    buffer->set_range(0, outputData.Length);
 
-    buffer->set_range(0, outputLength);
-
-    // Each output frame compresses 1024 input PCM samples.
-    int64_t timestampUs = ((mFrameCount - 1) * 1000000LL * 1024) / mSampleRate;
+    int64_t timestampUs = ((mFrameCount - 1) * 1000000LL * kNumSamplesPerFrame) / mSampleRate;
     ++mFrameCount;
     buffer->meta_data()->setInt64(kKeyTime, timestampUs);
 

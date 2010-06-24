@@ -52,6 +52,16 @@ class AACEncoder: public MediaSource {
         int32_t           mChannels;
         int32_t           mBitRate;
         int32_t           mFrameCount;
+
+        int64_t           mAnchorTimeUs;
+        int64_t           mNumInputSamples;
+
+        enum {
+            kNumSamplesPerFrame = 1024,
+        };
+
+        int16_t           mInputFrame[kNumSamplesPerFrame];
+
         uint8_t           mAudioSpecificConfigData[2]; // auido specific data
         void             *mEncoderHandle;
         VO_AUDIO_CODECAPI *mApiHandle;
