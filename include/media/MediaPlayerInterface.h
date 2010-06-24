@@ -39,7 +39,6 @@ template<typename T> class SortedVector;
 enum player_type {
     PV_PLAYER = 1,
     SONIVOX_PLAYER = 2,
-    VORBIS_PLAYER = 3,
     STAGEFRIGHT_PLAYER = 4,
     // Test players are available only in the 'test' and 'eng' builds.
     // The shared library with the test player is passed passed as an

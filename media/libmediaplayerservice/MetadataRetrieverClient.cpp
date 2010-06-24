@@ -37,7 +37,6 @@
 #include <media/MediaPlayerInterface.h>
 #include <media/PVMetadataRetriever.h>
 #include <private/media/VideoFrame.h>
-#include "VorbisMetadataRetriever.h"
 #include "MidiMetadataRetriever.h"
 #include "MetadataRetrieverClient.h"
 #include "StagefrightMetadataRetriever.h"
@@ -103,30 +102,17 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
 {
     sp<MediaMetadataRetrieverBase> p;
     switch (playerType) {
-#if BUILD_WITH_FULL_STAGEFRIGHT
         case STAGEFRIGHT_PLAYER:
         {
-            char value[PROPERTY_VALUE_MAX];
-            if (property_get("media.stagefright.enable-meta", value, NULL)
-                && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
-                LOGV("create StagefrightMetadataRetriever");
-                p = new StagefrightMetadataRetriever;
-                break;
-            }
-
-            // fall through
+            p = new StagefrightMetadataRetriever;
+            break;
         }
-#endif
 #ifndef NO_OPENCORE
         case PV_PLAYER:
             LOGV("create pv metadata retriever");
             p = new PVMetadataRetriever();
             break;
 #endif
-        case VORBIS_PLAYER:
-            LOGV("create vorbis metadata retriever");
-            p = new VorbisMetadataRetriever();
-            break;
         case SONIVOX_PLAYER:
             LOGV("create midi metadata retriever");
             p = new MidiMetadataRetriever();

@@ -24,6 +24,7 @@ LOCAL_SHARED_LIBRARIES := \
     libui \
     libcutils \
     libsurfaceflinger_client \
+    libstagefright \
     libcamera_client
 
 ifneq ($(BUILD_WITHOUT_PV),true)
@@ -32,15 +33,6 @@ LOCAL_SHARED_LIBRARIES += \
     libopencore_player
 else
     LOCAL_CFLAGS += -DNO_OPENCORE
-endif
-
-ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
-
-LOCAL_CFLAGS += -DBUILD_WITH_FULL_STAGEFRIGHT=1
-
-LOCAL_SHARED_LIBRARIES += \
-    libstagefright
-
 endif
 
 LOCAL_STATIC_LIBRARIES :=
