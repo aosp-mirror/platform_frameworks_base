@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
 LOCAL_PATH:= $(call my-dir)
 
@@ -54,5 +53,3 @@ LOCAL_MODULE := jpeg_bench
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_EXECUTABLE)
-
-endif

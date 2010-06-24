@@ -425,7 +425,6 @@ sp<MediaSource> OMXCodec::Create(
     for (size_t i = 0; i < matchingCodecs.size(); ++i) {
         componentName = matchingCodecs[i].string();
 
-#if BUILD_WITH_FULL_STAGEFRIGHT
         sp<MediaSource> softwareCodec = createEncoder?
             InstantiateSoftwareEncoder(componentName, source, meta):
             InstantiateSoftwareCodec(componentName, source);
@@ -435,7 +434,6 @@ sp<MediaSource> OMXCodec::Create(
 
             return softwareCodec;
         }
-#endif
 
         LOGV("Attempting to allocate OMX node '%s'", componentName);
 

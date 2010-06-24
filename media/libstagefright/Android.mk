@@ -3,50 +3,43 @@ include $(CLEAR_VARS)
 
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
-LOCAL_SRC_FILES:=                 \
-        ESDS.cpp                  \
-        MediaBuffer.cpp           \
-        MediaBufferGroup.cpp      \
-        MediaDefs.cpp             \
-        MediaSource.cpp           \
-        MetaData.cpp              \
-        OMXCodec.cpp              \
-        Utils.cpp                 \
-        OMXClient.cpp
-
-ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
-
-LOCAL_SRC_FILES +=                \
-        AMRExtractor.cpp          \
-        AMRWriter.cpp             \
-        AudioPlayer.cpp           \
-        AudioSource.cpp           \
-        AwesomePlayer.cpp         \
-        CameraSource.cpp          \
-        DataSource.cpp            \
-        FileSource.cpp            \
-        HTTPStream.cpp            \
-        JPEGSource.cpp            \
-        MP3Extractor.cpp          \
-        MPEG4Extractor.cpp        \
-        MPEG4Writer.cpp           \
-        MediaExtractor.cpp        \
-        NuCachedSource2.cpp       \
-        NuHTTPDataSource.cpp      \
-        OggExtractor.cpp          \
-        SampleIterator.cpp        \
-        SampleTable.cpp           \
-        ShoutcastSource.cpp       \
-        StagefrightMediaScanner.cpp \
-        StagefrightMetadataRetriever.cpp \
-        ThrottledSource.cpp       \
-        TimeSource.cpp            \
-        TimedEventQueue.cpp       \
-        WAVExtractor.cpp          \
+LOCAL_SRC_FILES:=                         \
+        AMRExtractor.cpp                  \
+        AMRWriter.cpp                     \
+        AudioPlayer.cpp                   \
+        AudioSource.cpp                   \
+        AwesomePlayer.cpp                 \
+        CameraSource.cpp                  \
+        DataSource.cpp                    \
+        ESDS.cpp                          \
+        FileSource.cpp                    \
+        HTTPStream.cpp                    \
+        JPEGSource.cpp                    \
+        MP3Extractor.cpp                  \
+        MPEG4Extractor.cpp                \
+        MPEG4Writer.cpp                   \
+        MediaBuffer.cpp                   \
+        MediaBufferGroup.cpp              \
+        MediaDefs.cpp                     \
+        MediaExtractor.cpp                \
+        MediaSource.cpp                   \
+        MetaData.cpp                      \
+        NuCachedSource2.cpp               \
+        NuHTTPDataSource.cpp              \
+        OMXClient.cpp                     \
+        OMXCodec.cpp                      \
+        OggExtractor.cpp                  \
+        SampleIterator.cpp                \
+        SampleTable.cpp                   \
+        ShoutcastSource.cpp               \
+        StagefrightMediaScanner.cpp       \
+        StagefrightMetadataRetriever.cpp  \
+        ThrottledSource.cpp               \
+        TimeSource.cpp                    \
+        TimedEventQueue.cpp               \
+        Utils.cpp                         \
+        WAVExtractor.cpp                  \
         string.cpp
-
-LOCAL_CFLAGS += -DBUILD_WITH_FULL_STAGEFRIGHT
-endif
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
@@ -82,20 +75,13 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_mpeg2ts \
         libstagefright_httplive \
         libstagefright_rtsp \
+        libstagefright_id3 \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
         libstagefright_enc_common \
         libstagefright_avc_common \
         libstagefright_foundation \
-
-ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
-
-
-LOCAL_STATIC_LIBRARIES += \
-        libstagefright_id3
-
-LOCAL_SHARED_LIBRARIES += \
         libstagefright_color_conversion
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
@@ -106,8 +92,6 @@ endif
 
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
-endif
-
 endif
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
