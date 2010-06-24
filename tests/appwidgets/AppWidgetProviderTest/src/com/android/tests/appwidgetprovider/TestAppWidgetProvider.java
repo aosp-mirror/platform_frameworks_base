@@ -41,6 +41,7 @@ public class TestAppWidgetProvider extends BroadcastReceiver {
             Log.d(TAG, "DISABLED");
         }
         else if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
+            if (true) return;
             Log.d(TAG, "UPDATE");
             Bundle extras = intent.getExtras();
             int[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
