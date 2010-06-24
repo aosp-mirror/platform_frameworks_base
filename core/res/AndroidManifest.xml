@@ -80,6 +80,9 @@
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
 
+    <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
+    <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
@@ -435,6 +438,14 @@
         android:protectionLevel="normal"
         android:label="@string/permlab_flashlight"
         android:description="@string/permdesc_flashlight" />
+
+    <!-- Allows an application to access USB devices
+         @hide -->
+    <permission android:name="android.permission.ACCESS_USB"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_accessUsb"
+        android:description="@string/permdesc_accessUsb" />
 
     <!-- Allows access to hardware peripherals.  Intended only for hardware testing -->
     <permission android:name="android.permission.HARDWARE_TEST"
