@@ -316,6 +316,9 @@ public interface IActivityManager extends IInterface {
     public boolean isImmersive(IBinder token) throws RemoteException;
     public boolean isTopActivityImmersive() throws RemoteException;
     
+    public void crashApplication(int uid, int initialPid, String packageName,
+            String message) throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -531,4 +534,5 @@ public interface IActivityManager extends IInterface {
     int IS_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+110;
     int SET_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+111;
     int IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+112;
+    int CRASH_APPLICATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+113;
 }
