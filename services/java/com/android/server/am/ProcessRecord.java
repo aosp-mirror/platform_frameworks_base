@@ -86,7 +86,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     
     // contains HistoryRecord objects
-    final ArrayList<HistoryRecord> activities = new ArrayList<HistoryRecord>();
+    final ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
     // all ServiceRecord running in this process
     final HashSet<ServiceRecord> services = new HashSet<ServiceRecord>();
     // services that are currently executing code (need to remain foreground).
@@ -248,7 +248,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     public boolean isInterestingToUserLocked() {
         final int size = activities.size();
         for (int i = 0 ; i < size ; i++) {
-            HistoryRecord r = activities.get(i);
+            ActivityRecord r = activities.get(i);
             if (r.isInterestingToUserLocked()) {
                 return true;
             }

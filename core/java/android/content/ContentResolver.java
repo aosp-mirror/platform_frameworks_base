@@ -18,6 +18,7 @@ package android.content;
 
 import android.accounts.Account;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -1305,7 +1306,7 @@ public abstract class ContentResolver {
         // ActivityThread.currentPackageName() only returns non-null if the
         // current thread is an application main thread.  This parameter tells
         // us whether an event loop is blocked, and if so, which app it is.
-        String blockingPackage = ActivityThread.currentPackageName();
+        String blockingPackage = AppGlobals.getInitialPackage();
 
         EventLog.writeEvent(
             EventLogTags.CONTENT_QUERY_SAMPLE,
@@ -1328,7 +1329,7 @@ public abstract class ContentResolver {
                 }
             }
         }
-        String blockingPackage = ActivityThread.currentPackageName();
+        String blockingPackage = AppGlobals.getInitialPackage();
         EventLog.writeEvent(
             EventLogTags.CONTENT_UPDATE_SAMPLE,
             uri.toString(),

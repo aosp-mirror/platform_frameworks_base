@@ -42,7 +42,7 @@ import java.util.HashSet;
 /**
  * An entry in the history stack, representing an activity.
  */
-class HistoryRecord extends IApplicationToken.Stub {
+class ActivityRecord extends IApplicationToken.Stub {
     final ActivityManagerService service; // owner
     final ActivityInfo info; // all about me
     final int launchedFromUid; // always the uid who started the activity.
@@ -68,7 +68,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     long startTime;         // when we starting launching this activity
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
-    HistoryRecord resultTo; // who started this entry, so will get our reply
+    ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
     ArrayList results;      // pending ActivityResult objs we have received
@@ -175,10 +175,10 @@ class HistoryRecord extends IApplicationToken.Stub {
         }
     }
 
-    HistoryRecord(ActivityManagerService _service, ProcessRecord _caller,
+    ActivityRecord(ActivityManagerService _service, ProcessRecord _caller,
             int _launchedFromUid, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
-            HistoryRecord _resultTo, String _resultWho, int _reqCode,
+            ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified) {
         service = _service;
         info = aInfo;
@@ -297,7 +297,7 @@ class HistoryRecord extends IApplicationToken.Stub {
         }
     }
 
-    void addResultLocked(HistoryRecord from, String resultWho,
+    void addResultLocked(ActivityRecord from, String resultWho,
             int requestCode, int resultCode,
             Intent resultData) {
         ActivityResult r = new ActivityResult(from, resultWho,
@@ -308,7 +308,7 @@ class HistoryRecord extends IApplicationToken.Stub {
         results.add(r);
     }
 
-    void removeResultsLocked(HistoryRecord from, String resultWho,
+    void removeResultsLocked(ActivityRecord from, String resultWho,
             int requestCode) {
         if (results != null) {
             for (int i=results.size()-1; i>=0; i--) {
@@ -418,7 +418,7 @@ class HistoryRecord extends IApplicationToken.Stub {
                     final int N = service.mWaitingVisibleActivities.size();
                     if (N > 0) {
                         for (int i=0; i<N; i++) {
-                            HistoryRecord r = (HistoryRecord)
+                            ActivityRecord r = (ActivityRecord)
                                 service.mWaitingVisibleActivities.get(i);
                             r.waitingVisible = false;
                             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
@@ -442,11 +442,11 @@ class HistoryRecord extends IApplicationToken.Stub {
         nowVisible = false;
     }
     
-    private HistoryRecord getWaitingHistoryRecordLocked() {
+    private ActivityRecord getWaitingHistoryRecordLocked() {
         // First find the real culprit...  if we are waiting
         // for another app to start, then we have paused dispatching
         // for this activity.
-        HistoryRecord r = this;
+        ActivityRecord r = this;
         if (r.waitingVisible) {
             // Hmmm, who might we be waiting for?
             r = service.mResumedActivity;
@@ -463,7 +463,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     }
 
     public boolean keyDispatchingTimedOut() {
-        HistoryRecord r;
+        ActivityRecord r;
         ProcessRecord anrApp = null;
         synchronized(service) {
             r = getWaitingHistoryRecordLocked();
@@ -501,7 +501,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     /** Returns the key dispatching timeout for this application token. */
     public long getKeyDispatchingTimeout() {
         synchronized(service) {
-            HistoryRecord r = getWaitingHistoryRecordLocked();
+            ActivityRecord r = getWaitingHistoryRecordLocked();
             if (r == null || r.app == null
                     || r.app.instrumentationClass == null) {
                 return ActivityManagerService.KEY_DISPATCHING_TIMEOUT;

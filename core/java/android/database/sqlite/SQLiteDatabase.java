@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
@@ -2072,7 +2073,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         // main thread, or when we are invoked via Binder (e.g. ContentProvider).
         // Hopefully the full path to the database will be informative enough.
 
-        String blockingPackage = ActivityThread.currentPackageName();
+        String blockingPackage = AppGlobals.getInitialPackage();
         if (blockingPackage == null) blockingPackage = "";
 
         EventLog.writeEvent(

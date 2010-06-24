@@ -34,6 +34,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
+import android.app.AppGlobals;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityController;
@@ -410,8 +411,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * due to app switches being disabled.
      */
     class PendingActivityLaunch {
-        HistoryRecord r;
-        HistoryRecord sourceRecord;
+        ActivityRecord r;
+        ActivityRecord sourceRecord;
         Uri[] grantedUriPermissions;
         int grantedMode;
         boolean onlyIfNeeded;
@@ -471,47 +472,47 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
      */
-    HistoryRecord mPausingActivity = null;
+    ActivityRecord mPausingActivity = null;
 
     /**
      * Current activity that is resumed, or null if there is none.
      */
-    HistoryRecord mResumedActivity = null;
+    ActivityRecord mResumedActivity = null;
 
     /**
      * Activity we have told the window manager to have key focus.
      */
-    HistoryRecord mFocusedActivity = null;
+    ActivityRecord mFocusedActivity = null;
 
     /**
      * This is the last activity that we put into the paused state.  This is
      * used to determine if we need to do an activity transition while sleeping,
      * when we normally hold the top activity paused.
      */
-    HistoryRecord mLastPausedActivity = null;
+    ActivityRecord mLastPausedActivity = null;
 
     /**
      * List of activities that are waiting for a new activity
      * to become visible before completing whatever operation they are
      * supposed to do.
      */
-    final ArrayList<HistoryRecord> mWaitingVisibleActivities
-            = new ArrayList<HistoryRecord>();
+    final ArrayList<ActivityRecord> mWaitingVisibleActivities
+            = new ArrayList<ActivityRecord>();
 
     /**
      * List of activities that are ready to be stopped, but waiting
      * for the next activity to settle down before doing so.  It contains
      * HistoryRecord objects.
      */
-    final ArrayList<HistoryRecord> mStoppingActivities
-            = new ArrayList<HistoryRecord>();
+    final ArrayList<ActivityRecord> mStoppingActivities
+            = new ArrayList<ActivityRecord>();
 
     /**
      * Animations that for the current transition have requested not to
      * be considered for the transition animation.
      */
-    final ArrayList<HistoryRecord> mNoAnimActivities
-            = new ArrayList<HistoryRecord>();
+    final ArrayList<ActivityRecord> mNoAnimActivities
+            = new ArrayList<ActivityRecord>();
     
     /**
      * List of intents that were used to start the most recent tasks.
@@ -524,8 +525,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * for the previous activity to settle down before doing so.  It contains
      * HistoryRecord objects.
      */
-    final ArrayList<HistoryRecord> mFinishingActivities
-            = new ArrayList<HistoryRecord>();
+    final ArrayList<ActivityRecord> mFinishingActivities
+            = new ArrayList<ActivityRecord>();
 
     /**
      * All of the applications we currently have running organized by name.
@@ -1096,7 +1097,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             false, false, MY_PID, Process.SYSTEM_UID);
 
                     Dialog d = new AppNotRespondingDialog(ActivityManagerService.this,
-                            mContext, proc, (HistoryRecord)data.get("activity"));
+                            mContext, proc, (ActivityRecord)data.get("activity"));
                     d.show();
                     proc.anrDialog = d;
                 }
@@ -1310,7 +1311,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     return;
                 }
                 
-                HistoryRecord root = (HistoryRecord)msg.obj;
+                ActivityRecord root = (ActivityRecord)msg.obj;
                 ProcessRecord process = root.app;
                 if (process == null) {
                     return;
@@ -1716,7 +1717,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return mAppBindArgs;
     }
 
-    private final void setFocusedActivityLocked(HistoryRecord r) {
+    private final void setFocusedActivityLocked(ActivityRecord r) {
         if (mFocusedActivity != r) {
             mFocusedActivity = r;
             mWindowManager.setFocusedApp(r, true);
@@ -1807,16 +1808,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         updateLruProcessInternalLocked(app, oomAdj, updateActivityTime, 0);
     }
     
-    private final boolean updateLRUListLocked(HistoryRecord r) {
+    private final boolean updateLRUListLocked(ActivityRecord r) {
         final boolean hadit = mLRUActivities.remove(r);
         mLRUActivities.add(r);
         return hadit;
     }
 
-    private final HistoryRecord topRunningActivityLocked(HistoryRecord notTop) {
+    private final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
         int i = mHistory.size()-1;
         while (i >= 0) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (!r.finishing && r != notTop) {
                 return r;
             }
@@ -1825,10 +1826,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return null;
     }
 
-    private final HistoryRecord topRunningNonDelayedActivityLocked(HistoryRecord notTop) {
+    private final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
         int i = mHistory.size()-1;
         while (i >= 0) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (!r.finishing && !r.delayedResume && r != notTop) {
                 return r;
             }
@@ -1846,10 +1847,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * 
      * @return Returns the HistoryRecord of the next activity on the stack.
      */
-    private final HistoryRecord topRunningActivityLocked(IBinder token, int taskId) {
+    private final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
         int i = mHistory.size()-1;
         while (i >= 0) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             // Note: the taskId check depends on real taskId fields being non-zero
             if (!r.finishing && (token != r) && (taskId != r.task.taskId)) {
                 return r;
@@ -1874,7 +1875,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void ensurePackageDexOpt(String packageName) {
-        IPackageManager pm = ActivityThread.getPackageManager();
+        IPackageManager pm = AppGlobals.getPackageManager();
         try {
             if (pm.performDexOpt(packageName)) {
                 mDidDexOpt = true;
@@ -1890,7 +1891,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 || transit == WindowManagerPolicy.TRANSIT_TASK_TO_FRONT;
     }
     
-    private final boolean realStartActivityLocked(HistoryRecord r,
+    private final boolean realStartActivityLocked(ActivityRecord r,
             ProcessRecord app, boolean andResume, boolean checkConfig)
             throws RemoteException {
 
@@ -2019,7 +2020,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return true;
     }
 
-    private final void startSpecificActivityLocked(HistoryRecord r,
+    private final void startSpecificActivityLocked(ActivityRecord r,
             boolean andResume, boolean checkConfig) {
         // Is this activity's application already running?
         ProcessRecord app = getProcessRecordLocked(r.processName,
@@ -2258,7 +2259,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Slog.e(TAG, "Trying to pause when pause is already pending for "
                   + mPausingActivity, e);
         }
-        HistoryRecord prev = mResumedActivity;
+        ActivityRecord prev = mResumedActivity;
         if (prev == null) {
             RuntimeException e = new RuntimeException();
             Slog.e(TAG, "Trying to pause when nothing is resumed", e);
@@ -2333,7 +2334,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private final void completePauseLocked() {
-        HistoryRecord prev = mPausingActivity;
+        ActivityRecord prev = mPausingActivity;
         if (DEBUG_PAUSE) Slog.v(TAG, "Complete pause: " + prev);
         
         if (prev != null) {
@@ -2415,7 +2416,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * the resumed state (either by launching it or explicitly telling it),
      * this function updates the rest of our state to match that fact.
      */
-    private final void completeResumeLocked(HistoryRecord next) {
+    private final void completeResumeLocked(ActivityRecord next) {
         next.idle = false;
         next.results = null;
         next.newIntents = null;
@@ -2460,8 +2461,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Make sure that all activities that need to be visible (that is, they
      * currently can be seen by the user) actually are.
      */
-    private final void ensureActivitiesVisibleLocked(HistoryRecord top,
-            HistoryRecord starting, String onlyThisProcess, int configChanges) {
+    private final void ensureActivitiesVisibleLocked(ActivityRecord top,
+            ActivityRecord starting, String onlyThisProcess, int configChanges) {
         if (DEBUG_VISBILITY) Slog.v(
                 TAG, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
@@ -2473,10 +2474,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         while (mHistory.get(i) != top) {
             i--;
         }
-        HistoryRecord r;
+        ActivityRecord r;
         boolean behindFullscreen = false;
         for (; i>=0; i--) {
-            r = (HistoryRecord)mHistory.get(i);
+            r = (ActivityRecord)mHistory.get(i);
             if (DEBUG_VISBILITY) Slog.v(
                     TAG, "Make visible? " + r + " finishing=" + r.finishing
                     + " state=" + r.state);
@@ -2559,7 +2560,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Now for any activities that aren't visible to the user, make
         // sure they no longer are keeping the screen frozen.
         while (i >= 0) {
-            r = (HistoryRecord)mHistory.get(i);
+            r = (ActivityRecord)mHistory.get(i);
             if (DEBUG_VISBILITY) Slog.v(
                     TAG, "Make invisible? " + r + " finishing=" + r.finishing
                     + " state=" + r.state
@@ -2602,15 +2603,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     /**
      * Version of ensureActivitiesVisible that can easily be called anywhere.
      */
-    private final void ensureActivitiesVisibleLocked(HistoryRecord starting,
+    private final void ensureActivitiesVisibleLocked(ActivityRecord starting,
             int configChanges) {
-        HistoryRecord r = topRunningActivityLocked(null);
+        ActivityRecord r = topRunningActivityLocked(null);
         if (r != null) {
             ensureActivitiesVisibleLocked(r, starting, null, configChanges);
         }
     }
     
-    private void updateUsageStats(HistoryRecord resumedComponent, boolean resumed) {
+    private void updateUsageStats(ActivityRecord resumedComponent, boolean resumed) {
         if (resumed) {
             mUsageStatsService.noteResumeComponent(resumedComponent.realActivity);
         } else {
@@ -2708,7 +2709,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
-    private void reportResumedActivityLocked(HistoryRecord r) {
+    private void reportResumedActivityLocked(ActivityRecord r) {
         //Slog.i(TAG, "**** REPORT RESUME: " + r);
         
         final int identHash = System.identityHashCode(r);
@@ -2737,9 +2738,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @return Returns true if something is being resumed, or false if
      * nothing happened.
      */
-    private final boolean resumeTopActivityLocked(HistoryRecord prev) {
+    private final boolean resumeTopActivityLocked(ActivityRecord prev) {
         // Find the first activity that is not finishing.
-        HistoryRecord next = topRunningActivityLocked(null);
+        ActivityRecord next = topRunningActivityLocked(null);
 
         // Remember how we'll process this pause/resume situation, and ensure
         // that the state is reset however we wind up proceeding.
@@ -2873,7 +2874,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // This activity is now becoming visible.
             mWindowManager.setAppVisibility(next, true);
 
-            HistoryRecord lastResumedActivity = mResumedActivity;
+            ActivityRecord lastResumedActivity = mResumedActivity;
             ActivityState lastState = next.state;
 
             updateCpuStats();
@@ -2902,7 +2903,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // We should be all done, but let's just make sure our activity
                 // is still at the top and schedule another run if something
                 // weird happened.
-                HistoryRecord nextNext = topRunningActivityLocked(null);
+                ActivityRecord nextNext = topRunningActivityLocked(null);
                 if (DEBUG_SWITCH) Slog.i(TAG,
                         "Activity config changed during resume: " + next
                         + ", new next: " + nextNext);
@@ -3000,7 +3001,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return true;
     }
 
-    private final void startActivityLocked(HistoryRecord r, boolean newTask,
+    private final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume) {
         final int NH = mHistory.size();
 
@@ -3008,10 +3009,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         if (!newTask) {
             // If starting in an existing task, find where that is...
-            HistoryRecord next = null;
+            ActivityRecord next = null;
             boolean startIt = true;
             for (int i = NH-1; i >= 0; i--) {
-                HistoryRecord p = (HistoryRecord)mHistory.get(i);
+                ActivityRecord p = (ActivityRecord)mHistory.get(i);
                 if (p.finishing) {
                     continue;
                 }
@@ -3105,7 +3106,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // "has the same starting icon" as the next one.  This allows the
                 // window manager to keep the previous window it had previously
                 // created, if it still had one.
-                HistoryRecord prev = mResumedActivity;
+                ActivityRecord prev = mResumedActivity;
                 if (prev != null) {
                     // We don't want to reuse the previous starting preview if:
                     // (1) The current activity is in a different task.
@@ -3143,14 +3144,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @return Returns the old activity that should be continue to be used,
      * or null if none was found.
      */
-    private final HistoryRecord performClearTaskLocked(int taskId,
-            HistoryRecord newR, int launchFlags, boolean doClear) {
+    private final ActivityRecord performClearTaskLocked(int taskId,
+            ActivityRecord newR, int launchFlags, boolean doClear) {
         int i = mHistory.size();
         
         // First find the requested task.
         while (i > 0) {
             i--;
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (r.task.taskId == taskId) {
                 i++;
                 break;
@@ -3160,7 +3161,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Now clear it.
         while (i > 0) {
             i--;
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (r.finishing) {
                 continue;
             }
@@ -3169,11 +3170,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (r.realActivity.equals(newR.realActivity)) {
                 // Here it is!  Now finish everything in front...
-                HistoryRecord ret = r;
+                ActivityRecord ret = r;
                 if (doClear) {
                     while (i < (mHistory.size()-1)) {
                         i++;
-                        r = (HistoryRecord)mHistory.get(i);
+                        r = (ActivityRecord)mHistory.get(i);
                         if (r.finishing) {
                             continue;
                         }
@@ -3210,11 +3211,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Find the activity in the history stack within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.
      */
-    private final int findActivityInHistoryLocked(HistoryRecord r, int task) {
+    private final int findActivityInHistoryLocked(ActivityRecord r, int task) {
         int i = mHistory.size();
         while (i > 0) {
             i--;
-            HistoryRecord candidate = (HistoryRecord)mHistory.get(i);
+            ActivityRecord candidate = (ActivityRecord)mHistory.get(i);
             if (candidate.task.taskId != task) {
                 break;
             }
@@ -3230,10 +3231,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Reorder the history stack so that the activity at the given index is
      * brought to the front.
      */
-    private final HistoryRecord moveActivityToFrontLocked(int where) {
-        HistoryRecord newTop = (HistoryRecord)mHistory.remove(where);
+    private final ActivityRecord moveActivityToFrontLocked(int where) {
+        ActivityRecord newTop = (ActivityRecord)mHistory.remove(where);
         int top = mHistory.size();
-        HistoryRecord oldTop = (HistoryRecord)mHistory.get(top-1);
+        ActivityRecord oldTop = (ActivityRecord)mHistory.get(top-1);
         mHistory.add(top, newTop);
         oldTop.frontOfTask = false;
         newTop.frontOfTask = true;
@@ -3244,7 +3245,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
      */
-    private final void deliverNewIntentLocked(HistoryRecord r, Intent intent) {
+    private final void deliverNewIntentLocked(ActivityRecord r, Intent intent) {
         boolean sent = false;
         if (r.state == ActivityState.RESUMED
                 && r.app != null && r.app.thread != null) {
@@ -3262,7 +3263,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void logStartActivity(int tag, HistoryRecord r,
+    private final void logStartActivity(int tag, ActivityRecord r,
             TaskRecord task) {
         EventLog.writeEvent(tag,
                 System.identityHashCode(r), task.taskId,
@@ -3280,14 +3281,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             boolean componentSpecified) {
         Slog.i(TAG, "Starting activity: " + intent);
 
-        HistoryRecord sourceRecord = null;
-        HistoryRecord resultRecord = null;
+        ActivityRecord sourceRecord = null;
+        ActivityRecord resultRecord = null;
         if (resultTo != null) {
             int index = indexOfTokenLocked(resultTo);
             if (DEBUG_RESULTS) Slog.v(
                 TAG, "Sending result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
-                sourceRecord = (HistoryRecord)mHistory.get(index);
+                sourceRecord = (ActivityRecord)mHistory.get(index);
                 if (requestCode >= 0 && !sourceRecord.finishing) {
                     resultRecord = sourceRecord;
                 }
@@ -3390,7 +3391,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        HistoryRecord r = new HistoryRecord(this, callerApp, callingUid,
+        ActivityRecord r = new ActivityRecord(this, callerApp, callingUid,
                 intent, resolvedType, aInfo, mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
 
@@ -3439,8 +3440,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mPendingActivityLaunches.clear();
     }
     
-    private final int startActivityUncheckedLocked(HistoryRecord r,
-            HistoryRecord sourceRecord, Uri[] grantedUriPermissions,
+    private final int startActivityUncheckedLocked(ActivityRecord r,
+            ActivityRecord sourceRecord, Uri[] grantedUriPermissions,
             int grantedMode, boolean onlyIfNeeded, boolean doResume) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
@@ -3460,7 +3461,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             r.delayedResume = true;
         }
         
-        HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
+        ActivityRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
                 != 0 ? r : null;
 
         // If the onlyIfNeeded flag is set, then we can do this if the activity
@@ -3468,7 +3469,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // a special case, if we do not know the caller then we count the
         // current top activity as the caller.
         if (onlyIfNeeded) {
-            HistoryRecord checkedCaller = sourceRecord;
+            ActivityRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
                 checkedCaller = topRunningNonDelayedActivityLocked(notTop);
             }
@@ -3534,7 +3535,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // a SINGLE_INSTANCE activity, there can be one and only one
                 // instance of it in the history, and it is always in its own
                 // unique task, so we do a special search.
-                HistoryRecord taskTop = r.launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE
+                ActivityRecord taskTop = r.launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE
                         ? findTaskLocked(intent, r.info)
                         : findActivityLocked(intent, r.info);
                 if (taskTop != null) {
@@ -3551,7 +3552,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // to have the same behavior as if a new instance was
                     // being started, which means not bringing it to the front
                     // if the caller is not itself in the front.
-                    HistoryRecord curTop = topRunningNonDelayedActivityLocked(notTop);
+                    ActivityRecord curTop = topRunningNonDelayedActivityLocked(notTop);
                     if (curTop.task != taskTop.task) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                         boolean callerAtFront = sourceRecord == null
@@ -3584,7 +3585,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // from the task up to the one being started.  In most
                         // cases this means we are resetting the task to its
                         // initial state.
-                        HistoryRecord top = performClearTaskLocked(
+                        ActivityRecord top = performClearTaskLocked(
                                 taskTop.task.taskId, r, launchFlags, true);
                         if (top != null) {
                             if (top.frontOfTask) {
@@ -3669,7 +3670,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // If the activity being launched is the same as the one currently
             // at the top, then we need to check if it should only be launched
             // once.
-            HistoryRecord top = topRunningNonDelayedActivityLocked(notTop);
+            ActivityRecord top = topRunningNonDelayedActivityLocked(notTop);
             if (top != null && r.resultTo == null) {
                 if (top.realActivity.equals(r.realActivity)) {
                     if (top.app != null && top.app.thread != null) {
@@ -3727,7 +3728,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
-                HistoryRecord top = performClearTaskLocked(
+                ActivityRecord top = performClearTaskLocked(
                         sourceRecord.task.taskId, r, launchFlags, true);
                 if (top != null) {
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
@@ -3746,7 +3747,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // we want to shuffle it to the front of the stack if so.
                 int where = findActivityInHistoryLocked(r, sourceRecord.task.taskId);
                 if (where >= 0) {
-                    HistoryRecord top = moveActivityToFrontLocked(where);
+                    ActivityRecord top = moveActivityToFrontLocked(where);
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
                     if (doResume) {
@@ -3767,8 +3768,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
             final int N = mHistory.size();
-            HistoryRecord prev =
-                N > 0 ? (HistoryRecord)mHistory.get(N-1) : null;
+            ActivityRecord prev =
+                N > 0 ? (ActivityRecord)mHistory.get(N-1) : null;
             r.task = prev != null
                 ? prev.task
                 : new TaskRecord(mCurTask, r.info, intent,
@@ -3784,7 +3785,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return START_SUCCESS;
     }
 
-    void reportActivityLaunchedLocked(boolean timeout, HistoryRecord r,
+    void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
             long thisTime, long totalTime) {
         for (int i=mWaitingActivityLaunched.size()-1; i>=0; i--) {
             WaitResult w = mWaitingActivityLaunched.get(i);
@@ -3798,7 +3799,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         notify();
     }
     
-    void reportActivityVisibleLocked(HistoryRecord r) {
+    void reportActivityVisibleLocked(ActivityRecord r) {
         for (int i=mWaitingActivityVisible.size()-1; i>=0; i--) {
             WaitResult w = mWaitingActivityVisible.get(i);
             w.timeout = false;
@@ -3830,7 +3831,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         ActivityInfo aInfo;
         try {
             ResolveInfo rInfo =
-                ActivityThread.getPackageManager().resolveIntent(
+                AppGlobals.getPackageManager().resolveIntent(
                         intent, resolvedType,
                         PackageManager.MATCH_DEFAULT_ONLY
                         | STOCK_PM_FLAGS);
@@ -3908,7 +3909,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT,
                                 new IntentSender(target));
                         if (mHeavyWeightProcess.activities.size() > 0) {
-                            HistoryRecord hist = mHeavyWeightProcess.activities.get(0);
+                            ActivityRecord hist = mHeavyWeightProcess.activities.get(0);
                             newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP,
                                     hist.packageName);
                             newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK,
@@ -3927,7 +3928,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         componentSpecified = true;
                         try {
                             ResolveInfo rInfo =
-                                ActivityThread.getPackageManager().resolveIntent(
+                                AppGlobals.getPackageManager().resolveIntent(
                                         intent, null,
                                         PackageManager.MATCH_DEFAULT_ONLY
                                         | STOCK_PM_FLAGS);
@@ -3970,7 +3971,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         }
                     } while (!outResult.timeout && outResult.who == null);
                 } else if (res == IActivityManager.START_TASK_TO_FRONT) {
-                    HistoryRecord r = this.topRunningActivityLocked(null);
+                    ActivityRecord r = this.topRunningActivityLocked(null);
                     if (r.nowVisible) {
                         outResult.timeout = false;
                         outResult.who = new ComponentName(r.info.packageName, r.info.name);
@@ -4067,7 +4068,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 return false;
             }
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             if (r.app == null || r.app.thread == null) {
                 // The caller is not running...  d'oh!
                 return false;
@@ -4081,7 +4082,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ActivityInfo aInfo = null;
             try {
                 List<ResolveInfo> resolves =
-                    ActivityThread.getPackageManager().queryIntentActivities(
+                    AppGlobals.getPackageManager().queryIntentActivities(
                             intent, r.resolvedType,
                             PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS);
 
@@ -4125,7 +4126,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             r.finishing = true;
 
             // Propagate reply information over to the new activity.
-            final HistoryRecord resultTo = r.resultTo;
+            final ActivityRecord resultTo = r.resultTo;
             final String resultWho = r.resultWho;
             final int requestCode = r.requestCode;
             r.resultTo = null;
@@ -4170,7 +4171,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         ActivityInfo aInfo;
         try {
             ResolveInfo rInfo =
-                ActivityThread.getPackageManager().resolveIntent(
+                AppGlobals.getPackageManager().resolveIntent(
                         intent, resolvedType,
                         PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS);
             aInfo = rInfo != null ? rInfo.activityInfo : null;
@@ -4224,7 +4225,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 return;
             }
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             final long origId = Binder.clearCallingIdentity();
             mWindowManager.setAppOrientation(r, requestedOrientation);
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
@@ -4246,12 +4247,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             return mWindowManager.getAppOrientation(r);
         }
     }
 
-    private final void stopActivityLocked(HistoryRecord r) {
+    private final void stopActivityLocked(ActivityRecord r) {
         if (DEBUG_SWITCH) Slog.d(TAG, "Stopping: " + r);
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
@@ -4302,12 +4303,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (index < 0) {
             return false;
         }
-        HistoryRecord r = (HistoryRecord)mHistory.get(index);
+        ActivityRecord r = (ActivityRecord)mHistory.get(index);
 
         // Is this the last activity left?
         boolean lastActivity = true;
         for (int i=mHistory.size()-1; i>=0; i--) {
-            HistoryRecord p = (HistoryRecord)mHistory.get(i);
+            ActivityRecord p = (ActivityRecord)mHistory.get(i);
             if (!p.finishing && p != r) {
                 lastActivity = false;
                 break;
@@ -4330,7 +4331,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
      */
-    private final boolean finishActivityLocked(HistoryRecord r, int index,
+    private final boolean finishActivityLocked(ActivityRecord r, int index,
             int resultCode, Intent resultData, String reason) {
         if (r.finishing) {
             Slog.w(TAG, "Duplicate finish request for " + r);
@@ -4343,7 +4344,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.task.taskId, r.shortComponentName, reason);
         r.task.numActivities--;
         if (index < (mHistory.size()-1)) {
-            HistoryRecord next = (HistoryRecord)mHistory.get(index+1);
+            ActivityRecord next = (ActivityRecord)mHistory.get(index+1);
             if (next.task == r.task) {
                 if (r.frontOfTask) {
                     // The next activity is now the front of the task.
@@ -4364,7 +4365,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         // send the result
-        HistoryRecord resultTo = r.resultTo;
+        ActivityRecord resultTo = r.resultTo;
         if (resultTo != null) {
             if (DEBUG_RESULTS) Slog.v(TAG, "Adding result to " + resultTo
                     + " who=" + r.resultWho + " req=" + r.requestCode
@@ -4396,7 +4397,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (mResumedActivity == r) {
             boolean endTask = index <= 0
-                    || ((HistoryRecord)mHistory.get(index-1)).task != r.task;
+                    || ((ActivityRecord)mHistory.get(index-1)).task != r.task;
             if (DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare close transition: finishing " + r);
             mWindowManager.prepareAppTransition(endTask
@@ -4429,7 +4430,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     private static final int FINISH_AFTER_PAUSE = 1;
     private static final int FINISH_AFTER_VISIBLE = 2;
 
-    private final HistoryRecord finishCurrentActivityLocked(HistoryRecord r,
+    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
             int mode) {
         final int index = indexOfTokenLocked(r);
         if (index < 0) {
@@ -4439,7 +4440,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return finishCurrentActivityLocked(r, index, mode);
     }
 
-    private final HistoryRecord finishCurrentActivityLocked(HistoryRecord r,
+    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
             int index, int mode) {
         // First things first: if this activity is currently visible,
         // and the resumed activity is not yet visible, then hold off on
@@ -4504,7 +4505,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized(this) {
             if (mController != null) {
                 // Find the first activity that is not finishing.
-                HistoryRecord next = topRunningActivityLocked(token, 0);
+                ActivityRecord next = topRunningActivityLocked(token, 0);
                 if (next != null) {
                     // ask watcher if this is allowed
                     boolean resumeOK = true;
@@ -4543,10 +4544,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
             
-            ArrayList<HistoryRecord> activities = new ArrayList<HistoryRecord>(
+            ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>(
                     mHeavyWeightProcess.activities);
             for (int i=0; i<activities.size(); i++) {
-                HistoryRecord r = activities.get(i);
+                ActivityRecord r = activities.get(i);
                 if (!r.finishing) {
                     int index = indexOfTokenLocked(r);
                     if (index >= 0) {
@@ -4561,7 +4562,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
-    void sendActivityResultLocked(int callingUid, HistoryRecord r,
+    void sendActivityResultLocked(int callingUid, ActivityRecord r,
             String resultWho, int requestCode, int resultCode, Intent data) {
 
         if (callingUid > 0) {
@@ -4594,13 +4595,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 return;
             }
-            HistoryRecord self = (HistoryRecord)mHistory.get(index);
+            ActivityRecord self = (ActivityRecord)mHistory.get(index);
 
             final long origId = Binder.clearCallingIdentity();
 
             int i;
             for (i=mHistory.size()-1; i>=0; i--) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                ActivityRecord r = (ActivityRecord)mHistory.get(i);
                 if (r.resultTo == self && r.requestCode == requestCode) {
                     if ((r.resultWho == null && resultWho == null) ||
                         (r.resultWho != null && r.resultWho.equals(resultWho))) {
@@ -4618,7 +4619,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized(this) {
             int i;
             for (i=mHistory.size()-1; i>=0; i--) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                ActivityRecord r = (ActivityRecord)mHistory.get(i);
                 if (r == token) {
                     return true;
                 }
@@ -4637,7 +4638,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 return;
             }
-            HistoryRecord self = (HistoryRecord)mHistory.get(index);
+            ActivityRecord self = (ActivityRecord)mHistory.get(index);
 
             final long origId = Binder.clearCallingIdentity();
             
@@ -4654,7 +4655,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     /**
      * Perform clean-up of service connections in an activity record.
      */
-    private final void cleanUpActivityServicesLocked(HistoryRecord r) {
+    private final void cleanUpActivityServicesLocked(ActivityRecord r) {
         // Throw away any services that have been bound by this activity.
         if (r.connections != null) {
             Iterator<ConnectionRecord> it = r.connections.iterator();
@@ -4673,7 +4674,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * processing going away, in which case there is no remaining client-side
      * state to destroy so only the cleanup here is needed.
      */
-    private final void cleanUpActivityLocked(HistoryRecord r, boolean cleanServices) {
+    private final void cleanUpActivityLocked(ActivityRecord r, boolean cleanServices) {
         if (mResumedActivity == r) {
             mResumedActivity = null;
         }
@@ -4717,7 +4718,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
     }
 
-    private final void removeActivityFromHistoryLocked(HistoryRecord r) {
+    private final void removeActivityFromHistoryLocked(ActivityRecord r) {
         if (r.state != ActivityState.DESTROYED) {
             mHistory.remove(r);
             r.inHistory = false;
@@ -4737,7 +4738,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * a configuration switch where we destroy the current client-side object
      * but then create a new client-side object for this same HistoryRecord.
      */
-    private final boolean destroyActivityLocked(HistoryRecord r,
+    private final boolean destroyActivityLocked(ActivityRecord r,
             boolean removeFromApp) {
         if (DEBUG_SWITCH) Slog.v(
             TAG, "Removing activity: token=" + r
@@ -4827,7 +4828,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             + " with " + i + " entries");
         while (i > 0) {
             i--;
-            HistoryRecord r = (HistoryRecord)list.get(i);
+            ActivityRecord r = (ActivityRecord)list.get(i);
             if (localLOGV) Slog.v(
                 TAG, "Record #" + i + " " + r + ": app=" + r.app);
             if (r.app == app) {
@@ -4873,7 +4874,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             TAG, "Removing app " + app + " from history with " + i + " entries");
         while (i > 0) {
             i--;
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (localLOGV) Slog.v(
                 TAG, "Record #" + i + " " + r + ": app=" + r.app);
             if (r.app == app) {
@@ -5078,8 +5079,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return tracesFile;
     }
 
-    final void appNotResponding(ProcessRecord app, HistoryRecord activity,
-            HistoryRecord parent, final String annotation) {
+    final void appNotResponding(ProcessRecord app, ActivityRecord activity,
+            ActivityRecord parent, final String annotation) {
         ArrayList<Integer> pids = new ArrayList<Integer>(20);
         
         synchronized (this) {
@@ -5231,7 +5232,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 return;
             }
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             ProcessRecord app = r.app;
 
             if (localLOGV) Slog.v(
@@ -5283,7 +5284,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         int pid = Binder.getCallingPid();
         long callingId = Binder.clearCallingIdentity();
         try {
-            IPackageManager pm = ActivityThread.getPackageManager();
+            IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
                 try {
@@ -5340,7 +5341,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         long callingId = Binder.clearCallingIdentity();
         try {
-            IPackageManager pm = ActivityThread.getPackageManager();
+            IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
                 try {
@@ -5372,7 +5373,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         long callingId = Binder.clearCallingIdentity();
         try {
-            IPackageManager pm = ActivityThread.getPackageManager();
+            IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
                 try {
@@ -5443,7 +5444,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.closeSystemDialogs(reason);
             
             for (i=mHistory.size()-1; i>=0; i--) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                ActivityRecord r = (ActivityRecord)mHistory.get(i);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
                     finishActivityLocked(r, i,
                             Activity.RESULT_CANCELED, null, "close-sys");
@@ -5546,7 +5547,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (uid < 0) {
             try {
-                uid = ActivityThread.getPackageManager().getPackageUid(name);
+                uid = AppGlobals.getPackageManager().getPackageUid(name);
             } catch (RemoteException e) {
             }
         }
@@ -5567,7 +5568,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 callerWillRestart, doit);
         
         for (i=mHistory.size()-1; i>=0; i--) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (r.packageName.equals(name)) {
                 if (!doit) {
                     return true;
@@ -5839,7 +5840,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         boolean didSomething = false;
 
         // See if the top visible activity is waiting to run in this process...
-        HistoryRecord hr = topRunningActivityLocked(null);
+        ActivityRecord hr = topRunningActivityLocked(null);
         if (hr != null && normalMode) {
             if (hr.app == null && app.info.uid == hr.info.applicationInfo.uid
                     && processName.equals(hr.processName)) {
@@ -5941,18 +5942,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         Binder.restoreCallingIdentity(origId);
     }
 
-    final ArrayList<HistoryRecord> processStoppingActivitiesLocked(
+    final ArrayList<ActivityRecord> processStoppingActivitiesLocked(
             boolean remove) {
         int N = mStoppingActivities.size();
         if (N <= 0) return null;
 
-        ArrayList<HistoryRecord> stops = null;
+        ArrayList<ActivityRecord> stops = null;
 
         final boolean nowVisible = mResumedActivity != null
                 && mResumedActivity.nowVisible
                 && !mResumedActivity.waitingVisible;
         for (int i=0; i<N; i++) {
-            HistoryRecord s = mStoppingActivities.get(i);
+            ActivityRecord s = mStoppingActivities.get(i);
             if (localLOGV) Slog.v(TAG, "Stopping " + s + ": nowVisible="
                     + nowVisible + " waitingVisible=" + s.waitingVisible
                     + " finishing=" + s.finishing);
@@ -5972,7 +5973,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (!s.waitingVisible && remove) {
                 if (localLOGV) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
-                    stops = new ArrayList<HistoryRecord>();
+                    stops = new ArrayList<ActivityRecord>();
                 }
                 stops.add(s);
                 mStoppingActivities.remove(i);
@@ -5994,9 +5995,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Configuration config) {
         if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
 
-        ArrayList<HistoryRecord> stops = null;
-        ArrayList<HistoryRecord> finishes = null;
-        ArrayList<HistoryRecord> thumbnails = null;
+        ArrayList<ActivityRecord> stops = null;
+        ArrayList<ActivityRecord> finishes = null;
+        ArrayList<ActivityRecord> thumbnails = null;
         int NS = 0;
         int NF = 0;
         int NT = 0;
@@ -6012,7 +6013,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Get the activity record.
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(index);
+                ActivityRecord r = (ActivityRecord)mHistory.get(index);
 
                 if (fromTimeout) {
                     reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
@@ -6061,11 +6062,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             stops = processStoppingActivitiesLocked(true);
             NS = stops != null ? stops.size() : 0;
             if ((NF=mFinishingActivities.size()) > 0) {
-                finishes = new ArrayList<HistoryRecord>(mFinishingActivities);
+                finishes = new ArrayList<ActivityRecord>(mFinishingActivities);
                 mFinishingActivities.clear();
             }
             if ((NT=mCancelledThumbnails.size()) > 0) {
-                thumbnails = new ArrayList<HistoryRecord>(mCancelledThumbnails);
+                thumbnails = new ArrayList<ActivityRecord>(mCancelledThumbnails);
                 mCancelledThumbnails.clear();
             }
 
@@ -6088,7 +6089,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Stop any activities that are scheduled to do so but have been
         // waiting for the next one to start.
         for (i=0; i<NS; i++) {
-            HistoryRecord r = (HistoryRecord)stops.get(i);
+            ActivityRecord r = (ActivityRecord)stops.get(i);
             synchronized (this) {
                 if (r.finishing) {
                     finishCurrentActivityLocked(r, FINISH_IMMEDIATELY);
@@ -6101,7 +6102,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Finish any activities that are scheduled to do so but have been
         // waiting for the next one to start.
         for (i=0; i<NF; i++) {
-            HistoryRecord r = (HistoryRecord)finishes.get(i);
+            ActivityRecord r = (ActivityRecord)finishes.get(i);
             synchronized (this) {
                 destroyActivityLocked(r, true);
             }
@@ -6109,7 +6110,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // Report back to any thumbnail receivers.
         for (i=0; i<NT; i++) {
-            HistoryRecord r = (HistoryRecord)thumbnails.get(i);
+            ActivityRecord r = (ActivityRecord)thumbnails.get(i);
             sendPendingThumbnail(r, null, null, null, true);
         }
 
@@ -6203,12 +6204,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             TAG, "Activity paused: token=" + token + ", icicle=" + icicle
             + ", timeout=" + timeout);
 
-        HistoryRecord r = null;
+        ActivityRecord r = null;
 
         synchronized (this) {
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
-                r = (HistoryRecord)mHistory.get(index);
+                r = (ActivityRecord)mHistory.get(index);
                 if (!timeout) {
                     r.icicle = icicle;
                     r.haveState = true;
@@ -6232,14 +6233,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (localLOGV) Slog.v(
             TAG, "Activity stopped: token=" + token);
 
-        HistoryRecord r = null;
+        ActivityRecord r = null;
 
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
-                r = (HistoryRecord)mHistory.get(index);
+                r = (ActivityRecord)mHistory.get(index);
                 r.thumbnail = thumbnail;
                 r.description = description;
                 r.stopped = true;
@@ -6269,7 +6270,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(index);
+                ActivityRecord r = (ActivityRecord)mHistory.get(index);
                 if (r.state == ActivityState.DESTROYING) {
                     final long origId = Binder.clearCallingIdentity();
                     removeActivityFromHistoryLocked(r);
@@ -6281,22 +6282,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
-            HistoryRecord r = getCallingRecordLocked(token);
+            ActivityRecord r = getCallingRecordLocked(token);
             return r != null && r.app != null ? r.info.packageName : null;
         }
     }
 
     public ComponentName getCallingActivity(IBinder token) {
         synchronized (this) {
-            HistoryRecord r = getCallingRecordLocked(token);
+            ActivityRecord r = getCallingRecordLocked(token);
             return r != null ? r.intent.getComponent() : null;
         }
     }
 
-    private HistoryRecord getCallingRecordLocked(IBinder token) {
+    private ActivityRecord getCallingRecordLocked(IBinder token) {
         int index = indexOfTokenLocked(token);
         if (index >= 0) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             if (r != null) {
                 return r.resultTo;
             }
@@ -6308,7 +6309,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized(this) {
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(index);
+                ActivityRecord r = (ActivityRecord)mHistory.get(index);
                 return r.intent.getComponent();
             }
             return null;
@@ -6319,7 +6320,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized(this) {
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(index);
+                ActivityRecord r = (ActivityRecord)mHistory.get(index);
                 return r.packageName;
             }
             return null;
@@ -6346,7 +6347,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             try {
                 if (callingUid != 0 && callingUid != Process.SYSTEM_UID &&
                         Process.supportsProcesses()) {
-                    int uid = ActivityThread.getPackageManager()
+                    int uid = AppGlobals.getPackageManager()
                             .getPackageUid(packageName);
                     if (uid != Binder.getCallingUid()) {
                         String msg = "Permission Denial: getIntentSender() from pid="
@@ -6371,13 +6372,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     IIntentSender getIntentSenderLocked(int type,
             String packageName, int callingUid, IBinder token, String resultWho,
             int requestCode, Intent intent, String resolvedType, int flags) {
-        HistoryRecord activity = null;
+        ActivityRecord activity = null;
         if (type == INTENT_SENDER_ACTIVITY_RESULT) {
             int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return null;
             }
-            activity = (HistoryRecord)mHistory.get(index);
+            activity = (ActivityRecord)mHistory.get(index);
             if (activity.finishing) {
                 return null;
             }
@@ -6427,7 +6428,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized(this) {
             PendingIntentRecord rec = (PendingIntentRecord)sender;
             try {
-                int uid = ActivityThread.getPackageManager()
+                int uid = AppGlobals.getPackageManager()
                         .getPackageUid(rec.key.packageName);
                 if (uid != Binder.getCallingUid()) {
                     String msg = "Permission Denial: cancelIntentSender() from pid="
@@ -6586,7 +6587,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return PackageManager.PERMISSION_GRANTED;
         }
         try {
-            return ActivityThread.getPackageManager()
+            return AppGlobals.getPackageManager()
                     .checkUidPermission(permission, uid);
         } catch (RemoteException e) {
             // Should never happen, but if it does... deny!
@@ -6695,7 +6696,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void grantUriPermissionLocked(int callingUid,
-            String targetPkg, Uri uri, int modeFlags, HistoryRecord activity) {
+            String targetPkg, Uri uri, int modeFlags, ActivityRecord activity) {
         modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         if (modeFlags == 0) {
@@ -6705,7 +6706,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
                 "Requested grant " + targetPkg + " permission to " + uri);
         
-        final IPackageManager pm = ActivityThread.getPackageManager();
+        final IPackageManager pm = AppGlobals.getPackageManager();
 
         // If this is not a content: uri, we can't do anything with it.
         if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
@@ -6824,7 +6825,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void grantUriPermissionFromIntentLocked(int callingUid,
-            String targetPkg, Intent intent, HistoryRecord activity) {
+            String targetPkg, Intent intent, ActivityRecord activity) {
         if (intent == null) {
             return;
         }
@@ -6875,7 +6876,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private void removeActivityUriPermissionsLocked(HistoryRecord activity) {
+    private void removeActivityUriPermissionsLocked(ActivityRecord activity) {
         if (activity.readUriPermissions != null) {
             for (UriPermission perm : activity.readUriPermissions) {
                 perm.readActivities.remove(activity);
@@ -6909,7 +6910,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
                 "Revoking all granted permissions to " + uri);
         
-        final IPackageManager pm = ActivityThread.getPackageManager();
+        final IPackageManager pm = AppGlobals.getPackageManager();
 
         final String authority = uri.getAuthority();
         ProviderInfo pi = null;
@@ -7003,7 +7004,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
-            final IPackageManager pm = ActivityThread.getPackageManager();
+            final IPackageManager pm = AppGlobals.getPackageManager();
 
             final String authority = uri.getAuthority();
             ProviderInfo pi = null;
@@ -7057,7 +7058,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         PendingThumbnailsRecord pending = null;
         IApplicationThread topThumbnail = null;
-        HistoryRecord topRecord = null;
+        ActivityRecord topRecord = null;
 
         synchronized(this) {
             if (localLOGV) Slog.v(
@@ -7083,17 +7084,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             int pos = mHistory.size()-1;
-            HistoryRecord next =
-                pos >= 0 ? (HistoryRecord)mHistory.get(pos) : null;
-            HistoryRecord top = null;
+            ActivityRecord next =
+                pos >= 0 ? (ActivityRecord)mHistory.get(pos) : null;
+            ActivityRecord top = null;
             CharSequence topDescription = null;
             TaskRecord curTask = null;
             int numActivities = 0;
             int numRunning = 0;
             while (pos >= 0 && maxNum > 0) {
-                final HistoryRecord r = next;
+                final ActivityRecord r = next;
                 pos--;
-                next = pos >= 0 ? (HistoryRecord)mHistory.get(pos) : null;
+                next = pos >= 0 ? (ActivityRecord)mHistory.get(pos) : null;
 
                 // Initialize state for next task if needed.
                 if (top == null ||
@@ -7195,7 +7196,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
                     "getRecentTasks()");
 
-            IPackageManager pm = ActivityThread.getPackageManager();
+            IPackageManager pm = AppGlobals.getPackageManager();
             
             final int N = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res
@@ -7242,12 +7243,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final int findAffinityTaskTopLocked(int startIndex, String affinity) {
         int j;
-        TaskRecord startTask = ((HistoryRecord)mHistory.get(startIndex)).task; 
+        TaskRecord startTask = ((ActivityRecord)mHistory.get(startIndex)).task; 
         TaskRecord jt = startTask;
         
         // First look backwards
         for (j=startIndex-1; j>=0; j--) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(j);
+            ActivityRecord r = (ActivityRecord)mHistory.get(j);
             if (r.task != jt) {
                 jt = r.task;
                 if (affinity.equals(jt.affinity)) {
@@ -7260,7 +7261,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final int N = mHistory.size();
         jt = startTask;
         for (j=startIndex+1; j<N; j++) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(j);
+            ActivityRecord r = (ActivityRecord)mHistory.get(j);
             if (r.task != jt) {
                 if (affinity.equals(jt.affinity)) {
                     return j;
@@ -7270,7 +7271,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         // Might it be at the top?
-        if (affinity.equals(((HistoryRecord)mHistory.get(N-1)).task.affinity)) {
+        if (affinity.equals(((ActivityRecord)mHistory.get(N-1)).task.affinity)) {
             return N-1;
         }
         
@@ -7281,8 +7282,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Perform a reset of the given task, if needed as part of launching it.
      * Returns the new HistoryRecord at the top of the task.
      */
-    private final HistoryRecord resetTaskIfNeededLocked(HistoryRecord taskTop,
-            HistoryRecord newActivity) {
+    private final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
+            ActivityRecord newActivity) {
         boolean forceReset = (newActivity.info.flags
                 &ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
         if (taskTop.task.getInactiveDuration() > ACTIVITY_INACTIVE_RESET_TIME) {
@@ -7297,13 +7298,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // We are going to move through the history list so that we can look
         // at each activity 'target' with 'below' either the interesting
         // activity immediately below it in the stack or null.
-        HistoryRecord target = null;
+        ActivityRecord target = null;
         int targetI = 0;
         int taskTopI = -1;
         int replyChainEnd = -1;
         int lastReparentPos = -1;
         for (int i=mHistory.size()-1; i>=-1; i--) {
-            HistoryRecord below = i >= 0 ? (HistoryRecord)mHistory.get(i) : null;
+            ActivityRecord below = i >= 0 ? (ActivityRecord)mHistory.get(i) : null;
             
             if (below != null && below.finishing) {
                 continue;
@@ -7357,7 +7358,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // bottom of the activity stack.  This also keeps it
                         // correctly ordered with any activities we previously
                         // moved.
-                        HistoryRecord p = (HistoryRecord)mHistory.get(0);
+                        ActivityRecord p = (ActivityRecord)mHistory.get(0);
                         if (target.taskAffinity != null
                                 && target.taskAffinity.equals(p.task.affinity)) {
                             // If the activity currently at the bottom has the
@@ -7383,7 +7384,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         }
                         int dstPos = 0;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
-                            p = (HistoryRecord)mHistory.get(srcPos);
+                            p = (ActivityRecord)mHistory.get(srcPos);
                             if (p.finishing) {
                                 continue;
                             }
@@ -7422,7 +7423,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             // like these are all in the reply chain.
                             replyChainEnd = targetI+1;
                             while (replyChainEnd < mHistory.size() &&
-                                    ((HistoryRecord)mHistory.get(
+                                    ((ActivityRecord)mHistory.get(
                                                 replyChainEnd)).task == task) {
                                 replyChainEnd++;
                             }
@@ -7430,9 +7431,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         } else if (replyChainEnd < 0) {
                             replyChainEnd = targetI;
                         }
-                        HistoryRecord p = null;
+                        ActivityRecord p = null;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
-                            p = (HistoryRecord)mHistory.get(srcPos);
+                            p = (ActivityRecord)mHistory.get(srcPos);
                             if (p.finishing) {
                                 continue;
                             }
@@ -7490,9 +7491,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (replyChainEnd < 0) {
                         replyChainEnd = targetI;
                     }
-                    HistoryRecord p = null;
+                    ActivityRecord p = null;
                     for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
-                        p = (HistoryRecord)mHistory.get(srcPos);
+                        p = (ActivityRecord)mHistory.get(srcPos);
                         if (p.finishing) {
                             continue;
                         }
@@ -7510,7 +7511,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         replyChainEnd = targetI;
                     }
                     for (int srcPos=replyChainEnd; srcPos>=targetI; srcPos--) {
-                        HistoryRecord p = (HistoryRecord)mHistory.get(srcPos);
+                        ActivityRecord p = (ActivityRecord)mHistory.get(srcPos);
                         if (p.finishing) {
                             continue;
                         }
@@ -7541,7 +7542,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // below so it remains singleTop.
                     if (target.info.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
                         for (int j=lastReparentPos-1; j>=0; j--) {
-                            HistoryRecord p = (HistoryRecord)mHistory.get(j);
+                            ActivityRecord p = (ActivityRecord)mHistory.get(j);
                             if (p.finishing) {
                                 continue;
                             }
@@ -7587,7 +7588,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
                 for (int i=mHistory.size()-1; i>=0; i--) {
-                    HistoryRecord hr = (HistoryRecord)mHistory.get(i);
+                    ActivityRecord hr = (ActivityRecord)mHistory.get(i);
                     if (hr.task.taskId == task) {
                         moveTaskToFrontLocked(hr.task, null);
                         return;
@@ -7599,13 +7600,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void moveTaskToFrontLocked(TaskRecord tr, HistoryRecord reason) {
+    private final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason) {
         if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
 
         final int task = tr.taskId;
         int top = mHistory.size()-1;
 
-        if (top < 0 || ((HistoryRecord)mHistory.get(top)).task.taskId == task) {
+        if (top < 0 || ((ActivityRecord)mHistory.get(top)).task.taskId == task) {
             // nothing to do!
             return;
         }
@@ -7620,7 +7621,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
         while (pos >= 0) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(pos);
+            ActivityRecord r = (ActivityRecord)mHistory.get(pos);
             if (localLOGV) Slog.v(
                 TAG, "At " + pos + " ckp " + r.task + ": " + r);
             boolean first = true;
@@ -7643,7 +7644,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
             mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
-            HistoryRecord r = topRunningActivityLocked(null);
+            ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
             }
@@ -7713,14 +7714,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param task The taskId to collect and move to the bottom.
      * @return Returns true if the move completed, false if not.
      */
-    private final boolean moveTaskToBackLocked(int task, HistoryRecord reason) {
+    private final boolean moveTaskToBackLocked(int task, ActivityRecord reason) {
         Slog.i(TAG, "moveTaskToBack: " + task);
         
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
         if (mController != null) {
-            HistoryRecord next = topRunningActivityLocked(null, task);
+            ActivityRecord next = topRunningActivityLocked(null, task);
             if (next == null) {
                 next = topRunningActivityLocked(null, 0);
             }
@@ -7750,7 +7751,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Shift all activities with this task down to the bottom
         // of the stack, keeping them in the same internal order.
         while (pos < N) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(pos);
+            ActivityRecord r = (ActivityRecord)mHistory.get(pos);
             if (localLOGV) Slog.v(
                 TAG, "At " + pos + " ckp " + r.task + ": " + r);
             if (r.task.taskId == task) {
@@ -7766,7 +7767,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
             mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
-            HistoryRecord r = topRunningActivityLocked(null);
+            ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
             }
@@ -7811,7 +7812,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final int N = mHistory.size();
         TaskRecord lastTask = null;
         for (int i=0; i<N; i++) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (r == token) {
                 if (!onlyRoot || lastTask != r.task) {
                     return r.task.taskId;
@@ -7828,7 +7829,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * Returns the top activity in any existing task matching the given
      * Intent.  Returns null if no such task is found.
      */
-    private HistoryRecord findTaskLocked(Intent intent, ActivityInfo info) {
+    private ActivityRecord findTaskLocked(Intent intent, ActivityInfo info) {
         ComponentName cls = intent.getComponent();
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
@@ -7838,7 +7839,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         final int N = mHistory.size();
         for (int i=(N-1); i>=0; i--) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (!r.finishing && r.task != cp
                     && r.launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 cp = r.task;
@@ -7874,7 +7875,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * is the same as the given activity.  Returns null if no such activity
      * is found.
      */
-    private HistoryRecord findActivityLocked(Intent intent, ActivityInfo info) {
+    private ActivityRecord findActivityLocked(Intent intent, ActivityInfo info) {
         ComponentName cls = intent.getComponent();
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
@@ -7882,7 +7883,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         final int N = mHistory.size();
         for (int i=(N-1); i>=0; i--) {
-            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
             if (!r.finishing) {
                 if (r.intent.getComponent().equals(cls)) {
                     //Slog.i(TAG, "Found matching class!");
@@ -7903,7 +7904,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             int N = mHistory.size();
             TaskRecord lastTask = null;
             for (int i=0; i<N; i++) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                ActivityRecord r = (ActivityRecord)mHistory.get(i);
                 if (r.realActivity.equals(className)
                         && r != token && lastTask != r.task) {
                     if (finishActivityLocked(r, i, Activity.RESULT_CANCELED,
@@ -7931,7 +7932,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         Binder.restoreCallingIdentity(origId);
     }
 
-    final void sendPendingThumbnail(HistoryRecord r, IBinder token,
+    final void sendPendingThumbnail(ActivityRecord r, IBinder token,
             Bitmap thumbnail, CharSequence description, boolean always) {
         TaskRecord task = null;
         ArrayList receivers = null;
@@ -7944,7 +7945,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (index < 0) {
                     return;
                 }
-                r = (HistoryRecord)mHistory.get(index);
+                r = (ActivityRecord)mHistory.get(index);
             }
             if (thumbnail == null) {
                 thumbnail = r.thumbnail;
@@ -8005,7 +8006,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     private final List generateApplicationProvidersLocked(ProcessRecord app) {
         List providers = null;
         try {
-            providers = ActivityThread.getPackageManager().
+            providers = AppGlobals.getPackageManager().
                 queryContentProviders(app.processName, app.info.uid,
                         STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
         } catch (RemoteException ex) {
@@ -8147,7 +8148,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             } else {
                 try {
-                    cpi = ActivityThread.getPackageManager().
+                    cpi = AppGlobals.getPackageManager().
                         resolveContentProvider(name,
                                 STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
                 } catch (RemoteException ex) {
@@ -8176,7 +8177,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (firstClass) {
                     try {
                         ApplicationInfo ai =
-                            ActivityThread.getPackageManager().
+                            AppGlobals.getPackageManager().
                                 getApplicationInfo(
                                         cpi.applicationInfo.packageName,
                                         STOCK_PM_FLAGS);
@@ -8481,7 +8482,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 TAG, "Performing unhandledBack(): stack size = " + count);
             if (count > 1) {
                 final long origId = Binder.clearCallingIdentity();
-                finishActivityLocked((HistoryRecord)mHistory.get(count-1),
+                finishActivityLocked((ActivityRecord)mHistory.get(count-1),
                         count-1, Activity.RESULT_CANCELED, null, "unhandled-back");
                 Binder.restoreCallingIdentity(origId);
             }
@@ -8731,7 +8732,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 throw new IllegalArgumentException();
             }
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             r.immersive = immersive;
         }
     }
@@ -8742,14 +8743,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index < 0) {
                 throw new IllegalArgumentException();
             }
-            HistoryRecord r = (HistoryRecord)mHistory.get(index);
+            ActivityRecord r = (ActivityRecord)mHistory.get(index);
             return r.immersive;
         }
     }
 
     public boolean isTopActivityImmersive() {
         synchronized (this) {
-            HistoryRecord r = topRunningActivityLocked(null);
+            ActivityRecord r = topRunningActivityLocked(null);
             return (r != null) ? r.immersive : false;
         }
     }
@@ -8760,7 +8761,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // and started launching other packages.
             if (!mSystemReady) {
                 try {
-                    ActivityThread.getPackageManager().enterSafeMode();
+                    AppGlobals.getPackageManager().enterSafeMode();
                 } catch (RemoteException e) {
                 }
 
@@ -9033,7 +9034,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
                 List<ResolveInfo> ris = null;
                 try {
-                    ris = ActivityThread.getPackageManager().queryIntentReceivers(
+                    ris = AppGlobals.getPackageManager().queryIntentReceivers(
                                 intent, null, 0);
                 } catch (RemoteException e) {
                 }
@@ -9152,7 +9153,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 try {
-                    List apps = ActivityThread.getPackageManager().
+                    List apps = AppGlobals.getPackageManager().
                         getPersistentApplications(STOCK_PM_FLAGS);
                     if (apps != null) {
                         int N = apps.size();
@@ -9175,7 +9176,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mBooting = true;
             
             try {
-                if (ActivityThread.getPackageManager().hasSystemUidErrors()) {
+                if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
                     Message msg = Message.obtain();
                     msg.what = SHOW_UID_ERROR_MSG;
                     mHandler.sendMessage(msg);
@@ -9272,7 +9273,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     app.info.processName, app.info.uid);
             killServicesLocked(app, false);
             for (int i=mHistory.size()-1; i>=0; i--) {
-                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                ActivityRecord r = (ActivityRecord)mHistory.get(i);
                 if (r.app == app) {
                     Slog.w(TAG, "  Force finishing activity "
                         + r.intent.getComponent().flattenToShortString());
@@ -9294,7 +9295,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return false;
             }
         } else {
-            HistoryRecord r = topRunningActivityLocked(null);
+            ActivityRecord r = topRunningActivityLocked(null);
             if (r.app == app) {
                 // If the top running activity is from this crashing
                 // process, then terminate it to avoid getting in a loop.
@@ -9308,7 +9309,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // re-start our crashing activity once it gets resumed again.
                 index--;
                 if (index >= 0) {
-                    r = (HistoryRecord)mHistory.get(index);
+                    r = (ActivityRecord)mHistory.get(index);
                     if (r.state == ActivityState.RESUMED
                             || r.state == ActivityState.PAUSING
                             || r.state == ActivityState.PAUSED) {
@@ -9506,7 +9507,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
-            ProcessRecord process, HistoryRecord activity, HistoryRecord parent, String subject,
+            ProcessRecord process, ActivityRecord activity, ActivityRecord parent, String subject,
             final String report, final File logFile,
             final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
@@ -9536,7 +9537,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         if (process != null) {
             int flags = process.info.flags;
-            IPackageManager pm = ActivityThread.getPackageManager();
+            IPackageManager pm = AppGlobals.getPackageManager();
             sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
             for (String pkg : process.pkgList) {
                 sb.append("Package: ").append(pkg);
@@ -9840,8 +9841,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     currApp.importanceReasonCode = app.adjTypeCode;
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
-                    } else if (app.adjSource instanceof HistoryRecord) {
-                        HistoryRecord r = (HistoryRecord)app.adjSource;
+                    } else if (app.adjSource instanceof ActivityRecord) {
+                        ActivityRecord r = (ActivityRecord)app.adjSource;
                         if (r.app != null) currApp.importanceReasonPid = r.app.pid;
                     }
                     if (app.adjTarget instanceof ComponentName) {
@@ -9871,7 +9872,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
             }
-            IPackageManager pm = ActivityThread.getPackageManager();
+            IPackageManager pm = AppGlobals.getPackageManager();
             for (String pkg : extList) {
                 try {
                     ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
@@ -10558,7 +10559,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             String prefix, String label, boolean complete) {
         TaskRecord lastTask = null;
         for (int i=list.size()-1; i>=0; i--) {
-            HistoryRecord r = (HistoryRecord)list.get(i);
+            ActivityRecord r = (ActivityRecord)list.get(i);
             final boolean full = complete || !r.inHistory;
             if (lastTask != r.task) {
                 lastTask = r.task;
@@ -11186,7 +11187,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (r == null) {
             try {
                 ResolveInfo rInfo =
-                    ActivityThread.getPackageManager().resolveService(
+                    AppGlobals.getPackageManager().resolveService(
                             service, resolvedType, 0);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
@@ -11243,7 +11244,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (r == null) {
             try {
                 ResolveInfo rInfo =
-                    ActivityThread.getPackageManager().resolveService(
+                    AppGlobals.getPackageManager().resolveService(
                             service, resolvedType, STOCK_PM_FLAGS);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
@@ -12014,14 +12015,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + ") when binding service " + service);
             }
 
-            HistoryRecord activity = null;
+            ActivityRecord activity = null;
             if (token != null) {
                 int aindex = indexOfTokenLocked(token);
                 if (aindex < 0) {
                     Slog.w(TAG, "Binding with unknown activity: " + token);
                     return 0;
                 }
-                activity = (HistoryRecord)mHistory.get(aindex);
+                activity = (ActivityRecord)mHistory.get(aindex);
             }
 
             int clientLabel = 0;
@@ -12126,7 +12127,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void removeConnectionLocked(
-        ConnectionRecord c, ProcessRecord skipApp, HistoryRecord skipAct) {
+        ConnectionRecord c, ProcessRecord skipApp, ActivityRecord skipAct) {
         IBinder binder = c.conn.asBinder();
         AppBindRecord b = c.binding;
         ServiceRecord s = b.service;
@@ -12807,7 +12808,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Always okay.
         } else if (callerApp == null || !callerApp.persistent) {
             try {
-                if (ActivityThread.getPackageManager().isProtectedBroadcast(
+                if (AppGlobals.getPackageManager().isProtectedBroadcast(
                         intent.getAction())) {
                     String msg = "Permission Denial: not allowed to send broadcast "
                             + intent.getAction() + " from pid="
@@ -12866,7 +12867,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         try {
             if (intent.getComponent() != null) {
                 // Broadcast is going to one specific receiver class...
-                ActivityInfo ai = ActivityThread.getPackageManager().
+                ActivityInfo ai = AppGlobals.getPackageManager().
                     getReceiverInfo(intent.getComponent(), STOCK_PM_FLAGS);
                 if (ai != null) {
                     receivers = new ArrayList();
@@ -12879,7 +12880,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                          == 0) {
                     receivers =
-                        ActivityThread.getPackageManager().queryIntentReceivers(
+                        AppGlobals.getPackageManager().queryIntentReceivers(
                                 intent, resolvedType, STOCK_PM_FLAGS);
                 }
                 registeredReceivers = mReceiverResolver.queryIntent(intent, resolvedType, false);
@@ -13631,7 +13632,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (r.callingUid != Process.SYSTEM_UID &&
                 r.requiredPermission != null) {
                 try {
-                    perm = ActivityThread.getPackageManager().
+                    perm = AppGlobals.getPackageManager().
                             checkPermission(r.requiredPermission,
                                     info.activityInfo.applicationInfo.packageName);
                 } catch (RemoteException e) {
@@ -13888,7 +13889,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * configuration.
      */
     public boolean updateConfigurationLocked(Configuration values,
-            HistoryRecord starting) {
+            ActivityRecord starting) {
         int changes = 0;
         
         boolean kept = true;
@@ -13979,7 +13980,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return kept;
     }
 
-    private final boolean relaunchActivityLocked(HistoryRecord r,
+    private final boolean relaunchActivityLocked(ActivityRecord r,
             int changes, boolean andResume) {
         List<ResultInfo> results = null;
         List<Intent> newIntents = null;
@@ -14023,7 +14024,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * for whatever reason.  Ensures the HistoryRecord is updated with the
      * correct configuration and all other bookkeeping is handled.
      */
-    private final boolean ensureActivityConfigurationLocked(HistoryRecord r,
+    private final boolean ensureActivityConfigurationLocked(ActivityRecord r,
             int globalChanges) {
         if (mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
@@ -14357,7 +14358,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 }
                             }
                         }
-                        HistoryRecord a = cr.activity;
+                        ActivityRecord a = cr.activity;
                         //if (a != null) {
                         //    Slog.i(TAG, "Connection to " + a ": state=" + a.state);
                         //}
@@ -14658,8 +14659,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return true;
     }
 
-    private final HistoryRecord resumedAppLocked() {
-        HistoryRecord resumedActivity = mResumedActivity;
+    private final ActivityRecord resumedAppLocked() {
+        ActivityRecord resumedActivity = mResumedActivity;
         if (resumedActivity == null || resumedActivity.app == null) {
             resumedActivity = mPausingActivity;
             if (resumedActivity == null || resumedActivity.app == null) {
@@ -14670,7 +14671,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private final boolean updateOomAdjLocked(ProcessRecord app) {
-        final HistoryRecord TOP_ACT = resumedAppLocked();
+        final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
         int curAdj = app.curAdj;
         final boolean wasHidden = app.curAdj >= HIDDEN_APP_MIN_ADJ
@@ -14693,7 +14694,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final boolean updateOomAdjLocked() {
         boolean didOomAdj = true;
-        final HistoryRecord TOP_ACT = resumedAppLocked();
+        final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
 
         if (false) {
@@ -14875,7 +14876,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (Config.LOGV) Slog.v(
                         TAG, "Looking to quit " + app.processName);
                     for (j=0; j<NUMA && canQuit; j++) {
-                        HistoryRecord r = app.activities.get(j);
+                        ActivityRecord r = app.activities.get(j);
                         if (Config.LOGV) Slog.v(
                             TAG, "  " + r.intent.getComponent().flattenToShortString()
                             + ": frozen=" + r.haveState + ", visible=" + r.visible);
@@ -14885,7 +14886,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (canQuit) {
                         // Finish all of the activities, and then the app itself.
                         for (j=0; j<NUMA; j++) {
-                            HistoryRecord r = app.activities.get(j);
+                            ActivityRecord r = app.activities.get(j);
                             if (!r.finishing) {
                                 destroyActivityLocked(r, false);
                             }
@@ -14927,8 +14928,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     i<mLRUActivities.size()
                         && mLRUActivities.size() > curMaxActivities;
                     i++) {
-                final HistoryRecord r
-                    = (HistoryRecord)mLRUActivities.get(i);
+                final ActivityRecord r
+                    = (ActivityRecord)mLRUActivities.get(i);
 
                 // We can finish this one if we have its icicle saved and
                 // it is not persistent.

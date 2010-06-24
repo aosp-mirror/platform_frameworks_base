@@ -174,7 +174,7 @@ class ContextImpl extends Context {
             new HashMap<File, SharedPreferencesImpl>();
 
     private AudioManager mAudioManager;
-    /*package*/ ActivityThread.PackageInfo mPackageInfo;
+    /*package*/ LoadedApk mPackageInfo;
     private Resources mResources;
     /*package*/ ActivityThread mMainThread;
     private Context mOuterContext;
@@ -707,7 +707,7 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new ActivityThread.PackageInfo.ReceiverDispatcher(
+                rd = new LoadedApk.ReceiverDispatcher(
                         resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
             }
         }
@@ -750,7 +750,7 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new ActivityThread.PackageInfo.ReceiverDispatcher(
+                rd = new LoadedApk.ReceiverDispatcher(
                         resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
             }
         }
@@ -806,7 +806,7 @@ class ContextImpl extends Context {
                 if (scheduler == null) {
                     scheduler = mMainThread.getHandler();
                 }
-                rd = new ActivityThread.PackageInfo.ReceiverDispatcher(
+                rd = new LoadedApk.ReceiverDispatcher(
                         receiver, context, scheduler, null, true).getIIntentReceiver();
             }
         }
@@ -1436,7 +1436,7 @@ class ContextImpl extends Context {
             return new ContextImpl(mMainThread.getSystemContext());
         }
 
-        ActivityThread.PackageInfo pi =
+        LoadedApk pi =
             mMainThread.getPackageInfo(packageName, flags);
         if (pi != null) {
             ContextImpl c = new ContextImpl();
@@ -1503,12 +1503,12 @@ class ContextImpl extends Context {
         mOuterContext = this;
     }
 
-    final void init(ActivityThread.PackageInfo packageInfo,
+    final void init(LoadedApk packageInfo,
             IBinder activityToken, ActivityThread mainThread) {
         init(packageInfo, activityToken, mainThread, null);
     }
 
-    final void init(ActivityThread.PackageInfo packageInfo,
+    final void init(LoadedApk packageInfo,
                 IBinder activityToken, ActivityThread mainThread,
                 Resources container) {
         mPackageInfo = packageInfo;

@@ -40,7 +40,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
     private final ProcessRecord mProc;
     
     public AppNotRespondingDialog(ActivityManagerService service, Context context,
-            ProcessRecord app, HistoryRecord activity) {
+            ProcessRecord app, ActivityRecord activity) {
         super(context);
         
         mService = service;

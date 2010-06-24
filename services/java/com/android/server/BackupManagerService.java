@@ -17,8 +17,8 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
-import android.app.ActivityThread;
 import android.app.AlarmManager;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
@@ -399,7 +399,7 @@ class BackupManagerService extends IBackupManager.Stub {
     public BackupManagerService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
-        mPackageManagerBinder = ActivityThread.getPackageManager();
+        mPackageManagerBinder = AppGlobals.getPackageManager();
         mActivityManager = ActivityManagerNative.getDefault();
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
