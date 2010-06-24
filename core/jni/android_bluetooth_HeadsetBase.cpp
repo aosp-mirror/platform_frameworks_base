@@ -169,7 +169,7 @@ again:
     // never receive non-ASCII UTF-8).
     // This was added because of the BMW 2005 E46 which sends binary junk.
     if (is_ascii(buf)) {
-        LOG(LOG_INFO, "Bluetooth AT recv", buf);
+        IF_LOGV() LOG(LOG_VERBOSE, "Bluetooth AT recv", buf);
     } else {
         LOGW("Ignoring invalid AT command: %s", buf);
         buf[0] = NULL;
@@ -494,7 +494,7 @@ static void pretty_log_urc(const char *urc) {
             }
         }
     }
-    LOG(LOG_INFO, "Bluetooth AT sent", buf);
+    IF_LOGV() LOG(LOG_VERBOSE, "Bluetooth AT sent", buf);
 
     free(buf);
 }
