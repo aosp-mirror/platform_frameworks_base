@@ -18,11 +18,10 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <SkMatrix.h>
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
-
-#define UI ((OpenGLRenderer*) renderer)
 
 namespace android {
 
@@ -34,73 +33,104 @@ static OpenGLRenderer* android_view_GLES20Renderer_createRenderer(JNIEnv* env, j
     return new OpenGLRenderer;
 }
 
-static void android_view_GLES20Renderer_destroyRenderer(JNIEnv* env, jobject canvas, jint renderer) {
-    delete UI;
+static void android_view_GLES20Renderer_destroyRenderer(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer) {
+    delete renderer;
 }
 
 // ----------------------------------------------------------------------------
 // Setup
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Renderer_setViewport(JNIEnv* env, jobject canvas, jint renderer,
-        jint width, jint height) {
-
-    UI->setViewport(width, height);
+static void android_view_GLES20Renderer_setViewport(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jint width, jint height) {
+    renderer->setViewport(width, height);
 }
 
-static void android_view_GLES20Renderer_prepare(JNIEnv* env, jobject canvas, jint renderer) {
-
-    UI->prepare();
+static void android_view_GLES20Renderer_prepare(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer) {
+    renderer->prepare();
 }
 
 // ----------------------------------------------------------------------------
 // State
 // ----------------------------------------------------------------------------
 
-static jint android_view_GLES20Renderer_save(JNIEnv* env, jobject canvas, jint renderer,
+static jint android_view_GLES20Renderer_save(JNIEnv* env, jobject canvas, OpenGLRenderer* renderer,
         jint flags) {
-
-    return UI->save(flags);
+    return renderer->save(flags);
 }
 
-static jint android_view_GLES20Renderer_getSaveCount(JNIEnv* env, jobject canvas, jint renderer) {
-    return UI->getSaveCount();
+static jint android_view_GLES20Renderer_getSaveCount(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer) {
+    return renderer->getSaveCount();
 }
 
-static void android_view_GLES20Renderer_restore(JNIEnv* env, jobject canvas, jint renderer) {
-    UI->restore();
+static void android_view_GLES20Renderer_restore(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer) {
+    renderer->restore();
 }
 
-static void android_view_GLES20Renderer_restoreToCount(JNIEnv* env, jobject canvas, jint renderer,
-        jint saveCount) {
-
-    UI->restoreToCount(saveCount);
+static void android_view_GLES20Renderer_restoreToCount(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jint saveCount) {
+    renderer->restoreToCount(saveCount);
 }
 
 // ----------------------------------------------------------------------------
 // Clipping
 // ----------------------------------------------------------------------------
 
-static bool android_view_GLES20Renderer_clipRectF(JNIEnv* env, jobject canvas, jint renderer,
-        jfloat left, jfloat top, jfloat right, jfloat bottom) {
-
-    return UI->clipRect(left, top, right, bottom);
+static bool android_view_GLES20Renderer_clipRectF(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom) {
+    return renderer->clipRect(left, top, right, bottom);
 }
 
-static bool android_view_GLES20Renderer_clipRect(JNIEnv* env, jobject canvas, jint renderer,
-        jint left, jint top, jint right, jint bottom) {
+static bool android_view_GLES20Renderer_clipRect(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jint left, jint top, jint right, jint bottom) {
+    return renderer->clipRect(float(left), float(top), float(right), float(bottom));
+}
 
-    return UI->clipRect(float(left), float(top), float(right), float(bottom));
+// ----------------------------------------------------------------------------
+// Transforms
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Renderer_translate(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat dx, jfloat dy) {
+	renderer->translate(dx, dy);
+}
+
+static void android_view_GLES20Renderer_rotate(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat degrees) {
+	renderer->rotate(degrees);
+}
+
+static void android_view_GLES20Renderer_scale(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat sx, jfloat sy) {
+	renderer->scale(sx, sy);
+}
+
+static void android_view_GLES20Renderer_setMatrix(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkMatrix* matrix) {
+	renderer->setMatrix(matrix);
+}
+
+static void android_view_GLES20Renderer_getMatrix(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkMatrix* matrix) {
+	renderer->getMatrix(matrix);
+}
+
+static void android_view_GLES20Renderer_concatMatrix(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkMatrix* matrix) {
+	renderer->concatMatrix(matrix);
 }
 
 // ----------------------------------------------------------------------------
 // Drawing
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas, jint renderer,
-        jint color, jint mode) {
-
-    UI->drawColor(color, (SkXfermode::Mode) mode);
+static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jint color, jint mode) {
+    renderer->drawColor(color, (SkXfermode::Mode) mode);
 }
 
 // ----------------------------------------------------------------------------
@@ -122,6 +152,14 @@ static JNINativeMethod gMethods[] = {
 
     {   "nClipRect",          "(IFFFF)Z", (void*) android_view_GLES20Renderer_clipRectF },
     {   "nClipRect",          "(IIIII)Z", (void*) android_view_GLES20Renderer_clipRect },
+
+    {   "nTranslate",         "(IFF)V",   (void*) android_view_GLES20Renderer_translate },
+    {   "nRotate",            "(IF)V",    (void*) android_view_GLES20Renderer_rotate },
+    {   "nScale",             "(IFF)V",   (void*) android_view_GLES20Renderer_scale },
+
+    {   "nSetMatrix",         "(II)V",    (void*) android_view_GLES20Renderer_setMatrix },
+    {   "nGetMatrix",         "(II)V",    (void*) android_view_GLES20Renderer_getMatrix },
+    {   "nConcatMatrix",      "(II)V",    (void*) android_view_GLES20Renderer_concatMatrix },
 
     {   "nDrawColor",         "(III)V",   (void*) android_view_GLES20Renderer_drawColor },
 };

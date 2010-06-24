@@ -22,30 +22,32 @@
 
 #include <utils/Log.h>
 
+#include <SkMatrix.h>
+
 #include "Matrix.h"
 
 namespace android {
 
 void Matrix4::loadIdentity() {
-	mMat[0]  = 1;
-	mMat[1]  = 0;
-	mMat[2]  = 0;
-	mMat[3]  = 0;
+	mMat[0]  = 1.0f;
+	mMat[1]  = 0.0f;
+	mMat[2]  = 0.0f;
+	mMat[3]  = 0.0f;
 
-	mMat[4]  = 0;
-	mMat[5]  = 1;
-	mMat[6]  = 0;
-	mMat[7]  = 0;
+	mMat[4]  = 0.0f;
+	mMat[5]  = 1.0f;
+	mMat[6]  = 0.0f;
+	mMat[7]  = 0.0f;
 
-	mMat[8]  = 0;
-	mMat[9]  = 0;
-	mMat[10] = 1;
-	mMat[11] = 0;
+	mMat[8]  = 0.0f;
+	mMat[9]  = 0.0f;
+	mMat[10] = 1.0f;
+	mMat[11] = 0.0f;
 
-	mMat[12] = 0;
-	mMat[13] = 0;
-	mMat[14] = 0;
-	mMat[15] = 1;
+	mMat[12] = 0.0f;
+	mMat[13] = 0.0f;
+	mMat[14] = 0.0f;
+	mMat[15] = 1.0f;
 }
 
 void Matrix4::load(const float* v) {
@@ -54,6 +56,40 @@ void Matrix4::load(const float* v) {
 
 void Matrix4::load(const Matrix4& v) {
 	memcpy(mMat, v.mMat, sizeof(mMat));
+}
+
+void Matrix4::load(const SkMatrix& v) {
+	memset(mMat, 0, sizeof(mMat));
+
+	mMat[0]  = v[SkMatrix::kMScaleX];
+	mMat[4]  = v[SkMatrix::kMSkewX];
+	mMat[12] = v[SkMatrix::kMTransX];
+
+	mMat[1]  = v[SkMatrix::kMSkewY];
+	mMat[5]  = v[SkMatrix::kMScaleY];
+	mMat[13] = v[SkMatrix::kMTransY];
+
+	mMat[3]  = v[SkMatrix::kMPersp0];
+	mMat[7]  = v[SkMatrix::kMPersp1];
+	mMat[15] = v[SkMatrix::kMPersp2];
+
+	mMat[10] = 1.0f;
+}
+
+void Matrix4::copyTo(SkMatrix& v) const {
+	v.reset();
+
+	v.set(SkMatrix::kMScaleX, mMat[0]);
+	v.set(SkMatrix::kMSkewX,  mMat[4]);
+	v.set(SkMatrix::kMTransX, mMat[12]);
+
+	v.set(SkMatrix::kMSkewY,  mMat[1]);
+	v.set(SkMatrix::kMScaleY, mMat[5]);
+	v.set(SkMatrix::kMTransY, mMat[13]);
+
+	v.set(SkMatrix::kMPersp0, mMat[3]);
+	v.set(SkMatrix::kMPersp1, mMat[7]);
+	v.set(SkMatrix::kMPersp2, mMat[15]);
 }
 
 void Matrix4::copyTo(float* v) const {
@@ -75,13 +111,13 @@ void Matrix4::loadScale(float sx, float sy, float sz) {
 }
 
 void Matrix4::loadRotate(float angle, float x, float y, float z) {
-	mMat[3]  = 0;
-	mMat[7]  = 0;
-	mMat[11] = 0;
-	mMat[12] = 0;
-	mMat[13] = 0;
-	mMat[14] = 0;
-	mMat[15] = 1;
+	mMat[3]  = 0.0f;
+	mMat[7]  = 0.0f;
+	mMat[11] = 0.0f;
+	mMat[12] = 0.0f;
+	mMat[13] = 0.0f;
+	mMat[14] = 0.0f;
+	mMat[15] = 1.0f;
 
 	angle *= float(M_PI / 180.0f);
 	float c = cosf(angle);
@@ -131,9 +167,9 @@ void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
 
 void Matrix4::loadOrtho(float left, float right, float bottom, float top, float near, float far) {
     loadIdentity();
-    mMat[0]  = 2 / (right - left);
-    mMat[5]  = 2 / (top - bottom);
-    mMat[10] = -2 / (far - near);
+    mMat[0]  = 2.0f / (right - left);
+    mMat[5]  = 2.0f / (top - bottom);
+    mMat[10] = -2.0f / (far - near);
     mMat[12] = -(right + left) / (right - left);
     mMat[13] = -(top + bottom) / (top - bottom);
     mMat[14] = -(far + near) / (far - near);

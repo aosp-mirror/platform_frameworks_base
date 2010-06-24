@@ -17,23 +17,35 @@
 #ifndef ANDROID_OPENGL_RENDERER_H
 #define ANDROID_OPENGL_RENDERER_H
 
+#include <SkMatrix.h>
 #include <SkXfermode.h>
 
 #include <utils/RefBase.h>
 
+#include "Matrix.h"
 #include "Rect.h"
 
 namespace android {
 
+///////////////////////////////////////////////////////////////////////////////
+// Support
+///////////////////////////////////////////////////////////////////////////////
+
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-	Snapshot() { }
+	Snapshot() {
+	}
 
-	Snapshot(const sp<Snapshot> s): clipRect(s->clipRect), flags(0), previous(s) { }
+	Snapshot(const sp<Snapshot> s): transform(s->transform), clipRect(s->clipRect),
+				flags(0), previous(s) {
+	}
 
 	enum Flags {
 		kFlagClipSet = 0x1,
 	};
+
+	// Local transformations
+	mat4 transform;
 
 	// Clipping rectangle at the time of this snapshot
 	Rect clipRect;
@@ -44,6 +56,10 @@ public:
 	// Previous snapshot in the frames stack
 	sp<Snapshot> previous;
 }; // struct Snapshot
+
+///////////////////////////////////////////////////////////////////////////////
+// Renderer
+///////////////////////////////////////////////////////////////////////////////
 
 class OpenGLRenderer {
 public:
@@ -57,6 +73,14 @@ public:
     int save(int flags);
     void restore();
     void restoreToCount(int saveCount);
+
+    void translate(float dx, float dy);
+    void rotate(float degrees);
+    void scale(float sx, float sy);
+
+    void setMatrix(SkMatrix* matrix);
+    void getMatrix(SkMatrix* matrix);
+    void concatMatrix(SkMatrix* matrix);
 
     bool clipRect(float left, float top, float right, float bottom);
 
@@ -76,6 +100,8 @@ private:
 
     // Number of saved states
     int mSaveCount;
+    // Base state
+    Snapshot mFirstSnapshot;
     // Current state
     sp<Snapshot> mSnapshot;
 }; // class OpenGLRenderer
