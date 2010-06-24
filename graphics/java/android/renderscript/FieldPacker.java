@@ -244,7 +244,7 @@ public class FieldPacker {
         addU32(v.w);
     }
 
-    public void addBoolean(Boolean v) {
+    public void addBoolean(boolean v) {
         addI8((byte)(v ? 1 : 0));
     }
 
