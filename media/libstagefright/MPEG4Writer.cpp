@@ -185,7 +185,7 @@ status_t MPEG4Writer::start() {
         return UNKNOWN_ERROR;
     }
 
-    mStartTimestampUs = 0;
+    mStartTimestampUs = -1;
     if (mStarted) {
         if (mPaused) {
             mPaused = false;
@@ -561,8 +561,7 @@ void MPEG4Writer::setStartTimestampUs(int64_t timeUs) {
     LOGI("setStartTimestampUs: %lld", timeUs);
     CHECK(timeUs >= 0);
     Mutex::Autolock autoLock(mLock);
-    if (mStartTimestampUs == 0 ||
-        (mStartTimestampUs > 0 && mStartTimestampUs > timeUs)) {
+    if (mStartTimestampUs < 0 || mStartTimestampUs > timeUs) {
         mStartTimestampUs = timeUs;
         LOGI("Earliest track starting time: %lld", mStartTimestampUs);
     }
