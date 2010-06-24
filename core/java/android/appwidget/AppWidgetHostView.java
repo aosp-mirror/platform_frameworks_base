@@ -46,8 +46,6 @@ public class AppWidgetHostView extends FrameLayout {
     static final boolean LOGD = false;
     static final boolean CROSSFADE = false;
 
-    static final int UPDATE_FLAGS_RESET = 0x00000001;
-
     static final int VIEW_MODE_NOINIT = 0;
     static final int VIEW_MODE_CONTENT = 1;
     static final int VIEW_MODE_ERROR = 2;
@@ -102,7 +100,7 @@ public class AppWidgetHostView extends FrameLayout {
         mAppWidgetId = appWidgetId;
         mInfo = info;
     }
-    
+
     public int getAppWidgetId() {
         return mAppWidgetId;
     }
@@ -148,21 +146,22 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
+     * Update the AppWidgetProviderInfo for this view, and reset it to the
+     * initial layout.
+     */
+    void resetAppWidget(AppWidgetProviderInfo info) {
+        mInfo = info;
+        mViewMode = VIEW_MODE_NOINIT;
+        updateAppWidget(null);
+    }
+
+    /**
      * Process a set of {@link RemoteViews} coming in as an update from the
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
-        updateAppWidget(remoteViews, 0);
-    }
+        if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
 
-    void updateAppWidget(RemoteViews remoteViews, int flags) {
-        if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld + " flags=0x"
-                + Integer.toHexString(flags));
-
-        if ((flags & UPDATE_FLAGS_RESET) != 0) {
-            mViewMode = VIEW_MODE_NOINIT;
-        }
-        
         boolean recycled = false;
         View content = null;
         Exception exception = null;

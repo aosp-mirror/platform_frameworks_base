@@ -237,7 +237,7 @@ public class AppWidgetHost {
             v = mViews.get(appWidgetId);
         }
         if (v != null) {
-            v.updateAppWidget(null, AppWidgetHostView.UPDATE_FLAGS_RESET);
+            v.resetAppWidget(appWidget);
         }
     }
 
@@ -247,7 +247,7 @@ public class AppWidgetHost {
             v = mViews.get(appWidgetId);
         }
         if (v != null) {
-            v.updateAppWidget(views, 0);
+            v.updateAppWidget(views);
         }
     }
 }
