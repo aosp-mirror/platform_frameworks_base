@@ -6644,11 +6644,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final int newSelStart = Selection.getSelectionStart(mText);
                     final int newSelEnd = Selection.getSelectionEnd(mText);
 
+                    CommitSelectionReceiver csr = null;
                     if (newSelStart != oldSelStart || newSelEnd != oldSelEnd) {
-                        CommitSelectionReceiver csr = new CommitSelectionReceiver(
-                                oldSelStart, oldSelEnd, newSelStart, newSelEnd);
-                        handled = imm.showSoftInput(this, 0, csr);
+                        csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd,
+                                newSelStart, newSelEnd);
                     }
+
+                    handled = imm.showSoftInput(this, 0, csr) && (csr != null);
                 }
             }
 
@@ -7355,9 +7357,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ArrayList<TextWatcher>  mListeners = null;
 
     // display attributes
-    private final TextPaint               mTextPaint;
+    private final TextPaint         mTextPaint;
     private boolean                 mUserSetTextScaleX;
-    private final Paint                   mHighlightPaint;
+    private final Paint             mHighlightPaint;
     private int                     mHighlightColor = 0xFFBBDDFF;
     private Layout                  mLayout;
 
