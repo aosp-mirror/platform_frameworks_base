@@ -37,7 +37,10 @@ public class Matrix {
     public static final int MPERSP_1 = 7;   //!< use with getValues/setValues
     public static final int MPERSP_2 = 8;   //!< use with getValues/setValues
 
-    /* package */ int native_instance;
+    /**
+     * @hide
+     */
+    public int native_instance;
 
     /**
      * Create an identity matrix

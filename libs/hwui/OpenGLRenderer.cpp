@@ -33,16 +33,21 @@
 
 namespace android {
 
+///////////////////////////////////////////////////////////////////////////////
+// Constructors/destructor
+///////////////////////////////////////////////////////////////////////////////
+
 OpenGLRenderer::OpenGLRenderer() {
     LOGD("Create OpenGLRenderer");
-
-    mSnapshot = new Snapshot;
-    mSaveCount = 0;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
     LOGD("Destroy OpenGLRenderer");
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Setup
+///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
@@ -56,14 +61,22 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare() {
+	mSnapshot = &mFirstSnapshot;
+	mSaveCount = 0;
+
     glDisable(GL_SCISSOR_TEST);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_SCISSOR_TEST);
+
     mSnapshot->clipRect.set(0.0f, 0.0f, mWidth, mHeight);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// State management
+///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::getSaveCount() const {
 	return mSaveCount;
@@ -97,8 +110,7 @@ void OpenGLRenderer::restoreToCount(int saveCount) {
 
 int OpenGLRenderer::saveSnapshot() {
 	mSnapshot = new Snapshot(mSnapshot);
-	mSaveCount++;
-	return mSaveCount;
+	return ++mSaveCount;
 }
 
 bool OpenGLRenderer::restoreSnapshot() {
@@ -106,14 +118,50 @@ bool OpenGLRenderer::restoreSnapshot() {
 	bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
 
 	mSaveCount--;
-	mSnapshot = mSnapshot->previous;
+
+	// Do not merge these two lines!
+	sp<Snapshot> previous = mSnapshot->previous;
+	mSnapshot = previous;
 
 	return restoreClip;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Transforms
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::translate(float dx, float dy) {
+	mSnapshot->transform.translate(dx, dy, 0.0f);
+}
+
+void OpenGLRenderer::rotate(float degrees) {
+	mSnapshot->transform.rotate(degrees, 0.0f, 0.0f, 1.0f);
+}
+
+void OpenGLRenderer::scale(float sx, float sy) {
+	mSnapshot->transform.scale(sx, sy, 1.0f);
+}
+
+void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
+	mSnapshot->transform.load(*matrix);
+}
+
+void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
+	mSnapshot->transform.copyTo(*matrix);
+}
+
+void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
+	mat4 m(*matrix);
+	mSnapshot->transform.multiply(m);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Clipping
+///////////////////////////////////////////////////////////////////////////////
+
 void OpenGLRenderer::setScissorFromClip() {
-	Rect clip = mSnapshot->clipRect;
-	glScissor(clip.left, clip.top, clip.getWidth(), clip.getHeight());
+	Rect* clip = &(mSnapshot->clipRect);
+	glScissor(clip->left, clip->top, clip->getWidth(), clip->getHeight());
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) {
@@ -125,6 +173,10 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 	}
 	return clipped;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Drawing
+///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
 	LOGD("Drawing color");

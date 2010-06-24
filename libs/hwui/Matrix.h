@@ -17,6 +17,8 @@
 #ifndef ANDROID_MATRIX_H
 #define ANDROID_MATRIX_H
 
+#include <SkMatrix.h>
+
 namespace android {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,10 +39,15 @@ public:
 		load(v);
 	}
 
+	Matrix4(const SkMatrix& v) {
+		load(v);
+	}
+
 	void loadIdentity();
 
 	void load(const float* v);
 	void load(const Matrix4& v);
+	void load(const SkMatrix& v);
 
 	void loadTranslate(float x, float y, float z);
 	void loadScale(float sx, float sy, float sz);
@@ -74,10 +81,11 @@ public:
 	}
 
 	void copyTo(float* v) const;
+	void copyTo(SkMatrix& v) const;
 
 	void dump() const;
 
-//private:
+private:
     inline float get(int i, int j) const {
         return mMat[i * 4 + j];
     }

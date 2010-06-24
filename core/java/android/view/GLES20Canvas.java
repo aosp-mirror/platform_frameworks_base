@@ -212,8 +212,10 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void translate(float dx, float dy) {
-        // TODO: Implement
+        nTranslate(mRenderer, dx, dy);
     }
+    
+    private native void nTranslate(int renderer, float dx, float dy);
 
     @Override
     public void skew(float sx, float sy) {
@@ -222,29 +224,38 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void rotate(float degrees) {
-        // TODO: Implement
+        nRotate(mRenderer, degrees);
     }
+    
+    private native void nRotate(int renderer, float degrees);
 
     @Override
     public void scale(float sx, float sy) {
-        // TODO: Implement
+        nScale(mRenderer, sx, sy);
     }
-
     
+    private native void nScale(int renderer, float sx, float sy);
+
     @Override
     public void setMatrix(Matrix matrix) {
-        // TODO: Implement
+        nSetMatrix(mRenderer, matrix.native_instance);
     }
+    
+    private native void nSetMatrix(int renderer, int matrix);
 
     @Override
-    public void getMatrix(Matrix ctm) {
-        // TODO: Implement
+    public void getMatrix(Matrix matrix) {
+        nGetMatrix(mRenderer, matrix.native_instance);
     }
+    
+    private native void nGetMatrix(int renderer, int matrix);
 
     @Override
     public void concat(Matrix matrix) {
-        // TODO: Implement
+        nConcatMatrix(mRenderer, matrix.native_instance);
     }
+    
+    private native void nConcatMatrix(int renderer, int matrix);
     
     ///////////////////////////////////////////////////////////////////////////
     // State management
