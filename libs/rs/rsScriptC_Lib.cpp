@@ -32,133 +32,6 @@ using namespace android::renderscript;
     ScriptC * sc = (ScriptC *) tls->mScript
 
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Non-Updated code below
-//////////////////////////////////////////////////////////////////////////////
-
-typedef struct {
-    float x;
-    float y;
-    float z;
-} vec3_t;
-
-typedef struct {
-    float x;
-    float y;
-    float z;
-    float w;
-} vec4_t;
-
-typedef struct {
-    float x;
-    float y;
-} vec2_t;
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Vec3 routines
-//////////////////////////////////////////////////////////////////////////////
-
-static void SC_vec3Norm(vec3_t *v)
-{
-    float len = sqrtf(v->x * v->x + v->y * v->y + v->z * v->z);
-    len = 1 / len;
-    v->x *= len;
-    v->y *= len;
-    v->z *= len;
-}
-
-static float SC_vec3Length(const vec3_t *v)
-{
-    return sqrtf(v->x * v->x + v->y * v->y + v->z * v->z);
-}
-
-static void SC_vec3Add(vec3_t *dest, const vec3_t *lhs, const vec3_t *rhs)
-{
-    dest->x = lhs->x + rhs->x;
-    dest->y = lhs->y + rhs->y;
-    dest->z = lhs->z + rhs->z;
-}
-
-static void SC_vec3Sub(vec3_t *dest, const vec3_t *lhs, const vec3_t *rhs)
-{
-    dest->x = lhs->x - rhs->x;
-    dest->y = lhs->y - rhs->y;
-    dest->z = lhs->z - rhs->z;
-}
-
-static void SC_vec3Cross(vec3_t *dest, const vec3_t *lhs, const vec3_t *rhs)
-{
-    float x = lhs->y * rhs->z  - lhs->z * rhs->y;
-    float y = lhs->z * rhs->x  - lhs->x * rhs->z;
-    float z = lhs->x * rhs->y  - lhs->y * rhs->x;
-    dest->x = x;
-    dest->y = y;
-    dest->z = z;
-}
-
-static float SC_vec3Dot(const vec3_t *lhs, const vec3_t *rhs)
-{
-    return lhs->x * rhs->x + lhs->y * rhs->y + lhs->z * rhs->z;
-}
-
-static void SC_vec3Scale(vec3_t *lhs, float scale)
-{
-    lhs->x *= scale;
-    lhs->y *= scale;
-    lhs->z *= scale;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Vec4 routines
-//////////////////////////////////////////////////////////////////////////////
-
-static void SC_vec4Norm(vec4_t *v)
-{
-    float len = sqrtf(v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w);
-    len = 1 / len;
-    v->x *= len;
-    v->y *= len;
-    v->z *= len;
-    v->w *= len;
-}
-
-static float SC_vec4Length(const vec4_t *v)
-{
-    return sqrtf(v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w);
-}
-
-static void SC_vec4Add(vec4_t *dest, const vec4_t *lhs, const vec4_t *rhs)
-{
-    dest->x = lhs->x + rhs->x;
-    dest->y = lhs->y + rhs->y;
-    dest->z = lhs->z + rhs->z;
-    dest->w = lhs->w + rhs->w;
-}
-
-static void SC_vec4Sub(vec4_t *dest, const vec4_t *lhs, const vec4_t *rhs)
-{
-    dest->x = lhs->x - rhs->x;
-    dest->y = lhs->y - rhs->y;
-    dest->z = lhs->z - rhs->z;
-    dest->w = lhs->w - rhs->w;
-}
-
-static float SC_vec4Dot(const vec4_t *lhs, const vec4_t *rhs)
-{
-    return lhs->x * rhs->x + lhs->y * rhs->y + lhs->z * rhs->z + lhs->w * rhs->w;
-}
-
-static void SC_vec4Scale(vec4_t *lhs, float scale)
-{
-    lhs->x *= scale;
-    lhs->y *= scale;
-    lhs->z *= scale;
-    lhs->w *= scale;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // Math routines
 //////////////////////////////////////////////////////////////////////////////
@@ -222,41 +95,6 @@ static int SC_randi(int max)
 static int SC_randi2(int min, int max)
 {
     return (int)SC_randf2(min, max);
-}
-
-static int SC_clamp(int amount, int low, int high)
-{
-    return amount < low ? low : (amount > high ? high : amount);
-}
-
-static float SC_roundf(float v)
-{
-    return floorf(v + 0.4999999999);
-}
-
-static float SC_distf2(float x1, float y1, float x2, float y2)
-{
-    float x = x2 - x1;
-    float y = y2 - y1;
-    return sqrtf(x * x + y * y);
-}
-
-static float SC_distf3(float x1, float y1, float z1, float x2, float y2, float z2)
-{
-    float x = x2 - x1;
-    float y = y2 - y1;
-    float z = z2 - z1;
-    return sqrtf(x * x + y * y + z * z);
-}
-
-static float SC_magf2(float a, float b)
-{
-    return sqrtf(a * a + b * b);
-}
-
-static float SC_magf3(float a, float b, float c)
-{
-    return sqrtf(a * a + b * b + c * c);
 }
 
 static float SC_frac(float v)
@@ -512,24 +350,6 @@ static void SC_debugI32(const char *s, int32_t i) {
     LOGE("%s %i  0x%x", s, i, i);
 }
 
-static uchar4 SC_convertColorTo8888_f3(float r, float g, float b) {
-    uchar4 t;
-    t.f[0] = (uint8_t)(r * 255.f);
-    t.f[1] = (uint8_t)(g * 255.f);
-    t.f[2] = (uint8_t)(b * 255.f);
-    t.f[3] = 0xff;
-    return t;
-}
-
-static uchar4 SC_convertColorTo8888_f4(float r, float g, float b, float a) {
-    uchar4 t;
-    t.f[0] = (uint8_t)(r * 255.f);
-    t.f[1] = (uint8_t)(g * 255.f);
-    t.f[2] = (uint8_t)(b * 255.f);
-    t.f[3] = (uint8_t)(a * 255.f);
-    return t;
-}
-
 static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
 {
     GET_TLS();
@@ -640,16 +460,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsAllocationGetDimFaces", (void *)&SC_allocGetDimFaces },
     { "rsGetAllocation", (void *)&SC_getAllocation },
 
-    // color
-    { "_Z17rsPackColorTo8888fff", (void *)&SC_convertColorTo8888_f3 },
-    { "_Z17rsPackColorTo8888ffff", (void *)&SC_convertColorTo8888_f4 },
-    //extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3);
-    //extern uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4);
-    //extern float4 rsUnpackColor8888(uchar4);
-    //extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float r, float g, float b);
-    //extern uchar4 __attribute__((overloadable)) rsPackColorTo565(float3);
-    //extern float4 rsUnpackColor565(uchar4);
-
     // Debug
     { "_Z7rsDebugPKcf", (void *)&SC_debugF },
     { "_Z7rsDebugPKcDv2_f", (void *)&SC_debugFv2 },
@@ -703,12 +513,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     //{ "sinf_fast", (void *)&SC_sinf_fast },
     //{ "cosf_fast", (void *)&SC_cosf_fast },
-    //{ "clamp", (void *)&SC_clamp },
-    //{ "distf2", (void *)&SC_distf2 },
-    //{ "distf3", (void *)&SC_distf3 },
-    //{ "magf2", (void *)&SC_magf2 },
-    //{ "magf3", (void *)&SC_magf3 },
-    //{ "mapf", (void *)&SC_mapf },
 
     { "scriptCall", (void *)&SC_scriptCall },
 

@@ -4,6 +4,9 @@
 #include "../../../../scriptc/rs_math.rsh"
 #include "../../../../scriptc/rs_graphics.rsh"
 
+#pragma rs java_package_name(com.android.rs.image)
+
+
 #define MAX_RADIUS 25
 
 int height;
@@ -32,7 +35,7 @@ static float overInWMinInB;
 
 // Store our coefficients here
 static float gaussian[MAX_RADIUS * 2 + 1];
-static float colorMat[4][4];
+static rs_matrix3x3 colorMat;
 
 static void computeColorMatrix() {
     // Saturation
@@ -48,17 +51,15 @@ static void computeColorMatrix() {
 
     float oneMinusS = 1.0f - saturation;
 
-    rsMatrixLoadIdentity((rs_matrix4x4 *)colorMat);
-
-    colorMat[0][0] = oneMinusS * rWeight + saturation;
-    colorMat[0][1] = oneMinusS * rWeight;
-    colorMat[0][2] = oneMinusS * rWeight;
-    colorMat[1][0] = oneMinusS * gWeight;
-    colorMat[1][1] = oneMinusS * gWeight + saturation;
-    colorMat[1][2] = oneMinusS * gWeight;
-    colorMat[2][0] = oneMinusS * bWeight;
-    colorMat[2][1] = oneMinusS * bWeight;
-    colorMat[2][2] = oneMinusS * bWeight + saturation;
+    rsMatrixSet(&colorMat, 0, 0, oneMinusS * rWeight + saturation);
+    rsMatrixSet(&colorMat, 0, 1, oneMinusS * rWeight);
+    rsMatrixSet(&colorMat, 0, 2, oneMinusS * rWeight);
+    rsMatrixSet(&colorMat, 1, 0, oneMinusS * gWeight);
+    rsMatrixSet(&colorMat, 1, 1, oneMinusS * gWeight + saturation);
+    rsMatrixSet(&colorMat, 1, 2, oneMinusS * gWeight);
+    rsMatrixSet(&colorMat, 2, 0, oneMinusS * bWeight);
+    rsMatrixSet(&colorMat, 2, 1, oneMinusS * bWeight);
+    rsMatrixSet(&colorMat, 2, 2, oneMinusS * bWeight + saturation);
 
     inWMinInB = inWhite - inBlack;
     outWMinOutB = outWhite - outBlack;
@@ -107,48 +108,10 @@ static void computeGaussianWeights() {
 
 // This needs to be inline
 static float4 levelsSaturation(float4 currentPixel) {
-#if 0
-    // Color matrix multiply
-    float tempX = colorMat[0][0] * currentPixel.x + colorMat[1][0] * currentPixel.y + colorMat[2][0] * currentPixel.z;
-    float tempY = colorMat[0][1] * currentPixel.x + colorMat[1][1] * currentPixel.y + colorMat[2][1] * currentPixel.z;
-    float tempZ = colorMat[0][2] * currentPixel.x + colorMat[1][2] * currentPixel.y + colorMat[2][2] * currentPixel.z;
-
-    currentPixel.x = tempX;
-    currentPixel.y = tempY;
-    currentPixel.z = tempZ;
-
-    // Clamp to 0..255
-    // Inline the code here to avoid funciton calls
-    currentPixel.x = currentPixel.x > 255.0f ? 255.0f : currentPixel.x;
-    currentPixel.y = currentPixel.y > 255.0f ? 255.0f : currentPixel.y;
-    currentPixel.z = currentPixel.z > 255.0f ? 255.0f : currentPixel.z;
-
-    currentPixel.x = currentPixel.x <= 0.0f ? 0.1f : currentPixel.x;
-    currentPixel.y = currentPixel.y <= 0.0f ? 0.1f : currentPixel.y;
-    currentPixel.z = currentPixel.z <= 0.0f ? 0.1f : currentPixel.z;
-
-    currentPixel.x = pow( (currentPixel.x - inBlack) * overInWMinInB, gamma) * outWMinOutB + outBlack;
-    currentPixel.y = pow( (currentPixel.y - inBlack) * overInWMinInB, gamma) * outWMinOutB + outBlack;
-    currentPixel.z = pow( (currentPixel.z - inBlack) * overInWMinInB, gamma) * outWMinOutB + outBlack;
-
-    currentPixel.x = currentPixel.x > 255.0f ? 255.0f : currentPixel.x;
-    currentPixel.y = currentPixel.y > 255.0f ? 255.0f : currentPixel.y;
-    currentPixel.z = currentPixel.z > 255.0f ? 255.0f : currentPixel.z;
-
-    currentPixel.x = currentPixel.x <= 0.0f ? 0.1f : currentPixel.x;
-    currentPixel.y = currentPixel.y <= 0.0f ? 0.1f : currentPixel.y;
-    currentPixel.z = currentPixel.z <= 0.0f ? 0.1f : currentPixel.z;
-#else
-    float3 temp;
-    // Color matrix multiply
-    temp.x = colorMat[0][0] * currentPixel.x + colorMat[1][0] * currentPixel.y + colorMat[2][0] * currentPixel.z;
-    temp.y = colorMat[0][1] * currentPixel.x + colorMat[1][1] * currentPixel.y + colorMat[2][1] * currentPixel.z;
-    temp.z = colorMat[0][2] * currentPixel.x + colorMat[1][2] * currentPixel.y + colorMat[2][2] * currentPixel.z;
+    float3 temp = rsMatrixMultiply(&colorMat, currentPixel.xyz);
     temp = (clamp(temp, 0.1f, 255.f) - inBlack) * overInWMinInB;
     temp = pow(temp, (float3)gamma);
     currentPixel.xyz = clamp(temp * outWMinOutB + outBlack, 0.1f, 255.f);
-#endif
-
     return currentPixel;
 }
 
@@ -188,8 +151,10 @@ static void horizontalBlur() {
     // Horizontal blur
     int w, h, r;
     for(h = 0; h < height; h ++) {
-        for(w = 0; w < width; w ++) {
+        uchar4 *input = InPixel + h*width;
+        uchar4 *output = ScratchPixel + h*width;
 
+        for(w = 0; w < width; w ++) {
             blurredPixel = 0;
 
             for(r = -radius; r <= radius; r ++) {
@@ -202,23 +167,22 @@ static void horizontalBlur() {
                 if(validW > width - 1) {
                     validW = width - 1;
                 }
-
-                uchar4 *input = InPixel + h*width + validW;
+                //int validW = rsClamp(w + r, 0, width - 1);
 
                 float weight = gaussian[r + radius];
-                currentPixel.x = (float)(input->x);
-                currentPixel.y = (float)(input->y);
-                currentPixel.z = (float)(input->z);
+                currentPixel.x = (float)(input[validW].x);
+                currentPixel.y = (float)(input[validW].y);
+                currentPixel.z = (float)(input[validW].z);
                 //currentPixel.w = (float)(input->a);
 
                 blurredPixel += currentPixel*weight;
             }
 
-            uchar4 *output = ScratchPixel + h*width + w;
             output->x = (uint8_t)blurredPixel.x;
             output->y = (uint8_t)blurredPixel.y;
             output->z = (uint8_t)blurredPixel.z;
             //output->a = (uint8_t)blurredPixel.w;
+            output++;
         }
     }
 }
@@ -229,8 +193,9 @@ static void horizontalBlurLevels() {
     // Horizontal blur
     int w, h, r;
     for(h = 0; h < height; h ++) {
-        for(w = 0; w < width; w ++) {
+        uchar4 *output = OutPixel + h*width;
 
+        for(w = 0; w < width; w ++) {
             blurredPixel = 0;
 
             for(r = -radius; r <= radius; r ++) {
@@ -243,6 +208,7 @@ static void horizontalBlurLevels() {
                 if(validW > width - 1) {
                     validW = width - 1;
                 }
+                //int validW = rsClamp(w + r, 0, width - 1);
 
                 uchar4 *input = InPixel + h*width + validW;
 
@@ -252,16 +218,16 @@ static void horizontalBlurLevels() {
                 currentPixel.z = (float)(input->z);
                 //currentPixel.w = (float)(input->a);
 
-                blurredPixel += currentPixel*weight;
+                blurredPixel.xyz += currentPixel.xyz * weight;
             }
 
             blurredPixel = levelsSaturation(blurredPixel);
 
-            uchar4 *output = ScratchPixel + h*width + w;
             output->x = (uint8_t)blurredPixel.x;
             output->y = (uint8_t)blurredPixel.y;
             output->z = (uint8_t)blurredPixel.z;
             //output->a = (uint8_t)blurredPixel.w;
+            output++;
         }
     }
 }
@@ -272,10 +238,13 @@ static void verticalBlur() {
     // Vertical blur
     int w, h, r;
     for(h = 0; h < height; h ++) {
+        uchar4 *output = OutPixel + h*width;
+
         for(w = 0; w < width; w ++) {
 
             blurredPixel = 0;
             for(r = -radius; r <= radius; r ++) {
+#if 1
                 int validH = h + r;
                 // Clamp to zero and width
                 if(validH < 0) {
@@ -292,17 +261,21 @@ static void verticalBlur() {
                 currentPixel.x = (float)(input->x);
                 currentPixel.y = (float)(input->y);
                 currentPixel.z = (float)(input->z);
-                //currentPixel.w = (float)(input->a);
 
-                blurredPixel += currentPixel*weight;
+                blurredPixel.xyz += currentPixel.xyz * weight;
+#else
+                int validH = rsClamp(h + r, 0, height - 1);
+                uchar4 *input = ScratchPixel + validH*width + w;
+                blurredPixel.xyz += convert_float3(input->xyz) * gaussian[r + radius];
+#endif
             }
 
-            uchar4 *output = OutPixel + h*width + w;
-
+            //output->xyz = convert_uchar3(blurredPixel.xyz);
             output->x = (uint8_t)blurredPixel.x;
             output->y = (uint8_t)blurredPixel.y;
             output->z = (uint8_t)blurredPixel.z;
             //output->a = (uint8_t)blurredPixel.w;
+            output++;
         }
     }
 }
@@ -311,12 +284,6 @@ void filter() {
     RS_DEBUG(height);
     RS_DEBUG(width);
     RS_DEBUG(radius);
-    RS_DEBUG(inBlack);
-    RS_DEBUG(outBlack);
-    RS_DEBUG(inWhite);
-    RS_DEBUG(outWhite);
-    RS_DEBUG(gamma);
-    RS_DEBUG(saturation);
 
     computeColorMatrix();
 
