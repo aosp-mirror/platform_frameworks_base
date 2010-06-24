@@ -66,14 +66,7 @@ public abstract class ActionBar {
      * navigation elements. This includes logo and icon.
      */
     public static final int DISPLAY_HIDE_HOME = 0x2;
-    
-    /**
-     * Set the callback that the ActionBar will use to handle events
-     * and populate menus.
-     * @param callback Callback to use
-     */
-    public abstract void setCallback(Callback callback);
-    
+
     /**
      * Set the action bar into custom navigation mode, supplying a view
      * for custom navigation.
@@ -95,8 +88,11 @@ public abstract class ActionBar {
      * @param adapter An adapter that will provide views both to display
      *                the current navigation selection and populate views
      *                within the dropdown navigation menu.
+     * @param callback A NavigationCallback that will receive events when the user
+     *                 selects a navigation item.
      */
-    public abstract void setDropdownNavigationMode(SpinnerAdapter adapter);
+    public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
+            NavigationCallback callback);
 
     /**
      * Set the action bar into standard navigation mode, supplying a title and subtitle.
@@ -198,10 +194,128 @@ public abstract class ActionBar {
      */
     public abstract int getDisplayOptions();
     
+    public abstract void startContextMode(ContextModeCallback callback);
+    public abstract void finishContextMode();
+    
     /**
-     * Callback interface for ActionBar events. 
+     * Represents a contextual mode of the Action Bar. Context modes can be used for
+     * modal interactions with activity content and replace the normal Action Bar until finished.
+     * Examples of good contextual modes include selection modes, search, content editing, etc.
      */
-    public interface Callback {
+    public static abstract class ContextMode {
+        /**
+         * Set the title of the context mode. This method will have no visible effect if
+         * a custom view has been set.
+         * 
+         * @param title Title string to set
+         * 
+         * @see #setCustomView(View)
+         */
+        public abstract void setTitle(CharSequence title);
+        
+        /**
+         * Set the subtitle of the context mode. This method will have no visible effect if
+         * a custom view has been set.
+         * 
+         * @param subtitle Subtitle string to set
+         * 
+         * @see #setCustomView(View)
+         */
+        public abstract void setSubtitle(CharSequence subtitle);
+        
+        /**
+         * Set a custom view for this context mode. The custom view will take the place of
+         * the title and subtitle. Useful for things like search boxes.
+         *  
+         * @param view Custom view to use in place of the title/subtitle.
+         * 
+         * @see #setTitle(CharSequence)
+         * @see #setSubtitle(CharSequence)
+         */
+        public abstract void setCustomView(View view);
+        
+        /**
+         * Invalidate the context mode and refresh menu content. The context mode's
+         * {@link ContextModeCallback} will have its
+         * {@link ContextModeCallback#onPrepareContextMode(ContextMode, Menu)} method called.
+         * If it returns true the menu will be scanned for updated content and any relevant changes
+         * will be reflected to the user.
+         */
+        public abstract void invalidate();
+        
+        /**
+         * Finish and close this context mode. The context mode's {@link ContextModeCallback} will
+         * have its {@link ContextModeCallback#onDestroyContextMode(ContextMode)} method called.
+         */
+        public abstract void finish();
+
+        /**
+         * Returns the menu of actions that this context mode presents.
+         * @return The context mode's menu.
+         */
+        public abstract Menu getMenu();
+    }
+    
+    /**
+     * Callback interface for ActionBar context modes. Supplied to
+     * {@link ActionBar#startContextMode(ContextModeCallback)}, a ContextModeCallback
+     * configures and handles events raised by a user's interaction with a context mode.
+     * 
+     * <p>A context mode's lifecycle is as follows:
+     * <ul>
+     * <li>{@link ContextModeCallback#onCreateContextMode(ContextMode, Menu)} once on initial
+     * creation</li>
+     * <li>{@link ContextModeCallback#onPrepareContextMode(ContextMode, Menu)} after creation
+     * and any time the {@link ContextMode} is invalidated</li>
+     * <li>{@link ContextModeCallback#onContextItemClicked(ContextMode, MenuItem)} any time a
+     * contextual action button is clicked</li>
+     * <li>{@link ContextModeCallback#onDestroyContextMode(ContextMode)} when the context mode
+     * is closed</li>
+     * </ul>
+     */
+    public interface ContextModeCallback {
+        /**
+         * Called when a context mode is first created. The menu supplied will be used to generate
+         * action buttons for the context mode.
+         * 
+         * @param mode ContextMode being created
+         * @param menu Menu used to populate contextual action buttons
+         * @return true if the context mode should be created, false if entering this context mode
+         *          should be aborted.
+         */
+        public boolean onCreateContextMode(ContextMode mode, Menu menu);
+        
+        /**
+         * Called to refresh a context mode's action menu whenever it is invalidated.
+         * 
+         * @param mode ContextMode being prepared
+         * @param menu Menu used to populate contextual action buttons
+         * @return true if the menu or context mode was updated, false otherwise.
+         */
+        public boolean onPrepareContextMode(ContextMode mode, Menu menu);
+        
+        /**
+         * Called to report a user click on a contextual action button.
+         * 
+         * @param mode The current ContextMode
+         * @param item The item that was clicked
+         * @return true if this callback handled the event, false if the standard MenuItem
+         *          invocation should continue.
+         */
+        public boolean onContextItemClicked(ContextMode mode, MenuItem item);
+        
+        /**
+         * Called when a context mode is about to be exited and destroyed.
+         * 
+         * @param mode The current ContextMode being destroyed
+         */
+        public void onDestroyContextMode(ContextMode mode);
+    }
+    
+    /**
+     * Callback interface for ActionBar navigation events. 
+     */
+    public interface NavigationCallback {
         /**
          * This method is called whenever a navigation item in your action bar
          * is selected.
@@ -211,35 +325,5 @@ public abstract class ActionBar {
          * @return True if the event was handled, false otherwise.
          */
         public boolean onNavigationItemSelected(int itemPosition, long itemId);
-        
-        /*
-         * In progress
-         */
-        public boolean onCreateContextMode(int modeId, Menu menu);
-        public boolean onPrepareContextMode(int modeId, Menu menu);
-        public boolean onContextItemClicked(int modeId, MenuItem item);
     }
-    
-    /**
-     * Simple stub implementations of ActionBar.Callback methods.
-     * Extend this if you only need a subset of Callback functionality.
-     */
-    public static class SimpleCallback implements Callback {
-        public boolean onCreateContextMode(int modeId, Menu menu) {
-            return false;
-        }
-        
-        public boolean onPrepareContextMode(int modeId, Menu menu) {
-            return false;
-        }
-        
-        public boolean onContextItemClicked(int modeId, MenuItem item) {
-            return false;
-        }
-
-        public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            return false;
-        }
-    }
-
 }

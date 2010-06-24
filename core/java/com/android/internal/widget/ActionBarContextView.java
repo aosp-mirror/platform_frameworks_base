@@ -1,0 +1,272 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.internal.widget;
+
+import com.android.internal.R;
+import com.android.internal.app.ActionBarImpl;
+
+import android.app.ActionBar;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+/**
+ * @hide
+ */
+public class ActionBarContextView extends ViewGroup {
+    // TODO: This must be defined in the default theme
+    private static final int CONTENT_HEIGHT_DIP = 50;
+    
+    private int mItemPadding;
+    private int mItemMargin;
+    private int mContentHeight;
+    
+    private CharSequence mTitle;
+    private CharSequence mSubtitle;
+    
+    private ImageButton mCloseButton;
+    private View mCustomView;
+    private TextView mTitleView;
+    private Drawable mCloseDrawable;
+    
+    public ActionBarContextView(Context context) {
+        this(context, null, 0);
+    }
+    
+    public ActionBarContextView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+    
+    public ActionBarContextView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.Theme);
+        mItemPadding = a.getDimensionPixelOffset(
+                com.android.internal.R.styleable.Theme_actionButtonPadding, 0);
+        setBackgroundDrawable(a.getDrawable(
+                com.android.internal.R.styleable.Theme_actionBarContextBackground));
+        mCloseDrawable = a.getDrawable(
+                com.android.internal.R.styleable.Theme_actionBarCloseContextDrawable);
+        mItemMargin = mItemPadding / 2;
+        
+        mContentHeight = CONTENT_HEIGHT_DIP;
+        a.recycle();
+    }
+    
+    public void setCustomView(View view) {
+        if (mCustomView != null) {
+            removeView(mCustomView);
+        }
+        mCustomView = view;
+        if (mTitleView != null) {
+            removeView(mTitleView);
+            mTitleView = null;
+        }
+        if (view != null) {
+            addView(view);
+        }
+        requestLayout();
+    }
+    
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        if (mTitleView == null) {
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            mTitleView = (TextView) inflater.inflate(R.layout.action_bar_title_item, null);
+            mTitleView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT));
+            if (title != null) {
+                mTitleView.setText(title);
+            }
+            addView(mTitleView);
+        } else {
+            mTitleView.setText(title);
+            if (mTitleView.getParent() == null) {
+                addView(mTitleView);
+            }
+        }
+    }
+    
+    public void setSubtitle(CharSequence subtitle) {
+        mSubtitle = subtitle;
+        // TODO add subtitle support
+    }
+    
+    public void initForMode(final ActionBar.ContextMode mode) {
+        final ActionBarImpl.ContextMode implMode = (ActionBarImpl.ContextMode) mode;
+        
+        if (mCloseButton == null) {
+            mCloseButton = new ImageButton(getContext());
+            mCloseButton.setImageDrawable(mCloseDrawable);
+            mCloseButton.setBackgroundDrawable(null);
+            mCloseButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    mode.finish();
+                }
+            });
+        }
+        addView(mCloseButton);
+
+        final Context context = getContext();
+        final Menu menu = mode.getMenu();
+        final int itemCount = menu.size();
+        for (int i = 0; i < itemCount; i++) {
+            final MenuItem item = menu.getItem(i);
+            final ImageButton button = new ImageButton(context, null,
+                    com.android.internal.R.attr.actionButtonStyle);
+            button.setClickable(true);
+            button.setFocusable(true);
+            button.setImageDrawable(item.getIcon());
+            button.setId(item.getItemId());
+            button.setVisibility(item.isVisible() ? VISIBLE : GONE);
+            button.setEnabled(item.isEnabled());
+            
+            button.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    implMode.dispatchOnContextItemClicked(item);
+                }
+            });
+            
+            addView(button);
+        }
+        requestLayout();
+    }
+    
+    public void closeMode() {
+        removeAllViews();
+        mCustomView = null;
+    }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        if (widthMode != MeasureSpec.EXACTLY) {
+            throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
+                    "with android:layout_width=\"match_parent\" (or fill_parent)");
+        }
+
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        if (heightMode != MeasureSpec.AT_MOST) {
+            throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
+                    "with android:layout_height=\"wrap_content\"");
+        }
+        
+        final int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
+        final int itemMargin = mItemPadding;
+
+        int availableWidth = contentWidth - getPaddingLeft() - getPaddingRight();
+        final int height = mContentHeight - getPaddingTop() - getPaddingBottom();
+        final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
+        
+        if (mCloseButton != null) {
+            availableWidth = measureChildView(mCloseButton, availableWidth,
+                    childSpecHeight, itemMargin);
+        }
+
+        if (mTitleView != null && mCustomView == null) {
+            availableWidth = measureChildView(mTitleView, availableWidth,
+                    childSpecHeight, itemMargin);
+        }
+
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = getChildAt(i);
+            if (child == mCloseButton || child == mTitleView || child == mCustomView) {
+                continue;
+            }
+            
+            availableWidth = measureChildView(child, availableWidth, childSpecHeight, itemMargin);
+        }
+
+        if (mCustomView != null) {
+            mCustomView.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        }
+
+        setMeasuredDimension(contentWidth, mContentHeight);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        int x = getPaddingLeft();
+        final int y = getPaddingTop();
+        final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
+        final int itemMargin = mItemPadding;
+        
+        if (mCloseButton != null && mCloseButton.getVisibility() != GONE) {
+            x += positionChild(mCloseButton, x, y, contentHeight);
+        }
+        
+        if (mTitleView != null && mCustomView == null) {
+            x += positionChild(mTitleView, x, y, contentHeight) + itemMargin;
+        }
+        
+        if (mCustomView != null) {
+            x += positionChild(mCustomView, x, y, contentHeight) + itemMargin;
+        }
+        
+        x = r - l - getPaddingRight();
+        
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = getChildAt(i);
+            if (child == mCloseButton || child == mTitleView || child == mCustomView) {
+                continue;
+            }
+
+            x -= positionChildInverse(child, x, y, contentHeight) + itemMargin;
+        }
+    }
+
+    private int measureChildView(View child, int availableWidth, int childSpecHeight, int spacing) {
+        child.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
+                childSpecHeight);
+
+        availableWidth -= child.getMeasuredWidth();
+        availableWidth -= spacing;
+
+        return availableWidth;
+    }
+    
+    private int positionChild(View child, int x, int y, int contentHeight) {
+        int childWidth = child.getMeasuredWidth();
+        int childHeight = child.getMeasuredHeight();
+        int childTop = y + (contentHeight - childHeight) / 2;
+
+        child.layout(x, childTop, x + childWidth, childTop + childHeight);
+
+        return childWidth;
+    }
+    
+    private int positionChildInverse(View child, int x, int y, int contentHeight) {
+        int childWidth = child.getMeasuredWidth();
+        int childHeight = child.getMeasuredHeight();
+        int childTop = y + (contentHeight - childHeight) / 2;
+
+        child.layout(x - childWidth, childTop, x, childTop + childHeight);
+
+        return childWidth;
+    }
+}

@@ -206,6 +206,8 @@
 
         <!-- Action bar styles -->
         <item name="actionButtonPadding">12dip</item>
+        <item name="actionBarContextBackground">@android:drawable/action_bar_context_background</item>
+        <item name="actionBarCloseContextDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->

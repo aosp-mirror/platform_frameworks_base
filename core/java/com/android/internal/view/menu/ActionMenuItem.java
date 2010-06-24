@@ -218,4 +218,8 @@ public class ActionMenuItem implements MenuItem {
         
         return false;
     }
+    
+    public void setShowAsAction(int show) {
+        // Do nothing. ActionMenuItems always show as action buttons.
+    }
 }

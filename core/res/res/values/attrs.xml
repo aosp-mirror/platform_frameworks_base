@@ -444,6 +444,8 @@
         <eat-comment />
         <!-- Default amount of padding to use between action buttons. -->
         <attr name="actionButtonPadding" format="dimension" />
+        <attr name="actionBarContextBackground" format="reference" />
+        <attr name="actionBarCloseContextDrawable" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->

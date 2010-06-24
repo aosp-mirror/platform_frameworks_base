@@ -242,12 +242,12 @@ public class MenuInflater {
         private boolean itemEnabled;
         
         /**
-         * Sync to attrs.xml enum:
+         * Sync to attrs.xml enum, values in MenuItem:
          * - 0: never
          * - 1: ifRoom
          * - 2: always
          */
-        private int itemShowAsAction;
+        private int itemShowAsAction = MenuItem.SHOW_AS_ACTION_NEVER;
         
         private String itemListenerMethodName;
         
@@ -346,7 +346,8 @@ public class MenuInflater {
                 .setTitleCondensed(itemTitleCondensed)
                 .setIcon(itemIconResId)
                 .setAlphabeticShortcut(itemAlphabeticShortcut)
-                .setNumericShortcut(itemNumericShortcut);
+                .setNumericShortcut(itemNumericShortcut)
+                .setShowAsAction(itemShowAsAction);
             
             if (itemListenerMethodName != null) {
                 item.setOnMenuItemClickListener(
@@ -358,7 +359,6 @@ public class MenuInflater {
                 if (itemCheckable >= 2) {
                     impl.setExclusiveCheckable(true);
                 }
-                impl.setShowAsAction(itemShowAsAction);
             }
         }
         

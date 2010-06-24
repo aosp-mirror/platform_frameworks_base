@@ -52,7 +52,6 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ActionBarView;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.InflateException;
@@ -74,8 +73,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 
-import com.android.internal.app.SplitActionBar;
+import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
+import com.android.internal.widget.ActionBarView;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -1675,20 +1675,12 @@ public class Activity extends ContextThemeWrapper
      * initializes the ActionBar with the view, and sets mActionBar.
      */
     private void initActionBar() {
-        if (!getWindow().hasFeature(Window.FEATURE_ACTION_BAR)) {
+        Window window = getWindow();
+        if (!window.hasFeature(Window.FEATURE_ACTION_BAR)) {
             return;
         }
         
-        ActionBarView view = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
-        if (view != null) {
-        	LinearLayout splitView = 
-        		(LinearLayout) findViewById(com.android.internal.R.id.context_action_bar);
-        	if (splitView != null) {
-        		mActionBar = new SplitActionBar(view, splitView);
-        	}
-        } else {
-            Log.e(TAG, "Could not create action bar; view not found in window decor.");
-        }
+        mActionBar = new ActionBarImpl(getWindow().getDecorView());
     }
     
     /**
