@@ -27,8 +27,8 @@ class UriPermission {
     final Uri uri;
     int modeFlags = 0;
     int globalModeFlags = 0;
-    final HashSet<HistoryRecord> readActivities = new HashSet<HistoryRecord>();
-    final HashSet<HistoryRecord> writeActivities = new HashSet<HistoryRecord>();
+    final HashSet<ActivityRecord> readActivities = new HashSet<ActivityRecord>();
+    final HashSet<ActivityRecord> writeActivities = new HashSet<ActivityRecord>();
     
     String stringName;
     
@@ -42,7 +42,7 @@ class UriPermission {
             globalModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
             modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
             if (readActivities.size() > 0) {
-                for (HistoryRecord r : readActivities) {
+                for (ActivityRecord r : readActivities) {
                     r.readUriPermissions.remove(this);
                     if (r.readUriPermissions.size() == 0) {
                         r.readUriPermissions = null;
@@ -55,7 +55,7 @@ class UriPermission {
             globalModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             if (readActivities.size() > 0) {
-                for (HistoryRecord r : readActivities) {
+                for (ActivityRecord r : readActivities) {
                     r.writeUriPermissions.remove(this);
                     if (r.writeUriPermissions.size() == 0) {
                         r.writeUriPermissions = null;

@@ -42,7 +42,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
     final static class Key {
         final int type;
         final String packageName;
-        final HistoryRecord activity;
+        final ActivityRecord activity;
         final String who;
         final int requestCode;
         final Intent requestIntent;
@@ -52,7 +52,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
         
         private static final int ODD_PRIME_NUMBER = 37;
         
-        Key(int _t, String _p, HistoryRecord _a, String _w,
+        Key(int _t, String _p, ActivityRecord _a, String _w,
                 int _r, Intent _i, String _it, int _f) {
             type = _t;
             packageName = _p;

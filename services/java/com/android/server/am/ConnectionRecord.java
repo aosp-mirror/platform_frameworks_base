@@ -26,7 +26,7 @@ import java.io.PrintWriter;
  */
 class ConnectionRecord {
     final AppBindRecord binding;    // The application/service binding.
-    final HistoryRecord activity;   // If non-null, the owning activity.
+    final ActivityRecord activity;   // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
     final int flags;                // Binding options.
     final int clientLabel;          // String resource labeling this client.
@@ -42,7 +42,7 @@ class ConnectionRecord {
                 + " flags=0x" + Integer.toHexString(flags));
     }
     
-    ConnectionRecord(AppBindRecord _binding, HistoryRecord _activity,
+    ConnectionRecord(AppBindRecord _binding, ActivityRecord _activity,
                IServiceConnection _conn, int _flags,
                int _clientLabel, PendingIntent _clientIntent) {
         binding = _binding;

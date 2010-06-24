@@ -19,7 +19,7 @@
 
 package com.google.android.gles_jni;
 
-import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.os.Build;
@@ -65,7 +65,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     private static boolean allowIndirectBuffers(String appName) {
         boolean result = false;
         int version = 0;
-        IPackageManager pm = ActivityThread.getPackageManager();
+        IPackageManager pm = AppGlobals.getPackageManager();
         try {
             ApplicationInfo applicationInfo = pm.getApplicationInfo(appName, 0);
             if (applicationInfo != null) {
