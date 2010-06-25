@@ -952,7 +952,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int vibrate = 0;
             vibrate = AudioService.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_NOTIFICATION, AudioManager.VIBRATE_SETTING_ON);
-            vibrate = AudioService.getValueForVibrateSetting(vibrate,
+            vibrate |= AudioService.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_OFF);
             loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
         } finally {
