@@ -37,10 +37,9 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class FreezeLock;
 class Client;
-class GLExtensions;
 class UserClient;
+class FreezeLock;
 
 // ---------------------------------------------------------------------------
 
@@ -207,7 +206,6 @@ private:
     // constants
     sp<Surface> mSurface;
     PixelFormat mFormat;
-    const GLExtensions& mGLExtensions;
     bool mNeedsBlending;
     bool mNeedsDithering;
 

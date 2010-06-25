@@ -112,17 +112,15 @@ void LayerDim::onDraw(const Region& clip) const
     Region::const_iterator const end = clip.end();
     if (s.alpha>0 && (it != end)) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
-        const GLfloat alpha = s.alpha/255.0f;
+        const GGLfixed alpha = (s.alpha << 16)/255;
         const uint32_t fbHeight = hw.getHeight();
         glDisable(GL_DITHER);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        glColor4f(0, 0, 0, alpha);
-
+        glColor4x(0, 0, 0, alpha);
+        
 #if defined(GL_OES_texture_external)
-        if (GLExtensions::getInstance().haveTextureExternal()) {
-            glDisable(GL_TEXTURE_EXTERNAL_OES);
-        }
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
 #endif
 #if defined(DIM_WITH_TEXTURE) && defined(EGL_ANDROID_image_native_buffer)
         if (sUseTexture) {
