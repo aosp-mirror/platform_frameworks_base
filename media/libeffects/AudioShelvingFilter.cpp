@@ -50,8 +50,8 @@ AudioCoefInterpolator AudioShelvingFilter::mLoCoefInterp(2, kLoInDims, 5, (const
 
 AudioShelvingFilter::AudioShelvingFilter(ShelfType type, int nChannels,
                                          int sampleRate)
-        : mBiquad(nChannels, sampleRate)
-        , mType(type) {
+        : mType(type),
+          mBiquad(nChannels, sampleRate)  {
     configure(nChannels, sampleRate);
 }
 

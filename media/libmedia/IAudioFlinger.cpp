@@ -67,7 +67,7 @@ enum {
     LOAD_EFFECT_LIBRARY,
     UNLOAD_EFFECT_LIBRARY,
     QUERY_NUM_EFFECTS,
-    QUERY_NEXT_EFFECT,
+    QUERY_EFFECT,
     GET_EFFECT_DESCRIPTOR,
     CREATE_EFFECT
 };
@@ -586,14 +586,15 @@ public:
         return NO_ERROR;
     }
 
-    virtual status_t queryNextEffect(effect_descriptor_t *pDescriptor)
+    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor)
     {
         if (pDescriptor == NULL) {
             return BAD_VALUE;
         }
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        status_t status = remote()->transact(QUERY_NEXT_EFFECT, data, &reply);
+        data.writeInt32(index);
+        status_t status = remote()->transact(QUERY_EFFECT, data, &reply);
         if (status != NO_ERROR) {
             return status;
         }
@@ -980,10 +981,10 @@ status_t BnAudioFlinger::onTransact(
             }
             return NO_ERROR;
         }
-        case QUERY_NEXT_EFFECT: {
+        case QUERY_EFFECT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             effect_descriptor_t desc;
-            status_t status = queryNextEffect(&desc);
+            status_t status = queryEffect(data.readInt32(), &desc);
             reply->writeInt32(status);
             if (status == NO_ERROR) {
                 reply->write(&desc, sizeof(effect_descriptor_t));

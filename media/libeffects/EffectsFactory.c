@@ -26,11 +26,16 @@
 static list_elem_t *gEffectList; // list of effect_entry_t: all currently created effects
 static list_elem_t *gLibraryList; // list of lib_entry_t: all currently loaded libraries
 static pthread_mutex_t gLibLock = PTHREAD_MUTEX_INITIALIZER; // controls access to gLibraryList
+static uint32_t gNumEffects;         // total number number of effects
 static list_elem_t *gCurLib;    // current library in enumeration process
 static list_elem_t *gCurEffect; // current effect in enumeration process
+static uint32_t gCurEffectIdx;       // current effect index in enumeration process
 
 static const char * const gEffectLibPath = "/system/lib/soundfx"; // path to built-in effect libraries
 static int gInitDone; // true is global initialization has been preformed
+static int gNextLibId; // used by loadLibrary() to allocate unique library handles
+static int gCanQueryEffect; // indicates that call to EffectQueryEffect() is valid, i.e. that the list of effects
+                          // was not modified since last call to EffectQueryNumberEffects()
 
 /////////////////////////////////////////////////
 //      Local functions prototypes
@@ -39,7 +44,8 @@ static int gInitDone; // true is global initialization has been preformed
 static int init();
 static int loadLibrary(const char *libPath, int *handle);
 static int unloadLibrary(int handle);
-static uint32_t numEffectModules();
+static void resetEffectEnumeration();
+static uint32_t updateNumEffects();
 static int findEffect(effect_uuid_t *uuid, lib_entry_t **lib, effect_descriptor_t **desc);
 static void dumpEffectDescriptor(effect_descriptor_t *desc, char *str, size_t len);
 
@@ -107,38 +113,53 @@ int EffectQueryNumberEffects(uint32_t *pNumEffects)
     }
 
     pthread_mutex_lock(&gLibLock);
-    *pNumEffects = numEffectModules();
+    *pNumEffects = gNumEffects;
+    gCanQueryEffect = 1;
     pthread_mutex_unlock(&gLibLock);
     LOGV("EffectQueryNumberEffects(): %d", *pNumEffects);
     return ret;
 }
 
-int EffectQueryNext(effect_descriptor_t *pDescriptor)
+int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor)
 {
     int ret = init();
     if (ret < 0) {
         return ret;
     }
-    if (pDescriptor == NULL) {
+    if (pDescriptor == NULL ||
+        index >= gNumEffects) {
         return -EINVAL;
+    }
+    if (gCanQueryEffect == 0) {
+        return -ENOSYS;
     }
 
     pthread_mutex_lock(&gLibLock);
     ret = -ENOENT;
+    if (index < gCurEffectIdx) {
+        resetEffectEnumeration();
+    }
     while (gCurLib) {
         if (gCurEffect) {
-            memcpy(pDescriptor, gCurEffect->object, sizeof(effect_descriptor_t));
-            gCurEffect = gCurEffect->next;
-            ret = 0;
-            break;
+            if (index == gCurEffectIdx) {
+                memcpy(pDescriptor, gCurEffect->object, sizeof(effect_descriptor_t));
+                ret = 0;
+                break;
+            } else {
+                gCurEffect = gCurEffect->next;
+                gCurEffectIdx++;
+            }
         } else {
             gCurLib = gCurLib->next;
             gCurEffect = ((lib_entry_t *)gCurLib->object)->effects;
         }
     }
+
+#if (LOG_NDEBUG == 0)
     char str[256];
     dumpEffectDescriptor(pDescriptor, str, 256);
-    LOGV("EffectQueryNext() desc:%s", str);
+    LOGV("EffectQueryEffect() desc:%s", str);
+#endif
     pthread_mutex_unlock(&gLibLock);
     return ret;
 }
@@ -164,7 +185,7 @@ int EffectGetDescriptor(effect_uuid_t *uuid, effect_descriptor_t *pDescriptor)
     return ret;
 }
 
-int EffectCreate(effect_uuid_t *uuid, effect_interface_t *pInterface)
+int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_interface_t *pInterface)
 {
     list_elem_t *e = gLibraryList;
     lib_entry_t *l = NULL;
@@ -198,9 +219,9 @@ int EffectCreate(effect_uuid_t *uuid, effect_interface_t *pInterface)
     }
 
     // create effect in library
-    ret = l->createFx(uuid, &itfe);
-    if (ret < 0) {
-        LOGW("EffectCreate() library %s: could not create fx %s", l->path, d->name);
+    ret = l->createFx(uuid, sessionId, ioId, &itfe);
+    if (ret != 0) {
+        LOGW("EffectCreate() library %s: could not create fx %s, error %d", l->path, d->name, ret);
         goto exit;
     }
 
@@ -282,7 +303,10 @@ int EffectLoadLibrary(const char *libPath, int *handle)
     if (libPath == NULL) {
         return -EINVAL;
     }
-    return loadLibrary(libPath, handle);
+
+    ret = loadLibrary(libPath, handle);
+    updateNumEffects();
+    return ret;
 }
 
 int EffectUnloadLibrary(int handle)
@@ -292,7 +316,9 @@ int EffectUnloadLibrary(int handle)
         return ret;
     }
 
-    return unloadLibrary(handle);
+    ret = unloadLibrary(handle);
+    updateNumEffects();
+    return ret;
 }
 
 int EffectIsNullUuid(effect_uuid_t *uuid)
@@ -339,7 +365,7 @@ int init() {
         }
     }
     closedir(dir);
-
+    updateNumEffects();
     gInitDone = 1;
     LOGV("init() done");
     return 0;
@@ -350,7 +376,7 @@ int loadLibrary(const char *libPath, int *handle)
 {
     void *hdl;
     effect_QueryNumberEffects_t queryNumFx;
-    effect_QueryNextEffect_t queryFx;
+    effect_QueryEffect_t queryFx;
     effect_CreateEffect_t createFx;
     effect_ReleaseEffect_t releaseFx;
     uint32_t numFx;
@@ -378,9 +404,9 @@ int loadLibrary(const char *libPath, int *handle)
         ret = -ENODEV;
         goto error;
     }
-    queryFx = (effect_QueryNextEffect_t)dlsym(hdl, "EffectQueryNext");
+    queryFx = (effect_QueryEffect_t)dlsym(hdl, "EffectQueryEffect");
     if (queryFx == NULL) {
-        LOGW("could not get EffectQueryNext from lib %s", libPath);
+        LOGW("could not get EffectQueryEffect from lib %s", libPath);
         ret = -ENODEV;
         goto error;
     }
@@ -409,7 +435,7 @@ int loadLibrary(const char *libPath, int *handle)
             ret = -ENOMEM;
             goto error;
         }
-        ret = queryFx(d);
+        ret = queryFx(fx, d);
         if (ret == 0) {
 #if (LOG_NDEBUG==0)
             char s[256];
@@ -434,8 +460,12 @@ int loadLibrary(const char *libPath, int *handle)
             LOGW("Error querying effect # %d on lib %s", fx, libPath);
         }
     }
+
+    pthread_mutex_lock(&gLibLock);
+
     // add entry for library in gLibraryList
     l = malloc(sizeof(lib_entry_t));
+    l->id = ++gNextLibId;
     l->handle = hdl;
     strncpy(l->path, libPath, PATH_MAX);
     l->createFx = createFx;
@@ -444,14 +474,13 @@ int loadLibrary(const char *libPath, int *handle)
     pthread_mutex_init(&l->lock, NULL);
 
     e = malloc(sizeof(list_elem_t));
-    pthread_mutex_lock(&gLibLock);
     e->next = gLibraryList;
     e->object = l;
     gLibraryList = e;
     pthread_mutex_unlock(&gLibLock);
     LOGV("loadLibrary() linked library %p", l);
 
-    *handle = (int)hdl;
+    *handle = l->id;
 
     return 0;
 
@@ -480,7 +509,7 @@ int unloadLibrary(int handle)
     el2 = NULL;
     while (el1) {
         l = (lib_entry_t *)el1->object;
-        if (handle == (int)l->handle) {
+        if (handle == l->id) {
             if (el2) {
                 el2->next = el1->next;
             } else {
@@ -508,6 +537,7 @@ int unloadLibrary(int handle)
 
     // disable all effects from this library
     pthread_mutex_lock(&l->lock);
+
     el1 = gEffectList;
     while (el1) {
         fx = (effect_entry_t *)el1->object;
@@ -523,17 +553,23 @@ int unloadLibrary(int handle)
     return 0;
 }
 
+void resetEffectEnumeration()
+{
+    gCurLib = gLibraryList;
+    gCurEffect = NULL;
+    if (gCurLib) {
+        gCurEffect = ((lib_entry_t *)gCurLib->object)->effects;
+    }
+    gCurEffectIdx = 0;
+}
 
-
-uint32_t numEffectModules() {
-    list_elem_t *e = gLibraryList;
+uint32_t updateNumEffects() {
+    list_elem_t *e;
     uint32_t cnt = 0;
 
-    // Reset pointers for EffectQueryNext()
-    gCurLib = e;
-    if (e) {
-        gCurEffect = ((lib_entry_t *)e->object)->effects;
-    }
+    resetEffectEnumeration();
+
+    e = gLibraryList;
     while (e) {
         lib_entry_t *l = (lib_entry_t *)e->object;
         list_elem_t *efx = l->effects;
@@ -543,6 +579,8 @@ uint32_t numEffectModules() {
         }
         e = e->next;
     }
+    gNumEffects = cnt;
+    gCanQueryEffect = 0;
     return cnt;
 }
 

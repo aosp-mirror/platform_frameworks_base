@@ -394,11 +394,11 @@ status_t AudioEffect::queryNumberEffects(uint32_t *numEffects)
     return af->queryNumberEffects(numEffects);
 }
 
-status_t AudioEffect::queryNextEffect(effect_descriptor_t *descriptor)
+status_t AudioEffect::queryEffect(uint32_t index, effect_descriptor_t *descriptor)
 {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
-    return af->queryNextEffect(descriptor);
+    return af->queryEffect(index, descriptor);
 }
 
 status_t AudioEffect::getEffectDescriptor(effect_uuid_t *uuid, effect_descriptor_t *descriptor)
