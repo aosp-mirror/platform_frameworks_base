@@ -50,12 +50,13 @@ public class ScriptC_Fountain extends ScriptC {
     }
 
     private final static int mExportFuncIdx_addParticles = 0;
-    public void invoke_addParticles(int rate, float x, float y, int newColor) {
+    public void invoke_addParticles(int rate, float x, float y, boolean newColor) {
         FieldPacker addParticles_fp = new FieldPacker(16);
         addParticles_fp.addI32(rate);
         addParticles_fp.addF32(x);
         addParticles_fp.addF32(y);
-        addParticles_fp.addI32(newColor);
+        addParticles_fp.addBoolean(newColor);
+        addParticles_fp.skip(3);
         invoke(mExportFuncIdx_addParticles, addParticles_fp);
     }
 

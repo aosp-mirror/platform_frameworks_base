@@ -51,7 +51,7 @@ public class FountainRS {
     boolean holdingColor = false;
     public void newTouchPosition(int x, int y, int rate) {
         if (rate > 0) {
-            mScript.invoke_addParticles(rate, x, y, !holdingColor ? 1 : 0);
+            mScript.invoke_addParticles(rate, x, y, !holdingColor);
             holdingColor = true;
         } else {
             holdingColor = false;
