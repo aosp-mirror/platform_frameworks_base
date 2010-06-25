@@ -178,6 +178,7 @@ public class WebSettings {
     private boolean         mUseWideViewport = false;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
+    private long            mMaximumDecodedImageSize = 0; // 0 means default
     // HTML5 API flags
     private boolean         mAppCacheEnabled = false;
     private boolean         mDatabaseEnabled = false;
@@ -1449,6 +1450,19 @@ public class WebSettings {
             postSync();
         }
      }
+
+    /**
+     * Specify the maximum decoded image size. The default is
+     * 2 megs for small memory devices and 8 megs for large memory devices.
+     * @param size The maximum decoded size, or zero to set to the default.
+     * @hide pending api council approval
+     */
+    public void setMaximumDecodedImageSize(long size) {
+        if (mMaximumDecodedImageSize != size) {
+            mMaximumDecodedImageSize = size;
+            postSync();
+        }
+    }
 
     int getDoubleTapToastCount() {
         return mDoubleTapToastCount;
