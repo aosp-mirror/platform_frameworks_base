@@ -8,7 +8,6 @@
 #include "../../../../scriptc/rs_graphics.rsh"
 
 static int newPart = 0;
-
 static float4 partColor;
 rs_mesh partMesh;
 
@@ -19,13 +18,13 @@ typedef struct __attribute__((packed, aligned(4))) Point {
 } Point_t;
 Point_t *point;
 
-#pragma rs export_var(point, partColor, partMesh)
+#pragma rs export_var(point, partMesh)
+#pragma rs export_func(addParticles)
 
 int root() {
     rsgClearColor(0.f, 0.f, 0.f, 1.f);
-    float height = rsgGetHeight();
-    rs_allocation alloc = rsGetAllocation(point);
-    int size = rsAllocationGetDimX(alloc);
+    const float height = rsgGetHeight();
+    const int size = rsAllocationGetDimX(rsGetAllocation(point));
 
     Point_t * p = point;
     for (int ct=0; ct < size; ct++) {
@@ -37,12 +36,9 @@ int root() {
         p++;
     }
 
-    rsgUploadToBufferObject(alloc);
     rsgDrawSimpleMesh(partMesh);
     return 1;
 }
-
-#pragma rs export_func(addParticles)
 
 void addParticles(int rate, float x, float y, int newColor)
 {

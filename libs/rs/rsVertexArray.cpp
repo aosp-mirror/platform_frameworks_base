@@ -84,6 +84,7 @@ void VertexArray::add(const Attrib &a, uint32_t stride)
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].set(a);
     mAttribs[mCount].buffer = mActiveBuffer;
+    mAttribs[mCount].ptr = mActivePointer;
     mAttribs[mCount].stride = stride;
     mCount ++;
 }
@@ -96,16 +97,19 @@ void VertexArray::add(uint32_t type, uint32_t size, uint32_t stride, bool normal
     mAttribs[mCount].size = size;
     mAttribs[mCount].offset = offset;
     mAttribs[mCount].normalized = normalized;
-    mAttribs[mCount].buffer = mActiveBuffer;
     mAttribs[mCount].stride = stride;
     mAttribs[mCount].name.setTo(name);
+
+    mAttribs[mCount].buffer = mActiveBuffer;
+    mAttribs[mCount].ptr = mActivePointer;
     mCount ++;
 }
 
 void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
-    LOGE("va %i: slot=%i name=%s buf=%i  size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx, slot,
+    LOGE("va %i: slot=%i name=%s buf=%i ptr=%p size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx, slot,
          mAttribs[idx].name.string(),
          mAttribs[idx].buffer,
+         mAttribs[idx].ptr,
          mAttribs[idx].size,
          mAttribs[idx].type,
          mAttribs[idx].stride,
@@ -154,7 +158,7 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
                               mAttribs[ct].type,
                               mAttribs[ct].normalized,
                               mAttribs[ct].stride,
-                              (void *)mAttribs[ct].offset);
+                              mAttribs[ct].ptr + mAttribs[ct].offset);
     }
     state->mLastEnableCount = mCount;
     rsc->checkError("VertexArray::setupGL2 done");

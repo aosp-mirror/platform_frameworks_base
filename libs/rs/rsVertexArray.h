@@ -37,6 +37,7 @@ public:
     class Attrib {
     public:
         uint32_t buffer;
+        const uint8_t * ptr;
         uint32_t offset;
         uint32_t type;
         uint32_t size;
@@ -51,7 +52,15 @@ public:
 
 
     void clearAll();
-    void setActiveBuffer(uint32_t id) {mActiveBuffer = id;}
+    void setActiveBuffer(uint32_t id) {
+        mActiveBuffer = id;
+        mActivePointer = NULL;
+    }
+    void setActiveBuffer(const void *ptr) {
+        mActiveBuffer = 0;
+        mActivePointer = (const uint8_t *)ptr;
+    }
+
     void add(const Attrib &, uint32_t stride);
     //void addLegacy(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset);
     void add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name);
@@ -63,6 +72,7 @@ public:
 protected:
     void clear(uint32_t index);
     uint32_t mActiveBuffer;
+    const uint8_t * mActivePointer;
     uint32_t mCount;
 
     Attrib mAttribs[RS_MAX_ATTRIBS];

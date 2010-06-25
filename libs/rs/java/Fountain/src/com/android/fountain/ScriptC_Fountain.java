@@ -26,20 +26,7 @@ public class ScriptC_Fountain extends ScriptC {
         super(rs, resources, id, isRoot);
     }
 
-    private final static int mExportVarIdx_partColor = 0;
-    private Float4 mExportVar_partColor;
-    public void set_partColor(Float4 v) {
-        mExportVar_partColor = v;
-        FieldPacker fp = new FieldPacker(16);
-        fp.addF32(v);
-        setVar(mExportVarIdx_partColor, fp);
-    }
-
-    public Float4 get_partColor() {
-        return mExportVar_partColor;
-    }
-
-    private final static int mExportVarIdx_partMesh = 1;
+    private final static int mExportVarIdx_partMesh = 0;
     private SimpleMesh mExportVar_partMesh;
     public void set_partMesh(SimpleMesh v) {
         mExportVar_partMesh = v;
@@ -50,7 +37,7 @@ public class ScriptC_Fountain extends ScriptC {
         return mExportVar_partMesh;
     }
 
-    private final static int mExportVarIdx_point = 2;
+    private final static int mExportVarIdx_point = 1;
     private ScriptField_Point mExportVar_point;
     public void bind_point(ScriptField_Point v) {
         mExportVar_point = v;
