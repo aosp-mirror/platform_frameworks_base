@@ -75,7 +75,7 @@ public:
         while (numSamples > 0) {
             uint32_t numSamplesIter = min(numSamples, mMaxSamplesPerCall);
             uint32_t nSamplesChannels = numSamplesIter * mNumChannels;
-            if (mPcmFormat == PCM_FORMAT_S7_24) {
+            if (mPcmFormat == SAMPLE_FORMAT_PCM_S7_24) {
                 if (mBehavior == EFFECT_BUFFER_ACCESS_WRITE) {
                     mpProcessor->process(
                         reinterpret_cast<const audio_sample_t *> (pIn),
@@ -125,7 +125,7 @@ private:
     //              sample.
     // numSamples   The number of single-channel samples to process.
     void ConvertInput(const void *& pIn, uint32_t numSamples) {
-        if (mPcmFormat == PCM_FORMAT_S15) {
+        if (mPcmFormat == SAMPLE_FORMAT_PCM_S15) {
             const int16_t * pIn16 = reinterpret_cast<const int16_t *>(pIn);
             audio_sample_t * pOut = mBuffer;
             while (numSamples-- > 0) {
@@ -143,7 +143,7 @@ private:
     //              When function exist will point to the next output sample.
     // numSamples   The number of single-channel samples to process.
     void ConvertOutput(void *& pOut, uint32_t numSamples) {
-        if (mPcmFormat == PCM_FORMAT_S15) {
+        if (mPcmFormat == SAMPLE_FORMAT_PCM_S15) {
             const audio_sample_t * pIn = mBuffer;
             int16_t * pOut16 = reinterpret_cast<int16_t *>(pOut);
             if (mBehavior == EFFECT_BUFFER_ACCESS_WRITE) {

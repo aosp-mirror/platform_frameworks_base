@@ -148,7 +148,7 @@ public:
 
     virtual status_t queryNumberEffects(uint32_t *numEffects) = 0;
 
-    virtual status_t queryNextEffect(effect_descriptor_t *pDescriptor) = 0;
+    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor) = 0;
 
     virtual status_t getEffectDescriptor(effect_uuid_t *pEffectUUID, effect_descriptor_t *pDescriptor) = 0;
 

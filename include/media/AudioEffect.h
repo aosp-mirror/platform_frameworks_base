@@ -93,14 +93,14 @@ public:
 
     /*
      * Returns the number of effects available. This method together
-     * with EffectQueryNext() is used to enumerate all effects:
+     * with queryEffect() is used to enumerate all effects:
      * The enumeration sequence is:
-     *      QueryNumberEffects(&num_effects);
-     *      while (num_effects--)
-     *          QueryNextEffect();
+     *      queryNumberEffects(&num_effects);
+     *      for (i = 0; i < num_effects; i++)
+     *          queryEffect(i,...);
      *
      * Parameters:
-     *      pNumEffects:    address where the number of effects should be returned.
+     *      numEffects:    address where the number of effects should be returned.
      *
      * Returned status (from utils/Errors.h) can be:
      *      NO_ERROR   successful operation.
@@ -114,24 +114,24 @@ public:
     static status_t queryNumberEffects(uint32_t *numEffects);
 
     /*
-     * Returns number effect descriptor during effect
+     * Returns an effect descriptor during effect
      * enumeration.
      *
      * Parameters:
-     *      pDescriptor:    address where the effect descriptor should be returned.
+     *      index:      index of the queried effect.
+     *      descriptor: address where the effect descriptor should be returned.
      *
      * Returned status (from utils/Errors.h) can be:
      *      NO_ERROR        successful operation.
-     *      NAME_NOT_FOUND  no more effect available
      *      PERMISSION_DENIED could not get AudioFlinger interface
      *      NO_INIT         effect library failed to initialize
-     *      BAD_VALUE       invalid descriptor pointer
+     *      BAD_VALUE       invalid descriptor pointer or index
      *      INVALID_OPERATION  effect list has changed since last execution of queryNumberEffects()
      *
      * Returned value
      *   *descriptor:     updated with effect descriptor
      */
-    static status_t queryNextEffect(effect_descriptor_t *descriptor);
+    static status_t queryEffect(uint32_t index, effect_descriptor_t *descriptor);
 
 
     /*

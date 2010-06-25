@@ -1,4 +1,4 @@
-/* //device/include/server/AudioFlinger/AudioCommon.h
+/*
 **
 ** Copyright 2009, The Android Open Source Project
 **

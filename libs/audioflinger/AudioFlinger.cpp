@@ -51,7 +51,7 @@
 #include "lifevibes.h"
 #endif
 
-#include <media/EffectFactoryApi.h>
+#include <media/EffectsFactoryApi.h>
 
 // ----------------------------------------------------------------------------
 // the sim build doesn't have gettid
@@ -126,7 +126,8 @@ static bool settingsAllowed() {
 
 AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
-        mAudioHardware(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1)
+        mAudioHardware(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1),
+        mTotalEffectsCpuLoad(0), mTotalEffectsMemory(0)
 {
     mHardwareStatus = AUDIO_HW_IDLE;
 
@@ -135,8 +136,8 @@ AudioFlinger::AudioFlinger()
     mHardwareStatus = AUDIO_HW_INIT;
     if (mAudioHardware->initCheck() == NO_ERROR) {
         // open 16-bit output stream for s/w mixer
-
-        setMode(AudioSystem::MODE_NORMAL);
+        mMode = AudioSystem::MODE_NORMAL;
+        setMode(mMode);
 
         setMasterVolume(1.0f);
         setMasterMute(false);
@@ -431,6 +432,8 @@ status_t AudioFlinger::setMasterVolume(float value)
 
 status_t AudioFlinger::setMode(int mode)
 {
+    status_t ret;
+
     // check calling permissions
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
@@ -440,15 +443,23 @@ status_t AudioFlinger::setMode(int mode)
         return BAD_VALUE;
     }
 
-    AutoMutex lock(mHardwareLock);
-    mHardwareStatus = AUDIO_HW_SET_MODE;
-    status_t ret = mAudioHardware->setMode(mode);
-#ifdef LVMX
-    if (NO_ERROR == ret) {
-        LifeVibes::setMode(mode);
+    { // scope for the lock
+        AutoMutex lock(mHardwareLock);
+        mHardwareStatus = AUDIO_HW_SET_MODE;
+        ret = mAudioHardware->setMode(mode);
+        mHardwareStatus = AUDIO_HW_IDLE;
     }
+
+    if (NO_ERROR == ret) {
+        Mutex::Autolock _l(mLock);
+        mMode = mode;
+        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
+           mPlaybackThreads.valueAt(i)->setMode(mode);
+#ifdef LVMX
+        LifeVibes::setMode(mode);
 #endif
-    mHardwareStatus = AUDIO_HW_IDLE;
+    }
+
     return ret;
 }
 
@@ -1385,6 +1396,15 @@ sp<AudioFlinger::EffectChain> AudioFlinger::PlaybackThread::getEffectChain_l(int
     return chain;
 }
 
+void AudioFlinger::PlaybackThread::setMode(uint32_t mode)
+{
+    Mutex::Autolock _l(mLock);
+    size_t size = mEffectChains.size();
+    for (size_t i = 0; i < size; i++) {
+        mEffectChains[i]->setMode(mode);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
@@ -1803,9 +1823,9 @@ void AudioFlinger::MixerThread::invalidateTracks(int streamType)
             t->mCblk->flags |= CBLK_INVALID_ON;
             t->mCblk->cv.signal();
             t->mCblk->lock.unlock();
-                }
-            }
         }
+    }
+}
 
 
 // getTrackName_l() must be called with ThreadBase::mLock held
@@ -4466,10 +4486,10 @@ status_t AudioFlinger::queryNumberEffects(uint32_t *numEffects)
     return EffectQueryNumberEffects(numEffects);
 }
 
-status_t AudioFlinger::queryNextEffect(effect_descriptor_t *descriptor)
+status_t AudioFlinger::queryEffect(uint32_t index, effect_descriptor_t *descriptor)
 {
     Mutex::Autolock _l(mLock);
-    return EffectQueryNext(descriptor);
+    return EffectQueryEffect(index, descriptor);
 }
 
 status_t AudioFlinger::getEffectDescriptor(effect_uuid_t *pUuid, effect_descriptor_t *descriptor)
@@ -4529,10 +4549,10 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
                 LOGW("createEffect() error %d from EffectQueryNumberEffects", lStatus);
                 goto Exit;
             }
-            for (; numEffects > 0; numEffects--) {
-                lStatus = EffectQueryNext(&desc);
+            for (uint32_t i = 0; i < numEffects; i++) {
+                lStatus = EffectQueryEffect(i, &desc);
                 if (lStatus < 0) {
-                    LOGW("createEffect() error %d from EffectQueryNext", lStatus);
+                    LOGW("createEffect() error %d from EffectQueryEffect", lStatus);
                     continue;
                 }
                 if (memcmp(&desc.type, &pDesc->type, sizeof(effect_uuid_t)) == 0) {
@@ -4567,6 +4587,13 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             goto Exit;
         }
 
+        // Session -1 is reserved for output stage effects that can only be created
+        // by audio policy manager (running in same process)
+        if (sessionId == -1 && getpid() != IPCThreadState::self()->getCallingPid()) {
+            lStatus = INVALID_OPERATION;
+            goto Exit;
+        }
+
         // return effect descriptor
         memcpy(pDesc, &desc, sizeof(effect_descriptor_t));
 
@@ -4574,7 +4601,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         // output threads.
         // TODO: allow attachment of effect to inputs
         if (output == 0) {
-            if (sessionId == 0) {
+            if (sessionId <= 0) {
                 // default to first output
                 // TODO: define criteria to choose output when not specified. Or
                 // receive output from audio policy manager
@@ -4621,6 +4648,33 @@ Exit:
     return handle;
 }
 
+status_t AudioFlinger::registerEffectResource_l(effect_descriptor_t *desc) {
+    if (mTotalEffectsCpuLoad + desc->cpuLoad > MAX_EFFECTS_CPU_LOAD) {
+        LOGW("registerEffectResource() CPU Load limit exceeded for Fx %s, CPU %f MIPS",
+                desc->name, (float)desc->cpuLoad/10);
+        return INVALID_OPERATION;
+    }
+    if (mTotalEffectsMemory + desc->memoryUsage > MAX_EFFECTS_MEMORY) {
+        LOGW("registerEffectResource() memory limit exceeded for Fx %s, Memory %d KB",
+                desc->name, desc->memoryUsage);
+        return INVALID_OPERATION;
+    }
+    mTotalEffectsCpuLoad += desc->cpuLoad;
+    mTotalEffectsMemory += desc->memoryUsage;
+    LOGV("registerEffectResource_l() effect %s, CPU %d, memory %d",
+            desc->name, desc->cpuLoad, desc->memoryUsage);
+    LOGV("  total CPU %d, total memory %d", mTotalEffectsCpuLoad, mTotalEffectsMemory);
+    return NO_ERROR;
+}
+
+void AudioFlinger::unregisterEffectResource_l(effect_descriptor_t *desc) {
+    mTotalEffectsCpuLoad -= desc->cpuLoad;
+    mTotalEffectsMemory -= desc->memoryUsage;
+    LOGV("unregisterEffectResource_l() effect %s, CPU %d, memory %d",
+            desc->name, desc->cpuLoad, desc->memoryUsage);
+    LOGV("  total CPU %d, total memory %d", mTotalEffectsCpuLoad, mTotalEffectsMemory);
+}
+
 // PlaybackThread::createEffect_l() must be called with AudioFlinger::mLock held
 sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
         const sp<AudioFlinger::Client>& client,
@@ -4638,6 +4692,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
     sp<Track> track;
     sp<EffectChain> chain;
     bool effectCreated = false;
+    bool effectRegistered = false;
 
     if (mOutput == 0) {
         LOGW("createEffect_l() Audio driver not initialized.");
@@ -4680,20 +4735,26 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
         LOGV("createEffect_l() got effect %p on chain %p", effect == 0 ? 0 : effect.get(), chain.get());
 
         if (effect == 0) {
+            // Check CPU and memory usage
+            lStatus = mAudioFlinger->registerEffectResource_l(desc);
+            if (lStatus != NO_ERROR) {
+                goto Exit;
+            }
+            effectRegistered = true;
             // create a new effect module if none present in the chain
-            effectCreated = true;
             effect = new EffectModule(this, chain, desc, mAudioFlinger->nextUniqueId(), sessionId);
             lStatus = effect->status();
             if (lStatus != NO_ERROR) {
                 goto Exit;
             }
-            //TODO: handle CPU load and memory usage here
             lStatus = chain->addEffect(effect);
             if (lStatus != NO_ERROR) {
                 goto Exit;
             }
+            effectCreated = true;
 
             effect->setDevice(mDevice);
+            effect->setMode(mAudioFlinger->getMode());
         }
         // create effect handle and connect it to effect module
         handle = new EffectHandle(effect, client, effectClient, priority);
@@ -4705,10 +4766,13 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
 
 Exit:
     if (lStatus != NO_ERROR && lStatus != ALREADY_EXISTS) {
-        if (chain != 0 && effectCreated) {
+        if (effectCreated) {
             if (chain->removeEffect(effect) == 0) {
                 removeEffectChain_l(chain);
             }
+        }
+        if (effectRegistered) {
+            mAudioFlinger->unregisterEffectResource_l(desc);
         }
         handle.clear();
     }
@@ -4719,21 +4783,37 @@ Exit:
     return handle;
 }
 
+void AudioFlinger::PlaybackThread::disconnectEffect(const sp< EffectModule>& effect,
+                                                    const wp<EffectHandle>& handle) {
+    effect_descriptor_t desc = effect->desc();
+    Mutex::Autolock _l(mLock);
+    // delete the effect module if removing last handle on it
+    if (effect->removeHandle(handle) == 0) {
+        if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
+            detachAuxEffect_l(effect->id());
+        }
+        sp<EffectChain> chain = effect->chain().promote();
+        if (chain != 0) {
+            // remove effect chain if remove last effect
+            if (chain->removeEffect(effect) == 0) {
+                removeEffectChain_l(chain);
+            }
+        }
+        mLock.unlock();
+        mAudioFlinger->mLock.lock();
+        mAudioFlinger->unregisterEffectResource_l(&desc);
+        mAudioFlinger->mLock.unlock();
+    }
+}
+
 status_t AudioFlinger::PlaybackThread::addEffectChain_l(const sp<EffectChain>& chain)
 {
     int session = chain->sessionId();
     int16_t *buffer = mMixBuffer;
+    bool ownsBuffer = false;
 
     LOGV("addEffectChain_l() %p on thread %p for session %d", chain.get(), this, session);
-    if (session == 0) {
-        chain->setInBuffer(buffer, false);
-        chain->setOutBuffer(buffer);
-        // Effect chain for session 0 is inserted at end of effect chains list
-        // to be processed last as it contains output mix effects to apply after
-        // all track specific effects
-        mEffectChains.add(chain);
-    } else {
-        bool ownsBuffer = false;
+    if (session > 0) {
         // Only one effect chain can be present in direct output thread and it uses
         // the mix buffer as input
         if (mType != DIRECT) {
@@ -4743,32 +4823,42 @@ status_t AudioFlinger::PlaybackThread::addEffectChain_l(const sp<EffectChain>& c
             LOGV("addEffectChain_l() creating new input buffer %p session %d", buffer, session);
             ownsBuffer = true;
         }
-        chain->setInBuffer(buffer, ownsBuffer);
-        chain->setOutBuffer(mMixBuffer);
-        // Effect chain for session other than 0 is inserted at beginning of effect
-        // chains list to be processed before output mix effects. Relative order between
-        // sessions other than 0 is not important
-        mEffectChains.insertAt(chain, 0);
-    }
 
-    // Attach all tracks with same session ID to this chain.
-    for (size_t i = 0; i < mTracks.size(); ++i) {
-        sp<Track> track = mTracks[i];
-        if (session == track->sessionId()) {
-            LOGV("addEffectChain_l() track->setMainBuffer track %p buffer %p", track.get(), buffer);
-            track->setMainBuffer(buffer);
+        // Attach all tracks with same session ID to this chain.
+        for (size_t i = 0; i < mTracks.size(); ++i) {
+            sp<Track> track = mTracks[i];
+            if (session == track->sessionId()) {
+                LOGV("addEffectChain_l() track->setMainBuffer track %p buffer %p", track.get(), buffer);
+                track->setMainBuffer(buffer);
+            }
+        }
+
+        // indicate all active tracks in the chain
+        for (size_t i = 0 ; i < mActiveTracks.size() ; ++i) {
+            sp<Track> track = mActiveTracks[i].promote();
+            if (track == 0) continue;
+            if (session == track->sessionId()) {
+                LOGV("addEffectChain_l() activating track %p on session %d", track.get(), session);
+                chain->startTrack();
+            }
         }
     }
 
-    // indicate all active tracks in the chain
-    for (size_t i = 0 ; i < mActiveTracks.size() ; ++i) {
-        sp<Track> track = mActiveTracks[i].promote();
-        if (track == 0) continue;
-        if (session == track->sessionId()) {
-            LOGV("addEffectChain_l() activating track %p on session %d", track.get(), session);
-            chain->startTrack();
-        }
+    chain->setInBuffer(buffer, ownsBuffer);
+    chain->setOutBuffer(mMixBuffer);
+    // Effect chain for session -1 is inserted at end of effect chains list
+    // in order to be processed last as it contains output stage effects
+    // Effect chain for session 0 is inserted before session -1 to be processed
+    // after track specific effects and before output stage
+    // Effect chain for session other than 0 is inserted at beginning of effect
+    // chains list to be processed before output mix effects. Relative order between
+    // sessions other than 0 is not important
+    size_t size = mEffectChains.size();
+    size_t i = 0;
+    for (i = 0; i < size; i++) {
+        if (mEffectChains[i]->sessionId() < session) break;
     }
+    mEffectChains.insertAt(chain, i);
 
     return NO_ERROR;
 }
@@ -4884,7 +4974,8 @@ AudioFlinger::EffectModule::EffectModule(const wp<ThreadBase>& wThread,
     memcpy(&mDescriptor, desc, sizeof(effect_descriptor_t));
 
     // create effect engine from effect factory
-    mStatus = EffectCreate(&desc->uuid, &mEffectInterface);
+    mStatus = EffectCreate(&desc->uuid, sessionId, p->id(), &mEffectInterface);
+
     if (mStatus != NO_ERROR) {
         return;
     }
@@ -4969,22 +5060,11 @@ void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle)
     // keep a strong reference on this EffectModule to avoid calling the
     // destructor before we exit
     sp<EffectModule> keep(this);
-    sp<ThreadBase> thread = mThread.promote();
-    if (thread != 0) {
-        Mutex::Autolock _l(thread->mLock);
-        // delete the effect module if removing last handle on it
-        if (removeHandle(handle) == 0) {
+    {
+        sp<ThreadBase> thread = mThread.promote();
+        if (thread != 0) {
             PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
-            if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-                playbackThread->detachAuxEffect_l(mId);
-            }
-            sp<EffectChain> chain = mChain.promote();
-            if (chain != 0) {
-                // remove effect chain if remove last effect
-                if (chain->removeEffect(keep) == 0) {
-                    playbackThread->removeEffectChain_l(chain);
-                }
-            }
+            playbackThread->disconnectEffect(keep, handle);
         }
     }
 }
@@ -5007,88 +5087,25 @@ void AudioFlinger::EffectModule::process()
 
         // TODO: handle effects with buffer provider
         if (mState != ACTIVE) {
-            uint32_t count = mConfig.inputCfg.buffer.frameCount;
-            int32_t amp = 32767L << 16;
-            int32_t step = amp / count;
-            int16_t *pIn = mConfig.inputCfg.buffer.s16;
-            int16_t *pOut = mConfig.outputCfg.buffer.s16;
-            int inChannels;
-            int outChannels;
-
-            if (mConfig.inputCfg.channels == CHANNEL_MONO) {
-                inChannels = 1;
-            } else {
-                inChannels = 2;
-            }
-            if (mConfig.outputCfg.channels == CHANNEL_MONO) {
-                outChannels = 1;
-            } else {
-                outChannels = 2;
-            }
-
             switch (mState) {
             case RESET:
                 reset();
+                mState = STARTING;
                 // clear auxiliary effect input buffer for next accumulation
                 if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
                     memset(mConfig.inputCfg.buffer.raw, 0, mConfig.inputCfg.buffer.frameCount*sizeof(int32_t));
                 }
-                step = -step;
-                mState = STARTING;
-                break;
+                return;
             case STARTING:
                 start();
-                amp = 0;
-                pOut = mConfig.inputCfg.buffer.s16;
-                outChannels = inChannels;
                 mState = ACTIVE;
                 break;
             case STOPPING:
-                step = -step;
-                pOut = mConfig.inputCfg.buffer.s16;
-                outChannels = inChannels;
                 mState = STOPPED;
                 break;
             case STOPPED:
                 stop();
-                amp = 0;
                 mState = IDLE;
-                break;
-            }
-
-            // ramp volume down or up before activating or deactivating the effect
-            if (inChannels == 1) {
-                if (outChannels == 1) {
-                    while (count--) {
-                        *pOut++ = (int16_t)(((int32_t)*pIn++ * (amp >> 16)) >> 15);
-                        amp += step;
-                    }
-                } else {
-                    while (count--) {
-                        int32_t smp = (int16_t)(((int32_t)*pIn++ * (amp >> 16)) >> 15);
-                        *pOut++ = smp;
-                        *pOut++ = smp;
-                        amp += step;
-                    }
-                }
-            } else {
-                if (outChannels == 1) {
-                    while (count--) {
-                        int32_t smp = (((int32_t)*pIn * (amp >> 16)) >> 16) +
-                                      (((int32_t)*(pIn + 1) * (amp >> 16)) >> 16);
-                        pIn += 2;
-                        *pOut++ = (int16_t)smp;
-                        amp += step;
-                    }
-                } else {
-                    while (count--) {
-                        *pOut++ = (int16_t)((int32_t)*pIn++ * (amp >> 16)) >> 15;
-                        *pOut++ = (int16_t)((int32_t)*pIn++ * (amp >> 16)) >> 15;
-                         amp += step;
-                    }
-                }
-            }
-            if (mState == STARTING || mState == IDLE) {
                 return;
             }
         }
@@ -5148,8 +5165,8 @@ status_t AudioFlinger::EffectModule::configure()
         mConfig.inputCfg.channels = channels;
     }
     mConfig.outputCfg.channels = channels;
-    mConfig.inputCfg.format = PCM_FORMAT_S15;
-    mConfig.outputCfg.format = PCM_FORMAT_S15;
+    mConfig.inputCfg.format = SAMPLE_FORMAT_PCM_S15;
+    mConfig.outputCfg.format = SAMPLE_FORMAT_PCM_S15;
     mConfig.inputCfg.samplingRate = thread->sampleRate();
     mConfig.outputCfg.samplingRate = mConfig.inputCfg.samplingRate;
     mConfig.inputCfg.bufferProvider.cookie = NULL;
@@ -5160,7 +5177,7 @@ status_t AudioFlinger::EffectModule::configure()
     mConfig.outputCfg.bufferProvider.releaseBuffer = NULL;
     mConfig.inputCfg.accessMode = EFFECT_BUFFER_ACCESS_READ;
     // Insert effect:
-    // - in session 0, always overwrites output buffer: input buffer == output buffer
+    // - in session 0 or -1, always overwrites output buffer: input buffer == output buffer
     // - in other sessions:
     //      last effect in the chain accumulates in output buffer: input buffer != output buffer
     //      other effect: overwrites output buffer: input buffer == output buffer
@@ -5331,7 +5348,12 @@ status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, 
 status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
 {
     status_t status = NO_ERROR;
-    if ((mDescriptor.flags & EFFECT_FLAG_DEVICE_MASK) == EFFECT_FLAG_DEVICE_MASK) {
+    if ((mDescriptor.flags & EFFECT_FLAG_DEVICE_MASK) == EFFECT_FLAG_DEVICE_IND) {
+        // convert device bit field from AudioSystem to EffectApi format.
+        device = deviceAudioSystemToEffectApi(device);
+        if (device == 0) {
+            return BAD_VALUE;
+        }
         status_t cmdStatus;
         int size = sizeof(status_t);
         status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_SET_DEVICE, sizeof(uint32_t), &device, &size, &cmdStatus);
@@ -5342,6 +5364,70 @@ status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
     return status;
 }
 
+status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
+{
+    status_t status = NO_ERROR;
+    if ((mDescriptor.flags & EFFECT_FLAG_AUDIO_MODE_MASK) == EFFECT_FLAG_AUDIO_MODE_IND) {
+        // convert audio mode from AudioSystem to EffectApi format.
+        int effectMode = modeAudioSystemToEffectApi(mode);
+        if (effectMode < 0) {
+            return BAD_VALUE;
+        }
+        status_t cmdStatus;
+        int size = sizeof(status_t);
+        status = (*mEffectInterface)->command(mEffectInterface, EFFECT_CMD_SET_AUDIO_MODE, sizeof(int), &effectMode, &size, &cmdStatus);
+        if (status == NO_ERROR) {
+            status = cmdStatus;
+        }
+    }
+    return status;
+}
+
+// update this table when AudioSystem::audio_devices or audio_device_e (in EffectApi.h) are modified
+const uint32_t AudioFlinger::EffectModule::sDeviceConvTable[] = {
+    DEVICE_EARPIECE, // AudioSystem::DEVICE_OUT_EARPIECE
+    DEVICE_SPEAKER, // AudioSystem::DEVICE_OUT_SPEAKER
+    DEVICE_WIRED_HEADSET, // case AudioSystem::DEVICE_OUT_WIRED_HEADSET
+    DEVICE_WIRED_HEADPHONE, // AudioSystem::DEVICE_OUT_WIRED_HEADPHONE
+    DEVICE_BLUETOOTH_SCO, // AudioSystem::DEVICE_OUT_BLUETOOTH_SCO
+    DEVICE_BLUETOOTH_SCO_HEADSET, // AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET
+    DEVICE_BLUETOOTH_SCO_CARKIT, //  AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT
+    DEVICE_BLUETOOTH_A2DP, //  AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP
+    DEVICE_BLUETOOTH_A2DP_HEADPHONES, // AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES
+    DEVICE_BLUETOOTH_A2DP_SPEAKER, // AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER
+    DEVICE_AUX_DIGITAL // AudioSystem::DEVICE_OUT_AUX_DIGITAL
+};
+
+uint32_t AudioFlinger::EffectModule::deviceAudioSystemToEffectApi(uint32_t device)
+{
+    uint32_t deviceOut = 0;
+    while (device) {
+        const uint32_t i = 31 - __builtin_clz(device);
+        device &= ~(1 << i);
+        if (i >= sizeof(sDeviceConvTable)/sizeof(uint32_t)) {
+            LOGE("device convertion error for AudioSystem device 0x%08x", device);
+            return 0;
+        }
+        deviceOut |= (uint32_t)sDeviceConvTable[i];
+    }
+    return deviceOut;
+}
+
+// update this table when AudioSystem::audio_mode or audio_mode_e (in EffectApi.h) are modified
+const uint32_t AudioFlinger::EffectModule::sModeConvTable[] = {
+    AUDIO_MODE_NORMAL,   // AudioSystem::MODE_NORMAL
+    AUDIO_MODE_RINGTONE, // AudioSystem::MODE_RINGTONE
+    AUDIO_MODE_IN_CALL   // AudioSystem::MODE_IN_CALL
+};
+
+int AudioFlinger::EffectModule::modeAudioSystemToEffectApi(uint32_t mode)
+{
+    int modeOut = -1;
+    if (mode < sizeof(sModeConvTable) / sizeof(uint32_t)) {
+        modeOut = (int)sModeConvTable[mode];
+    }
+    return modeOut;
+}
 
 status_t AudioFlinger::EffectModule::dump(int fd, const Vector<String16>& args)
 {
@@ -5525,7 +5611,16 @@ status_t AudioFlinger::EffectHandle::command(int cmdCode, int cmdSize, void *pCm
             int rsize = sizeof(int);
             int *p = (int *)(mBuffer + mCblk->serverIndex);
             int size = *p++;
+            if (((uint8_t *)p + size) > mBuffer + mCblk->clientIndex) {
+                LOGW("command(): invalid parameter block size");
+                break;
+            }
             effect_param_t *param = (effect_param_t *)p;
+            if (param->psize == 0 || param->vsize == 0) {
+                LOGW("command(): null parameter or value size");
+                mCblk->serverIndex += size;
+                continue;
+            }
             int psize = sizeof(effect_param_t) + ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
             status_t ret = mEffect->command(EFFECT_CMD_SET_PARAM, psize, p, &rsize, &reply);
             if (ret == NO_ERROR) {
@@ -5659,7 +5754,7 @@ void AudioFlinger::EffectChain::process_l()
     }
     // if no track is active, input buffer must be cleared here as the mixer process
     // will not do it
-    if (mSessionId != 0 && activeTracks() == 0) {
+    if (mSessionId > 0 && activeTracks() == 0) {
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
             size_t numSamples = thread->frameCount() * thread->channelCount();
@@ -5697,15 +5792,16 @@ status_t AudioFlinger::EffectChain::addEffect(sp<EffectModule>& effect)
     } else {
         // Insert effects are inserted at the end of mEffects vector as they are processed
         //  after track and auxiliary effects.
-        // Insert effect order:
-        //  if EFFECT_FLAG_INSERT_FIRST or EFFECT_FLAG_INSERT_EXCLUSIVE insert as first insert effect
+        // Insert effect order as a function of indicated preference:
+        //  if EFFECT_FLAG_INSERT_EXCLUSIVE, insert in first position or reject if
+        //  another effect is present
+        //  else if EFFECT_FLAG_INSERT_FIRST, insert in first position or after the
+        //  last effect claiming first position
+        //  else if EFFECT_FLAG_INSERT_LAST, insert in last position or before the
+        //  first effect claiming last position
         //  else if EFFECT_FLAG_INSERT_ANY insert after first or before last
-        //  else insert as last insert effect
-        // Reject insertion if:
-        //  - EFFECT_FLAG_INSERT_EXCLUSIVE and another effect is present
-        //  - an effect with EFFECT_FLAG_INSERT_EXCLUSIVE is present
-        //  - EFFECT_FLAG_INSERT_FIRST or EFFECT_FLAG_INSERT_LAST and an effect with same
-        //  preference is present
+        // Reject insertion if an effect with EFFECT_FLAG_INSERT_EXCLUSIVE is
+        // already present
 
         int size = (int)mEffects.size();
         int idx_insert = size;
@@ -5719,35 +5815,40 @@ status_t AudioFlinger::EffectChain::addEffect(sp<EffectModule>& effect)
             if (iMode == EFFECT_FLAG_TYPE_INSERT) {
                 // check invalid effect chaining combinations
                 if (insertPref == EFFECT_FLAG_INSERT_EXCLUSIVE ||
-                    iPref == EFFECT_FLAG_INSERT_EXCLUSIVE ||
-                    (insertPref != EFFECT_FLAG_INSERT_ANY
-                                && insertPref == iPref)) {
+                    iPref == EFFECT_FLAG_INSERT_EXCLUSIVE) {
+                    LOGW("addEffect() could not insert effect %s: exclusive conflict with %s", desc.name, d.name);
                     return INVALID_OPERATION;
                 }
-                // remember position of first insert effect
+                // remember position of first insert effect and by default
+                // select this as insert position for new effect
                 if (idx_insert == size) {
                     idx_insert = i;
                 }
-                // remember position of insert effect claiming
-                // first place
+                // remember position of last insert effect claiming
+                // first position
                 if (iPref == EFFECT_FLAG_INSERT_FIRST) {
                     idx_insert_first = i;
                 }
-                // remember position of insert effect claiming
-                // last place
-                if (iPref == EFFECT_FLAG_INSERT_LAST) {
+                // remember position of first insert effect claiming
+                // last position
+                if (iPref == EFFECT_FLAG_INSERT_LAST &&
+                    idx_insert_last == -1) {
                     idx_insert_last = i;
                 }
             }
         }
 
-        // modify idx_insert from first place if needed
-        if (idx_insert_first != -1) {
-            idx_insert = idx_insert_first + 1;
-        } else if (idx_insert_last != -1) {
-            idx_insert = idx_insert_last;
-        } else if (insertPref == EFFECT_FLAG_INSERT_LAST) {
-            idx_insert = size;
+        // modify idx_insert from first position if needed
+        if (insertPref == EFFECT_FLAG_INSERT_LAST) {
+            if (idx_insert_last != -1) {
+                idx_insert = idx_insert_last;
+            } else {
+                idx_insert = size;
+            }
+        } else {
+            if (idx_insert_first != -1) {
+                idx_insert = idx_insert_first + 1;
+            }
         }
 
         // always read samples from chain input buffer
@@ -5764,14 +5865,14 @@ status_t AudioFlinger::EffectChain::addEffect(sp<EffectModule>& effect)
         } else {
             effect->setOutBuffer(mInBuffer);
         }
-        status_t status = mEffects.insertAt(effect, idx_insert);
+        mEffects.insertAt(effect, idx_insert);
         // Always give volume control to last effect in chain with volume control capability
         if (((desc.flags & EFFECT_FLAG_VOLUME_MASK) & EFFECT_FLAG_VOLUME_CTRL) &&
                 mVolumeCtrlIdx < idx_insert) {
             mVolumeCtrlIdx = idx_insert;
         }
 
-        LOGV("addEffect() effect %p, added in chain %p at rank %d status %d", effect.get(), this, idx_insert, status);
+        LOGV("addEffect() effect %p, added in chain %p at rank %d", effect.get(), this, idx_insert);
     }
     effect->configure();
     return NO_ERROR;
@@ -5820,6 +5921,14 @@ void AudioFlinger::EffectChain::setDevice(uint32_t device)
     size_t size = mEffects.size();
     for (size_t i = 0; i < size; i++) {
         mEffects[i]->setDevice(device);
+    }
+}
+
+void AudioFlinger::EffectChain::setMode(uint32_t mode)
+{
+    size_t size = mEffects.size();
+    for (size_t i = 0; i < size; i++) {
+        mEffects[i]->setMode(mode);
     }
 }
 
