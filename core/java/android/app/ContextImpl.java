@@ -53,7 +53,6 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageParser.Package;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -85,11 +84,9 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.StatFs;
 import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
 import android.util.AndroidRuntimeException;
@@ -208,7 +205,7 @@ class ContextImpl extends Context {
     private File mCacheDir;
     private File mExternalFilesDir;
     private File mExternalCacheDir;
-    
+
     private static long sInstanceCount = 0;
 
     private static final String[] EMPTY_FILE_LIST = {};
@@ -260,18 +257,18 @@ class ContextImpl extends Context {
     public Looper getMainLooper() {
         return mMainThread.getLooper();
     }
-    
+
     @Override
     public Context getApplicationContext() {
         return (mPackageInfo != null) ?
                 mPackageInfo.getApplication() : mMainThread.getApplication();
     }
-    
+
     @Override
     public void setTheme(int resid) {
         mThemeResource = resid;
     }
-    
+
     @Override
     public Resources.Theme getTheme() {
         if (mTheme == null) {
@@ -321,7 +318,7 @@ class ContextImpl extends Context {
         }
         throw new RuntimeException("Not supported in system context");
     }
-    
+
     private static File makeBackupFile(File prefsFile) {
         return new File(prefsFile.getPath() + ".bak");
     }
@@ -341,7 +338,7 @@ class ContextImpl extends Context {
                 return sp;
             }
         }
-        
+
         FileInputStream str = null;
         File backup = makeBackupFile(f);
         if (backup.exists()) {
@@ -353,7 +350,7 @@ class ContextImpl extends Context {
         if (f.exists() && !f.canRead()) {
             Log.w(TAG, "Attempt to read preferences file " + f + " without permission");
         }
-        
+
         Map map = null;
         if (f.exists() && f.canRead()) {
             try {
@@ -437,7 +434,7 @@ class ContextImpl extends Context {
             }
             if (!mFilesDir.exists()) {
                 if(!mFilesDir.mkdirs()) {
-                    Log.w(TAG, "Unable to create files directory");
+                    Log.w(TAG, "Unable to create files directory " + mFilesDir.getPath());
                     return null;
                 }
                 FileUtils.setPermissions(
@@ -448,7 +445,7 @@ class ContextImpl extends Context {
             return mFilesDir;
         }
     }
-    
+
     @Override
     public File getExternalFilesDir(String type) {
         synchronized (mSync) {
@@ -480,7 +477,7 @@ class ContextImpl extends Context {
             return dir;
         }
     }
-    
+
     @Override
     public File getCacheDir() {
         synchronized (mSync) {
@@ -500,7 +497,7 @@ class ContextImpl extends Context {
         }
         return mCacheDir;
     }
-    
+
     @Override
     public File getExternalCacheDir() {
         synchronized (mSync) {
@@ -522,7 +519,7 @@ class ContextImpl extends Context {
             return mExternalCacheDir;
         }
     }
-    
+
     @Override
     public File getFileStreamPath(String name) {
         return makeFilename(getFilesDir(), name);
@@ -563,7 +560,7 @@ class ContextImpl extends Context {
         return (list != null) ? list : EMPTY_FILE_LIST;
     }
 
-    
+
     private File getDatabasesDir() {
         synchronized (mSync) {
             if (mDatabasesDir == null) {
@@ -575,7 +572,7 @@ class ContextImpl extends Context {
             return mDatabasesDir;
         }
     }
-    
+
     @Override
     public Drawable getWallpaper() {
         return getWallpaperManager().getDrawable();
@@ -643,7 +640,7 @@ class ContextImpl extends Context {
         } catch (RemoteException e) {
         }
     }
-    
+
     @Override
     public void sendBroadcast(Intent intent) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -1541,15 +1538,15 @@ class ContextImpl extends Context {
     final void setActivityToken(IBinder token) {
         mActivityToken = token;
     }
-    
+
     final void setOuterContext(Context context) {
         mOuterContext = context;
     }
-    
+
     final Context getOuterContext() {
         return mOuterContext;
     }
-    
+
     final IBinder getActivityToken() {
         return mActivityToken;
     }
@@ -1626,7 +1623,7 @@ class ContextImpl extends Context {
         {
             return mMainThread.releaseProvider(provider);
         }
-        
+
         private final ActivityThread mMainThread;
     }
 
@@ -1659,7 +1656,7 @@ class ContextImpl extends Context {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
-        
+
         @Override
         public String[] canonicalToCurrentPackageNames(String[] names) {
             try {
@@ -1668,7 +1665,7 @@ class ContextImpl extends Context {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
-        
+
         @Override
         public Intent getLaunchIntentForPackage(String packageName) {
             // First see if the package has an INFO activity; the existence of
@@ -1842,7 +1839,7 @@ class ContextImpl extends Context {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
-        
+
         @Override
         public boolean hasSystemFeature(String name) {
             try {
@@ -1851,7 +1848,7 @@ class ContextImpl extends Context {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
-        
+
         @Override
         public int checkPermission(String permName, String pkgName) {
             try {
@@ -1923,9 +1920,9 @@ class ContextImpl extends Context {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
-        
+
         @Override
-        public int getUidForSharedUser(String sharedUserName) 
+        public int getUidForSharedUser(String sharedUserName)
                 throws NameNotFoundException {
             try {
                 int uid = mPM.getUidForSharedUser(sharedUserName);
@@ -2296,7 +2293,7 @@ class ContextImpl extends Context {
                 }
             }
         }
-        
+
         private static final class ResourceName {
             final String packageName;
             final int iconId;
@@ -2468,7 +2465,7 @@ class ContextImpl extends Context {
             }
         }
         @Override
-        public void clearApplicationUserData(String packageName, 
+        public void clearApplicationUserData(String packageName,
                 IPackageDataObserver observer) {
             try {
                 mPM.clearApplicationUserData(packageName, observer);
@@ -2477,7 +2474,7 @@ class ContextImpl extends Context {
             }
         }
         @Override
-        public void deleteApplicationCacheFiles(String packageName, 
+        public void deleteApplicationCacheFiles(String packageName,
                 IPackageDataObserver observer) {
             try {
                 mPM.deleteApplicationCacheFiles(packageName, observer);
@@ -2502,9 +2499,9 @@ class ContextImpl extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
-        public void getPackageSizeInfo(String packageName, 
+        public void getPackageSizeInfo(String packageName,
                 IPackageStatsObserver observer) {
             try {
                 mPM.getPackageSizeInfo(packageName, observer);
@@ -2549,7 +2546,7 @@ class ContextImpl extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
         public void replacePreferredActivity(IntentFilter filter,
                 int match, ComponentName[] set, ComponentName activity) {
@@ -2568,7 +2565,7 @@ class ContextImpl extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
         public int getPreferredActivities(List<IntentFilter> outFilters,
                 List<ComponentName> outActivities, String packageName) {
@@ -2579,7 +2576,7 @@ class ContextImpl extends Context {
             }
             return 0;
         }
-        
+
         @Override
         public void setComponentEnabledSetting(ComponentName componentName,
                 int newState, int flags) {
@@ -2609,7 +2606,7 @@ class ContextImpl extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
         public int getApplicationEnabledSetting(String packageName) {
             try {
@@ -2666,7 +2663,7 @@ class ContextImpl extends Context {
                 return mTimestamp != mFileStatus.mtime;
             }
         }
-        
+
         public void replace(Map newContents) {
             if (newContents != null) {
                 synchronized (this) {
@@ -2674,7 +2671,7 @@ class ContextImpl extends Context {
                 }
             }
         }
-        
+
         public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
             synchronized(this) {
                 mListeners.put(listener, mContent);
@@ -2840,7 +2837,7 @@ class ContextImpl extends Context {
         public Editor edit() {
             return new EditorImpl();
         }
-        
+
         private FileOutputStream createFileOutputStream(File file) {
             FileOutputStream str = null;
             try {
@@ -2877,7 +2874,7 @@ class ContextImpl extends Context {
                     mFile.delete();
                 }
             }
-            
+
             // Attempt to write the file, delete the backup and return true as atomically as
             // possible.  If any exception occurs, delete the new file; next time we will restore
             // from the backup.
@@ -2892,7 +2889,7 @@ class ContextImpl extends Context {
                 if (FileUtils.getFileStatus(mFile.getPath(), mFileStatus)) {
                     mTimestamp = mFileStatus.mtime;
                 }
-                
+
                 // Writing was successful, delete the backup file if there is one.
                 mBackupFile.delete();
                 return true;
