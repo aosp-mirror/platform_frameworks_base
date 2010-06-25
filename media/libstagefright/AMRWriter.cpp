@@ -253,7 +253,7 @@ void AMRWriter::threadFunc() {
     }
 
     if (stoppedPrematurely) {
-        notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_STOP_PREMATURELY, 0);
+        notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_COMPLETION_STATUS, UNKNOWN_ERROR);
     }
 
     fflush(mFile);
