@@ -81,8 +81,11 @@ private:
     int32_t mSampleRate;
     int32_t mInterleaveDurationUs;
     int32_t mIFramesInterval;
+    int32_t mCameraId;
     int64_t mMaxFileSizeBytes;
     int64_t mMaxFileDurationUs;
+    int32_t mTrackEveryNumberOfFrames;
+    int64_t mTrackEveryTimeDurationUs;
 
     String8 mParams;
     int mOutputFd;
@@ -95,12 +98,15 @@ private:
     status_t startAACRecording();
     sp<MediaSource> createAudioSource();
     status_t setParameter(const String8 &key, const String8 &value);
-    status_t setParamVideoEncodingBitRate(int32_t bitRate);
     status_t setParamAudioEncodingBitRate(int32_t bitRate);
     status_t setParamAudioNumberOfChannels(int32_t channles);
     status_t setParamAudioSamplingRate(int32_t sampleRate);
+    status_t setParamVideoEncodingBitRate(int32_t bitRate);
+    status_t setParamVideoIFramesInterval(int32_t interval);
+    status_t setParamVideoCameraId(int32_t cameraId);
+    status_t setParamTrackTimeStatus(int64_t timeDurationUs);
+    status_t setParamTrackFrameStatus(int32_t nFrames);
     status_t setParamInterleaveDuration(int32_t durationUs);
-    status_t setParamIFramesInterval(int32_t interval);
     status_t setParam64BitFileOffset(bool use64BitFileOffset);
     status_t setParamMaxDurationOrFileSize(int64_t limit, bool limit_is_duration);
     void clipVideoBitRate();
