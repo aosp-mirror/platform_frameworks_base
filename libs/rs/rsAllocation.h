@@ -78,6 +78,9 @@ public:
 
     virtual void uploadCheck(const Context *rsc);
 
+    bool getIsTexture() const {return mIsTexture;}
+    bool getIsBufferObject() const {return mIsVertexBuffer;}
+
 protected:
     void sendDirty() const;
 
