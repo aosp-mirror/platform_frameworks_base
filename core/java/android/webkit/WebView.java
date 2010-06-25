@@ -3970,7 +3970,9 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        if (visibility != View.VISIBLE) {
+        // The zoomManager may be null if the webview is created from XML that
+        // specifies the view's visibility param as not visible (see http://b/2794841)
+        if (visibility != View.VISIBLE && mZoomManager != null) {
             mZoomManager.dismissZoomPicker();
         }
     }
