@@ -1919,6 +1919,9 @@
          combined with setIcon(android.R.drawable.ic_dialog_alert) -->
     <string name="dialog_alert_title">Attention</string>
 
+    <!-- Text shown by list fragment when waiting for data to display. -->
+    <string name="loading">Loading...</string>
+    
     <!-- Default text for a button that can be toggled on and off. -->
     <string name="capital_on">ON</string>
     <!-- Default text for a button that can be toggled on and off. -->
