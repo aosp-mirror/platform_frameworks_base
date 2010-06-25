@@ -30,14 +30,15 @@
 
 #include "clz.h"
 #include "DisplayHardware/DisplayHardware.h"
+#include "GLExtensions.h"
 #include "TextureManager.h"
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
-TextureManager::TextureManager(uint32_t flags)
-    : mFlags(flags)
+TextureManager::TextureManager()
+    : mGLExtensions(GLExtensions::getInstance())
 {
 }
 
@@ -85,9 +86,11 @@ status_t TextureManager::initTexture(Image* pImage, int32_t format)
 
     GLenum target = GL_TEXTURE_2D;
 #if defined(GL_OES_texture_external)
-    if (format && isSupportedYuvFormat(format)) {
-        target = GL_TEXTURE_EXTERNAL_OES;
-        pImage->target = Texture::TEXTURE_EXTERNAL;
+    if (GLExtensions::getInstance().haveTextureExternal()) {
+        if (format && isSupportedYuvFormat(format)) {
+            target = GL_TEXTURE_EXTERNAL_OES;
+            pImage->target = Texture::TEXTURE_EXTERNAL;
+        }
     }
 #endif
 
@@ -208,7 +211,7 @@ status_t TextureManager::loadTexture(Texture* texture,
     /*
      * round to POT if needed
      */
-    if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
+    if (!mGLExtensions.haveNpot()) {
         texture->NPOTAdjust = true;
     }
 
@@ -294,14 +297,19 @@ status_t TextureManager::loadTexture(Texture* texture,
 void TextureManager::activateTexture(const Texture& texture, bool filter)
 {
     const GLenum target = getTextureTarget(&texture);
-
-    glBindTexture(target, texture.name);
-    glEnable(target);
-
+    if (target == Texture::TEXTURE_2D) {
+        glBindTexture(GL_TEXTURE_2D, texture.name);
+        glEnable(GL_TEXTURE_2D);
 #if defined(GL_OES_texture_external)
-    if (texture.target == Texture::TEXTURE_2D) {
-        glDisable(GL_TEXTURE_EXTERNAL_OES);
-    } else {
+        if (GLExtensions::getInstance().haveTextureExternal()) {
+            glDisable(GL_TEXTURE_EXTERNAL_OES);
+        }
+#endif
+    }
+#if defined(GL_OES_texture_external)
+    else {
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture.name);
+        glEnable(GL_TEXTURE_EXTERNAL_OES);
         glDisable(GL_TEXTURE_2D);
     }
 #endif
@@ -319,7 +327,9 @@ void TextureManager::deactivateTextures()
 {
     glDisable(GL_TEXTURE_2D);
 #if defined(GL_OES_texture_external)
-    glDisable(GL_TEXTURE_EXTERNAL_OES);
+    if (GLExtensions::getInstance().haveTextureExternal()) {
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+    }
 #endif
 }
 
