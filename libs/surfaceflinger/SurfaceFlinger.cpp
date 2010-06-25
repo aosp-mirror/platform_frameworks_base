@@ -44,6 +44,7 @@
 #include <GLES/gl.h>
 
 #include "clz.h"
+#include "GLExtensions.h"
 #include "Layer.h"
 #include "LayerBlur.h"
 #include "LayerBuffer.h"
@@ -993,7 +994,9 @@ void SurfaceFlinger::drawWormhole() const
         glTexCoordPointer(2, GL_SHORT, 0, tcoords);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 #if defined(GL_OES_texture_external)
-        glDisable(GL_TEXTURE_EXTERNAL_OES);
+        if (GLExtensions::getInstance().haveTextureExternal()) {
+            glDisable(GL_TEXTURE_EXTERNAL_OES);
+        }
 #endif
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mWormholeTexName);
