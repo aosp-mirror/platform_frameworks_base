@@ -47,7 +47,6 @@ class LayerBuffer : public LayerBaseClient
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual void destroy() { }
-        SurfaceFlinger* getFlinger() const { return mLayer.mFlinger.get(); }
     protected:
         LayerBuffer& mLayer;
     };

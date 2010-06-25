@@ -147,9 +147,7 @@ void LayerBlur::onDraw(const Region& clip) const
     Region::const_iterator const end = clip.end();
     if (it != end) {
 #if defined(GL_OES_texture_external)
-        if (GLExtensions::getInstance().haveTextureExternal()) {
-            glDisable(GL_TEXTURE_EXTERNAL_OES);
-        }
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
 #endif
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mTextureName);
@@ -183,7 +181,7 @@ void LayerBlur::onDraw(const Region& clip) const
             bl.data = (GGLubyte*)pixels;            
             blurFilter(&bl, 8, 2);
 
-            if (GLExtensions::getInstance().haveNpot()) {
+            if (mFlags & (DisplayHardware::NPOT_EXTENSION)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, mReadFormat, w, h, 0,
                         mReadFormat, mReadType, pixels);
                 mWidthScale  = 1.0f / w;
