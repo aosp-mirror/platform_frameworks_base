@@ -123,6 +123,8 @@ public class RenderScript {
     native void nFileA3DGetIndexEntries(int fileA3D, int numEntries, int[] IDs, String[] names);
     native int  nFileA3DGetEntryByIndex(int fileA3D, int index);
 
+    native int  nFontCreateFromFile(String fileName, int size, int dpi);
+
     native void nAdapter1DBindAllocation(int ad, int alloc);
     native void nAdapter1DSetConstraint(int ad, int dim, int value);
     native void nAdapter1DData(int ad, int[] d);

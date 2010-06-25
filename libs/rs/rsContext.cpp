@@ -133,6 +133,7 @@ uint32_t Context::runScript(Script *s)
     ObjectBaseRef<ProgramVertex> vtx(mVertex);
     ObjectBaseRef<ProgramStore> store(mFragmentStore);
     ObjectBaseRef<ProgramRaster> raster(mRaster);
+    ObjectBaseRef<Font> font(mFont);
 
     uint32_t ret = s->run(this);
 
@@ -140,6 +141,7 @@ uint32_t Context::runScript(Script *s)
     mVertex.set(vtx);
     mFragmentStore.set(store);
     mRaster.set(raster);
+    mFont.set(font);
     return ret;
 }
 
@@ -290,6 +292,8 @@ void * Context::threadProc(void *vrsc)
          rsc->setFragment(NULL);
          rsc->mStateFragmentStore.init(rsc);
          rsc->setFragmentStore(NULL);
+         rsc->mStateFont.init(rsc);
+         rsc->setFont(NULL);
          rsc->mStateVertexArray.init(rsc);
      }
 
@@ -328,11 +332,13 @@ void * Context::threadProc(void *vrsc)
          rsc->mFragment.clear();
          rsc->mVertex.clear();
          rsc->mFragmentStore.clear();
+         rsc->mFont.clear();
          rsc->mRootScript.clear();
          rsc->mStateRaster.deinit(rsc);
          rsc->mStateVertex.deinit(rsc);
          rsc->mStateFragment.deinit(rsc);
          rsc->mStateFragmentStore.deinit(rsc);
+         rsc->mStateFont.deinit(rsc);
      }
      ObjectBase::zeroAllUserRef(rsc);
 
@@ -597,6 +603,16 @@ void Context::setVertex(ProgramVertex *pv)
     }
 }
 
+void Context::setFont(Font *f)
+{
+    rsAssert(mIsGraphicsContext);
+    if (f == NULL) {
+        mFont.set(mStateFont.mDefault);
+    } else {
+        mFont.set(f);
+    }
+}
+
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
 {
     rsAssert(!obj->getName());
@@ -806,6 +822,13 @@ void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv)
     ProgramVertex *pv = static_cast<ProgramVertex *>(vpv);
     rsc->setVertex(pv);
 }
+
+void rsi_ContextBindFont(Context *rsc, RsFont vfont)
+{
+    Font *font = static_cast<Font *>(vfont);
+    rsc->setFont(font);
+}
+
 
 void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
 {

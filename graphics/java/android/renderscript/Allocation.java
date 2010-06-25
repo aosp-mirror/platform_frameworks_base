@@ -386,6 +386,21 @@ public class Allocation extends BaseObj {
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
         return createFromBitmapBoxed(rs, b, dstFmt, genMips);
     }
+
+    static public Allocation createFromString(RenderScript rs, String str)
+        throws IllegalArgumentException {
+        byte[] allocArray = null;
+        try {
+            allocArray = str.getBytes("UTF-8");
+            Allocation alloc = Allocation.createSized(rs, Element.U8(rs), allocArray.length);
+            alloc.data(allocArray);
+            return alloc;
+        }
+        catch (Exception e) {
+            Log.e("rs", "could not convert string to utf-8");
+        }
+        return null;
+    }
 }
 
 

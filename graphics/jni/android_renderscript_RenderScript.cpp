@@ -764,6 +764,19 @@ nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, jint fileA3D, jint index)
 
 // -----------------------------------
 
+static int
+nFontCreateFromFile(JNIEnv *_env, jobject _this, jstring fileName, jint fontSize, jint dpi)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* fileNameUTF = _env->GetStringUTFChars(fileName, NULL);
+
+    jint id = (jint)rsFontCreateFromFile(con, fileNameUTF, fontSize, dpi);
+    return id;
+}
+
+
+// -----------------------------------
+
 static void
 nAdapter1DBindAllocation(JNIEnv *_env, jobject _this, jint adapter, jint alloc)
 {
@@ -1395,6 +1408,12 @@ static JNINativeMethod methods[] = {
 {"nContextDeinitToClient",         "()V",                                  (void*)nContextDeinitToClient },
 
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
+{"nFileA3DCreateFromAssetStream", "(I)I",                                 (void*)nFileA3DCreateFromAssetStream },
+{"nFileA3DGetNumIndexEntries",     "(I)I",                                 (void*)nFileA3DGetNumIndexEntries },
+{"nFileA3DGetIndexEntries",        "(II[I[Ljava/lang/String;)V",          (void*)nFileA3DGetIndexEntries },
+{"nFileA3DGetEntryByIndex",        "(II)I",                                (void*)nFileA3DGetEntryByIndex },
+
+{"nFontCreateFromFile",           "(Ljava/lang/String;II)I",             (void*)nFontCreateFromFile },
 
 {"nElementCreate",                 "(IIZI)I",                              (void*)nElementCreate },
 {"nElementCreate2",                "([I[Ljava/lang/String;)I",             (void*)nElementCreate2 },
@@ -1493,11 +1512,6 @@ static JNINativeMethod methods[] = {
 {"nSimpleMeshCreate",              "(II[II)I",                             (void*)nSimpleMeshCreate },
 {"nSimpleMeshBindVertex",          "(III)V",                               (void*)nSimpleMeshBindVertex },
 {"nSimpleMeshBindIndex",           "(II)V",                                (void*)nSimpleMeshBindIndex },
-
-{"nFileA3DCreateFromAssetStream", "(I)I",                                 (void*)nFileA3DCreateFromAssetStream },
-{"nFileA3DGetNumIndexEntries",     "(I)I",                                 (void*)nFileA3DGetNumIndexEntries },
-{"nFileA3DGetIndexEntries",        "(II[I[Ljava/lang/String;)V",          (void*)nFileA3DGetIndexEntries },
-{"nFileA3DGetEntryByIndex",        "(II)I",                                (void*)nFileA3DGetEntryByIndex },
 
 };
 

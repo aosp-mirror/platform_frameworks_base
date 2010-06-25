@@ -86,7 +86,6 @@ public class ModelViewerView extends RSSurfaceView {
             ret = false;
         }
 
-        Log.v("rs", "Values " + (int)ev.getX() + " " + (int)ev.getY());
         mRender.touchEvent((int)ev.getX(), (int)ev.getY());
         return ret;
     }

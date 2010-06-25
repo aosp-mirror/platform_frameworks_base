@@ -35,6 +35,7 @@ typedef void * RsContext;
 typedef void * RsDevice;
 typedef void * RsElement;
 typedef void * RsFile;
+typedef void * RsFont;
 typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsSimpleMesh;

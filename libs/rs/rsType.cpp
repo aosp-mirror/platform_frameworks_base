@@ -89,7 +89,9 @@ void Type::compute()
         mLODCount = 1;
     }
     if (mLODCount != oldLODCount) {
-        delete [] mLODs;
+        if(mLODs){
+            delete [] mLODs;
+        }        
         mLODs = new LOD[mLODCount];
     }
 

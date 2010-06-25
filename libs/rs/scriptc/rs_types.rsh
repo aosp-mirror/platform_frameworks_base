@@ -24,6 +24,7 @@ typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_fragme
 typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_vertex;
 typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_raster;
 typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_program_store;
+typedef struct { int* p; } __attribute__((packed, aligned(4))) rs_font;
 
 typedef float float2 __attribute__((ext_vector_type(2)));
 typedef float float3 __attribute__((ext_vector_type(3)));
