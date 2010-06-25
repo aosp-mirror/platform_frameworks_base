@@ -85,7 +85,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         void onClearAll();
         void onNotificationClick(String pkg, String tag, int id);
         void onPanelRevealed();
-        void onNotificationError(String pkg, String tag, int id, String message);
+        void onNotificationError(String pkg, String tag, int id,
+                int uid, int initialPid, String message);
     }
 
     /**
@@ -293,11 +294,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mNotificationCallbacks.onNotificationClick(pkg, tag, id);
     }
 
-    public void onNotificationError(String pkg, String tag, int id, String message) {
+    public void onNotificationError(String pkg, String tag, int id,
+            int uid, int initialPid, String message) {
         enforceStatusBarService();
 
         // WARNING: this will call back into us to do the remove.  Don't hold any locks.
-        mNotificationCallbacks.onNotificationError(pkg, tag, id, message);
+        mNotificationCallbacks.onNotificationError(pkg, tag, id, uid, initialPid, message);
     }
 
     public void onClearAllNotifications() {

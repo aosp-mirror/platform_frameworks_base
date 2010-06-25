@@ -4562,6 +4562,60 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
+    public void crashApplication(int uid, int initialPid, String packageName,
+            String message) {
+        if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: crashApplication() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.FORCE_STOP_PACKAGES;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        
+        synchronized(this) {
+            ProcessRecord proc = null;
+            
+            // Figure out which process to kill.  We don't trust that initialPid
+            // still has any relation to current pids, so must scan through the
+            // list.
+            synchronized (mPidsSelfLocked) {
+                for (int i=0; i<mPidsSelfLocked.size(); i++) {
+                    ProcessRecord p = mPidsSelfLocked.valueAt(i);
+                    if (p.info.uid != uid) {
+                        continue;
+                    }
+                    if (p.pid == initialPid) {
+                        proc = p;
+                        break;
+                    }
+                    for (String str : p.pkgList) {
+                        if (str.equals(packageName)) {
+                            proc = p;
+                        }
+                    }
+                }
+            }
+            
+            if (proc == null) {
+                Log.w(TAG, "crashApplication: nothing for uid=" + uid
+                        + " initialPid=" + initialPid
+                        + " packageName=" + packageName);
+                return;
+            }
+            
+            if (proc.thread != null) {
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    proc.thread.scheduleCrash(message);
+                } catch (RemoteException e) {
+                }
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+    
     void sendActivityResultLocked(int callingUid, ActivityRecord r,
             String resultWho, int requestCode, int resultCode, Intent data) {
 

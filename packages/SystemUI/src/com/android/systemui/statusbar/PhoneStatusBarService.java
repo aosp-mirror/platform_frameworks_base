@@ -990,7 +990,7 @@ public class PhoneStatusBarService extends StatusBarService {
     void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
         removeNotification(key);
         try {
-            mBarService.onNotificationError(n.pkg, n.tag, n.id, message);
+            mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
         } catch (RemoteException ex) {
             // The end is nigh.
         }
