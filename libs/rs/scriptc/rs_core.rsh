@@ -480,22 +480,22 @@ rsMatrixMultiply(rs_matrix2x2 *m, float2 in) {
 // int ops
 /////////////////////////////////////////////////////
 
-__inline__ static float __attribute__((overloadable, always_inline)) rsClamp(uint amount, uint low, uint high) {
+__inline__ static uint __attribute__((overloadable, always_inline)) rsClamp(uint amount, uint low, uint high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static float __attribute__((overloadable, always_inline)) rsClamp(int amount, int low, int high) {
+__inline__ static int __attribute__((overloadable, always_inline)) rsClamp(int amount, int low, int high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static float __attribute__((overloadable, always_inline)) rsClamp(ushort amount, ushort low, ushort high) {
+__inline__ static ushort __attribute__((overloadable, always_inline)) rsClamp(ushort amount, ushort low, ushort high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static float __attribute__((overloadable, always_inline)) rsClamp(short amount, short low, short high) {
+__inline__ static short __attribute__((overloadable, always_inline)) rsClamp(short amount, short low, short high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static float __attribute__((overloadable, always_inline)) rsClamp(uchar amount, uchar low, uchar high) {
+__inline__ static uchar __attribute__((overloadable, always_inline)) rsClamp(uchar amount, uchar low, uchar high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static float __attribute__((overloadable, always_inline)) rsClamp(char amount, char low, char high) {
+__inline__ static char __attribute__((overloadable, always_inline)) rsClamp(char amount, char low, char high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
 
