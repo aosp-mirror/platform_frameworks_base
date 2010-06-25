@@ -40,7 +40,7 @@ int root() {
     return 1;
 }
 
-void addParticles(int rate, float x, float y, int newColor)
+void addParticles(int rate, float x, float y, bool newColor)
 {
     if (newColor) {
         partColor.x = rsRand(0.5f, 1.0f);
