@@ -35,5 +35,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="TestAlertActivity" android:theme="@android:style/Theme.Dialog">
+        </activity>
     </application>
 </manifest>

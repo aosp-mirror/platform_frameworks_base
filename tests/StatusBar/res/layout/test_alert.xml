@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        >
+
+        <TextView android:id="@+id/alertTitle"
+            style="?android:attr/textAppearanceLarge"
+            android:padding="5dip"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/ButtonBar">
+
+            <Button
+                android:id="@+id/snooze"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:onClick="dismiss"
+                android:text="Snooze" />
+
+            <!-- blank stretchable view -->
+            <View
+                android:layout_width="2dip"
+                android:layout_height="2dip"
+                android:layout_gravity="fill_horizontal"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/dismiss"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:onClick="dismiss"
+                android:text="Dismiss" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
