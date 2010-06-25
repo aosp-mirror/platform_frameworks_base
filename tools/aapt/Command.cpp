@@ -197,8 +197,10 @@ int doList(Bundle* bundle)
         if (&res == NULL) {
             printf("\nNo resource table found.\n");
         } else {
+#ifndef HAVE_ANDROID_OS
             printf("\nResource table:\n");
             res.print(false);
+#endif
         }
 
         Asset* manifestAsset = assets.openNonAsset("AndroidManifest.xml",
@@ -388,8 +390,9 @@ int doDump(Bundle* bundle)
     }
 
     if (strcmp("resources", option) == 0) {
+#ifndef HAVE_ANDROID_OS
         res.print(bundle->getValues());
-
+#endif
     } else if (strcmp("xmltree", option) == 0) {
         if (bundle->getFileSpecCount() < 3) {
             fprintf(stderr, "ERROR: no dump xmltree resource file specified\n");

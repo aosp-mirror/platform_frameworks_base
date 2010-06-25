@@ -542,11 +542,11 @@ static bool applyFileOverlay(Bundle *bundle,
                         DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles =
                                 baseGroup->getFiles();
                         for (size_t i=0; i < baseFiles.size(); i++) {
-                            printf("baseFile %ld has flavor %s\n", i,
+                            printf("baseFile %d has flavor %s\n", i,
                                     baseFiles.keyAt(i).toString().string());
                         }
                         for (size_t i=0; i < overlayFiles.size(); i++) {
-                            printf("overlayFile %ld has flavor %s\n", i,
+                            printf("overlayFile %d has flavor %s\n", i,
                                     overlayFiles.keyAt(i).toString().string());
                         }
                     }
@@ -560,7 +560,7 @@ static bool applyFileOverlay(Bundle *bundle,
                                 keyAt(overlayGroupIndex));
                         if(baseFileIndex < UNKNOWN_ERROR) {
                             if (bundle->getVerbose()) {
-                                printf("found a match (%ld) for overlay file %s, for flavor %s\n",
+                                printf("found a match (%d) for overlay file %s, for flavor %s\n",
                                         baseFileIndex,
                                         overlayGroup->getLeaf().string(),
                                         overlayFiles.keyAt(overlayGroupIndex).toString().string());
