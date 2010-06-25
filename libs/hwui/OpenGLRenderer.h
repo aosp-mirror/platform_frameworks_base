@@ -38,88 +38,88 @@ namespace uirenderer {
 
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-	Snapshot() {
-	}
+    Snapshot() {
+    }
 
-	Snapshot(const sp<Snapshot> s):
-			transform(s->transform),
-			clipRect(s->clipRect),
-			flags(kFlagDirtyTransform),
-			previous(s) {
-	}
+    Snapshot(const sp<Snapshot> s):
+            transform(s->transform),
+            clipRect(s->clipRect),
+            flags(kFlagDirtyTransform),
+            previous(s) {
+    }
 
-	enum Flags {
-		kFlagClipSet = 0x1,
-		kFlagDirtyTransform = 0x2,
-	};
+    enum Flags {
+        kFlagClipSet = 0x1,
+        kFlagDirtyTransform = 0x2,
+    };
 
-	const Rect& getMappedClip();
+    const Rect& getMappedClip();
 
-	// Local transformations
-	mat4 transform;
+    // Local transformations
+    mat4 transform;
 
-	// Clipping rectangle at the time of this snapshot
-	Rect clipRect;
+    // Clipping rectangle at the time of this snapshot
+    Rect clipRect;
 
-	// Dirty flags
-	int flags;
+    // Dirty flags
+    int flags;
 
-	// Previous snapshot in the frames stack
-	sp<Snapshot> previous;
+    // Previous snapshot in the frames stack
+    sp<Snapshot> previous;
 
 private:
-	// Clipping rectangle mapped with the transform
-	Rect mappedClip;
+    // Clipping rectangle mapped with the transform
+    Rect mappedClip;
 }; // class Snapshot
 
 struct SimpleVertex {
-	float position[2];
+    float position[2];
 }; // struct SimpleVertex
 
 typedef char* shader;
 
 class Program: public LightRefBase<Program> {
 public:
-	Program(const char* vertex, const char* fragment);
-	~Program();
+    Program(const char* vertex, const char* fragment);
+    ~Program();
 
-	void use();
+    void use();
 
 protected:
-	int addAttrib(const char* name);
-	int getAttrib(const char* name);
+    int addAttrib(const char* name);
+    int getAttrib(const char* name);
 
-	int addUniform(const char* name);
-	int getUniform(const char* name);
+    int addUniform(const char* name);
+    int getUniform(const char* name);
 
 private:
-	GLuint buildShader(const char* source, GLenum type);
+    GLuint buildShader(const char* source, GLenum type);
 
-	// Handle of the OpenGL program
-	GLuint id;
+    // Handle of the OpenGL program
+    GLuint id;
 
-	// Handles of the shaders
-	GLuint vertexShader;
-	GLuint fragmentShader;
+    // Handles of the shaders
+    GLuint vertexShader;
+    GLuint fragmentShader;
 
-	// Keeps track of attributes and uniforms slots
-	KeyedVector<const char*, int> attributes;
-	KeyedVector<const char*, int> uniforms;
+    // Keeps track of attributes and uniforms slots
+    KeyedVector<const char*, int> attributes;
+    KeyedVector<const char*, int> uniforms;
 }; // class Program
 
 class DrawColorProgram: public Program {
 public:
-	DrawColorProgram();
+    DrawColorProgram();
 
-	void use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
-	         const GLfloat* transformMatrix);
+    void use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
+             const GLfloat* transformMatrix);
 
-	int position;
-	int color;
+    int position;
+    int color;
 
-	int projection;
-	int modelView;
-	int transform;
+    int projection;
+    int modelView;
+    int transform;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

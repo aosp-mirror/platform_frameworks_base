@@ -47,10 +47,10 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 const SimpleVertex gDrawColorVertices[] = {
-		V(0.0f, 0.0f),
-		V(1.0f, 0.0f),
-		V(0.0f, 1.0f),
-		V(1.0f, 1.0f)
+        V(0.0f, 0.0f),
+        V(1.0f, 0.0f),
+        V(0.0f, 1.0f),
+        V(1.0f, 1.0f)
 };
 const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
 const GLsizei gDrawColorVertexCount = 4;
@@ -65,93 +65,93 @@ const GLsizei gDrawColorVertexCount = 4;
 #include "shaders/drawColor.frag"
 
 Program::Program(const char* vertex, const char* fragment) {
-	vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
-	fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
+    vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
+    fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
 
-	id = glCreateProgram();
-	glAttachShader(id, vertexShader);
-	glAttachShader(id, fragmentShader);
-	glLinkProgram(id);
+    id = glCreateProgram();
+    glAttachShader(id, vertexShader);
+    glAttachShader(id, fragmentShader);
+    glLinkProgram(id);
 
-	GLint status;
-	glGetProgramiv(id, GL_LINK_STATUS, &status);
-	if (status != GL_TRUE) {
-		GLint infoLen = 0;
-		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
-		if (infoLen > 1) {
-			char* log = (char*) malloc(sizeof(char) * infoLen);
-			glGetProgramInfoLog(id, infoLen, 0, log);
-			LOGE("Error while linking shaders: %s", log);
-			delete log;
-		}
-		glDeleteProgram(id);
-	}
+    GLint status;
+    glGetProgramiv(id, GL_LINK_STATUS, &status);
+    if (status != GL_TRUE) {
+        GLint infoLen = 0;
+        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
+        if (infoLen > 1) {
+            char* log = (char*) malloc(sizeof(char) * infoLen);
+            glGetProgramInfoLog(id, infoLen, 0, log);
+            LOGE("Error while linking shaders: %s", log);
+            delete log;
+        }
+        glDeleteProgram(id);
+    }
 }
 
 Program::~Program() {
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	glDeleteProgram(id);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    glDeleteProgram(id);
 }
 
 void Program::use() {
-	glUseProgram(id);
+    glUseProgram(id);
 }
 
 int Program::addAttrib(const char* name) {
-	int slot = glGetAttribLocation(id, name);
-	attributes.add(name, slot);
-	return slot;
+    int slot = glGetAttribLocation(id, name);
+    attributes.add(name, slot);
+    return slot;
 }
 
 int Program::getAttrib(const char* name) {
-	return attributes.valueFor(name);
+    return attributes.valueFor(name);
 }
 
 int Program::addUniform(const char* name) {
-	int slot = glGetUniformLocation(id, name);
-	uniforms.add(name, slot);
-	return slot;
+    int slot = glGetUniformLocation(id, name);
+    uniforms.add(name, slot);
+    return slot;
 }
 
 int Program::getUniform(const char* name) {
-	return uniforms.valueFor(name);
+    return uniforms.valueFor(name);
 }
 
 GLuint Program::buildShader(const char* source, GLenum type) {
-	GLuint shader = glCreateShader(type);
-	glShaderSource(shader, 1, &source, 0);
-	glCompileShader(shader);
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, 0);
+    glCompileShader(shader);
 
-	GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (status != GL_TRUE) {
-		// Some drivers return wrong values for GL_INFO_LOG_LENGTH
-		// use a fixed size instead
-		GLchar log[512];
-		glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
-		LOGE("Error while compiling shader: %s", log);
-		glDeleteShader(shader);
-	}
+    GLint status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE) {
+        // Some drivers return wrong values for GL_INFO_LOG_LENGTH
+        // use a fixed size instead
+        GLchar log[512];
+        glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
+        LOGE("Error while compiling shader: %s", log);
+        glDeleteShader(shader);
+    }
 
-	return shader;
+    return shader;
 }
 
 DrawColorProgram::DrawColorProgram():
-		Program(gDrawColorVertexShader, gDrawColorFragmentShader) {
-	position = addAttrib("position");
-	color = addAttrib("color");
-	projection = addUniform("projection");
-	modelView = addUniform("modelView");
-	transform = addUniform("transform");
+        Program(gDrawColorVertexShader, gDrawColorFragmentShader) {
+    position = addAttrib("position");
+    color = addAttrib("color");
+    projection = addUniform("projection");
+    modelView = addUniform("modelView");
+    transform = addUniform("transform");
 }
 
 void DrawColorProgram::use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
         const GLfloat* transformMatrix) {
-	Program::use();
-	glUniformMatrix4fv(projection, 1, GL_FALSE, projectionMatrix);
-	glUniformMatrix4fv(modelView, 1, GL_FALSE, modelViewMatrix);
-	glUniformMatrix4fv(transform, 1, GL_FALSE, transformMatrix);
+    Program::use();
+    glUniformMatrix4fv(projection, 1, GL_FALSE, projectionMatrix);
+    glUniformMatrix4fv(modelView, 1, GL_FALSE, modelViewMatrix);
+    glUniformMatrix4fv(transform, 1, GL_FALSE, transformMatrix);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,12 +159,12 @@ void DrawColorProgram::use(const GLfloat* projectionMatrix, const GLfloat* model
 ///////////////////////////////////////////////////////////////////////////////
 
 const Rect& Snapshot::getMappedClip() {
-	if (flags & kFlagDirtyTransform) {
-		flags &= ~kFlagDirtyTransform;
-		mappedClip.set(clipRect);
-		transform.mapRect(mappedClip);
-	}
-	return mappedClip;
+    if (flags & kFlagDirtyTransform) {
+        flags &= ~kFlagDirtyTransform;
+        mappedClip.set(clipRect);
+        transform.mapRect(mappedClip);
+    }
+    return mappedClip;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -197,8 +197,8 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare() {
-	mSnapshot = &mFirstSnapshot;
-	mSaveCount = 0;
+    mSnapshot = &mFirstSnapshot;
+    mSaveCount = 0;
 
     glDisable(GL_SCISSOR_TEST);
 
@@ -216,50 +216,50 @@ void OpenGLRenderer::prepare() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::getSaveCount() const {
-	return mSaveCount;
+    return mSaveCount;
 }
 
 int OpenGLRenderer::save(int flags) {
-	return saveSnapshot();
+    return saveSnapshot();
 }
 
 void OpenGLRenderer::restore() {
-	if (mSaveCount == 0) return;
+    if (mSaveCount == 0) return;
 
-	if (restoreSnapshot()) {
-		setScissorFromClip();
-	}
+    if (restoreSnapshot()) {
+        setScissorFromClip();
+    }
 }
 
 void OpenGLRenderer::restoreToCount(int saveCount) {
-	if (saveCount <= 0 || saveCount > mSaveCount) return;
+    if (saveCount <= 0 || saveCount > mSaveCount) return;
 
-	bool restoreClip = false;
+    bool restoreClip = false;
 
-	while (mSaveCount != saveCount - 1) {
-		restoreClip |= restoreSnapshot();
-	}
+    while (mSaveCount != saveCount - 1) {
+        restoreClip |= restoreSnapshot();
+    }
 
-	if (restoreClip) {
-		setScissorFromClip();
-	}
+    if (restoreClip) {
+        setScissorFromClip();
+    }
 }
 
 int OpenGLRenderer::saveSnapshot() {
-	mSnapshot = new Snapshot(mSnapshot);
-	return ++mSaveCount;
+    mSnapshot = new Snapshot(mSnapshot);
+    return ++mSaveCount;
 }
 
 bool OpenGLRenderer::restoreSnapshot() {
-	bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
+    bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
 
-	mSaveCount--;
+    mSaveCount--;
 
-	// Do not merge these two lines!
-	sp<Snapshot> previous = mSnapshot->previous;
-	mSnapshot = previous;
+    // Do not merge these two lines!
+    sp<Snapshot> previous = mSnapshot->previous;
+    mSnapshot = previous;
 
-	return restoreClip;
+    return restoreClip;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -267,33 +267,33 @@ bool OpenGLRenderer::restoreSnapshot() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::translate(float dx, float dy) {
-	mSnapshot->transform.translate(dx, dy, 0.0f);
-	mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
+    mSnapshot->transform.translate(dx, dy, 0.0f);
+    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::rotate(float degrees) {
-	mSnapshot->transform.rotate(degrees, 0.0f, 0.0f, 1.0f);
-	mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
+    mSnapshot->transform.rotate(degrees, 0.0f, 0.0f, 1.0f);
+    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::scale(float sx, float sy) {
-	mSnapshot->transform.scale(sx, sy, 1.0f);
-	mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
+    mSnapshot->transform.scale(sx, sy, 1.0f);
+    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
-	mSnapshot->transform.load(*matrix);
-	mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
+    mSnapshot->transform.load(*matrix);
+    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
-	mSnapshot->transform.copyTo(*matrix);
+    mSnapshot->transform.copyTo(*matrix);
 }
 
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
-	mat4 m(*matrix);
-	mSnapshot->transform.multiply(m);
-	mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
+    mat4 m(*matrix);
+    mSnapshot->transform.multiply(m);
+    mSnapshot->flags |= Snapshot::kFlagDirtyTransform;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -301,12 +301,12 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-	const Rect& clip = mSnapshot->getMappedClip();
-	glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+    const Rect& clip = mSnapshot->getMappedClip();
+    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
-	return mSnapshot->clipRect;
+    return mSnapshot->clipRect;
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
@@ -328,12 +328,12 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) {
-	bool clipped = mSnapshot->clipRect.intersect(left, top, right, bottom);
-	if (clipped) {
-		mSnapshot->flags |= Snapshot::kFlagClipSet;
-		setScissorFromClip();
-	}
-	return clipped;
+    bool clipped = mSnapshot->clipRect.intersect(left, top, right, bottom);
+    if (clipped) {
+        mSnapshot->flags |= Snapshot::kFlagClipSet;
+        setScissorFromClip();
+    }
+    return clipped;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

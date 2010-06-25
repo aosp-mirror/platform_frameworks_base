@@ -36,8 +36,8 @@ using namespace uirenderer;
 // ----------------------------------------------------------------------------
 
 static struct {
-	jclass clazz;
-	jmethodID set;
+    jclass clazz;
+    jmethodID set;
 } gRectClassInfo;
 
 // ----------------------------------------------------------------------------
@@ -114,12 +114,12 @@ static bool android_view_GLES20Renderer_clipRect(JNIEnv* env, jobject canvas,
 static bool android_view_GLES20Renderer_getClipBounds(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jobject rect) {
 
-	const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+    const android::uirenderer::Rect& bounds(renderer->getClipBounds());
 
-	env->CallVoidMethod(rect, gRectClassInfo.set,
-			int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
+    env->CallVoidMethod(rect, gRectClassInfo.set,
+            int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
 
-	return !bounds.isEmpty();
+    return !bounds.isEmpty();
 }
 
 // ----------------------------------------------------------------------------
@@ -128,32 +128,32 @@ static bool android_view_GLES20Renderer_getClipBounds(JNIEnv* env, jobject canva
 
 static void android_view_GLES20Renderer_translate(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jfloat dx, jfloat dy) {
-	renderer->translate(dx, dy);
+    renderer->translate(dx, dy);
 }
 
 static void android_view_GLES20Renderer_rotate(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jfloat degrees) {
-	renderer->rotate(degrees);
+    renderer->rotate(degrees);
 }
 
 static void android_view_GLES20Renderer_scale(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jfloat sx, jfloat sy) {
-	renderer->scale(sx, sy);
+    renderer->scale(sx, sy);
 }
 
 static void android_view_GLES20Renderer_setMatrix(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkMatrix* matrix) {
-	renderer->setMatrix(matrix);
+    renderer->setMatrix(matrix);
 }
 
 static void android_view_GLES20Renderer_getMatrix(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkMatrix* matrix) {
-	renderer->getMatrix(matrix);
+    renderer->getMatrix(matrix);
 }
 
 static void android_view_GLES20Renderer_concatMatrix(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkMatrix* matrix) {
-	renderer->concatMatrix(matrix);
+    renderer->concatMatrix(matrix);
 }
 
 // ----------------------------------------------------------------------------
@@ -217,8 +217,8 @@ static JNINativeMethod gMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find method " methodName);
 
 int register_android_view_GLES20Canvas(JNIEnv* env) {
-	FIND_CLASS(gRectClassInfo.clazz, "android/graphics/Rect");
-	GET_METHOD_ID(gRectClassInfo.set, gRectClassInfo.clazz, "set", "(IIII)V");
+    FIND_CLASS(gRectClassInfo.clazz, "android/graphics/Rect");
+    GET_METHOD_ID(gRectClassInfo.set, gRectClassInfo.clazz, "set", "(IIII)V");
 
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

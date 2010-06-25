@@ -30,118 +30,118 @@ namespace android {
 namespace uirenderer {
 
 void Matrix4::loadIdentity() {
-	data[0]  = 1.0f;
-	data[1]  = 0.0f;
-	data[2]  = 0.0f;
-	data[3]  = 0.0f;
+    data[0]  = 1.0f;
+    data[1]  = 0.0f;
+    data[2]  = 0.0f;
+    data[3]  = 0.0f;
 
-	data[4]  = 0.0f;
-	data[5]  = 1.0f;
-	data[6]  = 0.0f;
-	data[7]  = 0.0f;
+    data[4]  = 0.0f;
+    data[5]  = 1.0f;
+    data[6]  = 0.0f;
+    data[7]  = 0.0f;
 
-	data[8]  = 0.0f;
-	data[9]  = 0.0f;
-	data[10] = 1.0f;
-	data[11] = 0.0f;
+    data[8]  = 0.0f;
+    data[9]  = 0.0f;
+    data[10] = 1.0f;
+    data[11] = 0.0f;
 
-	data[12] = 0.0f;
-	data[13] = 0.0f;
-	data[14] = 0.0f;
-	data[15] = 1.0f;
+    data[12] = 0.0f;
+    data[13] = 0.0f;
+    data[14] = 0.0f;
+    data[15] = 1.0f;
 }
 
 void Matrix4::load(const float* v) {
-	memcpy(data, v, sizeof(data));
+    memcpy(data, v, sizeof(data));
 }
 
 void Matrix4::load(const Matrix4& v) {
-	memcpy(data, v.data, sizeof(data));
+    memcpy(data, v.data, sizeof(data));
 }
 
 void Matrix4::load(const SkMatrix& v) {
-	memset(data, 0, sizeof(data));
+    memset(data, 0, sizeof(data));
 
-	data[0]  = v[SkMatrix::kMScaleX];
-	data[4]  = v[SkMatrix::kMSkewX];
-	data[12] = v[SkMatrix::kMTransX];
+    data[0]  = v[SkMatrix::kMScaleX];
+    data[4]  = v[SkMatrix::kMSkewX];
+    data[12] = v[SkMatrix::kMTransX];
 
-	data[1]  = v[SkMatrix::kMSkewY];
-	data[5]  = v[SkMatrix::kMScaleY];
-	data[13] = v[SkMatrix::kMTransY];
+    data[1]  = v[SkMatrix::kMSkewY];
+    data[5]  = v[SkMatrix::kMScaleY];
+    data[13] = v[SkMatrix::kMTransY];
 
-	data[3]  = v[SkMatrix::kMPersp0];
-	data[7]  = v[SkMatrix::kMPersp1];
-	data[15] = v[SkMatrix::kMPersp2];
+    data[3]  = v[SkMatrix::kMPersp0];
+    data[7]  = v[SkMatrix::kMPersp1];
+    data[15] = v[SkMatrix::kMPersp2];
 
-	data[10] = 1.0f;
+    data[10] = 1.0f;
 }
 
 void Matrix4::copyTo(SkMatrix& v) const {
-	v.reset();
+    v.reset();
 
-	v.set(SkMatrix::kMScaleX, data[0]);
-	v.set(SkMatrix::kMSkewX,  data[4]);
-	v.set(SkMatrix::kMTransX, data[12]);
+    v.set(SkMatrix::kMScaleX, data[0]);
+    v.set(SkMatrix::kMSkewX,  data[4]);
+    v.set(SkMatrix::kMTransX, data[12]);
 
-	v.set(SkMatrix::kMSkewY,  data[1]);
-	v.set(SkMatrix::kMScaleY, data[5]);
-	v.set(SkMatrix::kMTransY, data[13]);
+    v.set(SkMatrix::kMSkewY,  data[1]);
+    v.set(SkMatrix::kMScaleY, data[5]);
+    v.set(SkMatrix::kMTransY, data[13]);
 
-	v.set(SkMatrix::kMPersp0, data[3]);
-	v.set(SkMatrix::kMPersp1, data[7]);
-	v.set(SkMatrix::kMPersp2, data[15]);
+    v.set(SkMatrix::kMPersp0, data[3]);
+    v.set(SkMatrix::kMPersp1, data[7]);
+    v.set(SkMatrix::kMPersp2, data[15]);
 }
 
 void Matrix4::copyTo(float* v) const {
-	memcpy(v, data, sizeof(data));
+    memcpy(v, data, sizeof(data));
 }
 
 void Matrix4::loadTranslate(float x, float y, float z) {
-	loadIdentity();
-	data[12] = x;
-	data[13] = y;
-	data[14] = z;
+    loadIdentity();
+    data[12] = x;
+    data[13] = y;
+    data[14] = z;
 }
 
 void Matrix4::loadScale(float sx, float sy, float sz) {
-	loadIdentity();
-	data[0]  = sx;
-	data[5]  = sy;
-	data[10] = sz;
+    loadIdentity();
+    data[0]  = sx;
+    data[5]  = sy;
+    data[10] = sz;
 }
 
 void Matrix4::loadRotate(float angle, float x, float y, float z) {
-	data[3]  = 0.0f;
-	data[7]  = 0.0f;
-	data[11] = 0.0f;
-	data[12] = 0.0f;
-	data[13] = 0.0f;
-	data[14] = 0.0f;
-	data[15] = 1.0f;
+    data[3]  = 0.0f;
+    data[7]  = 0.0f;
+    data[11] = 0.0f;
+    data[12] = 0.0f;
+    data[13] = 0.0f;
+    data[14] = 0.0f;
+    data[15] = 1.0f;
 
-	angle *= float(M_PI / 180.0f);
-	float c = cosf(angle);
-	float s = sinf(angle);
+    angle *= float(M_PI / 180.0f);
+    float c = cosf(angle);
+    float s = sinf(angle);
 
-	const float length = sqrtf(x * x + y * y + z * z);
-	const float nc = 1.0f - c;
-	const float xy = x * y;
-	const float yz = y * z;
-	const float zx = z * x;
-	const float xs = x * s;
-	const float ys = y * s;
-	const float zs = z * s;
+    const float length = sqrtf(x * x + y * y + z * z);
+    const float nc = 1.0f - c;
+    const float xy = x * y;
+    const float yz = y * z;
+    const float zx = z * x;
+    const float xs = x * s;
+    const float ys = y * s;
+    const float zs = z * s;
 
-	data[0]  = x * x * nc +  c;
-	data[4]  =    xy * nc - zs;
-	data[8]  =    zx * nc + ys;
-	data[1]  =    xy * nc + zs;
-	data[5]  = y * y * nc +  c;
-	data[9]  =    yz * nc - xs;
-	data[2]  =    zx * nc - ys;
-	data[6]  =    yz * nc + xs;
-	data[10] = z * z * nc +  c;
+    data[0]  = x * x * nc +  c;
+    data[4]  =    xy * nc - zs;
+    data[8]  =    zx * nc + ys;
+    data[1]  =    xy * nc + zs;
+    data[5]  = y * y * nc +  c;
+    data[9]  =    yz * nc - xs;
+    data[2]  =    zx * nc - ys;
+    data[6]  =    yz * nc + xs;
+    data[10] = z * z * nc +  c;
 }
 
 void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
@@ -179,25 +179,25 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
 #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
 
 void Matrix4::mapRect(Rect& r) const {
-	const float sx = data[0];
-	const float sy = data[5];
+    const float sx = data[0];
+    const float sy = data[5];
 
-	const float tx = data[12];
-	const float ty = data[13];
+    const float tx = data[12];
+    const float ty = data[13];
 
-	MUL_ADD_STORE(r.left, sx, tx);
-	MUL_ADD_STORE(r.right, sx, tx);
-	MUL_ADD_STORE(r.top, sy, ty);
-	MUL_ADD_STORE(r.bottom, sy, ty);
+    MUL_ADD_STORE(r.left, sx, tx);
+    MUL_ADD_STORE(r.right, sx, tx);
+    MUL_ADD_STORE(r.top, sy, ty);
+    MUL_ADD_STORE(r.bottom, sy, ty);
 }
 
 void Matrix4::dump() const {
-	LOGD("Matrix4[");
-	LOGD("  %f %f %f %f", data[0], data[4], data[ 8], data[12]);
-	LOGD("  %f %f %f %f", data[1], data[5], data[ 9], data[13]);
-	LOGD("  %f %f %f %f", data[2], data[6], data[10], data[14]);
-	LOGD("  %f %f %f %f", data[3], data[7], data[11], data[15]);
-	LOGD("]");
+    LOGD("Matrix4[");
+    LOGD("  %f %f %f %f", data[0], data[4], data[ 8], data[12]);
+    LOGD("  %f %f %f %f", data[1], data[5], data[ 9], data[13]);
+    LOGD("  %f %f %f %f", data[2], data[6], data[10], data[14]);
+    LOGD("  %f %f %f %f", data[3], data[7], data[11], data[15]);
+    LOGD("]");
 }
 
 }; // namespace uirenderer
