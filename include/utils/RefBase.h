@@ -333,9 +333,10 @@ sp<T>::~sp()
 
 template<typename T>
 sp<T>& sp<T>::operator = (const sp<T>& other) {
-    if (other.m_ptr) other.m_ptr->incStrong(this);
+    T* otherPtr(other.m_ptr);
+    if (otherPtr) otherPtr->incStrong(this);
     if (m_ptr) m_ptr->decStrong(this);
-    m_ptr = other.m_ptr;
+    m_ptr = otherPtr;
     return *this;
 }
 
@@ -351,9 +352,10 @@ sp<T>& sp<T>::operator = (T* other)
 template<typename T> template<typename U>
 sp<T>& sp<T>::operator = (const sp<U>& other)
 {
-    if (other.m_ptr) other.m_ptr->incStrong(this);
+    U* otherPtr(other.m_ptr);
+    if (otherPtr) otherPtr->incStrong(this);
     if (m_ptr) m_ptr->decStrong(this);
-    m_ptr = other.m_ptr;
+    m_ptr = otherPtr;
     return *this;
 }
 
@@ -466,10 +468,12 @@ wp<T>& wp<T>::operator = (T* other)
 template<typename T>
 wp<T>& wp<T>::operator = (const wp<T>& other)
 {
-    if (other.m_ptr) other.m_refs->incWeak(this);
+    weakref_type* otherRefs(other.m_refs);
+    T* otherPtr(other.m_ptr);
+    if (otherPtr) otherRefs->incWeak(this);
     if (m_ptr) m_refs->decWeak(this);
-    m_ptr = other.m_ptr;
-    m_refs = other.m_refs;
+    m_ptr = otherPtr;
+    m_refs = otherRefs;
     return *this;
 }
 
@@ -478,8 +482,9 @@ wp<T>& wp<T>::operator = (const sp<T>& other)
 {
     weakref_type* newRefs =
         other != NULL ? other->createWeak(this) : 0;
+    T* otherPtr(other.m_ptr);
     if (m_ptr) m_refs->decWeak(this);
-    m_ptr = other.get();
+    m_ptr = otherPtr;
     m_refs = newRefs;
     return *this;
 }
@@ -498,10 +503,12 @@ wp<T>& wp<T>::operator = (U* other)
 template<typename T> template<typename U>
 wp<T>& wp<T>::operator = (const wp<U>& other)
 {
-    if (other.m_ptr) other.m_refs->incWeak(this);
+    weakref_type* otherRefs(other.m_refs);
+    U* otherPtr(other.m_ptr);
+    if (otherPtr) otherRefs->incWeak(this);
     if (m_ptr) m_refs->decWeak(this);
-    m_ptr = other.m_ptr;
-    m_refs = other.m_refs;
+    m_ptr = otherPtr;
+    m_refs = otherRefs;
     return *this;
 }
 
@@ -510,8 +517,9 @@ wp<T>& wp<T>::operator = (const sp<U>& other)
 {
     weakref_type* newRefs =
         other != NULL ? other->createWeak(this) : 0;
+    U* otherPtr(other.m_ptr);
     if (m_ptr) m_refs->decWeak(this);
-    m_ptr = other.get();
+    m_ptr = otherPtr;
     m_refs = newRefs;
     return *this;
 }
