@@ -758,7 +758,7 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
     LOGV("queryEffects() numEffects: %d", numEffects);
 
     for (i = 0; i < numEffects; i++) {
-        if (AudioEffect::queryNextEffect(&desc) != NO_ERROR) {
+        if (AudioEffect::queryEffect(i, &desc) != NO_ERROR) {
             goto queryEffects_failure;
         }
 

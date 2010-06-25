@@ -39,10 +39,11 @@ const effect_descriptor_t gEqualizerDescriptor = {
         {0xe25aa840, 0x543b, 0x11df, 0x98a5, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}}, // uuid
         EFFECT_API_VERSION,
         (EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_LAST),
+        0, // TODO
+        1,
         "Graphic Equalizer",
         "Google Inc.",
 };
-static int gEffectIndex;
 
 /////////////////// BEGIN EQ PRESETS ///////////////////////////////////////////
 const int kNumBands = 5;
@@ -101,7 +102,6 @@ struct EqualizerContext {
     AudioEqualizer * pEqualizer;
 };
 
-
 //--- local function prototypes
 
 int Equalizer_init(EqualizerContext *pContext);
@@ -116,22 +116,23 @@ int Equalizer_setParameter(AudioEqualizer * pEqualizer, int32_t *pParam, void *p
 
 extern "C" int EffectQueryNumberEffects(uint32_t *pNumEffects) {
     *pNumEffects = 1;
-    gEffectIndex = 0;
     return 0;
 } /* end EffectQueryNumberEffects */
 
-extern "C" int EffectQueryNext(effect_descriptor_t *pDescriptor) {
+extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor) {
     if (pDescriptor == NULL) {
         return -EINVAL;
     }
-    if (gEffectIndex++ > 0) {
-        return -ENOENT;
+    if (index > 0) {
+        return -EINVAL;
     }
     memcpy(pDescriptor, &gEqualizerDescriptor, sizeof(effect_descriptor_t));
     return 0;
 } /* end EffectQueryNext */
 
 extern "C" int EffectCreate(effect_uuid_t *uuid,
+        int32_t sessionId,
+        int32_t ioId,
         effect_interface_t *pInterface) {
     int ret;
     int i;
@@ -160,7 +161,7 @@ extern "C" int EffectCreate(effect_uuid_t *uuid,
 
     *pInterface = (effect_interface_t)pContext;
 
-    LOGV("EffectLibCreateEffect %p", pContext);
+    LOGV("EffectLibCreateEffect %p, size %d", pContext, AudioEqualizer::GetInstanceSize(kNumBands)+sizeof(EqualizerContext));
 
     return 0;
 
@@ -219,8 +220,8 @@ int Equalizer_configure(EqualizerContext *pContext, effect_config_t *pConfig)
     CHECK_ARG((pConfig->inputCfg.channels == CHANNEL_MONO) || (pConfig->inputCfg.channels == CHANNEL_STEREO));
     CHECK_ARG(pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_WRITE
               || pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE);
-    CHECK_ARG(pConfig->inputCfg.format == PCM_FORMAT_S7_24
-              || pConfig->inputCfg.format == PCM_FORMAT_S15);
+    CHECK_ARG(pConfig->inputCfg.format == SAMPLE_FORMAT_PCM_S7_24
+              || pConfig->inputCfg.format == SAMPLE_FORMAT_PCM_S15);
 
     int channelCount;
     if (pConfig->inputCfg.channels == CHANNEL_MONO) {
@@ -229,6 +230,8 @@ int Equalizer_configure(EqualizerContext *pContext, effect_config_t *pConfig)
         channelCount = 2;
     }
     CHECK_ARG(channelCount <= AudioBiquadFilter::MAX_CHANNELS);
+
+    memcpy(&pContext->config, pConfig, sizeof(effect_config_t));
 
     pContext->pEqualizer->configure(channelCount,
                           pConfig->inputCfg.samplingRate);
@@ -268,7 +271,7 @@ int Equalizer_init(EqualizerContext *pContext)
 
     pContext->config.inputCfg.accessMode = EFFECT_BUFFER_ACCESS_READ;
     pContext->config.inputCfg.channels = CHANNEL_STEREO;
-    pContext->config.inputCfg.format = PCM_FORMAT_S15;
+    pContext->config.inputCfg.format = SAMPLE_FORMAT_PCM_S15;
     pContext->config.inputCfg.samplingRate = 44100;
     pContext->config.inputCfg.bufferProvider.getBuffer = NULL;
     pContext->config.inputCfg.bufferProvider.releaseBuffer = NULL;
@@ -276,7 +279,7 @@ int Equalizer_init(EqualizerContext *pContext)
     pContext->config.inputCfg.mask = EFFECT_CONFIG_ALL;
     pContext->config.outputCfg.accessMode = EFFECT_BUFFER_ACCESS_ACCUMULATE;
     pContext->config.outputCfg.channels = CHANNEL_STEREO;
-    pContext->config.outputCfg.format = PCM_FORMAT_S15;
+    pContext->config.outputCfg.format = SAMPLE_FORMAT_PCM_S15;
     pContext->config.outputCfg.samplingRate = 44100;
     pContext->config.outputCfg.bufferProvider.getBuffer = NULL;
     pContext->config.outputCfg.bufferProvider.releaseBuffer = NULL;
@@ -526,6 +529,7 @@ extern "C" int Equalizer_process(effect_interface_t self, audio_buffer_t *inBuff
     }
 
     pContext->adapter.process(inBuffer->raw, outBuffer->raw, outBuffer->frameCount);
+
     return 0;
 }   // end Equalizer_process
 
@@ -589,6 +593,17 @@ extern "C" int Equalizer_command(effect_interface_t self, int cmdCode, int cmdSi
         *(int *)pReplyData = android::Equalizer_setParameter(pEqualizer, (int32_t *)p->data,
                 p->data + p->psize);
         } break;
+    case EFFECT_CMD_ENABLE:
+    case EFFECT_CMD_DISABLE:
+        if (pReplyData == NULL || *replySize != sizeof(int)) {
+            return -EINVAL;
+        }
+        *(int *)pReplyData = 0;
+        break;
+    case EFFECT_CMD_SET_DEVICE:
+    case EFFECT_CMD_SET_VOLUME:
+    case EFFECT_CMD_SET_AUDIO_MODE:
+        break;
     default:
         LOGW("Equalizer_command invalid command %d",cmdCode);
         return -EINVAL;

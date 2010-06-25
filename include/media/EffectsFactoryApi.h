@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_EFFECTFACTORYAPI_H_
-#define ANDROID_EFFECTFACTORYAPI_H_
+#ifndef ANDROID_EFFECTSFACTORYAPI_H_
+#define ANDROID_EFFECTSFACTORYAPI_H_
 
 #include <errno.h>
 #include <stdint.h>
@@ -36,11 +36,11 @@ extern "C" {
 //
 //    Description:    Returns the number of different effects in all loaded libraries.
 //          Each effect must have a different effect uuid (see
-//          effect_descriptor_t). This function together with EffectQueryNext()
+//          effect_descriptor_t). This function together with EffectQueryEffect()
 //          is used to enumerate all effects present in all loaded libraries.
 //          Each time EffectQueryNumberEffects() is called, the factory must
 //          reset the index of the effect descriptor returned by next call to
-//          EffectQueryNext() to restart enumeration from the beginning.
+//          EffectQueryEffect() to restart enumeration from the beginning.
 //
 //    Input/Output:
 //          pNumEffects:    address where the number of effects should be returned.
@@ -56,28 +56,29 @@ int EffectQueryNumberEffects(uint32_t *pNumEffects);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//    Function:       EffectQueryNext
+//    Function:       EffectQueryEffect
 //
 //    Description:    Returns a descriptor of the next available effect.
 //          See effect_descriptor_t for a details on effect descriptor.
-//          This function together with EffectQueryNext() is used to enumerate all
+//          This function together with EffectQueryNumberEffects() is used to enumerate all
 //          effects present in all loaded libraries. The enumeration sequence is:
 //              EffectQueryNumberEffects(&num_effects);
-//              while (num_effects--)
-//                  EffectQueryNext();
+//              for (i = 0; i < num_effects; i++)
+//                  EffectQueryEffect(i,...);
 //
 //    Input/Output:
 //          pDescriptor:    address where to return the effect descriptor.
 //
 //    Output:
 //        returned value:    0          successful operation.
+//                          -ENOENT     no more effect available
 //                          -ENODEV     factory failed to initialize
 //                          -EINVAL     invalid pDescriptor
-//                          -ENOENT     no more effect available
+//                          -ENOSYS     effect list has changed since last execution of EffectQueryNumberEffects()
 //        *pDescriptor:     updated with the effect descriptor.
 //
 ////////////////////////////////////////////////////////////////////////////////
-int EffectQueryNext(effect_descriptor_t *pDescriptor);
+int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -90,6 +91,12 @@ int EffectQueryNext(effect_descriptor_t *pDescriptor);
 //
 //    Input:
 //          pEffectUuid:    pointer to the effect uuid.
+//          sessionId:  audio session to which this effect instance will be attached. All effects created
+//              with the same session ID are connected in series and process the same signal stream.
+//              Knowing that two effects are part of the same effect chain can help the library implement
+//              some kind of optimizations.
+//          ioId:   identifies the output or input stream this effect is directed to at audio HAL. For future
+//              use especially with tunneled HW accelerated effects
 //
 //    Input/Output:
 //          pInterface:    address where to return the effect interface.
@@ -102,7 +109,7 @@ int EffectQueryNext(effect_descriptor_t *pDescriptor);
 //        *pInterface:     updated with the effect interface.
 //
 ////////////////////////////////////////////////////////////////////////////////
-int EffectCreate(effect_uuid_t *pEffectUuid, effect_interface_t *pInterface);
+int EffectCreate(effect_uuid_t *pEffectUuid, int32_t sessionId, int32_t ioId, effect_interface_t *pInterface);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -211,4 +218,4 @@ int EffectIsNullUuid(effect_uuid_t *pEffectUuid);
 #endif
 
 
-#endif /*ANDROID_EFFECTFACTORYAPI_H_*/
+#endif /*ANDROID_EFFECTSFACTORYAPI_H_*/

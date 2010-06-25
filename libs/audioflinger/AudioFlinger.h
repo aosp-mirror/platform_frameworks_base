@@ -149,7 +149,7 @@ public:
 
     virtual status_t queryNumberEffects(uint32_t *numEffects);
 
-    virtual status_t queryNextEffect(effect_descriptor_t *descriptor);
+    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *descriptor);
 
     virtual status_t getEffectDescriptor(effect_uuid_t *pUuid, effect_descriptor_t *descriptor);
 
@@ -162,6 +162,9 @@ public:
                         status_t *status,
                         int *id,
                         int *enabled);
+
+            status_t registerEffectResource_l(effect_descriptor_t *desc);
+            void     unregisterEffectResource_l(effect_descriptor_t *desc);
 
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
@@ -199,6 +202,8 @@ public:
                                 const Parcel& data,
                                 Parcel* reply,
                                 uint32_t flags);
+
+                uint32_t    getMode() { return mMode; }
 
 private:
                             AudioFlinger();
@@ -601,6 +606,8 @@ private:
                                         effect_descriptor_t *desc,
                                         int *enabled,
                                         status_t *status);
+                    void disconnectEffect(const sp< EffectModule>& effect,
+                                          const wp<EffectHandle>& handle);
 
                     bool hasAudioSession(int sessionId);
                     sp<EffectChain> getEffectChain(int sessionId);
@@ -614,6 +621,7 @@ private:
                     void detachAuxEffect_l(int effectId);
                     status_t attachAuxEffect(const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId);
                     status_t attachAuxEffect_l(const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId);
+                    void setMode(uint32_t mode);
 
         struct  stream_type_t {
             stream_type_t()
@@ -930,9 +938,11 @@ private:
         size_t removeHandle (const wp<EffectHandle>& handle);
 
         effect_descriptor_t& desc() { return mDescriptor; }
+        wp<EffectChain>&     chain() { return mChain; }
 
         status_t         setDevice(uint32_t device);
         status_t         setVolume(uint32_t *left, uint32_t *right, bool controller);
+        status_t         setMode(uint32_t mode);
 
         status_t         dump(int fd, const Vector<String16>& args);
 
@@ -943,6 +953,14 @@ private:
 
         status_t start();
         status_t stop();
+
+        // update this table when AudioSystem::audio_devices or audio_device_e (in EffectApi.h) are modified
+        static const uint32_t sDeviceConvTable[];
+        static uint32_t deviceAudioSystemToEffectApi(uint32_t device);
+
+        // update this table when AudioSystem::audio_mode or audio_mode_e (in EffectApi.h) are modified
+        static const uint32_t sModeConvTable[];
+        static int modeAudioSystemToEffectApi(uint32_t mode);
 
         Mutex               mLock;      // mutex for process, commands and handles list protection
         wp<ThreadBase>      mThread;    // parent thread
@@ -1042,6 +1060,8 @@ private:
         sp<EffectModule> getVolumeController();
         bool setVolume(uint32_t *left, uint32_t *right);
         void setDevice(uint32_t device);
+        void setMode(uint32_t mode);
+
 
         void setInBuffer(int16_t *buffer, bool ownsBuffer = false) {
             mInBuffer = buffer;
@@ -1104,6 +1124,14 @@ private:
 #ifdef LVMX
                 int mLifeVibesClientPid;
 #endif
+                uint32_t mMode;
+
+                // Maximum CPU load allocated to audio effects in 0.1 MIPS (ARMv5TE, 0 WS memory) units
+                static const uint32_t MAX_EFFECTS_CPU_LOAD = 1000;
+                // Maximum memory allocated to audio effects in KB
+                static const uint32_t MAX_EFFECTS_MEMORY = 512;
+                uint32_t mTotalEffectsCpuLoad; // current CPU load used by effects
+                uint32_t mTotalEffectsMemory;  // current memory used by effects
 };
 
 // ----------------------------------------------------------------------------

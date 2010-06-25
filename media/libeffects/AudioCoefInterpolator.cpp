@@ -46,7 +46,7 @@ void AudioCoefInterpolator::getCoef(const int intCoord[], uint32_t fracCoord[],
     while (dim-- > 0) {
         if (UNLIKELY(intCoord[dim] < 0)) {
             fracCoord[dim] = 0;
-        } else if (UNLIKELY(intCoord[dim] >= mInDims[dim] - 1)) {
+        } else if (UNLIKELY(intCoord[dim] >= (int)mInDims[dim] - 1)) {
             fracCoord[dim] = 0;
             index += mInDimOffsets[dim] * (mInDims[dim] - 1);
         } else {
