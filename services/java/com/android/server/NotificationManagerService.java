@@ -164,16 +164,21 @@ class NotificationManagerService extends INotificationManager.Stub
         final String pkg;
         final String tag;
         final int id;
+        final int uid;
+        final int initialPid;
         ITransientNotification callback;
         int duration;
         final Notification notification;
         IBinder statusBarKey;
 
-        NotificationRecord(String pkg, String tag, int id, Notification notification)
+        NotificationRecord(String pkg, String tag, int id, int uid, int initialPid,
+                Notification notification)
         {
             this.pkg = pkg;
             this.tag = tag;
             this.id = id;
+            this.uid = uid;
+            this.initialPid = initialPid;
             this.notification = notification;
         }
 
@@ -304,10 +309,18 @@ class NotificationManagerService extends INotificationManager.Stub
             }
         }
 
-        public void onNotificationError(String pkg, String tag, int id, String message) {
+        public void onNotificationError(String pkg, String tag, int id,
+                int uid, int initialPid, String message) {
             Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id);
             cancelNotification(pkg, tag, id, 0, 0);
-            // TODO: Tell the activity manager.
+            long ident = Binder.clearCallingIdentity();
+            try {
+                ActivityManagerNative.getDefault().crashApplication(uid, initialPid, pkg,
+                        "Bad notification posted from package " + pkg
+                        + ": " + message);
+            } catch (RemoteException e) {
+            }
+            Binder.restoreCallingIdentity(ident);
         }
     };
 
@@ -663,6 +676,9 @@ class NotificationManagerService extends INotificationManager.Stub
     public void enqueueNotificationWithTag(String pkg, String tag, int id,
             Notification notification, int[] idOut)
     {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        
         checkIncomingCall(pkg);
 
         // Limit the number of notifications that any given package except the android
@@ -708,7 +724,8 @@ class NotificationManagerService extends INotificationManager.Stub
         }
 
         synchronized (mNotificationList) {
-            NotificationRecord r = new NotificationRecord(pkg, tag, id, notification);
+            NotificationRecord r = new NotificationRecord(pkg, tag, id,
+                    callingUid, callingPid, notification);
             NotificationRecord old = null;
 
             int index = indexOfNotificationLocked(pkg, tag, id);
@@ -732,7 +749,8 @@ class NotificationManagerService extends INotificationManager.Stub
             }
 
             if (notification.icon != 0) {
-                StatusBarNotification n = new StatusBarNotification(pkg, id, tag, notification);
+                StatusBarNotification n = new StatusBarNotification(pkg, id, tag,
+                        r.uid, r.initialPid, notification);
                 if (old != null && old.statusBarKey != null) {
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();

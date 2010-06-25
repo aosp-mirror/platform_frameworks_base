@@ -1293,6 +1293,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case CRASH_APPLICATION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int uid = data.readInt();
+            int initialPid = data.readInt();
+            String packageName = data.readString();
+            String message = data.readString();
+            crashApplication(uid, initialPid, packageName, message);
+            reply.writeNoException();
+            return true;
+        }
+
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -2867,5 +2878,20 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
+    public void crashApplication(int uid, int initialPid, String packageName,
+            String message) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(uid);
+        data.writeInt(initialPid);
+        data.writeString(packageName);
+        data.writeString(message);
+        mRemote.transact(CRASH_APPLICATION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    
     private IBinder mRemote;
 }

@@ -402,6 +402,14 @@ public abstract class ApplicationThreadNative extends Binder
             dispatchPackageBroadcast(cmd, packages);
             return true;
         }
+
+        case SCHEDULE_CRASH_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            String msg = data.readString();
+            scheduleCrash(msg);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -822,6 +830,16 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(cmd);
         data.writeStringArray(packages);
         mRemote.transact(DISPATCH_PACKAGE_BROADCAST_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+        
+    }
+    
+    public void scheduleCrash(String msg) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeString(msg);
+        mRemote.transact(SCHEDULE_CRASH_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
         
