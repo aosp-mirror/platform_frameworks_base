@@ -22,8 +22,21 @@
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
+#include <Rect.h>
+#include <ui/Rect.h>
 
 namespace android {
+
+using namespace uirenderer;
+
+// ----------------------------------------------------------------------------
+// Java APIs
+// ----------------------------------------------------------------------------
+
+static struct {
+	jclass clazz;
+	jmethodID set;
+} gRectClassInfo;
 
 // ----------------------------------------------------------------------------
 // Constructors
@@ -90,6 +103,17 @@ static bool android_view_GLES20Renderer_clipRect(JNIEnv* env, jobject canvas,
     return renderer->clipRect(float(left), float(top), float(right), float(bottom));
 }
 
+static bool android_view_GLES20Renderer_getClipBounds(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jobject rect) {
+
+	const android::uirenderer::Rect& bounds(renderer->getClipBounds());
+
+	env->CallVoidMethod(rect, gRectClassInfo.set,
+			int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
+
+	return !bounds.isEmpty();
+}
+
 // ----------------------------------------------------------------------------
 // Transforms
 // ----------------------------------------------------------------------------
@@ -153,6 +177,9 @@ static JNINativeMethod gMethods[] = {
     {   "nClipRect",          "(IFFFF)Z", (void*) android_view_GLES20Renderer_clipRectF },
     {   "nClipRect",          "(IIIII)Z", (void*) android_view_GLES20Renderer_clipRect },
 
+    {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
+    		(void*) android_view_GLES20Renderer_getClipBounds },
+
     {   "nTranslate",         "(IFF)V",   (void*) android_view_GLES20Renderer_translate },
     {   "nRotate",            "(IF)V",    (void*) android_view_GLES20Renderer_rotate },
     {   "nScale",             "(IFF)V",   (void*) android_view_GLES20Renderer_scale },
@@ -164,7 +191,19 @@ static JNINativeMethod gMethods[] = {
     {   "nDrawColor",         "(III)V",   (void*) android_view_GLES20Renderer_drawColor },
 };
 
+#define FIND_CLASS(var, className) \
+        var = env->FindClass(className); \
+        LOG_FATAL_IF(! var, "Unable to find class " className); \
+        var = jclass(env->NewGlobalRef(var));
+
+#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
+        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
+        LOG_FATAL_IF(! var, "Unable to find method " methodName);
+
 int register_android_view_GLES20Canvas(JNIEnv* env) {
+	FIND_CLASS(gRectClassInfo.clazz, "android/graphics/Rect");
+	GET_METHOD_ID(gRectClassInfo.set, gRectClassInfo.clazz, "set", "(IIII)V");
+
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

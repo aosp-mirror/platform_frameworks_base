@@ -207,7 +207,7 @@ public final class CallManager {
      * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if active call is ringing, waiting, or
-     * dialing/alerting, or heldCall can�t be active.
+     * dialing/alerting, or heldCall can't be active.
      * In these cases, this operation may not be performed.
      */
     public void switchHoldingAndActive(Call heldCall) throws CallStateException {

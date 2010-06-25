@@ -186,9 +186,10 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean getClipBounds(Rect bounds) {
-        // TODO: Implement
-        return false;
+        return nGetClipBounds(mRenderer, bounds);
     }
+
+    private native boolean nGetClipBounds(int renderer, Rect bounds);
 
     @Override
     public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
