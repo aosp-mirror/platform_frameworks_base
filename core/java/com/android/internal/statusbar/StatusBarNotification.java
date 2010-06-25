@@ -38,18 +38,23 @@ public class StatusBarNotification implements Parcelable {
     public String pkg;
     public int id;
     public String tag;
+    public int uid;
+    public int initialPid;
     public Notification notification;
 
     public StatusBarNotification() {
     }
 
-    public StatusBarNotification(String pkg, int id, String tag, Notification notification) {
+    public StatusBarNotification(String pkg, int id, String tag,
+            int uid, int initialPid, Notification notification) {
         if (pkg == null) throw new NullPointerException();
         if (notification == null) throw new NullPointerException();
 
         this.pkg = pkg;
         this.id = id;
         this.tag = tag;
+        this.uid = uid;
+        this.initialPid = initialPid;
         this.notification = notification;
     }
 
@@ -65,6 +70,8 @@ public class StatusBarNotification implements Parcelable {
         } else {
             this.tag = null;
         }
+        this.uid = in.readInt();
+        this.initialPid = in.readInt();
         this.notification = new Notification(in);
     }
 
@@ -77,6 +84,8 @@ public class StatusBarNotification implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        out.writeInt(this.uid);
+        out.writeInt(this.initialPid);
         this.notification.writeToParcel(out, flags);
     }
 
@@ -99,7 +108,8 @@ public class StatusBarNotification implements Parcelable {
     };
 
     public StatusBarNotification clone() {
-        return new StatusBarNotification(this.pkg, this.id, this.tag, this.notification.clone());
+        return new StatusBarNotification(this.pkg, this.id, this.tag,
+                this.uid, this.initialPid, this.notification.clone());
     }
 
     public String toString() {

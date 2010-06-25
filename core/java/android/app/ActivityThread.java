@@ -99,6 +99,12 @@ final class SuperNotCalledException extends AndroidRuntimeException {
     }
 }
 
+final class RemoteServiceException extends AndroidRuntimeException {
+    public RemoteServiceException(String msg) {
+        super(msg);
+    }
+}
+
 /**
  * This manages the execution of the main thread in an
  * application process, scheduling and executing activities,
@@ -644,6 +650,10 @@ public final class ActivityThread {
         public void dispatchPackageBroadcast(int cmd, String[] packages) {
             queueOrSendMessage(H.DISPATCH_PACKAGE_BROADCAST, packages, cmd);
         }
+
+        public void scheduleCrash(String msg) {
+            queueOrSendMessage(H.SCHEDULE_CRASH, msg);
+        }
         
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -870,6 +880,7 @@ public final class ActivityThread {
         public static final int REMOVE_PROVIDER         = 131;
         public static final int ENABLE_JIT              = 132;
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
+        public static final int SCHEDULE_CRASH          = 134;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -907,6 +918,7 @@ public final class ActivityThread {
                     case REMOVE_PROVIDER: return "REMOVE_PROVIDER";
                     case ENABLE_JIT: return "ENABLE_JIT";
                     case DISPATCH_PACKAGE_BROADCAST: return "DISPATCH_PACKAGE_BROADCAST";
+                    case SCHEDULE_CRASH: return "SCHEDULE_CRASH";
                 }
             }
             return "(unknown)";
@@ -1030,6 +1042,8 @@ public final class ActivityThread {
                 case DISPATCH_PACKAGE_BROADCAST:
                     handleDispatchPackageBroadcast(msg.arg1, (String[])msg.obj);
                     break;
+                case SCHEDULE_CRASH:
+                    throw new RemoteServiceException((String)msg.obj);
             }
         }
 

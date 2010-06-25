@@ -103,6 +103,7 @@ public interface IApplicationThread extends IInterface {
     static final int PACKAGE_REMOVED = 0;
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
+    void scheduleCrash(String msg) throws RemoteException;
     
     String descriptor = "android.app.IApplicationThread";
 
@@ -139,4 +140,5 @@ public interface IApplicationThread extends IInterface {
     int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
     int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
+    int SCHEDULE_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
 }
