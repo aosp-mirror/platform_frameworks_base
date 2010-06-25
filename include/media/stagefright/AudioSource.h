@@ -39,6 +39,9 @@ struct AudioSource : public MediaSource {
     virtual status_t stop();
     virtual sp<MetaData> getFormat();
 
+    // Returns the maximum amplitude since last call.
+    int16_t getMaxAmplitude();
+
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
@@ -53,12 +56,16 @@ private:
     bool mStarted;
 
     bool mCollectStats;
+    bool mTrackMaxAmplitude;
     int64_t mTotalReadTimeUs;
     int64_t mTotalReadBytes;
     int64_t mTotalReads;
     int64_t mStartTimeUs;
+    int16_t mMaxAmplitude;
 
     MediaBufferGroup *mGroup;
+
+    void trackMaxAmplitude(int16_t *data, int nSamples);
 
     AudioSource(const AudioSource &);
     AudioSource &operator=(const AudioSource &);

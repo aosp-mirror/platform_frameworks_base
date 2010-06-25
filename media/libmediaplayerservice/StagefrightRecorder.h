@@ -26,6 +26,7 @@ namespace android {
 class Camera;
 struct MediaSource;
 struct MediaWriter;
+struct AudioSource;
 class MediaProfiles;
 
 struct StagefrightRecorder : public MediaRecorderBase {
@@ -64,6 +65,7 @@ private:
     sp<ISurface> mPreviewSurface;
     sp<IMediaPlayerClient> mListener;
     sp<MediaWriter> mWriter;
+    sp<AudioSource> mAudioSourceNode;
 
     audio_source mAudioSource;
     video_source mVideoSource;

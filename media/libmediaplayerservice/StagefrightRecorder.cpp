@@ -484,6 +484,7 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
     sp<MediaSource> audioEncoder =
         OMXCodec::Create(client.interface(), encMeta,
                          true /* createEncoder */, audioSource);
+    mAudioSourceNode = audioSource;
 
     return audioEncoder;
 }
@@ -822,6 +823,7 @@ status_t StagefrightRecorder::reset() {
     mAudioBitRate  = 12200;
     mInterleaveDurationUs = 0;
     mIFramesInterval = 1;
+    mAudioSourceNode = 0;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;
@@ -831,7 +833,11 @@ status_t StagefrightRecorder::reset() {
 }
 
 status_t StagefrightRecorder::getMaxAmplitude(int *max) {
-    *max = 0;
+    if (mAudioSourceNode != 0) {
+        *max = mAudioSourceNode->getMaxAmplitude();
+    } else {
+        *max = 0;
+    }
 
     return OK;
 }
