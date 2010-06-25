@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import com.android.server.AttributeCache;
-import com.android.server.am.ActivityManagerService.ActivityState;
+import com.android.server.am.ActivityStack.ActivityState;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -32,6 +32,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.IApplicationToken;
 
 import java.io.PrintWriter;
@@ -44,6 +45,7 @@ import java.util.HashSet;
  */
 class ActivityRecord extends IApplicationToken.Stub {
     final ActivityManagerService service; // owner
+    final ActivityStack stack; // owner
     final ActivityInfo info; // all about me
     final int launchedFromUid; // always the uid who started the activity.
     final Intent intent;    // the original intent that generated us
@@ -80,7 +82,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     ProcessRecord app;  // if non-null, hosting application
     Bitmap thumbnail;       // icon representation of paused screen
     CharSequence description; // textual description of paused screen
-    ActivityManagerService.ActivityState state;    // current state we are in
+    ActivityState state;    // current state we are in
     Bundle  icicle;         // last saved activity state
     boolean frontOfTask;    // is this the root activity of its task?
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
@@ -175,12 +177,13 @@ class ActivityRecord extends IApplicationToken.Stub {
         }
     }
 
-    ActivityRecord(ActivityManagerService _service, ProcessRecord _caller,
+    ActivityRecord(ActivityManagerService _service, ActivityStack _stack, ProcessRecord _caller,
             int _launchedFromUid, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified) {
         service = _service;
+        stack = _stack;
         info = aInfo;
         launchedFromUid = _launchedFromUid;
         intent = _intent;
@@ -191,7 +194,7 @@ class ActivityRecord extends IApplicationToken.Stub {
         resultTo = _resultTo;
         resultWho = _resultWho;
         requestCode = _reqCode;
-        state = ActivityManagerService.ActivityState.INITIALIZING;
+        state = ActivityState.INITIALIZING;
         frontOfTask = false;
         launchFailed = false;
         haveState = false;
@@ -332,6 +335,52 @@ class ActivityRecord extends IApplicationToken.Stub {
         }
         newIntents.add(intent);
     }
+    
+    /**
+     * Deliver a new Intent to an existing activity, so that its onNewIntent()
+     * method will be called at the proper time.
+     */
+    final void deliverNewIntentLocked(Intent intent) {
+        boolean sent = false;
+        if (state == ActivityState.RESUMED
+                && app != null && app.thread != null) {
+            try {
+                ArrayList<Intent> ar = new ArrayList<Intent>();
+                ar.add(new Intent(intent));
+                app.thread.scheduleNewIntent(ar, this);
+                sent = true;
+            } catch (Exception e) {
+                Slog.w(ActivityManagerService.TAG,
+                        "Exception thrown sending new intent to " + this, e);
+            }
+        }
+        if (!sent) {
+            addNewIntentLocked(new Intent(intent));
+        }
+    }
+
+    void removeUriPermissionsLocked() {
+        if (readUriPermissions != null) {
+            for (UriPermission perm : readUriPermissions) {
+                perm.readActivities.remove(this);
+                if (perm.readActivities.size() == 0 && (perm.globalModeFlags
+                        &Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
+                    perm.modeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                   service.removeUriPermissionIfNeededLocked(perm);
+                }
+            }
+        }
+        if (writeUriPermissions != null) {
+            for (UriPermission perm : writeUriPermissions) {
+                perm.writeActivities.remove(this);
+                if (perm.writeActivities.size() == 0 && (perm.globalModeFlags
+                        &Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0) {
+                    perm.modeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                    service.removeUriPermissionIfNeededLocked(perm);
+                }
+            }
+        }
+    }
 
     void pauseKeyDispatchingLocked() {
         if (!keysPaused) {
@@ -375,8 +424,8 @@ class ActivityRecord extends IApplicationToken.Stub {
             if (startTime != 0) {
                 final long curTime = SystemClock.uptimeMillis();
                 final long thisTime = curTime - startTime;
-                final long totalTime = service.mInitialStartTime != 0
-                        ? (curTime - service.mInitialStartTime) : thisTime;
+                final long totalTime = stack.mInitialStartTime != 0
+                        ? (curTime - stack.mInitialStartTime) : thisTime;
                 if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
                     EventLog.writeEvent(EventLogTags.ACTIVITY_LAUNCH_TIME,
                             System.identityHashCode(this), shortComponentName,
@@ -392,14 +441,14 @@ class ActivityRecord extends IApplicationToken.Stub {
                     sb.append(" ms)");
                     Log.i(ActivityManagerService.TAG, sb.toString());
                 }
-                service.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
+                stack.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
                 if (totalTime > 0) {
                     service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
                 }
                 startTime = 0;
-                service.mInitialStartTime = 0;
+                stack.mInitialStartTime = 0;
             }
-            service.reportActivityVisibleLocked(this);
+            stack.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
             if (!nowVisible) {
@@ -408,27 +457,27 @@ class ActivityRecord extends IApplicationToken.Stub {
                     // Instead of doing the full stop routine here, let's just
                     // hide any activities we now can, and let them stop when
                     // the normal idle happens.
-                    service.processStoppingActivitiesLocked(false);
+                    stack.processStoppingActivitiesLocked(false);
                 } else {
                     // If this activity was already idle, then we now need to
                     // make sure we perform the full stop of any activities
                     // that are waiting to do so.  This is because we won't
                     // do that while they are still waiting for this one to
                     // become visible.
-                    final int N = service.mWaitingVisibleActivities.size();
+                    final int N = stack.mWaitingVisibleActivities.size();
                     if (N > 0) {
                         for (int i=0; i<N; i++) {
                             ActivityRecord r = (ActivityRecord)
-                                service.mWaitingVisibleActivities.get(i);
+                                stack.mWaitingVisibleActivities.get(i);
                             r.waitingVisible = false;
                             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                                     ActivityManagerService.TAG,
                                     "Was waiting for visible: " + r);
                         }
-                        service.mWaitingVisibleActivities.clear();
+                        stack.mWaitingVisibleActivities.clear();
                         Message msg = Message.obtain();
-                        msg.what = ActivityManagerService.IDLE_NOW_MSG;
-                        service.mHandler.sendMessage(msg);
+                        msg.what = ActivityStack.IDLE_NOW_MSG;
+                        stack.mHandler.sendMessage(msg);
                     }
                 }
                 service.scheduleAppGcsLocked();
@@ -449,9 +498,9 @@ class ActivityRecord extends IApplicationToken.Stub {
         ActivityRecord r = this;
         if (r.waitingVisible) {
             // Hmmm, who might we be waiting for?
-            r = service.mResumedActivity;
+            r = stack.mResumedActivity;
             if (r == null) {
-                r = service.mPausingActivity;
+                r = stack.mPausingActivity;
             }
             // Both of those null?  Fall back to 'this' again
             if (r == null) {
