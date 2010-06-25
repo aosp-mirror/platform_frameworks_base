@@ -72,11 +72,6 @@ public class SQLiteQuery extends SQLiteProgram {
                 // is not safe in this situation. the native code will ignore maxRead
                 int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
                         maxRead, lastPos);
-
-                // Logging
-                if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                    Log.d(TAG, "fillWindow(): " + mSql);
-                }
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
             } catch (IllegalStateException e){
