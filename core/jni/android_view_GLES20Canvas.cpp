@@ -18,7 +18,9 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <SkCanvas.h>
 #include <SkMatrix.h>
+#include <SkPaint.h>
 #include <SkXfermode.h>
 
 #include <OpenGLRenderer.h>
@@ -93,6 +95,12 @@ static void android_view_GLES20Renderer_restoreToCount(JNIEnv* env, jobject canv
 // Clipping
 // ----------------------------------------------------------------------------
 
+static bool android_view_GLES20Renderer_quickReject(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom,
+        SkCanvas::EdgeType edge) {
+    return renderer->quickReject(left, top, right, bottom);
+}
+
 static bool android_view_GLES20Renderer_clipRectF(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom) {
     return renderer->clipRect(left, top, right, bottom);
@@ -157,6 +165,12 @@ static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas,
     renderer->drawColor(color, (SkXfermode::Mode) mode);
 }
 
+static void android_view_GLES20Renderer_drawRect(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom,
+        SkPaint* paint) {
+    renderer->drawRect(left, top, right, bottom, paint);
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -164,31 +178,33 @@ static void android_view_GLES20Renderer_drawColor(JNIEnv* env, jobject canvas,
 const char* const kClassPathName = "android/view/GLES20Canvas";
 
 static JNINativeMethod gMethods[] = {
-    {   "nCreateRenderer",    "()I",      (void*) android_view_GLES20Renderer_createRenderer },
-    {   "nDestroyRenderer",   "(I)V",     (void*) android_view_GLES20Renderer_destroyRenderer },
-    {   "nSetViewport",       "(III)V",   (void*) android_view_GLES20Renderer_setViewport },
-    {   "nPrepare",           "(I)V",     (void*) android_view_GLES20Renderer_prepare },
+    {   "nCreateRenderer",    "()I",       (void*) android_view_GLES20Renderer_createRenderer },
+    {   "nDestroyRenderer",   "(I)V",      (void*) android_view_GLES20Renderer_destroyRenderer },
+    {   "nSetViewport",       "(III)V",    (void*) android_view_GLES20Renderer_setViewport },
+    {   "nPrepare",           "(I)V",      (void*) android_view_GLES20Renderer_prepare },
 
-    {   "nSave",              "(II)I",    (void*) android_view_GLES20Renderer_save },
-    {   "nRestore",           "(I)V",     (void*) android_view_GLES20Renderer_restore },
-    {   "nRestoreToCount",    "(II)V",    (void*) android_view_GLES20Renderer_restoreToCount },
-    {   "nGetSaveCount",      "(I)I",     (void*) android_view_GLES20Renderer_getSaveCount },
+    {   "nSave",              "(II)I",     (void*) android_view_GLES20Renderer_save },
+    {   "nRestore",           "(I)V",      (void*) android_view_GLES20Renderer_restore },
+    {   "nRestoreToCount",    "(II)V",     (void*) android_view_GLES20Renderer_restoreToCount },
+    {   "nGetSaveCount",      "(I)I",      (void*) android_view_GLES20Renderer_getSaveCount },
 
-    {   "nClipRect",          "(IFFFF)Z", (void*) android_view_GLES20Renderer_clipRectF },
-    {   "nClipRect",          "(IIIII)Z", (void*) android_view_GLES20Renderer_clipRect },
+    {   "nQuickReject",       "(IFFFFI)Z", (void*) android_view_GLES20Renderer_quickReject },
+    {   "nClipRect",          "(IFFFF)Z",  (void*) android_view_GLES20Renderer_clipRectF },
+    {   "nClipRect",          "(IIIII)Z",  (void*) android_view_GLES20Renderer_clipRect },
+
+    {   "nTranslate",         "(IFF)V",    (void*) android_view_GLES20Renderer_translate },
+    {   "nRotate",            "(IF)V",     (void*) android_view_GLES20Renderer_rotate },
+    {   "nScale",             "(IFF)V",    (void*) android_view_GLES20Renderer_scale },
+
+    {   "nSetMatrix",         "(II)V",     (void*) android_view_GLES20Renderer_setMatrix },
+    {   "nGetMatrix",         "(II)V",     (void*) android_view_GLES20Renderer_getMatrix },
+    {   "nConcatMatrix",      "(II)V",     (void*) android_view_GLES20Renderer_concatMatrix },
+
+    {   "nDrawColor",         "(III)V",    (void*) android_view_GLES20Renderer_drawColor },
+    {   "nDrawRect",          "(IFFFFI)V", (void*) android_view_GLES20Renderer_drawRect },
 
     {   "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
-    		(void*) android_view_GLES20Renderer_getClipBounds },
-
-    {   "nTranslate",         "(IFF)V",   (void*) android_view_GLES20Renderer_translate },
-    {   "nRotate",            "(IF)V",    (void*) android_view_GLES20Renderer_rotate },
-    {   "nScale",             "(IFF)V",   (void*) android_view_GLES20Renderer_scale },
-
-    {   "nSetMatrix",         "(II)V",    (void*) android_view_GLES20Renderer_setMatrix },
-    {   "nGetMatrix",         "(II)V",    (void*) android_view_GLES20Renderer_getMatrix },
-    {   "nConcatMatrix",      "(II)V",    (void*) android_view_GLES20Renderer_concatMatrix },
-
-    {   "nDrawColor",         "(III)V",   (void*) android_view_GLES20Renderer_drawColor },
+            (void*) android_view_GLES20Renderer_getClipBounds },
 };
 
 #define FIND_CLASS(var, className) \

@@ -72,10 +72,9 @@ private:
 	Rect mappedClip;
 }; // class Snapshot
 
-struct Vertex {
+struct SimpleVertex {
 	float position[2];
-	float color[4];
-}; // struct Vertex
+}; // struct SimpleVertex
 
 typedef char* shader;
 
@@ -112,11 +111,15 @@ class DrawColorProgram: public Program {
 public:
 	DrawColorProgram();
 
+	void use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
+	         const GLfloat* transformMatrix);
+
 	int position;
 	int color;
 
 	int projection;
 	int modelView;
+	int transform;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,9 +148,11 @@ public:
     void concatMatrix(SkMatrix* matrix);
 
     const Rect& getClipBounds();
+    bool quickReject(float left, float top, float right, float bottom);
     bool clipRect(float left, float top, float right, float bottom);
 
     void drawColor(int color, SkXfermode::Mode mode);
+    void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
 
 private:
     int saveSnapshot();
@@ -155,11 +160,16 @@ private:
 
     void setScissorFromClip();
 
+    void drawColorRect(float left, float top, float right, float bottom, int color);
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
     // Matrix used for ortho projection in shaders
     float mOrthoMatrix[16];
+
+    // Model-view matrix used to position/size objects
+    mat4 mModelView;
 
     // Number of saved states
     int mSaveCount;

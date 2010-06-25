@@ -60,20 +60,32 @@ public class HwUiActivity extends Activity {
             canvas.save();
             canvas.clipRect(20.0f, 0.0f, 40.0f, 20.0f);
             Log.d(LOG_TAG, "clipRect = " + canvas.getClipBounds());
+            Log.d(LOG_TAG, "rejected = " + canvas.quickReject(100.0f, 100.0f, 110.0f, 110.0f,
+                    Canvas.EdgeType.BW));
+            Log.d(LOG_TAG, "rejected = " + canvas.quickReject(25.0f, 5.0f, 30.0f, 10.0f,
+                    Canvas.EdgeType.BW));
             canvas.restore();
             
             canvas.save();
             canvas.scale(2.0f, 2.0f);
             canvas.clipRect(20.0f, 0.0f, 40.0f, 20.0f);
             Log.d(LOG_TAG, "clipRect = " + canvas.getClipBounds());
+            Log.d(LOG_TAG, "rejected = " + canvas.quickReject(50.0f, 50.0f, 60.0f, 60.0f,
+                    Canvas.EdgeType.BW));
+            Log.d(LOG_TAG, "rejected = " + canvas.quickReject(25.0f, 5.0f, 30.0f, 10.0f,
+                    Canvas.EdgeType.BW));
             canvas.restore();
 
             canvas.save();
             canvas.translate(20.0f, 20.0f);
             canvas.clipRect(20.0f, 0.0f, 40.0f, 20.0f);
             Log.d(LOG_TAG, "clipRect = " + canvas.getClipBounds());
+            Log.d(LOG_TAG, "rejected = " + canvas.quickReject(80.0f, 80.0f, 90.0f, 90.0f,
+                    Canvas.EdgeType.BW));
+            Log.d(LOG_TAG, "rejected = " + canvas.quickReject(25.0f, 5.0f, 30.0f, 10.0f,
+                    Canvas.EdgeType.BW));
             canvas.restore();
-            
+
             canvas.scale(2.0f, 2.0f);            
             canvas.clipRect(20.0f, 0.0f, 40.0f, 20.0f);
 
