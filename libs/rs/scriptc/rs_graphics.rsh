@@ -35,6 +35,10 @@ extern void __attribute__((overloadable)) rsgDrawSimpleMesh(rs_mesh ism, int sta
 extern void rsgClearColor(float, float, float, float);
 extern void rsgClearDepth(float);
 
+extern void __attribute__((overloadable)) rsgDrawText(const char *, int x, int y);
+extern void __attribute__((overloadable)) rsgDrawText(rs_allocation, int x, int y);
+extern void rsgBindFont(rs_font);
+
 ///////////////////////////////////////////////////////
 // misc
 extern void color(float, float, float, float);

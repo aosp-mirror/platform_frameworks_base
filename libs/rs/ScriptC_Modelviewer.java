@@ -96,7 +96,7 @@ public class ScriptC_Modelviewer extends ScriptC {
     private Font mExportVar_gItalic;
     public void set_gItalic(Font v) {
         mExportVar_gItalic = v;
-        setVar(mExportVarIdx_gItalic, (v == null) ? 0 : v.getID());
+        setVar(mExportVarIdx_gItalic, v);
     }
 
     public Font get_gItalic() {

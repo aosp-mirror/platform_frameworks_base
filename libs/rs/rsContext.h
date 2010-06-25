@@ -32,6 +32,7 @@
 #include "rsAdapter.h"
 #include "rsSampler.h"
 #include "rsLight.h"
+#include "rsFont.h"
 #include "rsProgramFragment.h"
 #include "rsProgramStore.h"
 #include "rsProgramRaster.h"
@@ -76,6 +77,7 @@ public:
     ProgramVertexState mStateVertex;
     LightState mStateLight;
     VertexArrayState mStateVertexArray;
+    FontState mStateFont;
 
     ScriptCState mScriptC;
     ShaderCache mShaderCache;
@@ -86,6 +88,7 @@ public:
     void setVertex(ProgramVertex *);
     void setFragment(ProgramFragment *);
     void setFragmentStore(ProgramStore *);
+    void setFont(Font *);
 
     void updateSurface(void *sur);
 
@@ -93,6 +96,7 @@ public:
     const ProgramStore * getFragmentStore() {return mFragmentStore.get();}
     const ProgramRaster * getRaster() {return mRaster.get();}
     const ProgramVertex * getVertex() {return mVertex.get();}
+    Font * getFont() {return mFont.get();}
 
     bool setupCheck();
     bool checkDriver() const {return mEGL.mSurface != 0;}
@@ -123,6 +127,9 @@ public:
     }
     ProgramRaster * getDefaultProgramRaster() const {
         return mStateRaster.mDefault.get();
+    }
+    Font* getDefaultFont() const {
+        return mStateFont.mDefault.get();
     }
 
     uint32_t getWidth() const {return mWidth;}
@@ -221,7 +228,7 @@ protected:
     ObjectBaseRef<ProgramVertex> mVertex;
     ObjectBaseRef<ProgramStore> mFragmentStore;
     ObjectBaseRef<ProgramRaster> mRaster;
-
+    ObjectBaseRef<Font> mFont;
 
     struct ObjDestroyOOB {
         Mutex mMutex;

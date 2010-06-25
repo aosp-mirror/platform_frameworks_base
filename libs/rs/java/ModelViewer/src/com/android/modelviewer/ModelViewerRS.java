@@ -57,6 +57,9 @@ public class ModelViewerRS {
 
     private SimpleMesh mMesh;
 
+    private Font mItalic;
+    private Allocation mTextAlloc;
+
     private ScriptC_Modelviewer mScript;
 
     int mLastX;
@@ -123,9 +126,15 @@ public class ModelViewerRS {
 
     private void loadImage() {
         mGridImage = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.robot, Element.RGB_565(mRS), true);
-        mGridImage.uploadToTexture(1);
+        mGridImage.uploadToTexture(0);
 
         mScript.set_gTGrid(mGridImage);
+    }
+
+    private void initTextAllocation() {
+        String allocString = "Displaying file: R.raw.robot";
+        mTextAlloc = Allocation.createFromString(mRS, allocString);
+        mScript.set_gTextAlloc(mTextAlloc);
     }
 
     private void initRS() {
@@ -147,6 +156,11 @@ public class ModelViewerRS {
             mMesh = (SimpleMesh)entry.getObject();
             mScript.set_gTestMesh(mMesh);
         }
+
+        mItalic = Font.create(mRS, mRes, "DroidSerif-Italic.ttf", 10);
+        mScript.set_gItalic(mItalic);
+
+        initTextAllocation();
 
         mRS.contextBindRootScript(mScript);
     }

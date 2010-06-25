@@ -309,6 +309,24 @@ static uint32_t SC_getHeight()
     return rsc->getHeight();
 }
 
+static void SC_DrawTextAlloc(RsAllocation va, int x, int y)
+{
+    GET_TLS();
+    Allocation *alloc = static_cast<Allocation *>(va);
+    rsc->mStateFont.renderText(alloc, x, y);
+}
+
+static void SC_DrawText(const char *text, int x, int y)
+{
+    GET_TLS();
+    rsc->mStateFont.renderText(text, x, y);
+}
+
+static void SC_BindFont(RsFont font)
+{
+    GET_TLS();
+    rsi_ContextBindFont(rsc, font);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
@@ -359,6 +377,11 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     { "rsgClearColor", (void *)&SC_ClearColor },
     { "rsgClearDepth", (void *)&SC_ClearDepth },
+
+    { "_Z11rsgDrawTextPKcii", (void *)&SC_DrawText },
+    { "_Z11rsgDrawText13rs_allocationii", (void *)&SC_DrawTextAlloc },
+
+    { "rsgBindFont", (void *)&SC_BindFont },
 
 
     //////////////////////////////////////

@@ -14,6 +14,8 @@
 
 #pragma version(1)
 
+#pragma rs java_package_name(com.android.modelviewer)
+
 #include "../../../../scriptc/rs_types.rsh"
 #include "../../../../scriptc/rs_math.rsh"
 #include "../../../../scriptc/rs_graphics.rsh"
@@ -28,7 +30,13 @@ rs_program_store gPFSBackground;
 
 float gRotate;
 
-#pragma rs export_var(gPVBackground, gPFBackground, gTGrid, gTestMesh, gPFSBackground, gRotate)
+rs_font gItalic;
+rs_allocation gTextAlloc;
+
+#pragma rs export_var(gPVBackground, gPFBackground, gTGrid, gTestMesh, gPFSBackground, gRotate, gItalic, gTextAlloc)
+
+float gDT;
+int64_t gLastTime;
 
 void init() {
     gRotate = 0.0f;
@@ -50,10 +58,17 @@ int root(int launchID) {
     // Position our model on the screen
     rsMatrixTranslate(&matrix, 0.0f, -0.3f, 1.2f);
     rsMatrixScale(&matrix, 0.2f, 0.2f, 0.2f);
+    rsMatrixRotate(&matrix, -25.0f, 1.0f, 0.0f, 0.0f);
     rsMatrixRotate(&matrix, gRotate, 0.0f, 1.0f, 0.0f);
     rsgProgramVertexLoadModelMatrix(&matrix);
 
     rsgDrawSimpleMesh(gTestMesh);
+
+    color(0.3f, 0.3f, 0.3f, 1.0f);
+    rsgDrawText("Renderscript model test", 30, 695);
+
+    rsgBindFont(gItalic);
+    rsgDrawText(gTextAlloc, 30, 730);
 
     return 10;
 }

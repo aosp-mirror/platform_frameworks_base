@@ -23,6 +23,10 @@ ContextBindProgramRaster {
 	param RsProgramRaster pgm
 	}
 
+ContextBindFont {
+	param RsFont pgm
+	}
+
 ContextPause {
 	}
 
@@ -465,6 +469,13 @@ FileA3DGetEntryByIndex {
 	param uint32_t index
 	param RsFile file
 	ret RsObjectBase
+	}
+
+FontCreateFromFile {
+	param const char *name
+	param uint32_t fontSize
+	param uint32_t dpi
+	ret RsFont
 	}
 
 SimpleMeshCreate {
