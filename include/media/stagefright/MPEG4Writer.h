@@ -36,7 +36,7 @@ public:
     MPEG4Writer(int fd);
 
     virtual status_t addSource(const sp<MediaSource> &source);
-    virtual status_t start();
+    virtual status_t start(MetaData *param = NULL);
     virtual bool reachedEOS();
     virtual void stop();
     virtual void pause();
@@ -83,6 +83,7 @@ private:
     int64_t getStartTimestampUs();  // Not const
     status_t startTracks();
     size_t numTracks();
+    int64_t estimateMoovBoxSize(int32_t bitRate);
 
     void lock();
     void unlock();

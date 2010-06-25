@@ -24,13 +24,14 @@
 namespace android {
 
 struct MediaSource;
+struct MetaData;
 
 struct MediaWriter : public RefBase {
     MediaWriter() {}
 
     virtual status_t addSource(const sp<MediaSource> &source) = 0;
     virtual bool reachedEOS() = 0;
-    virtual status_t start() = 0;
+    virtual status_t start(MetaData *params = NULL) = 0;
     virtual void stop() = 0;
     virtual void pause() = 0;
     virtual void setMaxFileSize(int64_t bytes) { mMaxFileSizeLimitBytes = bytes; }
