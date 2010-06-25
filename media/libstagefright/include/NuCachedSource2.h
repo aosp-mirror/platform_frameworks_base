@@ -49,8 +49,8 @@ private:
     friend struct AHandlerReflector<NuCachedSource2>;
 
     enum {
-        kPageSize            = 16384,
-        kHighWaterThreshold  = 3 * 1024 * 1024,
+        kPageSize            = 65536,
+        kHighWaterThreshold  = 5 * 1024 * 1024,
         kLowWaterThreshold   = 512 * 1024,
 
         // Read data after a 15 sec timeout whether we're actively
