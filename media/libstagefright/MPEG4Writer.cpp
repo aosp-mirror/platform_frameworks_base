@@ -41,7 +41,7 @@ public:
     Track(MPEG4Writer *owner, const sp<MediaSource> &source);
     ~Track();
 
-    status_t start(int64_t startTimeUs);
+    status_t start(MetaData *params);
     void stop();
     void pause();
     bool reachedEOS();
@@ -101,9 +101,13 @@ private:
     void *mCodecSpecificData;
     size_t mCodecSpecificDataSize;
     bool mGotAllCodecSpecificData;
+    bool mTrackingProgressStatus;
 
     bool mReachedEOS;
     int64_t mStartTimestampUs;
+    int64_t mPreviousTrackTimeUs;
+    int64_t mTrackEveryTimeDurationUs;
+    int32_t mTrackEveryNumberOfFrames;
 
     static void *ThreadWrapper(void *me);
     void threadEntry();
@@ -114,6 +118,8 @@ private:
     void logStatisticalData(bool isAudio);
     void findMinMaxFrameRates(float *minFps, float *maxFps);
     void findMinMaxChunkDurations(int64_t *min, int64_t *max);
+    void trackProgressStatus(int32_t nFrames, int64_t timeUs);
+    void initTrackingProgressStatus(MetaData *params);
 
     Track(const Track &);
     Track &operator=(const Track &);
@@ -162,11 +168,10 @@ status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {
     return OK;
 }
 
-status_t MPEG4Writer::startTracks() {
-    int64_t startTimeUs = systemTime() / 1000;
+status_t MPEG4Writer::startTracks(MetaData *params) {
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
-        status_t err = (*it)->start(startTimeUs);
+        status_t err = (*it)->start(params);
 
         if (err != OK) {
             for (List<Track *>::iterator it2 = mTracks.begin();
@@ -247,10 +252,11 @@ status_t MPEG4Writer::start(MetaData *param) {
     }
 
     mStartTimestampUs = -1;
+
     if (mStarted) {
         if (mPaused) {
             mPaused = false;
-            return startTracks();
+            return startTracks(param);
         }
         return OK;
     }
@@ -261,9 +267,18 @@ status_t MPEG4Writer::start(MetaData *param) {
     mMoovBoxBufferOffset = 0;
 
     beginBox("ftyp");
-      writeFourcc("isom");
+      {
+        int32_t fileType;
+        if (param && param->findInt32(kKeyFileType, &fileType) &&
+            fileType != OUTPUT_FORMAT_MPEG_4) {
+            writeFourcc("3gp4");
+        } else {
+            writeFourcc("isom");
+        }
+      }
       writeInt32(0);
       writeFourcc("isom");
+      writeFourcc("3gp4");
     endBox();
 
     mFreeBoxOffset = mOffset;
@@ -288,8 +303,7 @@ status_t MPEG4Writer::start(MetaData *param) {
     } else {
         write("\x00\x00\x00\x01mdat????????", 16);
     }
-
-    status_t err = startTracks();
+    status_t err = startTracks(param);
     if (err != OK) {
         return err;
     }
@@ -670,12 +684,40 @@ MPEG4Writer::Track::~Track() {
     }
 }
 
-status_t MPEG4Writer::Track::start(int64_t startTimeUs) {
+void MPEG4Writer::Track::initTrackingProgressStatus(MetaData *params) {
+    LOGV("initTrackingProgressStatus");
+    mPreviousTrackTimeUs = -1;
+    mTrackingProgressStatus = false;
+    mTrackEveryTimeDurationUs = 0;
+    mTrackEveryNumberOfFrames = 0;
+    {
+        int64_t timeUs;
+        if (params && params->findInt64(kKeyTrackTimeStatus, &timeUs)) {
+            LOGV("Receive request to track progress status for every %lld us", timeUs);
+            mTrackEveryTimeDurationUs = timeUs;
+            mTrackingProgressStatus = true;
+        }
+    }
+    {
+        int32_t nFrames;
+        if (params && params->findInt32(kKeyTrackFrameStatus, &nFrames)) {
+            LOGV("Receive request to track progress status for every %d frames", nFrames);
+            mTrackEveryNumberOfFrames = nFrames;
+            mTrackingProgressStatus = true;
+        }
+    }
+}
+
+status_t MPEG4Writer::Track::start(MetaData *params) {
     if (!mDone && mPaused) {
         mPaused = false;
         mResumed = true;
         return OK;
     }
+
+    int64_t startTimeUs;
+    CHECK(params && params->findInt64(kKeyTime, &startTimeUs));
+    initTrackingProgressStatus(params);
 
     sp<MetaData> meta = new MetaData;
     meta->setInt64(kKeyTime, startTimeUs);
@@ -848,8 +890,9 @@ void MPEG4Writer::Track::threadEntry() {
     int64_t previousPausedDurationUs = 0;
     sp<MetaData> meta_data;
 
+    status_t err = OK;
     MediaBuffer *buffer;
-    while (!mDone && mSource->read(&buffer) == OK) {
+    while (!mDone && (err = mSource->read(&buffer)) == OK) {
         if (buffer->range_length() == 0) {
             buffer->release();
             buffer = NULL;
@@ -1062,6 +1105,12 @@ void MPEG4Writer::Track::threadEntry() {
             mStssTableEntries.push_back(mSampleInfos.size());
         }
 
+        if (mTrackingProgressStatus) {
+            if (mPreviousTrackTimeUs <= 0) {
+                mPreviousTrackTimeUs = mStartTimestampUs;
+            }
+            trackProgressStatus(mSampleInfos.size(), timestampUs);
+        }
         if (mOwner->numTracks() == 1) {
             off_t offset = is_avc? mOwner->addLengthPrefixedSample_l(copy)
                                  : mOwner->addSample_l(copy);
@@ -1101,8 +1150,9 @@ void MPEG4Writer::Track::threadEntry() {
     }
 
     if (mSampleInfos.empty()) {
-        mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_STOP_PREMATURELY, 0);
+        err = UNKNOWN_ERROR;
     }
+    mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_COMPLETION_STATUS, err);
 
     // Last chunk
     if (mOwner->numTracks() == 1) {
@@ -1130,6 +1180,24 @@ void MPEG4Writer::Track::threadEntry() {
             count, nZeroLengthFrames, mSampleInfos.size(), is_audio? "audio": "video");
 
     logStatisticalData(is_audio);
+}
+
+void MPEG4Writer::Track::trackProgressStatus(int32_t nFrames, int64_t timeUs) {
+    LOGV("trackProgressStatus: %d frames and %lld us", nFrames, timeUs);
+    if (nFrames % mTrackEveryNumberOfFrames == 0) {
+        LOGV("Fire frame tracking progress status at frame %d", nFrames);
+        mOwner->notify(MEDIA_RECORDER_EVENT_INFO,
+                       MEDIA_RECORDER_INFO_PROGRESS_FRAME_STATUS,
+                       nFrames);
+    }
+
+    if (timeUs - mPreviousTrackTimeUs >= mTrackEveryTimeDurationUs) {
+        LOGV("Fire time tracking progress status at %lld us", timeUs);
+        mOwner->notify(MEDIA_RECORDER_EVENT_INFO,
+                       MEDIA_RECORDER_INFO_PROGRESS_TIME_STATUS,
+                       timeUs / 1000);
+        mPreviousTrackTimeUs = timeUs;
+    }
 }
 
 void MPEG4Writer::Track::findMinMaxFrameRates(float *minFps, float *maxFps) {
