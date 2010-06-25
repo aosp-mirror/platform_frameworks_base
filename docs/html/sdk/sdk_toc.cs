@@ -133,7 +133,6 @@
     </h2>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/requirements.html">SDK System Requirements</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
       <!-- <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release
             Notes</a></li> -->
       <li><a href="<?cs var:toroot ?>sdk/older_releases.html">SDK
