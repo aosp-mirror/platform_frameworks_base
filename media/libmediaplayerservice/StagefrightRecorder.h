@@ -72,6 +72,7 @@ private:
     output_format mOutputFormat;
     audio_encoder mAudioEncoder;
     video_encoder mVideoEncoder;
+    bool mUse64BitFileOffset;
     int32_t mVideoWidth, mVideoHeight;
     int32_t mFrameRate;
     int32_t mVideoBitRate;
@@ -100,6 +101,7 @@ private:
     status_t setParamAudioSamplingRate(int32_t sampleRate);
     status_t setParamInterleaveDuration(int32_t durationUs);
     status_t setParamIFramesInterval(int32_t interval);
+    status_t setParam64BitFileOffset(bool use64BitFileOffset);
     status_t setParamMaxDurationOrFileSize(int64_t limit, bool limit_is_duration);
     void clipVideoBitRate();
     void clipVideoFrameRate();

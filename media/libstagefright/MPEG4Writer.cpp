@@ -180,9 +180,70 @@ status_t MPEG4Writer::startTracks() {
     return OK;
 }
 
-status_t MPEG4Writer::start() {
+int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
+    // This implementation is highly experimental/heurisitic.
+    //
+    // Statistical analysis shows that metadata usually accounts
+    // for a small portion of the total file size, usually < 0.6%.
+    // Currently, lets set to 0.4% for now.
+
+    // The default MIN_MOOV_BOX_SIZE is set to 0.4% x 1MB,
+    // where 1MB is the common file size limit for MMS application.
+    // The default MAX _MOOV_BOX_SIZE value is based on about 4
+    // minute video recording with a bit rate about 3 Mbps, because
+    // statistics also show that most of the video captured are going
+    // to be less than 3 minutes.
+
+    // If the estimation is wrong, we will pay the price of wasting
+    // some reserved space. This should not happen so often statistically.
+    static const int32_t factor = mUse32BitOffset? 1: 2;
+    static const int64_t MIN_MOOV_BOX_SIZE = 4 * 1024;  // 4 KB
+    static const int64_t MAX_MOOV_BOX_SIZE = (180 * 3000000 * 6LL / 8000);
+    int64_t size = MIN_MOOV_BOX_SIZE;
+
+    if (mMaxFileSizeLimitBytes != 0) {
+        size = mMaxFileSizeLimitBytes * 4 / 1000;
+    } else if (mMaxFileDurationLimitUs != 0) {
+        if (bitRate <= 0) {
+            // We could not estimate the file size since bitRate is not set.
+            size = MIN_MOOV_BOX_SIZE;
+        } else {
+            size = ((mMaxFileDurationLimitUs * bitRate * 4) / 1000 / 8000000);
+        }
+    }
+    if (size < MIN_MOOV_BOX_SIZE) {
+        size = MIN_MOOV_BOX_SIZE;
+    }
+
+    // Any long duration recording will be probably end up with
+    // non-streamable mp4 file.
+    if (size > MAX_MOOV_BOX_SIZE) {
+        size = MAX_MOOV_BOX_SIZE;
+    }
+
+    LOGI("limits: %lld/%lld bytes/us, bit rate: %d bps and the estimated"
+         " moov size %lld bytes",
+         mMaxFileSizeLimitBytes, mMaxFileDurationLimitUs, bitRate, size);
+    return factor * size;
+}
+
+status_t MPEG4Writer::start(MetaData *param) {
     if (mFile == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    int32_t use64BitOffset;
+    if (param &&
+        param->findInt32(kKey64BitFileOffset, &use64BitOffset) &&
+        use64BitOffset) {
+        mUse32BitOffset = false;
+    }
+
+    // System property can overwrite the file offset bits parameter
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.record-64bits", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        mUse32BitOffset = false;
     }
 
     mStartTimestampUs = -1;
@@ -208,9 +269,11 @@ status_t MPEG4Writer::start() {
     mFreeBoxOffset = mOffset;
 
     if (mEstimatedMoovBoxSize == 0) {
-        // XXX: Estimate the moov box size
-        //      based on max file size or duration limit
-        mEstimatedMoovBoxSize = 0x0F00;
+        int32_t bitRate = -1;
+        if (param) {
+            param->findInt32(kKeyBitRate, &bitRate);
+        }
+        mEstimatedMoovBoxSize = estimateMoovBoxSize(bitRate);
     }
     CHECK(mEstimatedMoovBoxSize >= 8);
     fseeko(mFile, mFreeBoxOffset, SEEK_SET);
@@ -332,8 +395,7 @@ void MPEG4Writer::stop() {
         write(mMoovBoxBuffer, 1, mMoovBoxBufferOffset, mFile);
 
         // Free box
-        mFreeBoxOffset = mStreamableFile? mOffset: mFreeBoxOffset;
-        fseeko(mFile, mFreeBoxOffset, SEEK_SET);
+        fseeko(mFile, mOffset, SEEK_SET);
         writeInt32(mEstimatedMoovBoxSize - mMoovBoxBufferOffset);
         write("free", 4);
 
@@ -341,6 +403,8 @@ void MPEG4Writer::stop() {
         free(mMoovBoxBuffer);
         mMoovBoxBuffer = NULL;
         mMoovBoxBufferOffset = 0;
+    } else {
+        LOGI("The mp4 file will not be streamable.");
     }
 
     CHECK(mBoxes.empty());

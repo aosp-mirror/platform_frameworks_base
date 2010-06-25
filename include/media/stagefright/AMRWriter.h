@@ -26,6 +26,7 @@
 namespace android {
 
 struct MediaSource;
+struct MetaData;
 
 struct AMRWriter : public MediaWriter {
     AMRWriter(const char *filename);
@@ -35,7 +36,7 @@ struct AMRWriter : public MediaWriter {
 
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual bool reachedEOS();
-    virtual status_t start();
+    virtual status_t start(MetaData *params = NULL);
     virtual void stop();
     virtual void pause();
 
