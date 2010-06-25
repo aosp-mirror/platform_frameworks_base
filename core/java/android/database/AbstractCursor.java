@@ -204,7 +204,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      * @param window
      */
     public void fillWindow(int position, CursorWindow window) {
-        if (position < 0 || position > getCount()) {
+        if (position < 0 || position >= getCount()) {
             return;
         }
         window.acquireReference();
