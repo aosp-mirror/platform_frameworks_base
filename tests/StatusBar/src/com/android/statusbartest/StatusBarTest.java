@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.view.View;
 import android.widget.ListView;
 import android.content.Intent;
+import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.StatusBarManager;
@@ -35,6 +36,8 @@ import android.os.SystemClock;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import android.os.PowerManager;
+import android.view.Window;
+import android.view.WindowManager;
 
 public class StatusBarTest extends TestActivity
 {
@@ -57,6 +60,53 @@ public class StatusBarTest extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+        new Test("Hide") {
+            public void run() {
+                Window win = getWindow();
+                WindowManager.LayoutParams winParams = win.getAttributes();
+                winParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                win.setAttributes(winParams);
+            }
+        },
+        new Test("Show") {
+            public void run() {
+                Window win = getWindow();
+                WindowManager.LayoutParams winParams = win.getAttributes();
+                winParams.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                win.setAttributes(winParams);
+            }
+        },
+        new Test("Immersive: Enter") {
+            public void run() {
+                setImmersive(true);
+            }
+        },
+        new Test("Immersive: Exit") {
+            public void run() {
+                setImmersive(false);
+            }
+        },
+        new Test("Priority notification") {
+            public void run() {
+                Notification not = new Notification(StatusBarTest.this,
+                                R.drawable.ic_statusbar_missedcall,
+                                "tick tick tick",
+                                System.currentTimeMillis()-(1000*60*60*24),
+                                "(453) 123-2328",
+                                "", null
+                                );
+                not.flags |= Notification.FLAG_HIGH_PRIORITY;
+                Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
+                int id = (int)System.currentTimeMillis(); // XXX HAX
+                fullScreenIntent.putExtra("id", id);
+                not.fullScreenIntent = PendingIntent.getActivity(
+                    StatusBarTest.this,
+                    0,
+                    fullScreenIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+                mNotificationManager.notify(id, not);
+            }
+        },
         new Test("Disable Alerts") {
             public void run() {
                 mStatusBarManager.disable(StatusBarManager.DISABLE_NOTIFICATION_ALERTS);
