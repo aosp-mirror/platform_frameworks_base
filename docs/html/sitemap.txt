@@ -7,7 +7,6 @@ http://developer.android.com/resources/index.html
 http://developer.android.com/videos/index.html
 http://developer.android.com/resources/dashboard/platform-versions.html
 http://developer.android.com/license.html
-http://developer.android.com/sdk/terms.html
 http://developer.android.com/resources/community-groups.html
 http://developer.android.com/resources/community-more.html
 http://developer.android.com/resources/articles/index.html
