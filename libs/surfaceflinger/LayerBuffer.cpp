@@ -315,7 +315,8 @@ void LayerBuffer::Source::unregisterBuffers() {
 
 LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         const ISurface::BufferHeap& buffers)
-    : Source(layer), mStatus(NO_ERROR), mBufferSize(0)
+    : Source(layer), mStatus(NO_ERROR), mBufferSize(0),
+      mTextureManager(layer.mFlags)
 {
     if (buffers.heap == NULL) {
         // this is allowed, but in this case, it is illegal to receive
@@ -373,11 +374,11 @@ LayerBuffer::BufferSource::~BufferSource()
 
     if (mTexture.name != -1U) {
         // GL textures can only be destroyed from the GL thread
-        getFlinger()->mEventQueue.postMessage(
-                new MessageDestroyTexture(getFlinger(), mTexture.name) );
+        mLayer.mFlinger->mEventQueue.postMessage(
+                new MessageDestroyTexture(mLayer.mFlinger.get(), mTexture.name) );
     }
     if (mTexture.image != EGL_NO_IMAGE_KHR) {
-        EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
+        EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
         eglDestroyImageKHR(dpy, mTexture.image);
     }
 }
@@ -443,7 +444,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     const Rect transformedBounds(mLayer.getTransformedBounds());
 
 #if defined(EGL_ANDROID_image_native_buffer)
-    if (GLExtensions::getInstance().haveDirectTexture()) {
+    if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         err = INVALID_OPERATION;
         if (ourBuffer->supportsCopybit()) {
             copybit_device_t* copybit = mLayer.mBlitEngine;
@@ -548,7 +549,7 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
         dst.crop.r = w;
         dst.crop.b = h;
 
-        EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
+        EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
         err = mTextureManager.initEglImage(&mTexture, dpy, buffer);
     }
 
@@ -558,7 +559,7 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
 void LayerBuffer::BufferSource::clearTempBufferImage() const
 {
     // delete the image
-    EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
+    EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
     eglDestroyImageKHR(dpy, mTexture.image);
 
     // and the associated texture (recreate a name)
@@ -575,7 +576,7 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
     : Source(layer), mVisibilityChanged(false),
     mOverlay(0), mOverlayHandle(0), mOverlayDevice(0), mOrientation(orientation)
 {
-    overlay_control_device_t* overlay_dev = getFlinger()->getOverlayEngine();
+    overlay_control_device_t* overlay_dev = mLayer.mFlinger->getOverlayEngine();
     if (overlay_dev == NULL) {
         // overlays not supported
         return;
@@ -606,7 +607,7 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
 
     *overlayRef = new OverlayRef(mOverlayHandle, channel,
             mWidth, mHeight, mFormat, mWidthStride, mHeightStride);
-    getFlinger()->signalEvent();
+    mLayer.mFlinger->signalEvent();
 }
 
 LayerBuffer::OverlaySource::~OverlaySource()

@@ -29,8 +29,6 @@
 
 #include <pixelflinger/pixelflinger.h>
 
-#include "GLExtensions.h"
-
 #include "DisplayHardware/DisplayHardwareBase.h"
 
 struct overlay_control_device_t;
@@ -45,11 +43,13 @@ class DisplayHardware : public DisplayHardwareBase
 {
 public:
     enum {
-        COPY_BITS_EXTENSION         = 0x00000008,
-        BUFFER_PRESERVED            = 0x00010000,
-        PARTIAL_UPDATES             = 0x00020000,   // video driver feature
-        SLOW_CONFIG                 = 0x00040000,   // software
-        SWAP_RECTANGLE              = 0x00080000,
+        DIRECT_TEXTURE          = 0x00000002,
+        COPY_BITS_EXTENSION     = 0x00000008,
+        NPOT_EXTENSION          = 0x00000100,
+        BUFFER_PRESERVED        = 0x00010000,
+        PARTIAL_UPDATES         = 0x00020000,   // video driver feature
+        SLOW_CONFIG             = 0x00040000,   // software
+        SWAP_RECTANGLE          = 0x00080000,
     };
 
     DisplayHardware(
