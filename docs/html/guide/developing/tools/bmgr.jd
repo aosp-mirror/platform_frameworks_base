@@ -15,6 +15,11 @@ page.title=bmgr
 <li><a href="#other">Other Commands</a></li>
   </ol>
 
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a></li>
+  </ol>
+
 </div>
 </div>
 
@@ -26,6 +31,9 @@ and restore operations so that you don't need to repeatedly wipe data or take si
 intrusive steps in order to test your application's backup agent.  These commands are
 accessed via the <a href="{@docRoot}guide/developing/tools/adb.html">adb</a> shell.
 
+<p>For information about adding support for backup in your application, read <a
+href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>, which includes a guide to testing
+your application using {@code bmgr}.</p>
 
 
 <h2 id="backup">Forcing a Backup Operation</h2>
@@ -90,6 +98,8 @@ will happen even if your application is not currently running.
 
 <h2 id="other">Other Commands</h2>
 
+<h3>Wiping data</h3>
+
 <p>The data for a single application can be erased from the active data set on demand.  This is
 very useful while you're developing a backup agent, in case bugs lead you to write corrupt data
 or saved state information. You can wipe an application's data with the <code>bmgr wipe</code>
@@ -101,6 +111,9 @@ command:
 you wish to
 erase.  The next backup operation that the application's agent processes will look as
 though the application had never backed anything up before.
+
+
+<h3>Enabling and disabling backup</h3>
 
 <p>You can see whether the Backup Manager is operational at all with the <code>bmgr
 enabled</code> command:
