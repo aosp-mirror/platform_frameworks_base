@@ -43,7 +43,6 @@ enum {
     kKeyVorbisInfo        = 'vinf',  // raw data
     kKeyVorbisBooks       = 'vboo',  // raw data
     kKeyWantsNALFragments = 'NALf',
-    kKey64BitFileOffset   = 'fobt',  // int32_t (bool)
     kKeyIsSyncFrame       = 'sync',  // int32_t (bool)
     kKeyIsCodecConfig     = 'conf',  // int32_t (bool)
     kKeyTime              = 'time',  // int64_t (usecs)
@@ -69,6 +68,21 @@ enum {
     kKeyDiscNumber        = 'dnum',  // cstring
     kKeyDate              = 'date',  // cstring
     kKeyWriter            = 'writ',  // cstring
+
+    // Set this key to enable authoring files in 64-bit offset
+    kKey64BitFileOffset   = 'fobt',  // int32_t (bool)
+
+    // Identify the file output format for authoring
+    // Please see <media/mediarecorder.h> for the supported
+    // file output formats.
+    kKeyFileType          = 'ftyp',  // int32_t
+
+    // Track authoring progress status
+    // kKeyTrackTimeStatus is used to track progress in elapsed time
+    // kKeyTrackFrameStatus is used to track progress in authored frames
+    kKeyTrackFrameStatus  = 'tkfm',  // int32_t
+    kKeyTrackTimeStatus   = 'tktm',  // int64_t
+
 };
 
 enum {

@@ -310,8 +310,8 @@ status_t StagefrightRecorder::setParamInterleaveDuration(int32_t durationUs) {
 // If interval <  0, only the first frame is I frame, and rest are all P frames
 // If interval == 0, all frames are encoded as I frames. No P frames
 // If interval >  0, it is the time spacing between 2 neighboring I frames
-status_t StagefrightRecorder::setParamIFramesInterval(int32_t interval) {
-    LOGV("setParamIFramesInterval: %d seconds", interval);
+status_t StagefrightRecorder::setParamVideoIFramesInterval(int32_t interval) {
+    LOGV("setParamVideoIFramesInterval: %d seconds", interval);
     mIFramesInterval = interval;
     return OK;
 }
@@ -320,6 +320,33 @@ status_t StagefrightRecorder::setParam64BitFileOffset(bool use64Bit) {
     LOGV("setParam64BitFileOffset: %s",
         use64Bit? "use 64 bit file offset": "use 32 bit file offset");
     mUse64BitFileOffset = use64Bit;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamVideoCameraId(int32_t cameraId) {
+    LOGV("setParamVideoCameraId: %d", cameraId);
+    if (cameraId < 0) {
+        return BAD_VALUE;
+    }
+    mCameraId = cameraId;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamTrackFrameStatus(int32_t nFrames) {
+    LOGV("setParamTrackFrameStatus: %d", nFrames);
+    if (nFrames <= 0) {
+        return BAD_VALUE;
+    }
+    mTrackEveryNumberOfFrames = nFrames;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamTrackTimeStatus(int64_t timeDurationUs) {
+    LOGV("setParamTrackTimeStatus: %lld", timeDurationUs);
+    if (timeDurationUs < 20000) {  // Infeasible if shorter than 20 ms?
+        return BAD_VALUE;
+    }
+    mTrackEveryTimeDurationUs = timeDurationUs;
     return OK;
 }
 
@@ -337,6 +364,26 @@ status_t StagefrightRecorder::setParameter(
         if (safe_strtoi64(value.string(), &max_filesize_bytes)) {
             return setParamMaxDurationOrFileSize(
                     max_filesize_bytes, false /* limit is filesize */);
+        }
+    } else if (key == "interleave-duration-us") {
+        int32_t durationUs;
+        if (safe_strtoi32(value.string(), &durationUs)) {
+            return setParamInterleaveDuration(durationUs);
+        }
+    } else if (key == "param-use-64bit-offset") {
+        int32_t use64BitOffset;
+        if (safe_strtoi32(value.string(), &use64BitOffset)) {
+            return setParam64BitFileOffset(use64BitOffset != 0);
+        }
+    } else if (key == "param-track-frame-status") {
+        int32_t nFrames;
+        if (safe_strtoi32(value.string(), &nFrames)) {
+            return setParamTrackFrameStatus(nFrames);
+        }
+    } else if (key == "param-track-time-status") {
+        int64_t timeDurationUs;
+        if (safe_strtoi64(value.string(), &timeDurationUs)) {
+            return setParamTrackTimeStatus(timeDurationUs);
         }
     } else if (key == "audio-param-sampling-rate") {
         int32_t sampling_rate;
@@ -358,20 +405,15 @@ status_t StagefrightRecorder::setParameter(
         if (safe_strtoi32(value.string(), &video_bitrate)) {
             return setParamVideoEncodingBitRate(video_bitrate);
         }
-    } else if (key == "param-interleave-duration-us") {
-        int32_t durationUs;
-        if (safe_strtoi32(value.string(), &durationUs)) {
-            return setParamInterleaveDuration(durationUs);
-        }
-    } else if (key == "param-i-frames-interval") {
+    } else if (key == "video-param-i-frames-interval") {
         int32_t interval;
         if (safe_strtoi32(value.string(), &interval)) {
-            return setParamIFramesInterval(interval);
+            return setParamVideoIFramesInterval(interval);
         }
-    } else if (key == "param-use-64bit-offset") {
-        int32_t use64BitOffset;
-        if (safe_strtoi32(value.string(), &use64BitOffset)) {
-            return setParam64BitFileOffset(use64BitOffset != 0);
+    } else if (key == "video-param-camera-id") {
+        int32_t cameraId;
+        if (safe_strtoi32(value.string(), &cameraId)) {
+            return setParamVideoCameraId(cameraId);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -677,7 +719,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
 
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         if (mCamera == 0) {
-            mCamera = Camera::connect(0);
+            mCamera = Camera::connect(mCameraId);
             mCamera->lock();
         }
 
@@ -778,8 +820,16 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     }
     mWriter->setListener(mListener);
     sp<MetaData> meta = new MetaData;
+    meta->setInt64(kKeyTime, systemTime() / 1000);
+    meta->setInt32(kKeyFileType, mOutputFormat);
     meta->setInt32(kKeyBitRate, totalBitRate);
     meta->setInt32(kKey64BitFileOffset, mUse64BitFileOffset);
+    if (mTrackEveryNumberOfFrames > 0) {
+        meta->setInt32(kKeyTrackFrameStatus, mTrackEveryNumberOfFrames);
+    }
+    if (mTrackEveryTimeDurationUs > 0) {
+        meta->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
+    }
     mWriter->start(meta.get());
     return OK;
 }
@@ -842,6 +892,9 @@ status_t StagefrightRecorder::reset() {
     mIFramesInterval = 1;
     mAudioSourceNode = 0;
     mUse64BitFileOffset = false;
+    mCameraId        = 0;
+    mTrackEveryNumberOfFrames = 0;
+    mTrackEveryTimeDurationUs = 0;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;
