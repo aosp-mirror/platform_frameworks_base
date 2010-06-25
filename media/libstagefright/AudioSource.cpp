@@ -78,6 +78,8 @@ status_t AudioSource::start(MetaData *params) {
         mCollectStats = true;
     }
 
+    mTrackMaxAmplitude = false;
+    mMaxAmplitude = 0;
     mStartTimeUs = 0;
     int64_t startTimeUs;
     if (params && params->findInt64(kKeyTime, &startTimeUs)) {
@@ -168,6 +170,10 @@ status_t AudioSource::read(
         return (status_t)n;
     }
 
+    if (mTrackMaxAmplitude) {
+        trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
+    }
+
     uint32_t sampleRate = mRecord->getSampleRate();
     int64_t timestampUs = (1000000LL * numFramesRecorded) / sampleRate + mStartTimeUs;
     buffer->meta_data()->setInt64(kKeyTime, timestampUs);
@@ -179,6 +185,29 @@ status_t AudioSource::read(
     *out = buffer;
 
     return OK;
+}
+
+void AudioSource::trackMaxAmplitude(int16_t *data, int nSamples) {
+    for (int i = nSamples; i > 0; --i) {
+        int16_t value = *data++;
+        if (value < 0) {
+            value = -value;
+        }
+        if (mMaxAmplitude < value) {
+            mMaxAmplitude = value;
+        }
+    }
+}
+
+int16_t AudioSource::getMaxAmplitude() {
+    // First call activates the tracking.
+    if (!mTrackMaxAmplitude) {
+        mTrackMaxAmplitude = true;
+    }
+    int16_t value = mMaxAmplitude;
+    mMaxAmplitude = 0;
+    LOGV("max amplitude since last call: %d", value);
+    return value;
 }
 
 }  // namespace android
