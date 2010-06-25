@@ -19,16 +19,12 @@ package android.webkit;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
-import android.graphics.Picture;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-
-import java.io.File;
-import java.io.FileOutputStream;
 
 /**
  * The ZoomManager is responsible for maintaining the WebView's current zoom
@@ -71,6 +67,15 @@ class ZoomManager {
 
     // Locks the minimum ZoomScale to the value currently set in mMinZoomScale.
     private boolean mMinZoomScaleFixed = true;
+
+    /*
+     * When loading a new page the WebView does not initially know the final
+     * width of the page. Therefore, when a new page is loaded in overview mode
+     * the overview scale is initialized to a default value. This flag is then
+     * set and used to notify the ZoomManager to take the width of the next
+     * picture from webkit and use that width to enter into zoom overview mode.
+     */
+    private boolean mInitialZoomOverview = false;
 
     /*
      * When in the zoom overview mode, the page's width is fully fit to the
@@ -724,8 +729,9 @@ class ZoomManager {
             mMinZoomScale = zoomOverviewScale;
         }
         // fit the content width to the current view. Ignore the rounding error case.
-        if (!mWebView.drawHistory() && mInZoomOverview
+        if (!mWebView.drawHistory() && (mInZoomOverview || mInitialZoomOverview)
                 && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1) {
+            mInitialZoomOverview = false;
             setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale));
         }
     }
@@ -758,6 +764,7 @@ class ZoomManager {
             } else {
                 WebSettings settings = mWebView.getSettings();
                 if (settings.getUseWideViewPort() && settings.getLoadWithOverviewMode()) {
+                    mInitialZoomOverview = true;
                     scale = (float) mWebView.getViewWidth() / WebView.DEFAULT_VIEWPORT_WIDTH;
                 } else {
                     scale = restoreState.mTextWrapScale;
