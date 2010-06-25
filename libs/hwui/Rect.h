@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RECT_H
-#define ANDROID_RECT_H
+#ifndef ANDROID_UI_RECT_H
+#define ANDROID_UI_RECT_H
 
 namespace android {
+namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structs
@@ -29,7 +30,19 @@ struct Rect {
 	float right;
 	float bottom;
 
-	Rect(): left(0), top(0), right(0), bottom(0) { }
+	Rect():
+			left(0),
+			top(0),
+			right(0),
+			bottom(0) {
+	}
+
+	Rect(float left, float top, float right, float bottom):
+			left(left),
+			top(top),
+			right(right),
+			bottom(bottom) {
+	}
 
 	Rect(const Rect& r) {
 		set(r);
@@ -120,6 +133,7 @@ struct Rect {
 
 }; // struct Rect
 
+}; // namespace uirenderer
 }; // namespace android
 
 #endif // ANDROID_RECT_H

@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_OPENGL_RENDERER_H
-#define ANDROID_OPENGL_RENDERER_H
+#ifndef ANDROID_UI_OPENGL_RENDERER_H
+#define ANDROID_UI_OPENGL_RENDERER_H
+
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <SkMatrix.h>
 #include <SkXfermode.h>
 
+#include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
 
 #include "Matrix.h"
 #include "Rect.h"
 
 namespace android {
+namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Support
@@ -36,13 +41,19 @@ public:
 	Snapshot() {
 	}
 
-	Snapshot(const sp<Snapshot> s): transform(s->transform), clipRect(s->clipRect),
-				flags(0), previous(s) {
+	Snapshot(const sp<Snapshot> s):
+			transform(s->transform),
+			clipRect(s->clipRect),
+			flags(kFlagDirtyTransform),
+			previous(s) {
 	}
 
 	enum Flags {
 		kFlagClipSet = 0x1,
+		kFlagDirtyTransform = 0x2,
 	};
+
+	const Rect& getMappedClip();
 
 	// Local transformations
 	mat4 transform;
@@ -55,7 +66,58 @@ public:
 
 	// Previous snapshot in the frames stack
 	sp<Snapshot> previous;
-}; // struct Snapshot
+
+private:
+	// Clipping rectangle mapped with the transform
+	Rect mappedClip;
+}; // class Snapshot
+
+struct Vertex {
+	float position[2];
+	float color[4];
+}; // struct Vertex
+
+typedef char* shader;
+
+class Program: public LightRefBase<Program> {
+public:
+	Program(const char* vertex, const char* fragment);
+	~Program();
+
+	void use();
+
+protected:
+	int addAttrib(const char* name);
+	int getAttrib(const char* name);
+
+	int addUniform(const char* name);
+	int getUniform(const char* name);
+
+private:
+	GLuint buildShader(const char* source, GLenum type);
+
+	// Handle of the OpenGL program
+	GLuint id;
+
+	// Handles of the shaders
+	GLuint vertexShader;
+	GLuint fragmentShader;
+
+	// Keeps track of attributes and uniforms slots
+	KeyedVector<const char*, int> attributes;
+	KeyedVector<const char*, int> uniforms;
+}; // class Program
+
+class DrawColorProgram: public Program {
+public:
+	DrawColorProgram();
+
+	int position;
+	int color;
+
+	int projection;
+	int modelView;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
@@ -82,6 +144,7 @@ public:
     void getMatrix(SkMatrix* matrix);
     void concatMatrix(SkMatrix* matrix);
 
+    const Rect& getClipBounds();
     bool clipRect(float left, float top, float right, float bottom);
 
     void drawColor(int color, SkXfermode::Mode mode);
@@ -104,8 +167,12 @@ private:
     Snapshot mFirstSnapshot;
     // Current state
     sp<Snapshot> mSnapshot;
+
+    // Shaders
+    sp<DrawColorProgram> mDrawColorShader;
 }; // class OpenGLRenderer
 
+}; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_OPENGL_RENDERER_H
+#endif // ANDROID_UI_OPENGL_RENDERER_H

@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_MATRIX_H
-#define ANDROID_MATRIX_H
+#ifndef ANDROID_UI_MATRIX_H
+#define ANDROID_UI_MATRIX_H
 
 #include <SkMatrix.h>
 
+#include "Rect.h"
+
 namespace android {
+namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -83,6 +86,8 @@ public:
 	void copyTo(float* v) const;
 	void copyTo(SkMatrix& v) const;
 
+	void mapRect(Rect& r) const;
+
 	void dump() const;
 
 private:
@@ -103,6 +108,7 @@ private:
 
 typedef Matrix4 mat4;
 
+}; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_MATRIX_H
+#endif // ANDROID_UI_MATRIX_H

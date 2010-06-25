@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "UIMatrix"
+#define LOG_TAG "Matrix"
 
 #include <math.h>
 #include <stdlib.h>
@@ -27,6 +27,7 @@
 #include "Matrix.h"
 
 namespace android {
+namespace uirenderer {
 
 void Matrix4::loadIdentity() {
 	mMat[0]  = 1.0f;
@@ -175,6 +176,21 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
     mMat[14] = -(far + near) / (far - near);
 }
 
+#define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
+
+void Matrix4::mapRect(Rect& r) const {
+	const float sx = mMat[0];
+	const float sy = mMat[5];
+
+	const float tx = mMat[12];
+	const float ty = mMat[13];
+
+	MUL_ADD_STORE(r.left, sx, tx);
+	MUL_ADD_STORE(r.right, sx, tx);
+	MUL_ADD_STORE(r.top, sy, ty);
+	MUL_ADD_STORE(r.bottom, sy, ty);
+}
+
 void Matrix4::dump() const {
 	LOGD("Matrix4[");
 	LOGD("  %f %f %f %f", mMat[0], mMat[4], mMat[ 8], mMat[12]);
@@ -184,4 +200,5 @@ void Matrix4::dump() const {
 	LOGD("]");
 }
 
-};
+}; // namespace uirenderer
+}; // namespace android
