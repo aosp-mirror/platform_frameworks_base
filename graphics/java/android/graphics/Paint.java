@@ -27,7 +27,11 @@ import android.text.TextUtils;
  */
 public class Paint {
 
-    /*package*/ int     mNativePaint;
+    /**
+     * @hide
+     */
+    public int mNativePaint;
+
     private ColorFilter mColorFilter;
     private MaskFilter  mMaskFilter;
     private PathEffect  mPathEffect;

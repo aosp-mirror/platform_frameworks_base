@@ -30,6 +30,8 @@ namespace uirenderer {
 
 class Matrix4 {
 public:
+	float data[16];
+
 	Matrix4() {
 		loadIdentity();
 	}
@@ -92,14 +94,12 @@ public:
 
 private:
     inline float get(int i, int j) const {
-        return mMat[i * 4 + j];
+        return data[i * 4 + j];
     }
 
     inline void set(int i, int j, float v) {
-    	mMat[i * 4 + j] = v;
+    	data[i * 4 + j] = v;
     }
-
-	float mMat[16];
 }; // class Matrix4
 
 ///////////////////////////////////////////////////////////////////////////////

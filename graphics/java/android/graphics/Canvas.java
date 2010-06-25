@@ -653,7 +653,11 @@ public class Canvas {
         EdgeType(int nativeInt) {
             this.nativeInt = nativeInt;
         }
-        final int nativeInt;
+
+        /**
+         * @hide
+         */
+        public final int nativeInt;
     }
 
     /**

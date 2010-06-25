@@ -193,9 +193,11 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
-        // TODO: Implement
-        return false;
+        return nQuickReject(mRenderer, left, top, right, bottom, type.nativeInt);
     }
+    
+    private native boolean nQuickReject(int renderer, float left, float top,
+            float right, float bottom, int edge);
 
     @Override
     public boolean quickReject(Path path, EdgeType type) {
@@ -480,17 +482,20 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawRect(float left, float top, float right, float bottom, Paint paint) {
-        // TODO: Implement
+        nDrawRect(mRenderer, left, top, right, bottom, paint.mNativePaint);
     }
+
+    private native void nDrawRect(int renderer, float left, float top, float right, float bottom,
+            int paint);
 
     @Override
     public void drawRect(Rect r, Paint paint) {
-        // TODO: Implement
+        drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
 
     @Override
-    public void drawRect(RectF rect, Paint paint) {
-        // TODO: Implement
+    public void drawRect(RectF r, Paint paint) {
+        drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
 
     @Override

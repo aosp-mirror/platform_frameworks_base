@@ -27,6 +27,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <SkPaint.h>
 #include <SkXfermode.h>
 
 #include "OpenGLRenderer.h"
@@ -39,20 +40,20 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define SOLID_WHITE { 1.0f, 1.0f, 1.0f, 1.0f }
-
-#define P(x, y) { x, y }
+#define V(x, y) { { x, y } }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
-const Vertex gDrawColorVertices[] = {
-		{ P(0.0f, 0.0f), SOLID_WHITE },
-		{ P(1.0f, 0.0f), SOLID_WHITE },
-		{ P(0.0f, 1.0f), SOLID_WHITE },
-		{ P(1.0f, 1.0f), SOLID_WHITE }
+const SimpleVertex gDrawColorVertices[] = {
+		V(0.0f, 0.0f),
+		V(1.0f, 0.0f),
+		V(0.0f, 1.0f),
+		V(1.0f, 1.0f)
 };
+const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
+const GLsizei gDrawColorVertexCount = 4;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shaders
@@ -142,6 +143,15 @@ DrawColorProgram::DrawColorProgram():
 	color = addAttrib("color");
 	projection = addUniform("projection");
 	modelView = addUniform("modelView");
+	transform = addUniform("transform");
+}
+
+void DrawColorProgram::use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
+        const GLfloat* transformMatrix) {
+	Program::use();
+	glUniformMatrix4fv(projection, 1, GL_FALSE, projectionMatrix);
+	glUniformMatrix4fv(modelView, 1, GL_FALSE, modelViewMatrix);
+	glUniformMatrix4fv(transform, 1, GL_FALSE, transformMatrix);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,7 +189,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
 
     mat4 ortho;
-    ortho.loadOrtho(0, width, height, 0, 0, 1);
+    ortho.loadOrtho(0, width, height, 0, -1, 1);
     ortho.copyTo(mOrthoMatrix);
 
     mWidth = width;
@@ -196,6 +206,7 @@ void OpenGLRenderer::prepare() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, mWidth, mHeight);
 
     mSnapshot->clipRect.set(0.0f, 0.0f, mWidth, mHeight);
 }
@@ -291,11 +302,29 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 
 void OpenGLRenderer::setScissorFromClip() {
 	const Rect& clip = mSnapshot->getMappedClip();
-	glScissor(clip.left, clip.top, clip.getWidth(), clip.getHeight());
+	glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
 	return mSnapshot->clipRect;
+}
+
+bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
+    /*
+     * The documentation of quickReject() indicates that the specified rect
+     * is transformed before being compared to the clip rect. However, the
+     * clip rect is not stored transformed in the snapshot and can thus be
+     * compared directly
+     *
+     * The following code can be used instead to performed a mapped comparison:
+     *
+     *     mSnapshot->transform.mapRect(r);
+     *     const Rect& clip = mSnapshot->getMappedClip();
+     *     return !clip.intersects(r);
+     */
+
+    Rect r(left, top, right, bottom);
+    return !mSnapshot->clipRect.intersects(r);
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) {
@@ -312,40 +341,38 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-	GLfloat a = ((color >> 24) & 0xFF) / 255.0f;
-	GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
-	GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
-	GLfloat b = ((color      ) & 0xFF) / 255.0f;
+    // TODO: Set the transfer mode
+    const Rect& clip = mSnapshot->clipRect;
+    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color);
+}
 
-	// TODO Optimize this section
-	const Rect& clip = mSnapshot->getMappedClip();
+void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* paint) {
+    // TODO Support more than  just color
+    // TODO: Set the transfer mode
+    drawColorRect(left, top, right, bottom, paint->getColor());
+}
 
-	mat4 modelView;
-	modelView.loadScale(clip.getWidth(), clip.getHeight(), 1.0f);
-	modelView.translate(clip.left, clip.top, 0.0f);
+void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom, int color) {
+    GLfloat a = ((color >> 24) & 0xFF) / 255.0f;
+    GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
+    GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
+    GLfloat b = ((color      ) & 0xFF) / 255.0f;
 
-	float matrix[16];
-	modelView.copyTo(matrix);
-	// TODO Optimize this section
+    mModelView.loadTranslate(left, top, 0.0f);
+    mModelView.scale(right - left, bottom - top, 1.0f);
 
-	mDrawColorShader->use();
+    mDrawColorShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
 
-	glUniformMatrix4fv(mDrawColorShader->projection, 1, GL_FALSE, &mOrthoMatrix[0]);
-	glUniformMatrix4fv(mDrawColorShader->modelView, 1, GL_FALSE, &matrix[0]);
+    const GLvoid* p = &gDrawColorVertices[0].position[0];
 
-	glEnableVertexAttribArray(mDrawColorShader->position);
+    glEnableVertexAttribArray(mDrawColorShader->position);
+    glVertexAttribPointer(mDrawColorShader->position, 2, GL_FLOAT, GL_FALSE,
+            gDrawColorVertexStride, p);
+    glVertexAttrib4f(mDrawColorShader->color, r, g, b, a);
 
-	GLsizei stride = sizeof(Vertex);
-	const GLvoid* p = &gDrawColorVertices[0].position[0];
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
 
-	glVertexAttribPointer(mDrawColorShader->position, 2, GL_FLOAT, GL_FALSE, stride, p);
-	glVertexAttrib4f(mDrawColorShader->color, r, g, b, a);
-
-	GLsizei vertexCount = sizeof(gDrawColorVertices) / sizeof(Vertex);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
-
-	glDisableVertexAttribArray(mDrawColorShader->position);
-	glDisableVertexAttribArray(mDrawColorShader->color);
+    glDisableVertexAttribArray(mDrawColorShader->position);
 }
 
 }; // namespace uirenderer
