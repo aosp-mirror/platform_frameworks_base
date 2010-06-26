@@ -278,30 +278,34 @@ class GLES20Canvas extends Canvas {
     
     @Override
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
-        // TODO: Implement
-        return 0;
+        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
     }
 
     @Override
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
             int saveFlags) {
-        // TODO: Implement
-        return 0;
+        int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        return nSaveLayer(mRenderer, left, top, right, bottom, nativePaint, saveFlags);
     }
+
+    private native int nSaveLayer(int renderer, float left, float top, float right, float bottom,
+            int paint, int saveFlags);
 
     @Override
     public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
-        // TODO: Implement
-        return 0;
+        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                alpha, saveFlags);
     }
 
     @Override
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             int saveFlags) {
-        // TODO: Implement
-        return 0;
+        return nSaveLayerAlpha(mRenderer, left, top, right, bottom, alpha, saveFlags);
     }
 
+    private native int nSaveLayerAlpha(int renderer, float left, float top, float right,
+            float bottom, int alpha, int saveFlags);
+    
     @Override
     public void restore() {
         nRestore(mRenderer);

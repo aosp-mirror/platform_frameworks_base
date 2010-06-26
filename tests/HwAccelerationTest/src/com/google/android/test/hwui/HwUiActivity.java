@@ -22,7 +22,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.FrameLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class HwUiActivity extends Activity {
@@ -32,7 +36,19 @@ public class HwUiActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(new DirtyBitmapView(this));
+        DirtyBitmapView container = new DirtyBitmapView(this);
+
+        ColorView color = new ColorView(this);
+        container.addView(color, new DirtyBitmapView.LayoutParams(
+                dipToPx(this, 100), dipToPx(this, 100), Gravity.CENTER));
+
+        AlphaAnimation a = new AlphaAnimation(1.0f, 0.0f);
+        a.setDuration(2000);
+        a.setRepeatCount(Animation.INFINITE);
+        a.setRepeatMode(Animation.REVERSE);
+        color.startAnimation(a);
+
+        setContentView(container);
     }
     
     @SuppressWarnings({"UnusedDeclaration"})
@@ -40,7 +56,19 @@ public class HwUiActivity extends Activity {
         return (int) (c.getResources().getDisplayMetrics().density * dip + 0.5f);
     }
 
-    static class DirtyBitmapView extends View {
+    static class ColorView extends View {
+        ColorView(Context c) {
+            super(c);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawRGB(0, 255, 0);
+        }
+    }
+
+    static class DirtyBitmapView extends FrameLayout {
         private final Paint mPaint;
 
         DirtyBitmapView(Context c) {
@@ -49,9 +77,7 @@ public class HwUiActivity extends Activity {
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
+        public void dispatchDraw(Canvas canvas) {
             canvas.drawRGB(255, 255, 255);
 
             mPaint.setColor(0xffff0000);
@@ -86,6 +112,7 @@ public class HwUiActivity extends Activity {
                     Canvas.EdgeType.BW));
             canvas.restore();
 
+            canvas.save();
             canvas.scale(2.0f, 2.0f);            
             canvas.clipRect(20.0f, 0.0f, 40.0f, 20.0f);
 
@@ -94,6 +121,21 @@ public class HwUiActivity extends Activity {
             
             mPaint.setColor(0xff0000ff);
             canvas.drawRect(20.0f, 0.0f, 40.0f, 20.0f, mPaint);
+            
+            canvas.restore();
+
+            final int restoreTo = canvas.save();
+            canvas.saveLayerAlpha(0.0f, 100.0f, getWidth(), 150.0f, 127,
+                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+            mPaint.setColor(0xff0000ff);
+            canvas.drawRect(0.0f, 100.0f, 40.0f, 150.0f, mPaint);
+            mPaint.setColor(0xff00ffff);
+            canvas.drawRect(40.0f, 100.0f, 140.0f, 150.0f, mPaint);
+            mPaint.setColor(0xffff00ff);
+            canvas.drawRect(140.0f, 100.0f, 240.0f, 150.0f, mPaint);
+            canvas.restoreToCount(restoreTo);
+
+            super.dispatchDraw(canvas);
         }
     }
 }

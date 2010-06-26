@@ -27,6 +27,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <SkCanvas.h>
 #include <SkPaint.h>
 #include <SkXfermode.h>
 
@@ -40,20 +41,30 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define V(x, y) { { x, y } }
+#define SV(x, y) { { x, y } }
+#define FV(x, y, u, v) { { x, y }, { u, v } }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
 const SimpleVertex gDrawColorVertices[] = {
-        V(0.0f, 0.0f),
-        V(1.0f, 0.0f),
-        V(0.0f, 1.0f),
-        V(1.0f, 1.0f)
+        SV(0.0f, 0.0f),
+        SV(1.0f, 0.0f),
+        SV(0.0f, 1.0f),
+        SV(1.0f, 1.0f)
 };
 const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
 const GLsizei gDrawColorVertexCount = 4;
+
+const TextureVertex gDrawTextureVertices[] = {
+        FV(0.0f, 0.0f, 0.0f, 1.0f),
+        FV(1.0f, 0.0f, 1.0f, 1.0f),
+        FV(0.0f, 1.0f, 0.0f, 0.0f),
+        FV(1.0f, 1.0f, 1.0f, 0.0f)
+};
+const GLsizei gDrawTextureVertexStride = sizeof(TextureVertex);
+const GLsizei gDrawTextureVertexCount = 4;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shaders
@@ -63,6 +74,9 @@ const GLsizei gDrawColorVertexCount = 4;
 
 #include "shaders/drawColor.vert"
 #include "shaders/drawColor.frag"
+
+#include "shaders/drawTexture.vert"
+#include "shaders/drawTexture.frag"
 
 Program::Program(const char* vertex, const char* fragment) {
     vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
@@ -139,6 +153,15 @@ GLuint Program::buildShader(const char* source, GLenum type) {
 
 DrawColorProgram::DrawColorProgram():
         Program(gDrawColorVertexShader, gDrawColorFragmentShader) {
+    getAttribsAndUniforms();
+}
+
+DrawColorProgram::DrawColorProgram(const char* vertex, const char* fragment):
+        Program(vertex, fragment) {
+    getAttribsAndUniforms();
+}
+
+void DrawColorProgram::getAttribsAndUniforms() {
     position = addAttrib("position");
     color = addAttrib("color");
     projection = addUniform("projection");
@@ -152,6 +175,12 @@ void DrawColorProgram::use(const GLfloat* projectionMatrix, const GLfloat* model
     glUniformMatrix4fv(projection, 1, GL_FALSE, projectionMatrix);
     glUniformMatrix4fv(modelView, 1, GL_FALSE, modelViewMatrix);
     glUniformMatrix4fv(transform, 1, GL_FALSE, transformMatrix);
+}
+
+DrawTextureProgram::DrawTextureProgram():
+        DrawColorProgram(gDrawTextureVertexShader, gDrawTextureFragmentShader) {
+    texCoords = addAttrib("texCoords");
+    sampler = addUniform("sampler");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,6 +204,7 @@ OpenGLRenderer::OpenGLRenderer() {
     LOGD("Create OpenGLRenderer");
 
     mDrawColorShader = new DrawColorProgram;
+    mDrawTextureShader = new DrawTextureProgram;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -252,14 +282,87 @@ int OpenGLRenderer::saveSnapshot() {
 
 bool OpenGLRenderer::restoreSnapshot() {
     bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
+    bool restoreLayer = mSnapshot->flags & Snapshot::kFlagIsLayer;
 
+    sp<Snapshot> current = mSnapshot;
+    sp<Snapshot> previous = mSnapshot->previous;
+
+    if (restoreLayer) {
+        // Unbind current FBO and restore previous one
+        // Most of the time, previous->fbo will be 0 to bind the default buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+
+        const Rect& layer = current->layer;
+        clipRect(layer.left, layer.top, layer.right, layer.bottom);
+        mSnapshot->transform.loadIdentity();
+
+        drawTextureRect(0.0f, 0.0f, mWidth, mHeight, current->texture, current->alpha);
+
+        glDeleteFramebuffers(1, &current->fbo);
+        glDeleteTextures(1, &current->texture);
+    }
+
+    mSnapshot = previous;
     mSaveCount--;
 
-    // Do not merge these two lines!
-    sp<Snapshot> previous = mSnapshot->previous;
-    mSnapshot = previous;
-
     return restoreClip;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Layers
+///////////////////////////////////////////////////////////////////////////////
+
+int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
+        const SkPaint* p, int flags) {
+    // TODO Implement
+    return saveSnapshot();
+}
+
+int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
+        int alpha, int flags) {
+    int count = saveSnapshot();
+
+    mSnapshot->flags |= Snapshot::kFlagIsLayer;
+    mSnapshot->alpha = alpha / 255.0f;
+    mSnapshot->layer.set(left, top, right, bottom);
+
+    // Generate the FBO and attach the texture
+    glGenFramebuffers(1, &mSnapshot->fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, mSnapshot->fbo);
+
+    // Generate the texture in which the FBO will draw
+    glGenTextures(1, &mSnapshot->texture);
+    glBindTexture(GL_TEXTURE_2D, mSnapshot->texture);
+
+    // The FBO will not be scaled, so we can use lower quality filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // TODO ***** IMPORTANT *****
+    // Creating a texture-backed FBO works only if the texture is the same size
+    // as the original rendering buffer (in this case, mWidth and mHeight.)
+    // This is expensive and wasteful and must be fixed.
+
+    const GLsizei width = mWidth; //right - left;
+    const GLsizei height = mHeight; //bottom - right;
+
+    const GLint format = (flags & SkCanvas::kHasAlphaLayer_SaveFlag) ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Bind texture to FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+            mSnapshot->texture, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOGD("Framebuffer incomplete %d", status);
+
+        glDeleteFramebuffers(1, &mSnapshot->fbo);
+        glDeleteTextures(1, &mSnapshot->texture);
+    }
+
+    return count;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -346,10 +449,10 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color);
 }
 
-void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* paint) {
+void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, const SkPaint* p) {
     // TODO Support more than  just color
     // TODO: Set the transfer mode
-    drawColorRect(left, top, right, bottom, paint->getColor());
+    drawColorRect(left, top, right, bottom, p->getColor());
 }
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom, int color) {
@@ -373,6 +476,44 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
 
     glDisableVertexAttribArray(mDrawColorShader->position);
+}
+
+void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
+        GLuint texture, float alpha) {
+    mModelView.loadTranslate(left, top, 0.0f);
+    mModelView.scale(right - left, bottom - top, 1.0f);
+
+    mDrawTextureShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
+
+    // TODO Correctly set the blend function
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(mDrawTextureShader->sampler, 0);
+
+    const GLvoid* p = &gDrawTextureVertices[0].position[0];
+    const GLvoid* t = &gDrawTextureVertices[0].texture[0];
+
+    glEnableVertexAttribArray(mDrawTextureShader->position);
+    glVertexAttribPointer(mDrawTextureShader->position, 2, GL_FLOAT, GL_FALSE,
+            gDrawTextureVertexStride, p);
+
+    glEnableVertexAttribArray(mDrawTextureShader->texCoords);
+    glVertexAttribPointer(mDrawTextureShader->texCoords, 2, GL_FLOAT, GL_FALSE,
+            gDrawTextureVertexStride, t);
+
+    glVertexAttrib4f(mDrawTextureShader->color, 1.0f, 1.0f, 1.0f, alpha);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
+
+    glDisableVertexAttribArray(mDrawTextureShader->position);
+    glDisableVertexAttribArray(mDrawTextureShader->texCoords);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_BLEND);
 }
 
 }; // namespace uirenderer

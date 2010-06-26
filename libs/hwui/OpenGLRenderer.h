@@ -45,12 +45,17 @@ public:
             transform(s->transform),
             clipRect(s->clipRect),
             flags(kFlagDirtyTransform),
-            previous(s) {
+            previous(s),
+            layer(0.0f, 0.0f, 0.0f, 0.0f),
+            texture(0),
+            fbo(0),
+            alpha(255) {
     }
 
     enum Flags {
         kFlagClipSet = 0x1,
         kFlagDirtyTransform = 0x2,
+        kFlagIsLayer = 0x4,
     };
 
     const Rect& getMappedClip();
@@ -67,6 +72,12 @@ public:
     // Previous snapshot in the frames stack
     sp<Snapshot> previous;
 
+    // Layer, only set if kFlagIsLayer is set
+    Rect layer;
+    GLuint texture;
+    GLuint fbo;
+    float alpha;
+
 private:
     // Clipping rectangle mapped with the transform
     Rect mappedClip;
@@ -76,7 +87,10 @@ struct SimpleVertex {
     float position[2];
 }; // struct SimpleVertex
 
-typedef char* shader;
+struct TextureVertex {
+    float position[2];
+    float texture[2];
+}; // struct TextureVertex
 
 class Program: public LightRefBase<Program> {
 public:
@@ -110,6 +124,7 @@ private:
 class DrawColorProgram: public Program {
 public:
     DrawColorProgram();
+    DrawColorProgram(const char* vertex, const char* fragment);
 
     void use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
              const GLfloat* transformMatrix);
@@ -120,6 +135,17 @@ public:
     int projection;
     int modelView;
     int transform;
+
+protected:
+    void getAttribsAndUniforms();
+};
+
+class DrawTextureProgram: public DrawColorProgram {
+public:
+    DrawTextureProgram();
+
+    int sampler;
+    int texCoords;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,6 +165,9 @@ public:
     void restore();
     void restoreToCount(int saveCount);
 
+    int saveLayer(float left, float top, float right, float bottom, const SkPaint* p, int flags);
+    int saveLayerAlpha(float left, float top, float right, float bottom, int alpha, int flags);
+
     void translate(float dx, float dy);
     void rotate(float degrees);
     void scale(float sx, float sy);
@@ -152,7 +181,7 @@ public:
     bool clipRect(float left, float top, float right, float bottom);
 
     void drawColor(int color, SkXfermode::Mode mode);
-    void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
 private:
     int saveSnapshot();
@@ -161,6 +190,8 @@ private:
     void setScissorFromClip();
 
     void drawColorRect(float left, float top, float right, float bottom, int color);
+    void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
+            float alpha);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -180,6 +211,7 @@ private:
 
     // Shaders
     sp<DrawColorProgram> mDrawColorShader;
+    sp<DrawTextureProgram> mDrawTextureShader;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer
