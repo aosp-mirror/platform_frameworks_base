@@ -97,6 +97,14 @@ void Matrix4::copyTo(float* v) const {
     memcpy(v, data, sizeof(data));
 }
 
+float Matrix4::getTranslateX() {
+    return data[12];
+}
+
+float Matrix4::getTranslateY() {
+    return data[13];
+}
+
 void Matrix4::loadTranslate(float x, float y, float z) {
     loadIdentity();
     data[12] = x;

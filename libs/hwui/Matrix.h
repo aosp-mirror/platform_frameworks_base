@@ -90,6 +90,9 @@ public:
 
     void mapRect(Rect& r) const;
 
+    float getTranslateX();
+    float getTranslateY();
+
     void dump() const;
 
 private:
