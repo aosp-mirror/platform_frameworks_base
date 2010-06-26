@@ -4,9 +4,9 @@ page.title=コミュニティ
 
 	<div id="mainBodyFluid">
 			<h1>コミュニティ</h1>
-			<p>Android デベロッパー コミュニティへようこそ。コミュニティでのディスカッションにぜひ参加してください。投稿する前に、コミュニティ ガイドラインが記載されている<a href="http://source.android.com/discuss/android-discussion-groups-charter">グループの趣意</a>をお読みください。</p>
+			<p>Android デベロッパー コミュニティへようこそ。コミュニティでのディスカッションにぜひ参加してください。投稿する前に、コミュニティ ガイドラインが記載されている<a href="http://source.android.com/community/groups-charter.html">グループの趣意</a>をお読みください。</p>
 
-<p class="note"><strong>注:</strong> Android ソース コード（アプリケーション開発ではなく）に関するディスカッションは、<a href="http://source.android.com/discuss">オープンソース プロジェクトのメーリング リスト</a>（英語）を参照してください。</p>
+<p class="note"><strong>注:</strong> Android ソース コード（アプリケーション開発ではなく）に関するディスカッションは、<a href="http://source.android.com/community">オープンソース プロジェクトのメーリング リスト</a>（英語）を参照してください。</p>
 
 <p style="margin-bottom:.5em"><strong>目次</strong></p>
 <ol class="toc">
@@ -28,7 +28,7 @@ page.title=コミュニティ
 
 <p>質問への答えが見つからない場合、コミュニティで質問することをおすすめします。投稿する際は、次の手順に従ってください。
 <ol>
-<li>コミュニティ ガイドラインが記載されている<b><a href="http://sites.google.com/a/android.com/opensource/discuss/android-discussion-groups-charter">Android メーリングリストの趣意</a></b>をお読みください。 
+<li>コミュニティ ガイドラインが記載されている<b><a href="http://source.android.com/community/groups-charter.html">Android メーリングリストの趣意</a></b>をお読みください。 
 </li>
 <li><b>質問に最適なメーリング リストを選択してください</b>。後述するように、デベロッパー向けのメーリング リストは何種類かに分かれています。</li>
 <li>
