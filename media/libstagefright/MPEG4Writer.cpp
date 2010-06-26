@@ -115,11 +115,16 @@ private:
     status_t makeAVCCodecSpecificData(
             const uint8_t *data, size_t size);
     void writeOneChunk(bool isAvc);
-    void logStatisticalData(bool isAudio);
-    void findMinMaxFrameRates(float *minFps, float *maxFps);
-    void findMinMaxChunkDurations(int64_t *min, int64_t *max);
+
+    // Track authoring progress status
     void trackProgressStatus(int32_t nFrames, int64_t timeUs);
     void initTrackingProgressStatus(MetaData *params);
+
+    // Utilities for collecting statistical data
+    void logStatisticalData(bool isAudio);
+    void findMinAvgMaxSampleDurationMs(
+            int32_t *min, int32_t *avg, int32_t *max);
+    void findMinMaxChunkDurations(int64_t *min, int64_t *max);
 
     Track(const Track &);
     Track &operator=(const Track &);
@@ -1184,14 +1189,16 @@ void MPEG4Writer::Track::threadEntry() {
 
 void MPEG4Writer::Track::trackProgressStatus(int32_t nFrames, int64_t timeUs) {
     LOGV("trackProgressStatus: %d frames and %lld us", nFrames, timeUs);
-    if (nFrames % mTrackEveryNumberOfFrames == 0) {
+    if (mTrackEveryNumberOfFrames > 0 &&
+        nFrames % mTrackEveryNumberOfFrames == 0) {
         LOGV("Fire frame tracking progress status at frame %d", nFrames);
         mOwner->notify(MEDIA_RECORDER_EVENT_INFO,
                        MEDIA_RECORDER_INFO_PROGRESS_FRAME_STATUS,
                        nFrames);
     }
 
-    if (timeUs - mPreviousTrackTimeUs >= mTrackEveryTimeDurationUs) {
+    if (mTrackEveryTimeDurationUs > 0 &&
+        timeUs - mPreviousTrackTimeUs >= mTrackEveryTimeDurationUs) {
         LOGV("Fire time tracking progress status at %lld us", timeUs);
         mOwner->notify(MEDIA_RECORDER_EVENT_INFO,
                        MEDIA_RECORDER_INFO_PROGRESS_TIME_STATUS,
@@ -1200,21 +1207,28 @@ void MPEG4Writer::Track::trackProgressStatus(int32_t nFrames, int64_t timeUs) {
     }
 }
 
-void MPEG4Writer::Track::findMinMaxFrameRates(float *minFps, float *maxFps) {
-    int32_t minSampleDuration = 0x7FFFFFFF;
-    int32_t maxSampleDuration = 0;
+void MPEG4Writer::Track::findMinAvgMaxSampleDurationMs(
+        int32_t *min, int32_t *avg, int32_t *max) {
+    CHECK(!mSampleInfos.empty());
+    int32_t avgSampleDurationMs = mMaxTimeStampUs / 1000/ mSampleInfos.size();
+    int32_t minSampleDurationMs = 0x7FFFFFFF;
+    int32_t maxSampleDurationMs = 0;
     for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
         it != mSttsTableEntries.end(); ++it) {
-        int32_t sampleDuration = static_cast<int32_t>(it->sampleDuration);
-        if (sampleDuration > maxSampleDuration) {
-            maxSampleDuration = sampleDuration;
-        } else if (sampleDuration < minSampleDuration) {
-            minSampleDuration = sampleDuration;
+        int32_t sampleDurationMs = static_cast<int32_t>(it->sampleDuration);
+        if (sampleDurationMs > maxSampleDurationMs) {
+            maxSampleDurationMs = sampleDurationMs;
+        } else if (sampleDurationMs < minSampleDurationMs) {
+            minSampleDurationMs = sampleDurationMs;
         }
+        LOGI("sample duration: %d ms", sampleDurationMs);
     }
-    CHECK(minSampleDuration != 0 && maxSampleDuration != 0);
-    *minFps = 1000.0 / maxSampleDuration;
-    *maxFps = 1000.0 / minSampleDuration;
+    CHECK(minSampleDurationMs != 0);
+    CHECK(avgSampleDurationMs != 0);
+    CHECK(maxSampleDurationMs != 0);
+    *min = minSampleDurationMs;
+    *avg = avgSampleDurationMs;
+    *max = maxSampleDurationMs;
 }
 
 // Don't count the last duration
@@ -1250,16 +1264,18 @@ void MPEG4Writer::Track::logStatisticalData(bool isAudio) {
     }
 
     if (collectStats) {
-        if (isAudio) {
-            LOGI("audio track - duration %lld us", mMaxTimeStampUs);
-        } else {
-            float fps = (mSampleInfos.size() * 1000000.0) / mMaxTimeStampUs;
-            float minFps;
-            float maxFps;
-            findMinMaxFrameRates(&minFps, &maxFps);
-            LOGI("video track - duration %lld us", mMaxTimeStampUs);
+        LOGI("%s track - duration %lld us, total %d frames",
+                isAudio? "audio": "video", mMaxTimeStampUs,
+                mSampleInfos.size());
+        int32_t min, avg, max;
+        findMinAvgMaxSampleDurationMs(&min, &avg, &max);
+        LOGI("min/avg/max sample duration (ms): %d/%d/%d", min, avg, max);
+        if (!isAudio) {
+            float avgFps = 1000.0 / avg;
+            float minFps = 1000.0 / max;
+            float maxFps = 1000.0 / min;
             LOGI("min/avg/max frame rate (fps): %.2f/%.2f/%.2f",
-                minFps, fps, maxFps);
+                minFps, avgFps, maxFps);
         }
 
         int64_t totalBytes = 0;
