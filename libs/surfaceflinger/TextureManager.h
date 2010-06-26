@@ -32,6 +32,7 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+class GLExtensions;
 class GraphicBuffer;
 
 // ---------------------------------------------------------------------------
@@ -61,7 +62,7 @@ struct Texture : public Image {
 // ---------------------------------------------------------------------------
 
 class TextureManager {
-    uint32_t mFlags;
+    const GLExtensions& mGLExtensions;
     static status_t initTexture(Image* texture, int32_t format);
     static status_t initTexture(Texture* texture);
     static bool isSupportedYuvFormat(int format);
@@ -69,7 +70,7 @@ class TextureManager {
     static GLenum getTextureTarget(const Image* pImage);
 public:
 
-    TextureManager(uint32_t flags);
+    TextureManager();
 
     // load bitmap data into the active buffer
     status_t loadTexture(Texture* texture,

@@ -40,6 +40,8 @@
 #include <hardware/overlay.h>
 #include <hardware/gralloc.h>
 
+#include "GLExtensions.h"
+
 using namespace android;
 
 
@@ -73,7 +75,8 @@ void checkEGLErrors(const char* token)
 DisplayHardware::DisplayHardware(
         const sp<SurfaceFlinger>& flinger,
         uint32_t dpy)
-    : DisplayHardwareBase(flinger, dpy), mFlags(0)
+    : DisplayHardwareBase(flinger, dpy),
+      mFlags(0)
 {
     init(dpy);
 }
@@ -97,12 +100,20 @@ void DisplayHardware::init(uint32_t dpy)
 {
     mNativeWindow = new FramebufferNativeWindow();
     framebuffer_device_t const * fbDev = mNativeWindow->getDevice();
+    mDpiX = mNativeWindow->xdpi;
+    mDpiY = mNativeWindow->ydpi;
+    mRefreshRate = fbDev->fps;
 
     mOverlayEngine = NULL;
     hw_module_t const* module;
     if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
         overlay_control_open(module, &mOverlayEngine);
     }
+
+    EGLint w, h, dummy;
+    EGLint numConfigs=0;
+    EGLSurface surface;
+    EGLContext context;
 
     // initialize EGL
     EGLint attribs[] = {
@@ -120,11 +131,6 @@ void DisplayHardware::init(uint32_t dpy)
             attribs[3] = EGL_SLOW_CONFIG;
         }
     }
-
-    EGLint w, h, dummy;
-    EGLint numConfigs=0;
-    EGLSurface surface;
-    EGLContext context;
 
     // TODO: all the extensions below should be queried through
     // eglGetProcAddress().
@@ -144,22 +150,6 @@ void DisplayHardware::init(uint32_t dpy)
     eglGetConfigAttrib(display, config, EGL_BLUE_SIZE,  &b);
     eglGetConfigAttrib(display, config, EGL_ALPHA_SIZE, &a);
 
-    /*
-     * Gather EGL extensions
-     */
-
-    const char* const egl_extensions = eglQueryString(
-            display, EGL_EXTENSIONS);
-    
-    LOGI("EGL informations:");
-    LOGI("# of configs : %d", numConfigs);
-    LOGI("vendor    : %s", eglQueryString(display, EGL_VENDOR));
-    LOGI("version   : %s", eglQueryString(display, EGL_VERSION));
-    LOGI("extensions: %s", egl_extensions);
-    LOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
-    LOGI("EGLSurface: %d-%d-%d-%d, config=%p", r, g, b, a, config);
-    
-
     if (mNativeWindow->isUpdateOnDemand()) {
         mFlags |= PARTIAL_UPDATES;
     }
@@ -174,6 +164,8 @@ void DisplayHardware::init(uint32_t dpy)
      */
 
     surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
+    eglQuerySurface(display, surface, EGL_WIDTH,  &mWidth);
+    eglQuerySurface(display, surface, EGL_HEIGHT, &mHeight);
 
     if (mFlags & PARTIAL_UPDATES) {
         // if we have partial updates, we definitely don't need to
@@ -187,31 +179,6 @@ void DisplayHardware::init(uint32_t dpy)
             mFlags |= BUFFER_PRESERVED;
         }
     }
-
-    eglQuerySurface(display, surface, EGL_WIDTH,  &mWidth);
-    eglQuerySurface(display, surface, EGL_HEIGHT, &mHeight);
-
-#ifdef EGL_ANDROID_swap_rectangle    
-    if (strstr(egl_extensions, "EGL_ANDROID_swap_rectangle")) {
-        if (eglSetSwapRectangleANDROID(display, surface,
-                0, 0, mWidth, mHeight) == EGL_TRUE) {
-            // This could fail if this extension is not supported by this
-            // specific surface (of config)
-            mFlags |= SWAP_RECTANGLE;
-        }
-    }
-    // when we have the choice between PARTIAL_UPDATES and SWAP_RECTANGLE
-    // choose PARTIAL_UPDATES, which should be more efficient
-    if (mFlags & PARTIAL_UPDATES)
-        mFlags &= ~SWAP_RECTANGLE;
-#endif
-    
-
-    LOGI("flags     : %08x", mFlags);
-    
-    mDpiX = mNativeWindow->xdpi;
-    mDpiY = mNativeWindow->ydpi;
-    mRefreshRate = fbDev->fps; 
     
     /* Read density from build-specific ro.sf.lcd_density property
      * except if it is overridden by qemu.sf.lcd_density.
@@ -234,49 +201,67 @@ void DisplayHardware::init(uint32_t dpy)
     
     context = eglCreateContext(display, config, NULL, NULL);
     
-    /*
-     * Gather OpenGL ES extensions
-     */
-
-    eglMakeCurrent(display, surface, surface, context);
-    const char* const  gl_extensions = (const char*)glGetString(GL_EXTENSIONS);
-    const char* const  gl_renderer = (const char*)glGetString(GL_RENDERER);
-    LOGI("OpenGL informations:");
-    LOGI("vendor    : %s", glGetString(GL_VENDOR));
-    LOGI("renderer  : %s", gl_renderer);
-    LOGI("version   : %s", glGetString(GL_VERSION));
-    LOGI("extensions: %s", gl_extensions);
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, &mMaxViewportDims);
-    LOGI("GL_MAX_TEXTURE_SIZE = %d", mMaxTextureSize);
-    LOGI("GL_MAX_VIEWPORT_DIMS = %d", mMaxViewportDims);
-
-
-    if (strstr(gl_extensions, "GL_ARB_texture_non_power_of_two")) {
-        mFlags |= NPOT_EXTENSION;
-    }
-#ifdef EGL_ANDROID_image_native_buffer
-    if (strstr( gl_extensions, "GL_OES_EGL_image") &&
-        (strstr(egl_extensions, "EGL_KHR_image_base") || 
-                strstr(egl_extensions, "EGL_KHR_image")) &&
-        strstr(egl_extensions, "EGL_ANDROID_image_native_buffer")) {
-        mFlags |= DIRECT_TEXTURE;
-    }
-#else
-#warning "EGL_ANDROID_image_native_buffer not supported"
-#endif
-
-
-    // Unbind the context from this thread
-    eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
     mDisplay = display;
     mConfig  = config;
     mSurface = surface;
     mContext = context;
     mFormat  = fbDev->format;
     mPageFlipCount = 0;
+
+    /*
+     * Gather OpenGL ES extensions
+     */
+
+    eglMakeCurrent(display, surface, surface, context);
+
+    GLExtensions& extensions(GLExtensions::getInstance());
+    extensions.initWithGLStrings(
+            glGetString(GL_VENDOR),
+            glGetString(GL_RENDERER),
+            glGetString(GL_VERSION),
+            glGetString(GL_EXTENSIONS),
+            eglQueryString(display, EGL_VENDOR),
+            eglQueryString(display, EGL_VERSION),
+            eglQueryString(display, EGL_EXTENSIONS));
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, &mMaxViewportDims);
+
+
+#ifdef EGL_ANDROID_swap_rectangle
+    if (extensions.hasExtension("EGL_ANDROID_swap_rectangle")) {
+        if (eglSetSwapRectangleANDROID(display, surface,
+                0, 0, mWidth, mHeight) == EGL_TRUE) {
+            // This could fail if this extension is not supported by this
+            // specific surface (of config)
+            mFlags |= SWAP_RECTANGLE;
+        }
+    }
+    // when we have the choice between PARTIAL_UPDATES and SWAP_RECTANGLE
+    // choose PARTIAL_UPDATES, which should be more efficient
+    if (mFlags & PARTIAL_UPDATES)
+        mFlags &= ~SWAP_RECTANGLE;
+#endif
+
+    LOGI("EGL informations:");
+    LOGI("# of configs : %d", numConfigs);
+    LOGI("vendor    : %s", extensions.getEglVendor());
+    LOGI("version   : %s", extensions.getEglVersion());
+    LOGI("extensions: %s", extensions.getEglExtension());
+    LOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
+    LOGI("EGLSurface: %d-%d-%d-%d, config=%p", r, g, b, a, config);
+
+    LOGI("OpenGL informations:");
+    LOGI("vendor    : %s", extensions.getVendor());
+    LOGI("renderer  : %s", extensions.getRenderer());
+    LOGI("version   : %s", extensions.getVersion());
+    LOGI("extensions: %s", extensions.getExtension());
+    LOGI("GL_MAX_TEXTURE_SIZE = %d", mMaxTextureSize);
+    LOGI("GL_MAX_VIEWPORT_DIMS = %d", mMaxViewportDims);
+    LOGI("flags = %08x", mFlags);
+
+    // Unbind the context from this thread
+    eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
 /*
