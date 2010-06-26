@@ -619,6 +619,7 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     public WifiConfiguration getWifiApConfiguration() {
+        enforceAccessPermission();
         final ContentResolver cr = mContext.getContentResolver();
         WifiConfiguration wifiConfig = new WifiConfiguration();
         int authType;
@@ -636,7 +637,8 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private void persistApConfiguration(WifiConfiguration wifiConfig) {
+    public void setWifiApConfiguration(WifiConfiguration wifiConfig) {
+        enforceChangePermission();
         final ContentResolver cr = mContext.getContentResolver();
         boolean isWpa;
         if (wifiConfig == null)
@@ -669,7 +671,7 @@ public class WifiService extends IWifiManager.Stub {
                 try {
                     nwService.setAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName(),
                                              SOFTAP_IFACE);
-                    persistApConfiguration(wifiConfig);
+                    setWifiApConfiguration(wifiConfig);
                     return true;
                 } catch(Exception e) {
                     Slog.e(TAG, "Exception in nwService during AP restart");
@@ -721,7 +723,7 @@ public class WifiService extends IWifiManager.Stub {
                 return false;
             }
 
-            persistApConfiguration(wifiConfig);
+            setWifiApConfiguration(wifiConfig);
 
         } else {
 

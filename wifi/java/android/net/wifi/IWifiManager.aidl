@@ -83,5 +83,7 @@ interface IWifiManager
     int getWifiApEnabledState();
 
     WifiConfiguration getWifiApConfiguration();
+
+    void setWifiApConfiguration(in WifiConfiguration wifiConfig);
 }
 

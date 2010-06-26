@@ -824,6 +824,21 @@ public class WifiManager {
     }
 
     /**
+     * Sets the Wi-Fi AP Configuration.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     *
+     * @hide Dont open yet
+     */
+    public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
+        try {
+            mService.setWifiApConfiguration(wifiConfig);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Allows an application to keep the Wi-Fi radio awake.
      * Normally the Wi-Fi radio may turn off when the user has not used the device in a while.
      * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple 
