@@ -318,7 +318,7 @@ MediaRecorderClient::~MediaRecorderClient()
     release();
 }
 
-status_t MediaRecorderClient::setListener(const sp<IMediaPlayerClient>& listener)
+status_t MediaRecorderClient::setListener(const sp<IMediaRecorderClient>& listener)
 {
     LOGV("setListener");
     Mutex::Autolock lock(mLock);

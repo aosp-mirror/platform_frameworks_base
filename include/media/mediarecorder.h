@@ -22,7 +22,7 @@
 #include <utils/threads.h>
 #include <utils/List.h>
 #include <utils/Errors.h>
-#include <media/IMediaPlayerClient.h>
+#include <media/IMediaRecorderClient.h>
 #include <media/IMediaDeathNotifier.h>
 
 namespace android {
@@ -149,7 +149,7 @@ public:
     virtual void notify(int msg, int ext1, int ext2) = 0;
 };
 
-class MediaRecorder : public BnMediaPlayerClient,
+class MediaRecorder : public BnMediaRecorderClient,
                       public virtual IMediaDeathNotifier
 {
 public:
