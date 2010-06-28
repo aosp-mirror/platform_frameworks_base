@@ -33,7 +33,7 @@ page.title=Data Backup
     <li><a href="#RestoreVersion">Checking the Restore Data Version</a></li>
     <li><a href="#RequestingBackup">Requesting Backup</a></li>
     <li><a href="#RequestingRestore">Requesting Restore</a></li>
-    <li><a href="#DevelopingTesting">Developing and Testing Your Backup Agent</a></li>
+    <li><a href="#Testing">Testing Your Backup Agent</a></li>
   </ol>
 
   <h2>Key classes</h2>
@@ -41,6 +41,11 @@ page.title=Data Backup
     <li>{@link android.app.backup.BackupManager}</li>
     <li>{@link android.app.backup.BackupAgent}</li>
     <li>{@link android.app.backup.BackupAgentHelper}</li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr} tool</a></li>
   </ol>
 
 </div>
@@ -308,7 +313,7 @@ backup for all applications that have requested a backup since the last backup w
 
 <p class="note"><strong>Tip:</strong> While developing your application, you can initiate an
 immediate backup operation from the Backup Manager with the <a
-href="{@docRoot}guide/developing/tools/bmgr.html">bmgr tool</a>.</p>
+href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr} tool</a>.</p>
 
 <p>When the Backup Manager calls your {@link
 android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
@@ -452,7 +457,7 @@ android.app.backup.BackupManager#requestRestore(RestoreObserver) requestRestore(
 href="#RequestingRestore">Requesting restore</a> for more information).</p>
 
 <p class="note"><strong>Note:</strong> While developing your application, you can also request a
-restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">bmgr
+restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}
 tool</a>.</p>
 
 <p>When the Backup Manager calls your {@link
@@ -813,7 +818,7 @@ onBackup()}.</p>
 
 <p class="note"><strong>Note:</strong> While developing your application, you can request a
 backup and initiate an immediate backup operation with the <a
-href="{@docRoot}guide/developing/tools/bmgr.html">bmgr
+href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}
 tool</a>.</p>
 
 
@@ -828,25 +833,52 @@ android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescripto
 implementation, passing the data from the current set of backup data.</p>
 
 <p class="note"><strong>Note:</strong> While developing your application, you can request a
-restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">bmgr
+restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}
 tool</a>.</p>
 
 
-<h2 id="DevelopingTesting">Developing and Testing Your Backup Agent</h2>
+<h2 id="Testing">Testing Your Backup Agent</h2>
 
-<p>To develop and test your backup agent:</p>
-<ul>
-  <li>Set your build target to a platform using API Level 8 or higher</li>
-  <li>Run your application on a suitable Android system image:
+<p>Once you've implemented your backup agent, you can test the backup and restore functionality
+with the following procedure, using <a
+href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}</a>.</p>
+
+<ol>
+  <li>Install your application on a suitable Android system image
     <ul>
-      <li>If using the emulator, create and use an AVD with the Google APIs add-on (API Level
-8) &mdash; the Google APIs add-on is available as an SDK component through the SDK and AVD
-Manager</li>
+      <li>If using the emulator, create and use an AVD with Android 2.2 (API Level 8).</li>
       <li>If using a device, the device must be running Android 2.2 or greater and have Android
-Market built in</li>
+Market built in.</li>
     </ul>
   </li>
-  <li>Test your backup agent using the <a href="{@docRoot}guide/developing/tools/bmgr.html">{@code
-bmgr}</a> tool to initiate backup and restore operations</li>
-</ul>
+  <li>Ensure that backup is enabled
+    <ul>
+      <li>If using the emulator, you can enable backup with the following command from your SDK
+{@code tools/} path:
+<pre class="no-pretty-print">adb shell bmgr enable true</pre>
+      </li>
+      <li>If using a device, open the system <b>Settings</b>, select <b>Privacy</b>, then enable
+<b>Back up my data</b> and <b>Automatic restore</b>.
+    </ul>
+  </li>
+  <li>Open your application and initialize some data
+    <p>If you've properly implemented backup in your application, then it should request a
+backup each time the data changes. For example, each time the user changes some data, your app
+should call {@link android.app.backup.BackupManager#dataChanged()}, which adds a backup request to
+the Backup Manager queue. For testing purposes, you can also make a request with the following
+{@code bmgr} command:</p>
+<pre class="no-pretty-print">adb shell bmgr backup <em>your.package.name</em></pre>
+  </li>
+  <li>Initiate a backup operation:
+<pre class="no-pretty-print">adb shell bmgr run</pre>
+    <p>This forces the Backup Manager to perform all backup requests that are in its
+queue.</p>
+  <li>Uninstall your application:
+<pre class="no-pretty-print">adb uninstall <em>your.package.name</em></pre>
+  </li>
+  <li>Re-install your application.</li>
+</ol>
+
+<p>If your backup agent is successful, all the data you initialized in step 4 is restored.</p>
+
 
