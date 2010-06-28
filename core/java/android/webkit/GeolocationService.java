@@ -45,14 +45,13 @@ final class GeolocationService implements LocationListener {
 
     /**
      * Constructor
+     * @param context The context from which we obtain the system service.
      * @param nativeObject The native object to which this object will report position updates and
      *     errors.
      */
-    public GeolocationService(long nativeObject) {
+    public GeolocationService(Context context, long nativeObject) {
         mNativeObject = nativeObject;
         // Register newLocationAvailable with platform service.
-        ActivityThread thread = ActivityThread.systemMain();
-        Context context = thread.getApplication();
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         if (mLocationManager == null) {
             Log.e(TAG, "Could not get location manager.");
