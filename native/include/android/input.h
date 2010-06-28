@@ -125,8 +125,8 @@ enum {
  * Input events are opaque structures.  Use the provided accessors functions to
  * read their properties.
  */
-struct input_event_t;
-typedef struct input_event_t input_event_t;
+struct AInputEvent;
+typedef struct AInputEvent AInputEvent;
 
 /*
  * Input event types.
@@ -319,7 +319,7 @@ enum {
 /*** Accessors for all input events. ***/
 
 /* Get the input event type. */
-int32_t input_event_get_type(const input_event_t* event);
+int32_t AInputEvent_getType(const AInputEvent* event);
 
 /* Get the id for the device that an input event came from.
  *
@@ -331,128 +331,128 @@ int32_t input_event_get_type(const input_event_t* event);
  * other numbers are arbitrary and you shouldn't depend on the values.
  * Use the provided input device query API to obtain information about input devices.
  */
-int32_t input_event_get_device_id(const input_event_t* event);
+int32_t AInputEvent_getDeviceId(const AInputEvent* event);
 
 /* Get the input event nature. */
-int32_t input_event_get_nature(const input_event_t* event);
+int32_t AInputEvent_getNature(const AInputEvent* event);
 
 /*** Accessors for key events only. ***/
 
 /* Get the key event action. */
-int32_t key_event_get_action(const input_event_t* key_event);
+int32_t AKeyEvent_getAction(const AInputEvent* key_event);
 
 /* Get the key event flags. */
-int32_t key_event_get_flags(const input_event_t* key_event);
+int32_t AKeyEvent_getFlags(const AInputEvent* key_event);
 
 /* Get the key code of the key event.
  * This is the physical key that was pressed, not the Unicode character. */
-int32_t key_event_get_key_code(const input_event_t* key_event);
+int32_t AKeyEvent_getKeyCode(const AInputEvent* key_event);
 
 /* Get the hardware key id of this key event.
  * These values are not reliable and vary from device to device. */
-int32_t key_event_get_scan_code(const input_event_t* key_event);
+int32_t AKeyEvent_getScanCode(const AInputEvent* key_event);
 
 /* Get the meta key state. */
-int32_t key_event_get_meta_state(const input_event_t* key_event);
+int32_t AKeyEvent_getMetaState(const AInputEvent* key_event);
 
 /* Get the repeat count of the event.
  * For both key up an key down events, this is the number of times the key has
  * repeated with the first down starting at 0 and counting up from there.  For
  * multiple key events, this is the number of down/up pairs that have occurred. */
-int32_t key_event_get_repeat_count(const input_event_t* key_event);
+int32_t AKeyEvent_getRepeatCount(const AInputEvent* key_event);
 
 /* Get the time of the most recent key down event, in the
  * java.lang.System.nanoTime() time base.  If this is a down event,
  * this will be the same as eventTime.
  * Note that when chording keys, this value is the down time of the most recently
  * pressed key, which may not be the same physical key of this event. */
-int64_t key_event_get_down_time(const input_event_t* key_event);
+int64_t AKeyEvent_getDownTime(const AInputEvent* key_event);
 
 /* Get the time this event occurred, in the
  * java.lang.System.nanoTime() time base. */
-int64_t key_event_get_event_time(const input_event_t* key_event);
+int64_t AKeyEvent_getEventTime(const AInputEvent* key_event);
 
 /*** Accessors for motion events only. ***/
 
 /* Get the combined motion event action code and pointer index. */
-int32_t motion_event_get_action(const input_event_t* motion_event);
+int32_t AMotionEvent_getAction(const AInputEvent* motion_event);
 
 /* Get the state of any meta / modifier keys that were in effect when the
  * event was generated. */
-int32_t motion_event_get_meta_state(const input_event_t* motion_event);
+int32_t AMotionEvent_getMetaState(const AInputEvent* motion_event);
 
 /* Get a bitfield indicating which edges, if any, were touched by this motion event.
  * For touch events, clients can use this to determine if the user's finger was
  * touching the edge of the display. */
-int32_t motion_event_get_edge_flags(const input_event_t* motion_event);
+int32_t AMotionEvent_getEdgeFlags(const AInputEvent* motion_event);
 
 /* Get the time when the user originally pressed down to start a stream of
  * position events, in the java.lang.System.nanoTime() time base. */
-int64_t motion_event_get_down_time(const input_event_t* motion_event);
+int64_t AMotionEvent_getDownTime(const AInputEvent* motion_event);
 
 /* Get the time when this specific event was generated,
  * in the java.lang.System.nanoTime() time base. */
-int64_t motion_event_get_event_time(const input_event_t* motion_event);
+int64_t AMotionEvent_getEventTime(const AInputEvent* motion_event);
 
 /* Get the X coordinate offset.
  * For touch events on the screen, this is the delta that was added to the raw
  * screen coordinates to adjust for the absolute position of the containing windows
  * and views. */
-float motion_event_get_x_offset(const input_event_t* motion_event);
+float AMotionEvent_getXOffset(const AInputEvent* motion_event);
 
 /* Get the precision of the Y coordinates being reported.
  * For touch events on the screen, this is the delta that was added to the raw
  * screen coordinates to adjust for the absolute position of the containing windows
  * and views. */
-float motion_event_get_y_offset(const input_event_t* motion_event);
+float AMotionEvent_getYOffset(const AInputEvent* motion_event);
 
 /* Get the precision of the X coordinates being reported.
  * You can multiply this number with an X coordinate sample to find the
  * actual hardware value of the X coordinate. */
-float motion_event_get_x_precision(const input_event_t* motion_event);
+float AMotionEvent_getXPrecision(const AInputEvent* motion_event);
 
 /* Get the precision of the Y coordinates being reported.
  * You can multiply this number with a Y coordinate sample to find the
  * actual hardware value of the Y coordinate. */
-float motion_event_get_y_precision(const input_event_t* motion_event);
+float AMotionEvent_getYPrecision(const AInputEvent* motion_event);
 
 /* Get the number of pointers of data contained in this event.
  * Always >= 1. */
-size_t motion_event_get_pointer_count(const input_event_t* motion_event);
+size_t AMotionEvent_getPointerCount(const AInputEvent* motion_event);
 
 /* Get the pointer identifier associated with a particular pointer
  * data index is this event.  The identifier tells you the actual pointer
  * number associated with the data, accounting for individual pointers
  * going up and down since the start of the current gesture. */
-int32_t motion_event_get_pointer_id(const input_event_t* motion_event, size_t pointer_index);
+int32_t AMotionEvent_getPointerId(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the original raw X coordinate of this event.
  * For touch events on the screen, this is the original location of the event
  * on the screen, before it had been adjusted for the containing window
  * and views. */
-float motion_event_get_raw_x(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getRawX(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the original raw X coordinate of this event.
  * For touch events on the screen, this is the original location of the event
  * on the screen, before it had been adjusted for the containing window
  * and views. */
-float motion_event_get_raw_y(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getRawY(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the current X coordinate of this event for the given pointer index.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float motion_event_get_x(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getX(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the current Y coordinate of this event for the given pointer index.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float motion_event_get_y(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getY(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the current pressure of this event for the given pointer index.
  * The pressure generally ranges from 0 (no pressure at all) to 1 (normal pressure),
  * however values higher than 1 may be generated depending on the calibration of
  * the input device. */
-float motion_event_get_pressure(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getPressure(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the current scaled value of the approximate size for the given pointer index.
  * This represents some approximation of the area of the screen being
@@ -460,17 +460,17 @@ float motion_event_get_pressure(const input_event_t* motion_event, size_t pointe
  * touch is normalized with the device specific range of values
  * and scaled to a value between 0 and 1.  The value of size can be used to
  * determine fat touch events. */
-float motion_event_get_size(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getSize(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the number of historical points in this event.  These are movements that
  * have occurred between this event and the previous event.  This only applies
  * to MOTION_EVENT_ACTION_MOVE events -- all other actions will have a size of 0.
  * Historical samples are indexed from oldest to newest. */
-size_t motion_event_get_history_size(const input_event_t* motion_event);
+size_t AMotionEvent_get_history_size(const AInputEvent* motion_event);
 
 /* Get the time that a historical movement occurred between this event and
  * the previous event, in the java.lang.System.nanoTime() time base. */
-int64_t motion_event_get_historical_event_time(input_event_t* motion_event,
+int64_t AMotionEvent_getHistoricalEventTime(AInputEvent* motion_event,
         size_t history_index);
 
 /* Get the historical raw X coordinate of this event for the given pointer index that
@@ -480,7 +480,7 @@ int64_t motion_event_get_historical_event_time(input_event_t* motion_event,
  * and views.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float motion_event_get_historical_raw_x(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getHistoricalRawX(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the historical raw Y coordinate of this event for the given pointer index that
  * occurred between this event and the previous motion event.
@@ -489,20 +489,20 @@ float motion_event_get_historical_raw_x(const input_event_t* motion_event, size_
  * and views.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float motion_event_get_historical_raw_y(const input_event_t* motion_event, size_t pointer_index);
+float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the historical X coordinate of this event for the given pointer index that
  * occurred between this event and the previous motion event.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float motion_event_get_historical_x(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalX(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
 
 /* Get the historical Y coordinate of this event for the given pointer index that
  * occurred between this event and the previous motion event.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float motion_event_get_historical_y(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalY(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
 
 /* Get the historical pressure of this event for the given pointer index that
@@ -510,7 +510,7 @@ float motion_event_get_historical_y(input_event_t* motion_event, size_t pointer_
  * The pressure generally ranges from 0 (no pressure at all) to 1 (normal pressure),
  * however values higher than 1 may be generated depending on the calibration of
  * the input device. */
-float motion_event_get_historical_pressure(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalPressure(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
 
 /* Get the current scaled value of the approximate size for the given pointer index that
@@ -520,7 +520,7 @@ float motion_event_get_historical_pressure(input_event_t* motion_event, size_t p
  * touch is normalized with the device specific range of values
  * and scaled to a value between 0 and 1.  The value of size can be used to
  * determine fat touch events. */
-float motion_event_get_historical_size(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
 
 /*
@@ -529,8 +529,8 @@ float motion_event_get_historical_size(input_event_t* motion_event, size_t point
  * An input queue is the facility through which you retrieve input
  * events.
  */
-struct input_queue_t;
-typedef struct input_queue_t input_queue_t;
+struct AInputQueue;
+typedef struct AInputQueue AInputQueue;
 
 /*
  * Return a file descriptor for the queue, which you
@@ -538,26 +538,26 @@ typedef struct input_queue_t input_queue_t;
  * is typically used with select() or poll() to multiplex
  * with other kinds of events.
  */
-int input_queue_get_fd(input_queue_t* queue);
+int AInputQueue_getFd(AInputQueue* queue);
 
 /*
  * Returns true if there are one or more events available in the
  * input queue.  Returns 1 if the queue has events; 0 if
  * it does not have events; and a negative value if there is an error.
  */
-int input_queue_has_events(input_queue_t* queue);
+int AInputQueue_hasEvents(AInputQueue* queue);
 
 /*
  * Returns the next available event from the queue.  Returns a negative
  * value if no events are available or an error has occurred.
  */
-int32_t input_queue_get_event(input_queue_t* queue, input_event_t** outEvent);
+int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent);
 
 /*
  * Report that dispatching has finished with the given event.
- * This must be called after receiving an event with input_queue_get_event().
+ * This must be called after receiving an event with AInputQueue_get_event().
  */
-void input_queue_finish_event(input_queue_t* queue, input_event_t* event, int handled);
+void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled);
 
 #ifdef __cplusplus
 }

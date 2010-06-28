@@ -29,7 +29,7 @@ namespace android
 {
 
 struct NativeCode {
-    NativeCode(void* _dlhandle, android_activity_create_t* _createFunc) {
+    NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc) {
         memset(&activity, sizeof(activity), 0);
         memset(&callbacks, sizeof(callbacks), 0);
         dlhandle = _dlhandle;
@@ -73,7 +73,7 @@ struct NativeCode {
             sp<InputChannel> ic =
                     android_view_InputChannel_getInputChannel(activity.env, _channel);
             if (ic != NULL) {
-                nativeInputQueue = new input_queue_t(ic);
+                nativeInputQueue = new AInputQueue(ic);
                 if (nativeInputQueue->getConsumer().initialize() != android::OK) {
                     delete nativeInputQueue;
                     nativeInputQueue = NULL;
@@ -86,15 +86,15 @@ struct NativeCode {
         return OK;
     }
     
-    android_activity_t activity;
-    android_activity_callbacks_t callbacks;
+    ANativeActivity activity;
+    ANativeActivityCallbacks callbacks;
     
     void* dlhandle;
-    android_activity_create_t* createActivityFunc;
+    ANativeActivity_createFunc* createActivityFunc;
     
     jobject surface;
     jobject inputChannel;
-    struct input_queue_t* nativeInputQueue;
+    struct AInputQueue* nativeInputQueue;
 };
 
 static jint
@@ -108,14 +108,19 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path)
     env->ReleaseStringUTFChars(path, pathStr);
     
     if (handle != NULL) {
-        code = new NativeCode(handle, (android_activity_create_t*)
-                dlsym(handle, "android_onCreateActivity"));
+        code = new NativeCode(handle, (ANativeActivity_createFunc*)
+                dlsym(handle, "ANativeActivity_onCreate"));
         if (code->createActivityFunc == NULL) {
-            LOGW("android_onCreateActivity not found");
+            LOGW("ANativeActivity_onCreate not found");
             delete code;
             return 0;
         }
         code->activity.callbacks = &code->callbacks;
+        if (env->GetJavaVM(&code->activity.vm) < 0) {
+            LOGW("NativeActivity GetJavaVM failed");
+            delete code;
+            return 0;
+        }
         code->activity.env = env;
         code->activity.clazz = clazz;
         code->createActivityFunc(&code->activity, NULL, 0);
@@ -219,7 +224,7 @@ onSurfaceCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
         code->setSurface(surface);
         if (code->callbacks.onSurfaceCreated != NULL) {
             code->callbacks.onSurfaceCreated(&code->activity,
-                    (android_surface_t*)code->surface);
+                    (ASurfaceHolder*)code->surface);
         }
     }
 }
@@ -232,7 +237,7 @@ onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
         NativeCode* code = (NativeCode*)handle;
         if (code->surface != NULL && code->callbacks.onSurfaceChanged != NULL) {
             code->callbacks.onSurfaceChanged(&code->activity,
-                    (android_surface_t*)code->surface, format, width, height);
+                    (ASurfaceHolder*)code->surface, format, width, height);
         }
     }
 }
@@ -244,7 +249,7 @@ onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surfa
         NativeCode* code = (NativeCode*)handle;
         if (code->surface != NULL && code->callbacks.onSurfaceDestroyed != NULL) {
             code->callbacks.onSurfaceDestroyed(&code->activity,
-                    (android_surface_t*)code->surface);
+                    (ASurfaceHolder*)code->surface);
         }
         code->setSurface(NULL);
     }
