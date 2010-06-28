@@ -554,6 +554,16 @@ var ANDROID_RESOURCES = [
       en: 'A simple Android home screen widgets example.'
     }
   },
+  {
+    tags: ['sample', 'layout', 'new'],
+    path: 'samples/XmlAdapters/index.html',
+    title: {
+      en: 'XML Adapters'
+    },
+    description: {
+      en: 'Binding data to views using XML Adapters examples.'
+    }
+  },
 
 /////////////////
 /// TUTORIALS ///

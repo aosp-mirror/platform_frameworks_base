@@ -415,7 +415,9 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/WiktionarySimple \
 		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
 		-samplecode $(sample_dir)/VoiceRecognitionService \
-		            resources/samples/VoiceRecognitionService "Voice Recognition Service"
+		            resources/samples/VoiceRecognitionService "Voice Recognition Service" \
+		-samplecode $(sample_dir)/XmlAdapters \
+		            resources/samples/XmlAdapters "XML Adapters"
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
