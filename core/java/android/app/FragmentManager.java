@@ -77,6 +77,10 @@ public class FragmentManager {
     static final boolean DEBUG = true;
     static final String TAG = "FragmentManager";
     
+    ArrayList<Runnable> mPendingActions;
+    Runnable[] mTmpActions;
+    boolean mExecutingActions;
+    
     ArrayList<Fragment> mActive;
     ArrayList<Fragment> mAdded;
     ArrayList<Integer> mAvailIndices;
@@ -90,6 +94,13 @@ public class FragmentManager {
     // Temporary vars for state save and restore.
     Bundle mStateBundle = null;
     SparseArray<Parcelable> mStateArray = null;
+    
+    Runnable mExecCommit = new Runnable() {
+        @Override
+        public void run() {
+            execPendingActions();
+        }
+    };
     
     Animation loadAnimation(Fragment fragment, int transit, boolean enter,
             int transitionStyle) {
@@ -486,6 +497,52 @@ public class FragmentManager {
         return null;
     }
     
+    public void enqueueAction(Runnable action) {
+        synchronized (this) {
+            if (mPendingActions == null) {
+                mPendingActions = new ArrayList<Runnable>();
+            }
+            mPendingActions.add(action);
+            if (mPendingActions.size() == 1) {
+                mActivity.mHandler.removeCallbacks(mExecCommit);
+                mActivity.mHandler.post(mExecCommit);
+            }
+        }
+    }
+    
+    /**
+     * Only call from main thread!
+     */
+    public void execPendingActions() {
+        if (mExecutingActions) {
+            throw new IllegalStateException("Recursive entry to execPendingActions");
+        }
+        
+        while (true) {
+            int numActions;
+            
+            synchronized (this) {
+                if (mPendingActions == null || mPendingActions.size() == 0) {
+                    return;
+                }
+                
+                numActions = mPendingActions.size();
+                if (mTmpActions == null || mTmpActions.length < numActions) {
+                    mTmpActions = new Runnable[numActions];
+                }
+                mPendingActions.toArray(mTmpActions);
+                mPendingActions.clear();
+                mActivity.mHandler.removeCallbacks(mExecCommit);
+            }
+            
+            mExecutingActions = true;
+            for (int i=0; i<numActions; i++) {
+                mTmpActions[i].run();
+            }
+            mExecutingActions = false;
+        }
+    }
+    
     public void addBackStackState(BackStackEntry state) {
         if (mBackStack == null) {
             mBackStack = new ArrayList<BackStackEntry>();
@@ -503,8 +560,9 @@ public class FragmentManager {
                 return false;
             }
             final BackStackEntry bss = mBackStack.remove(last);
-            handler.post(new Runnable() {
+            enqueueAction(new Runnable() {
                 public void run() {
+                    if (DEBUG) Log.v(TAG, "Popping back stack state: " + bss);
                     bss.popFromBackStack();
                     moveToState(mCurState, reverseTransit(bss.getTransition()),
                             bss.getTransitionStyle(), true);
@@ -526,9 +584,10 @@ public class FragmentManager {
             for (int i=mBackStack.size()-1; i>index; i--) {
                 states.add(mBackStack.remove(i));
             }
-            handler.post(new Runnable() {
+            enqueueAction(new Runnable() {
                 public void run() {
                     for (int i=0; i<states.size(); i++) {
+                        if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
                         states.get(i).popFromBackStack();
                     }
                     moveToState(mCurState, true);

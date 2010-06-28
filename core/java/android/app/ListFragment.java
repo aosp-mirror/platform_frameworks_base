@@ -21,9 +21,11 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 /**
  * An fragment that displays a list of items by binding to a data source such as
@@ -154,17 +156,28 @@ public class ListFragment extends Fragment {
 
     ListAdapter mAdapter;
     ListView mList;
+    View mEmptyView;
+    TextView mStandardEmptyView;
+    View mProgressContainer;
+    View mListContainer;
+    boolean mSetEmptyView;
+    boolean mListShown;
 
     public ListFragment() {
     }
 
     /**
-     * Provide default implementation to return a simple list view.
+     * Provide default implementation to return a simple list view.  Subclasses
+     * can override to replace with their own layout.  If doing so, the
+     * returned view hierarchy <em>must</em> have a ListView whose id
+     * is {@link android.R.id.list android.R.id.list} and can optionally
+     * have a sibling view id {@link android.R.id.empty android.R.id.empty}
+     * that is to be shown when the list is empty.
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(com.android.internal.R.layout.list_content,
+        return inflater.inflate(com.android.internal.R.layout.list_content_rich,
                 container, false);
     }
 
@@ -247,6 +260,62 @@ public class ListFragment extends Fragment {
     }
 
     /**
+     * The default content for a ListFragment has a TextView that can
+     * be shown when the list is empty.  If you would like to have it
+     * shown, call this method to supply the text it should use.
+     */
+    public void setEmptyText(CharSequence text) {
+        ensureList();
+        if (mStandardEmptyView == null) {
+            throw new IllegalStateException("Can't be used with a custom content view");
+        }
+        if (!mSetEmptyView) {
+            mSetEmptyView = true;
+            mList.setEmptyView(mStandardEmptyView);
+        }
+    }
+    
+    /**
+     * Control whether the list is being displayed.  You can make it not
+     * displayed if you are waiting for the initial data to show in it.  During
+     * this time an indeterminant progress indicator will be shown instead.
+     * 
+     * @param shown If true, the list view is shown; if false, the progress
+     * indicator.  The initial value is true.
+     * @param animate If true, an animation will be used to transition to the
+     * new state.
+     */
+    public void setListShown(boolean shown, boolean animate) {
+        ensureList();
+        if (mProgressContainer == null) {
+            throw new IllegalStateException("Can't be used with a custom content view");
+        }
+        if (mListShown == shown) {
+            return;
+        }
+        mListShown = shown;
+        if (shown) {
+            if (animate) {
+                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_out));
+                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_in));
+            }
+            mProgressContainer.setVisibility(View.GONE);
+            mListContainer.setVisibility(View.VISIBLE);
+        } else {
+            if (animate) {
+                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_in));
+                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_out));
+            }
+            mProgressContainer.setVisibility(View.VISIBLE);
+            mListContainer.setVisibility(View.GONE);
+        }
+    }
+    
+    /**
      * Get the ListAdapter associated with this activity's ListView.
      */
     public ListAdapter getListAdapter() {
@@ -261,16 +330,33 @@ public class ListFragment extends Fragment {
         if (root == null) {
             throw new IllegalStateException("Content view not yet created");
         }
-        View emptyView = root.findViewById(com.android.internal.R.id.empty);
-        mList = (ListView)root.findViewById(com.android.internal.R.id.list);
-        if (mList == null) {
-            throw new RuntimeException(
-                    "Your content must have a ListView whose id attribute is " +
-                    "'android.R.id.list'");
+        if (root instanceof ListView) {
+            mList = (ListView)root;
+        } else {
+            mStandardEmptyView = (TextView)root.findViewById(
+                    com.android.internal.R.id.internalEmpty);
+            if (mStandardEmptyView == null) {
+                mEmptyView = root.findViewById(android.R.id.empty);
+            }
+            mProgressContainer = root.findViewById(com.android.internal.R.id.progressContainer);
+            mListContainer = root.findViewById(com.android.internal.R.id.listContainer);
+            View rawListView = root.findViewById(android.R.id.list);
+            if (!(rawListView instanceof ListView)) {
+                throw new RuntimeException(
+                        "Content has view with id attribute 'android.R.id.list' "
+                        + "that is not a ListView class");
+            }
+            mList = (ListView)rawListView;
+            if (mList == null) {
+                throw new RuntimeException(
+                        "Your content must have a ListView whose id attribute is " +
+                        "'android.R.id.list'");
+            }
+            if (mEmptyView != null) {
+                mList.setEmptyView(mEmptyView);
+            }
         }
-        if (emptyView != null) {
-            mList.setEmptyView(emptyView);
-        }
+        mListShown = true;
         mList.setOnItemClickListener(mOnClickListener);
         if (mAdapter != null) {
             setListAdapter(mAdapter);

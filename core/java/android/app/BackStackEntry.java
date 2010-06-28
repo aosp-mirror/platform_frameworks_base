@@ -18,6 +18,7 @@ package android.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -28,14 +29,30 @@ final class BackStackState implements Parcelable {
     final String mName;
     
     public BackStackState(FragmentManager fm, BackStackEntry bse) {
-        mOps = new int[bse.mNumOp*4];
+        int numRemoved = 0;
         BackStackEntry.Op op = bse.mHead;
+        while (op != null) {
+            if (op.removed != null) numRemoved += op.removed.size();
+            op = op.next;
+        }
+        mOps = new int[bse.mNumOp*5 + numRemoved];
+        
+        op = bse.mHead;
         int pos = 0;
         while (op != null) {
             mOps[pos++] = op.cmd;
             mOps[pos++] = op.fragment.mIndex;
             mOps[pos++] = op.enterAnim;
             mOps[pos++] = op.exitAnim;
+            if (op.removed != null) {
+                final int N = op.removed.size();
+                mOps[pos++] = N;
+                for (int i=0; i<N; i++) {
+                    mOps[pos++] = op.removed.get(i).mIndex;
+                }
+            } else {
+                mOps[pos++] = 0;
+            }
             op = op.next;
         }
         mTransition = bse.mTransition;
@@ -61,6 +78,13 @@ final class BackStackState implements Parcelable {
             op.fragment = f;
             op.enterAnim = mOps[pos++];
             op.exitAnim = mOps[pos++];
+            final int N = mOps[pos++];
+            if (N > 0) {
+                op.removed = new ArrayList<Fragment>(N);
+                for (int i=0; i<N; i++) {
+                    op.removed.add(fm.mActive.get(mOps[pos++]));
+                }
+            }
             bse.addOp(op);
         }
         bse.mTransition = mTransition;
@@ -96,6 +120,8 @@ final class BackStackState implements Parcelable {
  * @hide Entry of an operation on the fragment back stack.
  */
 final class BackStackEntry implements FragmentTransaction, Runnable {
+    static final String TAG = "BackStackEntry";
+    
     final FragmentManager mManager;
     
     static final int OP_NULL = 0;
@@ -265,11 +291,14 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
 
     public void commit() {
         if (mCommitted) throw new IllegalStateException("commit already called");
+        if (FragmentManager.DEBUG) Log.v(TAG, "Commit: " + this);
         mCommitted = true;
-        mManager.mActivity.mHandler.post(this);
+        mManager.enqueueAction(this);
     }
     
     public void run() {
+        if (FragmentManager.DEBUG) Log.v(TAG, "Run: " + this);
+        
         Op op = mHead;
         while (op != null) {
             switch (op.cmd) {
@@ -286,6 +315,8 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
                     if (mManager.mAdded != null) {
                         for (int i=0; i<mManager.mAdded.size(); i++) {
                             Fragment old = mManager.mAdded.get(i);
+                            if (FragmentManager.DEBUG) Log.v(TAG,
+                                    "OP_REPLACE: adding=" + f + " old=" + old);
                             if (old.mContainerId == f.mContainerId) {
                                 if (op.removed == null) {
                                     op.removed = new ArrayList<Fragment>();
@@ -350,6 +381,8 @@ final class BackStackEntry implements FragmentTransaction, Runnable {
     }
     
     public void popFromBackStack() {
+        if (FragmentManager.DEBUG) Log.v(TAG, "popFromBackStack: " + this);
+        
         Op op = mTail;
         while (op != null) {
             switch (op.cmd) {
