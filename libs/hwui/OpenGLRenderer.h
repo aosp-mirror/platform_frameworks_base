@@ -23,11 +23,12 @@
 #include <SkMatrix.h>
 #include <SkXfermode.h>
 
-#include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
 
 #include "Matrix.h"
+#include "Program.h"
 #include "Rect.h"
+#include "Snapshot.h"
 
 namespace android {
 namespace uirenderer {
@@ -36,122 +37,30 @@ namespace uirenderer {
 // Support
 ///////////////////////////////////////////////////////////////////////////////
 
-class Snapshot: public LightRefBase<Snapshot> {
-public:
-    Snapshot() {
-    }
-
-    Snapshot(const sp<Snapshot> s):
-            transform(s->transform),
-            clipRect(s->clipRect),
-            flags(kFlagDirtyTransform),
-            previous(s),
-            layer(0.0f, 0.0f, 0.0f, 0.0f),
-            texture(0),
-            fbo(0),
-            alpha(255) {
-    }
-
-    enum Flags {
-        kFlagClipSet = 0x1,
-        kFlagDirtyTransform = 0x2,
-        kFlagIsLayer = 0x4,
-    };
-
-    const Rect& getMappedClip();
-
-    // Local transformations
-    mat4 transform;
-
-    // Clipping rectangle at the time of this snapshot
-    Rect clipRect;
-
-    // Dirty flags
-    int flags;
-
-    // Previous snapshot in the frames stack
-    sp<Snapshot> previous;
-
-    // Layer, only set if kFlagIsLayer is set
-    Rect layer;
-    GLuint texture;
-    GLuint fbo;
-    float alpha;
-
-private:
-    // Clipping rectangle mapped with the transform
-    Rect mappedClip;
-}; // class Snapshot
-
+/**
+ * Simple structure to describe a vertex with a position.
+ * This is used to draw filled rectangles without a texture.
+ */
 struct SimpleVertex {
     float position[2];
 }; // struct SimpleVertex
 
+/**
+ * Simple structure to describe a vertex with a position and a texture.
+ */
 struct TextureVertex {
     float position[2];
     float texture[2];
 }; // struct TextureVertex
 
-class Program: public LightRefBase<Program> {
-public:
-    Program(const char* vertex, const char* fragment);
-    ~Program();
-
-    void use();
-
-protected:
-    int addAttrib(const char* name);
-    int getAttrib(const char* name);
-
-    int addUniform(const char* name);
-    int getUniform(const char* name);
-
-private:
-    GLuint buildShader(const char* source, GLenum type);
-
-    // Handle of the OpenGL program
-    GLuint id;
-
-    // Handles of the shaders
-    GLuint vertexShader;
-    GLuint fragmentShader;
-
-    // Keeps track of attributes and uniforms slots
-    KeyedVector<const char*, int> attributes;
-    KeyedVector<const char*, int> uniforms;
-}; // class Program
-
-class DrawColorProgram: public Program {
-public:
-    DrawColorProgram();
-    DrawColorProgram(const char* vertex, const char* fragment);
-
-    void use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
-             const GLfloat* transformMatrix);
-
-    int position;
-    int color;
-
-    int projection;
-    int modelView;
-    int transform;
-
-protected:
-    void getAttribsAndUniforms();
-};
-
-class DrawTextureProgram: public DrawColorProgram {
-public:
-    DrawTextureProgram();
-
-    int sampler;
-    int texCoords;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * OpenGL renderer used to draw accelerated 2D graphics. The API is a
+ * simplified version of Skia's Canvas API.
+ */
 class OpenGLRenderer {
 public:
     OpenGLRenderer();
@@ -184,12 +93,52 @@ public:
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
 private:
+    /**
+     * Saves the current state of the renderer as a new snapshot.
+     * The new snapshot is saved in mSnapshot and the previous snapshot
+     * is linked from mSnapshot->previous.
+     *
+     * @return The new save count. This value can be passed to #restoreToCount()
+     */
     int saveSnapshot();
+
+    /**
+     * Restores the current snapshot; mSnapshot becomes mSnapshot->previous.
+     *
+     * @return True if the clip should be also reapplied by calling
+     *         #setScissorFromClip().
+     */
     bool restoreSnapshot();
 
+    /**
+     * Sets the clipping rectangle using glScissor. The clip is defined by
+     * the current snapshot's clipRect member.
+     */
     void setScissorFromClip();
 
+    /**
+     * Draws a colored rectangle with the specified color. The specified coordinates
+     * are transformed by the current snapshot's transform matrix.
+     *
+     * @param left The left coordinate of the rectangle
+     * @param top The top coordinate of the rectangle
+     * @param right The right coordinate of the rectangle
+     * @param bottom The bottom coordinate of the rectangle
+     * @param color The rectangle's ARGB color, defined as a packed 32 bits word
+     */
     void drawColorRect(float left, float top, float right, float bottom, int color);
+
+    /**
+     * Draws a textured rectangle with the specified texture. The specified coordinates
+     * are transformed by the current snapshot's transform matrix.
+     *
+     * @param left The left coordinate of the rectangle
+     * @param top The top coordinate of the rectangle
+     * @param right The right coordinate of the rectangle
+     * @param bottom The bottom coordinate of the rectangle
+     * @param texture The texture name to map onto the rectangle
+     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
+     */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
             float alpha);
 

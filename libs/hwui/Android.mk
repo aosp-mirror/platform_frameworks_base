@@ -3,7 +3,8 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
 	Matrix.cpp \
-	OpenGLRenderer.cpp
+	OpenGLRenderer.cpp \
+	Program.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
