@@ -43,6 +43,16 @@
         android:label="Test runner for Connectivity Manager Tests"
     />
 
+    <!--
+     To run the unit tests use the command:
+     "adb shell am instrument -w
+     com.android.connectivitymanagertest/.ConnectivityManagerUnitTestRunner"
+    -->
+    <instrumentation android:name=".ConnectivityManagerUnitTestRunner"
+        android:targetPackage="com.android.connectivitymanagertest"
+        android.label="Test runner for unit tests"
+    />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
