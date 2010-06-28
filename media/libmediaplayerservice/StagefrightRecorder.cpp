@@ -456,7 +456,7 @@ status_t StagefrightRecorder::setParameters(const String8 &params) {
     return OK;
 }
 
-status_t StagefrightRecorder::setListener(const sp<IMediaPlayerClient> &listener) {
+status_t StagefrightRecorder::setListener(const sp<IMediaRecorderClient> &listener) {
     mListener = listener;
 
     return OK;
