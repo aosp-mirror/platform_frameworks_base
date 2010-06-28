@@ -1738,11 +1738,11 @@ final class WebViewCore {
     // Used to suspend drawing.
     private boolean mDrawIsPaused;
 
-    // mRestoreState is set in didFirstLayout(), and reset in the next
-    // webkitDraw after passing it to the UI thread.
-    private RestoreState mRestoreState = null;
+    // mInitialViewState is set by didFirstLayout() and then reset in the
+    // next webkitDraw after passing the state to the UI thread.
+    private ViewState mInitialViewState = null;
 
-    static class RestoreState {
+    static class ViewState {
         float mMinScale;
         float mMaxScale;
         float mViewScale;
@@ -1762,8 +1762,8 @@ final class WebViewCore {
         Point mViewPoint;
         Point mWidthHeight;
         int mMinPrefWidth;
-        RestoreState mRestoreState; // only non-null if it is for the first
-                                    // picture set after the first layout
+        // only non-null if it is for the first picture set after the first layout
+        ViewState mViewState;
         boolean mFocusSizeChanged;
     }
 
@@ -1788,9 +1788,9 @@ final class WebViewCore {
                                         : mViewportWidth),
                         nativeGetContentMinPrefWidth());
             }
-            if (mRestoreState != null) {
-                draw.mRestoreState = mRestoreState;
-                mRestoreState = null;
+            if (mInitialViewState != null) {
+                draw.mViewState = mInitialViewState;
+                mInitialViewState = null;
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
@@ -2065,12 +2065,12 @@ final class WebViewCore {
 
         if (mWebView == null) return;
 
-        boolean updateRestoreState = standardLoad || mRestoredScale > 0;
-        setupViewport(updateRestoreState);
+        boolean updateViewState = standardLoad || mRestoredScale > 0;
+        setupViewport(updateViewState);
         // if updateRestoreState is true, ViewManager.postReadyToDrawAll() will
-        // be called after the WebView restore the state. If updateRestoreState
+        // be called after the WebView updates its state. If updateRestoreState
         // is false, start to draw now as it is ready.
-        if (!updateRestoreState) {
+        if (!updateViewState) {
             mWebView.mViewManager.postReadyToDrawAll();
         }
 
@@ -2096,7 +2096,7 @@ final class WebViewCore {
         }
     }
 
-    private void setupViewport(boolean updateRestoreState) {
+    private void setupViewport(boolean updateViewState) {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
@@ -2148,17 +2148,17 @@ final class WebViewCore {
         }
 
         // if mViewportWidth is 0, it means device-width, always update.
-        if (mViewportWidth != 0 && !updateRestoreState) {
-            RestoreState restoreState = new RestoreState();
-            restoreState.mMinScale = mViewportMinimumScale / 100.0f;
-            restoreState.mMaxScale = mViewportMaximumScale / 100.0f;
-            restoreState.mDefaultScale = adjust;
+        if (mViewportWidth != 0 && !updateViewState) {
+            ViewState viewState = new ViewState();
+            viewState.mMinScale = mViewportMinimumScale / 100.0f;
+            viewState.mMaxScale = mViewportMaximumScale / 100.0f;
+            viewState.mDefaultScale = adjust;
             // as mViewportWidth is not 0, it is not mobile site.
-            restoreState.mMobileSite = false;
+            viewState.mMobileSite = false;
             // for non-mobile site, we don't need minPrefWidth, set it as 0
-            restoreState.mScrollX = 0;
+            viewState.mScrollX = 0;
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.UPDATE_ZOOM_RANGE, restoreState).sendToTarget();
+                    WebView.UPDATE_ZOOM_RANGE, viewState).sendToTarget();
             return;
         }
 
@@ -2179,32 +2179,31 @@ final class WebViewCore {
         } else {
             webViewWidth = Math.round(viewportWidth * mCurrentViewScale);
         }
-        mRestoreState = new RestoreState();
-        mRestoreState.mMinScale = mViewportMinimumScale / 100.0f;
-        mRestoreState.mMaxScale = mViewportMaximumScale / 100.0f;
-        mRestoreState.mDefaultScale = adjust;
-        mRestoreState.mScrollX = mRestoredX;
-        mRestoreState.mScrollY = mRestoredY;
-        mRestoreState.mMobileSite = (0 == mViewportWidth);
+        mInitialViewState = new ViewState();
+        mInitialViewState.mMinScale = mViewportMinimumScale / 100.0f;
+        mInitialViewState.mMaxScale = mViewportMaximumScale / 100.0f;
+        mInitialViewState.mDefaultScale = adjust;
+        mInitialViewState.mScrollX = mRestoredX;
+        mInitialViewState.mScrollY = mRestoredY;
+        mInitialViewState.mMobileSite = (0 == mViewportWidth);
         if (mRestoredScale > 0) {
-            mRestoreState.mViewScale = mRestoredScale / 100.0f;
+            mInitialViewState.mViewScale = mRestoredScale / 100.0f;
             if (mRestoredTextWrapScale > 0) {
-                mRestoreState.mTextWrapScale =
-                        mRestoredTextWrapScale / 100.0f;
+                mInitialViewState.mTextWrapScale = mRestoredTextWrapScale / 100.0f;
             } else {
-                mRestoreState.mTextWrapScale = mRestoreState.mViewScale;
+                mInitialViewState.mTextWrapScale = mInitialViewState.mViewScale;
             }
         } else {
             if (mViewportInitialScale > 0) {
-                mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
+                mInitialViewState.mViewScale = mInitialViewState.mTextWrapScale =
                         mViewportInitialScale / 100.0f;
             } else if (mViewportWidth > 0 && mViewportWidth < webViewWidth) {
-                mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
+                mInitialViewState.mViewScale = mInitialViewState.mTextWrapScale =
                         (float) webViewWidth / mViewportWidth;
             } else {
-                mRestoreState.mTextWrapScale = adjust;
+                mInitialViewState.mTextWrapScale = adjust;
                 // 0 will trigger WebView to turn on zoom overview mode
-                mRestoreState.mViewScale = 0;
+                mInitialViewState.mViewScale = 0;
             }
         }
 
@@ -2245,15 +2244,15 @@ final class WebViewCore {
                 // mViewScale as 0 means it is in zoom overview mode. So we don't
                 // know the exact scale. If mRestoredScale is non-zero, use it;
                 // otherwise just use mTextWrapScale as the initial scale.
-                data.mScale = mRestoreState.mViewScale == 0
+                data.mScale = mInitialViewState.mViewScale == 0
                         ? (mRestoredScale > 0 ? mRestoredScale / 100.0f
-                                : mRestoreState.mTextWrapScale)
-                        : mRestoreState.mViewScale;
+                                : mInitialViewState.mTextWrapScale)
+                        : mInitialViewState.mViewScale;
                 if (DebugFlags.WEB_VIEW_CORE) {
                     Log.v(LOGTAG, "setupViewport"
                              + " mRestoredScale=" + mRestoredScale
-                             + " mViewScale=" + mRestoreState.mViewScale
-                             + " mTextWrapScale=" + mRestoreState.mTextWrapScale
+                             + " mViewScale=" + mInitialViewState.mViewScale
+                             + " mTextWrapScale=" + mInitialViewState.mTextWrapScale
                              );
                 }
                 data.mWidth = Math.round(webViewWidth / data.mScale);
@@ -2266,7 +2265,7 @@ final class WebViewCore {
                         Math.round(mWebView.getViewHeight() / data.mScale)
                         : mCurrentViewHeight * data.mWidth / viewportWidth;
                 data.mTextWrapWidth = Math.round(webViewWidth
-                        / mRestoreState.mTextWrapScale);
+                        / mInitialViewState.mTextWrapScale);
                 data.mIgnoreHeight = false;
                 data.mAnchorX = data.mAnchorY = 0;
                 // send VIEW_SIZE_CHANGED to the front of the queue so that we

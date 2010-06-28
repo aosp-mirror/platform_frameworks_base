@@ -720,15 +720,15 @@ class ZoomManager {
         }
     }
 
-    public void updateZoomRange(WebViewCore.RestoreState restoreState,
+    public void updateZoomRange(WebViewCore.ViewState viewState,
             int viewWidth, int minPrefWidth) {
-        if (restoreState.mMinScale == 0) {
-            if (restoreState.mMobileSite) {
+        if (viewState.mMinScale == 0) {
+            if (viewState.mMobileSite) {
                 if (minPrefWidth > Math.max(0, viewWidth)) {
                     mMinZoomScale = (float) viewWidth / minPrefWidth;
                     mMinZoomScaleFixed = false;
                 } else {
-                    mMinZoomScale = restoreState.mDefaultScale;
+                    mMinZoomScale = viewState.mDefaultScale;
                     mMinZoomScaleFixed = true;
                 }
             } else {
@@ -736,13 +736,13 @@ class ZoomManager {
                 mMinZoomScaleFixed = false;
             }
         } else {
-            mMinZoomScale = restoreState.mMinScale;
+            mMinZoomScale = viewState.mMinScale;
             mMinZoomScaleFixed = true;
         }
-        if (restoreState.mMaxScale == 0) {
+        if (viewState.mMaxScale == 0) {
             mMaxZoomScale = mDefaultMaxZoomScale;
         } else {
-            mMaxZoomScale = restoreState.mMaxScale;
+            mMaxZoomScale = viewState.mMaxScale;
         }
     }
 
@@ -776,18 +776,21 @@ class ZoomManager {
     }
 
     /**
-     * Updates zoom values when Webkit restores a old picture. This method
+     * Updates zoom values after Webkit completes the initial page layout. It
+     * is called when visiting a page for the first time as well as when the
+     * user navigates back to a page (in which case we may need to restore the
+     * zoom levels to the state they were when you left the page). This method
      * should only be called from the UI thread's message handler.
      */
-    public void restoreZoomState(WebViewCore.DrawData drawData) {
+    public void onFirstLayout(WebViewCore.DrawData drawData) {
         // precondition check
         assert drawData != null;
-        assert drawData.mRestoreState != null;
+        assert drawData.mViewState != null;
         assert mWebView.getSettings() != null;
 
-        WebViewCore.RestoreState restoreState = drawData.mRestoreState;
+        WebViewCore.ViewState viewState = drawData.mViewState;
         final Point viewSize = drawData.mViewPoint;
-        updateZoomRange(restoreState, viewSize.x, drawData.mMinPrefWidth);
+        updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
 
         if (!mWebView.drawHistory()) {
             final float scale;
@@ -796,9 +799,9 @@ class ZoomManager {
             if (mInitialScale > 0) {
                 scale = mInitialScale;
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
-            } else if (restoreState.mViewScale > 0) {
-                mTextWrapScale = restoreState.mTextWrapScale;
-                scale = restoreState.mViewScale;
+            } else if (viewState.mViewScale > 0) {
+                mTextWrapScale = viewState.mTextWrapScale;
+                scale = viewState.mViewScale;
                 reflowText = false;
             } else {
                 WebSettings settings = mWebView.getSettings();
@@ -806,7 +809,7 @@ class ZoomManager {
                     mInitialZoomOverview = true;
                     scale = (float) mWebView.getViewWidth() / WebView.DEFAULT_VIEWPORT_WIDTH;
                 } else {
-                    scale = restoreState.mTextWrapScale;
+                    scale = viewState.mTextWrapScale;
                 }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }
