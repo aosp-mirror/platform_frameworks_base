@@ -872,9 +872,9 @@
         the audio record path.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_camera">take pictures</string>
+    <string name="permlab_camera">take pictures and videos</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_camera">Allows application to take pictures
+    <string name="permdesc_camera">Allows application to take pictures and videos
         with the camera. This allows the application at any time to collect
         images the camera is seeing.</string>
 
