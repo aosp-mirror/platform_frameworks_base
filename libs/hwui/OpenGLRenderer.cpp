@@ -20,19 +20,11 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Errors.h>
-#include <utils/KeyedVector.h>
+#include <SkCanvas.h>
+
 #include <utils/Log.h>
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
-#include <SkCanvas.h>
-#include <SkPaint.h>
-#include <SkXfermode.h>
-
 #include "OpenGLRenderer.h"
-#include "Matrix.h"
 
 namespace android {
 namespace uirenderer {
@@ -57,7 +49,7 @@ const SimpleVertex gDrawColorVertices[] = {
 const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
 const GLsizei gDrawColorVertexCount = 4;
 
-const TextureVertex gDrawTextureVertices[] = {
+TextureVertex gDrawTextureVertices[] = {
         FV(0.0f, 0.0f, 0.0f, 1.0f),
         FV(1.0f, 0.0f, 1.0f, 1.0f),
         FV(0.0f, 1.0f, 0.0f, 0.0f),
@@ -66,134 +58,15 @@ const TextureVertex gDrawTextureVertices[] = {
 const GLsizei gDrawTextureVertexStride = sizeof(TextureVertex);
 const GLsizei gDrawTextureVertexCount = 4;
 
-///////////////////////////////////////////////////////////////////////////////
-// Shaders
-///////////////////////////////////////////////////////////////////////////////
-
-#define SHADER_SOURCE(name, source) const char* name = #source
-
-#include "shaders/drawColor.vert"
-#include "shaders/drawColor.frag"
-
-#include "shaders/drawTexture.vert"
-#include "shaders/drawTexture.frag"
-
-Program::Program(const char* vertex, const char* fragment) {
-    vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
-    fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
-
-    id = glCreateProgram();
-    glAttachShader(id, vertexShader);
-    glAttachShader(id, fragmentShader);
-    glLinkProgram(id);
-
-    GLint status;
-    glGetProgramiv(id, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
-        GLint infoLen = 0;
-        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
-        if (infoLen > 1) {
-            char* log = (char*) malloc(sizeof(char) * infoLen);
-            glGetProgramInfoLog(id, infoLen, 0, log);
-            LOGE("Error while linking shaders: %s", log);
-            delete log;
-        }
-        glDeleteProgram(id);
-    }
-}
-
-Program::~Program() {
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    glDeleteProgram(id);
-}
-
-void Program::use() {
-    glUseProgram(id);
-}
-
-int Program::addAttrib(const char* name) {
-    int slot = glGetAttribLocation(id, name);
-    attributes.add(name, slot);
-    return slot;
-}
-
-int Program::getAttrib(const char* name) {
-    return attributes.valueFor(name);
-}
-
-int Program::addUniform(const char* name) {
-    int slot = glGetUniformLocation(id, name);
-    uniforms.add(name, slot);
-    return slot;
-}
-
-int Program::getUniform(const char* name) {
-    return uniforms.valueFor(name);
-}
-
-GLuint Program::buildShader(const char* source, GLenum type) {
-    GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, 0);
-    glCompileShader(shader);
-
-    GLint status;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        // Some drivers return wrong values for GL_INFO_LOG_LENGTH
-        // use a fixed size instead
-        GLchar log[512];
-        glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
-        LOGE("Error while compiling shader: %s", log);
-        glDeleteShader(shader);
-    }
-
-    return shader;
-}
-
-DrawColorProgram::DrawColorProgram():
-        Program(gDrawColorVertexShader, gDrawColorFragmentShader) {
-    getAttribsAndUniforms();
-}
-
-DrawColorProgram::DrawColorProgram(const char* vertex, const char* fragment):
-        Program(vertex, fragment) {
-    getAttribsAndUniforms();
-}
-
-void DrawColorProgram::getAttribsAndUniforms() {
-    position = addAttrib("position");
-    color = addAttrib("color");
-    projection = addUniform("projection");
-    modelView = addUniform("modelView");
-    transform = addUniform("transform");
-}
-
-void DrawColorProgram::use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
-        const GLfloat* transformMatrix) {
-    Program::use();
-    glUniformMatrix4fv(projection, 1, GL_FALSE, projectionMatrix);
-    glUniformMatrix4fv(modelView, 1, GL_FALSE, modelViewMatrix);
-    glUniformMatrix4fv(transform, 1, GL_FALSE, transformMatrix);
-}
-
-DrawTextureProgram::DrawTextureProgram():
-        DrawColorProgram(gDrawTextureVertexShader, gDrawTextureFragmentShader) {
-    texCoords = addAttrib("texCoords");
-    sampler = addUniform("sampler");
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Support
-///////////////////////////////////////////////////////////////////////////////
-
-const Rect& Snapshot::getMappedClip() {
-    if (flags & kFlagDirtyTransform) {
-        flags &= ~kFlagDirtyTransform;
-        mappedClip.set(clipRect);
-        transform.mapRect(mappedClip);
-    }
-    return mappedClip;
+static inline void resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
+    gDrawTextureVertices[0].texture[0] = u1;
+    gDrawTextureVertices[0].texture[1] = v2;
+    gDrawTextureVertices[1].texture[0] = u2;
+    gDrawTextureVertices[1].texture[1] = v2;
+    gDrawTextureVertices[2].texture[0] = u1;
+    gDrawTextureVertices[2].texture[1] = v1;
+    gDrawTextureVertices[3].texture[0] = u2;
+    gDrawTextureVertices[3].texture[1] = v1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,11 +165,28 @@ bool OpenGLRenderer::restoreSnapshot() {
         // Most of the time, previous->fbo will be 0 to bind the default buffer
         glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
 
-        const Rect& layer = current->layer;
-        clipRect(layer.left, layer.top, layer.right, layer.bottom);
-        mSnapshot->transform.loadIdentity();
+        // Restore the clip from the previous snapshot
+        const Rect& clip = previous->getMappedClip();
+        glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 
-        drawTextureRect(0.0f, 0.0f, mWidth, mHeight, current->texture, current->alpha);
+        // Compute the correct texture coordinates for the FBO texture
+        // The texture is currently as big as the window but drawn with
+        // a quad of the appropriate size
+        const Rect& layer = current->layer;
+        Rect texCoords(current->layer);
+        mSnapshot->transform.mapRect(texCoords);
+
+        const float u1 = texCoords.left / float(mWidth);
+        const float v1 = (mHeight - texCoords.top) / float(mHeight);
+        const float u2 = texCoords.right / float(mWidth);
+        const float v2 = (mHeight - texCoords.bottom) / float(mHeight);
+
+        resetDrawTextureTexCoords(u1, v1, u2, v1);
+
+        drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
+                current->texture, current->alpha);
+
+        resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
 
         glDeleteFramebuffers(1, &current->fbo);
         glDeleteTextures(1, &current->texture);
@@ -337,11 +227,14 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
     // The FBO will not be scaled, so we can use lower quality filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // TODO ***** IMPORTANT *****
     // Creating a texture-backed FBO works only if the texture is the same size
     // as the original rendering buffer (in this case, mWidth and mHeight.)
     // This is expensive and wasteful and must be fixed.
+    // TODO Additionally we should use an FBO cache
 
     const GLsizei width = mWidth; //right - left;
     const GLsizei height = mHeight; //bottom - right;
@@ -425,7 +318,6 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
      *     const Rect& clip = mSnapshot->getMappedClip();
      *     return !clip.intersects(r);
      */
-
     Rect r(left, top, right, bottom);
     return !mSnapshot->clipRect.intersects(r);
 }
@@ -485,7 +377,7 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     mDrawTextureShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
 
-    // TODO Correctly set the blend function
+    // TODO Correctly set the blend function, based on texture format and xfermode
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 

@@ -17,6 +17,8 @@
 #ifndef ANDROID_UI_RECT_H
 #define ANDROID_UI_RECT_H
 
+#include <utils/Log.h>
+
 namespace android {
 namespace uirenderer {
 
