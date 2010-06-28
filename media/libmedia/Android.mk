@@ -12,6 +12,7 @@ LOCAL_SRC_FILES:= \
     mediaplayer.cpp \
     IMediaPlayerService.cpp \
     IMediaPlayerClient.cpp \
+    IMediaRecorderClient.cpp \
     IMediaPlayer.cpp \
     IMediaRecorder.cpp \
     Metadata.cpp \
