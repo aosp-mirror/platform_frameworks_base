@@ -39,6 +39,27 @@ public class Usb {
     public static final String ACTION_USB_DISCONNECTED =
             "android.hardware.action.USB_DISCONNECTED";
 
+   /**
+     * Broadcast Action:  A sticky broadcast for USB state change events.
+     *
+     * This is a sticky broadcast for clients that are interested in both USB connect and
+     * disconnect events.  If you are only concerned with one or the other, you can use
+     * {@link #ACTION_USB_CONNECTED} or {@link #ACTION_USB_DISCONNECTED} to avoid receiving
+     * unnecessary broadcasts.  The boolean {@link #USB_CONNECTED} extra indicates whether
+     * USB is connected or disconnected.
+     * The extras bundle will also contain name/value pairs with the name of the function
+     * and a value of either {@link #USB_FUNCTION_ENABLED} or {@link #USB_FUNCTION_DISABLED}.
+     * Possible USB function names include {@link #USB_FUNCTION_MASS_STORAGE},
+     * {@link #USB_FUNCTION_ADB}, {@link #USB_FUNCTION_RNDIS} and {@link #USB_FUNCTION_MTP}.
+     */
+    public static final String ACTION_USB_STATE =
+            "android.hardware.action.USB_STATE";
+
+    /**
+     * Boolean extra indicating whether USB is connected or disconnected.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
+     */
+    public static final String USB_CONNECTED = "connected";
 
     /**
      * Name of the USB mass storage USB function.
