@@ -61,9 +61,9 @@ public class ZoomManagerTest extends AndroidTestCase {
         // test the case where the minZoomScale has changed to be < the default
         float newDefaultScale = 1.50f;
         float minZoomScale = ZoomManager.DEFAULT_MIN_ZOOM_SCALE_FACTOR * newDefaultScale;
-        WebViewCore.RestoreState minRestoreState = new WebViewCore.RestoreState();
-        minRestoreState.mMinScale = minZoomScale - 0.1f;
-        zoomManager.updateZoomRange(minRestoreState, 0, 0);
+        WebViewCore.ViewState minViewState = new WebViewCore.ViewState();
+        minViewState.mMinScale = minZoomScale - 0.1f;
+        zoomManager.updateZoomRange(minViewState, 0, 0);
         zoomManager.updateDefaultZoomDensity(newDefaultScale);
         defaultScaleTest(newDefaultScale);
     }
@@ -72,9 +72,9 @@ public class ZoomManagerTest extends AndroidTestCase {
         // test the case where the minZoomScale has changed to be > the default
         float newDefaultScale = 1.50f;
         float minZoomScale = ZoomManager.DEFAULT_MIN_ZOOM_SCALE_FACTOR * newDefaultScale;
-        WebViewCore.RestoreState minRestoreState = new WebViewCore.RestoreState();
-        minRestoreState.mMinScale = minZoomScale + 0.1f;
-        zoomManager.updateZoomRange(minRestoreState, 0, 0);
+        WebViewCore.ViewState minViewState = new WebViewCore.ViewState();
+        minViewState.mMinScale = minZoomScale + 0.1f;
+        zoomManager.updateZoomRange(minViewState, 0, 0);
         zoomManager.updateDefaultZoomDensity(newDefaultScale);
         defaultScaleTest(newDefaultScale);
     }
@@ -83,9 +83,9 @@ public class ZoomManagerTest extends AndroidTestCase {
         // test the case where the maxZoomScale has changed to be < the default
         float newDefaultScale = 1.50f;
         float maxZoomScale = ZoomManager.DEFAULT_MAX_ZOOM_SCALE_FACTOR * newDefaultScale;
-        WebViewCore.RestoreState maxRestoreState = new WebViewCore.RestoreState();
-        maxRestoreState.mMaxScale = maxZoomScale - 0.1f;
-        zoomManager.updateZoomRange(maxRestoreState, 0, 0);
+        WebViewCore.ViewState maxViewState = new WebViewCore.ViewState();
+        maxViewState.mMaxScale = maxZoomScale - 0.1f;
+        zoomManager.updateZoomRange(maxViewState, 0, 0);
         zoomManager.updateDefaultZoomDensity(newDefaultScale);
         defaultScaleTest(newDefaultScale);
     }
@@ -94,9 +94,9 @@ public class ZoomManagerTest extends AndroidTestCase {
         // test the case where the maxZoomScale has changed to be > the default
         float newDefaultScale = 1.50f;
         float maxZoomScale = ZoomManager.DEFAULT_MAX_ZOOM_SCALE_FACTOR * newDefaultScale;
-        WebViewCore.RestoreState maxRestoreState = new WebViewCore.RestoreState();
-        maxRestoreState.mMaxScale = maxZoomScale + 0.1f;
-        zoomManager.updateZoomRange(maxRestoreState, 0, 0);
+        WebViewCore.ViewState maxViewState = new WebViewCore.ViewState();
+        maxViewState.mMaxScale = maxZoomScale + 0.1f;
+        zoomManager.updateZoomRange(maxViewState, 0, 0);
         zoomManager.updateDefaultZoomDensity(newDefaultScale);
         defaultScaleTest(newDefaultScale);
     }

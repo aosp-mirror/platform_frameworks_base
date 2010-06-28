@@ -6033,11 +6033,9 @@ public class WebView extends AbsoluteLayout
                     spawnContentScrollTo(msg.arg1, msg.arg2);
                     break;
                 case UPDATE_ZOOM_RANGE: {
-                    WebViewCore.RestoreState restoreState
-                            = (WebViewCore.RestoreState) msg.obj;
+                    WebViewCore.ViewState viewState = (WebViewCore.ViewState) msg.obj;
                     // mScrollX contains the new minPrefWidth
-                    mZoomManager.updateZoomRange(restoreState, getViewWidth(),
-                            restoreState.mScrollX);
+                    mZoomManager.updateZoomRange(viewState, getViewWidth(), viewState.mScrollX);
                     break;
                 }
                 case NEW_PICTURE_MSG_ID: {
@@ -6051,12 +6049,12 @@ public class WebView extends AbsoluteLayout
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
 
                     final Point viewSize = draw.mViewPoint;
-                    WebViewCore.RestoreState restoreState = draw.mRestoreState;
-                    boolean hasRestoreState = restoreState != null;
-                    if (hasRestoreState) {
-                        mZoomManager.restoreZoomState(draw);
+                    WebViewCore.ViewState viewState = draw.mViewState;
+                    boolean isPictureAfterFirstLayout = viewState != null;
+                    if (isPictureAfterFirstLayout) {
+                        mZoomManager.onFirstLayout(draw);
                         if (!mDrawHistory) {
-                            setContentScrollTo(restoreState.mScrollX, restoreState.mScrollY);
+                            setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
                             // As we are on a new page, remove the WebTextView. This
                             // is necessary for page loads driven by webkit, and in
                             // particular when the user was on a password field, so
@@ -6090,7 +6088,7 @@ public class WebView extends AbsoluteLayout
                     if (draw.mFocusSizeChanged && inEditingMode()) {
                         mFocusSizeChanged = true;
                     }
-                    if (hasRestoreState) {
+                    if (isPictureAfterFirstLayout) {
                         mViewManager.postReadyToDrawAll();
                     }
                     break;
