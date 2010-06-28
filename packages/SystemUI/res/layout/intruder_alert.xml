@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* apps/common/assets/default/default/skins/StatusBar.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**     http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+*/
+-->
+
+<!--    android:background="@drawable/status_bar_closed_default_background" -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/alert_bar_background"
+    android:orientation="horizontal"
+    android:focusable="true"
+    android:descendantFocusability="afterDescendants"
+    >
+        
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="6dip"
+        android:animationCache="false"
+        android:orientation="horizontal"
+        >
+
+        <ImageView
+            android:id="@+id/alertIcon"
+            android:layout_width="25dip"
+            android:layout_height="25dip"
+            android:layout_marginRight="8dip"
+            />
+        <TextView
+            android:id="@+id/alertText"
+            android:textAppearance="@*android:style/TextAppearance.StatusBar.EventContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            />
+    </LinearLayout>
+</FrameLayout>
