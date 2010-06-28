@@ -28,6 +28,10 @@
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">25dip</dimen>
+    <!-- Height of the status bar -->
+    <dimen name="status_bar_icon_size">25dip</dimen>
+    <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
+    <dimen name="status_bar_edge_ignore">5dp</dimen>
     <!-- Size of the fastscroll hint letter -->
     <dimen name="fastscroll_overlay_size">104dp</dimen>
     <!-- Width of the fastscroll thumb -->
@@ -38,6 +42,4 @@
     <dimen name="password_keyboard_key_height">56dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
-    <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
-    <dimen name="status_bar_edge_ignore">5dp</dimen>
 </resources>
