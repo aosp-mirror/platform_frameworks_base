@@ -21,7 +21,7 @@
 #include <binder/Parcel.h>
 #include <surfaceflinger/ISurface.h>
 #include <camera/ICamera.h>
-#include <media/IMediaPlayerClient.h>
+#include <media/IMediaRecorderClient.h>
 #include <media/IMediaRecorder.h>
 
 namespace android {
@@ -189,7 +189,7 @@ public:
         return reply.readInt32();
     }
 
-    status_t setListener(const sp<IMediaPlayerClient>& listener)
+    status_t setListener(const sp<IMediaRecorderClient>& listener)
     {
         LOGV("setListener(%p)", listener.get());
         Parcel data, reply;
@@ -399,8 +399,8 @@ status_t BnMediaRecorder::onTransact(
         case SET_LISTENER: {
             LOGV("SET_LISTENER");
             CHECK_INTERFACE(IMediaRecorder, data, reply);
-            sp<IMediaPlayerClient> listener =
-                interface_cast<IMediaPlayerClient>(data.readStrongBinder());
+            sp<IMediaRecorderClient> listener =
+                interface_cast<IMediaRecorderClient>(data.readStrongBinder());
             reply->writeInt32(setListener(listener));
             return NO_ERROR;
         } break;
