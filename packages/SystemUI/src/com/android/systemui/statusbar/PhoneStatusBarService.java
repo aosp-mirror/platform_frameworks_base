@@ -57,6 +57,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.ScrollView;
@@ -84,6 +85,11 @@ public class PhoneStatusBarService extends StatusBarService {
 
     private static final int MSG_ANIMATE = 1000;
     private static final int MSG_ANIMATE_REVEAL = 1001;
+    private static final int MSG_SHOW_INTRUDER = 1002;
+    private static final int MSG_HIDE_INTRUDER = 1003;
+
+    // will likely move to a resource or other tunable param at some point
+    private static final int INTRUDER_ALERT_DECAY_MS = 10000;
 
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
@@ -180,6 +186,9 @@ public class PhoneStatusBarService extends StatusBarService {
     // for disabling the status bar
     int mDisabled = 0;
 
+    // for immersive activities
+    private View mIntruderAlertView;
+
     /**
      * Construct the service, add the status bar view to the window manager
      */
@@ -208,6 +217,17 @@ public class PhoneStatusBarService extends StatusBarService {
         ExpandedView expanded = (ExpandedView)View.inflate(context,
                 R.layout.status_bar_expanded, null);
         expanded.mService = this;
+
+        mIntruderAlertView = View.inflate(context, R.layout.intruder_alert, null);
+        mIntruderAlertView.setVisibility(View.GONE);
+        mIntruderAlertView.setClickable(true);
+        mIntruderAlertView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Slog.d(TAG, "Intruder Alert clicked!");
+                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+            }
+        });
+
         StatusBarView sb = (StatusBarView)View.inflate(context, R.layout.status_bar, null);
         sb.mService = this;
 
@@ -286,6 +306,23 @@ public class PhoneStatusBarService extends StatusBarService {
         // TODO lp.windowAnimations = R.style.Animation_StatusBar;
 
         WindowManagerImpl.getDefault().addView(view, lp);
+
+        lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                mHeight,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        lp.y += mHeight * 1.5; // for now
+        lp.setTitle("IntruderAlert");
+        lp.windowAnimations = android.R.style.Animation_Dialog;
+
+        WindowManagerImpl.getDefault().addView(mIntruderAlertView, lp);
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
@@ -310,7 +347,8 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
-        addNotificationViews(key, notification);
+        StatusBarIconView iconView = addNotificationViews(key, notification);
+        if (iconView == null) return;
 
         boolean immersive = false;
         try {
@@ -322,21 +360,22 @@ public class PhoneStatusBarService extends StatusBarService {
             if ((notification.notification.flags & Notification.FLAG_HIGH_PRIORITY) != 0) {
                 Slog.d(TAG, "Presenting high-priority notification in immersive activity");
                 // @@@ special new transient ticker mode
-                /*
-                // 1. Populate mAlertBarView
+                // 1. Populate mIntruderAlertView
 
-                ImageView alertIcon = (ImageView) mAlertBarView.findViewById(R.id.alertIcon);
-                TextView alertText = (TextView) mAlertBarView.findViewById(R.id.alertText);
+                ImageView alertIcon = (ImageView) mIntruderAlertView.findViewById(R.id.alertIcon);
+                TextView alertText = (TextView) mIntruderAlertView.findViewById(R.id.alertText);
                 alertIcon.setImageDrawable(StatusBarIconView.getIcon(
                     alertIcon.getContext(), 
                     iconView.getStatusBarIcon()));
                 alertText.setText(notification.notification.tickerText);
 
-                // 2. Animate mAlertBarView in
-                mAlertBarView.setVisibility(View.VISIBLE);
+                // 2. Animate mIntruderAlertView in
+                mHandler.removeMessages(MSG_HIDE_INTRUDER);
+                mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
+                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
 
                 // 3. Set alarm to age the notification off (TODO)
-                */
+                
             }
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
@@ -502,7 +541,7 @@ public class PhoneStatusBarService extends StatusBarService {
         return new View[] { row, content, expanded };
     }
 
-    void addNotificationViews(IBinder key, StatusBarNotification notification) {
+    StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
         NotificationData list;
         ViewGroup parent;
         final boolean isOngoing = notification.isOngoing();
@@ -518,7 +557,7 @@ public class PhoneStatusBarService extends StatusBarService {
         if (views == null) {
             handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
                     + notification);
-            return;
+            return null;
         }
         final View row = views[0];
         final View content = views[1];
@@ -530,7 +569,7 @@ public class PhoneStatusBarService extends StatusBarService {
                     notification.notification.iconLevel, notification.notification.number);
         if (!iconView.set(ic)) {
             handleNotificationError(key, notification, "Coulding create icon: " + ic);
-            return;
+            return null;
         }
         // Add the expanded view.
         final int viewIndex = list.add(key, notification, row, content, expanded, iconView);
@@ -539,6 +578,8 @@ public class PhoneStatusBarService extends StatusBarService {
         final int iconIndex = chooseIconIndex(isOngoing, viewIndex);
         mNotificationIcons.addView(iconView, iconIndex,
                 new LinearLayout.LayoutParams(mIconWidth, mHeight));
+
+        return iconView;
     }
 
     StatusBarNotification removeNotificationViews(IBinder key) {
@@ -627,6 +668,12 @@ public class PhoneStatusBarService extends StatusBarService {
                     break;
                 case MSG_ANIMATE_REVEAL:
                     doRevealAnimation();
+                    break;
+                case MSG_SHOW_INTRUDER:
+                    setIntruderAlertVisibility(true);
+                    break;
+                case MSG_HIDE_INTRUDER:
+                    setIntruderAlertVisibility(false);
                     break;
             }
         }
@@ -1439,6 +1486,10 @@ public class PhoneStatusBarService extends StatusBarService {
             }
         }
     };
+
+    private void setIntruderAlertVisibility(boolean vis) {
+        mIntruderAlertView.setVisibility(vis ? View.VISIBLE : View.GONE);
+    }
 
     /**
      * Reload some of our resources when the configuration changes.
