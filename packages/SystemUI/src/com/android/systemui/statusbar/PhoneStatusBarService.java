@@ -111,10 +111,8 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     StatusBarPolicy mIconPolicy;
-
-    int mHeight;
-    int mIconWidth;
-
+    
+    int mIconSize;
     Display mDisplay;
     StatusBarView mStatusBarView;
     int mPixelFormat;
@@ -211,8 +209,7 @@ public class PhoneStatusBarService extends StatusBarService {
     private void makeStatusBarView(Context context) {
         Resources res = context.getResources();
 
-        mHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mIconWidth = mHeight;
+        mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
         ExpandedView expanded = (ExpandedView)View.inflate(context,
                 R.layout.status_bar_expanded, null);
@@ -277,7 +274,7 @@ public class PhoneStatusBarService extends StatusBarService {
         StatusBarIconView moreView = new StatusBarIconView(this, "more");
         moreView.set(new StatusBarIcon(null, R.drawable.stat_notify_more, 0));
         mNotificationIcons.addMoreView(moreView,
-                new LinearLayout.LayoutParams(mIconWidth, mHeight));
+                new LinearLayout.LayoutParams(mIconSize, mIconSize));
 
         // set the inital view visibility
         setAreThereNotifications();
@@ -293,10 +290,13 @@ public class PhoneStatusBarService extends StatusBarService {
 
     @Override
     protected void addStatusBarView() {
+        Resources res = getResources();
+        final int height= res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+
         final StatusBarView view = mStatusBarView;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                mHeight,
+                height,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
@@ -309,7 +309,7 @@ public class PhoneStatusBarService extends StatusBarService {
 
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                mHeight,
+                height,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -318,7 +318,7 @@ public class PhoneStatusBarService extends StatusBarService {
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
-        lp.y += mHeight * 1.5; // for now
+        lp.y += height * 1.5; // for now
         lp.setTitle("IntruderAlert");
         lp.windowAnimations = android.R.style.Animation_Dialog;
 
@@ -330,7 +330,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 + " viewIndex=" + viewIndex + " icon=" + icon);
         StatusBarIconView view = new StatusBarIconView(this, slot);
         view.set(icon);
-        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconWidth, mHeight));
+        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
 
     public void updateIcon(String slot, int index, int viewIndex,
@@ -380,7 +380,8 @@ public class PhoneStatusBarService extends StatusBarService {
             }
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
-            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive; sending fullScreenIntent");
+            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive;"
+                    + " sending fullScreenIntent");
             try {
                 notification.notification.fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
@@ -578,7 +579,7 @@ public class PhoneStatusBarService extends StatusBarService {
         // Add the icon.
         final int iconIndex = chooseIconIndex(isOngoing, viewIndex);
         mNotificationIcons.addView(iconView, iconIndex,
-                new LinearLayout.LayoutParams(mIconWidth, mHeight));
+                new LinearLayout.LayoutParams(mIconSize, mIconSize));
 
         return iconView;
     }
