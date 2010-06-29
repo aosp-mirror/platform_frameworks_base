@@ -114,6 +114,7 @@ LOCAL_SRC_FILES:= \
 	android_media_JetPlayer.cpp \
 	android_media_MtpClient.cpp \
 	android_media_MtpCursor.cpp \
+	android_media_MtpServer.cpp \
 	android_media_ToneGenerator.cpp \
 	android_hardware_Camera.cpp \
 	android_hardware_SensorManager.cpp \
@@ -193,9 +194,10 @@ LOCAL_SHARED_LIBRARIES := \
 	libicudata \
 	libmedia \
 	libwpa_client \
-	libjpeg
+	libjpeg \
+	libstagefright
 
-LOCAL_STATIC_LIBRARIES := libmtphost libusbhost
+LOCAL_STATIC_LIBRARIES := libmtp libusbhost
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

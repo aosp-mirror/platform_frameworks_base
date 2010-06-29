@@ -20,59 +20,52 @@ ifneq ($(TARGET_SIMULATOR),true)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
-                  mtptest.cpp                           \
+                  MtpClient.cpp                         \
+                  MtpCursor.cpp                         \
                   MtpDatabase.cpp                       \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
+                  MtpDevice.cpp                         \
+                  MtpDeviceInfo.cpp                     \
                   MtpMediaScanner.cpp                   \
+                  MtpObjectInfo.cpp                     \
                   MtpPacket.cpp                         \
+                  MtpProperty.cpp                       \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
                   MtpServer.cpp                         \
+                  MtpStorageInfo.cpp                    \
                   MtpStringBuffer.cpp                   \
                   MtpStorage.cpp                        \
                   MtpUtils.cpp                          \
                   SqliteDatabase.cpp                    \
                   SqliteStatement.cpp                   \
 
-LOCAL_MODULE:= mtptest
+LOCAL_MODULE:= libmtp
 
 LOCAL_C_INCLUDES := external/sqlite/dist
+
+LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=                                       \
+                  mtptest.cpp                           \
+
+LOCAL_MODULE:= mtptest
 
 LOCAL_CFLAGS := -DMTP_DEVICE
 
 LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libcutils \
 	libmedia
 
+LOCAL_STATIC_LIBRARIES := libmtp
+
 include $(BUILD_EXECUTABLE)
 
 endif
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libmtphost
-
-LOCAL_SRC_FILES:=                                       \
-                  MtpClient.cpp                         \
-                  MtpCursor.cpp                         \
-                  MtpDataPacket.cpp                     \
-                  MtpDebug.cpp                          \
-                  MtpDevice.cpp                         \
-                  MtpDeviceInfo.cpp                     \
-                  MtpObjectInfo.cpp                     \
-                  MtpPacket.cpp                         \
-                  MtpProperty.cpp                       \
-                  MtpRequestPacket.cpp                  \
-                  MtpResponsePacket.cpp                 \
-                  MtpStorageInfo.cpp                    \
-                  MtpStringBuffer.cpp                   \
-                  MtpUtils.cpp                          \
-
-
-LOCAL_CFLAGS := -g -DMTP_HOST
-LOCAL_LDFLAGS := -g
-
-include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 

@@ -42,7 +42,7 @@ typedef MtpPropertyCode MtpObjectProperty;
 // values 0x00000000 and 0xFFFFFFFF are reserved for special purposes.
 typedef uint32_t MtpObjectHandle;
 
-typedef union MtpPropertyValue {
+union MtpPropertyValue {
     int8_t          i8;
     uint8_t         u8;
     int16_t         i16;
