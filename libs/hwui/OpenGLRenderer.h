@@ -126,6 +126,34 @@ private:
     void setScissorFromClip();
 
     /**
+     * Compose the layer defined in the current snapshot with the layer
+     * defined by the previous snapshot.
+     *
+     * The current snapshot *must* be a layer (flag kFlagIsLayer set.)
+     *
+     * @param curent The current snapshot containing the layer to compose
+     * @param previous The previous snapshot to compose the current layer with
+     */
+    void composeLayer(sp<Snapshot> current, sp<Snapshot> previous);
+
+    /**
+     * Creates a new layer stored in the specified snapshot.
+     *
+     * @param snapshot The snapshot associated with the new layer
+     * @param left The left coordinate of the layer
+     * @param top The top coordinate of the layer
+     * @param right The right coordinate of the layer
+     * @param bottom The bottom coordinate of the layer
+     * @param alpha The translucency of the layer
+     * @param mode The blending mode of the layer
+     * @param flags The layer save flags
+     *
+     * @return True if the layer was successfully created, false otherwise
+     */
+    bool createLayer(sp<Snapshot> snapshot, float left, float top, float right, float bottom,
+            int alpha, SkXfermode::Mode mode, int flags);
+
+    /**
      * Draws a colored rectangle with the specified color. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
      *
@@ -149,9 +177,11 @@ private:
      * @param bottom The bottom coordinate of the rectangle
      * @param texture The texture name to map onto the rectangle
      * @param alpha An additional translucency parameter, between 0.0f and 1.0f
+     * @param mode The blending mode
+     * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha);
+            float alpha, SkXfermode::Mode mode, bool isPremultiplied = false);
 
     /**
      * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values

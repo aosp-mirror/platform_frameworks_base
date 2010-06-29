@@ -22,8 +22,18 @@
         android:hardwareAccelerated="true">
 
         <activity
-                android:name="HwUiActivity"
-                android:label="_Layers">
+                android:name="AlphaLayersActivity"
+                android:label="_αLayers">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+                android:name="LayersActivity"
+                android:label="_Layers"
+                android:theme="@android:style/Theme.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

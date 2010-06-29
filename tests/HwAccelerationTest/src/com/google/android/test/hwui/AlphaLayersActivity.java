@@ -29,7 +29,7 @@ import android.view.animation.Animation;
 import android.widget.FrameLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class HwUiActivity extends Activity {
+public class AlphaLayersActivity extends Activity {
     private static final String LOG_TAG = "HwUi";
 
     @Override
