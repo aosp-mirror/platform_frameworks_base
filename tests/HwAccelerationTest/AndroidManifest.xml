@@ -21,12 +21,24 @@
         android:label="HwUi"
         android:hardwareAccelerated="true">
 
-        <activity android:name="HwUiActivity">
+        <activity
+                android:name="HwUiActivity"
+                android:label="_Layers">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <activity
+                android:name="XfermodeActivity"
+                android:label="_Xfermodes"
+                android:theme="@android:style/Theme.Translucent">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
     </application>
 </manifest>
