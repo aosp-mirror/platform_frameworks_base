@@ -82,6 +82,7 @@
 
     <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
+    <protected-broadcast android:name="android.hardware.action.USB_STATE" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
