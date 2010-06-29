@@ -159,6 +159,16 @@ class UsbObserver extends UEventObserver {
     }
 
     private final Handler mHandler = new Handler() {
+        private void addEnabledFunctions(Intent intent) {
+            // include state of all USB functions in our extras
+            for (int i = 0; i < mEnabledFunctions.size(); i++) {
+                intent.putExtra(mEnabledFunctions.get(i), Usb.USB_FUNCTION_ENABLED);
+            }
+            for (int i = 0; i < mDisabledFunctions.size(); i++) {
+                intent.putExtra(mDisabledFunctions.get(i), Usb.USB_FUNCTION_DISABLED);
+            }
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -174,21 +184,21 @@ class UsbObserver extends UEventObserver {
                         // Send an Intent containing connected/disconnected state
                         // and the enabled/disabled state of all USB functions
                         Intent intent;
-                        if (mUsbConfig != 0) {
+                        boolean usbConnected = (mUsbConfig != 0);
+                        if (usbConnected) {
                             intent = new Intent(Usb.ACTION_USB_CONNECTED);
-
-                            // include state of all USB functions in our extras
-                            for (int i = 0; i < mEnabledFunctions.size(); i++) {
-                                intent.putExtra(mEnabledFunctions.get(i), Usb.USB_FUNCTION_ENABLED);
-                            }
-                            for (int i = 0; i < mDisabledFunctions.size(); i++) {
-                                intent.putExtra(mDisabledFunctions.get(i), Usb.USB_FUNCTION_DISABLED);
-                            }
+                            addEnabledFunctions(intent);
                         } else {
                             intent = new Intent(Usb.ACTION_USB_DISCONNECTED);
                         }
+                        mContext.sendBroadcast(intent);
 
-                        mContext.sendBroadcast(intent, android.Manifest.permission.ACCESS_USB);
+                        // send a sticky broadcast for clients interested in both connect and disconnect
+                        intent = new Intent(Usb.ACTION_USB_STATE);
+                        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                        intent.putExtra(Usb.USB_CONNECTED, usbConnected);
+                        addEnabledFunctions(intent);
+                        mContext.sendStickyBroadcast(intent);
                     }
                     break;
             }
