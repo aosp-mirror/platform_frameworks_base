@@ -23,7 +23,7 @@ import android.widget.LinearLayout;
 
 
 public class CloseDragHandle extends LinearLayout {
-    PhoneStatusBarService mService;
+    StatusBarService mService;
 
     public CloseDragHandle(Context context, AttributeSet attrs) {
         super(context, attrs);

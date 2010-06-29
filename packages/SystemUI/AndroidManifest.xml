@@ -10,7 +10,7 @@
         android:icon="@drawable/ic_launcher_settings">
                  
         <service
-            android:name=".statusbar.PhoneStatusBarService"
+            android:name=".statusbar.StatusBarService"
             android:exported="false"
             />
 
