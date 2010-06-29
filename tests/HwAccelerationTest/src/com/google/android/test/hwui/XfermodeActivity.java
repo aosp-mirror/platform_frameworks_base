@@ -35,11 +35,6 @@ public class XfermodeActivity extends Activity {
         
         setContentView(new XfermodesView(this));
     }
-    
-    @SuppressWarnings({"UnusedDeclaration"})
-    static int dipToPx(Context c, int dip) {
-        return (int) (c.getResources().getDisplayMetrics().density * dip + 0.5f);
-    }
 
     static class XfermodesView extends View {
         private final Paint mBluePaint;

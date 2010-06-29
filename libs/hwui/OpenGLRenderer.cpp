@@ -171,35 +171,7 @@ bool OpenGLRenderer::restoreSnapshot() {
     sp<Snapshot> previous = mSnapshot->previous;
 
     if (restoreLayer) {
-        // Unbind current FBO and restore previous one
-        // Most of the time, previous->fbo will be 0 to bind the default buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
-
-        // Restore the clip from the previous snapshot
-        const Rect& clip = previous->getMappedClip();
-        glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
-
-        // Compute the correct texture coordinates for the FBO texture
-        // The texture is currently as big as the window but drawn with
-        // a quad of the appropriate size
-        const Rect& layer = current->layer;
-        Rect texCoords(current->layer);
-        mSnapshot->transform.mapRect(texCoords);
-
-        const float u1 = texCoords.left / float(mWidth);
-        const float v1 = (mHeight - texCoords.top) / float(mHeight);
-        const float u2 = texCoords.right / float(mWidth);
-        const float v2 = (mHeight - texCoords.bottom) / float(mHeight);
-
-        resetDrawTextureTexCoords(u1, v1, u2, v1);
-
-        drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
-                current->texture, current->alpha);
-
-        resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
-
-        glDeleteFramebuffers(1, &current->fbo);
-        glDeleteTextures(1, &current->texture);
+        composeLayer(current, previous);
     }
 
     mSnapshot = previous;
@@ -208,31 +180,81 @@ bool OpenGLRenderer::restoreSnapshot() {
     return restoreClip;
 }
 
+void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
+    // Unbind current FBO and restore previous one
+    // Most of the time, previous->fbo will be 0 to bind the default buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+
+    // Restore the clip from the previous snapshot
+    const Rect& clip = previous->getMappedClip();
+    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+
+    // Compute the correct texture coordinates for the FBO texture
+    // The texture is currently as big as the window but drawn with
+    // a quad of the appropriate size
+    const Rect& layer = current->layer;
+    Rect texCoords(current->layer);
+    mSnapshot->transform.mapRect(texCoords);
+
+    const float u1 = texCoords.left / float(mWidth);
+    const float v1 = (mHeight - texCoords.top) / float(mHeight);
+    const float u2 = texCoords.right / float(mWidth);
+    const float v2 = (mHeight - texCoords.bottom) / float(mHeight);
+
+    resetDrawTextureTexCoords(u1, v1, u2, v1);
+
+    drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
+            current->texture, current->alpha, current->mode, true);
+
+    resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+
+    glDeleteFramebuffers(1, &current->fbo);
+    glDeleteTextures(1, &current->texture);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Layers
 ///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         const SkPaint* p, int flags) {
-    // TODO Implement
-    return saveSnapshot();
+    int count = saveSnapshot();
+
+    int alpha = 255;
+    SkXfermode::Mode mode;
+
+    if (p) {
+        alpha = p->getAlpha();
+        const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+        if (!isMode) {
+            // Assume SRC_OVER
+            mode = SkXfermode::kSrcOver_Mode;
+        }
+    } else {
+        mode = SkXfermode::kSrcOver_Mode;
+    }
+
+    createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags);
+
+    return count;
 }
 
 int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
         int alpha, int flags) {
     int count = saveSnapshot();
+    createLayer(mSnapshot, left, top, right, bottom, alpha, SkXfermode::kSrcOver_Mode, flags);
+    return count;
+}
 
-    mSnapshot->flags |= Snapshot::kFlagIsLayer;
-    mSnapshot->alpha = alpha / 255.0f;
-    mSnapshot->layer.set(left, top, right, bottom);
-
+bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
+        float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
     // Generate the FBO and attach the texture
-    glGenFramebuffers(1, &mSnapshot->fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, mSnapshot->fbo);
+    glGenFramebuffers(1, &snapshot->fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
 
     // Generate the texture in which the FBO will draw
-    glGenTextures(1, &mSnapshot->texture);
-    glBindTexture(GL_TEXTURE_2D, mSnapshot->texture);
+    glGenTextures(1, &snapshot->texture);
+    glBindTexture(GL_TEXTURE_2D, snapshot->texture);
 
     // The FBO will not be scaled, so we can use lower quality filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -255,17 +277,24 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
 
     // Bind texture to FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            mSnapshot->texture, 0);
+            snapshot->texture, 0);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LOGD("Framebuffer incomplete %d", status);
 
-        glDeleteFramebuffers(1, &mSnapshot->fbo);
-        glDeleteTextures(1, &mSnapshot->texture);
+        glDeleteFramebuffers(1, &snapshot->fbo);
+        glDeleteTextures(1, &snapshot->texture);
+
+        return false;
     }
 
-    return count;
+    snapshot->flags |= Snapshot::kFlagIsLayer;
+    snapshot->mode = mode;
+    snapshot->alpha = alpha / 255.0f;
+    snapshot->layer.set(left, top, right, bottom);
+
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -406,16 +435,20 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        GLuint texture, float alpha) {
+        GLuint texture, float alpha, SkXfermode::Mode mode, bool isPremultiplied) {
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
     mDrawTextureShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
 
-    // TODO Correctly set the blend function, based on texture format and xfermode
+    GLenum sourceMode = gBlends[mode].src;
+    if (!isPremultiplied && sourceMode == GL_ONE) {
+        sourceMode = GL_SRC_ALPHA;
+    }
+
+    // TODO: Try to disable blending when the texture is opaque and alpha == 1.0f
     glEnable(GL_BLEND);
-    // For not pre-multiplied sources
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(sourceMode, gBlends[mode].dst);
 
     glBindTexture(GL_TEXTURE_2D, texture);
 

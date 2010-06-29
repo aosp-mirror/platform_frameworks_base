@@ -20,6 +20,8 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <SkXfermode.h>
+
 #include <utils/RefBase.h>
 
 #include "Matrix.h"
@@ -133,6 +135,11 @@ public:
      * Only set when the flag kFlagIsLayer is set.
      */
     float alpha;
+    /**
+     * Blending mode of the layer.
+     * Only set when the flag kFlagIsLayer is set.
+     */
+    SkXfermode::Mode mode;
 
 private:
     // Clipping rectangle mapped with the transform
