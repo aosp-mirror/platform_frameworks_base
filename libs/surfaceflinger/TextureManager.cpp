@@ -297,22 +297,19 @@ status_t TextureManager::loadTexture(Texture* texture,
 void TextureManager::activateTexture(const Texture& texture, bool filter)
 {
     const GLenum target = getTextureTarget(&texture);
-    if (target == Texture::TEXTURE_2D) {
+    if (target == GL_TEXTURE_2D) {
         glBindTexture(GL_TEXTURE_2D, texture.name);
         glEnable(GL_TEXTURE_2D);
 #if defined(GL_OES_texture_external)
         if (GLExtensions::getInstance().haveTextureExternal()) {
             glDisable(GL_TEXTURE_EXTERNAL_OES);
         }
-#endif
-    }
-#if defined(GL_OES_texture_external)
-    else {
+    } else {
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture.name);
         glEnable(GL_TEXTURE_EXTERNAL_OES);
         glDisable(GL_TEXTURE_2D);
-    }
 #endif
+    }
 
     if (filter) {
         glTexParameterx(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
