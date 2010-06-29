@@ -31,6 +31,7 @@
 #include <surfaceflinger/Surface.h>
 
 #include "clz.h"
+#include "GLExtensions.h"
 #include "Layer.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
@@ -50,10 +51,11 @@ template <typename T> inline T min(T a, T b) {
 Layer::Layer(SurfaceFlinger* flinger,
         DisplayID display, const sp<Client>& client)
     :   LayerBaseClient(flinger, display, client),
+        mGLExtensions(GLExtensions::getInstance()),
         mNeedsBlending(true),
         mNeedsDithering(false),
         mSecure(false),
-        mTextureManager(mFlags),
+        mTextureManager(),
         mBufferManager(mTextureManager),
         mWidth(0), mHeight(0), mFixedSize(false)
 {
@@ -185,17 +187,13 @@ void Layer::reloadTexture(const Region& dirty)
         return;
     }
 
-#ifdef EGL_ANDROID_image_native_buffer
-    if (mFlags & DisplayHardware::DIRECT_TEXTURE) {
+    if (mGLExtensions.haveDirectTexture()) {
         EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
         if (mBufferManager.initEglImage(dpy, buffer) != NO_ERROR) {
             // not sure what we can do here...
-            mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
             goto slowpath;
         }
-    } else
-#endif
-    {
+    } else {
 slowpath:
         GGLSurface t;
         status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
@@ -786,19 +784,24 @@ status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
     status_t err = NO_INIT;
     ssize_t index = mActiveBuffer;
     if (index >= 0) {
-        Image& texture(mBufferData[index].texture);
-        err = mTextureManager.initEglImage(&texture, dpy, buffer);
-        // if EGLImage fails, we switch to regular texture mode, and we
-        // free all resources associated with using EGLImages.
-        if (err == NO_ERROR) {
-            mFailover = false;
-            destroyTexture(&mFailoverTexture, dpy);
-        } else {
-            mFailover = true;
-            const size_t num = mNumBuffers;
-            for (size_t i=0 ; i<num ; i++) {
-                destroyTexture(&mBufferData[i].texture, dpy);
+        if (!mFailover) {
+            Image& texture(mBufferData[index].texture);
+            err = mTextureManager.initEglImage(&texture, dpy, buffer);
+            // if EGLImage fails, we switch to regular texture mode, and we
+            // free all resources associated with using EGLImages.
+            if (err == NO_ERROR) {
+                mFailover = false;
+                destroyTexture(&mFailoverTexture, dpy);
+            } else {
+                mFailover = true;
+                const size_t num = mNumBuffers;
+                for (size_t i=0 ; i<num ; i++) {
+                    destroyTexture(&mBufferData[i].texture, dpy);
+                }
             }
+        } else {
+            // we failed once, don't try again
+            err = BAD_VALUE;
         }
     }
     return err;
