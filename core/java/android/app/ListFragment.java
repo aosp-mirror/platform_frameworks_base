@@ -170,8 +170,8 @@ public class ListFragment extends Fragment {
      * Provide default implementation to return a simple list view.  Subclasses
      * can override to replace with their own layout.  If doing so, the
      * returned view hierarchy <em>must</em> have a ListView whose id
-     * is {@link android.R.id.list android.R.id.list} and can optionally
-     * have a sibling view id {@link android.R.id.empty android.R.id.empty}
+     * is {@link android.R.id#list android.R.id.list} and can optionally
+     * have a sibling view id {@link android.R.id#empty android.R.id.empty}
      * that is to be shown when the list is empty.
      */
     @Override
