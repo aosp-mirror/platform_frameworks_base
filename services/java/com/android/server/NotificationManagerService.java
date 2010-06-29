@@ -38,9 +38,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.Usb;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -111,8 +113,6 @@ class NotificationManagerService extends INotificationManager.Stub
     private boolean mNotificationPulseEnabled;
 
     // for adb connected notifications
-    private boolean mUsbConnected;
-    private boolean mAdbEnabled = false;
     private boolean mAdbNotificationShown = false;
     private Notification mAdbNotification;
 
@@ -346,12 +346,14 @@ class NotificationManagerService extends INotificationManager.Stub
                     mBatteryFull = batteryFull;
                     updateLights();
                 }
-            } else if (action.equals(Intent.ACTION_UMS_CONNECTED)) {
-                mUsbConnected = true;
-                updateAdbNotification();
-            } else if (action.equals(Intent.ACTION_UMS_DISCONNECTED)) {
-                mUsbConnected = false;
-                updateAdbNotification();
+            } else if (action.equals(Usb.ACTION_USB_STATE)) {
+                Bundle extras = intent.getExtras();
+                boolean usbConnected = extras.getBoolean(Usb.USB_CONNECTED);
+                boolean adbEnabled = (Usb.USB_FUNCTION_ENABLED.equals(
+                                    extras.getString(Usb.USB_FUNCTION_ADB)));
+                updateAdbNotification(usbConnected && adbEnabled);
+            } else if (action.equals(Usb.ACTION_USB_DISCONNECTED)) {
+                updateAdbNotification(false);
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
@@ -397,8 +399,6 @@ class NotificationManagerService extends INotificationManager.Stub
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.ADB_ENABLED), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NOTIFICATION_LIGHT_PULSE), false, this);
             update();
@@ -410,12 +410,6 @@ class NotificationManagerService extends INotificationManager.Stub
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            boolean adbEnabled = Settings.Secure.getInt(resolver,
-                        Settings.Secure.ADB_ENABLED, 0) != 0;
-            if (mAdbEnabled != adbEnabled) {
-                mAdbEnabled = adbEnabled;
-                updateAdbNotification();
-            }
             boolean pulseEnabled = Settings.System.getInt(resolver,
                         Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
             if (mNotificationPulseEnabled != pulseEnabled) {
@@ -464,8 +458,7 @@ class NotificationManagerService extends INotificationManager.Stub
         // register for battery changed notifications
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_UMS_CONNECTED);
-        filter.addAction(Intent.ACTION_UMS_DISCONNECTED);
+        filter.addAction(Usb.ACTION_USB_STATE);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
@@ -1137,8 +1130,8 @@ class NotificationManagerService extends INotificationManager.Stub
     // This is here instead of StatusBarPolicy because it is an important
     // security feature that we don't want people customizing the platform
     // to accidentally lose.
-    private void updateAdbNotification() {
-        if (mAdbEnabled && mUsbConnected) {
+    private void updateAdbNotification(boolean adbEnabled) {
+        if (adbEnabled) {
             if ("0".equals(SystemProperties.get("persist.adb.notify"))) {
                 return;
             }
