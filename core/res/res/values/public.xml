@@ -1299,6 +1299,7 @@
   <public type="attr" name="actionButtonStyle" />
   <public type="attr" name="showAsAction" />
   <public type="attr" name="actionButtonPadding" />
+  <public type="attr" name="previewImage" />
 
   <public type="id" name="home" />
 
