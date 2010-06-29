@@ -576,8 +576,8 @@ helpers.</p>
 
 <h3 id="SharedPreferences">Backing up SharedPreferences</h3>
 
-<p>When you instantiate a {@link android.app.backup.SharedPreferencesBackupHelper}, you must the
-name of one or more {@link android.content.SharedPreferences} files.</p>
+<p>When you instantiate a {@link android.app.backup.SharedPreferencesBackupHelper}, you must
+include the name of one or more {@link android.content.SharedPreferences} files.</p>
 
 <p>For example, to back up a {@link android.content.SharedPreferences} file named
 "user_preferences", a complete backup agent using {@link android.app.backup.BackupAgentHelper} looks
