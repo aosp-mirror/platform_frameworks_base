@@ -333,13 +333,13 @@ private:
 /*
  * NDK input queue API.
  */
-struct input_queue_t {
+struct AInputQueue {
 public:
     /* Creates a consumer associated with an input channel. */
-    explicit input_queue_t(const android::sp<android::InputChannel>& channel);
+    explicit AInputQueue(const android::sp<android::InputChannel>& channel);
 
     /* Destroys the consumer and releases its input channel. */
-    ~input_queue_t();
+    ~AInputQueue();
 
     inline android::InputConsumer& getConsumer() { return mConsumer; }
     

@@ -30,30 +30,37 @@ extern "C" {
 #endif
 
 // Temporary until native surface API is defined.
-struct android_surface_t;
-typedef struct android_surface_t android_surface_t;
+struct ASurfaceHolder;
+typedef struct ASurfaceHolder ASurfaceHolder;
 
-struct android_activity_callbacks_t;
+struct ANativeActivityCallbacks;
 
 /**
  * This structure defines the native side of an android.app.NativeActivity.
  * It is created by the framework, and handed to the application's native
  * code as it is being launched.
  */
-typedef struct android_activity_t {
+typedef struct ANativeActivity {
     /**
      * Pointer to the callback function table of the native application.
      * You can set the functions here to your own callbacks.  The callbacks
      * pointer itself here should not be changed; it is allocated and managed
      * for you by the framework.
      */
-    struct android_activity_callbacks_t* callbacks;
+    struct ANativeActivityCallbacks* callbacks;
 
     /**
-     * JNI context for the main thread of the app.
+     * The global handle on the process's Java VM.
+     */
+    JavaVM* vm;
+
+    /**
+     * JNI context for the main thread of the app.  Note that this field
+     * can ONLY be used from the main thread of the process; that is, the
+     * thread that calls into the ANativeActivityCallbacks.
      */
     JNIEnv* env;
-    
+
     /**
      * The NativeActivity Java class.
      */
@@ -65,7 +72,7 @@ typedef struct android_activity_t {
      * state.
      */
     void* instance;
-} android_activity_t;
+} ANativeActivity;
 
 /**
  * These are the callbacks the framework makes into a native application.
@@ -73,18 +80,18 @@ typedef struct android_activity_t {
  * By default, all callbacks are NULL; set to a pointer to your own function
  * to have it called.
  */
-typedef struct android_activity_callbacks_t {
+typedef struct ANativeActivityCallbacks {
     /**
      * NativeActivity has started.  See Java documentation for Activity.onStart()
      * for more information.
      */
-    void (*onStart)(android_activity_t* activity);
+    void (*onStart)(ANativeActivity* activity);
     
     /**
      * NativeActivity has resumed.  See Java documentation for Activity.onResume()
      * for more information.
      */
-    void (*onResume)(android_activity_t* activity);
+    void (*onResume)(ANativeActivity* activity);
     
     /**
      * Framework is asking NativeActivity to save its current instance state.
@@ -95,38 +102,38 @@ typedef struct android_activity_callbacks_t {
      * saved state will be persisted, so it can not contain any active
      * entities (pointers to memory, file descriptors, etc).
      */
-    void* (*onSaveInstanceState)(android_activity_t* activity, size_t* outSize);
+    void* (*onSaveInstanceState)(ANativeActivity* activity, size_t* outSize);
     
     /**
      * NativeActivity has paused.  See Java documentation for Activity.onPause()
      * for more information.
      */
-    void (*onPause)(android_activity_t* activity);
+    void (*onPause)(ANativeActivity* activity);
     
     /**
      * NativeActivity has stopped.  See Java documentation for Activity.onStop()
      * for more information.
      */
-    void (*onStop)(android_activity_t* activity);
+    void (*onStop)(ANativeActivity* activity);
     
     /**
      * NativeActivity is being destroyed.  See Java documentation for Activity.onDestroy()
      * for more information.
      */
-    void (*onDestroy)(android_activity_t* activity);
+    void (*onDestroy)(ANativeActivity* activity);
 
     /**
      * Focus has changed in this NativeActivity's window.  This is often used,
      * for example, to pause a game when it loses input focus.
      */
-    void (*onWindowFocusChanged)(android_activity_t* activity, int hasFocus);
+    void (*onWindowFocusChanged)(ANativeActivity* activity, int hasFocus);
     
     /**
      * The drawing surface for this native activity has been created.  You
      * can use the given surface object to start drawing.  NOTE: surface
      * drawing API is not yet defined.
      */
-    void (*onSurfaceCreated)(android_activity_t* activity, android_surface_t* surface);
+    void (*onSurfaceCreated)(ANativeActivity* activity, ASurfaceHolder* surface);
 
     /**
      * The drawing surface for this native activity has changed.  The surface
@@ -134,7 +141,7 @@ typedef struct android_activity_callbacks_t {
      * onSurfaceCreated.  This is simply to inform you about interesting
      * changed to that surface.
      */
-    void (*onSurfaceChanged)(android_activity_t* activity, android_surface_t* surface,
+    void (*onSurfaceChanged)(ANativeActivity* activity, ASurfaceHolder* surface,
             int format, int width, int height);
 
     /**
@@ -145,28 +152,28 @@ typedef struct android_activity_callbacks_t {
      * properly synchronize with the other thread to stop its drawing before
      * returning from here.
      */
-    void (*onSurfaceDestroyed)(android_activity_t* activity, android_surface_t* surface);
+    void (*onSurfaceDestroyed)(ANativeActivity* activity, ASurfaceHolder* surface);
     
     /**
      * The input queue for this native activity's window has been created.
      * You can use the given input queue to start retrieving input events.
      */
-    void (*onInputQueueCreated)(android_activity_t* activity, input_queue_t* queue);
+    void (*onInputQueueCreated)(ANativeActivity* activity, AInputQueue* queue);
     
     /**
      * The input queue for this native activity's window is being destroyed.
      * You should no longer try to reference this object upon returning from this
      * function.
      */
-    void (*onInputQueueDestroyed)(android_activity_t* activity, input_queue_t* queue);
+    void (*onInputQueueDestroyed)(ANativeActivity* activity, AInputQueue* queue);
 
     /**
      * The system is running low on memory.  Use this callback to release
      * resources you do not need, to help the system avoid killing more
      * important processes.
      */
-    void (*onLowMemory)(android_activity_t* activity);
-} android_activity_callbacks_t;
+    void (*onLowMemory)(ANativeActivity* activity);
+} ANativeActivityCallbacks;
 
 /**
  * This is the function that must be in the native code to instantiate the
@@ -174,14 +181,14 @@ typedef struct android_activity_callbacks_t {
  * above); if the code is being instantiated from a previously saved instance,
  * the savedState will be non-NULL and point to the saved data.
  */
-typedef void android_activity_create_t(android_activity_t* activity,
+typedef void ANativeActivity_createFunc(ANativeActivity* activity,
         void* savedState, size_t savedStateSize);
 
 /**
  * The name of the function that NativeInstance looks for when launching its
  * native code.
  */
-extern android_activity_create_t android_onCreateActivity;
+extern ANativeActivity_createFunc ANativeActivity_onCreate;
 
 #ifdef __cplusplus
 };

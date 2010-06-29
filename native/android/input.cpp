@@ -27,168 +27,168 @@ using android::InputEvent;
 using android::KeyEvent;
 using android::MotionEvent;
 
-int32_t input_event_get_type(const input_event_t* event) {
+int32_t AInputEvent_getType(const AInputEvent* event) {
     return static_cast<const InputEvent*>(event)->getType();
 }
 
-int32_t input_event_get_device_id(const input_event_t* event) {
+int32_t AInputEvent_getDeviceId(const AInputEvent* event) {
     return static_cast<const InputEvent*>(event)->getDeviceId();
 }
 
-int32_t input_event_get_nature(const input_event_t* event) {
+int32_t AInputEvent_getNature(const AInputEvent* event) {
     return static_cast<const InputEvent*>(event)->getNature();
 }
 
-int32_t key_event_get_action(const input_event_t* key_event) {
+int32_t AKeyEvent_getAction(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getAction();
 }
 
-int32_t key_event_get_flags(const input_event_t* key_event) {
+int32_t AKeyEvent_getFlags(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getFlags();
 }
 
-int32_t key_event_get_key_code(const input_event_t* key_event) {
+int32_t AKeyEvent_getKeyCode(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getKeyCode();
 }
 
-int32_t key_event_get_scan_code(const input_event_t* key_event) {
+int32_t AKeyEvent_getScanCode(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getScanCode();
 }
 
-int32_t key_event_get_meta_state(const input_event_t* key_event) {
+int32_t AKeyEvent_getMetaState(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getMetaState();
 }
-int32_t key_event_get_repeat_count(const input_event_t* key_event) {
+int32_t AKeyEvent_getRepeatCount(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getRepeatCount();
 }
 
-int64_t key_event_get_down_time(const input_event_t* key_event) {
+int64_t AKeyEvent_getDownTime(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getDownTime();
 }
 
-int64_t key_event_get_event_time(const input_event_t* key_event) {
+int64_t AKeyEvent_getEventTime(const AInputEvent* key_event) {
     return static_cast<const KeyEvent*>(key_event)->getEventTime();
 }
 
-int32_t motion_event_get_action(const input_event_t* motion_event) {
+int32_t AMotionEvent_getAction(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getAction();
 }
 
-int32_t motion_event_get_meta_state(const input_event_t* motion_event) {
+int32_t AMotionEvent_getMetaState(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getMetaState();
 }
 
-int32_t motion_event_get_edge_flags(const input_event_t* motion_event) {
+int32_t AMotionEvent_getEdgeFlags(const AInputEvent* motion_event) {
     return reinterpret_cast<const MotionEvent*>(motion_event)->getEdgeFlags();
 }
 
-int64_t motion_event_get_down_time(const input_event_t* motion_event) {
+int64_t AMotionEvent_getDownTime(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getDownTime();
 }
 
-int64_t motion_event_get_event_time(const input_event_t* motion_event) {
+int64_t AMotionEvent_getEventTime(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getEventTime();
 }
 
-float motion_event_get_x_offset(const input_event_t* motion_event) {
+float AMotionEvent_getXOffset(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getXOffset();
 }
 
-float motion_event_get_y_offset(const input_event_t* motion_event) {
+float AMotionEvent_getYOffset(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getYOffset();
 }
 
-float motion_event_get_x_precision(const input_event_t* motion_event) {
+float AMotionEvent_getXPrecision(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getXPrecision();
 }
 
-float motion_event_get_y_precision(const input_event_t* motion_event) {
+float AMotionEvent_getYPrecision(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getYPrecision();
 }
 
-size_t motion_event_get_pointer_count(const input_event_t* motion_event) {
+size_t AMotionEvent_getPointerCount(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getPointerCount();
 }
 
-int32_t motion_event_get_pointer_id(const input_event_t* motion_event, size_t pointer_index) {
+int32_t AMotionEvent_getPointerId(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getPointerId(pointer_index);
 }
 
-float motion_event_get_raw_x(const input_event_t* motion_event, size_t pointer_index) {
+float AMotionEvent_getRawX(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getRawX(pointer_index);
 }
 
-float motion_event_get_raw_y(const input_event_t* motion_event, size_t pointer_index) {
+float AMotionEvent_getRawY(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getRawY(pointer_index);
 }
 
-float motion_event_get_x(const input_event_t* motion_event, size_t pointer_index) {
+float AMotionEvent_getX(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getX(pointer_index);
 }
 
-float motion_event_get_y(const input_event_t* motion_event, size_t pointer_index) {
+float AMotionEvent_getY(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getY(pointer_index);
 }
 
-float motion_event_get_pressure(const input_event_t* motion_event, size_t pointer_index) {
+float AMotionEvent_getPressure(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getPressure(pointer_index);
 }
 
-float motion_event_get_size(const input_event_t* motion_event, size_t pointer_index) {
+float AMotionEvent_getSize(const AInputEvent* motion_event, size_t pointer_index) {
     return static_cast<const MotionEvent*>(motion_event)->getSize(pointer_index);
 }
 
-size_t motion_event_get_history_size(const input_event_t* motion_event) {
+size_t AMotionEvent_getHistorySize(const AInputEvent* motion_event) {
     return static_cast<const MotionEvent*>(motion_event)->getHistorySize();
 }
 
-int64_t motion_event_get_historical_event_time(input_event_t* motion_event,
+int64_t AMotionEvent_getHistoricalEventTime(AInputEvent* motion_event,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalEventTime(
             history_index);
 }
 
-float motion_event_get_historical_raw_x(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalRawX(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalRawX(
             pointer_index, history_index);
 }
 
-float motion_event_get_historical_raw_y(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalRawY(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalRawY(
             pointer_index, history_index);
 }
 
-float motion_event_get_historical_x(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalX(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalX(
             pointer_index, history_index);
 }
 
-float motion_event_get_historical_y(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalY(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalY(
             pointer_index, history_index);
 }
 
-float motion_event_get_historical_pressure(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalPressure(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalPressure(
             pointer_index, history_index);
 }
 
-float motion_event_get_historical_size(input_event_t* motion_event, size_t pointer_index,
+float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index) {
     return static_cast<const MotionEvent*>(motion_event)->getHistoricalSize(
             pointer_index, history_index);
 }
 
-int input_queue_get_fd(input_queue_t* queue) {
+int AInputQueue_getFd(AInputQueue* queue) {
     return queue->getConsumer().getChannel()->getReceivePipeFd();
 }
 
-int input_queue_has_events(input_queue_t* queue) {
+int AInputQueue_hasEvents(AInputQueue* queue) {
     struct pollfd pfd;
     
     pfd.fd = queue->getConsumer().getChannel()->getReceivePipeFd();
@@ -200,7 +200,7 @@ int input_queue_has_events(input_queue_t* queue) {
     return pfd.revents == POLLIN ? 1 : -1;
 }
 
-int32_t input_queue_get_event(input_queue_t* queue, input_event_t** outEvent) {
+int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent) {
     *outEvent = NULL;
     
     int32_t res = queue->getConsumer().receiveDispatchSignal();
@@ -223,7 +223,7 @@ int32_t input_queue_get_event(input_queue_t* queue, input_event_t** outEvent) {
     return 0;
 }
 
-void input_queue_finish_event(input_queue_t* queue, input_event_t* event,
+void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event,
         int handled) {
     int32_t res = queue->getConsumer().sendFinishedSignal();
     if (res != android::OK) {
