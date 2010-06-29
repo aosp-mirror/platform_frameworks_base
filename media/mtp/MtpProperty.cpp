@@ -15,7 +15,6 @@
  */
 
 #define LOG_TAG "MtpProperty"
-#include "utils/Log.h"
 
 #include "MtpDataPacket.h"
 #include "MtpProperty.h"
@@ -144,7 +143,7 @@ void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {
             packet.getUInt128(value.u128);
             break;
         default:
-            fprintf(stderr, "unknown type %d in MtpProperty::readValue\n", mType);
+            LOGE("unknown type %d in MtpProperty::readValue", mType);
     }
 }
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpRequestPacket"
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <fcntl.h>

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpUtils"
+
 #include <stdio.h>
 #include <time.h>
 

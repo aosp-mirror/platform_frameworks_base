@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpMediaScanner"
+
+#include "MtpDebug.h"
 #include "MtpDatabase.h"
 #include "MtpMediaScanner.h"
 #include "mtp.h"
@@ -48,7 +51,7 @@ public:
     // returns true if it succeeded, false if an exception occured in the Java code
     virtual bool scanFile(const char* path, long long lastModified, long long fileSize)
     {
-        printf("scanFile %s\n", path);
+        LOGV("scanFile %s", path);
         return true;
     }
 
@@ -88,7 +91,7 @@ public:
             if (sscanf(value, "%d", &temp) == 1)
                 mDuration = temp;
         } else {
-            printf("handleStringTag %s : %s\n", name, value);
+            LOGV("handleStringTag %s : %s", name, value);
         }
         return true;
     }
@@ -104,7 +107,7 @@ public:
     // returns true if it succeeded, false if an exception occured in the Java code
     virtual bool addNoMediaFolder(const char* path)
     {
-        printf("addNoMediaFolder %s\n", path);
+        LOGV("addNoMediaFolder %s", path);
         return true;
     }
 
@@ -180,7 +183,7 @@ bool MtpMediaScanner::scanFiles() {
     for (int i = 0; i < mFileCount; i++) {
         MtpObjectHandle test = mFileList[i];
         if (! (test & kObjectHandleMarkBit)) {
-            printf("delete missing file %08X\n", test);
+            LOGV("delete missing file %08X", test);
             mDatabase->deleteFile(test);
         }
     }
@@ -260,12 +263,12 @@ int MtpMediaScanner::scanDirectory(const char* path, MtpObjectHandle parent)
 
     unsigned length = strlen(path);
     if (length > sizeof(buffer) + 2) {
-        fprintf(stderr, "path too long: %s\n", path);
+        LOGE("path too long: %s", path);
     }
 
     DIR* dir = opendir(path);
     if (!dir) {
-        fprintf(stderr, "opendir %s failed, errno: %d", path, errno);
+        LOGE("opendir %s failed, errno: %d", path, errno);
         return -1;
     }
 
@@ -285,7 +288,7 @@ int MtpMediaScanner::scanDirectory(const char* path, MtpObjectHandle parent)
             continue;
         }
         if (strlen(name) + 1 > fileNameLength) {
-            fprintf(stderr, "path too long for %s\n", name);
+            LOGE("path too long for %s", name);
             continue;
         }
         strcpy(fileStart, name);
@@ -327,7 +330,7 @@ void MtpMediaScanner::scanFile(const char* path, MtpObjectHandle parent, struct 
         handle = mDatabase->addFile(path, format, parent, mStorageID,
                 statbuf.st_size, statbuf.st_mtime);
         if (handle <= 0) {
-            fprintf(stderr, "addFile failed in MtpMediaScanner::scanFile()\n");
+            LOGE("addFile failed in MtpMediaScanner::scanFile()");
             mDatabase->rollbackTransaction();
             return;
         }
@@ -371,7 +374,7 @@ void MtpMediaScanner::markFile(MtpObjectHandle handle) {
                 return;
             }
         }
-        fprintf(stderr, "file %d not found in mFileList\n", handle);
+        LOGE("file %d not found in mFileList", handle);
     }
 }
 

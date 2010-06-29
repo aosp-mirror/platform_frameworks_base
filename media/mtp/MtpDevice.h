@@ -22,6 +22,8 @@
 #include "MtpResponsePacket.h"
 #include "MtpTypes.h"
 
+struct usb_device;
+
 namespace android {
 
 class MtpDeviceInfo;

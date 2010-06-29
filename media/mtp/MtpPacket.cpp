@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpPacket"
+
+#include "MtpDebug.h"
+#include "MtpPacket.h"
+#include "mtp.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <usbhost/usbhost.h>
-
-#include "MtpPacket.h"
-#include "mtp.h"
 
 namespace android {
 
@@ -33,7 +36,7 @@ MtpPacket::MtpPacket(int bufferSize)
 {
     mBuffer = (uint8_t *)malloc(bufferSize);
     if (!mBuffer) {
-        fprintf(stderr, "out of memory!\n");
+        LOGE("out of memory!");
         abort();
     }
 }
@@ -54,7 +57,7 @@ void MtpPacket::allocate(int length) {
         int newLength = length + mAllocationIncrement;
         mBuffer = (uint8_t *)realloc(mBuffer, newLength);
         if (!mBuffer) {
-            fprintf(stderr, "out of memory!\n");
+            LOGE("out of memory!");
             abort();
         }
         mBufferSize = newLength;
@@ -62,12 +65,23 @@ void MtpPacket::allocate(int length) {
 }
 
 void MtpPacket::dump() {
+#define DUMP_BYTES_PER_ROW  16
+    char buffer[500];
+    char* bufptr = buffer;
+
     for (int i = 0; i < mPacketSize; i++) {
-        printf("%02X ", mBuffer[i]);
-        if (i % 16 == 15)
-            printf("\n");
+        sprintf(bufptr, "%02X ", mBuffer[i]);
+        bufptr += strlen(bufptr);
+        if (i % DUMP_BYTES_PER_ROW == (DUMP_BYTES_PER_ROW - 1)) {
+            LOGV("%s", buffer);
+            bufptr = buffer;
+        }
     }
-    printf("\n\n");
+    if (bufptr != buffer) {
+        // print last line
+        LOGV("%s", buffer);
+    }
+    LOGV("\n");
 }
 
 uint16_t MtpPacket::getUInt16(int offset) const {
@@ -109,7 +123,7 @@ void MtpPacket::setTransactionID(MtpTransactionID id) {
 
 uint32_t MtpPacket::getParameter(int index) const {
     if (index < 1 || index > 5) {
-        fprintf(stderr, "index %d out of range in MtpRequestPacket::getParameter\n", index);
+        LOGE("index %d out of range in MtpRequestPacket::getParameter", index);
         return 0;
     }
     return getUInt32(MTP_CONTAINER_PARAMETER_OFFSET + (index - 1) * sizeof(uint32_t));
@@ -117,7 +131,7 @@ uint32_t MtpPacket::getParameter(int index) const {
 
 void MtpPacket::setParameter(int index, uint32_t value) {
     if (index < 1 || index > 5) {
-        fprintf(stderr, "index %d out of range in MtpResponsePacket::setParameter\n", index);
+        LOGE("index %d out of range in MtpResponsePacket::setParameter", index);
         return;
     }
     int offset = MTP_CONTAINER_PARAMETER_OFFSET + (index - 1) * sizeof(uint32_t);
@@ -129,7 +143,7 @@ void MtpPacket::setParameter(int index, uint32_t value) {
 #ifdef MTP_HOST
 int MtpPacket::transfer(struct usb_endpoint *ep, void* buffer, int length) {
     if (usb_endpoint_queue(ep, buffer, length)) {
-        printf("usb_endpoint_queue failed, errno: %d\n", errno);
+        LOGE("usb_endpoint_queue failed, errno: %d", errno);
         return -1;
     }
     int ep_num;

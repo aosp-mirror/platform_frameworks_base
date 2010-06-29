@@ -15,7 +15,10 @@
  */
 
 #define LOG_TAG "MtpClient"
-#include "utils/Log.h"
+
+#include "MtpDebug.h"
+#include "MtpClient.h"
+#include "MtpDevice.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,10 +35,6 @@
 #else
 #include <linux/usb_ch9.h>
 #endif
-
-#include "MtpClient.h"
-#include "MtpDevice.h"
-#include "MtpDebug.h"
 
 namespace android {
 

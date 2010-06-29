@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "SqliteDatabase"
+
+#include "MtpDebug.h"
 #include "SqliteDatabase.h"
 #include "SqliteStatement.h"
 
@@ -37,7 +40,7 @@ bool SqliteDatabase::open(const char* path, bool create) {
     // SQLITE_OPEN_NOMUTEX?
     int ret = sqlite3_open_v2(path, &mDatabaseHandle, flags, NULL);
     if (ret) {
-        fprintf(stderr, "could not open database\n");
+        LOGE("could not open database\n");
         return false;
     }
     return true;

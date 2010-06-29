@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpStorage"
+
+#include "MtpDebug.h"
 #include "MtpDatabase.h"
 #include "MtpStorage.h"
 #include "MtpMediaScanner.h"
@@ -36,7 +39,7 @@ MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, MtpDatabase* db)
         mDatabase(db),
         mMaxCapacity(0)
 {
-    printf("MtpStorage id: %d path: %s\n", id, filePath);
+    LOGD("MtpStorage id: %d path: %s\n", id, filePath);
 }
 
 MtpStorage::~MtpStorage() {

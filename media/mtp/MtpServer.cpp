@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpServer"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -29,6 +31,7 @@
 #include "MtpStorage.h"
 #include "MtpStringBuffer.h"
 #include "MtpDatabase.h"
+#include "MtpDebug.h"
 
 #include "f_mtp.h"
 
@@ -154,12 +157,12 @@ void MtpServer::scanStorage() {
 void MtpServer::run() {
     int fd = mFD;
 
-    printf("MtpServer::run fd: %d\n", fd);
+    LOGD("MtpServer::run fd: %d", fd);
 
     while (1) {
         int ret = mRequest.read(fd);
         if (ret < 0) {
-            fprintf(stderr, "request read returned %d, errno: %d\n", ret, errno);
+            LOGE("request read returned %d, errno: %d", ret, errno);
             if (errno == ECANCELED) {
                 // return to top of loop and wait for next command
                 continue;
@@ -169,7 +172,7 @@ void MtpServer::run() {
         MtpOperationCode operation = mRequest.getOperationCode();
         MtpTransactionID transaction = mRequest.getTransactionID();
 
-        printf("operation: %s\n", MtpDebug::getOperationCodeName(operation));
+        LOGV("operation: %s", MtpDebug::getOperationCodeName(operation));
         mRequest.dump();
 
         // FIXME need to generalize this
@@ -177,14 +180,14 @@ void MtpServer::run() {
         if (dataIn) {
             int ret = mData.read(fd);
             if (ret < 0) {
-                fprintf(stderr, "data read returned %d, errno: %d\n", ret, errno);
+                LOGE("data read returned %d, errno: %d", ret, errno);
                 if (errno == ECANCELED) {
                     // return to top of loop and wait for next command
                     continue;
                 }
                 break;
             }
-            printf("received data:\n");
+            LOGV("received data:");
             mData.dump();
         } else {
             mData.reset();
@@ -194,11 +197,11 @@ void MtpServer::run() {
             if (!dataIn && mData.hasData()) {
                 mData.setOperationCode(operation);
                 mData.setTransactionID(transaction);
-                printf("sending data:\n");
+                LOGV("sending data:");
                 mData.dump();
                 ret = mData.write(fd);
                 if (ret < 0) {
-                    fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
+                    LOGE("request write returned %d, errno: %d", ret, errno);
                     if (errno == ECANCELED) {
                         // return to top of loop and wait for next command
                         continue;
@@ -208,10 +211,10 @@ void MtpServer::run() {
             }
 
             mResponse.setTransactionID(transaction);
-            printf("sending response %04X\n", mResponse.getResponseCode());
+            LOGV("sending response %04X", mResponse.getResponseCode());
             ret = mResponse.write(fd);
             if (ret < 0) {
-                fprintf(stderr, "request write returned %d, errno: %d\n", ret, errno);
+                LOGE("request write returned %d, errno: %d", ret, errno);
                 if (errno == ECANCELED) {
                     // return to top of loop and wait for next command
                     continue;
@@ -219,7 +222,7 @@ void MtpServer::run() {
                 break;
             }
         } else {
-            printf("skipping response\n");
+            LOGV("skipping response");
         }
     }
 }
@@ -232,7 +235,7 @@ bool MtpServer::handleRequest() {
 
     if (mSendObjectHandle != kInvalidObjectHandle && operation != MTP_OPERATION_SEND_OBJECT) {
         // FIXME - need to delete mSendObjectHandle from the database
-        fprintf(stderr, "expected SendObject after SendObjectInfo\n");
+        LOGE("expected SendObject after SendObjectInfo");
         mSendObjectHandle = kInvalidObjectHandle;
     }
 
@@ -486,8 +489,9 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
-printf("SendObjectInfo format: %04X size: %d name: %s, created: %s, modified: %s\n",
-format, mSendObjectFileSize, (const char*)name, (const char*)created, (const char*)modified);
+    LOGV("SendObjectInfo format: %04X size: %d name: %s, created: %s, modified: %s",
+            format, mSendObjectFileSize, (const char*)name, (const char*)created,
+            (const char*)modified);
 
     if (path[path.size() - 1] != '/')
         path += "/";
@@ -526,7 +530,7 @@ format, mSendObjectFileSize, (const char*)name, (const char*)created, (const cha
 
 MtpResponseCode MtpServer::doSendObject() {
     if (mSendObjectHandle == kInvalidObjectHandle) {
-        fprintf(stderr, "Expected SendObjectInfo before SendObject\n");
+        LOGE("Expected SendObjectInfo before SendObject");
         return MTP_RESPONSE_NO_VALID_OBJECT_INFO;
     }
 
@@ -549,7 +553,7 @@ MtpResponseCode MtpServer::doSendObject() {
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
     close(mfr.fd);
     // FIXME - we need to delete mSendObjectHandle from the database if this fails.
-    printf("MTP_RECEIVE_FILE returned %d\n", ret);
+    LOGV("MTP_RECEIVE_FILE returned %d", ret);
     mSendObjectHandle = kInvalidObjectHandle;
 
     if (ret < 0) {
@@ -574,7 +578,7 @@ MtpResponseCode MtpServer::doDeleteObject() {
     if (!mDatabase->getObjectFilePath(handle, filePath, fileLength))
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
 
-printf("deleting %s\n", (const char *)filePath);
+    LOGV("deleting %s", (const char *)filePath);
     // one of these should work
     rmdir((const char *)filePath);
     unlink((const char *)filePath);
