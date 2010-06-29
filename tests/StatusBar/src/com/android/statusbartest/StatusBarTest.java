@@ -104,6 +104,8 @@ public class StatusBarTest extends TestActivity
                     0,
                     fullScreenIntent,
                     PendingIntent.FLAG_CANCEL_CURRENT);
+                // if you tap on it you should get the original alert box
+                not.contentIntent = not.fullScreenIntent;
                 mNotificationManager.notify(id, not);
             }
         },
