@@ -75,13 +75,7 @@ public final class MenuItemImpl implements MenuItem {
     private static final int HIDDEN         = 0x00000008;
     private static final int ENABLED        = 0x00000010;
     private static final int IS_ACTION      = 0x00000020;
-    
-    /*
-     * These should be kept in sync with attrs.xml enum constants for showAsAction
-     */
-    private static final int SHOW_AS_ACTION_NEVER = 0;
-    private static final int SHOW_AS_ACTION_IF_ROOM = 1;
-    private static final int SHOW_AS_ACTION_ALWAYS = 2;
+
     private int mShowAsAction = SHOW_AS_ACTION_NEVER;
 
     /** Used for the icon resource ID if this item does not have an icon */
@@ -659,13 +653,7 @@ public final class MenuItemImpl implements MenuItem {
             mFlags &= ~IS_ACTION;
         }
     }
-    
-    /**
-     * Used by MenuInflater to set how this item should display in the presence of
-     * an Action Bar.
-     *
-     * @param actionEnum Enum flag as defined in attrs.xml/SHOW_AS_ constants.
-     */
+
     public void setShowAsAction(int actionEnum) {
         mShowAsAction = actionEnum;
         mMenu.onItemActionRequestChanged(this);

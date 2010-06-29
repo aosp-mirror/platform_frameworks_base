@@ -1300,6 +1300,8 @@
   <public type="attr" name="showAsAction" />
   <public type="attr" name="actionButtonPadding" />
   <public type="attr" name="previewImage" />
+  <public type="attr" name="actionBarContextBackground" />
+  <public type="attr" name="actionBarCloseContextDrawable" />
 
   <public type="id" name="home" />
 

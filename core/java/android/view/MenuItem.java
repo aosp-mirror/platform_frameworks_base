@@ -31,6 +31,21 @@ import android.view.View.OnCreateContextMenuListener;
  * For a feature set of specific menu types, see {@link Menu}.
  */
 public interface MenuItem {
+    /*
+     * These should be kept in sync with attrs.xml enum constants for showAsAction
+     */
+    /** Never show this item as a button in an Action Bar. */
+    public static final int SHOW_AS_ACTION_NEVER = 0;
+    /** Show this item as a button in an Action Bar if the system decides there is room for it. */
+    public static final int SHOW_AS_ACTION_IF_ROOM = 1;
+    /**
+     * Always show this item as a button in an Action Bar.
+     * Use sparingly! If too many items are set to always show in the Action Bar it can
+     * crowd the Action Bar and degrade the user experience on devices with smaller screens.
+     * A good rule of thumb is to have no more than 2 items set to always show at a time.
+     */
+    public static final int SHOW_AS_ACTION_ALWAYS = 2;
+    
     /**
      * Interface definition for a callback to be invoked when a menu item is
      * clicked.
@@ -381,4 +396,13 @@ public interface MenuItem {
      *         menu item to the menu. This can be null.
      */
     public ContextMenuInfo getMenuInfo();
+    
+    /**
+     * Sets how this item should display in the presence of an Action Bar.
+     *
+     * @param actionEnum How the item should display. One of
+     * 
+     * @see android.app.ActionBar
+     */
+    public void setShowAsAction(int actionEnum);
 }

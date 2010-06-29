@@ -53,7 +53,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final Resources res = getResources();
         final int size = res.getDimensionPixelSize(com.android.internal.R.dimen.action_icon_size);
         final int spaceAvailable = res.getDisplayMetrics().widthPixels / 2;
-        final int itemSpace = size + mItemPadding; 
+        final int itemSpace = size + mItemPadding;
         
         mMaxItems = spaceAvailable / (itemSpace > 0 ? itemSpace : 1);
     }

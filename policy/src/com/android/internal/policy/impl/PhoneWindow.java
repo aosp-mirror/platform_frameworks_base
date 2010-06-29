@@ -29,6 +29,7 @@ import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -53,7 +54,6 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ActionBarView;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InputQueue;
@@ -2224,7 +2224,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mIsFloating) {
                 layoutResource = com.android.internal.R.layout.dialog_title;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
-                layoutResource = com.android.internal.R.layout.screen_action_bar;
+                Configuration config = getContext().getResources().getConfiguration();
+                if ((config.screenLayout & Configuration.SCREENLAYOUT_SIZE_XLARGE) ==
+                    Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+                    layoutResource = com.android.internal.R.layout.screen_xlarge_action_bar;
+                } else {
+                    layoutResource = com.android.internal.R.layout.screen_action_bar;
+                }
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }

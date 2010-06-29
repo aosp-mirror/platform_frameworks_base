@@ -21,20 +21,30 @@ This is an optimized layout for a screen with the Action Bar enabled.
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
-    <ActionBarView android:id="@+id/action_bar"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               style="?android:attr/windowActionBarStyle" />
+    <ViewAnimator android:id="@+id/action_bar_animator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inAnimation="@anim/push_down_in"
+        android:outAnimation="@anim/push_down_out">
+        <com.android.internal.widget.ActionBarView
+            android:id="@+id/action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/windowActionBarStyle" />
+        <com.android.internal.widget.ActionBarContextView
+            android:id="@+id/action_context_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ViewAnimator>
     <FrameLayout android:id="@android:id/content"
         android:layout_width="match_parent" 
         android:layout_height="0dip"
         android:layout_weight="1"
         android:foregroundGravity="fill_horizontal|top"
         android:foreground="?android:attr/windowContentOverlay" />
-    <LinearLayout android:id="@+id/context_action_bar"
+    <LinearLayout android:id="@+id/lower_action_context_bar"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   style="?android:attr/windowActionBarStyle"
                   android:visibility="gone" />
 </LinearLayout>
-
