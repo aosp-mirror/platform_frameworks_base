@@ -53,6 +53,15 @@ struct TextureVertex {
     float texture[2];
 }; // struct TextureVertex
 
+/**
+ * Structure mapping Skia xfermodes to OpenGL blending factors.
+ */
+struct Blender {
+    SkXfermode::Mode mode;
+    GLenum src;
+    GLenum dst;
+}; // struct Blender
+
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,8 +134,10 @@ private:
      * @param right The right coordinate of the rectangle
      * @param bottom The bottom coordinate of the rectangle
      * @param color The rectangle's ARGB color, defined as a packed 32 bits word
+     * @param mode The Skia xfermode to use
      */
-    void drawColorRect(float left, float top, float right, float bottom, int color);
+    void drawColorRect(float left, float top, float right, float bottom,
+    		int color, SkXfermode::Mode mode);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -141,6 +152,19 @@ private:
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
             float alpha);
+
+    /**
+     * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
+     * back to default is achieved by calling:
+     *
+     * resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+     *
+     * @param u1 The left coordinate of the texture
+     * @param v1 The bottom coordinate of the texture
+     * @param u2 The right coordinate of the texture
+     * @param v2 The top coordinate of the texture
+     */
+    void resetDrawTextureTexCoords(float u1, float v1, float u2, float v2);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -161,6 +185,9 @@ private:
     // Shaders
     sp<DrawColorProgram> mDrawColorShader;
     sp<DrawTextureProgram> mDrawTextureShader;
+
+    // Used to draw textured quads
+    TextureVertex mDrawTextureVertices[4];
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer

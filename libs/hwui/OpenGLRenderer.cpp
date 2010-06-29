@@ -40,34 +40,42 @@ namespace uirenderer {
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
-const SimpleVertex gDrawColorVertices[] = {
+static const SimpleVertex gDrawColorVertices[] = {
         SV(0.0f, 0.0f),
         SV(1.0f, 0.0f),
         SV(0.0f, 1.0f),
         SV(1.0f, 1.0f)
 };
-const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
-const GLsizei gDrawColorVertexCount = 4;
+static const GLsizei gDrawColorVertexStride = sizeof(SimpleVertex);
+static const GLsizei gDrawColorVertexCount = 4;
 
-TextureVertex gDrawTextureVertices[] = {
+// This array is never used directly but used as a memcpy source in the
+// OpenGLRenderer constructor
+static const TextureVertex gDrawTextureVertices[] = {
         FV(0.0f, 0.0f, 0.0f, 1.0f),
         FV(1.0f, 0.0f, 1.0f, 1.0f),
         FV(0.0f, 1.0f, 0.0f, 0.0f),
         FV(1.0f, 1.0f, 1.0f, 0.0f)
 };
-const GLsizei gDrawTextureVertexStride = sizeof(TextureVertex);
-const GLsizei gDrawTextureVertexCount = 4;
+static const GLsizei gDrawTextureVertexStride = sizeof(TextureVertex);
+static const GLsizei gDrawTextureVertexCount = 4;
 
-static inline void resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
-    gDrawTextureVertices[0].texture[0] = u1;
-    gDrawTextureVertices[0].texture[1] = v2;
-    gDrawTextureVertices[1].texture[0] = u2;
-    gDrawTextureVertices[1].texture[1] = v2;
-    gDrawTextureVertices[2].texture[0] = u1;
-    gDrawTextureVertices[2].texture[1] = v1;
-    gDrawTextureVertices[3].texture[0] = u2;
-    gDrawTextureVertices[3].texture[1] = v1;
-}
+// In this array, the index of each Blender equals the value of the first
+// entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
+static const Blender gBlends[] = {
+        { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
+        { SkXfermode::kSrc_Mode,     GL_ONE,                  GL_ZERO },
+        { SkXfermode::kDst_Mode,     GL_ZERO,                 GL_ONE },
+        { SkXfermode::kSrcOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
+        { SkXfermode::kDstOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
+        { SkXfermode::kSrcIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
+        { SkXfermode::kDstIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
+        { SkXfermode::kSrcOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
+        { SkXfermode::kDstOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
+        { SkXfermode::kSrcATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
+        { SkXfermode::kDstATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
+        { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
@@ -78,6 +86,8 @@ OpenGLRenderer::OpenGLRenderer() {
 
     mDrawColorShader = new DrawColorProgram;
     mDrawTextureShader = new DrawTextureProgram;
+
+    memcpy(mDrawTextureVertices, gDrawTextureVertices, sizeof(gDrawTextureVertices));
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -336,22 +346,43 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-    // TODO: Set the transfer mode
     const Rect& clip = mSnapshot->clipRect;
-    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color);
+    drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode);
 }
 
 void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, const SkPaint* p) {
-    // TODO Support more than  just color
-    // TODO: Set the transfer mode
-    drawColorRect(left, top, right, bottom, p->getColor());
+    SkXfermode::Mode mode;
+
+    const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+    if (!isMode) {
+        // Assume SRC_OVER
+        mode = SkXfermode::kSrcOver_Mode;
+    }
+
+    // Skia draws using the color's alpha channel if < 255
+    // Otherwise, it uses the paint's alpha
+    int color = p->getColor();
+    if (((color >> 24) & 0xFF) == 255) {
+        color |= p->getAlpha() << 24;
+    }
+
+    drawColorRect(left, top, right, bottom, color, mode);
 }
 
-void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom, int color) {
-    GLfloat a = ((color >> 24) & 0xFF) / 255.0f;
-    GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
-    GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
-    GLfloat b = ((color      ) & 0xFF) / 255.0f;
+void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
+        int color, SkXfermode::Mode mode) {
+    const int alpha = (color >> 24) & 0xFF;
+    const bool blend = alpha < 255 || mode != SkXfermode::kSrcOver_Mode;
+
+    const GLfloat a = alpha                  / 255.0f;
+    const GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
+    const GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
+    const GLfloat b = ((color      ) & 0xFF) / 255.0f;
+
+    if (blend) {
+        glEnable(GL_BLEND);
+        glBlendFunc(gBlends[mode].src, gBlends[mode].dst);
+    }
 
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
@@ -368,6 +399,10 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
 
     glDisableVertexAttribArray(mDrawColorShader->position);
+
+    if (blend) {
+        glDisable(GL_BLEND);
+    }
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -379,15 +414,16 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     // TODO Correctly set the blend function, based on texture format and xfermode
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    // For not pre-multiplied sources
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(mDrawTextureShader->sampler, 0);
 
-    const GLvoid* p = &gDrawTextureVertices[0].position[0];
-    const GLvoid* t = &gDrawTextureVertices[0].texture[0];
+    const GLvoid* p = &mDrawTextureVertices[0].position[0];
+    const GLvoid* t = &mDrawTextureVertices[0].texture[0];
 
     glEnableVertexAttribArray(mDrawTextureShader->position);
     glVertexAttribPointer(mDrawTextureShader->position, 2, GL_FLOAT, GL_FALSE,
@@ -406,6 +442,17 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
+}
+
+void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
+    mDrawTextureVertices[0].texture[0] = u1;
+    mDrawTextureVertices[0].texture[1] = v2;
+    mDrawTextureVertices[1].texture[0] = u2;
+    mDrawTextureVertices[1].texture[1] = v2;
+    mDrawTextureVertices[2].texture[0] = u1;
+    mDrawTextureVertices[2].texture[1] = v1;
+    mDrawTextureVertices[3].texture[0] = u2;
+    mDrawTextureVertices[3].texture[1] = v1;
 }
 
 }; // namespace uirenderer
