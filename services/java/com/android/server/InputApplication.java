@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_VIEW_INPUTTARGET_H
-#define _ANDROID_VIEW_INPUTTARGET_H
+package com.android.server;
 
-#include "jni.h"
-
-namespace android {
-
-class InputTarget;
-
-extern void android_view_InputTarget_toNative(JNIEnv* env, jobject inputTargetObj,
-        InputTarget* outInputTarget);
-
-} // namespace android
-
-#endif // _ANDROID_OS_INPUTTARGET_H
+/**
+ * Describes input-related application properties for use by the input dispatcher.
+ * 
+ * @hide
+ */
+public final class InputApplication {
+    // Application name.
+    public String name;
+    
+    // Dispatching timeout.
+    public long dispatchingTimeoutNanos;
+    
+    // The application window token.
+    public Object token;
+}

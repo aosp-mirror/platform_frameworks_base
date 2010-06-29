@@ -87,6 +87,14 @@ public:
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis) = 0;
 
+    /* Preempts input dispatch in progress by making pending synchronous
+     * dispatches asynchronous instead.  This method is generally called during a focus
+     * transition from one application to the next so as to enable the new application
+     * to start receiving input as soon as possible without having to wait for the
+     * old application to finish up.
+     */
+    virtual void preemptInputDispatch() = 0;
+
     /* Gets input device configuration. */
     virtual void getInputConfiguration(InputConfiguration* outConfiguration) const = 0;
 
@@ -129,6 +137,8 @@ public:
 
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, bool sync, int32_t timeoutMillis);
+
+    virtual void preemptInputDispatch();
 
     virtual void getInputConfiguration(InputConfiguration* outConfiguration) const;
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t deviceClasses,

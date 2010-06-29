@@ -17,23 +17,20 @@
 package com.android.server;
 
 import com.android.internal.util.XmlUtils;
-import com.android.server.KeyInputQueue.VirtualKey;
 
 import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Environment;
 import android.os.LocalPowerManager;
 import android.os.PowerManager;
-import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
-import android.view.InputTarget;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
@@ -85,6 +82,10 @@ public class InputManager {
             int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
     private static native int nativeInjectMotionEvent(MotionEvent event, int nature,
             int injectorPid, int injectorUid, boolean sync, int timeoutMillis);
+    private static native void nativeSetInputWindows(InputWindow[] windows);
+    private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
+    private static native void nativeSetFocusedApplication(InputApplication application);
+    private static native void nativePreemptInputDispatch();
     
     // Device class as defined by EventHub.
     private static final int CLASS_KEYBOARD = 0x00000001;
@@ -284,6 +285,22 @@ public class InputManager {
                 sync, timeoutMillis);
     }
     
+    public void setInputWindows(InputWindow[] windows) {
+        nativeSetInputWindows(windows);
+    }
+    
+    public void setFocusedApplication(InputApplication application) {
+        nativeSetFocusedApplication(application);
+    }
+    
+    public void preemptInputDispatch() {
+        nativePreemptInputDispatch();
+    }
+    
+    public void setInputDispatchMode(boolean enabled, boolean frozen) {
+        nativeSetInputDispatchMode(enabled, frozen);
+    }
+    
     public void dump(PrintWriter pw) {
         // TODO
     }
@@ -344,32 +361,43 @@ public class InputManager {
         
         @SuppressWarnings("unused")
         public void notifyInputChannelBroken(InputChannel inputChannel) {
-            mWindowManagerService.notifyInputChannelBroken(inputChannel);
+            mWindowManagerService.mInputMonitor.notifyInputChannelBroken(inputChannel);
         }
 
         @SuppressWarnings("unused")
         public long notifyInputChannelANR(InputChannel inputChannel) {
-            return mWindowManagerService.notifyInputChannelANR(inputChannel);
+            return mWindowManagerService.mInputMonitor.notifyInputChannelANR(inputChannel);
         }
 
         @SuppressWarnings("unused")
         public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
-            mWindowManagerService.notifyInputChannelRecoveredFromANR(inputChannel);
+            mWindowManagerService.mInputMonitor.notifyInputChannelRecoveredFromANR(inputChannel);
         }
         
         @SuppressWarnings("unused")
-        public int hackInterceptKey(int deviceId, int type, int scanCode,
+        public long notifyANR(Object token) {
+            return mWindowManagerService.mInputMonitor.notifyANR(token);
+        }
+        
+        @SuppressWarnings("unused")
+        public int interceptKeyBeforeQueueing(int deviceId, int type, int scanCode,
                 int keyCode, int policyFlags, int value, long whenNanos, boolean isScreenOn) {
-            RawInputEvent event = new RawInputEvent();
-            event.deviceId = deviceId;
-            event.type = type;
-            event.scancode = scanCode;
-            event.keycode = keyCode;
-            event.flags = policyFlags;
-            event.value = value;
-            event.when = whenNanos / 1000000;
-            
-            return mWindowManagerPolicy.interceptKeyTq(event, isScreenOn);
+            return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(deviceId, type,
+                    scanCode, keyCode, policyFlags, value, whenNanos, isScreenOn);
+        }
+        
+        @SuppressWarnings("unused")
+        public boolean interceptKeyBeforeDispatching(InputChannel focus, int keyCode,
+                int metaState, boolean down, int repeatCount, int policyFlags) {
+            return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(focus,
+                    keyCode, metaState, down, repeatCount, policyFlags);
+        }
+        
+        @SuppressWarnings("unused")
+        public boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
+            return mContext.checkPermission(
+                    android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)
+                    == PackageManager.PERMISSION_GRANTED;
         }
         
         @SuppressWarnings("unused")
@@ -379,15 +407,14 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public void pokeUserActivityForKey(long whenNanos) {
-            long when = whenNanos / 1000000;
-            mPowerManagerService.userActivity(when, false,
-                    LocalPowerManager.BUTTON_EVENT, false);
+        public void pokeUserActivity(long eventTimeNanos, int eventType) {
+            long eventTime = eventTimeNanos / 1000000;
+            mPowerManagerService.userActivity(eventTime, false, eventType, false);
         }
         
         @SuppressWarnings("unused")
         public void notifyAppSwitchComing() {
-            mWindowManagerService.mKeyWaiter.appSwitchComing();
+            mWindowManagerService.mInputMonitor.notifyAppSwitchComing();
         }
         
         @SuppressWarnings("unused")
@@ -484,25 +511,6 @@ public class InputManager {
             }
             
             return names.toArray(new String[names.size()]);
-        }
-        
-        // TODO All code related to target identification should be moved down into native.
-        @SuppressWarnings("unused")
-        public int getKeyEventTargets(InputTargetList inputTargets,
-                KeyEvent event, int nature, int policyFlags,
-                int injectorPid, int injectorUid) {
-            inputTargets.clear();
-            return mWindowManagerService.getKeyEventTargetsTd(
-                    inputTargets, event, nature, policyFlags, injectorPid, injectorUid);
-        }
-        
-        @SuppressWarnings("unused")
-        public int getMotionEventTargets(InputTargetList inputTargets,
-                MotionEvent event, int nature, int policyFlags,
-                int injectorPid, int injectorUid) {
-            inputTargets.clear();
-            return mWindowManagerService.getMotionEventTargetsTd(
-                    inputTargets, event, nature, policyFlags, injectorPid, injectorUid);
         }
     }
 }

@@ -361,7 +361,11 @@ public:
 
         // The input dispatcher should add POLICY_FLAG_BRIGHT_HERE to the policy flags it
         // passes through the dispatch pipeline.
-        ACTION_BRIGHT_HERE = 0x00000008
+        ACTION_BRIGHT_HERE = 0x00000008,
+
+        // The input dispatcher should add POLICY_FLAG_INTERCEPT_DISPATCH to the policy flags
+        // it passed through the dispatch pipeline.
+        ACTION_INTERCEPT_DISPATCH = 0x00000010
     };
 
     /* Describes a virtual key. */

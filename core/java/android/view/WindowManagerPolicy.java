@@ -83,7 +83,7 @@ public interface WindowManagerPolicy {
      * Temporary flag added during the transition to the new native input dispatcher.
      * This will be removed when the old input dispatch code is deleted.
      */
-    public final static boolean ENABLE_NATIVE_INPUT_DISPATCH = false;
+    public final static boolean ENABLE_NATIVE_INPUT_DISPATCH = true;
 
     // flags for interceptKeyTq
     /**
