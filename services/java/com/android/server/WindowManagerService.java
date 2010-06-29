@@ -103,7 +103,6 @@ import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputQueue;
-import android.view.InputTarget;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RawInputEvent;
@@ -206,6 +205,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // Maximum number of milliseconds to wait for input event injection.
     // FIXME is this value reasonable?
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
+    
+    // Default input dispatching timeout in nanoseconds.
+    private static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
     static final int INJECT_FAILED = 0;
     static final int INJECT_SUCCEEDED = 1;
@@ -2060,8 +2062,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean focusChanged = false;
             if (win.canReceiveKeys()) {
-                if ((focusChanged=updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS))
-                        == true) {
+                focusChanged = updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS);
+                if (focusChanged) {
                     imMayMove = false;
                 }
             }
@@ -2077,10 +2079,9 @@ public class WindowManagerService extends IWindowManager.Stub
             //dump();
 
             if (focusChanged) {
-                if (mCurrentFocus != null) {
-                    mKeyWaiter.handleNewWindowLocked(mCurrentFocus);
-                }
+                finishUpdateFocusedWindowAfterAssignLayersLocked();
             }
+            
             if (localLOGV) Slog.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
@@ -2182,10 +2183,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void removeWindowInnerLocked(Session session, WindowState win) {
-        mKeyWaiter.finishedKey(session, win.mClient, true,
-                KeyWaiter.RETURN_NOTHING);
-        mKeyWaiter.releasePendingPointerLocked(win.mSession);
-        mKeyWaiter.releasePendingTrackballLocked(win.mSession);
+        if (ENABLE_NATIVE_INPUT_DISPATCH) {
+            mInputMonitor.windowIsBeingRemovedLw(win);
+        } else {
+            mKeyWaiter.finishedKey(session, win.mClient, true,
+                    KeyWaiter.RETURN_NOTHING);
+            mKeyWaiter.releasePendingPointerLocked(win.mSession);
+            mKeyWaiter.releasePendingTrackballLocked(win.mSession);
+        }
 
         win.mRemoved = true;
 
@@ -2553,8 +2558,12 @@ public class WindowManagerService extends IWindowManager.Stub
                               applyAnimationLocked(win, transit, false)) {
                             focusMayChange = true;
                             win.mExiting = true;
-                            mKeyWaiter.finishedKey(session, client, true,
-                                    KeyWaiter.RETURN_NOTHING);
+                            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                                mInputMonitor.windowIsBecomingInvisibleLw(win);
+                            } else {
+                                mKeyWaiter.finishedKey(session, client, true,
+                                        KeyWaiter.RETURN_NOTHING);
+                            }
                         } else if (win.isAnimating()) {
                             // Currently in a hide animation... turn this into
                             // an exit.
@@ -3015,8 +3024,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (win.isVisibleNow()) {
                             applyAnimationLocked(win,
                                     WindowManagerPolicy.TRANSIT_EXIT, false);
-                            mKeyWaiter.finishedKey(win.mSession, win.mClient, true,
-                                    KeyWaiter.RETURN_NOTHING);
+                            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                                mInputMonitor.windowIsBeingRemovedLw(win);
+                            } else {
+                                mKeyWaiter.finishedKey(win.mSession, win.mClient, true,
+                                        KeyWaiter.RETURN_NOTHING);
+                            }
                             changed = true;
                         }
                     }
@@ -3047,6 +3060,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
+        
+        // Get the dispatching timeout here while we are not holding any locks so that it
+        // can be cached by the AppWindowToken.  The timeout value is used later by the
+        // input dispatcher in code that does hold locks.  If we did not cache the value
+        // here we would run the chance of introducing a deadlock between the window manager
+        // (which holds locks while updating the input dispatcher state) and the activity manager
+        // (which holds locks while querying the application token).
+        long inputDispatchingTimeoutNanos;
+        try {
+            inputDispatchingTimeoutNanos = token.getKeyDispatchingTimeout() * 1000000L;
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "Could not get dispatching timeout.", ex);
+            inputDispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        }
 
         synchronized(mWindowMap) {
             AppWindowToken wtoken = findAppWindowToken(token.asBinder());
@@ -3055,6 +3082,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             wtoken = new AppWindowToken(token);
+            wtoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             wtoken.groupId = groupId;
             wtoken.appFullscreen = fullscreen;
             wtoken.requestedOrientation = requestedOrientation;
@@ -3318,7 +3346,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_FOCUS) Slog.v(TAG, "Clearing focused app, was " + mFocusedApp);
                 changed = mFocusedApp != null;
                 mFocusedApp = null;
-                mKeyWaiter.tickle();
+                if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                    if (changed) {
+                        mInputMonitor.setFocusedAppLw(null);
+                    }
+                } else {
+                    mKeyWaiter.tickle();
+                }
             } else {
                 AppWindowToken newFocus = findAppWindowToken(token);
                 if (newFocus == null) {
@@ -3328,7 +3362,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 changed = mFocusedApp != newFocus;
                 mFocusedApp = newFocus;
                 if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp);
-                mKeyWaiter.tickle();
+                if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                    if (changed) {
+                        mInputMonitor.setFocusedAppLw(newFocus);
+                    }
+                } else {
+                    mKeyWaiter.tickle();
+                }
             }
 
             if (moveFocusNow && changed) {
@@ -3639,8 +3679,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         applyAnimationLocked(win,
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
                     }
-                    mKeyWaiter.finishedKey(win.mSession, win.mClient, true,
-                            KeyWaiter.RETURN_NOTHING);
+                    if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                        mInputMonitor.windowIsBecomingInvisibleLw(win);
+                    } else {
+                        mKeyWaiter.finishedKey(win.mSession, win.mClient, true,
+                                KeyWaiter.RETURN_NOTHING);
+                    }
                     changed = true;
                 }
             }
@@ -3925,7 +3969,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_FOCUS) Slog.v(TAG, "Removing focused app token:" + wtoken);
                     mFocusedApp = null;
                     updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
-                    mKeyWaiter.tickle();
+                    if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                        mInputMonitor.setFocusedAppLw(null);
+                    } else {
+                        mKeyWaiter.tickle();
+                    }
                 }
             } else {
                 Slog.w(TAG, "Attempted to remove non-existing app token: " + token);
@@ -5073,456 +5121,375 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
     
-    /* Notifies the window manager about a broken input channel.
-     * 
-     * Called by the InputManager.
-     */
-    public void notifyInputChannelBroken(InputChannel inputChannel) {
-        synchronized (mWindowMap) {
-            WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
-            if (windowState == null) {
-                return; // irrelevant
-            }
-            
-            Slog.i(TAG, "WINDOW DIED " + windowState);
-            removeWindowLocked(windowState.mSession, windowState);
-        }
-    }
-    
-    /* Notifies the window manager about a broken input channel.
-     * 
-     * Called by the InputManager.
-     */
-    public long notifyInputChannelANR(InputChannel inputChannel) {
-        IApplicationToken appToken;
-        synchronized (mWindowMap) {
-            WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
-            if (windowState == null) {
-                return -2; // irrelevant, abort dispatching (-2)
-            }
-            
-            Slog.i(TAG, "Input event dispatching timed out sending to "
-                    + windowState.mAttrs.getTitle());
-            appToken = windowState.getAppToken();
-        }
-        
-        try {
-            // Notify the activity manager about the timeout and let it decide whether
-            // to abort dispatching or keep waiting.
-            boolean abort = appToken.keyDispatchingTimedOut();
-            if (abort) {
-                return -2; // abort dispatching
-            }
-            
-            // Return new timeout.
-            // We use -1 for infinite timeout to avoid clash with -2 magic number.
-            long newTimeout = appToken.getKeyDispatchingTimeout() * 1000000;
-            return newTimeout < 0 ? -1 : newTimeout;
-        } catch (RemoteException ex) {
-            return -2; // abort dispatching
-        }
-    }
-
-    /* Notifies the window manager about a broken input channel.
-     * 
-     * Called by the InputManager.
-     */
-    public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
-        // Nothing to do just now.
-        // Just wait for the user to dismiss the ANR dialog.
-        
-        // TODO We could try to automatically dismiss the ANR dialog on recovery
-        //      although that might be disorienting.
-    }
-    
-    private WindowState getWindowStateForInputChannelLocked(InputChannel inputChannel) {
-        int windowCount = mWindows.size();
-        for (int i = 0; i < windowCount; i++) {
-            WindowState windowState = (WindowState) mWindows.get(i);
-            if (windowState.mInputChannel == inputChannel) {
-                return windowState;
-            }
-        }
-        
-        return null;
-    }
-
     // -------------------------------------------------------------
     // Input Events and Focus Management
     // -------------------------------------------------------------
     
-    private boolean checkInjectionPermissionTd(WindowState focus,
-            int injectorPid, int injectorUid) {
-        if (injectorUid > 0 && (focus == null || injectorUid != focus.mSession.mUid)) {
-            if (mContext.checkPermission(
-                    android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.w(TAG, "Permission denied: injecting key event from pid "
-                        + injectorPid + " uid " + injectorUid + " to window " + focus
-                        + " owned by uid " + focus.mSession.mUid);
-                return false;
+    InputMonitor mInputMonitor = new InputMonitor();
+    
+    /* Tracks the progress of input dispatch and ensures that input dispatch state
+     * is kept in sync with changes in window focus, visibility, registration, and
+     * other relevant Window Manager state transitions. */
+    final class InputMonitor {
+        // Current window with input focus for keys and other non-touch events.  May be null.
+        private WindowState mInputFocus;
+        
+        // When true, prevents input dispatch from proceeding until set to false again.
+        private boolean mInputDispatchFrozen;
+        
+        // When true, input dispatch proceeds normally.  Otherwise all events are dropped.
+        private boolean mInputDispatchEnabled = true;
+
+        // Temporary list of windows information to provide to the input dispatcher.
+        private InputWindowList mTempInputWindows = new InputWindowList();
+        
+        // Temporary input application object to provide to the input dispatcher.
+        private InputApplication mTempInputApplication = new InputApplication();
+        
+        /* Notifies the window manager about a broken input channel.
+         * 
+         * Called by the InputManager.
+         */
+        public void notifyInputChannelBroken(InputChannel inputChannel) {
+            synchronized (mWindowMap) {
+                WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
+                if (windowState == null) {
+                    return; // irrelevant
+                }
+                
+                Slog.i(TAG, "WINDOW DIED " + windowState);
+                removeWindowLocked(windowState.mSession, windowState);
             }
         }
-        return true;
-    }
-    
-    /* Gets the input targets for a key event.
-     * 
-     * Called by the InputManager on the InputDispatcher thread.
-     */
-    public int getKeyEventTargetsTd(InputTargetList inputTargets,
-            KeyEvent event, int nature, int policyFlags, int injectorPid, int injectorUid) {
-        if (DEBUG_INPUT) Slog.v(TAG, "Dispatch key: " + event);
-
-        // TODO what do we do with mDisplayFrozen?
-        // TODO what do we do with focus.mToken.paused?
         
-        WindowState focus = getFocusedWindow();
-        
-        if (! checkInjectionPermissionTd(focus, injectorPid, injectorUid)) {
-            return InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED;
-        }
-        
-        if (mPolicy.interceptKeyTi(focus, event.getKeyCode(), event.getMetaState(),
-                event.getAction() == KeyEvent.ACTION_DOWN,
-                event.getRepeatCount(), event.getFlags())) {
-            // Policy consumed the event.
-            return InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
-        }
-        
-        if (focus == null) {
-            return InputManager.INPUT_EVENT_INJECTION_FAILED;
-        }
-        
-        wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
-        
-        addInputTargetTd(inputTargets, focus, InputTarget.FLAG_SYNC);
-        return InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
-    }
-    
-    /* Gets the input targets for a motion event.
-     * 
-     * Called by the InputManager on the InputDispatcher thread.
-     */
-    public int getMotionEventTargetsTd(InputTargetList inputTargets,
-            MotionEvent event, int nature, int policyFlags, int injectorPid, int injectorUid) {
-        switch (nature) {
-            case InputQueue.INPUT_EVENT_NATURE_TRACKBALL:
-                return getMotionEventTargetsForTrackballTd(inputTargets, event, policyFlags,
-                        injectorPid, injectorUid);
+        /* Notifies the window manager about an input channel that is not responding.
+         * The method can either cause dispatching to be aborted by returning -2 or
+         * return a new timeout in nanoseconds.
+         * 
+         * Called by the InputManager.
+         */
+        public long notifyInputChannelANR(InputChannel inputChannel) {
+            AppWindowToken token;
+            synchronized (mWindowMap) {
+                WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
+                if (windowState == null) {
+                    return -2; // irrelevant, abort dispatching (-2)
+                }
                 
-            case InputQueue.INPUT_EVENT_NATURE_TOUCH:
-                return getMotionEventTargetsForTouchTd(inputTargets, event, policyFlags,
-                        injectorPid, injectorUid);
-                
-            default:
-                return InputManager.INPUT_EVENT_INJECTION_FAILED;
-        }
-    }
-    
-    /* Gets the input targets for a trackball event.
-     * 
-     * Called by the InputManager on the InputDispatcher thread.
-     */
-    private int getMotionEventTargetsForTrackballTd(InputTargetList inputTargets,
-            MotionEvent event, int policyFlags, int injectorPid, int injectorUid) {
-        WindowState focus = getFocusedWindow();
-        
-        if (! checkInjectionPermissionTd(focus, injectorPid, injectorUid)) {
-            return InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED;
-        }
-        
-        if (focus == null) {
-            return InputManager.INPUT_EVENT_INJECTION_FAILED;
-        }
-        
-        wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
-        
-        addInputTargetTd(inputTargets, focus, InputTarget.FLAG_SYNC);
-        return InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
-    }
-    
-    /* Set to true when a fat touch has been detected during the processing of a touch event.
-     * 
-     * Only used by getMotionEventTargetsForTouchTd.
-     * Set to true whenever a fat touch is detected and reset to false on ACTION_UP.
-     */
-    private boolean mFatTouch;
-    
-    /* Set to true when we think the touch event.
-     * 
-     * Only used by getMotionEventTargetsForTouchTd.
-     * Set to true on ACTION_DOWN and set to false on ACTION_UP.
-     */
-    private boolean mTouchDown;
-    
-    /* Current target of Motion events.
-     * 
-     * Only used by getMotionEventTargetsForTouchTd.
-     * Initialized on ACTION_DOWN and cleared on ACTION_UP.
-     */
-    private WindowState mTouchFocus;
-
-    /* Windows above the target that would like to receive an "outside" touch event
-     * for any down events outside of them.
-     * 
-     * Only used by getMotionEventTargetsForTouchTd.
-     * Initialized on ACTION_DOWN and cleared immediately afterwards.
-     */
-    private ArrayList<WindowState> mOutsideTouchTargets = new ArrayList<WindowState>();
-    
-    /* Wallpaper windows that are currently receiving touch events.
-     * 
-     * Only used by getMotionEventTargetsForTouchTd.
-     * Initialized on ACTION_DOWN and cleared on ACTION_UP.
-     */
-    private ArrayList<WindowState> mWallpaperTouchTargets = new ArrayList<WindowState>();
-    
-    /* Gets the input targets for a touch event.
-     * 
-     * Called by the InputManager on the InputDispatcher thread.
-     */
-    private int getMotionEventTargetsForTouchTd(InputTargetList inputTargets,
-            MotionEvent event, int policyFlags, int injectorPid, int injectorUid) {
-        final int action = event.getAction();
-        
-        if (action == MotionEvent.ACTION_DOWN) {
-            updateTouchFocusBeforeDownTd(event, policyFlags);
-        } else {
-            updateTouchFocusBeforeNonDownTd(event, policyFlags);
-        }
-
-        boolean skipDelivery = false;
-        int touchTargetFlags = 0;
-        
-        int injectionResult = InputManager.INPUT_EVENT_INJECTION_SUCCEEDED;
-        WindowState focusedTouchTarget = mTouchFocus;
-        if (focusedTouchTarget == null) {
-            // In this case we are either dropping the event, or have received
-            // a move or up without a down.  It is common to receive move
-            // events in such a way, since this means the user is moving the
-            // pointer without actually pressing down.  All other cases should
-            // be atypical, so let's log them.
-            if (action != MotionEvent.ACTION_MOVE) {
-                Slog.w(TAG, "No window to dispatch pointer action " + action);
-                injectionResult = InputManager.INPUT_EVENT_INJECTION_FAILED;
-            }
-        } else {
-            // We have a valid focused touch target.
-            if (! checkInjectionPermissionTd(focusedTouchTarget, injectorPid, injectorUid)) {
-                return InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+                Slog.i(TAG, "Input event dispatching timed out sending to "
+                        + windowState.mAttrs.getTitle());
+                token = windowState.mAppToken;
             }
             
-            wakeupIfNeeded(focusedTouchTarget, eventType(event));
-            
-            if ((focusedTouchTarget.mAttrs.flags &
-                    WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES) != 0) {
-                // Target wants to ignore fat touch events
-                boolean cheekPress = mPolicy.isCheekPressedAgainstScreen(event);
-                
-                if (cheekPress) {
-                    if ((action == MotionEvent.ACTION_DOWN)) {
-                        mFatTouch = true;
-                        skipDelivery = true;
-                    } else {
-                        if (! mFatTouch) {
-                            // cancel the earlier event
-                            touchTargetFlags |= InputTarget.FLAG_CANCEL;
-                            mFatTouch = true;
-                        } else {
-                            skipDelivery = true;
-                        }
+            return notifyANRInternal(token);
+        }
+    
+        /* Notifies the window manager about an input channel spontaneously recovering from ANR
+         * by successfully delivering the event that originally timed out.
+         * 
+         * Called by the InputManager.
+         */
+        public void notifyInputChannelRecoveredFromANR(InputChannel inputChannel) {
+            // Nothing to do just now.
+            // Just wait for the user to dismiss the ANR dialog.
+        }
+        
+        /* Notifies the window manager about an application that is not responding
+         * in general rather than with respect to a particular input channel.
+         * The method can either cause dispatching to be aborted by returning -2 or
+         * return a new timeout in nanoseconds.
+         * 
+         * Called by the InputManager.
+         */
+        public long notifyANR(Object token) {
+            AppWindowToken appWindowToken = (AppWindowToken) token;
+
+            Slog.i(TAG, "Input event dispatching timed out sending to application "
+                    + appWindowToken.stringName);
+            return notifyANRInternal(appWindowToken);
+        }
+        
+        private long notifyANRInternal(AppWindowToken token) {
+            if (token != null && token.appToken != null) {
+                try {
+                    // Notify the activity manager about the timeout and let it decide whether
+                    // to abort dispatching or keep waiting.
+                    boolean abort = token.appToken.keyDispatchingTimedOut();
+                    if (! abort) {
+                        // The activity manager declined to abort dispatching.
+                        // Wait a bit longer and timeout again later.
+                        return token.inputDispatchingTimeoutNanos;
                     }
+                } catch (RemoteException ex) {
                 }
             }
+            return -2; // abort dispatching
         }
         
-        if (! skipDelivery) {
-            int outsideTargetCount = mOutsideTouchTargets.size();
-            for (int i = 0; i < outsideTargetCount; i++) {
-                WindowState outsideTouchTarget = mOutsideTouchTargets.get(i);
-                addInputTargetTd(inputTargets, outsideTouchTarget,
-                        InputTarget.FLAG_OUTSIDE | touchTargetFlags);
+        private WindowState getWindowStateForInputChannel(InputChannel inputChannel) {
+            synchronized (mWindowMap) {
+                return getWindowStateForInputChannelLocked(inputChannel);
+            }
+        }
+        
+        private WindowState getWindowStateForInputChannelLocked(InputChannel inputChannel) {
+            int windowCount = mWindows.size();
+            for (int i = 0; i < windowCount; i++) {
+                WindowState windowState = (WindowState) mWindows.get(i);
+                if (windowState.mInputChannel == inputChannel) {
+                    return windowState;
+                }
             }
             
-            int wallpaperTargetCount = mWallpaperTouchTargets.size();
-            for (int i = 0; i < wallpaperTargetCount; i++) {
-                WindowState wallpaperTouchTarget = mWallpaperTouchTargets.get(i);
-                addInputTargetTd(inputTargets, wallpaperTouchTarget,
-                        touchTargetFlags);
-            }
-            
-            if (focusedTouchTarget != null) {
-                addInputTargetTd(inputTargets, focusedTouchTarget,
-                        InputTarget.FLAG_SYNC | touchTargetFlags);
-            }
-        }
-
-        if (action == MotionEvent.ACTION_UP) {
-            updateTouchFocusAfterUpTd(event, policyFlags);
+            return null;
         }
         
-        return injectionResult;
-    }
-    
-    private void updateTouchFocusBeforeDownTd(MotionEvent event, int policyFlags) {
-        if (mTouchDown) {
-            // This is weird, we got a down, but we thought it was already down!
-            // XXX: We should probably send an ACTION_UP to the current target.
-            Slog.w(TAG, "Pointer down received while already down in: " + mTouchFocus);
-            updateTouchFocusAfterUpTd(event, policyFlags);
-        }
-        
-        mTouchDown = true;
-        mPowerManager.logPointerDownEvent();
-        
-        final boolean screenWasOff = (policyFlags & WindowManagerPolicy.FLAG_BRIGHT_HERE) != 0;
-        synchronized (mWindowMap) {
-            final int x = (int) event.getX();
-            final int y = (int) event.getY();
-
+        /* Updates the cached window information provided to the input dispatcher. */
+        public void updateInputWindowsLw() {
+            // Populate the input window list with information about all of the windows that
+            // could potentially receive input.
+            // As an optimization, we could try to prune the list of windows but this turns
+            // out to be difficult because only the native code knows for sure which window
+            // currently has touch focus.
             final ArrayList windows = mWindows;
             final int N = windows.size();
-            WindowState topErrWindow = null;
-            final Rect tmpRect = mTempRect;
-            for (int i= N - 1; i >= 0; i--) {
-                WindowState child = (WindowState) windows.get(i);
-                //Slog.i(TAG, "Checking dispatch to: " + child);
-                
-                final int flags = child.mAttrs.flags;
-                if ((flags & WindowManager.LayoutParams.FLAG_SYSTEM_ERROR) != 0) {
-                    if (topErrWindow == null) {
-                        topErrWindow = child;
-                    }
-                }
-                
-                if (!child.isVisibleLw()) {
-                    //Slog.i(TAG, "Not visible!");
+            for (int i = N - 1; i >= 0; i--) {
+                final WindowState child = (WindowState) windows.get(i);
+                if (child.mInputChannel == null) {
+                    // Skip this window because it cannot possibly receive input.
                     continue;
                 }
                 
-                if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) == 0) {
-                    tmpRect.set(child.mFrame);
-                    if (child.mTouchableInsets == ViewTreeObserver
-                                .InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT) {
-                        // The touch is inside of the window if it is
-                        // inside the frame, AND the content part of that
-                        // frame that was given by the application.
-                        tmpRect.left += child.mGivenContentInsets.left;
-                        tmpRect.top += child.mGivenContentInsets.top;
-                        tmpRect.right -= child.mGivenContentInsets.right;
-                        tmpRect.bottom -= child.mGivenContentInsets.bottom;
-                    } else if (child.mTouchableInsets == ViewTreeObserver
-                                .InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE) {
-                        // The touch is inside of the window if it is
-                        // inside the frame, AND the visible part of that
-                        // frame that was given by the application.
-                        tmpRect.left += child.mGivenVisibleInsets.left;
-                        tmpRect.top += child.mGivenVisibleInsets.top;
-                        tmpRect.right -= child.mGivenVisibleInsets.right;
-                        tmpRect.bottom -= child.mGivenVisibleInsets.bottom;
+                final int flags = child.mAttrs.flags;
+                final int type = child.mAttrs.type;
+                
+                final boolean hasFocus = (child == mInputFocus);
+                final boolean isVisible = child.isVisibleLw();
+                final boolean hasWallpaper = (child == mWallpaperTarget)
+                        && (type != WindowManager.LayoutParams.TYPE_KEYGUARD);
+                
+                // Add a window to our list of input windows.
+                final InputWindow inputWindow = mTempInputWindows.add();
+                inputWindow.inputChannel = child.mInputChannel;
+                inputWindow.layoutParamsFlags = flags;
+                inputWindow.layoutParamsType = type;
+                inputWindow.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
+                inputWindow.visible = isVisible;
+                inputWindow.hasFocus = hasFocus;
+                inputWindow.hasWallpaper = hasWallpaper;
+                inputWindow.paused = child.mAppToken != null ? child.mAppToken.paused : false;
+                inputWindow.ownerPid = child.mSession.mPid;
+                inputWindow.ownerUid = child.mSession.mUid;
+                
+                final Rect frame = child.mFrame;
+                inputWindow.frameLeft = frame.left;
+                inputWindow.frameTop = frame.top;
+                
+                switch (child.mTouchableInsets) {
+                    default:
+                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
+                        inputWindow.touchableAreaLeft = frame.left;
+                        inputWindow.touchableAreaTop = frame.top;
+                        inputWindow.touchableAreaRight = frame.right;
+                        inputWindow.touchableAreaBottom = frame.bottom;
+                        break;
+                        
+                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT: {
+                        Rect inset = child.mGivenContentInsets;
+                        inputWindow.touchableAreaLeft = frame.left + inset.left;
+                        inputWindow.touchableAreaTop = frame.top + inset.top;
+                        inputWindow.touchableAreaRight = frame.right - inset.right;
+                        inputWindow.touchableAreaBottom = frame.bottom - inset.bottom;
+                        break;
                     }
-                    final int touchFlags = flags &
-                        (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        |WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-                    if (tmpRect.contains(x, y) || touchFlags == 0) {
-                        //Slog.i(TAG, "Using this target!");
-                        if (! screenWasOff || (flags &
-                                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING) != 0) {
-                            mTouchFocus = child;
-                        } else {
-                            //Slog.i(TAG, "Waking, skip!");
-                            mTouchFocus = null;
-                        }
+                        
+                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE: {
+                        Rect inset = child.mGivenVisibleInsets;
+                        inputWindow.touchableAreaLeft = frame.left + inset.left;
+                        inputWindow.touchableAreaTop = frame.top + inset.top;
+                        inputWindow.touchableAreaRight = frame.right - inset.right;
+                        inputWindow.touchableAreaBottom = frame.bottom - inset.bottom;
                         break;
                     }
                 }
-
-                if ((flags & WindowManager.LayoutParams
-                        .FLAG_WATCH_OUTSIDE_TOUCH) != 0) {
-                    //Slog.i(TAG, "Adding to outside target list: " + child);
-                    mOutsideTouchTargets.add(child);
-                }
             }
 
-            // If there's an error window but it's not accepting focus (typically because
-            // it is not yet visible) just wait for it -- any other focused window may in fact
-            // be in ANR state.
-            if (topErrWindow != null && mTouchFocus != topErrWindow) {
-                mTouchFocus = null;
-            }
+            // Send windows to native code.
+            mInputManager.setInputWindows(mTempInputWindows.toNullTerminatedArray());
             
-            // Drop the touch focus if the window is not visible.
-            if (mTouchFocus != null && ! mTouchFocus.isVisibleLw()) {
-                mTouchFocus = null;
-            }
+            // Clear the list in preparation for the next round.
+            // Also avoids keeping InputChannel objects referenced unnecessarily.
+            mTempInputWindows.clear();
+        }
+        
+        /* Notifies that an app switch key (BACK / HOME) has just been pressed.
+         * This essentially starts a .5 second timeout for the application to process
+         * subsequent input events while waiting for the app switch to occur.  If it takes longer
+         * than this, the pending events will be dropped.
+         */
+        public void notifyAppSwitchComing() {
+            // TODO Not implemented yet.  Should go in the native side.
+        }
+
+        /* Provides an opportunity for the window manager policy to intercept early key
+         * processing as soon as the key has been read from the device. */
+        public int interceptKeyBeforeQueueing(int deviceId, int type, int scanCode,
+                int keyCode, int policyFlags, int value, long whenNanos, boolean isScreenOn) {
+            RawInputEvent event = new RawInputEvent();
+            event.deviceId = deviceId;
+            event.type = type;
+            event.scancode = scanCode;
+            event.keycode = keyCode;
+            event.flags = policyFlags;
+            event.value = value;
+            event.when = whenNanos / 1000000;
             
-            // Determine wallpaper targets.
-            if (mTouchFocus != null
-                    && mTouchFocus == mWallpaperTarget
-                    && mTouchFocus.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
-                int curTokenIndex = mWallpaperTokens.size();
-                while (curTokenIndex > 0) {
-                    curTokenIndex--;
-                    WindowToken token = mWallpaperTokens.get(curTokenIndex);
-                    
-                    int curWallpaperIndex = token.windows.size();
-                    while (curWallpaperIndex > 0) {
-                        curWallpaperIndex--;
-                        WindowState wallpaper = token.windows.get(curWallpaperIndex);
-                        if ((wallpaper.mAttrs.flags &
-                                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) == 0) {
-                            mWallpaperTouchTargets.add(wallpaper);
+            return mPolicy.interceptKeyTq(event, isScreenOn);
+        }
+        
+        /* Provides an opportunity for the window manager policy to process a key before
+         * ordinary dispatch. */
+        public boolean interceptKeyBeforeDispatching(InputChannel focus, int keyCode,
+                int metaState, boolean down, int repeatCount, int policyFlags) {
+            WindowState windowState = getWindowStateForInputChannel(focus);
+            return mPolicy.interceptKeyTi(windowState, keyCode, metaState, down, repeatCount,
+                    policyFlags);
+        }
+        
+        /* Called when the current input focus changes.
+         * Layer assignment is assumed to be complete by the time this is called.
+         */
+        public void setInputFocusLw(WindowState newWindow) {
+            if (DEBUG_INPUT) {
+                Slog.d(TAG, "Input focus has changed to " + newWindow);
+            }
+
+            if (newWindow != mInputFocus) {
+                if (newWindow != null && newWindow.canReceiveKeys()) {
+                    // If the new input focus is an error window or appears above the current
+                    // input focus, preempt any pending synchronous dispatch so that we can
+                    // start delivering events to the new input focus as soon as possible.
+                    if ((newWindow.mAttrs.flags & FLAG_SYSTEM_ERROR) != 0) {
+                        if (DEBUG_INPUT) {
+                            Slog.v(TAG, "New SYSTEM_ERROR window; resetting state");
                         }
+                        preemptInputDispatchLw();
+                    } else if (mInputFocus != null && newWindow.mLayer > mInputFocus.mLayer) {
+                        if (DEBUG_INPUT) {
+                            Slog.v(TAG, "Transferring focus to new window at higher layer: "
+                                    + "old win layer=" + mInputFocus.mLayer
+                                    + ", new win layer=" + newWindow.mLayer);
+                        }
+                        preemptInputDispatchLw();
                     }
+                    
+                    // Displaying a window implicitly causes dispatching to be unpaused.
+                    // This is to protect against bugs if someone pauses dispatching but
+                    // forgets to resume.
+                    newWindow.mToken.paused = false;
                 }
-            }
-        }
-    }
-
-    private void updateTouchFocusBeforeNonDownTd(MotionEvent event, int policyFlags) {
-        synchronized (mWindowMap) {
-            // Drop the touch focus if the window is not visible.
-            if (mTouchFocus != null && ! mTouchFocus.isVisibleLw()) {
-                mTouchFocus = null;
-                mWallpaperTouchTargets.clear();
-            }
-        }
-    }
-    
-    private void updateTouchFocusAfterUpTd(MotionEvent event, int policyFlags) {
-        mFatTouch = false;
-        mTouchDown = false;
-        mTouchFocus = null;
-        mOutsideTouchTargets.clear();
-        mWallpaperTouchTargets.clear();
-        
-        mPowerManager.logPointerUpEvent();
-    }
-
-    /* Adds a window to a list of input targets.
-     * Do NOT call this method while holding any locks because the call to
-     * appToken.getKeyDispatchingTimeout() can potentially call into the ActivityManager
-     * and create a deadlock hazard.
-     */
-    private void addInputTargetTd(InputTargetList inputTargets, WindowState window, int flags) {
-        if (window.mInputChannel == null) {
-            return;
-        }
-        
-        long timeoutNanos = -1;
-        IApplicationToken appToken = window.getAppToken();
-
-        if (appToken != null) {
-            try {
-                timeoutNanos = appToken.getKeyDispatchingTimeout() * 1000000;
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Could not get key dispatching timeout.", ex);
+            
+                mInputFocus = newWindow;
+                updateInputWindowsLw();
             }
         }
         
-        inputTargets.add(window.mInputChannel, flags, timeoutNanos,
-                - window.mFrame.left, - window.mFrame.top);
+        public void windowIsBecomingInvisibleLw(WindowState window) {
+            // The window is becoming invisible.  Preempt input dispatch in progress
+            // so that the next window below can receive focus.
+            if (window == mInputFocus) {
+                mInputFocus = null;
+                preemptInputDispatchLw();
+            }
+            
+            updateInputWindowsLw();
+        }
+        
+        /* Tells the dispatcher to stop waiting for its current synchronous event targets.
+         * Essentially, just makes those dispatches asynchronous so a new dispatch cycle
+         * can begin.
+         */
+        private void preemptInputDispatchLw() {
+            mInputManager.preemptInputDispatch();
+        }
+        
+        public void setFocusedAppLw(AppWindowToken newApp) {
+            // Focused app has changed.
+            if (newApp == null) {
+                mInputManager.setFocusedApplication(null);
+            } else {
+                mTempInputApplication.name = newApp.toString();
+                mTempInputApplication.dispatchingTimeoutNanos =
+                        newApp.inputDispatchingTimeoutNanos;
+                mTempInputApplication.token = newApp;
+                
+                mInputManager.setFocusedApplication(mTempInputApplication);
+            }
+        }
+        
+        public void windowIsBeingRemovedLw(WindowState window) {
+            // Window is being removed.
+            updateInputWindowsLw();
+        }
+        
+        public void pauseDispatchingLw(WindowToken window) {
+            if (! window.paused) {
+                if (DEBUG_INPUT) {
+                    Slog.v(TAG, "Pausing WindowToken " + window);
+                }
+                
+                window.paused = true;
+                updateInputWindowsLw();
+            }
+        }
+        
+        public void resumeDispatchingLw(WindowToken window) {
+            if (window.paused) {
+                if (DEBUG_INPUT) {
+                    Slog.v(TAG, "Resuming WindowToken " + window);
+                }
+                
+                window.paused = false;
+                updateInputWindowsLw();
+            }
+        }
+        
+        public void freezeInputDispatchingLw() {
+            if (! mInputDispatchFrozen) {
+                if (DEBUG_INPUT) {
+                    Slog.v(TAG, "Freezing input dispatching");
+                }
+                
+                mInputDispatchFrozen = true;
+                updateInputDispatchModeLw();
+            }
+        }
+        
+        public void thawInputDispatchingLw() {
+            if (mInputDispatchFrozen) {
+                if (DEBUG_INPUT) {
+                    Slog.v(TAG, "Thawing input dispatching");
+                }
+                
+                mInputDispatchFrozen = false;
+                updateInputDispatchModeLw();
+            }
+        }
+        
+        public void setEventDispatchingLw(boolean enabled) {
+            if (mInputDispatchEnabled != enabled) {
+                if (DEBUG_INPUT) {
+                    Slog.v(TAG, "Setting event dispatching to " + enabled);
+                }
+                
+                mInputDispatchEnabled = enabled;
+                updateInputDispatchModeLw();
+            }
+        }
+        
+        private void updateInputDispatchModeLw() {
+            mInputManager.setInputDispatchMode(mInputDispatchEnabled, mInputDispatchFrozen);
+        }
     }
 
     private final void wakeupIfNeeded(WindowState targetWin, int eventType) {
@@ -5580,6 +5547,8 @@ public class WindowManagerService extends IWindowManager.Stub
             return OTHER_EVENT;
         }
     }
+    
+    private boolean mFatTouch; // remove me together with dispatchPointer
 
     /**
      * @return Returns true if event was dispatched, false if it was dropped for any reason
@@ -5981,7 +5950,11 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             WindowToken token = mTokenMap.get(_token);
             if (token != null) {
-                mKeyWaiter.pauseDispatchingLocked(token);
+                if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                    mInputMonitor.pauseDispatchingLw(token);
+                } else {
+                    mKeyWaiter.pauseDispatchingLocked(token);
+                }
             }
         }
     }
@@ -5995,7 +5968,11 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             WindowToken token = mTokenMap.get(_token);
             if (token != null) {
-                mKeyWaiter.resumeDispatchingLocked(token);
+                if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                    mInputMonitor.resumeDispatchingLw(token);
+                } else {
+                    mKeyWaiter.resumeDispatchingLocked(token);
+                }
             }
         }
     }
@@ -6007,7 +5984,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            mKeyWaiter.setEventDispatchingLocked(enabled);
+            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                mInputMonitor.setEventDispatchingLw(enabled);
+            } else {
+                mKeyWaiter.setEventDispatchingLocked(enabled);
+            }
         }
     }
 
@@ -7386,6 +7367,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public void finishKey(IWindow window) {
             if (localLOGV) Slog.v(
                 TAG, "IWindow finishKey called for " + window);
+            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                throw new IllegalStateException("Should not be called anymore.");
+            }
             mKeyWaiter.finishedKey(this, window, false,
                     KeyWaiter.RETURN_NOTHING);
         }
@@ -7393,6 +7377,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public MotionEvent getPendingPointerMove(IWindow window) {
             if (localLOGV) Slog.v(
                     TAG, "IWindow getPendingMotionEvent called for " + window);
+            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                throw new IllegalStateException("Should not be called anymore.");
+            }
             return mKeyWaiter.finishedKey(this, window, false,
                     KeyWaiter.RETURN_PENDING_POINTER);
         }
@@ -7400,6 +7387,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public MotionEvent getPendingTrackballMove(IWindow window) {
             if (localLOGV) Slog.v(
                     TAG, "IWindow getPendingMotionEvent called for " + window);
+            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                throw new IllegalStateException("Should not be called anymore.");
+            }
             return mKeyWaiter.finishedKey(this, window, false,
                     KeyWaiter.RETURN_PENDING_TRACKBALL);
         }
@@ -7946,6 +7936,12 @@ public class WindowManagerService extends IWindowManager.Stub
         public IApplicationToken getAppToken() {
             return mAppToken != null ? mAppToken.appToken : null;
         }
+        
+        public long getInputDispatchingTimeoutNanos() {
+            return mAppToken != null
+                    ? mAppToken.inputDispatchingTimeoutNanos
+                    : DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        }
 
         public boolean hasAppShownWindows() {
             return mAppToken != null ? mAppToken.firstWindowDrawn : false;
@@ -8082,10 +8078,12 @@ public class WindowManagerService extends IWindowManager.Stub
             // Window is no longer on-screen, so can no longer receive
             // key events...  if we were waiting for it to finish
             // handling a key event, the wait is over!
-            mKeyWaiter.finishedKey(mSession, mClient, true,
-                    KeyWaiter.RETURN_NOTHING);
-            mKeyWaiter.releasePendingPointerLocked(mSession);
-            mKeyWaiter.releasePendingTrackballLocked(mSession);
+            if (! ENABLE_NATIVE_INPUT_DISPATCH) {
+                mKeyWaiter.finishedKey(mSession, mClient, true,
+                        KeyWaiter.RETURN_NOTHING);
+                mKeyWaiter.releasePendingPointerLocked(mSession);
+                mKeyWaiter.releasePendingTrackballLocked(mSession);
+            }
 
             if (mAppToken != null && this == mAppToken.startingWindow) {
                 mAppToken.startingDisplayed = false;
@@ -8101,6 +8099,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     i--;
                     WindowState c = (WindowState)mChildWindows.get(i);
                     c.mAttachedHidden = true;
+                    
+                    if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                        mInputMonitor.windowIsBecomingInvisibleLw(c);
+                    }
                 }
 
                 if (mReportDestroySurface) {
@@ -8408,7 +8410,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Error hiding surface in " + this, e);
                 }
                 mLastHidden = true;
-                mKeyWaiter.releasePendingPointerLocked(mSession);
+                
+                if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                    for (int i=0; i<N; i++) {
+                        mInputMonitor.windowIsBecomingInvisibleLw((WindowState)mChildWindows.get(i));
+                    }
+                } else {
+                    mKeyWaiter.releasePendingPointerLocked(mSession);
+                }
             }
             mExiting = false;
             if (mRemoveOnExit) {
@@ -9099,6 +9108,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int groupId = -1;
         boolean appFullscreen;
         int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        
+        // The input dispatching timeout for this application token in nanoseconds.
+        long inputDispatchingTimeoutNanos;
 
         // These are used for determining when all windows associated with
         // an activity have been drawn, so they can be made visible together
@@ -10159,6 +10171,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+        
+        // Window frames may have changed.  Tell the input dispatcher about it.
+        if (ENABLE_NATIVE_INPUT_DISPATCH) {
+            mInputMonitor.updateInputWindowsLw();
+        }
 
         return mPolicy.finishLayoutLw();
     }
@@ -10953,7 +10970,11 @@ public class WindowManagerService extends IWindowManager.Stub
                                     Slog.w(TAG, "Exception hiding surface in " + w);
                                 }
                             }
-                            mKeyWaiter.releasePendingPointerLocked(w.mSession);
+                            if (ENABLE_NATIVE_INPUT_DISPATCH) {
+                                mInputMonitor.windowIsBecomingInvisibleLw(w);
+                            } else {
+                                mKeyWaiter.releasePendingPointerLocked(w.mSession);
+                            }
                         }
                         // If we are waiting for this window to handle an
                         // orientation change, well, it is hidden, so
@@ -11538,13 +11559,25 @@ public class WindowManagerService extends IWindowManager.Stub
                     assignLayersLocked();
                 }
             }
-
-            if (newFocus != null && mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
-                mKeyWaiter.handleNewWindowLocked(newFocus);
+            
+            if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
+                // If we defer assigning layers, then the caller is responsible for
+                // doing this part.
+                finishUpdateFocusedWindowAfterAssignLayersLocked();
             }
             return true;
         }
         return false;
+    }
+    
+    private void finishUpdateFocusedWindowAfterAssignLayersLocked() {
+        if (ENABLE_NATIVE_INPUT_DISPATCH) {
+            mInputMonitor.setInputFocusLw(mCurrentFocus);
+        } else {
+            if (mCurrentFocus != null) {
+                mKeyWaiter.handleNewWindowLocked(mCurrentFocus);
+            }
+        }
     }
 
     private WindowState computeFocusedWindowLocked() {
@@ -11624,8 +11657,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // still frozen, the events will continue to be blocked while the
             // successive orientation change is processed.  To prevent spurious
             // ANRs, we reset the event dispatch timeout in this case.
-            synchronized (mKeyWaiter) {
-                mKeyWaiter.mWasFrozen = true;
+            if (! ENABLE_NATIVE_INPUT_DISPATCH) {
+                synchronized (mKeyWaiter) {
+                    mKeyWaiter.mWasFrozen = true;
+                }
             }
             return;
         }
@@ -11646,6 +11681,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mDisplayFrozen = true;
+        
+        if (ENABLE_NATIVE_INPUT_DISPATCH) {
+            mInputMonitor.freezeInputDispatchingLw();
+        }
+        
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
             mNextAppTransitionPackage = null;
@@ -11677,9 +11717,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Reset the key delivery timeout on unfreeze, too.  We force a wakeup here
         // too because regular key delivery processing should resume immediately.
-        synchronized (mKeyWaiter) {
-            mKeyWaiter.mWasFrozen = true;
-            mKeyWaiter.notifyAll();
+        if (ENABLE_NATIVE_INPUT_DISPATCH) {
+            mInputMonitor.thawInputDispatchingLw();
+        } else {
+            synchronized (mKeyWaiter) {
+                mKeyWaiter.mWasFrozen = true;
+                mKeyWaiter.notifyAll();
+            }
         }
 
         // While the display is frozen we don't re-compute the orientation
@@ -11935,20 +11979,25 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
                     pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
-            pw.println("  KeyWaiter state:");
-            pw.print("    mLastWin="); pw.print(mKeyWaiter.mLastWin);
-                    pw.print(" mLastBinder="); pw.println(mKeyWaiter.mLastBinder);
-            pw.print("    mFinished="); pw.print(mKeyWaiter.mFinished);
-                    pw.print(" mGotFirstWindow="); pw.print(mKeyWaiter.mGotFirstWindow);
-                    pw.print(" mEventDispatching="); pw.print(mKeyWaiter.mEventDispatching);
-                    pw.print(" mTimeToSwitch="); pw.println(mKeyWaiter.mTimeToSwitch);
+
+            if (! ENABLE_NATIVE_INPUT_DISPATCH) {
+                pw.println("  KeyWaiter state:");
+                pw.print("    mLastWin="); pw.print(mKeyWaiter.mLastWin);
+                        pw.print(" mLastBinder="); pw.println(mKeyWaiter.mLastBinder);
+                pw.print("    mFinished="); pw.print(mKeyWaiter.mFinished);
+                        pw.print(" mGotFirstWindow="); pw.print(mKeyWaiter.mGotFirstWindow);
+                        pw.print(" mEventDispatching="); pw.print(mKeyWaiter.mEventDispatching);
+                        pw.print(" mTimeToSwitch="); pw.println(mKeyWaiter.mTimeToSwitch);
+            }
         }
     }
 
+    // Called by the heartbeat to ensure locks are not held indefnitely (for deadlock detection).
     public void monitor() {
         synchronized (mWindowMap) { }
         synchronized (mKeyguardTokenWatcher) { }
         synchronized (mKeyWaiter) { }
+        synchronized (mInputMonitor) { }
     }
 
     public void virtualKeyFeedback(KeyEvent event) {

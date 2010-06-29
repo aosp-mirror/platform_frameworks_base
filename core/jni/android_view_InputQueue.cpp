@@ -19,10 +19,10 @@
 //#define LOG_NDEBUG 0
 
 // Log debug messages about the dispatch cycle.
-#define DEBUG_DISPATCH_CYCLE 1
+#define DEBUG_DISPATCH_CYCLE 0
 
 // Log debug messages about registrations.
-#define DEBUG_REGISTRATION 1
+#define DEBUG_REGISTRATION 0
 
 
 #include "JNIHelp.h"

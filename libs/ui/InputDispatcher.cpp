@@ -8,25 +8,25 @@
 //#define LOG_NDEBUG 0
 
 // Log detailed debug messages about each inbound event notification to the dispatcher.
-#define DEBUG_INBOUND_EVENT_DETAILS 1
+#define DEBUG_INBOUND_EVENT_DETAILS 0
 
 // Log detailed debug messages about each outbound event processed by the dispatcher.
-#define DEBUG_OUTBOUND_EVENT_DETAILS 1
+#define DEBUG_OUTBOUND_EVENT_DETAILS 0
 
 // Log debug messages about batching.
-#define DEBUG_BATCHING 1
+#define DEBUG_BATCHING 0
 
 // Log debug messages about the dispatch cycle.
-#define DEBUG_DISPATCH_CYCLE 1
+#define DEBUG_DISPATCH_CYCLE 0
 
 // Log debug messages about registrations.
-#define DEBUG_REGISTRATION 1
+#define DEBUG_REGISTRATION 0
 
 // Log debug messages about performance statistics.
-#define DEBUG_PERFORMANCE_STATISTICS 1
+#define DEBUG_PERFORMANCE_STATISTICS 0
 
 // Log debug messages about input event injection.
-#define DEBUG_INJECTION 1
+#define DEBUG_INJECTION 0
 
 #include <cutils/log.h>
 #include <ui/InputDispatcher.h>
@@ -249,9 +249,7 @@ void InputDispatcher::processKeyLockedInterruptible(
             entry->downTime);
 #endif
 
-    // TODO: Poke user activity.
-
-    if (entry->action == KEY_EVENT_ACTION_DOWN) {
+    if (entry->action == KEY_EVENT_ACTION_DOWN && ! entry->isInjected()) {
         if (mKeyRepeatState.lastKeyEntry
                 && mKeyRepeatState.lastKeyEntry->keyCode == entry->keyCode) {
             // We have seen two identical key downs in a row which indicates that the device
@@ -277,14 +275,24 @@ void InputDispatcher::processKeyLockedInterruptible(
 
 void InputDispatcher::processKeyRepeatLockedInterruptible(
         nsecs_t currentTime, nsecs_t keyRepeatTimeout) {
-    // TODO Old WindowManagerServer code sniffs the input queue for following key up
-    //      events and drops the repeat if one is found.  We should do something similar.
-    //      One good place to do it is in notifyKey as soon as the key up enters the
-    //      inbound event queue.
+    KeyEntry* entry = mKeyRepeatState.lastKeyEntry;
+
+    // Search the inbound queue for a key up corresponding to this device.
+    // It doesn't make sense to generate a key repeat event if the key is already up.
+    for (EventEntry* queuedEntry = mInboundQueue.head.next;
+            queuedEntry != & mInboundQueue.tail; queuedEntry = entry->next) {
+        if (queuedEntry->type == EventEntry::TYPE_KEY) {
+            KeyEntry* queuedKeyEntry = static_cast<KeyEntry*>(queuedEntry);
+            if (queuedKeyEntry->deviceId == entry->deviceId
+                    && entry->action == KEY_EVENT_ACTION_UP) {
+                resetKeyRepeatLocked();
+                return;
+            }
+        }
+    }
 
     // Synthesize a key repeat after the repeat timeout expired.
-    // We reuse the previous key entry if otherwise unreferenced.
-    KeyEntry* entry = mKeyRepeatState.lastKeyEntry;
+    // Reuse the repeated key entry if it is otherwise unreferenced.
     uint32_t policyFlags = entry->policyFlags & POLICY_FLAG_RAW_MASK;
     if (entry->refCount == 1) {
         entry->eventTime = currentTime;
@@ -366,7 +374,7 @@ void InputDispatcher::identifyInputTargetsAndDispatchKeyLockedInterruptible(
             entry->downTime, entry->eventTime);
 
     mCurrentInputTargets.clear();
-    int32_t injectionResult = mPolicy->getKeyEventTargets(& mReusableKeyEvent,
+    int32_t injectionResult = mPolicy->waitForKeyEventTargets(& mReusableKeyEvent,
             entry->policyFlags, entry->injectorPid, entry->injectorUid,
             mCurrentInputTargets);
 
@@ -375,7 +383,9 @@ void InputDispatcher::identifyInputTargetsAndDispatchKeyLockedInterruptible(
 
     setInjectionResultLocked(entry, injectionResult);
 
-    dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
+    if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED) {
+        dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
+    }
 }
 
 void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
@@ -395,7 +405,7 @@ void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
             entry->firstSample.pointerCoords);
 
     mCurrentInputTargets.clear();
-    int32_t injectionResult = mPolicy->getMotionEventTargets(& mReusableMotionEvent,
+    int32_t injectionResult = mPolicy->waitForMotionEventTargets(& mReusableMotionEvent,
             entry->policyFlags, entry->injectorPid, entry->injectorUid,
             mCurrentInputTargets);
 
@@ -404,7 +414,9 @@ void InputDispatcher::identifyInputTargetsAndDispatchMotionLockedInterruptible(
 
     setInjectionResultLocked(entry, injectionResult);
 
-    dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
+    if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED) {
+        dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
+    }
 }
 
 void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTime,
@@ -514,7 +526,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
                         connection->getInputChannelName());
             } else if (status == status_t(FAILED_TRANSACTION)) {
                 LOGD("channel '%s' ~ Could not append motion sample to currently "
-                        "dispatchedmove event because the event has already been consumed.  "
+                        "dispatched move event because the event has already been consumed.  "
                         "(Waiting for next dispatch cycle to start.)",
                         connection->getInputChannelName());
             } else {
@@ -1253,9 +1265,37 @@ void InputDispatcher::resetKeyRepeatLocked() {
     }
 }
 
+void InputDispatcher::preemptInputDispatch() {
+#if DEBUG_DISPATCH_CYCLE
+    LOGD("preemptInputDispatch");
+#endif
+
+    bool preemptedOne = false;
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        for (size_t i = 0; i < mActiveConnections.size(); i++) {
+            Connection* connection = mActiveConnections[i];
+            if (connection->hasPendingSyncTarget()) {
+#if DEBUG_DISPATCH_CYCLE
+                LOGD("channel '%s' ~ Preempted pending synchronous dispatch",
+                        connection->getInputChannelName());
+#endif
+                connection->outboundQueue.tail.prev->targetFlags &= ~ InputTarget::FLAG_SYNC;
+                preemptedOne = true;
+            }
+        }
+    } // release lock
+
+    if (preemptedOne) {
+        // Wake up the poll loop so it can get a head start dispatching the next event.
+        mPollLoop->wake();
+    }
+}
+
 status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChannel) {
 #if DEBUG_REGISTRATION
-    LOGD("channel '%s' - Registered", inputChannel->getName().string());
+    LOGD("channel '%s' ~ registerInputChannel", inputChannel->getName().string());
 #endif
 
     int receiveFd;
@@ -1288,7 +1328,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
 
 status_t InputDispatcher::unregisterInputChannel(const sp<InputChannel>& inputChannel) {
 #if DEBUG_REGISTRATION
-    LOGD("channel '%s' - Unregistered", inputChannel->getName().string());
+    LOGD("channel '%s' ~ unregisterInputChannel", inputChannel->getName().string());
 #endif
 
     int32_t receiveFd;

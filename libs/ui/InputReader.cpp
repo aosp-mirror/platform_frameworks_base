@@ -11,13 +11,13 @@
 #define DEBUG_RAW_EVENTS 0
 
 // Log debug messages about touch screen filtering hacks.
-#define DEBUG_HACKS 1
+#define DEBUG_HACKS 0
 
 // Log debug messages about virtual key processing.
-#define DEBUG_VIRTUAL_KEYS 1
+#define DEBUG_VIRTUAL_KEYS 0
 
 // Log debug messages about pointers.
-#define DEBUG_POINTERS 1
+#define DEBUG_POINTERS 0
 
 // Log debug messages about pointer assignment calculations.
 #define DEBUG_POINTER_ASSIGNMENT 0
@@ -630,7 +630,8 @@ void InputDevice::TouchScreenState::applyAveragingTouchFilter() {
         int32_t pressure = currentTouch.pointers[currentIndex].pressure;
 
         if (lastTouch.idBits.hasBit(id)) {
-            // Pointer still down compute average.
+            // Pointer was down before and is still down now.
+            // Compute average over history trace.
             uint32_t start = averagingTouchFilter.historyStart[id];
             uint32_t end = averagingTouchFilter.historyEnd[id];
 
@@ -644,11 +645,15 @@ void InputDevice::TouchScreenState::applyAveragingTouchFilter() {
 #endif
 
             if (distance < AVERAGING_DISTANCE_LIMIT) {
+                // Increment end index in preparation for recording new historical data.
                 end += 1;
                 if (end > AVERAGING_HISTORY_SIZE) {
                     end = 0;
                 }
 
+                // If the end index has looped back to the start index then we have filled
+                // the historical trace up to the desired size so we drop the historical
+                // data at the start of the trace.
                 if (end == start) {
                     start += 1;
                     if (start > AVERAGING_HISTORY_SIZE) {
@@ -656,23 +661,25 @@ void InputDevice::TouchScreenState::applyAveragingTouchFilter() {
                     }
                 }
 
+                // Add the raw data to the historical trace.
                 averagingTouchFilter.historyStart[id] = start;
                 averagingTouchFilter.historyEnd[id] = end;
                 averagingTouchFilter.historyData[end].pointers[id].x = x;
                 averagingTouchFilter.historyData[end].pointers[id].y = y;
                 averagingTouchFilter.historyData[end].pointers[id].pressure = pressure;
 
+                // Average over all historical positions in the trace by total pressure.
                 int32_t averagedX = 0;
                 int32_t averagedY = 0;
                 int32_t totalPressure = 0;
                 for (;;) {
                     int32_t historicalX = averagingTouchFilter.historyData[start].pointers[id].x;
-                    int32_t historicalY = averagingTouchFilter.historyData[start].pointers[id].x;
+                    int32_t historicalY = averagingTouchFilter.historyData[start].pointers[id].y;
                     int32_t historicalPressure = averagingTouchFilter.historyData[start]
                             .pointers[id].pressure;
 
-                    averagedX += historicalX;
-                    averagedY += historicalY;
+                    averagedX += historicalX * historicalPressure;
+                    averagedY += historicalY * historicalPressure;
                     totalPressure += historicalPressure;
 
                     if (start == end) {
@@ -1144,12 +1151,6 @@ void InputReader::onMultiTouchScreenStateChanged(nsecs_t when,
 
 void InputReader::onSingleTouchScreenStateChanged(nsecs_t when,
         InputDevice* device) {
-    static const uint32_t POSITION_FIELDS =
-            InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_X
-            | InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_Y
-            | InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_PRESSURE
-            | InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_TOOL_WIDTH;
-
     /* Refresh display properties so we can map touch screen coords into display coords */
 
     if (! refreshDisplayProperties()) {
@@ -1167,10 +1168,19 @@ void InputReader::onSingleTouchScreenStateChanged(nsecs_t when,
         in->current.down = in->accumulator.btnTouch;
     }
 
-    if ((fields & POSITION_FIELDS) == POSITION_FIELDS) {
+    if (fields & InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_X) {
         in->current.x = in->accumulator.absX;
+    }
+
+    if (fields & InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_Y) {
         in->current.y = in->accumulator.absY;
+    }
+
+    if (fields & InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_PRESSURE) {
         in->current.pressure = in->accumulator.absPressure;
+    }
+
+    if (fields & InputDevice::SingleTouchScreenState::Accumulator::FIELD_ABS_TOOL_WIDTH) {
         in->current.size = in->accumulator.absToolWidth;
     }
 
@@ -1323,18 +1333,23 @@ bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
 void InputReader::dispatchVirtualKey(nsecs_t when,
         InputDevice* device, uint32_t policyFlags,
         int32_t keyEventAction, int32_t keyEventFlags) {
+    updateExportedVirtualKeyState();
+
     int32_t keyCode = device->touchScreen.currentVirtualKey.keyCode;
     int32_t scanCode = device->touchScreen.currentVirtualKey.scanCode;
     nsecs_t downTime = device->touchScreen.currentVirtualKey.downTime;
     int32_t metaState = globalMetaState();
 
-    updateExportedVirtualKeyState();
-
     mPolicy->virtualKeyFeedback(when, device->id, keyEventAction, keyEventFlags,
             keyCode, scanCode, metaState, downTime);
 
-    mDispatcher->notifyKey(when, device->id, INPUT_EVENT_NATURE_KEY, policyFlags,
-            keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
+    int32_t policyActions = mPolicy->interceptKey(when, device->id,
+            keyEventAction == KEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
+
+    if (applyStandardInputDispatchPolicyActions(when, policyActions, & policyFlags)) {
+        mDispatcher->notifyKey(when, device->id, INPUT_EVENT_NATURE_KEY, policyFlags,
+                keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
+    }
 }
 
 void InputReader::dispatchTouches(nsecs_t when,
@@ -1607,6 +1622,10 @@ bool InputReader::applyStandardInputDispatchPolicyActions(nsecs_t when,
 
     if (policyActions & InputReaderPolicyInterface::ACTION_BRIGHT_HERE) {
         *policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+    }
+
+    if (policyActions & InputReaderPolicyInterface::ACTION_INTERCEPT_DISPATCH) {
+        *policyFlags |= POLICY_FLAG_INTERCEPT_DISPATCH;
     }
 
     return policyActions & InputReaderPolicyInterface::ACTION_DISPATCH;
