@@ -430,10 +430,12 @@ status_t InputPublisher::appendMotionSample(
             reinterpret_cast<char*>(mSharedMessage);
 
     if (newBytesUsed > mAshmemSize) {
+#if DEBUG_TRANSPORT_ACTIONS
         LOGD("channel '%s' publisher ~ Cannot append motion sample because the shared memory "
                 "buffer is full.  Buffer size: %d bytes, pointers: %d, samples: %d",
                 mChannel->getName().string(),
                 mAshmemSize, mMotionEventPointerCount, mSharedMessage->motion.sampleCount);
+#endif
         return NO_MEMORY;
     }
 
@@ -444,8 +446,10 @@ status_t InputPublisher::appendMotionSample(
             if (errno == EAGAIN) {
                 // Only possible source of contention is the consumer having consumed (or being in the
                 // process of consuming) the message and left the semaphore count at 0.
+#if DEBUG_TRANSPORT_ACTIONS
                 LOGD("channel '%s' publisher ~ Cannot append motion sample because the message has "
                         "already been consumed.", mChannel->getName().string());
+#endif
                 return FAILED_TRANSACTION;
             } else {
                 LOGE("channel '%s' publisher ~ Error %d in sem_trywait.",

@@ -19,14 +19,17 @@
 //#define LOG_NDEBUG 0
 
 // Log debug messages about InputReaderPolicy
-#define DEBUG_INPUT_READER_POLICY 1
+#define DEBUG_INPUT_READER_POLICY 0
 
 // Log debug messages about InputDispatcherPolicy
-#define DEBUG_INPUT_DISPATCHER_POLICY 1
+#define DEBUG_INPUT_DISPATCHER_POLICY 0
 
+// Log debug messages about input focus tracking
+#define DEBUG_FOCUS 0
 
 #include "JNIHelp.h"
 #include "jni.h"
+#include <limits.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <ui/InputReader.h>
 #include <ui/InputDispatcher.h>
@@ -37,9 +40,93 @@
 #include "../../core/jni/android_view_KeyEvent.h"
 #include "../../core/jni/android_view_MotionEvent.h"
 #include "../../core/jni/android_view_InputChannel.h"
-#include "../../core/jni/android_view_InputTarget.h"
 
 namespace android {
+
+// Window flags from WindowManager.LayoutParams
+enum {
+    FLAG_ALLOW_LOCK_WHILE_SCREEN_ON     = 0x00000001,
+    FLAG_DIM_BEHIND        = 0x00000002,
+    FLAG_BLUR_BEHIND        = 0x00000004,
+    FLAG_NOT_FOCUSABLE      = 0x00000008,
+    FLAG_NOT_TOUCHABLE      = 0x00000010,
+    FLAG_NOT_TOUCH_MODAL    = 0x00000020,
+    FLAG_TOUCHABLE_WHEN_WAKING = 0x00000040,
+    FLAG_KEEP_SCREEN_ON     = 0x00000080,
+    FLAG_LAYOUT_IN_SCREEN   = 0x00000100,
+    FLAG_LAYOUT_NO_LIMITS   = 0x00000200,
+    FLAG_FULLSCREEN      = 0x00000400,
+    FLAG_FORCE_NOT_FULLSCREEN   = 0x00000800,
+    FLAG_DITHER             = 0x00001000,
+    FLAG_SECURE             = 0x00002000,
+    FLAG_SCALED             = 0x00004000,
+    FLAG_IGNORE_CHEEK_PRESSES    = 0x00008000,
+    FLAG_LAYOUT_INSET_DECOR = 0x00010000,
+    FLAG_ALT_FOCUSABLE_IM = 0x00020000,
+    FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000,
+    FLAG_SHOW_WHEN_LOCKED = 0x00080000,
+    FLAG_SHOW_WALLPAPER = 0x00100000,
+    FLAG_TURN_SCREEN_ON = 0x00200000,
+    FLAG_DISMISS_KEYGUARD = 0x00400000,
+    FLAG_IMMERSIVE = 0x00800000,
+    FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000,
+    FLAG_COMPATIBLE_WINDOW = 0x20000000,
+    FLAG_SYSTEM_ERROR = 0x40000000,
+};
+
+// Window types from WindowManager.LayoutParams
+enum {
+    FIRST_APPLICATION_WINDOW = 1,
+    TYPE_BASE_APPLICATION   = 1,
+    TYPE_APPLICATION        = 2,
+    TYPE_APPLICATION_STARTING = 3,
+    LAST_APPLICATION_WINDOW = 99,
+    FIRST_SUB_WINDOW        = 1000,
+    TYPE_APPLICATION_PANEL  = FIRST_SUB_WINDOW,
+    TYPE_APPLICATION_MEDIA  = FIRST_SUB_WINDOW+1,
+    TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW+2,
+    TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3,
+    TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4,
+    LAST_SUB_WINDOW         = 1999,
+    FIRST_SYSTEM_WINDOW     = 2000,
+    TYPE_STATUS_BAR         = FIRST_SYSTEM_WINDOW,
+    TYPE_SEARCH_BAR         = FIRST_SYSTEM_WINDOW+1,
+    TYPE_PHONE              = FIRST_SYSTEM_WINDOW+2,
+    TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3,
+    TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4,
+    TYPE_TOAST              = FIRST_SYSTEM_WINDOW+5,
+    TYPE_SYSTEM_OVERLAY     = FIRST_SYSTEM_WINDOW+6,
+    TYPE_PRIORITY_PHONE     = FIRST_SYSTEM_WINDOW+7,
+    TYPE_SYSTEM_DIALOG      = FIRST_SYSTEM_WINDOW+8,
+    TYPE_KEYGUARD_DIALOG    = FIRST_SYSTEM_WINDOW+9,
+    TYPE_SYSTEM_ERROR       = FIRST_SYSTEM_WINDOW+10,
+    TYPE_INPUT_METHOD       = FIRST_SYSTEM_WINDOW+11,
+    TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12,
+    TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13,
+    TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14,
+    LAST_SYSTEM_WINDOW      = 2999,
+};
+
+enum {
+    POWER_MANAGER_OTHER_EVENT = 0,
+    POWER_MANAGER_CHEEK_EVENT = 1,
+    POWER_MANAGER_TOUCH_EVENT = 2, // touch events are TOUCH for 300ms, and then either
+                                   // up events or LONG_TOUCH events.
+    POWER_MANAGER_LONG_TOUCH_EVENT = 3,
+    POWER_MANAGER_TOUCH_UP_EVENT = 4,
+    POWER_MANAGER_BUTTON_EVENT = 5, // Button and trackball events.
+};
+
+// Delay between reporting long touch events to the power manager.
+const nsecs_t EVENT_IGNORE_DURATION = 300 * 1000000LL; // 300 ms
+
+// Default input dispatching timeout if there is no focused application or paused window
+// from which to determine an appropriate dispatching timeout.
+const nsecs_t DEFAULT_INPUT_DISPATCHING_TIMEOUT = 5000 * 1000000LL; // 5 sec
+
+// Minimum amount of time to provide to the input dispatcher for delivery of an event
+// regardless of how long the application window was paused.
+const nsecs_t MIN_INPUT_DISPATCHING_TIMEOUT = 1000 * 1000000LL; // 1 sec
 
 // ----------------------------------------------------------------------------
 
@@ -53,17 +140,18 @@ static struct {
     jmethodID notifyInputChannelBroken;
     jmethodID notifyInputChannelANR;
     jmethodID notifyInputChannelRecoveredFromANR;
+    jmethodID notifyANR;
     jmethodID virtualKeyFeedback;
-    jmethodID hackInterceptKey;
+    jmethodID interceptKeyBeforeQueueing;
+    jmethodID interceptKeyBeforeDispatching;
+    jmethodID checkInjectEventsPermission;
     jmethodID goToSleep;
-    jmethodID pokeUserActivityForKey;
+    jmethodID pokeUserActivity;
     jmethodID notifyAppSwitchComing;
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
     jmethodID getVirtualKeyDefinitions;
     jmethodID getExcludedDeviceNames;
-    jmethodID getKeyEventTargets;
-    jmethodID getMotionEventTargets;
 } gCallbacksClassInfo;
 
 static struct {
@@ -79,9 +167,37 @@ static struct {
 static struct {
     jclass clazz;
 
-    jmethodID ctor;
-    jfieldID mArray;
-} gInputTargetListClassInfo;
+    jfieldID inputChannel;
+    jfieldID layoutParamsFlags;
+    jfieldID layoutParamsType;
+    jfieldID dispatchingTimeoutNanos;
+    jfieldID frameLeft;
+    jfieldID frameTop;
+    jfieldID touchableAreaLeft;
+    jfieldID touchableAreaTop;
+    jfieldID touchableAreaRight;
+    jfieldID touchableAreaBottom;
+    jfieldID visible;
+    jfieldID hasFocus;
+    jfieldID hasWallpaper;
+    jfieldID paused;
+    jfieldID ownerPid;
+    jfieldID ownerUid;
+} gInputWindowClassInfo;
+
+static struct {
+    jclass clazz;
+
+    jfieldID name;
+    jfieldID dispatchingTimeoutNanos;
+    jfieldID token;
+} gInputApplicationClassInfo;
+
+// ----------------------------------------------------------------------------
+
+static inline nsecs_t now() {
+    return systemTime(SYSTEM_TIME_MONOTONIC);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -102,6 +218,11 @@ public:
     status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
             jweak inputChannelObjWeak);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
+
+    void setInputWindows(JNIEnv* env, jobjectArray windowObjArray);
+    void setFocusedApplication(JNIEnv* env, jobject applicationObj);
+    void setInputDispatchMode(bool enabled, bool frozen);
+    void preemptInputDispatch();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -130,16 +251,66 @@ public:
             nsecs_t& outNewTimeout);
     virtual void notifyInputChannelRecoveredFromANR(const sp<InputChannel>& inputChannel);
     virtual nsecs_t getKeyRepeatTimeout();
-    virtual int32_t getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+    virtual int32_t waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
-    virtual int32_t getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+    virtual int32_t waitForMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
 
 private:
+    struct InputWindow {
+        sp<InputChannel> inputChannel;
+        int32_t layoutParamsFlags;
+        int32_t layoutParamsType;
+        nsecs_t dispatchingTimeout;
+        int32_t frameLeft;
+        int32_t frameTop;
+        int32_t touchableAreaLeft;
+        int32_t touchableAreaTop;
+        int32_t touchableAreaRight;
+        int32_t touchableAreaBottom;
+        bool visible;
+        bool hasFocus;
+        bool hasWallpaper;
+        bool paused;
+        int32_t ownerPid;
+        int32_t ownerUid;
+
+        inline bool touchableAreaContainsPoint(int32_t x, int32_t y) {
+            return x >= touchableAreaLeft && x <= touchableAreaRight
+                    && y >= touchableAreaTop && y <= touchableAreaBottom;
+        }
+    };
+
+    struct InputApplication {
+        String8 name;
+        nsecs_t dispatchingTimeout;
+        jweak tokenObjWeak;
+    };
+
+    class ANRTimer {
+        enum Budget {
+            SYSTEM = 0,
+            APPLICATION = 1
+        };
+
+        Budget mBudget;
+        nsecs_t mStartTime;
+        bool mFrozen;
+        InputWindow* mPausedWindow;
+
+    public:
+        ANRTimer();
+
+        void dispatchFrozenBySystem();
+        void dispatchPausedByApplication(InputWindow* pausedWindow);
+        bool waitForDispatchStateChangeLd(NativeInputManager* inputManager);
+
+        nsecs_t getTimeSpentWaitingForApplication() const;
+    };
+
     sp<InputManager> mInputManager;
 
     jobject mCallbacksObj;
-    jobject mReusableInputTargetListObj;
 
     // Cached filtering policies.
     int32_t mFilterTouchEvents;
@@ -160,29 +331,77 @@ private:
 
     jobject getInputChannelObjLocal(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
+    // Input target and focus tracking.  (lock mDispatchLock)
+    Mutex mDispatchLock;
+    Condition mDispatchStateChanged;
+
+    bool mDispatchEnabled;
+    bool mDispatchFrozen;
+    bool mWindowsReady;
+    Vector<InputWindow> mWindows;
+    Vector<InputWindow*> mWallpaperWindows;
+
+    // Focus tracking for keys, trackball, etc.
+    InputWindow* mFocusedWindow;
+
+    // Focus tracking for touch.
+    bool mTouchDown;
+    InputWindow* mTouchedWindow;                   // primary target for current down
+    Vector<InputWindow*> mTouchedWallpaperWindows; // wallpaper targets
+
+    Vector<InputWindow*> mTempTouchedOutsideWindows; // temporary outside touch targets
+    Vector<sp<InputChannel> > mTempTouchedWallpaperChannels; // temporary wallpaper targets
+
+    // Focused application.
+    InputApplication* mFocusedApplication;
+    InputApplication mFocusedApplicationStorage; // preallocated storage for mFocusedApplication
+
+    void dumpDispatchStateLd();
+
+    bool notifyANR(jobject tokenObj, nsecs_t& outNewTimeout);
+    void releaseFocusedApplicationLd(JNIEnv* env);
+
+    int32_t waitForFocusedWindowLd(uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
+            Vector<InputTarget>& outTargets, InputWindow*& outFocusedWindow);
+    int32_t waitForTouchedWindowLd(MotionEvent* motionEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid,
+            Vector<InputTarget>& outTargets, InputWindow*& outTouchedWindow);
+
+    void releaseTouchedWindowLd();
+
+    int32_t identifyTrackballEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
+    int32_t identifyTouchEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+            int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
+
+    void pokeUserActivityIfNeeded(int32_t windowType, int32_t eventType);
+    void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
+    bool checkInjectionPermission(const InputWindow* window,
+            int32_t injectorPid, int32_t injectorUid);
+
+    static bool populateWindow(JNIEnv* env, jobject windowObj, InputWindow& outWindow);
+    static void addTarget(const InputWindow* window, int32_t targetFlags,
+            nsecs_t timeSpentWaitingForApplication, Vector<InputTarget>& outTargets);
+
     static inline JNIEnv* jniEnv() {
         return AndroidRuntime::getJNIEnv();
     }
 
     static bool isAppSwitchKey(int32_t keyCode);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
-    static void populateInputTargets(JNIEnv* env, jobject inputTargetListObj,
-            Vector<InputTarget>& outTargets);
 };
 
 // ----------------------------------------------------------------------------
 
 NativeInputManager::NativeInputManager(jobject callbacksObj) :
     mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1),
-    mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(-1) {
+    mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(-1),
+    mDispatchEnabled(true), mDispatchFrozen(false), mWindowsReady(true),
+    mFocusedWindow(NULL), mTouchDown(false), mTouchedWindow(NULL),
+    mFocusedApplication(NULL) {
     JNIEnv* env = jniEnv();
 
     mCallbacksObj = env->NewGlobalRef(callbacksObj);
-
-    jobject inputTargetListObj = env->NewObject(gInputTargetListClassInfo.clazz,
-            gInputTargetListClassInfo.ctor);
-    mReusableInputTargetListObj = env->NewGlobalRef(inputTargetListObj);
-    env->DeleteLocalRef(inputTargetListObj);
 
     sp<EventHub> eventHub = new EventHub();
     mInputManager = new InputManager(eventHub, this, this);
@@ -192,7 +411,8 @@ NativeInputManager::~NativeInputManager() {
     JNIEnv* env = jniEnv();
 
     env->DeleteGlobalRef(mCallbacksObj);
-    env->DeleteGlobalRef(mReusableInputTargetListObj);
+
+    releaseFocusedApplicationLd(env);
 }
 
 bool NativeInputManager::isAppSwitchKey(int32_t keyCode) {
@@ -362,7 +582,7 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
         int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags) {
 #if DEBUG_INPUT_READER_POLICY
     LOGD("interceptKey - when=%lld, deviceId=%d, down=%d, keyCode=%d, scanCode=%d, "
-            "policyFlags=%d",
+            "policyFlags=0x%x",
             when, deviceId, down, keyCode, scanCode, policyFlags);
 #endif
 
@@ -375,9 +595,10 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     bool isScreenOn = this->isScreenOn();
     bool isScreenBright = this->isScreenBright();
 
-    jint wmActions = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.hackInterceptKey,
+    jint wmActions = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.interceptKeyBeforeQueueing,
             deviceId, EV_KEY, scanCode, keyCode, policyFlags, down ? 1 : 0, when, isScreenOn);
-    if (checkAndClearExceptionFromCallback(env, "hackInterceptKey")) {
+    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
         wmActions = 0;
     }
 
@@ -398,8 +619,7 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     }
 
     if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
-        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.pokeUserActivityForKey, when);
-        checkAndClearExceptionFromCallback(env, "pokeUserActivityForKey");
+        pokeUserActivity(when, POWER_MANAGER_BUTTON_EVENT);
     }
 
     if (wmActions & WM_ACTION_PASS_TO_USER) {
@@ -412,6 +632,9 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
             actions |= InputReaderPolicyInterface::ACTION_APP_SWITCH_COMING;
         }
     }
+
+    // TODO Be smarter about which keys cause us to request interception during dispatch.
+    actions |= InputReaderPolicyInterface::ACTION_INTERCEPT_DISPATCH;
     return actions;
 }
 
@@ -423,12 +646,13 @@ int32_t NativeInputManager::interceptTouch(nsecs_t when) {
     int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
     if (isScreenOn()) {
         // Only dispatch touch events when the device is awake.
+        // Do not wake the device.
         actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
-    }
 
-    if (! isScreenBright()) {
-        // Brighten the screen if dimmed.
-        actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+        if (! isScreenBright()) {
+            // Brighten the screen if dimmed.
+            actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+        }
     }
 
     return actions;
@@ -444,12 +668,13 @@ int32_t NativeInputManager::interceptTrackball(nsecs_t when,
     int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
     if (isScreenOn()) {
         // Only dispatch trackball events when the device is awake.
+        // Do not wake the device.
         actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
-    }
 
-    if (! isScreenBright()) {
-        // Brighten the screen if dimmed.
-        actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+        if (! isScreenBright()) {
+            // Brighten the screen if dimmed.
+            actions |= InputReaderPolicyInterface::ACTION_BRIGHT_HERE;
+        }
     }
 
     return actions;
@@ -639,6 +864,27 @@ void NativeInputManager::notifyInputChannelRecoveredFromANR(const sp<InputChanne
     }
 }
 
+bool NativeInputManager::notifyANR(jobject tokenObj, nsecs_t& outNewTimeout) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifyANR");
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    jlong newTimeout = env->CallLongMethod(mCallbacksObj,
+            gCallbacksClassInfo.notifyANR, tokenObj);
+    if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
+        newTimeout = -2;
+    }
+
+    if (newTimeout == -2) {
+        return false; // abort
+    }
+
+    outNewTimeout = newTimeout;
+    return true; // resume
+}
+
 nsecs_t NativeInputManager::getKeyRepeatTimeout() {
     if (! isScreenOn()) {
         // Disable key repeat when the screen is off.
@@ -649,85 +895,898 @@ nsecs_t NativeInputManager::getKeyRepeatTimeout() {
     }
 }
 
-int32_t NativeInputManager::getKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
-        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("getKeyEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
-            policyFlags, injectorPid, injectorUid);
+void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArray) {
+#if DEBUG_FOCUS
+    LOGD("setInputWindows");
+#endif
+    { // acquire lock
+        AutoMutex _l(mDispatchLock);
+
+        sp<InputChannel> touchedWindowChannel;
+        if (mTouchedWindow) {
+            touchedWindowChannel = mTouchedWindow->inputChannel;
+            mTouchedWindow = NULL;
+        }
+        size_t numTouchedWallpapers = mTouchedWallpaperWindows.size();
+        if (numTouchedWallpapers != 0) {
+            for (size_t i = 0; i < numTouchedWallpapers; i++) {
+                mTempTouchedWallpaperChannels.push(mTouchedWallpaperWindows[i]->inputChannel);
+            }
+            mTouchedWallpaperWindows.clear();
+        }
+
+        mWindows.clear();
+        mFocusedWindow = NULL;
+        mWallpaperWindows.clear();
+
+        if (windowObjArray) {
+            mWindowsReady = true;
+
+            jsize length = env->GetArrayLength(windowObjArray);
+            for (jsize i = 0; i < length; i++) {
+                jobject inputTargetObj = env->GetObjectArrayElement(windowObjArray, i);
+                if (! inputTargetObj) {
+                    break; // found null element indicating end of used portion of the array
+                }
+
+                mWindows.push();
+                InputWindow& window = mWindows.editTop();
+                bool valid = populateWindow(env, inputTargetObj, window);
+                if (! valid) {
+                    mWindows.pop();
+                }
+
+                env->DeleteLocalRef(inputTargetObj);
+            }
+
+            size_t numWindows = mWindows.size();
+            for (size_t i = 0; i < numWindows; i++) {
+                InputWindow* window = & mWindows.editItemAt(i);
+                if (window->hasFocus) {
+                    mFocusedWindow = window;
+                }
+
+                if (window->layoutParamsType == TYPE_WALLPAPER) {
+                    mWallpaperWindows.push(window);
+
+                    for (size_t j = 0; j < numTouchedWallpapers; j++) {
+                        if (window->inputChannel == mTempTouchedWallpaperChannels[i]) {
+                            mTouchedWallpaperWindows.push(window);
+                        }
+                    }
+                }
+
+                if (window->inputChannel == touchedWindowChannel) {
+                    mTouchedWindow = window;
+                }
+            }
+        } else {
+            mWindowsReady = false;
+        }
+
+        mTempTouchedWallpaperChannels.clear();
+
+        mDispatchStateChanged.broadcast();
+
+#if DEBUG_FOCUS
+        dumpDispatchStateLd();
+#endif
+    } // release lock
+}
+
+bool NativeInputManager::populateWindow(JNIEnv* env, jobject windowObj,
+        InputWindow& outWindow) {
+    bool valid = false;
+
+    jobject inputChannelObj = env->GetObjectField(windowObj,
+            gInputWindowClassInfo.inputChannel);
+    if (inputChannelObj) {
+        sp<InputChannel> inputChannel =
+                android_view_InputChannel_getInputChannel(env, inputChannelObj);
+        if (inputChannel != NULL) {
+            jint layoutParamsFlags = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.layoutParamsFlags);
+            jint layoutParamsType = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.layoutParamsType);
+            jlong dispatchingTimeoutNanos = env->GetLongField(windowObj,
+                    gInputWindowClassInfo.dispatchingTimeoutNanos);
+            jint frameLeft = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.frameLeft);
+            jint frameTop = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.frameTop);
+            jint touchableAreaLeft = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.touchableAreaLeft);
+            jint touchableAreaTop = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.touchableAreaTop);
+            jint touchableAreaRight = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.touchableAreaRight);
+            jint touchableAreaBottom = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.touchableAreaBottom);
+            jboolean visible = env->GetBooleanField(windowObj,
+                    gInputWindowClassInfo.visible);
+            jboolean hasFocus = env->GetBooleanField(windowObj,
+                    gInputWindowClassInfo.hasFocus);
+            jboolean hasWallpaper = env->GetBooleanField(windowObj,
+                    gInputWindowClassInfo.hasWallpaper);
+            jboolean paused = env->GetBooleanField(windowObj,
+                    gInputWindowClassInfo.paused);
+            jint ownerPid = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.ownerPid);
+            jint ownerUid = env->GetIntField(windowObj,
+                    gInputWindowClassInfo.ownerUid);
+
+            outWindow.inputChannel = inputChannel;
+            outWindow.layoutParamsFlags = layoutParamsFlags;
+            outWindow.layoutParamsType = layoutParamsType;
+            outWindow.dispatchingTimeout = dispatchingTimeoutNanos;
+            outWindow.frameLeft = frameLeft;
+            outWindow.frameTop = frameTop;
+            outWindow.touchableAreaLeft = touchableAreaLeft;
+            outWindow.touchableAreaTop = touchableAreaTop;
+            outWindow.touchableAreaRight = touchableAreaRight;
+            outWindow.touchableAreaBottom = touchableAreaBottom;
+            outWindow.visible = visible;
+            outWindow.hasFocus = hasFocus;
+            outWindow.hasWallpaper = hasWallpaper;
+            outWindow.paused = paused;
+            outWindow.ownerPid = ownerPid;
+            outWindow.ownerUid = ownerUid;
+            valid = true;
+        } else {
+            LOGW("Dropping input target because its input channel is not initialized.");
+        }
+
+        env->DeleteLocalRef(inputChannelObj);
+    } else {
+        LOGW("Dropping input target because the input channel object was null.");
+    }
+    return valid;
+}
+
+void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationObj) {
+#if DEBUG_FOCUS
+    LOGD("setFocusedApplication");
+#endif
+    { // acquire lock
+        AutoMutex _l(mDispatchLock);
+
+        releaseFocusedApplicationLd(env);
+
+        if (applicationObj) {
+            jstring nameObj = jstring(env->GetObjectField(applicationObj,
+                    gInputApplicationClassInfo.name));
+            jlong dispatchingTimeoutNanos = env->GetLongField(applicationObj,
+                    gInputApplicationClassInfo.dispatchingTimeoutNanos);
+            jobject tokenObj = env->GetObjectField(applicationObj,
+                    gInputApplicationClassInfo.token);
+            jweak tokenObjWeak = env->NewWeakGlobalRef(tokenObj);
+            if (! tokenObjWeak) {
+                LOGE("Could not create weak reference for application token.");
+                LOGE_EX(env);
+                env->ExceptionClear();
+            }
+            env->DeleteLocalRef(tokenObj);
+
+            mFocusedApplication = & mFocusedApplicationStorage;
+
+            if (nameObj) {
+                const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
+                mFocusedApplication->name.setTo(nameStr);
+                env->ReleaseStringUTFChars(nameObj, nameStr);
+                env->DeleteLocalRef(nameObj);
+            } else {
+                LOGE("InputApplication.name should not be null.");
+                mFocusedApplication->name.setTo("unknown");
+            }
+
+            mFocusedApplication->dispatchingTimeout = dispatchingTimeoutNanos;
+            mFocusedApplication->tokenObjWeak = tokenObjWeak;
+        }
+
+        mDispatchStateChanged.broadcast();
+
+#if DEBUG_FOCUS
+        dumpDispatchStateLd();
+#endif
+    } // release lock
+}
+
+void NativeInputManager::releaseFocusedApplicationLd(JNIEnv* env) {
+    if (mFocusedApplication) {
+        env->DeleteWeakGlobalRef(mFocusedApplication->tokenObjWeak);
+        mFocusedApplication = NULL;
+    }
+}
+
+void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
+#if DEBUG_FOCUS
+    LOGD("setInputDispatchMode: enabled=%d, frozen=%d", enabled, frozen);
 #endif
 
-    JNIEnv* env = jniEnv();
+    { // acquire lock
+        AutoMutex _l(mDispatchLock);
 
-    jint injectionResult;
-    jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
-    if (! keyEventObj) {
-        LOGE("Could not obtain DVM KeyEvent object to get key event targets.");
-        injectionResult = INPUT_EVENT_INJECTION_FAILED;
-    } else {
-        jint injectionResult = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.getKeyEventTargets, mReusableInputTargetListObj,
-                keyEventObj, jint(keyEvent->getNature()), jint(policyFlags),
-                jint(injectorPid), jint(injectorUid));
-        if (checkAndClearExceptionFromCallback(env, "getKeyEventTargets")) {
-            injectionResult = INPUT_EVENT_INJECTION_FAILED;
-        } else {
-            populateInputTargets(env, mReusableInputTargetListObj, outTargets);
+        if (mDispatchEnabled != enabled || mDispatchFrozen != frozen) {
+            mDispatchEnabled = enabled;
+            mDispatchFrozen = frozen;
+
+            mDispatchStateChanged.broadcast();
         }
-        env->DeleteLocalRef(keyEventObj);
+
+#if DEBUG_FOCUS
+        dumpDispatchStateLd();
+#endif
+    } // release lock
+}
+
+void NativeInputManager::preemptInputDispatch() {
+#if DEBUG_FOCUS
+    LOGD("preemptInputDispatch");
+#endif
+
+    mInputManager->preemptInputDispatch();
+}
+
+int32_t NativeInputManager::waitForFocusedWindowLd(uint32_t policyFlags,
+        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets,
+        InputWindow*& outFocusedWindow) {
+
+    int32_t injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
+    bool firstIteration = true;
+    ANRTimer anrTimer;
+    for (;;) {
+        if (firstIteration) {
+            firstIteration = false;
+        } else {
+            if (! anrTimer.waitForDispatchStateChangeLd(this)) {
+                LOGW("Dropping event because the dispatcher timed out waiting to identify "
+                        "the window that should receive it.");
+                injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
+                break;
+            }
+        }
+
+        // If dispatch is not enabled then fail.
+        if (! mDispatchEnabled) {
+            LOGI("Dropping event because input dispatch is disabled.");
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+            break;
+        }
+
+        // If dispatch is frozen or we don't have valid window data yet then wait.
+        if (mDispatchFrozen || ! mWindowsReady) {
+#if DEBUG_FOCUS
+            LOGD("Waiting because dispatch is frozen or windows are not ready.");
+#endif
+            anrTimer.dispatchFrozenBySystem();
+            continue;
+        }
+
+        // If there is no currently focused window and no focused application
+        // then drop the event.
+        if (! mFocusedWindow) {
+            if (mFocusedApplication) {
+#if DEBUG_FOCUS
+                LOGD("Waiting because there is no focused window but there is a "
+                        "focused application that may yet introduce a new target: '%s'.",
+                        mFocusedApplication->name.string());
+#endif
+                continue;
+            }
+
+            LOGI("Dropping event because there is no focused window or focused application.");
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+            break;
+        }
+
+        // Check permissions.
+        if (! checkInjectionPermission(mFocusedWindow, injectorPid, injectorUid)) {
+            injectionResult = INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+            break;
+        }
+
+        // If the currently focused window is paused then keep waiting.
+        if (mFocusedWindow->paused) {
+#if DEBUG_FOCUS
+            LOGD("Waiting because focused window is paused.");
+#endif
+            anrTimer.dispatchPausedByApplication(mFocusedWindow);
+            continue;
+        }
+
+        // Success!
+        break; // done waiting, exit loop
     }
+
+    // Output targets.
+    if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED) {
+        addTarget(mFocusedWindow, InputTarget::FLAG_SYNC,
+                anrTimer.getTimeSpentWaitingForApplication(), outTargets);
+
+        outFocusedWindow = mFocusedWindow;
+    } else {
+        outFocusedWindow = NULL;
+    }
+
+#if DEBUG_FOCUS
+    LOGD("waitForFocusedWindow finished: injectionResult=%d",
+            injectionResult);
+    dumpDispatchStateLd();
+#endif
     return injectionResult;
 }
 
-int32_t NativeInputManager::getMotionEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
-        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("getMotionEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
-            policyFlags, injectorPid, injectorUid);
-#endif
+int32_t NativeInputManager::waitForTouchedWindowLd(MotionEvent* motionEvent, uint32_t policyFlags,
+        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets,
+        InputWindow*& outTouchedWindow) {
+    nsecs_t startTime = now();
 
-    JNIEnv* env = jniEnv();
+    int32_t injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
+    int32_t action = motionEvent->getAction();
 
-    jint injectionResult;
-    jobject motionEventObj = android_view_MotionEvent_fromNative(env, motionEvent);
-    if (! motionEventObj) {
-        LOGE("Could not obtain DVM MotionEvent object to get key event targets.");
-        injectionResult = INPUT_EVENT_INJECTION_FAILED;
-    } else {
-        jint injectionResult = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.getMotionEventTargets, mReusableInputTargetListObj,
-                motionEventObj, jint(motionEvent->getNature()), jint(policyFlags),
-                jint(injectorPid), jint(injectorUid));
-        if (checkAndClearExceptionFromCallback(env, "getMotionEventTargets")) {
-            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+    // For security reasons, we defer updating the touch state until we are sure that
+    // event injection will be allowed.
+    //
+    // FIXME In the original code, screenWasOff could never be set to true.
+    //       The reason is that the POLICY_FLAG_WOKE_HERE
+    //       and POLICY_FLAG_BRIGHT_HERE flags were set only when preprocessing raw
+    //       EV_KEY, EV_REL and EV_ABS events.  As it happens, the touch event was
+    //       actually enqueued using the policyFlags that appeared in the final EV_SYN
+    //       events upon which no preprocessing took place.  So policyFlags was always 0.
+    //       In the new native input dispatcher we're a bit more careful about event
+    //       preprocessing so the touches we receive can actually have non-zero policyFlags.
+    //       Unfortunately we obtain undesirable behavior.
+    //
+    //       Here's what happens:
+    //
+    //       When the device dims in anticipation of going to sleep, touches
+    //       in windows which have FLAG_TOUCHABLE_WHEN_WAKING cause
+    //       the device to brighten and reset the user activity timer.
+    //       Touches on other windows (such as the launcher window)
+    //       are dropped.  Then after a moment, the device goes to sleep.  Oops.
+    //
+    //       Also notice how screenWasOff was being initialized using POLICY_FLAG_BRIGHT_HERE
+    //       instead of POLICY_FLAG_WOKE_HERE...
+    //
+    bool screenWasOff = false; // original policy: policyFlags & POLICY_FLAG_BRIGHT_HERE;
+    bool firstIteration = true;
+    ANRTimer anrTimer;
+    for (;;) {
+        if (firstIteration) {
+            firstIteration = false;
         } else {
-            populateInputTargets(env, mReusableInputTargetListObj, outTargets);
+            if (! anrTimer.waitForDispatchStateChangeLd(this)) {
+                LOGW("Dropping event because the dispatcher timed out waiting to identify "
+                        "the window that should receive it.");
+                injectionResult = INPUT_EVENT_INJECTION_TIMED_OUT;
+                break;
+            }
         }
-        android_view_MotionEvent_recycle(env, motionEventObj);
-        env->DeleteLocalRef(motionEventObj);
+
+        // If dispatch is not enabled then fail.
+        if (! mDispatchEnabled) {
+            LOGI("Dropping event because input dispatch is disabled.");
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+            break; // failed, exit wait loop
+        }
+
+        // If dispatch is frozen or we don't have valid window data yet then wait.
+        if (mDispatchFrozen || ! mWindowsReady) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+            LOGD("Waiting because dispatch is frozen or windows are not ready.");
+#endif
+            anrTimer.dispatchFrozenBySystem();
+            continue;
+        }
+
+        // Update the touch state as needed based on the properties of the touch event.
+        if (action == MOTION_EVENT_ACTION_DOWN) {
+            InputWindow* newTouchedWindow = NULL;
+            mTempTouchedOutsideWindows.clear();
+
+            int32_t x = int32_t(motionEvent->getX(0));
+            int32_t y = int32_t(motionEvent->getY(0));
+            InputWindow* topErrorWindow = NULL;
+
+            // Traverse windows from front to back to find touched window and outside targets.
+            size_t numWindows = mWindows.size();
+            for (size_t i = 0; i < numWindows; i++) {
+                InputWindow* window = & mWindows.editItemAt(i);
+                int32_t flags = window->layoutParamsFlags;
+
+                if (flags & FLAG_SYSTEM_ERROR) {
+                    if (! topErrorWindow) {
+                        topErrorWindow = window;
+                    }
+                }
+
+                if (window->visible) {
+                    if (! (flags & FLAG_NOT_TOUCHABLE)) {
+                        bool isTouchModal = (flags &
+                                (FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL)) == 0;
+                        if (isTouchModal || window->touchableAreaContainsPoint(x, y)) {
+                            if (! screenWasOff || flags & FLAG_TOUCHABLE_WHEN_WAKING) {
+                                newTouchedWindow = window;
+                            }
+                            break; // found touched window, exit window loop
+                        }
+                    }
+
+                    if (flags & FLAG_WATCH_OUTSIDE_TOUCH) {
+                        mTempTouchedOutsideWindows.push(window);
+                    }
+                }
+            }
+
+            // If there is an error window but it is not taking focus (typically because
+            // it is invisible) then wait for it.  Any other focused window may in
+            // fact be in ANR state.
+            if (topErrorWindow && newTouchedWindow != topErrorWindow) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+                LOGD("Waiting because system error window is pending.");
+#endif
+                anrTimer.dispatchFrozenBySystem();
+                continue; // wait some more
+            }
+
+            // If we did not find a touched window then fail.
+            if (! newTouchedWindow) {
+                if (mFocusedApplication) {
+#if DEBUG_FOCUS
+                    LOGD("Waiting because there is no focused window but there is a "
+                            "focused application that may yet introduce a new target: '%s'.",
+                            mFocusedApplication->name.string());
+#endif
+                    continue;
+                }
+
+                LOGI("Dropping event because there is no touched window or focused application.");
+                injectionResult = INPUT_EVENT_INJECTION_FAILED;
+                break; // failed, exit wait loop
+            }
+
+            // Check permissions.
+            if (! checkInjectionPermission(newTouchedWindow, injectorPid, injectorUid)) {
+                injectionResult = INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+                break; // failed, exit wait loop
+            }
+
+            // If the touched window is paused then keep waiting.
+            if (newTouchedWindow->paused) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+                LOGD("Waiting because touched window is paused.");
+#endif
+                anrTimer.dispatchPausedByApplication(newTouchedWindow);
+                continue; // wait some more
+            }
+
+            // Success!  Update the touch dispatch state for real.
+            releaseTouchedWindowLd();
+
+            mTouchedWindow = newTouchedWindow;
+
+            if (newTouchedWindow->hasWallpaper) {
+                mTouchedWallpaperWindows.appendVector(mWallpaperWindows);
+            }
+            break; // done
+        } else {
+            // Check permissions.
+            if (! checkInjectionPermission(mTouchedWindow, injectorPid, injectorUid)) {
+                injectionResult = INPUT_EVENT_INJECTION_PERMISSION_DENIED;
+                break; // failed, exit wait loop
+            }
+
+            // If there is no currently touched window then fail.
+            if (! mTouchedWindow || ! mTouchDown) {
+                LOGI("Dropping event because touched window is no longer valid.");
+                injectionResult = INPUT_EVENT_INJECTION_FAILED;
+                break; // failed, exit wait loop
+            }
+
+            // If the touched window is paused then keep waiting.
+            if (mTouchedWindow->paused) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+                LOGD("Waiting because touched window is paused.");
+#endif
+                anrTimer.dispatchPausedByApplication(mTouchedWindow);
+                continue; // wait some more
+            }
+
+            // Success!
+            break; // done
+        }
     }
+
+    // Output targets.
+    bool havePermission;
+    if (injectionResult == INPUT_EVENT_INJECTION_SUCCEEDED) {
+        // Injection succeeded so the injector must have permission.
+        havePermission = true;
+
+        size_t numWallpaperWindows = mTouchedWallpaperWindows.size();
+        for (size_t i = 0; i < numWallpaperWindows; i++) {
+            addTarget(mTouchedWallpaperWindows[i], 0, 0, outTargets);
+        }
+
+        size_t numOutsideWindows = mTempTouchedOutsideWindows.size();
+        for (size_t i = 0; i < numOutsideWindows; i++) {
+            addTarget(mTempTouchedOutsideWindows[i], InputTarget::FLAG_OUTSIDE, 0, outTargets);
+        }
+
+        addTarget(mTouchedWindow, InputTarget::FLAG_SYNC,
+                anrTimer.getTimeSpentWaitingForApplication(), outTargets);
+        outTouchedWindow = mTouchedWindow;
+    } else {
+        if (injectionResult != INPUT_EVENT_INJECTION_PERMISSION_DENIED
+                && checkInjectionPermission(NULL, injectorPid, injectorUid)) {
+            // Injection failed but the injector does have permission to inject events.
+            // While we might not have found a valid target for the injected event, we
+            // still want to update the dispatch state to take it into account.
+            havePermission = true;
+        } else {
+            // Injector does not have permission to inject events.
+            // We make sure to leave the dispatch state unchanged.
+            havePermission = false;
+        }
+        outTouchedWindow = NULL;
+    }
+    mTempTouchedOutsideWindows.clear();
+
+    // Update final pieces of touch state now that we know for sure whether the injector
+    // had permission to perform the injection.
+    if (havePermission) {
+        if (action == MOTION_EVENT_ACTION_DOWN) {
+            if (mTouchDown) {
+                // This is weird.  We got a down but we thought it was already down!
+                LOGW("Pointer down received while already down.");
+            } else {
+                mTouchDown = true;
+            }
+
+            if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
+                // Since we failed to identify a target for this touch down, we may still
+                // be holding on to an earlier target from a previous touch down.  Release it.
+                releaseTouchedWindowLd();
+            }
+        } else if (action == MOTION_EVENT_ACTION_UP) {
+            mTouchDown = false;
+            releaseTouchedWindowLd();
+        }
+    }
+
+#if DEBUG_FOCUS
+    LOGD("waitForTouchedWindow finished: injectionResult=%d",
+            injectionResult);
+    dumpDispatchStateLd();
+#endif
     return injectionResult;
 }
 
-void NativeInputManager::populateInputTargets(JNIEnv* env, jobject inputTargetListObj,
+void NativeInputManager::releaseTouchedWindowLd() {
+    mTouchedWindow = NULL;
+    mTouchedWallpaperWindows.clear();
+}
+
+void NativeInputManager::addTarget(const InputWindow* window, int32_t targetFlags,
+        nsecs_t timeSpentWaitingForApplication, Vector<InputTarget>& outTargets) {
+    nsecs_t timeout = window->dispatchingTimeout - timeSpentWaitingForApplication;
+    if (timeout < MIN_INPUT_DISPATCHING_TIMEOUT) {
+        timeout = MIN_INPUT_DISPATCHING_TIMEOUT;
+    }
+
+    outTargets.push();
+
+    InputTarget& target = outTargets.editTop();
+    target.inputChannel = window->inputChannel;
+    target.flags = targetFlags;
+    target.timeout = timeout;
+    target.xOffset = - window->frameLeft;
+    target.yOffset = - window->frameTop;
+}
+
+bool NativeInputManager::checkInjectionPermission(const InputWindow* window,
+        int32_t injectorPid, int32_t injectorUid) {
+    if (injectorUid > 0 && (window == NULL || window->ownerUid != injectorUid)) {
+        JNIEnv* env = jniEnv();
+        jboolean result = env->CallBooleanMethod(mCallbacksObj,
+                gCallbacksClassInfo.checkInjectEventsPermission, injectorPid, injectorUid);
+        checkAndClearExceptionFromCallback(env, "checkInjectEventsPermission");
+
+        if (! result) {
+            if (window) {
+                LOGW("Permission denied: injecting event from pid %d uid %d to window "
+                        "with input channel %s owned by uid %d",
+                        injectorPid, injectorUid, window->inputChannel->getName().string(),
+                        window->ownerUid);
+            } else {
+                LOGW("Permission denied: injecting event from pid %d uid %d",
+                        injectorPid, injectorUid);
+            }
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int32_t NativeInputManager::waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t policyFlags,
+        int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("waitForKeyEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+            policyFlags, injectorPid, injectorUid);
+#endif
+
+    int32_t windowType;
+    { // acquire lock
+        AutoMutex _l(mDispatchLock);
+
+        InputWindow* focusedWindow;
+        int32_t injectionResult = waitForFocusedWindowLd(policyFlags,
+                injectorPid, injectorUid, outTargets, /*out*/ focusedWindow);
+        if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
+            return injectionResult;
+        }
+
+        windowType = focusedWindow->layoutParamsType;
+    } // release lock
+
+    if (policyFlags & POLICY_FLAG_INTERCEPT_DISPATCH) {
+        const InputTarget& target = outTargets.top();
+
+        JNIEnv* env = jniEnv();
+
+        jobject inputChannelObj = getInputChannelObjLocal(env, target.inputChannel);
+        if (inputChannelObj) {
+            jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
+                    gCallbacksClassInfo.interceptKeyBeforeDispatching,
+                    inputChannelObj, keyEvent->getKeyCode(), keyEvent->getMetaState(),
+                    keyEvent->getAction() == KEY_EVENT_ACTION_DOWN,
+                    keyEvent->getRepeatCount(), policyFlags);
+            bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatch");
+
+            env->DeleteLocalRef(inputChannelObj);
+
+            if (error) {
+                return INPUT_EVENT_INJECTION_FAILED;
+            }
+
+            if (consumed) {
+                outTargets.clear();
+                return INPUT_EVENT_INJECTION_SUCCEEDED;
+            }
+        } else {
+            LOGW("Could not apply key dispatch policy because input channel '%s' is "
+                    "no longer valid.", target.inputChannel->getName().string());
+        }
+    }
+
+    pokeUserActivityIfNeeded(windowType, POWER_MANAGER_BUTTON_EVENT);
+    return INPUT_EVENT_INJECTION_SUCCEEDED;
+}
+
+int32_t NativeInputManager::waitForMotionEventTargets(MotionEvent* motionEvent,
+        uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
         Vector<InputTarget>& outTargets) {
-    jobjectArray inputTargetArray = jobjectArray(env->GetObjectField(
-            inputTargetListObj, gInputTargetListClassInfo.mArray));
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("waitForMotionEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+            policyFlags, injectorPid, injectorUid);
+#endif
 
-    jsize length = env->GetArrayLength(inputTargetArray);
-    for (jsize i = 0; i < length; i++) {
-        jobject item = env->GetObjectArrayElement(inputTargetArray, i);
-        if (! item) {
-            break; // found null element indicating end of used portion of the array
-        }
+    switch (motionEvent->getNature()) {
+    case INPUT_EVENT_NATURE_TRACKBALL:
+        return identifyTrackballEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
+                outTargets);
 
-        outTargets.add();
-        android_view_InputTarget_toNative(env, item, & outTargets.editTop());
+    case INPUT_EVENT_NATURE_TOUCH:
+        return identifyTouchEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
+                outTargets);
 
-        env->DeleteLocalRef(item);
+    default:
+        assert(false);
+        return INPUT_EVENT_INJECTION_FAILED;
     }
-    env->DeleteLocalRef(inputTargetArray);
 }
 
+int32_t NativeInputManager::identifyTrackballEventTargets(MotionEvent* motionEvent,
+        uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
+        Vector<InputTarget>& outTargets) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("identifyTrackballEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+            policyFlags, injectorPid, injectorUid);
+#endif
+
+    int32_t windowType;
+    { // acquire lock
+        AutoMutex _l(mDispatchLock);
+
+        InputWindow* focusedWindow;
+        int32_t injectionResult = waitForFocusedWindowLd(policyFlags,
+                injectorPid, injectorUid, outTargets, /*out*/ focusedWindow);
+        if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
+            return injectionResult;
+        }
+
+        windowType = focusedWindow->layoutParamsType;
+    } // release lock
+
+    pokeUserActivityIfNeeded(windowType, POWER_MANAGER_BUTTON_EVENT);
+    return INPUT_EVENT_INJECTION_SUCCEEDED;
+}
+
+int32_t NativeInputManager::identifyTouchEventTargets(MotionEvent* motionEvent,
+        uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
+        Vector<InputTarget>& outTargets) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("identifyTouchEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+            policyFlags, injectorPid, injectorUid);
+#endif
+
+    int32_t windowType;
+    { // acquire lock
+        AutoMutex _l(mDispatchLock);
+
+        InputWindow* touchedWindow;
+        int32_t injectionResult = waitForTouchedWindowLd(motionEvent, policyFlags,
+                injectorPid, injectorUid, outTargets, /*out*/ touchedWindow);
+        if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
+            return injectionResult;
+        }
+
+        windowType = touchedWindow->layoutParamsType;
+    } // release lock
+
+    int32_t eventType;
+    switch (motionEvent->getAction()) {
+    case MOTION_EVENT_ACTION_DOWN:
+        eventType = POWER_MANAGER_TOUCH_EVENT;
+        break;
+    case MOTION_EVENT_ACTION_UP:
+        eventType = POWER_MANAGER_TOUCH_UP_EVENT;
+        break;
+    default:
+        if (motionEvent->getEventTime() - motionEvent->getDownTime()
+                >= EVENT_IGNORE_DURATION) {
+            eventType = POWER_MANAGER_TOUCH_EVENT;
+        } else {
+            eventType = POWER_MANAGER_LONG_TOUCH_EVENT;
+        }
+        break;
+    }
+    pokeUserActivityIfNeeded(windowType, eventType);
+    return INPUT_EVENT_INJECTION_SUCCEEDED;
+}
+
+void NativeInputManager::pokeUserActivityIfNeeded(int32_t windowType, int32_t eventType) {
+    if (windowType != TYPE_KEYGUARD) {
+        nsecs_t eventTime = now();
+        pokeUserActivity(eventTime, eventType);
+    }
+}
+
+void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
+    JNIEnv* env = jniEnv();
+    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.pokeUserActivity,
+            eventTime, eventType);
+    checkAndClearExceptionFromCallback(env, "pokeUserActivity");
+}
+
+void NativeInputManager::dumpDispatchStateLd() {
+#if DEBUG_FOCUS
+    LOGD("  dispatcherState: dispatchEnabled=%d, dispatchFrozen=%d, windowsReady=%d",
+            mDispatchEnabled, mDispatchFrozen, mWindowsReady);
+    if (mFocusedApplication) {
+        LOGD("  focusedApplication: name='%s', dispatchingTimeout=%0.3fms",
+                mFocusedApplication->name.string(),
+                mFocusedApplication->dispatchingTimeout / 1000000.0);
+    } else {
+        LOGD("  focusedApplication: <null>");
+    }
+    LOGD("  focusedWindow: '%s'",
+            mFocusedWindow != NULL ? mFocusedWindow->inputChannel->getName().string() : "<null>");
+    LOGD("  touchedWindow: '%s', touchDown=%d",
+            mTouchedWindow != NULL ? mTouchedWindow->inputChannel->getName().string() : "<null>",
+            mTouchDown);
+    for (size_t i = 0; i < mTouchedWallpaperWindows.size(); i++) {
+        LOGD("  touchedWallpaperWindows[%d]: '%s'",
+                i, mTouchedWallpaperWindows[i]->inputChannel->getName().string());
+    }
+    for (size_t i = 0; i < mWindows.size(); i++) {
+        LOGD("  windows[%d]: '%s', paused=%d, hasFocus=%d, hasWallpaper=%d, visible=%d, "
+                "flags=0x%08x, type=0x%08x, "
+                "frame=[%d,%d], touchableArea=[%d,%d][%d,%d], "
+                "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms",
+                i, mWindows[i].inputChannel->getName().string(),
+                mWindows[i].paused, mWindows[i].hasFocus, mWindows[i].hasWallpaper,
+                mWindows[i].visible, mWindows[i].layoutParamsFlags, mWindows[i].layoutParamsType,
+                mWindows[i].frameLeft, mWindows[i].frameTop,
+                mWindows[i].touchableAreaLeft, mWindows[i].touchableAreaTop,
+                mWindows[i].touchableAreaRight, mWindows[i].touchableAreaBottom,
+                mWindows[i].ownerPid, mWindows[i].ownerUid,
+                mWindows[i].dispatchingTimeout / 1000000.0);
+    }
+#endif
+}
+
+// ----------------------------------------------------------------------------
+
+NativeInputManager::ANRTimer::ANRTimer() :
+        mBudget(APPLICATION), mStartTime(now()), mFrozen(false), mPausedWindow(NULL) {
+}
+
+void NativeInputManager::ANRTimer::dispatchFrozenBySystem() {
+    mFrozen = true;
+}
+
+void NativeInputManager::ANRTimer::dispatchPausedByApplication(InputWindow* pausedWindow) {
+    mPausedWindow = pausedWindow;
+}
+
+bool NativeInputManager::ANRTimer::waitForDispatchStateChangeLd(NativeInputManager* inputManager) {
+    nsecs_t currentTime = now();
+
+    Budget newBudget;
+    nsecs_t dispatchingTimeout;
+    sp<InputChannel> pausedChannel = NULL;
+    jobject tokenObj = NULL;
+    if (mFrozen) {
+        newBudget = SYSTEM;
+        dispatchingTimeout = DEFAULT_INPUT_DISPATCHING_TIMEOUT;
+        mFrozen = false;
+    } else if (mPausedWindow) {
+        newBudget = APPLICATION;
+        dispatchingTimeout = mPausedWindow->dispatchingTimeout;
+        pausedChannel = mPausedWindow->inputChannel;
+        mPausedWindow = NULL;
+    } else if (inputManager->mFocusedApplication) {
+        newBudget = APPLICATION;
+        dispatchingTimeout = inputManager->mFocusedApplication->dispatchingTimeout;
+        tokenObj = jniEnv()->NewLocalRef(inputManager->mFocusedApplication->tokenObjWeak);
+    } else {
+        newBudget = APPLICATION;
+        dispatchingTimeout = DEFAULT_INPUT_DISPATCHING_TIMEOUT;
+    }
+
+    if (mBudget != newBudget) {
+        mBudget = newBudget;
+        mStartTime = currentTime;
+    }
+
+    bool result = false;
+    nsecs_t timeoutRemaining = mStartTime + dispatchingTimeout - currentTime;
+    if (timeoutRemaining > 0
+            && inputManager->mDispatchStateChanged.waitRelative(inputManager->mDispatchLock,
+                    timeoutRemaining) == OK) {
+        result = true;
+    } else {
+        if (pausedChannel != NULL || tokenObj != NULL) {
+            bool resumed;
+            nsecs_t newTimeout = 0;
+
+            inputManager->mDispatchLock.unlock(); // release lock
+            if (pausedChannel != NULL) {
+                resumed = inputManager->notifyInputChannelANR(pausedChannel, /*out*/ newTimeout);
+            } else {
+                resumed = inputManager->notifyANR(tokenObj, /*out*/ newTimeout);
+            }
+            inputManager->mDispatchLock.lock(); // re-acquire lock
+
+            if (resumed) {
+                mStartTime = now() - dispatchingTimeout + newTimeout;
+                result = true;
+            }
+        }
+    }
+
+    if (tokenObj) {
+        jniEnv()->DeleteLocalRef(tokenObj);
+    }
+
+    return result;
+}
+
+nsecs_t NativeInputManager::ANRTimer::getTimeSpentWaitingForApplication() const {
+    return mBudget == APPLICATION ? now() - mStartTime : 0;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -926,6 +1985,42 @@ static jint android_server_InputManager_nativeInjectMotionEvent(JNIEnv* env, jcl
             injectorPid, injectorUid, sync, timeoutMillis);
 }
 
+static void android_server_InputManager_nativeSetInputWindows(JNIEnv* env, jclass clazz,
+        jobjectArray windowObjArray) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->setInputWindows(env, windowObjArray);
+}
+
+static void android_server_InputManager_nativeSetFocusedApplication(JNIEnv* env, jclass clazz,
+        jobject applicationObj) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->setFocusedApplication(env, applicationObj);
+}
+
+static void android_server_InputManager_nativeSetInputDispatchMode(JNIEnv* env,
+        jclass clazz, jboolean enabled, jboolean frozen) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->setInputDispatchMode(enabled, frozen);
+}
+
+static void android_server_InputManager_nativePreemptInputDispatch(JNIEnv* env,
+        jclass clazz) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->preemptInputDispatch();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gInputManagerMethods[] = {
@@ -953,7 +2048,15 @@ static JNINativeMethod gInputManagerMethods[] = {
     { "nativeInjectKeyEvent", "(Landroid/view/KeyEvent;IIIZI)I",
             (void*) android_server_InputManager_nativeInjectKeyEvent },
     { "nativeInjectMotionEvent", "(Landroid/view/MotionEvent;IIIZI)I",
-            (void*) android_server_InputManager_nativeInjectMotionEvent }
+            (void*) android_server_InputManager_nativeInjectMotionEvent },
+    { "nativeSetInputWindows", "([Lcom/android/server/InputWindow;)V",
+            (void*) android_server_InputManager_nativeSetInputWindows },
+    { "nativeSetFocusedApplication", "(Lcom/android/server/InputApplication;)V",
+            (void*) android_server_InputManager_nativeSetFocusedApplication },
+    { "nativeSetInputDispatchMode", "(ZZ)V",
+            (void*) android_server_InputManager_nativeSetInputDispatchMode },
+    { "nativePreemptInputDispatch", "()V",
+            (void*) android_server_InputManager_nativePreemptInputDispatch }
 };
 
 #define FIND_CLASS(var, className) \
@@ -999,17 +2102,26 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelRecoveredFromANR, gCallbacksClassInfo.clazz,
             "notifyInputChannelRecoveredFromANR", "(Landroid/view/InputChannel;)V");
 
+    GET_METHOD_ID(gCallbacksClassInfo.notifyANR, gCallbacksClassInfo.clazz,
+            "notifyANR", "(Ljava/lang/Object;)J");
+
     GET_METHOD_ID(gCallbacksClassInfo.virtualKeyFeedback, gCallbacksClassInfo.clazz,
             "virtualKeyFeedback", "(JIIIIIIJ)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.hackInterceptKey, gCallbacksClassInfo.clazz,
-            "hackInterceptKey", "(IIIIIIJZ)I");
+    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, gCallbacksClassInfo.clazz,
+            "interceptKeyBeforeQueueing", "(IIIIIIJZ)I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, gCallbacksClassInfo.clazz,
+            "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIZII)Z");
+
+    GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
+            "checkInjectEventsPermission", "(II)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.goToSleep, gCallbacksClassInfo.clazz,
             "goToSleep", "(J)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.pokeUserActivityForKey, gCallbacksClassInfo.clazz,
-            "pokeUserActivityForKey", "(J)V");
+    GET_METHOD_ID(gCallbacksClassInfo.pokeUserActivity, gCallbacksClassInfo.clazz,
+            "pokeUserActivity", "(JI)V");
 
     GET_METHOD_ID(gCallbacksClassInfo.notifyAppSwitchComing, gCallbacksClassInfo.clazz,
             "notifyAppSwitchComing", "()V");
@@ -1026,14 +2138,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
-
-    GET_METHOD_ID(gCallbacksClassInfo.getKeyEventTargets, gCallbacksClassInfo.clazz,
-            "getKeyEventTargets",
-            "(Lcom/android/server/InputTargetList;Landroid/view/KeyEvent;IIII)I");
-
-    GET_METHOD_ID(gCallbacksClassInfo.getMotionEventTargets, gCallbacksClassInfo.clazz,
-            "getMotionEventTargets",
-            "(Lcom/android/server/InputTargetList;Landroid/view/MotionEvent;IIII)I");
 
     // VirtualKeyDefinition
 
@@ -1055,15 +2159,71 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.height, gVirtualKeyDefinitionClassInfo.clazz,
             "height", "I");
 
-    // InputTargetList
+    // InputWindow
 
-    FIND_CLASS(gInputTargetListClassInfo.clazz, "com/android/server/InputTargetList");
+    FIND_CLASS(gInputWindowClassInfo.clazz, "com/android/server/InputWindow");
 
-    GET_METHOD_ID(gInputTargetListClassInfo.ctor, gInputTargetListClassInfo.clazz,
-            "<init>", "()V");
+    GET_FIELD_ID(gInputWindowClassInfo.inputChannel, gInputWindowClassInfo.clazz,
+            "inputChannel", "Landroid/view/InputChannel;");
 
-    GET_FIELD_ID(gInputTargetListClassInfo.mArray, gInputTargetListClassInfo.clazz,
-            "mArray", "[Landroid/view/InputTarget;");
+    GET_FIELD_ID(gInputWindowClassInfo.layoutParamsFlags, gInputWindowClassInfo.clazz,
+            "layoutParamsFlags", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.layoutParamsType, gInputWindowClassInfo.clazz,
+            "layoutParamsType", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.dispatchingTimeoutNanos, gInputWindowClassInfo.clazz,
+            "dispatchingTimeoutNanos", "J");
+
+    GET_FIELD_ID(gInputWindowClassInfo.frameLeft, gInputWindowClassInfo.clazz,
+            "frameLeft", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.frameTop, gInputWindowClassInfo.clazz,
+            "frameTop", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaLeft, gInputWindowClassInfo.clazz,
+            "touchableAreaLeft", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaTop, gInputWindowClassInfo.clazz,
+            "touchableAreaTop", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaRight, gInputWindowClassInfo.clazz,
+            "touchableAreaRight", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaBottom, gInputWindowClassInfo.clazz,
+            "touchableAreaBottom", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.visible, gInputWindowClassInfo.clazz,
+            "visible", "Z");
+
+    GET_FIELD_ID(gInputWindowClassInfo.hasFocus, gInputWindowClassInfo.clazz,
+            "hasFocus", "Z");
+
+    GET_FIELD_ID(gInputWindowClassInfo.hasWallpaper, gInputWindowClassInfo.clazz,
+            "hasWallpaper", "Z");
+
+    GET_FIELD_ID(gInputWindowClassInfo.paused, gInputWindowClassInfo.clazz,
+            "paused", "Z");
+
+    GET_FIELD_ID(gInputWindowClassInfo.ownerPid, gInputWindowClassInfo.clazz,
+            "ownerPid", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.ownerUid, gInputWindowClassInfo.clazz,
+            "ownerUid", "I");
+
+    // InputApplication
+
+    FIND_CLASS(gInputApplicationClassInfo.clazz, "com/android/server/InputApplication");
+
+    GET_FIELD_ID(gInputApplicationClassInfo.name, gInputApplicationClassInfo.clazz,
+            "name", "Ljava/lang/String;");
+
+    GET_FIELD_ID(gInputApplicationClassInfo.dispatchingTimeoutNanos,
+            gInputApplicationClassInfo.clazz,
+            "dispatchingTimeoutNanos", "J");
+
+    GET_FIELD_ID(gInputApplicationClassInfo.token, gInputApplicationClassInfo.clazz,
+            "token", "Ljava/lang/Object;");
 
     return 0;
 }
