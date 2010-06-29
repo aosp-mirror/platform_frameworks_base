@@ -273,12 +273,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         mIntruderAlertView = View.inflate(context, R.layout.intruder_alert, null);
         mIntruderAlertView.setVisibility(View.GONE);
         mIntruderAlertView.setClickable(true);
-        mIntruderAlertView.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Slog.d(TAG, "Intruder Alert clicked!");
-                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
-            }
-        });
 
         StatusBarView sb = (StatusBarView)View.inflate(context, R.layout.status_bar, null);
         sb.mService = this;
@@ -423,13 +417,16 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                     iconView.getStatusBarIcon()));
                 alertText.setText(notification.notification.tickerText);
 
+                mIntruderAlertView.setOnClickListener(
+                    new Launcher(notification.notification.contentIntent,
+                        notification.pkg, notification.tag, notification.id));
+
                 // 2. Animate mIntruderAlertView in
-                mHandler.removeMessages(MSG_HIDE_INTRUDER);
                 mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
-                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
 
                 // 3. Set alarm to age the notification off (TODO)
-
+                mHandler.removeMessages(MSG_HIDE_INTRUDER);
+                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
             }
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
@@ -1085,23 +1082,32 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                 ActivityManagerNative.getDefault().resumeAppSwitches();
             } catch (RemoteException e) {
             }
-            int[] pos = new int[2];
-            v.getLocationOnScreen(pos);
-            Intent overlay = new Intent();
-            overlay.setSourceBounds(
-                    new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
-            try {
-                mIntent.send(StatusBarService.this, 0, overlay);
-            } catch (PendingIntent.CanceledException e) {
-                // the stack trace isn't very helpful here.  Just log the exception message.
-                Slog.w(TAG, "Sending contentIntent failed: " + e);
+
+            if (mIntent != null) {
+                int[] pos = new int[2];
+                v.getLocationOnScreen(pos);
+                Intent overlay = new Intent();
+                overlay.setSourceBounds(
+                        new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
+                try {
+                    mIntent.send(StatusBarService.this, 0, overlay);
+                } catch (PendingIntent.CanceledException e) {
+                    // the stack trace isn't very helpful here.  Just log the exception message.
+                    Slog.w(TAG, "Sending contentIntent failed: " + e);
+                }
             }
+
             try {
                 mBarService.onNotificationClick(mPkg, mTag, mId);
             } catch (RemoteException ex) {
                 // system process is dead if we're here.
             }
+
+            // close the shade if it was open
             animateCollapse();
+
+            // If this click was on the intruder alert, hide that instead
+            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
         }
     }
 
