@@ -39,6 +39,7 @@ Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL)
     mAllocLine = __LINE__;
     mInitialized = false;
     mHasKerning = false;
+    mFace = NULL;
 }
 
 bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
@@ -62,8 +63,6 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
     mFontName = name;
     mFontSize = fontSize;
     mDpi = dpi;
-
-    //LOGE("Font initialized: %s", fullPath.string());
 
     error = FT_Set_Char_Size(mFace, fontSize * 64, 0, dpi, 0);
     if(error) {
@@ -206,8 +205,6 @@ Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph)
     newGlyph->mGlyphIndex = FT_Get_Char_Index(mFace, glyph);
     newGlyph->mIsValid = false;
 
-    //LOGE("Glyph = %c, face index: %u", (unsigned char)glyph, newGlyph->mGlyphIndex);
-
     updateGlyphCache(newGlyph);
 
     return newGlyph;
@@ -261,6 +258,7 @@ FontState::FontState()
     mMaxNumberOfQuads = 1024;
     mCurrentQuadIndex = 0;
     mRSC = NULL;
+    mLibrary = NULL;
 }
 
 FontState::~FontState()
@@ -281,13 +279,12 @@ FT_Library FontState::getLib()
             return NULL;
         }
     }
+
     return mLibrary;
 }
 
 void FontState::init(Context *rsc)
 {
-    //getLib();
-
     mRSC = rsc;
 }
 
@@ -349,8 +346,6 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     uint32_t endX = startX + bitmap->width;
     uint32_t endY = startY + bitmap->rows;
-
-    //LOGE("Bitmap width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
 
     uint32_t cacheWidth = getCacheTextureType()->getDimX();
 
@@ -508,13 +503,6 @@ void FontState::checkInit()
 
     initVertexArrayBuffers();
 
-    /*mTextMeshRefs = new ObjectBaseRef<SimpleMesh>[mNumMeshes];
-
-    for(uint32_t i = 0; i < mNumMeshes; i ++){
-        SimpleMesh *textMesh = createTextMesh();
-        mTextMeshRefs[i].set(textMesh);
-    }*/
-
     mInitialized = true;
 }
 
@@ -626,6 +614,11 @@ void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, 
         }
         currentFont = mDefault.get();
     }
+    if(!currentFont) {
+        LOGE("Unable to initialize any fonts");
+        return;
+    }
+
     currentFont->renderUTF(text, len, startIndex, numGlyphs, x, y);
 
     if(mCurrentQuadIndex != 0) {
@@ -681,8 +674,14 @@ void FontState::deinit(Context *rsc)
 
     mDefault.clear();
 
+    Vector<Font*> fontsToDereference = mActiveFonts;
+    for(uint32_t i = 0; i < fontsToDereference.size(); i ++) {
+        fontsToDereference[i]->zeroUserRef();
+    }
+
     if(mLibrary) {
         FT_Done_FreeType( mLibrary );
+        mLibrary = NULL;
     }
 }
 
