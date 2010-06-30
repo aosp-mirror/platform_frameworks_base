@@ -590,6 +590,7 @@ public class WebView extends AbsoluteLayout
     static final int SET_SCROLLBAR_MODES                = 129;
     static final int SELECTION_STRING_CHANGED           = 130;
     static final int SET_TOUCH_HIGHLIGHT_RECTS          = 131;
+    static final int SAVE_WEBARCHIVE_FINISHED           = 132;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -638,7 +639,8 @@ public class WebView extends AbsoluteLayout
         "REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID", // = 128;
         "SET_SCROLLBAR_MODES", //            = 129;
         "SELECTION_STRING_CHANGED", //       = 130;
-        "SET_TOUCH_HIGHLIGHT_RECTS" //       = 131;
+        "SET_TOUCH_HIGHLIGHT_RECTS", //      = 131;
+        "SAVE_WEBARCHIVE_FINISHED" //        = 132;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -1517,6 +1519,45 @@ public class WebView extends AbsoluteLayout
         arg.mHistoryUrl = historyUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
         clearTextEntry(false);
+    }
+
+    /**
+     * Saves the current view as a web archive.
+     *
+     * @param filename The filename where the archive should be placed.
+     */
+    public void saveWebArchive(String filename) {
+        saveWebArchive(filename, false, null);
+    }
+
+    /* package */ static class SaveWebArchiveMessage {
+        SaveWebArchiveMessage (String basename, boolean autoname, ValueCallback<String> callback) {
+            mBasename = basename;
+            mAutoname = autoname;
+            mCallback = callback;
+        }
+
+        /* package */ final String mBasename;
+        /* package */ final boolean mAutoname;
+        /* package */ final ValueCallback<String> mCallback;
+        /* package */ String mResultFile;
+    }
+
+    /**
+     * Saves the current view as a web archive.
+     *
+     * @param basename The filename where the archive should be placed.
+     * @param autoname If false, takes basename to be a file. If true, basename
+     *                 is assumed to be a directory in which a filename will be
+     *                 chosen according to the url of the current page.
+     * @param callback Called after the web archive has been saved. The
+     *                 parameter for onReceiveValue will either be the filename
+     *                 under which the file was saved, or null if saving the
+     *                 file failed.
+     */
+    public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
+        mWebViewCore.sendMessage(EventHub.SAVE_WEBARCHIVE,
+            new SaveWebArchiveMessage(basename, autoname, callback));
     }
 
     /**
@@ -6432,6 +6473,13 @@ public class WebView extends AbsoluteLayout
                                         + viewRect);
                             }
                         }
+                    }
+                    break;
+
+                case SAVE_WEBARCHIVE_FINISHED:
+                    SaveWebArchiveMessage saveMessage = (SaveWebArchiveMessage)msg.obj;
+                    if (saveMessage.mCallback != null) {
+                        saveMessage.mCallback.onReceiveValue(saveMessage.mResultFile);
                     }
                     break;
 

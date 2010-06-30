@@ -301,6 +301,18 @@ class BrowserFrame extends Handler {
     }
 
     /**
+     * Saves the contents of the frame as a web archive.
+     *
+     * @param basename The filename where the archive should be placed.
+     * @param autoname If false, takes filename to be a file. If true, filename
+     *                 is assumed to be a directory in which a filename will be
+     *                 chosen according to the url of the current page.
+     */
+    /* package */ String saveWebArchive(String basename, boolean autoname) {
+        return nativeSaveWebArchive(basename, autoname);
+    }
+
+    /**
      * Go back or forward the number of steps given.
      * @param steps A negative or positive number indicating the direction
      *              and number of steps to move.
@@ -1039,6 +1051,8 @@ class BrowserFrame extends Handler {
      *         returns null.
      */
     private native HashMap getFormTextData();
+
+    private native String nativeSaveWebArchive(String basename, boolean autoname);
 
     private native void nativeOrientationChanged(int orientation);
 }

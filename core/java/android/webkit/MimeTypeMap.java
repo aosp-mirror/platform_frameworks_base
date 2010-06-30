@@ -363,6 +363,7 @@ public class MimeTypeMap {
             sMimeTypeMap.loadEntry("application/x-wais-source", "src");
             sMimeTypeMap.loadEntry("application/x-wingz", "wz");
             sMimeTypeMap.loadEntry("application/x-webarchive", "webarchive");
+            sMimeTypeMap.loadEntry("application/x-webarchive-xml", "webarchivexml");
             sMimeTypeMap.loadEntry("application/x-x509-ca-cert", "crt");
             sMimeTypeMap.loadEntry("application/x-x509-user-cert", "crt");
             sMimeTypeMap.loadEntry("application/x-xcf", "xcf");

@@ -774,6 +774,7 @@ final class WebViewCore {
             "ON_RESUME",    // = 144
             "FREE_MEMORY",  // = 145
             "VALID_NODE_BOUNDS", // = 146
+            "SAVE_WEBARCHIVE", // = 147
         };
 
     class EventHub {
@@ -839,6 +840,9 @@ final class WebViewCore {
         static final int ON_RESUME = 144;
         static final int FREE_MEMORY = 145;
         static final int VALID_NODE_BOUNDS = 146;
+
+        // Load and save web archives
+        static final int SAVE_WEBARCHIVE = 147;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -1300,6 +1304,15 @@ final class WebViewCore {
                             nativeSetJsFlags((String)msg.obj);
                             break;
 
+                        case SAVE_WEBARCHIVE:
+                            WebView.SaveWebArchiveMessage saveMessage =
+                                (WebView.SaveWebArchiveMessage)msg.obj;
+                            saveMessage.mResultFile =
+                                saveWebArchive(saveMessage.mBasename, saveMessage.mAutoname);
+                            mWebView.mPrivateHandler.obtainMessage(
+                                WebView.SAVE_WEBARCHIVE_FINISHED, saveMessage).sendToTarget();
+                            break;
+
                         case GEOLOCATION_PERMISSIONS_PROVIDE:
                             GeolocationPermissionsData data =
                                     (GeolocationPermissionsData) msg.obj;
@@ -1599,6 +1612,13 @@ final class WebViewCore {
     private void loadUrl(String url, Map<String, String> extraHeaders) {
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, " CORE loadUrl " + url);
         mBrowserFrame.loadUrl(url, extraHeaders);
+    }
+
+    private String saveWebArchive(String filename, boolean autoname) {
+        if (DebugFlags.WEB_VIEW_CORE) {
+            Log.v(LOGTAG, " CORE saveWebArchive " + filename + " " + autoname);
+        }
+        return mBrowserFrame.saveWebArchive(filename, autoname);
     }
 
     private void key(KeyEvent evt, boolean isDown) {
