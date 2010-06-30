@@ -172,6 +172,9 @@ private:
     void setVideoInputFormat(
             const char *mime, const sp<MetaData>& meta);
 
+    status_t setupBitRate(int32_t bitRate);
+    status_t setupErrorCorrectionParameters();
+    status_t setupH263EncoderParameters(const sp<MetaData>& meta);
     status_t setupMPEG4EncoderParameters(const sp<MetaData>& meta);
     status_t setupAVCEncoderParameters(const sp<MetaData>& meta);
 

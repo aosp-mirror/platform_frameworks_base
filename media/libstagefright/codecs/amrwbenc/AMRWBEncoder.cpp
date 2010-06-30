@@ -124,7 +124,10 @@ AMRWBEncoder::~AMRWBEncoder() {
 }
 
 status_t AMRWBEncoder::start(MetaData *params) {
-    CHECK(!mStarted);
+    if (mStarted) {
+        LOGW("Call start() when encoder already started");
+        return OK;
+    }
 
     mBufferGroup = new MediaBufferGroup;
 
@@ -142,8 +145,10 @@ status_t AMRWBEncoder::start(MetaData *params) {
 }
 
 status_t AMRWBEncoder::stop() {
-    CHECK(mStarted);
-
+    if (!mStarted) {
+        LOGW("Call stop() when encoder has not started");
+        return OK;
+    }
 
     if (mInputBuffer) {
         mInputBuffer->release();

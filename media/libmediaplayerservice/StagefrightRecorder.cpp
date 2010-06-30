@@ -42,11 +42,16 @@
 
 namespace android {
 
-StagefrightRecorder::StagefrightRecorder() {
+StagefrightRecorder::StagefrightRecorder()
+    : mWriter(NULL),
+      mOutputFd(-1) {
+
+    LOGV("Constructor");
     reset();
 }
 
 StagefrightRecorder::~StagefrightRecorder() {
+    LOGV("Destructor");
     stop();
 
     if (mOutputFd >= 0) {
@@ -56,40 +61,92 @@ StagefrightRecorder::~StagefrightRecorder() {
 }
 
 status_t StagefrightRecorder::init() {
+    LOGV("init");
     return OK;
 }
 
 status_t StagefrightRecorder::setAudioSource(audio_source as) {
-    mAudioSource = as;
+    LOGV("setAudioSource: %d", as);
+    if (as < AUDIO_SOURCE_DEFAULT ||
+        as >= AUDIO_SOURCE_LIST_END) {
+        return BAD_VALUE;
+    }
+
+    if (as == AUDIO_SOURCE_DEFAULT) {
+        mAudioSource = AUDIO_SOURCE_MIC;
+    } else {
+        mAudioSource = as;
+    }
 
     return OK;
 }
 
 status_t StagefrightRecorder::setVideoSource(video_source vs) {
-    mVideoSource = vs;
+    LOGV("setVideoSource: %d", vs);
+    if (vs < VIDEO_SOURCE_DEFAULT ||
+        vs >= VIDEO_SOURCE_LIST_END) {
+        return BAD_VALUE;
+    }
+
+    if (vs == VIDEO_SOURCE_DEFAULT) {
+        mVideoSource = VIDEO_SOURCE_CAMERA;
+    } else {
+        mVideoSource = vs;
+    }
 
     return OK;
 }
 
 status_t StagefrightRecorder::setOutputFormat(output_format of) {
-    mOutputFormat = of;
+    LOGV("setOutputFormat: %d", of);
+    if (of < OUTPUT_FORMAT_DEFAULT ||
+        of >= OUTPUT_FORMAT_LIST_END) {
+        return BAD_VALUE;
+    }
+
+    if (of == OUTPUT_FORMAT_DEFAULT) {
+        mOutputFormat = OUTPUT_FORMAT_THREE_GPP;
+    } else {
+        mOutputFormat = of;
+    }
 
     return OK;
 }
 
 status_t StagefrightRecorder::setAudioEncoder(audio_encoder ae) {
-    mAudioEncoder = ae;
+    LOGV("setAudioEncoder: %d", ae);
+    if (ae < AUDIO_ENCODER_DEFAULT ||
+        ae >= AUDIO_ENCODER_LIST_END) {
+        return BAD_VALUE;
+    }
+
+    if (ae == AUDIO_ENCODER_DEFAULT) {
+        mAudioEncoder = AUDIO_ENCODER_AMR_NB;
+    } else {
+        mAudioEncoder = ae;
+    }
 
     return OK;
 }
 
 status_t StagefrightRecorder::setVideoEncoder(video_encoder ve) {
-    mVideoEncoder = ve;
+    LOGV("setVideoEncoder: %d", ve);
+    if (ve < VIDEO_ENCODER_DEFAULT ||
+        ve >= VIDEO_ENCODER_LIST_END) {
+        return BAD_VALUE;
+    }
+
+    if (ve == VIDEO_ENCODER_DEFAULT) {
+        mVideoEncoder = VIDEO_ENCODER_H263;
+    } else {
+        mVideoEncoder = ve;
+    }
 
     return OK;
 }
 
 status_t StagefrightRecorder::setVideoSize(int width, int height) {
+    LOGV("setVideoSize: %dx%d", width, height);
     if (width <= 0 || height <= 0) {
         LOGE("Invalid video size: %dx%d", width, height);
         return BAD_VALUE;
@@ -103,6 +160,7 @@ status_t StagefrightRecorder::setVideoSize(int width, int height) {
 }
 
 status_t StagefrightRecorder::setVideoFrameRate(int frames_per_second) {
+    LOGV("setVideoFrameRate: %d", frames_per_second);
     if (frames_per_second <= 0 || frames_per_second > 30) {
         LOGE("Invalid video frame rate: %d", frames_per_second);
         return BAD_VALUE;
@@ -141,12 +199,14 @@ status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
 }
 
 status_t StagefrightRecorder::setPreviewSurface(const sp<ISurface> &surface) {
+    LOGV("setPreviewSurface: %p", surface.get());
     mPreviewSurface = surface;
 
     return OK;
 }
 
 status_t StagefrightRecorder::setOutputFile(const char *path) {
+    LOGE("setOutputFile(const char*) should not be called");
     // We don't actually support this at all, as the media_server process
     // no longer has permissions to create files.
 
@@ -154,6 +214,7 @@ status_t StagefrightRecorder::setOutputFile(const char *path) {
 }
 
 status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t length) {
+    LOGV("setOutputFile: %d, %lld, %lld", fd, offset, length);
     // These don't make any sense, do they?
     CHECK_EQ(offset, 0);
     CHECK_EQ(length, 0);
@@ -720,8 +781,14 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         if (mCamera == 0) {
             mCamera = Camera::connect(mCameraId);
+            if (mCamera == 0) {
+                LOGE("Camera connection could not be established.");
+                return -EBUSY;
+            }
+            mFlags &= ~FLAGS_HOT_CAMERA;
             mCamera->lock();
         }
+
 
         // Set the actual video recording frame size
         CameraParameters params(mCamera->getParameters());
@@ -835,6 +902,7 @@ status_t StagefrightRecorder::startMPEG4Recording() {
 }
 
 status_t StagefrightRecorder::pause() {
+    LOGV("pause");
     if (mWriter == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -843,20 +911,14 @@ status_t StagefrightRecorder::pause() {
 }
 
 status_t StagefrightRecorder::stop() {
-    if (mWriter == NULL) {
-        return UNKNOWN_ERROR;
+    LOGV("stop");
+    if (mWriter != NULL) {
+        mWriter->stop();
+        mWriter = NULL;
     }
 
-    mWriter->stop();
-    mWriter = NULL;
-
-    return OK;
-}
-
-status_t StagefrightRecorder::close() {
-    stop();
-
     if (mCamera != 0) {
+        LOGV("Disconnect camera");
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         if ((mFlags & FLAGS_HOT_CAMERA) == 0) {
             LOGV("Camera was cold when we started, stopping preview");
@@ -867,10 +929,19 @@ status_t StagefrightRecorder::close() {
         IPCThreadState::self()->restoreCallingIdentity(token);
         mFlags = 0;
     }
+
+    return OK;
+}
+
+status_t StagefrightRecorder::close() {
+    LOGV("close");
+    stop();
+
     return OK;
 }
 
 status_t StagefrightRecorder::reset() {
+    LOGV("reset");
     stop();
 
     // No audio or video source by default
@@ -904,6 +975,13 @@ status_t StagefrightRecorder::reset() {
 }
 
 status_t StagefrightRecorder::getMaxAmplitude(int *max) {
+    LOGV("getMaxAmplitude");
+
+    if (max == NULL) {
+        LOGE("Null pointer argument");
+        return BAD_VALUE;
+    }
+
     if (mAudioSourceNode != 0) {
         *max = mAudioSourceNode->getMaxAmplitude();
     } else {
