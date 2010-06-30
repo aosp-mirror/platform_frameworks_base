@@ -232,6 +232,9 @@ void InputDispatcher::processConfigurationChangedLockedInterruptible(
     LOGD("processConfigurationChanged - eventTime=%lld", entry->eventTime);
 #endif
 
+    // Reset key repeating in case a keyboard device was added or removed or something.
+    resetKeyRepeatLocked();
+
     mLock.unlock();
 
     mPolicy->notifyConfigurationChanged(entry->eventTime);

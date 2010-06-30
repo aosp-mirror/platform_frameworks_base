@@ -387,6 +387,11 @@ void InputDevice::TouchScreenState::calculatePointerIds() {
  * points has moved more than a screen height from the last position,
  * then drop it. */
 bool InputDevice::TouchScreenState::applyBadTouchFilter() {
+    // This hack requires valid axis parameters.
+    if (! parameters.yAxis.valid) {
+        return false;
+    }
+
     uint32_t pointerCount = currentTouch.pointerCount;
 
     // Nothing to do if there are no points.
@@ -466,6 +471,11 @@ bool InputDevice::TouchScreenState::applyBadTouchFilter() {
  * the coordinate value for one axis has jumped to the other pointer's location.
  */
 bool InputDevice::TouchScreenState::applyJumpyTouchFilter() {
+    // This hack requires valid axis parameters.
+    if (! parameters.yAxis.valid) {
+        return false;
+    }
+
     uint32_t pointerCount = currentTouch.pointerCount;
     if (lastTouch.pointerCount != pointerCount) {
 #if DEBUG_HACKS
@@ -724,6 +734,12 @@ void InputDevice::TouchScreenState::applyAveragingTouchFilter() {
 }
 
 bool InputDevice::TouchScreenState::isPointInsideDisplay(int32_t x, int32_t y) const {
+    if (! parameters.xAxis.valid || ! parameters.yAxis.valid) {
+        // Assume all points on a touch screen without valid axis parameters are
+        // inside the display.
+        return true;
+    }
+
     return x >= parameters.xAxis.minValue
         && x <= parameters.xAxis.maxValue
         && y >= parameters.yAxis.minValue
@@ -1435,6 +1451,9 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
     int32_t pointerIds[MAX_POINTERS];
     PointerCoords pointerCoords[MAX_POINTERS];
 
+    const InputDevice::TouchScreenState::Precalculated& precalculated =
+            device->touchScreen.precalculated;
+
     // Walk through the the active pointers and map touch screen coordinates (TouchData) into
     // display coordinates (PointerCoords) and adjust for display orientation.
     while (! idBits.isEmpty()) {
@@ -1442,18 +1461,14 @@ void InputReader::dispatchTouch(nsecs_t when, InputDevice* device, uint32_t poli
         idBits.clearBit(id);
         uint32_t index = touch->idToIndex[id];
 
-        float x = (float(touch->pointers[index].x)
-                        - device->touchScreen.parameters.xAxis.minValue)
-                * device->touchScreen.precalculated.xScale;
-        float y = (float(touch->pointers[index].y)
-                        - device->touchScreen.parameters.yAxis.minValue)
-                * device->touchScreen.precalculated.yScale;
-        float pressure = (float(touch->pointers[index].pressure)
-                        - device->touchScreen.parameters.pressureAxis.minValue)
-                * device->touchScreen.precalculated.pressureScale;
-        float size = (float(touch->pointers[index].size)
-                        - device->touchScreen.parameters.sizeAxis.minValue)
-                * device->touchScreen.precalculated.sizeScale;
+        float x = float(touch->pointers[index].x
+                - precalculated.xOrigin) * precalculated.xScale;
+        float y = float(touch->pointers[index].y
+                - precalculated.yOrigin) * precalculated.yScale;
+        float pressure = float(touch->pointers[index].pressure
+                - precalculated.pressureOrigin) * precalculated.pressureScale;
+        float size = float(touch->pointers[index].size
+                - precalculated.sizeOrigin) * precalculated.sizeScale;
 
         switch (mDisplayOrientation) {
         case InputReaderPolicyInterface::ROTATION_90: {
@@ -1651,7 +1666,11 @@ bool InputReader::refreshDisplayProperties() {
             }
         }
 
-        mDisplayOrientation = newOrientation;
+        if (newOrientation != mDisplayOrientation) {
+            LOGD("Display orientation changed to %d", mDisplayOrientation);
+
+            mDisplayOrientation = newOrientation;
+        }
         return true;
     } else {
         resetDisplayProperties();
@@ -1740,10 +1759,25 @@ void InputReader::configureDevice(InputDevice* device) {
         device->touchScreen.parameters.useJumpyTouchFilter =
                 mPolicy->filterJumpyTouchEvents();
 
-        device->touchScreen.precalculated.pressureScale =
-                1.0f / device->touchScreen.parameters.pressureAxis.range;
-        device->touchScreen.precalculated.sizeScale =
-                1.0f / device->touchScreen.parameters.sizeAxis.range;
+        if (device->touchScreen.parameters.pressureAxis.valid) {
+            device->touchScreen.precalculated.pressureOrigin =
+                    device->touchScreen.parameters.pressureAxis.minValue;
+            device->touchScreen.precalculated.pressureScale =
+                    1.0f / device->touchScreen.parameters.pressureAxis.range;
+        } else {
+            device->touchScreen.precalculated.pressureOrigin = 0;
+            device->touchScreen.precalculated.pressureScale = 1.0f;
+        }
+
+        if (device->touchScreen.parameters.sizeAxis.valid) {
+            device->touchScreen.precalculated.sizeOrigin =
+                    device->touchScreen.parameters.sizeAxis.minValue;
+            device->touchScreen.precalculated.sizeScale =
+                    1.0f / device->touchScreen.parameters.sizeAxis.range;
+        } else {
+            device->touchScreen.precalculated.sizeOrigin = 0;
+            device->touchScreen.precalculated.sizeScale = 1.0f;
+        }
     }
 
     if (device->isTrackball()) {
@@ -1758,22 +1792,42 @@ void InputReader::configureDevice(InputDevice* device) {
 
 void InputReader::configureDeviceForCurrentDisplaySize(InputDevice* device) {
     if (device->isTouchScreen()) {
-        if (mDisplayWidth < 0) {
-            LOGD("Skipping part of touch screen configuration since display size is unknown.");
-        } else {
-            LOGI("Device configured: id=0x%x, name=%s (display size was changed)", device->id,
-                    device->name.string());
-            configureVirtualKeys(device);
+        if (device->touchScreen.parameters.xAxis.valid
+                && device->touchScreen.parameters.yAxis.valid) {
+            device->touchScreen.precalculated.xOrigin =
+                    device->touchScreen.parameters.xAxis.minValue;
+            device->touchScreen.precalculated.yOrigin =
+                    device->touchScreen.parameters.yAxis.minValue;
 
-            device->touchScreen.precalculated.xScale =
-                    float(mDisplayWidth) / device->touchScreen.parameters.xAxis.range;
-            device->touchScreen.precalculated.yScale =
-                    float(mDisplayHeight) / device->touchScreen.parameters.yAxis.range;
+            if (mDisplayWidth < 0) {
+                LOGD("Skipping part of touch screen configuration since display size is unknown.");
+
+                device->touchScreen.precalculated.xScale = 1.0f;
+                device->touchScreen.precalculated.yScale = 1.0f;
+            } else {
+                LOGI("Device configured: id=0x%x, name=%s (display size was changed)", device->id,
+                        device->name.string());
+
+                device->touchScreen.precalculated.xScale =
+                        float(mDisplayWidth) / device->touchScreen.parameters.xAxis.range;
+                device->touchScreen.precalculated.yScale =
+                        float(mDisplayHeight) / device->touchScreen.parameters.yAxis.range;
+
+                configureVirtualKeys(device);
+            }
+        } else {
+            device->touchScreen.precalculated.xOrigin = 0;
+            device->touchScreen.precalculated.xScale = 1.0f;
+            device->touchScreen.precalculated.yOrigin = 0;
+            device->touchScreen.precalculated.yScale = 1.0f;
         }
     }
 }
 
 void InputReader::configureVirtualKeys(InputDevice* device) {
+    assert(device->touchScreen.parameters.xAxis.valid
+            && device->touchScreen.parameters.yAxis.valid);
+
     device->touchScreen.virtualKeys.clear();
 
     Vector<InputReaderPolicyInterface::VirtualKeyDefinition> virtualKeyDefinitions;
@@ -1837,16 +1891,18 @@ void InputReader::configureAbsoluteAxisInfo(InputDevice* device,
         if (out->range != 0) {
             LOGI("  %s: min=%d max=%d flat=%d fuzz=%d",
                     name, out->minValue, out->maxValue, out->flat, out->fuzz);
+            out->valid = true;
             return;
         }
     }
 
+    out->valid = false;
     out->minValue = 0;
     out->maxValue = 0;
     out->flat = 0;
     out->fuzz = 0;
     out->range = 0;
-    LOGI("  %s: unknown axis values, setting to zero", name);
+    LOGI("  %s: unknown axis values, marking as invalid", name);
 }
 
 void InputReader::configureExcludedDevices() {

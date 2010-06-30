@@ -53,6 +53,8 @@ extern int32_t rotateKeyCode(int32_t keyCode, int32_t orientation);
  */
 struct InputDevice {
     struct AbsoluteAxisInfo {
+        bool valid;        // set to true if axis parameters are known, false otherwise
+
         int32_t minValue;  // minimum value
         int32_t maxValue;  // maximum value
         int32_t range;     // range of values, equal to maxValue - minValue
@@ -272,9 +274,16 @@ struct InputDevice {
         } jumpyTouchFilter;
 
         struct Precalculated {
+            int32_t xOrigin;
             float xScale;
+
+            int32_t yOrigin;
             float yScale;
+
+            int32_t pressureOrigin;
             float pressureScale;
+
+            int32_t sizeOrigin;
             float sizeScale;
         } precalculated;
 
