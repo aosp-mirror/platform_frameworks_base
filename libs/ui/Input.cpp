@@ -20,6 +20,70 @@ void InputEvent::initialize(int32_t deviceId, int32_t nature) {
 
 // class KeyEvent
 
+bool KeyEvent::hasDefaultAction(int32_t keyCode) {
+    switch (keyCode) {
+        case KEYCODE_HOME:
+        case KEYCODE_BACK:
+        case KEYCODE_CALL:
+        case KEYCODE_ENDCALL:
+        case KEYCODE_VOLUME_UP:
+        case KEYCODE_VOLUME_DOWN:
+        case KEYCODE_POWER:
+        case KEYCODE_CAMERA:
+        case KEYCODE_HEADSETHOOK:
+        case KEYCODE_MENU:
+        case KEYCODE_NOTIFICATION:
+        case KEYCODE_FOCUS:
+        case KEYCODE_SEARCH:
+        case KEYCODE_MEDIA_PLAY_PAUSE:
+        case KEYCODE_MEDIA_STOP:
+        case KEYCODE_MEDIA_NEXT:
+        case KEYCODE_MEDIA_PREVIOUS:
+        case KEYCODE_MEDIA_REWIND:
+        case KEYCODE_MEDIA_FAST_FORWARD:
+        case KEYCODE_MUTE:
+            return true;
+    }
+    
+    return false;
+}
+
+bool KeyEvent::hasDefaultAction() const {
+    return hasDefaultAction(getKeyCode());
+}
+
+bool KeyEvent::isSystemKey(int32_t keyCode) {
+    switch (keyCode) {
+        case KEYCODE_MENU:
+        case KEYCODE_SOFT_RIGHT:
+        case KEYCODE_HOME:
+        case KEYCODE_BACK:
+        case KEYCODE_CALL:
+        case KEYCODE_ENDCALL:
+        case KEYCODE_VOLUME_UP:
+        case KEYCODE_VOLUME_DOWN:
+        case KEYCODE_MUTE:
+        case KEYCODE_POWER:
+        case KEYCODE_HEADSETHOOK:
+        case KEYCODE_MEDIA_PLAY_PAUSE:
+        case KEYCODE_MEDIA_STOP:
+        case KEYCODE_MEDIA_NEXT:
+        case KEYCODE_MEDIA_PREVIOUS:
+        case KEYCODE_MEDIA_REWIND:
+        case KEYCODE_MEDIA_FAST_FORWARD:
+        case KEYCODE_CAMERA:
+        case KEYCODE_FOCUS:
+        case KEYCODE_SEARCH:
+            return true;
+    }
+    
+    return false;
+}
+
+bool KeyEvent::isSystemKey() const {
+    return isSystemKey(getKeyCode());
+}
+
 void KeyEvent::initialize(
         int32_t deviceId,
         int32_t nature,

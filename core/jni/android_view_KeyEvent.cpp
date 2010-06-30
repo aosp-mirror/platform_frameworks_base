@@ -76,7 +76,22 @@ void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj, int32_t natur
             milliseconds_to_nanoseconds(eventTime));
 }
 
+static jboolean native_isSystemKey(JNIEnv* env, jobject clazz, jint keyCode) {
+    return KeyEvent::isSystemKey(keyCode);
+}
+
+static jboolean native_hasDefaultAction(JNIEnv* env, jobject clazz, jint keyCode) {
+    return KeyEvent::hasDefaultAction(keyCode);
+}
+
 // ----------------------------------------------------------------------------
+
+static const JNINativeMethod g_methods[] = {
+    { "native_isSystemKey", "(I)Z", (void*)native_isSystemKey },
+    { "native_hasDefaultAction", "(I)Z", (void*)native_hasDefaultAction },
+};
+
+static const char* const kKeyEventPathName = "android/view/KeyEvent";
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
@@ -92,8 +107,8 @@ void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj, int32_t natur
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_view_KeyEvent(JNIEnv* env) {
-    FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
-
+    FIND_CLASS(gKeyEventClassInfo.clazz, kKeyEventPathName);
+        
     GET_METHOD_ID(gKeyEventClassInfo.ctor, gKeyEventClassInfo.clazz,
             "<init>", "(JJIIIIIII)V");
 
@@ -118,7 +133,9 @@ int register_android_view_KeyEvent(JNIEnv* env) {
     GET_FIELD_ID(gKeyEventClassInfo.mCharacters, gKeyEventClassInfo.clazz,
             "mCharacters", "Ljava/lang/String;");
 
-    return 0;
+    return AndroidRuntime::registerNativeMethods(
+        env, kKeyEventPathName,
+        g_methods, NELEM(g_methods));
 }
 
 } // namespace android

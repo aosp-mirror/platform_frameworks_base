@@ -17,16 +17,62 @@
 #define LOG_TAG "NativeActivity"
 #include <utils/Log.h>
 
-#include "JNIHelp.h"
-#include "android_view_InputChannel.h"
+#include <poll.h>
+#include <dlfcn.h>
+
 #include <android_runtime/AndroidRuntime.h>
 #include <android/native_activity.h>
 #include <ui/InputTransport.h>
+#include <utils/PollLoop.h>
 
-#include <dlfcn.h>
+#include "JNIHelp.h"
+#include "android_os_MessageQueue.h"
+#include "android_view_InputChannel.h"
+#include "android_view_KeyEvent.h"
 
 namespace android
 {
+
+static struct {
+    jclass clazz;
+
+    jmethodID dispatchUnhandledKeyEvent;
+} gNativeActivityClassInfo;
+
+struct MyInputQueue : AInputQueue {
+    explicit MyInputQueue(const android::sp<android::InputChannel>& channel, int workWrite)
+        : AInputQueue(channel), mWorkWrite(workWrite) {
+    }
+    
+    virtual void doDefaultKey(android::KeyEvent* keyEvent) {
+        mLock.lock();
+        LOGI("Default key: pending=%d write=%d\n", mPendingKeys.size(), mWorkWrite);
+        if (mPendingKeys.size() <= 0 && mWorkWrite >= 0) {
+            int8_t cmd = 1;
+            write(mWorkWrite, &cmd, sizeof(cmd));
+        }
+        mPendingKeys.add(keyEvent);
+        mLock.unlock();
+    }
+    
+    KeyEvent* getNextEvent() {
+        KeyEvent* event = NULL;
+        
+        mLock.lock();
+        if (mPendingKeys.size() > 0) {
+            event = mPendingKeys[0];
+            mPendingKeys.removeAt(0);
+        }
+        mLock.unlock();
+        
+        return event;
+    }
+    
+    int mWorkWrite;
+    
+    Mutex mLock;
+    Vector<KeyEvent*> mPendingKeys;
+};
 
 struct NativeCode {
     NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc) {
@@ -37,14 +83,26 @@ struct NativeCode {
         surface = NULL;
         inputChannel = NULL;
         nativeInputQueue = NULL;
+        mainWorkRead = mainWorkWrite = -1;
     }
     
     ~NativeCode() {
+        if (activity.env != NULL && activity.clazz != NULL) {
+            activity.env->DeleteGlobalRef(activity.clazz);
+        }
+        if (pollLoop != NULL && mainWorkRead >= 0) {
+            pollLoop->removeCallback(mainWorkRead);
+        }
+        if (nativeInputQueue != NULL) {
+            nativeInputQueue->mWorkWrite = -1;
+        }
         setSurface(NULL);
         setInputChannel(NULL);
         if (callbacks.onDestroy != NULL) {
             callbacks.onDestroy(&activity);
         }
+        if (mainWorkRead >= 0) close(mainWorkRead);
+        if (mainWorkWrite >= 0) close(mainWorkWrite);
         if (dlhandle != NULL) {
             dlclose(dlhandle);
         }
@@ -73,7 +131,7 @@ struct NativeCode {
             sp<InputChannel> ic =
                     android_view_InputChannel_getInputChannel(activity.env, _channel);
             if (ic != NULL) {
-                nativeInputQueue = new AInputQueue(ic);
+                nativeInputQueue = new MyInputQueue(ic, mainWorkWrite);
                 if (nativeInputQueue->getConsumer().initialize() != android::OK) {
                     delete nativeInputQueue;
                     nativeInputQueue = NULL;
@@ -94,11 +152,36 @@ struct NativeCode {
     
     jobject surface;
     jobject inputChannel;
-    struct AInputQueue* nativeInputQueue;
+    struct MyInputQueue* nativeInputQueue;
+    
+    // These are used to wake up the main thread to process work.
+    int mainWorkRead;
+    int mainWorkWrite;
+    sp<PollLoop> pollLoop;
 };
 
+static bool mainWorkCallback(int fd, int events, void* data) {
+    NativeCode* code = (NativeCode*)data;
+    if ((events & POLLIN) != 0) {
+        KeyEvent* keyEvent;
+        while ((keyEvent=code->nativeInputQueue->getNextEvent()) != NULL) {
+            jobject inputEventObj = android_view_KeyEvent_fromNative(
+                    code->activity.env, keyEvent);
+            code->activity.env->CallVoidMethod(code->activity.clazz,
+                    gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
+            int32_t res = code->nativeInputQueue->getConsumer().sendFinishedSignal();
+            if (res != OK) {
+                LOGW("Failed to send finished signal on channel '%s'.  status=%d",
+                        code->nativeInputQueue->getConsumer().getChannel()->getName().string(), res);
+            }
+        }
+    }
+    
+    return true;
+}
+
 static jint
-loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path)
+loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQueue)
 {
     const char* pathStr = env->GetStringUTFChars(path, NULL);
     NativeCode* code = NULL;
@@ -115,6 +198,24 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path)
             delete code;
             return 0;
         }
+        
+        code->pollLoop = android_os_MessageQueue_getPollLoop(env, messageQueue);
+        if (code->pollLoop == NULL) {
+            LOGW("Unable to retrieve MessageQueue's PollLoop");
+            delete code;
+            return 0;
+        }
+        
+        int msgpipe[2];
+        if (pipe(msgpipe)) {
+            LOGW("could not create pipe: %s", strerror(errno));
+            delete code;
+            return 0;
+        }
+        code->mainWorkRead = msgpipe[0];
+        code->mainWorkWrite = msgpipe[1];
+        code->pollLoop->setCallback(code->mainWorkRead, POLLIN, mainWorkCallback, code);
+        
         code->activity.callbacks = &code->callbacks;
         if (env->GetJavaVM(&code->activity.vm) < 0) {
             LOGW("NativeActivity GetJavaVM failed");
@@ -122,7 +223,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path)
             return 0;
         }
         code->activity.env = env;
-        code->activity.clazz = clazz;
+        code->activity.clazz = env->NewGlobalRef(clazz);
         code->createActivityFunc(&code->activity, NULL, 0);
     }
     
@@ -288,7 +389,7 @@ onInputChannelDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject 
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;)I", (void*)loadNativeCode_native },
+    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;)I", (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
     { "onStartNative", "(I)V", (void*)onStart_native },
     { "onResumeNative", "(I)V", (void*)onResume_native },
@@ -306,15 +407,25 @@ static const JNINativeMethod g_methods[] = {
 
 static const char* const kNativeActivityPathName = "android/app/NativeActivity";
 
+#define FIND_CLASS(var, className) \
+        var = env->FindClass(className); \
+        LOG_FATAL_IF(! var, "Unable to find class " className); \
+        var = jclass(env->NewGlobalRef(var));
+
+#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
+        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
+        LOG_FATAL_IF(! var, "Unable to find method" methodName);
+        
 int register_android_app_NativeActivity(JNIEnv* env)
 {
     //LOGD("register_android_app_NativeActivity");
 
-    jclass clazz;
-
-    clazz = env->FindClass(kNativeActivityPathName);
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.app.NativeActivity");
-
+    FIND_CLASS(gNativeActivityClassInfo.clazz, kNativeActivityPathName);
+        
+    GET_METHOD_ID(gNativeActivityClassInfo.dispatchUnhandledKeyEvent,
+            gNativeActivityClassInfo.clazz,
+            "dispatchUnhandledKeyEvent", "(Landroid/view/KeyEvent;)V");
+            
     return AndroidRuntime::registerNativeMethods(
         env, kNativeActivityPathName,
         g_methods, NELEM(g_methods));
