@@ -20,6 +20,10 @@ LOCAL_SRC_FILES:= \
 LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
+ifeq ($(TARGET_BOARD_PLATFORM), omap3)
+	LOCAL_CFLAGS += -DNO_RGBX_8888
+endif
+
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
 	ifeq ($(HOST_OS),linux)
