@@ -30,7 +30,9 @@
 
 
 namespace android {
-    
+
+class CursorWindow;
+
 class AndroidRuntime
 {
 public:
@@ -120,6 +122,8 @@ private:
 
 // Returns the Unix file descriptor for a ParcelFileDescriptor object
 extern int getParcelFileDescriptorFD(JNIEnv* env, jobject object);
+
+extern CursorWindow * get_window_from_object(JNIEnv * env, jobject javaWindow);
 
 }
 

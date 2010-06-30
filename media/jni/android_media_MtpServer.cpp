@@ -30,7 +30,7 @@
 
 #include "MtpServer.h"
 
-namespace android {
+using namespace android;
 
 // ----------------------------------------------------------------------------
 
@@ -158,5 +158,3 @@ int register_android_media_MtpServer(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MtpServer", gMethods, NELEM(gMethods));
 }
-
-} // namespace android

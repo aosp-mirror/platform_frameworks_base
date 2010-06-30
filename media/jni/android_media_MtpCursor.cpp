@@ -31,12 +31,11 @@
 #include "MtpClient.h"
 #include "MtpCursor.h"
 
-namespace android {
+using namespace android;
+
+// ----------------------------------------------------------------------------
 
 static jfieldID field_context;
-
-// From android_database_CursorWindow.cpp
-CursorWindow * get_window_from_object(JNIEnv * env, jobject javaWindow);
 
 // From android_media_MtpClient.cpp
 MtpClient * get_client_from_object(JNIEnv * env, jobject javaClient);
@@ -127,5 +126,3 @@ int register_android_media_MtpCursor(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MtpCursor", gMethods, NELEM(gMethods));
 }
-
-} // namespace android

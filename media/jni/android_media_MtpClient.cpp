@@ -31,7 +31,7 @@
 #include "MtpClient.h"
 #include "MtpDevice.h"
 
-namespace android {
+using namespace android;
 
 // ----------------------------------------------------------------------------
 
@@ -261,5 +261,3 @@ int register_android_media_MtpClient(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MtpClient", gMethods, NELEM(gMethods));
 }
-
-} // namespace android
