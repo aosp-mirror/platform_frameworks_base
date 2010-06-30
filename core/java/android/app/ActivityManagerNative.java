@@ -1021,16 +1021,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case REPORT_PSS_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
-            int pss = data.readInt();
-            reportPss(app, pss);
-            reply.writeNoException();
-            return true;
-        }
-
         case START_RUNNING_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
@@ -2528,14 +2518,6 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
-    }
-    public void reportPss(IApplicationThread caller, int pss) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(caller.asBinder());
-        data.writeInt(pss);
-        mRemote.transact(REPORT_PSS_TRANSACTION, data, null, 0);
-        data.recycle();
     }
     public void startRunning(String pkg, String cls, String action,
             String indata) throws RemoteException {
