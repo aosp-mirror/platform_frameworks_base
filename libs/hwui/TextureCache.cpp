@@ -40,7 +40,8 @@ void TextureCache::operator()(SkBitmap* key, Texture* value) {
 Texture* TextureCache::get(SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
     if (!texture) {
-        texture = generateTexture(bitmap);
+        texture = new Texture;
+        generateTexture(bitmap, texture);
         mCache.put(bitmap, texture);
     }
     return texture;
@@ -54,9 +55,7 @@ void TextureCache::clear() {
     mCache.clear();
 }
 
-Texture* TextureCache::generateTexture(SkBitmap* bitmap) {
-    Texture* texture = new Texture;
-
+void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture) {
     texture->width = bitmap->width();
     texture->height = bitmap->height();
 
@@ -76,6 +75,8 @@ Texture* TextureCache::generateTexture(SkBitmap* bitmap) {
     case SkBitmap::kARGB_8888_Config:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height,
                 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
+        break;
+    default:
         break;
     }
 

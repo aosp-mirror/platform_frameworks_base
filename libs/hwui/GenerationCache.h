@@ -41,9 +41,9 @@ public:
     void clear();
 
     bool contains(K* key) const;
-    const V* get(K* key);
+    V* get(K* key);
     void put(K* key, V* value);
-    const V* remove(K* key);
+    V* remove(K* key);
 
     unsigned int size() const;
 
@@ -108,7 +108,7 @@ bool GenerationCache<K, V>::contains(K* key) const {
 }
 
 template<typename K, typename V>
-const V* GenerationCache<K, V>::get(K* key) {
+V* GenerationCache<K, V>::get(K* key) {
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
         sp<Entry<K*, V*> > entry = mCache.valueAt(index);
@@ -148,7 +148,7 @@ void GenerationCache<K, V>::addToCache(sp<Entry<K*, V*> > entry, K* key, V* valu
 }
 
 template<typename K, typename V>
-const V* GenerationCache<K, V>::remove(K* key) {
+V* GenerationCache<K, V>::remove(K* key) {
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
         sp<Entry<K*, V*> > entry = mCache.valueAt(index);
