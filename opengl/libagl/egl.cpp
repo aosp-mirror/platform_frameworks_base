@@ -213,7 +213,7 @@ struct egl_window_surface_v2_t : public egl_surface_t
     egl_window_surface_v2_t(
             EGLDisplay dpy, EGLConfig config,
             int32_t depthFormat,
-            android_native_window_t* window);
+            ANativeWindow* window);
 
     ~egl_window_surface_v2_t();
 
@@ -235,7 +235,7 @@ struct egl_window_surface_v2_t : public egl_surface_t
 private:
     status_t lock(android_native_buffer_t* buf, int usage, void** vaddr);
     status_t unlock(android_native_buffer_t* buf);
-    android_native_window_t*   nativeWindow;
+    ANativeWindow*   nativeWindow;
     android_native_buffer_t*   buffer;
     android_native_buffer_t*   previousBuffer;
     gralloc_module_t const*    module;
@@ -355,7 +355,7 @@ private:
 egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         EGLConfig config,
         int32_t depthFormat,
-        android_native_window_t* window)
+        ANativeWindow* window)
     : egl_surface_t(dpy, config, depthFormat), 
     nativeWindow(window), buffer(0), previousBuffer(0), module(0),
     blitengine(0), bits(NULL)
@@ -1300,7 +1300,7 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
     if (!(surfaceType & EGL_WINDOW_BIT))
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
 
-    if (static_cast<android_native_window_t*>(window)->common.magic !=
+    if (static_cast<ANativeWindow*>(window)->common.magic !=
             ANDROID_NATIVE_WINDOW_MAGIC) {
         return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
     }
@@ -1323,7 +1323,7 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
 
     egl_surface_t* surface;
     surface = new egl_window_surface_v2_t(dpy, config, depthFormat,
-            static_cast<android_native_window_t*>(window));
+            static_cast<ANativeWindow*>(window));
 
     if (!surface->initCheck()) {
         // there was a problem in the ctor, the error
