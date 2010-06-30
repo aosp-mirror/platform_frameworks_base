@@ -845,6 +845,7 @@ java.math.BigDecimal
 java.math.BigInt
 java.math.BigInteger
 java.math.Multiplication
+java.math.NativeBN
 java.net.AddressCache
 java.net.AddressCache$1
 java.net.ConnectException
@@ -1249,7 +1250,6 @@ org.ccil.cowan.tagsoup.Parser
 org.json.JSONObject
 org.kxml2.io.KXmlParser
 org.kxml2.io.KXmlSerializer
-org.openssl.NativeBN
 org.xml.sax.Attributes
 org.xml.sax.InputSource
 org.xml.sax.helpers.AttributesImpl
