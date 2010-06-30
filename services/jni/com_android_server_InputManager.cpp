@@ -395,7 +395,7 @@ private:
 
 NativeInputManager::NativeInputManager(jobject callbacksObj) :
     mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1),
-    mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(-1),
+    mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(ROTATION_0),
     mDispatchEnabled(true), mDispatchFrozen(false), mWindowsReady(true),
     mFocusedWindow(NULL), mTouchDown(false), mTouchedWindow(NULL),
     mFocusedApplication(NULL) {
