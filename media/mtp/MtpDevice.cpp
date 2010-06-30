@@ -15,7 +15,14 @@
  */
 
 #define LOG_TAG "MtpDevice"
-#include "utils/Log.h"
+
+#include "MtpDebug.h"
+#include "MtpDevice.h"
+#include "MtpDeviceInfo.h"
+#include "MtpObjectInfo.h"
+#include "MtpProperty.h"
+#include "MtpStorageInfo.h"
+#include "MtpStringBuffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,14 +33,6 @@
 #include <errno.h>
 
 #include <usbhost/usbhost.h>
-
-#include "MtpDevice.h"
-#include "MtpDebug.h"
-#include "MtpDeviceInfo.h"
-#include "MtpObjectInfo.h"
-#include "MtpProperty.h"
-#include "MtpStorageInfo.h"
-#include "MtpStringBuffer.h"
 
 namespace android {
 

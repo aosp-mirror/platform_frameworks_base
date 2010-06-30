@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpDataPacket"
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -312,15 +314,12 @@ void MtpDataPacket::putString(const char* s)
 int MtpDataPacket::read(int fd) {
     // first read the header
     int ret = ::read(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
-printf("MtpDataPacket::read 1 returned %d\n", ret);
     if (ret != MTP_CONTAINER_HEADER_SIZE)
         return -1;
     // then the following data
     int total = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
     int remaining = total - MTP_CONTAINER_HEADER_SIZE;
-printf("total: %d, remaining: %d\n", total, remaining);
     ret = ::read(fd, &mBuffer[0] + MTP_CONTAINER_HEADER_SIZE, remaining);
-printf("MtpDataPacket::read 2 returned %d\n", ret);
     if (ret != remaining)
         return -1;
 

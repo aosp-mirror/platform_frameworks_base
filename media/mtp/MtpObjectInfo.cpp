@@ -15,8 +15,8 @@
  */
 
 #define LOG_TAG "MtpObjectInfo"
-#include "utils/Log.h"
 
+#include "MtpDebug.h"
 #include "MtpDataPacket.h"
 #include "MtpObjectInfo.h"
 #include "MtpStringBuffer.h"

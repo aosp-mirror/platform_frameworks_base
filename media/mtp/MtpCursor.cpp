@@ -15,14 +15,15 @@
  */
 
 #define LOG_TAG "MtpCursor"
-#include "utils/Log.h"
 
+#include "MtpDebug.h"
 #include "MtpClient.h"
 #include "MtpCursor.h"
 #include "MtpDevice.h"
 #include "MtpDeviceInfo.h"
 #include "MtpObjectInfo.h"
 #include "MtpStorageInfo.h"
+
 
 #include "binder/CursorWindow.h"
 

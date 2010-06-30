@@ -15,7 +15,8 @@
  */
 
 #define LOG_TAG "mtp_usb"
-#include "cutils/log.h"
+
+#include "MtpDebug.h"
 
 #include <stdio.h>
 #include <stdlib.h>

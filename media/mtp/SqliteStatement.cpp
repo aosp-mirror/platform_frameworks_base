@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "SqliteStatement"
+
 #include "SqliteStatement.h"
 #include "SqliteDatabase.h"
 

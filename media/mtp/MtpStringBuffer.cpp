@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "MtpStringBuffer"
+
 #include <string.h>
 
 #include "MtpDataPacket.h"
