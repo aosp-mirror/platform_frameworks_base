@@ -43,6 +43,8 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         texture = new Texture;
         generateTexture(bitmap, texture);
         mCache.put(bitmap, texture);
+    } else if (bitmap->getGenerationID() != texture->generation) {
+        generateTexture(bitmap, texture, true);
     }
     return texture;
 }
@@ -55,11 +57,14 @@ void TextureCache::clear() {
     mCache.clear();
 }
 
-void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture) {
-    texture->width = bitmap->width();
-    texture->height = bitmap->height();
+void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
+    if (!regenerate) {
+        texture->width = bitmap->width();
+        texture->height = bitmap->height();
 
-    glGenTextures(1, &texture->id);
+        glGenTextures(1, &texture->id);
+    }
+
     glBindTexture(GL_TEXTURE_2D, texture->id);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -80,7 +85,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture) {
         break;
     }
 
-    return texture;
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 }; // namespace uirenderer

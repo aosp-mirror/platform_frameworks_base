@@ -31,6 +31,10 @@ struct Texture {
      */
     GLuint id;
     /**
+     * Generation of the backing bitmap,
+     */
+    uint32_t generation;
+    /**
      * Indicates whether the texture requires blending.
      */
     bool blend;

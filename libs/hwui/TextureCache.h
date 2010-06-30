@@ -37,7 +37,7 @@ public:
     void clear();
 
 private:
-    void generateTexture(SkBitmap* bitmap, Texture* texture);
+    void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
 
     GenerationCache<SkBitmap, Texture> mCache;
 }; // class TextureCache
