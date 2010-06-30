@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
@@ -47,7 +48,9 @@ public class ActionBarContextView extends ViewGroup {
     
     private ImageButton mCloseButton;
     private View mCustomView;
+    private LinearLayout mTitleLayout;
     private TextView mTitleView;
+    private TextView mSubtitleView;
     private Drawable mCloseDrawable;
     
     public ActionBarContextView(Context context) {
@@ -80,40 +83,48 @@ public class ActionBarContextView extends ViewGroup {
             removeView(mCustomView);
         }
         mCustomView = view;
-        if (mTitleView != null) {
-            removeView(mTitleView);
-            mTitleView = null;
+        if (mTitleLayout != null) {
+            removeView(mTitleLayout);
+            mTitleLayout = null;
         }
         if (view != null) {
             addView(view);
         }
         requestLayout();
     }
-    
+
     public void setTitle(CharSequence title) {
         mTitle = title;
-        if (mTitleView == null) {
+        initTitle();
+    }
+
+    public void setSubtitle(CharSequence subtitle) {
+        mSubtitle = subtitle;
+        initTitle();
+    }
+
+    private void initTitle() {
+        if (mTitleLayout == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            mTitleView = (TextView) inflater.inflate(R.layout.action_bar_title_item, null);
-            mTitleView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.WRAP_CONTENT));
-            if (title != null) {
-                mTitleView.setText(title);
+            mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
+            mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
+            mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
+            if (mTitle != null) {
+                mTitleView.setText(mTitle);
             }
-            addView(mTitleView);
+            if (mSubtitle != null) {
+                mSubtitleView.setText(mSubtitle);
+            }
+            addView(mTitleLayout);
         } else {
-            mTitleView.setText(title);
-            if (mTitleView.getParent() == null) {
-                addView(mTitleView);
+            mTitleView.setText(mTitle);
+            mSubtitleView.setText(mSubtitle);
+            if (mTitleLayout.getParent() == null) {
+                addView(mTitleLayout);
             }
         }
     }
-    
-    public void setSubtitle(CharSequence subtitle) {
-        mSubtitle = subtitle;
-        // TODO add subtitle support
-    }
-    
+
     public void initForMode(final ActionBar.ContextMode mode) {
         final ActionBarImpl.ContextMode implMode = (ActionBarImpl.ContextMode) mode;
         
@@ -148,17 +159,17 @@ public class ActionBarContextView extends ViewGroup {
                     implMode.dispatchOnContextItemClicked(item);
                 }
             });
-            
+
             addView(button);
         }
         requestLayout();
     }
-    
+
     public void closeMode() {
         removeAllViews();
         mCustomView = null;
     }
-    
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -185,15 +196,15 @@ public class ActionBarContextView extends ViewGroup {
                     childSpecHeight, itemMargin);
         }
 
-        if (mTitleView != null && mCustomView == null) {
-            availableWidth = measureChildView(mTitleView, availableWidth,
+        if (mTitleLayout != null && mCustomView == null) {
+            availableWidth = measureChildView(mTitleLayout, availableWidth,
                     childSpecHeight, itemMargin);
         }
 
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
-            if (child == mCloseButton || child == mTitleView || child == mCustomView) {
+            if (child == mCloseButton || child == mTitleLayout || child == mCustomView) {
                 continue;
             }
             
@@ -219,8 +230,8 @@ public class ActionBarContextView extends ViewGroup {
             x += positionChild(mCloseButton, x, y, contentHeight);
         }
         
-        if (mTitleView != null && mCustomView == null) {
-            x += positionChild(mTitleView, x, y, contentHeight) + itemMargin;
+        if (mTitleLayout != null && mCustomView == null) {
+            x += positionChild(mTitleLayout, x, y, contentHeight) + itemMargin;
         }
         
         if (mCustomView != null) {
@@ -232,7 +243,7 @@ public class ActionBarContextView extends ViewGroup {
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
-            if (child == mCloseButton || child == mTitleView || child == mCustomView) {
+            if (child == mCloseButton || child == mTitleLayout || child == mCustomView) {
                 continue;
             }
 

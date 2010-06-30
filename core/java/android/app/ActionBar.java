@@ -103,7 +103,7 @@ public abstract class ActionBar {
      * good for extended descriptions of activity state.
      *
      * @param title The action bar's title. null is treated as an empty string.
-     * @param subtitle The action bar's subtitle. null is treated as an empty string.
+     * @param subtitle The action bar's subtitle. null will remove the subtitle entirely.
      */
     public abstract void setStandardNavigationMode(CharSequence title, CharSequence subtitle);
 
@@ -111,11 +111,35 @@ public abstract class ActionBar {
      * Set the action bar into standard navigation mode, supplying a title and subtitle.
      * 
      * Standard navigation mode is default. The title is automatically set to the
-     * name of your Activity.
+     * name of your Activity on startup if an action bar is present.
      *
      * @param title The action bar's title. null is treated as an empty string.
      */
     public abstract void setStandardNavigationMode(CharSequence title);
+
+    /**
+     * Set the action bar into standard navigation mode, using the currently set title
+     * and/or subtitle.
+     *
+     * Standard navigation mode is default. The title is automatically set to the name of
+     * your Activity on startup if an action bar is present.
+     */
+    public abstract void setStandardNavigationMode();
+
+    /**
+     * Set the action bar's title. This will only be displayed in standard navigation mode.
+     *
+     * @param title Title to set
+     */
+    public abstract void setTitle(CharSequence title);
+
+    /**
+     * Set the action bar's subtitle. This will only be displayed in standard navigation mode.
+     * Set to null to disable the subtitle entirely.
+     *
+     * @param subtitle Subtitle to set
+     */
+    public abstract void setSubtitle(CharSequence subtitle);
 
     /**
      * Set display options. This changes all display option bits at once. To change

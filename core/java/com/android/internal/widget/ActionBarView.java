@@ -39,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -80,6 +81,7 @@ public class ActionBarView extends ViewGroup {
 
     private ImageView mIconView;
     private ImageView mLogoView;
+    private LinearLayout mTitleLayout;
     private TextView mTitleView;
     private TextView mSubtitleView;
     private Spinner mSpinner;
@@ -250,9 +252,11 @@ public class ActionBarView extends ViewGroup {
         if (mode != oldMode) {
             switch (oldMode) {
             case ActionBar.NAVIGATION_MODE_STANDARD:
-                if (mTitleView != null) {
-                    removeView(mTitleView);
+                if (mTitleLayout != null) {
+                    removeView(mTitleLayout);
+                    mTitleLayout = null;
                     mTitleView = null;
+                    mSubtitleView = null;
                 }
                 break;
             case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
@@ -361,13 +365,17 @@ public class ActionBarView extends ViewGroup {
     
     private void initTitle() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        mTitleView = (TextView) inflater.inflate(R.layout.action_bar_title_item, null);
-        mTitleView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT));
+        mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
+        mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
+        mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
         if (mTitle != null) {
             mTitleView.setText(mTitle);
         }
-        addView(mTitleView);
+        if (mSubtitle != null) {
+            mSubtitleView.setText(mSubtitle);
+            mSubtitleView.setVisibility(VISIBLE);
+        }
+        addView(mTitleLayout);
     }
 
     @Override
@@ -404,8 +412,8 @@ public class ActionBarView extends ViewGroup {
         
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_STANDARD:
-            if (mTitleView != null) {
-                measureChildView(mTitleView, availableWidth, childSpecHeight, mSpacing);
+            if (mTitleLayout != null) {
+                measureChildView(mTitleLayout, availableWidth, childSpecHeight, mSpacing);
             }
             break;
         case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
@@ -452,8 +460,8 @@ public class ActionBarView extends ViewGroup {
         
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_STANDARD:
-            if (mTitleView != null) {
-                x += positionChild(mTitleView, x, y, contentHeight) + mSpacing;
+            if (mTitleLayout != null) {
+                x += positionChild(mTitleLayout, x, y, contentHeight) + mSpacing;
             }
             break;
         case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:

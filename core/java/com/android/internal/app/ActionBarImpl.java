@@ -23,6 +23,7 @@ import com.android.internal.widget.ActionBarView;
 
 import android.app.ActionBar;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,7 +53,17 @@ public class ActionBarImpl extends ActionBar {
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
     
     private int mContextDisplayMode;
-    
+
+    final Handler mHandler = new Handler();
+    final Runnable mCloseContext = new Runnable() {
+        public void run() {
+            mUpperContextView.closeMode();
+            if (mLowerContextView != null) {
+                mLowerContextView.removeAllViews();
+            }
+        }
+    };
+
     public ActionBarImpl(View decor) {
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mUpperContextView = (ActionBarContextView) decor.findViewById(
@@ -66,7 +77,7 @@ public class ActionBarImpl extends ActionBar {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
                     "with a compatible window decor layout");
         }
-        
+
         mContextDisplayMode = mLowerContextView == null ?
                 CONTEXT_DISPLAY_NORMAL : CONTEXT_DISPLAY_SPLIT;
     }
@@ -75,17 +86,22 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setCustomNavigationView(view);
         mActionView.setCallback(null);
     }
-    
+
     public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback) {
         mActionView.setCallback(callback);
         mActionView.setNavigationMode(NAVIGATION_MODE_DROPDOWN_LIST);
         mActionView.setDropdownAdapter(adapter);
     }
-    
+
+    public void setStandardNavigationMode() {
+        mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
+        mActionView.setCallback(null);
+    }
+
     public void setStandardNavigationMode(CharSequence title) {
         setStandardNavigationMode(title, null);
     }
-    
+
     public void setStandardNavigationMode(CharSequence title, CharSequence subtitle) {
         mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
         mActionView.setTitle(title);
@@ -93,10 +109,18 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setCallback(null);
     }
 
+    public void setTitle(CharSequence title) {
+        mActionView.setTitle(title);
+    }
+
+    public void setSubtitle(CharSequence subtitle) {
+        mActionView.setSubtitle(subtitle);
+    }
+
     public void setDisplayOptions(int options) {
         mActionView.setDisplayOptions(options);
     }
-    
+
     public void setDisplayOptions(int options, int mask) {
         final int current = mActionView.getDisplayOptions(); 
         mActionView.setDisplayOptions((options & mask) | (current & ~mask));
@@ -170,11 +194,11 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public void finish() {
             mCallback.onDestroyContextMode(this);
-            mUpperContextView.closeMode();
-            if (mLowerContextView != null) {
-                mLowerContextView.removeAllViews();
-            }
             mAnimatorView.setDisplayedChild(NORMAL_VIEW);
+
+            // Clear out the context mode views after the animation finishes
+            mHandler.postDelayed(mCloseContext, mAnimatorView.getOutAnimation().getDuration());
+
             if (mLowerContextView != null && mLowerContextView.getVisibility() != View.GONE) {
                 // TODO Animate this
                 mLowerContextView.setVisibility(View.GONE);

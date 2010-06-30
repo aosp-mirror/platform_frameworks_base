@@ -14,9 +14,20 @@
      limitations under the License.
 -->
 
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-
-    android:singleLine="true"
-    android:ellipsize="end"
-    android:textAppearance="?android:attr/textAppearanceMediumInverse" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical" >
+    <TextView android:id="@+id/action_bar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse" />
+    <TextView android:id="@+id/action_bar_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textAppearance="?android:attr/textAppearanceSmallInverse" />
+</LinearLayout>
