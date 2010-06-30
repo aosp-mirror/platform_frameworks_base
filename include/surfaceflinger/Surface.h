@@ -131,7 +131,7 @@ private:
 // ---------------------------------------------------------------------------
 
 class Surface 
-    : public EGLNativeBase<android_native_window_t, Surface, RefBase>
+    : public EGLNativeBase<ANativeWindow, Surface, RefBase>
 {
 public:
     struct SurfaceInfo {
@@ -195,14 +195,14 @@ private:
 
 
     /*
-     *  android_native_window_t hooks
+     *  ANativeWindow hooks
      */
-    static int setSwapInterval(android_native_window_t* window, int interval);
-    static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
-    static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
-    static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
-    static int query(android_native_window_t* window, int what, int* value);
-    static int perform(android_native_window_t* window, int operation, ...);
+    static int setSwapInterval(ANativeWindow* window, int interval);
+    static int dequeueBuffer(ANativeWindow* window, android_native_buffer_t** buffer);
+    static int lockBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
+    static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
+    static int query(ANativeWindow* window, int what, int* value);
+    static int perform(ANativeWindow* window, int operation, ...);
 
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);

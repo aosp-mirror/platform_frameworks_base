@@ -461,7 +461,7 @@ Context::~Context()
     objDestroyOOBDestroy();
 }
 
-void Context::setSurface(uint32_t w, uint32_t h, android_native_window_t *sur)
+void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
 {
     rsAssert(mIsGraphicsContext);
 
@@ -853,7 +853,7 @@ void rsi_ContextResume(Context *rsc)
     rsc->resume();
 }
 
-void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, android_native_window_t *sur)
+void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur)
 {
     rsc->setSurface(w, h, sur);
 }

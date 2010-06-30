@@ -36,7 +36,7 @@ ContextResume {
 ContextSetSurface {
 	param uint32_t width
 	param uint32_t height
-	param android_native_window_t *sur
+	param ANativeWindow *sur
 	}
 
 ContextDump {
