@@ -22,6 +22,8 @@
 
 #include <hardware/gralloc.h>
 
+#include <android/native_window.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -90,19 +92,19 @@ enum {
     NATIVE_WINDOW_API_EGL = 1
 };
 
-typedef struct android_native_window_t 
+struct ANativeWindow 
 {
 #ifdef __cplusplus
-    android_native_window_t()
+    ANativeWindow()
         : flags(0), minSwapInterval(0), maxSwapInterval(0), xdpi(0), ydpi(0)
     {
         common.magic = ANDROID_NATIVE_WINDOW_MAGIC;
-        common.version = sizeof(android_native_window_t);
+        common.version = sizeof(ANativeWindow);
         memset(common.reserved, 0, sizeof(common.reserved));
     }
 
-    // Implement the methods that sp<android_native_window_t> expects so that it
-    // can be used to automatically refcount android_native_window_t's.
+    // Implement the methods that sp<ANativeWindow> expects so that it
+    // can be used to automatically refcount ANativeWindow's.
     void incStrong(const void* id) const {
         common.incRef(const_cast<android_native_base_t*>(&common));
     }
@@ -135,7 +137,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*setSwapInterval)(struct android_native_window_t* window,
+    int     (*setSwapInterval)(struct ANativeWindow* window,
                 int interval);
     
     /*
@@ -145,7 +147,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*dequeueBuffer)(struct android_native_window_t* window,
+    int     (*dequeueBuffer)(struct ANativeWindow* window,
                 struct android_native_buffer_t** buffer);
 
     /*
@@ -155,7 +157,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*lockBuffer)(struct android_native_window_t* window,
+    int     (*lockBuffer)(struct ANativeWindow* window,
                 struct android_native_buffer_t* buffer);
    /*
     * hook called by EGL when modifications to the render buffer are done. 
@@ -165,7 +167,7 @@ typedef struct android_native_window_t
     * 
     * Returns 0 on success or -errno on error.
     */
-    int     (*queueBuffer)(struct android_native_window_t* window,
+    int     (*queueBuffer)(struct ANativeWindow* window,
                 struct android_native_buffer_t* buffer);
 
     /*
@@ -173,13 +175,13 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*query)(struct android_native_window_t* window,
+    int     (*query)(struct ANativeWindow* window,
                 int what, int* value);
     
     /*
      * hook used to perform various operations on the surface.
      * (*perform)() is a generic mechanism to add functionality to
-     * android_native_window_t while keeping backward binary compatibility.
+     * ANativeWindow while keeping backward binary compatibility.
      * 
      * This hook should not be called directly, instead use the helper functions
      * defined below.
@@ -197,12 +199,14 @@ typedef struct android_native_window_t
      *  
      */
     
-    int     (*perform)(struct android_native_window_t* window,
+    int     (*perform)(struct ANativeWindow* window,
                 int operation, ... );
     
     void* reserved_proc[3];
-} android_native_window_t;
+};
 
+// Backwards compatibility...  please switch to ANativeWindow.
+typedef struct ANativeWindow android_native_window_t;
 
 /*
  *  native_window_set_usage(..., usage)
@@ -216,7 +220,7 @@ typedef struct android_native_window_t
  */
 
 static inline int native_window_set_usage(
-        android_native_window_t* window, int usage)
+        ANativeWindow* window, int usage)
 {
     return window->perform(window, NATIVE_WINDOW_SET_USAGE, usage);
 }
@@ -228,7 +232,7 @@ static inline int native_window_set_usage(
  * can happen if it's connected to some other API.
  */
 static inline int native_window_connect(
-        android_native_window_t* window, int api)
+        ANativeWindow* window, int api)
 {
     return window->perform(window, NATIVE_WINDOW_CONNECT, api);
 }
@@ -240,7 +244,7 @@ static inline int native_window_connect(
  * first place.
  */
 static inline int native_window_disconnect(
-        android_native_window_t* window, int api)
+        ANativeWindow* window, int api)
 {
     return window->perform(window, NATIVE_WINDOW_DISCONNECT, api);
 }
@@ -258,7 +262,7 @@ static inline int native_window_disconnect(
  * out of the buffer's bound or if the window is invalid.
  */
 static inline int native_window_set_crop(
-        android_native_window_t* window,
+        ANativeWindow* window,
         android_native_rect_t const * crop)
 {
     return window->perform(window, NATIVE_WINDOW_SET_CROP, crop);
@@ -269,7 +273,7 @@ static inline int native_window_set_crop(
  * Sets the number of buffers associated with this native window.
  */
 static inline int native_window_set_buffer_count(
-        android_native_window_t* window,
+        ANativeWindow* window,
         size_t bufferCount)
 {
     return window->perform(window, NATIVE_WINDOW_SET_BUFFER_COUNT, bufferCount);
@@ -287,7 +291,7 @@ static inline int native_window_set_buffer_count(
  *
  */
 static inline int native_window_set_buffers_geometry(
-        android_native_window_t* window,
+        ANativeWindow* window,
         int w, int h, int format)
 {
     return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,

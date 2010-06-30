@@ -387,21 +387,21 @@ sp<Surface> Surface::readFromParcel(
 
 void Surface::init()
 {
-    android_native_window_t::setSwapInterval  = setSwapInterval;
-    android_native_window_t::dequeueBuffer    = dequeueBuffer;
-    android_native_window_t::lockBuffer       = lockBuffer;
-    android_native_window_t::queueBuffer      = queueBuffer;
-    android_native_window_t::query            = query;
-    android_native_window_t::perform          = perform;
+    ANativeWindow::setSwapInterval  = setSwapInterval;
+    ANativeWindow::dequeueBuffer    = dequeueBuffer;
+    ANativeWindow::lockBuffer       = lockBuffer;
+    ANativeWindow::queueBuffer      = queueBuffer;
+    ANativeWindow::query            = query;
+    ANativeWindow::perform          = perform;
 
     DisplayInfo dinfo;
     SurfaceComposerClient::getDisplayInfo(0, &dinfo);
-    const_cast<float&>(android_native_window_t::xdpi) = dinfo.xdpi;
-    const_cast<float&>(android_native_window_t::ydpi) = dinfo.ydpi;
+    const_cast<float&>(ANativeWindow::xdpi) = dinfo.xdpi;
+    const_cast<float&>(ANativeWindow::ydpi) = dinfo.ydpi;
     // FIXME: set real values here
-    const_cast<int&>(android_native_window_t::minSwapInterval) = 1;
-    const_cast<int&>(android_native_window_t::maxSwapInterval) = 1;
-    const_cast<uint32_t&>(android_native_window_t::flags) = 0;
+    const_cast<int&>(ANativeWindow::minSwapInterval) = 1;
+    const_cast<int&>(ANativeWindow::maxSwapInterval) = 1;
+    const_cast<uint32_t&>(ANativeWindow::flags) = 0;
 
     mConnected = 0;
     mSwapRectangle.makeInvalid();
@@ -485,35 +485,35 @@ sp<ISurface> Surface::getISurface() const {
 
 // ----------------------------------------------------------------------------
 
-int Surface::setSwapInterval(android_native_window_t* window, int interval) {
+int Surface::setSwapInterval(ANativeWindow* window, int interval) {
     return 0;
 }
 
-int Surface::dequeueBuffer(android_native_window_t* window, 
+int Surface::dequeueBuffer(ANativeWindow* window, 
         android_native_buffer_t** buffer) {
     Surface* self = getSelf(window);
     return self->dequeueBuffer(buffer);
 }
 
-int Surface::lockBuffer(android_native_window_t* window, 
+int Surface::lockBuffer(ANativeWindow* window, 
         android_native_buffer_t* buffer) {
     Surface* self = getSelf(window);
     return self->lockBuffer(buffer);
 }
 
-int Surface::queueBuffer(android_native_window_t* window, 
+int Surface::queueBuffer(ANativeWindow* window, 
         android_native_buffer_t* buffer) {
     Surface* self = getSelf(window);
     return self->queueBuffer(buffer);
 }
 
-int Surface::query(android_native_window_t* window, 
+int Surface::query(ANativeWindow* window, 
         int what, int* value) {
     Surface* self = getSelf(window);
     return self->query(what, value);
 }
 
-int Surface::perform(android_native_window_t* window, 
+int Surface::perform(ANativeWindow* window, 
         int operation, ...) {
     va_list args;
     va_start(args, operation);
@@ -803,7 +803,7 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
 {
     if (getConnectedApi()) {
         LOGE("Surface::lock(%p) failed. Already connected to another API",
-                (android_native_window_t*)this);
+                (ANativeWindow*)this);
         CallStack stack;
         stack.update();
         stack.dump("");
