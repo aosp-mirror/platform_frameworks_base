@@ -76,7 +76,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
     const int32_t nature = INPUT_EVENT_NATURE_KEY;
     const int32_t action = KEY_EVENT_ACTION_DOWN;
     const int32_t flags = KEY_EVENT_FLAG_FROM_SYSTEM;
-    const int32_t keyCode = KEYCODE_ENTER;
+    const int32_t keyCode = AKEYCODE_ENTER;
     const int32_t scanCode = 13;
     const int32_t metaState = META_ALT_LEFT_ON | META_ALT_ON;
     const int32_t repeatCount = 1;

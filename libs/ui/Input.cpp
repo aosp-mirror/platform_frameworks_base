@@ -22,26 +22,26 @@ void InputEvent::initialize(int32_t deviceId, int32_t nature) {
 
 bool KeyEvent::hasDefaultAction(int32_t keyCode) {
     switch (keyCode) {
-        case KEYCODE_HOME:
-        case KEYCODE_BACK:
-        case KEYCODE_CALL:
-        case KEYCODE_ENDCALL:
-        case KEYCODE_VOLUME_UP:
-        case KEYCODE_VOLUME_DOWN:
-        case KEYCODE_POWER:
-        case KEYCODE_CAMERA:
-        case KEYCODE_HEADSETHOOK:
-        case KEYCODE_MENU:
-        case KEYCODE_NOTIFICATION:
-        case KEYCODE_FOCUS:
-        case KEYCODE_SEARCH:
-        case KEYCODE_MEDIA_PLAY_PAUSE:
-        case KEYCODE_MEDIA_STOP:
-        case KEYCODE_MEDIA_NEXT:
-        case KEYCODE_MEDIA_PREVIOUS:
-        case KEYCODE_MEDIA_REWIND:
-        case KEYCODE_MEDIA_FAST_FORWARD:
-        case KEYCODE_MUTE:
+        case AKEYCODE_HOME:
+        case AKEYCODE_BACK:
+        case AKEYCODE_CALL:
+        case AKEYCODE_ENDCALL:
+        case AKEYCODE_VOLUME_UP:
+        case AKEYCODE_VOLUME_DOWN:
+        case AKEYCODE_POWER:
+        case AKEYCODE_CAMERA:
+        case AKEYCODE_HEADSETHOOK:
+        case AKEYCODE_MENU:
+        case AKEYCODE_NOTIFICATION:
+        case AKEYCODE_FOCUS:
+        case AKEYCODE_SEARCH:
+        case AKEYCODE_MEDIA_PLAY_PAUSE:
+        case AKEYCODE_MEDIA_STOP:
+        case AKEYCODE_MEDIA_NEXT:
+        case AKEYCODE_MEDIA_PREVIOUS:
+        case AKEYCODE_MEDIA_REWIND:
+        case AKEYCODE_MEDIA_FAST_FORWARD:
+        case AKEYCODE_MUTE:
             return true;
     }
     
@@ -54,26 +54,26 @@ bool KeyEvent::hasDefaultAction() const {
 
 bool KeyEvent::isSystemKey(int32_t keyCode) {
     switch (keyCode) {
-        case KEYCODE_MENU:
-        case KEYCODE_SOFT_RIGHT:
-        case KEYCODE_HOME:
-        case KEYCODE_BACK:
-        case KEYCODE_CALL:
-        case KEYCODE_ENDCALL:
-        case KEYCODE_VOLUME_UP:
-        case KEYCODE_VOLUME_DOWN:
-        case KEYCODE_MUTE:
-        case KEYCODE_POWER:
-        case KEYCODE_HEADSETHOOK:
-        case KEYCODE_MEDIA_PLAY_PAUSE:
-        case KEYCODE_MEDIA_STOP:
-        case KEYCODE_MEDIA_NEXT:
-        case KEYCODE_MEDIA_PREVIOUS:
-        case KEYCODE_MEDIA_REWIND:
-        case KEYCODE_MEDIA_FAST_FORWARD:
-        case KEYCODE_CAMERA:
-        case KEYCODE_FOCUS:
-        case KEYCODE_SEARCH:
+        case AKEYCODE_MENU:
+        case AKEYCODE_SOFT_RIGHT:
+        case AKEYCODE_HOME:
+        case AKEYCODE_BACK:
+        case AKEYCODE_CALL:
+        case AKEYCODE_ENDCALL:
+        case AKEYCODE_VOLUME_UP:
+        case AKEYCODE_VOLUME_DOWN:
+        case AKEYCODE_MUTE:
+        case AKEYCODE_POWER:
+        case AKEYCODE_HEADSETHOOK:
+        case AKEYCODE_MEDIA_PLAY_PAUSE:
+        case AKEYCODE_MEDIA_STOP:
+        case AKEYCODE_MEDIA_NEXT:
+        case AKEYCODE_MEDIA_PREVIOUS:
+        case AKEYCODE_MEDIA_REWIND:
+        case AKEYCODE_MEDIA_FAST_FORWARD:
+        case AKEYCODE_CAMERA:
+        case AKEYCODE_FOCUS:
+        case AKEYCODE_SEARCH:
             return true;
     }
     
