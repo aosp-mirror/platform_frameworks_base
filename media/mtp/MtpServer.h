@@ -28,6 +28,7 @@ namespace android {
 
 class MtpStorage;
 class MtpDatabase;
+class MtpProperty;
 
 class MtpServer {
 
@@ -51,6 +52,9 @@ private:
 
     MtpStorageList      mStorages;
 
+    MtpPropertyList     mObjectProperties;
+    MtpPropertyList     mDeviceProperties;
+
     // handle for new object, set by SendObjectInfo and used by SendObject
     MtpObjectHandle     mSendObjectHandle;
     MtpString           mSendObjectFilePath;
@@ -66,7 +70,12 @@ public:
     void                scanStorage();
     void                run();
 
+    MtpProperty*        getObjectProperty(MtpPropertyCode propCode);
+    MtpProperty*        getDeviceProperty(MtpPropertyCode propCode);
+
 private:
+    void                initObjectProperties();
+
     bool                handleRequest();
 
     MtpResponseCode     doGetDeviceInfo();

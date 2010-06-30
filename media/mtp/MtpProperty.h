@@ -55,15 +55,24 @@ public:
 
 public:
                         MtpProperty();
+                        MtpProperty(MtpPropertyCode propCode,
+                                     MtpDataType type,
+                                     bool writeable = false,
+                                     int defaultValue = 0);
     virtual             ~MtpProperty();
 
-    void                read(MtpDataPacket& packet);
+    inline MtpPropertyCode getPropertyCode() const { return mCode; }
+
+    void                read(MtpDataPacket& packet, bool deviceProp);
+    void                write(MtpDataPacket& packet);
 
     void                print();
 
 private:
     void                readValue(MtpDataPacket& packet, MtpPropertyValue& value);
+    void                writeValue(MtpDataPacket& packet, MtpPropertyValue& value);
     MtpPropertyValue*   readArrayValues(MtpDataPacket& packet, int& length);
+    void                writeArrayValues(MtpDataPacket& packet, MtpPropertyValue* values, int length);
 };
 
 }; // namespace android

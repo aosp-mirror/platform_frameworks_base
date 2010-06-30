@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MtpServer"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -27,11 +25,11 @@
 #include <cutils/properties.h>
 
 #include "MtpDebug.h"
+#include "MtpDatabase.h"
+#include "MtpProperty.h"
 #include "MtpServer.h"
 #include "MtpStorage.h"
 #include "MtpStringBuffer.h"
-#include "MtpDatabase.h"
-#include "MtpDebug.h"
 
 #include "f_mtp.h"
 
@@ -126,6 +124,8 @@ MtpServer::MtpServer(int fd, const char* databasePath)
 {
     mDatabase = new MtpDatabase();
     mDatabase->open(databasePath, true);
+
+    initObjectProperties();
 }
 
 MtpServer::~MtpServer() {
@@ -157,7 +157,7 @@ void MtpServer::scanStorage() {
 void MtpServer::run() {
     int fd = mFD;
 
-    LOGD("MtpServer::run fd: %d", fd);
+    LOGV("MtpServer::run fd: %d\n", fd);
 
     while (1) {
         int ret = mRequest.read(fd);
@@ -222,9 +222,35 @@ void MtpServer::run() {
                 break;
             }
         } else {
-            LOGV("skipping response");
+            LOGV("skipping response\n");
         }
     }
+}
+
+MtpProperty* MtpServer::getObjectProperty(MtpPropertyCode propCode) {
+    for (int i = 0; i < mObjectProperties.size(); i++) {
+        MtpProperty* property = mObjectProperties[i];
+        if (property->getPropertyCode() == propCode)
+            return property;
+    }
+    return NULL;
+}
+
+MtpProperty* MtpServer::getDeviceProperty(MtpPropertyCode propCode) {
+    for (int i = 0; i < mDeviceProperties.size(); i++) {
+        MtpProperty* property = mDeviceProperties[i];
+        if (property->getPropertyCode() == propCode)
+            return property;
+    }
+    return NULL;
+}
+
+void MtpServer::initObjectProperties() {
+    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_STORAGE_ID, MTP_TYPE_UINT16));
+    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FORMAT, MTP_TYPE_UINT16));
+    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_SIZE, MTP_TYPE_UINT64));
+    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_OBJECT_FILE_NAME, MTP_TYPE_STR));
+    mObjectProperties.push(new MtpProperty(MTP_PROPERTY_PARENT_OBJECT, MTP_TYPE_UINT32));
 }
 
 bool MtpServer::handleRequest() {
@@ -280,6 +306,8 @@ bool MtpServer::handleRequest() {
             response = doDeleteObject();
             break;
         case MTP_OPERATION_GET_OBJECT_PROP_DESC:
+            response = doGetObjectPropDesc();
+            break;
         default:
             response = MTP_RESPONSE_OPERATION_NOT_SUPPORTED;
             break;
@@ -489,9 +517,6 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
-    LOGV("SendObjectInfo format: %04X size: %d name: %s, created: %s, modified: %s",
-            format, mSendObjectFileSize, (const char*)name, (const char*)created,
-            (const char*)modified);
 
     if (path[path.size() - 1] != '/')
         path += "/";
@@ -589,10 +614,14 @@ MtpResponseCode MtpServer::doDeleteObject() {
 }
 
 MtpResponseCode MtpServer::doGetObjectPropDesc() {
-    MtpObjectProperty property = mRequest.getParameter(1);
+    MtpObjectProperty propCode = mRequest.getParameter(1);
     MtpObjectFormat format = mRequest.getParameter(2);
+    MtpProperty* property = getObjectProperty(propCode);
+    if (!property)
+        return MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
 
-    return -1;
+    property->write(mData);
+    return MTP_RESPONSE_OK;
 }
 
 }  // namespace android

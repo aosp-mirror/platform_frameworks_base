@@ -41,6 +41,58 @@ MtpProperty::MtpProperty()
     mMaximumValue.str = NULL;
 }
 
+MtpProperty::MtpProperty(MtpPropertyCode propCode,
+                         MtpDataType type,
+                         bool writeable,
+                         int defaultValue)
+    :   mCode(propCode),
+        mType(type),
+        mWriteable(writeable),
+        mDefaultArrayLength(0),
+        mDefaultArrayValues(NULL),
+        mCurrentArrayLength(0),
+        mCurrentArrayValues(NULL),
+        mFormFlag(kFormNone),
+        mEnumLength(0),
+        mEnumValues(NULL)
+{
+    memset(&mDefaultValue, 0, sizeof(mDefaultValue));
+    memset(&mCurrentValue, 0, sizeof(mCurrentValue));
+    memset(&mMinimumValue, 0, sizeof(mMinimumValue));
+    memset(&mMaximumValue, 0, sizeof(mMaximumValue));
+
+    if (defaultValue) {
+        switch (type) {
+            case MTP_TYPE_INT8:
+                mDefaultValue.i8 = defaultValue;
+                break;
+            case MTP_TYPE_UINT8:
+                mDefaultValue.u8 = defaultValue;
+                break;
+            case MTP_TYPE_INT16:
+                mDefaultValue.i16 = defaultValue;
+                break;
+            case MTP_TYPE_UINT16:
+                mDefaultValue.u16 = defaultValue;
+                break;
+            case MTP_TYPE_INT32:
+                mDefaultValue.i32 = defaultValue;
+                break;
+            case MTP_TYPE_UINT32:
+                mDefaultValue.u32 = defaultValue;
+                break;
+            case MTP_TYPE_INT64:
+                mDefaultValue.i64 = defaultValue;
+                break;
+            case MTP_TYPE_UINT64:
+                mDefaultValue.u64 = defaultValue;
+                break;
+            default:
+                LOGE("unknown type %d in MtpProperty::MtpProperty", type);
+        }
+    }
+}
+
 MtpProperty::~MtpProperty() {
     if (mType == MTP_TYPE_STR) {
         // free all strings
@@ -66,7 +118,7 @@ MtpProperty::~MtpProperty() {
     delete[] mEnumValues;
 }
 
-void MtpProperty::read(MtpDataPacket& packet) {
+void MtpProperty::read(MtpDataPacket& packet, bool deviceProp) {
     MtpStringBuffer string;
 
     mCode = packet.getUInt16();
@@ -88,7 +140,8 @@ void MtpProperty::read(MtpDataPacket& packet) {
             break;
         default:
             readValue(packet, mDefaultValue);
-            readValue(packet, mCurrentValue);
+            if (deviceProp)
+                readValue(packet, mCurrentValue);
     }
     mFormFlag = packet.getUInt8();
 
@@ -101,6 +154,40 @@ void MtpProperty::read(MtpDataPacket& packet) {
         mEnumValues = new MtpPropertyValue[mEnumLength];
         for (int i = 0; i < mEnumLength; i++)
             readValue(packet, mEnumValues[i]);
+    }
+}
+
+// FIXME - only works for object properties
+void MtpProperty::write(MtpDataPacket& packet) {
+    packet.putUInt16(mCode);
+    packet.putUInt16(mType);
+    packet.putUInt8(mWriteable ? 1 : 0);
+
+    switch (mType) {
+        case MTP_TYPE_AINT8:
+        case MTP_TYPE_AUINT8:
+        case MTP_TYPE_AINT16:
+        case MTP_TYPE_AUINT16:
+        case MTP_TYPE_AINT32:
+        case MTP_TYPE_AUINT32:
+        case MTP_TYPE_AINT64:
+        case MTP_TYPE_AUINT64:
+        case MTP_TYPE_AINT128:
+        case MTP_TYPE_AUINT128:
+            writeArrayValues(packet, mDefaultArrayValues, mDefaultArrayLength);
+            break;
+        default:
+            writeValue(packet, mDefaultValue);
+    }
+    packet.putUInt8(mFormFlag);
+    if (mFormFlag == kFormRange) {
+            writeValue(packet, mMinimumValue);
+            writeValue(packet, mMaximumValue);
+            writeValue(packet, mStepSize);
+    } else if (mFormFlag == kFormEnum) {
+        packet.putUInt16(mEnumLength);
+        for (int i = 0; i < mEnumLength; i++)
+            writeValue(packet, mEnumValues[i]);
     }
 }
 
@@ -147,6 +234,43 @@ void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {
     }
 }
 
+void MtpProperty::writeValue(MtpDataPacket& packet, MtpPropertyValue& value) {
+    switch (mType) {
+        case MTP_TYPE_INT8:
+            packet.putInt8(value.i8);
+            break;
+        case MTP_TYPE_UINT8:
+            packet.putUInt8(value.u8);
+            break;
+        case MTP_TYPE_INT16:
+            packet.putInt16(value.i16);
+            break;
+        case MTP_TYPE_UINT16:
+            packet.putUInt16(value.u16);
+            break;
+        case MTP_TYPE_INT32:
+            packet.putInt32(value.i32);
+            break;
+        case MTP_TYPE_UINT32:
+            packet.putUInt32(value.u32);
+            break;
+        case MTP_TYPE_INT64:
+            packet.putInt64(value.i64);
+            break;
+        case MTP_TYPE_UINT64:
+            packet.putUInt64(value.u64);
+            break;
+        case MTP_TYPE_INT128:
+            packet.putInt128(value.i128);
+            break;
+        case MTP_TYPE_UINT128:
+            packet.putUInt128(value.u128);
+            break;
+        default:
+            LOGE("unknown type %d in MtpProperty::readValue", mType);
+    }
+}
+
 MtpPropertyValue* MtpProperty::readArrayValues(MtpDataPacket& packet, int& length) {
     length = packet.getUInt32();
     if (length == 0)
@@ -155,6 +279,12 @@ MtpPropertyValue* MtpProperty::readArrayValues(MtpDataPacket& packet, int& lengt
     for (int i = 0; i < length; i++)
         readValue(packet, result[i]);
     return result;
+}
+
+void MtpProperty::writeArrayValues(MtpDataPacket& packet, MtpPropertyValue* values, int length) {
+    packet.putUInt32(length);
+    for (int i = 0; i < length; i++)
+        writeValue(packet, values[i]);
 }
 
 }  // namespace android

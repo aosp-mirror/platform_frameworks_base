@@ -245,7 +245,7 @@ MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     MtpResponseCode ret = readResponse();
     if (ret == MTP_RESPONSE_OK) {
         MtpProperty* property = new MtpProperty;
-        property->read(mData);
+        property->read(mData, true);
         return property;
     }
     return NULL;
