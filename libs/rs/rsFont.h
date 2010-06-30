@@ -79,9 +79,6 @@ protected:
         // Values below contain a glyph's origin in the bitmap
         FT_Int mBitmapLeft;
         FT_Int mBitmapTop;
-        // Hold on to the bitmap in case cache is invalidated
-        FT_Bitmap mBitmap;
-        bool mBitmapValid;
     };
 
     String8 mFontName;
@@ -156,6 +153,7 @@ protected:
 
     // Free type library, we only need one copy
     FT_Library mLibrary;
+    FT_Library getLib();
     Vector<Font*> mActiveFonts;
 
     // Render state for the font

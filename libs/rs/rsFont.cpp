@@ -35,6 +35,8 @@ using namespace android::renderscript;
 
 Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mInitialized = false;
     mHasKerning = false;
 }
@@ -51,7 +53,7 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
     fullPath += fontsDir;
     fullPath += name;
 
-    FT_Error error = FT_New_Face(mRSC->mStateFont.mLibrary, fullPath.string(), 0, &mFace);
+    FT_Error error = FT_New_Face(mRSC->mStateFont.getLib(), fullPath.string(), 0, &mFace);
     if(error) {
         LOGE("Unable to initialize font %s", fullPath.string());
         return false;
@@ -70,7 +72,6 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
     }
 
     mHasKerning = FT_HAS_KERNING(mFace);
-    LOGE("Kerning: %i", mHasKerning);
 
     mInitialized = true;
     return true;
@@ -156,25 +157,17 @@ void Font::renderUTF(const char *text, uint32_t len, uint32_t start, int numGlyp
 
 void Font::updateGlyphCache(CachedGlyphInfo *glyph)
 {
-    if(!glyph->mBitmapValid) {
-
-        FT_Error error = FT_Load_Glyph( mFace, glyph->mGlyphIndex, FT_LOAD_RENDER );
-        if(error) {
-            LOGE("Couldn't load glyph.");
-            return;
-        }
-
-        glyph->mAdvance = mFace->glyph->advance;
-        glyph->mBitmapLeft = mFace->glyph->bitmap_left;
-        glyph->mBitmapTop = mFace->glyph->bitmap_top;
-
-        FT_Bitmap *bitmap = &mFace->glyph->bitmap;
-
-        FT_Bitmap_New(&glyph->mBitmap);
-        FT_Bitmap_Copy(mRSC->mStateFont.mLibrary, bitmap, &glyph->mBitmap);
-
-        glyph->mBitmapValid = true;
+    FT_Error error = FT_Load_Glyph( mFace, glyph->mGlyphIndex, FT_LOAD_RENDER );
+    if(error) {
+        LOGE("Couldn't load glyph.");
+        return;
     }
+
+    glyph->mAdvance = mFace->glyph->advance;
+    glyph->mBitmapLeft = mFace->glyph->bitmap_left;
+    glyph->mBitmapTop = mFace->glyph->bitmap_top;
+
+    FT_Bitmap *bitmap = &mFace->glyph->bitmap;
 
     // Now copy the bitmap into the cache texture
     uint32_t startX = 0;
@@ -182,19 +175,19 @@ void Font::updateGlyphCache(CachedGlyphInfo *glyph)
 
     // Let the font state figure out where to put the bitmap
     FontState *state = &mRSC->mStateFont;
-    glyph->mIsValid = state->cacheBitmap(&glyph->mBitmap, &startX, &startY);
+    glyph->mIsValid = state->cacheBitmap(bitmap, &startX, &startY);
 
     if(!glyph->mIsValid) {
         return;
     }
 
-    uint32_t endX = startX + glyph->mBitmap.width;
-    uint32_t endY = startY + glyph->mBitmap.rows;
+    uint32_t endX = startX + bitmap->width;
+    uint32_t endY = startY + bitmap->rows;
 
     glyph->mBitmapMinX = startX;
     glyph->mBitmapMinY = startY;
-    glyph->mBitmapWidth = glyph->mBitmap.width;
-    glyph->mBitmapHeight = glyph->mBitmap.rows;
+    glyph->mBitmapWidth = bitmap->width;
+    glyph->mBitmapHeight = bitmap->rows;
 
     uint32_t cacheWidth = state->getCacheTextureType()->getDimX();
     uint32_t cacheHeight = state->getCacheTextureType()->getDimY();
@@ -212,7 +205,6 @@ Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph)
 
     newGlyph->mGlyphIndex = FT_Get_Char_Index(mFace, glyph);
     newGlyph->mIsValid = false;
-    newGlyph->mBitmapValid = false;
 
     //LOGE("Glyph = %c, face index: %u", (unsigned char)glyph, newGlyph->mGlyphIndex);
 
@@ -228,7 +220,6 @@ Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t 
     for(uint32_t i = 0; i < activeFonts.size(); i ++) {
         Font *ithFont = activeFonts[i];
         if(ithFont->mFontName == name && ithFont->mFontSize == fontSize && ithFont->mDpi == dpi) {
-            ithFont->incUserRef();
             return ithFont;
         }
     }
@@ -236,7 +227,6 @@ Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t 
     Font *newFont = new Font(rsc);
     bool isInitialized = newFont->init(name, fontSize, dpi);
     if(isInitialized) {
-        newFont->incUserRef();
         activeFonts.push(newFont);
         return newFont;
     }
@@ -261,9 +251,6 @@ Font::~Font()
 
     for(uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
         CachedGlyphInfo *glyph = mCachedGlyphs.valueAt(i);
-        if(glyph->mBitmapValid) {
-            FT_Bitmap_Done(mRSC->mStateFont.mLibrary, &glyph->mBitmap);
-        }
         delete glyph;
     }
 }
@@ -285,21 +272,23 @@ FontState::~FontState()
     rsAssert(!mActiveFonts.size());
 }
 
-void FontState::init(Context *rsc)
+FT_Library FontState::getLib()
 {
-    FT_Error error;
-
     if(!mLibrary) {
-        error = FT_Init_FreeType(&mLibrary);
+        FT_Error error = FT_Init_FreeType(&mLibrary);
         if(error) {
             LOGE("Unable to initialize freetype");
-            return;
+            return NULL;
         }
     }
+    return mLibrary;
+}
+
+void FontState::init(Context *rsc)
+{
+    //getLib();
 
     mRSC = rsc;
-
-    mDefault.set(Font::create(rsc, "DroidSans.ttf", 16, 96));
 }
 
 void FontState::flushAllAndInvalidate()
@@ -627,10 +616,16 @@ void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, 
 {
     checkInit();
 
-    String8 text8(text);
+    //String8 text8(text);
 
     // Render code here
     Font *currentFont = mRSC->getFont();
+    if(!currentFont) {
+        if(!mDefault.get()) {
+            mDefault.set(Font::create(mRSC, "DroidSans.ttf", 16, 96));
+        }
+        currentFont = mDefault.get();
+    }
     currentFont->renderUTF(text, len, startIndex, numGlyphs, x, y);
 
     if(mCurrentQuadIndex != 0) {
@@ -669,12 +664,26 @@ void FontState::renderText(Allocation *alloc, uint32_t start, int len, int x, in
 
 void FontState::deinit(Context *rsc)
 {
+    mInitialized = false;
+
+    mIndexBuffer.clear();
+    mVertexArray.clear();
+
+    mFontShaderF.clear();
+    mFontSampler.clear();
+    mFontProgramStore.clear();
+
+    mTextTexture.clear();
+    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+        delete mCacheLines[i];
+    }
+    mCacheLines.clear();
+
+    mDefault.clear();
+
     if(mLibrary) {
         FT_Done_FreeType( mLibrary );
     }
-
-    delete mDefault.get();
-    mDefault.clear();
 }
 
 namespace android {
@@ -682,7 +691,11 @@ namespace renderscript {
 
 RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, uint32_t fontSize, uint32_t dpi)
 {
-    return Font::create(rsc, name, fontSize, dpi);
+    Font *newFont = Font::create(rsc, name, fontSize, dpi);
+    if(newFont) {
+        newFont->incUserRef();
+    }
+    return newFont;
 }
 
 } // renderscript
