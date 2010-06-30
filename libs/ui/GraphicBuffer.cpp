@@ -127,18 +127,6 @@ status_t GraphicBuffer::initSize(uint32_t w, uint32_t h, PixelFormat format,
 {
     GraphicBufferAllocator& allocator = GraphicBufferAllocator::get();
     status_t err = allocator.alloc(w, h, format, reqUsage, &handle, &stride);
-
-    if (err<0 && format == PIXEL_FORMAT_RGBX_8888) {
-        /*
-         * There is currently a bug with some gralloc implementations
-         * not supporting RGBX_8888. In this case, we revert to using RGBA_8888
-         * which is not exactly the same, as GL_REPLACE will yield a different
-         * result.
-         */
-        format = PIXEL_FORMAT_RGBA_8888;
-        err = allocator.alloc(w, h, format, reqUsage, &handle, &stride);
-    }
-
     if (err == NO_ERROR) {
         this->width  = w;
         this->height = h;
