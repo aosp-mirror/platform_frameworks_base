@@ -42,6 +42,7 @@ bool ColorConverter::isValid() const {
         case OMX_COLOR_FormatYUV420Planar:
         case OMX_COLOR_FormatCbYCrY:
         case OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
+        case OMX_COLOR_FormatYUV420SemiPlanar:
             return true;
 
         default:
@@ -68,6 +69,11 @@ void ColorConverter::convert(
 
         case OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
             convertQCOMYUV420SemiPlanar(
+                    width, height, srcBits, srcSkip, dstBits, dstSkip);
+            break;
+
+        case OMX_COLOR_FormatYUV420SemiPlanar:
+            convertYUV420SemiPlanar(
                     width, height, srcBits, srcSkip, dstBits, dstSkip);
             break;
 
@@ -240,6 +246,68 @@ void ColorConverter::convertQCOMYUV420SemiPlanar(
 
             signed u = (signed)src_u[x & ~1] - 128;
             signed v = (signed)src_u[(x & ~1) + 1] - 128;
+
+            signed u_b = u * 517;
+            signed u_g = -u * 100;
+            signed v_g = -v * 208;
+            signed v_r = v * 409;
+
+            signed tmp1 = y1 * 298;
+            signed b1 = (tmp1 + u_b) / 256;
+            signed g1 = (tmp1 + v_g + u_g) / 256;
+            signed r1 = (tmp1 + v_r) / 256;
+
+            signed tmp2 = y2 * 298;
+            signed b2 = (tmp2 + u_b) / 256;
+            signed g2 = (tmp2 + v_g + u_g) / 256;
+            signed r2 = (tmp2 + v_r) / 256;
+
+            uint32_t rgb1 =
+                ((kAdjustedClip[b1] >> 3) << 11)
+                | ((kAdjustedClip[g1] >> 2) << 5)
+                | (kAdjustedClip[r1] >> 3);
+
+            uint32_t rgb2 =
+                ((kAdjustedClip[b2] >> 3) << 11)
+                | ((kAdjustedClip[g2] >> 2) << 5)
+                | (kAdjustedClip[r2] >> 3);
+
+            dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
+        }
+
+        src_y += width;
+
+        if (y & 1) {
+            src_u += width;
+        }
+
+        dst_ptr += dstSkip / 4;
+    }
+}
+
+void ColorConverter::convertYUV420SemiPlanar(
+        size_t width, size_t height,
+        const void *srcBits, size_t srcSkip,
+        void *dstBits, size_t dstSkip) {
+    CHECK_EQ(srcSkip, 0);  // Doesn't really make sense for YUV formats.
+    CHECK(dstSkip >= width * 2);
+    CHECK((dstSkip & 3) == 0);
+
+    uint8_t *kAdjustedClip = initClip();
+
+    uint32_t *dst_ptr = (uint32_t *)dstBits;
+    const uint8_t *src_y = (const uint8_t *)srcBits;
+
+    const uint8_t *src_u =
+        (const uint8_t *)src_y + width * height;
+
+    for (size_t y = 0; y < height; ++y) {
+        for (size_t x = 0; x < width; x += 2) {
+            signed y1 = (signed)src_y[x] - 16;
+            signed y2 = (signed)src_y[x + 1] - 16;
+
+            signed v = (signed)src_u[x & ~1] - 128;
+            signed u = (signed)src_u[(x & ~1) + 1] - 128;
 
             signed u_b = u * 517;
             signed u_g = -u * 100;
