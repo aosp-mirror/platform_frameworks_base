@@ -849,6 +849,7 @@ void OMXCodec::setVideoInputFormat(
         }
 
         case OMX_VIDEO_CodingH263:
+            CHECK_EQ(setupH263EncoderParameters(meta), OK);
             break;
 
         case OMX_VIDEO_CodingAVC:
@@ -872,6 +873,90 @@ static OMX_U32 setPFramesSpacing(int32_t iFramesInterval, int32_t frameRate) {
     OMX_U32 ret = frameRate * iFramesInterval;
     CHECK(ret > 1);
     return ret;
+}
+
+status_t OMXCodec::setupErrorCorrectionParameters() {
+    OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE errorCorrectionType;
+    InitOMXParams(&errorCorrectionType);
+    errorCorrectionType.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoErrorCorrection,
+            &errorCorrectionType, sizeof(errorCorrectionType));
+    CHECK_EQ(err, OK);
+
+    errorCorrectionType.bEnableHEC = OMX_FALSE;
+    errorCorrectionType.bEnableResync = OMX_TRUE;
+    errorCorrectionType.nResynchMarkerSpacing = 256;
+    errorCorrectionType.bEnableDataPartitioning = OMX_FALSE;
+    errorCorrectionType.bEnableRVLC = OMX_FALSE;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoErrorCorrection,
+            &errorCorrectionType, sizeof(errorCorrectionType));
+    CHECK_EQ(err, OK);
+    return OK;
+}
+
+status_t OMXCodec::setupBitRate(int32_t bitRate) {
+    OMX_VIDEO_PARAM_BITRATETYPE bitrateType;
+    InitOMXParams(&bitrateType);
+    bitrateType.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoBitrate,
+            &bitrateType, sizeof(bitrateType));
+    CHECK_EQ(err, OK);
+
+    bitrateType.eControlRate = OMX_Video_ControlRateVariable;
+    bitrateType.nTargetBitrate = bitRate;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoBitrate,
+            &bitrateType, sizeof(bitrateType));
+    CHECK_EQ(err, OK);
+    return OK;
+}
+
+status_t OMXCodec::setupH263EncoderParameters(const sp<MetaData>& meta) {
+    int32_t iFramesInterval, frameRate, bitRate;
+    bool success = meta->findInt32(kKeyBitRate, &bitRate);
+    success = success && meta->findInt32(kKeySampleRate, &frameRate);
+    success = success && meta->findInt32(kKeyIFramesInterval, &iFramesInterval);
+    CHECK(success);
+    OMX_VIDEO_PARAM_H263TYPE h263type;
+    InitOMXParams(&h263type);
+    h263type.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoH263, &h263type, sizeof(h263type));
+    CHECK_EQ(err, OK);
+
+    h263type.nAllowedPictureTypes =
+        OMX_VIDEO_PictureTypeI | OMX_VIDEO_PictureTypeP;
+
+    h263type.nPFrames = setPFramesSpacing(iFramesInterval, frameRate);
+    if (h263type.nPFrames == 0) {
+        h263type.nAllowedPictureTypes = OMX_VIDEO_PictureTypeI;
+    }
+    h263type.nBFrames = 0;
+
+    h263type.eProfile = OMX_VIDEO_H263ProfileBaseline;
+    h263type.eLevel = OMX_VIDEO_H263Level45;
+
+    h263type.bPLUSPTYPEAllowed = OMX_FALSE;
+    h263type.bForceRoundingTypeToZero = OMX_FALSE;
+    h263type.nPictureHeaderRepetition = 0;
+    h263type.nGOBHeaderInterval = 0;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoH263, &h263type, sizeof(h263type));
+    CHECK_EQ(err, OK);
+
+    CHECK_EQ(setupBitRate(bitRate), OK);
+    CHECK_EQ(setupErrorCorrectionParameters(), OK);
+
+    return OK;
 }
 
 status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
@@ -907,53 +992,15 @@ status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
     mpeg4type.nHeaderExtension = 0;
     mpeg4type.bReversibleVLC = OMX_FALSE;
 
-    mpeg4type.eProfile = OMX_VIDEO_MPEG4ProfileCore;
+    mpeg4type.eProfile = OMX_VIDEO_MPEG4ProfileSimple;
     mpeg4type.eLevel = OMX_VIDEO_MPEG4Level2;
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoMpeg4, &mpeg4type, sizeof(mpeg4type));
     CHECK_EQ(err, OK);
 
-    // ----------------
-
-    OMX_VIDEO_PARAM_BITRATETYPE bitrateType;
-    InitOMXParams(&bitrateType);
-    bitrateType.nPortIndex = kPortIndexOutput;
-
-    err = mOMX->getParameter(
-            mNode, OMX_IndexParamVideoBitrate,
-            &bitrateType, sizeof(bitrateType));
-    CHECK_EQ(err, OK);
-
-    bitrateType.eControlRate = OMX_Video_ControlRateVariable;
-    bitrateType.nTargetBitrate = bitRate;
-
-    err = mOMX->setParameter(
-            mNode, OMX_IndexParamVideoBitrate,
-            &bitrateType, sizeof(bitrateType));
-    CHECK_EQ(err, OK);
-
-    // ----------------
-
-    OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE errorCorrectionType;
-    InitOMXParams(&errorCorrectionType);
-    errorCorrectionType.nPortIndex = kPortIndexOutput;
-
-    err = mOMX->getParameter(
-            mNode, OMX_IndexParamVideoErrorCorrection,
-            &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
-
-    errorCorrectionType.bEnableHEC = OMX_FALSE;
-    errorCorrectionType.bEnableResync = OMX_TRUE;
-    errorCorrectionType.nResynchMarkerSpacing = 256;
-    errorCorrectionType.bEnableDataPartitioning = OMX_FALSE;
-    errorCorrectionType.bEnableRVLC = OMX_FALSE;
-
-    err = mOMX->setParameter(
-            mNode, OMX_IndexParamVideoErrorCorrection,
-            &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    CHECK_EQ(setupBitRate(bitRate), OK);
+    CHECK_EQ(setupErrorCorrectionParameters(), OK);
 
     return OK;
 }
@@ -1004,22 +1051,7 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
             mNode, OMX_IndexParamVideoAvc, &h264type, sizeof(h264type));
     CHECK_EQ(err, OK);
 
-    OMX_VIDEO_PARAM_BITRATETYPE bitrateType;
-    InitOMXParams(&bitrateType);
-    bitrateType.nPortIndex = kPortIndexOutput;
-
-    err = mOMX->getParameter(
-            mNode, OMX_IndexParamVideoBitrate,
-            &bitrateType, sizeof(bitrateType));
-    CHECK_EQ(err, OK);
-
-    bitrateType.eControlRate = OMX_Video_ControlRateVariable;
-    bitrateType.nTargetBitrate = bitRate;
-
-    err = mOMX->setParameter(
-            mNode, OMX_IndexParamVideoBitrate,
-            &bitrateType, sizeof(bitrateType));
-    CHECK_EQ(err, OK);
+    CHECK_EQ(setupBitRate(bitRate), OK);
 
     return OK;
 }
