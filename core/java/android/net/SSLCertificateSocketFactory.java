@@ -35,6 +35,11 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -48,17 +53,33 @@ import org.apache.harmony.xnet.provider.jsse.SSLParameters;
 
 /**
  * SSLSocketFactory implementation with several extra features:
+ *
  * <ul>
  * <li>Timeout specification for SSL handshake operations
+ * <li>Hostname verification in most cases (see WARNINGs below)
  * <li>Optional SSL session caching with {@link SSLSessionCache}
  * <li>Optionally bypass all SSL certificate checks
  * </ul>
- * Note that the handshake timeout does not apply to actual connection.
- * If you want a connection timeout as well, use {@link #createSocket()} and
- * {@link Socket#connect(SocketAddress, int)}.
- * <p>
- * On development devices, "setprop socket.relaxsslcheck yes" bypasses all
- * SSL certificate checks, for testing with development servers.
+ *
+ * The handshake timeout does not apply to actual TCP socket connection.
+ * If you want a connection timeout as well, use {@link #createSocket()}
+ * and {@link Socket#connect(SocketAddress, int)}, after which you
+ * must verify the identity of the server you are connected to.
+ *
+ * <p class="caution"><b>Most {@link SSLSocketFactory} implementations do not
+ * verify the server's identity, allowing man-in-the-middle attacks.</b>
+ * This implementation does check the server's certificate hostname, but only
+ * for createSocket variants that specify a hostname.  When using methods that
+ * use {@link InetAddress} or which return an unconnected socket, you MUST
+ * verify the server's identity yourself to ensure a secure connection.</p>
+ *
+ * <p>One way to verify the server's identity is to use
+ * {@link HttpsURLConnection#getDefaultHostnameVerifier()} to get a
+ * {@link HostnameVerifier} to verify the certificate hostname.
+ *
+ * <p>On development devices, "setprop socket.relaxsslcheck yes" bypasses all
+ * SSL certificate and hostname checks for testing purposes.  This setting
+ * requires root access.
  */
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private static final String TAG = "SSLCertificateSocketFactory";
@@ -70,6 +91,9 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             public void checkServerTrusted(X509Certificate[] certs, String authType) { }
         }
     };
+
+    private static final HostnameVerifier HOSTNAME_VERIFIER =
+        HttpsURLConnection.getDefaultHostnameVerifier();
 
     private SSLSocketFactory mInsecureFactory = null;
     private SSLSocketFactory mSecureFactory = null;
@@ -95,7 +119,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
-     * @return a new SocketFactory with the specified parameters
+     * @return a new SSLSocketFactory with the specified parameters
      */
     public static SocketFactory getDefault(int handshakeTimeoutMillis) {
         return new SSLCertificateSocketFactory(handshakeTimeoutMillis, null, true);
@@ -108,7 +132,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
      * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
-     * @return a new SocketFactory with the specified parameters
+     * @return a new SSLSocketFactory with the specified parameters
      */
     public static SSLSocketFactory getDefault(int handshakeTimeoutMillis, SSLSessionCache cache) {
         return new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, true);
@@ -117,13 +141,14 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     /**
      * Returns a new instance of a socket factory with all SSL security checks
      * disabled, using an optional handshake timeout and SSL session cache.
-     * Sockets created using this factory are vulnerable to man-in-the-middle
-     * attacks!
+     *
+     * <p class="caution"><b>Warning:</b> Sockets created using this factory
+     * are vulnerable to man-in-the-middle attacks!</p>
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
      * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
-     * @return an insecure SocketFactory with the specified parameters
+     * @return an insecure SSLSocketFactory with the specified parameters
      */
     public static SSLSocketFactory getInsecure(int handshakeTimeoutMillis, SSLSessionCache cache) {
         return new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, false);
@@ -145,6 +170,44 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
                 new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, true));
     }
 
+    /**
+     * Verify the hostname of the certificate used by the other end of a
+     * connected socket.  You MUST call this if you did not supply a hostname
+     * to {@link #createSocket()}.  It is harmless to call this method
+     * redundantly if the hostname has already been verified.
+     *
+     * <p>Wildcard certificates are allowed to verify any matching hostname,
+     * so "foo.bar.example.com" is verified if the peer has a certificate
+     * for "*.example.com".
+     *
+     * @param socket An SSL socket which has been connected to a server
+     * @param hostname The expected hostname of the remote server
+     * @throws IOException if something goes wrong handshaking with the server
+     * @throws SSLPeerUnverifiedException if the server cannot prove its identity
+     *
+     * @hide
+     */
+    public static void verifyHostname(Socket socket, String hostname) throws IOException {
+        if (!(socket instanceof SSLSocket)) {
+            throw new IllegalArgumentException("Attempt to verify non-SSL socket");
+        }
+
+        if (!isSslCheckRelaxed()) {
+            // The code at the start of OpenSSLSocketImpl.startHandshake()
+            // ensures that the call is idempotent, so we can safely call it.
+            SSLSocket ssl = (SSLSocket) socket;
+            ssl.startHandshake();
+
+            SSLSession session = ssl.getSession();
+            if (session == null) {
+                throw new SSLException("Cannot verify SSL socket without session");
+            }
+            if (!HOSTNAME_VERIFIER.verify(hostname, session)) {
+                throw new SSLPeerUnverifiedException("Cannot verify hostname: " + hostname);
+            }
+        }
+    }
+
     private SSLSocketFactory makeSocketFactory(TrustManager[] trustManagers) {
         try {
             SSLContextImpl sslContext = new SSLContextImpl();
@@ -156,10 +219,14 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
+    private static boolean isSslCheckRelaxed() {
+        return "1".equals(SystemProperties.get("ro.debuggable")) &&
+            "yes".equals(SystemProperties.get("socket.relaxsslcheck"));
+    }
+
     private synchronized SSLSocketFactory getDelegate() {
         // Relax the SSL check if instructed (for this factory, or systemwide)
-        if (!mSecure || ("1".equals(SystemProperties.get("ro.debuggable")) &&
-            "yes".equals(SystemProperties.get("socket.relaxsslcheck")))) {
+        if (!mSecure || isSslCheckRelaxed()) {
             if (mInsecureFactory == null) {
                 if (mSecure) {
                     Log.w(TAG, "*** BYPASSING SSL SECURITY CHECKS (socket.relaxsslcheck=yes) ***");
@@ -177,13 +244,27 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method verifies the peer's certificate hostname after connecting.
+     */
     @Override
     public Socket createSocket(Socket k, String host, int port, boolean close) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(k, host, port, close);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        verifyHostname(s, host);
         return s;
     }
 
+    /**
+     * Creates a new socket which is not connected to any remote host.
+     * You must use {@link Socket#connect} to connect the socket.
+     *
+     * <p class="caution"><b>Warning:</b> Hostname verification is not performed
+     * with this method.  You MUST verify the server's identity after connecting
+     * the socket to avoid man-in-the-middle attacks.</p>
+     */
     @Override
     public Socket createSocket() throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket();
@@ -191,6 +272,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         return s;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p class="caution"><b>Warning:</b> Hostname verification is not performed
+     * with this method.  You MUST verify the server's identity after connecting
+     * the socket to avoid man-in-the-middle attacks.</p>
+     */
     @Override
     public Socket createSocket(InetAddress addr, int port, InetAddress localAddr, int localPort)
             throws IOException {
@@ -200,6 +288,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         return s;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p class="caution"><b>Warning:</b> Hostname verification is not performed
+     * with this method.  You MUST verify the server's identity after connecting
+     * the socket to avoid man-in-the-middle attacks.</p>
+     */
     @Override
     public Socket createSocket(InetAddress addr, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(addr, port);
@@ -207,19 +302,31 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         return s;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method verifies the peer's certificate hostname after connecting.
+     */
     @Override
     public Socket createSocket(String host, int port, InetAddress localAddr, int localPort)
             throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(
                 host, port, localAddr, localPort);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        verifyHostname(s, host);
         return s;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method verifies the peer's certificate hostname after connecting.
+     */
     @Override
     public Socket createSocket(String host, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(host, port);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        verifyHostname(s, host);
         return s;
     }
 
