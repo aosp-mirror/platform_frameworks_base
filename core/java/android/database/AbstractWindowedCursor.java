@@ -19,175 +19,105 @@ package android.database;
 /**
  * A base class for Cursors that store their data in {@link CursorWindow}s.
  */
-public abstract class AbstractWindowedCursor extends AbstractCursor
-{
+public abstract class AbstractWindowedCursor extends AbstractCursor {
     @Override
-    public byte[] getBlob(int columnIndex)
-    {
+    public byte[] getBlob(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                return (byte[])getUpdatedField(columnIndex);
-            }
-        }
-
         return mWindow.getBlob(mPos, columnIndex);
     }
 
     @Override
-    public String getString(int columnIndex)
-    {
+    public String getString(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                return (String)getUpdatedField(columnIndex);
-            }
-        }
-
         return mWindow.getString(mPos, columnIndex);
     }
-    
+
     @Override
-    public void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer)
-    {
+    public void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer) {
         checkPosition();
-        
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                super.copyStringToBuffer(columnIndex, buffer);
-            }
-        }
-        
         mWindow.copyStringToBuffer(mPos, columnIndex, buffer);
     }
 
     @Override
-    public short getShort(int columnIndex)
-    {
+    public short getShort(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Number value = (Number)getUpdatedField(columnIndex);
-                return value.shortValue();
-            }
-        }
-
         return mWindow.getShort(mPos, columnIndex);
     }
 
     @Override
-    public int getInt(int columnIndex)
-    {
+    public int getInt(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Number value = (Number)getUpdatedField(columnIndex);
-                return value.intValue();
-            }
-        }
-
         return mWindow.getInt(mPos, columnIndex);
     }
 
     @Override
-    public long getLong(int columnIndex)
-    {
+    public long getLong(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Number value = (Number)getUpdatedField(columnIndex);
-                return value.longValue();
-            }
-        }
-
         return mWindow.getLong(mPos, columnIndex);
     }
 
     @Override
-    public float getFloat(int columnIndex)
-    {
+    public float getFloat(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Number value = (Number)getUpdatedField(columnIndex);
-                return value.floatValue();
-            }
-        }
-
         return mWindow.getFloat(mPos, columnIndex);
     }
 
     @Override
-    public double getDouble(int columnIndex)
-    {
+    public double getDouble(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                Number value = (Number)getUpdatedField(columnIndex);
-                return value.doubleValue();
-            }
-        }
-
         return mWindow.getDouble(mPos, columnIndex);
     }
 
     @Override
-    public boolean isNull(int columnIndex)
-    {
+    public boolean isNull(int columnIndex) {
         checkPosition();
-
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                return getUpdatedField(columnIndex) == null;
-            }
-        }
-
         return mWindow.getType(mPos, columnIndex) == Cursor.FIELD_TYPE_NULL;
     }
 
+    /**
+     * @deprecated Use {@link #getType}
+     */
+    @Deprecated
     public boolean isBlob(int columnIndex) {
         return getType(columnIndex) == Cursor.FIELD_TYPE_BLOB;
     }
 
+    /**
+     * @deprecated Use {@link #getType}
+     */
+    @Deprecated
     public boolean isString(int columnIndex) {
         return getType(columnIndex) == Cursor.FIELD_TYPE_STRING;
     }
 
+    /**
+     * @deprecated Use {@link #getType}
+     */
+    @Deprecated
     public boolean isLong(int columnIndex) {
         return getType(columnIndex) == Cursor.FIELD_TYPE_INTEGER;
     }
 
+    /**
+     * @deprecated Use {@link #getType}
+     */
+    @Deprecated
     public boolean isFloat(int columnIndex) {
         return getType(columnIndex) == Cursor.FIELD_TYPE_FLOAT;
     }
 
     @Override
-    public int getType(int columnIndex)
-    {
+    public int getType(int columnIndex) {
         checkPosition();
-        synchronized(mUpdatedRows) {
-            if (isFieldUpdated(columnIndex)) {
-                return DatabaseUtils.getTypeOfObject(getUpdatedField(columnIndex));
-            }
-        }
-
         return mWindow.getType(mPos, columnIndex);
     }
 
     @Override
-    protected void checkPosition()
-    {
+    protected void checkPosition() {
         super.checkPosition();
         
         if (mWindow == null) {
-            throw new StaleDataException("Access closed cursor");
+            throw new StaleDataException("Attempting to access a closed cursor");
         }
     }
 
