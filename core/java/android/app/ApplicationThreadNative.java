@@ -341,13 +341,6 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
         
-        case REQUEST_PSS_TRANSACTION:
-        {
-            data.enforceInterface(IApplicationThread.descriptor);
-            requestPss();
-            return true;
-        }
-        
         case PROFILER_CONTROL_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -775,14 +768,6 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         mRemote.transact(SCHEDULE_ACTIVITY_CONFIGURATION_CHANGED_TRANSACTION, data, null,
-                IBinder.FLAG_ONEWAY);
-        data.recycle();
-    }
-    
-    public final void requestPss() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        data.writeInterfaceToken(IApplicationThread.descriptor);
-        mRemote.transact(REQUEST_PSS_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }

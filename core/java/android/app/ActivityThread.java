@@ -616,14 +616,6 @@ public final class ActivityThread {
             queueOrSendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
         }
 
-        public void requestPss() {
-            try {
-                ActivityManagerNative.getDefault().reportPss(this,
-                        (int)Process.getPss(Process.myPid()));
-            } catch (RemoteException e) {
-            }
-        }
-
         public void profilerControl(boolean start, String path, ParcelFileDescriptor fd) {
             ProfilerControlData pcd = new ProfilerControlData();
             pcd.path = path;

@@ -247,8 +247,6 @@ public interface IActivityManager extends IInterface {
     
     public boolean killPids(int[] pids, String reason) throws RemoteException;
     
-    public void reportPss(IApplicationThread caller, int pss) throws RemoteException;
-    
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,
             String data) throws RemoteException;
@@ -502,7 +500,7 @@ public interface IActivityManager extends IInterface {
     int FORCE_STOP_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+78;
     int KILL_PIDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+79;
     int GET_SERVICES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+80;
-    int REPORT_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
+
     int GET_RUNNING_APP_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+82;
     int GET_DEVICE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+83;
     int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;

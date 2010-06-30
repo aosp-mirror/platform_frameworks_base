@@ -39,7 +39,7 @@ import java.util.HashSet;
  * Full information about a particular process that
  * is currently running.
  */
-class ProcessRecord implements Watchdog.PssRequestor {
+class ProcessRecord {
     final BatteryStatsImpl.Uid.Proc batteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final String processName;   // name of the process
@@ -261,16 +261,6 @@ class ProcessRecord implements Watchdog.PssRequestor {
         while (i > 0) {
             i--;
             activities.get(i).stopFreezingScreenLocked(true);
-        }
-    }
-    
-    public void requestPss() {
-        IApplicationThread localThread = thread;
-        if (localThread != null) {
-            try {
-                localThread.requestPss();
-            } catch (RemoteException e) {
-            }
         }
     }
     
