@@ -35,9 +35,13 @@ public final class Bitmap implements Parcelable {
      */
     public static final int DENSITY_NONE = 0;
     
-    // Note:  mNativeBitmap is used by FaceDetector_jni.cpp
-    // Don't change/rename without updating FaceDetector_jni.cpp
-    private final int mNativeBitmap;
+    /**
+     * Note:  mNativeBitmap is used by FaceDetector_jni.cpp
+     * Don't change/rename without updating FaceDetector_jni.cpp
+     * 
+     * @hide
+     */
+    public final int mNativeBitmap;
 
     private final boolean mIsMutable;
     private byte[] mNinePatchChunk;   // may be null

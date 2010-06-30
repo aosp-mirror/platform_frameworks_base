@@ -33,6 +33,8 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
+#define MAX_TEXTURE_COUNT 128
+
 #define SV(x, y) { { x, y } }
 #define FV(x, y, u, v) { { x, y }, { u, v } }
 
@@ -81,7 +83,7 @@ static const Blender gBlends[] = {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-OpenGLRenderer::OpenGLRenderer() {
+OpenGLRenderer::OpenGLRenderer(): mTextureCache(MAX_TEXTURE_COUNT) {
     LOGD("Create OpenGLRenderer");
 
     mDrawColorShader = new DrawColorProgram;
@@ -92,6 +94,8 @@ OpenGLRenderer::OpenGLRenderer() {
 
 OpenGLRenderer::~OpenGLRenderer() {
     LOGD("Destroy OpenGLRenderer");
+
+    mTextureCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -373,6 +377,10 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 ///////////////////////////////////////////////////////////////////////////////
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
+    LOGD("Drawing bitmap!");
+}
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     const Rect& clip = mSnapshot->clipRect;
