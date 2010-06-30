@@ -16,7 +16,7 @@
 
 #define LOG_TAG "GpsLocationProvider"
 
-//#define LOG_NDDEBUG 0
+//#define LOG_NDEBUG 0
 
 #include "JNIHelp.h"
 #include "jni.h"
@@ -66,7 +66,6 @@ static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
 
 static void location_callback(GpsLocation* location)
 {
-    LOGD("location_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_reportLocation, location->flags,
             (jdouble)location->latitude, (jdouble)location->longitude,
@@ -78,16 +77,13 @@ static void location_callback(GpsLocation* location)
 
 static void status_callback(GpsStatus* status)
 {
-    LOGD("status_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    LOGD("env: %p obj: %p\n", env, mCallbacksObj);
     env->CallVoidMethod(mCallbacksObj, method_reportStatus, status->status);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
 static void sv_status_callback(GpsSvStatus* sv_status)
 {
-    LOGD("sv_status_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     memcpy(&sGpsSvStatus, sv_status, sizeof(sGpsSvStatus));
     env->CallVoidMethod(mCallbacksObj, method_reportSvStatus);
@@ -96,7 +92,6 @@ static void sv_status_callback(GpsSvStatus* sv_status)
 
 static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
 {
-    LOGD("nmea_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     // The Java code will call back to read these values
     // We do this to avoid creating unnecessary String objects
@@ -108,7 +103,6 @@ static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
 
 static void set_capabilities_callback(uint32_t capabilities)
 {
-    LOGD("set_capabilities_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -116,19 +110,16 @@ static void set_capabilities_callback(uint32_t capabilities)
 
 static void acquire_wakelock_callback()
 {
-    LOGD("acquire_wakelock_callback\n");
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_NAME);
 }
 
 static void release_wakelock_callback()
 {
-    LOGD("release_wakelock_callback\n");
     release_wake_lock(WAKE_LOCK_NAME);
 }
 
 static pthread_t create_thread_callback(const char* name, void (*start)(void *), void* arg)
 {
-    LOGD("create_thread_callback\n");
     return (pthread_t)AndroidRuntime::createJavaThread(name, start, arg);
 }
 
@@ -146,7 +137,6 @@ GpsCallbacks sGpsCallbacks = {
 
 static void xtra_download_request_callback()
 {
-    LOGD("xtra_download_request_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_xtraDownloadRequest);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -159,7 +149,6 @@ GpsXtraCallbacks sGpsXtraCallbacks = {
 
 static void agps_status_callback(AGpsStatus* agps_status)
 {
-    LOGD("agps_status_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
                         agps_status->type, agps_status->status);
@@ -241,8 +230,6 @@ static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, j
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
 {
-    LOGD("android_location_GpsLocationProvider_init obj: %p\n", obj);
-
     // this must be set before calling into the HAL library
     if (!mCallbacksObj)
         mCallbacksObj = env->NewGlobalRef(obj);
