@@ -58,6 +58,11 @@ private:
             const void *srcBits, size_t srcSkip,
             void *dstBits, size_t dstSkip);
 
+    void convertYUV420SemiPlanar(
+            size_t width, size_t height,
+            const void *srcBits, size_t srcSkip,
+            void *dstBits, size_t dstSkip);
+
     ColorConverter(const ColorConverter &);
     ColorConverter &operator=(const ColorConverter &);
 };
