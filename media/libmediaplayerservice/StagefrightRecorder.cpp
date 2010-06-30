@@ -69,6 +69,7 @@ status_t StagefrightRecorder::setAudioSource(audio_source as) {
     LOGV("setAudioSource: %d", as);
     if (as < AUDIO_SOURCE_DEFAULT ||
         as >= AUDIO_SOURCE_LIST_END) {
+        LOGE("Invalid audio source: %d", as);
         return BAD_VALUE;
     }
 
@@ -85,6 +86,7 @@ status_t StagefrightRecorder::setVideoSource(video_source vs) {
     LOGV("setVideoSource: %d", vs);
     if (vs < VIDEO_SOURCE_DEFAULT ||
         vs >= VIDEO_SOURCE_LIST_END) {
+        LOGE("Invalid video source: %d", vs);
         return BAD_VALUE;
     }
 
@@ -101,6 +103,7 @@ status_t StagefrightRecorder::setOutputFormat(output_format of) {
     LOGV("setOutputFormat: %d", of);
     if (of < OUTPUT_FORMAT_DEFAULT ||
         of >= OUTPUT_FORMAT_LIST_END) {
+        LOGE("Invalid output format: %d", of);
         return BAD_VALUE;
     }
 
@@ -117,6 +120,7 @@ status_t StagefrightRecorder::setAudioEncoder(audio_encoder ae) {
     LOGV("setAudioEncoder: %d", ae);
     if (ae < AUDIO_ENCODER_DEFAULT ||
         ae >= AUDIO_ENCODER_LIST_END) {
+        LOGE("Invalid audio encoder: %d", ae);
         return BAD_VALUE;
     }
 
@@ -133,6 +137,7 @@ status_t StagefrightRecorder::setVideoEncoder(video_encoder ve) {
     LOGV("setVideoEncoder: %d", ve);
     if (ve < VIDEO_ENCODER_DEFAULT ||
         ve >= VIDEO_ENCODER_LIST_END) {
+        LOGE("Invalid video encoder: %d", ve);
         return BAD_VALUE;
     }
 
@@ -176,7 +181,7 @@ status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
     LOGV("setCamera");
     if (camera == 0) {
         LOGE("camera is NULL");
-        return UNKNOWN_ERROR;
+        return BAD_VALUE;
     }
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
@@ -185,7 +190,7 @@ status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
     if (mCamera == 0) {
         LOGE("Unable to connect to camera");
         IPCThreadState::self()->restoreCallingIdentity(token);
-        return UNKNOWN_ERROR;
+        return -EBUSY;
     }
 
     LOGV("Connected to camera");
@@ -206,11 +211,11 @@ status_t StagefrightRecorder::setPreviewSurface(const sp<ISurface> &surface) {
 }
 
 status_t StagefrightRecorder::setOutputFile(const char *path) {
-    LOGE("setOutputFile(const char*) should not be called");
+    LOGE("setOutputFile(const char*) must not be called");
     // We don't actually support this at all, as the media_server process
     // no longer has permissions to create files.
 
-    return UNKNOWN_ERROR;
+    return -EPERM;
 }
 
 status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t length) {
@@ -218,6 +223,11 @@ status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t leng
     // These don't make any sense, do they?
     CHECK_EQ(offset, 0);
     CHECK_EQ(length, 0);
+
+    if (fd < 0) {
+        LOGE("Invalid file descriptor: %d", fd);
+        return -EBADF;
+    }
 
     if (mOutputFd >= 0) {
         ::close(mOutputFd);
@@ -294,6 +304,7 @@ status_t StagefrightRecorder::setParamAudioNumberOfChannels(int32_t channels) {
     LOGV("setParamAudioNumberOfChannels: %d", channels);
     if (channels <= 0 || channels >= 3) {
         LOGE("Invalid number of audio channels: %d", channels);
+        return BAD_VALUE;
     }
 
     // Additional check on the number of channels will be performed later.
@@ -331,21 +342,23 @@ status_t StagefrightRecorder::setParamVideoEncodingBitRate(int32_t bitRate) {
     return OK;
 }
 
-status_t StagefrightRecorder::setParamMaxDurationOrFileSize(int64_t limit,
-        bool limit_is_duration) {
-    LOGV("setParamMaxDurationOrFileSize: limit (%lld) for %s",
-            limit, limit_is_duration?"duration":"size");
-    if (limit_is_duration) {  // limit is in ms
-        if (limit <= 1000) {  // XXX: 1 second
-            LOGE("Max file duration is too short: %lld us", limit);
-        }
-        mMaxFileDurationUs = limit * 1000LL;
-    } else {
-        if (limit <= 1024) {  // XXX: 1 kB
-            LOGE("Max file size is too small: %lld bytes", limit);
-        }
-        mMaxFileSizeBytes = limit;
+status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
+    LOGV("setParamMaxFileDurationUs: %lld us", timeUs);
+    if (timeUs <= 1000000LL) {  // XXX: 1 second
+        LOGE("Max file duration is too short: %lld us", timeUs);
+        return BAD_VALUE;
     }
+    mMaxFileDurationUs = timeUs;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamMaxFileSizeBytes(int64_t bytes) {
+    LOGV("setParamMaxFileSizeBytes: %lld bytes", bytes);
+    if (bytes <= 1024) {  // XXX: 1 kB
+        LOGE("Max file size is too small: %lld bytes", bytes);
+        return BAD_VALUE;
+    }
+    mMaxFileSizeBytes = bytes;
     return OK;
 }
 
@@ -370,7 +383,7 @@ status_t StagefrightRecorder::setParamInterleaveDuration(int32_t durationUs) {
 
 // If interval <  0, only the first frame is I frame, and rest are all P frames
 // If interval == 0, all frames are encoded as I frames. No P frames
-// If interval >  0, it is the time spacing between 2 neighboring I frames
+// If interval >  0, it is the time spacing (seconds) between 2 neighboring I frames
 status_t StagefrightRecorder::setParamVideoIFramesInterval(int32_t interval) {
     LOGV("setParamVideoIFramesInterval: %d seconds", interval);
     mIFramesInterval = interval;
@@ -396,6 +409,7 @@ status_t StagefrightRecorder::setParamVideoCameraId(int32_t cameraId) {
 status_t StagefrightRecorder::setParamTrackFrameStatus(int32_t nFrames) {
     LOGV("setParamTrackFrameStatus: %d", nFrames);
     if (nFrames <= 0) {
+        LOGE("Invalid number of frames to track: %d", nFrames);
         return BAD_VALUE;
     }
     mTrackEveryNumberOfFrames = nFrames;
@@ -405,6 +419,7 @@ status_t StagefrightRecorder::setParamTrackFrameStatus(int32_t nFrames) {
 status_t StagefrightRecorder::setParamTrackTimeStatus(int64_t timeDurationUs) {
     LOGV("setParamTrackTimeStatus: %lld", timeDurationUs);
     if (timeDurationUs < 20000) {  // Infeasible if shorter than 20 ms?
+        LOGE("Tracking time duration too short: %lld us", timeDurationUs);
         return BAD_VALUE;
     }
     mTrackEveryTimeDurationUs = timeDurationUs;
@@ -417,14 +432,12 @@ status_t StagefrightRecorder::setParameter(
     if (key == "max-duration") {
         int64_t max_duration_ms;
         if (safe_strtoi64(value.string(), &max_duration_ms)) {
-            return setParamMaxDurationOrFileSize(
-                    max_duration_ms, true /* limit_is_duration */);
+            return setParamMaxFileDurationUs(1000LL * max_duration_ms);
         }
     } else if (key == "max-filesize") {
         int64_t max_filesize_bytes;
         if (safe_strtoi64(value.string(), &max_filesize_bytes)) {
-            return setParamMaxDurationOrFileSize(
-                    max_filesize_bytes, false /* limit is filesize */);
+            return setParamMaxFileSizeBytes(max_filesize_bytes);
         }
     } else if (key == "interleave-duration-us") {
         int32_t durationUs;
@@ -528,7 +541,10 @@ status_t StagefrightRecorder::prepare() {
 }
 
 status_t StagefrightRecorder::start() {
+    CHECK(mOutputFd >= 0);
+
     if (mWriter != NULL) {
+        LOGE("File writer is not avaialble");
         return UNKNOWN_ERROR;
     }
 
@@ -547,6 +563,7 @@ status_t StagefrightRecorder::start() {
             return startAACRecording();
 
         default:
+            LOGE("Unsupported output file format: %d", mOutputFormat);
             return UNKNOWN_ERROR;
     }
 }
@@ -610,7 +627,6 @@ status_t StagefrightRecorder::startAACRecording() {
 
     CHECK(mAudioEncoder == AUDIO_ENCODER_AAC);
     CHECK(mAudioSource != AUDIO_SOURCE_LIST_END);
-    CHECK(mOutputFd >= 0);
 
     CHECK(0 == "AACWriter is not implemented yet");
 
@@ -626,34 +642,34 @@ status_t StagefrightRecorder::startAMRRecording() {
             mAudioEncoder != AUDIO_ENCODER_AMR_NB) {
             LOGE("Invalid encoder %d used for AMRNB recording",
                     mAudioEncoder);
-            return UNKNOWN_ERROR;
+            return BAD_VALUE;
         }
         if (mSampleRate != 8000) {
             LOGE("Invalid sampling rate %d used for AMRNB recording",
                     mSampleRate);
-            return UNKNOWN_ERROR;
+            return BAD_VALUE;
         }
     } else {  // mOutputFormat must be OUTPUT_FORMAT_AMR_WB
         if (mAudioEncoder != AUDIO_ENCODER_AMR_WB) {
             LOGE("Invlaid encoder %d used for AMRWB recording",
                     mAudioEncoder);
-            return UNKNOWN_ERROR;
+            return BAD_VALUE;
         }
         if (mSampleRate != 16000) {
             LOGE("Invalid sample rate %d used for AMRWB recording",
                     mSampleRate);
-            return UNKNOWN_ERROR;
+            return BAD_VALUE;
         }
     }
     if (mAudioChannels != 1) {
         LOGE("Invalid number of audio channels %d used for amr recording",
                 mAudioChannels);
-        return UNKNOWN_ERROR;
+        return BAD_VALUE;
     }
 
     if (mAudioSource >= AUDIO_SOURCE_LIST_END) {
         LOGE("Invalid audio source: %d", mAudioSource);
-        return UNKNOWN_ERROR;
+        return BAD_VALUE;
     }
 
     sp<MediaSource> audioEncoder = createAudioSource();
@@ -662,7 +678,6 @@ status_t StagefrightRecorder::startAMRRecording() {
         return UNKNOWN_ERROR;
     }
 
-    CHECK(mOutputFd >= 0);
     mWriter = new AMRWriter(dup(mOutputFd));
     mWriter->addSource(audioEncoder);
 
@@ -729,6 +744,54 @@ void StagefrightRecorder::clipVideoFrameWidth() {
     }
 }
 
+status_t StagefrightRecorder::setupCameraSource() {
+    clipVideoBitRate();
+    clipVideoFrameRate();
+    clipVideoFrameWidth();
+    clipVideoFrameHeight();
+
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    if (mCamera == 0) {
+        mCamera = Camera::connect(mCameraId);
+        if (mCamera == 0) {
+            LOGE("Camera connection could not be established.");
+            return -EBUSY;
+        }
+        mFlags &= ~FLAGS_HOT_CAMERA;
+        mCamera->lock();
+    }
+
+    // Set the actual video recording frame size
+    CameraParameters params(mCamera->getParameters());
+    params.setPreviewSize(mVideoWidth, mVideoHeight);
+    params.setPreviewFrameRate(mFrameRate);
+    String8 s = params.flatten();
+    CHECK_EQ(OK, mCamera->setParameters(s));
+    CameraParameters newCameraParams(mCamera->getParameters());
+
+    // Check on video frame size
+    int frameWidth = 0, frameHeight = 0;
+    newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
+    if (frameWidth  < 0 || frameWidth  != mVideoWidth ||
+        frameHeight < 0 || frameHeight != mVideoHeight) {
+        LOGE("Failed to set the video frame size to %dx%d",
+                mVideoWidth, mVideoHeight);
+        IPCThreadState::self()->restoreCallingIdentity(token);
+        return UNKNOWN_ERROR;
+    }
+
+    // Check on video frame rate
+    int frameRate = newCameraParams.getPreviewFrameRate();
+    if (frameRate < 0 || (frameRate - mFrameRate) != 0) {
+        LOGE("Failed to set frame rate to %d fps. The actual "
+             "frame rate is %d", mFrameRate, frameRate);
+    }
+
+    CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
+    IPCThreadState::self()->restoreCallingIdentity(token);
+    return OK;
+}
+
 void StagefrightRecorder::clipVideoFrameHeight() {
     LOGV("clipVideoFrameHeight: encoder %d", mVideoEncoder);
     int minFrameHeight = mEncoderProfiles->getVideoEncoderParamByName(
@@ -746,146 +809,110 @@ void StagefrightRecorder::clipVideoFrameHeight() {
     }
 }
 
+status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
+    status_t err = setupCameraSource();
+    if (err != OK) return err;
+
+    sp<CameraSource> cameraSource = CameraSource::CreateFromCamera(mCamera);
+    CHECK(cameraSource != NULL);
+
+    sp<MetaData> enc_meta = new MetaData;
+    enc_meta->setInt32(kKeyBitRate, mVideoBitRate);
+    enc_meta->setInt32(kKeySampleRate, mFrameRate);
+
+    switch (mVideoEncoder) {
+        case VIDEO_ENCODER_H263:
+            enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
+            break;
+
+        case VIDEO_ENCODER_MPEG_4_SP:
+            enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
+            break;
+
+        case VIDEO_ENCODER_H264:
+            enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
+            break;
+
+        default:
+            CHECK(!"Should not be here, unsupported video encoding.");
+            break;
+    }
+
+    sp<MetaData> meta = cameraSource->getFormat();
+
+    int32_t width, height, stride, sliceHeight;
+    CHECK(meta->findInt32(kKeyWidth, &width));
+    CHECK(meta->findInt32(kKeyHeight, &height));
+    CHECK(meta->findInt32(kKeyStride, &stride));
+    CHECK(meta->findInt32(kKeySliceHeight, &sliceHeight));
+
+    enc_meta->setInt32(kKeyWidth, width);
+    enc_meta->setInt32(kKeyHeight, height);
+    enc_meta->setInt32(kKeyIFramesInterval, mIFramesInterval);
+    enc_meta->setInt32(kKeyStride, stride);
+    enc_meta->setInt32(kKeySliceHeight, sliceHeight);
+
+    OMXClient client;
+    CHECK_EQ(client.connect(), OK);
+
+    sp<MediaSource> encoder = OMXCodec::Create(
+            client.interface(), enc_meta,
+            true /* createEncoder */, cameraSource);
+    if (encoder == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    writer->addSource(encoder);
+    return OK;
+}
+
+status_t StagefrightRecorder::setupAudioEncoder(const sp<MediaWriter>& writer) {
+    sp<MediaSource> audioEncoder;
+    switch(mAudioEncoder) {
+        case AUDIO_ENCODER_AMR_NB:
+        case AUDIO_ENCODER_AMR_WB:
+        case AUDIO_ENCODER_AAC:
+            audioEncoder = createAudioSource();
+            break;
+        default:
+            LOGE("Unsupported audio encoder: %d", mAudioEncoder);
+            return UNKNOWN_ERROR;
+    }
+
+    if (audioEncoder == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    writer->addSource(audioEncoder);
+    return OK;
+}
+
 status_t StagefrightRecorder::startMPEG4Recording() {
-    mWriter = new MPEG4Writer(dup(mOutputFd));
     int32_t totalBitRate = 0;
+    status_t err = OK;
+    sp<MediaWriter> writer = new MPEG4Writer(dup(mOutputFd));
 
     // Add audio source first if it exists
     if (mAudioSource != AUDIO_SOURCE_LIST_END) {
-        sp<MediaSource> audioEncoder;
-        switch(mAudioEncoder) {
-            case AUDIO_ENCODER_AMR_NB:
-            case AUDIO_ENCODER_AMR_WB:
-            case AUDIO_ENCODER_AAC:
-                audioEncoder = createAudioSource();
-                break;
-            default:
-                LOGE("Unsupported audio encoder: %d", mAudioEncoder);
-                return UNKNOWN_ERROR;
-        }
-
-        if (audioEncoder == NULL) {
-            return UNKNOWN_ERROR;
-        }
+        err = setupAudioEncoder(writer);
+        if (err != OK) return err;
         totalBitRate += mAudioBitRate;
-        mWriter->addSource(audioEncoder);
     }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
-
-        clipVideoBitRate();
-        clipVideoFrameRate();
-        clipVideoFrameWidth();
-        clipVideoFrameHeight();
-
-        int64_t token = IPCThreadState::self()->clearCallingIdentity();
-        if (mCamera == 0) {
-            mCamera = Camera::connect(mCameraId);
-            if (mCamera == 0) {
-                LOGE("Camera connection could not be established.");
-                return -EBUSY;
-            }
-            mFlags &= ~FLAGS_HOT_CAMERA;
-            mCamera->lock();
-        }
-
-
-        // Set the actual video recording frame size
-        CameraParameters params(mCamera->getParameters());
-        params.setPreviewSize(mVideoWidth, mVideoHeight);
-        params.setPreviewFrameRate(mFrameRate);
-        String8 s = params.flatten();
-        CHECK_EQ(OK, mCamera->setParameters(s));
-        CameraParameters newCameraParams(mCamera->getParameters());
-
-        // Check on video frame size
-        int frameWidth = 0, frameHeight = 0;
-        newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
-        if (frameWidth  < 0 || frameWidth  != mVideoWidth ||
-            frameHeight < 0 || frameHeight != mVideoHeight) {
-            LOGE("Failed to set the video frame size to %dx%d",
-                    mVideoWidth, mVideoHeight);
-            IPCThreadState::self()->restoreCallingIdentity(token);
-            return UNKNOWN_ERROR;
-        }
-
-        // Check on video frame rate
-        int frameRate = newCameraParams.getPreviewFrameRate();
-        if (frameRate < 0 || (frameRate - mFrameRate) != 0) {
-            LOGE("Failed to set frame rate to %d fps. The actual "
-                 "frame rate is %d", mFrameRate, frameRate);
-        }
-
-        CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
-        IPCThreadState::self()->restoreCallingIdentity(token);
-
-        sp<CameraSource> cameraSource =
-            CameraSource::CreateFromCamera(mCamera);
-
-        CHECK(cameraSource != NULL);
-
-        sp<MetaData> enc_meta = new MetaData;
-        enc_meta->setInt32(kKeyBitRate, mVideoBitRate);
-        enc_meta->setInt32(kKeySampleRate, mFrameRate);
-
-        switch (mVideoEncoder) {
-            case VIDEO_ENCODER_H263:
-                enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
-                break;
-
-            case VIDEO_ENCODER_MPEG_4_SP:
-                enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
-                break;
-
-            case VIDEO_ENCODER_H264:
-                enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
-                break;
-
-            default:
-                CHECK(!"Should not be here, unsupported video encoding.");
-                break;
-        }
-
-        sp<MetaData> meta = cameraSource->getFormat();
-
-        int32_t width, height, stride, sliceHeight;
-        CHECK(meta->findInt32(kKeyWidth, &width));
-        CHECK(meta->findInt32(kKeyHeight, &height));
-        CHECK(meta->findInt32(kKeyStride, &stride));
-        CHECK(meta->findInt32(kKeySliceHeight, &sliceHeight));
-
-        enc_meta->setInt32(kKeyWidth, width);
-        enc_meta->setInt32(kKeyHeight, height);
-        enc_meta->setInt32(kKeyIFramesInterval, mIFramesInterval);
-        enc_meta->setInt32(kKeyStride, stride);
-        enc_meta->setInt32(kKeySliceHeight, sliceHeight);
-
-        OMXClient client;
-        CHECK_EQ(client.connect(), OK);
-
-        sp<MediaSource> encoder =
-            OMXCodec::Create(
-                    client.interface(), enc_meta,
-                    true /* createEncoder */, cameraSource);
-
-        CHECK(mOutputFd >= 0);
+        err = setupVideoEncoder(writer);
+        if (err != OK) return err;
         totalBitRate += mVideoBitRate;
-        mWriter->addSource(encoder);
     }
 
-    {
-        // MPEGWriter specific handling
-        MPEG4Writer *writer = ((MPEG4Writer *) mWriter.get());
-        writer->setInterleaveDuration(mInterleaveDurationUs);
-    }
+    reinterpret_cast<MPEG4Writer *>(writer.get())->
+        setInterleaveDuration(mInterleaveDurationUs);
 
     if (mMaxFileDurationUs != 0) {
-        mWriter->setMaxFileDuration(mMaxFileDurationUs);
+        writer->setMaxFileDuration(mMaxFileDurationUs);
     }
     if (mMaxFileSizeBytes != 0) {
-        mWriter->setMaxFileSize(mMaxFileSizeBytes);
+        writer->setMaxFileSize(mMaxFileSizeBytes);
     }
-    mWriter->setListener(mListener);
     sp<MetaData> meta = new MetaData;
     meta->setInt64(kKeyTime, systemTime() / 1000);
     meta->setInt32(kKeyFileType, mOutputFormat);
@@ -897,8 +924,9 @@ status_t StagefrightRecorder::startMPEG4Recording() {
     if (mTrackEveryTimeDurationUs > 0) {
         meta->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
     }
-    mWriter->start(meta.get());
-    return OK;
+    writer->setListener(mListener);
+    mWriter = writer;
+    return mWriter->start(meta.get());
 }
 
 status_t StagefrightRecorder::pause() {
@@ -914,7 +942,7 @@ status_t StagefrightRecorder::stop() {
     LOGV("stop");
     if (mWriter != NULL) {
         mWriter->stop();
-        mWriter = NULL;
+        mWriter.clear();
     }
 
     if (mCamera != 0) {
@@ -925,7 +953,7 @@ status_t StagefrightRecorder::stop() {
             mCamera->stopPreview();
         }
         mCamera->unlock();
-        mCamera = NULL;
+        mCamera.clear();
         IPCThreadState::self()->restoreCallingIdentity(token);
         mFlags = 0;
     }
