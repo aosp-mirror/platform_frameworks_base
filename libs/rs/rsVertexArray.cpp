@@ -44,6 +44,7 @@ void VertexArray::clearAll()
         mAttribs[ct].clear();
     }
     mActiveBuffer = 0;
+    mActivePointer = NULL;
     mCount = 0;
 }
 
@@ -55,6 +56,7 @@ VertexArray::Attrib::Attrib()
 void VertexArray::Attrib::set(const Attrib &a)
 {
     buffer = a.buffer;
+    ptr = a.ptr;
     offset = a.offset;
     type = a.type;
     size = a.size;
@@ -70,6 +72,7 @@ void VertexArray::Attrib::clear()
     type = 0;
     size = 0;
     stride = 0;
+    ptr = NULL;
     normalized = false;
     name.setTo("");
 }
