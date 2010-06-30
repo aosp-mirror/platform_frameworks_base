@@ -6,7 +6,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := \
 	$(call all-subdir-java-files)
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner bouncycastle
 
 LOCAL_PACKAGE_NAME := CoreTests
 

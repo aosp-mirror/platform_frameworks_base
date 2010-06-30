@@ -194,7 +194,7 @@ LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework-res-source-path)/com/android/internal/R.java
 
 LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core core-junit ext
+LOCAL_JAVA_LIBRARIES := bouncycastle core core-junit ext
 
 LOCAL_MODULE := framework
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
@@ -342,6 +342,7 @@ framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework-res-source-path)/com/android/internal/R.java
 
 framework_docs_LOCAL_JAVA_LIBRARIES := \
+			bouncycastle \
 			core \
 			ext \
 			framework \
