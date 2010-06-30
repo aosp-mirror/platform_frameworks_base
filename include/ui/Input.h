@@ -145,7 +145,7 @@ public:
     inline int32_t getDeviceId() const { return mDeviceId; }
 
     inline int32_t getNature() const { return mNature; }
-
+    
 protected:
     void initialize(int32_t deviceId, int32_t nature);
 
@@ -179,6 +179,14 @@ public:
 
     inline nsecs_t getEventTime() const { return mEventTime; }
 
+    // Return true if this event may have a default action implementation.
+    static bool hasDefaultAction(int32_t keyCode);
+    bool hasDefaultAction() const;
+
+    // Return true if this event represents a system key.
+    static bool isSystemKey(int32_t keyCode);
+    bool isSystemKey() const;
+    
     void initialize(
             int32_t deviceId,
             int32_t nature,

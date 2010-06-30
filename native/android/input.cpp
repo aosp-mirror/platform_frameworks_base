@@ -225,6 +225,15 @@ int32_t AInputQueue_getEvent(AInputQueue* queue, AInputEvent** outEvent) {
 
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event,
         int handled) {
+    if (!handled && ((InputEvent*)event)->getType() == INPUT_EVENT_TYPE_KEY
+            && ((KeyEvent*)event)->hasDefaultAction()) {
+        // The app didn't handle this, but it may have a default action
+        // associated with it.  We need to hand this back to Java to be
+        // executed.
+        queue->doDefaultKey((KeyEvent*)event);
+        return;
+    }
+    
     int32_t res = queue->getConsumer().sendFinishedSignal();
     if (res != android::OK) {
         LOGW("Failed to send finished signal on channel '%s'.  status=%d",

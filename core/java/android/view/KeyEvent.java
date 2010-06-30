@@ -676,33 +676,12 @@ public class KeyEvent implements Parcelable {
      * TODO: should the dpad keys be here?  arguably, because they also shouldn't be menu shortcuts
      */
     public final boolean isSystem() {
-        switch (mKeyCode) {
-        case KEYCODE_MENU:
-        case KEYCODE_SOFT_RIGHT:
-        case KEYCODE_HOME:
-        case KEYCODE_BACK:
-        case KEYCODE_CALL:
-        case KEYCODE_ENDCALL:
-        case KEYCODE_VOLUME_UP:
-        case KEYCODE_VOLUME_DOWN:
-        case KEYCODE_MUTE:
-        case KEYCODE_POWER:
-        case KEYCODE_HEADSETHOOK:
-        case KEYCODE_MEDIA_PLAY_PAUSE:
-        case KEYCODE_MEDIA_STOP:
-        case KEYCODE_MEDIA_NEXT:
-        case KEYCODE_MEDIA_PREVIOUS:
-        case KEYCODE_MEDIA_REWIND:
-        case KEYCODE_MEDIA_FAST_FORWARD:
-        case KEYCODE_CAMERA:
-        case KEYCODE_FOCUS:
-        case KEYCODE_SEARCH:
-        case KEYCODE_PICTSYMBOLS:
-        case KEYCODE_SWITCH_CHARSET:
-            return true;
-        default:
-            return false;
-        }
+        return native_isSystemKey(mKeyCode);
+    }
+
+    /** @hide */
+    public final boolean hasDefaultAction() {
+        return native_hasDefaultAction(mKeyCode);
     }
 
 
@@ -1226,4 +1205,7 @@ public class KeyEvent implements Parcelable {
         mDownTime = in.readLong();
         mEventTime = in.readLong();
     }
+    
+    private native boolean native_isSystemKey(int keyCode);
+    private native boolean native_hasDefaultAction(int keyCode);
 }
