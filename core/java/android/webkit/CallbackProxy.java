@@ -114,6 +114,7 @@ class CallbackProxy extends Handler {
     private static final int ADD_HISTORY_ITEM                    = 135;
     private static final int HISTORY_INDEX_CHANGED               = 136;
     private static final int AUTH_CREDENTIALS                    = 137;
+    private static final int SET_INSTALLABLE_WEBAPP              = 138;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -790,6 +791,9 @@ class CallbackProxy extends Handler {
                 password = msg.getData().getString("password");
                 mWebView.setHttpAuthUsernamePassword(
                         host, realm, username, password);
+                break;
+            case SET_INSTALLABLE_WEBAPP:
+                mWebChromeClient.setInstallableWebApp();
                 break;
         }
     }
@@ -1547,5 +1551,12 @@ class CallbackProxy extends Handler {
         }
         Message msg = obtainMessage(HISTORY_INDEX_CHANGED, index, 0, item);
         sendMessage(msg);
+    }
+
+    void setInstallableWebApp() {
+        if (mWebChromeClient == null) {
+            return;
+        }
+        sendMessage(obtainMessage(SET_INSTALLABLE_WEBAPP));
     }
 }

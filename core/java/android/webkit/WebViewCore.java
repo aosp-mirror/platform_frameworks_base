@@ -424,6 +424,13 @@ final class WebViewCore {
         return mCallbackProxy.onJsTimeout();
     }
 
+    /**
+     * Notify the webview that this is an installable web app.
+     */
+    protected void setInstallableWebApp() {
+        mCallbackProxy.setInstallableWebApp();
+    }
+
     //-------------------------------------------------------------------------
     // JNI methods
     //-------------------------------------------------------------------------
