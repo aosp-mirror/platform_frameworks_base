@@ -87,9 +87,6 @@ enum {
     // Indicates that the screen was dim when the event was received and the event
     // should brighten the device.
     POLICY_FLAG_BRIGHT_HERE = 0x20000000,
-
-    // Indicates that the dispatcher should call back into the policy before dispatching. */
-    POLICY_FLAG_INTERCEPT_DISPATCH = 0x40000000,
 };
 
 /*

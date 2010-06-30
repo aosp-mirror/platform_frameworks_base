@@ -1639,10 +1639,6 @@ bool InputReader::applyStandardInputDispatchPolicyActions(nsecs_t when,
         *policyFlags |= POLICY_FLAG_BRIGHT_HERE;
     }
 
-    if (policyActions & InputReaderPolicyInterface::ACTION_INTERCEPT_DISPATCH) {
-        *policyFlags |= POLICY_FLAG_INTERCEPT_DISPATCH;
-    }
-
     return policyActions & InputReaderPolicyInterface::ACTION_DISPATCH;
 }
 

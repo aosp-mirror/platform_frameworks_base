@@ -374,6 +374,9 @@ private:
     int32_t identifyTouchEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
 
+    bool interceptKeyBeforeDispatching(const InputTarget& target,
+            const KeyEvent* keyEvent, uint32_t policyFlags);
+
     void pokeUserActivityIfNeeded(int32_t windowType, int32_t eventType);
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     bool checkInjectionPermission(const InputWindow* window,
@@ -633,8 +636,6 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
         }
     }
 
-    // TODO Be smarter about which keys cause us to request interception during dispatch.
-    actions |= InputReaderPolicyInterface::ACTION_INTERCEPT_DISPATCH;
     return actions;
 }
 
@@ -1530,34 +1531,11 @@ int32_t NativeInputManager::waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t 
         windowType = focusedWindow->layoutParamsType;
     } // release lock
 
-    if (policyFlags & POLICY_FLAG_INTERCEPT_DISPATCH) {
-        const InputTarget& target = outTargets.top();
-
-        JNIEnv* env = jniEnv();
-
-        jobject inputChannelObj = getInputChannelObjLocal(env, target.inputChannel);
-        if (inputChannelObj) {
-            jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
-                    gCallbacksClassInfo.interceptKeyBeforeDispatching,
-                    inputChannelObj, keyEvent->getKeyCode(), keyEvent->getMetaState(),
-                    keyEvent->getAction() == KEY_EVENT_ACTION_DOWN,
-                    keyEvent->getRepeatCount(), policyFlags);
-            bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatch");
-
-            env->DeleteLocalRef(inputChannelObj);
-
-            if (error) {
-                return INPUT_EVENT_INJECTION_FAILED;
-            }
-
-            if (consumed) {
-                outTargets.clear();
-                return INPUT_EVENT_INJECTION_SUCCEEDED;
-            }
-        } else {
-            LOGW("Could not apply key dispatch policy because input channel '%s' is "
-                    "no longer valid.", target.inputChannel->getName().string());
-        }
+    const InputTarget& target = outTargets.top();
+    bool consumed = interceptKeyBeforeDispatching(target, keyEvent, policyFlags);
+    if (consumed) {
+        outTargets.clear();
+        return INPUT_EVENT_INJECTION_SUCCEEDED;
     }
 
     pokeUserActivityIfNeeded(windowType, POWER_MANAGER_BUTTON_EVENT);
@@ -1654,6 +1632,29 @@ int32_t NativeInputManager::identifyTouchEventTargets(MotionEvent* motionEvent,
     }
     pokeUserActivityIfNeeded(windowType, eventType);
     return INPUT_EVENT_INJECTION_SUCCEEDED;
+}
+
+bool NativeInputManager::interceptKeyBeforeDispatching(const InputTarget& target,
+        const KeyEvent* keyEvent, uint32_t policyFlags) {
+    JNIEnv* env = jniEnv();
+
+    jobject inputChannelObj = getInputChannelObjLocal(env, target.inputChannel);
+    if (inputChannelObj) {
+        jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
+                gCallbacksClassInfo.interceptKeyBeforeDispatching,
+                inputChannelObj, keyEvent->getKeyCode(), keyEvent->getMetaState(),
+                keyEvent->getAction() == KEY_EVENT_ACTION_DOWN,
+                keyEvent->getRepeatCount(), policyFlags);
+        bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
+
+        env->DeleteLocalRef(inputChannelObj);
+
+        return consumed && ! error;
+    } else {
+        LOGW("Could not apply key dispatch policy because input channel '%s' is "
+                "no longer valid.", target.inputChannel->getName().string());
+        return false;
+    }
 }
 
 void NativeInputManager::pokeUserActivityIfNeeded(int32_t windowType, int32_t eventType) {
