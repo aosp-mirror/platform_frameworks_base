@@ -357,7 +357,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                height,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -366,9 +366,9 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
-        lp.y += height * 1.5; // for now
+        lp.y += height * 1.5; // FIXME
         lp.setTitle("IntruderAlert");
-        lp.windowAnimations = android.R.style.Animation_Dialog;
+        lp.windowAnimations = com.android.internal.R.style.Animation_StatusBar_IntruderAlert;
 
         WindowManagerImpl.getDefault().addView(mIntruderAlertView, lp);
     }
@@ -417,7 +417,8 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                     iconView.getStatusBarIcon()));
                 alertText.setText(notification.notification.tickerText);
 
-                mIntruderAlertView.setOnClickListener(
+                View button = mIntruderAlertView.findViewById(R.id.intruder_alert_content);
+                button.setOnClickListener(
                     new Launcher(notification.notification.contentIntent,
                         notification.pkg, notification.tag, notification.id));
 
