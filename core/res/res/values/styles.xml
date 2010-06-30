@@ -88,6 +88,13 @@
         <item name="windowExitAnimation">@anim/status_bar_exit</item>
     </style>
 
+    <!-- {@hide} -->
+    <style name="Animation.StatusBar.IntruderAlert"
+        parent="@android:style/Animation.StatusBar">
+        <item name="android:windowEnterAnimation">@anim/priority_alert_enter</item>
+        <item name="android:windowExitAnimation">@anim/priority_alert_exit</item>
+    </style>
+
     <!-- Standard animations for a translucent window or activity.  This
          style is <em>not<em> used by default for the translucent theme
          (since translucent activities are a special case that have no
