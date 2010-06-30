@@ -339,11 +339,13 @@ public:
     explicit AInputQueue(const android::sp<android::InputChannel>& channel);
 
     /* Destroys the consumer and releases its input channel. */
-    ~AInputQueue();
+    virtual ~AInputQueue();
 
     inline android::InputConsumer& getConsumer() { return mConsumer; }
     
     android::status_t consume(android::InputEvent** event);
+    
+    virtual void doDefaultKey(android::KeyEvent* keyEvent) = 0;
     
 private:
     android::InputConsumer mConsumer;
