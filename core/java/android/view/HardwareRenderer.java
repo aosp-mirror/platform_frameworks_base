@@ -76,10 +76,12 @@ abstract class HardwareRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      * @param translator Translator used to draw applications in compatibility mode.
      * @param yoff The vertical offset for the drawing.
+     * @param density The density of the application
      * @param scalingRequired Whether drawing should be scaled.
      */
     abstract void draw(View view, View.AttachInfo attachInfo,
-            CompatibilityInfo.Translator translator, int yoff, boolean scalingRequired);
+            CompatibilityInfo.Translator translator, int yoff, int density,
+            boolean scalingRequired);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -370,7 +372,7 @@ abstract class HardwareRenderer {
 
         @Override
         void draw(View view, View.AttachInfo attachInfo, CompatibilityInfo.Translator translator,
-                int yoff, boolean scalingRequired) {
+                int yoff, int density, boolean scalingRequired) {
 
             if (canDraw()) {
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
@@ -386,6 +388,7 @@ abstract class HardwareRenderer {
                     if (translator != null) {
                         translator.translateCanvas(canvas);
                     }
+                    canvas.setDensity(density);
                     canvas.setScreenDensity(scalingRequired ? DisplayMetrics.DENSITY_DEVICE : 0);
     
                     view.draw(canvas);

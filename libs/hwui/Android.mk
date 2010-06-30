@@ -4,7 +4,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	Matrix.cpp \
 	OpenGLRenderer.cpp \
-	Program.cpp
+	Program.cpp \
+	TextureCache.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \

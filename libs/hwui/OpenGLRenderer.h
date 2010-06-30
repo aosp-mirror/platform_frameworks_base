@@ -20,7 +20,9 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <SkBitmap.h>
 #include <SkMatrix.h>
+#include <SkPaint.h>
 #include <SkXfermode.h>
 
 #include <utils/RefBase.h>
@@ -29,6 +31,8 @@
 #include "Program.h"
 #include "Rect.h"
 #include "Snapshot.h"
+#include "Texture.h"
+#include "TextureCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -98,6 +102,7 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     bool clipRect(float left, float top, float right, float bottom);
 
+    void drawBitmap(const SkBitmap* bitmap, float left, float top, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
@@ -218,6 +223,9 @@ private:
 
     // Used to draw textured quads
     TextureVertex mDrawTextureVertices[4];
+
+    // Used to cache all drawBitmap textures
+    TextureCache mTextureCache;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer

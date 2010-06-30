@@ -45,13 +45,19 @@ public class Canvas {
     private GL      mGL;        // if not null, mBitmap must be null
     
     // optional field set by the caller
-    private DrawFilter  mDrawFilter;
+    private DrawFilter mDrawFilter;
 
-    // Package-scoped for quick access.
-    /*package*/ int mDensity = Bitmap.DENSITY_NONE;
+    /**
+     * @hide
+     */
+    protected int mDensity = Bitmap.DENSITY_NONE;
 
-    // Used to determine when compatibility scaling is in effect.
-    private int mScreenDensity = Bitmap.DENSITY_NONE;
+    /**
+     * Used to determine when compatibility scaling is in effect.
+     * 
+     * @hide
+     */
+    protected int mScreenDensity = Bitmap.DENSITY_NONE;
     
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})

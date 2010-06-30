@@ -42,6 +42,9 @@ class GLES20Canvas extends Canvas {
     
     private int mWidth;
     private int mHeight;
+    
+    private final float[] mPoint = new float[2];
+    private final float[] mLine = new float[4];
 
     ///////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -64,7 +67,7 @@ class GLES20Canvas extends Canvas {
             nDestroyRenderer(mRenderer);
         }
     }
-    
+
     private native void nDestroyRenderer(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
@@ -358,23 +361,44 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
-        // TODO: Implement
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint,
+                bitmap.getDensity(), mDensity, mScreenDensity);
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-        // TODO: Implement
+        final float width = bitmap.getWidth();
+        final float height = bitmap.getHeight();
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, 0.0f, 0.0f, width, height,
+                0.0f, 0.0f, width, height, matrix.native_instance, nativePaint,
+                bitmap.getDensity(), mDensity, mScreenDensity);
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
-        // TODO: Implement
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
+                dst.left, dst.top, dst.right, dst.bottom, 0, nativePaint,
+                bitmap.getDensity(), mDensity, mScreenDensity);
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
-        // TODO: Implement
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
+                dst.left, dst.top, dst.right, dst.bottom, 0, nativePaint,
+                bitmap.getDensity(), mDensity, mScreenDensity);
     }
+
+    private native void nDrawBitmap(int renderer, int bitmap, float left, float top, int paint,
+            int bitmapDensity, int canvasDensity, int screenDensity);
+
+    private native void nDrawBitmap(int renderer, int bitmap,
+            float srcLeft, float srcTop, float srcRight, float srcBottom,
+            float left, float top, float right, float bottom, int matrix, int paint,
+            int bitmapDensity, int canvasDensity, int screenDensity);
 
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
@@ -386,14 +410,12 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
             int width, int height, boolean hasAlpha, Paint paint) {
-
-        // TODO: Implement
+        drawBitmap(colors, offset, stride, (float) x, (float) y, width, height, hasAlpha, paint);
     }
 
     @Override
     public void drawBitmapMesh(Bitmap bitmap, int meshWidth, int meshHeight, float[] verts,
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
-
         throw new UnsupportedOperationException();
     }
 
@@ -416,7 +438,11 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
-        // TODO: Implement
+        mLine[0] = startX;
+        mLine[1] = startY;
+        mLine[2] = stopX;
+        mLine[3] = stopY;
+        drawLines(mLine, 0, 1, paint);
     }
 
     @Override
@@ -426,7 +452,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawLines(float[] pts, Paint paint) {
-        // TODO: Implement
+        drawLines(pts, 0, pts.length / 4, paint);
     }
 
     @Override
@@ -461,7 +487,9 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawPoint(float x, float y, Paint paint) {
-        // TODO: Implement
+        mPoint[0] = x;
+        mPoint[1] = y;
+        drawPoints(mPoint, 0, 1, paint);
     }
 
     @Override
@@ -471,7 +499,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawPoints(float[] pts, Paint paint) {
-        // TODO: Implement
+        drawPoints(pts, 0, pts.length / 2, paint);
     }
 
     @Override
@@ -529,13 +557,12 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
-        // TODO: Implement
+        drawText(text, 0, text.length(), x, y, paint);
     }
 
     @Override
     public void drawTextOnPath(char[] text, int index, int count, Path path, float hOffset,
             float vOffset, Paint paint) {
-
         throw new UnsupportedOperationException();
     }
 
@@ -547,14 +574,12 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,
             float x, float y, int dir, Paint paint) {
-        
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void drawTextRun(CharSequence text, int start, int end, int contextStart, int contextEnd,
             float x, float y, int dir, Paint paint) {
-
         throw new UnsupportedOperationException();
     }
 
@@ -562,7 +587,6 @@ class GLES20Canvas extends Canvas {
     public void drawVertices(VertexMode mode, int vertexCount, float[] verts, int vertOffset,
             float[] texs, int texOffset, int[] colors, int colorOffset, short[] indices,
             int indexOffset, int indexCount, Paint paint) {
-
         throw new UnsupportedOperationException();
     }
 }
