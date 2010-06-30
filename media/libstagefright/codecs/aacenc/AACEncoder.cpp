@@ -132,7 +132,10 @@ AACEncoder::~AACEncoder() {
 }
 
 status_t AACEncoder::start(MetaData *params) {
-    CHECK(!mStarted);
+    if (mStarted) {
+        LOGW("Call start() when encoder already started");
+        return OK;
+    }
 
     mBufferGroup = new MediaBufferGroup;
     mBufferGroup->add_buffer(new MediaBuffer(2048));
@@ -150,7 +153,10 @@ status_t AACEncoder::start(MetaData *params) {
 }
 
 status_t AACEncoder::stop() {
-    CHECK(mStarted);
+    if (!mStarted) {
+        LOGW("Call stop() when encoder has not started");
+        return OK;
+    }
 
     if (mInputBuffer) {
         mInputBuffer->release();

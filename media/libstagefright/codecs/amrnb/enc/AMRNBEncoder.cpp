@@ -70,7 +70,10 @@ static Mode PickModeFromBitrate(int32_t bps) {
 }
 
 status_t AMRNBEncoder::start(MetaData *params) {
-    CHECK(!mStarted);
+    if (mStarted) {
+        LOGW("Call start() when encoder already started");
+        return OK;
+    }
 
     mBufferGroup = new MediaBufferGroup;
     mBufferGroup->add_buffer(new MediaBuffer(32));
@@ -97,7 +100,10 @@ status_t AMRNBEncoder::start(MetaData *params) {
 }
 
 status_t AMRNBEncoder::stop() {
-    CHECK(mStarted);
+    if (!mStarted) {
+        LOGW("Call stop() when encoder has not started.");
+        return OK;
+    }
 
     if (mInputBuffer) {
         mInputBuffer->release();
