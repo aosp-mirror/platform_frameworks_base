@@ -21,29 +21,35 @@
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/alert_bar_background"
-    android:orientation="horizontal"
-    android:focusable="true"
-    android:descendantFocusability="afterDescendants"
+    android:layout_height="32dip"
+    android:layout_width="match_parent"
+    android:paddingLeft="8dip"
+    android:paddingRight="8dip"
     >
         
     <LinearLayout 
+        android:id="@+id/intruder_alert_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="6dip"
+        android:gravity="center"
         android:animationCache="false"
         android:orientation="horizontal"
+        android:background="@drawable/alert_bar_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:descendantFocusability="afterDescendants"
         >
 
         <ImageView
             android:id="@+id/alertIcon"
             android:layout_width="25dip"
             android:layout_height="25dip"
+            android:paddingLeft="6dip"
             android:layout_marginRight="8dip"
             />
         <TextView
             android:id="@+id/alertText"
-            android:textAppearance="@*android:style/TextAppearance.StatusBar.EventContent"
+            android:textAppearance="@style/TextAppearance.StatusBar.IntruderAlert"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
