@@ -6052,6 +6052,8 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.ViewState viewState = draw.mViewState;
                     boolean isPictureAfterFirstLayout = viewState != null;
                     if (isPictureAfterFirstLayout) {
+                        // Reset the last sent data here since dealing with new page.
+                        mLastWidthSent = 0;
                         mZoomManager.onFirstLayout(draw);
                         if (!mDrawHistory) {
                             setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
