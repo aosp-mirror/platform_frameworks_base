@@ -880,7 +880,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (localLOGV) Slog.v(
                 TAG, "Death received in " + this
                 + " for thread " + mAppThread.asBinder());
-            removeRequestedPss(mApp);
             synchronized(ActivityManagerService.this) {
                 appDiedLocked(mApp, mPid, mAppThread);
             }
@@ -1785,7 +1784,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     hostingNameStr != null ? hostingNameStr : "");
             
             if (app.persistent) {
-                Watchdog.getInstance().processStarted(app, app.processName, pid);
+                Watchdog.getInstance().processStarted(app.processName, pid);
             }
             
             StringBuilder buf = mStringBuilder;
@@ -5660,123 +5659,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
         return killed;
-    }
-    
-    public void reportPss(IApplicationThread caller, int pss) {
-        Watchdog.PssRequestor req;
-        String name;
-        ProcessRecord callerApp;
-        synchronized (this) {
-            if (caller == null) {
-                return;
-            }
-            callerApp = getRecordForAppLocked(caller);
-            if (callerApp == null) {
-                return;
-            }
-            callerApp.lastPss = pss;
-            req = callerApp;
-            name = callerApp.processName;
-        }
-        Watchdog.getInstance().reportPss(req, name, pss);
-        if (!callerApp.persistent) {
-            removeRequestedPss(callerApp);
-        }
-    }
-    
-    public void requestPss(Runnable completeCallback) {
-        ArrayList<ProcessRecord> procs;
-        synchronized (this) {
-            mRequestPssCallback = completeCallback;
-            mRequestPssList.clear();
-            for (int i=mLruProcesses.size()-1; i>=0; i--) {
-                ProcessRecord proc = mLruProcesses.get(i);
-                if (!proc.persistent) {
-                    mRequestPssList.add(proc);
-                }
-            }
-            procs = new ArrayList<ProcessRecord>(mRequestPssList);
-        }
-        
-        int oldPri = Process.getThreadPriority(Process.myTid()); 
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        for (int i=procs.size()-1; i>=0; i--) {
-            ProcessRecord proc = procs.get(i);
-            proc.lastPss = 0;
-            proc.requestPss();
-        }
-        Process.setThreadPriority(oldPri);
-    }
-    
-    void removeRequestedPss(ProcessRecord proc) {
-        Runnable callback = null;
-        synchronized (this) {
-            if (mRequestPssList.remove(proc)) {
-                if (mRequestPssList.size() == 0) {
-                    callback = mRequestPssCallback;
-                    mRequestPssCallback = null;
-                }
-            }
-        }
-        
-        if (callback != null) {
-            callback.run();
-        }
-    }
-    
-    public void collectPss(Watchdog.PssStats stats) {
-        stats.mEmptyPss = 0;
-        stats.mEmptyCount = 0;
-        stats.mBackgroundPss = 0;
-        stats.mBackgroundCount = 0;
-        stats.mServicePss = 0;
-        stats.mServiceCount = 0;
-        stats.mVisiblePss = 0;
-        stats.mVisibleCount = 0;
-        stats.mForegroundPss = 0;
-        stats.mForegroundCount = 0;
-        stats.mNoPssCount = 0;
-        synchronized (this) {
-            int i;
-            int NPD = mProcDeaths.length < stats.mProcDeaths.length
-                    ? mProcDeaths.length : stats.mProcDeaths.length;
-            int aggr = 0;
-            for (i=0; i<NPD; i++) {
-                aggr += mProcDeaths[i];
-                stats.mProcDeaths[i] = aggr;
-            }
-            while (i<stats.mProcDeaths.length) {
-                stats.mProcDeaths[i] = 0;
-                i++;
-            }
-            
-            for (i=mLruProcesses.size()-1; i>=0; i--) {
-                ProcessRecord proc = mLruProcesses.get(i);
-                if (proc.persistent) {
-                    continue;
-                }
-                //Slog.i(TAG, "Proc " + proc + ": pss=" + proc.lastPss);
-                if (proc.lastPss == 0) {
-                    stats.mNoPssCount++;
-                    continue;
-                }
-                if (proc.setAdj >= HIDDEN_APP_MIN_ADJ) {
-                    if (proc.empty) {
-                        stats.mEmptyPss += proc.lastPss;
-                        stats.mEmptyCount++;
-                    } else {
-                        stats.mBackgroundPss += proc.lastPss;
-                        stats.mBackgroundCount++;
-                    }
-                } else if (proc.setAdj >= VISIBLE_APP_ADJ) {
-                    stats.mVisiblePss += proc.lastPss;
-                    stats.mVisibleCount++;
-                } else {
-                    stats.mForegroundPss += proc.lastPss;
-                    stats.mForegroundCount++;
-                }
-            }
-        }
     }
     
     public final void startRunning(String pkg, String cls, String action,
