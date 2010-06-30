@@ -78,9 +78,26 @@ public final class Calendar {
 
 
     /**
+     * Generic columns for use by sync adapters. The specific functions of
+     * these columns are private to the sync adapter. Other clients of the API
+     * should not attempt to either read or write this column.
+     */
+    protected interface BaseSyncColumns {
+
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC1 = "sync1";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC2 = "sync2";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC3 = "sync3";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC4 = "sync4";
+    }
+
+    /**
      * Columns for Sync information used by Calendars and Events tables.
      */
-    public interface SyncColumns {
+    public interface SyncColumns extends BaseSyncColumns {
         /**
          * The account that was used to sync the entry to the device.
          * <P>Type: TEXT</P>
@@ -269,11 +286,9 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_MARK);
 
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SELF_URL);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
-                        Calendars.EDIT_URL);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
-                        Calendars.EVENTS_URL);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC2);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC3);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
@@ -848,8 +863,7 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
-                        Calendars.EVENTS_URL);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
 
                 Entity entity = new Entity(cv);
                 Cursor subCursor;
