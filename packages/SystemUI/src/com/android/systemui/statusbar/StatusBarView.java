@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -40,11 +41,15 @@ public class StatusBarView extends FrameLayout {
     ViewGroup mNotificationIcons;
     ViewGroup mStatusIcons;
     View mDate;
+    View mButtonArea;
     FixedSizeDrawable mBackground;
     
     boolean mNightMode = false;
     int mStartAlpha = 0, mEndAlpha = 0;
     long mEndTime = 0;
+
+    Rect mButtonBounds = new Rect();
+    boolean mCapturingEvents = true;
 
     public StatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,6 +65,8 @@ public class StatusBarView extends FrameLayout {
         mBackground = new FixedSizeDrawable(mDate.getBackground());
         mBackground.setFixedBounds(0, 0, 0, 0);
         mDate.setBackgroundDrawable(mBackground);
+
+        mButtonArea = findViewById(R.id.buttons);
     }
 
     @Override
@@ -125,6 +132,8 @@ public class StatusBarView extends FrameLayout {
 
         mDate.layout(mDate.getLeft(), mDate.getTop(), newDateRight, mDate.getBottom());
         mBackground.setFixedBounds(-mDate.getLeft(), -mDate.getTop(), (r-l), (b-t));
+
+        mButtonArea.getHitRect(mButtonBounds);
     }
 
     @Override
@@ -177,6 +186,9 @@ public class StatusBarView extends FrameLayout {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mCapturingEvents) {
+            return false;
+        }
         if (event.getAction() != MotionEvent.ACTION_DOWN) {
             mService.interceptTouchEvent(event);
         }
@@ -185,6 +197,13 @@ public class StatusBarView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mButtonBounds.contains((int)event.getX(), (int)event.getY())) {
+                mCapturingEvents = false;
+                return false;
+            }
+        }
+        mCapturingEvents = true;
         return mService.interceptTouchEvent(event)
                 ? true : super.onInterceptTouchEvent(event);
     }
