@@ -5457,10 +5457,6 @@ public class WebView extends AbsoluteLayout
         mLastVelocity = velocity;
 
         mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY);
-        // TODO: duration is calculated based on velocity, if the range is
-        // small, the animation will stop before duration is up. We may
-        // want to calculate how long the animation is going to run to precisely
-        // resume the webcore update.
         final int time = mScroller.getDuration();
         mPrivateHandler.sendEmptyMessageDelayed(RESUME_WEBCORE_PRIORITY, time);
         awakenScrollBars(time);
