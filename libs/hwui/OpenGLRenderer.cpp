@@ -54,10 +54,10 @@ static const GLsizei gDrawColorVertexCount = 4;
 // This array is never used directly but used as a memcpy source in the
 // OpenGLRenderer constructor
 static const TextureVertex gDrawTextureVertices[] = {
-        FV(0.0f, 0.0f, 0.0f, 1.0f),
-        FV(1.0f, 0.0f, 1.0f, 1.0f),
-        FV(0.0f, 1.0f, 0.0f, 0.0f),
-        FV(1.0f, 1.0f, 1.0f, 0.0f)
+        FV(0.0f, 0.0f, 0.0f, 0.0f),
+        FV(1.0f, 0.0f, 1.0f, 0.0f),
+        FV(0.0f, 1.0f, 0.0f, 1.0f),
+        FV(1.0f, 1.0f, 1.0f, 1.0f)
 };
 static const GLsizei gDrawTextureVertexStride = sizeof(TextureVertex);
 static const GLsizei gDrawTextureVertexCount = 4;
@@ -208,7 +208,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     resetDrawTextureTexCoords(u1, v1, u2, v1);
 
     drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
-            current->texture, current->alpha, current->mode, true);
+            current->texture, current->alpha, current->mode, true, true);
 
     resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
 
@@ -378,8 +378,33 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
-    LOGD("Drawing bitmap!");
+void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
+    Texture* texture = mTextureCache.get(bitmap);
+
+    SkXfermode::Mode mode;
+    int alpha;
+
+    if (paint) {
+        const bool isMode = SkXfermode::IsMode(paint->getXfermode(), &mode);
+        if (!isMode) {
+            // Assume SRC_OVER
+            mode = SkXfermode::kSrcOver_Mode;
+        }
+
+        // Skia draws using the color's alpha channel if < 255
+        // Otherwise, it uses the paint's alpha
+        int color = paint->getColor();
+        alpha = (color >> 24) & 0xFF;
+        if (alpha == 255) {
+            alpha = paint->getAlpha();
+        }
+    } else {
+        mode = SkXfermode::kSrcOver_Mode;
+        alpha = 255;
+    }
+
+    drawTextureRect(left, top, left + texture->width, top + texture->height, texture->id,
+            alpha / 255.0f, mode, texture->blend, true);
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -443,22 +468,25 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        GLuint texture, float alpha, SkXfermode::Mode mode, bool isPremultiplied) {
+        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied) {
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
     mDrawTextureShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
 
-    GLenum sourceMode = gBlends[mode].src;
-    if (!isPremultiplied && sourceMode == GL_ONE) {
-        sourceMode = GL_SRC_ALPHA;
+    if (blend || alpha < 1.0f || mode != SkXfermode::kSrcOver_Mode) {
+        GLenum sourceMode = gBlends[mode].src;
+        if (!isPremultiplied && sourceMode == GL_ONE) {
+            sourceMode = GL_SRC_ALPHA;
+        }
+
+        glEnable(GL_BLEND);
+        glBlendFunc(sourceMode, gBlends[mode].dst);
     }
 
-    // TODO: Try to disable blending when the texture is opaque and alpha == 1.0f
-    glEnable(GL_BLEND);
-    glBlendFunc(sourceMode, gBlends[mode].dst);
-
     glBindTexture(GL_TEXTURE_2D, texture);
+
+    // TODO handle tiling and filtering here
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(mDrawTextureShader->sampler, 0);

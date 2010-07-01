@@ -41,7 +41,7 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
     if (!texture) {
         texture = new Texture;
-        generateTexture(bitmap, texture);
+        generateTexture(bitmap, texture, false);
         mCache.put(bitmap, texture);
     } else if (bitmap->getGenerationID() != texture->generation) {
         generateTexture(bitmap, texture, true);
@@ -58,7 +58,14 @@ void TextureCache::clear() {
 }
 
 void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
+    SkAutoLockPixels alp(*bitmap);
+    if (!bitmap->readyToDraw()) {
+        LOGE("Cannot generate texture from bitmap");
+        return;
+    }
+
     if (!regenerate) {
+        texture->generation = bitmap->getGenerationID();
         texture->width = bitmap->width();
         texture->height = bitmap->height();
 
@@ -66,24 +73,27 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     }
 
     glBindTexture(GL_TEXTURE_2D, texture->id);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
+
+    switch (bitmap->getConfig()) {
+    case SkBitmap::kRGB_565_Config:
+        texture->blend = false;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bitmap->rowBytesAsPixels(), texture->height, 0,
+                GL_RGB, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
+        break;
+    case SkBitmap::kARGB_8888_Config:
+        texture->blend = true;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
+        break;
+    default:
+        break;
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    switch (bitmap->getConfig()) {
-    case SkBitmap::kRGB_565_Config:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB565, texture->width, texture->height,
-                0, GL_RGB565, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
-        break;
-    case SkBitmap::kARGB_8888_Config:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height,
-                0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
-        break;
-    default:
-        break;
-    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
