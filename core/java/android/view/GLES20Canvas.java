@@ -403,7 +403,6 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
             int width, int height, boolean hasAlpha, Paint paint) {
-
         // TODO: Implement
     }
 

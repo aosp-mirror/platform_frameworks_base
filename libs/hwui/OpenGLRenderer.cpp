@@ -205,12 +205,12 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const float u2 = texCoords.right / float(mWidth);
     const float v2 = (mHeight - texCoords.bottom) / float(mHeight);
 
-    resetDrawTextureTexCoords(u1, v1, u2, v1);
+    resetDrawTextureTexCoords(u1, v1, u2, v2);
 
     drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
             current->texture, current->alpha, current->mode, true, true);
 
-    resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 
     glDeleteFramebuffers(1, &current->fbo);
     glDeleteTextures(1, &current->texture);
@@ -263,9 +263,11 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     // The FBO will not be scaled, so we can use lower quality filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+    // TODO VERY IMPORTANT: Fix TextView to not call saveLayer() all the time
     // TODO ***** IMPORTANT *****
     // Creating a texture-backed FBO works only if the texture is the same size
     // as the original rendering buffer (in this case, mWidth and mHeight.)
@@ -381,30 +383,40 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
     Texture* texture = mTextureCache.get(bitmap);
 
-    SkXfermode::Mode mode;
     int alpha;
-
-    if (paint) {
-        const bool isMode = SkXfermode::IsMode(paint->getXfermode(), &mode);
-        if (!isMode) {
-            // Assume SRC_OVER
-            mode = SkXfermode::kSrcOver_Mode;
-        }
-
-        // Skia draws using the color's alpha channel if < 255
-        // Otherwise, it uses the paint's alpha
-        int color = paint->getColor();
-        alpha = (color >> 24) & 0xFF;
-        if (alpha == 255) {
-            alpha = paint->getAlpha();
-        }
-    } else {
-        mode = SkXfermode::kSrcOver_Mode;
-        alpha = 255;
-    }
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
 
     drawTextureRect(left, top, left + texture->width, top + texture->height, texture->id,
             alpha / 255.0f, mode, texture->blend, true);
+}
+
+void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
+         float srcLeft, float srcTop, float srcRight, float srcBottom,
+         float dstLeft, float dstTop, float dstRight, float dstBottom,
+         const SkMatrix* matrix, const SkPaint* paint) {
+    Texture* texture = mTextureCache.get(bitmap);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    const float width = texture->width;
+    const float height = texture->height;
+
+    const float u1 = srcLeft / width;
+    const float v1 = srcTop / height;
+    const float u2 = srcRight / width;
+    const float v2 = srcBottom / height;
+
+    resetDrawTextureTexCoords(u1, v1, u2, v2);
+
+    // TODO: implement Matrix
+
+    drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture->id,
+            alpha / 255.0f, mode, texture->blend, true);
+
+    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -515,13 +527,34 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
 void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
     mDrawTextureVertices[0].texture[0] = u1;
-    mDrawTextureVertices[0].texture[1] = v2;
+    mDrawTextureVertices[0].texture[1] = v1;
     mDrawTextureVertices[1].texture[0] = u2;
-    mDrawTextureVertices[1].texture[1] = v2;
+    mDrawTextureVertices[1].texture[1] = v1;
     mDrawTextureVertices[2].texture[0] = u1;
-    mDrawTextureVertices[2].texture[1] = v1;
+    mDrawTextureVertices[2].texture[1] = v2;
     mDrawTextureVertices[3].texture[0] = u2;
-    mDrawTextureVertices[3].texture[1] = v1;
+    mDrawTextureVertices[3].texture[1] = v2;
+}
+
+void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+    if (paint) {
+        const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
+        if (!isMode) {
+            // Assume SRC_OVER
+            *mode = SkXfermode::kSrcOver_Mode;
+        }
+
+        // Skia draws using the color's alpha channel if < 255
+        // Otherwise, it uses the paint's alpha
+        int color = paint->getColor();
+        *alpha = (color >> 24) & 0xFF;
+        if (*alpha == 255) {
+            *alpha = paint->getAlpha();
+        }
+    } else {
+        *mode = SkXfermode::kSrcOver_Mode;
+        *alpha = 255;
+    }
 }
 
 }; // namespace uirenderer
