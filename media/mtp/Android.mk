@@ -15,8 +15,6 @@
 #
 LOCAL_PATH:= $(call my-dir)
 
-ifneq ($(TARGET_SIMULATOR),true)
-
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
@@ -49,6 +47,8 @@ LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
 
 include $(BUILD_STATIC_LIBRARY)
 
+ifneq ($(TARGET_SIMULATOR),true)
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
@@ -64,8 +64,6 @@ LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libcutils \
 LOCAL_STATIC_LIBRARIES := libmtp
 
 include $(BUILD_EXECUTABLE)
-
-endif
 
 include $(CLEAR_VARS)
 
@@ -88,8 +86,9 @@ LOCAL_SRC_FILES:=                                       \
 LOCAL_C_INCLUDES := external/sqlite/dist
 LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libmedia
 
-
 LOCAL_CFLAGS := -g
 LOCAL_LDFLAGS := -g
 
 include $(BUILD_EXECUTABLE)
+
+endif
