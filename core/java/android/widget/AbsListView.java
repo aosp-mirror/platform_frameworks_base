@@ -2541,6 +2541,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private static final int MOVE_UP_POS = 2;
         private static final int MOVE_DOWN_BOUND = 3;
         private static final int MOVE_UP_BOUND = 4;
+        private static final int MOVE_OFFSET = 5;
         
         private int mMode;
         private int mTargetPos;
@@ -2548,6 +2549,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private int mLastSeenPos;
         private int mScrollDuration;
         private final int mExtraScroll;
+
+        private int mOffsetFromTop;
         
         PositionScroller() {
             mExtraScroll = ViewConfiguration.get(mContext).getScaledFadingEdgeLength();
@@ -2639,11 +2642,37 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             
             post(this);
         }
-        
+
+        void startWithOffset(int position, int offset) {
+            mTargetPos = position;
+            mOffsetFromTop = offset;
+            mBoundPos = INVALID_POSITION;
+            mLastSeenPos = INVALID_POSITION;
+            mMode = MOVE_OFFSET;
+
+            final int firstPos = mFirstPosition;
+            final int lastPos = firstPos + getChildCount() - 1;
+
+            int viewTravelCount = 0;
+            if (position < firstPos) {
+                viewTravelCount = firstPos - position;
+            } else if (position > lastPos) {
+                viewTravelCount = position - lastPos;
+            } else {
+                // On-screen, just scroll.
+                final int targetTop = getChildAt(position - firstPos).getTop();
+                smoothScrollBy(targetTop - offset, SCROLL_DURATION);
+                return;
+            }
+
+            mScrollDuration = SCROLL_DURATION / viewTravelCount;
+            post(this);
+        }
+
         void stop() {
             removeCallbacks(this);
         }
-        
+
         public void run() {
             final int listHeight = getHeight();
             final int firstPos = mFirstPosition;
@@ -2769,6 +2798,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 break;
             }
 
+            case MOVE_OFFSET: {
+                if (firstPos == mLastSeenPos) {
+                    // No new views, let things keep going.
+                    post(this);
+                }
+
+                final int position = mTargetPos;
+                final int lastPos = firstPos + getChildCount() - 1;
+
+                if (position < firstPos) {
+                    final View firstView = getChildAt(0);
+                    final int firstViewPixelsShowing = firstView.getHeight() + firstView.getTop();
+                    smoothScrollBy(-firstViewPixelsShowing, mScrollDuration);
+                    post(this);
+                } else if (position > lastPos) {
+                    final View lastView = getChildAt(getChildCount() - 1);
+                    final int lastViewPixelsShowing = lastView.getBottom() - lastView.getHeight();
+                    smoothScrollBy(lastViewPixelsShowing, mScrollDuration);
+                    post(this);
+                } else {
+                    // On-screen, just scroll.
+                    final int targetTop = getChildAt(position - firstPos).getTop();
+                    smoothScrollBy(targetTop - mOffsetFromTop, mScrollDuration);
+                }
+                break;
+            }
+
             default:
                 break;
             }
@@ -2787,6 +2843,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mPositionScroller.start(position);
     }
     
+    /**
+     * Smoothly scroll to the specified adapter position. The view will scroll
+     * such that the indicated position is displayed <code>offset</code> pixels from
+     * the top edge of the view. If this is impossible, (e.g. the offset would scroll
+     * the first or last item beyond the boundaries of the list) it will get as close
+     * as possible.
+     *
+     * @param position Position to scroll to
+     * @param offset Desired distance in pixels of <code>position</code> from the top
+     *               of the view when scrolling is finished
+     */
+    public void smoothScrollToPositionFromTop(int position, int offset) {
+        if (mPositionScroller == null) {
+            mPositionScroller = new PositionScroller();
+        }
+        mPositionScroller.startWithOffset(position, offset);
+    }
+
     /**
      * Smoothly scroll to the specified adapter position. The view will
      * scroll such that the indicated position is displayed, but it will
