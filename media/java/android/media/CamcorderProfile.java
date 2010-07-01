@@ -119,15 +119,26 @@ public class CamcorderProfile
     public int audioChannels;
 
     /**
-     * Returns the camcorder profile for the given quality level.
+     * Returns the camcorder profile for the default camera at the given
+     * quality level.
      * @param quality the target quality level for the camcorder profile
      */
     public static CamcorderProfile get(int quality) {
+        return get(0, quality);
+    }
+
+    /**
+     * Returns the camcorder profile for the given camera at the given
+     * quality level.
+     * @param cameraId the id for the camera
+     * @param quality the target quality level for the camcorder profile
+     */
+    public static CamcorderProfile get(int cameraId, int quality) {
         if (quality < QUALITY_LOW || quality > QUALITY_HIGH) {
             String errMessage = "Unsupported quality level: " + quality;
             throw new IllegalArgumentException(errMessage);
         }
-        return native_get_camcorder_profile(quality);
+        return native_get_camcorder_profile(cameraId, quality);
     }
 
     static {
@@ -165,5 +176,6 @@ public class CamcorderProfile
 
     // Methods implemented by JNI
     private static native final void native_init();
-    private static native final CamcorderProfile native_get_camcorder_profile(int quality);
+    private static native final CamcorderProfile native_get_camcorder_profile(
+            int cameraId, int quality);
 }
