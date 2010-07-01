@@ -195,13 +195,22 @@ static void android_view_GLES20Canvas_drawBitmapRect(JNIEnv* env, jobject canvas
         OpenGLRenderer* renderer, SkBitmap* bitmap,
         float srcLeft, float srcTop, float srcRight, float srcBottom,
         float dstLeft, float dstTop, float dstRight, float dstBottom,
-        SkMatrix* matrix, SkPaint* paint,
-        jint bitmapDensity, jint canvasDensity, jint screenDensity) {
+        SkPaint* paint, jint bitmapDensity, jint canvasDensity, jint screenDensity) {
     if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
         renderer->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
-                dstLeft, dstTop, dstRight, dstBottom, matrix, paint);
+                dstLeft, dstTop, dstRight, dstBottom, paint);
     } else {
+        // TODO: implement
+    }
+}
 
+static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint,
+        jint bitmapDensity, jint canvasDensity,jint screenDensity) {
+    if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
+        renderer->drawBitmap(bitmap, matrix, paint);
+    } else {
+        // TODO: implement
     }
 }
 
@@ -249,7 +258,8 @@ static JNINativeMethod gMethods[] = {
     {   "nConcatMatrix",      "(II)V",              (void*) android_view_GLES20Canvas_concatMatrix },
 
     {   "nDrawBitmap",        "(IIFFIIII)V",        (void*) android_view_GLES20Canvas_drawBitmap },
-    {   "nDrawBitmap",        "(IIFFFFFFFFIIIII)V", (void*) android_view_GLES20Canvas_drawBitmapRect },
+    {   "nDrawBitmap",        "(IIFFFFFFFFIIII)V",  (void*) android_view_GLES20Canvas_drawBitmapRect },
+    {   "nDrawBitmap",        "(IIIIIII)V",         (void*) android_view_GLES20Canvas_drawBitmapMatrix },
     {   "nDrawColor",         "(III)V",             (void*) android_view_GLES20Canvas_drawColor },
     {   "nDrawRect",          "(IFFFFI)V",          (void*) android_view_GLES20Canvas_drawRect },
 

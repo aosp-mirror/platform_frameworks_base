@@ -103,9 +103,9 @@ public:
     bool clipRect(float left, float top, float right, float bottom);
 
     void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop, float srcRight, float srcBottom,
-            float dstLeft, float dstTop, float dstRight, float dstBottom,
-            const SkMatrix* matrix, const SkPaint* paint);
+            float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
