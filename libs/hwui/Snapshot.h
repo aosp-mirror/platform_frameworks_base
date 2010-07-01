@@ -51,6 +51,7 @@ public:
      * snapshot.
      */
     Snapshot(const sp<Snapshot> s):
+            height(s->height),
             transform(s->transform),
             clipRect(s->clipRect),
             flags(kFlagDirtyTransform),
@@ -80,6 +81,10 @@ public:
          * a new layer.
          */
         kFlagIsLayer = 0x4,
+        /**
+         * Indicates that this snapshot has changed the ortho matrix.
+         */
+        kFlagDirtyOrtho = 0x8,
     };
 
     /**
@@ -93,6 +98,11 @@ public:
         }
         return mappedClip;
     }
+
+    /**
+     * Height of the framebuffer the snapshot is rendering into.
+     */
+    int height;
 
     /**
      * Local transformation. Holds the current translation, scale and
@@ -140,6 +150,11 @@ public:
      * Only set when the flag kFlagIsLayer is set.
      */
     SkXfermode::Mode mode;
+
+    /**
+     * Contains the previous ortho matrix.
+     */
+    float orthoMatrix[16];
 
 private:
     // Clipping rectangle mapped with the transform

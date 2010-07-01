@@ -111,6 +111,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
     mWidth = width;
     mHeight = height;
+    mFirstSnapshot.height = height;
 }
 
 void OpenGLRenderer::prepare() {
@@ -170,9 +171,14 @@ int OpenGLRenderer::saveSnapshot() {
 bool OpenGLRenderer::restoreSnapshot() {
     bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
     bool restoreLayer = mSnapshot->flags & Snapshot::kFlagIsLayer;
+    bool restoreOrtho = mSnapshot->flags & Snapshot::kFlagDirtyOrtho;
 
     sp<Snapshot> current = mSnapshot;
     sp<Snapshot> previous = mSnapshot->previous;
+
+    if (restoreOrtho) {
+        memcpy(mOrthoMatrix, current->orthoMatrix, sizeof(mOrthoMatrix));
+    }
 
     if (restoreLayer) {
         composeLayer(current, previous);
@@ -197,21 +203,11 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // The texture is currently as big as the window but drawn with
     // a quad of the appropriate size
     const Rect& layer = current->layer;
-    Rect texCoords(current->layer);
-    mSnapshot->transform.mapRect(texCoords);
-
-    const float u1 = texCoords.left / float(mWidth);
-    const float v1 = (mHeight - texCoords.top) / float(mHeight);
-    const float u2 = texCoords.right / float(mWidth);
-    const float v2 = (mHeight - texCoords.bottom) / float(mHeight);
-
-    resetDrawTextureTexCoords(u1, v1, u2, v2);
 
     drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
             current->texture, current->alpha, current->mode, true, true);
 
-    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
-
+    // TODO Don't delete these things, but cache them
     glDeleteFramebuffers(1, &current->fbo);
     glDeleteTextures(1, &current->texture);
 }
@@ -268,14 +264,10 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // TODO VERY IMPORTANT: Fix TextView to not call saveLayer() all the time
-    // TODO ***** IMPORTANT *****
-    // Creating a texture-backed FBO works only if the texture is the same size
-    // as the original rendering buffer (in this case, mWidth and mHeight.)
-    // This is expensive and wasteful and must be fixed.
-    // TODO Additionally we should use an FBO cache
+    // TODO Use an FBO cache
 
-    const GLsizei width = mWidth; //right - left;
-    const GLsizei height = mHeight; //bottom - right;
+    const GLsizei width = right - left;
+    const GLsizei height = bottom - top;
 
     const GLint format = (flags & SkCanvas::kHasAlphaLayer_SaveFlag) ? GL_RGBA : GL_RGB;
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL);
@@ -287,7 +279,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LOGD("Framebuffer incomplete %d", status);
+        LOGD("Framebuffer incomplete (GL error code 0x%x)", status);
 
         glDeleteFramebuffers(1, &snapshot->fbo);
         glDeleteTextures(1, &snapshot->texture);
@@ -295,10 +287,33 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         return false;
     }
 
+    // Clear the FBO
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
+
     snapshot->flags |= Snapshot::kFlagIsLayer;
     snapshot->mode = mode;
     snapshot->alpha = alpha / 255.0f;
     snapshot->layer.set(left, top, right, bottom);
+
+    // Creates a new snapshot to draw into the FBO
+    saveSnapshot();
+    // TODO: This doesn't preserve other transformations (check Skia first)
+    mSnapshot->transform.loadTranslate(-left, -top, 0.0f);
+    mSnapshot->clipRect.set(left, top, right, bottom);
+    mSnapshot->height = bottom - top;
+    setScissorFromClip();
+
+    mSnapshot->flags = Snapshot::kFlagDirtyTransform | Snapshot::kFlagDirtyOrtho |
+            Snapshot::kFlagClipSet;
+    memcpy(mSnapshot->orthoMatrix, mOrthoMatrix, sizeof(mOrthoMatrix));
+
+    // Change the ortho projection
+    mat4 ortho;
+    ortho.loadOrtho(0.0f, right - left, bottom - top, 0.0f, 0.0f, 1.0f);
+    ortho.copyTo(mOrthoMatrix);
 
     return true;
 }
@@ -343,7 +358,7 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 
 void OpenGLRenderer::setScissorFromClip() {
     const Rect& clip = mSnapshot->getMappedClip();
-    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+    glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
@@ -381,7 +396,7 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
-    Texture* texture = mTextureCache.get(bitmap);
+    const Texture* texture = mTextureCache.get(bitmap);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -391,11 +406,26 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const S
             alpha / 255.0f, mode, texture->blend, true);
 }
 
+void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint) {
+    Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
+    const mat4 transform(*matrix);
+    transform.mapRect(r);
+
+    const Texture* texture = mTextureCache.get(bitmap);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    drawTextureRect(r.left, r.top, r.right, r.bottom, texture->id,
+            alpha / 255.0f, mode, texture->blend, true);
+}
+
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
-         const SkMatrix* matrix, const SkPaint* paint) {
-    Texture* texture = mTextureCache.get(bitmap);
+         const SkPaint* paint) {
+    const Texture* texture = mTextureCache.get(bitmap);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -410,8 +440,6 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     const float v2 = srcBottom / height;
 
     resetDrawTextureTexCoords(u1, v1, u2, v2);
-
-    // TODO: implement Matrix
 
     drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture->id,
             alpha / 255.0f, mode, texture->blend, true);

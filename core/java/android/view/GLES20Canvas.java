@@ -368,19 +368,19 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-        final float width = bitmap.getWidth();
-        final float height = bitmap.getHeight();
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, 0.0f, 0.0f, width, height,
-                0.0f, 0.0f, width, height, matrix.native_instance, nativePaint,
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, matrix.native_instance, nativePaint,
                 bitmap.getDensity(), mDensity, mScreenDensity);
     }
+
+    private native void nDrawBitmap(int renderer, int bitmap, int matrix, int paint,
+            int bitmapDensity, int canvasDensity, int screenDensity);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, 0, nativePaint,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
                 bitmap.getDensity(), mDensity, mScreenDensity);
     }
 
@@ -388,7 +388,7 @@ class GLES20Canvas extends Canvas {
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, 0, nativePaint,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
                 bitmap.getDensity(), mDensity, mScreenDensity);
     }
 
@@ -397,7 +397,7 @@ class GLES20Canvas extends Canvas {
 
     private native void nDrawBitmap(int renderer, int bitmap,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
-            float left, float top, float right, float bottom, int matrix, int paint,
+            float left, float top, float right, float bottom, int paint,
             int bitmapDensity, int canvasDensity, int screenDensity);
 
     @Override

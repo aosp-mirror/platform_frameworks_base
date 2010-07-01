@@ -413,33 +413,30 @@ abstract class HardwareRenderer {
             }
 
             EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
-                int[] num_config = new int[1];
-                if (!egl.eglChooseConfig(display, mConfigSpec, null, 0,
-                        num_config)) {
+                int[] index = new int[1];
+                if (!egl.eglChooseConfig(display, mConfigSpec, null, 0, index)) {
                     throw new IllegalArgumentException("eglChooseConfig failed");
                 }
 
-                int numConfigs = num_config[0];
-
+                int numConfigs = index[0];
                 if (numConfigs <= 0) {
-                    throw new IllegalArgumentException(
-                            "No configs match configSpec");
+                    throw new IllegalArgumentException("No configs match configSpec");
                 }
 
                 EGLConfig[] configs = new EGLConfig[numConfigs];
-                if (!egl.eglChooseConfig(display, mConfigSpec, configs, numConfigs,
-                        num_config)) {
-                    throw new IllegalArgumentException("eglChooseConfig#2 failed");
+                if (!egl.eglChooseConfig(display, mConfigSpec, configs, numConfigs, index)) {
+                    throw new IllegalArgumentException("eglChooseConfig failed");
                 }
+
                 EGLConfig config = chooseConfig(egl, display, configs);
                 if (config == null) {
                     throw new IllegalArgumentException("No config chosen");
                 }
+
                 return config;
             }
 
-            abstract EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
-                    EGLConfig[] configs);
+            abstract EGLConfig chooseConfig(EGL10 egl, EGLDisplay display, EGLConfig[] configs);
 
             private int[] filterConfigSpec(int[] configSpec) {
                 if (mGlVersion != 2) {
@@ -450,10 +447,10 @@ abstract class HardwareRenderer {
                  */
                 int len = configSpec.length;
                 int[] newConfigSpec = new int[len + 2];
-                System.arraycopy(configSpec, 0, newConfigSpec, 0, len-1);
-                newConfigSpec[len-1] = EGL10.EGL_RENDERABLE_TYPE;
+                System.arraycopy(configSpec, 0, newConfigSpec, 0, len - 1);
+                newConfigSpec[len - 1] = EGL10.EGL_RENDERABLE_TYPE;
                 newConfigSpec[len] = 4; /* EGL_OPENGL_ES2_BIT */
-                newConfigSpec[len+1] = EGL10.EGL_NONE;
+                newConfigSpec[len + 1] = EGL10.EGL_NONE;
                 return newConfigSpec;
             }
         }
@@ -496,13 +493,12 @@ abstract class HardwareRenderer {
                 for (EGLConfig config : configs) {
                     int d = findConfigAttrib(egl, display, config, EGL10.EGL_DEPTH_SIZE, 0);
                     int s = findConfigAttrib(egl, display, config, EGL10.EGL_STENCIL_SIZE, 0);
-                    if ((d >= mDepthSize) && (s >= mStencilSize)) {
+                    if (d >= mDepthSize && s >= mStencilSize) {
                         int r = findConfigAttrib(egl, display, config, EGL10.EGL_RED_SIZE, 0);
                         int g = findConfigAttrib(egl, display, config, EGL10.EGL_GREEN_SIZE, 0);
                         int b = findConfigAttrib(egl, display, config, EGL10.EGL_BLUE_SIZE, 0);
                         int a = findConfigAttrib(egl, display, config, EGL10.EGL_ALPHA_SIZE, 0);
-                        if ((r == mRedSize) && (g == mGreenSize) && (b == mBlueSize) &&
-                                (a == mAlphaSize)) {
+                        if (r == mRedSize && g == mGreenSize && b == mBlueSize && a >= mAlphaSize) {
                             return config;
                         }
                     }
@@ -510,16 +506,15 @@ abstract class HardwareRenderer {
                 return null;
             }
 
-            private int findConfigAttrib(EGL10 egl, EGLDisplay display,
-                    EGLConfig config, int attribute, int defaultValue) {
-
+            private int findConfigAttrib(EGL10 egl, EGLDisplay display, EGLConfig config,
+                    int attribute, int defaultValue) {
                 if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
                     return mValue[0];
                 }
 
                 return defaultValue;
             }
-        }        
+        }
     }
     
     /**
