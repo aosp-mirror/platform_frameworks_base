@@ -35,6 +35,10 @@ public:
     static CameraSource *Create();
     static CameraSource *CreateFromCamera(const sp<Camera> &camera);
 
+    void enableTimeLapseMode(
+            int64_t timeBetweenTimeLapseFrameCaptureUs, int32_t videoFrameRate);
+    void disableTimeLapseMode();
+
     virtual ~CameraSource();
 
     virtual status_t start(MetaData *params = NULL);
@@ -70,6 +74,14 @@ private:
     int64_t mGlitchDurationThresholdUs;
     bool mCollectStats;
     bool mStarted;
+
+    // Time between capture of two frames during time lapse recording
+    // Negative value indicates that timelapse is disabled.
+    int64_t mTimeBetweenTimeLapseFrameCaptureUs;
+    // Time between two frames in final video (1/frameRate)
+    int64_t mTimeBetweenTimeLapseVideoFramesUs;
+    // Real timestamp of the last encoded time lapse frame
+    int64_t mLastTimeLapseFrameRealTimestampUs;
 
     CameraSource(const sp<Camera> &camera);
 

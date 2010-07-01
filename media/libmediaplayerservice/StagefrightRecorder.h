@@ -87,6 +87,8 @@ private:
     int32_t mTrackEveryNumberOfFrames;
     int64_t mTrackEveryTimeDurationUs;
 
+    bool mCaptureTimeLapse;
+
     String8 mParams;
     int mOutputFd;
     int32_t mFlags;

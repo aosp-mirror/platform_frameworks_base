@@ -116,6 +116,19 @@ CameraSource *CameraSource::CreateFromCamera(const sp<Camera> &camera) {
     return new CameraSource(camera);
 }
 
+void CameraSource::enableTimeLapseMode(
+        int64_t timeBetweenTimeLapseFrameCaptureUs, int32_t videoFrameRate) {
+    LOGV("starting time lapse mode");
+    mTimeBetweenTimeLapseFrameCaptureUs = timeBetweenTimeLapseFrameCaptureUs;
+    mTimeBetweenTimeLapseVideoFramesUs = (1E6/videoFrameRate);
+}
+
+void CameraSource::disableTimeLapseMode() {
+    LOGV("stopping time lapse mode");
+    mTimeBetweenTimeLapseFrameCaptureUs = -1;
+    mTimeBetweenTimeLapseVideoFramesUs = 0;
+}
+
 CameraSource::CameraSource(const sp<Camera> &camera)
     : mCamera(camera),
       mFirstFrameTimeUs(0),
@@ -126,7 +139,10 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mNumGlitches(0),
       mGlitchDurationThresholdUs(200000),
       mCollectStats(false),
-      mStarted(false) {
+      mStarted(false),
+      mTimeBetweenTimeLapseFrameCaptureUs(-1),
+      mTimeBetweenTimeLapseVideoFramesUs(0),
+      mLastTimeLapseFrameRealTimestampUs(0) {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
@@ -314,6 +330,35 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
             LOGW("Long delay detected in video recording");
         }
         ++mNumGlitches;
+    }
+
+    // time lapse
+    if(mTimeBetweenTimeLapseFrameCaptureUs >= 0) {
+        if(mLastTimeLapseFrameRealTimestampUs == 0) {
+            // First time lapse frame. Initialize mLastTimeLapseFrameRealTimestampUs
+            // to current time (timestampUs) and save frame data.
+            LOGV("dataCallbackTimestamp timelapse: initial frame");
+
+            mLastTimeLapseFrameRealTimestampUs = timestampUs;
+        } else if (timestampUs <
+                (mLastTimeLapseFrameRealTimestampUs + mTimeBetweenTimeLapseFrameCaptureUs)) {
+            // Skip all frames from last encoded frame until
+            // sufficient time (mTimeBetweenTimeLapseFrameCaptureUs) has passed.
+            // Tell the camera to release its recording frame and return.
+            LOGV("dataCallbackTimestamp timelapse: skipping intermediate frame");
+
+            releaseOneRecordingFrame(data);
+            return;
+        } else {
+            // Desired frame has arrived after mTimeBetweenTimeLapseFrameCaptureUs time:
+            // - Reset mLastTimeLapseFrameRealTimestampUs to current time.
+            // - Artificially modify timestampUs to be one frame time (1/framerate) ahead
+            // of the last encoded frame's time stamp.
+            LOGV("dataCallbackTimestamp timelapse: got timelapse frame");
+
+            mLastTimeLapseFrameRealTimestampUs = timestampUs;
+            timestampUs = mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
+        }
     }
 
     mLastFrameTimestampUs = timestampUs;
