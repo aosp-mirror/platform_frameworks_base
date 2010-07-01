@@ -80,7 +80,8 @@ class ServerThread extends Thread {
                 android.os.Process.THREAD_PRIORITY_FOREGROUND);
 
         BinderInternal.disableBackgroundScheduling(true);
-        
+        android.os.Process.setCanSelfBackground(false);
+
         String factoryTestStr = SystemProperties.get("ro.factorytest");
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);

@@ -626,6 +626,15 @@ public class Process {
             throws IllegalArgumentException, SecurityException;
 
     /**
+     * Call with 'false' to cause future calls to {@link #setThreadPriority(int)} to
+     * throw an exception if passed a background-level thread priority.  This is only
+     * effective if the JNI layer is built with GUARD_THREAD_PRIORITY defined to 1.
+     *
+     * @hide
+     */
+    public static final native void setCanSelfBackground(boolean backgroundOk);
+
+    /**
      * Sets the scheduling group for a thread.
      * @hide
      * @param tid The indentifier of the thread/process to change.

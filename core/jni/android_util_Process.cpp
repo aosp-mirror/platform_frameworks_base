@@ -52,8 +52,14 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #endif
 
 #define POLICY_DEBUG 0
+#define GUARD_THREAD_PRIORITY 0
 
 using namespace android;
+
+#if GUARD_THREAD_PRIORITY
+Mutex gKeyCreateMutex;
+static pthread_key_t gBgKey = -1;
+#endif
 
 static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
 {
@@ -264,9 +270,41 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     closedir(d);
 }
 
+static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, jboolean bgOk) {
+    // Establishes the calling thread as illegal to put into the background.
+    // Typically used only for the system process's main looper.
+#if GUARD_THREAD_PRIORITY
+    LOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, androidGetTid());
+    {
+        Mutex::Autolock _l(gKeyCreateMutex);
+        if (gBgKey == -1) {
+            pthread_key_create(&gBgKey, NULL);
+        }
+    }
+
+    // inverted:  not-okay, we set a sentinel value
+    pthread_setspecific(gBgKey, (void*)(bgOk ? 0 : 0xbaad));
+#endif
+}
+
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
+#if GUARD_THREAD_PRIORITY
+    // if we're putting the current thread into the background, check the TLS
+    // to make sure this thread isn't guarded.  If it is, raise an exception.
+    if (pri >= ANDROID_PRIORITY_BACKGROUND) {
+        if (pid == androidGetTid()) {
+            void* bgOk = pthread_getspecific(gBgKey);
+            if (bgOk == ((void*)0xbaad)) {
+                LOGE("Thread marked fg-only put self in background!");
+                jniThrowException(env, "java/lang/SecurityException", "May not put this thread into background");
+                return;
+            }
+        }
+    }
+#endif
+
     int rc = androidSetThreadPriority(pid, pri);
     if (rc != 0) {
         if (rc == INVALID_OPERATION) {
@@ -852,6 +890,7 @@ static const JNINativeMethod methods[] = {
     {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
     {"getGidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
     {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},
+    {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
