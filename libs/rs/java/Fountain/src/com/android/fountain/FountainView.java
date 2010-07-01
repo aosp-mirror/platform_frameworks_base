@@ -71,12 +71,16 @@ public class FountainView extends RSSurfaceView {
     @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
-        int act = ev.getAction();
+        int act = ev.getActionMasked();
         if (act == ev.ACTION_UP) {
-            mRender.newTouchPosition(0, 0, 0, 0);
+            mRender.newTouchPosition(0, 0, 0, ev.getPointerId(0));
             return false;
+        } else if (act == MotionEvent.ACTION_POINTER_UP) {
+            // only one pointer going up, we can get the index like this
+            int pointerIndex = ev.getActionIndex();
+            int pointerId = ev.getPointerId(pointerIndex);
+            mRender.newTouchPosition(0, 0, 0, pointerId);
         }
-
         int count = ev.getHistorySize();
         int pcount = ev.getPointerCount();
 
