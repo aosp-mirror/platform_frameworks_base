@@ -105,6 +105,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Rasterizer.cpp \
 	android/graphics/Region.cpp \
 	android/graphics/Shader.cpp \
+	android/graphics/TextLayout.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/Xfermode.cpp \
 	android/graphics/YuvToJpegEncoder.cpp \
