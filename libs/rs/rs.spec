@@ -478,8 +478,34 @@ FontCreateFromFile {
 	ret RsFont
 	}
 
+MeshCreate {
+	ret RsMesh
+	param uint32_t vtxCount
+	param uint32_t idxCount
+	}
+
+MeshBindIndex {
+	param RsMesh mesh
+	param RsAllocation idx
+	param uint32_t primType
+	param uint32_t slot
+	}
+
+MeshBindPrimitive {
+	param RsMesh mesh
+	param RsAllocation prim
+	param uint32_t primType
+	param uint32_t slot
+	}
+
+MeshBindVertex {
+	param RsMesh mesh
+	param RsAllocation vtx
+	param uint32_t slot
+	}
+
 SimpleMeshCreate {
-	ret RsSimpleMesh
+	ret RsMesh
 	param RsAllocation prim
 	param RsAllocation index
 	param RsAllocation *vtx
@@ -489,17 +515,17 @@ SimpleMeshCreate {
 
 
 SimpleMeshBindIndex {
-	param RsSimpleMesh mesh
+	param RsMesh mesh
 	param RsAllocation idx
 	}
 
 SimpleMeshBindPrimitive {
-	param RsSimpleMesh mesh
+	param RsMesh mesh
 	param RsAllocation prim
 	}
 
 SimpleMeshBindVertex {
-	param RsSimpleMesh mesh
+	param RsMesh mesh
 	param RsAllocation vtx
 	param uint32_t slot
 	}

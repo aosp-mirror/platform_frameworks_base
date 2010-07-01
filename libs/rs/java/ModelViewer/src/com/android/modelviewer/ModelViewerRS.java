@@ -55,7 +55,7 @@ public class ModelViewerRS {
     private Allocation mGridImage;
     private Allocation mAllocPV;
 
-    private SimpleMesh mMesh;
+    private Mesh mMesh;
 
     private Font mItalic;
     private Allocation mTextAlloc;
@@ -149,15 +149,15 @@ public class ModelViewerRS {
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.robot);
         FileA3D.IndexEntry entry = model.getIndexEntry(0);
-        if(entry == null || entry.getClassID() != FileA3D.ClassID.SIMPLE_MESH) {
+        if(entry == null || entry.getClassID() != FileA3D.ClassID.MESH) {
             Log.e("rs", "could not load model");
         }
         else {
-            mMesh = (SimpleMesh)entry.getObject();
+            mMesh = (Mesh)entry.getObject();
             mScript.set_gTestMesh(mMesh);
         }
 
-        mItalic = Font.create(mRS, mRes, "DroidSerif-Italic.ttf", 10);
+        mItalic = Font.create(mRS, mRes, "DroidSerif-Italic.ttf", 8);
         mScript.set_gItalic(mItalic);
 
         initTextAllocation();

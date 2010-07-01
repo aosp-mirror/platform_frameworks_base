@@ -36,7 +36,6 @@ public class FileA3D extends BaseObj {
 
         UNKNOWN,
         MESH,
-        SIMPLE_MESH,
         TYPE,
         ELEMENT,
         ALLOCATION,
@@ -89,10 +88,7 @@ public class FileA3D extends BaseObj {
 
             switch (mClassID) {
             case MESH:
-                mLoadedObj = null;
-                break;
-            case SIMPLE_MESH:
-                mLoadedObj = new SimpleMesh(objectID, mRS);
+                mLoadedObj = new Mesh(objectID, mRS);
                 break;
             case TYPE:
                 mLoadedObj = new Type(objectID, mRS);

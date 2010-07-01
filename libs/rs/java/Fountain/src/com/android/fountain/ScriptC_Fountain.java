@@ -27,13 +27,13 @@ public class ScriptC_Fountain extends ScriptC {
     }
 
     private final static int mExportVarIdx_partMesh = 0;
-    private SimpleMesh mExportVar_partMesh;
-    public void set_partMesh(SimpleMesh v) {
+    private Mesh mExportVar_partMesh;
+    public void set_partMesh(Mesh v) {
         mExportVar_partMesh = v;
         setVar(mExportVarIdx_partMesh, (v == null) ? 0 : v.getID());
     }
 
-    public SimpleMesh get_partMesh() {
+    public Mesh get_partMesh() {
         return mExportVar_partMesh;
     }
 

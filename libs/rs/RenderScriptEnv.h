@@ -9,7 +9,7 @@ typedef void * RsDevice;
 typedef void * RsElement;
 typedef void * RsSampler;
 typedef void * RsScript;
-typedef void * RsSimpleMesh;
+typedef void * RsMesh;
 typedef void * RsType;
 typedef void * RsProgramFragment;
 typedef void * RsProgramStore;

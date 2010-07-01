@@ -24,7 +24,6 @@
 #include "rsType.h"
 #include "rsMatrix.h"
 #include "rsAllocation.h"
-#include "rsSimpleMesh.h"
 #include "rsMesh.h"
 //#include "rsDevice.h"
 #include "rsScriptC.h"

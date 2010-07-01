@@ -32,6 +32,10 @@ extern void rsgDrawSpriteScreenspace(float x, float y, float z, float w, float h
 extern void __attribute__((overloadable)) rsgDrawSimpleMesh(rs_mesh ism);
 extern void __attribute__((overloadable)) rsgDrawSimpleMesh(rs_mesh ism, int start, int len);
 
+extern void __attribute__((overloadable)) rsgDrawMesh(rs_mesh ism);
+extern void __attribute__((overloadable)) rsgDrawMesh(rs_mesh ism, int primitiveIndex);
+extern void __attribute__((overloadable)) rsgDrawMesh(rs_mesh ism, int primitiveIndex, int start, int len);
+
 extern void rsgClearColor(float, float, float, float);
 extern void rsgClearDepth(float);
 

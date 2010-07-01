@@ -43,10 +43,10 @@ using namespace android::renderscript;
 // IO routines
 //////////////////////////////////////////////////////////////////////////////
 
-static void SC_updateSimpleMesh(RsSimpleMesh mesh)
+static void SC_updateSimpleMesh(RsMesh mesh)
 {
     GET_TLS();
-    SimpleMesh *sm = static_cast<SimpleMesh *>(mesh);
+    Mesh *sm = static_cast<Mesh *>(mesh);
     sm->uploadAll(rsc);
 }
 
@@ -220,24 +220,54 @@ static void SC_drawRect(float x1, float y1,
                 x1, y1, z);
 }
 
-static void SC_drawSimpleMesh(RsSimpleMesh vsm)
+static void SC_drawSimpleMesh(RsMesh vsm)
 {
     GET_TLS();
-    SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
+    Mesh *sm = static_cast<Mesh *>(vsm);
+    if (!rsc->setupCheck()) {
+        return;
+    }
+    sm->renderPrimitive(rsc, 0);
+}
+
+static void SC_drawSimpleMeshRange(RsMesh vsm, uint32_t start, uint32_t len)
+{
+    GET_TLS();
+    Mesh *sm = static_cast<Mesh *>(vsm);
+    if (!rsc->setupCheck()) {
+        return;
+    }
+    sm->renderPrimitiveRange(rsc, 0, start, len);
+}
+
+static void SC_drawMesh(RsMesh vsm)
+{
+    GET_TLS();
+    Mesh *sm = static_cast<Mesh *>(vsm);
     if (!rsc->setupCheck()) {
         return;
     }
     sm->render(rsc);
 }
 
-static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t len)
+static void SC_drawMeshPrimitive(RsMesh vsm, uint32_t primIndex)
 {
     GET_TLS();
-    SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
+    Mesh *sm = static_cast<Mesh *>(vsm);
     if (!rsc->setupCheck()) {
         return;
     }
-    sm->renderRange(rsc, start, len);
+    sm->renderPrimitive(rsc, primIndex);
+}
+
+static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t start, uint32_t len)
+{
+    GET_TLS();
+    Mesh *sm = static_cast<Mesh *>(vsm);
+    if (!rsc->setupCheck()) {
+        return;
+    }
+    sm->renderPrimitiveRange(rsc, primIndex, start, len);
 }
 
 
@@ -374,6 +404,10 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgDrawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
     { "_Z17rsgDrawSimpleMesh7rs_mesh", (void *)&SC_drawSimpleMesh },
     { "_Z17rsgDrawSimpleMesh7rs_meshii", (void *)&SC_drawSimpleMeshRange },
+
+    { "_Z11rsgDrawMesh7rs_mesh", (void *)&SC_drawMesh },
+    { "_Z11rsgDrawMesh7rs_meshi", (void *)&SC_drawMeshPrimitive },
+    { "_Z11rsgDrawMesh7rs_meshiii", (void *)&SC_drawMeshPrimitiveRange },
 
     { "rsgClearColor", (void *)&SC_ClearColor },
     { "rsgClearDepth", (void *)&SC_ClearDepth },
