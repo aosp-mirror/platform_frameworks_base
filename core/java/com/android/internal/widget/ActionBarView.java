@@ -176,11 +176,11 @@ public class ActionBarView extends ViewGroup {
             };
         }
     }
-    
+
     public void setCallback(NavigationCallback callback) {
         mCallback = callback;
     }
-    
+
     public void setMenu(Menu menu) {
         MenuBuilder builder = (MenuBuilder) menu;
         mOptionsMenu = builder;
@@ -196,18 +196,18 @@ public class ActionBarView extends ViewGroup {
         addView(menuView);
         mMenuView = menuView;
     }
-    
+
     public void setCustomNavigationView(View view) {
         mCustomNavView = view;
         if (view != null) {
             setNavigationMode(ActionBar.NAVIGATION_MODE_CUSTOM);
         }
     }
-    
+
     public CharSequence getTitle() {
         return mTitle;
     }
-    
+
     public void setTitle(CharSequence title) {
         mTitle = title;
         if (mTitleView != null) {
@@ -217,18 +217,18 @@ public class ActionBarView extends ViewGroup {
             mLogoNavItem.setTitle(title);
         }
     }
-    
+
     public CharSequence getSubtitle() {
         return mSubtitle;
     }
-    
+
     public void setSubtitle(CharSequence subtitle) {
         mSubtitle = subtitle;
         if (mSubtitleView != null) {
             mSubtitleView.setText(subtitle);
         }
     }
-    
+
     public void setDisplayOptions(int options) {
         final int flagsChanged = options ^ mDisplayOptions;
         mDisplayOptions = options;
@@ -281,13 +281,9 @@ public class ActionBarView extends ViewGroup {
                 mSpinner = new Spinner(mContext, null,
                         com.android.internal.R.attr.dropDownSpinnerStyle);
                 mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
-                mSpinner.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                        LayoutParams.WRAP_CONTENT));
                 addView(mSpinner);
                 break;
             case ActionBar.NAVIGATION_MODE_CUSTOM:
-                mCustomNavView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                        LayoutParams.WRAP_CONTENT));
                 addView(mCustomNavView);
                 break;
             }
@@ -311,7 +307,14 @@ public class ActionBarView extends ViewGroup {
     public int getDisplayOptions() {
         return mDisplayOptions;
     }
-    
+
+    @Override
+    protected LayoutParams generateDefaultLayoutParams() {
+        // Used by custom nav views if they don't supply layout params. Everything else
+        // added to an ActionBarView should have them already.
+        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -419,15 +422,24 @@ public class ActionBarView extends ViewGroup {
         case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
             if (mSpinner != null) {
                 mSpinner.measure(
-                        MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             }
             break;
         case ActionBar.NAVIGATION_MODE_CUSTOM:
             if (mCustomNavView != null) {
+                LayoutParams lp = mCustomNavView.getLayoutParams();
+                final int customNavWidthMode = lp.width != LayoutParams.WRAP_CONTENT ?
+                        MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+                final int customNavWidth = lp.width >= 0 ?
+                        Math.min(lp.width, availableWidth) : availableWidth;
+                final int customNavHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
+                        MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+                final int customNavHeight = lp.height >= 0 ?
+                        Math.min(lp.height, height) : height;
                 mCustomNavView.measure(
-                        MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+                        MeasureSpec.makeMeasureSpec(customNavWidth, customNavWidthMode),
+                        MeasureSpec.makeMeasureSpec(customNavHeight, customNavHeightMode));
             }
             break;
         }

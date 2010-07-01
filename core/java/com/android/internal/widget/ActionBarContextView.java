@@ -28,6 +28,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.MeasureSpec;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -171,6 +173,13 @@ public class ActionBarContextView extends ViewGroup {
     }
 
     @Override
+    protected LayoutParams generateDefaultLayoutParams() {
+        // Used by custom views if they don't supply layout params. Everything else
+        // added to an ActionBarContextView should have them already.
+        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         if (widthMode != MeasureSpec.EXACTLY) {
@@ -212,8 +221,17 @@ public class ActionBarContextView extends ViewGroup {
         }
 
         if (mCustomView != null) {
-            mCustomView.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            LayoutParams lp = mCustomView.getLayoutParams();
+            final int customWidthMode = lp.width != LayoutParams.WRAP_CONTENT ?
+                    MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+            final int customWidth = lp.width >= 0 ?
+                    Math.min(lp.width, availableWidth) : availableWidth;
+            final int customHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
+                    MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+            final int customHeight = lp.height >= 0 ?
+                    Math.min(lp.height, height) : height;
+            mCustomView.measure(MeasureSpec.makeMeasureSpec(customWidth, customWidthMode),
+                    MeasureSpec.makeMeasureSpec(customHeight, customHeightMode));
         }
 
         setMeasuredDimension(contentWidth, mContentHeight);
