@@ -7,7 +7,8 @@ include $(CLEAR_VARS)
 #
 LOCAL_SRC_FILES:= \
     activity.cpp \
-    input.cpp
+    input.cpp \
+    native_window.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
