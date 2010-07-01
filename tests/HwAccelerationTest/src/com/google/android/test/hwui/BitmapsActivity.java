@@ -26,13 +26,24 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class BitmapsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(new BitmapsView(this));
+        final BitmapsView view = new BitmapsView(this);
+        setContentView(view);
+        
+        ScaleAnimation a = new ScaleAnimation(1.0f, 2.0f, 1.0f, 2.0f,
+                ScaleAnimation.RELATIVE_TO_SELF, 0.5f,
+                ScaleAnimation.RELATIVE_TO_SELF,0.5f);
+        a.setDuration(2000);
+        a.setRepeatCount(Animation.INFINITE);
+        a.setRepeatMode(Animation.REVERSE);
+        view.startAnimation(a);
     }
 
     static class BitmapsView extends View {

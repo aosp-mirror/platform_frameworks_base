@@ -102,7 +102,7 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     bool clipRect(float left, float top, float right, float bottom);
 
-    void drawBitmap(const SkBitmap* bitmap, float left, float top, const SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
@@ -183,10 +183,11 @@ private:
      * @param texture The texture name to map onto the rectangle
      * @param alpha An additional translucency parameter, between 0.0f and 1.0f
      * @param mode The blending mode
+     * @param blend True if the texture contains an alpha channel
      * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool isPremultiplied = false);
+            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = false);
 
     /**
      * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
