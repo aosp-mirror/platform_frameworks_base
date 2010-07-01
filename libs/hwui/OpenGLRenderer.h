@@ -103,6 +103,9 @@ public:
     bool clipRect(float left, float top, float right, float bottom);
 
     void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop, float srcRight, float srcBottom,
+            float dstLeft, float dstTop, float dstRight, float dstBottom,
+            const SkMatrix* matrix, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 
@@ -193,7 +196,7 @@ private:
      * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
      * back to default is achieved by calling:
      *
-     * resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+     * resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
      *
      * @param u1 The left coordinate of the texture
      * @param v1 The bottom coordinate of the texture
@@ -201,6 +204,16 @@ private:
      * @param v2 The top coordinate of the texture
      */
     void resetDrawTextureTexCoords(float u1, float v1, float u2, float v2);
+
+    /**
+     * Gets the alpha and xfermode out of a paint object. If the paint is null
+     * alpha will be 255 and the xfermode will be SRC_OVER.
+     *
+     * @param paint The paint to extract values from
+     * @param alpha Where to store the resulting alpha
+     * @param mode Where to store the resulting xfermode
+     */
+    inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;

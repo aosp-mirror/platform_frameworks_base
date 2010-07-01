@@ -196,9 +196,13 @@ static void android_view_GLES20Canvas_drawBitmapRect(JNIEnv* env, jobject canvas
         float srcLeft, float srcTop, float srcRight, float srcBottom,
         float dstLeft, float dstTop, float dstRight, float dstBottom,
         SkMatrix* matrix, SkPaint* paint,
-        jint bitmapDenstiy, jint canvasDensity, jint screenDensity) {
-    // TODO: Implement!
-    LOGE("Not implemented: drawBitmap(IIFFFFFFFFIIIII)V");
+        jint bitmapDensity, jint canvasDensity, jint screenDensity) {
+    if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
+        renderer->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
+                dstLeft, dstTop, dstRight, dstBottom, matrix, paint);
+    } else {
+
+    }
 }
 
 static void android_view_GLES20Canvas_drawColor(JNIEnv* env, jobject canvas,
