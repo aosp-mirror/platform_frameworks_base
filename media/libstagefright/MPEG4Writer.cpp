@@ -34,6 +34,8 @@
 #include <media/mediarecorder.h>
 #include <cutils/properties.h>
 
+#include "include/ESDS.h"
+
 namespace android {
 
 class MPEG4Writer::Track {
@@ -125,6 +127,8 @@ private:
     void findMinAvgMaxSampleDurationMs(
             int32_t *min, int32_t *avg, int32_t *max);
     void findMinMaxChunkDurations(int64_t *min, int64_t *max);
+
+    void getCodecSpecificDataFromInputFormatIfPossible();
 
     Track(const Track &);
     Track &operator=(const Track &);
@@ -678,6 +682,38 @@ MPEG4Writer::Track::Track(
       mCodecSpecificDataSize(0),
       mGotAllCodecSpecificData(false),
       mReachedEOS(false) {
+    getCodecSpecificDataFromInputFormatIfPossible();
+}
+
+void MPEG4Writer::Track::getCodecSpecificDataFromInputFormatIfPossible() {
+    const char *mime;
+    CHECK(mMeta->findCString(kKeyMIMEType, &mime));
+
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
+        uint32_t type;
+        const void *data;
+        size_t size;
+        if (mMeta->findData(kKeyAVCC, &type, &data, &size)) {
+            mCodecSpecificData = malloc(size);
+            mCodecSpecificDataSize = size;
+            memcpy(mCodecSpecificData, data, size);
+            mGotAllCodecSpecificData = true;
+        }
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4)
+            || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
+        uint32_t type;
+        const void *data;
+        size_t size;
+        if (mMeta->findData(kKeyESDS, &type, &data, &size)) {
+            ESDS esds(data, size);
+            if (esds.getCodecSpecificInfo(&data, &size) == OK) {
+                mCodecSpecificData = malloc(size);
+                mCodecSpecificDataSize = size;
+                memcpy(mCodecSpecificData, data, size);
+                mGotAllCodecSpecificData = true;
+            }
+        }
+    }
 }
 
 MPEG4Writer::Track::~Track() {
@@ -721,7 +757,10 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     }
 
     int64_t startTimeUs;
-    CHECK(params && params->findInt64(kKeyTime, &startTimeUs));
+    if (params == NULL || !params->findInt64(kKeyTime, &startTimeUs)) {
+        startTimeUs = 0;
+    }
+
     initTrackingProgressStatus(params);
 
     sp<MetaData> meta = new MetaData;
