@@ -38,6 +38,9 @@
 #include <media/stagefright/OMXCodec.h>
 #include <media/mediametadataretriever.h>
 
+#include <media/stagefright/foundation/hexdump.h>
+#include <media/stagefright/MPEG4Writer.h>
+
 using namespace android;
 
 static long gNumRepetitions;
@@ -45,6 +48,8 @@ static long gMaxNumFrames;  // 0 means decode all available.
 static long gReproduceBug;  // if not -1.
 static bool gPreferSoftwareCodec;
 static bool gPlaybackAudio;
+static bool gWriteMP4;
+static String8 gWriteMP4Filename;
 
 static int64_t getNowUs() {
     struct timeval tv;
@@ -258,6 +263,21 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     }
 }
 
+static void writeSourceToMP4(const sp<MediaSource> &source) {
+    sp<MPEG4Writer> writer =
+        new MPEG4Writer(gWriteMP4Filename.string());
+
+    CHECK_EQ(writer->addSource(source), OK);
+
+    sp<MetaData> params = new MetaData;
+    CHECK_EQ(writer->start(), OK);
+
+    while (!writer->reachedEOS()) {
+        usleep(100000);
+    }
+    writer->stop();
+}
+
 static void usage(const char *me) {
     fprintf(stderr, "usage: %s\n", me);
     fprintf(stderr, "       -h(elp)\n");
@@ -270,6 +290,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -t(humbnail) extract video thumbnail or album art\n");
     fprintf(stderr, "       -s(oftware) prefer software codec\n");
     fprintf(stderr, "       -o playback audio\n");
+    fprintf(stderr, "       -w(rite) filename (write to .mp4 file)\n");
 }
 
 int main(int argc, char **argv) {
@@ -284,9 +305,10 @@ int main(int argc, char **argv) {
     gReproduceBug = -1;
     gPreferSoftwareCodec = false;
     gPlaybackAudio = false;
+    gWriteMP4 = false;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptso")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsow:")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -319,6 +341,13 @@ int main(int argc, char **argv) {
                     CHECK_EQ(res, 'b');
                     gReproduceBug = x;
                 }
+                break;
+            }
+
+            case 'w':
+            {
+                gWriteMP4 = true;
+                gWriteMP4Filename.setTo(optarg);
                 break;
             }
 
@@ -554,7 +583,11 @@ int main(int argc, char **argv) {
             mediaSource = extractor->getTrack(i);
         }
 
-        playSource(&client, mediaSource);
+        if (gWriteMP4) {
+            writeSourceToMP4(mediaSource);
+        } else {
+            playSource(&client, mediaSource);
+        }
     }
 
     client.disconnect();

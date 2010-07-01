@@ -7,7 +7,7 @@ LOCAL_SRC_FILES:=       \
 	SineSource.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright libmedia libutils libbinder
+	libstagefright libmedia libutils libbinder libstagefright_foundation
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
