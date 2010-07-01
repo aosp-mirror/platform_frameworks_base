@@ -19,18 +19,25 @@
 
 #include "MtpTypes.h"
 
+struct usb_host_context;
+
 namespace android {
+
+class MtpClientThread;
 
 class MtpClient {
 private:
-    MtpDeviceList           mDeviceList;
-    bool                    mStarted;
+    MtpDeviceList               mDeviceList;
+    MtpClientThread*            mThread;
+    struct usb_host_context*    mUsbHostContext;
+    bool                        mDone;
 
 public:
                             MtpClient();
     virtual                 ~MtpClient();
 
     bool                    start();
+    void                    stop();
 
     inline MtpDeviceList&   getDeviceList() { return mDeviceList; }
     MtpDevice*              getDevice(int id);
@@ -40,10 +47,14 @@ public:
     virtual void            deviceRemoved(MtpDevice *device) = 0;
 
 private:
-    void                    usbDeviceAdded(const char *devname);
-    void                    usbDeviceRemoved(const char *devname);
-    static void             usb_device_added(const char *devname, void* client_data);
-    static void             usb_device_removed(const char *devname, void* client_data);
+    // these return true if we should stop monitoring USB and clean up
+    bool                    usbDeviceAdded(const char *devname);
+    bool                    usbDeviceRemoved(const char *devname);
+
+    friend class MtpClientThread;
+    bool                    threadLoop();
+    static int              usb_device_added(const char *devname, void* client_data);
+    static int              usb_device_removed(const char *devname, void* client_data);
 };
 
 }; // namespace android

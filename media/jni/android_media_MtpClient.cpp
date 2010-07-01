@@ -22,7 +22,6 @@
 #include <limits.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <utils/threads.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -39,34 +38,25 @@ static jmethodID method_deviceAdded;
 static jmethodID method_deviceRemoved;
 static jfieldID field_context;
 
+static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
+    if (env->ExceptionCheck()) {
+        LOGE("An exception was thrown by callback '%s'.", methodName);
+        LOGE_EX(env);
+        env->ExceptionClear();
+    }
+}
+
 class MyClient : public MtpClient {
 private:
-
-    enum {
-        kDeviceAdded = 1,
-        kDeviceRemoved,
-    };
-
     virtual void    deviceAdded(MtpDevice *device);
     virtual void    deviceRemoved(MtpDevice *device);
 
-    bool            reportDeviceAdded(JNIEnv *env, MtpDevice *device);
-    bool            reportDeviceRemoved(JNIEnv *env, MtpDevice *device);
-
-    JNIEnv*         mEnv;
     jobject         mClient;
-    Mutex           mEventLock;
-    Condition       mEventCondition;
-    Mutex           mAckLock;
-    Condition       mAckCondition;
-    int             mEvent;
     MtpDevice*      mEventDevice;
 
 public:
                     MyClient(JNIEnv *env, jobject client);
-    virtual         ~MyClient();
-    void            waitForEvent(JNIEnv *env);
-
+    void            cleanup(JNIEnv *env);
 };
 
 MtpClient* get_client_from_object(JNIEnv* env, jobject javaClient)
@@ -76,86 +66,35 @@ MtpClient* get_client_from_object(JNIEnv* env, jobject javaClient)
 
 
 MyClient::MyClient(JNIEnv *env, jobject client)
-    :   mEnv(env),
-        mClient(env->NewGlobalRef(client)),
-        mEvent(0),
-        mEventDevice(NULL)
+    :   mClient(env->NewGlobalRef(client))
 {
 }
 
-MyClient::~MyClient() {
-    mEnv->DeleteGlobalRef(mClient);
+void MyClient::cleanup(JNIEnv *env) {
+    env->DeleteGlobalRef(mClient);
 }
-
 
 void MyClient::deviceAdded(MtpDevice *device) {
-    LOGD("MyClient::deviceAdded\n");
-    mAckLock.lock();
-    mEventLock.lock();
-    mEvent = kDeviceAdded;
-    mEventDevice = device;
-    mEventCondition.signal();
-    mEventLock.unlock();
-    mAckCondition.wait(mAckLock);
-    mAckLock.unlock();
-}
-
-void MyClient::deviceRemoved(MtpDevice *device) {
-    LOGD("MyClient::deviceRemoved\n");
-    mAckLock.lock();
-    mEventLock.lock();
-    mEvent = kDeviceRemoved;
-    mEventDevice = device;
-    mEventCondition.signal();
-    mEventLock.unlock();
-    mAckCondition.wait(mAckLock);
-    mAckLock.unlock();
-}
-
-bool MyClient::reportDeviceAdded(JNIEnv *env, MtpDevice *device) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
     const char* name = device->getDeviceName();
-    LOGD("MyClient::reportDeviceAdded %s\n", name);
+    LOGD("MyClient::deviceAdded %s\n", name);
 
     env->CallVoidMethod(mClient, method_deviceAdded, device->getID());
 
-    return (!env->ExceptionCheck());
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
-bool MyClient::reportDeviceRemoved(JNIEnv *env, MtpDevice *device) {
-   const char* name = device->getDeviceName();
-    LOGD("MyClient::reportDeviceRemoved %s\n", name);
+void MyClient::deviceRemoved(MtpDevice *device) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    const char* name = device->getDeviceName();
+    LOGD("MyClient::deviceRemoved %s\n", name);
 
     env->CallVoidMethod(mClient, method_deviceRemoved, device->getID());
 
-    return (!env->ExceptionCheck());
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
-
-void MyClient::waitForEvent(JNIEnv *env) {
-    mEventLock.lock();
-    mEventCondition.wait(mEventLock);
-    mEventLock.unlock();
-
-    switch (mEvent) {
-        case kDeviceAdded:
-            reportDeviceAdded(env, mEventDevice);
-            break;
-        case kDeviceRemoved:
-            reportDeviceRemoved(env, mEventDevice);
-            break;
-    }
-
-    mAckLock.lock();
-    mAckCondition.signal();
-    mAckLock.unlock();
-}
-
 
 // ----------------------------------------------------------------------------
-
-static bool ExceptionCheck(void* env)
-{
-    return ((JNIEnv *)env)->ExceptionCheck();
-}
 
 static void
 android_media_MtpClient_setup(JNIEnv *env, jobject thiz)
@@ -171,15 +110,25 @@ android_media_MtpClient_finalize(JNIEnv *env, jobject thiz)
 {
     LOGD("finalize\n");
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
+    client->cleanup(env);
     delete client;
+    env->SetIntField(thiz, field_context, 0);
+}
+
+static jboolean
+android_media_MtpClient_start(JNIEnv *env, jobject thiz)
+{
+    LOGD("start\n");
+    MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
+    return client->start();
 }
 
 static void
-android_media_MtpClient_wait_for_event(JNIEnv *env, jobject thiz)
+android_media_MtpClient_stop(JNIEnv *env, jobject thiz)
 {
-    LOGD("wait_for_event\n");
+    LOGD("stop\n");
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
-    client->waitForEvent(env);
+    client->stop();
 }
 
 static jboolean
@@ -223,7 +172,8 @@ android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
 static JNINativeMethod gMethods[] = {
     {"native_setup",            "()V",  (void *)android_media_MtpClient_setup},
     {"native_finalize",         "()V",  (void *)android_media_MtpClient_finalize},
-    {"native_wait_for_event",   "()V",  (void *)android_media_MtpClient_wait_for_event},
+    {"native_start",            "()Z",  (void *)android_media_MtpClient_start},
+    {"native_stop",             "()V",  (void *)android_media_MtpClient_stop},
     {"native_delete_object",   "(II)Z", (void *)android_media_MtpClient_delete_object},
     {"native_get_parent",      "(II)I", (void *)android_media_MtpClient_get_parent},
     {"native_get_storage_id",  "(II)I", (void *)android_media_MtpClient_get_storage_id},

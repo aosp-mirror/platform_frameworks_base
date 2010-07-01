@@ -44,9 +44,12 @@ public class MtpClient {
         native_finalize();
     }
 
-    public void start() {
-        mEventThread = new MtpEventThread();
-        mEventThread.start();
+    public boolean start() {
+        return native_start();
+    }
+
+    public void stop() {
+        native_stop();
     }
 
     public boolean deleteObject(int deviceID, int objectID) {
@@ -59,24 +62,6 @@ public class MtpClient {
 
     public int getStorageID(int deviceID, int objectID) {
         return native_get_storage_id(deviceID, objectID);
-    }
-
-    private class MtpEventThread extends Thread {
-
-        private boolean mDone;
-
-        public MtpEventThread() {
-            super("MtpEventThread");
-        }
-
-        public void run() {
-            Log.d(TAG, "MtpEventThread starting");
-            while (!mDone) {
-                // this will wait for an event from an MTP device
-                native_wait_for_event();
-            }
-            Log.d(TAG, "MtpEventThread exiting");
-        }
     }
 
     public interface Listener {
@@ -99,14 +84,13 @@ public class MtpClient {
         mListener.deviceRemoved(id);
     }
 
-    private MtpEventThread mEventThread;
-
     // used by the JNI code
     private int mNativeContext;
 
     private native final void native_setup();
     private native final void native_finalize();
-    private native void native_wait_for_event();
+    private native boolean native_start();
+    private native void native_stop();
     private native boolean native_delete_object(int deviceID, int objectID);
     private native int native_get_parent(int deviceID, int objectID);
     private native int native_get_storage_id(int deviceID, int objectID);
