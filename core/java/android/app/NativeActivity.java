@@ -5,12 +5,14 @@ import dalvik.system.PathClassLoader;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.view.InputChannel;
 import android.view.InputQueue;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 
@@ -41,10 +43,10 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
     private native void onStopNative(int handle);
     private native void onLowMemoryNative(int handle);
     private native void onWindowFocusChangedNative(int handle, boolean focused);
-    private native void onSurfaceCreatedNative(int handle, SurfaceHolder holder);
-    private native void onSurfaceChangedNative(int handle, SurfaceHolder holder,
+    private native void onSurfaceCreatedNative(int handle, Surface surface);
+    private native void onSurfaceChangedNative(int handle, Surface surface,
             int format, int width, int height);
-    private native void onSurfaceDestroyedNative(int handle, SurfaceHolder holder);
+    private native void onSurfaceDestroyedNative(int handle);
     private native void onInputChannelCreatedNative(int handle, InputChannel channel);
     private native void onInputChannelDestroyedNative(int handle, InputChannel channel);
     
@@ -55,6 +57,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         
         getWindow().takeSurface(this);
         getWindow().takeInputQueue(this);
+        getWindow().setFormat(PixelFormat.RGB_565);
         
         try {
             ai = getPackageManager().getActivityInfo(
@@ -98,7 +101,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
     protected void onDestroy() {
         mDestroyed = true;
         if (mCurSurfaceHolder != null) {
-            onSurfaceDestroyedNative(mNativeHandle, mCurSurfaceHolder);
+            onSurfaceDestroyedNative(mNativeHandle);
             mCurSurfaceHolder = null;
         }
         if (mCurInputQueue != null) {
@@ -158,21 +161,21 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
     public void surfaceCreated(SurfaceHolder holder) {
         if (!mDestroyed) {
             mCurSurfaceHolder = holder;
-            onSurfaceCreatedNative(mNativeHandle, holder);
+            onSurfaceCreatedNative(mNativeHandle, holder.getSurface());
         }
     }
     
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         if (!mDestroyed) {
             mCurSurfaceHolder = holder;
-            onSurfaceChangedNative(mNativeHandle, holder, format, width, height);
+            onSurfaceChangedNative(mNativeHandle, holder.getSurface(), format, width, height);
         }
     }
     
     public void surfaceDestroyed(SurfaceHolder holder) {
         mCurSurfaceHolder = null;
         if (!mDestroyed) {
-            onSurfaceDestroyedNative(mNativeHandle, holder);
+            onSurfaceDestroyedNative(mNativeHandle);
         }
     }
     
@@ -195,5 +198,13 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
         if (decor != null) {
             decor.dispatchKeyEvent(event);
         }
+    }
+    
+    void setWindowFlags(int flags, int mask) {
+        getWindow().setFlags(flags, mask);
+    }
+    
+    void setWindowFormat(int format) {
+        getWindow().setFormat(format);
     }
 }

@@ -25,6 +25,23 @@ extern "C" {
 struct ANativeWindow;
 typedef struct ANativeWindow ANativeWindow;
 
+/*
+ * Return the current width in pixels of the window surface.  Returns a
+ * negative value on error.
+ */
+int32_t ANativeWindow_getWidth(ANativeWindow* window);
+
+/*
+ * Return the current height in pixels of the window surface.  Returns a
+ * negative value on error.
+ */
+int32_t ANativeWindow_getHeight(ANativeWindow* window);
+
+/*
+ * Return the current pixel format of the window surface.  Returns a
+ * negative value on error.
+ */
+int32_t ANativeWindow_getFormat(ANativeWindow* window);
 
 #ifdef __cplusplus
 };

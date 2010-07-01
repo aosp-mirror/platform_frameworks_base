@@ -33,6 +33,7 @@
 
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
+#include "android_view_Surface.h"
 #include <utils/misc.h>
 
 
@@ -179,7 +180,7 @@ static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
     return result;
 }
 
-EGLNativeWindowType android_Surface_getEGLNativeWindow(
+sp<ANativeWindow> android_Surface_getNativeWindow(
         JNIEnv* env, jobject clazz) {
     return getSurface(env, clazz).get();
 }
