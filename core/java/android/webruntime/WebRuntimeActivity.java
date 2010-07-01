@@ -16,7 +16,6 @@
 
 package android.webruntime;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.ComponentName;
@@ -53,6 +52,22 @@ public class WebRuntimeActivity extends Activity
     private WebView mWebView;
     private URL mBaseUrl;
     private ImageView mSplashScreen;
+
+    public static class SensitiveFeatures {
+        // All of the sensitive features
+        private boolean mGeolocation;
+        // On Android, the Browser doesn't prompt for database access, so we don't require an
+        // explicit permission here in the WebRuntimeActivity, and there's no Android system
+        // permission required for it either.
+        //private boolean mDatabase;
+
+        public boolean getGeolocation() {
+            return mGeolocation;
+        }
+        public void setGeolocation(boolean geolocation) {
+            mGeolocation = geolocation;
+        }
+    }
 
     /** Called when the activity is first created. */
     @Override
@@ -93,6 +108,10 @@ public class WebRuntimeActivity extends Activity
             Log.d(LOGTAG, "Invalid URL");
         }
 
+        // All false by default, and reading non-existent bundle properties gives false too.
+        final SensitiveFeatures sensitiveFeatures = new SensitiveFeatures();
+        sensitiveFeatures.setGeolocation(metaData.getBoolean("android.webruntime.SensitiveFeaturesGeolocation"));
+
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.web_runtime);
         mWebView = (WebView) findViewById(R.id.webview);
@@ -105,9 +124,8 @@ public class WebRuntimeActivity extends Activity
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 try {
                     URL newOrigin = new URL(url);
-                    if (newOrigin.getHost().equals(mBaseUrl.getHost())) {
+                    if (areSameOrigin(mBaseUrl, newOrigin)) {
                         // If simple same origin test passes, load in the webview.
-                        // FIXME: We should do a more robust SOP check.
                         return false;
                     }
                 } catch(MalformedURLException e) {
@@ -130,16 +148,20 @@ public class WebRuntimeActivity extends Activity
             }
         });
 
-        // Use a custom WebChromeClient with geolocation permissions handling to always
-        // allow or deny, based on the app's permissions.
-        String packageName = componentName.getPackageName();
-        final boolean allowed = packageManager.checkPermission(
-                Manifest.permission.ACCESS_FINE_LOCATION, packageName)
-                == PackageManager.PERMISSION_GRANTED;
+        // Use a custom WebChromeClient with geolocation permissions handling.
         mWebView.setWebChromeClient(new WebChromeClient() {
             public void onGeolocationPermissionsShowPrompt(
                         String origin, GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, allowed, true);
+                // Allow this origin if it has Geolocation permissions, otherwise deny.
+                boolean allowed = false;
+                if (sensitiveFeatures.getGeolocation()) {
+                    try {
+                        URL originUrl = new URL(origin);
+                        allowed = areSameOrigin(mBaseUrl, originUrl);
+                    } catch(MalformedURLException e) {
+                    }
+                }
+                callback.invoke(origin, allowed, false);
             }
         });
 
@@ -172,5 +194,11 @@ public class WebRuntimeActivity extends Activity
         menu.add(0, 0, 0, "Menu item 1");
         menu.add(0, 1, 0, "Menu item 2");
         return true;
+    }
+
+    private static boolean areSameOrigin(URL a, URL b) {
+        int aPort = a.getPort() == -1 ? a.getDefaultPort() : a.getPort();
+        int bPort = b.getPort() == -1 ? b.getDefaultPort() : b.getPort();
+        return a.getProtocol().equals(b.getProtocol()) && aPort == bPort && a.getHost().equals(b.getHost());
     }
 }
