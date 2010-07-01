@@ -134,14 +134,16 @@ public abstract class CursorTreeAdapter extends BaseExpandableListAdapter implem
     /**
      * Sets the group Cursor.
      * 
-     * @param cursor The Cursor to set for the group.
+     * @param cursor The Cursor to set for the group. If there is an existing cursor 
+     * it will be closed.
      */
     public void setGroupCursor(Cursor cursor) {
         mGroupCursorHelper.changeCursor(cursor, false);
     }
     
     /**
-     * Sets the children Cursor for a particular group.
+     * Sets the children Cursor for a particular group. If there is an existing cursor
+     * it will be closed.
      * <p>
      * This is useful when asynchronously querying to prevent blocking the UI.
      * 
@@ -476,7 +478,7 @@ public abstract class CursorTreeAdapter extends BaseExpandableListAdapter implem
             
             mCursor.unregisterContentObserver(mContentObserver);
             mCursor.unregisterDataSetObserver(mDataSetObserver);
-            mCursor.deactivate();
+            mCursor.close();
             mCursor = null;
         }
         
