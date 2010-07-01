@@ -2314,7 +2314,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Get the touch icon url for the apple-touch-icon <link> element.
+     * Get the touch icon url for the apple-touch-icon <link> element, or
+     * a URL on this site's server pointing to the standard location of a
+     * touch icon.
      * @hide
      */
     public String getTouchIconUrl() {
