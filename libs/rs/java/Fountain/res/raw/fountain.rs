@@ -8,7 +8,6 @@
 #include "../../../../scriptc/rs_graphics.rsh"
 
 static int newPart = 0;
-static float4 partColor;
 rs_mesh partMesh;
 
 typedef struct __attribute__((packed, aligned(4))) Point {
@@ -40,16 +39,17 @@ int root() {
     return 1;
 }
 
-void addParticles(int rate, float x, float y, bool newColor)
+static float4 partColor[10];
+void addParticles(int rate, float x, float y, int index, bool newColor)
 {
     if (newColor) {
-        partColor.x = rsRand(0.5f, 1.0f);
-        partColor.y = rsRand(1.0f);
-        partColor.z = rsRand(1.0f);
+        partColor[index].x = rsRand(0.5f, 1.0f);
+        partColor[index].y = rsRand(1.0f);
+        partColor[index].z = rsRand(1.0f);
     }
-    float rMax = ((float)rate) * 0.005f;
+    float rMax = ((float)rate) * 0.02f;
     int size = rsAllocationGetDimX(rsGetAllocation(point));
-    uchar4 c = rsPackColorTo8888(partColor);
+    uchar4 c = rsPackColorTo8888(partColor[index]);
 
     Point_t * np = &point[newPart];
     float2 p = {x, y};
