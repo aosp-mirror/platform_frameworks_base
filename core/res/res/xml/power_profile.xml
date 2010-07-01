@@ -18,6 +18,7 @@
 -->
 
 <device name="Android">
+  <!-- All values are in mAh except as noted -->
   <item name="none">0</item>
   <item name="screen.on">0.1</item>
   <item name="bluetooth.active">0.1</item>
@@ -48,4 +49,6 @@
   <array name="cpu.active">
       <value>0.2</value>
   </array>
+  <!-- This is the battery capacity in mAh -->
+  <item name="battery.capacity">1000</item>
 </device>

@@ -126,6 +126,11 @@ public class PowerProfile {
 
     public static final String POWER_CPU_SPEEDS = "cpu.speeds";
 
+    /**
+     * Battery capacity in milliAmpHour (mAh).
+     */
+    public static final String POWER_BATTERY_CAPACITY = "battery.capacity";
+
     static final HashMap<String, Object> sPowerMap = new HashMap<String, Object>();
 
     private static final String TAG_DEVICE = "device";
@@ -243,6 +248,19 @@ public class PowerProfile {
         }
     }
 
+    /**
+     * Returns the battery capacity, if available, in milli Amp Hours. If not available,
+     * it returns zero.
+     * @return the battery capacity in mAh
+     */
+    public double getBatteryCapacity() {
+        return getAveragePower(POWER_BATTERY_CAPACITY);
+    }
+
+    /**
+     * Returns the number of speeds that the CPU can be run at.
+     * @return
+     */
     public int getNumSpeedSteps() {
         Object value = sPowerMap.get(POWER_CPU_SPEEDS);
         if (value != null && value instanceof Double[]) {
