@@ -330,9 +330,9 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return mDataSetObservable;
         
     }
+
     public void registerDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.registerObserver(observer);
-        
     }
 
     public void unregisterDataSetObserver(DataSetObserver observer) {
@@ -387,36 +387,19 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     }
 
     /**
-     * This function returns true if the field has been updated and is
-     * used in conjunction with {@link #getUpdatedField} to allow subclasses to
-     * support reading uncommitted updates. NOTE: This function and
-     * {@link #getUpdatedField} should be called together inside of a
-     * block synchronized on mUpdatedRows.
-     *
-     * @param columnIndex the column index of the field to check
-     * @return true if the field has been updated, false otherwise
+     * @deprecated Always returns false since Cursors do not support updating rows
      */
+    @Deprecated
     protected boolean isFieldUpdated(int columnIndex) {
-        if (mRowIdColumnIndex != -1 && mUpdatedRows.size() > 0) {
-            Map<String, Object> updates = mUpdatedRows.get(mCurrentRowID);
-            if (updates != null && updates.containsKey(getColumnNames()[columnIndex])) {
-                return true;
-            }
-        }
         return false;
     }
 
     /**
-     * This function returns the uncommitted updated value for the field
-     * at columnIndex.  NOTE: This function and {@link #isFieldUpdated} should
-     * be called together inside of a block synchronized on mUpdatedRows.
-     *
-     * @param columnIndex the column index of the field to retrieve
-     * @return the updated value
+     * @deprecated Always returns null since Cursors do not support updating rows
      */
+    @Deprecated
     protected Object getUpdatedField(int columnIndex) {
-        Map<String, Object> updates = mUpdatedRows.get(mCurrentRowID);
-        return updates.get(getColumnNames()[columnIndex]);
+        return null;
     }
 
     /**
@@ -466,11 +449,9 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     }
 
     /**
-     * This HashMap contains a mapping from Long rowIDs to another Map
-     * that maps from String column names to new values. A NULL value means to
-     * remove an existing value, and all numeric values are in their class
-     * forms, i.e. Integer, Long, Float, etc.
+     * @deprecated This is never updated by this class and should not be used
      */
+    @Deprecated
     protected HashMap<Long, Map<String, Object>> mUpdatedRows;
 
     /**
@@ -480,6 +461,11 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     protected int mRowIdColumnIndex;
 
     protected int mPos;
+    /**
+     * If {@link mRowIdColumnIndex} is not -1 this contains contains the value of
+     * the column at {@link mRowIdColumnIndex} for the current row this cursor is
+     * pointing at.
+     */
     protected Long mCurrentRowID;
     protected ContentResolver mContentResolver;
     protected boolean mClosed = false;
