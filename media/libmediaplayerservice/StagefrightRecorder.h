@@ -97,6 +97,11 @@ private:
     status_t startAMRRecording();
     status_t startAACRecording();
     sp<MediaSource> createAudioSource();
+    status_t setupCameraSource();
+    status_t setupAudioEncoder(const sp<MediaWriter>& writer);
+    status_t setupVideoEncoder(const sp<MediaWriter>& writer);
+
+    // Encoding parameter handling utilities
     status_t setParameter(const String8 &key, const String8 &value);
     status_t setParamAudioEncodingBitRate(int32_t bitRate);
     status_t setParamAudioNumberOfChannels(int32_t channles);
@@ -108,7 +113,8 @@ private:
     status_t setParamTrackFrameStatus(int32_t nFrames);
     status_t setParamInterleaveDuration(int32_t durationUs);
     status_t setParam64BitFileOffset(bool use64BitFileOffset);
-    status_t setParamMaxDurationOrFileSize(int64_t limit, bool limit_is_duration);
+    status_t setParamMaxFileDurationUs(int64_t timeUs);
+    status_t setParamMaxFileSizeBytes(int64_t bytes);
     void clipVideoBitRate();
     void clipVideoFrameRate();
     void clipVideoFrameWidth();
