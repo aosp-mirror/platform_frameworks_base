@@ -571,6 +571,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mHaveInputMethods);
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_DISPLAY);
+            android.os.Process.setCanSelfBackground(false);
 
             synchronized (this) {
                 mService = s;
@@ -606,6 +607,7 @@ public class WindowManagerService extends IWindowManager.Stub
             //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_FOREGROUND);
+            android.os.Process.setCanSelfBackground(false);
             mPolicy.init(mContext, mService, mPM);
 
             synchronized (this) {

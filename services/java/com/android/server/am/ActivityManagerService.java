@@ -1259,6 +1259,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_FOREGROUND);
+            android.os.Process.setCanSelfBackground(false);
 
             ActivityManagerService m = new ActivityManagerService();
 
