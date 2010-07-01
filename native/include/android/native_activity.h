@@ -24,14 +24,11 @@
 #include <jni.h>
 
 #include <android/input.h>
+#include <android/native_window.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// Temporary until native surface API is defined.
-struct ASurfaceHolder;
-typedef struct ASurfaceHolder ASurfaceHolder;
 
 struct ANativeActivityCallbacks;
 
@@ -129,30 +126,28 @@ typedef struct ANativeActivityCallbacks {
     void (*onWindowFocusChanged)(ANativeActivity* activity, int hasFocus);
     
     /**
-     * The drawing surface for this native activity has been created.  You
-     * can use the given surface object to start drawing.  NOTE: surface
-     * drawing API is not yet defined.
+     * The drawing window for this native activity has been created.  You
+     * can use the given native window object to start drawing.
      */
-    void (*onSurfaceCreated)(ANativeActivity* activity, ASurfaceHolder* surface);
+    void (*onNativeWindowCreated)(ANativeActivity* activity, ANativeWindow* window);
 
     /**
-     * The drawing surface for this native activity has changed.  The surface
-     * given here is guaranteed to be the same as the one last given to
-     * onSurfaceCreated.  This is simply to inform you about interesting
-     * changed to that surface.
+     * The drawing window for this native activity has changed.  During this time,
+     * old ANativeWindow object is still valid but no longer active and drawing
+     * should switch to the new ANativeWindow given here.  After returning from
+     * this function, you must not touch the old window.
      */
-    void (*onSurfaceChanged)(ANativeActivity* activity, ASurfaceHolder* surface,
-            int format, int width, int height);
+    void (*onNativeWindowChanged)(ANativeActivity* activity, ANativeWindow* window);
 
     /**
-     * The drawing surface for this native activity is going to be destroyed.
-     * You MUST ensure that you do not touch the surface object after returning
-     * from this function: in the common case of drawing to the surface from
+     * The drawing window for this native activity is going to be destroyed.
+     * You MUST ensure that you do not touch the window object after returning
+     * from this function: in the common case of drawing to the window from
      * another thread, that means the implementation of this callback must
      * properly synchronize with the other thread to stop its drawing before
      * returning from here.
      */
-    void (*onSurfaceDestroyed)(ANativeActivity* activity, ASurfaceHolder* surface);
+    void (*onNativeWindowDestroyed)(ANativeActivity* activity, ANativeWindow* window);
     
     /**
      * The input queue for this native activity's window has been created.

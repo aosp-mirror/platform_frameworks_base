@@ -22,6 +22,8 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android/native_activity.h>
+#include <surfaceflinger/Surface.h>
+#include <ui/egl/android_natives.h>
 #include <ui/InputTransport.h>
 #include <utils/PollLoop.h>
 
@@ -29,6 +31,7 @@
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
+#include "android_view_Surface.h"
 
 namespace android
 {
@@ -37,8 +40,16 @@ static struct {
     jclass clazz;
 
     jmethodID dispatchUnhandledKeyEvent;
+    jmethodID setWindowFlags;
+    jmethodID setWindowFormat;
 } gNativeActivityClassInfo;
 
+// ------------------------------------------------------------------------
+
+/*
+ * Specialized input queue that allows unhandled key events to be dispatched
+ * back to the native activity's Java framework code.
+ */
 struct MyInputQueue : AInputQueue {
     explicit MyInputQueue(const android::sp<android::InputChannel>& channel, int workWrite)
         : AInputQueue(channel), mWorkWrite(workWrite) {
@@ -74,13 +85,18 @@ struct MyInputQueue : AInputQueue {
     Vector<KeyEvent*> mPendingKeys;
 };
 
+// ------------------------------------------------------------------------
+
+/*
+ * Native state for interacting with the NativeActivity class.
+ */
 struct NativeCode {
     NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc) {
         memset(&activity, sizeof(activity), 0);
         memset(&callbacks, sizeof(callbacks), 0);
         dlhandle = _dlhandle;
         createActivityFunc = _createFunc;
-        surface = NULL;
+        nativeWindow = NULL;
         inputChannel = NULL;
         nativeInputQueue = NULL;
         mainWorkRead = mainWorkWrite = -1;
@@ -104,18 +120,18 @@ struct NativeCode {
         if (mainWorkRead >= 0) close(mainWorkRead);
         if (mainWorkWrite >= 0) close(mainWorkWrite);
         if (dlhandle != NULL) {
-            dlclose(dlhandle);
+            // for now don't unload...  we probably should clean this
+            // up and only keep one open dlhandle per proc, since there
+            // is really no benefit to unloading the code.
+            //dlclose(dlhandle);
         }
     }
     
     void setSurface(jobject _surface) {
-        if (surface != NULL) {
-            activity.env->DeleteGlobalRef(surface);
-        }
         if (_surface != NULL) {
-            surface = activity.env->NewGlobalRef(_surface);
+            nativeWindow = android_Surface_getNativeWindow(activity.env, _surface);
         } else {
-            surface = NULL;
+            nativeWindow = NULL;
         }
     }
     
@@ -150,7 +166,7 @@ struct NativeCode {
     void* dlhandle;
     ANativeActivity_createFunc* createActivityFunc;
     
-    jobject surface;
+    sp<ANativeWindow> nativeWindow;
     jobject inputChannel;
     struct MyInputQueue* nativeInputQueue;
     
@@ -160,6 +176,11 @@ struct NativeCode {
     sp<PollLoop> pollLoop;
 };
 
+// ------------------------------------------------------------------------
+
+/*
+ * Callback for handling native events on the application's main thread.
+ */
 static bool mainWorkCallback(int fd, int events, void* data) {
     NativeCode* code = (NativeCode*)data;
     if ((events & POLLIN) != 0) {
@@ -179,6 +200,8 @@ static bool mainWorkCallback(int fd, int events, void* data) {
     
     return true;
 }
+
+// ------------------------------------------------------------------------
 
 static jint
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQueue)
@@ -323,9 +346,9 @@ onSurfaceCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         code->setSurface(surface);
-        if (code->callbacks.onSurfaceCreated != NULL) {
-            code->callbacks.onSurfaceCreated(&code->activity,
-                    (ASurfaceHolder*)code->surface);
+        if (code->nativeWindow != NULL && code->callbacks.onNativeWindowCreated != NULL) {
+            code->callbacks.onNativeWindowCreated(&code->activity,
+                    code->nativeWindow.get());
         }
     }
 }
@@ -336,9 +359,13 @@ onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
 {
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
-        if (code->surface != NULL && code->callbacks.onSurfaceChanged != NULL) {
-            code->callbacks.onSurfaceChanged(&code->activity,
-                    (ASurfaceHolder*)code->surface, format, width, height);
+        sp<ANativeWindow> oldNativeWindow = code->nativeWindow;
+        code->setSurface(surface);
+        if (oldNativeWindow != code->nativeWindow) {
+            if (code->nativeWindow != NULL && code->callbacks.onNativeWindowChanged != NULL) {
+                code->callbacks.onNativeWindowChanged(&code->activity,
+                        code->nativeWindow.get());
+            }
         }
     }
 }
@@ -348,9 +375,9 @@ onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surfa
 {
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
-        if (code->surface != NULL && code->callbacks.onSurfaceDestroyed != NULL) {
-            code->callbacks.onSurfaceDestroyed(&code->activity,
-                    (ASurfaceHolder*)code->surface);
+        if (code->nativeWindow != NULL && code->callbacks.onNativeWindowDestroyed != NULL) {
+            code->callbacks.onNativeWindowDestroyed(&code->activity,
+                    code->nativeWindow.get());
         }
         code->setSurface(NULL);
     }
@@ -398,9 +425,9 @@ static const JNINativeMethod g_methods[] = {
     { "onStopNative", "(I)V", (void*)onStop_native },
     { "onLowMemoryNative", "(I)V", (void*)onLowMemory_native },
     { "onWindowFocusChangedNative", "(IZ)V", (void*)onWindowFocusChanged_native },
-    { "onSurfaceCreatedNative", "(ILandroid/view/SurfaceHolder;)V", (void*)onSurfaceCreated_native },
-    { "onSurfaceChangedNative", "(ILandroid/view/SurfaceHolder;III)V", (void*)onSurfaceChanged_native },
-    { "onSurfaceDestroyedNative", "(ILandroid/view/SurfaceHolder;)V", (void*)onSurfaceDestroyed_native },
+    { "onSurfaceCreatedNative", "(ILandroid/view/Surface;)V", (void*)onSurfaceCreated_native },
+    { "onSurfaceChangedNative", "(ILandroid/view/Surface;III)V", (void*)onSurfaceChanged_native },
+    { "onSurfaceDestroyedNative", "(I)V", (void*)onSurfaceDestroyed_native },
     { "onInputChannelCreatedNative", "(ILandroid/view/InputChannel;)V", (void*)onInputChannelCreated_native },
     { "onInputChannelDestroyedNative", "(ILandroid/view/InputChannel;)V", (void*)onInputChannelDestroyed_native },
 };
@@ -421,11 +448,18 @@ int register_android_app_NativeActivity(JNIEnv* env)
     //LOGD("register_android_app_NativeActivity");
 
     FIND_CLASS(gNativeActivityClassInfo.clazz, kNativeActivityPathName);
-        
+    
     GET_METHOD_ID(gNativeActivityClassInfo.dispatchUnhandledKeyEvent,
             gNativeActivityClassInfo.clazz,
             "dispatchUnhandledKeyEvent", "(Landroid/view/KeyEvent;)V");
-            
+
+    GET_METHOD_ID(gNativeActivityClassInfo.setWindowFlags,
+            gNativeActivityClassInfo.clazz,
+            "setWindowFlags", "(II)V");
+    GET_METHOD_ID(gNativeActivityClassInfo.setWindowFormat,
+            gNativeActivityClassInfo.clazz,
+            "setWindowFormat", "(I)V");
+
     return AndroidRuntime::registerNativeMethods(
         env, kNativeActivityPathName,
         g_methods, NELEM(g_methods));

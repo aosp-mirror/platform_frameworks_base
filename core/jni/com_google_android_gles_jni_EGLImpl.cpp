@@ -25,10 +25,9 @@
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
 
-namespace android {
+#include "android_view_Surface.h"
 
-extern EGLNativeWindowType android_Surface_getEGLNativeWindow(
-        JNIEnv* env, jobject clazz);
+namespace android {
 
 static jclass gDisplay_class;
 static jclass gContext_class;
@@ -325,7 +324,7 @@ static jint jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject disp
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLContext cnf = getConfig(_env, config);
-    EGLNativeWindowType window = 0;
+    sp<ANativeWindow> window;
     if (native_window == NULL) {
 not_valid_surface:
         doThrow(_env, "java/lang/IllegalArgumentException",
@@ -333,12 +332,12 @@ not_valid_surface:
         return 0;
     }
 
-    window = android_Surface_getEGLNativeWindow(_env, native_window);
+    window = android_Surface_getNativeWindow(_env, native_window);
     if (window == NULL)
         goto not_valid_surface;
 
     jint* base = beginNativeAttribList(_env, attrib_list);
-    EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window, base);
+    EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window.get(), base);
     endNativeAttributeList(_env, attrib_list, base);
     return (jint)sur;
 }
