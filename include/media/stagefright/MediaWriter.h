@@ -27,7 +27,10 @@ struct MediaSource;
 struct MetaData;
 
 struct MediaWriter : public RefBase {
-    MediaWriter() {}
+    MediaWriter()
+        : mMaxFileSizeLimitBytes(0),
+          mMaxFileDurationLimitUs(0) {
+    }
 
     virtual status_t addSource(const sp<MediaSource> &source) = 0;
     virtual bool reachedEOS() = 0;
