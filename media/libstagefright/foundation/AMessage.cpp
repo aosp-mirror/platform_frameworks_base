@@ -16,6 +16,8 @@
 
 #include "AMessage.h"
 
+#include <ctype.h>
+
 #include "AAtomizer.h"
 #include "ADebug.h"
 #include "ALooperRoster.h"
@@ -236,6 +238,107 @@ sp<AMessage> AMessage::dup() const {
     }
 
     return msg;
+}
+
+static void appendIndent(AString *s, int32_t indent) {
+    static const char kWhitespace[] =
+        "                                        "
+        "                                        ";
+
+    CHECK_LT((size_t)indent, sizeof(kWhitespace));
+
+    s->append(kWhitespace, indent);
+}
+
+static bool isFourcc(uint32_t what) {
+    return isprint(what & 0xff)
+        && isprint((what >> 8) & 0xff)
+        && isprint((what >> 16) & 0xff)
+        && isprint((what >> 24) & 0xff);
+}
+
+AString AMessage::debugString(int32_t indent) const {
+    AString s = "AMessage(what = ";
+
+    AString tmp;
+    if (isFourcc(mWhat)) {
+        tmp = StringPrintf(
+                "'%c%c%c%c'",
+                (char)(mWhat >> 24),
+                (char)((mWhat >> 16) & 0xff),
+                (char)((mWhat >> 8) & 0xff),
+                (char)(mWhat & 0xff));
+    } else {
+        tmp = StringPrintf("0x%08x", mWhat);
+    }
+    s.append(tmp);
+
+    if (mTarget != 0) {
+        tmp = StringPrintf(", target = %d", mTarget);
+        s.append(tmp);
+    }
+    s.append(") = {\n");
+
+    for (size_t i = 0; i < mNumItems; ++i) {
+        const Item &item = mItems[i];
+
+        switch (item.mType) {
+            case kTypeInt32:
+                tmp = StringPrintf(
+                        "int32_t %s = %d", item.mName, item.u.int32Value);
+                break;
+            case kTypeInt64:
+                tmp = StringPrintf(
+                        "int64_t %s = %lld", item.mName, item.u.int64Value);
+                break;
+            case kTypeSize:
+                tmp = StringPrintf(
+                        "size_t %s = %d", item.mName, item.u.sizeValue);
+                break;
+            case kTypeFloat:
+                tmp = StringPrintf(
+                        "float %s = %f", item.mName, item.u.floatValue);
+                break;
+            case kTypeDouble:
+                tmp = StringPrintf(
+                        "double %s = %f", item.mName, item.u.doubleValue);
+                break;
+            case kTypePointer:
+                tmp = StringPrintf(
+                        "void *%s = %p", item.mName, item.u.ptrValue);
+                break;
+            case kTypeString:
+                tmp = StringPrintf(
+                        "string %s = \"%s\"",
+                        item.mName,
+                        item.u.stringValue->c_str());
+                break;
+            case kTypeObject:
+                tmp = StringPrintf(
+                        "RefBase *%s = %p", item.mName, item.u.refValue);
+                break;
+            case kTypeMessage:
+                tmp = StringPrintf(
+                        "AMessage %s = %s",
+                        item.mName,
+                        static_cast<AMessage *>(
+                            item.u.refValue)->debugString(
+                                indent + strlen(item.mName) + 14).c_str());
+                break;
+            default:
+                TRESPASS();
+        }
+
+        appendIndent(&s, indent);
+        s.append("  ");
+        s.append(tmp);
+        s.append("\n");
+    }
+
+    appendIndent(&s, indent);
+    s.append("}");
+
+    return s;
 }
 
 }  // namespace android
