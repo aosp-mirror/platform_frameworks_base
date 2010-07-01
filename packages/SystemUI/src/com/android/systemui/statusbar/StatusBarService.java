@@ -374,7 +374,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+        if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
         StatusBarIconView view = new StatusBarIconView(this, slot);
         view.set(icon);
@@ -383,14 +383,14 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
-        Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+        if (SPEW) Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " old=" + old + " icon=" + icon);
         StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
         view.set(icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
-        Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        if (SPEW) Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
         mStatusIcons.removeViewAt(viewIndex);
     }
 
@@ -490,7 +490,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
                 && oldContentView.getLayoutId() == contentView.getLayoutId()) {
-            Slog.d(TAG, "reusing notification");
+            if (SPEW) Slog.d(TAG, "reusing notification");
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
@@ -517,7 +517,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                 addNotificationViews(key, notification);
             }
         } else {
-            Slog.d(TAG, "not reusing notification");
+            if (SPEW) Slog.d(TAG, "not reusing notification");
             removeNotificationViews(key);
             addNotificationViews(key, notification);
         }
@@ -531,7 +531,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     }
 
     public void removeNotification(IBinder key) {
-        Slog.d(TAG, "removeNotification key=" + key);
+        if (SPEW) Slog.d(TAG, "removeNotification key=" + key);
         StatusBarNotification old = removeNotificationViews(key);
 
         if (old != null) {
@@ -1447,7 +1447,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
             // the user's perception of what's showing, call to say that the visibility
             // has changed. (Otherwise, someone else will call to do that).
             if (expandedPosition != EXPANDED_LEAVE_ALONE) {
-                Slog.d(TAG, "updateExpandedViewPos visibilityChanged(" + visible + ")");
+                if (SPEW) Slog.d(TAG, "updateExpandedViewPos visibilityChanged(" + visible + ")");
                 visibilityChanged(visible);
             }
         }
