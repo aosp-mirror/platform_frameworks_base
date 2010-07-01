@@ -48,13 +48,20 @@ public class FountainRS {
         mRS.contextBindRootScript(mScript);
     }
 
-    boolean holdingColor = false;
-    public void newTouchPosition(int x, int y, int rate) {
+    boolean holdingColor[] = new boolean[10];
+    public void newTouchPosition(float x, float y, float pressure, int id) {
+        if (id > holdingColor.length) {
+            return;
+        }
+        int rate = (int)(pressure * pressure * 500.f);
+        if(rate > 500) {
+            rate = 500;
+        }
         if (rate > 0) {
-            mScript.invoke_addParticles(rate, x, y, !holdingColor);
-            holdingColor = true;
+            mScript.invoke_addParticles(rate, x, y, id, !holdingColor[id]);
+            holdingColor[id] = true;
         } else {
-            holdingColor = false;
+            holdingColor[id] = false;
         }
 
     }
