@@ -1103,29 +1103,6 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
     }
 
     @SmallTest
-    public void testLruCachingOfSqliteCompiledSqlObjs() {
-        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
-        mDatabase.execSQL("insert into test values(1,1);");
-        // set cache size
-        int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
-        mDatabase.setMaxSqlCacheSize(N);
-
-        // do N+1 queries - and when the 0th entry is removed from LRU cache due to the
-        // insertion of (N+1)th entry, make sure 0th entry is closed
-        ArrayList<SQLiteStatement> stmtObjs = new ArrayList<SQLiteStatement>();
-        for (int i = 0; i < N+1; i++) {
-            SQLiteStatement c = mDatabase.compileStatement("select * from test where i = " + i);
-            c.close();
-            stmtObjs.add(i, c);
-        }
-
-        assertEquals(0, stmtObjs.get(0).getUniqueId());
-        for (int i = 1; i < N+1; i++) {
-            assertTrue(stmtObjs.get(i).getUniqueId() > 0);
-        }
-    }
-
-    @SmallTest
     public void testSetMaxCahesize() {
         mDatabase.execSQL("CREATE TABLE test (i int, j int);");
         mDatabase.execSQL("insert into test values(1,1);");

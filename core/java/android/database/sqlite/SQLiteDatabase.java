@@ -16,7 +16,6 @@
 
 package android.database.sqlite;
 
-import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -1044,6 +1043,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     public void close() {
         if (!isOpen()) {
             return; // already closed
+        }
+        if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+            Log.i(TAG, "closing db: " + mPath + " (connection # " + mConnectionNum);
         }
         lock();
         try {
@@ -2123,7 +2125,8 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /* package */ void verifyDbIsOpen() {
         if (!isOpen()) {
-            throw new IllegalStateException("database " + getPath() + " already closed");
+            throw new IllegalStateException("database " + getPath() + " (conn# " +
+                    mConnectionNum + ") already closed");
         }
     }
 
