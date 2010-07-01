@@ -768,8 +768,8 @@ class ZoomManager {
             mMinZoomScale = zoomOverviewScale;
         }
         // fit the content width to the current view. Ignore the rounding error case.
-        if (!mWebView.drawHistory() && (mInZoomOverview || mInitialZoomOverview)
-                && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1) {
+        if (!mWebView.drawHistory() && (mInitialZoomOverview || (mInZoomOverview
+                && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1))) {
             mInitialZoomOverview = false;
             setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale));
         }
