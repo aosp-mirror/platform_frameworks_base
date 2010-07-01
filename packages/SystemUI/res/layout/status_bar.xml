@@ -21,6 +21,7 @@
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
 <com.android.systemui.statusbar.StatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
     android:orientation="vertical"
     android:focusable="true"
@@ -59,6 +60,33 @@
             android:textStyle="bold"
             android:gravity="center_vertical|left"
             />
+
+        <LinearLayout android:id="@+id/buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="6dip"
+            android:orientation="horizontal" >
+
+            <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
+                android:layout_width="wrap_content"
+                android:layout_height="@*android:dimen/status_bar_height"
+                android:src="@drawable/status_bar_back"
+                systemui:keyCode="4"
+                />
+            <com.android.systemui.statusbar.KeyButtonView android:id="@+id/menu"
+                android:layout_width="wrap_content"
+                android:layout_height="@*android:dimen/status_bar_height"
+                android:src="@drawable/status_bar_menu"
+                systemui:keyCode="82"
+                />
+            <com.android.systemui.statusbar.KeyButtonView android:id="@+id/home"
+                android:layout_width="wrap_content"
+                android:layout_height="@*android:dimen/status_bar_height"
+                android:src="@drawable/status_bar_home"
+                systemui:keyCode="3"
+                />
+        </LinearLayout>
+            
     </LinearLayout>
         
     <LinearLayout android:id="@+id/ticker"

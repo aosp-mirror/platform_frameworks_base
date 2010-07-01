@@ -97,6 +97,9 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     // will likely move to a resource or other tunable param at some point
     private static final int INTRUDER_ALERT_DECAY_MS = 10000;
 
+    static final int POSITION_TOP = 0;
+    static final int POSITION_BOTTOM = 0;
+
     StatusBarPolicy mIconPolicy;
 
     CommandQueue mCommandQueue;
@@ -104,6 +107,8 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
     int mIconSize;
     Display mDisplay;
+    int mPosition;
+
     StatusBarView mStatusBarView;
     int mPixelFormat;
     H mHandler = new H();
@@ -193,10 +198,11 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         }
     }
 
-
     @Override
     public void onCreate() {
         // First set up our views and stuff.
+        final Resources res = getResources();
+        mPosition = res.getInteger(R.integer.config_status_bar_position);
         mDisplay = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         makeStatusBarView(this);
 
@@ -349,7 +355,11 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
                 PixelFormat.RGBX_8888);
-        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        if (mPosition == POSITION_TOP) {
+            lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        } else {
+            lp.gravity = Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
+        }
         lp.setTitle("StatusBar");
         // TODO lp.windowAnimations = R.style.Animation_StatusBar;
 
@@ -365,7 +375,11 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        if (mPosition == POSITION_TOP) {
+            lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        } else {
+            lp.gravity = Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
+        }
         lp.y += height * 1.5; // FIXME
         lp.setTitle("IntruderAlert");
         lp.windowAnimations = com.android.internal.R.style.Animation_StatusBar_IntruderAlert;

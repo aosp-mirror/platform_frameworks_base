@@ -133,7 +133,9 @@ public class StatusBarView extends FrameLayout {
         mDate.layout(mDate.getLeft(), mDate.getTop(), newDateRight, mDate.getBottom());
         mBackground.setFixedBounds(-mDate.getLeft(), -mDate.getTop(), (r-l), (b-t));
 
-        mButtonArea.getHitRect(mButtonBounds);
+        if (mButtonArea != null) {
+            mButtonArea.getHitRect(mButtonBounds);
+        }
     }
 
     @Override
