@@ -60,13 +60,13 @@ public class ScriptC_Modelviewer extends ScriptC {
     }
 
     private final static int mExportVarIdx_gTestMesh = 3;
-    private SimpleMesh mExportVar_gTestMesh;
-    public void set_gTestMesh(SimpleMesh v) {
+    private Mesh mExportVar_gTestMesh;
+    public void set_gTestMesh(Mesh v) {
         mExportVar_gTestMesh = v;
         setVar(mExportVarIdx_gTestMesh, (v == null) ? 0 : v.getID());
     }
 
-    public SimpleMesh get_gTestMesh() {
+    public Mesh get_gTestMesh() {
         return mExportVar_gTestMesh;
     }
 

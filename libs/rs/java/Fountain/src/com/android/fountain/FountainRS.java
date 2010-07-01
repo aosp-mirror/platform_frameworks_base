@@ -36,11 +36,10 @@ public class FountainRS {
 
         ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
 
-        SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
-        int vtxSlot = smb.addVertexType(points.getType());
-        smb.setPrimitive(Primitive.POINT);
-        SimpleMesh sm = smb.create();
-        sm.bindVertexAllocation(points.getAllocation(), vtxSlot);
+        Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
+        smb.addVertexAllocation(points.getAllocation());
+        smb.addIndexType(Primitive.POINT);
+        Mesh sm = smb.create();
 
         mScript = new ScriptC_Fountain(mRS, mRes, R.raw.fountain_bc, true);
         mScript.set_partMesh(sm);

@@ -38,7 +38,7 @@ typedef void * RsFile;
 typedef void * RsFont;
 typedef void * RsSampler;
 typedef void * RsScript;
-typedef void * RsSimpleMesh;
+typedef void * RsMesh;
 typedef void * RsType;
 typedef void * RsLight;
 typedef void * RsObjectBase;
@@ -229,7 +229,6 @@ enum RsAnimationEdge {
 enum RsA3DClassID {
     RS_A3D_CLASS_ID_UNKNOWN,
     RS_A3D_CLASS_ID_MESH,
-    RS_A3D_CLASS_ID_SIMPLE_MESH,
     RS_A3D_CLASS_ID_TYPE,
     RS_A3D_CLASS_ID_ELEMENT,
     RS_A3D_CLASS_ID_ALLOCATION,

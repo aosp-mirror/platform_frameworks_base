@@ -258,9 +258,6 @@ ObjectBase *FileA3D::initializeFromEntry(size_t index) {
         case RS_A3D_CLASS_ID_MESH:
             entry->mRsObj = Mesh::createFromStream(mRSC, mReadStream);
             break;
-        case RS_A3D_CLASS_ID_SIMPLE_MESH:
-            entry->mRsObj = SimpleMesh::createFromStream(mRSC, mReadStream);
-            break;
         case RS_A3D_CLASS_ID_TYPE:
             entry->mRsObj = Type::createFromStream(mRSC, mReadStream);
             break;

@@ -1351,6 +1351,33 @@ nLightSetPosition(JNIEnv *_env, jobject _this, jint light, float x, float y, flo
 // ---------------------------------------------------------------------------
 
 static jint
+nMeshCreate(JNIEnv *_env, jobject _this, jint vtxCount, jint idxCount)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshCreate, con(%p), vtxCount(%i), idxCount(%i)", con, vtxCount, idxCount);
+    int id = (int)rsMeshCreate(con, vtxCount, idxCount);
+    return id;
+}
+
+static void
+nMeshBindVertex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint slot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshBindVertex, con(%p), Mesh(%p), Alloc(%p), slot(%i)", con, (RsMesh)s, (RsAllocation)alloc, slot);
+    rsMeshBindVertex(con, (RsMesh)s, (RsAllocation)alloc, slot);
+}
+
+static void
+nMeshBindIndex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint primID, jint slot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshBindIndex, con(%p), Mesh(%p), Alloc(%p)", con, (RsMesh)s, (RsAllocation)alloc);
+    rsMeshBindIndex(con, (RsMesh)s, (RsAllocation)alloc, primID, slot);
+}
+
+// ---------------------------------------------------------------------------
+
+static jint
 nSimpleMeshCreate(JNIEnv *_env, jobject _this, jint batchID, jint indexID, jintArray vtxIDs, jint primID)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1367,16 +1394,16 @@ static void
 nSimpleMeshBindVertex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint slot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSimpleMeshBindVertex, con(%p), SimpleMesh(%p), Alloc(%p), slot(%i)", con, (RsSimpleMesh)s, (RsAllocation)alloc, slot);
-    rsSimpleMeshBindVertex(con, (RsSimpleMesh)s, (RsAllocation)alloc, slot);
+    LOG_API("nSimpleMeshBindVertex, con(%p), Mesh(%p), Alloc(%p), slot(%i)", con, (RsMesh)s, (RsAllocation)alloc, slot);
+    rsSimpleMeshBindVertex(con, (RsMesh)s, (RsAllocation)alloc, slot);
 }
 
 static void
 nSimpleMeshBindIndex(JNIEnv *_env, jobject _this, jint s, jint alloc)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSimpleMeshBindIndex, con(%p), SimpleMesh(%p), Alloc(%p)", con, (RsSimpleMesh)s, (RsAllocation)alloc);
-    rsSimpleMeshBindIndex(con, (RsSimpleMesh)s, (RsAllocation)alloc);
+    LOG_API("nSimpleMeshBindIndex, con(%p), Mesh(%p), Alloc(%p)", con, (RsMesh)s, (RsAllocation)alloc);
+    rsSimpleMeshBindIndex(con, (RsMesh)s, (RsAllocation)alloc);
 }
 
 // ---------------------------------------------------------------------------
@@ -1512,6 +1539,10 @@ static JNINativeMethod methods[] = {
 {"nSimpleMeshCreate",              "(II[II)I",                             (void*)nSimpleMeshCreate },
 {"nSimpleMeshBindVertex",          "(III)V",                               (void*)nSimpleMeshBindVertex },
 {"nSimpleMeshBindIndex",           "(II)V",                                (void*)nSimpleMeshBindIndex },
+
+{"nMeshCreate",                    "(II)I",                                (void*)nMeshCreate },
+{"nMeshBindVertex",                "(III)V",                               (void*)nMeshBindVertex },
+{"nMeshBindIndex",                 "(IIII)V",                              (void*)nMeshBindIndex },
 
 };
 

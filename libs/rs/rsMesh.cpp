@@ -35,14 +35,124 @@ Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    mVerticies = NULL;
-    mVerticiesCount = 0;
     mPrimitives = NULL;
     mPrimitivesCount = 0;
+    mVertexBuffers = NULL;
+    mVertexTypes = NULL;
+    mVertexBufferCount = 0;
 }
 
 Mesh::~Mesh()
 {
+    if(mVertexTypes) {
+        delete[] mVertexTypes;
+    }
+
+    if(mVertexBuffers) {
+        delete[] mVertexBuffers;
+    }
+
+    if(mPrimitives) {
+        for(uint32_t i = 0; i < mPrimitivesCount; i ++) {
+            delete mPrimitives[i];
+        }
+        delete[] mPrimitives;
+    }
+}
+
+void Mesh::render(Context *rsc) const
+{
+    for(uint32_t ct = 0; ct < mPrimitivesCount; ct ++) {
+        renderPrimitive(rsc, ct);
+    }
+}
+
+void Mesh::renderPrimitive(Context *rsc, uint32_t primIndex) const {
+    if (primIndex >= mPrimitivesCount) {
+        LOGE("Invalid primitive index");
+        return;
+    }
+
+    Primitive_t *prim = mPrimitives[primIndex];
+
+    if (prim->mIndexBuffer.get()) {
+        renderPrimitiveRange(rsc, primIndex, 0, prim->mIndexBuffer->getType()->getDimX());
+        return;
+    }
+
+    if (prim->mPrimitiveBuffer.get()) {
+        renderPrimitiveRange(rsc, primIndex, 0, prim->mPrimitiveBuffer->getType()->getDimX());
+        return;
+    }
+
+    renderPrimitiveRange(rsc, primIndex, 0, mVertexBuffers[0]->getType()->getDimX());
+}
+
+void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start, uint32_t len) const
+{
+    if (len < 1 || primIndex >= mPrimitivesCount) {
+        return;
+    }
+
+    rsc->checkError("Mesh::renderPrimitiveRange 1");
+    VertexArray va;
+    for (uint32_t ct=0; ct < mVertexBufferCount; ct++) {
+        mVertexBuffers[ct]->uploadCheck(rsc);
+        if (mVertexBuffers[ct]->getIsBufferObject()) {
+            va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
+        } else {
+            va.setActiveBuffer(mVertexBuffers[ct]->getPtr());
+        }
+        mVertexBuffers[ct]->getType()->enableGLVertexBuffer(&va);
+    }
+    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
+
+    rsc->checkError("Mesh::renderPrimitiveRange 2");
+    Primitive_t *prim = mPrimitives[primIndex];
+    if (prim->mIndexBuffer.get()) {
+        prim->mIndexBuffer->uploadCheck(rsc);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prim->mIndexBuffer->getBufferObjectID());
+        glDrawElements(prim->mGLPrimitive, len, GL_UNSIGNED_SHORT, (uint16_t *)(start * 2));
+    } else {
+        glDrawArrays(prim->mGLPrimitive, start, len);
+    }
+
+    rsc->checkError("Mesh::renderPrimitiveRange");
+}
+
+
+void Mesh::uploadAll(Context *rsc)
+{
+    for (uint32_t ct = 0; ct < mVertexBufferCount; ct ++) {
+        if (mVertexBuffers[ct].get()) {
+            mVertexBuffers[ct]->deferedUploadToBufferObject(rsc);
+        }
+    }
+
+    for (uint32_t ct = 0; ct < mPrimitivesCount; ct ++) {
+        if (mPrimitives[ct]->mIndexBuffer.get()) {
+            mPrimitives[ct]->mIndexBuffer->deferedUploadToBufferObject(rsc);
+        }
+        if (mPrimitives[ct]->mPrimitiveBuffer.get()) {
+            mPrimitives[ct]->mPrimitiveBuffer->deferedUploadToBufferObject(rsc);
+        }
+    }
+
+    rsc->checkError("Mesh::uploadAll");
+}
+
+void Mesh::updateGLPrimitives()
+{
+    for(uint32_t i = 0; i < mPrimitivesCount; i ++) {
+        switch(mPrimitives[i]->mPrimitive) {
+            case RS_PRIMITIVE_POINT:          mPrimitives[i]->mGLPrimitive = GL_POINTS; break;
+            case RS_PRIMITIVE_LINE:           mPrimitives[i]->mGLPrimitive = GL_LINES; break;
+            case RS_PRIMITIVE_LINE_STRIP:     mPrimitives[i]->mGLPrimitive = GL_LINE_STRIP; break;
+            case RS_PRIMITIVE_TRIANGLE:       mPrimitives[i]->mGLPrimitive = GL_TRIANGLES; break;
+            case RS_PRIMITIVE_TRIANGLE_STRIP: mPrimitives[i]->mGLPrimitive = GL_TRIANGLE_STRIP; break;
+            case RS_PRIMITIVE_TRIANGLE_FAN:   mPrimitives[i]->mGLPrimitive = GL_TRIANGLE_FAN; break;
+        }
+    }
 }
 
 void Mesh::serialize(OStream *stream) const
@@ -53,25 +163,10 @@ void Mesh::serialize(OStream *stream) const
     String8 name(getName());
     stream->addString(&name);
 
-    stream->addU32(mVerticiesCount);
-
-    for(uint32_t vCount = 0; vCount < mVerticiesCount; vCount ++) {
-        Verticies_t *verts = mVerticies[vCount];
-
-        stream->addU32(verts->mAllocationCount);
-
-        for (uint32_t aCount = 0; aCount < verts->mAllocationCount; aCount++) {
-            verts->mAllocations[aCount]->serialize(stream);
-        }
-        stream->addU32(verts->mVertexDataSize);
-
-        stream->addU32(verts->mOffsetCoord);
-        stream->addU32(verts->mOffsetTex);
-        stream->addU32(verts->mOffsetNorm);
-
-        stream->addU32(verts->mSizeCoord);
-        stream->addU32(verts->mSizeTex);
-        stream->addU32(verts->mSizeNorm );
+    // Store number of vertex streams
+    stream->addU32(mVertexBufferCount);
+    for(uint32_t vCount = 0; vCount < mVertexBufferCount; vCount ++) {
+        mVertexBuffers[vCount]->serialize(stream);
     }
 
     stream->addU32(mPrimitivesCount);
@@ -79,27 +174,22 @@ void Mesh::serialize(OStream *stream) const
     for (uint32_t pCount = 0; pCount < mPrimitivesCount; pCount ++) {
         Primitive_t * prim = mPrimitives[pCount];
 
-        stream->addU8((uint8_t)prim->mType);
+        stream->addU8((uint8_t)prim->mPrimitive);
 
-        // We store the index to the vertices
-        // So iterate over our vertices to find which one we point to
-        uint32_t vertexIndex = 0;
-        for(uint32_t vCount = 0; vCount < mVerticiesCount; vCount ++) {
-            if(prim->mVerticies == mVerticies[vCount]) {
-                vertexIndex = vCount;
-                break;
-            }
+        if(prim->mIndexBuffer.get()) {
+            stream->addU32(1);
+            prim->mIndexBuffer->serialize(stream);
         }
-        stream->addU32(vertexIndex);
-
-        stream->addU32(prim->mIndexCount);
-        for (uint32_t ct = 0; ct < prim->mIndexCount; ct++) {
-            stream->addU16(prim->mIndicies[ct]);
+        else {
+            stream->addU32(0);
         }
 
-        stream->addU32(prim->mRestartCounts);
-        for (uint32_t ct = 0; ct < prim->mRestartCounts; ct++) {
-            stream->addU16(prim->mRestarts[ct]);
+        if(prim->mPrimitiveBuffer.get()) {
+            stream->addU32(1);
+            prim->mPrimitiveBuffer->serialize(stream);
+        }
+        else {
+            stream->addU32(0);
         }
     }
 }
@@ -119,85 +209,45 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream)
     stream->loadString(&name);
     mesh->setName(name.string(), name.size());
 
-    mesh->mVerticiesCount = stream->loadU32();
-    if(mesh->mVerticiesCount) {
-        mesh->mVerticies = new Verticies_t *[mesh->mVerticiesCount];
-    }
-    else {
-        mesh->mVerticies = NULL;
-    }
+    mesh->mVertexBufferCount = stream->loadU32();
+    if(mesh->mVertexBufferCount) {
+        mesh->mVertexBuffers = new ObjectBaseRef<Allocation>[mesh->mVertexBufferCount];
 
-    for(uint32_t vCount = 0; vCount < mesh->mVerticiesCount; vCount ++) {
-        Verticies_t *verts = new Verticies_t();
-        // Store our vertices one the mesh
-        mesh->mVerticies[vCount] = verts;
-
-        verts->mAllocationCount = stream->loadU32();
-        verts->mAllocations = new Allocation *[verts->mAllocationCount];
-
-        LOGE("processChunk_Verticies count %i", verts->mAllocationCount);
-        for (uint32_t aCount = 0; aCount < verts->mAllocationCount; aCount++) {
-            verts->mAllocations[aCount] = Allocation::createFromStream(rsc, stream);
+        for(uint32_t vCount = 0; vCount < mesh->mVertexBufferCount; vCount ++) {
+            Allocation *vertexAlloc = Allocation::createFromStream(rsc, stream);
+            mesh->mVertexBuffers[vCount].set(vertexAlloc);
         }
-        verts->mVertexDataSize = stream->loadU32();
-
-        verts->mOffsetCoord = stream->loadU32();
-        verts->mOffsetTex = stream->loadU32();
-        verts->mOffsetNorm = stream->loadU32();
-
-        verts->mSizeCoord = stream->loadU32();
-        verts->mSizeTex = stream->loadU32();
-        verts->mSizeNorm = stream->loadU32();
     }
 
     mesh->mPrimitivesCount = stream->loadU32();
     if(mesh->mPrimitivesCount) {
         mesh->mPrimitives = new Primitive_t *[mesh->mPrimitivesCount];
-    }
-    else {
-        mesh->mPrimitives = NULL;
-    }
 
-    // load all primitives
-    for (uint32_t pCount = 0; pCount < mesh->mPrimitivesCount; pCount ++) {
-        Primitive_t * prim = new Primitive_t;
-        mesh->mPrimitives[pCount] = prim;
+        // load all primitives
+        for (uint32_t pCount = 0; pCount < mesh->mPrimitivesCount; pCount ++) {
+            Primitive_t * prim = new Primitive_t;
+            mesh->mPrimitives[pCount] = prim;
 
-        prim->mType = (RsPrimitive)stream->loadU8();
+            prim->mPrimitive = (RsPrimitive)stream->loadU8();
 
-        // We store the index to the vertices
-        uint32_t vertexIndex = stream->loadU32();
-        if(vertexIndex < mesh->mVerticiesCount) {
-            prim->mVerticies = mesh->mVerticies[vertexIndex];
-        }
-        else {
-            prim->mVerticies = NULL;
-        }
+            // Check to see if the index buffer was stored
+            uint32_t isIndexPresent = stream->loadU32();
+            if(isIndexPresent) {
+                Allocation *indexAlloc = Allocation::createFromStream(rsc, stream);
+                prim->mIndexBuffer.set(indexAlloc);
+            }
 
-        prim->mIndexCount = stream->loadU32();
-        if(prim->mIndexCount){
-            prim->mIndicies = new uint16_t[prim->mIndexCount];
-            for (uint32_t ct = 0; ct < prim->mIndexCount; ct++) {
-                prim->mIndicies[ct] = stream->loadU16();
+            // Check to see if the primitive buffer was stored
+            uint32_t isPrimitivePresent = stream->loadU32();
+            if(isPrimitivePresent) {
+                Allocation *primitiveAlloc = Allocation::createFromStream(rsc, stream);
+                prim->mPrimitiveBuffer.set(primitiveAlloc);
             }
         }
-        else {
-            prim->mIndicies = NULL;
-        }
-
-        prim->mRestartCounts = stream->loadU32();
-        if (prim->mRestartCounts) {
-            prim->mRestarts = new uint16_t[prim->mRestartCounts];
-            for (uint32_t ct = 0; ct < prim->mRestartCounts; ct++) {
-                prim->mRestarts[ct] = stream->loadU16();
-
-            }
-        }
-        else {
-            prim->mRestarts = NULL;
-        }
-
     }
+
+    mesh->updateGLPrimitives();
+    mesh->uploadAll(rsc);
 
     return mesh;
 }
@@ -211,3 +261,103 @@ MeshContext::~MeshContext()
 {
 }
 
+namespace android {
+namespace renderscript {
+
+RsMesh rsi_MeshCreate(Context *rsc, uint32_t vtxCount, uint32_t idxCount)
+{
+    Mesh *sm = new Mesh(rsc);
+    sm->incUserRef();
+
+    sm->mPrimitivesCount = idxCount;
+    sm->mPrimitives = new Mesh::Primitive_t *[sm->mPrimitivesCount];
+    for(uint32_t ct = 0; ct < idxCount; ct ++) {
+        sm->mPrimitives[ct] = new Mesh::Primitive_t;
+    }
+
+    sm->mVertexBufferCount = vtxCount;
+    sm->mVertexBuffers = new ObjectBaseRef<Allocation>[vtxCount];
+    sm->mVertexTypes = new ObjectBaseRef<const Type>[vtxCount];
+
+    return sm;
+}
+
+void rsi_MeshBindVertex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t slot)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    rsAssert(slot < sm->mVertexBufferCount);
+
+    sm->mVertexBuffers[slot].set((Allocation *)va);
+}
+
+void rsi_MeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primType, uint32_t slot)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    rsAssert(slot < sm->mPrimitivesCount);
+
+    sm->mPrimitives[slot]->mIndexBuffer.set((Allocation *)va);
+    sm->mPrimitives[slot]->mPrimitive = (RsPrimitive)primType;
+    sm->updateGLPrimitives();
+}
+
+void rsi_MeshBindPrimitive(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primType, uint32_t slot)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    rsAssert(slot < sm->mPrimitivesCount);
+
+    sm->mPrimitives[slot]->mPrimitiveBuffer.set((Allocation *)va);
+    sm->mPrimitives[slot]->mPrimitive = (RsPrimitive)primType;
+    sm->updateGLPrimitives();
+}
+
+
+// Route all the simple mesh through mesh
+
+RsMesh rsi_SimpleMeshCreate(Context *rsc, RsType prim, RsType idx, RsType *vtx, uint32_t vtxCount, uint32_t primType)
+{
+    Mesh *sm = new Mesh(rsc);
+    sm->incUserRef();
+
+    sm->mPrimitivesCount = 1;
+    sm->mPrimitives = new Mesh::Primitive_t *[sm->mPrimitivesCount];
+    sm->mPrimitives[0] = new Mesh::Primitive_t;
+
+    sm->mPrimitives[0]->mIndexType.set((const Type *)idx);
+    sm->mPrimitives[0]->mPrimitiveType.set((const Type *)prim);
+    sm->mPrimitives[0]->mPrimitive = (RsPrimitive)primType;
+    sm->updateGLPrimitives();
+
+    sm->mVertexBufferCount = vtxCount;
+    sm->mVertexTypes = new ObjectBaseRef<const Type>[vtxCount];
+    sm->mVertexBuffers = new ObjectBaseRef<Allocation>[vtxCount];
+    for (uint32_t ct=0; ct < vtxCount; ct++) {
+        sm->mVertexTypes[ct].set((const Type *)vtx[ct]);
+    }
+
+    return sm;
+}
+
+void rsi_SimpleMeshBindVertex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t slot)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    rsAssert(slot < sm->mVertexBufferCount);
+
+    sm->mVertexBuffers[slot].set((Allocation *)va);
+}
+
+void rsi_SimpleMeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    sm->mPrimitives[0]->mIndexBuffer.set((Allocation *)va);
+}
+
+void rsi_SimpleMeshBindPrimitive(Context *rsc, RsMesh mv, RsAllocation va)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    sm->mPrimitives[0]->mPrimitiveBuffer.set((Allocation *)va);
+}
+
+
+
+
+}}

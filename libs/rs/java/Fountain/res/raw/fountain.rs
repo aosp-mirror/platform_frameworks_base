@@ -35,7 +35,7 @@ int root() {
         p++;
     }
 
-    rsgDrawSimpleMesh(partMesh);
+    rsgDrawMesh(partMesh);
     return 1;
 }
 
