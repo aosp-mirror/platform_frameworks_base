@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <utils/threads.h>
 
 #include <usbhost/usbhost.h>
 #include <linux/version.h>
@@ -38,34 +39,59 @@
 
 namespace android {
 
+class MtpClientThread : public Thread {
+private:
+    MtpClient*   mClient;
+
+public:
+    MtpClientThread(MtpClient* client)
+        : mClient(client)
+    {
+    }
+
+    virtual bool threadLoop() {
+        return mClient->threadLoop();
+    }
+};
+
+
 MtpClient::MtpClient()
-    :   mStarted(false)
+    :   mThread(NULL),
+        mUsbHostContext(NULL),
+        mDone(false)
 {
 }
 
 MtpClient::~MtpClient() {
+    usb_host_cleanup(mUsbHostContext);
 }
 
 bool MtpClient::start() {
-    if (mStarted)
+    if (mThread)
         return true;
 
-    if (usb_host_init(usb_device_added, usb_device_removed, this)) {
-        LOGE("MtpClient::start failed\n");
+    mUsbHostContext = usb_host_init();
+    if (!mUsbHostContext)
         return false;
-    }
-    mStarted = true;
+
+    mThread = new MtpClientThread(this);
+    mThread->run("MtpClientThread");
+
     return true;
 }
 
-void MtpClient::usbDeviceAdded(const char *devname) {
+void MtpClient::stop() {
+    mDone = true;
+}
+
+bool MtpClient::usbDeviceAdded(const char *devname) {
     struct usb_descriptor_header* desc;
     struct usb_descriptor_iter iter;
 
     struct usb_device *device = usb_device_open(devname);
     if (!device) {
         LOGE("usb_device_open failed\n");
-        return;
+        return mDone;
     }
 
     usb_descriptor_iter_init(device, &iter);
@@ -90,7 +116,7 @@ void MtpClient::usbDeviceAdded(const char *devname) {
                     ep = (struct usb_endpoint_descriptor *)usb_descriptor_iter_next(&iter);
                     if (!ep || ep->bDescriptorType != USB_DT_ENDPOINT) {
                         LOGE("endpoints not found\n");
-                        return;
+                        return mDone;
                     }
                     if (ep->bmAttributes == USB_ENDPOINT_XFER_BULK) {
                         if (ep->bEndpointAddress & USB_ENDPOINT_DIR_MASK)
@@ -104,7 +130,7 @@ void MtpClient::usbDeviceAdded(const char *devname) {
                 }
                 if (!ep_in_desc || !ep_out_desc || !ep_intr_desc) {
                     LOGE("endpoints not found\n");
-                    return;
+                    return mDone;
                 }
 
                 struct usb_endpoint *ep_in = usb_endpoint_open(device, ep_in_desc);
@@ -116,7 +142,7 @@ void MtpClient::usbDeviceAdded(const char *devname) {
                     usb_endpoint_close(ep_in);
                     usb_endpoint_close(ep_out);
                     usb_endpoint_close(ep_intr);
-                    return;
+                    return mDone;
                 }
 
                 MtpDevice* mtpDevice = new MtpDevice(device, interface->bInterfaceNumber,
@@ -124,12 +150,13 @@ void MtpClient::usbDeviceAdded(const char *devname) {
                 mDeviceList.add(mtpDevice);
                 mtpDevice->initialize();
                 deviceAdded(mtpDevice);
-                return;
+                return mDone;
             }
         }
     }
 
     usb_device_close(device);
+    return mDone;
 }
 
 MtpDevice* MtpClient::getDevice(int id) {
@@ -141,7 +168,7 @@ MtpDevice* MtpClient::getDevice(int id) {
     return NULL;
 }
 
-void MtpClient::usbDeviceRemoved(const char *devname) {
+bool MtpClient::usbDeviceRemoved(const char *devname) {
     for (int i = 0; i < mDeviceList.size(); i++) {
         MtpDevice* device = mDeviceList[i];
         if (!strcmp(devname, device->getDeviceName())) {
@@ -152,16 +179,22 @@ void MtpClient::usbDeviceRemoved(const char *devname) {
             break;
         }
     }
+    return mDone;
 }
 
-void MtpClient::usb_device_added(const char *devname, void* client_data) {
+bool MtpClient::threadLoop() {
+    usb_host_run(mUsbHostContext, usb_device_added, usb_device_removed, this);
+    return false;
+}
+
+int MtpClient::usb_device_added(const char *devname, void* client_data) {
     LOGD("usb_device_added %s\n", devname);
-    ((MtpClient *)client_data)->usbDeviceAdded(devname);
+    return ((MtpClient *)client_data)->usbDeviceAdded(devname);
 }
 
-void MtpClient::usb_device_removed(const char *devname, void* client_data) {
+int MtpClient::usb_device_removed(const char *devname, void* client_data) {
     LOGD("usb_device_removed %s\n", devname);
-    ((MtpClient *)client_data)->usbDeviceRemoved(devname);
+    return ((MtpClient *)client_data)->usbDeviceRemoved(devname);
 }
 
 }  // namespace android
