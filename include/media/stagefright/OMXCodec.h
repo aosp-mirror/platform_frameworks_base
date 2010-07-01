@@ -27,6 +27,7 @@ namespace android {
 
 class MemoryDealer;
 struct OMXCodecObserver;
+struct CodecProfileLevel;
 
 struct OMXCodec : public MediaSource,
                   public MediaBufferObserver {
@@ -177,6 +178,12 @@ private:
     status_t setupH263EncoderParameters(const sp<MetaData>& meta);
     status_t setupMPEG4EncoderParameters(const sp<MetaData>& meta);
     status_t setupAVCEncoderParameters(const sp<MetaData>& meta);
+
+    // If profile/level is set in the meta data, its value in the meta
+    // data will be used; otherwise, the default value will be used.
+    status_t getVideoProfileLevel(const sp<MetaData>& meta,
+            const CodecProfileLevel& defaultProfileLevel,
+            CodecProfileLevel& profileLevel);
 
     status_t setVideoOutputFormat(
             const char *mime, OMX_U32 width, OMX_U32 height);

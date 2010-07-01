@@ -831,7 +831,7 @@ void OMXCodec::setVideoInputFormat(
 
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
-    video_def->xFramerate = (frameRate << 16);  // Q16 format
+    video_def->xFramerate = 0;      // No need for output port
     video_def->nBitrate = bitRate;  // Q16 format
     video_def->eCompressionFormat = compressionFormat;
     video_def->eColorFormat = OMX_COLOR_FormatUnused;
@@ -918,6 +918,52 @@ status_t OMXCodec::setupBitRate(int32_t bitRate) {
     return OK;
 }
 
+status_t OMXCodec::getVideoProfileLevel(
+        const sp<MetaData>& meta,
+        const CodecProfileLevel& defaultProfileLevel,
+        CodecProfileLevel &profileLevel) {
+    CODEC_LOGV("Default profile: %ld, level %ld",
+            defaultProfileLevel.mProfile, defaultProfileLevel.mLevel);
+
+    // Are the default profile and level overwriten?
+    int32_t profile, level;
+    if (!meta->findInt32(kKeyVideoProfile, &profile)) {
+        profile = defaultProfileLevel.mProfile;
+    }
+    if (!meta->findInt32(kKeyVideoLevel, &level)) {
+        level = defaultProfileLevel.mLevel;
+    }
+    CODEC_LOGV("Target profile: %d, level: %d", profile, level);
+
+    // Are the target profile and level supported by the encoder?
+    OMX_VIDEO_PARAM_PROFILELEVELTYPE param;
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexOutput;
+    for (param.nProfileIndex = 0;; ++param.nProfileIndex) {
+        status_t err = mOMX->getParameter(
+                mNode, OMX_IndexParamVideoProfileLevelQuerySupported,
+                &param, sizeof(param));
+
+        if (err != OK) return err;
+
+        int32_t supportedProfile = static_cast<int32_t>(param.eProfile);
+        int32_t supportedLevel = static_cast<int32_t>(param.eLevel);
+        CODEC_LOGV("Supported profile: %ld, level %ld",
+            supportedProfile, supportedLevel);
+
+        if (profile == supportedProfile &&
+            level == supportedLevel) {
+            profileLevel.mProfile = profile;
+            profileLevel.mLevel = level;
+            return OK;
+        }
+    }
+
+    CODEC_LOGE("Target profile (%d) and level (%d) is not supported",
+            profile, level);
+    return BAD_VALUE;
+}
+
 status_t OMXCodec::setupH263EncoderParameters(const sp<MetaData>& meta) {
     int32_t iFramesInterval, frameRate, bitRate;
     bool success = meta->findInt32(kKeyBitRate, &bitRate);
@@ -941,8 +987,14 @@ status_t OMXCodec::setupH263EncoderParameters(const sp<MetaData>& meta) {
     }
     h263type.nBFrames = 0;
 
-    h263type.eProfile = OMX_VIDEO_H263ProfileBaseline;
-    h263type.eLevel = OMX_VIDEO_H263Level45;
+    // Check profile and level parameters
+    CodecProfileLevel defaultProfileLevel, profileLevel;
+    defaultProfileLevel.mProfile = OMX_VIDEO_H263ProfileBaseline;
+    defaultProfileLevel.mLevel = OMX_VIDEO_H263Level45;
+    err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
+    if (err != OK) return err;
+    h263type.eProfile = static_cast<OMX_VIDEO_H263PROFILETYPE>(profileLevel.mProfile);
+    h263type.eLevel = static_cast<OMX_VIDEO_H263LEVELTYPE>(profileLevel.mLevel);
 
     h263type.bPLUSPTYPEAllowed = OMX_FALSE;
     h263type.bForceRoundingTypeToZero = OMX_FALSE;
@@ -992,8 +1044,14 @@ status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
     mpeg4type.nHeaderExtension = 0;
     mpeg4type.bReversibleVLC = OMX_FALSE;
 
-    mpeg4type.eProfile = OMX_VIDEO_MPEG4ProfileSimple;
-    mpeg4type.eLevel = OMX_VIDEO_MPEG4Level2;
+    // Check profile and level parameters
+    CodecProfileLevel defaultProfileLevel, profileLevel;
+    defaultProfileLevel.mProfile = OMX_VIDEO_MPEG4ProfileSimple;
+    defaultProfileLevel.mLevel = OMX_VIDEO_MPEG4Level2;
+    err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
+    if (err != OK) return err;
+    mpeg4type.eProfile = static_cast<OMX_VIDEO_MPEG4PROFILETYPE>(profileLevel.mProfile);
+    mpeg4type.eLevel = static_cast<OMX_VIDEO_MPEG4LEVELTYPE>(profileLevel.mLevel);
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoMpeg4, &mpeg4type, sizeof(mpeg4type));
@@ -1029,22 +1087,39 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
     if (h264type.nPFrames == 0) {
         h264type.nAllowedPictureTypes = OMX_VIDEO_PictureTypeI;
     }
-    h264type.bUseHadamard = OMX_TRUE;
-    h264type.nRefFrames = 1;
-    h264type.nRefIdx10ActiveMinus1 = 0;
-    h264type.nRefIdx11ActiveMinus1 = 0;
+
+    // Check profile and level parameters
+    CodecProfileLevel defaultProfileLevel, profileLevel;
+    defaultProfileLevel.mProfile = h264type.eProfile;
+    defaultProfileLevel.mLevel = h264type.eLevel;
+    err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
+    if (err != OK) return err;
+    h264type.eProfile = static_cast<OMX_VIDEO_AVCPROFILETYPE>(profileLevel.mProfile);
+    h264type.eLevel = static_cast<OMX_VIDEO_AVCLEVELTYPE>(profileLevel.mLevel);
+
+    if (h264type.eProfile == OMX_VIDEO_AVCProfileBaseline) {
+        h264type.bUseHadamard = OMX_TRUE;
+        h264type.nRefFrames = 1;
+        h264type.nRefIdx10ActiveMinus1 = 0;
+        h264type.nRefIdx11ActiveMinus1 = 0;
+        h264type.bEntropyCodingCABAC = OMX_FALSE;
+        h264type.bWeightedPPrediction = OMX_FALSE;
+        h264type.bconstIpred = OMX_FALSE;
+        h264type.bDirect8x8Inference = OMX_FALSE;
+        h264type.bDirectSpatialTemporal = OMX_FALSE;
+        h264type.nCabacInitIdc = 0;
+    }
+
+    if (h264type.nBFrames != 0) {
+        h264type.nAllowedPictureTypes |= OMX_VIDEO_PictureTypeB;
+    }
+
     h264type.bEnableUEP = OMX_FALSE;
     h264type.bEnableFMO = OMX_FALSE;
     h264type.bEnableASO = OMX_FALSE;
     h264type.bEnableRS = OMX_FALSE;
     h264type.bFrameMBsOnly = OMX_TRUE;
     h264type.bMBAFF = OMX_FALSE;
-    h264type.bEntropyCodingCABAC = OMX_FALSE;
-    h264type.bWeightedPPrediction = OMX_FALSE;
-    h264type.bconstIpred = OMX_FALSE;
-    h264type.bDirect8x8Inference = OMX_FALSE;
-    h264type.bDirectSpatialTemporal = OMX_FALSE;
-    h264type.nCabacInitIdc = 0;
     h264type.eLoopFilterMode = OMX_VIDEO_AVCLoopFilterEnable;
 
     err = mOMX->setParameter(
