@@ -38,6 +38,10 @@ import android.view.View;
  * binding can be found, an {@link IllegalStateException} is thrown.
  */
 public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter {
+    
+    /** The name of the columns that contain the data to display for a group. */
+    private String[] mGroupFromNames;
+    
     /** The indices of columns that contain data to display for a group. */
     private int[] mGroupFrom;
     /**
@@ -46,6 +50,9 @@ public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter 
      */
     private int[] mGroupTo;
 
+    /** The name of the columns that contain the data to display for a child. */
+    private String[] mChildFromNames;
+    
     /** The indices of columns that contain data to display for a child. */
     private int[] mChildFrom;
     /**
@@ -171,38 +178,12 @@ public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter 
 
     private void init(String[] groupFromNames, int[] groupTo, String[] childFromNames,
             int[] childTo) {
+        
+        mGroupFromNames = groupFromNames;
         mGroupTo = groupTo;
         
+        mChildFromNames = childFromNames;
         mChildTo = childTo;
-        
-        // Get the group cursor column indices, the child cursor column indices will come
-        // when needed
-        initGroupFromColumns(groupFromNames);
-        
-        // Get a temporary child cursor to init the column indices
-        if (getGroupCount() > 0) {
-            MyCursorHelper tmpCursorHelper = getChildrenCursorHelper(0, true);
-            if (tmpCursorHelper != null) {
-                initChildrenFromColumns(childFromNames, tmpCursorHelper.getCursor());
-                deactivateChildrenCursorHelper(0);
-            }
-        }
-    }
-    
-    private void initFromColumns(Cursor cursor, String[] fromColumnNames, int[] fromColumns) {
-        for (int i = fromColumnNames.length - 1; i >= 0; i--) {
-            fromColumns[i] = cursor.getColumnIndexOrThrow(fromColumnNames[i]);
-        }
-    }
-    
-    private void initGroupFromColumns(String[] groupFromNames) {
-        mGroupFrom = new int[groupFromNames.length];
-        initFromColumns(mGroupCursorHelper.getCursor(), groupFromNames, mGroupFrom);
-    }
-
-    private void initChildrenFromColumns(String[] childFromNames, Cursor childCursor) {
-        mChildFrom = new int[childFromNames.length];
-        initFromColumns(childCursor, childFromNames, mChildFrom);
     }
     
     /**
@@ -257,13 +238,29 @@ public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter 
         }
     }
     
+    private void initFromColumns(Cursor cursor, String[] fromColumnNames, int[] fromColumns) {
+        for (int i = fromColumnNames.length - 1; i >= 0; i--) {
+            fromColumns[i] = cursor.getColumnIndexOrThrow(fromColumnNames[i]);
+        }
+    }
+    
     @Override
     protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
+        if (mChildFrom == null) {
+            mChildFrom = new int[mChildFromNames.length];
+            initFromColumns(cursor, mChildFromNames, mChildFrom);
+        }
+        
         bindView(view, context, cursor, mChildFrom, mChildTo);
     }
 
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+        if (mGroupFrom == null) {
+            mGroupFrom = new int[mGroupFromNames.length];
+            initFromColumns(cursor, mGroupFromNames, mGroupFrom);
+        }
+        
         bindView(view, context, cursor, mGroupFrom, mGroupTo);
     }
 
