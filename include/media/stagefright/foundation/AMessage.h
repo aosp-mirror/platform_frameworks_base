@@ -60,6 +60,8 @@ struct AMessage : public RefBase {
 
     sp<AMessage> dup() const;
 
+    AString debugString(int32_t indent = 0) const;
+
 protected:
     virtual ~AMessage();
 
