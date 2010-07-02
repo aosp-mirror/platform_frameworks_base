@@ -307,29 +307,18 @@ public:
             int32_t     priority() const { return mPriority; }
 
 
-    /* Enables the effect engine.
+    /* Enables or disables the effect engine.
      *
      * Parameters:
-     *      None.
+     *  enabled: requested enable state.
      *
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful operation
-     *  - INVALID_OPERATION: the application does not have control of the effect engine
+     *  - INVALID_OPERATION: the application does not have control of the effect engine or the
+     *  effect is already in the requested state.
      */
-            status_t    enable();
-
-    /* Disables the effect engine.
-     *
-     * Parameters:
-     *      None.
-     *
-     * Returned status (from utils/Errors.h) can be:
-     *  - NO_ERROR: successful operation
-     *  - INVALID_OPERATION: the application does not have control of the effect engine
-     */
-             status_t    disable();
-
-             bool        isEnabled() const;
+    virtual status_t    setEnabled(bool enabled);
+            bool        getEnabled() const;
 
     /* Sets a parameter value.
      *
@@ -342,7 +331,7 @@ public:
      *  - BAD_VALUE: invalid parameter identifier or value.
      *  - DEAD_OBJECT: the effect engine has been deleted.
      */
-             status_t   setParameter(effect_param_t *param);
+     virtual status_t   setParameter(effect_param_t *param);
 
     /* Prepare a new parameter value that will be set by next call to
      * setParameterCommit(). This method can be used to set multiple parameters
@@ -359,7 +348,7 @@ public:
      *  - NO_MEMORY: no more space available in shared memory used for deferred parameter
      *  setting.
      */
-             status_t   setParameterDeferred(effect_param_t *param);
+     virtual status_t   setParameterDeferred(effect_param_t *param);
 
      /* Commit all parameter values previously prepared by setParameterDeferred().
       *
@@ -373,7 +362,7 @@ public:
       *     as to which of the parameters caused this error.
       *  - DEAD_OBJECT: the effect engine has been deleted.
       */
-             status_t   setParameterCommit();
+     virtual status_t   setParameterCommit();
 
     /* Gets a parameter value.
      *
@@ -387,13 +376,17 @@ public:
      *  - BAD_VALUE: invalid parameter identifier.
      *  - DEAD_OBJECT: the effect engine has been deleted.
      */
-             status_t   getParameter(effect_param_t *param);
+     virtual status_t   getParameter(effect_param_t *param);
 
      /* Sends a command and receives a response to/from effect engine.
       *     See EffectApi.h for details on effect command() function, valid command codes
       *     and formats.
       */
-             status_t command(int32_t cmdCode, int32_t cmdSize, void *cmdData, int32_t *replySize, void *replyData);
+     virtual status_t command(int32_t cmdCode,
+                              int32_t cmdSize,
+                              void *cmdData,
+                              int32_t *replySize,
+                              void *replyData);
 
 
      /*
@@ -409,6 +402,17 @@ public:
       */
      static status_t guidToString(const effect_uuid_t *guid, char *str, size_t maxLen);
 
+protected:
+     volatile int32_t        mEnabled;           // enable state
+     int32_t                 mSessionId;         // audio session ID
+     int32_t                 mPriority;          // priority for effect control
+     status_t                mStatus;            // effect status
+     effect_callback_t       mCbf;               // callback function for status, control and
+                                                 // parameter changes notifications
+     void*                   mUserData;          // client context for callback function
+     effect_descriptor_t     mDescriptor;        // effect descriptor
+     int32_t                 mId;                // system wide unique effect engine instance ID
+
 private:
 
      // Implements the IEffectClient interface
@@ -419,9 +423,17 @@ private:
         EffectClient(AudioEffect *effect) : mEffect(effect){}
 
         // IEffectClient
-        virtual void controlStatusChanged(bool controlGranted) {mEffect->controlStatusChanged(controlGranted);}
-        virtual void enableStatusChanged(bool enabled) {mEffect->enableStatusChanged(enabled);}
-        virtual void commandExecuted(int cmdCode, int cmdSize, void *pCmdData, int replySize, void *pReplyData) {
+        virtual void controlStatusChanged(bool controlGranted) {
+            mEffect->controlStatusChanged(controlGranted);
+        }
+        virtual void enableStatusChanged(bool enabled) {
+            mEffect->enableStatusChanged(enabled);
+        }
+        virtual void commandExecuted(int cmdCode,
+                                     int cmdSize,
+                                     void *pCmdData,
+                                     int replySize,
+                                     void *pReplyData) {
             mEffect->commandExecuted(cmdCode, cmdSize, pCmdData, replySize, pReplyData);
         }
 
@@ -446,14 +458,6 @@ private:
     sp<EffectClient>        mIEffectClient;     // IEffectClient implementation
     sp<IMemory>             mCblkMemory;        // shared memory for deferred parameter setting
     effect_param_cblk_t*    mCblk;              // control block for deferred parameter setting
-    int32_t                 mPriority;          // priority for effect control
-    status_t                mStatus;            // effect status
-    volatile int32_t        mEnabled;           // enable state
-    effect_callback_t       mCbf;               // callback function for status, control, parameter changes notifications
-    void*                   mUserData;          // client context for callback function
-    effect_descriptor_t     mDescriptor;        // effect descriptor
-    int32_t                 mId;                // system wide unique effect engine instance identifier
-    int32_t                 mSessionId;         // audio session ID
 };
 
 
