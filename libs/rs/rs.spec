@@ -491,40 +491,7 @@ MeshBindIndex {
 	param uint32_t slot
 	}
 
-MeshBindPrimitive {
-	param RsMesh mesh
-	param RsAllocation prim
-	param uint32_t primType
-	param uint32_t slot
-	}
-
 MeshBindVertex {
-	param RsMesh mesh
-	param RsAllocation vtx
-	param uint32_t slot
-	}
-
-SimpleMeshCreate {
-	ret RsMesh
-	param RsAllocation prim
-	param RsAllocation index
-	param RsAllocation *vtx
-	param uint32_t vtxCount
-	param uint32_t primType
-	}
-
-
-SimpleMeshBindIndex {
-	param RsMesh mesh
-	param RsAllocation idx
-	}
-
-SimpleMeshBindPrimitive {
-	param RsMesh mesh
-	param RsAllocation prim
-	}
-
-SimpleMeshBindVertex {
 	param RsMesh mesh
 	param RsAllocation vtx
 	param uint32_t slot

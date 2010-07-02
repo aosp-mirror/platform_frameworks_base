@@ -40,18 +40,6 @@ using namespace android::renderscript;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// IO routines
-//////////////////////////////////////////////////////////////////////////////
-
-static void SC_updateSimpleMesh(RsMesh mesh)
-{
-    GET_TLS();
-    Mesh *sm = static_cast<Mesh *>(mesh);
-    sm->uploadAll(rsc);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Context
 //////////////////////////////////////////////////////////////////////////////
 
@@ -220,26 +208,6 @@ static void SC_drawRect(float x1, float y1,
                 x1, y1, z);
 }
 
-static void SC_drawSimpleMesh(RsMesh vsm)
-{
-    GET_TLS();
-    Mesh *sm = static_cast<Mesh *>(vsm);
-    if (!rsc->setupCheck()) {
-        return;
-    }
-    sm->renderPrimitive(rsc, 0);
-}
-
-static void SC_drawSimpleMeshRange(RsMesh vsm, uint32_t start, uint32_t len)
-{
-    GET_TLS();
-    Mesh *sm = static_cast<Mesh *>(vsm);
-    if (!rsc->setupCheck()) {
-        return;
-    }
-    sm->renderPrimitiveRange(rsc, 0, start, len);
-}
-
 static void SC_drawMesh(RsMesh vsm)
 {
     GET_TLS();
@@ -402,8 +370,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "rsgDrawQuadTexCoords", (void *)&SC_drawQuadTexCoords },
     //{ "drawSprite", (void *)&SC_drawSprite },
     { "rsgDrawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace },
-    { "_Z17rsgDrawSimpleMesh7rs_mesh", (void *)&SC_drawSimpleMesh },
-    { "_Z17rsgDrawSimpleMesh7rs_meshii", (void *)&SC_drawSimpleMeshRange },
 
     { "_Z11rsgDrawMesh7rs_mesh", (void *)&SC_drawMesh },
     { "_Z11rsgDrawMesh7rs_meshi", (void *)&SC_drawMeshPrimitive },
@@ -416,11 +382,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z11rsgDrawText13rs_allocationii", (void *)&SC_DrawTextAlloc },
 
     { "rsgBindFont", (void *)&SC_BindFont },
-
-
-    //////////////////////////////////////
-    // IO
-    { "updateSimpleMesh", (void *)&SC_updateSimpleMesh },
 
     // misc
     { "color", (void *)&SC_color },

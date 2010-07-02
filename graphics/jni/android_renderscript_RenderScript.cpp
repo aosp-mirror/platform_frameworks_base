@@ -1377,37 +1377,6 @@ nMeshBindIndex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint primID, jin
 
 // ---------------------------------------------------------------------------
 
-static jint
-nSimpleMeshCreate(JNIEnv *_env, jobject _this, jint batchID, jint indexID, jintArray vtxIDs, jint primID)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    jint len = _env->GetArrayLength(vtxIDs);
-    LOG_API("nSimpleMeshCreate, con(%p), batchID(%i), indexID(%i), vtxIDs.len(%i), primID(%i)",
-            con, batchID, indexID, len, primID);
-    jint *ptr = _env->GetIntArrayElements(vtxIDs, NULL);
-    int id = (int)rsSimpleMeshCreate(con, (void *)batchID, (void *)indexID, (void **)ptr, len, primID);
-    _env->ReleaseIntArrayElements(vtxIDs, ptr, 0/*JNI_ABORT*/);
-    return id;
-}
-
-static void
-nSimpleMeshBindVertex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint slot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSimpleMeshBindVertex, con(%p), Mesh(%p), Alloc(%p), slot(%i)", con, (RsMesh)s, (RsAllocation)alloc, slot);
-    rsSimpleMeshBindVertex(con, (RsMesh)s, (RsAllocation)alloc, slot);
-}
-
-static void
-nSimpleMeshBindIndex(JNIEnv *_env, jobject _this, jint s, jint alloc)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSimpleMeshBindIndex, con(%p), Mesh(%p), Alloc(%p)", con, (RsMesh)s, (RsAllocation)alloc);
-    rsSimpleMeshBindIndex(con, (RsMesh)s, (RsAllocation)alloc);
-}
-
-// ---------------------------------------------------------------------------
-
 
 static const char *classPathName = "android/renderscript/RenderScript";
 
@@ -1535,10 +1504,6 @@ static JNINativeMethod methods[] = {
 {"nSamplerBegin",                  "()V",                                  (void*)nSamplerBegin },
 {"nSamplerSet",                    "(II)V",                                (void*)nSamplerSet },
 {"nSamplerCreate",                 "()I",                                  (void*)nSamplerCreate },
-
-{"nSimpleMeshCreate",              "(II[II)I",                             (void*)nSimpleMeshCreate },
-{"nSimpleMeshBindVertex",          "(III)V",                               (void*)nSimpleMeshBindVertex },
-{"nSimpleMeshBindIndex",           "(II)V",                                (void*)nSimpleMeshBindIndex },
 
 {"nMeshCreate",                    "(II)I",                                (void*)nMeshCreate },
 {"nMeshBindVertex",                "(III)V",                               (void*)nMeshBindVertex },

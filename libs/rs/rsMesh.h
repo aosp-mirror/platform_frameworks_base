@@ -36,7 +36,6 @@ public:
     // Position, normal, texcoord, etc could either be strided in one allocation
     // of provided separetely in multiple ones
     ObjectBaseRef<Allocation> *mVertexBuffers;
-    ObjectBaseRef<const Type> *mVertexTypes;
     uint32_t mVertexBufferCount;
 
     // Either mIndexBuffer, mPrimitiveBuffer or both could have a NULL reference
@@ -44,9 +43,6 @@ public:
     struct Primitive_t
     {
         ObjectBaseRef<Allocation> mIndexBuffer;
-        ObjectBaseRef<Allocation> mPrimitiveBuffer;
-        ObjectBaseRef<const Type> mIndexType;
-        ObjectBaseRef<const Type> mPrimitiveType;
 
         RsPrimitive mPrimitive;
         uint32_t mGLPrimitive;

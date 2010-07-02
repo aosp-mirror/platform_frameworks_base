@@ -38,16 +38,11 @@ Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
     mPrimitives = NULL;
     mPrimitivesCount = 0;
     mVertexBuffers = NULL;
-    mVertexTypes = NULL;
     mVertexBufferCount = 0;
 }
 
 Mesh::~Mesh()
 {
-    if(mVertexTypes) {
-        delete[] mVertexTypes;
-    }
-
     if(mVertexBuffers) {
         delete[] mVertexBuffers;
     }
@@ -77,11 +72,6 @@ void Mesh::renderPrimitive(Context *rsc, uint32_t primIndex) const {
 
     if (prim->mIndexBuffer.get()) {
         renderPrimitiveRange(rsc, primIndex, 0, prim->mIndexBuffer->getType()->getDimX());
-        return;
-    }
-
-    if (prim->mPrimitiveBuffer.get()) {
-        renderPrimitiveRange(rsc, primIndex, 0, prim->mPrimitiveBuffer->getType()->getDimX());
         return;
     }
 
@@ -133,9 +123,6 @@ void Mesh::uploadAll(Context *rsc)
         if (mPrimitives[ct]->mIndexBuffer.get()) {
             mPrimitives[ct]->mIndexBuffer->deferedUploadToBufferObject(rsc);
         }
-        if (mPrimitives[ct]->mPrimitiveBuffer.get()) {
-            mPrimitives[ct]->mPrimitiveBuffer->deferedUploadToBufferObject(rsc);
-        }
     }
 
     rsc->checkError("Mesh::uploadAll");
@@ -179,14 +166,6 @@ void Mesh::serialize(OStream *stream) const
         if(prim->mIndexBuffer.get()) {
             stream->addU32(1);
             prim->mIndexBuffer->serialize(stream);
-        }
-        else {
-            stream->addU32(0);
-        }
-
-        if(prim->mPrimitiveBuffer.get()) {
-            stream->addU32(1);
-            prim->mPrimitiveBuffer->serialize(stream);
         }
         else {
             stream->addU32(0);
@@ -236,13 +215,6 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream)
                 Allocation *indexAlloc = Allocation::createFromStream(rsc, stream);
                 prim->mIndexBuffer.set(indexAlloc);
             }
-
-            // Check to see if the primitive buffer was stored
-            uint32_t isPrimitivePresent = stream->loadU32();
-            if(isPrimitivePresent) {
-                Allocation *primitiveAlloc = Allocation::createFromStream(rsc, stream);
-                prim->mPrimitiveBuffer.set(primitiveAlloc);
-            }
         }
     }
 
@@ -277,7 +249,6 @@ RsMesh rsi_MeshCreate(Context *rsc, uint32_t vtxCount, uint32_t idxCount)
 
     sm->mVertexBufferCount = vtxCount;
     sm->mVertexBuffers = new ObjectBaseRef<Allocation>[vtxCount];
-    sm->mVertexTypes = new ObjectBaseRef<const Type>[vtxCount];
 
     return sm;
 }
@@ -299,65 +270,5 @@ void rsi_MeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primTy
     sm->mPrimitives[slot]->mPrimitive = (RsPrimitive)primType;
     sm->updateGLPrimitives();
 }
-
-void rsi_MeshBindPrimitive(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primType, uint32_t slot)
-{
-    Mesh *sm = static_cast<Mesh *>(mv);
-    rsAssert(slot < sm->mPrimitivesCount);
-
-    sm->mPrimitives[slot]->mPrimitiveBuffer.set((Allocation *)va);
-    sm->mPrimitives[slot]->mPrimitive = (RsPrimitive)primType;
-    sm->updateGLPrimitives();
-}
-
-
-// Route all the simple mesh through mesh
-
-RsMesh rsi_SimpleMeshCreate(Context *rsc, RsType prim, RsType idx, RsType *vtx, uint32_t vtxCount, uint32_t primType)
-{
-    Mesh *sm = new Mesh(rsc);
-    sm->incUserRef();
-
-    sm->mPrimitivesCount = 1;
-    sm->mPrimitives = new Mesh::Primitive_t *[sm->mPrimitivesCount];
-    sm->mPrimitives[0] = new Mesh::Primitive_t;
-
-    sm->mPrimitives[0]->mIndexType.set((const Type *)idx);
-    sm->mPrimitives[0]->mPrimitiveType.set((const Type *)prim);
-    sm->mPrimitives[0]->mPrimitive = (RsPrimitive)primType;
-    sm->updateGLPrimitives();
-
-    sm->mVertexBufferCount = vtxCount;
-    sm->mVertexTypes = new ObjectBaseRef<const Type>[vtxCount];
-    sm->mVertexBuffers = new ObjectBaseRef<Allocation>[vtxCount];
-    for (uint32_t ct=0; ct < vtxCount; ct++) {
-        sm->mVertexTypes[ct].set((const Type *)vtx[ct]);
-    }
-
-    return sm;
-}
-
-void rsi_SimpleMeshBindVertex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t slot)
-{
-    Mesh *sm = static_cast<Mesh *>(mv);
-    rsAssert(slot < sm->mVertexBufferCount);
-
-    sm->mVertexBuffers[slot].set((Allocation *)va);
-}
-
-void rsi_SimpleMeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va)
-{
-    Mesh *sm = static_cast<Mesh *>(mv);
-    sm->mPrimitives[0]->mIndexBuffer.set((Allocation *)va);
-}
-
-void rsi_SimpleMeshBindPrimitive(Context *rsc, RsMesh mv, RsAllocation va)
-{
-    Mesh *sm = static_cast<Mesh *>(mv);
-    sm->mPrimitives[0]->mPrimitiveBuffer.set((Allocation *)va);
-}
-
-
-
 
 }}
