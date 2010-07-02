@@ -29,8 +29,8 @@ public:
                     SqliteDatabase();
     virtual         ~SqliteDatabase();
 
-    virtual bool    open(const char* path, bool create);
-    virtual void    close();
+    bool            open(const char* path, bool create);
+    void            close();
 
     bool            exec(const char* sql);
     int             lastInsertedRow();

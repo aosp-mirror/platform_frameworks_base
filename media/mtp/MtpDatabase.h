@@ -23,65 +23,57 @@
 namespace android {
 
 class MtpDataPacket;
-class SqliteStatement;
 
-class MtpDatabase : public SqliteDatabase {
-private:
-    SqliteStatement*        mFileIdQuery;
-    SqliteStatement*        mFilePathQuery;
-    SqliteStatement*        mObjectInfoQuery;
-    SqliteStatement*        mFileInserter;
-    SqliteStatement*        mFileDeleter;
-    SqliteStatement*        mAudioInserter;
-    SqliteStatement*        mAudioDeleter;
-
+class MtpDatabase {
 public:
-                            MtpDatabase();
-    virtual                 ~MtpDatabase();
+    virtual ~MtpDatabase();
 
-    static uint32_t         getTableForFile(MtpObjectFormat format);
+    static uint32_t                 getTableForFile(MtpObjectFormat format);
 
-    bool                    open(const char* path, bool create);
-    MtpObjectHandle         getObjectHandle(const char* path);
-    MtpObjectHandle         addFile(const char* path,
+    virtual MtpObjectHandle         getObjectHandle(const char* path) = 0;
+    virtual MtpObjectHandle         addFile(const char* path,
+                                            MtpObjectFormat format,
+                                            MtpObjectHandle parent,
+                                            MtpStorageID storage,
+                                            uint64_t size,
+                                            time_t modified) = 0;
+
+    virtual MtpObjectHandle         addAudioFile(MtpObjectHandle id) = 0;
+
+    virtual MtpObjectHandle         addAudioFile(MtpObjectHandle id,
+                                            const char* title,
+                                            const char* artist,
+                                            const char* album,
+                                            const char* albumArtist,
+                                            const char* genre,
+                                            const char* composer,
+                                            const char* mimeType,
+                                            int track,
+                                            int year,
+                                            int duration) = 0;
+
+    virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
                                     MtpObjectFormat format,
-                                    MtpObjectHandle parent,
-                                    MtpStorageID storage,
-                                    uint64_t size,
-                                    time_t modified);
+                                    MtpObjectHandle parent) = 0;
 
-    MtpObjectHandle         addAudioFile(MtpObjectHandle id);
+    virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
+                                            MtpObjectProperty property,
+                                            MtpDataPacket& packet) = 0;
 
-    MtpObjectHandle         addAudioFile(MtpObjectHandle id,
-                                    const char* title,
-                                    const char* artist,
-                                    const char* album,
-                                    const char* albumArtist,
-                                    const char* genre,
-                                    const char* composer,
-                                    const char* mimeType,
-                                    int track,
-                                    int year,
-                                    int duration);
+    virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
+                                            MtpDataPacket& packet) = 0;
 
-    MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
-                                    MtpObjectFormat format,
-                                    MtpObjectHandle parent);
-
-    MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
-                                    MtpObjectProperty property,
-                                    MtpDataPacket& packet);
-
-    MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
-                                    MtpDataPacket& packet);
-
-    bool                    getObjectFilePath(MtpObjectHandle handle,
-                                    MtpString& filePath,
-                                    int64_t& fileLength);
-    bool                    deleteFile(MtpObjectHandle handle);
+    virtual bool                    getObjectFilePath(MtpObjectHandle handle,
+                                            MtpString& filePath,
+                                            int64_t& fileLength) = 0;
+    virtual bool                    deleteFile(MtpObjectHandle handle) = 0;
 
     // helper for media scanner
-    MtpObjectHandle*        getFileList(int& outCount);
+    virtual MtpObjectHandle*        getFileList(int& outCount) = 0;
+
+    virtual void                    beginTransaction() = 0;
+    virtual void                    commitTransaction() = 0;
+    virtual void                    rollbackTransaction() = 0;
 };
 
 }; // namespace android

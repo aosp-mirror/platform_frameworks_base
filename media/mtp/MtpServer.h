@@ -27,7 +27,7 @@
 namespace android {
 
 class MtpStorage;
-class MtpDatabase;
+class MtpSqliteDatabase;
 class MtpProperty;
 
 class MtpServer {
@@ -39,7 +39,7 @@ private:
     // path to our sqlite3 database
     const char*         mDatabasePath;
 
-    MtpDatabase*        mDatabase;
+    MtpSqliteDatabase*  mDatabase;
 
     // current session ID
     MtpSessionID        mSessionID;

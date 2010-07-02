@@ -25,9 +25,9 @@
 #include <cutils/properties.h>
 
 #include "MtpDebug.h"
-#include "MtpDatabase.h"
 #include "MtpProperty.h"
 #include "MtpServer.h"
+#include "MtpSqliteDatabase.h"
 #include "MtpStorage.h"
 #include "MtpStringBuffer.h"
 
@@ -122,7 +122,7 @@ MtpServer::MtpServer(int fd, const char* databasePath)
         mSendObjectHandle(kInvalidObjectHandle),
         mSendObjectFileSize(0)
 {
-    mDatabase = new MtpDatabase();
+    mDatabase = new MtpSqliteDatabase();
     mDatabase->open(databasePath, true);
 
     initObjectProperties();

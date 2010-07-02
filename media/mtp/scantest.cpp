@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 
-#include "MtpDatabase.h"
+#include "MtpSqliteDatabase.h"
 #include "MtpMediaScanner.h"
 
 using namespace android;
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    MtpDatabase* database = new MtpDatabase();
+    MtpSqliteDatabase* database = new MtpSqliteDatabase();
     database->open("scantest.db", true);
 
     MtpMediaScanner scanner(1, argv[1], database);
