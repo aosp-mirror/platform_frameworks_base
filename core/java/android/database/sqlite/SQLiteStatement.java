@@ -31,6 +31,9 @@ import dalvik.system.BlockGuard;
  */
 public class SQLiteStatement extends SQLiteProgram
 {
+    private static final boolean READ = true;
+    private static final boolean WRITE = false;
+
     /**
      * Don't use SQLiteStatement constructor directly, please use
      * {@link SQLiteDatabase#compileStatement(String)}
@@ -49,19 +52,12 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
-        mDatabase.verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onWriteToDisk();
-        long timeStart = SystemClock.uptimeMillis();
-        mDatabase.lock();
-
-        acquireReference();
+        long timeStart = acquireAndLock(WRITE);
         try {
-            mDatabase.closePendingStatements();
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
         } finally {
-            releaseReference();
-            mDatabase.unlock();
+            releaseAndUnlock();
         }
     }
 
@@ -75,20 +71,13 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
-        mDatabase.verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onWriteToDisk();
-        long timeStart = SystemClock.uptimeMillis();
-        mDatabase.lock();
-
-        acquireReference();
+        long timeStart = acquireAndLock(WRITE);
         try {
-            mDatabase.closePendingStatements();
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
             return (mDatabase.lastChangeCount() > 0) ? mDatabase.lastInsertRow() : -1;
         } finally {
-            releaseReference();
-            mDatabase.unlock();
+            releaseAndUnlock();
         }
     }
 
@@ -101,20 +90,13 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
-        mDatabase.verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onReadFromDisk();
-        long timeStart = SystemClock.uptimeMillis();
-        mDatabase.lock();
-
-        acquireReference();
+        long timeStart = acquireAndLock(READ);
         try {
-            mDatabase.closePendingStatements();
             long retValue = native_1x1_long();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
         } finally {
-            releaseReference();
-            mDatabase.unlock();
+            releaseAndUnlock();
         }
     }
 
@@ -127,21 +109,50 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
-        mDatabase.verifyDbIsOpen();
-        BlockGuard.getThreadPolicy().onReadFromDisk();
-        long timeStart = SystemClock.uptimeMillis();
-        mDatabase.lock();
-
-        acquireReference();
+        long timeStart = acquireAndLock(READ);
         try {
-            mDatabase.closePendingStatements();
             String retValue = native_1x1_string();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
         } finally {
-            releaseReference();
-            mDatabase.unlock();
+            releaseAndUnlock();
         }
+    }
+
+    /**
+     * Called before every method in this class before executing a SQL statement,
+     * this method does the following:
+     * <ul>
+     *   <li>make sure the database is open</li>
+     *   <li>notifies {@link BlockGuard} of read/write</li>
+     *   <li>get lock on the database</li>
+     *   <li>acquire reference on this object</li>
+     *   <li>and then return the current time _before_ the database lock was acquired</li>
+     * </ul>
+     * <p>
+     * This method removes the duplcate code from the other public
+     * methods in this class.
+     */
+    private long acquireAndLock(boolean rwFlag) {
+        mDatabase.verifyDbIsOpen();
+        if (rwFlag == WRITE) {
+            BlockGuard.getThreadPolicy().onWriteToDisk();
+        } else {
+            BlockGuard.getThreadPolicy().onReadFromDisk();
+        }
+        long startTime = SystemClock.uptimeMillis();
+        mDatabase.lock();
+        acquireReference();
+        mDatabase.closePendingStatements();
+        return startTime;
+    }
+
+    /**
+     * this method releases locks and references acquired in {@link #acquireAndLock(boolean)}.
+     */
+    private void releaseAndUnlock() {
+        releaseReference();
+        mDatabase.unlock();
     }
 
     private final native void native_execute();

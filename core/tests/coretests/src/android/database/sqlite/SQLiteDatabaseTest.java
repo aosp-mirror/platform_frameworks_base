@@ -18,12 +18,16 @@ package android.database.sqlite;
 
 import android.content.Context;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class SQLiteDatabaseTest extends AndroidTestCase {
     private static final String TAG = "DatabaseGeneralTest";
@@ -125,6 +129,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
      * </ul>
      */
     @LargeTest
+    @Suppress // run this test only if you need to collect the numbers from this test
     public void testConcurrencyEffectsOfConnPool() throws Exception {
         // run the test with sqlite WAL enable
         runConnectionPoolTest(true);
@@ -269,6 +274,39 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
                 }
             }
             setCounts(readerNum, numReads);
+        }
+    }
+
+    @SmallTest
+    public void testLruCachingOfSqliteCompiledSqlObjs() {
+        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        mDatabase.execSQL("insert into test values(1,1);");
+        // set cache size
+        int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
+        mDatabase.setMaxSqlCacheSize(N);
+
+        // do N+1 queries - and when the 0th entry is removed from LRU cache due to the
+        // insertion of (N+1)th entry, make sure 0th entry is closed
+        ArrayList<Integer> stmtObjs = new ArrayList<Integer>();
+        ArrayList<String> sqlStrings = new ArrayList<String>();
+        SQLiteStatement stmt0 = null;
+        for (int i = 0; i < N+1; i++) {
+            String s = "select * from test where i = " + i;
+            sqlStrings.add(s);
+            SQLiteStatement c = mDatabase.compileStatement(s);
+            stmtObjs.add(i, c.getUniqueId());
+            if (i == 0) {
+                // save thie SQLiteStatement obj. we want to make sure it is thrown out of
+                // the cache and its handle is 0'ed.
+                stmt0 = c;
+            }
+            c.close();
+        }
+        // is 0'th entry out of the cache?
+        assertEquals(0, stmt0.getUniqueId());
+        for (int i = 1; i < N+1; i++) {
+            SQLiteCompiledSql compSql = mDatabase.getCompiledStatementForSql(sqlStrings.get(i));
+            assertTrue(stmtObjs.contains(compSql.nStatement));
         }
     }
 }
