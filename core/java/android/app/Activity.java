@@ -1676,11 +1676,11 @@ public class Activity extends ContextThemeWrapper
      */
     private void initActionBar() {
         Window window = getWindow();
-        if (!window.hasFeature(Window.FEATURE_ACTION_BAR)) {
+        if (!window.hasFeature(Window.FEATURE_ACTION_BAR) || mActionBar != null) {
             return;
         }
         
-        mActionBar = new ActionBarImpl(getWindow().getDecorView());
+        mActionBar = new ActionBarImpl(this);
     }
     
     /**

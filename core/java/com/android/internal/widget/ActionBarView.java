@@ -31,8 +31,10 @@ import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -85,6 +87,7 @@ public class ActionBarView extends ViewGroup {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private Spinner mSpinner;
+    private LinearLayout mTabLayout;
     private View mCustomNavView;
     
     private boolean mShowMenu;
@@ -128,7 +131,8 @@ public class ActionBarView extends ViewGroup {
 
         ApplicationInfo info = context.getApplicationInfo();
         PackageManager pm = context.getPackageManager();
-        mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode, ActionBar.NAVIGATION_MODE_STANDARD);
+        mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode,
+                ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = a.getText(R.styleable.ActionBar_title);
         mSubtitle = a.getText(R.styleable.ActionBar_subtitle);
         mDisplayOptions = a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT);
@@ -271,6 +275,11 @@ public class ActionBarView extends ViewGroup {
                     mCustomNavView = null;
                 }
                 break;
+            case ActionBar.NAVIGATION_MODE_TABS:
+                if (mTabLayout != null) {
+                    removeView(mTabLayout);
+                    mTabLayout = null;
+                }
             }
             
             switch (mode) {
@@ -285,6 +294,10 @@ public class ActionBarView extends ViewGroup {
                 break;
             case ActionBar.NAVIGATION_MODE_CUSTOM:
                 addView(mCustomNavView);
+                break;
+            case ActionBar.NAVIGATION_MODE_TABS:
+                mTabLayout = new LinearLayout(getContext());
+                addView(mTabLayout);
                 break;
             }
             mNavigationMode = mode;
@@ -306,6 +319,35 @@ public class ActionBarView extends ViewGroup {
     
     public int getDisplayOptions() {
         return mDisplayOptions;
+    }
+
+    private TabView createTabView(ActionBar.Tab tab) {
+        final TabView tabView = new TabView(getContext(), tab);
+        tabView.setFocusable(true);
+        tabView.setOnClickListener(new TabClickListener());
+        return tabView;
+    }
+
+    public void addTab(ActionBar.Tab tab) {
+        final boolean isFirst = mTabLayout.getChildCount() == 0;
+        final TabView tabView = createTabView(tab);
+        mTabLayout.addView(tabView);
+        if (isFirst) {
+            tabView.setSelected(true);
+        }
+    }
+
+    public void insertTab(ActionBar.Tab tab, int position) {
+        final boolean isFirst = mTabLayout.getChildCount() == 0;
+        final TabView tabView = createTabView(tab);
+        mTabLayout.addView(tabView, position);
+        if (isFirst) {
+            tabView.setSelected(true);
+        }
+    }
+
+    public void removeTabAt(int position) {
+        mTabLayout.removeViewAt(position);
     }
 
     @Override
@@ -356,7 +398,7 @@ public class ActionBarView extends ViewGroup {
             
         case ActionBar.NAVIGATION_MODE_TABS:
             throw new UnsupportedOperationException(
-                    "Tab navigation isn't supported yet!");
+                    "Inflating tab navigation isn't supported yet!");
             
         case ActionBar.NAVIGATION_MODE_CUSTOM:
             if (mCustomNavView != null) {
@@ -379,6 +421,14 @@ public class ActionBarView extends ViewGroup {
             mSubtitleView.setVisibility(VISIBLE);
         }
         addView(mTitleLayout);
+    }
+
+    public void setTabSelected(int position) {
+        final int tabCount = mTabLayout.getChildCount();
+        for (int i = 0; i < tabCount; i++) {
+            final View child = mTabLayout.getChildAt(i);
+            child.setSelected(i == position);
+        }
     }
 
     @Override
@@ -442,6 +492,13 @@ public class ActionBarView extends ViewGroup {
                         MeasureSpec.makeMeasureSpec(customNavHeight, customNavHeightMode));
             }
             break;
+        case ActionBar.NAVIGATION_MODE_TABS:
+            if (mTabLayout != null) {
+                mTabLayout.measure(
+                        MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            }
+            break;
         }
 
         setMeasuredDimension(contentWidth, mContentHeight);
@@ -486,6 +543,10 @@ public class ActionBarView extends ViewGroup {
                 x += positionChild(mCustomNavView, x, y, contentHeight) + mSpacing;
             }
             break;
+        case ActionBar.NAVIGATION_MODE_TABS:
+            if (mTabLayout != null) {
+                x += positionChild(mTabLayout, x, y, contentHeight) + mSpacing;
+            }
         }
 
         x = r - l - getPaddingRight();
@@ -514,5 +575,60 @@ public class ActionBarView extends ViewGroup {
         child.layout(x - childWidth, childTop, x, childTop + childHeight);
 
         return childWidth;
+    }
+
+    private static class TabView extends LinearLayout {
+        private ActionBar.Tab mTab;
+
+        public TabView(Context context, ActionBar.Tab tab) {
+            super(context);
+            mTab = tab;
+
+            // TODO Style tabs based on the theme
+
+            final Drawable icon = tab.getIcon();
+            final CharSequence text = tab.getText();
+
+            if (icon != null) {
+                ImageView iconView = new ImageView(context);
+                iconView.setImageDrawable(icon);
+                LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT);
+                lp.gravity = Gravity.CENTER_VERTICAL;
+                iconView.setLayoutParams(lp);
+                addView(iconView);
+            }
+
+            if (text != null) {
+                TextView textView = new TextView(context);
+                textView.setText(text);
+                textView.setSingleLine();
+                textView.setEllipsize(TruncateAt.END);
+                LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT);
+                lp.gravity = Gravity.CENTER_VERTICAL;
+                textView.setLayoutParams(lp);
+                addView(textView);
+            }
+
+            setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                    LayoutParams.MATCH_PARENT, 1));
+        }
+
+        public ActionBar.Tab getTab() {
+            return mTab;
+        }
+    }
+
+    private class TabClickListener implements OnClickListener {
+        public void onClick(View view) {
+            TabView tabView = (TabView) view;
+            tabView.getTab().select();
+            final int tabCount = mTabLayout.getChildCount();
+            for (int i = 0; i < tabCount; i++) {
+                final View child = mTabLayout.getChildAt(i);
+                child.setSelected(child == view);
+            }
+        }
     }
 }

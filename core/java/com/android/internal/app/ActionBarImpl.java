@@ -22,6 +22,9 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
 import android.app.ActionBar;
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.Menu;
@@ -30,6 +33,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 import android.widget.ViewAnimator;
+
+import java.util.ArrayList;
 
 /**
  * ActionBarImpl is the ActionBar implementation used
@@ -42,10 +47,21 @@ public class ActionBarImpl extends ActionBar {
     private static final int NORMAL_VIEW = 0;
     private static final int CONTEXT_VIEW = 1;
     
+    private static final int TAB_SWITCH_SHOW_HIDE = 0;
+    private static final int TAB_SWITCH_ADD_REMOVE = 1;
+
+    private Activity mActivity;
+
     private ViewAnimator mAnimatorView;
     private ActionBarView mActionView;
     private ActionBarContextView mUpperContextView;
     private LinearLayout mLowerContextView;
+
+    private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
+
+    private int mTabContainerViewId = android.R.id.content;
+    private TabImpl mSelectedTab;
+    private int mTabSwitchMode = TAB_SWITCH_ADD_REMOVE;
     
     private ContextMode mContextMode;
     
@@ -64,7 +80,9 @@ public class ActionBarImpl extends ActionBar {
         }
     };
 
-    public ActionBarImpl(View decor) {
+    public ActionBarImpl(Activity activity) {
+        final View decor = activity.getWindow().getDecorView();
+        mActivity = activity;
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mUpperContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
@@ -83,30 +101,52 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public void setCustomNavigationMode(View view) {
+        cleanupTabs();
         mActionView.setCustomNavigationView(view);
         mActionView.setCallback(null);
     }
 
     public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback) {
+        cleanupTabs();
         mActionView.setCallback(callback);
         mActionView.setNavigationMode(NAVIGATION_MODE_DROPDOWN_LIST);
         mActionView.setDropdownAdapter(adapter);
     }
 
     public void setStandardNavigationMode() {
+        cleanupTabs();
         mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
         mActionView.setCallback(null);
     }
 
     public void setStandardNavigationMode(CharSequence title) {
+        cleanupTabs();
         setStandardNavigationMode(title, null);
     }
 
     public void setStandardNavigationMode(CharSequence title, CharSequence subtitle) {
+        cleanupTabs();
         mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
         mActionView.setTitle(title);
         mActionView.setSubtitle(subtitle);
         mActionView.setCallback(null);
+    }
+
+    private void cleanupTabs() {
+        if (mSelectedTab != null) {
+            selectTab(null);
+        }
+        if (!mTabs.isEmpty()) {
+            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
+                final FragmentTransaction trans = mActivity.openFragmentTransaction();
+                final int tabCount = mTabs.size();
+                for (int i = 0; i < tabCount; i++) {
+                    trans.remove(mTabs.get(i).getFragment());
+                }
+                trans.commit();
+            }
+            mTabs.clear();
+        }
     }
 
     public void setTitle(CharSequence title) {
@@ -174,6 +214,113 @@ public class ActionBarImpl extends ActionBar {
         }
     }
 
+    private void configureTab(Tab tab, int position) {
+        final TabImpl tabi = (TabImpl) tab;
+        final boolean isFirstTab = mTabs.isEmpty();
+        final FragmentTransaction trans = mActivity.openFragmentTransaction();
+        final Fragment frag = tabi.getFragment();
+
+        tabi.setPosition(position);
+        mTabs.add(position, tabi);
+
+        if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
+            if (!frag.isAdded()) {
+                trans.add(mTabContainerViewId, frag);
+            }
+        }
+
+        if (isFirstTab) {
+            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
+                trans.show(frag);
+            } else if (mTabSwitchMode == TAB_SWITCH_ADD_REMOVE) {
+                trans.add(mTabContainerViewId, frag);
+            }
+            mSelectedTab = tabi;
+        } else {
+            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
+                trans.hide(frag);
+            }
+        }
+        trans.commit();
+    }
+
+    @Override
+    public void addTab(Tab tab) {
+        mActionView.addTab(tab);
+        configureTab(tab, mTabs.size());
+    }
+
+    @Override
+    public void insertTab(Tab tab, int position) {
+        mActionView.insertTab(tab, position);
+        configureTab(tab, position);
+    }
+
+    @Override
+    public Tab newTab() {
+        return new TabImpl();
+    }
+
+    @Override
+    public void removeTab(Tab tab) {
+        removeTabAt(tab.getPosition());
+    }
+
+    @Override
+    public void removeTabAt(int position) {
+        mActionView.removeTabAt(position);
+        mTabs.remove(position);
+
+        final int newTabCount = mTabs.size();
+        for (int i = position; i < newTabCount; i++) {
+            mTabs.get(i).setPosition(i);
+        }
+
+        selectTab(mTabs.isEmpty() ? null : mTabs.get(Math.max(0, position - 1)));
+    }
+
+    @Override
+    public void setTabNavigationMode() {
+        mActionView.setNavigationMode(NAVIGATION_MODE_TABS);
+    }
+
+    @Override
+    public void setTabNavigationMode(int containerViewId) {
+        mTabContainerViewId = containerViewId;
+        setTabNavigationMode();
+    }
+
+    @Override
+    public void selectTab(Tab tab) {
+        if (mSelectedTab == tab) {
+            return;
+        }
+
+        mActionView.setTabSelected(tab != null ? tab.getPosition() : Tab.INVALID_POSITION);
+        final FragmentTransaction trans = mActivity.openFragmentTransaction();
+        if (mSelectedTab != null) {
+            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
+                trans.hide(mSelectedTab.getFragment());
+            } else if (mTabSwitchMode == TAB_SWITCH_ADD_REMOVE) {
+                trans.remove(mSelectedTab.getFragment());
+            }
+        }
+        if (tab != null) {
+            if (mTabSwitchMode == TAB_SWITCH_SHOW_HIDE) {
+                trans.show(tab.getFragment());
+            } else if (mTabSwitchMode == TAB_SWITCH_ADD_REMOVE) {
+                trans.add(mTabContainerViewId, tab.getFragment());
+            }
+        }
+        mSelectedTab = (TabImpl) tab;
+        trans.commit();
+    }
+
+    @Override
+    public void selectTabAt(int position) {
+        selectTab(mTabs.get(position));
+    }
+
     /**
      * @hide 
      */
@@ -233,6 +380,60 @@ public class ActionBarImpl extends ActionBar {
             if (!actionItem.invoke()) {
                 mCallback.onContextItemClicked(this, item);
             }
+       }
+    }
+
+    /**
+     * @hide
+     */
+    public class TabImpl extends ActionBar.Tab {
+        private Fragment mFragment;
+        private Drawable mIcon;
+        private CharSequence mText;
+        private int mPosition;
+
+        @Override
+        public Fragment getFragment() {
+            return mFragment;
+        }
+
+        @Override
+        public Drawable getIcon() {
+            return mIcon;
+        }
+
+        @Override
+        public int getPosition() {
+            return mPosition;
+        }
+
+        public void setPosition(int position) {
+            mPosition = position;
+        }
+
+        @Override
+        public CharSequence getText() {
+            return mText;
+        }
+
+        @Override
+        public void setFragment(Fragment fragment) {
+            mFragment = fragment;
+        }
+
+        @Override
+        public void setIcon(Drawable icon) {
+            mIcon = icon;
+        }
+
+        @Override
+        public void setText(CharSequence text) {
+            mText = text;
+        }
+
+        @Override
+        public void select() {
+            selectTab(this);
         }
     }
 }

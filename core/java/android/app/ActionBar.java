@@ -206,9 +206,11 @@ public abstract class ActionBar {
      *
      * @return The current navigation mode.
      * 
+     * @see #setStandardNavigationMode()
      * @see #setStandardNavigationMode(CharSequence)
      * @see #setStandardNavigationMode(CharSequence, CharSequence)
      * @see #setDropdownNavigationMode(SpinnerAdapter)
+     * @see #setTabNavigationMode()
      * @see #setCustomNavigationMode(View)
      */
     public abstract int getNavigationMode();
@@ -217,10 +219,98 @@ public abstract class ActionBar {
      * @return The current set of display options. 
      */
     public abstract int getDisplayOptions();
-    
+
+    /**
+     * Start a context mode controlled by <code>callback</code>.
+     * The {@link ContextModeCallback} will receive lifecycle events for the duration
+     * of the context mode.
+     *
+     * @param callback Callback handler that will manage this context mode.
+     */
     public abstract void startContextMode(ContextModeCallback callback);
+
+    /**
+     * Finish the current context mode.
+     */
     public abstract void finishContextMode();
-    
+
+    /**
+     * Set the action bar into tabbed navigation mode.
+     *
+     * @see #addTab(Tab)
+     * @see #insertTab(Tab, int)
+     * @see #removeTab(Tab)
+     * @see #removeTabAt(int)
+     */
+    public abstract void setTabNavigationMode();
+
+    /**
+     * Set the action bar into tabbed navigation mode.
+     *
+     * @param containerViewId Id of the container view where tab content fragments should appear.
+     *
+     * @see #addTab(Tab)
+     * @see #insertTab(Tab, int)
+     * @see #removeTab(Tab)
+     * @see #removeTabAt(int)
+     */
+    public abstract void setTabNavigationMode(int containerViewId);
+
+    /**
+     * Create and return a new {@link Tab}.
+     * This tab will not be included in the action bar until it is added.
+     *
+     * @return A new Tab
+     *
+     * @see #addTab(Tab)
+     * @see #insertTab(Tab, int)
+     */
+    public abstract Tab newTab();
+
+    /**
+     * Add a tab for use in tabbed navigation mode. The tab will be added at the end of the list.
+     *
+     * @param tab Tab to add
+     */
+    public abstract void addTab(Tab tab);
+
+    /**
+     * Insert a tab for use in tabbed navigation mode. The tab will be inserted at
+     * <code>position</code>.
+     *
+     * @param tab The tab to add
+     * @param position The new position of the tab
+     */
+    public abstract void insertTab(Tab tab, int position);
+
+    /**
+     * Remove a tab from the action bar.
+     *
+     * @param tab The tab to remove
+     */
+    public abstract void removeTab(Tab tab);
+
+    /**
+     * Remove a tab from the action bar.
+     *
+     * @param position Position of the tab to remove
+     */
+    public abstract void removeTabAt(int position);
+
+    /**
+     * Select the specified tab. If it is not a child of this action bar it will be added.
+     *
+     * @param tab Tab to select
+     */
+    public abstract void selectTab(Tab tab);
+
+    /**
+     * Select the tab at <code>position</code>
+     *
+     * @param position Position of the tab to select
+     */
+    public abstract void selectTabAt(int position);
+
     /**
      * Represents a contextual mode of the Action Bar. Context modes can be used for
      * modal interactions with activity content and replace the normal Action Bar until finished.
@@ -349,5 +439,75 @@ public abstract class ActionBar {
          * @return True if the event was handled, false otherwise.
          */
         public boolean onNavigationItemSelected(int itemPosition, long itemId);
+    }
+
+    /**
+     * A tab in the action bar.
+     *
+     * <p>Tabs manage the hiding and showing of {@link Fragment}s.
+     */
+    public static abstract class Tab {
+        /**
+         * An invalid position for a tab.
+         *
+         * @see #getPosition()
+         */
+        public static final int INVALID_POSITION = -1;
+
+        /**
+         * Return the current position of this tab in the action bar.
+         *
+         * @return Current position, or {@link #INVALID_POSITION} if this tab is not currently in
+         *         the action bar.
+         */
+        public abstract int getPosition();
+
+        /**
+         * Return the icon associated with this tab.
+         *
+         * @return The tab's icon
+         */
+        public abstract Drawable getIcon();
+
+        /**
+         * Return the text of this tab.
+         *
+         * @return The tab's text
+         */
+        public abstract CharSequence getText();
+
+        /**
+         * Set the icon displayed on this tab.
+         *
+         * @param icon The drawable to use as an icon
+         */
+        public abstract void setIcon(Drawable icon);
+
+        /**
+         * Set the text displayed on this tab. Text may be truncated if there is not
+         * room to display the entire string.
+         *
+         * @param text The text to display
+         */
+        public abstract void setText(CharSequence text);
+
+        /**
+         * Returns the fragment that will be shown when this tab is selected.
+         *
+         * @return Fragment associated with this tab
+         */
+        public abstract Fragment getFragment();
+
+        /**
+         * Set the fragment that will be shown when this tab is selected.
+         *
+         * @param fragment Fragment to associate with this tab
+         */
+        public abstract void setFragment(Fragment fragment);
+
+        /**
+         * Select this tab. Only valid if the tab has been added to the action bar.
+         */
+        public abstract void select();
     }
 }
