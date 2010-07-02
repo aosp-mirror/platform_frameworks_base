@@ -250,7 +250,13 @@ struct InputDevice {
         nsecs_t downTime;
 
         struct CurrentVirtualKeyState {
-            bool down;
+            enum Status {
+                STATUS_UP,
+                STATUS_DOWN,
+                STATUS_CANCELED
+            };
+
+            Status status;
             nsecs_t downTime;
             int32_t keyCode;
             int32_t scanCode;
@@ -295,6 +301,7 @@ struct InputDevice {
         void calculatePointerIds();
 
         bool isPointInsideDisplay(int32_t x, int32_t y) const;
+        const InputDevice::VirtualKey* findVirtualKeyHit() const;
     };
 
     InputDevice(int32_t id, uint32_t classes, String8 name);
@@ -390,11 +397,9 @@ public:
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation) = 0;
 
-    /* Provides feedback for a virtual key.
+    /* Provides feedback for a virtual key down.
      */
-    virtual void virtualKeyFeedback(nsecs_t when, int32_t deviceId,
-            int32_t action, int32_t flags, int32_t keyCode,
-            int32_t scanCode, int32_t metaState, nsecs_t downTime) = 0;
+    virtual void virtualKeyDownFeedback() = 0;
 
     /* Intercepts a key event.
      * The policy can use this method as an opportunity to perform power management functions

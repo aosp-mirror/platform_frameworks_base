@@ -216,20 +216,7 @@ public abstract class WallpaperService extends Service {
             @Override
             public void handleTouch(MotionEvent event, Runnable finishedCallback) {
                 try {
-                    synchronized (mLock) {
-                        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                            if (mPendingMove != null) {
-                                mCaller.removeMessages(MSG_TOUCH_EVENT, mPendingMove);
-                                mPendingMove.recycle();
-                            }
-                            mPendingMove = event;
-                        } else {
-                            mPendingMove = null;
-                        }
-                        Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT,
-                                event);
-                        mCaller.sendMessage(msg);
-                    }
+                    dispatchPointer(event);
                 } finally {
                     finishedCallback.run();
                 }
@@ -237,26 +224,6 @@ public abstract class WallpaperService extends Service {
         };
         
         final BaseIWindow mWindow = new BaseIWindow() {
-            @Override
-            public boolean onDispatchPointer(MotionEvent event, long eventTime,
-                    boolean callWhenDone) {
-                synchronized (mLock) {
-                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                        if (mPendingMove != null) {
-                            mCaller.removeMessages(MSG_TOUCH_EVENT, mPendingMove);
-                            mPendingMove.recycle();
-                        }
-                        mPendingMove = event;
-                    } else {
-                        mPendingMove = null;
-                    }
-                    Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT,
-                            event);
-                    mCaller.sendMessage(msg);
-                }
-                return false;
-            }
-            
             @Override
             public void resized(int w, int h, Rect coveredInsets,
                     Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
@@ -466,6 +433,22 @@ public abstract class WallpaperService extends Service {
          */
         public void onSurfaceDestroyed(SurfaceHolder holder) {
         }
+        
+        private void dispatchPointer(MotionEvent event) {
+            synchronized (mLock) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (mPendingMove != null) {
+                        mCaller.removeMessages(MSG_TOUCH_EVENT, mPendingMove);
+                        mPendingMove.recycle();
+                    }
+                    mPendingMove = event;
+                } else {
+                    mPendingMove = null;
+                }
+                Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT, event);
+                mCaller.sendMessage(msg);
+            }
+        }
 
         void updateSurface(boolean forceRelayout, boolean forceReport) {
             if (mDestroyed) {
@@ -523,10 +506,8 @@ public abstract class WallpaperService extends Service {
                                 mInputChannel);
                         mCreated = true;
 
-                        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-                            InputQueue.registerInputChannel(mInputChannel, mInputHandler,
-                                    Looper.myQueue());
-                        }
+                        InputQueue.registerInputChannel(mInputChannel, mInputHandler,
+                                Looper.myQueue());
                     }
                     
                     mSurfaceHolder.mSurfaceLock.lock();
@@ -770,10 +751,8 @@ public abstract class WallpaperService extends Service {
                     if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
                             + mSurfaceHolder.getSurface() + " of: " + this);
                     
-                    if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-                        if (mInputChannel != null) {
-                            InputQueue.unregisterInputChannel(mInputChannel);
-                        }
+                    if (mInputChannel != null) {
+                        InputQueue.unregisterInputChannel(mInputChannel);
                     }
                     
                     mSession.remove(mWindow);
@@ -782,13 +761,11 @@ public abstract class WallpaperService extends Service {
                 mSurfaceHolder.mSurface.release();
                 mCreated = false;
                 
-                if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-                    // Dispose the input channel after removing the window so the Window Manager
-                    // doesn't interpret the input channel being closed as an abnormal termination.
-                    if (mInputChannel != null) {
-                        mInputChannel.dispose();
-                        mInputChannel = null;
-                    }
+                // Dispose the input channel after removing the window so the Window Manager
+                // doesn't interpret the input channel being closed as an abnormal termination.
+                if (mInputChannel != null) {
+                    mInputChannel.dispose();
+                    mInputChannel = null;
                 }
             }
         }
@@ -841,7 +818,7 @@ public abstract class WallpaperService extends Service {
 
         public void dispatchPointer(MotionEvent event) {
             if (mEngine != null) {
-                mEngine.mWindow.onDispatchPointer(event, event.getEventTime(), false);
+                mEngine.dispatchPointer(event);
             }
         }
         
