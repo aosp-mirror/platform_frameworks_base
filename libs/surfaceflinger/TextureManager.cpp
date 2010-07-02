@@ -87,7 +87,7 @@ status_t TextureManager::initTexture(Image* pImage, int32_t format)
     GLenum target = GL_TEXTURE_2D;
 #if defined(GL_OES_texture_external)
     if (GLExtensions::getInstance().haveTextureExternal()) {
-        if (format && isSupportedYuvFormat(format)) {
+        if (format && isYuvFormat(format)) {
             target = GL_TEXTURE_EXTERNAL_OES;
             pImage->target = Texture::TEXTURE_EXTERNAL;
         }
@@ -105,23 +105,32 @@ status_t TextureManager::initTexture(Image* pImage, int32_t format)
 
 bool TextureManager::isSupportedYuvFormat(int format)
 {
-    return isYuvFormat(format);
+    switch (format) {
+    case HAL_PIXEL_FORMAT_YV12:
+    case HAL_PIXEL_FORMAT_YV16:
+        return true;
+    }
+    return false;
 }
 
 bool TextureManager::isYuvFormat(int format)
 {
     switch (format) {
-    case HAL_PIXEL_FORMAT_NV16:
-    case HAL_PIXEL_FORMAT_NV21:
-    case HAL_PIXEL_FORMAT_IYUV:
-    case HAL_PIXEL_FORMAT_YUV9:
-    case HAL_PIXEL_FORMAT_YUY2:
-    case HAL_PIXEL_FORMAT_UYVY:
-    case HAL_PIXEL_FORMAT_NV12:
-    case HAL_PIXEL_FORMAT_NV61:
-    case HAL_PIXEL_FORMAT_NV12_ADRENO_TILED:
+    // supported YUV formats
+    case HAL_PIXEL_FORMAT_YV12:
+    case HAL_PIXEL_FORMAT_YV16:
+    // Legacy/deprecated YUV formats
+    case HAL_PIXEL_FORMAT_YCbCr_422_SP:
+    case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+    case HAL_PIXEL_FORMAT_YCbCr_422_I:
+    case HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED:
         return true;
     }
+
+    // Any OEM format needs to be considered
+    if (format>=0x100 && format<=0x1FF)
+        return true;
+
     return false;
 }
 
@@ -255,7 +264,7 @@ status_t TextureManager::loadTexture(Texture* texture,
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGBA, texture->potWidth, texture->potHeight, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else if (isYuvFormat(t.format)) {
+        } else if (isSupportedYuvFormat(t.format)) {
             // just show the Y plane of YUV buffers
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_LUMINANCE, texture->potWidth, texture->potHeight, 0,
@@ -283,7 +292,7 @@ status_t TextureManager::loadTexture(Texture* texture,
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGBA, GL_UNSIGNED_BYTE,
                     t.data + bounds.top*t.stride*4);
-        } else if (isYuvFormat(t.format)) {
+        } else if (isSupportedYuvFormat(t.format)) {
             // just show the Y plane of YUV buffers
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
