@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include <GLES2/gl2.h>
 
 #include "TextureCache.h"
@@ -21,7 +23,13 @@
 namespace android {
 namespace uirenderer {
 
-TextureCache::TextureCache(unsigned int maxEntries): mCache(maxEntries) {
+///////////////////////////////////////////////////////////////////////////////
+// Constructors/destructor
+///////////////////////////////////////////////////////////////////////////////
+
+TextureCache::TextureCache(unsigned int maxByteSize):
+        mCache(GenerationCache<SkBitmap, Texture>::kUnlimitedCapacity),
+        mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }
 
@@ -29,28 +37,71 @@ TextureCache::~TextureCache() {
     mCache.clear();
 }
 
-void TextureCache::operator()(SkBitmap* key, Texture* value) {
-    LOGD("Entry removed");
-    if (value) {
-        glDeleteTextures(1, &value->id);
-        delete value;
+///////////////////////////////////////////////////////////////////////////////
+// Size management
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned int TextureCache::getSize() {
+    return mSize;
+}
+
+unsigned int TextureCache::getMaxSize() {
+    return mMaxSize;
+}
+
+void TextureCache::setMaxSize(unsigned int maxSize) {
+    mMaxSize = maxSize;
+    while (mSize > mMaxSize) {
+        mCache.removeOldest();
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Callbacks
+///////////////////////////////////////////////////////////////////////////////
+
+void TextureCache::operator()(SkBitmap* bitmap, Texture* texture) {
+    if (bitmap) {
+        const unsigned int size = bitmap->rowBytes() * bitmap->height();
+        mSize -= size;
+    }
+
+    if (texture) {
+        glDeleteTextures(1, &texture->id);
+        delete texture;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Caching
+///////////////////////////////////////////////////////////////////////////////
 
 Texture* TextureCache::get(SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
     if (!texture) {
+        const unsigned int size = bitmap->rowBytes() * bitmap->height();
+        // Don't even try to cache a bitmap that's bigger than the cache
+        if (size < mMaxSize) {
+            while (mSize + size > mMaxSize) {
+                mCache.removeOldest();
+            }
+        }
+
         texture = new Texture;
         generateTexture(bitmap, texture, false);
-        mCache.put(bitmap, texture);
+
+        if (size < mMaxSize) {
+            mSize += size;
+            mCache.put(bitmap, texture);
+        }
     } else if (bitmap->getGenerationID() != texture->generation) {
         generateTexture(bitmap, texture, true);
     }
     return texture;
 }
 
-Texture* TextureCache::remove(SkBitmap* bitmap) {
-    return mCache.remove(bitmap);
+void TextureCache::remove(SkBitmap* bitmap) {
+    mCache.remove(bitmap);
 }
 
 void TextureCache::clear() {

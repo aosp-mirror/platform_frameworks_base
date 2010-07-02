@@ -25,21 +25,63 @@
 namespace android {
 namespace uirenderer {
 
+/**
+ * A simple LRU texture cache. The cache has a maximum size expressed in bytes.
+ * Any texture added to the cache causing the cache to grow beyond the maximum
+ * allowed size will also cause the oldest texture to be kicked out.
+ */
 class TextureCache: public OnEntryRemoved<SkBitmap*, Texture*> {
 public:
-    TextureCache(unsigned int maxEntries);
+    TextureCache(unsigned int maxByteSize);
     ~TextureCache();
 
-    void operator()(SkBitmap* key, Texture* value);
+    /**
+     * Used as a callback when an entry is removed from the cache.
+     * Do not invoke directly.
+     */
+    void operator()(SkBitmap* bitmap, Texture* texture);
 
+    /**
+     * Returns the texture associated with the specified bitmap. If the texture
+     * cannot be found in the cache, a new texture is generated.
+     */
     Texture* get(SkBitmap* bitmap);
-    Texture* remove(SkBitmap* bitmap);
+    /**
+     * Removes the texture associated with the specified bitmap. Returns NULL
+     * if the texture cannot be found. Upon remove the texture is freed.
+     */
+    void remove(SkBitmap* bitmap);
+    /**
+     * Clears the cache. This causes all textures to be deleted.
+     */
     void clear();
 
+    /**
+     * Sets the maximum size of the cache in bytes.
+     */
+    void setMaxSize(unsigned int maxSize);
+    /**
+     * Returns the maximum size of the cache in bytes.
+     */
+    unsigned int getMaxSize();
+    /**
+     * Returns the current size of the cache in bytes.
+     */
+    unsigned int getSize();
+
 private:
+    /**
+     * Generates the texture from a bitmap into the specified texture structure.
+     *
+     * @param regenerate If true, the bitmap data is reuploaded into the texture, but
+     *        no new texture is generated.
+     */
     void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
 
     GenerationCache<SkBitmap, Texture> mCache;
+
+    unsigned int mSize;
+    unsigned int mMaxSize;
 }; // class TextureCache
 
 }; // namespace uirenderer
