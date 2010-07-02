@@ -32,6 +32,7 @@ LOCAL_SRC_FILES:=                                       \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
                   MtpServer.cpp                         \
+                  MtpSqliteDatabase.cpp                 \
                   MtpStorageInfo.cpp                    \
                   MtpStringBuffer.cpp                   \
                   MtpStorage.cpp                        \
@@ -70,18 +71,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := scantest
 LOCAL_SRC_FILES:=                                       \
                   scantest.cpp                          \
-                  MtpMediaScanner.cpp                   \
-                  MtpDatabase.cpp                       \
-                  MtpDataPacket.cpp                     \
-                  MtpPacket.cpp                         \
-                  MtpStringBuffer.cpp                   \
-                  MtpUtils.cpp                          \
-                  SqliteDatabase.cpp                    \
-                  SqliteStatement.cpp                   \
 
 
-#LOCAL_STATIC_LIBRARIES := libusbhost
-#LOCAL_LDLIBS := -lpthread
+LOCAL_STATIC_LIBRARIES := libmtp
 
 LOCAL_C_INCLUDES := external/sqlite/dist
 LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libmedia
