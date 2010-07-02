@@ -18,6 +18,9 @@ package android.webkit;
 
 import android.graphics.Bitmap;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * A convenience class for accessing fields in an entry in the back/forward list
  * of a WebView. Each WebHistoryItem is a snapshot of the requested history
@@ -39,8 +42,12 @@ public class WebHistoryItem implements Cloneable {
     private Bitmap mFavicon;
     // The pre-flattened data used for saving the state.
     private byte[] mFlattenedData;
-    // The apple-touch-icon url for use when adding the site to the home screen
-    private String mTouchIconUrl;
+    // The apple-touch-icon url for use when adding the site to the home screen,
+    // as obtained from a <link> element in the page.
+    private String mTouchIconUrlFromLink;
+    // If no <link> is specified, this holds the default location of the
+    // apple-touch-icon.
+    private String mTouchIconUrlServerDefault;
     // Custom client data that is not flattened or read by native code.
     private Object mCustomData;
 
@@ -132,10 +139,28 @@ public class WebHistoryItem implements Cloneable {
 
     /**
      * Return the touch icon url.
+     * If no touch icon <link> tag was specified, returns
+     * <host>/apple-touch-icon.png. The DownloadTouchIcon class that
+     * attempts to retrieve the touch icon will handle the case where
+     * that file does not exist. An icon set by a <link> tag is always
+     * used in preference to an icon saved on the server.
      * @hide
      */
     public String getTouchIconUrl() {
-        return mTouchIconUrl;
+        if (mTouchIconUrlFromLink != null) {
+            return mTouchIconUrlFromLink;
+        } else if (mTouchIconUrlServerDefault != null) {
+            return mTouchIconUrlServerDefault;
+        }
+
+        try {
+            URL url = new URL(mOriginalUrl);
+            mTouchIconUrlServerDefault = new URL(url.getProtocol(), url.getHost(), url.getPort(),
+                    "/apple-touch-icon.png").toString();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+        return mTouchIconUrlServerDefault;
     }
 
     /**
@@ -171,11 +196,14 @@ public class WebHistoryItem implements Cloneable {
     }
 
     /**
-     * Set the touch icon url.
+     * Set the touch icon url. Will not overwrite an icon that has been
+     * set already from a <link> tag, unless the new icon is precomposed.
      * @hide
      */
-    /*package*/ void setTouchIconUrl(String url) {
-        mTouchIconUrl = url;
+    /*package*/ void setTouchIconUrl(String url, boolean precomposed) {
+        if (precomposed || mTouchIconUrlFromLink == null) {
+            mTouchIconUrlFromLink = url;
+        }
     }
 
     /**
