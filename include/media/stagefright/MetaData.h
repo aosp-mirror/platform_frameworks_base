@@ -68,6 +68,7 @@ enum {
     kKeyDiscNumber        = 'dnum',  // cstring
     kKeyDate              = 'date',  // cstring
     kKeyWriter            = 'writ',  // cstring
+    kKeyTimeScale         = 'tmsl',  // int32_t
 
     // video profile and level
     kKeyVideoProfile      = 'vprf',  // int32_t

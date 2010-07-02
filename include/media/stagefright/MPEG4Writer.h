@@ -52,6 +52,7 @@ public:
     void endBox();
     uint32_t interleaveDuration() const { return mInterleaveDurationUs; }
     status_t setInterleaveDuration(uint32_t duration);
+    int32_t getTimeScale() const { return mTimeScale; }
 
 protected:
     virtual ~MPEG4Writer();
@@ -72,6 +73,7 @@ private:
     bool mStreamableFile;
     off_t mEstimatedMoovBoxSize;
     uint32_t mInterleaveDurationUs;
+    int32_t mTimeScale;
     int64_t mStartTimestampUs;
     Mutex mLock;
 
