@@ -22,6 +22,7 @@
 
 #include <SkCanvas.h>
 
+#include <cutils/properties.h>
 #include <utils/Log.h>
 
 #include "OpenGLRenderer.h"
@@ -33,7 +34,15 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define MAX_TEXTURE_COUNT 128
+// These properties are defined in mega-bytes
+#define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
+#define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
+
+// Converts a number of mega-bytes into bytes
+#define MB(s) s * 1024 * 1024
+
+#define DEFAULT_TEXTURE_CACHE_SIZE MB(20)
+#define DEFAULT_LAYER_CACHE_SIZE MB(10)
 
 #define SV(x, y) { { x, y } }
 #define FV(x, y, u, v) { { x, y }, { u, v } }
@@ -83,8 +92,13 @@ static const Blender gBlends[] = {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-OpenGLRenderer::OpenGLRenderer(): mTextureCache(MAX_TEXTURE_COUNT) {
+OpenGLRenderer::OpenGLRenderer(): mTextureCache(DEFAULT_TEXTURE_CACHE_SIZE) {
     LOGD("Create OpenGLRenderer");
+
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
+        mTextureCache.setMaxSize(MB(atoi(property)));
+    }
 
     mDrawColorShader = new DrawColorProgram;
     mDrawTextureShader = new DrawTextureProgram;
@@ -397,6 +411,8 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
     const Texture* texture = mTextureCache.get(bitmap);
+    LOGD("Texture cache size %d", mTextureCache.getSize());
+    LOGD("          max size %d", mTextureCache.getMaxSize());
 
     int alpha;
     SkXfermode::Mode mode;

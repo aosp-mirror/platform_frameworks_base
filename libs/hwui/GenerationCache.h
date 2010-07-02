@@ -36,6 +36,10 @@ public:
     GenerationCache(unsigned int maxCapacity): mMaxCapacity(maxCapacity), mListener(NULL) { };
     ~GenerationCache() { clear(); };
 
+    enum Capacity {
+        kUnlimitedCapacity,
+    };
+
     void setOnEntryRemovedListener(OnEntryRemoved<K*, V*>* listener);
 
     void clear();
@@ -44,12 +48,11 @@ public:
     V* get(K* key);
     void put(K* key, V* value);
     V* remove(K* key);
+    void removeOldest();
 
     unsigned int size() const;
 
 private:
-    void removeOldest();
-
     template<typename EntryKey, typename EntryValue>
     struct Entry: public LightRefBase<Entry<EntryKey, EntryValue> > {
         Entry() { }
@@ -124,7 +127,7 @@ V* GenerationCache<K, V>::get(K* key) {
 
 template<typename K, typename V>
 void GenerationCache<K, V>::put(K* key, V* value) {
-    if (mCache.size() >= mMaxCapacity) {
+    if (mMaxCapacity != kUnlimitedCapacity && mCache.size() >= mMaxCapacity) {
         removeOldest();
     }
 
