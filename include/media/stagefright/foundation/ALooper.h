@@ -39,7 +39,10 @@ struct ALooper : public RefBase {
     handler_id registerHandler(const sp<AHandler> &handler);
     void unregisterHandler(handler_id handlerID);
 
-    status_t start(bool runOnCallingThread = false);
+    status_t start(
+            bool runOnCallingThread = false,
+            bool canCallJava = false);
+
     status_t stop();
 
     static int64_t GetNowUs();
