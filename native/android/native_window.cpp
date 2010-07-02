@@ -39,3 +39,9 @@ int32_t ANativeWindow_getHeight(ANativeWindow* window) {
 int32_t ANativeWindow_getFormat(ANativeWindow* window) {
     return getWindowProp(window, NATIVE_WINDOW_FORMAT);
 }
+
+int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width,
+        int32_t height, int32_t format) {
+    native_window_set_buffers_geometry(window, width, height, format);
+    return 0;
+}

@@ -362,8 +362,12 @@ onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
         sp<ANativeWindow> oldNativeWindow = code->nativeWindow;
         code->setSurface(surface);
         if (oldNativeWindow != code->nativeWindow) {
-            if (code->nativeWindow != NULL && code->callbacks.onNativeWindowChanged != NULL) {
-                code->callbacks.onNativeWindowChanged(&code->activity,
+            if (oldNativeWindow != NULL && code->callbacks.onNativeWindowDestroyed != NULL) {
+                code->callbacks.onNativeWindowDestroyed(&code->activity,
+                        oldNativeWindow.get());
+            }
+            if (code->nativeWindow != NULL && code->callbacks.onNativeWindowCreated != NULL) {
+                code->callbacks.onNativeWindowCreated(&code->activity,
                         code->nativeWindow.get());
             }
         }

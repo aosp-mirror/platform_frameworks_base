@@ -132,14 +132,6 @@ typedef struct ANativeActivityCallbacks {
     void (*onNativeWindowCreated)(ANativeActivity* activity, ANativeWindow* window);
 
     /**
-     * The drawing window for this native activity has changed.  During this time,
-     * old ANativeWindow object is still valid but no longer active and drawing
-     * should switch to the new ANativeWindow given here.  After returning from
-     * this function, you must not touch the old window.
-     */
-    void (*onNativeWindowChanged)(ANativeActivity* activity, ANativeWindow* window);
-
-    /**
      * The drawing window for this native activity is going to be destroyed.
      * You MUST ensure that you do not touch the window object after returning
      * from this function: in the common case of drawing to the window from
