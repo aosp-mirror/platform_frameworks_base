@@ -27,6 +27,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "private/android_filesystem_config.h"
 
 #include "MtpServer.h"
 
@@ -65,7 +66,7 @@ public:
             return false;
         }
 
-        MtpServer* server = new MtpServer(fd, mDatabasePath);
+        MtpServer* server = new MtpServer(fd, mDatabasePath, AID_SDCARD_RW, 0664, 0775);
         server->addStorage(mStoragePath);
 
         // temporary
