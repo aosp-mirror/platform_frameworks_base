@@ -12,8 +12,8 @@ your application with strings:</p>
     <dd>XML resource that provides a single string.</dd>
   <dt><a href="#StringArray">String Array</a></dt>
     <dd>XML resource that provides an array of strings.</dd>
-  <dt><a href="#Plurals">Plurals</a></dt>
-    <dd>XML resource that carries different strings for different pluralizations
+  <dt><a href="#Plurals">Quantity Strings (Plurals)</a></dt>
+    <dd>XML resource that carries different strings for different quantities
     of the same word or phrase.</dd>
 </dl>
 
@@ -218,13 +218,30 @@ getStringArray}(R.array.planets_array);
 
 
 
-<h2 id="Plurals">Plurals</h2>
+<h2 id="Plurals">Quantity Strings (Plurals)</h2>
 
-<p>A pair of strings that each provide a different plural form of the same word or phrase,
-which you can collectively reference from the application. When you request the plurals
-resource using a method such as {@link android.content.res.Resources#getQuantityString(int,int)
-getQuantityString()}, you must pass a "count", which will determine the plural form you
-require and return that string to you.</p>
+<p>Different languages have different rules for grammatical agreement with quantity. In English,
+for example, the quantity 1 is a special case. We write "1 book", but for any other quantity we'd
+write "<i>n</i> books". This distinction between singular and plural is very common, but other
+languages make finer distinctions. The full set supported by Android is <code>zero</code>,
+<code>one</code>, <code>two</code>, <code>few</code>, <code>many</code>, and <code>other</code>.
+
+<p>The rules for deciding which case to use for a given language and quantity can be very complex,
+so Android provides you with methods such as
+{@link android.content.res.Resources#getQuantityString(int,int) getQuantityString()} to select
+the appropriate resource for you.
+
+<p>Note that the selection is made based on grammatical necessity. A string for <code>zero</code>
+in English will be ignored even if the quantity is 0, because 0 isn't grammatically different
+from 2, or any other number except 1 ("zero books", "one book", "two books", et cetera).
+Don't be misled either by the fact that, say, <code>two</code> sounds like it could only apply to
+the quantity 2: a language may require that 2, 12, 102 (et cetera) are all treated like one
+another but differently to other quantities. Rely on your translator to know what distinctions
+their language actually insists upon.
+
+<p>It's often possible to avoid quantity strings by using quantity-neutral formulations such as
+"Books: 1". This will make your life and your translators' lives easier, if it's a style that's
+in keeping with your application.
 
 <p class="note"><strong>Note:</strong> A plurals collection is a simple resource that is
 referenced using the value provided in the {@code name} attribute (not the name of the XML
@@ -251,7 +268,7 @@ In Java: <code>R.plurals.<em>plural_name</em></code>
     &lt;<a href="#plurals-element">plurals</a>
         name="<em>plural_name</em>">
         &lt;<a href="#plurals-item-element">item</a>
-            quantity=["one" | "other"]
+            quantity=["zero" | "one" | "two" | "few" | "many" | "other"]
             &gt;<em>text_string</em>&lt;/item>
     &lt;/plurals>
 &lt;/resources>
@@ -285,16 +302,27 @@ Styling</a>, below, for information about to properly style and format your stri
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>quantity</code></dt>
-        <dd><em>Keyword</em>. A value indicating the case in which this string should be used. Valid
-values:
+        <dd><em>Keyword</em>. A value indicating when this string should be used. Valid
+values, with non-exhaustive examples in parentheses:
           <table>
             <tr><th>Value</th><th>Description</th></tr>
             <tr>
-              <td>{@code one}</td><td>When there is one (a singular string).</td>
+              <td>{@code zero}</td><td>When the language requires special treatment of the number 0 (as in Arabic).</td>
             </tr>
             <tr>
-              <td>{@code other}</td><td>When the quantity is anything other than one (a plural
-string, but also used when the count is zero).</td>
+              <td>{@code one}</td><td>When the language requires special treatment of numbers like one (as with the number 1 in English and most other languages; in Russian, any number ending in 1 but not ending in 11 is in this class).</td>
+            </tr>
+            <tr>
+              <td>{@code two}</td><td>When the language requires special treatment of numbers like two (as in Welsh).</td>
+            </tr>
+            <tr>
+              <td>{@code few}</td><td>When the language requires special treatment of "small" numbers (as with 2, 3, and 4 in Czech; or numbers ending 2, 3, or 4 but not 12, 13, or 14 in Polish).</td>
+            </tr>
+            <tr>
+              <td>{@code many}</td><td>When the language requires special treatment of "large" numbers (as with numbers ending 11-99 in Maltese).</td>
+            </tr>
+            <tr>
+              <td>{@code other}</td><td>When the language does not require special treatment of the given quantity.</td>
             </tr>
           </table>
         </dd>
@@ -312,6 +340,17 @@ string, but also used when the count is zero).</td>
     &lt;plurals name="numberOfSongsAvailable">
         &lt;item quantity="one">One song found.&lt;/item>
         &lt;item quantity="other">%d songs found.&lt;/item>
+    &lt;/plurals>
+&lt;/resources>
+</pre>
+    <p>XML file saved at {@code res/values-pl/strings.xml}:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;plurals name="numberOfSongsAvailable">
+        &lt;item quantity="one">Znaleziono jedn&#x0105; piosenk&#x0119;.&lt;/item>
+        &lt;item quantity="few">Znaleziono %d piosenki.&lt;/item>
+        &lt;item quantity="other">Znaleziono %d piosenek.&lt;/item>
     &lt;/plurals>
 &lt;/resources>
 </pre>
