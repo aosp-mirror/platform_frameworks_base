@@ -41,11 +41,11 @@ struct Texture {
     /**
      * Width of the backing bitmap.
      */
-    unsigned int width;
+    uint32_t width;
     /**
      * Height of the backing bitmap.
      */
-    unsigned int height;
+    uint32_t height;
 }; // struct Texture
 
 }; // namespace uirenderer
