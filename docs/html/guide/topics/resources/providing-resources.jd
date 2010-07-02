@@ -761,7 +761,7 @@ Android runs your application, it will crash if you do not provide default resou
 cannot use the resources named with the new qualifier. For example, if your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
 minSdkVersion}</a> is set to 4, and you qualify all of your drawable resources using <a
-href="NightQualifier">night mode</a> ({@code night} or {@code notnight}, which were added in API
+href="#NightQualifier">night mode</a> ({@code night} or {@code notnight}, which were added in API
 Level 8), then an API Level 4 device cannot access your drawable resources and will crash. In this
 case, you probably want {@code notnight} to be your default resources, so you should exclude that
 qualifier so your drawable resources are in either {@code drawable/} or {@code drawable-night/}.</p>

@@ -687,7 +687,7 @@ so that other applications can use it, you can do so by adding a the
 <p>A library project's manifest file must declare all of the shared components
 that it includes, just as would a standard Android application. For more
 information, see the documentation for <a
-href="{@docRoot}guide/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
 
 <p>For example, the <a
 href="{@docRoot}resources/samples/TicTacToeLib/AndroidManifest.html">TicTacToeLib</a>
@@ -799,7 +799,8 @@ like this: </p>
   ...
 &lt;/manifest&gt;</pre>
 
-<p>For more information about the manifest file, see the documentation for <a href="{@docRoot}guide/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
+<p>For more information about the manifest file, see the documentation for <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
 
 <h3 id="depAppBuild">Building a dependent application</h3>
 
