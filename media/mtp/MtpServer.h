@@ -41,6 +41,12 @@ private:
 
     MtpSqliteDatabase*  mDatabase;
 
+    // group to own new files and folders
+    int                 mFileGroup;
+    // permissions for new files and directories
+    int                 mFilePermission;
+    int                 mDirectoryPermission;
+
     // current session ID
     MtpSessionID        mSessionID;
     // true if we have an open session and mSessionID is valid
@@ -61,7 +67,8 @@ private:
     size_t              mSendObjectFileSize;
 
 public:
-                        MtpServer(int fd, const char* databasePath);
+                        MtpServer(int fd, const char* databasePath,
+                                    int fileGroup, int filePerm, int directoryPerm);
     virtual             ~MtpServer();
 
     void                addStorage(const char* filePath);

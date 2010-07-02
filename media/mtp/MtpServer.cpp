@@ -113,10 +113,14 @@ static const MtpObjectFormat kSupportedPlaybackFormats[] = {
     // MTP_FORMAT_PLS_PLAYLIST,
 };
 
-MtpServer::MtpServer(int fd, const char* databasePath)
+MtpServer::MtpServer(int fd, const char* databasePath,
+                    int fileGroup, int filePerm, int directoryPerm)
     :   mFD(fd),
         mDatabasePath(databasePath),
         mDatabase(NULL),
+        mFileGroup(fileGroup),
+        mFilePermission(filePerm),
+        mDirectoryPermission(directoryPerm),
         mSessionID(0),
         mSessionOpen(false),
         mSendObjectHandle(kInvalidObjectHandle),
@@ -536,10 +540,11 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
 
   if (format == MTP_FORMAT_ASSOCIATION) {
         mode_t mask = umask(0);
-        int ret = mkdir((const char *)path, S_IRWXU | S_IRWXG | S_IRWXO);
+        int ret = mkdir((const char *)path, mDirectoryPermission);
         umask(mask);
         if (ret && ret != -EEXIST)
             return MTP_RESPONSE_GENERAL_ERROR;
+        chown((const char *)path, getuid(), mFileGroup);
     } else {
         mSendObjectFilePath = path;
         // save the handle for the SendObject call, which should follow
@@ -571,12 +576,19 @@ MtpResponseCode MtpServer::doSendObject() {
     if (mfr.fd < 0) {
         return MTP_RESPONSE_GENERAL_ERROR;
     }
+    fchown(mfr.fd, getuid(), mFileGroup);
+    // set permissions
+    mode_t mask = umask(0);
+    fchmod(mfr.fd, mFilePermission);
+    umask(mask);
+
     mfr.offset = 0;
     mfr.length = mSendObjectFileSize;
 
     // transfer the file
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
     close(mfr.fd);
+
     // FIXME - we need to delete mSendObjectHandle from the database if this fails.
     LOGV("MTP_RECEIVE_FILE returned %d", ret);
     mSendObjectHandle = kInvalidObjectHandle;
