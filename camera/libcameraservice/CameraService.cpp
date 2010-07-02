@@ -1031,6 +1031,7 @@ void CameraService::Client::handleShutter(image_rect_type *size) {
             mHardware->getRawHeap());
 
         mSurface->registerBuffers(buffers);
+        IPCThreadState::self()->flushCommands();
     }
 
     mLock.unlock();
