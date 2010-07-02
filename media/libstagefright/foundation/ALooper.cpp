@@ -31,8 +31,9 @@ namespace android {
 ALooperRoster gLooperRoster;
 
 struct ALooper::LooperThread : public Thread {
-    LooperThread(ALooper *looper)
-        : mLooper(looper) {
+    LooperThread(ALooper *looper, bool canCallJava)
+        : Thread(canCallJava),
+          mLooper(looper) {
     }
 
     virtual bool threadLoop() {
@@ -72,7 +73,7 @@ void ALooper::unregisterHandler(handler_id handlerID) {
     gLooperRoster.unregisterHandler(handlerID);
 }
 
-status_t ALooper::start(bool runOnCallingThread) {
+status_t ALooper::start(bool runOnCallingThread, bool canCallJava) {
     if (runOnCallingThread) {
         {
             Mutex::Autolock autoLock(mLock);
@@ -96,7 +97,7 @@ status_t ALooper::start(bool runOnCallingThread) {
         return INVALID_OPERATION;
     }
 
-    mThread = new LooperThread(this);
+    mThread = new LooperThread(this, canCallJava);
 
     status_t err = mThread->run("ALooper");
     if (err != OK) {
