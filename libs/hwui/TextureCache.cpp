@@ -27,7 +27,7 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-TextureCache::TextureCache(unsigned int maxByteSize):
+TextureCache::TextureCache(uint32_t maxByteSize):
         mCache(GenerationCache<SkBitmap, Texture>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
@@ -41,15 +41,15 @@ TextureCache::~TextureCache() {
 // Size management
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned int TextureCache::getSize() {
+uint32_t TextureCache::getSize() {
     return mSize;
 }
 
-unsigned int TextureCache::getMaxSize() {
+uint32_t TextureCache::getMaxSize() {
     return mMaxSize;
 }
 
-void TextureCache::setMaxSize(unsigned int maxSize) {
+void TextureCache::setMaxSize(uint32_t maxSize) {
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -62,7 +62,7 @@ void TextureCache::setMaxSize(unsigned int maxSize) {
 
 void TextureCache::operator()(SkBitmap* bitmap, Texture* texture) {
     if (bitmap) {
-        const unsigned int size = bitmap->rowBytes() * bitmap->height();
+        const uint32_t size = bitmap->rowBytes() * bitmap->height();
         mSize -= size;
     }
 
@@ -79,7 +79,7 @@ void TextureCache::operator()(SkBitmap* bitmap, Texture* texture) {
 Texture* TextureCache::get(SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap);
     if (!texture) {
-        const unsigned int size = bitmap->rowBytes() * bitmap->height();
+        const uint32_t size = bitmap->rowBytes() * bitmap->height();
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
             while (mSize + size > mMaxSize) {

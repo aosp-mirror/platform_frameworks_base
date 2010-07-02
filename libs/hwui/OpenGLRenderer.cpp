@@ -411,8 +411,6 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
     const Texture* texture = mTextureCache.get(bitmap);
-    LOGD("Texture cache size %d", mTextureCache.getSize());
-    LOGD("          max size %d", mTextureCache.getMaxSize());
 
     int alpha;
     SkXfermode::Mode mode;

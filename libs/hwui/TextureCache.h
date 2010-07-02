@@ -32,7 +32,7 @@ namespace uirenderer {
  */
 class TextureCache: public OnEntryRemoved<SkBitmap*, Texture*> {
 public:
-    TextureCache(unsigned int maxByteSize);
+    TextureCache(uint32_t maxByteSize);
     ~TextureCache();
 
     /**
@@ -59,15 +59,15 @@ public:
     /**
      * Sets the maximum size of the cache in bytes.
      */
-    void setMaxSize(unsigned int maxSize);
+    void setMaxSize(uint32_t maxSize);
     /**
      * Returns the maximum size of the cache in bytes.
      */
-    unsigned int getMaxSize();
+    uint32_t getMaxSize();
     /**
      * Returns the current size of the cache in bytes.
      */
-    unsigned int getSize();
+    uint32_t getSize();
 
 private:
     /**
@@ -80,8 +80,8 @@ private:
 
     GenerationCache<SkBitmap, Texture> mCache;
 
-    unsigned int mSize;
-    unsigned int mMaxSize;
+    uint32_t mSize;
+    uint32_t mMaxSize;
 }; // class TextureCache
 
 }; // namespace uirenderer

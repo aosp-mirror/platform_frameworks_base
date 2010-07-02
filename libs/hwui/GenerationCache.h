@@ -33,7 +33,7 @@ public:
 template<typename K, typename V>
 class GenerationCache {
 public:
-    GenerationCache(unsigned int maxCapacity): mMaxCapacity(maxCapacity), mListener(NULL) { };
+    GenerationCache(uint32_t maxCapacity): mMaxCapacity(maxCapacity), mListener(NULL) { };
     ~GenerationCache() { clear(); };
 
     enum Capacity {
@@ -50,7 +50,7 @@ public:
     V* remove(K* key);
     void removeOldest();
 
-    unsigned int size() const;
+    uint32_t size() const;
 
 private:
     template<typename EntryKey, typename EntryValue>
@@ -72,7 +72,7 @@ private:
     void attachToCache(sp<Entry<K*, V*> > entry);
     void detachFromCache(sp<Entry<K*, V*> > entry);
 
-    unsigned int mMaxCapacity;
+    uint32_t mMaxCapacity;
 
     OnEntryRemoved<K*, V*>* mListener;
 
@@ -83,7 +83,7 @@ private:
 }; // class GenerationCache
 
 template<typename K, typename V>
-unsigned int GenerationCache<K, V>::size() const {
+uint32_t GenerationCache<K, V>::size() const {
     return mCache.size();
 }
 
