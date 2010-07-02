@@ -584,7 +584,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         }
         if (expanded == null) {
             String ident = notification.pkg + "/0x" + Integer.toHexString(notification.id);
-            Slog.e(TAG, "couldn't inflate view for notification " + ident);
+            Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
             return null;
         } else {
             content.addView(expanded);
