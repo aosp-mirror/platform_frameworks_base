@@ -22,6 +22,15 @@
 extern "C" {
 #endif
 
+/*
+ * Pixel formats that a window can use.
+ */
+enum {
+    WINDOW_FORMAT_RGBA_8888          = 1,
+    WINDOW_FORMAT_RGBX_8888          = 2,
+    WINDOW_FORMAT_RGB_565            = 4,
+};
+
 struct ANativeWindow;
 typedef struct ANativeWindow ANativeWindow;
 
@@ -42,6 +51,22 @@ int32_t ANativeWindow_getHeight(ANativeWindow* window);
  * negative value on error.
  */
 int32_t ANativeWindow_getFormat(ANativeWindow* window);
+
+/*
+ * Change the format and size of the window buffers.
+ *
+ * The width and height control the number of pixels in the buffers, not the
+ * dimensions of the window on screen.  If these are different than the
+ * window's physical size, then it buffer will be scaled to match that size
+ * when compositing it to the screen.
+ *
+ * The format may be one of the window format constants above.
+ *
+ * For all of these parameters, if 0 is supplied than the window's base
+ * value will come back in force.
+ */
+int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width,
+        int32_t height, int32_t format);
 
 #ifdef __cplusplus
 };
