@@ -190,10 +190,6 @@ public class RenderScript {
     native void nMeshBindVertex(int id, int alloc, int slot);
     native void nMeshBindIndex(int id, int alloc, int prim, int slot);
 
-    native int  nSimpleMeshCreate(int batchID, int idxID, int[] vtxID, int prim);
-    native void nSimpleMeshBindVertex(int id, int alloc, int slot);
-    native void nSimpleMeshBindIndex(int id, int alloc);
-
     native void nAnimationBegin(int attribCount, int keyframeCount);
     native void nAnimationAdd(float time, float[] attribs);
     native int  nAnimationCreate();
