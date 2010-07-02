@@ -1043,6 +1043,10 @@ EGLContext eglCreateContext(EGLDisplay dpy, EGLConfig config,
     int i=0, index=0;
     egl_connection_t* cnx = validate_display_config(dpy, config, dp, i, index);
     if (cnx) {
+        if (share_list != EGL_NO_CONTEXT) {
+            egl_context_t* const c = get_context(share_list);
+            share_list = c->context;
+        }
         EGLContext context = cnx->egl.eglCreateContext(
                 dp->disp[i].dpy, dp->disp[i].config[index],
                 share_list, attrib_list);
