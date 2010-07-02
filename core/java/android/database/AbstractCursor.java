@@ -462,8 +462,8 @@ public abstract class AbstractCursor implements CrossProcessCursor {
 
     protected int mPos;
     /**
-     * If {@link mRowIdColumnIndex} is not -1 this contains contains the value of
-     * the column at {@link mRowIdColumnIndex} for the current row this cursor is
+     * If {@link #mRowIdColumnIndex} is not -1 this contains contains the value of
+     * the column at {@link #mRowIdColumnIndex} for the current row this cursor is
      * pointing at.
      */
     protected Long mCurrentRowID;
