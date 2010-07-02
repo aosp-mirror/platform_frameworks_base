@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:=               \
     AAtomizer.cpp               \
     ABuffer.cpp                 \
     ADebug.cpp                  \
+    AHandler.cpp                \
     ALooper.cpp                 \
     ALooperRoster.cpp           \
     AMessage.cpp                \
