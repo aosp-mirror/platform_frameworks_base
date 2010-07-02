@@ -240,7 +240,7 @@ Backup Service Key is ignored.</p>
 <h2 id="BackupAgent">Extending BackupAgent</h2>
 
 <p>Most applications shouldn't need to extend the {@link android.app.backup.BackupAgent} class
-directly, but should instead <a href="BackupAgentHelper">extend BackupAgentHelper</a> to take
+directly, but should instead <a href="#BackupAgentHelper">extend BackupAgentHelper</a> to take
 advantage of the built-in helper classes that automatically backup and restore your files. However,
 you might want to extend {@link android.app.backup.BackupAgent} directly if you need to:</p>
 <ul>
@@ -262,7 +262,7 @@ create your table and insert the data during a restore operation.</li>
 <p>If you don't need to perform any of the tasks above and want to back up complete files from
 {@link android.content.SharedPreferences} or <a
 href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>, you
-should skip to <a href="BackupAgentHelper">Extending BackupAgentHelper</a>.</p>
+should skip to <a href="#BackupAgentHelper">Extending BackupAgentHelper</a>.</p>
 
 
 

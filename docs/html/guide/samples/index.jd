@@ -3,99 +3,13 @@ page.title=Sample Code
 @jd:body
 
 
-<p>Sometimes, the best way to learn how things are done is to look at some code.
-Here, you can browse the source of some sample Android applications that are included
-in the Android SDK.</p>
+<script type="text/javascript">
+  window.location = toRoot + "resources/samples/index.html";
+</script>
 
-<p>Each version of the Android platform available for the SDK includes a full set of sample
-applications (which may vary between different versions of the platform).
-You can find the samples in your SDK at:</p>
+<p><strong>This document has moved. Please go to <a
+href="http://developer.android.com/resources/samples/index.html">List of Sample
+Apps</a>.</strong></p>
 
-<p style="margin-left:2em">
-<code><em>&lt;sdk&gt;</em>/platforms/android-<em>&lt;version&gt;</em>/samples/</code>
-</p>
-
-<p>You can easily create new Android projects with these samples, modify them
-if you'd like, then run them on an emulator or device. For example, to create
-a project for the API Demos app from Eclipse,
-start a new Android Project, select "Create project from existing source", then select
-{@code ApiDemos} in the {@code samples/} directory. To create the API Demos project
-using the {@code android} tool, execute:</p>
-<pre>
-android update project -s -n API Demos -t <em>&lt;target_ID></em> -p <em>&lt;path-to-platform></em>/samples/ApiDemos/
-</pre>
-
-<p>The pages below provide an overview of each sample application (available with most
-platforms) and allow you to view the source files in your browser. </p>
-
-<div class="special">
-  <p>Some of the samples in this listing are not yet available in the
-  SDK. While we work to update the SDK, you can
-  <a href="{@docRoot}shareables/latest_samples.zip">download the latest samples</a> as a ZIP
-  archive.</p>
-</div>
-
-<dl>
-
- <dt><a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a></dt>
-  <dd>A variety of small applications that demonstrate an extensive collection of
-  framework topics.</dd>
-
- <dt><a href="{@docRoot}resources/samples/BackupRestore/index.html">Backup and Restore</a></dt>
-  <dd>An simple example that illustrates a few different ways for an application to
-  implement support for the Android data backup and restore mechanism.</dd>
-
- <dt><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat</a></dt>
-  <dd>An application for two-way text messaging over Bluetooth.</dd>
-
- <dt><a href="{@docRoot}resources/samples/ContactManager/index.html">Contact Manager</a></dt>
-  <dd>An application that demonstrates how to query the system contacts provider 
-  using the <code>ContactsContract</code> API, as
-  well as insert contacts into a specific account.</dd>
-  
- <dt><a href="{@docRoot}resources/samples/Home/index.html">Home</a></dt>
-  <dd>A home screen replacement application.</dd>
-  
- <dt><a href="{@docRoot}resources/samples/JetBoy/index.html">JetBoy</a></dt>
-  <dd>JetBoy is a game that demonstrates the SONiVOX JET interactive music technology,
-  with {@link android.media.JetPlayer}.</dd>
-    
- <dt><a href="{@docRoot}resources/samples/LunarLander/index.html">Lunar Lander</a></dt>
-  <dd>A classic Lunar Lander game.</dd>
-
- <dt><a href="{@docRoot}resources/samples/MultiResolution/index.html">Multiple Resolutions</a></dt>
-  <dd>A sample application that shows how to use resource directory qualifiers to
-  provide different resources for different screen configurations.</dd>
-  
- <dt><a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a></dt>
-  <dd>An application for saving notes. Similar (but not identical) to the 
-    <a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
-  
- <dt><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable Dictionary</a></dt>
-  <dd>A sample application that demonstrates Android's search framework, 
-  including how to provide search suggestions for Quick Search Box.</dd>
-  
- <dt><a href="{@docRoot}resources/samples/Snake/index.html">Snake</a></dt>
-  <dd>An implementation of the classic game "Snake."</dd>
-  
- <dt><a href="{@docRoot}resources/samples/SoftKeyboard/index.html">Soft Keyboard</a></dt>
-  <dd>An example of writing an input method for a software keyboard.</dd>
-
- <dt><a href=""{@docRoot}resources/samples/Wiktionary/index.html">Wiktionary</a></dt>
-  <dd>An example of creating interactive widgets for display on the Android
-  home screen.</dd>
-
- <dt><a href="{@docRoot}resources/samples/WiktionarySimple/index.html">Wiktionary (Simplified)</a></dt>
-  <dd>A simple Android home screen widgets example.</dd>
-    
-</dl>
-
-
-<div class="special">
-<p>For more sample applications, check out
-<a href="http://code.google.com/p/apps-for-android/">apps-for-android</a>, a
-collection of open source applications that demonstrate various Android APIs.
-</p>
-</div>
 
 
