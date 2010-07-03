@@ -23,7 +23,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 
 import java.io.File;
 
-public class SQLiteGeneralTest extends AndroidTestCase {
+public class SQLiteStatementTest extends AndroidTestCase {
 
     private SQLiteDatabase mDatabase;
     private File mDatabaseFile;
