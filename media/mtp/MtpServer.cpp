@@ -113,11 +113,10 @@ static const MtpObjectFormat kSupportedPlaybackFormats[] = {
     // MTP_FORMAT_PLS_PLAYLIST,
 };
 
-MtpServer::MtpServer(int fd, const char* databasePath,
+MtpServer::MtpServer(int fd, MtpDatabase* database,
                     int fileGroup, int filePerm, int directoryPerm)
     :   mFD(fd),
-        mDatabasePath(databasePath),
-        mDatabase(NULL),
+        mDatabase(database),
         mFileGroup(fileGroup),
         mFilePermission(filePerm),
         mDirectoryPermission(directoryPerm),
@@ -126,9 +125,6 @@ MtpServer::MtpServer(int fd, const char* databasePath,
         mSendObjectHandle(kInvalidObjectHandle),
         mSendObjectFileSize(0)
 {
-    mDatabase = new MtpSqliteDatabase();
-    mDatabase->open(databasePath, true);
-
     initObjectProperties();
 }
 
@@ -427,6 +423,8 @@ MtpResponseCode MtpServer::doGetObjectHandles() {
     MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
     MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
                                                             // 0x00000000 for all objects?
+    if (parent == 0xFFFFFFFF)
+        parent = 0;
 
     MtpObjectHandleList* handles = mDatabase->getObjectList(storageID, format, parent);
     mData.putAUInt32(handles);
@@ -488,9 +486,10 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         return MTP_RESPONSE_INVALID_STORAGE_ID;
 
     // special case the root
-    if (parent == MTP_PARENT_ROOT)
+    if (parent == MTP_PARENT_ROOT) {
         path = storage->getPath();
-    else {
+        parent = 0;
+    } else {
         int64_t dummy;
         if (!mDatabase->getObjectFilePath(parent, path, dummy))
             return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
@@ -549,7 +548,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     }
 
     mResponse.setParameter(1, storageID);
-    mResponse.setParameter(2, parent);
+    mResponse.setParameter(2, (parent == 0 ? 0xFFFFFFFF: parent));
     mResponse.setParameter(3, handle);
 
     return MTP_RESPONSE_OK;

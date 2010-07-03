@@ -239,6 +239,44 @@ public final class MediaStore {
         public static final String MIME_TYPE = "mime_type";
      }
 
+
+
+    /**
+     * Media provider interface used by MTP implementation.
+     * @hide
+     */
+    public static final class MtpObjects {
+
+        public static Uri getContentUri(String volumeName) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
+                    "/object");
+        }
+
+        public static final Uri getContentUri(String volumeName,
+                long objectId) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
+                    + "/object/" + objectId);
+        }
+
+        /**
+         * Fields for master table for all media files.
+         * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.
+         */
+        public interface ObjectColumns extends MediaColumns {
+            /**
+             * The MTP format code of the file
+             * <P>Type: INTEGER</P>
+             */
+            public static final String FORMAT = "format";
+
+            /**
+             * The index of the parent directory of the file
+             * <P>Type: INTEGER</P>
+             */
+            public static final String PARENT = "parent";
+        }
+    }
+
     /**
      * This class is used internally by Images.Thumbnails and Video.Thumbnails, it's not intended
      * to be accessed elsewhere.

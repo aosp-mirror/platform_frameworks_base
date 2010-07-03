@@ -30,6 +30,7 @@
 #include "private/android_filesystem_config.h"
 
 #include "MtpServer.h"
+#include "MtpSqliteDatabase.h"  // REMOVE
 
 using namespace android;
 
@@ -37,6 +38,8 @@ using namespace android;
 
 static jfieldID field_context;
 
+// in android_media_MtpDatabase.cpp
+extern MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database);
 
 // ----------------------------------------------------------------------------
 
@@ -47,14 +50,13 @@ static bool ExceptionCheck(void* env)
 
 class MtpThread : public Thread {
 private:
+    MtpDatabase*    mDatabase;
     String8 mStoragePath;
-    String8 mDatabasePath;
     bool mDone;
-    bool mScannedOnce;
 
 public:
-    MtpThread(const char* storagePath, const char* databasePath)
-        : mStoragePath(storagePath), mDatabasePath(databasePath), mDone(false), mScannedOnce(false)
+    MtpThread(MtpDatabase* database, const char* storagePath)
+        : mDatabase(database), mStoragePath(storagePath), mDone(false)
     {
     }
 
@@ -66,12 +68,10 @@ public:
             return false;
         }
 
-        MtpServer* server = new MtpServer(fd, mDatabasePath, AID_SDCARD_RW, 0664, 0775);
+        MtpServer* server = new MtpServer(fd, mDatabase, AID_SDCARD_RW, 0664, 0775);
         server->addStorage(mStoragePath);
 
         // temporary
-        LOGD("MtpThread server->scanStorage");
-        server->scanStorage();
         LOGD("MtpThread server->run");
         server->run();
         close(fd);
@@ -88,18 +88,17 @@ public:
 };
 
 static void
-android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jstring storagePath, jstring databasePath)
+android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jstring storagePath)
 {
     LOGD("setup\n");
 
+    MtpDatabase* database = getMtpDatabase(env, javaDatabase);
     const char *storagePathStr = env->GetStringUTFChars(storagePath, NULL);
-    const char *databasePathStr = env->GetStringUTFChars(databasePath, NULL);
 
-    MtpThread* thread = new MtpThread(storagePathStr, databasePathStr);
+    MtpThread* thread = new MtpThread(database, storagePathStr);
     env->SetIntField(thiz, field_context, (int)thread);
 
     env->ReleaseStringUTFChars(storagePath, storagePathStr);
-    env->ReleaseStringUTFChars(databasePath, databasePathStr);
 }
 
 static void
@@ -131,7 +130,8 @@ android_media_MtpServer_stop(JNIEnv *env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",            "(Ljava/lang/String;Ljava/lang/String;)V",  (void *)android_media_MtpServer_setup},
+    {"native_setup",            "(Landroid/media/MtpDatabase;Ljava/lang/String;)V",
+                                            (void *)android_media_MtpServer_setup},
     {"native_finalize",         "()V",  (void *)android_media_MtpServer_finalize},
     {"native_start",            "()V",  (void *)android_media_MtpServer_start},
     {"native_stop",             "()V",  (void *)android_media_MtpServer_stop},

@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
+import android.provider.Mtp;
 import android.media.DecoderCapabilities;
 import android.media.DecoderCapabilities.VideoDecoder;
 import android.media.DecoderCapabilities.AudioDecoder;
@@ -96,13 +97,26 @@ public class MediaFile {
         }
     }
     
-    private static HashMap<String, MediaFileType> sFileTypeMap 
+    private static HashMap<String, MediaFileType> sFileTypeMap
             = new HashMap<String, MediaFileType>();
-    private static HashMap<String, Integer> sMimeTypeMap 
-            = new HashMap<String, Integer>();            
+    private static HashMap<String, Integer> sMimeTypeMap
+            = new HashMap<String, Integer>();
+    // maps file extension to MTP format code
+    private static HashMap<String, Integer> sFileTypeToFormatMap
+            = new HashMap<String, Integer>();
+    // maps mime type to MTP format code
+    private static HashMap<String, Integer> sMimeTypeToFormatMap
+            = new HashMap<String, Integer>();
+
     static void addFileType(String extension, int fileType, String mimeType) {
         sFileTypeMap.put(extension, new MediaFileType(fileType, mimeType));
         sMimeTypeMap.put(mimeType, Integer.valueOf(fileType));
+    }
+
+    static void addFileType(String extension, int fileType, String mimeType, int mtpFormatCode) {
+        addFileType(extension, fileType, mimeType);
+        sFileTypeToFormatMap.put(extension, Integer.valueOf(mtpFormatCode));
+        sMimeTypeToFormatMap.put(mimeType, Integer.valueOf(mtpFormatCode));
     }
 
     private static boolean isWMAEnabled() {
@@ -126,17 +140,17 @@ public class MediaFile {
     }
 
     static {
-        addFileType("MP3", FILE_TYPE_MP3, "audio/mpeg");
-        addFileType("M4A", FILE_TYPE_M4A, "audio/mp4");
-        addFileType("WAV", FILE_TYPE_WAV, "audio/x-wav");
+        addFileType("MP3", FILE_TYPE_MP3, "audio/mpeg", Mtp.Object.FORMAT_MP3);
+        addFileType("M4A", FILE_TYPE_M4A, "audio/mp4", Mtp.Object.FORMAT_MPEG);
+        addFileType("WAV", FILE_TYPE_WAV, "audio/x-wav", Mtp.Object.FORMAT_WAV);
         addFileType("AMR", FILE_TYPE_AMR, "audio/amr");
         addFileType("AWB", FILE_TYPE_AWB, "audio/amr-wb");
         if (isWMAEnabled()) {
-            addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");
+            addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma", Mtp.Object.FORMAT_WMA);
         }
-        addFileType("OGG", FILE_TYPE_OGG, "application/ogg");
-        addFileType("OGA", FILE_TYPE_OGG, "application/ogg");
-        addFileType("AAC", FILE_TYPE_AAC, "audio/aac");
+        addFileType("OGG", FILE_TYPE_OGG, "application/ogg", Mtp.Object.FORMAT_OGG);
+        addFileType("OGA", FILE_TYPE_OGG, "application/ogg", Mtp.Object.FORMAT_OGG);
+        addFileType("AAC", FILE_TYPE_AAC, "audio/aac", Mtp.Object.FORMAT_AAC);
         addFileType("MKA", FILE_TYPE_MKA, "audio/x-matroska");
  
         addFileType("MID", FILE_TYPE_MID, "audio/midi");
@@ -148,32 +162,32 @@ public class MediaFile {
         addFileType("RTX", FILE_TYPE_MID, "audio/midi");
         addFileType("OTA", FILE_TYPE_MID, "audio/midi");
         
-        addFileType("MPEG", FILE_TYPE_MP4, "video/mpeg");
-        addFileType("MP4", FILE_TYPE_MP4, "video/mp4");
-        addFileType("M4V", FILE_TYPE_M4V, "video/mp4");
-        addFileType("3GP", FILE_TYPE_3GPP, "video/3gpp");
-        addFileType("3GPP", FILE_TYPE_3GPP, "video/3gpp");
-        addFileType("3G2", FILE_TYPE_3GPP2, "video/3gpp2");
-        addFileType("3GPP2", FILE_TYPE_3GPP2, "video/3gpp2");
+        addFileType("MPEG", FILE_TYPE_MP4, "video/mpeg", Mtp.Object.FORMAT_MPEG);
+        addFileType("MP4", FILE_TYPE_MP4, "video/mp4", Mtp.Object.FORMAT_MPEG);
+        addFileType("M4V", FILE_TYPE_M4V, "video/mp4", Mtp.Object.FORMAT_MPEG);
+        addFileType("3GP", FILE_TYPE_3GPP, "video/3gpp",  Mtp.Object.FORMAT_3GP_CONTAINER);
+        addFileType("3GPP", FILE_TYPE_3GPP, "video/3gpp", Mtp.Object.FORMAT_3GP_CONTAINER);
+        addFileType("3G2", FILE_TYPE_3GPP2, "video/3gpp2", Mtp.Object.FORMAT_3GP_CONTAINER);
+        addFileType("3GPP2", FILE_TYPE_3GPP2, "video/3gpp2", Mtp.Object.FORMAT_3GP_CONTAINER);
         addFileType("MKV", FILE_TYPE_MKV, "video/x-matroska");
         addFileType("WEBM", FILE_TYPE_MKV, "video/x-matroska");
         addFileType("TS", FILE_TYPE_MP2TS, "video/mp2ts");
 
         if (isWMVEnabled()) {
-            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv");
+            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", Mtp.Object.FORMAT_WMV);
             addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
         }
 
-        addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg");
-        addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg");
-        addFileType("GIF", FILE_TYPE_GIF, "image/gif");
-        addFileType("PNG", FILE_TYPE_PNG, "image/png");
-        addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp");
+        addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg", Mtp.Object.FORMAT_EXIF_JPEG);
+        addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg", Mtp.Object.FORMAT_EXIF_JPEG);
+        addFileType("GIF", FILE_TYPE_GIF, "image/gif", Mtp.Object.FORMAT_GIF);
+        addFileType("PNG", FILE_TYPE_PNG, "image/png", Mtp.Object.FORMAT_PNG);
+        addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp", Mtp.Object.FORMAT_BMP);
         addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp");
  
-        addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl");
-        addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls");
-        addFileType("WPL", FILE_TYPE_WPL, "application/vnd.ms-wpl");
+        addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", Mtp.Object.FORMAT_M3U_PLAYLIST);
+        addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls", Mtp.Object.FORMAT_PLS_PLAYLIST);
+        addFileType("WPL", FILE_TYPE_WPL, "application/vnd.ms-wpl", Mtp.Object.FORMAT_WPL_PLAYLIST);
 
         // compute file extensions list for native Media Scanner
         StringBuilder builder = new StringBuilder();
@@ -222,4 +236,21 @@ public class MediaFile {
         return (value == null ? 0 : value.intValue());
     }
 
+    public static int getFormatCode(String fileName, String mimeType) {
+        if (mimeType != null) {
+            Integer value = sMimeTypeToFormatMap.get(mimeType);
+            if (value != null) {
+                return value.intValue();
+            }
+        }
+        int lastDot = fileName.lastIndexOf('.');
+        if (lastDot > 0) {
+            String extension = fileName.substring(lastDot + 1);
+            Integer value = sFileTypeToFormatMap.get(extension);
+            if (value != null) {
+                return value.intValue();
+            }
+        }
+        return Mtp.Object.FORMAT_UNDEFINED;
+    }
 }
