@@ -63,11 +63,6 @@ union MtpPropertyValue {
 // MtpObjectHandle bits and masks
 #define kObjectHandleMarkBit        0x80000000      // used for mark & sweep by MtpMediaScanner
 #define kObjectHandleTableMask      0x70000000      // mask for object table
-#define kObjectHandleTableFile      0x00000000      // object is only in the file table
-#define kObjectHandleTableAudio     0x10000000      // object is in the audio table
-#define kObjectHandleTableVideo     0x20000000      // object is in the video table
-#define kObjectHandleTableImage     0x30000000      // object is in the images table
-#define kObjectHandleTablePlaylist  0x40000000      // object is in the playlist table
 #define kObjectHandleIndexMask      0x0FFFFFFF      // mask for object index in file table
 
 class MtpStorage;

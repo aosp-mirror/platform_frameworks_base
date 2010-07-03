@@ -37,22 +37,6 @@ namespace android {
 #define FILE_SIZE_COLUMN                6
 #define FILE_MODIFIED_COLUMN            7
 
-#define AUDIO_ID_COLUMN                 1
-#define AUDIO_TITLE_COLUMN              2
-#define AUDIO_ARTIST_COLUMN             3
-#define AUDIO_ALBUM_COLUMN              4
-#define AUDIO_ALBUM_ARTIST_COLUMN       5
-#define AUDIO_GENRE_COLUMN              6
-#define AUDIO_COMPOSER_COLUMN           7
-#define AUDIO_TRACK_NUMBER_COLUMN       8
-#define AUDIO_YEAR_COLUMN               9
-#define AUDIO_DURATION_COLUMN           10
-#define AUDIO_USE_COUNT_COLUMN          11
-#define AUDIO_SAMPLE_RATE_COLUMN        12
-#define AUDIO_NUM_CHANNELS_COLUMN       13
-#define AUDIO_AUDIO_WAVE_CODEC_COLUMN   14
-#define AUDIO_AUDIO_BIT_RATE_COLUMN     15
-
 #define FILE_TABLE_CREATE    "CREATE TABLE IF NOT EXISTS files ("    \
                         "_id INTEGER PRIMARY KEY,"              \
                         "path TEXT,"                            \
@@ -63,24 +47,6 @@ namespace android {
                         "date_modified INTEGER"                \
                         ");"
 
-#define AUDIO_TABLE_CREATE    "CREATE TABLE IF NOT EXISTS audio ("    \
-                        "id INTEGER PRIMARY KEY,"               \
-                        "title TEXT,"                           \
-                        "artist TEXT,"                          \
-                        "album TEXT,"                           \
-                        "album_artist TEXT,"                    \
-                        "genre TEXT,"                           \
-                        "composer TEXT,"                        \
-                        "track_number INTEGER,"                 \
-                        "year INTEGER,"                         \
-                        "duration INTEGER,"                     \
-                        "use_count INTEGER,"                    \
-                        "sample_rate INTEGER,"                  \
-                        "num_channels INTEGER,"                 \
-                        "audio_wave_codec TEXT,"                \
-                        "audio_bit_rate INTEGER"                \
-                        ");"
-
 #define PATH_INDEX_CREATE "CREATE INDEX IF NOT EXISTS path_index on files(path);"
 
 #define FILE_ID_QUERY   "SELECT _id,format FROM files WHERE path = ?;"
@@ -89,9 +55,6 @@ namespace android {
 #define GET_OBJECT_INFO_QUERY   "SELECT storage,format,parent,path,size,date_modified FROM files WHERE _id = ?;"
 #define FILE_INSERT     "INSERT INTO files VALUES(?,?,?,?,?,?,?);"
 #define FILE_DELETE     "DELETE FROM files WHERE _id = ?;"
-
-#define AUDIO_INSERT    "INSERT INTO audio VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);"
-#define AUDIO_DELETE    "DELETE FROM audio WHERE id = ?;"
 
 struct PropertyTableEntry {
     MtpObjectProperty   property;
@@ -127,9 +90,7 @@ MtpSqliteDatabase::MtpSqliteDatabase()
         mFilePathQuery(NULL),
         mObjectInfoQuery(NULL),
         mFileInserter(NULL),
-        mFileDeleter(NULL),
-        mAudioInserter(NULL),
-        mAudioDeleter(NULL)
+        mFileDeleter(NULL)
 {
 }
 
@@ -140,8 +101,6 @@ MtpSqliteDatabase::~MtpSqliteDatabase() {
     delete mObjectInfoQuery;
     delete mFileInserter;
     delete mFileDeleter;
-    delete mAudioInserter;
-    delete mAudioDeleter;
 }
 
 bool MtpSqliteDatabase::open(const char* path, bool create) {
@@ -157,10 +116,6 @@ bool MtpSqliteDatabase::open(const char* path, bool create) {
     }
     if (!mDatabase->exec(PATH_INDEX_CREATE)) {
         LOGE("could not path index on file table");
-        goto fail;
-    }
-    if (!mDatabase->exec(AUDIO_TABLE_CREATE)) {
-        LOGE("could not create file table");
         goto fail;
     }
 
@@ -199,20 +154,6 @@ bool MtpSqliteDatabase::open(const char* path, bool create) {
             goto fail;
         }
     }
-    if (!mAudioInserter) {
-        mAudioInserter = new SqliteStatement(mDatabase);
-        if (!mAudioInserter->prepare(AUDIO_INSERT)) {
-            LOGE("could not compile AUDIO_INSERT\n");
-            goto fail;
-        }
-    }
-    if (!mAudioDeleter) {
-        mAudioDeleter = new SqliteStatement(mDatabase);
-        if (!mAudioDeleter->prepare(AUDIO_DELETE)) {
-            LOGE("could not compile AUDIO_DELETE\n");
-            goto fail;
-        }
-    }
 
     return true;
 
@@ -223,16 +164,12 @@ fail:
     delete mObjectInfoQuery;
     delete mFileInserter;
     delete mFileDeleter;
-    delete mAudioInserter;
-    delete mAudioDeleter;
     mDatabase = NULL;
     mFileIdQuery = NULL;
     mFilePathQuery = NULL;
     mObjectInfoQuery = NULL;
     mFileInserter = NULL;
     mFileDeleter = NULL;
-    mAudioInserter = NULL;
-    mAudioDeleter = NULL;
     return false;
 }
 
@@ -250,7 +187,6 @@ MtpObjectHandle MtpSqliteDatabase::getObjectHandle(const char* path) {
         int row = mFileIdQuery->getColumnInt(0);
         if (row > 0) {
             MtpObjectFormat format = mFileIdQuery->getColumnInt(1);
-            row |= getTableForFile(format);
             return row;
         }
     }
@@ -274,45 +210,6 @@ MtpObjectHandle MtpSqliteDatabase::addFile(const char* path,
     mFileInserter->reset();
     int result = mDatabase->lastInsertedRow();
     return (result <= 0 ? kInvalidObjectHandle : result);
-}
-
-MtpObjectHandle MtpSqliteDatabase::addAudioFile(MtpObjectHandle handle) {
-    mAudioInserter->bind(AUDIO_ID_COLUMN, handle);
-    mAudioInserter->step();
-    mAudioInserter->reset();
-    int result = mDatabase->lastInsertedRow();
-    handle |= kObjectHandleTableAudio;
-    return (result > 0 ? handle : kInvalidObjectHandle);
-}
-
-MtpObjectHandle MtpSqliteDatabase::addAudioFile(MtpObjectHandle handle,
-                                    const char* title,
-                                    const char* artist,
-                                    const char* album,
-                                    const char* albumArtist,
-                                    const char* genre,
-                                    const char* composer,
-                                    const char* mimeType,
-                                    int track,
-                                    int year,
-                                    int duration) {
-    mAudioInserter->bind(AUDIO_ID_COLUMN, handle);
-    if (title) mAudioInserter->bind(AUDIO_TITLE_COLUMN, title);
-    if (artist) mAudioInserter->bind(AUDIO_ARTIST_COLUMN, artist);
-    if (album) mAudioInserter->bind(AUDIO_ALBUM_COLUMN, album);
-    if (albumArtist) mAudioInserter->bind(AUDIO_ALBUM_ARTIST_COLUMN, albumArtist);
-    if (genre) mAudioInserter->bind(AUDIO_GENRE_COLUMN, genre);
-    if (composer) mAudioInserter->bind(AUDIO_COMPOSER_COLUMN, composer);
-    if (track) mAudioInserter->bind(AUDIO_TRACK_NUMBER_COLUMN, track);
-    if (year) mAudioInserter->bind(AUDIO_YEAR_COLUMN, year);
-    if (duration) mAudioInserter->bind(AUDIO_DURATION_COLUMN, duration);
-    mAudioInserter->step();
-    mAudioInserter->reset();
-    int result = mDatabase->lastInsertedRow();
-    if (result <= 0)
-        return kInvalidObjectHandle;
-    result |= kObjectHandleTableAudio;
-    return result;
 }
 
 MtpObjectHandleList* MtpSqliteDatabase::getObjectList(MtpStorageID storageID,
@@ -360,7 +257,6 @@ MtpObjectHandleList* MtpSqliteDatabase::getObjectList(MtpStorageID storageID,
             LOGV("stmt.getColumnInt returned %d", index);
             if (index > 0) {
                 MtpObjectFormat format = stmt.getColumnInt(1);
-                index |= getTableForFile(format);
                 list->push(index);
             }
         }
@@ -508,11 +404,6 @@ bool MtpSqliteDatabase::deleteFile(MtpObjectHandle handle) {
     mFileDeleter->bind(1, handle);
     mFileDeleter->step();
     mFileDeleter->reset();
-    if (table == kObjectHandleTableAudio) {
-        mAudioDeleter->bind(1, handle);
-        mAudioDeleter->step();
-        mAudioDeleter->reset();
-    }
 
     return true;
 }
@@ -541,7 +432,6 @@ MtpObjectHandle* MtpSqliteDatabase::getFileList(int& outCount) {
             }
             MtpObjectHandle handle = stmt2.getColumnInt(0);
             MtpObjectFormat format = stmt2.getColumnInt(1);
-            handle |= getTableForFile(format);
             result[i] = handle;
         }
     }

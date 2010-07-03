@@ -23,16 +23,12 @@ namespace android {
 
 class MtpDatabase;
 class SqliteStatement;
-class MediaScanner;
-class MtpMediaScannerClient;
 
 class MtpMediaScanner {
 private:
     MtpStorageID            mStorageID;
     const char*             mFilePath;
     MtpDatabase*            mDatabase;
-    MediaScanner*           mMediaScanner;
-    MtpMediaScannerClient*  mMediaScannerClient;
 
     // for garbage collecting missing files
     MtpObjectHandle*        mFileList;
@@ -45,7 +41,7 @@ public:
     bool                    scanFiles();
 
 private:
-    MtpObjectFormat         getFileFormat(const char* path, uint32_t& table);
+    MtpObjectFormat         getFileFormat(const char* path);
     int                     scanDirectory(const char* path, MtpObjectHandle parent);
     void                    scanFile(const char* path, MtpObjectHandle parent, struct stat& statbuf);
     void                    markFile(MtpObjectHandle handle);

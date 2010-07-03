@@ -26,9 +26,7 @@ class MtpDataPacket;
 
 class MtpDatabase {
 public:
-    virtual ~MtpDatabase();
-
-    static uint32_t                 getTableForFile(MtpObjectFormat format);
+    virtual ~MtpDatabase() {}
 
     virtual MtpObjectHandle         getObjectHandle(const char* path) = 0;
     virtual MtpObjectHandle         addFile(const char* path,
@@ -37,20 +35,6 @@ public:
                                             MtpStorageID storage,
                                             uint64_t size,
                                             time_t modified) = 0;
-
-    virtual MtpObjectHandle         addAudioFile(MtpObjectHandle id) = 0;
-
-    virtual MtpObjectHandle         addAudioFile(MtpObjectHandle id,
-                                            const char* title,
-                                            const char* artist,
-                                            const char* album,
-                                            const char* albumArtist,
-                                            const char* genre,
-                                            const char* composer,
-                                            const char* mimeType,
-                                            int track,
-                                            int year,
-                                            int duration) = 0;
 
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
                                     MtpObjectFormat format,
