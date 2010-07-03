@@ -21,6 +21,10 @@
 
 namespace android {
 
+static pthread_mutex_t gTLSMutex = PTHREAD_MUTEX_INITIALIZER;
+static bool gHaveTLS = false;
+static pthread_key_t gTLS = 0;
+
 PollLoop::PollLoop() :
         mPolling(false), mWaiters(0) {
     openWakePipe();
@@ -28,6 +32,41 @@ PollLoop::PollLoop() :
 
 PollLoop::~PollLoop() {
     closeWakePipe();
+}
+
+void PollLoop::threadDestructor(void *st) {
+    PollLoop* const self = static_cast<PollLoop*>(st);
+    if (self != NULL) {
+        self->decStrong((void*)threadDestructor);
+    }
+}
+
+void PollLoop::setForThread(const sp<PollLoop>& pollLoop) {
+    sp<PollLoop> old = getForThread();
+    
+    if (pollLoop != NULL) {
+        pollLoop->incStrong((void*)threadDestructor);
+    }
+    
+    pthread_setspecific(gTLS, pollLoop.get());
+    
+    if (old != NULL) {
+        old->decStrong((void*)threadDestructor);
+    }
+}
+    
+sp<PollLoop> PollLoop::getForThread() {
+    if (!gHaveTLS) {
+        pthread_mutex_lock(&gTLSMutex);
+        if (pthread_key_create(&gTLS, threadDestructor) != 0) {
+            pthread_mutex_unlock(&gTLSMutex);
+            return NULL;
+        }
+        gHaveTLS = true;
+        pthread_mutex_unlock(&gTLSMutex);
+    }
+    
+    return (PollLoop*)pthread_getspecific(gTLS);
 }
 
 void PollLoop::openWakePipe() {
@@ -54,6 +93,7 @@ void PollLoop::openWakePipe() {
 
     RequestedCallback requestedCallback;
     requestedCallback.callback = NULL;
+    requestedCallback.looperCallback = NULL;
     requestedCallback.data = NULL;
     mRequestedCallbacks.insertAt(requestedCallback, 0);
 }
@@ -123,12 +163,14 @@ bool PollLoop::pollOnce(int timeoutMillis) {
         if (revents) {
             const RequestedCallback& requestedCallback = mRequestedCallbacks.itemAt(i);
             Callback callback = requestedCallback.callback;
+            ALooper_callbackFunc* looperCallback = requestedCallback.looperCallback;
 
-            if (callback) {
+            if (callback || looperCallback) {
                 PendingCallback pendingCallback;
                 pendingCallback.fd = requestedFd.fd;
                 pendingCallback.events = requestedFd.revents;
                 pendingCallback.callback = callback;
+                pendingCallback.looperCallback = looperCallback;
                 pendingCallback.data = requestedCallback.data;
                 mPendingCallbacks.push(pendingCallback);
             } else {
@@ -172,8 +214,14 @@ Done:
             LOGD("%p ~ pollOnce - invoking callback for fd %d", this, pendingCallback.fd);
 #endif
 
-            bool keep = pendingCallback.callback(pendingCallback.fd, pendingCallback.events,
-                    pendingCallback.data);
+            bool keep = true;
+            if (pendingCallback.callback != NULL) {
+                keep = pendingCallback.callback(pendingCallback.fd, pendingCallback.events,
+                        pendingCallback.data);
+            } else {
+                keep = pendingCallback.looperCallback(pendingCallback.fd, pendingCallback.events,
+                        pendingCallback.data) != 0;
+            }
             if (! keep) {
                 removeCallback(pendingCallback.fd);
             }
@@ -200,11 +248,22 @@ void PollLoop::wake() {
 }
 
 void PollLoop::setCallback(int fd, int events, Callback callback, void* data) {
+    setCallbackCommon(fd, events, callback, NULL, data);
+}
+
+void PollLoop::setLooperCallback(int fd, int events, ALooper_callbackFunc* callback,
+        void* data) {
+    setCallbackCommon(fd, events, NULL, callback, data);
+}
+
+void PollLoop::setCallbackCommon(int fd, int events, Callback callback,
+        ALooper_callbackFunc* looperCallback, void* data) {
+
 #if DEBUG_CALLBACKS
     LOGD("%p ~ setCallback - fd=%d, events=%d", this, fd, events);
 #endif
 
-    if (! events || ! callback) {
+    if (! events || (! callback && ! looperCallback)) {
         LOGE("Invalid attempt to set a callback with no selected poll events or no callback.");
         removeCallback(fd);
         return;
@@ -218,6 +277,7 @@ void PollLoop::setCallback(int fd, int events, Callback callback, void* data) {
 
     RequestedCallback requestedCallback;
     requestedCallback.callback = callback;
+    requestedCallback.looperCallback = looperCallback;
     requestedCallback.data = data;
 
     ssize_t index = getRequestIndexLocked(fd);

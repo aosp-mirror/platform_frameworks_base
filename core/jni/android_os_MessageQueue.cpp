@@ -51,7 +51,11 @@ private:
 // ----------------------------------------------------------------------------
 
 NativeMessageQueue::NativeMessageQueue() {
-    mPollLoop = new PollLoop();
+    mPollLoop = PollLoop::getForThread();
+    if (mPollLoop == NULL) {
+        mPollLoop = new PollLoop();
+        PollLoop::setForThread(mPollLoop);
+    }
 }
 
 NativeMessageQueue::~NativeMessageQueue() {

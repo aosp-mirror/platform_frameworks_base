@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <android/keycodes.h>
+#include <android/looper.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -533,12 +534,15 @@ struct AInputQueue;
 typedef struct AInputQueue AInputQueue;
 
 /*
- * Return a file descriptor for the queue, which you
- * can use to determine if there are events available.  This
- * is typically used with select() or poll() to multiplex
- * with other kinds of events.
+ * Add this input queue to a looper for processing.
  */
-int AInputQueue_getFd(AInputQueue* queue);
+void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
+        ALooper_callbackFunc callback, void* data);
+
+/*
+ * Remove the input queue from the looper it is currently attached to.
+ */
+void AInputQueue_detachLooper(AInputQueue* queue);
 
 /*
  * Returns true if there are one or more events available in the
