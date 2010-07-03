@@ -133,4 +133,55 @@ public class SQLiteStatementTest extends AndroidTestCase {
         }
         assertTrue(exceptionRecvd);
     }
+
+    public void testGetSqlStatementId() {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
+                "num1 INTEGER, num2 INTEGER, image BLOB);");
+        final String statement = "DELETE FROM test WHERE _id=?;";
+        SQLiteStatement statementOne = mDatabase.compileStatement(statement);
+        SQLiteStatement statementTwo = mDatabase.compileStatement(statement);
+        // since the same compiled statement is being accessed at the same time by 2 different
+        // objects, they each get their own statement id
+        assertTrue(statementOne.getSqlStatementId() != statementTwo.getSqlStatementId());
+        statementOne.close();
+        statementTwo.close();
+
+        statementOne = mDatabase.compileStatement(statement);
+        int n = statementOne.getSqlStatementId();
+        statementOne.close();
+        statementTwo = mDatabase.compileStatement(statement);
+        assertEquals(n, statementTwo.getSqlStatementId());
+        statementTwo.close();
+
+        // now try to compile 2 different statements and they should have different uniquerIds.
+        SQLiteStatement statement1 = mDatabase.compileStatement("DELETE FROM test WHERE _id=1;");
+        SQLiteStatement statement2 = mDatabase.compileStatement("DELETE FROM test WHERE _id=2;");
+        assertTrue(statement1.getSqlStatementId() != statement2.getSqlStatementId());
+        statement1.close();
+        statement2.close();
+    }
+
+    public void testOnAllReferencesReleased() {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
+                "num1 INTEGER, num2 INTEGER, image BLOB);");
+        final String statement = "DELETE FROM test WHERE _id=?;";
+        SQLiteStatement statementOne = mDatabase.compileStatement(statement);
+        assertTrue(statementOne.getSqlStatementId() > 0);
+        int nStatement = statementOne.getSqlStatementId();
+        statementOne.releaseReference();
+        assertEquals(0, statementOne.getSqlStatementId());
+        statementOne.close();
+    }
+
+    public void testOnAllReferencesReleasedFromContainer() {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
+                "num1 INTEGER, num2 INTEGER, image BLOB);");
+        final String statement = "DELETE FROM test WHERE _id=?;";
+        SQLiteStatement statementOne = mDatabase.compileStatement(statement);
+        assertTrue(statementOne.getSqlStatementId() > 0);
+        int nStatement = statementOne.getSqlStatementId();
+        statementOne.releaseReferenceFromContainer();
+        assertEquals(0, statementOne.getSqlStatementId());
+        statementOne.close();
+    }
 }

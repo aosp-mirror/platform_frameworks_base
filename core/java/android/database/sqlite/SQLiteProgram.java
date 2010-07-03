@@ -181,11 +181,21 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * Returns a unique identifier for this program.
      *
      * @return a unique identifier for this program
+     * @deprecated do not use this method. it is not guaranteed to be the same across executions of
+     * the SQL statement contained in this object.
      */
+    @Deprecated
     public final int getUniqueId() {
-        synchronized (this) {
-            return (mCompiledSql != null) ? mCompiledSql.nStatement : 0;
-        }
+      return -1;
+    }
+
+    /**
+     * used only for testing purposes
+     */
+    /* package */ int getSqlStatementId() {
+      synchronized(this) {
+        return (mCompiledSql == null) ? 0 : nStatement;
+      }
     }
 
     /* package */ String getSqlString() {
