@@ -868,17 +868,19 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
 
     sp<MetaData> meta = cameraSource->getFormat();
 
-    int32_t width, height, stride, sliceHeight;
+    int32_t width, height, stride, sliceHeight, colorFormat;
     CHECK(meta->findInt32(kKeyWidth, &width));
     CHECK(meta->findInt32(kKeyHeight, &height));
     CHECK(meta->findInt32(kKeyStride, &stride));
     CHECK(meta->findInt32(kKeySliceHeight, &sliceHeight));
+    CHECK(meta->findInt32(kKeyColorFormat, &colorFormat));
 
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
     enc_meta->setInt32(kKeyIFramesInterval, mIFramesInterval);
     enc_meta->setInt32(kKeyStride, stride);
     enc_meta->setInt32(kKeySliceHeight, sliceHeight);
+    enc_meta->setInt32(kKeyColorFormat, colorFormat);
     if (mVideoEncoderProfile != -1) {
         enc_meta->setInt32(kKeyVideoProfile, mVideoEncoderProfile);
     }
