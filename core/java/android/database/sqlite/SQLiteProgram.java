@@ -64,10 +64,15 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     protected int nStatement = 0;
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
-        mDatabase = db;
+        this(db, sql, true);
+    }
+
+    /* package */ SQLiteProgram(SQLiteDatabase db, String sql, boolean compileFlag) {
         mSql = sql.trim();
         attachObjectToDatabase(db);
-        compileSql();
+        if (compileFlag) {
+            compileSql();
+        }
     }
 
     private void compileSql() {
@@ -139,12 +144,33 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     private synchronized void attachObjectToDatabase(SQLiteDatabase db) {
         db.acquireReference();
         db.addSQLiteClosable(this);
+        mDatabase = db;
         nHandle = db.mNativeHandle;
     }
 
     private synchronized void detachObjectFromDatabase() {
         mDatabase.removeSQLiteClosable(this);
         mDatabase.releaseReference();
+    }
+
+    /* package */ synchronized void verifyDbAndCompileSql() {
+        mDatabase.verifyDbIsOpen();
+        // use pooled database connection handles for SELECT SQL statements
+        SQLiteDatabase db = (getSqlStatementType(mSql) != SELECT_STMT) ? mDatabase
+                : mDatabase.getDbConnection(mSql);
+        if (!db.equals(mDatabase)) {
+            // the database connection handle to be used is not the same as the one supplied
+            // in the constructor. do some housekeeping.
+            detachObjectFromDatabase();
+            attachObjectToDatabase(db);
+        }
+        // compile the sql statement
+        mDatabase.lock();
+        try {
+            compileSql();
+        } finally {
+            mDatabase.unlock();
+        }
     }
 
     @Override
@@ -159,7 +185,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         mDatabase.releaseReference();
     }
 
-    private void releaseCompiledSqlIfNotInCache() {
+    /* package */ synchronized void releaseCompiledSqlIfNotInCache() {
         if (mCompiledSql == null) {
             return;
         }
@@ -222,7 +248,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void bindNull(int index) {
         synchronized (this) {
-            mDatabase.verifyDbIsOpen();
+            verifyDbAndCompileSql();
             acquireReference();
             try {
                 native_bind_null(index);
@@ -241,7 +267,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void bindLong(int index, long value) {
         synchronized (this) {
-            mDatabase.verifyDbIsOpen();
+            verifyDbAndCompileSql();
             acquireReference();
             try {
                 native_bind_long(index, value);
@@ -260,7 +286,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void bindDouble(int index, double value) {
         synchronized (this) {
-            mDatabase.verifyDbIsOpen();
+            verifyDbAndCompileSql();
             acquireReference();
             try {
                 native_bind_double(index, value);
@@ -282,7 +308,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
         synchronized (this) {
-            mDatabase.verifyDbIsOpen();
+            verifyDbAndCompileSql();
             acquireReference();
             try {
                 native_bind_string(index, value);
@@ -304,7 +330,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
         synchronized (this) {
-            mDatabase.verifyDbIsOpen();
+            verifyDbAndCompileSql();
             acquireReference();
             try {
                 native_bind_blob(index, value);
@@ -319,6 +345,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void clearBindings() {
         synchronized (this) {
+            if (this.nStatement == 0) {
+                return;
+            }
             mDatabase.verifyDbIsOpen();
             acquireReference();
             try {
@@ -334,14 +363,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void close() {
         synchronized (this) {
-            if (nStatement == 0 || nHandle == 0 || !mDatabase.isOpen()) {
+            if (nHandle == 0 || !mDatabase.isOpen()) {
                 return;
             }
             releaseReference();
-            // set all database objects to null/0, so that the user can't use a closed Object.
-            mCompiledSql = null;
-            nStatement = 0;
-            nHandle = 0;
         }
     }
 
@@ -366,6 +391,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     protected final native void native_bind_double(int index, double value);
     protected final native void native_bind_string(int index, String value);
     protected final native void native_bind_blob(int index, byte[] value);
-    private final native void native_clear_bindings();
+    /* package */ final native void native_clear_bindings();
 }
 

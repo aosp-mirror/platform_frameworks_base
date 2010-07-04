@@ -29,6 +29,7 @@ import dalvik.system.BlockGuard;
  * SQLiteStatement is not internally synchronized so code using a SQLiteStatement from multiple
  * threads should perform its own synchronization when using the SQLiteStatement.
  */
+@SuppressWarnings("deprecation")
 public class SQLiteStatement extends SQLiteProgram
 {
     private static final boolean READ = true;
@@ -41,7 +42,7 @@ public class SQLiteStatement extends SQLiteProgram
      * @param sql
      */
     /* package */ SQLiteStatement(SQLiteDatabase db, String sql) {
-        super(db, sql);
+        super(db, sql, false /* don't compile sql statement */);
     }
 
     /**
@@ -134,7 +135,7 @@ public class SQLiteStatement extends SQLiteProgram
      * methods in this class.
      */
     private long acquireAndLock(boolean rwFlag) {
-        mDatabase.verifyDbIsOpen();
+        verifyDbAndCompileSql();
         if (rwFlag == WRITE) {
             BlockGuard.getThreadPolicy().onWriteToDisk();
         } else {
@@ -153,6 +154,10 @@ public class SQLiteStatement extends SQLiteProgram
     private void releaseAndUnlock() {
         releaseReference();
         mDatabase.unlock();
+        clearBindings();
+        // release the compiled sql statement so that the caller's SQLiteStatement no longer
+        // has a hard reference to a database object that may get deallocated at any point.
+        releaseCompiledSqlIfNotInCache();
     }
 
     private final native void native_execute();
