@@ -28,7 +28,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(GenerationCache<SkBitmap, Texture>::kUnlimitedCapacity),
+        mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }
@@ -60,7 +60,7 @@ void TextureCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextureCache::operator()(SkBitmap* bitmap, Texture* texture) {
+void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
     if (bitmap) {
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         mSize -= size;

@@ -39,7 +39,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(SkBitmap* bitmap, Texture* texture);
+    void operator()(SkBitmap*& bitmap, Texture*& texture);
 
     /**
      * Returns the texture associated with the specified bitmap. If the texture
@@ -78,7 +78,7 @@ private:
      */
     void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
 
-    GenerationCache<SkBitmap, Texture> mCache;
+    GenerationCache<SkBitmap*, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

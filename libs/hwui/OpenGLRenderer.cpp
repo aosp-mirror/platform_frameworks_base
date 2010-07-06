@@ -34,18 +34,29 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
+// Debug
+#define DEBUG_LAYERS 0
+
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
 
+#define DEFAULT_TEXTURE_CACHE_SIZE 20
+#define DEFAULT_LAYER_CACHE_SIZE 10
+
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
 
-#define DEFAULT_TEXTURE_CACHE_SIZE MB(20)
-#define DEFAULT_LAYER_CACHE_SIZE MB(10)
-
+// Generates simple and textured vertices
 #define SV(x, y) { { x, y } }
 #define FV(x, y, u, v) { { x, y }, { u, v } }
+
+// Debug
+#ifdef DEBUG_LAYERS
+    #define LAYER_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define LAYER_LOGD(...)
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
@@ -92,12 +103,24 @@ static const Blender gBlends[] = {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-OpenGLRenderer::OpenGLRenderer(): mTextureCache(DEFAULT_TEXTURE_CACHE_SIZE) {
+OpenGLRenderer::OpenGLRenderer():
+        mTextureCache(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
+        mLayerCache(MB(DEFAULT_LAYER_CACHE_SIZE)) {
     LOGD("Create OpenGLRenderer");
 
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting texture cache size to %sMB", property);
         mTextureCache.setMaxSize(MB(atoi(property)));
+    } else {
+        LOGD("  Using default texture cache size of %dMB", DEFAULT_TEXTURE_CACHE_SIZE);
+    }
+
+    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
+        LOGD("  Setting layer cache size to %sMB", property);
+        mLayerCache.setMaxSize(MB(atoi(property)));
+    } else {
+        LOGD("  Using default layer cache size of %dMB", DEFAULT_LAYER_CACHE_SIZE);
     }
 
     mDrawColorShader = new DrawColorProgram;
@@ -110,6 +133,7 @@ OpenGLRenderer::~OpenGLRenderer() {
     LOGD("Destroy OpenGLRenderer");
 
     mTextureCache.clear();
+    mLayerCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -205,6 +229,11 @@ bool OpenGLRenderer::restoreSnapshot() {
 }
 
 void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
+    if (!current->layer) {
+        LOGE("Attempting to compose a layer that does not exist");
+        return;
+    }
+
     // Unbind current FBO and restore previous one
     // Most of the time, previous->fbo will be 0 to bind the default buffer
     glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
@@ -213,17 +242,25 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const Rect& clip = previous->getMappedClip();
     glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
 
+    Layer* layer = current->layer;
+
     // Compute the correct texture coordinates for the FBO texture
     // The texture is currently as big as the window but drawn with
     // a quad of the appropriate size
-    const Rect& layer = current->layer;
+    const Rect& rect = layer->layer;
 
-    drawTextureRect(layer.left, layer.top, layer.right, layer.bottom,
-            current->texture, current->alpha, current->mode, true, true);
+    drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
+            layer->texture, layer->alpha, layer->mode, layer->blend, true);
 
-    // TODO Don't delete these things, but cache them
-    glDeleteFramebuffers(1, &current->fbo);
-    glDeleteTextures(1, &current->texture);
+    LayerSize size(rect.getWidth(), rect.getHeight());
+    if (!mLayerCache.put(size, layer)) {
+        LAYER_LOGD("Deleting layer");
+
+        glDeleteFramebuffers(1, &layer->fbo);
+        glDeleteTextures(1, &layer->texture);
+
+        delete layer;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -262,43 +299,62 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
 
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
-    // Generate the FBO and attach the texture
-    glGenFramebuffers(1, &snapshot->fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
 
-    // Generate the texture in which the FBO will draw
-    glGenTextures(1, &snapshot->texture);
-    glBindTexture(GL_TEXTURE_2D, snapshot->texture);
+    LayerSize size(right - left, bottom - top);
+    Layer* layer = mLayerCache.get(size);
 
-    // The FBO will not be scaled, so we can use lower quality filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    LAYER_LOGD("Requesting layer %dx%d", size.width, size.height);
+    LAYER_LOGD("Layer cache size = %d", mLayerCache.getSize());
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if (!layer) {
+        LAYER_LOGD("Creating new layer");
 
-    // TODO VERY IMPORTANT: Fix TextView to not call saveLayer() all the time
-    // TODO Use an FBO cache
+        layer = new Layer;
+        layer->blend = true;
 
-    const GLsizei width = right - left;
-    const GLsizei height = bottom - top;
+        // Generate the FBO and attach the texture
+        glGenFramebuffers(1, &layer->fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
 
-    const GLint format = (flags & SkCanvas::kHasAlphaLayer_SaveFlag) ? GL_RGBA : GL_RGB;
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL);
-    glBindTexture(GL_TEXTURE_2D, 0);
+        // Generate the texture in which the FBO will draw
+        glGenTextures(1, &layer->texture);
+        glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-    // Bind texture to FBO
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            snapshot->texture, 0);
+        // The FBO will not be scaled, so we can use lower quality filtering
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LOGD("Framebuffer incomplete (GL error code 0x%x)", status);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        glDeleteFramebuffers(1, &snapshot->fbo);
-        glDeleteTextures(1, &snapshot->texture);
+        // TODO VERY IMPORTANT: Fix TextView to not call saveLayer() all the time
 
-        return false;
+        const GLsizei width = right - left;
+        const GLsizei height = bottom - top;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Bind texture to FBO
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                layer->texture, 0);
+
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LOGD("Framebuffer incomplete (GL error code 0x%x)", status);
+
+            GLuint previousFbo = snapshot->previous.get() ? snapshot->previous->fbo : 0;
+            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+
+            glDeleteFramebuffers(1, &layer->fbo);
+            glDeleteTextures(1, &layer->texture);
+            delete layer;
+
+            return false;
+        }
+    } else {
+        LAYER_LOGD("Reusing layer");
+        glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
     }
 
     // Clear the FBO
@@ -307,10 +363,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_SCISSOR_TEST);
 
+    // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
-    snapshot->mode = mode;
-    snapshot->alpha = alpha / 255.0f;
-    snapshot->layer.set(left, top, right, bottom);
+    layer->mode = mode;
+    layer->alpha = alpha / 255.0f;
+    layer->layer.set(left, top, right, bottom);
+
+    snapshot->layer = layer;
+    snapshot->fbo = layer->fbo;
 
     // Creates a new snapshot to draw into the FBO
     saveSnapshot();

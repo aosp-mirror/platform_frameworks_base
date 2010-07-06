@@ -20,10 +20,9 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <SkXfermode.h>
-
 #include <utils/RefBase.h>
 
+#include "Layer.h"
 #include "Matrix.h"
 #include "Rect.h"
 
@@ -41,8 +40,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot() {
-    }
+    Snapshot(): layer(NULL), fbo(0) { }
 
     /**
      * Copies the specified snapshot. Only the transform and clip rectangle
@@ -56,10 +54,8 @@ public:
             clipRect(s->clipRect),
             flags(kFlagDirtyTransform),
             previous(s),
-            layer(0.0f, 0.0f, 0.0f, 0.0f),
-            texture(0),
-            fbo(0),
-            alpha(255) {
+            layer(NULL),
+            fbo(s->fbo) {
     }
 
     /**
@@ -126,30 +122,10 @@ public:
     sp<Snapshot> previous;
 
     /**
-     * Coordinates of the layer corresponding to this snapshot.
      * Only set when the flag kFlagIsLayer is set.
      */
-    Rect layer;
-    /**
-     * Name of the texture used to render the layer.
-     * Only set when the flag kFlagIsLayer is set.
-     */
-    GLuint texture;
-    /**
-     * Name of the FBO used to render the layer.
-     * Only set when the flag kFlagIsLayer is set.
-     */
+    Layer* layer;
     GLuint fbo;
-    /**
-     * Opacity of the layer.
-     * Only set when the flag kFlagIsLayer is set.
-     */
-    float alpha;
-    /**
-     * Blending mode of the layer.
-     * Only set when the flag kFlagIsLayer is set.
-     */
-    SkXfermode::Mode mode;
 
     /**
      * Contains the previous ortho matrix.
