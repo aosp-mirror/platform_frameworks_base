@@ -134,14 +134,14 @@ final class FragmentState implements Parcelable {
  * that can be placed in an {@link Activity}.
  */
 public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener {
-    private static final HashMap<String, Class> sClassMap =
-            new HashMap<String, Class>();
+    private static final HashMap<String, Class<?>> sClassMap =
+            new HashMap<String, Class<?>>();
     
-    static final int INITIALIZING = 0;  // Not yet created.
-    static final int CREATED = 1;       // Created.
-    static final int CONTENT = 2;       // View hierarchy content available.
-    static final int STARTED = 3;       // Created and started, not resumed.
-    static final int RESUMED = 4;       // Created started and resumed.
+    static final int INITIALIZING = 0;     // Not yet created.
+    static final int CREATED = 1;          // Created.
+    static final int ACTIVITY_CREATED = 2; // The activity has finished its creation.
+    static final int STARTED = 3;          // Created and started, not resumed.
+    static final int RESUMED = 4;          // Created started and resumed.
     
     int mState = INITIALIZING;
     
@@ -210,6 +210,17 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // The View generated for this fragment.
     View mView;
     
+    LoaderManager mLoaderManager;
+    boolean mStarted;
+    
+    /**
+     * Default constructor.  <strong>Every</string> fragment must have an
+     * empty constructor, so it can be instantiated when restoring its
+     * activity's state.  It is strongly recommended that subclasses do not
+     * have other constructors with parameters, since these constructors
+     * will not be called when the fragment is re-instantiated; instead,
+     * retrieve such parameters from the activity in {@link #onAttach(Activity)}.
+     */
     public Fragment() {
     }
 
@@ -217,7 +228,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
             throws NoSuchMethodException, ClassNotFoundException,
             IllegalArgumentException, InstantiationException,
             IllegalAccessException, InvocationTargetException {
-        Class clazz = sClassMap.get(fname);
+        Class<?> clazz = sClassMap.get(fname);
 
         if (clazz == null) {
             // Class not found in the cache, see if it's real, and try to add it
@@ -350,7 +361,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * will be, because the fragment is being detached from its current activity).
      * <li> {@link #onCreate(Bundle)} will not be called since the fragment
      * is not being re-created.
-     * <li> {@link #onAttach(Activity)} and {@link #onReady(Bundle)} <b>will</b>
+     * <li> {@link #onAttach(Activity)} and {@link #onActivityCreated(Bundle)} <b>will</b>
      * still be called.
      * </ul>
      */
@@ -376,6 +387,17 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
                 mActivity.invalidateOptionsMenu();
             }
         }
+    }
+    
+    /**
+     * Return the LoaderManager for this fragment, creating it if needed.
+     */
+    public LoaderManager getLoaderManager() {
+        if (mLoaderManager != null) {
+            return mLoaderManager;
+        }
+        mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted);
+        return mLoaderManager;
     }
     
     /**
@@ -446,7 +468,15 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     
     /**
      * Called to do initial creation of a fragment.  This is called after
-     * {@link #onAttach(Activity)} and before {@link #onReady(Bundle)}.
+     * {@link #onAttach(Activity)} and before
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * 
+     * <p>Note that this can be called while the fragment's activity is
+     * still in the process of being created.  As such, you can not rely
+     * on things like the activity's content view hierarchy being initialized
+     * at this point.  If you want to do work once the activity itself is
+     * created, see {@link #onActivityCreated(Bundle)}.
+     * 
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
@@ -458,7 +488,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * Called to have the fragment instantiate its user interface view.
      * This is optional, and non-graphical fragments can return null (which
      * is the default implementation).  This will be called between
-     * {@link #onCreate(Bundle)} and {@link #onReady(Bundle)}.
+     * {@link #onCreate(Bundle)} and {@link #onActivityCreated(Bundle)}.
      * 
      * <p>If you return a View from here, you will later be called in
      * {@link #onDestroyView} when the view is being released.
@@ -483,16 +513,19 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
     
     /**
-     * Called when the activity is ready for the fragment to run.  This is
-     * most useful for fragments that use {@link #setRetainInstance(boolean)}
-     * instance, as this tells the fragment when it is fully associated with
+     * Called when the fragment's activity has been created and this
+     * fragment's view hierarchy instantiated.  It can be used to do final
+     * initialization once these pieces are in place, such as retrieving
+     * views or restoring state.  It is also useful for fragments that use
+     * {@link #setRetainInstance(boolean)} to retain their instance,
+     * as this callback tells the fragment when it is fully associated with
      * the new activity instance.  This is called after {@link #onCreateView}
      * and before {@link #onStart()}.
      * 
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
-    public void onReady(Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         mCalled = true;
     }
     
@@ -503,6 +536,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onStart() {
         mCalled = true;
+        mStarted = true;
+        if (mLoaderManager != null) {
+            mLoaderManager.doStart();
+        }
     }
     
     /**
@@ -538,6 +575,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onStop() {
         mCalled = true;
+        mStarted = false;
+        if (mLoaderManager != null) {
+            mLoaderManager.doStop();
+        }
     }
     
     public void onLowMemory() {
@@ -561,6 +602,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onDestroy() {
         mCalled = true;
+        if (mLoaderManager != null) {
+            mLoaderManager.doDestroy();
+        }
     }
 
     /**

@@ -649,6 +649,7 @@ public class Activity extends ContextThemeWrapper
         Object activity;
         HashMap<String, Object> children;
         ArrayList<Fragment> fragments;
+        SparseArray<LoaderManager> loaders;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
     
@@ -665,6 +666,9 @@ public class Activity extends ContextThemeWrapper
     private int mTitleColor = 0;
 
     final FragmentManager mFragments = new FragmentManager();
+    
+    SparseArray<LoaderManager> mAllLoaderManagers;
+    LoaderManager mLoaderManager;
     
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
@@ -762,6 +766,29 @@ public class Activity extends ContextThemeWrapper
         return mWindow;
     }
 
+    /**
+     * Return the LoaderManager for this fragment, creating it if needed.
+     */
+    public LoaderManager getLoaderManager() {
+        if (mLoaderManager != null) {
+            return mLoaderManager;
+        }
+        mLoaderManager = getLoaderManager(-1, false);
+        return mLoaderManager;
+    }
+    
+    LoaderManager getLoaderManager(int index, boolean started) {
+        if (mAllLoaderManagers == null) {
+            mAllLoaderManagers = new SparseArray<LoaderManager>();
+        }
+        LoaderManager lm = mAllLoaderManagers.get(index);
+        if (lm == null) {
+            lm = new LoaderManager(started);
+            mAllLoaderManagers.put(index, lm);
+        }
+        return lm;
+    }
+    
     /**
      * Calls {@link android.view.Window#getCurrentFocus} on the
      * Window of this Activity to return the currently focused view.
@@ -1519,6 +1546,14 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
+     * Called when a Fragment is being attached to this activity, immediately
+     * after the call to its {@link Fragment#onAttach Fragment.onAttach()}
+     * method and before {@link Fragment#onCreate Fragment.onCreate()}.
+     */
+    public void onAttachFragment(Fragment fragment) {
+    }
+    
+    /**
      * Wrapper around
      * {@link ContentResolver#query(android.net.Uri , String[], String, String[], String)}
      * that gives the resulting {@link Cursor} to call
@@ -2060,13 +2095,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     public void onContentChanged() {
-        // First time content is available, let the fragment manager
-        // attach all of the fragments to it.  Don't do this if the
-        // activity is no longer attached (because it is being destroyed).
-        if (mFragments.mCurState < Fragment.CONTENT
-                && mFragments.mActivity != null) {
-            mFragments.moveToState(Fragment.CONTENT, false);
-        }
     }
 
     /**
@@ -4024,6 +4052,7 @@ public class Activity extends ContextThemeWrapper
 
     final void performCreate(Bundle icicle) {
         onCreate(icicle);
+        mFragments.dispatchActivityCreated();
     }
     
     final void performStart() {

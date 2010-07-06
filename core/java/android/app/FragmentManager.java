@@ -162,6 +162,7 @@ public class FragmentManager {
                         throw new SuperNotCalledException("Fragment " + f
                                 + " did not call through to super.onAttach()");
                     }
+                    mActivity.onAttachFragment(f);
                     
                     if (!f.mRetaining) {
                         f.mCalled = false;
@@ -216,15 +217,15 @@ public class FragmentManager {
                         }
                         
                         f.mCalled = false;
-                        f.onReady(f.mSavedFragmentState);
+                        f.onActivityCreated(f.mSavedFragmentState);
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onReady()");
                         }
                         f.mSavedFragmentState = null;
                     }
-                case Fragment.CONTENT:
-                    if (newState > Fragment.CONTENT) {
+                case Fragment.ACTIVITY_CREATED:
+                    if (newState > Fragment.ACTIVITY_CREATED) {
                         if (DEBUG) Log.v(TAG, "moveto STARTED: " + f);
                         f.mCalled = false;
                         f.onStart();
@@ -266,8 +267,8 @@ public class FragmentManager {
                                     + " did not call through to super.onStop()");
                         }
                     }
-                case Fragment.CONTENT:
-                    if (newState < Fragment.CONTENT) {
+                case Fragment.ACTIVITY_CREATED:
+                    if (newState < Fragment.ACTIVITY_CREATED) {
                         if (DEBUG) Log.v(TAG, "movefrom CONTENT: " + f);
                         if (f.mView != null) {
                             f.mCalled = false;
@@ -783,6 +784,10 @@ public class FragmentManager {
         moveToState(Fragment.CREATED, false);
     }
     
+    public void dispatchActivityCreated() {
+        moveToState(Fragment.ACTIVITY_CREATED, false);
+    }
+    
     public void dispatchStart() {
         moveToState(Fragment.STARTED, false);
     }
@@ -796,7 +801,7 @@ public class FragmentManager {
     }
     
     public void dispatchStop() {
-        moveToState(Fragment.CONTENT, false);
+        moveToState(Fragment.ACTIVITY_CREATED, false);
     }
     
     public void dispatchDestroy() {

@@ -160,7 +160,6 @@ public class ListFragment extends Fragment {
     TextView mStandardEmptyView;
     View mProgressContainer;
     View mListContainer;
-    boolean mSetEmptyView;
     boolean mListShown;
 
     public ListFragment() {
@@ -185,8 +184,8 @@ public class ListFragment extends Fragment {
      * Attach to list view once Fragment is ready to run.
      */
     @Override
-    public void onReady(Bundle savedInstanceState) {
-        super.onReady(savedInstanceState);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         ensureList();
     }
 
@@ -269,10 +268,7 @@ public class ListFragment extends Fragment {
         if (mStandardEmptyView == null) {
             throw new IllegalStateException("Can't be used with a custom content view");
         }
-        if (!mSetEmptyView) {
-            mSetEmptyView = true;
-            mList.setEmptyView(mStandardEmptyView);
-        }
+        mList.setEmptyView(mStandardEmptyView);
     }
     
     /**
