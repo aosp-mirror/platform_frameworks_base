@@ -27,7 +27,7 @@ template<typename EntryKey, typename EntryValue>
 class OnEntryRemoved {
 public:
     virtual ~OnEntryRemoved() { };
-    virtual void operator()(EntryKey key, EntryValue value) = 0;
+    virtual void operator()(EntryKey& key, EntryValue& value) = 0;
 }; // class OnEntryRemoved
 
 template<typename K, typename V>
@@ -40,15 +40,15 @@ public:
         kUnlimitedCapacity,
     };
 
-    void setOnEntryRemovedListener(OnEntryRemoved<K*, V*>* listener);
+    void setOnEntryRemovedListener(OnEntryRemoved<K, V>* listener);
 
     void clear();
 
-    bool contains(K* key) const;
-    V* get(K* key);
-    void put(K* key, V* value);
-    V* remove(K* key);
-    void removeOldest();
+    bool contains(K key) const;
+    V get(K key);
+    void put(K key, V value);
+    V remove(K key);
+    V removeOldest();
 
     uint32_t size() const;
 
@@ -68,18 +68,18 @@ private:
         sp<Entry<EntryKey, EntryValue> > child;
     }; // struct Entry
 
-    void addToCache(sp<Entry<K*, V*> > entry, K* key, V* value);
-    void attachToCache(sp<Entry<K*, V*> > entry);
-    void detachFromCache(sp<Entry<K*, V*> > entry);
+    void addToCache(sp<Entry<K, V> > entry, K key, V value);
+    void attachToCache(sp<Entry<K, V> > entry);
+    void detachFromCache(sp<Entry<K, V> > entry);
 
     uint32_t mMaxCapacity;
 
-    OnEntryRemoved<K*, V*>* mListener;
+    OnEntryRemoved<K, V>* mListener;
 
-    KeyedVector<K*, sp<Entry<K*, V*> > > mCache;
+    KeyedVector<K, sp<Entry<K, V> > > mCache;
 
-    sp<Entry<K*, V*> > mOldest;
-    sp<Entry<K*, V*> > mYougest;
+    sp<Entry<K, V> > mOldest;
+    sp<Entry<K, V> > mYougest;
 }; // class GenerationCache
 
 template<typename K, typename V>
@@ -88,7 +88,7 @@ uint32_t GenerationCache<K, V>::size() const {
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::setOnEntryRemovedListener(OnEntryRemoved<K*, V*>* listener) {
+void GenerationCache<K, V>::setOnEntryRemovedListener(OnEntryRemoved<K, V>* listener) {
     mListener = listener;
 }
 
@@ -106,15 +106,15 @@ void GenerationCache<K, V>::clear() {
 }
 
 template<typename K, typename V>
-bool GenerationCache<K, V>::contains(K* key) const {
+bool GenerationCache<K, V>::contains(K key) const {
     return mCache.indexOfKey(key) >= 0;
 }
 
 template<typename K, typename V>
-V* GenerationCache<K, V>::get(K* key) {
+V GenerationCache<K, V>::get(K key) {
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        sp<Entry<K*, V*> > entry = mCache.valueAt(index);
+        sp<Entry<K, V> > entry = mCache.valueAt(index);
         if (entry.get()) {
             detachFromCache(entry);
             attachToCache(entry);
@@ -126,24 +126,24 @@ V* GenerationCache<K, V>::get(K* key) {
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::put(K* key, V* value) {
+void GenerationCache<K, V>::put(K key, V value) {
     if (mMaxCapacity != kUnlimitedCapacity && mCache.size() >= mMaxCapacity) {
         removeOldest();
     }
 
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        sp<Entry<K*, V*> > entry = mCache.valueAt(index);
+        sp<Entry<K, V> > entry = mCache.valueAt(index);
         detachFromCache(entry);
         addToCache(entry, key, value);
     } else {
-        sp<Entry<K*, V*> > entry = new Entry<K*, V*>;
+        sp<Entry<K, V> > entry = new Entry<K, V>;
         addToCache(entry, key, value);
     }
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::addToCache(sp<Entry<K*, V*> > entry, K* key, V* value) {
+void GenerationCache<K, V>::addToCache(sp<Entry<K, V> > entry, K key, V value) {
     entry->key = key;
     entry->value = value;
     mCache.add(key, entry);
@@ -151,29 +151,33 @@ void GenerationCache<K, V>::addToCache(sp<Entry<K*, V*> > entry, K* key, V* valu
 }
 
 template<typename K, typename V>
-V* GenerationCache<K, V>::remove(K* key) {
+V GenerationCache<K, V>::remove(K key) {
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        sp<Entry<K*, V*> > entry = mCache.valueAt(index);
+        sp<Entry<K, V> > entry = mCache.valueAt(index);
         if (mListener) {
             (*mListener)(entry->key, entry->value);
         }
         mCache.removeItemsAt(index, 1);
         detachFromCache(entry);
+
+        return entry->value;
     }
 
     return NULL;
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::removeOldest() {
+V GenerationCache<K, V>::removeOldest() {
     if (mOldest.get()) {
-        remove(mOldest->key);
+        return remove(mOldest->key);
     }
+
+    return NULL;
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::attachToCache(sp<Entry<K*, V*> > entry) {
+void GenerationCache<K, V>::attachToCache(sp<Entry<K, V> > entry) {
     if (!mYougest.get()) {
         mYougest = mOldest = entry;
     } else {
@@ -184,7 +188,7 @@ void GenerationCache<K, V>::attachToCache(sp<Entry<K*, V*> > entry) {
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::detachFromCache(sp<Entry<K*, V*> > entry) {
+void GenerationCache<K, V>::detachFromCache(sp<Entry<K, V> > entry) {
     if (entry->parent.get()) {
         entry->parent->child = entry->child;
     }

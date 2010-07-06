@@ -32,7 +32,9 @@
 #include "Rect.h"
 #include "Snapshot.h"
 #include "Texture.h"
+#include "Layer.h"
 #include "TextureCache.h"
+#include "LayerCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -240,6 +242,7 @@ private:
 
     // Used to cache all drawBitmap textures
     TextureCache mTextureCache;
+    LayerCache mLayerCache;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer
