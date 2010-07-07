@@ -66,7 +66,8 @@ public:
 private:
     void deleteLayer(Layer* layer);
 
-    GenerationMultiCache<LayerSize, Layer*> mCache;
+    GenerationCache<LayerSize, Layer*> mCache;
+    uint32_t mIdGenerator;
 
     uint32_t mSize;
     uint32_t mMaxSize;

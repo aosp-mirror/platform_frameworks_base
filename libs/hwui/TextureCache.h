@@ -78,7 +78,7 @@ private:
      */
     void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
 
-    GenerationSingleCache<SkBitmap*, Texture*> mCache;
+    GenerationCache<SkBitmap*, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

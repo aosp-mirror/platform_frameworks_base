@@ -28,8 +28,8 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 LayerCache::LayerCache(uint32_t maxByteSize):
-        mCache(GenerationMultiCache<LayerSize, Layer*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
+        mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
+        mIdGenerator(1), mSize(0), mMaxSize(maxByteSize) {
 }
 
 LayerCache::~LayerCache() {
@@ -101,6 +101,7 @@ bool LayerCache::put(LayerSize& layerSize, Layer* layer) {
             deleteLayer(oldest);
         }
 
+        layerSize.id = mIdGenerator++;
         mCache.put(layerSize, layer);
         mSize += size;
 
