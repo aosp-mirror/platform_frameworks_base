@@ -186,9 +186,9 @@ float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_i
 }
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
-        ALooper_callbackFunc callback, void* data) {
+        ALooper_callbackFunc* callback, void* data) {
     queue->setPollLoop(static_cast<android::PollLoop*>(looper));
-    ALooper_setCallback(looper, queue->getConsumer().getChannel()->getReceivePipeFd(),
+    ALooper_addFd(looper, queue->getConsumer().getChannel()->getReceivePipeFd(),
             POLLIN, callback, data);
 }
 

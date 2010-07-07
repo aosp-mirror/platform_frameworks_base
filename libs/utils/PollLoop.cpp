@@ -25,8 +25,9 @@ static pthread_mutex_t gTLSMutex = PTHREAD_MUTEX_INITIALIZER;
 static bool gHaveTLS = false;
 static pthread_key_t gTLS = 0;
 
-PollLoop::PollLoop() :
-        mPolling(false), mWaiters(0) {
+PollLoop::PollLoop(bool allowNonCallbacks) :
+        mAllowNonCallbacks(allowNonCallbacks), mPolling(false),
+        mWaiters(0), mPendingFdsPos(0) {
     openWakePipe();
 }
 
@@ -106,7 +107,18 @@ void PollLoop::closeWakePipe() {
     //       method is currently only called by the destructor.
 }
 
-bool PollLoop::pollOnce(int timeoutMillis) {
+int32_t PollLoop::pollOnce(int timeoutMillis, int* outEvents, void** outData) {
+    // If there are still pending fds from the last call, dispatch those
+    // first, to avoid an earlier fd from starving later ones.
+    const size_t pendingFdsCount = mPendingFds.size();
+    if (mPendingFdsPos < pendingFdsCount) {
+        const PendingCallback& pending = mPendingFds.itemAt(mPendingFdsPos);
+        mPendingFdsPos++;
+        if (outEvents != NULL) *outEvents = pending.events;
+        if (outData != NULL) *outData = pending.data;
+        return pending.fd;
+    }
+    
     mLock.lock();
     while (mWaiters != 0) {
         mResume.wait(mLock);
@@ -114,7 +126,7 @@ bool PollLoop::pollOnce(int timeoutMillis) {
     mPolling = true;
     mLock.unlock();
 
-    bool result;
+    int32_t result;
     size_t requestedCount = mRequestedFds.size();
 
 #if DEBUG_POLL_AND_WAKE
@@ -131,7 +143,7 @@ bool PollLoop::pollOnce(int timeoutMillis) {
 #if DEBUG_POLL_AND_WAKE
         LOGD("%p ~ pollOnce - timeout", this);
 #endif
-        result = false;
+        result = POLL_TIMEOUT;
         goto Done;
     }
 
@@ -143,7 +155,7 @@ bool PollLoop::pollOnce(int timeoutMillis) {
         if (errno != EINTR) {
             LOGW("Poll failed with an unexpected error, errno=%d", errno);
         }
-        result = false;
+        result = POLL_ERROR;
         goto Done;
     }
 
@@ -156,38 +168,44 @@ bool PollLoop::pollOnce(int timeoutMillis) {
 #endif
 
     mPendingCallbacks.clear();
+    mPendingFds.clear();
+    mPendingFdsPos = 0;
+    if (outEvents != NULL) *outEvents = 0;
+    if (outData != NULL) *outData = NULL;
+    
+    result = POLL_CALLBACK;
     for (size_t i = 0; i < requestedCount; i++) {
         const struct pollfd& requestedFd = mRequestedFds.itemAt(i);
 
         short revents = requestedFd.revents;
         if (revents) {
             const RequestedCallback& requestedCallback = mRequestedCallbacks.itemAt(i);
-            Callback callback = requestedCallback.callback;
-            ALooper_callbackFunc* looperCallback = requestedCallback.looperCallback;
+            PendingCallback pending;
+            pending.fd = requestedFd.fd;
+            pending.events = revents;
+            pending.callback = requestedCallback.callback;
+            pending.looperCallback = requestedCallback.looperCallback;
+            pending.data = requestedCallback.data;
 
-            if (callback || looperCallback) {
-                PendingCallback pendingCallback;
-                pendingCallback.fd = requestedFd.fd;
-                pendingCallback.events = requestedFd.revents;
-                pendingCallback.callback = callback;
-                pendingCallback.looperCallback = looperCallback;
-                pendingCallback.data = requestedCallback.data;
-                mPendingCallbacks.push(pendingCallback);
-            } else {
-                if (requestedFd.fd == mWakeReadPipeFd) {
-#if DEBUG_POLL_AND_WAKE
-                    LOGD("%p ~ pollOnce - awoken", this);
-#endif
-                    char buffer[16];
-                    ssize_t nRead;
-                    do {
-                        nRead = read(mWakeReadPipeFd, buffer, sizeof(buffer));
-                    } while (nRead == sizeof(buffer));
+            if (pending.callback || pending.looperCallback) {
+                mPendingCallbacks.push(pending);
+            } else if (pending.fd != mWakeReadPipeFd) {
+                if (result == POLL_CALLBACK) {
+                    result = pending.fd;
+                    if (outEvents != NULL) *outEvents = pending.events;
+                    if (outData != NULL) *outData = pending.data;
                 } else {
-#if DEBUG_POLL_AND_WAKE || DEBUG_CALLBACKS
-                    LOGD("%p ~ pollOnce - fd %d has no callback!", this, requestedFd.fd);
-#endif
+                    mPendingFds.push(pending);
                 }
+            } else {
+#if DEBUG_POLL_AND_WAKE
+                LOGD("%p ~ pollOnce - awoken", this);
+#endif
+                char buffer[16];
+                ssize_t nRead;
+                do {
+                    nRead = read(mWakeReadPipeFd, buffer, sizeof(buffer));
+                } while (nRead == sizeof(buffer));
             }
 
             respondedCount -= 1;
@@ -196,7 +214,6 @@ bool PollLoop::pollOnce(int timeoutMillis) {
             }
         }
     }
-    result = true;
 
 Done:
     mLock.lock();
@@ -206,7 +223,7 @@ Done:
     }
     mLock.unlock();
 
-    if (result) {
+    if (result == POLL_CALLBACK || result >= 0) {
         size_t pendingCount = mPendingCallbacks.size();
         for (size_t i = 0; i < pendingCount; i++) {
             const PendingCallback& pendingCallback = mPendingCallbacks.itemAt(i);
@@ -247,6 +264,10 @@ void PollLoop::wake() {
     }
 }
 
+bool PollLoop::getAllowNonCallbacks() const {
+    return mAllowNonCallbacks;
+}
+
 void PollLoop::setCallback(int fd, int events, Callback callback, void* data) {
     setCallbackCommon(fd, events, callback, NULL, data);
 }
@@ -263,12 +284,18 @@ void PollLoop::setCallbackCommon(int fd, int events, Callback callback,
     LOGD("%p ~ setCallback - fd=%d, events=%d", this, fd, events);
 #endif
 
-    if (! events || (! callback && ! looperCallback)) {
-        LOGE("Invalid attempt to set a callback with no selected poll events or no callback.");
+    if (! events) {
+        LOGE("Invalid attempt to set a callback with no selected poll events.");
         removeCallback(fd);
         return;
     }
 
+    if (! callback && ! looperCallback && ! mAllowNonCallbacks) {
+        LOGE("Invalid attempt to set NULL callback but not allowed.");
+        removeCallback(fd);
+        return;
+    }
+    
     wakeAndLock();
 
     struct pollfd requestedFd;
