@@ -18,21 +18,21 @@ package android.database.sqlite;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.File;
+import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SQLiteStatementTest extends AndroidTestCase {
-
     private SQLiteDatabase mDatabase;
     private File mDatabaseFile;
-    Boolean exceptionRecvd = false;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        exceptionRecvd = false;
+
         File dbDir = getContext().getDir(this.getClass().getName(), Context.MODE_PRIVATE);
         mDatabaseFile = new File(dbDir, "database_test.db");
         if (mDatabaseFile.exists()) {
@@ -49,78 +49,60 @@ public class SQLiteStatementTest extends AndroidTestCase {
         super.tearDown();
     }
 
+    /**
+     * Start 2 threads to repeatedly execute the above SQL statement.
+     * Even though 2 threads are executing the same SQL, they each should get their own copy of
+     * prepared SQL statement id and there SHOULD NOT be an error from sqlite or android.
+     * @throws InterruptedException thrown if the test threads started by this test are interrupted
+     */
     @LargeTest
-    public void testUseOfSameSqlStatementBy2Threads() throws Exception {
+    public void testUseOfSameSqlStatementBy2Threads() throws InterruptedException {
         mDatabase.execSQL("CREATE TABLE test_pstmt (i INTEGER PRIMARY KEY, j text);");
-
-        // thread 1 creates a prepared statement
         final String stmt = "SELECT * FROM test_pstmt WHERE i = ?";
-
-        // start 2 threads to do repeatedly execute "stmt"
-        // since these 2 threads are executing the same sql, they each should get
-        // their own copy and
-        // there SHOULD NOT be an error from sqlite: "prepared statement is busy"
         class RunStmtThread extends Thread {
-            private static final int N = 1000;
             @Override public void run() {
-                int i = 0;
-                try {
-                    // execute many times
-                    for (i = 0; i < N; i++) {
-                        SQLiteStatement s1 = mDatabase.compileStatement(stmt);
-                        s1.bindLong(1, i);
-                        s1.execute();
-                        s1.close();
-                    }
-                } catch (SQLiteException e) {
-                    fail("SQLiteException: " + e.getMessage());
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail("random unexpected exception: " + e.getMessage());
-                    return;
-                }
+                // do it enough times to make sure there are no corner cases going untested
+                for (int i = 0; i < 1000; i++) {
+                    SQLiteStatement s1 = mDatabase.compileStatement(stmt);
+                    s1.bindLong(1, i);
+                    s1.execute();
+                    s1.close();
+                 }
             }
         }
         RunStmtThread t1 = new RunStmtThread();
         t1.start();
         RunStmtThread t2 = new RunStmtThread();
         t2.start();
-        while (t1.isAlive() || t2.isAlive()) {
-            Thread.sleep(1000);
-        }
-    }
+         while (t1.isAlive() || t2.isAlive()) {
+             Thread.sleep(10);
+         }
+     }
 
-    @FlakyTest
-    public void testUseOfSamePreparedStatementBy2Threads() throws Exception {
+    /**
+     * A simple test: start 2 threads to repeatedly execute the same {@link SQLiteStatement}.
+     * The 2 threads take turns to use the {@link SQLiteStatement}; i.e., it is NOT in use
+     * by both the threads at the same time.
+     *
+     * @throws InterruptedException thrown if the test threads started by this test are interrupted
+     */
+    @LargeTest
+    public void testUseOfSameSqliteStatementBy2Threads() throws InterruptedException {
         mDatabase.execSQL("CREATE TABLE test_pstmt (i INTEGER PRIMARY KEY, j text);");
-
-        // thread 1 creates a prepared statement
         final String stmt = "SELECT * FROM test_pstmt WHERE i = ?";
         final SQLiteStatement s1 = mDatabase.compileStatement(stmt);
-
-        // start 2 threads to do repeatedly execute "stmt"
-        // since these 2 threads are executing the same prepared statement,
-        // should see an error from sqlite: "prepared statement is busy"
         class RunStmtThread extends Thread {
-            private static final int N = 1000;
             @Override public void run() {
-                int i = 0;
-                try {
-                    // execute many times
-                    for (i = 0; i < N; i++) {
+                // do it enough times to make sure there are no corner cases going untested
+                for (int i = 0; i < 1000; i++) {
+                    lock();
+                    try {
                         s1.bindLong(1, i);
                         s1.execute();
+                    } finally {
+                        unlock();
                     }
-                } catch (SQLiteException e) {
-                    // expect it
-                    assertTrue(e.getMessage().contains("library routine called out of sequence:"));
-                    exceptionRecvd = true;
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail("random unexpected exception: " + e.getMessage());
-                    return;
+                    Thread.yield();
                 }
             }
         }
@@ -129,33 +111,147 @@ public class SQLiteStatementTest extends AndroidTestCase {
         RunStmtThread t2 = new RunStmtThread();
         t2.start();
         while (t1.isAlive() || t2.isAlive()) {
-            Thread.sleep(1000);
+            Thread.sleep(10);
         }
-        assertTrue(exceptionRecvd);
+    }
+    /** Synchronize on this when accessing the SqliteStatemet in the above */
+    private final ReentrantLock mLock = new ReentrantLock(true);
+    private void lock() {
+        mLock.lock();
+    }
+    private void unlock() {
+        mLock.unlock();
     }
 
+    /**
+     * Tests the following: a {@link SQLiteStatement} object should not refer to a
+     * pre-compiled SQL statement id except in during the period of binding the arguments
+     * and executing the SQL statement.
+     */
+    @SmallTest
+    public void testReferenceToPrecompiledStatementId() {
+        mDatabase.execSQL("create table t (i int, j text);");
+        verifyReferenceToPrecompiledStatementId(false);
+        verifyReferenceToPrecompiledStatementId(true);
+
+        // a small stress test to make sure there are no side effects of
+        // the acquire & release of pre-compiled statement id by SQLiteStatement object.
+        for (int i = 0; i < 100; i++) {
+            verifyReferenceToPrecompiledStatementId(false);
+            verifyReferenceToPrecompiledStatementId(true);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void verifyReferenceToPrecompiledStatementId(boolean wal) {
+        if (wal) {
+            mDatabase.enableWriteAheadLogging();
+        } else {
+            mDatabase.disableWriteAheadLogging();
+        }
+        // test with INSERT statement - doesn't use connection pool, if WAL is set
+        SQLiteStatement stmt = mDatabase.compileStatement("insert into t values(?,?);");
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
+        // sql statement should not be compiled yet
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        int colValue = new Random().nextInt();
+        stmt.bindLong(1, colValue);
+        // verify that the sql statement is now compiled
+        int n = stmt.nStatement;
+        assertTrue(n > 0);
+        assertEquals(n, stmt.getSqlStatementId());
+        // should still be using the mDatabase connection - verify
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        stmt.bindString(2, "blah" + colValue);
+        assertEquals(n, stmt.nStatement);
+        stmt.executeInsert();
+        // now that the statement is executed, pre-compiled statement should be released
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
+        stmt.close();
+        // pre-compiled SQL statement should still remain released from this object
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        // but the database handle should still be the same
+        assertEquals(mDatabase, stmt.mDatabase);
+
+        // test with a SELECT statement - uses connection pool if WAL is set
+        stmt = mDatabase.compileStatement("select i from t where j=?;");
+        // sql statement should not be compiled yet
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
+        stmt.bindString(1, "blah" + colValue);
+        // verify that the sql statement is now compiled
+        n = stmt.nStatement;
+        assertTrue(n > 0);
+        assertEquals(n, stmt.getSqlStatementId());
+        SQLiteDatabase dbUsed = mDatabase;
+        if (wal) {
+            // if wal is set, should be using a pooled connection handle
+            dbUsed = mDatabase.mConnectionPool.getConnectionList().get(0);
+            assertTrue(mDatabase.mNativeHandle != dbUsed.mNativeHandle);
+        }
+        assertEquals(dbUsed.mNativeHandle, stmt.nHandle);
+        assertEquals(dbUsed, stmt.mDatabase);
+        // execute the statement
+        Long l = stmt.simpleQueryForLong();
+        assertEquals(colValue, l.intValue());
+        // now that the statement is executed, pre-compiled statement should be released
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        // but the database handle should still remain attached to the statement
+        assertEquals(dbUsed.mNativeHandle, stmt.nHandle);
+        assertEquals(dbUsed, stmt.mDatabase);
+        stmt.close();
+        // pre-compiled SQL statement should still remain released from this object
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        // but the database handle should still remain attached to the statement
+        assertEquals(dbUsed, stmt.mDatabase);
+    }
+
+    /**
+     * test to make sure SqliteStatement.nStatement is populated only during bind and execute calls.
+     */
     public void testGetSqlStatementId() {
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
                 "num1 INTEGER, num2 INTEGER, image BLOB);");
         final String statement = "DELETE FROM test WHERE _id=?;";
         SQLiteStatement statementOne = mDatabase.compileStatement(statement);
+        // sql statement is NOT compiled until the bind or execute call.
+        statementOne.bindLong(1, 1);
         SQLiteStatement statementTwo = mDatabase.compileStatement(statement);
+        statementTwo.bindLong(1, 1);
         // since the same compiled statement is being accessed at the same time by 2 different
         // objects, they each get their own statement id
         assertTrue(statementOne.getSqlStatementId() != statementTwo.getSqlStatementId());
         statementOne.close();
         statementTwo.close();
 
+        // two SQLiteStatements referring to the same SQL statement should refer to the same
+        // pre-compiled SQl statement id if the SQLiteStatement objects are NOT in use at the same
+        // time
         statementOne = mDatabase.compileStatement(statement);
+        statementOne.bindLong(1, 1);
+        // now that the SQL statement is compiled, get its pre-compiled SQL statement id
         int n = statementOne.getSqlStatementId();
         statementOne.close();
         statementTwo = mDatabase.compileStatement(statement);
+        statementTwo.bindLong(1, 2); // use different value for bindarg, just for the heck of it
         assertEquals(n, statementTwo.getSqlStatementId());
         statementTwo.close();
 
         // now try to compile 2 different statements and they should have different uniquerIds.
-        SQLiteStatement statement1 = mDatabase.compileStatement("DELETE FROM test WHERE _id=1;");
-        SQLiteStatement statement2 = mDatabase.compileStatement("DELETE FROM test WHERE _id=2;");
+        SQLiteStatement statement1 = mDatabase.compileStatement("DELETE FROM test WHERE _id > ?;");
+        statement1.bindLong(1, 1);
+        SQLiteStatement statement2 = mDatabase.compileStatement("DELETE FROM test WHERE _id < ?;");
+        statement2.bindLong(1, 11);
         assertTrue(statement1.getSqlStatementId() != statement2.getSqlStatementId());
         statement1.close();
         statement2.close();
@@ -166,8 +262,8 @@ public class SQLiteStatementTest extends AndroidTestCase {
                 "num1 INTEGER, num2 INTEGER, image BLOB);");
         final String statement = "DELETE FROM test WHERE _id=?;";
         SQLiteStatement statementOne = mDatabase.compileStatement(statement);
+        statementOne.bindLong(1, 1);
         assertTrue(statementOne.getSqlStatementId() > 0);
-        int nStatement = statementOne.getSqlStatementId();
         statementOne.releaseReference();
         assertEquals(0, statementOne.getSqlStatementId());
         statementOne.close();
@@ -178,8 +274,8 @@ public class SQLiteStatementTest extends AndroidTestCase {
                 "num1 INTEGER, num2 INTEGER, image BLOB);");
         final String statement = "DELETE FROM test WHERE _id=?;";
         SQLiteStatement statementOne = mDatabase.compileStatement(statement);
+        statementOne.bindLong(1, 1);
         assertTrue(statementOne.getSqlStatementId() > 0);
-        int nStatement = statementOne.getSqlStatementId();
         statementOne.releaseReferenceFromContainer();
         assertEquals(0, statementOne.getSqlStatementId());
         statementOne.close();

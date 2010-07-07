@@ -343,25 +343,14 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private static final String MEMORY_DB_PATH = ":memory:";
 
-    /**
-     * @param closable
-     */
-    void addSQLiteClosable(SQLiteClosable closable) {
-        lock();
-        try {
-            mPrograms.put(closable, null);
-        } finally {
-            unlock();
-        }
+    synchronized void addSQLiteClosable(SQLiteClosable closable) {
+        // mPrograms is per instance of SQLiteDatabase and it doesn't actually touch the database
+        // itself. so, there is no need to lock().
+        mPrograms.put(closable, null);
     }
 
-    void removeSQLiteClosable(SQLiteClosable closable) {
-        lock();
-        try {
-            mPrograms.remove(closable);
-        } finally {
-            unlock();
-        }
+    synchronized void removeSQLiteClosable(SQLiteClosable closable) {
+        mPrograms.remove(closable);
     }
 
     @Override
@@ -1261,6 +1250,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      * statement and fill in those values with {@link SQLiteProgram#bindString}
      * and {@link SQLiteProgram#bindLong} each time you want to run the
      * statement. Statements may not return result sets larger than 1x1.
+     *<p>
+     * No two threads should be using the same {@link SQLiteStatement} at the same time.
      *
      * @param sql The raw SQL statement, may contain ? for unknown values to be
      *            bound later.
@@ -1269,19 +1260,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
         verifyDbIsOpen();
-        String prefixSql = sql.trim().substring(0, 6);
-        SQLiteDatabase db = this;
-        // get a pooled database connection handle to use, if this is a query
-        if (prefixSql.equalsIgnoreCase("SELECT")) {
-            db = getDbConnection(sql);
-        }
-        db.lock();
-        try {
-            return new SQLiteStatement(db, sql);
-        } finally {
-            releaseDbConnection(db);
-            db.unlock();
-        }
+        return new SQLiteStatement(this, sql);
     }
 
     /**
@@ -2354,7 +2333,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         return true;
     }
 
-    private synchronized void disableWriteAheadLogging() {
+    /**
+     * package visibility only for testing purposes
+     */
+    /* package */ synchronized void disableWriteAheadLogging() {
         if (mConnectionPool == null) {
             return;
         }
@@ -2394,7 +2376,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         return this.mConnectionNum > 0;
     }
 
-    private SQLiteDatabase getDbConnection(String sql) {
+    /* package */ SQLiteDatabase getDbConnection(String sql) {
         verifyDbIsOpen();
 
         // use the current connection handle if
