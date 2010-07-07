@@ -28,13 +28,12 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 LayerCache::LayerCache(uint32_t maxByteSize):
-        mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
+        mCache(GenerationMultiCache<LayerSize, Layer*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
 }
 
 LayerCache::~LayerCache() {
-    mCache.setOnEntryRemovedListener(this);
-    mCache.clear();
+    clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
