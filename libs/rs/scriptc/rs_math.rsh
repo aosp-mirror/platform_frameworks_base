@@ -1,3 +1,6 @@
+#ifndef __RS_MATH_RSH__
+#define __RS_MATH_RSH__
+
 #include "rs_cl.rsh"
 #include "rs_core.rsh"
 
@@ -52,4 +55,4 @@ extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation inpu
 extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, int xStart, int yStart, int xEnd, int yEnd);
 extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output, int xStart, int yStart, int xEnd, int yEnd);
 
-
+#endif
