@@ -164,6 +164,10 @@ void OMX::binderDied(const wp<IBinder> &the_late_who) {
         instance = mLiveNodes.editValueAt(index);
         mLiveNodes.removeItemsAt(index);
 
+        index = mDispatchers.indexOfKey(instance->nodeID());
+        CHECK(index >= 0);
+        mDispatchers.removeItemsAt(index);
+
         invalidateNodeID_l(instance->nodeID());
     }
 
@@ -240,6 +244,11 @@ status_t OMX::freeNode(node_id node) {
     ssize_t index = mLiveNodes.indexOfKey(instance->observer()->asBinder());
     CHECK(index >= 0);
     mLiveNodes.removeItemsAt(index);
+
+    index = mDispatchers.indexOfKey(node);
+    CHECK(index >= 0);
+    mDispatchers.removeItemsAt(index);
+
     instance->observer()->asBinder()->unlinkToDeath(this);
 
     return instance->freeNode(mMaster);
