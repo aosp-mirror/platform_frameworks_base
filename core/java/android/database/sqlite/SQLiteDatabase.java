@@ -1837,6 +1837,12 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Instead, you're encouraged to use {@link #insert(String, String, ContentValues)},
      * {@link #update(String, ContentValues, String, String[])}, et al, when possible.
      * </p>
+     * <p>
+     * When using {@link #enableWriteAheadLogging()}, journal_mode is
+     * automatically managed by this class. So, do not set journal_mode
+     * using "PRAGMA journal_mode'<value>" statement if your app is using
+     * {@link #enableWriteAheadLogging()}
+     * </p>
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
@@ -1903,6 +1909,12 @@ public class SQLiteDatabase extends SQLiteClosable {
      *   <li>SAVEPOINT</li>
      *   <li>PRAGMA that returns no data</li>
      * </ul>
+     * </p>
+     * <p>
+     * When using {@link #enableWriteAheadLogging()}, journal_mode is
+     * automatically managed by this class. So, do not set journal_mode
+     * using "PRAGMA journal_mode'<value>" statement if your app is using
+     * {@link #enableWriteAheadLogging()}
      * </p>
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
