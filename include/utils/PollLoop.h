@@ -22,12 +22,22 @@
 
 #include <sys/poll.h>
 
+#include <android/looper.h>
+
+struct ALooper : public android::RefBase {
+protected:
+    virtual ~ALooper() { }
+
+public:
+    ALooper() { }
+};
+
 namespace android {
 
 /**
  * A basic file descriptor polling loop based on poll() with callbacks.
  */
-class PollLoop : public RefBase {
+class PollLoop : public ALooper {
 protected:
     virtual ~PollLoop();
 
@@ -83,6 +93,11 @@ public:
     void setCallback(int fd, int events, Callback callback, void* data = NULL);
 
     /**
+     * Like setCallback(), but for the NDK callback function.
+     */
+    void setLooperCallback(int fd, int events, ALooper_callbackFunc* callback, void* data);
+    
+    /**
      * Removes the callback for a file descriptor, if one exists.
      *
      * When this method returns, it is safe to close the file descriptor since the poll loop
@@ -100,9 +115,22 @@ public:
      */
     bool removeCallback(int fd);
 
+    /**
+     * Set the given PollLoop to be associated with the
+     * calling thread.  There must be a 1:1 relationship between
+     * PollLoop and thread.
+     */
+    static void setForThread(const sp<PollLoop>& pollLoop);
+    
+    /**
+     * Return the PollLoop associated with the calling thread.
+     */
+    static sp<PollLoop> getForThread();
+    
 private:
     struct RequestedCallback {
         Callback callback;
+        ALooper_callbackFunc* looperCallback;
         void* data;
     };
 
@@ -110,6 +138,7 @@ private:
         int fd;
         int events;
         Callback callback;
+        ALooper_callbackFunc* looperCallback;
         void* data;
     };
 
@@ -130,8 +159,11 @@ private:
     void openWakePipe();
     void closeWakePipe();
 
+    void setCallbackCommon(int fd, int events, Callback callback,
+            ALooper_callbackFunc* looperCallback, void* data);
     ssize_t getRequestIndexLocked(int fd);
     void wakeAndLock();
+    static void threadDestructor(void *st);
 };
 
 } // namespace android

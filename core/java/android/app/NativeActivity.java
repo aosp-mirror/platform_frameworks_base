@@ -6,7 +6,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.view.InputChannel;
@@ -33,7 +35,8 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
     
     private boolean mDestroyed;
     
-    private native int loadNativeCode(String path, MessageQueue queue);
+    private native int loadNativeCode(String path, MessageQueue queue,
+            String internalDataPath, String externalDataPath, int sdkVersion);
     private native void unloadNativeCode(int handle);
     
     private native void onStartNative(int handle);
@@ -90,7 +93,11 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback,
             throw new IllegalArgumentException("Unable to find native library: " + libname);
         }
         
-        mNativeHandle = loadNativeCode(path, Looper.myQueue());
+        mNativeHandle = loadNativeCode(path, Looper.myQueue(),
+                 getFilesDir().toString(),
+                 Environment.getExternalStorageAppFilesDirectory(ai.packageName).toString(),
+                 Build.VERSION.SDK_INT);
+        
         if (mNativeHandle == 0) {
             throw new IllegalArgumentException("Unable to load native library: " + path);
         }
