@@ -98,7 +98,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     private static final int INTRUDER_ALERT_DECAY_MS = 10000;
 
     static final int POSITION_TOP = 0;
-    static final int POSITION_BOTTOM = 0;
+    static final int POSITION_BOTTOM = 1;
 
     StatusBarPolicy mIconPolicy;
 
