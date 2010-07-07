@@ -236,14 +236,14 @@ import junit.framework.Assert;
  *
  * <h3>Building web pages to support different screen densities</h3>
  *
- * <p>The screen density of a device is based on the screen resolution. A screen with low density
- * has fewer available pixels per inch, where a screen with high density
- * has more — sometimes significantly more — pixels per inch. The density of a
+ * <p>A screen's density is based on it's screen resolution and physical size. A screen with low
+ * density has fewer available pixels per inch, where a screen with high density
+ * has more -- sometimes significantly more -- pixels per inch. The density of a
  * screen is important because, other things being equal, a UI element (such as a button) whose
  * height and width are defined in terms of screen pixels will appear larger on the lower density
- * screen and smaller on the higher density screen.
- * For simplicity, Android collapses all actual screen densities into three generalized densities:
- * high, medium, and low.</p>
+ * screen and smaller on the higher density screen. For simplicity, Android collapses all
+ * actual screen densities into three generalized densities:high, medium, and low. </p>
+ *
  * <p>By default, WebView scales a web page so that it is drawn at a size that matches the default
  * appearance on a medium density screen. So, it applies 1.5x scaling on a high density screen
  * (because its pixels are smaller) and 0.75x scaling on a low density screen (because its pixels
