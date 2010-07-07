@@ -89,11 +89,12 @@ public class StatusBarTest extends TestActivity
         new Test("Priority notification") {
             public void run() {
                 Notification not = new Notification(StatusBarTest.this,
-                                R.drawable.ic_statusbar_missedcall,
-                                "tick tick tick",
+                                R.drawable.stat_sys_phone,
+                                "Incoming call from: Imperious Leader",
                                 System.currentTimeMillis()-(1000*60*60*24),
-                                "(453) 123-2328",
-                                "", null
+                                "Imperious Leader",
+                                "(888) 555-5038",
+                                null
                                 );
                 not.flags |= Notification.FLAG_HIGH_PRIORITY;
                 Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
