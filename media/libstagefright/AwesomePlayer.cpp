@@ -371,9 +371,6 @@ void AwesomePlayer::reset_l() {
     }
     mAudioSource.clear();
 
-    if (mTimeSource != mAudioPlayer) {
-        delete mTimeSource;
-    }
     mTimeSource = NULL;
 
     delete mAudioPlayer;
@@ -494,22 +491,35 @@ void AwesomePlayer::onStreamDone() {
     }
     mStreamDoneEventPending = false;
 
-    if (mStreamDoneStatus == ERROR_END_OF_STREAM && (mFlags & LOOPING)) {
+    if (mStreamDoneStatus != ERROR_END_OF_STREAM) {
+        LOGV("MEDIA_ERROR %d", mStreamDoneStatus);
+
+        notifyListener_l(
+                MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, mStreamDoneStatus);
+
+        pause_l();
+
+        mFlags |= AT_EOS;
+        return;
+    }
+
+    const bool allDone =
+        (mVideoSource == NULL || (mFlags & VIDEO_AT_EOS))
+            && (mAudioSource == NULL || (mFlags & AUDIO_AT_EOS));
+
+    if (!allDone) {
+        return;
+    }
+
+    if (mFlags & LOOPING) {
         seekTo_l(0);
 
         if (mVideoSource != NULL) {
             postVideoEvent_l();
         }
     } else {
-        if (mStreamDoneStatus == ERROR_END_OF_STREAM) {
-            LOGV("MEDIA_PLAYBACK_COMPLETE");
-            notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
-        } else {
-            LOGV("MEDIA_ERROR %d", mStreamDoneStatus);
-
-            notifyListener_l(
-                    MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, mStreamDoneStatus);
-        }
+        LOGV("MEDIA_PLAYBACK_COMPLETE");
+        notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
 
         pause_l();
 
@@ -563,7 +573,6 @@ status_t AwesomePlayer::play_l() {
                     return err;
                 }
 
-                delete mTimeSource;
                 mTimeSource = mAudioPlayer;
 
                 deferredAudioSeek = true;
@@ -579,7 +588,7 @@ status_t AwesomePlayer::play_l() {
     }
 
     if (mTimeSource == NULL && mAudioPlayer == NULL) {
-        mTimeSource = new SystemTimeSource;
+        mTimeSource = &mSystemTimeSource;
     }
 
     if (mVideoSource != NULL) {
@@ -744,7 +753,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     mSeeking = true;
     mSeekNotificationSent = false;
     mSeekTimeUs = timeUs;
-    mFlags &= ~AT_EOS;
+    mFlags &= ~(AT_EOS | AUDIO_AT_EOS | VIDEO_AT_EOS);
 
     seekAudioIfNecessary_l();
 
@@ -924,6 +933,7 @@ void AwesomePlayer::onVideoEvent() {
                     continue;
                 }
 
+                mFlags |= VIDEO_AT_EOS;
                 postStreamDoneEvent_l(err);
                 return;
             }
@@ -968,19 +978,21 @@ void AwesomePlayer::onVideoEvent() {
         mSeekNotificationSent = false;
     }
 
+    TimeSource *ts = (mFlags & AUDIO_AT_EOS) ? &mSystemTimeSource : mTimeSource;
+
     if (mFlags & FIRST_FRAME) {
         mFlags &= ~FIRST_FRAME;
 
-        mTimeSourceDeltaUs = mTimeSource->getRealTimeUs() - timeUs;
+        mTimeSourceDeltaUs = ts->getRealTimeUs() - timeUs;
     }
 
     int64_t realTimeUs, mediaTimeUs;
-    if (mAudioPlayer != NULL
+    if (!(mFlags & AUDIO_AT_EOS) && mAudioPlayer != NULL
         && mAudioPlayer->getMediaTimeMapping(&realTimeUs, &mediaTimeUs)) {
         mTimeSourceDeltaUs = realTimeUs - mediaTimeUs;
     }
 
-    int64_t nowUs = mTimeSource->getRealTimeUs() - mTimeSourceDeltaUs;
+    int64_t nowUs = ts->getRealTimeUs() - mTimeSourceDeltaUs;
 
     int64_t latenessUs = nowUs - timeUs;
 
@@ -1081,6 +1093,8 @@ void AwesomePlayer::onCheckAudioStatus() {
     status_t finalStatus;
     if (mWatchForAudioEOS && mAudioPlayer->reachedEOS(&finalStatus)) {
         mWatchForAudioEOS = false;
+        mFlags |= AUDIO_AT_EOS;
+        mFlags |= FIRST_FRAME;
         postStreamDoneEvent_l(finalStatus);
     }
 
