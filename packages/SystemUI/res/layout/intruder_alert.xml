@@ -44,7 +44,7 @@
             android:id="@+id/alertIcon"
             android:layout_width="25dip"
             android:layout_height="25dip"
-            android:paddingLeft="6dip"
+            android:layout_marginLeft="6dip"
             android:layout_marginRight="8dip"
             />
         <TextView
