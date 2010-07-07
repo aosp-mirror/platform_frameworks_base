@@ -313,12 +313,15 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
 
         moveGapTo(end);
 
-        if (tbend - tbstart >= mGapLength + (end - start))
-            resizeFor(mText.length - mGapLength +
-                      tbend - tbstart - (end - start));
+        // Can be negative
+        final int nbNewChars = (tbend - tbstart) - (end - start);
 
-        mGapStart += tbend - tbstart - (end - start);
-        mGapLength -= tbend - tbstart - (end - start);
+        if (nbNewChars >= mGapLength) {
+            resizeFor(mText.length + nbNewChars - mGapLength);
+        }
+
+        mGapStart += nbNewChars;
+        mGapLength -= nbNewChars;
 
         if (mGapLength < 1)
             new Exception("mGapLength < 1").printStackTrace();
@@ -708,6 +711,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * the specified range of the buffer.  The kind may be Object.class to get
      * a list of all the spans regardless of type.
      */
+    @SuppressWarnings("unchecked")
     public <T> T[] getSpans(int queryStart, int queryEnd, Class<T> kind) {
         int spanCount = mSpanCount;
         Object[] spans = mSpans;
@@ -718,8 +722,8 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         int gaplen = mGapLength;
 
         int count = 0;
-        Object[] ret = null;
-        Object ret1 = null;
+        T[] ret = null;
+        T ret1 = null;
 
         for (int i = 0; i < spanCount; i++) {
             int spanStart = starts[i];
@@ -751,11 +755,13 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
             }
 
             if (count == 0) {
-                ret1 = spans[i];
+                // Safe conversion thanks to the isInstance test above
+                ret1 = (T) spans[i];
                 count++;
             } else {
                 if (count == 1) {
-                    ret = (Object[]) Array.newInstance(kind, spanCount - i + 1);
+                    // Safe conversion, but requires a suppressWarning
+                    ret = (T[]) Array.newInstance(kind, spanCount - i + 1);
                     ret[0] = ret1;
                 }
 
@@ -772,10 +778,12 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
                     }
 
                     System.arraycopy(ret, j, ret, j + 1, count - j);
-                    ret[j] = spans[i];
+                    // Safe conversion thanks to the isInstance test above
+                    ret[j] = (T) spans[i];
                     count++;
                 } else {
-                    ret[count++] = spans[i];
+                    // Safe conversion thanks to the isInstance test above
+                    ret[count++] = (T) spans[i];
                 }
             }
         }
@@ -784,17 +792,19 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
             return ArrayUtils.emptyArray(kind);
         }
         if (count == 1) {
-            ret = (Object[]) Array.newInstance(kind, 1);
+            // Safe conversion, but requires a suppressWarning
+            ret = (T[]) Array.newInstance(kind, 1);
             ret[0] = ret1;
-            return (T[]) ret;
+            return ret;
         }
         if (count == ret.length) {
-            return (T[]) ret;
+            return ret;
         }
 
-        Object[] nret = (Object[]) Array.newInstance(kind, count);
+        // Safe conversion, but requires a suppressWarning
+        T[] nret = (T[]) Array.newInstance(kind, count);
         System.arraycopy(ret, 0, nret, 0, count);
-        return (T[]) nret;
+        return nret;
     }
 
     /**
@@ -863,6 +873,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     /**
      * Return a String containing a copy of the chars in this buffer.
      */
+    @Override
     public String toString() {
         int len = length();
         char[] buf = new char[len];
@@ -953,6 +964,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         }
     }
 
+/*
     private boolean isprint(char c) { // XXX
         if (c >= ' ' && c <= '~')
             return true;
@@ -960,7 +972,6 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
             return false;
     }
 
-/*
     private static final int startFlag(int flag) {
         return (flag >> 4) & 0x0F;
     }
@@ -1169,7 +1180,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
                     flags, offset, cursorOpt);
         } else if (contextStart >= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart + mGapLength, contextLen,
-                    flags, offset + mGapLength, cursorOpt);
+                    flags, offset + mGapLength, cursorOpt) - mGapLength;
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
