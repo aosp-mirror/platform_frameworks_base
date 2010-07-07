@@ -52,7 +52,7 @@ namespace uirenderer {
 #define FV(x, y, u, v) { { x, y }, { u, v } }
 
 // Debug
-#ifdef DEBUG_LAYERS
+#if DEBUG_LAYERS
     #define LAYER_LOGD(...) LOGD(__VA_ARGS__)
 #else
     #define LAYER_LOGD(...)

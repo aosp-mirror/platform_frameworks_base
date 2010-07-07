@@ -6,6 +6,7 @@ LOCAL_SRC_FILES:= \
 	Matrix.cpp \
 	OpenGLRenderer.cpp \
 	Program.cpp \
+	SortedList.cpp \
 	TextureCache.cpp
 
 LOCAL_C_INCLUDES += \
