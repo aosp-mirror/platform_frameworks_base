@@ -91,8 +91,9 @@ public class Program extends BaseObj {
             mTextureCount = 0;
         }
 
-        public void setShader(String s) {
+        public BaseProgramBuilder setShader(String s) {
             mShader = s;
+            return this;
         }
 
         public void addInput(Element e) throws IllegalStateException {
@@ -120,12 +121,13 @@ public class Program extends BaseObj {
             return mConstantCount++;
         }
 
-        public void setTextureCount(int count) throws IllegalArgumentException {
+        public BaseProgramBuilder setTextureCount(int count) throws IllegalArgumentException {
             // Should check for consistant and non-conflicting names...
             if(count >= MAX_CONSTANT) {
                 throw new IllegalArgumentException("Max texture count exceeded.");
             }
             mTextureCount = count;
+            return this;
         }
 
         protected void initProgram(Program p) {

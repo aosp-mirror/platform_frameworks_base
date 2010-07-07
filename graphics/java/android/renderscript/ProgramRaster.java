@@ -89,16 +89,19 @@ public class ProgramRaster extends BaseObj {
             mPointSprite = false;
         }
 
-        public void setPointSpriteEnable(boolean enable) {
+        public Builder setPointSpriteEnable(boolean enable) {
             mPointSprite = enable;
+            return this;
         }
 
-        public void setPointSmoothEnable(boolean enable) {
+        public Builder setPointSmoothEnable(boolean enable) {
             mPointSmooth = enable;
+            return this;
         }
 
-        public void setLineSmoothEnable(boolean enable) {
+        public Builder setLineSmoothEnable(boolean enable) {
             mLineSmooth = enable;
+            return this;
         }
 
         static synchronized ProgramRaster internalCreate(RenderScript rs, Builder b) {

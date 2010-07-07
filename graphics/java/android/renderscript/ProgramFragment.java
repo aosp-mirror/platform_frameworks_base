@@ -106,16 +106,18 @@ public class ProgramFragment extends Program {
             mPointSpriteEnable = false;
         }
 
-        public void setTexture(EnvMode env, Format fmt, int slot)
+        public Builder setTexture(EnvMode env, Format fmt, int slot)
             throws IllegalArgumentException {
             if((slot < 0) || (slot >= MAX_TEXTURE)) {
                 throw new IllegalArgumentException("MAX_TEXTURE exceeded.");
             }
             mSlots[slot] = new Slot(env, fmt);
+            return this;
         }
 
-        public void setPointSpriteTexCoordinateReplacement(boolean enable) {
+        public Builder setPointSpriteTexCoordinateReplacement(boolean enable) {
             mPointSpriteEnable = enable;
+            return this;
         }
 
         public ProgramFragment create() {
