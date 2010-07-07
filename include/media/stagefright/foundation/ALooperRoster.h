@@ -34,6 +34,8 @@ struct ALooperRoster {
     void postMessage(const sp<AMessage> &msg, int64_t delayUs = 0);
     void deliverMessage(const sp<AMessage> &msg);
 
+    sp<ALooper> findLooper(ALooper::handler_id handlerID);
+
 private:
     struct HandlerInfo {
         sp<ALooper> mLooper;
