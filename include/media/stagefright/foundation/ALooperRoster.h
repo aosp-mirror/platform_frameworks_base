@@ -38,8 +38,8 @@ struct ALooperRoster {
 
 private:
     struct HandlerInfo {
-        sp<ALooper> mLooper;
-        sp<AHandler> mHandler;
+        wp<ALooper> mLooper;
+        wp<AHandler> mHandler;
     };
 
     Mutex mLock;
