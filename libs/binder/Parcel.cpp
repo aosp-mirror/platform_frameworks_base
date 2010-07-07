@@ -48,6 +48,9 @@
 
 #define PAD_SIZE(s) (((s)+3)&~3)
 
+// Note: must be kept in sync with android/os/StrictMode.java's PENALTY_GATHER
+#define STRICT_MODE_PENALTY_GATHER 0x100
+
 // XXX This can be made public if we want to provide
 // support for typed data.
 struct small_flat_data
@@ -440,7 +443,8 @@ bool Parcel::hasFileDescriptors() const
 // Write RPC headers.  (previously just the interface token)
 status_t Parcel::writeInterfaceToken(const String16& interface)
 {
-    writeInt32(IPCThreadState::self()->getStrictModePolicy());
+    writeInt32(IPCThreadState::self()->getStrictModePolicy() |
+               STRICT_MODE_PENALTY_GATHER);
     // currently the interface identification token is just its name as a string
     return writeString16(interface);
 }
@@ -450,9 +454,14 @@ bool Parcel::checkInterface(IBinder* binder) const
     return enforceInterface(binder->getInterfaceDescriptor());
 }
 
-bool Parcel::enforceInterface(const String16& interface) const
+bool Parcel::enforceInterface(const String16& interface,
+                              int32_t* strict_policy_out) const
 {
     int32_t strict_policy = readInt32();
+    IPCThreadState::self()->setStrictModePolicy(strict_policy);
+    if (strict_policy_out != NULL) {
+      *strict_policy_out = strict_policy;
+    }
     const String16 str(readString16());
     if (str == interface) {
         return true;

@@ -69,6 +69,17 @@ public final class StrictMode {
      */
     public static final int PENALTY_DROPBOX = 0x80;
 
+    /**
+     * Non-public penalty mode which overrides all the other penalty
+     * bits and signals that we're in a Binder call and we should
+     * ignore the other penalty bits and instead serialize back all
+     * our offending stack traces to the caller to ultimately handle
+     * in the originating process.
+     *
+     * @hide
+     */
+    public static final int PENALTY_GATHER = 0x100;
+
     /** @hide */
     public static final int PENALTY_MASK =
             PENALTY_LOG | PENALTY_DIALOG |
@@ -81,6 +92,19 @@ public final class StrictMode {
      * @param policyMask a bitmask of DISALLOW_* and PENALTY_* values.
      */
     public static void setThreadBlockingPolicy(final int policyMask) {
+        // In addition to the Java-level thread-local in Dalvik's
+        // BlockGuard, we also need to keep a native thread-local in
+        // Binder in order to propagate the value across Binder calls,
+        // even across native-only processes.  The two are kept in
+        // sync via the callback to onStrictModePolicyChange, below.
+        setBlockGuardPolicy(policyMask);
+
+        // And set the Android native version...
+        Binder.setThreadStrictModePolicy(policyMask);
+    }
+
+    // Sets the policy in Dalvik/libcore (BlockGuard)
+    private static void setBlockGuardPolicy(final int policyMask) {
         if (policyMask == 0) {
             BlockGuard.setThreadPolicy(BlockGuard.LAX_POLICY);
             return;
@@ -189,6 +213,11 @@ public final class StrictMode {
                     new ApplicationErrorReport.CrashInfo(violation);
             crashInfo.durationMillis = durationMillis;
 
+            if ((policy & PENALTY_GATHER) != 0) {
+                Log.d(TAG, "StrictMode violation via Binder call; ignoring for now.");
+                return;
+            }
+
             // Not perfect, but fast and good enough for dup suppression.
             Integer crashFingerprint = crashInfo.stackTrace.hashCode();
             long lastViolationTime = 0;
@@ -227,13 +256,23 @@ public final class StrictMode {
 
             if (violationMask != 0) {
                 violationMask |= violation.getPolicyViolation();
+                final int savedPolicy = getThreadBlockingPolicy();
                 try {
+                    // First, remove any policy before we call into the Activity Manager,
+                    // otherwise we'll infinite recurse as we try to log policy violations
+                    // to disk, thus violating policy, thus requiring logging, etc...
+                    // We restore the current policy below, in the finally block.
+                    setThreadBlockingPolicy(0);
+
                     ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
                         RuntimeInit.getApplicationObject(),
                         violationMask,
                         new ApplicationErrorReport.CrashInfo(violation));
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
+                } finally {
+                    // Restore the policy.
+                    setThreadBlockingPolicy(savedPolicy);
                 }
             }
 
@@ -243,5 +282,17 @@ public final class StrictMode {
                 System.exit(10);
             }
         }
+    }
+
+    /**
+     * Called from android_util_Binder.cpp's
+     * android_os_Parcel_enforceInterface when an incoming Binder call
+     * requires changing the StrictMode policy mask.  The role of this
+     * function is to ask Binder for its current (native) thread-local
+     * policy value and synchronize it to libcore's (Java)
+     * thread-local policy value.
+     */
+    private static void onBinderStrictModePolicyChange(int newPolicy) {
+        setBlockGuardPolicy(newPolicy);
     }
 }
