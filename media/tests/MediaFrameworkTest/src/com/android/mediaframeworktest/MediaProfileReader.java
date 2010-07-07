@@ -34,10 +34,12 @@ public class MediaProfileReader
     private static final List<AudioDecoder> audioDecoders = DecoderCapabilities.getAudioDecoders();
     private static final List<VideoEncoderCap> videoEncoders = EncoderCapabilities.getVideoEncoders();
     private static final List<AudioEncoderCap> audioEncoders = EncoderCapabilities.getAudioEncoders();
-    private static final HashMap<Integer, String> encoderMap = new HashMap<Integer, String>();
+    private static final HashMap<Integer, String> videoEncoderMap = new HashMap<Integer, String>();
+    private static final HashMap<Integer, String> audioEncoderMap = new HashMap<Integer, String>();
 
     static {
-        initEncoderMap();
+        initAudioEncoderMap();
+        initVideoEncoderMap();
     };
 
     public static List<VideoEncoderCap> getVideoEncoders() {
@@ -79,7 +81,7 @@ public class MediaProfileReader
             videoEncoder != MediaRecorder.VideoEncoder.MPEG_4_SP) {
             throw new IllegalArgumentException("Unsupported video encoder " + videoEncoder);
         }
-        return encoderMap.get(videoEncoder);
+        return videoEncoderMap.get(videoEncoder);
     }
 
     public static String getAudioCodecName(int audioEncoder) {
@@ -90,22 +92,24 @@ public class MediaProfileReader
             audioEncoder != MediaRecorder.AudioEncoder.EAAC_PLUS) {
             throw new IllegalArgumentException("Unsupported audio encodeer " + audioEncoder);
         }
-        return encoderMap.get(audioEncoder);
+        return audioEncoderMap.get(audioEncoder);
     }
 
     private MediaProfileReader() {} // Don't call me
 
-    private static void initEncoderMap() {
+    private static void initVideoEncoderMap() {
         // video encoders
-        encoderMap.put(MediaRecorder.VideoEncoder.H263, "h263");
-        encoderMap.put(MediaRecorder.VideoEncoder.H264, "h264");
-        encoderMap.put(MediaRecorder.VideoEncoder.MPEG_4_SP, "m4v");
+        videoEncoderMap.put(MediaRecorder.VideoEncoder.H263, "h263");
+        videoEncoderMap.put(MediaRecorder.VideoEncoder.H264, "h264");
+        videoEncoderMap.put(MediaRecorder.VideoEncoder.MPEG_4_SP, "m4v");
+    }
 
+    private static void initAudioEncoderMap() {
         // audio encoders
-        encoderMap.put(MediaRecorder.AudioEncoder.AMR_NB, "amrnb");
-        encoderMap.put(MediaRecorder.AudioEncoder.AMR_WB, "amrwb");
-        encoderMap.put(MediaRecorder.AudioEncoder.AAC, "aac");
-        encoderMap.put(MediaRecorder.AudioEncoder.AAC_PLUS, "aacplus");
-        encoderMap.put(MediaRecorder.AudioEncoder.EAAC_PLUS, "eaacplus");
+        audioEncoderMap.put(MediaRecorder.AudioEncoder.AMR_NB, "amrnb");
+        audioEncoderMap.put(MediaRecorder.AudioEncoder.AMR_WB, "amrwb");
+        audioEncoderMap.put(MediaRecorder.AudioEncoder.AAC, "aac");
+        audioEncoderMap.put(MediaRecorder.AudioEncoder.AAC_PLUS, "aacplus");
+        audioEncoderMap.put(MediaRecorder.AudioEncoder.EAAC_PLUS, "eaacplus");
     }
 }
