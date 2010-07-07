@@ -121,8 +121,8 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         String filename = ("/sdcard/" + videoEncoder + "_" + audioEncoder + "_" + highQuality + ".3gp");
         try {
-            Log.v(TAG, "video encoder :" + videoEncoder);
-            Log.v(TAG, "audio encoder :" + audioEncoder);
+            Log.v(TAG, "video encoder : " + videoEncoder);
+            Log.v(TAG, "audio encoder : " + audioEncoder);
             Log.v(TAG, "quality : " + (highQuality?"high": "low"));
             Log.v(TAG, "encoder : " + MediaProfileReader.getVideoCodecName(videoEncoder));
             Log.v(TAG, "audio : " + MediaProfileReader.getAudioCodecName(audioEncoder));
