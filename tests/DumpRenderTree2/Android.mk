@@ -5,6 +5,6 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_MODULE := DumpRenderTree2
+LOCAL_PACKAGE_NAME := DumpRenderTree2
 
-include $(BUILD_JAVA_LIBRARY)
+include $(BUILD_PACKAGE)
