@@ -54,10 +54,15 @@ void ALooperRoster::unregisterHandler(ALooper::handler_id handlerID) {
     Mutex::Autolock autoLock(mLock);
 
     ssize_t index = mHandlers.indexOfKey(handlerID);
-    CHECK(index >= 0);
+    CHECK_GE(index, 0);
 
     const HandlerInfo &info = mHandlers.valueAt(index);
-    info.mHandler->setID(0);
+
+    sp<AHandler> handler = info.mHandler.promote();
+
+    if (handler != NULL) {
+        handler->setID(0);
+    }
 
     mHandlers.removeItemsAt(index);
 }
@@ -74,7 +79,18 @@ void ALooperRoster::postMessage(
     }
 
     const HandlerInfo &info = mHandlers.valueAt(index);
-    info.mLooper->post(msg, delayUs);
+
+    sp<ALooper> looper = info.mLooper.promote();
+
+    if (looper == NULL) {
+        LOG(WARNING) << "failed to post message. "
+                        "Target handler still registered, but object gone.";
+
+        mHandlers.removeItemsAt(index);
+        return;
+    }
+
+    looper->post(msg, delayUs);
 }
 
 void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
@@ -86,12 +102,21 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
         ssize_t index = mHandlers.indexOfKey(msg->target());
 
         if (index < 0) {
-            LOG(WARNING) << "failed to deliver message. Target handler not registered.";
+            LOG(WARNING) << "failed to deliver message. "
+                         << "Target handler not registered.";
             return;
         }
 
         const HandlerInfo &info = mHandlers.valueAt(index);
-        handler = info.mHandler;
+        handler = info.mHandler.promote();
+
+        if (handler == NULL) {
+            LOG(WARNING) << "failed to deliver message. "
+                            "Target handler registered, but object gone.";
+
+            mHandlers.removeItemsAt(index);
+            return;
+        }
     }
 
     handler->onMessageReceived(msg);
@@ -106,7 +131,14 @@ sp<ALooper> ALooperRoster::findLooper(ALooper::handler_id handlerID) {
         return NULL;
     }
 
-    return mHandlers.valueAt(index).mLooper;
+    sp<ALooper> looper = mHandlers.valueAt(index).mLooper.promote();
+
+    if (looper == NULL) {
+        mHandlers.removeItemsAt(index);
+        return NULL;
+    }
+
+    return looper;
 }
 
 }  // namespace android
