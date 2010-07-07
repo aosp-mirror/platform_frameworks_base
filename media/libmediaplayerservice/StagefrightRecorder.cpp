@@ -426,6 +426,24 @@ status_t StagefrightRecorder::setParamTrackTimeStatus(int64_t timeDurationUs) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParamVideoEncoderProfile(int32_t profile) {
+    LOGV("setParamVideoEncoderProfile: %d", profile);
+
+    // Additional check will be done later when we load the encoder.
+    // For now, we are accepting values defined in OpenMAX IL.
+    mVideoEncoderProfile = profile;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamVideoEncoderLevel(int32_t level) {
+    LOGV("setParamVideoEncoderLevel: %d", level);
+
+    // Additional check will be done later when we load the encoder.
+    // For now, we are accepting values defined in OpenMAX IL.
+    mVideoEncoderLevel = level;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParameter(
         const String8 &key, const String8 &value) {
     LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
@@ -483,6 +501,16 @@ status_t StagefrightRecorder::setParameter(
         int32_t interval;
         if (safe_strtoi32(value.string(), &interval)) {
             return setParamVideoIFramesInterval(interval);
+        }
+    } else if (key == "video-param-encoder-profile") {
+        int32_t profile;
+        if (safe_strtoi32(value.string(), &profile)) {
+            return setParamVideoEncoderProfile(profile);
+        }
+    } else if (key == "video-param-encoder-level") {
+        int32_t level;
+        if (safe_strtoi32(value.string(), &level)) {
+            return setParamVideoEncoderLevel(level);
         }
     } else if (key == "video-param-camera-id") {
         int32_t cameraId;
@@ -854,6 +882,12 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
     enc_meta->setInt32(kKeyIFramesInterval, mIFramesInterval);
     enc_meta->setInt32(kKeyStride, stride);
     enc_meta->setInt32(kKeySliceHeight, sliceHeight);
+    if (mVideoEncoderProfile != -1) {
+        enc_meta->setInt32(kKeyVideoProfile, mVideoEncoderProfile);
+    }
+    if (mVideoEncoderLevel != -1) {
+        enc_meta->setInt32(kKeyVideoLevel, mVideoEncoderLevel);
+    }
 
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
@@ -995,6 +1029,10 @@ status_t StagefrightRecorder::reset() {
     mAudioSourceNode = 0;
     mUse64BitFileOffset = false;
     mCameraId        = 0;
+    mVideoEncoderProfile = -1;
+    mVideoEncoderLevel   = -1;
+    mMaxFileDurationUs = 0;
+    mMaxFileSizeBytes = 0;
     mTrackEveryNumberOfFrames = 0;
     mTrackEveryTimeDurationUs = 0;
     mCaptureTimeLapse = false;

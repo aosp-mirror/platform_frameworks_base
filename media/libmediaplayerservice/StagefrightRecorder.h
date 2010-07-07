@@ -82,6 +82,8 @@ private:
     int32_t mInterleaveDurationUs;
     int32_t mIFramesInterval;
     int32_t mCameraId;
+    int32_t mVideoEncoderProfile;
+    int32_t mVideoEncoderLevel;
     int64_t mMaxFileSizeBytes;
     int64_t mMaxFileDurationUs;
     int32_t mTrackEveryNumberOfFrames;
@@ -110,6 +112,8 @@ private:
     status_t setParamAudioSamplingRate(int32_t sampleRate);
     status_t setParamVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoIFramesInterval(int32_t interval);
+    status_t setParamVideoEncoderProfile(int32_t profile);
+    status_t setParamVideoEncoderLevel(int32_t level);
     status_t setParamVideoCameraId(int32_t cameraId);
     status_t setParamTrackTimeStatus(int64_t timeDurationUs);
     status_t setParamTrackFrameStatus(int32_t nFrames);
