@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_LAYERS 0
+#define DEBUG_LAYERS 1
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"

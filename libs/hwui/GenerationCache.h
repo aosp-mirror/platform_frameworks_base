@@ -20,67 +20,8 @@
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
 
-#include "SortedList.h"
-
 namespace android {
 namespace uirenderer {
-
-template<typename K, typename V>
-class GenerationCacheStorage {
-public:
-    virtual ~GenerationCacheStorage();
-
-    virtual size_t size() const = 0;
-    virtual void clear() = 0;
-    virtual ssize_t add(const K& key, const V& item) = 0;
-    virtual ssize_t indexOfKey(const K& key) const = 0;
-    virtual const V& valueAt(size_t index) const = 0;
-    virtual ssize_t removeItemsAt(size_t index, size_t count) = 0;
-}; // GenerationCacheStorage
-
-template<typename K, typename V>
-GenerationCacheStorage<K, V>::~GenerationCacheStorage() {
-}
-
-template<typename K, typename V>
-class KeyedVectorStorage: public GenerationCacheStorage<K, V> {
-public:
-    KeyedVectorStorage() { }
-    ~KeyedVectorStorage() { }
-
-    inline size_t size() const { return mStorage.size(); }
-    inline void clear() { mStorage.clear(); }
-    inline ssize_t add(const K& key, const V& value) { return mStorage.add(key, value); }
-    inline ssize_t indexOfKey(const K& key) const { return mStorage.indexOfKey(key); }
-    inline const V& valueAt(size_t index) const { return mStorage.valueAt(index); }
-    inline ssize_t removeItemsAt(size_t index, size_t count) {
-        return mStorage.removeItemsAt(index, count);
-    }
-private:
-    KeyedVector<K, V> mStorage;
-}; // class KeyedVectorStorage
-
-template<typename K, typename V>
-class SortedListStorage: public GenerationCacheStorage<K, V> {
-public:
-    SortedListStorage() { }
-    ~SortedListStorage() { }
-
-    inline size_t size() const { return mStorage.size(); }
-    inline void clear() { mStorage.clear(); }
-    inline ssize_t add(const K& key, const V& value) {
-        return mStorage.add(key_value_pair_t<K, V>(key, value));
-    }
-    inline ssize_t indexOfKey(const K& key) const {
-        return mStorage.indexOf(key_value_pair_t<K, V>(key));
-    }
-    inline const V& valueAt(size_t index) const { return mStorage.itemAt(index).value; }
-    inline ssize_t removeItemsAt(size_t index, size_t count) {
-        return mStorage.removeItemsAt(index, count);
-    }
-private:
-    SortedList<key_value_pair_t<K, V> > mStorage;
-}; // class SortedListStorage
 
 template<typename EntryKey, typename EntryValue>
 class OnEntryRemoved {
@@ -127,17 +68,13 @@ public:
 
     uint32_t size() const;
 
-protected:
-    virtual GenerationCacheStorage<K, sp<Entry<K, V> > >* createStorage() = 0;
-    GenerationCacheStorage<K, sp<Entry<K, V> > >* mCache;
-
-private:
     void addToCache(sp<Entry<K, V> > entry, K key, V value);
     void attachToCache(sp<Entry<K, V> > entry);
     void detachFromCache(sp<Entry<K, V> > entry);
 
     V removeAt(ssize_t index);
 
+    KeyedVector<K, sp<Entry<K, V> > > mCache;
     uint32_t mMaxCapacity;
 
     OnEntryRemoved<K, V>* mListener;
@@ -147,44 +84,17 @@ private:
 }; // class GenerationCache
 
 template<typename K, typename V>
-class GenerationSingleCache: public GenerationCache<K, V> {
-public:
-    GenerationSingleCache(uint32_t maxCapacity): GenerationCache<K, V>(maxCapacity) {
-        GenerationCache<K, V>::mCache = createStorage();
-    };
-    ~GenerationSingleCache() { }
-protected:
-    GenerationCacheStorage<K, sp<Entry<K, V> > >* createStorage() {
-        return new KeyedVectorStorage<K, sp<Entry<K, V> > >;
-    }
-}; // GenerationSingleCache
-
-template<typename K, typename V>
-class GenerationMultiCache: public GenerationCache<K, V> {
-public:
-    GenerationMultiCache(uint32_t maxCapacity): GenerationCache<K, V>(maxCapacity) {
-        GenerationCache<K, V>::mCache = createStorage();
-    };
-    ~GenerationMultiCache() { }
-protected:
-    GenerationCacheStorage<K, sp<Entry<K, V> > >* createStorage() {
-        return new SortedListStorage<K, sp<Entry<K, V> > >;
-    }
-}; // GenerationMultiCache
-
-template<typename K, typename V>
 GenerationCache<K, V>::GenerationCache(uint32_t maxCapacity): mMaxCapacity(maxCapacity), mListener(NULL) {
 };
 
 template<typename K, typename V>
 GenerationCache<K, V>::~GenerationCache() {
     clear();
-    delete mCache;
 };
 
 template<typename K, typename V>
 uint32_t GenerationCache<K, V>::size() const {
-    return mCache->size();
+    return mCache.size();
 }
 
 template<typename K, typename V>
@@ -195,11 +105,11 @@ void GenerationCache<K, V>::setOnEntryRemovedListener(OnEntryRemoved<K, V>* list
 template<typename K, typename V>
 void GenerationCache<K, V>::clear() {
     if (mListener) {
-        while (mCache->size() > 0) {
+        while (mCache.size() > 0) {
             removeOldest();
         }
     } else {
-        mCache->clear();
+        mCache.clear();
     }
     mYoungest.clear();
     mOldest.clear();
@@ -207,14 +117,14 @@ void GenerationCache<K, V>::clear() {
 
 template<typename K, typename V>
 bool GenerationCache<K, V>::contains(K key) const {
-    return mCache->indexOfKey(key) >= 0;
+    return mCache.indexOfKey(key) >= 0;
 }
 
 template<typename K, typename V>
 V GenerationCache<K, V>::get(K key) {
-    ssize_t index = mCache->indexOfKey(key);
+    ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        sp<Entry<K, V> > entry = mCache->valueAt(index);
+        sp<Entry<K, V> > entry = mCache.valueAt(index);
         if (entry.get()) {
             detachFromCache(entry);
             attachToCache(entry);
@@ -227,13 +137,13 @@ V GenerationCache<K, V>::get(K key) {
 
 template<typename K, typename V>
 void GenerationCache<K, V>::put(K key, V value) {
-    if (mMaxCapacity != kUnlimitedCapacity && mCache->size() >= mMaxCapacity) {
+    if (mMaxCapacity != kUnlimitedCapacity && mCache.size() >= mMaxCapacity) {
         removeOldest();
     }
 
-    ssize_t index = mCache->indexOfKey(key);
+    ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        sp<Entry<K, V> > entry = mCache->valueAt(index);
+        sp<Entry<K, V> > entry = mCache.valueAt(index);
         detachFromCache(entry);
         addToCache(entry, key, value);
     } else {
@@ -246,13 +156,13 @@ template<typename K, typename V>
 void GenerationCache<K, V>::addToCache(sp<Entry<K, V> > entry, K key, V value) {
     entry->key = key;
     entry->value = value;
-    entry->index = mCache->add(key, entry);
+    entry->index = mCache.add(key, entry);
     attachToCache(entry);
 }
 
 template<typename K, typename V>
 V GenerationCache<K, V>::remove(K key) {
-    ssize_t index = mCache->indexOfKey(key);
+    ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
         return removeAt(index);
     }
@@ -262,11 +172,11 @@ V GenerationCache<K, V>::remove(K key) {
 
 template<typename K, typename V>
 V GenerationCache<K, V>::removeAt(ssize_t index) {
-    sp<Entry<K, V> > entry = mCache->valueAt(index);
+    sp<Entry<K, V> > entry = mCache.valueAt(index);
     if (mListener) {
         (*mListener)(entry->key, entry->value);
     }
-    mCache->removeItemsAt(index, 1);
+    mCache.removeItemsAt(index, 1);
     detachFromCache(entry);
 
     return entry->value;

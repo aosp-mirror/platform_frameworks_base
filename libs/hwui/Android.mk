@@ -6,7 +6,6 @@ LOCAL_SRC_FILES:= \
 	Matrix.cpp \
 	OpenGLRenderer.cpp \
 	Program.cpp \
-	SortedList.cpp \
 	TextureCache.cpp
 
 LOCAL_C_INCLUDES += \
@@ -20,7 +19,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia
-LOCAL_MODULE:= libhwui
+LOCAL_MODULE := libhwui
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)

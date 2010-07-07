@@ -30,14 +30,21 @@ namespace uirenderer {
  * Dimensions of a layer.
  */
 struct LayerSize {
-    LayerSize(): width(0), height(0) { }
-    LayerSize(const uint32_t width, const uint32_t height): width(width), height(height) { }
-    LayerSize(const LayerSize& size): width(size.width), height(size.height) { }
+    LayerSize(): width(0), height(0), id(0) { }
+    LayerSize(const uint32_t width, const uint32_t height): width(width), height(height), id(0) { }
+    LayerSize(const LayerSize& size): width(size.width), height(size.height), id(size.id) { }
 
     uint32_t width;
     uint32_t height;
 
+    // Incremental id used by the layer cache to store multiple
+    // LayerSize with the same dimensions
+    uint32_t id;
+
     bool operator<(const LayerSize& rhs) const {
+        if (id != 0 && rhs.id != 0) {
+            return id < rhs.id;
+        }
         if (width == rhs.width) {
             return height < rhs.height;
         }
