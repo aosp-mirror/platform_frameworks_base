@@ -97,4 +97,16 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
     handler->onMessageReceived(msg);
 }
 
+sp<ALooper> ALooperRoster::findLooper(ALooper::handler_id handlerID) {
+    Mutex::Autolock autoLock(mLock);
+
+    ssize_t index = mHandlers.indexOfKey(handlerID);
+
+    if (index < 0) {
+        return NULL;
+    }
+
+    return mHandlers.valueAt(index).mLooper;
+}
+
 }  // namespace android
