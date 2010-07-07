@@ -48,6 +48,9 @@ import java.util.Random;
     /** the main database connection to which this connection pool is attached */
     private final SQLiteDatabase mParentDbObj;
 
+    /** Random number generator used to pick a free connection out of the pool */
+    private Random rand; // lazily initialized
+
     /* package */ DatabaseConnectionPool(SQLiteDatabase db) {
         this.mParentDbObj = db;
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -75,50 +78,67 @@ import java.util.Random;
      * @return the Database connection that the caller can use
      */
     /* package */ SQLiteDatabase get(String sql) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            doAsserts();
-        }
-
         SQLiteDatabase db = null;
         PoolObj poolObj = null;
         synchronized(mParentDbObj) {
+            int poolSize = mPool.size();
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                assert sql != null;
+                doAsserts();
+            }
             if (getFreePoolSize() == 0) {
-                if (mMaxPoolSize == mPool.size()) {
+                // no free ( = available) connections
+                if (mMaxPoolSize == poolSize) {
                     // maxed out. can't open any more connections.
                     // let the caller wait on one of the pooled connections
+                    // preferably a connection caching the pre-compiled statement of the given SQL
                     if (mMaxPoolSize == 1) {
                         poolObj = mPool.get(0);
                     } else {
-                        // get a random number between 0 and (mMaxPoolSize-1)
-                        poolObj = mPool.get(
-                                new Random(SystemClock.elapsedRealtime()).nextInt(mMaxPoolSize-1));
+                        for (int i = 0; i < mMaxPoolSize; i++) {
+                            if (mPool.get(i).mDb.isSqlInStatementCache(sql)) {
+                                poolObj = mPool.get(i);
+                                break;
+                            }
+                        }
+                        if (poolObj == null) {
+                            // there are no database connections with the given SQL pre-compiled.
+                            // ok to return any of the connections.
+                            if (rand == null) {
+                                rand = new Random(SystemClock.elapsedRealtime());
+                            }
+                            poolObj = mPool.get(rand.nextInt(mMaxPoolSize));
+                        }
                     }
                     db = poolObj.mDb;
                 } else {
                     // create a new connection and add it to the pool, since we haven't reached
                     // max pool size allowed
-                    int poolSize = getPoolSize();
                     db = mParentDbObj.createPoolConnection((short)(poolSize + 1));
                     poolObj = new PoolObj(db);
                     mPool.add(poolSize, poolObj);
                 }
             } else {
                 // there are free connections available. pick one
-                for (int i = mPool.size() - 1; i >= 0; i--) {
-                    poolObj = mPool.get(i);
-                    if (!poolObj.isFree()) {
-                        continue;
-                    }
-                    // it is free - but does its database object already have the given sql in its
-                    // statement-cache?
-                    db = poolObj.mDb;
-                    if (sql == null || db.isSqlInStatementCache(sql)) {
-                        // found a free connection we can use
+                // preferably a connection caching the pre-compiled statement of the given SQL
+                for (int i = 0; i < poolSize; i++) {
+                    if (mPool.get(i).isFree() && mPool.get(i).mDb.isSqlInStatementCache(sql)) {
+                        poolObj = mPool.get(i);
                         break;
                     }
-                    // haven't found a database object which has the given sql in its
-                    // statement-cache
                 }
+                if (poolObj == null) {
+                    // didn't find a free database connection with the given SQL already
+                    // pre-compiled. return a free connection (this means, the same SQL could be
+                    // pre-compiled on more than one database connection. potential wasted memory.)
+                    for (int i = 0; i < poolSize; i++) {
+                        if (mPool.get(i).isFree()) {
+                            poolObj = mPool.get(i);
+                            break;
+                        }
+                    }
+                }
+                db = poolObj.mDb;
             }
 
             assert poolObj != null;
@@ -181,13 +201,10 @@ import java.util.Random;
         return list;
     }
 
-    /* package */ int getPoolSize() {
-        synchronized(mParentDbObj) {
-            return mPool.size();
-        }
-    }
-
-    private int getFreePoolSize() {
+    /**
+     * package level access for testing purposes only. otherwise, private should be sufficient.
+     */
+    /* package */ int getFreePoolSize() {
         int count = 0;
         for (int i = mPool.size() - 1; i >= 0; i--) {
             if (mPool.get(i).isFree()) {
@@ -197,12 +214,29 @@ import java.util.Random;
         return count++;
     }
 
+    /**
+     * only for testing purposes
+     */
+    /* package */ ArrayList<PoolObj> getPool() {
+        return mPool;
+    }
+
     @Override
     public String toString() {
-        return "db: " + mParentDbObj.getPath() +
-                ", threadid = " + Thread.currentThread().getId() +
-                ", totalsize = " + mPool.size() + ", #free = " + getFreePoolSize() +
-                ", maxpoolsize = " + mMaxPoolSize;
+        StringBuilder buff = new StringBuilder();
+        buff.append("db: ");
+        buff.append(mParentDbObj.getPath());
+        buff.append(", totalsize = ");
+        buff.append(mPool.size());
+        buff.append(", #free = ");
+        buff.append(getFreePoolSize());
+        buff.append(", maxpoolsize = ");
+        buff.append(mMaxPoolSize);
+        for (PoolObj p : mPool) {
+            buff.append("\n");
+            buff.append(p.toString());
+        }
+        return buff.toString();
     }
 
     private void doAsserts() {
@@ -224,10 +258,21 @@ import java.util.Random;
         }
     }
 
+    /** only used for testing purposes. */
+    /* package */ boolean isDatabaseObjFree(SQLiteDatabase db) {
+        return mPool.get(db.mConnectionNum - 1).isFree();
+    }
+
+    /** only used for testing purposes. */
+    /* package */ int getSize() {
+        return mPool.size();
+    }
+
     /**
      * represents objects in the connection pool.
+     * package-level access for testing purposes only.
      */
-    private static class PoolObj {
+    /* package */ static class PoolObj {
 
         private final SQLiteDatabase mDb;
         private boolean mFreeBusyFlag = FREE;
@@ -287,6 +332,13 @@ import java.util.Random;
             } else {
                 assert mNumHolders > 0;
             }
+        }
+
+        /**
+         * only for testing purposes
+         */
+        /* package */ synchronized int getNumHolders() {
+            return mNumHolders;
         }
 
         @Override
