@@ -24,6 +24,7 @@
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/OMXClient.h>
+#include <media/stagefright/TimeSource.h>
 #include <utils/threads.h>
 
 namespace android {
@@ -33,7 +34,6 @@ struct DataSource;
 struct MediaBuffer;
 struct MediaExtractor;
 struct MediaSource;
-struct TimeSource;
 struct NuCachedSource2;
 
 struct ALooper;
@@ -102,6 +102,8 @@ private:
         AT_EOS              = 32,
         PREPARE_CANCELLED   = 64,
         CACHE_UNDERRUN      = 128,
+        AUDIO_AT_EOS        = 256,
+        VIDEO_AT_EOS        = 512,
     };
 
     mutable Mutex mLock;
@@ -115,6 +117,7 @@ private:
     sp<ISurface> mISurface;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 
+    SystemTimeSource mSystemTimeSource;
     TimeSource *mTimeSource;
 
     String8 mUri;
