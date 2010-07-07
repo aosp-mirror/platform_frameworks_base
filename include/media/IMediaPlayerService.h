@@ -48,10 +48,6 @@ public:
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
     virtual sp<IOMX>            getOMX() = 0;
-
-    // Take a peek at currently playing audio, for visualization purposes.
-    // This returns a buffer of 16 bit mono PCM data, or NULL if no visualization buffer is currently available.
-    virtual sp<IMemory>         snoop() = 0;
 };
 
 // ----------------------------------------------------------------------------

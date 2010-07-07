@@ -171,7 +171,7 @@ AudioEffect::~AudioEffect()
     LOGV("Destructor %p", this);
 
     if (mStatus == NO_ERROR || mStatus == ALREADY_EXISTS) {
-        disable();
+        setEnabled(false);
         if (mIEffect != NULL) {
             mIEffect->disconnect();
             mIEffect->asBinder()->unlinkToDeath(mIEffectClient);
@@ -196,36 +196,28 @@ effect_descriptor_t AudioEffect::descriptor() const
     return mDescriptor;
 }
 
-bool AudioEffect::isEnabled() const
+bool AudioEffect::getEnabled() const
 {
     return (mEnabled != 0);
 }
 
-status_t AudioEffect::enable()
+status_t AudioEffect::setEnabled(bool enabled)
 {
     if (mStatus != NO_ERROR) {
         return INVALID_OPERATION;
     }
-    LOGV("enable %p", this);
 
-    if (android_atomic_or(1, &mEnabled) == 0) {
-       return mIEffect->enable();
+    if (enabled) {
+        LOGV("enable %p", this);
+        if (android_atomic_or(1, &mEnabled) == 0) {
+           return mIEffect->enable();
+        }
+    } else {
+        LOGV("disable %p", this);
+        if (android_atomic_and(~1, &mEnabled) == 1) {
+           return mIEffect->disable();
+        }
     }
-
-    return INVALID_OPERATION;
-}
-
-status_t AudioEffect::disable()
-{
-    if (mStatus != NO_ERROR) {
-        return INVALID_OPERATION;
-    }
-    LOGV("disable %p", this);
-
-    if (android_atomic_and(~1, &mEnabled) == 1) {
-       return mIEffect->disable();
-    }
-
     return INVALID_OPERATION;
 }
 
@@ -349,7 +341,7 @@ void AudioEffect::controlStatusChanged(bool controlGranted)
 
 void AudioEffect::enableStatusChanged(bool enabled)
 {
-    LOGV("enableStatusChanged %p enabled %d", this, enabled);
+    LOGV("enableStatusChanged %p enabled %d mCbf %p", this, enabled, mCbf);
     if (mStatus == ALREADY_EXISTS) {
         mEnabled = enabled;
         if (mCbf) {

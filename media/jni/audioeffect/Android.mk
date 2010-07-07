@@ -2,7 +2,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	android_media_AudioEffect.cpp
+	android_media_AudioEffect.cpp \
+	android_media_Visualizer.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
