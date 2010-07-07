@@ -681,18 +681,6 @@ android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 }
 
 static jint
-android_media_MediaPlayer_snoop(JNIEnv* env, jobject thiz, jobject data, jint kind) {
-    jshort* ar = (jshort*)env->GetPrimitiveArrayCritical((jarray)data, 0);
-    jsize len = env->GetArrayLength((jarray)data);
-    int ret = 0;
-    if (ar) {
-        ret = MediaPlayer::snoop(ar, len, kind);
-        env->ReleasePrimitiveArrayCritical((jarray)data, ar, 0);
-    }
-    return ret;
-}
-
-static jint
 android_media_MediaPlayer_native_suspend_resume(
         JNIEnv *env, jobject thiz, jboolean isSuspend) {
     LOGV("suspend_resume(%d)", isSuspend);
@@ -757,7 +745,6 @@ static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
-    {"snoop",               "([SI)I",                           (void *)android_media_MediaPlayer_snoop},
     {"native_suspend_resume", "(Z)I",                           (void *)android_media_MediaPlayer_native_suspend_resume},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},

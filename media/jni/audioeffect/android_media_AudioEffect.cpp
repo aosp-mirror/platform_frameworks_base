@@ -455,9 +455,8 @@ static void android_media_AudioEffect_native_release(JNIEnv *env,  jobject thiz)
     env->SetIntField(thiz, fields.fidJniData, 0);
 }
 
-
 static jint
-android_media_AudioEffect_native_enable(JNIEnv *env, jobject thiz)
+android_media_AudioEffect_native_setEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
 {
     // retrieve the AudioEffect object
     AudioEffect* lpAudioEffect = (AudioEffect *)env->GetIntField(
@@ -469,29 +468,11 @@ android_media_AudioEffect_native_enable(JNIEnv *env, jobject thiz)
         return AUDIOEFFECT_ERROR_NO_INIT;
     }
 
-    return translateError(lpAudioEffect->enable());
+    return translateError(lpAudioEffect->setEnabled(enabled));
 }
-
-
-static jint
-android_media_AudioEffect_native_disable(JNIEnv *env, jobject thiz)
-{
-    // retrieve the AudioEffect object
-    AudioEffect* lpAudioEffect = (AudioEffect *)env->GetIntField(
-        thiz, fields.fidNativeAudioEffect);
-
-    if (lpAudioEffect == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-            "Unable to retrieve AudioEffect pointer for disable()");
-        return AUDIOEFFECT_ERROR_NO_INIT;
-    }
-
-    return translateError(lpAudioEffect->disable());
-}
-
 
 static jboolean
-android_media_AudioEffect_native_getEnable(JNIEnv *env, jobject thiz)
+android_media_AudioEffect_native_getEnabled(JNIEnv *env, jobject thiz)
 {
     // retrieve the AudioEffect object
     AudioEffect* lpAudioEffect = (AudioEffect *)env->GetIntField(
@@ -503,7 +484,7 @@ android_media_AudioEffect_native_getEnable(JNIEnv *env, jobject thiz)
         return false;
     }
 
-    return (jboolean)lpAudioEffect->isEnabled();
+    return (jboolean)lpAudioEffect->getEnabled();
 }
 
 
@@ -516,7 +497,7 @@ android_media_AudioEffect_native_hasControl(JNIEnv *env, jobject thiz)
 
     if (lpAudioEffect == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
-            "Unable to retrieve AudioEffect pointer for getEnabled()");
+            "Unable to retrieve AudioEffect pointer for hasControl()");
         return false;
     }
 
@@ -817,9 +798,8 @@ static JNINativeMethod gMethods[] = {
                                          (void *)android_media_AudioEffect_native_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioEffect_native_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioEffect_native_release},
-    {"native_enable",        "()I",      (void *)android_media_AudioEffect_native_enable},
-    {"native_disable",       "()I",      (void *)android_media_AudioEffect_native_disable},
-    {"native_getEnable",     "()Z",      (void *)android_media_AudioEffect_native_getEnable},
+    {"native_setEnabled",    "(Z)I",      (void *)android_media_AudioEffect_native_setEnabled},
+    {"native_getEnabled",    "()Z",      (void *)android_media_AudioEffect_native_getEnabled},
     {"native_hasControl",    "()Z",      (void *)android_media_AudioEffect_native_hasControl},
     {"native_setParameter",  "(I[BI[B)I",  (void *)android_media_AudioEffect_native_setParameter},
     {"native_getParameter",  "(I[B[I[B)I",  (void *)android_media_AudioEffect_native_getParameter},
@@ -829,6 +809,8 @@ static JNINativeMethod gMethods[] = {
 
 
 // ----------------------------------------------------------------------------
+
+extern int register_android_media_visualizer(JNIEnv *env);
 
 int register_android_media_AudioEffect(JNIEnv *env)
 {
@@ -849,6 +831,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_AudioEffect(env) < 0) {
         LOGE("ERROR: AudioEffect native registration failed\n");
+        goto bail;
+    }
+
+    if (register_android_media_visualizer(env) < 0) {
+        LOGE("ERROR: Visualizer native registration failed\n");
         goto bail;
     }
 

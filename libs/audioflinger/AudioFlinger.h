@@ -916,7 +916,7 @@ private:
         void process();
         status_t command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData);
 
-        void reset();
+        void reset_l();
         status_t configure();
         status_t init();
         uint32_t state() {
@@ -951,8 +951,8 @@ private:
         EffectModule(const EffectModule&);
         EffectModule& operator = (const EffectModule&);
 
-        status_t start();
-        status_t stop();
+        status_t start_l();
+        status_t stop_l();
 
         // update this table when AudioSystem::audio_devices or audio_device_e (in EffectApi.h) are modified
         static const uint32_t sDeviceConvTable[];

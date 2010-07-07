@@ -17,7 +17,8 @@
 
 
 #define LOG_TAG "AudioFlinger"
-//#define LOG_NDEBUG 0
+//
+#define LOG_NDEBUG 0
 
 #include <math.h>
 #include <signal.h>
@@ -52,6 +53,7 @@
 #endif
 
 #include <media/EffectsFactoryApi.h>
+#include <media/EffectVisualizerApi.h>
 
 // ----------------------------------------------------------------------------
 // the sim build doesn't have gettid
@@ -4498,6 +4500,11 @@ status_t AudioFlinger::getEffectDescriptor(effect_uuid_t *pUuid, effect_descript
     return EffectGetDescriptor(pUuid, descriptor);
 }
 
+
+// this UUID must match the one defined in media/libeffects/EffectVisualizer.cpp
+static const effect_uuid_t VISUALIZATION_UUID_ =
+    {0xd069d9e0, 0x8329, 0x11df, 0x9168, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}};
+
 sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         effect_descriptor_t *pDesc,
         const sp<IEffectClient>& effectClient,
@@ -4524,6 +4531,15 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
 
     {
         Mutex::Autolock _l(mLock);
+
+        // check recording permission for visualizer
+        if (memcmp(&pDesc->type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0 ||
+            memcmp(&pDesc->uuid, &VISUALIZATION_UUID_, sizeof(effect_uuid_t)) == 0) {
+            if (!recordingAllowed()) {
+                lStatus = PERMISSION_DENIED;
+                goto Exit;
+            }
+        }
 
         if (!EffectIsNullUuid(&pDesc->uuid)) {
             // if uuid is specified, request effect descriptor
@@ -5089,7 +5105,7 @@ void AudioFlinger::EffectModule::process()
         if (mState != ACTIVE) {
             switch (mState) {
             case RESET:
-                reset();
+                reset_l();
                 mState = STARTING;
                 // clear auxiliary effect input buffer for next accumulation
                 if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
@@ -5097,14 +5113,14 @@ void AudioFlinger::EffectModule::process()
                 }
                 return;
             case STARTING:
-                start();
+                start_l();
                 mState = ACTIVE;
                 break;
             case STOPPING:
                 mState = STOPPED;
                 break;
             case STOPPED:
-                stop();
+                stop_l();
                 mState = IDLE;
                 return;
             }
@@ -5132,7 +5148,7 @@ void AudioFlinger::EffectModule::process()
     }
 }
 
-void AudioFlinger::EffectModule::reset()
+void AudioFlinger::EffectModule::reset_l()
 {
     if (mEffectInterface == NULL) {
         return;
@@ -5205,6 +5221,7 @@ status_t AudioFlinger::EffectModule::configure()
 
 status_t AudioFlinger::EffectModule::init()
 {
+    Mutex::Autolock _l(mLock);
     if (mEffectInterface == NULL) {
         return NO_INIT;
     }
@@ -5217,7 +5234,7 @@ status_t AudioFlinger::EffectModule::init()
     return status;
 }
 
-status_t AudioFlinger::EffectModule::start()
+status_t AudioFlinger::EffectModule::start_l()
 {
     if (mEffectInterface == NULL) {
         return NO_INIT;
@@ -5231,7 +5248,7 @@ status_t AudioFlinger::EffectModule::start()
     return status;
 }
 
-status_t AudioFlinger::EffectModule::stop()
+status_t AudioFlinger::EffectModule::stop_l()
 {
     if (mEffectInterface == NULL) {
         return NO_INIT;
@@ -5247,7 +5264,8 @@ status_t AudioFlinger::EffectModule::stop()
 
 status_t AudioFlinger::EffectModule::command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData)
 {
-    LOGV("command(), cmdCode: %d, mEffectInterface: %p", cmdCode, mEffectInterface);
+    Mutex::Autolock _l(mLock);
+//    LOGV("command(), cmdCode: %d, mEffectInterface: %p", cmdCode, mEffectInterface);
 
     if (mEffectInterface == NULL) {
         return NO_INIT;
@@ -5255,7 +5273,6 @@ status_t AudioFlinger::EffectModule::command(int cmdCode, int cmdSize, void *pCm
     status_t status = (*mEffectInterface)->command(mEffectInterface, cmdCode, cmdSize, pCmdData, replySize, pReplyData);
     if (cmdCode != EFFECT_CMD_GET_PARAM && status == NO_ERROR) {
         int size = (replySize == NULL) ? 0 : *replySize;
-        Mutex::Autolock _l(mLock);
         for (size_t i = 1; i < mHandles.size(); i++) {
             sp<EffectHandle> h = mHandles[i].promote();
             if (h != 0) {
@@ -5322,6 +5339,7 @@ bool AudioFlinger::EffectModule::isEnabled()
 
 status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, bool controller)
 {
+    Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
 
     // Send volume indication if EFFECT_FLAG_VOLUME_IND is set and read back altered volume
@@ -5347,6 +5365,7 @@ status_t AudioFlinger::EffectModule::setVolume(uint32_t *left, uint32_t *right, 
 
 status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
 {
+    Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
     if ((mDescriptor.flags & EFFECT_FLAG_DEVICE_MASK) == EFFECT_FLAG_DEVICE_IND) {
         // convert device bit field from AudioSystem to EffectApi format.
@@ -5366,6 +5385,7 @@ status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
 
 status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
 {
+    Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
     if ((mDescriptor.flags & EFFECT_FLAG_AUDIO_MODE_MASK) == EFFECT_FLAG_AUDIO_MODE_IND) {
         // convert audio mode from AudioSystem to EffectApi format.
@@ -5586,7 +5606,7 @@ void AudioFlinger::EffectHandle::disconnect()
 
 status_t AudioFlinger::EffectHandle::command(int cmdCode, int cmdSize, void *pCmdData, int *replySize, void *pReplyData)
 {
-    LOGV("command(), cmdCode: %d, mHasControl: %d, mEffect: %p", cmdCode, mHasControl, (mEffect == 0) ? 0 : mEffect.get());
+//    LOGV("command(), cmdCode: %d, mHasControl: %d, mEffect: %p", cmdCode, mHasControl, (mEffect == 0) ? 0 : mEffect.get());
 
     // only get parameter command is permitted for applications not controlling the effect
     if (!mHasControl && cmdCode != EFFECT_CMD_GET_PARAM) {
