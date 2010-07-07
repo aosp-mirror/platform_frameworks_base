@@ -1505,7 +1505,7 @@ public class Canvas {
         }
         native_drawTextOnPath(mNativeCanvas, text, index, count,
                               path.ni(), hOffset, vOffset,
-                              paint.mNativePaint);
+                              paint.mBidiFlags, paint.mNativePaint);
     }
 
     /**
@@ -1525,7 +1525,8 @@ public class Canvas {
                                float vOffset, Paint paint) {
         if (text.length() > 0) {
             native_drawTextOnPath(mNativeCanvas, text, path.ni(),
-                                  hOffset, vOffset, paint.mNativePaint);
+                                  hOffset, vOffset, paint.mBidiFlags,
+                                  paint.mNativePaint);
         }
     }
 
@@ -1716,11 +1717,13 @@ public class Canvas {
                                                      char[] text, int index,
                                                      int count, int path,
                                                      float hOffset,
-                                                     float vOffset, int paint);
+                                                     float vOffset, int bidiFlags,
+                                                     int paint);
     private static native void native_drawTextOnPath(int nativeCanvas,
                                                      String text, int path,
-                                                     float hOffset,
-                                                     float vOffset, int paint);
+                                                     float hOffset, 
+                                                     float vOffset, 
+                                                     int flags, int paint);
     private static native void native_drawPicture(int nativeCanvas,
                                                   int nativePicture);
     private static native void finalizer(int nativeCanvas);
