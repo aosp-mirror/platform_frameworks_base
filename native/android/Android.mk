@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
     activity.cpp \
     input.cpp \
+    looper.cpp \
     native_window.cpp
 
 LOCAL_SHARED_LIBRARIES := \

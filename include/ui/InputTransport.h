@@ -33,6 +33,7 @@
 #include <semaphore.h>
 #include <ui/Input.h>
 #include <utils/Errors.h>
+#include <utils/PollLoop.h>
 #include <utils/Timers.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
@@ -345,11 +346,15 @@ public:
     
     android::status_t consume(android::InputEvent** event);
     
+    void setPollLoop(const android::sp<android::PollLoop>& pollLoop) { mPollLoop = pollLoop; }
+    const android::sp<android::PollLoop> getPollLoop() const { return mPollLoop; }
+    
     virtual void doDefaultKey(android::KeyEvent* keyEvent) = 0;
     
 private:
     android::InputConsumer mConsumer;
     android::PreallocatedInputEventFactory mInputEventFactory;
+    android::sp<android::PollLoop> mPollLoop;
 };
 
 #endif // _UI_INPUT_TRANSPORT_H

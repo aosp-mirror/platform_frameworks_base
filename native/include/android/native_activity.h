@@ -64,6 +64,21 @@ typedef struct ANativeActivity {
     jobject clazz;
 
     /**
+     * Path to this application's internal data directory.
+     */
+    const char* internalDataPath;
+    
+    /**
+     * Path to this application's external (removable/mountable) data directory.
+     */
+    const char* externalDataPath;
+    
+    /**
+     * The platform's SDK version code.
+     */
+    int32_t sdkVersion;
+    
+    /**
      * This is the native instance of the application.  It is not used by
      * the framework, but can be set by the application to its own instance
      * state.

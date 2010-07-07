@@ -20,6 +20,7 @@
 #include <android/input.h>
 #include <ui/Input.h>
 #include <ui/InputTransport.h>
+#include <utils/PollLoop.h>
 
 #include <poll.h>
 
@@ -184,8 +185,16 @@ float AMotionEvent_getHistoricalSize(AInputEvent* motion_event, size_t pointer_i
             pointer_index, history_index);
 }
 
-int AInputQueue_getFd(AInputQueue* queue) {
-    return queue->getConsumer().getChannel()->getReceivePipeFd();
+void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
+        ALooper_callbackFunc callback, void* data) {
+    queue->setPollLoop(static_cast<android::PollLoop*>(looper));
+    ALooper_setCallback(looper, queue->getConsumer().getChannel()->getReceivePipeFd(),
+            POLLIN, callback, data);
+}
+
+void AInputQueue_detachLooper(AInputQueue* queue) {
+    queue->getPollLoop()->removeCallback(
+            queue->getConsumer().getChannel()->getReceivePipeFd());
 }
 
 int AInputQueue_hasEvents(AInputQueue* queue) {
