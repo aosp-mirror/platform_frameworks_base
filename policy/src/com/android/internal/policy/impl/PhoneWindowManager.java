@@ -1254,10 +1254,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mStatusBar.isVisibleLw()) {
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
-                mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
-                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockBottom="
-                        + mDockBottom + " mContentBottom="
-                        + mContentBottom + " mCurBottom=" + mCurBottom);
+                final Rect r = mStatusBar.getFrameLw();
+                if (mDockTop == r.top) mDockTop = r.bottom;
+                else if (mDockBottom == r.bottom) mDockBottom = r.top;
+                mContentTop = mCurTop = mDockTop;
+                mContentBottom = mCurBottom = mDockBottom;
+                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockTop=" + mDockTop
+                        + " mContentTop=" + mContentTop
+                        + " mCurTop=" + mCurTop
+                        + " mDockBottom=" + mDockBottom
+                        + " mContentBottom=" + mContentBottom
+                        + " mCurBottom=" + mCurBottom);
             }
         }
     }

@@ -10184,6 +10184,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
+        if (mDisplay == null) {
+            Slog.i(TAG, "skipping performLayoutAndPlaceSurfacesLockedInner with no mDisplay");
+            return;
+        }
+
         final long currentTime = SystemClock.uptimeMillis();
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
