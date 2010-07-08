@@ -19,11 +19,6 @@ package android.webkit;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
-import android.graphics.Canvas;
-import android.graphics.DrawFilter;
-import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
-import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -33,7 +28,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -443,35 +437,18 @@ final class WebViewCore {
     private native void nativeClearContent();
 
     /**
-     * Create a flat picture from the set of pictures.
-     */
-    private native void nativeCopyContentToPicture(Picture picture);
-
-    /**
-     * Draw the picture set with a background color. Returns true
-     * if some individual picture took too long to draw and can be
-     * split into parts. Called from the UI thread.
-     */
-    private native boolean nativeDrawContent(Canvas canvas, int color);
-
-    /**
-     * check to see if picture is blank and in progress
-     */
-    private native boolean nativePictureReady();
-
-    /**
      * Redraw a portion of the picture set. The Point wh returns the
      * width and height of the overall picture.
      */
-    private native boolean nativeRecordContent(Region invalRegion, Point wh);
+    private native int nativeRecordContent(Region invalRegion, Point wh);
 
     private native boolean nativeFocusBoundsChanged();
 
     /**
-     * Splits slow parts of the picture set. Called from the webkit
-     * thread after nativeDrawContent returns true.
+     * Splits slow parts of the picture set. Called from the webkit thread after
+     * WebView.nativeDraw() returns content to be split.
      */
-    private native void nativeSplitContent();
+    private native void nativeSplitContent(int content);
 
     private native boolean nativeKey(int keyCode, int unichar,
             int repeatCount, boolean isShift, boolean isAlt, boolean isSym,
@@ -1336,7 +1313,9 @@ final class WebViewCore {
                             break;
 
                         case SPLIT_PICTURE_SET:
-                            nativeSplitContent();
+                            nativeSplitContent(msg.arg1);
+                            mWebView.mPrivateHandler.obtainMessage(
+                                    WebView.REPLACE_BASE_CONTENT, msg.arg1, 0);
                             mSplitPictureIsScheduled = false;
                             break;
 
@@ -1736,6 +1715,14 @@ final class WebViewCore {
         return usedQuota;
     }
 
+    // called from UI thread
+    void splitContent(int content) {
+        if (!mSplitPictureIsScheduled) {
+            mSplitPictureIsScheduled = true;
+            sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+        }
+    }
+
     // Used to avoid posting more than one draw message.
     private boolean mDrawIsScheduled;
 
@@ -1762,9 +1749,11 @@ final class WebViewCore {
 
     static class DrawData {
         DrawData() {
+            mBaseLayer = 0;
             mInvalRegion = new Region();
             mWidthHeight = new Point();
         }
+        int mBaseLayer;
         Region mInvalRegion;
         Point mViewPoint;
         Point mWidthHeight;
@@ -1778,8 +1767,8 @@ final class WebViewCore {
         mDrawIsScheduled = false;
         DrawData draw = new DrawData();
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw start");
-        if (nativeRecordContent(draw.mInvalRegion, draw.mWidthHeight)
-                == false) {
+        draw.mBaseLayer = nativeRecordContent(draw.mInvalRegion, draw.mWidthHeight);
+        if (draw.mBaseLayer == 0) {
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort");
             return;
         }
@@ -1810,51 +1799,6 @@ final class WebViewCore {
                 mWebkitScrollX = mWebkitScrollY = 0;
             }
         }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // These are called from the UI thread, not our thread
-
-    static final int ZOOM_BITS = Paint.FILTER_BITMAP_FLAG |
-                                         Paint.DITHER_FLAG |
-                                         Paint.SUBPIXEL_TEXT_FLAG;
-    static final int SCROLL_BITS = Paint.FILTER_BITMAP_FLAG |
-                                           Paint.DITHER_FLAG;
-
-    final DrawFilter mZoomFilter =
-                    new PaintFlagsDrawFilter(ZOOM_BITS, Paint.LINEAR_TEXT_FLAG);
-    // If we need to trade better quality for speed, set mScrollFilter to null
-    final DrawFilter mScrollFilter =
-                new PaintFlagsDrawFilter(SCROLL_BITS, 0);
-
-    /* package */ void drawContentPicture(Canvas canvas, int color,
-                                          boolean animatingZoom,
-                                          boolean animatingScroll) {
-        DrawFilter df = null;
-        if (animatingZoom) {
-            df = mZoomFilter;
-        } else if (animatingScroll) {
-            df = mScrollFilter;
-        }
-        canvas.setDrawFilter(df);
-        boolean tookTooLong = nativeDrawContent(canvas, color);
-        canvas.setDrawFilter(null);
-        if (tookTooLong && mSplitPictureIsScheduled == false) {
-            mSplitPictureIsScheduled = true;
-            sendMessage(EventHub.SPLIT_PICTURE_SET);
-        }
-    }
-
-    /* package */ synchronized boolean pictureReady() {
-        return 0 != mNativeClass ? nativePictureReady() : false;
-    }
-
-    /*package*/ synchronized Picture copyContentPicture() {
-        Picture result = new Picture();
-        if (0 != mNativeClass) {
-            nativeCopyContentToPicture(result);
-        }
-        return result;
     }
 
     static void reducePriority() {
@@ -2036,24 +1980,6 @@ final class WebViewCore {
      */
     /* package */ void signalRepaintDone() {
         mRepaintScheduled = false;
-    }
-
-    // called by JNI
-    private void sendImmediateRepaint() {
-        if (mWebView != null && !mRepaintScheduled) {
-            mRepaintScheduled = true;
-            Message.obtain(mWebView.mPrivateHandler,
-                           WebView.IMMEDIATE_REPAINT_MSG_ID).sendToTarget();
-        }
-    }
-
-    // called by JNI
-    private void setRootLayer(int layer) {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                           WebView.SET_ROOT_LAYER_MSG_ID,
-                           layer, 0).sendToTarget();
-        }
     }
 
     /* package */ WebView getWebView() {
