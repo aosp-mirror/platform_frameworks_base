@@ -30,7 +30,8 @@ LOCAL_SRC_FILES:= \
     MediaProfiles.cpp \
     IEffect.cpp \
     IEffectClient.cpp \
-    AudioEffect.cpp
+    AudioEffect.cpp \
+    Visualizer.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat libsurfaceflinger_client libcamera_client

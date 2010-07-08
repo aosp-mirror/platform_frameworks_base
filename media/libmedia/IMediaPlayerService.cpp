@@ -35,8 +35,7 @@ enum {
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
     CREATE_METADATA_RETRIEVER,
-    GET_OMX,
-    SNOOP
+    GET_OMX
 };
 
 class BpMediaPlayerService: public BpInterface<IMediaPlayerService>
@@ -134,14 +133,6 @@ public:
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
 
-    virtual sp<IMemory> snoop()
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
-        remote()->transact(SNOOP, data, &reply);
-        return interface_cast<IMemory>(reply.readStrongBinder());
-    }
-
     virtual sp<IOMX> getOMX() {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
@@ -219,12 +210,6 @@ status_t BnMediaPlayerService::onTransact(
             reply->writeInt32(numChannels);
             reply->writeInt32(format);
             reply->writeStrongBinder(player->asBinder());
-            return NO_ERROR;
-        } break;
-        case SNOOP: {
-            CHECK_INTERFACE(IMediaPlayerService, data, reply);
-            sp<IMemory> snooped_audio = snoop();
-            reply->writeStrongBinder(snooped_audio->asBinder());
             return NO_ERROR;
         } break;
         case CREATE_MEDIA_RECORDER: {
