@@ -23,6 +23,24 @@
 namespace android {
 namespace uirenderer {
 
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Debug
+#define DEBUG_LAYERS 0
+
+// Debug
+#if DEBUG_LAYERS
+    #define LAYER_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define LAYER_LOGD(...)
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// Cache
+///////////////////////////////////////////////////////////////////////////////
+
 class LayerCache: public OnEntryRemoved<LayerSize, Layer*> {
 public:
     LayerCache(uint32_t maxByteSize);
@@ -35,12 +53,24 @@ public:
     void operator()(LayerSize& bitmap, Layer*& texture);
 
     /**
-     * Returns the layer of specified dimensions, NULL if cannot be found.
+     * Returns the layer of specified dimensions. If not suitable layer
+     * can be found, a new one is created and returned. If creating a new
+     * layer fails, NULL is returned.
+     *
+     * When a layer is obtained from the cache, it is removed and the total
+     * size of the cache goes down.
+     *
+     * @param size The dimensions of the desired layer
+     * @param previousFbo The name of the FBO to bind to if creating a new
+     *        layer fails
      */
-    Layer* get(LayerSize& size);
+    Layer* get(LayerSize& size, GLuint previousFbo);
     /**
      * Adds the layer to the cache. The layer will not be added if there is
      * not enough space available.
+     *
+     * @param size The dimensions of the layer
+     * @param layer The layer to add to the cache
      *
      * @return True if the layer was added, false otherwise.
      */
