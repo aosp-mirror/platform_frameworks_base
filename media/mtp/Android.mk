@@ -20,7 +20,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:=                                       \
                   MtpClient.cpp                         \
                   MtpCursor.cpp                         \
-                  MtpDatabase.cpp                       \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
                   MtpDevice.cpp                         \
@@ -59,7 +58,7 @@ LOCAL_MODULE:= mtptest
 
 LOCAL_CFLAGS := -DMTP_DEVICE
 
-LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libcutils \
+LOCAL_SHARED_LIBRARIES := libutils libsqlite libcutils \
 	libmedia
 
 LOCAL_STATIC_LIBRARIES := libmtp
@@ -76,7 +75,7 @@ LOCAL_SRC_FILES:=                                       \
 LOCAL_STATIC_LIBRARIES := libmtp
 
 LOCAL_C_INCLUDES := external/sqlite/dist
-LOCAL_SHARED_LIBRARIES := libutils libsqlite libstagefright libmedia
+LOCAL_SHARED_LIBRARIES := libutils libsqlite libmedia
 
 LOCAL_CFLAGS := -g
 LOCAL_LDFLAGS := -g

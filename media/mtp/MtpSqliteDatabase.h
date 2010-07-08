@@ -35,8 +35,6 @@ private:
     SqliteStatement*            mObjectInfoQuery;
     SqliteStatement*            mFileInserter;
     SqliteStatement*            mFileDeleter;
-    SqliteStatement*            mAudioInserter;
-    SqliteStatement*            mAudioDeleter;
 
 public:
                                 MtpSqliteDatabase();
@@ -52,20 +50,6 @@ public:
                                         MtpStorageID storage,
                                         uint64_t size,
                                         time_t modified);
-
-    virtual MtpObjectHandle     addAudioFile(MtpObjectHandle id);
-
-    virtual MtpObjectHandle     addAudioFile(MtpObjectHandle id,
-                                            const char* title,
-                                            const char* artist,
-                                            const char* album,
-                                            const char* albumArtist,
-                                            const char* genre,
-                                            const char* composer,
-                                            const char* mimeType,
-                                            int track,
-                                            int year,
-                                            int duration);
 
     virtual MtpObjectHandleList* getObjectList(MtpStorageID storageID,
                                             MtpObjectFormat format,

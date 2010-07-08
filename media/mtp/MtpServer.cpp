@@ -533,9 +533,6 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         mDatabase->rollbackTransaction();
         return MTP_RESPONSE_GENERAL_ERROR;
     }
-    uint32_t table = MtpDatabase::getTableForFile(format);
-    if (table == kObjectHandleTableAudio)
-        handle = mDatabase->addAudioFile(handle);
     mDatabase->commitTransaction();
 
   if (format == MTP_FORMAT_ASSOCIATION) {

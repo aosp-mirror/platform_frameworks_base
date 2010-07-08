@@ -31,143 +31,15 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include <media/mediascanner.h>
-#include <media/stagefright/StagefrightMediaScanner.h>
-
 namespace android {
-
-class MtpMediaScannerClient : public MediaScannerClient
-{
-public:
-    MtpMediaScannerClient()
-    {
-        reset();
-    }
-
-    virtual ~MtpMediaScannerClient()
-    {
-    }
-
-    // returns true if it succeeded, false if an exception occured in the Java code
-    virtual bool scanFile(const char* path, long long lastModified, long long fileSize)
-    {
-        LOGV("scanFile %s", path);
-        return true;
-    }
-
-    // returns true if it succeeded, false if an exception occured in the Java code
-    virtual bool handleStringTag(const char* name, const char* value)
-    {
-        int temp;
-
-        if (!strcmp(name, "title")) {
-            mTitle = value;
-            mHasTitle = true;
-        } else if  (!strcmp(name, "artist")) {
-            mArtist = value;
-            mHasArtist = true;
-        } else if  (!strcmp(name, "album")) {
-            mAlbum = value;
-            mHasAlbum = true;
-        } else if  (!strcmp(name, "albumartist")) {
-            mAlbumArtist = value;
-            mHasAlbumArtist = true;
-        } else if  (!strcmp(name, "genre")) {
-            // FIXME - handle numeric values here
-            mGenre = value;
-            mHasGenre = true;
-        } else if  (!strcmp(name, "composer")) {
-            mComposer = value;
-            mHasComposer = true;
-        } else if  (!strcmp(name, "tracknumber")) {
-            if (sscanf(value, "%d", &temp) == 1)
-                mTrack = temp;
-        } else if  (!strcmp(name, "discnumber")) {
-            // currently unused
-        } else if  (!strcmp(name, "year") || !strcmp(name, "date")) {
-            if (sscanf(value, "%d", &temp) == 1)
-                mYear = temp;
-        } else if  (!strcmp(name, "duration")) {
-            if (sscanf(value, "%d", &temp) == 1)
-                mDuration = temp;
-        } else {
-            LOGV("handleStringTag %s : %s", name, value);
-        }
-        return true;
-    }
-
-    // returns true if it succeeded, false if an exception occured in the Java code
-    virtual bool setMimeType(const char* mimeType)
-    {
-        mMimeType = mimeType;
-        mHasMimeType = true;
-        return true;
-    }
-
-    // returns true if it succeeded, false if an exception occured in the Java code
-    virtual bool addNoMediaFolder(const char* path)
-    {
-        LOGV("addNoMediaFolder %s", path);
-        return true;
-    }
-
-    void reset()
-    {
-        mHasTitle = false;
-        mHasArtist = false;
-        mHasAlbum = false;
-        mHasAlbumArtist = false;
-        mHasGenre = false;
-        mHasComposer = false;
-        mHasMimeType = false;
-        mTrack = mYear = mDuration = 0;
-    }
-
-    inline const char* getTitle() const { return mHasTitle ? (const char *)mTitle : NULL; }
-    inline const char* getArtist() const { return mHasArtist ? (const char *)mArtist : NULL; }
-    inline const char* getAlbum() const { return mHasAlbum ? (const char *)mAlbum : NULL; }
-    inline const char* getAlbumArtist() const { return mHasAlbumArtist ? (const char *)mAlbumArtist : NULL; }
-    inline const char* getGenre() const { return mHasGenre ? (const char *)mGenre : NULL; }
-    inline const char* getComposer() const { return mHasComposer ? (const char *)mComposer : NULL; }
-    inline const char* getMimeType() const { return mHasMimeType ? (const char *)mMimeType : NULL; }
-    inline int getTrack() const { return mTrack; }
-    inline int getYear() const { return mYear; }
-    inline int getDuration() const { return mDuration; }
-
-private:
-    MtpString   mTitle;
-    MtpString   mArtist;
-    MtpString   mAlbum;
-    MtpString   mAlbumArtist;
-    MtpString   mGenre;
-    MtpString   mComposer;
-    MtpString   mMimeType;
-
-    bool        mHasTitle;
-    bool        mHasArtist;
-    bool        mHasAlbum;
-    bool        mHasAlbumArtist;
-    bool        mHasGenre;
-    bool        mHasComposer;
-    bool        mHasMimeType;
-
-    int         mTrack;
-    int         mYear;
-    int         mDuration;
-};
-
 
 MtpMediaScanner::MtpMediaScanner(MtpStorageID id, const char* filePath, MtpDatabase* db)
     :   mStorageID(id),
         mFilePath(filePath),
         mDatabase(db),
-        mMediaScanner(NULL),
-        mMediaScannerClient(NULL),
         mFileList(NULL),
         mFileCount(0)
 {
-    mMediaScanner = new StagefrightMediaScanner;
-    mMediaScannerClient = new MtpMediaScannerClient;
 }
 
 MtpMediaScanner::~MtpMediaScanner() {
@@ -199,47 +71,46 @@ static const struct MediaFileTypeEntry
 {
     const char*     extension;
     MtpObjectFormat format;
-    uint32_t        table;
 } sFileTypes[] =
 {
-    { "MP3",    MTP_FORMAT_MP3,             kObjectHandleTableAudio     },
-    { "M4A",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "WAV",    MTP_FORMAT_WAV,             kObjectHandleTableAudio     },
-    { "AMR",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "AWB",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "WMA",    MTP_FORMAT_WMA,             kObjectHandleTableAudio     },
-    { "OGG",    MTP_FORMAT_OGG,             kObjectHandleTableAudio     },
-    { "OGA",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "AAC",    MTP_FORMAT_AAC,             kObjectHandleTableAudio     },
-    { "MID",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "MIDI",   MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "XMF",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "RTTTL",  MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "SMF",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "IMY",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "RTX",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "OTA",    MTP_FORMAT_UNDEFINED_AUDIO, kObjectHandleTableAudio     },
-    { "MPEG",   MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "MP4",    MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "M4V",    MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "3GP",    MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "3GPP",   MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "3G2",    MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "3GPP2",  MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "WMV",    MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "ASF",    MTP_FORMAT_UNDEFINED_VIDEO, kObjectHandleTableVideo     },
-    { "JPG",    MTP_FORMAT_EXIF_JPEG,       kObjectHandleTableImage     },
-    { "JPEG",   MTP_FORMAT_EXIF_JPEG,       kObjectHandleTableImage     },
-    { "GIF",    MTP_FORMAT_GIF,             kObjectHandleTableImage     },
-    { "PNG",    MTP_FORMAT_PNG,             kObjectHandleTableImage     },
-    { "BMP",    MTP_FORMAT_BMP,             kObjectHandleTableImage     },
-    { "WBMP",   MTP_FORMAT_BMP,             kObjectHandleTableImage     },
-    { "M3U",    MTP_FORMAT_M3U_PLAYLIST,    kObjectHandleTablePlaylist  },
-    { "PLS",    MTP_FORMAT_PLS_PLAYLIST,    kObjectHandleTablePlaylist  },
-    { "WPL",    MTP_FORMAT_WPL_PLAYLIST,    kObjectHandleTablePlaylist  },
+    { "MP3",    MTP_FORMAT_MP3,             },
+    { "M4A",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "WAV",    MTP_FORMAT_WAV,             },
+    { "AMR",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "AWB",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "WMA",    MTP_FORMAT_WMA,             },
+    { "OGG",    MTP_FORMAT_OGG,             },
+    { "OGA",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "AAC",    MTP_FORMAT_AAC,             },
+    { "MID",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "MIDI",   MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "XMF",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "RTTTL",  MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "SMF",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "IMY",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "RTX",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "OTA",    MTP_FORMAT_UNDEFINED_AUDIO, },
+    { "MPEG",   MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "MP4",    MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "M4V",    MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "3GP",    MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "3GPP",   MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "3G2",    MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "3GPP2",  MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "WMV",    MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "ASF",    MTP_FORMAT_UNDEFINED_VIDEO, },
+    { "JPG",    MTP_FORMAT_EXIF_JPEG,       },
+    { "JPEG",   MTP_FORMAT_EXIF_JPEG,       },
+    { "GIF",    MTP_FORMAT_GIF,             },
+    { "PNG",    MTP_FORMAT_PNG,             },
+    { "BMP",    MTP_FORMAT_BMP,             },
+    { "WBMP",   MTP_FORMAT_BMP,             },
+    { "M3U",    MTP_FORMAT_M3U_PLAYLIST,    },
+    { "PLS",    MTP_FORMAT_PLS_PLAYLIST,    },
+    { "WPL",    MTP_FORMAT_WPL_PLAYLIST,    },
 };
 
-MtpObjectFormat MtpMediaScanner::getFileFormat(const char* path, uint32_t& table)
+MtpObjectFormat MtpMediaScanner::getFileFormat(const char* path)
 {
     const char* extension = strrchr(path, '.');
     if (!extension)
@@ -248,11 +119,9 @@ MtpObjectFormat MtpMediaScanner::getFileFormat(const char* path, uint32_t& table
 
     for (unsigned i = 0; i < sizeof(sFileTypes) / sizeof(sFileTypes[0]); i++) {
         if (!strcasecmp(extension, sFileTypes[i].extension)) {
-            table = sFileTypes[i].table;
             return sFileTypes[i].format;
         }
     }
-    table = kObjectHandleTableFile;
     return MTP_FORMAT_UNDEFINED;
 }
 
@@ -316,8 +185,7 @@ int MtpMediaScanner::scanDirectory(const char* path, MtpObjectHandle parent)
 }
 
 void MtpMediaScanner::scanFile(const char* path, MtpObjectHandle parent, struct stat& statbuf) {
-    uint32_t table;
-    MtpObjectFormat format = getFileFormat(path, table);
+    MtpObjectFormat format = getFileFormat(path);
     // don't scan unknown file types
     if (format == MTP_FORMAT_UNDEFINED)
         return;
@@ -333,22 +201,6 @@ void MtpMediaScanner::scanFile(const char* path, MtpObjectHandle parent, struct 
             LOGE("addFile failed in MtpMediaScanner::scanFile()");
             mDatabase->rollbackTransaction();
             return;
-        }
-
-        if (table == kObjectHandleTableAudio) {
-            mMediaScannerClient->reset();
-            mMediaScanner->processFile(path, NULL, *mMediaScannerClient);
-            handle = mDatabase->addAudioFile(handle,
-                    mMediaScannerClient->getTitle(),
-                    mMediaScannerClient->getArtist(),
-                    mMediaScannerClient->getAlbum(),
-                    mMediaScannerClient->getAlbumArtist(),
-                    mMediaScannerClient->getGenre(),
-                    mMediaScannerClient->getComposer(),
-                    mMediaScannerClient->getMimeType(),
-                    mMediaScannerClient->getTrack(),
-                    mMediaScannerClient->getYear(),
-                    mMediaScannerClient->getDuration());
         }
         mDatabase->commitTransaction();
     }
