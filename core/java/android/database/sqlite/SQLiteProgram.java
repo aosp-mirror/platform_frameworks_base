@@ -76,11 +76,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     private void compileSql() {
-        if (nStatement > 0) {
-            // already compiled.
-            return;
-        }
-
         // only cache CRUD statements
         if (getSqlStatementType(mSql) == OTHER_STMT) {
             mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
@@ -165,6 +160,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             attachObjectToDatabase(db);
         }
         // compile the sql statement
+        if (nStatement > 0) {
+            // already compiled.
+            return;
+        }
         mDatabase.lock();
         try {
             compileSql();
