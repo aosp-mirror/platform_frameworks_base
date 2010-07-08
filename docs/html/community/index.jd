@@ -4,10 +4,10 @@ page.title=Community
 
 	<div id="mainBodyFluid">
 <h1>Community</h1>
-<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in these discussions. Before posting, please read the <a href="http://source.android.com/discuss/android-discussion-groups-charter">Groups Charter</a> that covers the community guidelines.</p>
+<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in these discussions. Before posting, please read the <a href="http://source.android.com/community/groups-charter.html">Groups Charter</a> that covers the community guidelines.</p>
 
 <p class="note"><strong>Note:</strong> If you are seeking discussion about Android source code (not application development),
-then please refer to the <a href="http://source.android.com/discuss">Open Source Project Mailing lists</a>.</p>
+then please refer to the <a href="http://source.android.com/community">Open Source Project Mailing lists</a>.</p>
 
 <p style="margin-bottom:.5em"><strong>Contents</strong></p>
 <ol class="toc">
@@ -31,7 +31,7 @@ then please refer to the <a href="http://source.android.com/discuss">Open Source
 As you write your post, please do the following:
 <ol>
 <li><b>Read
-the <a href="http://sites.google.com/a/android.com/opensource/discuss/android-discussion-groups-charter">mailing list charter</a></b> that covers the community guidelines. 
+the <a href="http://source.android.com/community/groups-charter.html">mailing list charter</a></b> that covers the community guidelines. 
 </li>
 <li><b>Select the most appropriate mailing list for your question</b>. There are several different lists for 
 developers, described below.</li>
