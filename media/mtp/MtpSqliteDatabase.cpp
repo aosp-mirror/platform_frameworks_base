@@ -414,7 +414,6 @@ MtpObjectHandle* MtpSqliteDatabase::getFileList(int& outCount) {
     SqliteStatement stmt(mDatabase);
     stmt.prepare("SELECT count(*) FROM files;");
 
-    MtpObjectHandleList* list = new MtpObjectHandleList();
     if (stmt.step())
         count = stmt.getColumnInt(0);
 

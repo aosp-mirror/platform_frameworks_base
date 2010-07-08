@@ -766,6 +766,7 @@ extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_media_MtpClient(JNIEnv *env);
 extern int register_android_media_MtpCursor(JNIEnv *env);
+extern int register_android_media_MtpDatabase(JNIEnv *env);
 extern int register_android_media_MtpServer(JNIEnv *env);
 
 #ifndef NO_OPENCORE
@@ -827,6 +828,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_MtpCursor(env) < 0) {
         LOGE("ERROR: MtpCursor native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MtpDatabase(env) < 0) {
+        LOGE("ERROR: MtpDatabase native registration failed");
         goto bail;
     }
 

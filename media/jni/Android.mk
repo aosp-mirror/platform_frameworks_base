@@ -15,6 +15,7 @@ LOCAL_SRC_FILES:= \
     android_media_AmrInputStream.cpp \
 	android_media_MtpClient.cpp \
 	android_media_MtpCursor.cpp \
+	android_media_MtpDatabase.cpp \
 	android_media_MtpServer.cpp \
 
 LOCAL_SHARED_LIBRARIES := \

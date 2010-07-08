@@ -25,6 +25,7 @@
 #include <sys/ioctl.h>
 
 #include "MtpServer.h"
+#include "MtpSqliteDatabase.h"
 #include "MtpStorage.h"
 #include "f_mtp.h"
 #include "private/android_filesystem_config.h"
@@ -77,7 +78,9 @@ int main(int argc, char* argv[]) {
     enable_usb_function("usb_mass_storage", false);
     enable_usb_function("mtp", true);
 
-    MtpServer   server(fd, "/data/data/mtp/mtp.db", AID_SDCARD_RW, 0664, 0775);
+    MtpSqliteDatabase* database = new MtpSqliteDatabase();
+    database->open("/data/data/mtp/mtp.db", true);
+    MtpServer   server(fd, database, AID_SDCARD_RW, 0664, 0775);
     server.addStorage(storagePath);
     server.scanStorage();
     server.run();

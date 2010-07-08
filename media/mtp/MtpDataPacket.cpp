@@ -299,15 +299,26 @@ void MtpDataPacket::putAUInt64(const uint64_t* values, int count) {
         putUInt64(*values++);
 }
 
-void MtpDataPacket::putString(const MtpStringBuffer& string)
-{
+void MtpDataPacket::putString(const MtpStringBuffer& string) {
     string.writeToPacket(this);
 }
 
-void MtpDataPacket::putString(const char* s)
-{
+void MtpDataPacket::putString(const char* s) {
     MtpStringBuffer string(s);
     string.writeToPacket(this);
+}
+
+void MtpDataPacket::putString(const uint16_t* string) {
+    int count = 0;
+    for (int i = 0; i < 256; i++) {
+        if (string[i])
+            count++;
+        else
+            break;
+    }
+    putUInt8(count);
+    for (int i = 0; i < count; i++)
+        putUInt16(string[i]);
 }
 
 #ifdef MTP_DEVICE 

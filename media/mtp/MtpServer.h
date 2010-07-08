@@ -26,9 +26,9 @@
 
 namespace android {
 
-class MtpStorage;
-class MtpSqliteDatabase;
+class MtpDatabase;
 class MtpProperty;
+class MtpStorage;
 
 class MtpServer {
 
@@ -36,10 +36,7 @@ private:
     // file descriptor for MTP kernel driver
     int                 mFD;
 
-    // path to our sqlite3 database
-    const char*         mDatabasePath;
-
-    MtpSqliteDatabase*  mDatabase;
+    MtpDatabase*        mDatabase;
 
     // group to own new files and folders
     int                 mFileGroup;
@@ -67,7 +64,7 @@ private:
     size_t              mSendObjectFileSize;
 
 public:
-                        MtpServer(int fd, const char* databasePath,
+                        MtpServer(int fd, MtpDatabase* database,
                                     int fileGroup, int filePerm, int directoryPerm);
     virtual             ~MtpServer();
 
