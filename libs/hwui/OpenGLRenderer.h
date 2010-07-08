@@ -26,6 +26,7 @@
 #include <SkXfermode.h>
 
 #include <utils/RefBase.h>
+#include <utils/ResourceTypes.h>
 
 #include "Matrix.h"
 #include "Program.h"
@@ -108,6 +109,8 @@ public:
     void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop, float srcRight, float srcBottom,
             float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint);
+    void drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, float left, float top,
+            float right, float bottom, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
 

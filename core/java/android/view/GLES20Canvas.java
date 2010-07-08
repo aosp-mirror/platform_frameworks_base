@@ -360,6 +360,16 @@ class GLES20Canvas extends Canvas {
     }
 
     @Override
+    public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawPatch(mRenderer, bitmap.mNativeBitmap, chunks, dst.left, dst.top, dst.right,
+                dst.bottom, nativePaint, bitmap.getDensity(), mDensity, mScreenDensity);
+    }
+
+    private native void nDrawPatch(int renderer, int bitmap, byte[] chunks, float left, float top,
+            float right, float bottom, int paint, int bitmapDensity, int canvasDensity, int screenDensity);
+
+    @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint,
