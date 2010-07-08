@@ -57,7 +57,7 @@ static const effect_descriptor_t gInsertEnvReverbDescriptor = {
 
 // Google auxiliary preset reverb UUID: 63909320-53a6-11df-bdbd-0002a5d5c51b
 static const effect_descriptor_t gAuxPresetReverbDescriptor = {
-        {0x47382d60, 0xddd8, 0x4763, 0x11db, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0x63909320, 0x53a6, 0x11df, 0xbdbd, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
@@ -69,7 +69,7 @@ static const effect_descriptor_t gAuxPresetReverbDescriptor = {
 
 // Google insert preset reverb UUID: d93dc6a0-6342-11df-b128-0002a5d5c51b
 static const effect_descriptor_t gInsertPresetReverbDescriptor = {
-        {0x47382d60, 0xddd8, 0x4763, 0x11db, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
+        {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0xd93dc6a0, 0x6342, 0x11df, 0xb128, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         EFFECT_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
@@ -196,7 +196,7 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
     pReverb = (reverb_object_t*) &pRvbModule->context;
 
     //if bypassed or the preset forces the signal to be completely dry
-    if (pReverb->m_bBypass) {
+    if (pReverb->m_bBypass != 0) {
         if (inBuffer->raw != outBuffer->raw) {
             int16_t smp;
             pSrc = inBuffer->s16;
@@ -520,7 +520,7 @@ int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
         pReverb->m_bUseNoise = true;
 
         // for debugging purposes, allow bypass
-        pReverb->m_bBypass = false;
+        pReverb->m_bBypass = 0;
 
         pReverb->m_nNextRoom = 1;
 
@@ -662,247 +662,253 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
     int32_t temp2;
     size_t size;
 
-    if (pReverb->m_Preset && param != REVERB_PARAM_PRESET) {
-        return -EINVAL;
-    }
-    if (!pReverb->m_Preset && param == REVERB_PARAM_PRESET) {
-        return -EINVAL;
-    }
-
-    switch (param) {
-    case REVERB_PARAM_ROOM_LEVEL:
-    case REVERB_PARAM_ROOM_HF_LEVEL:
-    case REVERB_PARAM_DECAY_HF_RATIO:
-    case REVERB_PARAM_REFLECTIONS_LEVEL:
-    case REVERB_PARAM_REVERB_LEVEL:
-    case REVERB_PARAM_DIFFUSION:
-    case REVERB_PARAM_DENSITY:
+    if (pReverb->m_Preset) {
+        if (param != REVERB_PARAM_PRESET || *pSize < sizeof(int16_t)) {
+            return -EINVAL;
+        }
         size = sizeof(int16_t);
-        break;
-
-    case REVERB_PARAM_BYPASS:
-    case REVERB_PARAM_PRESET:
-    case REVERB_PARAM_DECAY_TIME:
-    case REVERB_PARAM_REFLECTIONS_DELAY:
-    case REVERB_PARAM_REVERB_DELAY:
-        size = sizeof(int32_t);
-        break;
-
-    case REVERB_PARAM_PROPERTIES:
-        size = sizeof(t_reverb_properties);
-        break;
-
-    default:
-        return -EINVAL;
-    }
-
-    if (*pSize < size) {
-        return -EINVAL;
-    }
-    *pSize = size;
-    pValue32 = (int32_t *) pValue;
-    pValue16 = (int16_t *) pValue;
-    pProperties = (t_reverb_properties *) pValue;
-
-    switch (param) {
-    case REVERB_PARAM_BYPASS:
-        *(int32_t *) pValue = (int32_t) pReverb->m_bBypass;
-        break;
-    case REVERB_PARAM_PRESET:
-        *(int32_t *) pValue = (int8_t) pReverb->m_nCurrentRoom;
-        break;
-
-    case REVERB_PARAM_PROPERTIES:
-        pValue16 = &pProperties->roomLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_ROOM_LEVEL:
-        // Convert m_nRoomLpfFwd to millibels
-        temp = (pReverb->m_nRoomLpfFwd << 15)
-                / (32767 - pReverb->m_nRoomLpfFbk);
-        *pValue16 = Effects_Linear16ToMillibels(temp);
-
-        LOGV("get REVERB_PARAM_ROOM_LEVEL %d, gain %d, m_nRoomLpfFwd %d, m_nRoomLpfFbk %d", *pValue16, temp, pReverb->m_nRoomLpfFwd, pReverb->m_nRoomLpfFbk);
-
-        if (param == REVERB_PARAM_ROOM_LEVEL) {
-            break;
-        }
-        pValue16 = &pProperties->roomHFLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_ROOM_HF_LEVEL:
-        // The ratio between linear gain at 0Hz and at 5000Hz for the room low pass is:
-        // (1 + a1) / sqrt(a1^2 + 2*C*a1 + 1) where:
-        // - a1 is minus the LP feedback gain: -pReverb->m_nRoomLpfFbk
-        // - C is cos(2piWT) @ 5000Hz: pReverb->m_nCosWT_5KHz
-
-        temp = MULT_EG1_EG1(pReverb->m_nRoomLpfFbk, pReverb->m_nRoomLpfFbk);
-        LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, a1^2 %d", temp);
-        temp2 = MULT_EG1_EG1(pReverb->m_nRoomLpfFbk, pReverb->m_nCosWT_5KHz)
-                << 1;
-        LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, 2 Cos a1 %d", temp2);
-        temp = 32767 + temp - temp2;
-        LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, a1^2 + 2 Cos a1 + 1 %d", temp);
-        temp = Effects_Sqrt(temp) * 181;
-        LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, SQRT(a1^2 + 2 Cos a1 + 1) %d", temp);
-        temp = ((32767 - pReverb->m_nRoomLpfFbk) << 15) / temp;
-
-        LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, gain %d, m_nRoomLpfFwd %d, m_nRoomLpfFbk %d", temp, pReverb->m_nRoomLpfFwd, pReverb->m_nRoomLpfFbk);
-
-        *pValue16 = Effects_Linear16ToMillibels(temp);
-
-        if (param == REVERB_PARAM_ROOM_HF_LEVEL) {
-            break;
-        }
-        pValue32 = &pProperties->decayTime;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DECAY_TIME:
-        // Calculate reverb feedback path gain
-        temp = (pReverb->m_nRvbLpfFwd << 15) / (32767 - pReverb->m_nRvbLpfFbk);
-        temp = Effects_Linear16ToMillibels(temp);
-
-        // Calculate decay time: g = -6000 d/DT , g gain in millibels, d reverb delay, DT decay time
-        temp = (-6000 * pReverb->m_nLateDelay) / temp;
-
-        // Convert samples to ms
-        *pValue32 = (temp * 1000) / pReverb->m_nSamplingRate;
-
-        LOGV("get REVERB_PARAM_DECAY_TIME, samples %d, ms %d", temp, *pValue32);
-
-        if (param == REVERB_PARAM_DECAY_TIME) {
-            break;
-        }
-        pValue16 = &pProperties->decayHFRatio;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DECAY_HF_RATIO:
-        // If r is the decay HF ratio  (r = REVERB_PARAM_DECAY_HF_RATIO/1000) we have:
-        //       DT_5000Hz = DT_0Hz * r
-        //  and  G_5000Hz = -6000 * d / DT_5000Hz and G_0Hz = -6000 * d / DT_0Hz in millibels so :
-        // r = G_0Hz/G_5000Hz in millibels
-        // The linear gain at 5000Hz is b0 / sqrt(a1^2 + 2*C*a1 + 1) where:
-        // - a1 is minus the LP feedback gain: -pReverb->m_nRvbLpfFbk
-        // - b0 is the LP forward gain: pReverb->m_nRvbLpfFwd
-        // - C is cos(2piWT) @ 5000Hz: pReverb->m_nCosWT_5KHz
-        if (pReverb->m_nRvbLpfFbk == 0) {
-            *pValue16 = 1000;
-            LOGV("get REVERB_PARAM_DECAY_HF_RATIO, pReverb->m_nRvbLpfFbk == 0, ratio %d", *pValue16);
+        pValue16 = (int16_t *)pValue;
+        // REVERB_PRESET_NONE is mapped to bypass
+        if (pReverb->m_bBypass != 0) {
+            *pValue16 = (int16_t)REVERB_PRESET_NONE;
         } else {
-            temp = MULT_EG1_EG1(pReverb->m_nRvbLpfFbk, pReverb->m_nRvbLpfFbk);
-            temp2 = MULT_EG1_EG1(pReverb->m_nRvbLpfFbk, pReverb->m_nCosWT_5KHz)
+            *pValue16 = (int16_t)(pReverb->m_nNextRoom + 1);
+        }
+        LOGV("get REVERB_PARAM_PRESET, preset %d", *pValue16);
+    } else {
+        switch (param) {
+        case REVERB_PARAM_ROOM_LEVEL:
+        case REVERB_PARAM_ROOM_HF_LEVEL:
+        case REVERB_PARAM_DECAY_HF_RATIO:
+        case REVERB_PARAM_REFLECTIONS_LEVEL:
+        case REVERB_PARAM_REVERB_LEVEL:
+        case REVERB_PARAM_DIFFUSION:
+        case REVERB_PARAM_DENSITY:
+            size = sizeof(int16_t);
+            break;
+
+        case REVERB_PARAM_BYPASS:
+        case REVERB_PARAM_DECAY_TIME:
+        case REVERB_PARAM_REFLECTIONS_DELAY:
+        case REVERB_PARAM_REVERB_DELAY:
+            size = sizeof(int32_t);
+            break;
+
+        case REVERB_PARAM_PROPERTIES:
+            size = sizeof(t_reverb_properties);
+            break;
+
+        default:
+            return -EINVAL;
+        }
+
+        if (*pSize < size) {
+            return -EINVAL;
+        }
+
+        pValue32 = (int32_t *) pValue;
+        pValue16 = (int16_t *) pValue;
+        pProperties = (t_reverb_properties *) pValue;
+
+        switch (param) {
+        case REVERB_PARAM_BYPASS:
+            *pValue32 = (int32_t) pReverb->m_bBypass;
+            break;
+
+        case REVERB_PARAM_PROPERTIES:
+            pValue16 = &pProperties->roomLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_ROOM_LEVEL:
+            // Convert m_nRoomLpfFwd to millibels
+            temp = (pReverb->m_nRoomLpfFwd << 15)
+                    / (32767 - pReverb->m_nRoomLpfFbk);
+            *pValue16 = Effects_Linear16ToMillibels(temp);
+
+            LOGV("get REVERB_PARAM_ROOM_LEVEL %d, gain %d, m_nRoomLpfFwd %d, m_nRoomLpfFbk %d", *pValue16, temp, pReverb->m_nRoomLpfFwd, pReverb->m_nRoomLpfFbk);
+
+            if (param == REVERB_PARAM_ROOM_LEVEL) {
+                break;
+            }
+            pValue16 = &pProperties->roomHFLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_ROOM_HF_LEVEL:
+            // The ratio between linear gain at 0Hz and at 5000Hz for the room low pass is:
+            // (1 + a1) / sqrt(a1^2 + 2*C*a1 + 1) where:
+            // - a1 is minus the LP feedback gain: -pReverb->m_nRoomLpfFbk
+            // - C is cos(2piWT) @ 5000Hz: pReverb->m_nCosWT_5KHz
+
+            temp = MULT_EG1_EG1(pReverb->m_nRoomLpfFbk, pReverb->m_nRoomLpfFbk);
+            LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, a1^2 %d", temp);
+            temp2 = MULT_EG1_EG1(pReverb->m_nRoomLpfFbk, pReverb->m_nCosWT_5KHz)
                     << 1;
+            LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, 2 Cos a1 %d", temp2);
             temp = 32767 + temp - temp2;
+            LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, a1^2 + 2 Cos a1 + 1 %d", temp);
             temp = Effects_Sqrt(temp) * 181;
-            temp = (pReverb->m_nRvbLpfFwd << 15) / temp;
-            // The linear gain at 0Hz is b0 / (a1 + 1)
-            temp2 = (pReverb->m_nRvbLpfFwd << 15) / (32767
-                    - pReverb->m_nRvbLpfFbk);
+            LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, SQRT(a1^2 + 2 Cos a1 + 1) %d", temp);
+            temp = ((32767 - pReverb->m_nRoomLpfFbk) << 15) / temp;
 
+            LOGV("get REVERB_PARAM_ROOM_HF_LEVEL, gain %d, m_nRoomLpfFwd %d, m_nRoomLpfFbk %d", temp, pReverb->m_nRoomLpfFwd, pReverb->m_nRoomLpfFbk);
+
+            *pValue16 = Effects_Linear16ToMillibels(temp);
+
+            if (param == REVERB_PARAM_ROOM_HF_LEVEL) {
+                break;
+            }
+            pValue32 = &pProperties->decayTime;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DECAY_TIME:
+            // Calculate reverb feedback path gain
+            temp = (pReverb->m_nRvbLpfFwd << 15) / (32767 - pReverb->m_nRvbLpfFbk);
             temp = Effects_Linear16ToMillibels(temp);
-            temp2 = Effects_Linear16ToMillibels(temp2);
-            LOGV("get REVERB_PARAM_DECAY_HF_RATIO, gain 5KHz %d mB, gain DC %d mB", temp, temp2);
 
-            if (temp == 0)
-                temp = 1;
-            temp = (int16_t) ((1000 * temp2) / temp);
+            // Calculate decay time: g = -6000 d/DT , g gain in millibels, d reverb delay, DT decay time
+            temp = (-6000 * pReverb->m_nLateDelay) / temp;
+
+            // Convert samples to ms
+            *pValue32 = (temp * 1000) / pReverb->m_nSamplingRate;
+
+            LOGV("get REVERB_PARAM_DECAY_TIME, samples %d, ms %d", temp, *pValue32);
+
+            if (param == REVERB_PARAM_DECAY_TIME) {
+                break;
+            }
+            pValue16 = &pProperties->decayHFRatio;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DECAY_HF_RATIO:
+            // If r is the decay HF ratio  (r = REVERB_PARAM_DECAY_HF_RATIO/1000) we have:
+            //       DT_5000Hz = DT_0Hz * r
+            //  and  G_5000Hz = -6000 * d / DT_5000Hz and G_0Hz = -6000 * d / DT_0Hz in millibels so :
+            // r = G_0Hz/G_5000Hz in millibels
+            // The linear gain at 5000Hz is b0 / sqrt(a1^2 + 2*C*a1 + 1) where:
+            // - a1 is minus the LP feedback gain: -pReverb->m_nRvbLpfFbk
+            // - b0 is the LP forward gain: pReverb->m_nRvbLpfFwd
+            // - C is cos(2piWT) @ 5000Hz: pReverb->m_nCosWT_5KHz
+            if (pReverb->m_nRvbLpfFbk == 0) {
+                *pValue16 = 1000;
+                LOGV("get REVERB_PARAM_DECAY_HF_RATIO, pReverb->m_nRvbLpfFbk == 0, ratio %d", *pValue16);
+            } else {
+                temp = MULT_EG1_EG1(pReverb->m_nRvbLpfFbk, pReverb->m_nRvbLpfFbk);
+                temp2 = MULT_EG1_EG1(pReverb->m_nRvbLpfFbk, pReverb->m_nCosWT_5KHz)
+                        << 1;
+                temp = 32767 + temp - temp2;
+                temp = Effects_Sqrt(temp) * 181;
+                temp = (pReverb->m_nRvbLpfFwd << 15) / temp;
+                // The linear gain at 0Hz is b0 / (a1 + 1)
+                temp2 = (pReverb->m_nRvbLpfFwd << 15) / (32767
+                        - pReverb->m_nRvbLpfFbk);
+
+                temp = Effects_Linear16ToMillibels(temp);
+                temp2 = Effects_Linear16ToMillibels(temp2);
+                LOGV("get REVERB_PARAM_DECAY_HF_RATIO, gain 5KHz %d mB, gain DC %d mB", temp, temp2);
+
+                if (temp == 0)
+                    temp = 1;
+                temp = (int16_t) ((1000 * temp2) / temp);
+                if (temp > 1000)
+                    temp = 1000;
+
+                *pValue16 = temp;
+                LOGV("get REVERB_PARAM_DECAY_HF_RATIO, ratio %d", *pValue16);
+            }
+
+            if (param == REVERB_PARAM_DECAY_HF_RATIO) {
+                break;
+            }
+            pValue16 = &pProperties->reflectionsLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REFLECTIONS_LEVEL:
+            *pValue16 = Effects_Linear16ToMillibels(pReverb->m_nEarlyGain);
+
+            LOGV("get REVERB_PARAM_REFLECTIONS_LEVEL, %d", *pValue16);
+            if (param == REVERB_PARAM_REFLECTIONS_LEVEL) {
+                break;
+            }
+            pValue32 = &pProperties->reflectionsDelay;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REFLECTIONS_DELAY:
+            // convert samples to ms
+            *pValue32 = (pReverb->m_nEarlyDelay * 1000) / pReverb->m_nSamplingRate;
+
+            LOGV("get REVERB_PARAM_REFLECTIONS_DELAY, samples %d, ms %d", pReverb->m_nEarlyDelay, *pValue32);
+
+            if (param == REVERB_PARAM_REFLECTIONS_DELAY) {
+                break;
+            }
+            pValue16 = &pProperties->reverbLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REVERB_LEVEL:
+            // Convert linear gain to millibels
+            *pValue16 = Effects_Linear16ToMillibels(pReverb->m_nLateGain << 2);
+
+            LOGV("get REVERB_PARAM_REVERB_LEVEL %d", *pValue16);
+
+            if (param == REVERB_PARAM_REVERB_LEVEL) {
+                break;
+            }
+            pValue32 = &pProperties->reverbDelay;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REVERB_DELAY:
+            // convert samples to ms
+            *pValue32 = (pReverb->m_nLateDelay * 1000) / pReverb->m_nSamplingRate;
+
+            LOGV("get REVERB_PARAM_REVERB_DELAY, samples %d, ms %d", pReverb->m_nLateDelay, *pValue32);
+
+            if (param == REVERB_PARAM_REVERB_DELAY) {
+                break;
+            }
+            pValue16 = &pProperties->diffusion;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DIFFUSION:
+            temp = (int16_t) ((1000 * (pReverb->m_sAp0.m_nApGain - AP0_GAIN_BASE))
+                    / AP0_GAIN_RANGE);
+
+            if (temp < 0)
+                temp = 0;
             if (temp > 1000)
                 temp = 1000;
 
             *pValue16 = temp;
-            LOGV("get REVERB_PARAM_DECAY_HF_RATIO, ratio %d", *pValue16);
-        }
+            LOGV("get REVERB_PARAM_DIFFUSION, %d, AP0 gain %d", *pValue16, pReverb->m_sAp0.m_nApGain);
 
-        if (param == REVERB_PARAM_DECAY_HF_RATIO) {
+            if (param == REVERB_PARAM_DIFFUSION) {
+                break;
+            }
+            pValue16 = &pProperties->density;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DENSITY:
+            // Calculate AP delay in time units
+            temp = ((pReverb->m_sAp0.m_zApOut - pReverb->m_sAp0.m_zApIn) << 16)
+                    / pReverb->m_nSamplingRate;
+
+            temp = (int16_t) ((1000 * (temp - AP0_TIME_BASE)) / AP0_TIME_RANGE);
+
+            if (temp < 0)
+                temp = 0;
+            if (temp > 1000)
+                temp = 1000;
+
+            *pValue16 = temp;
+
+            LOGV("get REVERB_PARAM_DENSITY, %d, AP0 delay smps %d", *pValue16, pReverb->m_sAp0.m_zApOut - pReverb->m_sAp0.m_zApIn);
+            break;
+
+        default:
             break;
         }
-        pValue16 = &pProperties->reflectionsLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REFLECTIONS_LEVEL:
-        *pValue16 = Effects_Linear16ToMillibels(pReverb->m_nEarlyGain);
-
-        LOGV("get REVERB_PARAM_REFLECTIONS_LEVEL, %d", *pValue16);
-        if (param == REVERB_PARAM_REFLECTIONS_LEVEL) {
-            break;
-        }
-        pValue32 = &pProperties->reflectionsDelay;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REFLECTIONS_DELAY:
-        // convert samples to ms
-        *pValue32 = (pReverb->m_nEarlyDelay * 1000) / pReverb->m_nSamplingRate;
-
-        LOGV("get REVERB_PARAM_REFLECTIONS_DELAY, samples %d, ms %d", pReverb->m_nEarlyDelay, *pValue32);
-
-        if (param == REVERB_PARAM_REFLECTIONS_DELAY) {
-            break;
-        }
-        pValue16 = &pProperties->reverbLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REVERB_LEVEL:
-        // Convert linear gain to millibels
-        *pValue16 = Effects_Linear16ToMillibels(pReverb->m_nLateGain << 2);
-
-        LOGV("get REVERB_PARAM_REVERB_LEVEL %d", *pValue16);
-
-        if (param == REVERB_PARAM_REVERB_LEVEL) {
-            break;
-        }
-        pValue32 = &pProperties->reverbDelay;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REVERB_DELAY:
-        // convert samples to ms
-        *pValue32 = (pReverb->m_nLateDelay * 1000) / pReverb->m_nSamplingRate;
-
-        LOGV("get REVERB_PARAM_REVERB_DELAY, samples %d, ms %d", pReverb->m_nLateDelay, *pValue32);
-
-        if (param == REVERB_PARAM_REVERB_DELAY) {
-            break;
-        }
-        pValue16 = &pProperties->diffusion;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DIFFUSION:
-        temp = (int16_t) ((1000 * (pReverb->m_sAp0.m_nApGain - AP0_GAIN_BASE))
-                / AP0_GAIN_RANGE);
-
-        if (temp < 0)
-            temp = 0;
-        if (temp > 1000)
-            temp = 1000;
-
-        *pValue16 = temp;
-        LOGV("get REVERB_PARAM_DIFFUSION, %d, AP0 gain %d", *pValue16, pReverb->m_sAp0.m_nApGain);
-
-        if (param == REVERB_PARAM_DIFFUSION) {
-            break;
-        }
-        pValue16 = &pProperties->density;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DENSITY:
-        // Calculate AP delay in time units
-        temp = ((pReverb->m_sAp0.m_zApOut - pReverb->m_sAp0.m_zApIn) << 16)
-                / pReverb->m_nSamplingRate;
-
-        temp = (int16_t) ((1000 * (temp - AP0_TIME_BASE)) / AP0_TIME_RANGE);
-
-        if (temp < 0)
-            temp = 0;
-        if (temp > 1000)
-            temp = 1000;
-
-        *pValue16 = temp;
-
-        LOGV("get REVERB_PARAM_DENSITY, %d, AP0 delay smps %d", *pValue16, pReverb->m_sAp0.m_zApOut - pReverb->m_sAp0.m_zApIn);
-        break;
-
-    default:
-        break;
     }
+
+    *pSize = size;
 
     LOGV("Reverb_getParameter, context %p, param %d, value %d",
             pReverb, param, *(int *)pValue);
@@ -945,382 +951,386 @@ int Reverb_setParameter(reverb_object_t *pReverb, int32_t param, size_t size,
     LOGV("Reverb_setParameter, context %p, param %d, value16 %d, value32 %d",
             pReverb, param, *(int16_t *)pValue, *(int32_t *)pValue);
 
-    if (pReverb->m_Preset && param != REVERB_PARAM_PRESET) {
-        return -EINVAL;
-    }
-    if (!pReverb->m_Preset && param == REVERB_PARAM_PRESET) {
-        return -EINVAL;
-    }
-
-    switch (param) {
-    case REVERB_PARAM_ROOM_LEVEL:
-    case REVERB_PARAM_ROOM_HF_LEVEL:
-    case REVERB_PARAM_DECAY_HF_RATIO:
-    case REVERB_PARAM_REFLECTIONS_LEVEL:
-    case REVERB_PARAM_REVERB_LEVEL:
-    case REVERB_PARAM_DIFFUSION:
-    case REVERB_PARAM_DENSITY:
-        paramSize = sizeof(int16_t);
-        break;
-
-    case REVERB_PARAM_BYPASS:
-    case REVERB_PARAM_PRESET:
-    case REVERB_PARAM_DECAY_TIME:
-    case REVERB_PARAM_REFLECTIONS_DELAY:
-    case REVERB_PARAM_REVERB_DELAY:
-        paramSize = sizeof(int32_t);
-        break;
-
-    case REVERB_PARAM_PROPERTIES:
-        paramSize = sizeof(t_reverb_properties);
-        break;
-
-    default:
-        return -EINVAL;
-    }
-
-    if (size != paramSize) {
-        return -EINVAL;
-    }
-
-    if (paramSize == sizeof(int16_t)) {
-        value16 = *(int16_t *) pValue;
-    } else if (paramSize == sizeof(int32_t)) {
-        value32 = *(int32_t *) pValue;
-    } else {
-        pProperties = (t_reverb_properties *) pValue;
-    }
-
-    pPreset = &pReverb->m_sPreset.m_sPreset[pReverb->m_nCurrentRoom];
-
-    switch (param) {
-    case REVERB_PARAM_BYPASS:
-        pReverb->m_bBypass = (uint16_t)value32;
-        break;
-    case REVERB_PARAM_PRESET:
-        if (value32 != REVERB_PRESET_LARGE_HALL && value32
-                != REVERB_PRESET_HALL && value32 != REVERB_PRESET_CHAMBER
-                && value32 != REVERB_PRESET_ROOM)
+    if (pReverb->m_Preset) {
+        if (param != REVERB_PARAM_PRESET || size != sizeof(int16_t)) {
             return -EINVAL;
-        pReverb->m_nNextRoom = (int16_t) value32;
-        break;
-
-    case REVERB_PARAM_PROPERTIES:
-        value16 = pProperties->roomLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_ROOM_LEVEL:
-        // Convert millibels to linear 16 bit signed => m_nRoomLpfFwd
-        if (value16 > 0)
-            return -EINVAL;
-
-        temp = Effects_MillibelsToLinear16(value16);
-
-        pReverb->m_nRoomLpfFwd
-                = MULT_EG1_EG1(temp, (32767 - pReverb->m_nRoomLpfFbk));
-
-        LOGV("REVERB_PARAM_ROOM_LEVEL, gain %d, new m_nRoomLpfFwd %d, m_nRoomLpfFbk %d", temp, pReverb->m_nRoomLpfFwd, pReverb->m_nRoomLpfFbk);
-        if (param == REVERB_PARAM_ROOM_LEVEL)
-            break;
-        value16 = pProperties->roomHFLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_ROOM_HF_LEVEL:
-
-        // Limit to 0 , -40dB range because of low pass implementation
-        if (value16 > 0 || value16 < -4000)
-            return -EINVAL;
-        // Convert attenuation @ 5000H expressed in millibels to => m_nRoomLpfFbk
-        // m_nRoomLpfFbk is -a1 where a1 is the solution of:
-        // a1^2 + 2*(C-dG^2)/(1-dG^2)*a1 + 1 = 0 where:
-        // - C is cos(2*pi*5000/Fs) (pReverb->m_nCosWT_5KHz)
-        // - dG is G0/Gf (G0 is the linear gain at DC and Gf is the wanted gain at 5000Hz)
-
-        // Save current DC gain m_nRoomLpfFwd / (32767 - m_nRoomLpfFbk) to keep it unchanged
-        // while changing HF level
-        temp2 = (pReverb->m_nRoomLpfFwd << 15) / (32767
-                - pReverb->m_nRoomLpfFbk);
-        if (value16 == 0) {
-            pReverb->m_nRoomLpfFbk = 0;
-        } else {
-            int32_t dG2, b, delta;
-
-            // dG^2
-            temp = Effects_MillibelsToLinear16(value16);
-            LOGV("REVERB_PARAM_ROOM_HF_LEVEL, HF gain %d", temp);
-            temp = (1 << 30) / temp;
-            LOGV("REVERB_PARAM_ROOM_HF_LEVEL, 1/ HF gain %d", temp);
-            dG2 = (int32_t) (((int64_t) temp * (int64_t) temp) >> 15);
-            LOGV("REVERB_PARAM_ROOM_HF_LEVEL, 1/ HF gain ^ 2 %d", dG2);
-            // b = 2*(C-dG^2)/(1-dG^2)
-            b = (int32_t) ((((int64_t) 1 << (15 + 1))
-                    * ((int64_t) pReverb->m_nCosWT_5KHz - (int64_t) dG2))
-                    / ((int64_t) 32767 - (int64_t) dG2));
-
-            // delta = b^2 - 4
-            delta = (int32_t) ((((int64_t) b * (int64_t) b) >> 15) - (1 << (15
-                    + 2)));
-
-            LOGV_IF(delta > (1<<30), " delta overflow %d", delta);
-
-            LOGV("REVERB_PARAM_ROOM_HF_LEVEL, dG2 %d, b %d, delta %d, m_nCosWT_5KHz %d", dG2, b, delta, pReverb->m_nCosWT_5KHz);
-            // m_nRoomLpfFbk = -a1 = - (- b + sqrt(delta)) / 2
-            pReverb->m_nRoomLpfFbk = (b - Effects_Sqrt(delta) * 181) >> 1;
         }
-        LOGV("REVERB_PARAM_ROOM_HF_LEVEL, olg DC gain %d new m_nRoomLpfFbk %d, old m_nRoomLpfFwd %d",
-                temp2, pReverb->m_nRoomLpfFbk, pReverb->m_nRoomLpfFwd);
-
-        pReverb->m_nRoomLpfFwd
-                = MULT_EG1_EG1(temp2, (32767 - pReverb->m_nRoomLpfFbk));
-        LOGV("REVERB_PARAM_ROOM_HF_LEVEL, new m_nRoomLpfFwd %d", pReverb->m_nRoomLpfFwd);
-
-        if (param == REVERB_PARAM_ROOM_HF_LEVEL)
-            break;
-        value32 = pProperties->decayTime;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DECAY_TIME:
-
-        // Convert milliseconds to => m_nRvbLpfFwd (function of m_nRvbLpfFbk)
-        // convert ms to samples
-        value32 = (value32 * pReverb->m_nSamplingRate) / 1000;
-
-        // calculate valid decay time range as a function of current reverb delay and
-        // max feed back gain. Min value <=> -40dB in one pass, Max value <=> feedback gain = -1 dB
-        // Calculate attenuation for each round in late reverb given a total attenuation of -6000 millibels.
-        // g = -6000 d/DT , g gain in millibels, d reverb delay, DT decay time
-        averageDelay = pReverb->m_nLateDelay - pReverb->m_nMaxExcursion;
-        averageDelay += ((pReverb->m_sAp0.m_zApOut - pReverb->m_sAp0.m_zApIn)
-                + (pReverb->m_sAp1.m_zApOut - pReverb->m_sAp1.m_zApIn)) >> 1;
-
-        temp = (-6000 * averageDelay) / value32;
-        LOGV("REVERB_PARAM_DECAY_TIME, delay smps %d, DT smps %d, gain mB %d",averageDelay, value32, temp);
-        if (temp < -4000 || temp > -100)
+        value16 = *(int16_t *)pValue;
+        LOGV("set REVERB_PARAM_PRESET, preset %d", value16);
+        if (value16 < REVERB_PRESET_NONE || value16 > REVERB_PRESET_PLATE) {
             return -EINVAL;
-
-        // calculate low pass gain by adding reverb input attenuation (pReverb->m_nLateGain) and substrating output
-        // xfade and sum gain (max +9dB)
-        temp -= Effects_Linear16ToMillibels(pReverb->m_nLateGain) + 900;
-        temp = Effects_MillibelsToLinear16(temp);
-
-        // DC gain (temp) = b0 / (1 + a1) = pReverb->m_nRvbLpfFwd / (32767 - pReverb->m_nRvbLpfFbk)
-        pReverb->m_nRvbLpfFwd
-                = MULT_EG1_EG1(temp, (32767 - pReverb->m_nRvbLpfFbk));
-
-        LOGV("REVERB_PARAM_DECAY_TIME, gain %d, new m_nRvbLpfFwd %d, old m_nRvbLpfFbk %d, reverb gain %d", temp, pReverb->m_nRvbLpfFwd, pReverb->m_nRvbLpfFbk, Effects_Linear16ToMillibels(pReverb->m_nLateGain));
-
-        if (param == REVERB_PARAM_DECAY_TIME)
-            break;
-        value16 = pProperties->decayHFRatio;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DECAY_HF_RATIO:
-
-        // We limit max value to 1000 because reverb filter is lowpass only
-        if (value16 < 100 || value16 > 1000)
-            return -EINVAL;
-        // Convert per mille to => m_nLpfFwd, m_nLpfFbk
-
-        // Save current DC gain m_nRoomLpfFwd / (32767 - m_nRoomLpfFbk) to keep it unchanged
-        // while changing HF level
-        temp2 = (pReverb->m_nRvbLpfFwd << 15) / (32767 - pReverb->m_nRvbLpfFbk);
-
-        if (value16 == 1000) {
-            pReverb->m_nRvbLpfFbk = 0;
+        }
+        // REVERB_PRESET_NONE is mapped to bypass
+        if (value16 == REVERB_PRESET_NONE) {
+            pReverb->m_bBypass = 1;
         } else {
-            int32_t dG2, b, delta;
+            pReverb->m_bBypass = 0;
+            pReverb->m_nNextRoom = value16 - 1;
+        }
+    } else {
+        switch (param) {
+        case REVERB_PARAM_ROOM_LEVEL:
+        case REVERB_PARAM_ROOM_HF_LEVEL:
+        case REVERB_PARAM_DECAY_HF_RATIO:
+        case REVERB_PARAM_REFLECTIONS_LEVEL:
+        case REVERB_PARAM_REVERB_LEVEL:
+        case REVERB_PARAM_DIFFUSION:
+        case REVERB_PARAM_DENSITY:
+            paramSize = sizeof(int16_t);
+            break;
 
-            temp = Effects_Linear16ToMillibels(temp2);
-            // G_5000Hz = G_DC * (1000/REVERB_PARAM_DECAY_HF_RATIO) in millibels
+        case REVERB_PARAM_BYPASS:
+        case REVERB_PARAM_DECAY_TIME:
+        case REVERB_PARAM_REFLECTIONS_DELAY:
+        case REVERB_PARAM_REVERB_DELAY:
+            paramSize = sizeof(int32_t);
+            break;
 
-            value32 = ((int32_t) 1000 << 15) / (int32_t) value16;
-            LOGV("REVERB_PARAM_DECAY_HF_RATIO, DC gain %d, DC gain mB %d, 1000/R %d", temp2, temp, value32);
+        case REVERB_PARAM_PROPERTIES:
+            paramSize = sizeof(t_reverb_properties);
+            break;
 
-            temp = (int32_t) (((int64_t) temp * (int64_t) value32) >> 15);
+        default:
+            return -EINVAL;
+        }
 
-            if (temp < -4000) {
-                LOGV("REVERB_PARAM_DECAY_HF_RATIO HF gain overflow %d mB", temp);
-                temp = -4000;
+        if (size != paramSize) {
+            return -EINVAL;
+        }
+
+        if (paramSize == sizeof(int16_t)) {
+            value16 = *(int16_t *) pValue;
+        } else if (paramSize == sizeof(int32_t)) {
+            value32 = *(int32_t *) pValue;
+        } else {
+            pProperties = (t_reverb_properties *) pValue;
+        }
+
+        pPreset = &pReverb->m_sPreset.m_sPreset[pReverb->m_nNextRoom];
+
+        switch (param) {
+        case REVERB_PARAM_BYPASS:
+            pReverb->m_bBypass = (uint16_t)value32;
+            break;
+
+        case REVERB_PARAM_PROPERTIES:
+            value16 = pProperties->roomLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_ROOM_LEVEL:
+            // Convert millibels to linear 16 bit signed => m_nRoomLpfFwd
+            if (value16 > 0)
+                return -EINVAL;
+
+            temp = Effects_MillibelsToLinear16(value16);
+
+            pReverb->m_nRoomLpfFwd
+                    = MULT_EG1_EG1(temp, (32767 - pReverb->m_nRoomLpfFbk));
+
+            LOGV("REVERB_PARAM_ROOM_LEVEL, gain %d, new m_nRoomLpfFwd %d, m_nRoomLpfFbk %d", temp, pReverb->m_nRoomLpfFwd, pReverb->m_nRoomLpfFbk);
+            if (param == REVERB_PARAM_ROOM_LEVEL)
+                break;
+            value16 = pProperties->roomHFLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_ROOM_HF_LEVEL:
+
+            // Limit to 0 , -40dB range because of low pass implementation
+            if (value16 > 0 || value16 < -4000)
+                return -EINVAL;
+            // Convert attenuation @ 5000H expressed in millibels to => m_nRoomLpfFbk
+            // m_nRoomLpfFbk is -a1 where a1 is the solution of:
+            // a1^2 + 2*(C-dG^2)/(1-dG^2)*a1 + 1 = 0 where:
+            // - C is cos(2*pi*5000/Fs) (pReverb->m_nCosWT_5KHz)
+            // - dG is G0/Gf (G0 is the linear gain at DC and Gf is the wanted gain at 5000Hz)
+
+            // Save current DC gain m_nRoomLpfFwd / (32767 - m_nRoomLpfFbk) to keep it unchanged
+            // while changing HF level
+            temp2 = (pReverb->m_nRoomLpfFwd << 15) / (32767
+                    - pReverb->m_nRoomLpfFbk);
+            if (value16 == 0) {
+                pReverb->m_nRoomLpfFbk = 0;
+            } else {
+                int32_t dG2, b, delta;
+
+                // dG^2
+                temp = Effects_MillibelsToLinear16(value16);
+                LOGV("REVERB_PARAM_ROOM_HF_LEVEL, HF gain %d", temp);
+                temp = (1 << 30) / temp;
+                LOGV("REVERB_PARAM_ROOM_HF_LEVEL, 1/ HF gain %d", temp);
+                dG2 = (int32_t) (((int64_t) temp * (int64_t) temp) >> 15);
+                LOGV("REVERB_PARAM_ROOM_HF_LEVEL, 1/ HF gain ^ 2 %d", dG2);
+                // b = 2*(C-dG^2)/(1-dG^2)
+                b = (int32_t) ((((int64_t) 1 << (15 + 1))
+                        * ((int64_t) pReverb->m_nCosWT_5KHz - (int64_t) dG2))
+                        / ((int64_t) 32767 - (int64_t) dG2));
+
+                // delta = b^2 - 4
+                delta = (int32_t) ((((int64_t) b * (int64_t) b) >> 15) - (1 << (15
+                        + 2)));
+
+                LOGV_IF(delta > (1<<30), " delta overflow %d", delta);
+
+                LOGV("REVERB_PARAM_ROOM_HF_LEVEL, dG2 %d, b %d, delta %d, m_nCosWT_5KHz %d", dG2, b, delta, pReverb->m_nCosWT_5KHz);
+                // m_nRoomLpfFbk = -a1 = - (- b + sqrt(delta)) / 2
+                pReverb->m_nRoomLpfFbk = (b - Effects_Sqrt(delta) * 181) >> 1;
+            }
+            LOGV("REVERB_PARAM_ROOM_HF_LEVEL, olg DC gain %d new m_nRoomLpfFbk %d, old m_nRoomLpfFwd %d",
+                    temp2, pReverb->m_nRoomLpfFbk, pReverb->m_nRoomLpfFwd);
+
+            pReverb->m_nRoomLpfFwd
+                    = MULT_EG1_EG1(temp2, (32767 - pReverb->m_nRoomLpfFbk));
+            LOGV("REVERB_PARAM_ROOM_HF_LEVEL, new m_nRoomLpfFwd %d", pReverb->m_nRoomLpfFwd);
+
+            if (param == REVERB_PARAM_ROOM_HF_LEVEL)
+                break;
+            value32 = pProperties->decayTime;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DECAY_TIME:
+
+            // Convert milliseconds to => m_nRvbLpfFwd (function of m_nRvbLpfFbk)
+            // convert ms to samples
+            value32 = (value32 * pReverb->m_nSamplingRate) / 1000;
+
+            // calculate valid decay time range as a function of current reverb delay and
+            // max feed back gain. Min value <=> -40dB in one pass, Max value <=> feedback gain = -1 dB
+            // Calculate attenuation for each round in late reverb given a total attenuation of -6000 millibels.
+            // g = -6000 d/DT , g gain in millibels, d reverb delay, DT decay time
+            averageDelay = pReverb->m_nLateDelay - pReverb->m_nMaxExcursion;
+            averageDelay += ((pReverb->m_sAp0.m_zApOut - pReverb->m_sAp0.m_zApIn)
+                    + (pReverb->m_sAp1.m_zApOut - pReverb->m_sAp1.m_zApIn)) >> 1;
+
+            temp = (-6000 * averageDelay) / value32;
+            LOGV("REVERB_PARAM_DECAY_TIME, delay smps %d, DT smps %d, gain mB %d",averageDelay, value32, temp);
+            if (temp < -4000 || temp > -100)
+                return -EINVAL;
+
+            // calculate low pass gain by adding reverb input attenuation (pReverb->m_nLateGain) and substrating output
+            // xfade and sum gain (max +9dB)
+            temp -= Effects_Linear16ToMillibels(pReverb->m_nLateGain) + 900;
+            temp = Effects_MillibelsToLinear16(temp);
+
+            // DC gain (temp) = b0 / (1 + a1) = pReverb->m_nRvbLpfFwd / (32767 - pReverb->m_nRvbLpfFbk)
+            pReverb->m_nRvbLpfFwd
+                    = MULT_EG1_EG1(temp, (32767 - pReverb->m_nRvbLpfFbk));
+
+            LOGV("REVERB_PARAM_DECAY_TIME, gain %d, new m_nRvbLpfFwd %d, old m_nRvbLpfFbk %d, reverb gain %d", temp, pReverb->m_nRvbLpfFwd, pReverb->m_nRvbLpfFbk, Effects_Linear16ToMillibels(pReverb->m_nLateGain));
+
+            if (param == REVERB_PARAM_DECAY_TIME)
+                break;
+            value16 = pProperties->decayHFRatio;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DECAY_HF_RATIO:
+
+            // We limit max value to 1000 because reverb filter is lowpass only
+            if (value16 < 100 || value16 > 1000)
+                return -EINVAL;
+            // Convert per mille to => m_nLpfFwd, m_nLpfFbk
+
+            // Save current DC gain m_nRoomLpfFwd / (32767 - m_nRoomLpfFbk) to keep it unchanged
+            // while changing HF level
+            temp2 = (pReverb->m_nRvbLpfFwd << 15) / (32767 - pReverb->m_nRvbLpfFbk);
+
+            if (value16 == 1000) {
+                pReverb->m_nRvbLpfFbk = 0;
+            } else {
+                int32_t dG2, b, delta;
+
+                temp = Effects_Linear16ToMillibels(temp2);
+                // G_5000Hz = G_DC * (1000/REVERB_PARAM_DECAY_HF_RATIO) in millibels
+
+                value32 = ((int32_t) 1000 << 15) / (int32_t) value16;
+                LOGV("REVERB_PARAM_DECAY_HF_RATIO, DC gain %d, DC gain mB %d, 1000/R %d", temp2, temp, value32);
+
+                temp = (int32_t) (((int64_t) temp * (int64_t) value32) >> 15);
+
+                if (temp < -4000) {
+                    LOGV("REVERB_PARAM_DECAY_HF_RATIO HF gain overflow %d mB", temp);
+                    temp = -4000;
+                }
+
+                temp = Effects_MillibelsToLinear16(temp);
+                LOGV("REVERB_PARAM_DECAY_HF_RATIO, HF gain %d", temp);
+                // dG^2
+                temp = (temp2 << 15) / temp;
+                dG2 = (int32_t) (((int64_t) temp * (int64_t) temp) >> 15);
+
+                // b = 2*(C-dG^2)/(1-dG^2)
+                b = (int32_t) ((((int64_t) 1 << (15 + 1))
+                        * ((int64_t) pReverb->m_nCosWT_5KHz - (int64_t) dG2))
+                        / ((int64_t) 32767 - (int64_t) dG2));
+
+                // delta = b^2 - 4
+                delta = (int32_t) ((((int64_t) b * (int64_t) b) >> 15) - (1 << (15
+                        + 2)));
+
+                // m_nRoomLpfFbk = -a1 = - (- b + sqrt(delta)) / 2
+                pReverb->m_nRvbLpfFbk = (b - Effects_Sqrt(delta) * 181) >> 1;
+
+                LOGV("REVERB_PARAM_DECAY_HF_RATIO, dG2 %d, b %d, delta %d", dG2, b, delta);
+
             }
 
-            temp = Effects_MillibelsToLinear16(temp);
-            LOGV("REVERB_PARAM_DECAY_HF_RATIO, HF gain %d", temp);
-            // dG^2
-            temp = (temp2 << 15) / temp;
-            dG2 = (int32_t) (((int64_t) temp * (int64_t) temp) >> 15);
+            LOGV("REVERB_PARAM_DECAY_HF_RATIO, gain %d, m_nRvbLpfFbk %d, m_nRvbLpfFwd %d", temp2, pReverb->m_nRvbLpfFbk, pReverb->m_nRvbLpfFwd);
 
-            // b = 2*(C-dG^2)/(1-dG^2)
-            b = (int32_t) ((((int64_t) 1 << (15 + 1))
-                    * ((int64_t) pReverb->m_nCosWT_5KHz - (int64_t) dG2))
-                    / ((int64_t) 32767 - (int64_t) dG2));
+            pReverb->m_nRvbLpfFwd
+                    = MULT_EG1_EG1(temp2, (32767 - pReverb->m_nRvbLpfFbk));
 
-            // delta = b^2 - 4
-            delta = (int32_t) ((((int64_t) b * (int64_t) b) >> 15) - (1 << (15
-                    + 2)));
+            if (param == REVERB_PARAM_DECAY_HF_RATIO)
+                break;
+            value16 = pProperties->reflectionsLevel;
+            /* FALL THROUGH */
 
-            // m_nRoomLpfFbk = -a1 = - (- b + sqrt(delta)) / 2
-            pReverb->m_nRvbLpfFbk = (b - Effects_Sqrt(delta) * 181) >> 1;
+        case REVERB_PARAM_REFLECTIONS_LEVEL:
+            // We limit max value to 0 because gain is limited to 0dB
+            if (value16 > 0 || value16 < -6000)
+                return -EINVAL;
 
-            LOGV("REVERB_PARAM_DECAY_HF_RATIO, dG2 %d, b %d, delta %d", dG2, b, delta);
+            // Convert millibels to linear 16 bit signed and recompute m_sEarlyL.m_nGain[i] and m_sEarlyR.m_nGain[i].
+            value16 = Effects_MillibelsToLinear16(value16);
+            for (i = 0; i < REVERB_MAX_NUM_REFLECTIONS; i++) {
+                pReverb->m_sEarlyL.m_nGain[i]
+                        = MULT_EG1_EG1(pPreset->m_sEarlyL.m_nGain[i],value16);
+                pReverb->m_sEarlyR.m_nGain[i]
+                        = MULT_EG1_EG1(pPreset->m_sEarlyR.m_nGain[i],value16);
+            }
+            pReverb->m_nEarlyGain = value16;
+            LOGV("REVERB_PARAM_REFLECTIONS_LEVEL, m_nEarlyGain %d", pReverb->m_nEarlyGain);
 
+            if (param == REVERB_PARAM_REFLECTIONS_LEVEL)
+                break;
+            value32 = pProperties->reflectionsDelay;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REFLECTIONS_DELAY:
+            // We limit max value MAX_EARLY_TIME
+            // convert ms to time units
+            temp = (value32 * 65536) / 1000;
+            if (temp < 0 || temp > MAX_EARLY_TIME)
+                return -EINVAL;
+
+            maxSamples = (int32_t) (MAX_EARLY_TIME * pReverb->m_nSamplingRate)
+                    >> 16;
+            temp = (temp * pReverb->m_nSamplingRate) >> 16;
+            for (i = 0; i < REVERB_MAX_NUM_REFLECTIONS; i++) {
+                temp2 = temp + (((int32_t) pPreset->m_sEarlyL.m_zDelay[i]
+                        * pReverb->m_nSamplingRate) >> 16);
+                if (temp2 > maxSamples)
+                    temp2 = maxSamples;
+                pReverb->m_sEarlyL.m_zDelay[i] = pReverb->m_nEarly0in + temp2;
+                temp2 = temp + (((int32_t) pPreset->m_sEarlyR.m_zDelay[i]
+                        * pReverb->m_nSamplingRate) >> 16);
+                if (temp2 > maxSamples)
+                    temp2 = maxSamples;
+                pReverb->m_sEarlyR.m_zDelay[i] = pReverb->m_nEarly1in + temp2;
+            }
+            pReverb->m_nEarlyDelay = temp;
+
+            LOGV("REVERB_PARAM_REFLECTIONS_DELAY, m_nEarlyDelay smps %d max smp delay %d", pReverb->m_nEarlyDelay, maxSamples);
+
+            // Convert milliseconds to sample count => m_nEarlyDelay
+            if (param == REVERB_PARAM_REFLECTIONS_DELAY)
+                break;
+            value16 = pProperties->reverbLevel;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REVERB_LEVEL:
+            // We limit max value to 0 because gain is limited to 0dB
+            if (value16 > 0 || value16 < -6000)
+                return -EINVAL;
+            // Convert millibels to linear 16 bits (gange 0 - 8191) => m_nLateGain.
+            pReverb->m_nLateGain = Effects_MillibelsToLinear16(value16) >> 2;
+
+            LOGV("REVERB_PARAM_REVERB_LEVEL, m_nLateGain %d", pReverb->m_nLateGain);
+
+            if (param == REVERB_PARAM_REVERB_LEVEL)
+                break;
+            value32 = pProperties->reverbDelay;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_REVERB_DELAY:
+            // We limit max value to MAX_DELAY_TIME
+            // convert ms to time units
+            temp = (value32 * 65536) / 1000;
+            if (temp < 0 || temp > MAX_DELAY_TIME)
+                return -EINVAL;
+
+            maxSamples = (int32_t) (MAX_DELAY_TIME * pReverb->m_nSamplingRate)
+                    >> 16;
+            temp = (temp * pReverb->m_nSamplingRate) >> 16;
+            if ((temp + pReverb->m_nMaxExcursion) > maxSamples) {
+                temp = maxSamples - pReverb->m_nMaxExcursion;
+            }
+            if (temp < pReverb->m_nMaxExcursion) {
+                temp = pReverb->m_nMaxExcursion;
+            }
+
+            temp -= pReverb->m_nLateDelay;
+            pReverb->m_nDelay0Out += temp;
+            pReverb->m_nDelay1Out += temp;
+            pReverb->m_nLateDelay += temp;
+
+            LOGV("REVERB_PARAM_REVERB_DELAY, m_nLateDelay smps %d max smp delay %d", pReverb->m_nLateDelay, maxSamples);
+
+            // Convert milliseconds to sample count => m_nDelay1Out + m_nMaxExcursion
+            if (param == REVERB_PARAM_REVERB_DELAY)
+                break;
+
+            value16 = pProperties->diffusion;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DIFFUSION:
+            if (value16 < 0 || value16 > 1000)
+                return -EINVAL;
+
+            // Convert per mille to m_sAp0.m_nApGain, m_sAp1.m_nApGain
+            pReverb->m_sAp0.m_nApGain = AP0_GAIN_BASE + ((int32_t) value16
+                    * AP0_GAIN_RANGE) / 1000;
+            pReverb->m_sAp1.m_nApGain = AP1_GAIN_BASE + ((int32_t) value16
+                    * AP1_GAIN_RANGE) / 1000;
+
+            LOGV("REVERB_PARAM_DIFFUSION, m_sAp0.m_nApGain %d m_sAp1.m_nApGain %d", pReverb->m_sAp0.m_nApGain, pReverb->m_sAp1.m_nApGain);
+
+            if (param == REVERB_PARAM_DIFFUSION)
+                break;
+
+            value16 = pProperties->density;
+            /* FALL THROUGH */
+
+        case REVERB_PARAM_DENSITY:
+            if (value16 < 0 || value16 > 1000)
+                return -EINVAL;
+
+            // Convert per mille to m_sAp0.m_zApOut, m_sAp1.m_zApOut
+            maxSamples = (int32_t) (MAX_AP_TIME * pReverb->m_nSamplingRate) >> 16;
+
+            temp = AP0_TIME_BASE + ((int32_t) value16 * AP0_TIME_RANGE) / 1000;
+            /*lint -e{702} shift for performance */
+            temp = (temp * pReverb->m_nSamplingRate) >> 16;
+            if (temp > maxSamples)
+                temp = maxSamples;
+            pReverb->m_sAp0.m_zApOut = (uint16_t) (pReverb->m_sAp0.m_zApIn + temp);
+
+            LOGV("REVERB_PARAM_DENSITY, Ap0 delay smps %d", temp);
+
+            temp = AP1_TIME_BASE + ((int32_t) value16 * AP1_TIME_RANGE) / 1000;
+            /*lint -e{702} shift for performance */
+            temp = (temp * pReverb->m_nSamplingRate) >> 16;
+            if (temp > maxSamples)
+                temp = maxSamples;
+            pReverb->m_sAp1.m_zApOut = (uint16_t) (pReverb->m_sAp1.m_zApIn + temp);
+
+            LOGV("Ap1 delay smps %d", temp);
+
+            break;
+
+        default:
+            break;
         }
-
-        LOGV("REVERB_PARAM_DECAY_HF_RATIO, gain %d, m_nRvbLpfFbk %d, m_nRvbLpfFwd %d", temp2, pReverb->m_nRvbLpfFbk, pReverb->m_nRvbLpfFwd);
-
-        pReverb->m_nRvbLpfFwd
-                = MULT_EG1_EG1(temp2, (32767 - pReverb->m_nRvbLpfFbk));
-
-        if (param == REVERB_PARAM_DECAY_HF_RATIO)
-            break;
-        value16 = pProperties->reflectionsLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REFLECTIONS_LEVEL:
-        // We limit max value to 0 because gain is limited to 0dB
-        if (value16 > 0 || value16 < -6000)
-            return -EINVAL;
-
-        // Convert millibels to linear 16 bit signed and recompute m_sEarlyL.m_nGain[i] and m_sEarlyR.m_nGain[i].
-        value16 = Effects_MillibelsToLinear16(value16);
-        for (i = 0; i < REVERB_MAX_NUM_REFLECTIONS; i++) {
-            pReverb->m_sEarlyL.m_nGain[i]
-                    = MULT_EG1_EG1(pPreset->m_sEarlyL.m_nGain[i],value16);
-            pReverb->m_sEarlyR.m_nGain[i]
-                    = MULT_EG1_EG1(pPreset->m_sEarlyR.m_nGain[i],value16);
-        }
-        pReverb->m_nEarlyGain = value16;
-        LOGV("REVERB_PARAM_REFLECTIONS_LEVEL, m_nEarlyGain %d", pReverb->m_nEarlyGain);
-
-        if (param == REVERB_PARAM_REFLECTIONS_LEVEL)
-            break;
-        value32 = pProperties->reflectionsDelay;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REFLECTIONS_DELAY:
-        // We limit max value MAX_EARLY_TIME
-        // convert ms to time units
-        temp = (value32 * 65536) / 1000;
-        if (temp < 0 || temp > MAX_EARLY_TIME)
-            return -EINVAL;
-
-        maxSamples = (int32_t) (MAX_EARLY_TIME * pReverb->m_nSamplingRate)
-                >> 16;
-        temp = (temp * pReverb->m_nSamplingRate) >> 16;
-        for (i = 0; i < REVERB_MAX_NUM_REFLECTIONS; i++) {
-            temp2 = temp + (((int32_t) pPreset->m_sEarlyL.m_zDelay[i]
-                    * pReverb->m_nSamplingRate) >> 16);
-            if (temp2 > maxSamples)
-                temp2 = maxSamples;
-            pReverb->m_sEarlyL.m_zDelay[i] = pReverb->m_nEarly0in + temp2;
-            temp2 = temp + (((int32_t) pPreset->m_sEarlyR.m_zDelay[i]
-                    * pReverb->m_nSamplingRate) >> 16);
-            if (temp2 > maxSamples)
-                temp2 = maxSamples;
-            pReverb->m_sEarlyR.m_zDelay[i] = pReverb->m_nEarly1in + temp2;
-        }
-        pReverb->m_nEarlyDelay = temp;
-
-        LOGV("REVERB_PARAM_REFLECTIONS_DELAY, m_nEarlyDelay smps %d max smp delay %d", pReverb->m_nEarlyDelay, maxSamples);
-
-        // Convert milliseconds to sample count => m_nEarlyDelay
-        if (param == REVERB_PARAM_REFLECTIONS_DELAY)
-            break;
-        value16 = pProperties->reverbLevel;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REVERB_LEVEL:
-        // We limit max value to 0 because gain is limited to 0dB
-        if (value16 > 0 || value16 < -6000)
-            return -EINVAL;
-        // Convert millibels to linear 16 bits (gange 0 - 8191) => m_nLateGain.
-        pReverb->m_nLateGain = Effects_MillibelsToLinear16(value16) >> 2;
-
-        LOGV("REVERB_PARAM_REVERB_LEVEL, m_nLateGain %d", pReverb->m_nLateGain);
-
-        if (param == REVERB_PARAM_REVERB_LEVEL)
-            break;
-        value32 = pProperties->reverbDelay;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_REVERB_DELAY:
-        // We limit max value to MAX_DELAY_TIME
-        // convert ms to time units
-        temp = (value32 * 65536) / 1000;
-        if (temp < 0 || temp > MAX_DELAY_TIME)
-            return -EINVAL;
-
-        maxSamples = (int32_t) (MAX_DELAY_TIME * pReverb->m_nSamplingRate)
-                >> 16;
-        temp = (temp * pReverb->m_nSamplingRate) >> 16;
-        if ((temp + pReverb->m_nMaxExcursion) > maxSamples) {
-            temp = maxSamples - pReverb->m_nMaxExcursion;
-        }
-        if (temp < pReverb->m_nMaxExcursion) {
-            temp = pReverb->m_nMaxExcursion;
-        }
-
-        temp -= pReverb->m_nLateDelay;
-        pReverb->m_nDelay0Out += temp;
-        pReverb->m_nDelay1Out += temp;
-        pReverb->m_nLateDelay += temp;
-
-        LOGV("REVERB_PARAM_REVERB_DELAY, m_nLateDelay smps %d max smp delay %d", pReverb->m_nLateDelay, maxSamples);
-
-        // Convert milliseconds to sample count => m_nDelay1Out + m_nMaxExcursion
-        if (param == REVERB_PARAM_REVERB_DELAY)
-            break;
-
-        value16 = pProperties->diffusion;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DIFFUSION:
-        if (value16 < 0 || value16 > 1000)
-            return -EINVAL;
-
-        // Convert per mille to m_sAp0.m_nApGain, m_sAp1.m_nApGain
-        pReverb->m_sAp0.m_nApGain = AP0_GAIN_BASE + ((int32_t) value16
-                * AP0_GAIN_RANGE) / 1000;
-        pReverb->m_sAp1.m_nApGain = AP1_GAIN_BASE + ((int32_t) value16
-                * AP1_GAIN_RANGE) / 1000;
-
-        LOGV("REVERB_PARAM_DIFFUSION, m_sAp0.m_nApGain %d m_sAp1.m_nApGain %d", pReverb->m_sAp0.m_nApGain, pReverb->m_sAp1.m_nApGain);
-
-        if (param == REVERB_PARAM_DIFFUSION)
-            break;
-
-        value16 = pProperties->density;
-        /* FALL THROUGH */
-
-    case REVERB_PARAM_DENSITY:
-        if (value16 < 0 || value16 > 1000)
-            return -EINVAL;
-
-        // Convert per mille to m_sAp0.m_zApOut, m_sAp1.m_zApOut
-        maxSamples = (int32_t) (MAX_AP_TIME * pReverb->m_nSamplingRate) >> 16;
-
-        temp = AP0_TIME_BASE + ((int32_t) value16 * AP0_TIME_RANGE) / 1000;
-        /*lint -e{702} shift for performance */
-        temp = (temp * pReverb->m_nSamplingRate) >> 16;
-        if (temp > maxSamples)
-            temp = maxSamples;
-        pReverb->m_sAp0.m_zApOut = (uint16_t) (pReverb->m_sAp0.m_zApIn + temp);
-
-        LOGV("REVERB_PARAM_DENSITY, Ap0 delay smps %d", temp);
-
-        temp = AP1_TIME_BASE + ((int32_t) value16 * AP1_TIME_RANGE) / 1000;
-        /*lint -e{702} shift for performance */
-        temp = (temp * pReverb->m_nSamplingRate) >> 16;
-        if (temp > maxSamples)
-            temp = maxSamples;
-        pReverb->m_sAp1.m_zApOut = (uint16_t) (pReverb->m_sAp1.m_zApIn + temp);
-
-        LOGV("Ap1 delay smps %d", temp);
-
-        break;
-
-    default:
-        break;
     }
+
     return 0;
 } /* end Reverb_setParameter */
 
@@ -1905,139 +1915,15 @@ static int ReverbUpdateRoom(reverb_object_t *pReverb, bool fullUpdate) {
  */
 static int ReverbReadInPresets(reverb_object_t *pReverb) {
 
-    int preset = 0;
-    int defaultPreset = 0;
+    int preset;
 
-    //now init any remaining presets to defaults
-    for (defaultPreset = preset; defaultPreset < REVERB_MAX_ROOM_TYPE; defaultPreset++) {
-        reverb_preset_t *pPreset = &pReverb->m_sPreset.m_sPreset[defaultPreset];
-        if (defaultPreset == 0 || defaultPreset > REVERB_MAX_ROOM_TYPE - 1) {
-            pPreset->m_nRvbLpfFbk = 8307;
-            pPreset->m_nRvbLpfFwd = 14768;
-            pPreset->m_nEarlyGain = 27690;
-            pPreset->m_nEarlyDelay = 1311;
-            pPreset->m_nLateGain = 8191;
-            pPreset->m_nLateDelay = 3932;
-            pPreset->m_nRoomLpfFbk = 3692;
-            pPreset->m_nRoomLpfFwd = 24569;
-            pPreset->m_sEarlyL.m_zDelay[0] = 1376;
-            pPreset->m_sEarlyL.m_nGain[0] = 22152;
-            pPreset->m_sEarlyL.m_zDelay[1] = 2163;
-            pPreset->m_sEarlyL.m_nGain[1] = 17537;
-            pPreset->m_sEarlyL.m_zDelay[2] = 0;
-            pPreset->m_sEarlyL.m_nGain[2] = 14768;
-            pPreset->m_sEarlyL.m_zDelay[3] = 1835;
-            pPreset->m_sEarlyL.m_nGain[3] = 14307;
-            pPreset->m_sEarlyL.m_zDelay[4] = 0;
-            pPreset->m_sEarlyL.m_nGain[4] = 13384;
-            pPreset->m_sEarlyR.m_zDelay[0] = 721;
-            pPreset->m_sEarlyR.m_nGain[0] = 20306;
-            pPreset->m_sEarlyR.m_zDelay[1] = 2621;
-            pPreset->m_sEarlyR.m_nGain[1] = 17537;
-            pPreset->m_sEarlyR.m_zDelay[2] = 0;
-            pPreset->m_sEarlyR.m_nGain[2] = 14768;
-            pPreset->m_sEarlyR.m_zDelay[3] = 0;
-            pPreset->m_sEarlyR.m_nGain[3] = 16153;
-            pPreset->m_sEarlyR.m_zDelay[4] = 0;
-            pPreset->m_sEarlyR.m_nGain[4] = 13384;
-            pPreset->m_nMaxExcursion = 127;
-            pPreset->m_nXfadeInterval = 6388;
-            pPreset->m_nAp0_ApGain = 15691;
-            pPreset->m_nAp0_ApOut = 711;
-            pPreset->m_nAp1_ApGain = 16317;
-            pPreset->m_nAp1_ApOut = 1029;
-            pPreset->m_rfu4 = 0;
-            pPreset->m_rfu5 = 0;
-            pPreset->m_rfu6 = 0;
-            pPreset->m_rfu7 = 0;
-            pPreset->m_rfu8 = 0;
-            pPreset->m_rfu9 = 0;
-            pPreset->m_rfu10 = 0;
-        } else if (defaultPreset == 1) {
-            pPreset->m_nRvbLpfFbk = 6461;
-            pPreset->m_nRvbLpfFwd = 14307;
-            pPreset->m_nEarlyGain = 27690;
-            pPreset->m_nEarlyDelay = 1311;
-            pPreset->m_nLateGain = 8191;
-            pPreset->m_nLateDelay = 3932;
-            pPreset->m_nRoomLpfFbk = 3692;
-            pPreset->m_nRoomLpfFwd = 24569;
-            pPreset->m_sEarlyL.m_zDelay[0] = 1376;
-            pPreset->m_sEarlyL.m_nGain[0] = 22152;
-            pPreset->m_sEarlyL.m_zDelay[1] = 1462;
-            pPreset->m_sEarlyL.m_nGain[1] = 17537;
-            pPreset->m_sEarlyL.m_zDelay[2] = 0;
-            pPreset->m_sEarlyL.m_nGain[2] = 14768;
-            pPreset->m_sEarlyL.m_zDelay[3] = 1835;
-            pPreset->m_sEarlyL.m_nGain[3] = 14307;
-            pPreset->m_sEarlyL.m_zDelay[4] = 0;
-            pPreset->m_sEarlyL.m_nGain[4] = 13384;
-            pPreset->m_sEarlyR.m_zDelay[0] = 721;
-            pPreset->m_sEarlyR.m_nGain[0] = 20306;
-            pPreset->m_sEarlyR.m_zDelay[1] = 2621;
-            pPreset->m_sEarlyR.m_nGain[1] = 17537;
-            pPreset->m_sEarlyR.m_zDelay[2] = 0;
-            pPreset->m_sEarlyR.m_nGain[2] = 14768;
-            pPreset->m_sEarlyR.m_zDelay[3] = 0;
-            pPreset->m_sEarlyR.m_nGain[3] = 16153;
-            pPreset->m_sEarlyR.m_zDelay[4] = 0;
-            pPreset->m_sEarlyR.m_nGain[4] = 13384;
-            pPreset->m_nMaxExcursion = 127;
-            pPreset->m_nXfadeInterval = 6391;
-            pPreset->m_nAp0_ApGain = 15230;
-            pPreset->m_nAp0_ApOut = 708;
-            pPreset->m_nAp1_ApGain = 15547;
-            pPreset->m_nAp1_ApOut = 1023;
-            pPreset->m_rfu4 = 0;
-            pPreset->m_rfu5 = 0;
-            pPreset->m_rfu6 = 0;
-            pPreset->m_rfu7 = 0;
-            pPreset->m_rfu8 = 0;
-            pPreset->m_rfu9 = 0;
-            pPreset->m_rfu10 = 0;
-        } else if (defaultPreset == 2) {
-            pPreset->m_nRvbLpfFbk = 5077;
-            pPreset->m_nRvbLpfFwd = 12922;
-            pPreset->m_nEarlyGain = 27690;
-            pPreset->m_nEarlyDelay = 1311;
-            pPreset->m_nLateGain = 8191;
-            pPreset->m_nLateDelay = 3932;
-            pPreset->m_nRoomLpfFbk = 3692;
-            pPreset->m_nRoomLpfFwd = 21703;
-            pPreset->m_sEarlyL.m_zDelay[0] = 1376;
-            pPreset->m_sEarlyL.m_nGain[0] = 22152;
-            pPreset->m_sEarlyL.m_zDelay[1] = 1462;
-            pPreset->m_sEarlyL.m_nGain[1] = 17537;
-            pPreset->m_sEarlyL.m_zDelay[2] = 0;
-            pPreset->m_sEarlyL.m_nGain[2] = 14768;
-            pPreset->m_sEarlyL.m_zDelay[3] = 1835;
-            pPreset->m_sEarlyL.m_nGain[3] = 14307;
-            pPreset->m_sEarlyL.m_zDelay[4] = 0;
-            pPreset->m_sEarlyL.m_nGain[4] = 13384;
-            pPreset->m_sEarlyR.m_zDelay[0] = 721;
-            pPreset->m_sEarlyR.m_nGain[0] = 20306;
-            pPreset->m_sEarlyR.m_zDelay[1] = 2621;
-            pPreset->m_sEarlyR.m_nGain[1] = 17537;
-            pPreset->m_sEarlyR.m_zDelay[2] = 0;
-            pPreset->m_sEarlyR.m_nGain[2] = 14768;
-            pPreset->m_sEarlyR.m_zDelay[3] = 0;
-            pPreset->m_sEarlyR.m_nGain[3] = 16153;
-            pPreset->m_sEarlyR.m_zDelay[4] = 0;
-            pPreset->m_sEarlyR.m_nGain[4] = 13384;
-            pPreset->m_nMaxExcursion = 127;
-            pPreset->m_nXfadeInterval = 6449;
-            pPreset->m_nAp0_ApGain = 15691;
-            pPreset->m_nAp0_ApOut = 774;
-            pPreset->m_nAp1_ApGain = 16317;
-            pPreset->m_nAp1_ApOut = 1155;
-            pPreset->m_rfu4 = 0;
-            pPreset->m_rfu5 = 0;
-            pPreset->m_rfu6 = 0;
-            pPreset->m_rfu7 = 0;
-            pPreset->m_rfu8 = 0;
-            pPreset->m_rfu9 = 0;
-            pPreset->m_rfu10 = 0;
-        } else if (defaultPreset == 3) {
+    // this is for test only. OpenSL ES presets are mapped to 4 presets.
+    // REVERB_PRESET_NONE is mapped to bypass
+    for (preset = 0; preset < REVERB_NUM_PRESETS; preset++) {
+        reverb_preset_t *pPreset = &pReverb->m_sPreset.m_sPreset[preset];
+        switch (preset + 1) {
+        case REVERB_PRESET_PLATE:
+        case REVERB_PRESET_SMALLROOM:
             pPreset->m_nRvbLpfFbk = 5077;
             pPreset->m_nRvbLpfFwd = 11076;
             pPreset->m_nEarlyGain = 27690;
@@ -2079,6 +1965,137 @@ static int ReverbReadInPresets(reverb_object_t *pReverb) {
             pPreset->m_rfu8 = 0;
             pPreset->m_rfu9 = 0;
             pPreset->m_rfu10 = 0;
+            break;
+        case REVERB_PRESET_MEDIUMROOM:
+        case REVERB_PRESET_LARGEROOM:
+            pPreset->m_nRvbLpfFbk = 5077;
+            pPreset->m_nRvbLpfFwd = 12922;
+            pPreset->m_nEarlyGain = 27690;
+            pPreset->m_nEarlyDelay = 1311;
+            pPreset->m_nLateGain = 8191;
+            pPreset->m_nLateDelay = 3932;
+            pPreset->m_nRoomLpfFbk = 3692;
+            pPreset->m_nRoomLpfFwd = 21703;
+            pPreset->m_sEarlyL.m_zDelay[0] = 1376;
+            pPreset->m_sEarlyL.m_nGain[0] = 22152;
+            pPreset->m_sEarlyL.m_zDelay[1] = 1462;
+            pPreset->m_sEarlyL.m_nGain[1] = 17537;
+            pPreset->m_sEarlyL.m_zDelay[2] = 0;
+            pPreset->m_sEarlyL.m_nGain[2] = 14768;
+            pPreset->m_sEarlyL.m_zDelay[3] = 1835;
+            pPreset->m_sEarlyL.m_nGain[3] = 14307;
+            pPreset->m_sEarlyL.m_zDelay[4] = 0;
+            pPreset->m_sEarlyL.m_nGain[4] = 13384;
+            pPreset->m_sEarlyR.m_zDelay[0] = 721;
+            pPreset->m_sEarlyR.m_nGain[0] = 20306;
+            pPreset->m_sEarlyR.m_zDelay[1] = 2621;
+            pPreset->m_sEarlyR.m_nGain[1] = 17537;
+            pPreset->m_sEarlyR.m_zDelay[2] = 0;
+            pPreset->m_sEarlyR.m_nGain[2] = 14768;
+            pPreset->m_sEarlyR.m_zDelay[3] = 0;
+            pPreset->m_sEarlyR.m_nGain[3] = 16153;
+            pPreset->m_sEarlyR.m_zDelay[4] = 0;
+            pPreset->m_sEarlyR.m_nGain[4] = 13384;
+            pPreset->m_nMaxExcursion = 127;
+            pPreset->m_nXfadeInterval = 6449;
+            pPreset->m_nAp0_ApGain = 15691;
+            pPreset->m_nAp0_ApOut = 774;
+            pPreset->m_nAp1_ApGain = 16317;
+            pPreset->m_nAp1_ApOut = 1155;
+            pPreset->m_rfu4 = 0;
+            pPreset->m_rfu5 = 0;
+            pPreset->m_rfu6 = 0;
+            pPreset->m_rfu7 = 0;
+            pPreset->m_rfu8 = 0;
+            pPreset->m_rfu9 = 0;
+            pPreset->m_rfu10 = 0;
+            break;
+        case REVERB_PRESET_MEDIUMHALL:
+            pPreset->m_nRvbLpfFbk = 6461;
+            pPreset->m_nRvbLpfFwd = 14307;
+            pPreset->m_nEarlyGain = 27690;
+            pPreset->m_nEarlyDelay = 1311;
+            pPreset->m_nLateGain = 8191;
+            pPreset->m_nLateDelay = 3932;
+            pPreset->m_nRoomLpfFbk = 3692;
+            pPreset->m_nRoomLpfFwd = 24569;
+            pPreset->m_sEarlyL.m_zDelay[0] = 1376;
+            pPreset->m_sEarlyL.m_nGain[0] = 22152;
+            pPreset->m_sEarlyL.m_zDelay[1] = 1462;
+            pPreset->m_sEarlyL.m_nGain[1] = 17537;
+            pPreset->m_sEarlyL.m_zDelay[2] = 0;
+            pPreset->m_sEarlyL.m_nGain[2] = 14768;
+            pPreset->m_sEarlyL.m_zDelay[3] = 1835;
+            pPreset->m_sEarlyL.m_nGain[3] = 14307;
+            pPreset->m_sEarlyL.m_zDelay[4] = 0;
+            pPreset->m_sEarlyL.m_nGain[4] = 13384;
+            pPreset->m_sEarlyR.m_zDelay[0] = 721;
+            pPreset->m_sEarlyR.m_nGain[0] = 20306;
+            pPreset->m_sEarlyR.m_zDelay[1] = 2621;
+            pPreset->m_sEarlyR.m_nGain[1] = 17537;
+            pPreset->m_sEarlyR.m_zDelay[2] = 0;
+            pPreset->m_sEarlyR.m_nGain[2] = 14768;
+            pPreset->m_sEarlyR.m_zDelay[3] = 0;
+            pPreset->m_sEarlyR.m_nGain[3] = 16153;
+            pPreset->m_sEarlyR.m_zDelay[4] = 0;
+            pPreset->m_sEarlyR.m_nGain[4] = 13384;
+            pPreset->m_nMaxExcursion = 127;
+            pPreset->m_nXfadeInterval = 6391;
+            pPreset->m_nAp0_ApGain = 15230;
+            pPreset->m_nAp0_ApOut = 708;
+            pPreset->m_nAp1_ApGain = 15547;
+            pPreset->m_nAp1_ApOut = 1023;
+            pPreset->m_rfu4 = 0;
+            pPreset->m_rfu5 = 0;
+            pPreset->m_rfu6 = 0;
+            pPreset->m_rfu7 = 0;
+            pPreset->m_rfu8 = 0;
+            pPreset->m_rfu9 = 0;
+            pPreset->m_rfu10 = 0;
+            break;
+        case REVERB_PRESET_LARGEHALL:
+            pPreset->m_nRvbLpfFbk = 8307;
+            pPreset->m_nRvbLpfFwd = 14768;
+            pPreset->m_nEarlyGain = 27690;
+            pPreset->m_nEarlyDelay = 1311;
+            pPreset->m_nLateGain = 8191;
+            pPreset->m_nLateDelay = 3932;
+            pPreset->m_nRoomLpfFbk = 3692;
+            pPreset->m_nRoomLpfFwd = 24569;
+            pPreset->m_sEarlyL.m_zDelay[0] = 1376;
+            pPreset->m_sEarlyL.m_nGain[0] = 22152;
+            pPreset->m_sEarlyL.m_zDelay[1] = 2163;
+            pPreset->m_sEarlyL.m_nGain[1] = 17537;
+            pPreset->m_sEarlyL.m_zDelay[2] = 0;
+            pPreset->m_sEarlyL.m_nGain[2] = 14768;
+            pPreset->m_sEarlyL.m_zDelay[3] = 1835;
+            pPreset->m_sEarlyL.m_nGain[3] = 14307;
+            pPreset->m_sEarlyL.m_zDelay[4] = 0;
+            pPreset->m_sEarlyL.m_nGain[4] = 13384;
+            pPreset->m_sEarlyR.m_zDelay[0] = 721;
+            pPreset->m_sEarlyR.m_nGain[0] = 20306;
+            pPreset->m_sEarlyR.m_zDelay[1] = 2621;
+            pPreset->m_sEarlyR.m_nGain[1] = 17537;
+            pPreset->m_sEarlyR.m_zDelay[2] = 0;
+            pPreset->m_sEarlyR.m_nGain[2] = 14768;
+            pPreset->m_sEarlyR.m_zDelay[3] = 0;
+            pPreset->m_sEarlyR.m_nGain[3] = 16153;
+            pPreset->m_sEarlyR.m_zDelay[4] = 0;
+            pPreset->m_sEarlyR.m_nGain[4] = 13384;
+            pPreset->m_nMaxExcursion = 127;
+            pPreset->m_nXfadeInterval = 6388;
+            pPreset->m_nAp0_ApGain = 15691;
+            pPreset->m_nAp0_ApOut = 711;
+            pPreset->m_nAp1_ApGain = 16317;
+            pPreset->m_nAp1_ApOut = 1029;
+            pPreset->m_rfu4 = 0;
+            pPreset->m_rfu5 = 0;
+            pPreset->m_rfu6 = 0;
+            pPreset->m_rfu7 = 0;
+            pPreset->m_rfu8 = 0;
+            pPreset->m_rfu9 = 0;
+            pPreset->m_rfu10 = 0;
+            break;
         }
     }
 
