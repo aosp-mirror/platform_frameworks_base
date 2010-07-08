@@ -78,12 +78,6 @@ public interface WindowManagerPolicy {
     public final static int FLAG_BRIGHT_HERE = 0x20000000;
 
     public final static boolean WATCH_POINTER = false;
-    
-    /**
-     * Temporary flag added during the transition to the new native input dispatcher.
-     * This will be removed when the old input dispatch code is deleted.
-     */
-    public final static boolean ENABLE_NATIVE_INPUT_DISPATCH = true;
 
     // flags for interceptKeyTq
     /**
@@ -555,23 +549,26 @@ public interface WindowManagerPolicy {
     public Animation createForceHideEnterAnimation();
     
     /**
-     * Called from the key queue thread before a key is dispatched to the
-     * input thread.
+     * Called from the input reader thread before a key is enqueued.
      *
      * <p>There are some actions that need to be handled here because they
      * affect the power state of the device, for example, the power keys.
      * Generally, it's best to keep as little as possible in the queue thread
      * because it's the most fragile.
+     * @param whenNanos The event time in uptime nanoseconds.
+     * @param keyCode The key code.
+     * @param down True if the key is down.
+     * @param policyFlags The policy flags associated with the key.
+     * @param isScreenOn True if the screen is already on
      *
-     * @param event the raw input event as read from the driver
-     * @param screenIsOn true if the screen is already on
      * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
      *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
      */
-    public int interceptKeyTq(RawInputEvent event, boolean screenIsOn);
+    public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down, int policyFlags,
+            boolean isScreenOn);
     
     /**
-     * Called from the input thread before a key is dispatched to a window.
+     * Called from the input dispatcher thread before a key is dispatched to a window.
      *
      * <p>Allows you to define
      * behavior for keys that can not be overridden by applications or redirect
@@ -583,16 +580,17 @@ public interface WindowManagerPolicy {
      * 
      * @param win The window that currently has focus.  This is where the key
      *            event will normally go.
-     * @param code Key code.
-     * @param metaKeys bit mask of meta keys that are held.
-     * @param down Is this a key press (true) or release (false)?
+     * @param action The key event action.
+     * @param flags The key event flags.
+     * @param keyCode The key code.
+     * @param metaState bit mask of meta keys that are held.
      * @param repeatCount Number of times a key down has repeated.
-     * @param flags event's flags.
+     * @param policyFlags The policy flags associated with the key.
      * @return Returns true if the policy consumed the event and it should
      * not be further dispatched.
      */
-    public boolean interceptKeyTi(WindowState win, int code,
-                               int metaKeys, boolean down, int repeatCount, int flags);
+    public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
+            int keyCode, int metaState, int repeatCount, int policyFlags);
 
     /**
      * Called when layout of the windows is about to start.
@@ -701,83 +699,13 @@ public interface WindowManagerPolicy {
      * Return whether the screen is currently on.
      */
     public boolean isScreenOn();
-    
+
     /**
-     * Perform any initial processing of a low-level input event before the
-     * window manager handles special keys and generates a high-level event
-     * that is dispatched to the application.
-     * 
-     * @param event The input event that has occurred.
-     * 
-     * @return Return true if you have consumed the event and do not want
-     * further processing to occur; return false for normal processing.
+     * Tell the policy that the lid switch has changed state.
+     * @param whenNanos The time when the change occurred in uptime nanoseconds.
+     * @param lidOpen True if the lid is now open.
      */
-    public boolean preprocessInputEventTq(RawInputEvent event);
-    
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
-    
-    /**
-     * Determine whether a given key code is used to cause an app switch
-     * to occur (most often the HOME key, also often ENDCALL).  If you return
-     * true, then the system will go into a special key processing state
-     * where it drops any pending events that it cans and adjusts timeouts to
-     * try to get to this key as quickly as possible.
-     * 
-     * <p>Note that this function is called from the low-level input queue
-     * thread, with either/or the window or input lock held; be very careful
-     * about what you do here.  You absolutely should never acquire a lock
-     * that you would ever hold elsewhere while calling out into the window
-     * manager or view hierarchy.
-     * 
-     * @param keycode The key that should be checked for performing an
-     * app switch before delivering to the application.
-     * 
-     * @return Return true if this is an app switch key and special processing
-     * should happen; return false for normal processing.
-     */
-    public boolean isAppSwitchKeyTqTiLwLi(int keycode);
-    
-    /**
-     * Determine whether a given key code is used for movement within a UI,
-     * and does not generally cause actions to be performed (normally the DPAD
-     * movement keys, NOT the DPAD center press key).  This is called
-     * when {@link #isAppSwitchKeyTiLi} returns true to remove any pending events
-     * in the key queue that are not needed to switch applications.
-     * 
-     * <p>Note that this function is called from the low-level input queue
-     * thread; be very careful about what you do here.
-     * 
-     * @param keycode The key that is waiting to be delivered to the
-     * application.
-     * 
-     * @return Return true if this is a purely navigation key and can be
-     * dropped without negative consequences; return false to keep it.
-     */
-    public boolean isMovementKeyTi(int keycode);
-    
-    /**
-     * Given the current state of the world, should this relative movement
-     * wake up the device?
-     * 
-     * @param device The device the movement came from.
-     * @param classes The input classes associated with the device.
-     * @param event The input event that occurred.
-     * @return
-     */
-    public boolean isWakeRelMovementTq(int device, int classes,
-            RawInputEvent event);
-    
-    /**
-     * Given the current state of the world, should this absolute movement
-     * wake up the device?
-     * 
-     * @param device The device the movement came from.
-     * @param classes The input classes associated with the device.
-     * @param event The input event that occurred.
-     * @return
-     */
-    public boolean isWakeAbsMovementTq(int device, int classes,
-            RawInputEvent event);
     
     /**
      * Tell the policy if anyone is requesting that keyguard not come on.
@@ -852,18 +780,6 @@ public interface WindowManagerPolicy {
     public void enableScreenAfterBoot();
     
     /**
-     * Returns true if the user's cheek has been pressed against the phone. This is 
-     * determined by comparing the event's size attribute with a threshold value.
-     * For example for a motion event like down or up or move, if the size exceeds
-     * the threshold, it is considered as cheek press.
-     * @param ev the motion event generated when the cheek is pressed 
-     * against the phone
-     * @return Returns true if the user's cheek has been pressed against the phone
-     * screen resulting in an invalid motion event
-     */
-    public boolean isCheekPressedAgainstScreen(MotionEvent ev);
-    
-    /**
      * Called every time the window manager is dispatching a pointer event.
      */
     public void dispatchedPointerEventLw(MotionEvent ev, int targetX, int targetY);
@@ -874,13 +790,6 @@ public interface WindowManagerPolicy {
      * Call from application to perform haptic feedback on its window.
      */
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always);
-    
-    /**
-     * A special function that is called from the very low-level input queue
-     * to provide feedback to the user.  Currently only called for virtual
-     * keys.
-     */
-    public void keyFeedbackFromInput(KeyEvent event);
     
     /**
      * Called when we have stopped keeping the screen on because a window

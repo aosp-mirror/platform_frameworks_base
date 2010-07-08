@@ -299,19 +299,22 @@ void InputDispatcher::processKeyRepeatLockedInterruptible(
     uint32_t policyFlags = entry->policyFlags & POLICY_FLAG_RAW_MASK;
     if (entry->refCount == 1) {
         entry->eventTime = currentTime;
-        entry->downTime = currentTime;
         entry->policyFlags = policyFlags;
         entry->repeatCount += 1;
     } else {
         KeyEntry* newEntry = mAllocator.obtainKeyEntry(currentTime,
                 entry->deviceId, entry->nature, policyFlags,
                 entry->action, entry->flags, entry->keyCode, entry->scanCode,
-                entry->metaState, entry->repeatCount + 1, currentTime);
+                entry->metaState, entry->repeatCount + 1, entry->downTime);
 
         mKeyRepeatState.lastKeyEntry = newEntry;
         mAllocator.releaseKeyEntry(entry);
 
         entry = newEntry;
+    }
+
+    if (entry->repeatCount == 1) {
+        entry->flags |= KEY_EVENT_FLAG_LONG_PRESS;
     }
 
     mKeyRepeatState.nextRepeatTime = currentTime + keyRepeatTimeout;

@@ -556,18 +556,16 @@ public final class ViewRoot extends Handler implements ViewParent,
                         "Unable to add window -- unknown error code " + res);
                 }
 
-                if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-                    if (view instanceof RootViewSurfaceTaker) {
-                        mInputQueueCallback =
-                            ((RootViewSurfaceTaker)view).willYouTakeTheInputQueue();
-                    }
-                    if (mInputQueueCallback != null) {
-                        mInputQueue = new InputQueue(mInputChannel);
-                        mInputQueueCallback.onInputQueueCreated(mInputQueue);
-                    } else {
-                        InputQueue.registerInputChannel(mInputChannel, mInputHandler,
-                                Looper.myQueue());
-                    }
+                if (view instanceof RootViewSurfaceTaker) {
+                    mInputQueueCallback =
+                        ((RootViewSurfaceTaker)view).willYouTakeTheInputQueue();
+                }
+                if (mInputQueueCallback != null) {
+                    mInputQueue = new InputQueue(mInputChannel);
+                    mInputQueueCallback.onInputQueueCreated(mInputQueue);
+                } else {
+                    InputQueue.registerInputChannel(mInputChannel, mInputHandler,
+                            Looper.myQueue());
                 }
                 
                 view.assignParent(this);
@@ -1745,16 +1743,12 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         mSurface.release();
 
-        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-            if (mInputChannel != null) {
-                if (mInputQueueCallback != null) {
-                    mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
-                    mInputQueueCallback = null;
-                } else {
-                    InputQueue.unregisterInputChannel(mInputChannel);
-                }
-                mInputChannel.dispose();
-                mInputChannel = null;
+        if (mInputChannel != null) {
+            if (mInputQueueCallback != null) {
+                mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
+                mInputQueueCallback = null;
+            } else {
+                InputQueue.unregisterInputChannel(mInputChannel);
             }
         }
         
@@ -1763,13 +1757,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         } catch (RemoteException e) {
         }
         
-        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-            // Dispose the input channel after removing the window so the Window Manager
-            // doesn't interpret the input channel being closed as an abnormal termination.
-            if (mInputChannel != null) {
-                mInputChannel.dispose();
-                mInputChannel = null;
-            }
+        // Dispose the input channel after removing the window so the Window Manager
+        // doesn't interpret the input channel being closed as an abnormal termination.
+        if (mInputChannel != null) {
+            mInputChannel.dispose();
+            mInputChannel = null;
         }
     }
 
@@ -1869,105 +1861,22 @@ public final class ViewRoot extends Handler implements ViewParent,
             deliverKeyEvent((KeyEvent)msg.obj, true);
             break;
         case DISPATCH_POINTER: {
-            MotionEvent event = (MotionEvent)msg.obj;
-            boolean callWhenDone = msg.arg1 != 0;
-            
-            if (event == null) {
-                long timeBeforeGettingEvents;
-                if (MEASURE_LATENCY) {
-                    timeBeforeGettingEvents = System.nanoTime();
-                }
-
-                event = getPendingPointerMotionEvent();
-
-                if (MEASURE_LATENCY && event != null) {
-                    lt.sample("9 Client got events      ", System.nanoTime() - event.getEventTimeNano());
-                    lt.sample("8 Client getting events  ", timeBeforeGettingEvents - event.getEventTimeNano());
-                }
-                callWhenDone = false;
-            }
-            if (event != null && mTranslator != null) {
-                mTranslator.translateEventInScreenToAppWindow(event);
-            }
+            MotionEvent event = (MotionEvent) msg.obj;
             try {
-                boolean handled;
-                if (mView != null && mAdded && event != null) {
-
-                    // enter touch mode on the down
-                    boolean isDown = event.getAction() == MotionEvent.ACTION_DOWN;
-                    if (isDown) {
-                        ensureTouchMode(true);
-                    }
-                    if(Config.LOGV) {
-                        captureMotionLog("captureDispatchPointer", event);
-                    }
-                    if (mCurScrollY != 0) {
-                        event.offsetLocation(0, mCurScrollY);
-                    }
-                    if (MEASURE_LATENCY) {
-                        lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
-                    }
-                    handled = mView.dispatchTouchEvent(event);
-                    if (MEASURE_LATENCY) {
-                        lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
-                    }
-                    if (!handled && isDown) {
-                        int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
-
-                        final int edgeFlags = event.getEdgeFlags();
-                        int direction = View.FOCUS_UP;
-                        int x = (int)event.getX();
-                        int y = (int)event.getY();
-                        final int[] deltas = new int[2];
-
-                        if ((edgeFlags & MotionEvent.EDGE_TOP) != 0) {
-                            direction = View.FOCUS_DOWN;
-                            if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                                deltas[0] = edgeSlop;
-                                x += edgeSlop;
-                            } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                                deltas[0] = -edgeSlop;
-                                x -= edgeSlop;
-                            }
-                        } else if ((edgeFlags & MotionEvent.EDGE_BOTTOM) != 0) {
-                            direction = View.FOCUS_UP;
-                            if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                                deltas[0] = edgeSlop;
-                                x += edgeSlop;
-                            } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                                deltas[0] = -edgeSlop;
-                                x -= edgeSlop;
-                            }
-                        } else if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                            direction = View.FOCUS_RIGHT;
-                        } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                            direction = View.FOCUS_LEFT;
-                        }
-
-                        if (edgeFlags != 0 && mView instanceof ViewGroup) {
-                            View nearest = FocusFinder.getInstance().findNearestTouchable(
-                                    ((ViewGroup) mView), x, y, direction, deltas);
-                            if (nearest != null) {
-                                event.offsetLocation(deltas[0], deltas[1]);
-                                event.setEdgeFlags(0);
-                                mView.dispatchTouchEvent(event);
-                            }
-                        }
-                    }
-                }
+                deliverPointerEvent(event);
             } finally {
-                if (callWhenDone) {
-                    finishMotionEvent();
-                }
-                recycleMotionEvent(event);
+                event.recycle();
                 if (LOCAL_LOGV || WATCH_POINTER) Log.i(TAG, "Done dispatching!");
-                // Let the exception fall through -- the looper will catch
-                // it and take care of the bad app for us.
             }
         } break;
-        case DISPATCH_TRACKBALL:
-            deliverTrackballEvent((MotionEvent)msg.obj, msg.arg1 != 0);
-            break;
+        case DISPATCH_TRACKBALL: {
+            MotionEvent event = (MotionEvent) msg.obj;
+            try {
+                deliverTrackballEvent(event);
+            } finally {
+                event.recycle();
+            }
+        } break;
         case DISPATCH_APP_VISIBILITY:
             handleAppVisibility(msg.arg1 != 0);
             break;
@@ -2101,60 +2010,11 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
     
     private void finishKeyEvent(KeyEvent event) {
-        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-            if (mFinishedCallback != null) {
-                mFinishedCallback.run();
-                mFinishedCallback = null;
-            }
-        } else {
-            try {
-                sWindowSession.finishKey(mWindow);
-            } catch (RemoteException e) {
-            }
+        if (mFinishedCallback != null) {
+            mFinishedCallback.run();
+            mFinishedCallback = null;
         }
     }
-    
-    private void finishMotionEvent() {
-        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-            throw new IllegalStateException("Should not be reachable with native input dispatch.");
-        }
-        
-        try {
-            sWindowSession.finishKey(mWindow);
-        } catch (RemoteException e) {
-        }
-    }
-
-    private void recycleMotionEvent(MotionEvent event) {
-        if (event != null) {
-            event.recycle();
-        }
-    }
-    
-    private MotionEvent getPendingPointerMotionEvent() {
-        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-            throw new IllegalStateException("Should not be reachable with native input dispatch.");
-        }
-        
-        try {
-            return sWindowSession.getPendingPointerMove(mWindow);
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    private MotionEvent getPendingTrackballMotionEvent() {
-        if (WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH) {
-            throw new IllegalStateException("Should not be reachable with native input dispatch.");
-        }
-        
-        try {
-            return sWindowSession.getPendingTrackballMove(mWindow);
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-    
     
     /**
      * Something in the current window tells us we need to change the touch mode.  For
@@ -2277,42 +2137,95 @@ public final class ViewRoot extends Handler implements ViewParent,
         return false;
     }
 
-
-    private void deliverTrackballEvent(MotionEvent event, boolean callWhenDone) {
-        if (event == null) {
-            event = getPendingTrackballMotionEvent();
-            callWhenDone = false;
+    private void deliverPointerEvent(MotionEvent event) {
+        if (mTranslator != null) {
+            mTranslator.translateEventInScreenToAppWindow(event);
         }
+        
+        boolean handled;
+        if (mView != null && mAdded) {
 
+            // enter touch mode on the down
+            boolean isDown = event.getAction() == MotionEvent.ACTION_DOWN;
+            if (isDown) {
+                ensureTouchMode(true);
+            }
+            if(Config.LOGV) {
+                captureMotionLog("captureDispatchPointer", event);
+            }
+            if (mCurScrollY != 0) {
+                event.offsetLocation(0, mCurScrollY);
+            }
+            if (MEASURE_LATENCY) {
+                lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
+            }
+            handled = mView.dispatchTouchEvent(event);
+            if (MEASURE_LATENCY) {
+                lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
+            }
+            if (!handled && isDown) {
+                int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
+
+                final int edgeFlags = event.getEdgeFlags();
+                int direction = View.FOCUS_UP;
+                int x = (int)event.getX();
+                int y = (int)event.getY();
+                final int[] deltas = new int[2];
+
+                if ((edgeFlags & MotionEvent.EDGE_TOP) != 0) {
+                    direction = View.FOCUS_DOWN;
+                    if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
+                        deltas[0] = edgeSlop;
+                        x += edgeSlop;
+                    } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
+                        deltas[0] = -edgeSlop;
+                        x -= edgeSlop;
+                    }
+                } else if ((edgeFlags & MotionEvent.EDGE_BOTTOM) != 0) {
+                    direction = View.FOCUS_UP;
+                    if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
+                        deltas[0] = edgeSlop;
+                        x += edgeSlop;
+                    } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
+                        deltas[0] = -edgeSlop;
+                        x -= edgeSlop;
+                    }
+                } else if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
+                    direction = View.FOCUS_RIGHT;
+                } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
+                    direction = View.FOCUS_LEFT;
+                }
+
+                if (edgeFlags != 0 && mView instanceof ViewGroup) {
+                    View nearest = FocusFinder.getInstance().findNearestTouchable(
+                            ((ViewGroup) mView), x, y, direction, deltas);
+                    if (nearest != null) {
+                        event.offsetLocation(deltas[0], deltas[1]);
+                        event.setEdgeFlags(0);
+                        mView.dispatchTouchEvent(event);
+                    }
+                }
+            }
+        }
+    }
+
+    private void deliverTrackballEvent(MotionEvent event) {
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
 
         boolean handled = false;
-        try {
-            if (event == null) {
-                handled = true;
-            } else if (mView != null && mAdded) {
-                handled = mView.dispatchTrackballEvent(event);
-                if (!handled) {
-                    // we could do something here, like changing the focus
-                    // or something?
-                }
-            }
-        } finally {
+        if (mView != null && mAdded) {
+            handled = mView.dispatchTrackballEvent(event);
             if (handled) {
-                if (callWhenDone) {
-                    finishMotionEvent();
-                }
-                recycleMotionEvent(event);
                 // If we reach this, we delivered a trackball event to mView and
                 // mView consumed it. Because we will not translate the trackball
                 // event into a key event, touch mode will not exit, so we exit
                 // touch mode here.
                 ensureTouchMode(false);
-                //noinspection ReturnInsideFinallyBlock
                 return;
             }
-            // Let the exception fall through -- the looper will catch
-            // it and take care of the bad app for us.
+            
+            // Otherwise we could do something here, like changing the focus
+            // or something?
         }
 
         final TrackballAxis x = mTrackballAxisX;
@@ -2327,95 +2240,86 @@ public final class ViewRoot extends Handler implements ViewParent,
             mLastTrackballTime = curTime;
         }
 
-        try {
-            final int action = event.getAction();
-            final int metastate = event.getMetaState();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                    x.reset(2);
-                    y.reset(2);
-                    deliverKeyEvent(new KeyEvent(curTime, curTime,
-                            KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER,
-                            0, metastate), false);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    x.reset(2);
-                    y.reset(2);
-                    deliverKeyEvent(new KeyEvent(curTime, curTime,
-                            KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER,
-                            0, metastate), false);
-                    break;
-            }
+        final int action = event.getAction();
+        final int metastate = event.getMetaState();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                x.reset(2);
+                y.reset(2);
+                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER,
+                        0, metastate), false);
+                break;
+            case MotionEvent.ACTION_UP:
+                x.reset(2);
+                y.reset(2);
+                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                        KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER,
+                        0, metastate), false);
+                break;
+        }
 
-            if (DEBUG_TRACKBALL) Log.v(TAG, "TB X=" + x.position + " step="
-                    + x.step + " dir=" + x.dir + " acc=" + x.acceleration
-                    + " move=" + event.getX()
-                    + " / Y=" + y.position + " step="
-                    + y.step + " dir=" + y.dir + " acc=" + y.acceleration
-                    + " move=" + event.getY());
-            final float xOff = x.collect(event.getX(), event.getEventTime(), "X");
-            final float yOff = y.collect(event.getY(), event.getEventTime(), "Y");
+        if (DEBUG_TRACKBALL) Log.v(TAG, "TB X=" + x.position + " step="
+                + x.step + " dir=" + x.dir + " acc=" + x.acceleration
+                + " move=" + event.getX()
+                + " / Y=" + y.position + " step="
+                + y.step + " dir=" + y.dir + " acc=" + y.acceleration
+                + " move=" + event.getY());
+        final float xOff = x.collect(event.getX(), event.getEventTime(), "X");
+        final float yOff = y.collect(event.getY(), event.getEventTime(), "Y");
 
-            // Generate DPAD events based on the trackball movement.
-            // We pick the axis that has moved the most as the direction of
-            // the DPAD.  When we generate DPAD events for one axis, then the
-            // other axis is reset -- we don't want to perform DPAD jumps due
-            // to slight movements in the trackball when making major movements
-            // along the other axis.
-            int keycode = 0;
-            int movement = 0;
-            float accel = 1;
-            if (xOff > yOff) {
-                movement = x.generate((2/event.getXPrecision()));
-                if (movement != 0) {
-                    keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT
-                            : KeyEvent.KEYCODE_DPAD_LEFT;
-                    accel = x.acceleration;
-                    y.reset(2);
-                }
-            } else if (yOff > 0) {
-                movement = y.generate((2/event.getYPrecision()));
-                if (movement != 0) {
-                    keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_DOWN
-                            : KeyEvent.KEYCODE_DPAD_UP;
-                    accel = y.acceleration;
-                    x.reset(2);
-                }
+        // Generate DPAD events based on the trackball movement.
+        // We pick the axis that has moved the most as the direction of
+        // the DPAD.  When we generate DPAD events for one axis, then the
+        // other axis is reset -- we don't want to perform DPAD jumps due
+        // to slight movements in the trackball when making major movements
+        // along the other axis.
+        int keycode = 0;
+        int movement = 0;
+        float accel = 1;
+        if (xOff > yOff) {
+            movement = x.generate((2/event.getXPrecision()));
+            if (movement != 0) {
+                keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT
+                        : KeyEvent.KEYCODE_DPAD_LEFT;
+                accel = x.acceleration;
+                y.reset(2);
             }
+        } else if (yOff > 0) {
+            movement = y.generate((2/event.getYPrecision()));
+            if (movement != 0) {
+                keycode = movement > 0 ? KeyEvent.KEYCODE_DPAD_DOWN
+                        : KeyEvent.KEYCODE_DPAD_UP;
+                accel = y.acceleration;
+                x.reset(2);
+            }
+        }
 
-            if (keycode != 0) {
-                if (movement < 0) movement = -movement;
-                int accelMovement = (int)(movement * accel);
-                if (DEBUG_TRACKBALL) Log.v(TAG, "Move: movement=" + movement
-                        + " accelMovement=" + accelMovement
-                        + " accel=" + accel);
-                if (accelMovement > movement) {
-                    if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
-                            + keycode);
-                    movement--;
-                    deliverKeyEvent(new KeyEvent(curTime, curTime,
-                            KeyEvent.ACTION_MULTIPLE, keycode,
-                            accelMovement-movement, metastate), false);
-                }
-                while (movement > 0) {
-                    if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
-                            + keycode);
-                    movement--;
-                    curTime = SystemClock.uptimeMillis();
-                    deliverKeyEvent(new KeyEvent(curTime, curTime,
-                            KeyEvent.ACTION_DOWN, keycode, 0, event.getMetaState()), false);
-                    deliverKeyEvent(new KeyEvent(curTime, curTime,
-                            KeyEvent.ACTION_UP, keycode, 0, metastate), false);
-                }
-                mLastTrackballTime = curTime;
+        if (keycode != 0) {
+            if (movement < 0) movement = -movement;
+            int accelMovement = (int)(movement * accel);
+            if (DEBUG_TRACKBALL) Log.v(TAG, "Move: movement=" + movement
+                    + " accelMovement=" + accelMovement
+                    + " accel=" + accel);
+            if (accelMovement > movement) {
+                if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
+                        + keycode);
+                movement--;
+                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                        KeyEvent.ACTION_MULTIPLE, keycode,
+                        accelMovement-movement, metastate), false);
             }
-        } finally {
-            if (callWhenDone) {
-                finishMotionEvent();
-                recycleMotionEvent(event);
+            while (movement > 0) {
+                if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
+                        + keycode);
+                movement--;
+                curTime = SystemClock.uptimeMillis();
+                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                        KeyEvent.ACTION_DOWN, keycode, 0, event.getMetaState()), false);
+                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                        KeyEvent.ACTION_UP, keycode, 0, metastate), false);
             }
-            // Let the exception fall through -- the looper will catch
-            // it and take care of the bad app for us.
+            mLastTrackballTime = curTime;
         }
     }
 
@@ -2862,45 +2766,20 @@ public final class ViewRoot extends Handler implements ViewParent,
     private final InputHandler mInputHandler = new InputHandler() {
         public void handleKey(KeyEvent event, Runnable finishedCallback) {
             mFinishedCallback = finishedCallback;
-            
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                //noinspection ConstantConditions
-                if (false && event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
-                    if (Config.LOGD) Log.d("keydisp",
-                            "===================================================");
-                    if (Config.LOGD) Log.d("keydisp", "Focused view Hierarchy is:");
-                    debug();
 
-                    if (Config.LOGD) Log.d("keydisp",
-                            "===================================================");
-                }
-            }
-
-            Message msg = obtainMessage(DISPATCH_KEY);
-            msg.obj = event;
-
-            if (LOCAL_LOGV) Log.v(
-                "ViewRoot", "sending key " + event + " to " + mView);
-
-            sendMessageAtTime(msg, event.getEventTime());
+            dispatchKey(event);
         }
 
         public void handleTouch(MotionEvent event, Runnable finishedCallback) {
             finishedCallback.run();
             
-            Message msg = obtainMessage(DISPATCH_POINTER);
-            msg.obj = event;
-            msg.arg1 = 0;
-            sendMessageAtTime(msg, event.getEventTime());
+            dispatchPointer(event);
         }
 
         public void handleTrackball(MotionEvent event, Runnable finishedCallback) {
             finishedCallback.run();
             
-            Message msg = obtainMessage(DISPATCH_TRACKBALL);
-            msg.obj = event;
-            msg.arg1 = 0;
-            sendMessageAtTime(msg, event.getEventTime());
+            dispatchTrackball(event);
         }
     };
 
@@ -2927,22 +2806,18 @@ public final class ViewRoot extends Handler implements ViewParent,
         sendMessageAtTime(msg, event.getEventTime());
     }
 
-    public void dispatchPointer(MotionEvent event, long eventTime,
-            boolean callWhenDone) {
+    public void dispatchPointer(MotionEvent event) {
         Message msg = obtainMessage(DISPATCH_POINTER);
         msg.obj = event;
-        msg.arg1 = callWhenDone ? 1 : 0;
-        sendMessageAtTime(msg, eventTime);
+        sendMessageAtTime(msg, event.getEventTime());
     }
 
-    public void dispatchTrackball(MotionEvent event, long eventTime,
-            boolean callWhenDone) {
+    public void dispatchTrackball(MotionEvent event) {
         Message msg = obtainMessage(DISPATCH_TRACKBALL);
         msg.obj = event;
-        msg.arg1 = callWhenDone ? 1 : 0;
-        sendMessageAtTime(msg, eventTime);
+        sendMessageAtTime(msg, event.getEventTime());
     }
-
+    
     public void dispatchAppVisibility(boolean visible) {
         Message msg = obtainMessage(DISPATCH_APP_VISIBILITY);
         msg.arg1 = visible ? 1 : 0;
@@ -3073,56 +2948,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
-    class EventCompletion extends Handler {
-        final IWindow mWindow;
-        final KeyEvent mKeyEvent;
-        final boolean mIsPointer;
-        final MotionEvent mMotionEvent;
-
-        EventCompletion(Looper looper, IWindow window, KeyEvent key,
-                boolean isPointer, MotionEvent motion) {
-            super(looper);
-            mWindow = window;
-            mKeyEvent = key;
-            mIsPointer = isPointer;
-            mMotionEvent = motion;
-            sendEmptyMessage(0);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (mKeyEvent != null) {
-                finishKeyEvent(mKeyEvent);
-           } else if (mIsPointer) {
-                boolean didFinish;
-                MotionEvent event = mMotionEvent;
-                if (event == null) {
-                    event = getPendingPointerMotionEvent();
-                    didFinish = true;
-                } else {
-                    didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
-                }
-                if (!didFinish) {
-                    finishMotionEvent();
-                }
-            } else {
-                MotionEvent event = mMotionEvent;
-                if (event == null) {
-                    event = getPendingTrackballMotionEvent();
-                } else {
-                    finishMotionEvent();
-                }
-            }
-        }
-    }
-
     static class W extends IWindow.Stub {
         private final WeakReference<ViewRoot> mViewRoot;
-        private final Looper mMainLooper;
 
         public W(ViewRoot viewRoot, Context context) {
             mViewRoot = new WeakReference<ViewRoot>(viewRoot);
-            mMainLooper = context.getMainLooper();
         }
 
         public void resized(int w, int h, Rect coveredInsets,
@@ -3131,40 +2961,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (viewRoot != null) {
                 viewRoot.dispatchResized(w, h, coveredInsets,
                         visibleInsets, reportDraw, newConfig);
-            }
-        }
-
-        public void dispatchKey(KeyEvent event) {
-            final ViewRoot viewRoot = mViewRoot.get();
-            if (viewRoot != null) {
-                viewRoot.dispatchKey(event);
-            } else {
-                Log.w("ViewRoot.W", "Key event " + event + " but no ViewRoot available!");
-                viewRoot.new EventCompletion(mMainLooper, this, event, false, null);
-            }
-        }
-
-        public void dispatchPointer(MotionEvent event, long eventTime,
-                boolean callWhenDone) {
-            final ViewRoot viewRoot = mViewRoot.get();
-            if (viewRoot != null) {                
-                if (MEASURE_LATENCY) {
-                    // Note: eventTime is in milliseconds
-                    ViewRoot.lt.sample("* ViewRoot b4 dispatchPtr", System.nanoTime() - eventTime * 1000000);
-                }
-                viewRoot.dispatchPointer(event, eventTime, callWhenDone);
-            } else {
-                viewRoot.new EventCompletion(mMainLooper, this, null, true, event);
-            }
-        }
-
-        public void dispatchTrackball(MotionEvent event, long eventTime,
-                boolean callWhenDone) {
-            final ViewRoot viewRoot = mViewRoot.get();
-            if (viewRoot != null) {
-                viewRoot.dispatchTrackball(event, eventTime, callWhenDone);
-            } else {
-                viewRoot.new EventCompletion(mMainLooper, this, null, false, event);
             }
         }
 

@@ -109,10 +109,6 @@ interface IWindowSession {
     void getDisplayFrame(IWindow window, out Rect outDisplayFrame);
     
     void finishDrawing(IWindow window);
-
-    void finishKey(IWindow window);
-    MotionEvent getPendingPointerMove(IWindow window);
-    MotionEvent getPendingTrackballMove(IWindow window);
     
     void setInTouchMode(boolean showFocus);
     boolean getInTouchMode();

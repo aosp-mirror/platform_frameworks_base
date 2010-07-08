@@ -43,59 +43,6 @@ public class BaseIWindow extends IWindow.Stub {
         }
     }
 
-    public void dispatchKey(KeyEvent event) {
-        try {
-            mSession.finishKey(this);
-        } catch (RemoteException ex) {
-        }
-    }
-
-    public boolean onDispatchPointer(MotionEvent event, long eventTime,
-            boolean callWhenDone) {
-        event.recycle();
-        return false;
-    }
-    
-    public void dispatchPointer(MotionEvent event, long eventTime,
-            boolean callWhenDone) {
-        try {
-            if (event == null) {
-                event = mSession.getPendingPointerMove(this);
-                onDispatchPointer(event, eventTime, false);
-            } else if (callWhenDone) {
-                if (!onDispatchPointer(event, eventTime, true)) {
-                    mSession.finishKey(this);
-                }
-            } else {
-                onDispatchPointer(event, eventTime, false);
-            }
-        } catch (RemoteException ex) {
-        }
-    }
-
-    public boolean onDispatchTrackball(MotionEvent event, long eventTime,
-            boolean callWhenDone) {
-        event.recycle();
-        return false;
-    }
-    
-    public void dispatchTrackball(MotionEvent event, long eventTime,
-            boolean callWhenDone) {
-        try {
-            if (event == null) {
-                event = mSession.getPendingTrackballMove(this);
-                onDispatchTrackball(event, eventTime, false);
-            } else if (callWhenDone) {
-                if (!onDispatchTrackball(event, eventTime, true)) {
-                    mSession.finishKey(this);
-                }
-            } else {
-                onDispatchTrackball(event, eventTime, false);
-            }
-        } catch (RemoteException ex) {
-        }
-    }
-
     public void dispatchAppVisibility(boolean visible) {
     }
 
