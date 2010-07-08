@@ -17,7 +17,8 @@
 #ifndef ANDROID_EFFECTREVERB_H_
 #define ANDROID_EFFECTREVERB_H_
 
-#include <media/EffectReverbApi.h>
+#include <media/EffectEnvironmentalReverbApi.h>
+#include <media/EffectPresetReverbApi.h>
 
 
 /*------------------------------------
@@ -43,7 +44,7 @@ if the buffer size is a power of two.
 
 #define REVERB_BUFFER_SIZE_IN_SAMPLES_MAX   16384
 
-#define REVERB_MAX_ROOM_TYPE            4   // any room numbers larger than this are invalid
+#define REVERB_NUM_PRESETS  REVERB_PRESET_PLATE   // REVERB_PRESET_NONE is not included
 #define REVERB_MAX_NUM_REFLECTIONS      5   // max num reflections per channel
 
 
@@ -171,7 +172,7 @@ typedef struct
 
 typedef struct
 {
-    reverb_preset_t     m_sPreset[REVERB_MAX_ROOM_TYPE];    //array of presets
+    reverb_preset_t     m_sPreset[REVERB_NUM_PRESETS]; // array of presets(does not include REVERB_PRESET_NONE)
 
 } reverb_preset_bank_t;
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_EFFECTREVERBAPI_H_
-#define ANDROID_EFFECTREVERBAPI_H_
+#ifndef ANDROID_EFFECTENVIRONMENTALREVERBAPI_H_
+#define ANDROID_EFFECTENVIRONMENTALREVERBAPI_H_
 
 #include <media/EffectApi.h>
 
@@ -27,14 +27,9 @@ extern "C" {
 static const effect_uuid_t SL_IID_ENVIRONMENTALREVERB_ = { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, { 0x4e, 0x23, 0x4d, 0x6, 0x83, 0x9e } };
 const effect_uuid_t * const SL_IID_ENVIRONMENTALREVERB = &SL_IID_ENVIRONMENTALREVERB_;
 
-static const effect_uuid_t SL_IID_PRESETREVERB_ = { 0x47382d60, 0xddd8, 0x11db, 0xbf3a, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };
-const effect_uuid_t * const SL_IID_PRESETREVERB = &SL_IID_PRESETREVERB_;
-
-/* enumerated parameter settings for Reverb effect */
+/* enumerated parameter settings for environmental reverb effect */
 typedef enum
 {
-    REVERB_PARAM_BYPASS,
-    REVERB_PARAM_PRESET,
     // Parameters below are as defined in OpenSL ES specification for environmental reverb interface
     REVERB_PARAM_ROOM_LEVEL,            // in millibels,    range -6000 to 0
     REVERB_PARAM_ROOM_HF_LEVEL,         // in millibels,    range -4000 to 0
@@ -46,17 +41,9 @@ typedef enum
     REVERB_PARAM_REVERB_DELAY,          // in milliseconds, range 0 to 65
     REVERB_PARAM_DIFFUSION,             // in permilles,    range 0 to 1000
     REVERB_PARAM_DENSITY,               // in permilles,    range 0 to 1000
-    REVERB_PARAM_PROPERTIES
-} t_reverb_params;
-
-
-typedef enum
-{
-    REVERB_PRESET_LARGE_HALL,
-    REVERB_PRESET_HALL,
-    REVERB_PRESET_CHAMBER,
-    REVERB_PRESET_ROOM,
-} t_reverb_presets;
+    REVERB_PARAM_PROPERTIES,
+    REVERB_PARAM_BYPASS
+} t_env_reverb_params;
 
 //t_reverb_properties is equal to SLEnvironmentalReverbSettings defined in OpenSL ES specification.
 typedef struct s_reverb_properties {
@@ -79,4 +66,4 @@ typedef struct s_reverb_properties {
 #endif
 
 
-#endif /*ANDROID_EFFECTREVERBAPI_H_*/
+#endif /*ANDROID_EFFECTENVIRONMENTALREVERBAPI_H_*/
