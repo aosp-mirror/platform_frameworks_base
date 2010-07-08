@@ -289,6 +289,7 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC2);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC3);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC4);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
