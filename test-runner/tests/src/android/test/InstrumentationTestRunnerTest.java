@@ -16,6 +16,7 @@
 
 package android.test;
 
+import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Bundle;
 import android.test.mock.MockContext;
@@ -87,6 +88,42 @@ public class InstrumentationTestRunnerTest extends TestCase {
             new TestDescriptor(PlaceHolderTest.class.getName(), "testPlaceHolder"), 
             new TestDescriptor(PlaceHolderTest2.class.getName(), "testPlaceHolder2"));
         
+    }
+
+    /**
+     * Test that runtime exceptions during runTest are handled gracefully
+     */
+    public void testUnhandledException() throws Exception {
+        StubAndroidTestRunner stubAndroidTestRunner = new StubAndroidTestRunner() {
+            @Override
+            public void runTest() {
+                throw new RuntimeException();
+            }
+        };
+        StubInstrumentationTestRunner instrumentationTestRunner = new StubInstrumentationTestRunner(
+                new StubContext("com.google.foo.tests"),
+                new StubContext(mTargetContextPackageName), stubAndroidTestRunner);
+        instrumentationTestRunner.onCreate(new Bundle());
+        instrumentationTestRunner.onStart();
+        assertTrue("Instrumentation did not finish", instrumentationTestRunner.isFinished());
+        // ensure a meaningful error message placed in results
+        String resultsData = instrumentationTestRunner.mResults.getString(
+                Instrumentation.REPORT_KEY_STREAMRESULT);
+        assertTrue("Instrumentation results is missing RuntimeException",
+                resultsData.contains("RuntimeException"));
+    }
+
+    /**
+     * Test that specifying a method which does not exist is handled gracefully
+     */
+    public void testBadMethodArgument() throws Exception {
+        String testClassName = PlaceHolderTest.class.getName();
+        String invalidMethodName = "testNoExist";
+        String classAndMethod = testClassName + "#" + invalidMethodName;
+        mInstrumentationTestRunner.onCreate(createBundle(
+                InstrumentationTestRunner.ARGUMENT_TEST_CLASS, classAndMethod));
+        assertTestRunnerCalledWithExpectedParameters(testClassName,
+                invalidMethodName);
     }
 
     public void testDelayParameter() throws Exception {
@@ -170,6 +207,7 @@ public class InstrumentationTestRunnerTest extends TestCase {
         private TestSuite mTestSuite;
         private TestSuite mDefaultTestSuite;
         private String mPackageNameForDefaultTests;
+        private Bundle mResults;
 
         public StubInstrumentationTestRunner(Context context, Context targetContext,
                 AndroidTestRunner androidTestRunner) {
@@ -200,6 +238,7 @@ public class InstrumentationTestRunnerTest extends TestCase {
 
         public void finish(int resultCode, Bundle results) {
             mFinished = true;
+            mResults = results;
         }
 
         public boolean isStarted() {
@@ -220,6 +259,11 @@ public class InstrumentationTestRunnerTest extends TestCase {
 
         public String getPackageNameForDefaultTests() {
             return mPackageNameForDefaultTests;
+        }
+
+        @Override
+        void prepareLooper() {
+            // ignore
         }
     }
 
