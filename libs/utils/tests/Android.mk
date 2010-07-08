@@ -3,6 +3,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 test_src_files := \
+	ObbFile_test.cpp \
 	PollLoop_test.cpp
 
 shared_libraries := \
