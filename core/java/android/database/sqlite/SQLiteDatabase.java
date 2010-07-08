@@ -613,7 +613,10 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             // This thread didn't already have the lock, so begin a database
             // transaction now.
-            if (exclusive) {
+            // STOPSHIP - uncomment the following 1 line
+            // if (exclusive) {
+            // STOPSHIP - remove the following 1 line
+            if (exclusive && mConnectionPool == null) {
                 execSQL("BEGIN EXCLUSIVE;");
             } else {
                 execSQL("BEGIN IMMEDIATE;");
@@ -946,7 +949,10 @@ public class SQLiteDatabase extends SQLiteClosable {
             sBlockSize = new StatFs("/data").getBlockSize();
         }
         sqliteDatabase.setPageSize(sBlockSize);
-        sqliteDatabase.setJournalMode(path, "TRUNCATE");
+        //STOPSHIP - uncomment the following line
+        //sqliteDatabase.setJournalMode(path, "TRUNCATE");
+        // STOPSHIP remove the following lines
+        sqliteDatabase.enableWriteAheadLogging();
 
         // add this database to the list of databases opened in this process
         ActiveDatabases.addActiveDatabase(sqliteDatabase);
