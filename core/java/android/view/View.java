@@ -6848,16 +6848,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if (verticalEdges) {
             topFadeStrength = Math.max(0.0f, Math.min(1.0f, getTopFadingEdgeStrength()));
-            drawTop = topFadeStrength >= 0.0f;
+            drawTop = topFadeStrength > 0.0f;
             bottomFadeStrength = Math.max(0.0f, Math.min(1.0f, getBottomFadingEdgeStrength()));
-            drawBottom = bottomFadeStrength >= 0.0f;
+            drawBottom = bottomFadeStrength > 0.0f;
         }
 
         if (horizontalEdges) {
             leftFadeStrength = Math.max(0.0f, Math.min(1.0f, getLeftFadingEdgeStrength()));
-            drawLeft = leftFadeStrength >= 0.0f;
+            drawLeft = leftFadeStrength > 0.0f;
             rightFadeStrength = Math.max(0.0f, Math.min(1.0f, getRightFadingEdgeStrength()));
-            drawRight = rightFadeStrength >= 0.0f;
+            drawRight = rightFadeStrength > 0.0f;
         }
 
         saveCount = canvas.getSaveCount();

@@ -6790,8 +6790,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected int computeHorizontalScrollRange() {
-        if (mLayout != null)
-            return mLayout.getWidth();
+        if (mLayout != null) {
+            return mSingleLine && (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.LEFT ?
+                    (int) mLayout.getLineWidth(0) : mLayout.getWidth();
+        }
 
         return super.computeHorizontalScrollRange();
     }
