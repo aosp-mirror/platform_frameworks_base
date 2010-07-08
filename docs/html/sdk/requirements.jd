@@ -23,6 +23,9 @@ installation notes</a>.</li>
 <h4 style="margin-top:.25em"><em>Eclipse IDE</em></h4>
     <ul>
       <li>Eclipse 3.4 (Ganymede) or 3.5 (Galileo)
+         <p class="caution"><strong>Caution:</strong> There are known issues with the ADT plugin
+running with Eclipse 3.6. Please stay on 3.5 until further notice.</p>
+      </li>
       <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
 in most Eclipse IDE packages) </li>
       <li>If you need to install or update Eclipse, you can download it from <a
