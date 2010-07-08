@@ -141,7 +141,7 @@ public class WebRuntimeActivity extends Activity
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (mSplashScreen.getVisibility() == View.VISIBLE) {
+                if (mSplashScreen != null && mSplashScreen.getVisibility() == View.VISIBLE) {
                     mSplashScreen.setVisibility(View.GONE);
                     mSplashScreen = null;
                 }
