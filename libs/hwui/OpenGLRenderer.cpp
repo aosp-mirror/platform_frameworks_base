@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_LAYERS 1
+#define DEBUG_LAYERS 0
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
@@ -519,6 +519,12 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
             alpha / 255.0f, mode, texture->blend, true);
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+}
+
+void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
+    // TODO: Implement
+    LOGD("Draw 9patch, paddingLeft=%d", patch->paddingLeft);
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {

@@ -17,6 +17,7 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <utils/ResourceTypes.h>
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
@@ -214,6 +215,33 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject canv
     }
 }
 
+static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray chunks,
+        float left, float top, float right, float bottom, SkPaint* paint,
+        jint bitmapDensity, jint canvasDensity,jint screenDensity) {
+
+    jbyte* storage = env->GetByteArrayElements(chunks, NULL);
+    Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(storage);
+    Res_png_9patch::deserialize(patch);
+
+    if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
+        renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
+    } else {
+        renderer->save(0);
+        const float scale = canvasDensity / float(bitmapDensity);
+        renderer->translate(left, top);
+        renderer->scale(scale, scale);
+        left = top = 0.0f;
+        right = (right - left) / scale;
+        bottom = (bottom - top) / scale;
+        renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
+        renderer->restore();
+    }
+
+    // TODO: make sure that 0 is correct for the flags
+    env->ReleaseByteArrayElements(chunks, storage, 0);
+}
+
 static void android_view_GLES20Canvas_drawColor(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, jint color, SkXfermode::Mode mode) {
     renderer->drawColor(color, mode);
@@ -260,6 +288,7 @@ static JNINativeMethod gMethods[] = {
     {   "nDrawBitmap",        "(IIFFIIII)V",        (void*) android_view_GLES20Canvas_drawBitmap },
     {   "nDrawBitmap",        "(IIFFFFFFFFIIII)V",  (void*) android_view_GLES20Canvas_drawBitmapRect },
     {   "nDrawBitmap",        "(IIIIIII)V",         (void*) android_view_GLES20Canvas_drawBitmapMatrix },
+    {   "nDrawPatch",         "(II[BFFFFIIII)V",    (void*) android_view_GLES20Canvas_drawPatch },
     {   "nDrawColor",         "(III)V",             (void*) android_view_GLES20Canvas_drawColor },
     {   "nDrawRect",          "(IFFFFI)V",          (void*) android_view_GLES20Canvas_drawRect },
 
