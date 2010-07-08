@@ -18,6 +18,8 @@
 
 #include <GLES2/gl2.h>
 
+#include <utils/Log.h>
+
 #include "LayerCache.h"
 
 namespace android {
@@ -84,11 +86,55 @@ void LayerCache::clear() {
     mCache.setOnEntryRemovedListener(NULL);
 }
 
-Layer* LayerCache::get(LayerSize& size) {
+Layer* LayerCache::get(LayerSize& size, GLuint previousFbo) {
     Layer* layer = mCache.remove(size);
     if (layer) {
+        LAYER_LOGD("Reusing layer");
+
         mSize -= layer->layer.getWidth() * layer->layer.getHeight() * 4;
+    } else {
+        LAYER_LOGD("Creating new layer");
+
+        layer = new Layer;
+        layer->blend = true;
+
+        // Generate the FBO and attach the texture
+        glGenFramebuffers(1, &layer->fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
+
+        // Generate the texture in which the FBO will draw
+        glGenTextures(1, &layer->texture);
+        glBindTexture(GL_TEXTURE_2D, layer->texture);
+
+        // The FBO will not be scaled, so we can use lower quality filtering
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width, size.height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Bind texture to FBO
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                layer->texture, 0);
+
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+
+            glDeleteFramebuffers(1, &layer->fbo);
+            glDeleteTextures(1, &layer->texture);
+            delete layer;
+
+            return NULL;
+        }
     }
+
     return layer;
 }
 
