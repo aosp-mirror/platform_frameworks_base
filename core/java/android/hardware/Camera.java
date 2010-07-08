@@ -535,6 +535,7 @@ public class Camera {
      * application does not need a particular callback, a null can be passed
      * instead of a callback method.
      *
+     * This method is only valid after {@link #startPreview()} has been called.
      * This method will stop the preview. Applications should not call {@link
      * #stopPreview()} before this. After jpeg callback is received,
      * applications can call {@link #startPreview()} to restart the preview.
@@ -562,6 +563,7 @@ public class Camera {
      * application does not need a particular callback, a null can be passed
      * instead of a callback method.
      *
+     * This method is only valid after {@link #startPreview()} has been called.
      * This method will stop the preview. Applications should not call {@link
      * #stopPreview()} before this. After jpeg callback is received,
      * applications can call {@link #startPreview()} to restart the preview.
