@@ -26,6 +26,7 @@ commonSources:= \
 	Debug.cpp \
 	FileMap.cpp \
 	Flattenable.cpp \
+	ObbFile.cpp \
 	Pool.cpp \
 	RefBase.cpp \
 	ResourceTypes.cpp \
@@ -63,6 +64,11 @@ ifeq ($(strip $(USE_CYGWIN),),)
 # Under MinGW, ctype.h doesn't need multi-byte support
 LOCAL_CFLAGS += -DMB_CUR_MAX=1
 endif
+endif
+
+ifeq ($(HOST_OS),darwin)
+# MacOS doesn't have lseek64. However, off_t is 64-bit anyway.
+LOCAL_CFLAGS += -DOFF_T_IS_64_BIT
 endif
 
 include $(BUILD_HOST_STATIC_LIBRARY)
