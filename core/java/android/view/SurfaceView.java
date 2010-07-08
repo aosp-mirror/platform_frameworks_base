@@ -625,41 +625,6 @@ public class SurfaceView extends View {
             }
         }
 
-        public void dispatchKey(KeyEvent event) {
-            SurfaceView surfaceView = mSurfaceView.get();
-            if (surfaceView != null) {
-                //Log.w("SurfaceView", "Unexpected key event in surface: " + event);
-                if (surfaceView.mSession != null && surfaceView.mSurface != null) {
-                    try {
-                        surfaceView.mSession.finishKey(surfaceView.mWindow);
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
-        }
-
-        public void dispatchPointer(MotionEvent event, long eventTime,
-                boolean callWhenDone) {
-            Log.w("SurfaceView", "Unexpected pointer event in surface: " + event);
-            //if (mSession != null && mSurface != null) {
-            //    try {
-            //        //mSession.finishKey(mWindow);
-            //    } catch (RemoteException ex) {
-            //    }
-            //}
-        }
-
-        public void dispatchTrackball(MotionEvent event, long eventTime,
-                boolean callWhenDone) {
-            Log.w("SurfaceView", "Unexpected trackball event in surface: " + event);
-            //if (mSession != null && mSurface != null) {
-            //    try {
-            //        //mSession.finishKey(mWindow);
-            //    } catch (RemoteException ex) {
-            //    }
-            //}
-        }
-
         public void dispatchAppVisibility(boolean visible) {
             // The point of SurfaceView is to let the app control the surface.
         }
@@ -686,7 +651,6 @@ public class SurfaceView extends View {
     private SurfaceHolder mSurfaceHolder = new SurfaceHolder() {
         
         private static final String LOG_TAG = "SurfaceHolder";
-        private int mSaveCount;
         
         public boolean isCreating() {
             return mIsCreating;

@@ -48,7 +48,6 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
-import com.android.server.KeyInputQueue.QueuedEvent;
 import com.android.server.am.BatteryStatsService;
 
 import android.Manifest;
@@ -95,6 +94,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -105,7 +105,6 @@ import android.view.InputChannel;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -137,7 +136,7 @@ import java.util.List;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
-        implements Watchdog.Monitor, KeyInputQueue.HapticFeedbackCallback {
+        implements Watchdog.Monitor {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_FOCUS = false;
@@ -159,16 +158,11 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean HIDE_STACK_CRAWLS = true;
     static final boolean MEASURE_LATENCY = false;
-    static final boolean ENABLE_NATIVE_INPUT_DISPATCH =
-        WindowManagerPolicy.ENABLE_NATIVE_INPUT_DISPATCH;
     static private LatencyTimer lt;
 
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean BLUR = true;
     static final boolean localLOGV = DEBUG;
-
-    /** How long to wait for subsequent key repeats, in milliseconds */
-    static final int KEY_REPEAT_DELAY = 50;
 
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment
@@ -210,33 +204,10 @@ public class WindowManagerService extends IWindowManager.Stub
     // Default input dispatching timeout in nanoseconds.
     private static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
-    static final int INJECT_FAILED = 0;
-    static final int INJECT_SUCCEEDED = 1;
-    static final int INJECT_NO_PERMISSION = -1;
-
     static final int UPDATE_FOCUS_NORMAL = 0;
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
     static final int UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
-
-    /** The minimum time between dispatching touch events. */
-    int mMinWaitTimeBetweenTouchEvents = 1000 / 35;
-
-    // Last touch event time
-    long mLastTouchEventTime = 0;
-
-    // Last touch event type
-    int mLastTouchEventType = OTHER_EVENT;
-
-    // Time to wait before calling useractivity again. This saves CPU usage
-    // when we get a flood of touch events.
-    static final int MIN_TIME_BETWEEN_USERACTIVITIES = 1000;
-
-    // Last time we call user activity
-    long mLastUserActivityCallTime = 0;
-
-    // Last time we updated battery stats
-    long mLastBatteryStatsCallTime = 0;
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
@@ -486,7 +457,6 @@ public class WindowManagerService extends IWindowManager.Stub
     float mLastWallpaperY = -1;
     float mLastWallpaperXStep = -1;
     float mLastWallpaperYStep = -1;
-    boolean mSendingPointersToWallpaper = false;
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
     WindowState mWaitingOnWallpaper;
@@ -504,10 +474,7 @@ public class WindowManagerService extends IWindowManager.Stub
     float mWindowAnimationScale = 1.0f;
     float mTransitionAnimationScale = 1.0f;
 
-    final KeyWaiter mKeyWaiter = new KeyWaiter();
-    final KeyQ mQueue;
     final InputManager mInputManager;
-    final InputDispatcherThread mInputThread;
 
     // Who is holding the screen on.
     Session mHoldingScreenOn;
@@ -522,8 +489,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mInTouchMode = false;
 
     private ViewServer mViewServer;
-
-    final Rect mTempRect = new Rect();
 
     final Configuration mTempConfiguration = new Configuration();
     int mScreenLayout = Configuration.SCREENLAYOUT_SIZE_UNDEFINED;
@@ -652,28 +617,11 @@ public class WindowManagerService extends IWindowManager.Stub
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
-        int max_events_per_sec = 35;
-        try {
-            max_events_per_sec = Integer.parseInt(SystemProperties
-                    .get("windowsmgr.max_events_per_sec"));
-            if (max_events_per_sec < 1) {
-                max_events_per_sec = 35;
-            }
-        } catch (NumberFormatException e) {
-        }
-        mMinWaitTimeBetweenTouchEvents = 1000 / max_events_per_sec;
-
         mHoldingScreenWakeLock = pmc.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "KEEP_SCREEN_ON_FLAG");
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputManager = new InputManager(context, this, mPolicy, pmc, mPowerManager);
-        } else {
-            mInputManager = null;
-        }
-        mQueue = new KeyQ();
-        mInputThread = new InputDispatcherThread();
+        mInputManager = new InputManager(context, this, pmc, mPowerManager);
 
         PolicyThread thr = new PolicyThread(mPolicy, this, context, pm);
         thr.start();
@@ -687,11 +635,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputManager.start();
-        } else {
-            mInputThread.start();
-        }
+        mInputManager.start();
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
@@ -1817,70 +1761,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-
-    void sendPointerToWallpaperLocked(WindowState srcWin,
-            MotionEvent pointer, long eventTime) {
-        int curTokenIndex = mWallpaperTokens.size();
-        while (curTokenIndex > 0) {
-            curTokenIndex--;
-            WindowToken token = mWallpaperTokens.get(curTokenIndex);
-            int curWallpaperIndex = token.windows.size();
-            while (curWallpaperIndex > 0) {
-                curWallpaperIndex--;
-                WindowState wallpaper = token.windows.get(curWallpaperIndex);
-                if ((wallpaper.mAttrs.flags &
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                    continue;
-                }
-                try {
-                    MotionEvent ev = MotionEvent.obtainNoHistory(pointer);
-                    if (srcWin != null) {
-                        ev.offsetLocation(srcWin.mFrame.left-wallpaper.mFrame.left,
-                                srcWin.mFrame.top-wallpaper.mFrame.top);
-                    } else {
-                        ev.offsetLocation(-wallpaper.mFrame.left, -wallpaper.mFrame.top);
-                    }
-                    switch (pointer.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            mSendingPointersToWallpaper = true;
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            mSendingPointersToWallpaper = false;
-                            break;
-                    }
-                    wallpaper.mClient.dispatchPointer(ev, eventTime, false);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failure sending pointer to wallpaper", e);
-                }
-            }
-        }
-    }
-
-    void dispatchPointerElsewhereLocked(WindowState srcWin, WindowState relWin,
-            MotionEvent pointer, long eventTime, boolean skipped) {
-        if (relWin != null) {
-            mPolicy.dispatchedPointerEventLw(pointer, relWin.mFrame.left, relWin.mFrame.top);
-        } else {
-            mPolicy.dispatchedPointerEventLw(pointer, 0, 0);
-        }
-        
-        // If we sent an initial down to the wallpaper, then continue
-        // sending events until the final up.
-        if (mSendingPointersToWallpaper) {
-            if (skipped) {
-                Slog.i(TAG, "Sending skipped pointer to wallpaper!");
-            }
-            sendPointerToWallpaperLocked(relWin, pointer, eventTime);
-            
-        // If we are on top of the wallpaper, then the wallpaper also
-        // gets to see this movement.
-        } else if (srcWin != null
-                && pointer.getAction() == MotionEvent.ACTION_DOWN
-                && mWallpaperTarget == srcWin
-                && srcWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
-            sendPointerToWallpaperLocked(relWin, pointer, eventTime);
-        }
-    }
     
     public int addWindow(Session session, IWindow client,
             WindowManager.LayoutParams attrs, int viewVisibility,
@@ -1903,12 +1783,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDisplay = wm.getDefaultDisplay();
                 mInitialDisplayWidth = mDisplay.getWidth();
                 mInitialDisplayHeight = mDisplay.getHeight();
-                if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                    mInputManager.setDisplaySize(0,
-                            mInitialDisplayWidth, mInitialDisplayHeight);
-                } else {
-                    mQueue.setDisplay(mDisplay);
-                }
+                mInputManager.setDisplaySize(0, mInitialDisplayWidth, mInitialDisplayHeight);
                 reportNewConfig = true;
             }
 
@@ -2002,15 +1877,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return res;
             }
             
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                if (outInputChannel != null) {
-                    String name = win.makeInputChannelName();
-                    InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
-                    win.mInputChannel = inputChannels[0];
-                    inputChannels[1].transferToBinderOutParameter(outInputChannel);
-                    
-                    mInputManager.registerInputChannel(win.mInputChannel);
-                }
+            if (outInputChannel != null) {
+                String name = win.makeInputChannelName();
+                InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
+                win.mInputChannel = inputChannels[0];
+                inputChannels[1].transferToBinderOutParameter(outInputChannel);
+                
+                mInputManager.registerInputChannel(win.mInputChannel);
             }
 
             // From now on, no exceptions or errors allowed!
@@ -2186,14 +2059,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void removeWindowInnerLocked(Session session, WindowState win) {
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputMonitor.windowIsBeingRemovedLw(win);
-        } else {
-            mKeyWaiter.finishedKey(session, win.mClient, true,
-                    KeyWaiter.RETURN_NOTHING);
-            mKeyWaiter.releasePendingPointerLocked(win.mSession);
-            mKeyWaiter.releasePendingTrackballLocked(win.mSession);
-        }
+        mInputMonitor.windowIsBeingRemovedLw(win);
 
         win.mRemoved = true;
 
@@ -2561,12 +2427,7 @@ public class WindowManagerService extends IWindowManager.Stub
                               applyAnimationLocked(win, transit, false)) {
                             focusMayChange = true;
                             win.mExiting = true;
-                            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                                mInputMonitor.windowIsBecomingInvisibleLw(win);
-                            } else {
-                                mKeyWaiter.finishedKey(session, client, true,
-                                        KeyWaiter.RETURN_NOTHING);
-                            }
+                            mInputMonitor.windowIsBecomingInvisibleLw(win);
                         } else if (win.isAnimating()) {
                             // Currently in a hide animation... turn this into
                             // an exit.
@@ -3027,12 +2888,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (win.isVisibleNow()) {
                             applyAnimationLocked(win,
                                     WindowManagerPolicy.TRANSIT_EXIT, false);
-                            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                                mInputMonitor.windowIsBeingRemovedLw(win);
-                            } else {
-                                mKeyWaiter.finishedKey(win.mSession, win.mClient, true,
-                                        KeyWaiter.RETURN_NOTHING);
-                            }
+                            mInputMonitor.windowIsBeingRemovedLw(win);
                             changed = true;
                         }
                     }
@@ -3349,12 +3205,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_FOCUS) Slog.v(TAG, "Clearing focused app, was " + mFocusedApp);
                 changed = mFocusedApp != null;
                 mFocusedApp = null;
-                if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                    if (changed) {
-                        mInputMonitor.setFocusedAppLw(null);
-                    }
-                } else {
-                    mKeyWaiter.tickle();
+                if (changed) {
+                    mInputMonitor.setFocusedAppLw(null);
                 }
             } else {
                 AppWindowToken newFocus = findAppWindowToken(token);
@@ -3365,12 +3217,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 changed = mFocusedApp != newFocus;
                 mFocusedApp = newFocus;
                 if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp);
-                if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                    if (changed) {
-                        mInputMonitor.setFocusedAppLw(newFocus);
-                    }
-                } else {
-                    mKeyWaiter.tickle();
+                if (changed) {
+                    mInputMonitor.setFocusedAppLw(newFocus);
                 }
             }
 
@@ -3682,12 +3530,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         applyAnimationLocked(win,
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
                     }
-                    if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                        mInputMonitor.windowIsBecomingInvisibleLw(win);
-                    } else {
-                        mKeyWaiter.finishedKey(win.mSession, win.mClient, true,
-                                KeyWaiter.RETURN_NOTHING);
-                    }
+                    mInputMonitor.windowIsBecomingInvisibleLw(win);
                     changed = true;
                 }
             }
@@ -3972,11 +3815,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_FOCUS) Slog.v(TAG, "Removing focused app token:" + wtoken);
                     mFocusedApp = null;
                     updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
-                    if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                        mInputMonitor.setFocusedAppLw(null);
-                    } else {
-                        mKeyWaiter.tickle();
-                    }
+                    mInputMonitor.setFocusedAppLw(null);
                 }
             } else {
                 Slog.w(TAG, "Attempted to remove non-existing app token: " + token);
@@ -4441,11 +4280,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getSwitchState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getSwitchState(sw);
-        } else {
-            return KeyInputQueue.getSwitchState(sw);
-        }
+        return mInputManager.getSwitchState(sw);
     }
 
     public int getSwitchStateForDevice(int devid, int sw) {
@@ -4453,11 +4288,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getSwitchStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getSwitchState(devid, sw);
-        } else {
-            return KeyInputQueue.getSwitchState(devid, sw);
-        }
+        return mInputManager.getSwitchState(devid, sw);
     }
 
     public int getScancodeState(int sw) {
@@ -4465,11 +4296,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getScancodeState(sw);
-        } else {
-            return mQueue.getScancodeState(sw);
-        }
+        return mInputManager.getScancodeState(sw);
     }
 
     public int getScancodeStateForDevice(int devid, int sw) {
@@ -4477,11 +4304,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getScancodeState(devid, sw);
-        } else {
-            return mQueue.getScancodeState(devid, sw);
-        }
+        return mInputManager.getScancodeState(devid, sw);
     }
 
     public int getTrackballScancodeState(int sw) {
@@ -4489,11 +4312,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getTrackballScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getTrackballScancodeState(sw);
-        } else {
-            return mQueue.getTrackballScancodeState(sw);
-        }
+        return mInputManager.getTrackballScancodeState(sw);
     }
 
     public int getDPadScancodeState(int sw) {
@@ -4501,11 +4320,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getDPadScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getDPadScancodeState(sw);
-        } else {
-            return mQueue.getDPadScancodeState(sw);
-        }
+        return mInputManager.getDPadScancodeState(sw);
     }
 
     public int getKeycodeState(int sw) {
@@ -4513,11 +4328,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getKeycodeState(sw);
-        } else {
-            return mQueue.getKeycodeState(sw);
-        }
+        return mInputManager.getKeycodeState(sw);
     }
 
     public int getKeycodeStateForDevice(int devid, int sw) {
@@ -4525,11 +4336,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getKeycodeState(devid, sw);
-        } else {
-            return mQueue.getKeycodeState(devid, sw);
-        }
+        return mInputManager.getKeycodeState(devid, sw);
     }
 
     public int getTrackballKeycodeState(int sw) {
@@ -4537,11 +4344,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getTrackballKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getTrackballKeycodeState(sw);
-        } else {
-            return mQueue.getTrackballKeycodeState(sw);
-        }
+        return mInputManager.getTrackballKeycodeState(sw);
     }
 
     public int getDPadKeycodeState(int sw) {
@@ -4549,19 +4352,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getDPadKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.getDPadKeycodeState(sw);
-        } else {
-            return mQueue.getDPadKeycodeState(sw);
-        }
+        return mInputManager.getDPadKeycodeState(sw);
     }
 
     public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            return mInputManager.hasKeys(keycodes, keyExists);
-        } else {
-            return KeyInputQueue.hasKeys(keycodes, keyExists);
-        }
+        return mInputManager.hasKeys(keycodes, keyExists);
     }
 
     public void enableScreenAfterBoot() {
@@ -4706,11 +4501,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mLayoutNeeded = true;
             startFreezingDisplayLocked();
             Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                mInputManager.setDisplayOrientation(0, rotation);
-            } else {
-                mQueue.setOrientation(rotation);
-            }
+            mInputManager.setDisplayOrientation(0, rotation);
             if (mDisplayEnabled) {
                 Surface.setOrientation(0, rotation, animFlags);
             }
@@ -5041,11 +4832,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mDisplay == null) {
             return false;
         }
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputManager.getInputConfiguration(config);
-        } else {
-            mQueue.getInputConfiguration(config);
-        }
+        
+        mInputManager.getInputConfiguration(config);
 
         // Use the effective "visual" dimensions based on current rotation
         final boolean rotated = (mRotation == Surface.ROTATION_90
@@ -5326,6 +5114,13 @@ public class WindowManagerService extends IWindowManager.Stub
             mTempInputWindows.clear();
         }
         
+        /* Provides feedback for a virtual key down. */
+        public void virtualKeyDownFeedback() {
+            synchronized (mWindowMap) {
+                mPolicy.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+            }
+        }
+        
         /* Notifies that an app switch key (BACK / HOME) has just been pressed.
          * This essentially starts a .5 second timeout for the application to process
          * subsequent input events while waiting for the app switch to occur.  If it takes longer
@@ -5334,30 +5129,28 @@ public class WindowManagerService extends IWindowManager.Stub
         public void notifyAppSwitchComing() {
             // TODO Not implemented yet.  Should go in the native side.
         }
-
+        
+        /* Notifies that the lid switch changed state. */
+        public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
+            mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
+        }
+        
         /* Provides an opportunity for the window manager policy to intercept early key
          * processing as soon as the key has been read from the device. */
-        public int interceptKeyBeforeQueueing(int deviceId, int type, int scanCode,
-                int keyCode, int policyFlags, int value, long whenNanos, boolean isScreenOn) {
-            RawInputEvent event = new RawInputEvent();
-            event.deviceId = deviceId;
-            event.type = type;
-            event.scancode = scanCode;
-            event.keycode = keyCode;
-            event.flags = policyFlags;
-            event.value = value;
-            event.when = whenNanos / 1000000;
-            
-            return mPolicy.interceptKeyTq(event, isScreenOn);
+        public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down,
+                int policyFlags, boolean isScreenOn) {
+            return mPolicy.interceptKeyBeforeQueueing(whenNanos,
+                    keyCode, down, policyFlags, isScreenOn);
         }
         
         /* Provides an opportunity for the window manager policy to process a key before
          * ordinary dispatch. */
-        public boolean interceptKeyBeforeDispatching(InputChannel focus, int keyCode,
-                int metaState, boolean down, int repeatCount, int policyFlags) {
+        public boolean interceptKeyBeforeDispatching(InputChannel focus,
+                int action, int flags, int keyCode, int metaState, int repeatCount,
+                int policyFlags) {
             WindowState windowState = getWindowStateForInputChannel(focus);
-            return mPolicy.interceptKeyTi(windowState, keyCode, metaState, down, repeatCount,
-                    policyFlags);
+            return mPolicy.interceptKeyBeforeDispatching(windowState, action, flags,
+                    keyCode, metaState, repeatCount, policyFlags);
         }
         
         /* Called when the current input focus changes.
@@ -5496,450 +5289,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private final void wakeupIfNeeded(WindowState targetWin, int eventType) {
-        long curTime = SystemClock.uptimeMillis();
-
-        if (eventType == TOUCH_EVENT || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
-            if (mLastTouchEventType == eventType &&
-                    (curTime - mLastUserActivityCallTime) < MIN_TIME_BETWEEN_USERACTIVITIES) {
-                return;
-            }
-            mLastUserActivityCallTime = curTime;
-            mLastTouchEventType = eventType;
-        }
-
-        if (targetWin == null
-                || targetWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
-            mPowerManager.userActivity(curTime, false, eventType, false);
-        }
-    }
-
-    // tells if it's a cheek event or not -- this function is stateful
-    private static final int EVENT_NONE = 0;
-    private static final int EVENT_UNKNOWN = 0;
-    private static final int EVENT_CHEEK = 0;
-    private static final int EVENT_IGNORE_DURATION = 300; // ms
-    private static final float CHEEK_THRESHOLD = 0.6f;
-    private int mEventState = EVENT_NONE;
-    private float mEventSize;
-
-    private int eventType(MotionEvent ev) {
-        float size = ev.getSize();
-        switch (ev.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            mEventSize = size;
-            return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : TOUCH_EVENT;
-        case MotionEvent.ACTION_UP:
-            if (size > mEventSize) mEventSize = size;
-            return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : TOUCH_UP_EVENT;
-        case MotionEvent.ACTION_MOVE:
-            final int N = ev.getHistorySize();
-            if (size > mEventSize) mEventSize = size;
-            if (mEventSize > CHEEK_THRESHOLD) return CHEEK_EVENT;
-            for (int i=0; i<N; i++) {
-                size = ev.getHistoricalSize(i);
-                if (size > mEventSize) mEventSize = size;
-                if (mEventSize > CHEEK_THRESHOLD) return CHEEK_EVENT;
-            }
-            if (ev.getEventTime() < ev.getDownTime() + EVENT_IGNORE_DURATION) {
-                return TOUCH_EVENT;
-            } else {
-                return LONG_TOUCH_EVENT;
-            }
-        default:
-            // not good
-            return OTHER_EVENT;
-        }
-    }
-    
-    private boolean mFatTouch; // remove me together with dispatchPointer
-
-    /**
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    private int dispatchPointer(QueuedEvent qev, MotionEvent ev, int pid, int uid) {
-        if (DEBUG_INPUT || WindowManagerPolicy.WATCH_POINTER) Slog.v(TAG,
-                "dispatchPointer " + ev);
-
-        if (MEASURE_LATENCY) {
-            lt.sample("3 Wait for last dispatch ", System.nanoTime() - qev.whenNano);
-        }
-
-        Object targetObj = mKeyWaiter.waitForNextEventTarget(null, qev,
-                ev, true, false, pid, uid);
-
-        if (MEASURE_LATENCY) {
-            lt.sample("3 Last dispatch finished ", System.nanoTime() - qev.whenNano);
-        }
-
-        int action = ev.getAction();
-
-        if (action == MotionEvent.ACTION_UP) {
-            // let go of our target
-            mKeyWaiter.mMotionTarget = null;
-            mPowerManager.logPointerUpEvent();
-        } else if (action == MotionEvent.ACTION_DOWN) {
-            mPowerManager.logPointerDownEvent();
-        }
-
-        if (targetObj == null) {
-            // In this case we are either dropping the event, or have received
-            // a move or up without a down.  It is common to receive move
-            // events in such a way, since this means the user is moving the
-            // pointer without actually pressing down.  All other cases should
-            // be atypical, so let's log them.
-            if (action != MotionEvent.ACTION_MOVE) {
-                Slog.w(TAG, "No window to dispatch pointer action " + ev.getAction());
-            }
-            synchronized (mWindowMap) {
-                dispatchPointerElsewhereLocked(null, null, ev, ev.getEventTime(), true);
-            }
-            if (qev != null) {
-                mQueue.recycleEvent(qev);
-            }
-            ev.recycle();
-            return INJECT_FAILED;
-        }
-        if (targetObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
-            synchronized (mWindowMap) {
-                dispatchPointerElsewhereLocked(null, null, ev, ev.getEventTime(), true);
-            }
-            if (qev != null) {
-                mQueue.recycleEvent(qev);
-            }
-            ev.recycle();
-            return INJECT_SUCCEEDED;
-        }
-
-        WindowState target = (WindowState)targetObj;
-
-        final long eventTime = ev.getEventTime();
-        final long eventTimeNano = ev.getEventTimeNano();
-
-        //Slog.i(TAG, "Sending " + ev + " to " + target);
-
-        if (uid != 0 && uid != target.mSession.mUid) {
-            if (mContext.checkPermission(
-                    android.Manifest.permission.INJECT_EVENTS, pid, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.w(TAG, "Permission denied: injecting pointer event from pid "
-                        + pid + " uid " + uid + " to window " + target
-                        + " owned by uid " + target.mSession.mUid);
-                if (qev != null) {
-                    mQueue.recycleEvent(qev);
-                }
-                ev.recycle();
-                return INJECT_NO_PERMISSION;
-            }
-        }
-
-        if (MEASURE_LATENCY) {
-            lt.sample("4 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
-        }
-
-        if ((target.mAttrs.flags &
-                        WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES) != 0) {
-            //target wants to ignore fat touch events
-            boolean cheekPress = mPolicy.isCheekPressedAgainstScreen(ev);
-            //explicit flag to return without processing event further
-            boolean returnFlag = false;
-            if((action == MotionEvent.ACTION_DOWN)) {
-                mFatTouch = false;
-                if(cheekPress) {
-                    mFatTouch = true;
-                    returnFlag = true;
-                }
-            } else {
-                if(action == MotionEvent.ACTION_UP) {
-                    if(mFatTouch) {
-                        //earlier even was invalid doesnt matter if current up is cheekpress or not
-                        mFatTouch = false;
-                        returnFlag = true;
-                    } else if(cheekPress) {
-                        //cancel the earlier event
-                        ev.setAction(MotionEvent.ACTION_CANCEL);
-                        action = MotionEvent.ACTION_CANCEL;
-                    }
-                } else if(action == MotionEvent.ACTION_MOVE) {
-                    if(mFatTouch) {
-                        //two cases here
-                        //an invalid down followed by 0 or moves(valid or invalid)
-                        //a valid down,  invalid move, more moves. want to ignore till up
-                        returnFlag = true;
-                    } else if(cheekPress) {
-                        //valid down followed by invalid moves
-                        //an invalid move have to cancel earlier action
-                        ev.setAction(MotionEvent.ACTION_CANCEL);
-                        action = MotionEvent.ACTION_CANCEL;
-                        if (DEBUG_INPUT) Slog.v(TAG, "Sending cancel for invalid ACTION_MOVE");
-                        //note that the subsequent invalid moves will not get here
-                        mFatTouch = true;
-                    }
-                }
-            } //else if action
-            if(returnFlag) {
-                //recycle que, ev
-                if (qev != null) {
-                    mQueue.recycleEvent(qev);
-                }
-                ev.recycle();
-                return INJECT_FAILED;
-            }
-        } //end if target
-
-        // Enable this for testing the "right" value
-        if (false && action == MotionEvent.ACTION_DOWN) {
-            int max_events_per_sec = 35;
-            try {
-                max_events_per_sec = Integer.parseInt(SystemProperties
-                        .get("windowsmgr.max_events_per_sec"));
-                if (max_events_per_sec < 1) {
-                    max_events_per_sec = 35;
-                }
-            } catch (NumberFormatException e) {
-            }
-            mMinWaitTimeBetweenTouchEvents = 1000 / max_events_per_sec;
-        }
-
-        /*
-         * Throttle events to minimize CPU usage when there's a flood of events
-         * e.g. constant contact with the screen
-         */
-        if (action == MotionEvent.ACTION_MOVE) {
-            long nextEventTime = mLastTouchEventTime + mMinWaitTimeBetweenTouchEvents;
-            long now = SystemClock.uptimeMillis();
-            if (now < nextEventTime) {
-                try {
-                    Thread.sleep(nextEventTime - now);
-                } catch (InterruptedException e) {
-                }
-                mLastTouchEventTime = nextEventTime;
-            } else {
-                mLastTouchEventTime = now;
-            }
-        }
-
-        if (MEASURE_LATENCY) {
-            lt.sample("5 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
-        }
-
-        synchronized(mWindowMap) {
-            if (!target.isVisibleLw()) {
-                // During this motion dispatch, the target window has become
-                // invisible.
-                dispatchPointerElsewhereLocked(null, null, ev, ev.getEventTime(), false);
-                if (qev != null) {
-                    mQueue.recycleEvent(qev);
-                }
-                ev.recycle();
-                return INJECT_SUCCEEDED;
-            }
-
-            if (qev != null && action == MotionEvent.ACTION_MOVE) {
-                mKeyWaiter.bindTargetWindowLocked(target,
-                        KeyWaiter.RETURN_PENDING_POINTER, qev);
-                ev = null;
-            } else {
-                if (action == MotionEvent.ACTION_DOWN) {
-                    WindowState out = mKeyWaiter.mOutsideTouchTargets;
-                    if (out != null) {
-                        MotionEvent oev = MotionEvent.obtain(ev);
-                        oev.setAction(MotionEvent.ACTION_OUTSIDE);
-                        do {
-                            final Rect frame = out.mFrame;
-                            oev.offsetLocation(-(float)frame.left, -(float)frame.top);
-                            try {
-                                out.mClient.dispatchPointer(oev, eventTime, false);
-                            } catch (android.os.RemoteException e) {
-                                Slog.i(TAG, "WINDOW DIED during outside motion dispatch: " + out);
-                            }
-                            oev.offsetLocation((float)frame.left, (float)frame.top);
-                            out = out.mNextOutsideTouch;
-                        } while (out != null);
-                        mKeyWaiter.mOutsideTouchTargets = null;
-                    }
-                }
-
-                dispatchPointerElsewhereLocked(target, null, ev, ev.getEventTime(), false);
-
-                final Rect frame = target.mFrame;
-                ev.offsetLocation(-(float)frame.left, -(float)frame.top);
-                mKeyWaiter.bindTargetWindowLocked(target);
-            }
-        }
-
-        // finally offset the event to the target's coordinate system and
-        // dispatch the event.
-        try {
-            if (DEBUG_INPUT || DEBUG_FOCUS || WindowManagerPolicy.WATCH_POINTER) {
-                Slog.v(TAG, "Delivering pointer " + qev + " to " + target);
-            }
-
-            if (MEASURE_LATENCY) {
-                lt.sample("6 before svr->client ipc ", System.nanoTime() - eventTimeNano);
-            }
-
-            target.mClient.dispatchPointer(ev, eventTime, true);
-
-            if (MEASURE_LATENCY) {
-                lt.sample("7 after  svr->client ipc ", System.nanoTime() - eventTimeNano);
-            }
-            return INJECT_SUCCEEDED;
-        } catch (android.os.RemoteException e) {
-            Slog.i(TAG, "WINDOW DIED during motion dispatch: " + target);
-            mKeyWaiter.mMotionTarget = null;
-            try {
-                removeWindow(target.mSession, target.mClient);
-            } catch (java.util.NoSuchElementException ex) {
-                // This will happen if the window has already been
-                // removed.
-            }
-        }
-        return INJECT_FAILED;
-    }
-
-    /**
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    private int dispatchTrackball(QueuedEvent qev, MotionEvent ev, int pid, int uid) {
-        if (DEBUG_INPUT) Slog.v(
-                TAG, "dispatchTrackball [" + ev.getAction() +"] <" + ev.getX() + ", " + ev.getY() + ">");
-
-        Object focusObj = mKeyWaiter.waitForNextEventTarget(null, qev,
-                ev, false, false, pid, uid);
-        if (focusObj == null) {
-            Slog.w(TAG, "No focus window, dropping trackball: " + ev);
-            if (qev != null) {
-                mQueue.recycleEvent(qev);
-            }
-            ev.recycle();
-            return INJECT_FAILED;
-        }
-        if (focusObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
-            if (qev != null) {
-                mQueue.recycleEvent(qev);
-            }
-            ev.recycle();
-            return INJECT_SUCCEEDED;
-        }
-
-        WindowState focus = (WindowState)focusObj;
-
-        if (uid != 0 && uid != focus.mSession.mUid) {
-            if (mContext.checkPermission(
-                    android.Manifest.permission.INJECT_EVENTS, pid, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.w(TAG, "Permission denied: injecting key event from pid "
-                        + pid + " uid " + uid + " to window " + focus
-                        + " owned by uid " + focus.mSession.mUid);
-                if (qev != null) {
-                    mQueue.recycleEvent(qev);
-                }
-                ev.recycle();
-                return INJECT_NO_PERMISSION;
-            }
-        }
-
-        final long eventTime = ev.getEventTime();
-
-        synchronized(mWindowMap) {
-            if (qev != null && ev.getAction() == MotionEvent.ACTION_MOVE) {
-                mKeyWaiter.bindTargetWindowLocked(focus,
-                        KeyWaiter.RETURN_PENDING_TRACKBALL, qev);
-                // We don't deliver movement events to the client, we hold
-                // them and wait for them to call back.
-                ev = null;
-            } else {
-                mKeyWaiter.bindTargetWindowLocked(focus);
-            }
-        }
-
-        try {
-            focus.mClient.dispatchTrackball(ev, eventTime, true);
-            return INJECT_SUCCEEDED;
-        } catch (android.os.RemoteException e) {
-            Slog.i(TAG, "WINDOW DIED during key dispatch: " + focus);
-            try {
-                removeWindow(focus.mSession, focus.mClient);
-            } catch (java.util.NoSuchElementException ex) {
-                // This will happen if the window has already been
-                // removed.
-            }
-        }
-
-        return INJECT_FAILED;
-    }
-
-    /**
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    private int dispatchKey(KeyEvent event, int pid, int uid) {
-        if (DEBUG_INPUT) Slog.v(TAG, "Dispatch key: " + event);
-
-        Object focusObj = mKeyWaiter.waitForNextEventTarget(event, null,
-                null, false, false, pid, uid);
-        if (focusObj == null) {
-            Slog.w(TAG, "No focus window, dropping: " + event);
-            return INJECT_FAILED;
-        }
-        if (focusObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
-            return INJECT_SUCCEEDED;
-        }
-
-        // Okay we have finished waiting for the last event to be processed.
-        // First off, if this is a repeat event, check to see if there is
-        // a corresponding up event in the queue.  If there is, we will
-        // just drop the repeat, because it makes no sense to repeat after
-        // the user has released a key.  (This is especially important for
-        // long presses.)
-        if (event.getRepeatCount() > 0 && mQueue.hasKeyUpEvent(event)) {
-            return INJECT_SUCCEEDED;
-        }
-
-        WindowState focus = (WindowState)focusObj;
-
-        if (DEBUG_INPUT) Slog.v(
-            TAG, "Dispatching to " + focus + ": " + event);
-
-        if (uid != 0 && uid != focus.mSession.mUid) {
-            if (mContext.checkPermission(
-                    android.Manifest.permission.INJECT_EVENTS, pid, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.w(TAG, "Permission denied: injecting key event from pid "
-                        + pid + " uid " + uid + " to window " + focus
-                        + " owned by uid " + focus.mSession.mUid);
-                return INJECT_NO_PERMISSION;
-            }
-        }
-
-        synchronized(mWindowMap) {
-            mKeyWaiter.bindTargetWindowLocked(focus);
-        }
-
-        // NOSHIP extra state logging
-        mKeyWaiter.recordDispatchState(event, focus);
-        // END NOSHIP
-
-        try {
-            if (DEBUG_INPUT || DEBUG_FOCUS) {
-                Slog.v(TAG, "Delivering key " + event.getKeyCode()
-                        + " to " + focus);
-            }
-            focus.mClient.dispatchKey(event);
-            return INJECT_SUCCEEDED;
-        } catch (android.os.RemoteException e) {
-            Slog.i(TAG, "WINDOW DIED during key dispatch: " + focus);
-            try {
-                removeWindow(focus.mSession, focus.mClient);
-            } catch (java.util.NoSuchElementException ex) {
-                // This will happen if the window has already been
-                // removed.
-            }
-        }
-
-        return INJECT_FAILED;
-    }
-
     public void pauseKeyDispatching(IBinder _token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "pauseKeyDispatching()")) {
@@ -5949,11 +5298,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             WindowToken token = mTokenMap.get(_token);
             if (token != null) {
-                if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                    mInputMonitor.pauseDispatchingLw(token);
-                } else {
-                    mKeyWaiter.pauseDispatchingLocked(token);
-                }
+                mInputMonitor.pauseDispatchingLw(token);
             }
         }
     }
@@ -5967,11 +5312,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             WindowToken token = mTokenMap.get(_token);
             if (token != null) {
-                if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                    mInputMonitor.resumeDispatchingLw(token);
-                } else {
-                    mKeyWaiter.resumeDispatchingLocked(token);
-                }
+                mInputMonitor.resumeDispatchingLw(token);
             }
         }
     }
@@ -5983,11 +5324,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                mInputMonitor.setEventDispatchingLw(enabled);
-            } else {
-                mKeyWaiter.setEventDispatchingLocked(enabled);
-            }
+            mInputMonitor.setEventDispatchingLw(enabled);
         }
     }
 
@@ -6020,16 +5357,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
-        final int result;
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            result = mInputManager.injectKeyEvent(newEvent, InputQueue.INPUT_EVENT_NATURE_KEY,
-                    pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
-        } else {
-            result = dispatchKey(newEvent, pid, uid);
-            if (sync) {
-                mKeyWaiter.waitForNextEventTarget(null, null, null, false, true, pid, uid);
-            }
-        }
+        final int result = mInputManager.injectKeyEvent(newEvent,
+                InputQueue.INPUT_EVENT_NATURE_KEY, pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -6049,16 +5378,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
-        final int result;
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            result = mInputManager.injectMotionEvent(ev, InputQueue.INPUT_EVENT_NATURE_TOUCH,
-                    pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
-        } else {
-            result = dispatchPointer(null, ev, pid, uid);
-            if (sync) {
-                mKeyWaiter.waitForNextEventTarget(null, null, null, false, true, pid, uid);
-            }
-        }
+        final int result = mInputManager.injectMotionEvent(ev,
+                InputQueue.INPUT_EVENT_NATURE_TOUCH, pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
@@ -6078,48 +5399,29 @@ public class WindowManagerService extends IWindowManager.Stub
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         
-        final int result;
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            result = mInputManager.injectMotionEvent(ev, InputQueue.INPUT_EVENT_NATURE_TRACKBALL,
-                    pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
-        } else {
-            result = dispatchTrackball(null, ev, pid, uid);
-            if (sync) {
-                mKeyWaiter.waitForNextEventTarget(null, null, null, false, true, pid, uid);
-            }
-        }
+        final int result = mInputManager.injectMotionEvent(ev,
+                InputQueue.INPUT_EVENT_NATURE_TRACKBALL, pid, uid, sync, INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
         return reportInjectionResult(result);
     }
     
     private boolean reportInjectionResult(int result) {
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            switch (result) {
-                case InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
-                    Slog.w(TAG, "Input event injection permission denied.");
-                    throw new SecurityException(
-                            "Injecting to another application requires INJECT_EVENTS permission");
-                case InputManager.INPUT_EVENT_INJECTION_SUCCEEDED:
-                    Slog.v(TAG, "Input event injection succeeded.");
-                    return true;
-                case InputManager.INPUT_EVENT_INJECTION_TIMED_OUT:
-                    Slog.w(TAG, "Input event injection timed out.");
-                    return false;
-                case InputManager.INPUT_EVENT_INJECTION_FAILED:
-                default:
-                    Slog.w(TAG, "Input event injection failed.");
-                    return false;
-            }
-        } else {
-            switch (result) {
-                case INJECT_NO_PERMISSION:
-                    throw new SecurityException(
-                            "Injecting to another application requires INJECT_EVENTS permission");
-                case INJECT_SUCCEEDED:
-                    return true;
-            }
-            return false;
+        switch (result) {
+            case InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+                Slog.w(TAG, "Input event injection permission denied.");
+                throw new SecurityException(
+                        "Injecting to another application requires INJECT_EVENTS permission");
+            case InputManager.INPUT_EVENT_INJECTION_SUCCEEDED:
+                Slog.v(TAG, "Input event injection succeeded.");
+                return true;
+            case InputManager.INPUT_EVENT_INJECTION_TIMED_OUT:
+                Slog.w(TAG, "Input event injection timed out.");
+                return false;
+            case InputManager.INPUT_EVENT_INJECTION_FAILED:
+            default:
+                Slog.w(TAG, "Input event injection failed.");
+                return false;
         }
     }
 
@@ -6133,867 +5435,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return mCurrentFocus;
     }
 
-    /**
-     * This class holds the state for dispatching key events.  This state
-     * is protected by the KeyWaiter instance, NOT by the window lock.  You
-     * can be holding the main window lock while acquire the KeyWaiter lock,
-     * but not the other way around.
-     */
-    final class KeyWaiter {
-        // NOSHIP debugging
-        public class DispatchState {
-            private KeyEvent event;
-            private WindowState focus;
-            private long time;
-            private WindowState lastWin;
-            private IBinder lastBinder;
-            private boolean finished;
-            private boolean gotFirstWindow;
-            private boolean eventDispatching;
-            private long timeToSwitch;
-            private boolean wasFrozen;
-            private boolean focusPaused;
-            private WindowState curFocus;
-
-            DispatchState(KeyEvent theEvent, WindowState theFocus) {
-                focus = theFocus;
-                event = theEvent;
-                time = System.currentTimeMillis();
-                // snapshot KeyWaiter state
-                lastWin = mLastWin;
-                lastBinder = mLastBinder;
-                finished = mFinished;
-                gotFirstWindow = mGotFirstWindow;
-                eventDispatching = mEventDispatching;
-                timeToSwitch = mTimeToSwitch;
-                wasFrozen = mWasFrozen;
-                curFocus = mCurrentFocus;
-                // cache the paused state at ctor time as well
-                if (theFocus == null || theFocus.mToken == null) {
-                    focusPaused = false;
-                } else {
-                    focusPaused = theFocus.mToken.paused;
-                }
-            }
-
-            public String toString() {
-                return "{{" + event + " to " + focus + " @ " + time
-                        + " lw=" + lastWin + " lb=" + lastBinder
-                        + " fin=" + finished + " gfw=" + gotFirstWindow
-                        + " ed=" + eventDispatching + " tts=" + timeToSwitch
-                        + " wf=" + wasFrozen + " fp=" + focusPaused
-                        + " mcf=" + curFocus + "}}";
-            }
-        };
-        private DispatchState mDispatchState = null;
-        public void recordDispatchState(KeyEvent theEvent, WindowState theFocus) {
-            mDispatchState = new DispatchState(theEvent, theFocus);
-        }
-        // END NOSHIP
-
-        public static final int RETURN_NOTHING = 0;
-        public static final int RETURN_PENDING_POINTER = 1;
-        public static final int RETURN_PENDING_TRACKBALL = 2;
-
-        final Object SKIP_TARGET_TOKEN = new Object();
-        final Object CONSUMED_EVENT_TOKEN = new Object();
-
-        private WindowState mLastWin = null;
-        private IBinder mLastBinder = null;
-        private boolean mFinished = true;
-        private boolean mGotFirstWindow = false;
-        private boolean mEventDispatching = true;
-        private long mTimeToSwitch = 0;
-        /* package */ boolean mWasFrozen = false;
-
-        // Target of Motion events
-        WindowState mMotionTarget;
-
-        // Windows above the target who would like to receive an "outside"
-        // touch event for any down events outside of them.
-        WindowState mOutsideTouchTargets;
-
-        /**
-         * Wait for the last event dispatch to complete, then find the next
-         * target that should receive the given event and wait for that one
-         * to be ready to receive it.
-         */
-        Object waitForNextEventTarget(KeyEvent nextKey, QueuedEvent qev,
-                MotionEvent nextMotion, boolean isPointerEvent,
-                boolean failIfTimeout, int callingPid, int callingUid) {
-            long startTime = SystemClock.uptimeMillis();
-            long keyDispatchingTimeout = 5 * 1000;
-            long waitedFor = 0;
-
-            while (true) {
-                // Figure out which window we care about.  It is either the
-                // last window we are waiting to have process the event or,
-                // if none, then the next window we think the event should go
-                // to.  Note: we retrieve mLastWin outside of the lock, so
-                // it may change before we lock.  Thus we must check it again.
-                WindowState targetWin = mLastWin;
-                boolean targetIsNew = targetWin == null;
-                if (DEBUG_INPUT) Slog.v(
-                        TAG, "waitForLastKey: mFinished=" + mFinished +
-                        ", mLastWin=" + mLastWin);
-                if (targetIsNew) {
-                    Object target = findTargetWindow(nextKey, qev, nextMotion,
-                            isPointerEvent, callingPid, callingUid);
-                    if (target == SKIP_TARGET_TOKEN) {
-                        // The user has pressed a special key, and we are
-                        // dropping all pending events before it.
-                        if (DEBUG_INPUT) Slog.v(TAG, "Skipping: " + nextKey
-                                + " " + nextMotion);
-                        return null;
-                    }
-                    if (target == CONSUMED_EVENT_TOKEN) {
-                        if (DEBUG_INPUT) Slog.v(TAG, "Consumed: " + nextKey
-                                + " " + nextMotion);
-                        return target;
-                    }
-                    targetWin = (WindowState)target;
-                }
-
-                AppWindowToken targetApp = null;
-
-                // Now: is it okay to send the next event to this window?
-                synchronized (this) {
-                    // First: did we come here based on the last window not
-                    // being null, but it changed by the time we got here?
-                    // If so, try again.
-                    if (!targetIsNew && mLastWin == null) {
-                        continue;
-                    }
-
-                    // We never dispatch events if not finished with the
-                    // last one, or the display is frozen.
-                    if (mFinished && !mDisplayFrozen) {
-                        // If event dispatching is disabled, then we
-                        // just consume the events.
-                        if (!mEventDispatching) {
-                            if (DEBUG_INPUT) Slog.v(TAG,
-                                    "Skipping event; dispatching disabled: "
-                                    + nextKey + " " + nextMotion);
-                            return null;
-                        }
-                        if (targetWin != null) {
-                            // If this is a new target, and that target is not
-                            // paused or unresponsive, then all looks good to
-                            // handle the event.
-                            if (targetIsNew && !targetWin.mToken.paused) {
-                                return targetWin;
-                            }
-
-                        // If we didn't find a target window, and there is no
-                        // focused app window, then just eat the events.
-                        } else if (mFocusedApp == null) {
-                            if (DEBUG_INPUT) Slog.v(TAG,
-                                    "Skipping event; no focused app: "
-                                    + nextKey + " " + nextMotion);
-                            return null;
-                        }
-                    }
-
-                    if (DEBUG_INPUT) Slog.v(
-                            TAG, "Waiting for last key in " + mLastBinder
-                            + " target=" + targetWin
-                            + " mFinished=" + mFinished
-                            + " mDisplayFrozen=" + mDisplayFrozen
-                            + " targetIsNew=" + targetIsNew
-                            + " paused="
-                            + (targetWin != null ? targetWin.mToken.paused : false)
-                            + " mFocusedApp=" + mFocusedApp
-                            + " mCurrentFocus=" + mCurrentFocus);
-
-                    targetApp = targetWin != null
-                            ? targetWin.mAppToken : mFocusedApp;
-
-                    long curTimeout = keyDispatchingTimeout;
-                    if (mTimeToSwitch != 0) {
-                        long now = SystemClock.uptimeMillis();
-                        if (mTimeToSwitch <= now) {
-                            // If an app switch key has been pressed, and we have
-                            // waited too long for the current app to finish
-                            // processing keys, then wait no more!
-                            doFinishedKeyLocked(false);
-                            continue;
-                        }
-                        long switchTimeout = mTimeToSwitch - now;
-                        if (curTimeout > switchTimeout) {
-                            curTimeout = switchTimeout;
-                        }
-                    }
-
-                    try {
-                        // after that continue
-                        // processing keys, so we don't get stuck.
-                        if (DEBUG_INPUT) Slog.v(
-                                TAG, "Waiting for key dispatch: " + curTimeout);
-                        wait(curTimeout);
-                        if (DEBUG_INPUT) Slog.v(TAG, "Finished waiting @"
-                                + SystemClock.uptimeMillis() + " startTime="
-                                + startTime + " switchTime=" + mTimeToSwitch
-                                + " target=" + targetWin + " mLW=" + mLastWin
-                                + " mLB=" + mLastBinder + " fin=" + mFinished
-                                + " mCurrentFocus=" + mCurrentFocus);
-                    } catch (InterruptedException e) {
-                    }
-                }
-
-                // If we were frozen during configuration change, restart the
-                // timeout checks from now; otherwise look at whether we timed
-                // out before awakening.
-                if (mWasFrozen) {
-                    waitedFor = 0;
-                    mWasFrozen = false;
-                } else {
-                    waitedFor = SystemClock.uptimeMillis() - startTime;
-                }
-
-                if (waitedFor >= keyDispatchingTimeout && mTimeToSwitch == 0) {
-                    IApplicationToken at = null;
-                    synchronized (this) {
-                        Slog.w(TAG, "Key dispatching timed out sending to " +
-                              (targetWin != null ? targetWin.mAttrs.getTitle()
-                              : "<null>: no window ready for key dispatch"));
-                        // NOSHIP debugging
-                        Slog.w(TAG, "Previous dispatch state: " + mDispatchState);
-                        Slog.w(TAG, "Current dispatch state: " +
-                                new DispatchState(nextKey, targetWin));
-                        // END NOSHIP
-                        //dump();
-                        if (targetWin != null) {
-                            at = targetWin.getAppToken();
-                        } else if (targetApp != null) {
-                            at = targetApp.appToken;
-                        }
-                    }
-
-                    boolean abort = true;
-                    if (at != null) {
-                        try {
-                            long timeout = at.getKeyDispatchingTimeout();
-                            if (timeout > waitedFor) {
-                                // we did not wait the proper amount of time for this application.
-                                // set the timeout to be the real timeout and wait again.
-                                keyDispatchingTimeout = timeout - waitedFor;
-                                continue;
-                            } else {
-                                abort = at.keyDispatchingTimedOut();
-                            }
-                        } catch (RemoteException ex) {
-                        }
-                    }
-
-                    synchronized (this) {
-                        if (abort && (mLastWin == targetWin || targetWin == null)) {
-                            mFinished = true;
-                            if (mLastWin != null) {
-                                if (DEBUG_INPUT) Slog.v(TAG,
-                                        "Window " + mLastWin +
-                                        " timed out on key input");
-                                if (mLastWin.mToken.paused) {
-                                    Slog.w(TAG, "Un-pausing dispatching to this window");
-                                    mLastWin.mToken.paused = false;
-                                }
-                            }
-                            if (mMotionTarget == targetWin) {
-                                mMotionTarget = null;
-                            }
-                            mLastWin = null;
-                            mLastBinder = null;
-                            if (failIfTimeout || targetWin == null) {
-                                return null;
-                            }
-                        } else {
-                            Slog.w(TAG, "Continuing to wait for key to be dispatched");
-                            startTime = SystemClock.uptimeMillis();
-                        }
-                    }
-                }
-            }
-        }
-
-        Object findTargetWindow(KeyEvent nextKey, QueuedEvent qev,
-                MotionEvent nextMotion, boolean isPointerEvent,
-                int callingPid, int callingUid) {
-            mOutsideTouchTargets = null;
-
-            if (nextKey != null) {
-                // Find the target window for a normal key event.
-                final int keycode = nextKey.getKeyCode();
-                final int repeatCount = nextKey.getRepeatCount();
-                final boolean down = nextKey.getAction() != KeyEvent.ACTION_UP;
-                boolean dispatch = mKeyWaiter.checkShouldDispatchKey(keycode);
-
-                if (!dispatch) {
-                    if (callingUid == 0 ||
-                            mContext.checkPermission(
-                                    android.Manifest.permission.INJECT_EVENTS,
-                                    callingPid, callingUid)
-                                    == PackageManager.PERMISSION_GRANTED) {
-                        mPolicy.interceptKeyTi(null, keycode,
-                                nextKey.getMetaState(), down, repeatCount,
-                                nextKey.getFlags());
-                    }
-                    Slog.w(TAG, "Event timeout during app switch: dropping "
-                            + nextKey);
-                    return SKIP_TARGET_TOKEN;
-                }
-
-                // System.out.println("##### [" + SystemClock.uptimeMillis() + "] WindowManagerService.dispatchKey(" + keycode + ", " + down + ", " + repeatCount + ")");
-
-                WindowState focus = null;
-                synchronized(mWindowMap) {
-                    focus = getFocusedWindowLocked();
-                }
-
-                wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
-
-                if (callingUid == 0 ||
-                        (focus != null && callingUid == focus.mSession.mUid) ||
-                        mContext.checkPermission(
-                                android.Manifest.permission.INJECT_EVENTS,
-                                callingPid, callingUid)
-                                == PackageManager.PERMISSION_GRANTED) {
-                    if (mPolicy.interceptKeyTi(focus,
-                            keycode, nextKey.getMetaState(), down, repeatCount,
-                            nextKey.getFlags())) {
-                        return CONSUMED_EVENT_TOKEN;
-                    }
-                }
-
-                return focus;
-
-            } else if (!isPointerEvent) {
-                boolean dispatch = mKeyWaiter.checkShouldDispatchKey(-1);
-                if (!dispatch) {
-                    Slog.w(TAG, "Event timeout during app switch: dropping trackball "
-                            + nextMotion);
-                    return SKIP_TARGET_TOKEN;
-                }
-
-                WindowState focus = null;
-                synchronized(mWindowMap) {
-                    focus = getFocusedWindowLocked();
-                }
-
-                wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
-                return focus;
-            }
-
-            if (nextMotion == null) {
-                return SKIP_TARGET_TOKEN;
-            }
-
-            boolean dispatch = mKeyWaiter.checkShouldDispatchKey(
-                    KeyEvent.KEYCODE_UNKNOWN);
-            if (!dispatch) {
-                Slog.w(TAG, "Event timeout during app switch: dropping pointer "
-                        + nextMotion);
-                return SKIP_TARGET_TOKEN;
-            }
-
-            // Find the target window for a pointer event.
-            int action = nextMotion.getAction();
-            final float xf = nextMotion.getX();
-            final float yf = nextMotion.getY();
-            final long eventTime = nextMotion.getEventTime();
-
-            final boolean screenWasOff = qev != null
-                    && (qev.flags&WindowManagerPolicy.FLAG_BRIGHT_HERE) != 0;
-
-            WindowState target = null;
-
-            synchronized(mWindowMap) {
-                synchronized (this) {
-                    if (action == MotionEvent.ACTION_DOWN) {
-                        if (mMotionTarget != null) {
-                            // this is weird, we got a pen down, but we thought it was
-                            // already down!
-                            // XXX: We should probably send an ACTION_UP to the current
-                            // target.
-                            Slog.w(TAG, "Pointer down received while already down in: "
-                                    + mMotionTarget);
-                            mMotionTarget = null;
-                        }
-
-                        // ACTION_DOWN is special, because we need to lock next events to
-                        // the window we'll land onto.
-                        final int x = (int)xf;
-                        final int y = (int)yf;
-
-                        final ArrayList windows = mWindows;
-                        final int N = windows.size();
-                        WindowState topErrWindow = null;
-                        final Rect tmpRect = mTempRect;
-                        for (int i=N-1; i>=0; i--) {
-                            WindowState child = (WindowState)windows.get(i);
-                            //Slog.i(TAG, "Checking dispatch to: " + child);
-                            final int flags = child.mAttrs.flags;
-                            if ((flags & WindowManager.LayoutParams.FLAG_SYSTEM_ERROR) != 0) {
-                                if (topErrWindow == null) {
-                                    topErrWindow = child;
-                                }
-                            }
-                            if (!child.isVisibleLw()) {
-                                //Slog.i(TAG, "Not visible!");
-                                continue;
-                            }
-                            if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                                //Slog.i(TAG, "Not touchable!");
-                                if ((flags & WindowManager.LayoutParams
-                                        .FLAG_WATCH_OUTSIDE_TOUCH) != 0) {
-                                    child.mNextOutsideTouch = mOutsideTouchTargets;
-                                    mOutsideTouchTargets = child;
-                                }
-                                continue;
-                            }
-                            tmpRect.set(child.mFrame);
-                            if (child.mTouchableInsets == ViewTreeObserver
-                                        .InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT) {
-                                // The touch is inside of the window if it is
-                                // inside the frame, AND the content part of that
-                                // frame that was given by the application.
-                                tmpRect.left += child.mGivenContentInsets.left;
-                                tmpRect.top += child.mGivenContentInsets.top;
-                                tmpRect.right -= child.mGivenContentInsets.right;
-                                tmpRect.bottom -= child.mGivenContentInsets.bottom;
-                            } else if (child.mTouchableInsets == ViewTreeObserver
-                                        .InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE) {
-                                // The touch is inside of the window if it is
-                                // inside the frame, AND the visible part of that
-                                // frame that was given by the application.
-                                tmpRect.left += child.mGivenVisibleInsets.left;
-                                tmpRect.top += child.mGivenVisibleInsets.top;
-                                tmpRect.right -= child.mGivenVisibleInsets.right;
-                                tmpRect.bottom -= child.mGivenVisibleInsets.bottom;
-                            }
-                            final int touchFlags = flags &
-                                (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                                |WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-                            if (tmpRect.contains(x, y) || touchFlags == 0) {
-                                //Slog.i(TAG, "Using this target!");
-                                if (!screenWasOff || (flags &
-                                        WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING) != 0) {
-                                    mMotionTarget = child;
-                                } else {
-                                    //Slog.i(TAG, "Waking, skip!");
-                                    mMotionTarget = null;
-                                }
-                                break;
-                            }
-
-                            if ((flags & WindowManager.LayoutParams
-                                    .FLAG_WATCH_OUTSIDE_TOUCH) != 0) {
-                                child.mNextOutsideTouch = mOutsideTouchTargets;
-                                mOutsideTouchTargets = child;
-                                //Slog.i(TAG, "Adding to outside target list: " + child);
-                            }
-                        }
-
-                        // if there's an error window but it's not accepting
-                        // focus (typically because it is not yet visible) just
-                        // wait for it -- any other focused window may in fact
-                        // be in ANR state.
-                        if (topErrWindow != null && mMotionTarget != topErrWindow) {
-                            mMotionTarget = null;
-                        }
-                    }
-
-                    target = mMotionTarget;
-                }
-            }
-
-            wakeupIfNeeded(target, eventType(nextMotion));
-
-            // Pointer events are a little different -- if there isn't a
-            // target found for any event, then just drop it.
-            return target != null ? target : SKIP_TARGET_TOKEN;
-        }
-
-        boolean checkShouldDispatchKey(int keycode) {
-            synchronized (this) {
-                if (mPolicy.isAppSwitchKeyTqTiLwLi(keycode)) {
-                    mTimeToSwitch = 0;
-                    return true;
-                }
-                if (mTimeToSwitch != 0
-                        && mTimeToSwitch < SystemClock.uptimeMillis()) {
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        void bindTargetWindowLocked(WindowState win,
-                int pendingWhat, QueuedEvent pendingMotion) {
-            synchronized (this) {
-                bindTargetWindowLockedLocked(win, pendingWhat, pendingMotion);
-            }
-        }
-
-        void bindTargetWindowLocked(WindowState win) {
-            synchronized (this) {
-                bindTargetWindowLockedLocked(win, RETURN_NOTHING, null);
-            }
-        }
-
-        void bindTargetWindowLockedLocked(WindowState win,
-                int pendingWhat, QueuedEvent pendingMotion) {
-            mLastWin = win;
-            mLastBinder = win.mClient.asBinder();
-            mFinished = false;
-            if (pendingMotion != null) {
-                final Session s = win.mSession;
-                if (pendingWhat == RETURN_PENDING_POINTER) {
-                    releasePendingPointerLocked(s);
-                    s.mPendingPointerMove = pendingMotion;
-                    s.mPendingPointerWindow = win;
-                    if (DEBUG_INPUT) Slog.v(TAG,
-                            "bindTargetToWindow " + s.mPendingPointerMove);
-                } else if (pendingWhat == RETURN_PENDING_TRACKBALL) {
-                    releasePendingTrackballLocked(s);
-                    s.mPendingTrackballMove = pendingMotion;
-                    s.mPendingTrackballWindow = win;
-                }
-            }
-        }
-
-        void releasePendingPointerLocked(Session s) {
-            if (DEBUG_INPUT) Slog.v(TAG,
-                    "releasePendingPointer " + s.mPendingPointerMove);
-            if (s.mPendingPointerMove != null) {
-                mQueue.recycleEvent(s.mPendingPointerMove);
-                s.mPendingPointerMove = null;
-            }
-        }
-
-        void releasePendingTrackballLocked(Session s) {
-            if (s.mPendingTrackballMove != null) {
-                mQueue.recycleEvent(s.mPendingTrackballMove);
-                s.mPendingTrackballMove = null;
-            }
-        }
-
-        MotionEvent finishedKey(Session session, IWindow client, boolean force,
-                int returnWhat) {
-            if (DEBUG_INPUT) Slog.v(
-                TAG, "finishedKey: client=" + client + ", force=" + force);
-
-            if (client == null) {
-                return null;
-            }
-
-            MotionEvent res = null;
-            QueuedEvent qev = null;
-            WindowState win = null;
-
-            synchronized (this) {
-                if (DEBUG_INPUT) Slog.v(
-                    TAG, "finishedKey: client=" + client.asBinder()
-                    + ", force=" + force + ", last=" + mLastBinder
-                    + " (token=" + (mLastWin != null ? mLastWin.mToken : null) + ")");
-
-                if (returnWhat == RETURN_PENDING_POINTER) {
-                    qev = session.mPendingPointerMove;
-                    win = session.mPendingPointerWindow;
-                    session.mPendingPointerMove = null;
-                    session.mPendingPointerWindow = null;
-                } else if (returnWhat == RETURN_PENDING_TRACKBALL) {
-                    qev = session.mPendingTrackballMove;
-                    win = session.mPendingTrackballWindow;
-                    session.mPendingTrackballMove = null;
-                    session.mPendingTrackballWindow = null;
-                }
-
-                if (mLastBinder == client.asBinder()) {
-                    if (DEBUG_INPUT) Slog.v(
-                        TAG, "finishedKey: last paused="
-                        + ((mLastWin != null) ? mLastWin.mToken.paused : "null"));
-                    if (mLastWin != null && (!mLastWin.mToken.paused || force
-                            || !mEventDispatching)) {
-                        doFinishedKeyLocked(true);
-                    } else {
-                        // Make sure to wake up anyone currently waiting to
-                        // dispatch a key, so they can re-evaluate their
-                        // current situation.
-                        mFinished = true;
-                        notifyAll();
-                    }
-                }
-
-                if (qev != null) {
-                    res = (MotionEvent)qev.event;
-                    if (DEBUG_INPUT) Slog.v(TAG,
-                            "Returning pending motion: " + res);
-                    mQueue.recycleEvent(qev);
-                    if (win != null && returnWhat == RETURN_PENDING_POINTER) {
-                        res.offsetLocation(-win.mFrame.left, -win.mFrame.top);
-                    }
-                }
-            }
-
-            if (res != null && returnWhat == RETURN_PENDING_POINTER) {
-                synchronized (mWindowMap) {
-                    dispatchPointerElsewhereLocked(win, win, res, res.getEventTime(), false);
-                }
-            }
-
-            return res;
-        }
-
-        void tickle() {
-            synchronized (this) {
-                notifyAll();
-            }
-        }
-
-        void handleNewWindowLocked(WindowState newWindow) {
-            if (!newWindow.canReceiveKeys()) {
-                return;
-            }
-            synchronized (this) {
-                if (DEBUG_INPUT) Slog.v(
-                    TAG, "New key dispatch window: win="
-                    + newWindow.mClient.asBinder()
-                    + ", last=" + mLastBinder
-                    + " (token=" + (mLastWin != null ? mLastWin.mToken : null)
-                    + "), finished=" + mFinished + ", paused="
-                    + newWindow.mToken.paused);
-
-                // Displaying a window implicitly causes dispatching to
-                // be unpaused.  (This is to protect against bugs if someone
-                // pauses dispatching but forgets to resume.)
-                newWindow.mToken.paused = false;
-
-                mGotFirstWindow = true;
-
-                if ((newWindow.mAttrs.flags & FLAG_SYSTEM_ERROR) != 0) {
-                    if (DEBUG_INPUT) Slog.v(TAG,
-                            "New SYSTEM_ERROR window; resetting state");
-                    mLastWin = null;
-                    mLastBinder = null;
-                    mMotionTarget = null;
-                    mFinished = true;
-                } else if (mLastWin != null) {
-                    // If the new window is above the window we are
-                    // waiting on, then stop waiting and let key dispatching
-                    // start on the new guy.
-                    if (DEBUG_INPUT) Slog.v(
-                        TAG, "Last win layer=" + mLastWin.mLayer
-                        + ", new win layer=" + newWindow.mLayer);
-                    if (newWindow.mLayer >= mLastWin.mLayer) {
-                        // The new window is above the old; finish pending input to the last
-                        // window and start directing it to the new one.
-                        mLastWin.mToken.paused = false;
-                        doFinishedKeyLocked(false);  // does a notifyAll()
-                        return;
-                    }
-                }
-
-                // Now that we've put a new window state in place, make the event waiter
-                // take notice and retarget its attentions.
-                notifyAll();
-            }
-        }
-
-        void pauseDispatchingLocked(WindowToken token) {
-            synchronized (this)
-            {
-                if (DEBUG_INPUT) Slog.v(TAG, "Pausing WindowToken " + token);
-                token.paused = true;
-
-                /*
-                if (mLastWin != null && !mFinished && mLastWin.mBaseLayer <= layer) {
-                    mPaused = true;
-                } else {
-                    if (mLastWin == null) {
-                        Slog.i(TAG, "Key dispatching not paused: no last window.");
-                    } else if (mFinished) {
-                        Slog.i(TAG, "Key dispatching not paused: finished last key.");
-                    } else {
-                        Slog.i(TAG, "Key dispatching not paused: window in higher layer.");
-                    }
-                }
-                */
-            }
-        }
-
-        void resumeDispatchingLocked(WindowToken token) {
-            synchronized (this) {
-                if (token.paused) {
-                    if (DEBUG_INPUT) Slog.v(
-                        TAG, "Resuming WindowToken " + token
-                        + ", last=" + mLastBinder
-                        + " (token=" + (mLastWin != null ? mLastWin.mToken : null)
-                        + "), finished=" + mFinished + ", paused="
-                        + token.paused);
-                    token.paused = false;
-                    if (mLastWin != null && mLastWin.mToken == token && mFinished) {
-                        doFinishedKeyLocked(false);
-                    } else {
-                        notifyAll();
-                    }
-                }
-            }
-        }
-
-        void setEventDispatchingLocked(boolean enabled) {
-            synchronized (this) {
-                mEventDispatching = enabled;
-                notifyAll();
-            }
-        }
-
-        void appSwitchComing() {
-            synchronized (this) {
-                // Don't wait for more than .5 seconds for app to finish
-                // processing the pending events.
-                long now = SystemClock.uptimeMillis() + 500;
-                if (DEBUG_INPUT) Slog.v(TAG, "appSwitchComing: " + now);
-                if (mTimeToSwitch == 0 || now < mTimeToSwitch) {
-                    mTimeToSwitch = now;
-                }
-                notifyAll();
-            }
-        }
-
-        private final void doFinishedKeyLocked(boolean force) {
-            if (mLastWin != null) {
-                releasePendingPointerLocked(mLastWin.mSession);
-                releasePendingTrackballLocked(mLastWin.mSession);
-            }
-
-            if (force || mLastWin == null || !mLastWin.mToken.paused
-                    || !mLastWin.isVisibleLw()) {
-                // If the current window has been paused, we aren't -really-
-                // finished...  so let the waiters still wait.
-                mLastWin = null;
-                mLastBinder = null;
-            }
-            mFinished = true;
-            notifyAll();
-        }
-    }
-
-    private class KeyQ extends KeyInputQueue
-            implements KeyInputQueue.FilterCallback {
-        KeyQ() {
-            super(mContext, WindowManagerService.this);
-        }
-
-        @Override
-        boolean preprocessEvent(InputDevice device, RawInputEvent event) {
-            if (mPolicy.preprocessInputEventTq(event)) {
-                return true;
-            }
-
-            switch (event.type) {
-                case RawInputEvent.EV_KEY: {
-                    // XXX begin hack
-                    if (DEBUG) {
-                        if (event.keycode == KeyEvent.KEYCODE_G) {
-                            if (event.value != 0) {
-                                // G down
-                                mPolicy.screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
-                            }
-                            return false;
-                        }
-                        if (event.keycode == KeyEvent.KEYCODE_D) {
-                            if (event.value != 0) {
-                                //dump();
-                            }
-                            return false;
-                        }
-                    }
-                    // XXX end hack
-
-                    boolean screenIsOff = !mPowerManager.isScreenOn();
-                    boolean screenIsDim = !mPowerManager.isScreenBright();
-                    int actions = mPolicy.interceptKeyTq(event, !screenIsOff);
-
-                    if ((actions & WindowManagerPolicy.ACTION_GO_TO_SLEEP) != 0) {
-                        mPowerManager.goToSleep(event.when);
-                    }
-
-                    if (screenIsOff) {
-                        event.flags |= WindowManagerPolicy.FLAG_WOKE_HERE;
-                    }
-                    if (screenIsDim) {
-                        event.flags |= WindowManagerPolicy.FLAG_BRIGHT_HERE;
-                    }
-                    if ((actions & WindowManagerPolicy.ACTION_POKE_USER_ACTIVITY) != 0) {
-                        mPowerManager.userActivity(event.when, false,
-                                LocalPowerManager.BUTTON_EVENT, false);
-                    }
-
-                    if ((actions & WindowManagerPolicy.ACTION_PASS_TO_USER) != 0) {
-                        if (event.value != 0 && mPolicy.isAppSwitchKeyTqTiLwLi(event.keycode)) {
-                            filterQueue(this);
-                            mKeyWaiter.appSwitchComing();
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                case RawInputEvent.EV_REL: {
-                    boolean screenIsOff = !mPowerManager.isScreenOn();
-                    boolean screenIsDim = !mPowerManager.isScreenBright();
-                    if (screenIsOff) {
-                        if (!mPolicy.isWakeRelMovementTq(event.deviceId,
-                                device.classes, event)) {
-                            //Slog.i(TAG, "dropping because screenIsOff and !isWakeKey");
-                            return false;
-                        }
-                        event.flags |= WindowManagerPolicy.FLAG_WOKE_HERE;
-                    }
-                    if (screenIsDim) {
-                        event.flags |= WindowManagerPolicy.FLAG_BRIGHT_HERE;
-                    }
-                    return true;
-                }
-
-                case RawInputEvent.EV_ABS: {
-                    boolean screenIsOff = !mPowerManager.isScreenOn();
-                    boolean screenIsDim = !mPowerManager.isScreenBright();
-                    if (screenIsOff) {
-                        if (!mPolicy.isWakeAbsMovementTq(event.deviceId,
-                                device.classes, event)) {
-                            //Slog.i(TAG, "dropping because screenIsOff and !isWakeKey");
-                            return false;
-                        }
-                        event.flags |= WindowManagerPolicy.FLAG_WOKE_HERE;
-                    }
-                    if (screenIsDim) {
-                        event.flags |= WindowManagerPolicy.FLAG_BRIGHT_HERE;
-                    }
-                    return true;
-                }
-
-                default:
-                    return true;
-            }
-        }
-
-        public int filterEvent(QueuedEvent ev) {
-            switch (ev.classType) {
-                case RawInputEvent.CLASS_KEYBOARD:
-                    KeyEvent ke = (KeyEvent)ev.event;
-                    if (mPolicy.isMovementKeyTi(ke.getKeyCode())) {
-                        Slog.w(TAG, "Dropping movement key during app switch: "
-                                + ke.getKeyCode() + ", action=" + ke.getAction());
-                        return FILTER_REMOVE;
-                    }
-                    return FILTER_ABORT;
-                default:
-                    return FILTER_KEEP;
-            }
-        }
-    }
-
     public boolean detectSafeMode() {
         mSafeMode = mPolicy.detectSafeMode();
         return mSafeMode;
@@ -7001,219 +5442,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void systemReady() {
         mPolicy.systemReady();
-    }
-
-    private final class InputDispatcherThread extends Thread {
-        // Time to wait when there is nothing to do: 9999 seconds.
-        static final int LONG_WAIT=9999*1000;
-
-        public InputDispatcherThread() {
-            super("InputDispatcher");
-        }
-
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    process();
-                } catch (Exception e) {
-                    Slog.e(TAG, "Exception in input dispatcher", e);
-                }
-            }
-        }
-
-        private void process() {
-            android.os.Process.setThreadPriority(
-                    android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
-
-            // The last key event we saw
-            KeyEvent lastKey = null;
-
-            // Last keydown time for auto-repeating keys
-            long lastKeyTime = SystemClock.uptimeMillis();
-            long nextKeyTime = lastKeyTime+LONG_WAIT;
-            long downTime = 0;
-
-            // How many successive repeats we generated
-            int keyRepeatCount = 0;
-
-            // Need to report that configuration has changed?
-            boolean configChanged = false;
-
-            while (true) {
-                long curTime = SystemClock.uptimeMillis();
-
-                if (DEBUG_INPUT) Slog.v(
-                    TAG, "Waiting for next key: now=" + curTime
-                    + ", repeat @ " + nextKeyTime);
-
-                // Retrieve next event, waiting only as long as the next
-                // repeat timeout.  If the configuration has changed, then
-                // don't wait at all -- we'll report the change as soon as
-                // we have processed all events.
-                QueuedEvent ev = mQueue.getEvent(
-                    (int)((!configChanged && curTime < nextKeyTime)
-                            ? (nextKeyTime-curTime) : 0));
-
-                if (DEBUG_INPUT && ev != null) Slog.v(
-                        TAG, "Event: type=" + ev.classType + " data=" + ev.event);
-
-                if (MEASURE_LATENCY) {
-                    lt.sample("2 got event              ", System.nanoTime() - ev.whenNano);
-                }
-
-                if (lastKey != null && !mPolicy.allowKeyRepeat()) {
-                    // cancel key repeat at the request of the policy.
-                    lastKey = null;
-                    downTime = 0;
-                    lastKeyTime = curTime;
-                    nextKeyTime = curTime + LONG_WAIT;
-                }
-                try {
-                    if (ev != null) {
-                        curTime = SystemClock.uptimeMillis();
-                        int eventType;
-                        if (ev.classType == RawInputEvent.CLASS_TOUCHSCREEN) {
-                            eventType = eventType((MotionEvent)ev.event);
-                        } else if (ev.classType == RawInputEvent.CLASS_KEYBOARD ||
-                                    ev.classType == RawInputEvent.CLASS_TRACKBALL) {
-                            eventType = LocalPowerManager.BUTTON_EVENT;
-                        } else {
-                            eventType = LocalPowerManager.OTHER_EVENT;
-                        }
-                        try {
-                            if ((curTime - mLastBatteryStatsCallTime)
-                                    >= MIN_TIME_BETWEEN_USERACTIVITIES) {
-                                mLastBatteryStatsCallTime = curTime;
-                                mBatteryStats.noteInputEvent();
-                            }
-                        } catch (RemoteException e) {
-                            // Ignore
-                        }
-
-                        if (ev.classType == RawInputEvent.CLASS_CONFIGURATION_CHANGED) {
-                            // do not wake screen in this case
-                        } else if (eventType != TOUCH_EVENT
-                                && eventType != LONG_TOUCH_EVENT
-                                && eventType != CHEEK_EVENT) {
-                            mPowerManager.userActivity(curTime, false,
-                                    eventType, false);
-                        } else if (mLastTouchEventType != eventType
-                                || (curTime - mLastUserActivityCallTime)
-                                >= MIN_TIME_BETWEEN_USERACTIVITIES) {
-                            mLastUserActivityCallTime = curTime;
-                            mLastTouchEventType = eventType;
-                            mPowerManager.userActivity(curTime, false,
-                                    eventType, false);
-                        }
-
-                        switch (ev.classType) {
-                            case RawInputEvent.CLASS_KEYBOARD:
-                                KeyEvent ke = (KeyEvent)ev.event;
-                                if (ke.isDown()) {
-                                    lastKeyTime = curTime;
-                                    if (lastKey != null &&
-                                            ke.getKeyCode() == lastKey.getKeyCode()) {
-                                        keyRepeatCount++;
-                                        // Arbitrary long timeout to block
-                                        // repeating here since we know that
-                                        // the device driver takes care of it.
-                                        nextKeyTime = lastKeyTime + LONG_WAIT;
-                                        if (DEBUG_INPUT) Slog.v(
-                                                TAG, "Received repeated key down");
-                                    } else {
-                                        downTime = curTime;
-                                        keyRepeatCount = 0;
-                                        nextKeyTime = lastKeyTime
-                                                + ViewConfiguration.getLongPressTimeout();
-                                        if (DEBUG_INPUT) Slog.v(
-                                            TAG, "Received key down: first repeat @ "
-                                            + nextKeyTime);
-                                    }
-                                    lastKey = ke;
-                                } else {
-                                    lastKey = null;
-                                    downTime = 0;
-                                    keyRepeatCount = 0;
-                                    // Arbitrary long timeout.
-                                    lastKeyTime = curTime;
-                                    nextKeyTime = curTime + LONG_WAIT;
-                                    if (DEBUG_INPUT) Slog.v(
-                                        TAG, "Received key up: ignore repeat @ "
-                                        + nextKeyTime);
-                                }
-                                if (keyRepeatCount > 0) {
-                                    dispatchKey(KeyEvent.changeTimeRepeat(ke,
-                                            ke.getEventTime(), keyRepeatCount), 0, 0);
-                                } else {
-                                    dispatchKey(ke, 0, 0);
-                                }
-                                mQueue.recycleEvent(ev);
-                                break;
-                            case RawInputEvent.CLASS_TOUCHSCREEN:
-                                //Slog.i(TAG, "Read next event " + ev);
-                                dispatchPointer(ev, (MotionEvent)ev.event, 0, 0);
-                                break;
-                            case RawInputEvent.CLASS_TRACKBALL:
-                                dispatchTrackball(ev, (MotionEvent)ev.event, 0, 0);
-                                break;
-                            case RawInputEvent.CLASS_CONFIGURATION_CHANGED:
-                                configChanged = true;
-                                break;
-                            default:
-                                mQueue.recycleEvent(ev);
-                            break;
-                        }
-
-                    } else if (configChanged) {
-                        configChanged = false;
-                        sendNewConfiguration();
-
-                    } else if (lastKey != null) {
-                        curTime = SystemClock.uptimeMillis();
-
-                        // Timeout occurred while key was down.  If it is at or
-                        // past the key repeat time, dispatch the repeat.
-                        if (DEBUG_INPUT) Slog.v(
-                            TAG, "Key timeout: repeat=" + nextKeyTime
-                            + ", now=" + curTime);
-                        if (curTime < nextKeyTime) {
-                            continue;
-                        }
-
-                        lastKeyTime = nextKeyTime;
-                        nextKeyTime = nextKeyTime + KEY_REPEAT_DELAY;
-                        keyRepeatCount++;
-                        if (DEBUG_INPUT) Slog.v(
-                            TAG, "Key repeat: count=" + keyRepeatCount
-                            + ", next @ " + nextKeyTime);
-                        KeyEvent newEvent;
-                        if (downTime != 0 && (downTime
-                                + ViewConfiguration.getLongPressTimeout())
-                                <= curTime) {
-                            newEvent = KeyEvent.changeTimeRepeat(lastKey,
-                                    curTime, keyRepeatCount,
-                                    lastKey.getFlags() | KeyEvent.FLAG_LONG_PRESS);
-                            downTime = 0;
-                        } else {
-                            newEvent = KeyEvent.changeTimeRepeat(lastKey,
-                                    curTime, keyRepeatCount);
-                        }
-                        dispatchKey(newEvent, 0, 0);
-
-                    } else {
-                        curTime = SystemClock.uptimeMillis();
-
-                        lastKeyTime = curTime;
-                        nextKeyTime = curTime + LONG_WAIT;
-                    }
-
-                } catch (Exception e) {
-                    Slog.e(TAG,
-                        "Input thread received uncaught exception: " + e, e);
-                }
-            }
-        }
     }
 
     // -------------------------------------------------------------
@@ -7230,20 +5458,6 @@ public class WindowManagerService extends IWindowManager.Stub
         SurfaceSession mSurfaceSession;
         int mNumWindow = 0;
         boolean mClientDead = false;
-
-        /**
-         * Current pointer move event being dispatched to client window...  must
-         * hold key lock to access.
-         */
-        QueuedEvent mPendingPointerMove;
-        WindowState mPendingPointerWindow;
-
-        /**
-         * Current trackball move event being dispatched to client window...  must
-         * hold key lock to access.
-         */
-        QueuedEvent mPendingTrackballMove;
-        WindowState mPendingTrackballWindow;
 
         public Session(IInputMethodClient client, IInputContext inputContext) {
             mClient = client;
@@ -7363,36 +5577,6 @@ public class WindowManagerService extends IWindowManager.Stub
             finishDrawingWindow(this, window);
         }
 
-        public void finishKey(IWindow window) {
-            if (localLOGV) Slog.v(
-                TAG, "IWindow finishKey called for " + window);
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                throw new IllegalStateException("Should not be called anymore.");
-            }
-            mKeyWaiter.finishedKey(this, window, false,
-                    KeyWaiter.RETURN_NOTHING);
-        }
-
-        public MotionEvent getPendingPointerMove(IWindow window) {
-            if (localLOGV) Slog.v(
-                    TAG, "IWindow getPendingMotionEvent called for " + window);
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                throw new IllegalStateException("Should not be called anymore.");
-            }
-            return mKeyWaiter.finishedKey(this, window, false,
-                    KeyWaiter.RETURN_PENDING_POINTER);
-        }
-
-        public MotionEvent getPendingTrackballMove(IWindow window) {
-            if (localLOGV) Slog.v(
-                    TAG, "IWindow getPendingMotionEvent called for " + window);
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                throw new IllegalStateException("Should not be called anymore.");
-            }
-            return mKeyWaiter.finishedKey(this, window, false,
-                    KeyWaiter.RETURN_PENDING_TRACKBALL);
-        }
-
         public void setInTouchMode(boolean mode) {
             synchronized(mWindowMap) {
                 mInTouchMode = mode;
@@ -7496,16 +5680,6 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print(prefix); pw.print("mNumWindow="); pw.print(mNumWindow);
                     pw.print(" mClientDead="); pw.print(mClientDead);
                     pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
-            if (mPendingPointerWindow != null || mPendingPointerMove != null) {
-                pw.print(prefix);
-                        pw.print("mPendingPointerWindow="); pw.print(mPendingPointerWindow);
-                        pw.print(" mPendingPointerMove="); pw.println(mPendingPointerMove);
-            }
-            if (mPendingTrackballWindow != null || mPendingTrackballMove != null) {
-                pw.print(prefix);
-                        pw.print("mPendingTrackballWindow="); pw.print(mPendingTrackballWindow);
-                        pw.print(" mPendingTrackballMove="); pw.println(mPendingTrackballMove);
-            }
         }
 
         @Override
@@ -7555,8 +5729,6 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mHaveFrame;
         boolean mObscured;
         boolean mTurnOnScreen;
-
-        WindowState mNextOutsideTouch;
 
         int mLayoutSeq = -1;
         
@@ -8074,16 +6246,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void destroySurfaceLocked() {
-            // Window is no longer on-screen, so can no longer receive
-            // key events...  if we were waiting for it to finish
-            // handling a key event, the wait is over!
-            if (! ENABLE_NATIVE_INPUT_DISPATCH) {
-                mKeyWaiter.finishedKey(mSession, mClient, true,
-                        KeyWaiter.RETURN_NOTHING);
-                mKeyWaiter.releasePendingPointerLocked(mSession);
-                mKeyWaiter.releasePendingTrackballLocked(mSession);
-            }
-
             if (mAppToken != null && this == mAppToken.startingWindow) {
                 mAppToken.startingDisplayed = false;
             }
@@ -8099,9 +6261,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     WindowState c = (WindowState)mChildWindows.get(i);
                     c.mAttachedHidden = true;
                     
-                    if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                        mInputMonitor.windowIsBecomingInvisibleLw(c);
-                    }
+                    mInputMonitor.windowIsBecomingInvisibleLw(c);
                 }
 
                 if (mReportDestroySurface) {
@@ -8410,12 +6570,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mLastHidden = true;
                 
-                if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                    for (int i=0; i<N; i++) {
-                        mInputMonitor.windowIsBecomingInvisibleLw((WindowState)mChildWindows.get(i));
-                    }
-                } else {
-                    mKeyWaiter.releasePendingPointerLocked(mSession);
+                for (int i=0; i<N; i++) {
+                    mInputMonitor.windowIsBecomingInvisibleLw((WindowState)mChildWindows.get(i));
                 }
             }
             mExiting = false;
@@ -8752,13 +6908,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // we are doing this as part of processing a death note.)
             }
             
-            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                if (mInputChannel != null) {
-                    mInputManager.unregisterInputChannel(mInputChannel);
-                    
-                    mInputChannel.dispose();
-                    mInputChannel = null;
-                }
+            if (mInputChannel != null) {
+                mInputManager.unregisterInputChannel(mInputChannel);
+                
+                mInputChannel.dispose();
+                mInputChannel = null;
             }
         }
 
@@ -10174,9 +8328,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         // Window frames may have changed.  Tell the input dispatcher about it.
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputMonitor.updateInputWindowsLw();
-        }
+        mInputMonitor.updateInputWindowsLw();
 
         return mPolicy.finishLayoutLw();
     }
@@ -10977,11 +9129,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     Slog.w(TAG, "Exception hiding surface in " + w);
                                 }
                             }
-                            if (ENABLE_NATIVE_INPUT_DISPATCH) {
-                                mInputMonitor.windowIsBecomingInvisibleLw(w);
-                            } else {
-                                mKeyWaiter.releasePendingPointerLocked(w.mSession);
-                            }
+                            mInputMonitor.windowIsBecomingInvisibleLw(w);
                         }
                         // If we are waiting for this window to handle an
                         // orientation change, well, it is hidden, so
@@ -11583,13 +9731,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     
     private void finishUpdateFocusedWindowAfterAssignLayersLocked() {
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputMonitor.setInputFocusLw(mCurrentFocus);
-        } else {
-            if (mCurrentFocus != null) {
-                mKeyWaiter.handleNewWindowLocked(mCurrentFocus);
-            }
-        }
+        mInputMonitor.setInputFocusLw(mCurrentFocus);
     }
 
     private WindowState computeFocusedWindowLocked() {
@@ -11663,17 +9805,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void startFreezingDisplayLocked() {
         if (mDisplayFrozen) {
-            // Freezing the display also suspends key event delivery, to
-            // keep events from going astray while the display is reconfigured.
-            // If someone has changed orientation again while the screen is
-            // still frozen, the events will continue to be blocked while the
-            // successive orientation change is processed.  To prevent spurious
-            // ANRs, we reset the event dispatch timeout in this case.
-            if (! ENABLE_NATIVE_INPUT_DISPATCH) {
-                synchronized (mKeyWaiter) {
-                    mKeyWaiter.mWasFrozen = true;
-                }
-            }
             return;
         }
 
@@ -11696,9 +9827,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         mDisplayFrozen = true;
         
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputMonitor.freezeInputDispatchingLw();
-        }
+        mInputMonitor.freezeInputDispatchingLw();
         
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
@@ -11731,16 +9860,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         Surface.unfreezeDisplay(0);
 
-        // Reset the key delivery timeout on unfreeze, too.  We force a wakeup here
-        // too because regular key delivery processing should resume immediately.
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            mInputMonitor.thawInputDispatchingLw();
-        } else {
-            synchronized (mKeyWaiter) {
-                mKeyWaiter.mWasFrozen = true;
-                mKeyWaiter.notifyAll();
-            }
-        }
+        mInputMonitor.thawInputDispatchingLw();
 
         // While the display is frozen we don't re-compute the orientation
         // to avoid inconsistent states.  However, something interesting
@@ -11772,13 +9892,8 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (ENABLE_NATIVE_INPUT_DISPATCH) {
-            pw.println("Input Dispatcher State:");
-            mInputManager.dump(pw);
-        } else {
-            pw.println("Input State:");
-            mQueue.dump(pw, "  ");
-        }
+        pw.println("Input Dispatcher State:");
+        mInputManager.dump(pw);
         pw.println(" ");
         
         synchronized(mWindowMap) {
@@ -11995,16 +10110,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
                     pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
-
-            if (! ENABLE_NATIVE_INPUT_DISPATCH) {
-                pw.println("  KeyWaiter state:");
-                pw.print("    mLastWin="); pw.print(mKeyWaiter.mLastWin);
-                        pw.print(" mLastBinder="); pw.println(mKeyWaiter.mLastBinder);
-                pw.print("    mFinished="); pw.print(mKeyWaiter.mFinished);
-                        pw.print(" mGotFirstWindow="); pw.print(mKeyWaiter.mGotFirstWindow);
-                        pw.print(" mEventDispatching="); pw.print(mKeyWaiter.mEventDispatching);
-                        pw.print(" mTimeToSwitch="); pw.println(mKeyWaiter.mTimeToSwitch);
-            }
         }
     }
 
@@ -12012,12 +10117,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public void monitor() {
         synchronized (mWindowMap) { }
         synchronized (mKeyguardTokenWatcher) { }
-        synchronized (mKeyWaiter) { }
-        synchronized (mInputMonitor) { }
-    }
-
-    public void virtualKeyFeedback(KeyEvent event) {
-        mPolicy.keyFeedbackFromInput(event);
     }
 
     /**
