@@ -48,6 +48,9 @@ href="#installing">Installing the ADT Plugin</a>, below. </p>
 how to update ADT to the latest version or how to uninstall it, if necessary.
 </p>
 
+<p class="caution"><strong>Caution:</strong> There are known issues with the ADT plugin running with
+Eclipse 3.6. Please stay on 3.5 until further notice.</p>
+
 <h2 id="notes">Revisions</h2>
 
 <p>The sections below provide notes about successive releases of
