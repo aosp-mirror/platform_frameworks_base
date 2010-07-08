@@ -534,10 +534,11 @@ struct AInputQueue;
 typedef struct AInputQueue AInputQueue;
 
 /*
- * Add this input queue to a looper for processing.
+ * Add this input queue to a looper for processing.  See
+ * ALooper_addFd() for information on the callback and data params.
  */
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
-        ALooper_callbackFunc callback, void* data);
+        ALooper_callbackFunc* callback, void* data);
 
 /*
  * Remove the input queue from the looper it is currently attached to.

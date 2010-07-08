@@ -87,7 +87,7 @@ protected:
     sp<PollLoop> mPollLoop;
 
     virtual void SetUp() {
-        mPollLoop = new PollLoop();
+        mPollLoop = new PollLoop(false);
     }
 
     virtual void TearDown() {
@@ -98,26 +98,26 @@ protected:
 
 TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndNotAwoken_WaitsForTimeoutAndReturnsFalse) {
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(100);
+    int32_t result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal timeout";
-    EXPECT_FALSE(result)
-            << "pollOnce result should be false because timeout occurred";
+    EXPECT_EQ(result, PollLoop::POLL_TIMEOUT)
+            << "pollOnce result should be POLL_TIMEOUT";
 }
 
 TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndAwokenBeforeWaiting_ImmediatelyReturnsTrue) {
     mPollLoop->wake();
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(1000);
+    int32_t result = mPollLoop->pollOnce(1000);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. zero because wake() was called before waiting";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because loop was awoken";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because loop was awoken";
 }
 
 TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndAwokenWhileWaiting_PromptlyReturnsTrue) {
@@ -125,24 +125,24 @@ TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndAwokenWhileWaiting_PromptlyRe
     delayedWake->run();
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(1000);
+    int32_t result = mPollLoop->pollOnce(1000);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal wake delay";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because loop was awoken";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because loop was awoken";
 }
 
 TEST_F(PollLoopTest, PollOnce_WhenZeroTimeoutAndNoRegisteredFDs_ImmediatelyReturnsFalse) {
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(0);
+    int32_t result = mPollLoop->pollOnce(0);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should be approx. zero";
-    EXPECT_FALSE(result)
-            << "pollOnce result should be false because timeout occurred";
+    EXPECT_EQ(result, PollLoop::POLL_TIMEOUT)
+            << "pollOnce result should be POLL_TIMEOUT";
 }
 
 TEST_F(PollLoopTest, PollOnce_WhenZeroTimeoutAndNoSignalledFDs_ImmediatelyReturnsFalse) {
@@ -152,13 +152,13 @@ TEST_F(PollLoopTest, PollOnce_WhenZeroTimeoutAndNoSignalledFDs_ImmediatelyReturn
     handler.setCallback(mPollLoop, pipe.receiveFd, POLL_IN);
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(0);
+    int32_t result = mPollLoop->pollOnce(0);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should be approx. zero";
-    EXPECT_FALSE(result)
-            << "pollOnce result should be false because timeout occurred";
+    EXPECT_EQ(result, PollLoop::POLL_TIMEOUT)
+            << "pollOnce result should be POLL_TIMEOUT";
     EXPECT_EQ(0, handler.callbackCount)
             << "callback should not have been invoked because FD was not signalled";
 }
@@ -171,13 +171,13 @@ TEST_F(PollLoopTest, PollOnce_WhenZeroTimeoutAndSignalledFD_ImmediatelyInvokesCa
     handler.setCallback(mPollLoop, pipe.receiveFd, POLL_IN);
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(0);
+    int32_t result = mPollLoop->pollOnce(0);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should be approx. zero";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because FD was signalled";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because FD was signalled";
     EXPECT_EQ(1, handler.callbackCount)
             << "callback should be invoked exactly once";
     EXPECT_EQ(pipe.receiveFd, handler.fd)
@@ -193,13 +193,13 @@ TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndNoSignalledFDs_WaitsForTimeou
     handler.setCallback(mPollLoop, pipe.receiveFd, POLL_IN);
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(100);
+    int32_t result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal timeout";
-    EXPECT_FALSE(result)
-            << "pollOnce result should be false because timeout occurred";
+    EXPECT_EQ(result, PollLoop::POLL_TIMEOUT)
+            << "pollOnce result should be POLL_TIMEOUT";
     EXPECT_EQ(0, handler.callbackCount)
             << "callback should not have been invoked because FD was not signalled";
 }
@@ -212,15 +212,15 @@ TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndSignalledFDBeforeWaiting_Imme
     handler.setCallback(mPollLoop, pipe.receiveFd, POLL_IN);
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(100);
+    int32_t result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should be approx. zero";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because FD was signalled";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because FD was signalled";
     EXPECT_EQ(1, handler.callbackCount)
             << "callback should be invoked exactly once";
     EXPECT_EQ(pipe.receiveFd, handler.fd)
@@ -238,15 +238,15 @@ TEST_F(PollLoopTest, PollOnce_WhenNonZeroTimeoutAndSignalledFDWhileWaiting_Promp
     delayedWriteSignal->run();
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(1000);
+    int32_t result = mPollLoop->pollOnce(1000);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal signal delay";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because FD was signalled";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because FD was signalled";
     EXPECT_EQ(1, handler.callbackCount)
             << "callback should be invoked exactly once";
     EXPECT_EQ(pipe.receiveFd, handler.fd)
@@ -264,15 +264,15 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackAddedThenRemoved_CallbackShouldNotBeIn
     mPollLoop->removeCallback(pipe.receiveFd);
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(100);
+    int32_t result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal timeout because FD was no longer registered";
-    EXPECT_FALSE(result)
-            << "pollOnce result should be false because timeout occurred";
+    EXPECT_EQ(result, PollLoop::POLL_TIMEOUT)
+            << "pollOnce result should be POLL_TIMEOUT";
     EXPECT_EQ(0, handler.callbackCount)
             << "callback should not be invoked";
 }
@@ -287,15 +287,15 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackReturnsFalse_CallbackShouldNotBeInvoke
     pipe.writeSignal();
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(0);
+    int32_t result = mPollLoop->pollOnce(0);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal zero because FD was already signalled";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because FD was signalled";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because FD was signalled";
     EXPECT_EQ(1, handler.callbackCount)
             << "callback should be invoked";
 
@@ -310,8 +310,8 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackReturnsFalse_CallbackShouldNotBeInvoke
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. equal zero because timeout was zero";
-    EXPECT_FALSE(result)
-            << "pollOnce result should be false because timeout occurred";
+    EXPECT_EQ(result, PollLoop::POLL_TIMEOUT)
+            << "pollOnce result should be POLL_TIMEOUT";
     EXPECT_EQ(1, handler.callbackCount)
             << "callback should not be invoked this time";
 }
@@ -351,15 +351,15 @@ TEST_F(PollLoopTest, PollOnce_WhenCallbackAddedTwice_OnlySecondCallbackShouldBeI
     pipe.writeSignal(); // would cause FD to be considered signalled
 
     StopWatch stopWatch("pollOnce");
-    bool result = mPollLoop->pollOnce(100);
+    int32_t result = mPollLoop->pollOnce(100);
     int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
 
     ASSERT_EQ(OK, pipe.readSignal())
             << "signal should actually have been written";
     EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
             << "elapsed time should approx. zero because FD was already signalled";
-    EXPECT_TRUE(result)
-            << "pollOnce result should be true because FD was signalled";
+    EXPECT_EQ(result, PollLoop::POLL_CALLBACK)
+            << "pollOnce result should be POLL_CALLBACK because FD was signalled";
     EXPECT_EQ(0, handler1.callbackCount)
             << "original handler callback should not be invoked because it was replaced";
     EXPECT_EQ(1, handler2.callbackCount)

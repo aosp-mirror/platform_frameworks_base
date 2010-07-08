@@ -42,7 +42,7 @@ protected:
     virtual ~PollLoop();
 
 public:
-    PollLoop();
+    PollLoop(bool allowNonCallbacks);
 
     /**
      * A callback that it to be invoked when an event occurs on a file descriptor.
@@ -54,6 +54,12 @@ public:
      */
     typedef bool (*Callback)(int fd, int events, void* data);
 
+    enum {
+        POLL_CALLBACK = ALOOPER_POLL_CALLBACK,
+        POLL_TIMEOUT = ALOOPER_POLL_TIMEOUT,
+        POLL_ERROR = ALOOPER_POLL_ERROR,
+    };
+    
     /**
      * Performs a single call to poll() with optional timeout in milliseconds.
      * Invokes callbacks for all file descriptors on which an event occurred.
@@ -61,16 +67,25 @@ public:
      * If the timeout is zero, returns immediately without blocking.
      * If the timeout is negative, waits indefinitely until awoken.
      *
-     * Returns true if a callback was invoked or if the loop was awoken by wake().
-     * Returns false if a timeout or error occurred.
+     * Returns ALOOPER_POLL_CALLBACK if a callback was invoked.
      *
-     * This method must only be called on the main thread.
+     * Returns ALOOPER_POLL_TIMEOUT if there was no data before the given
+     * timeout expired.
+     *
+     * Returns ALOPER_POLL_ERROR if an error occurred.
+     *
+     * Returns a value >= 0 containing a file descriptor if it has data
+     * and it has no callback function (requiring the caller here to handle it).
+     * In this (and only this) case outEvents and outData will contain the poll
+     * events and data associated with the fd.
+     *
+     * This method must only be called on the thread owning the PollLoop.
      * This method blocks until either a file descriptor is signalled, a timeout occurs,
      * or wake() is called.
      * This method does not return until it has finished invoking the appropriate callbacks
      * for all file descriptors that were signalled.
      */
-    bool pollOnce(int timeoutMillis);
+    int32_t pollOnce(int timeoutMillis, int* outEvents = NULL, void** outData = NULL);
 
     /**
      * Wakes the loop asynchronously.
@@ -80,6 +95,12 @@ public:
      */
     void wake();
 
+    /**
+     * Control whether this PollLoop instance allows using IDs instead
+     * of callbacks.
+     */
+    bool getAllowNonCallbacks() const;
+    
     /**
      * Sets the callback for a file descriptor, replacing the existing one, if any.
      * It is an error to call this method with events == 0 or callback == NULL.
@@ -95,7 +116,8 @@ public:
     /**
      * Like setCallback(), but for the NDK callback function.
      */
-    void setLooperCallback(int fd, int events, ALooper_callbackFunc* callback, void* data);
+    void setLooperCallback(int fd, int events, ALooper_callbackFunc* callback,
+            void* data);
     
     /**
      * Removes the callback for a file descriptor, if one exists.
@@ -141,7 +163,9 @@ private:
         ALooper_callbackFunc* looperCallback;
         void* data;
     };
-
+    
+    const bool mAllowNonCallbacks;
+    
     Mutex mLock;
     bool mPolling;
     uint32_t mWaiters;
@@ -155,7 +179,9 @@ private:
     Vector<RequestedCallback> mRequestedCallbacks;
 
     Vector<PendingCallback> mPendingCallbacks; // used privately by pollOnce
-
+    Vector<PendingCallback> mPendingFds;       // used privately by pollOnce
+    size_t mPendingFdsPos;
+    
     void openWakePipe();
     void closeWakePipe();
 

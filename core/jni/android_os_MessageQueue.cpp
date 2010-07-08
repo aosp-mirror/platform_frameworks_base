@@ -53,7 +53,7 @@ private:
 NativeMessageQueue::NativeMessageQueue() {
     mPollLoop = PollLoop::getForThread();
     if (mPollLoop == NULL) {
-        mPollLoop = new PollLoop();
+        mPollLoop = new PollLoop(false);
         PollLoop::setForThread(mPollLoop);
     }
 }
@@ -62,7 +62,7 @@ NativeMessageQueue::~NativeMessageQueue() {
 }
 
 bool NativeMessageQueue::pollOnce(int timeoutMillis) {
-    return mPollLoop->pollOnce(timeoutMillis);
+    return mPollLoop->pollOnce(timeoutMillis) != PollLoop::POLL_TIMEOUT;
 }
 
 void NativeMessageQueue::wake() {
