@@ -1057,4 +1057,64 @@ status_t StagefrightRecorder::getMaxAmplitude(int *max) {
     return OK;
 }
 
+status_t StagefrightRecorder::dump(int fd, const Vector<String16>& args) const {
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+    snprintf(buffer, SIZE, "   Recorder: %p", this);
+    snprintf(buffer, SIZE, "   Output file (fd %d):\n", mOutputFd);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     File format: %d\n", mOutputFormat);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Max file size (bytes): %lld\n", mMaxFileSizeBytes);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Max file duration (us): %lld\n", mMaxFileDurationUs);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     File offset length (bits): %d\n", mUse64BitFileOffset? 64: 32);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Interleave duration (us): %d\n", mInterleaveDurationUs);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Progress notification: %d frames\n", mTrackEveryNumberOfFrames);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Progress notification: %lld us\n", mTrackEveryTimeDurationUs);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "   Audio\n");
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Source: %d\n", mAudioSource);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Encoder: %d\n", mAudioEncoder);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Bit rate (bps): %d\n", mAudioBitRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Sampling rate (hz): %d\n", mSampleRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Number of channels: %d\n", mAudioChannels);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Max amplitude: %d\n", mAudioSourceNode == 0? 0: mAudioSourceNode->getMaxAmplitude());
+    result.append(buffer);
+    snprintf(buffer, SIZE, "   Video\n");
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Source: %d\n", mVideoSource);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Camera Id: %d\n", mCameraId);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Camera flags: %d\n", mFlags);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Encoder: %d\n", mVideoEncoder);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Encoder profile: %d\n", mVideoEncoderProfile);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Encoder level: %d\n", mVideoEncoderLevel);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     I frames interval (s): %d\n", mIFramesInterval);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Frame size (pixels): %dx%d\n", mVideoWidth, mVideoHeight);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Frame rate (fps): %d\n", mFrameRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Bit rate (bps): %d\n", mVideoBitRate);
+    result.append(buffer);
+    ::write(fd, result.string(), result.size());
+    return OK;
+}
 }  // namespace android
