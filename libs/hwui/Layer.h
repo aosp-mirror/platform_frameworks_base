@@ -17,6 +17,8 @@
 #ifndef ANDROID_UI_LAYER_H
 #define ANDROID_UI_LAYER_H
 
+#include <sys/types.h>
+
 #include <GLES2/gl2.h>
 
 #include <SkXfermode.h>
@@ -54,7 +56,7 @@ struct LayerSize {
     bool operator==(const LayerSize& rhs) const {
         return width == rhs.width && height == rhs.height;
     }
-};
+}; // struct LayerSize
 
 /**
  * A layer has dimensions and is backed by an OpenGL texture.

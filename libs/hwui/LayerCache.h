@@ -50,7 +50,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(LayerSize& bitmap, Layer*& texture);
+    void operator()(LayerSize& size, Layer*& layer);
 
     /**
      * Returns the layer of specified dimensions. If not suitable layer
