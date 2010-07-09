@@ -16,7 +16,8 @@
 
 #define LOG_TAG "Equalizer"
 #define ARRAY_SIZE(array) (sizeof array / sizeof array[0])
-//#define LOG_NDEBUG 0
+//
+#define LOG_NDEBUG 0
 #include <cutils/log.h>
 #include <assert.h>
 #include <stdlib.h>
