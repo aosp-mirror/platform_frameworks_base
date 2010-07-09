@@ -323,8 +323,8 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
                                     priority,
                                     effectCallback,
                                     &lpJniStorage->mCallbackData,
-                                    0,
-                                    sessionId);
+                                    sessionId,
+                                    0);
     if (lpAudioEffect == NULL) {
         LOGE("Error creating AudioEffect");
         goto setup_failure;
