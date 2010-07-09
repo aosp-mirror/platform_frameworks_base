@@ -32,7 +32,7 @@ import com.android.internal.statusbar.StatusBarNotification;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-class CommandQueue extends IStatusBar.Stub {
+public class CommandQueue extends IStatusBar.Stub {
     private static final String TAG = "StatusBar.CommandQueue";
 
     private static final int MSG_MASK = 0xffff0000;

@@ -35,13 +35,12 @@ public class StatusBarView extends FrameLayout {
 
     static final int DIM_ANIM_TIME = 400;
     
-    StatusBarService mService;
+    PhoneStatusBarService mService;
     boolean mTracking;
     int mStartX, mStartY;
     ViewGroup mNotificationIcons;
     ViewGroup mStatusIcons;
     View mDate;
-    View mButtonArea;
     FixedSizeDrawable mBackground;
     
     boolean mNightMode = false;
@@ -65,8 +64,6 @@ public class StatusBarView extends FrameLayout {
         mBackground = new FixedSizeDrawable(mDate.getBackground());
         mBackground.setFixedBounds(0, 0, 0, 0);
         mDate.setBackgroundDrawable(mBackground);
-
-        mButtonArea = findViewById(R.id.buttons);
     }
 
     @Override
@@ -101,7 +98,7 @@ public class StatusBarView extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mService.updateExpandedViewPos(StatusBarService.EXPANDED_LEAVE_ALONE);
+        mService.updateExpandedViewPos(PhoneStatusBarService.EXPANDED_LEAVE_ALONE);
     }
 
     @Override
@@ -132,10 +129,6 @@ public class StatusBarView extends FrameLayout {
 
         mDate.layout(mDate.getLeft(), mDate.getTop(), newDateRight, mDate.getBottom());
         mBackground.setFixedBounds(-mDate.getLeft(), -mDate.getTop(), (r-l), (b-t));
-
-        if (mButtonArea != null) {
-            mButtonArea.getHitRect(mButtonBounds);
-        }
     }
 
     @Override

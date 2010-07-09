@@ -26,7 +26,7 @@ import android.widget.LinearLayout;
 
 public class TrackingView extends LinearLayout {
     final Display mDisplay;
-    StatusBarService mService;
+    PhoneStatusBarService mService;
     boolean mTracking;
     int mStartX, mStartY;
 

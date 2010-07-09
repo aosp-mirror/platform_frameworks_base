@@ -12,7 +12,12 @@
         android:icon="@drawable/ic_launcher_settings">
                  
         <service
-            android:name=".statusbar.StatusBarService"
+            android:name=".statusbar.PhoneStatusBarService"
+            android:exported="false"
+            />
+
+        <service
+            android:name=".statusbar.tablet.TabletStatusBarService"
             android:exported="false"
             />
 
