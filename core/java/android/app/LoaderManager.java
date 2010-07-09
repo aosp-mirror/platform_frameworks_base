@@ -115,8 +115,7 @@ public class LoaderManager {
     }
 
     /**
-     * @param <D>
-     * @return the Loader with the given id or null if no matching Loader
+     * Return the Loader with the given id or null if no matching Loader
      * is found.
      */
     @SuppressWarnings("unchecked")
