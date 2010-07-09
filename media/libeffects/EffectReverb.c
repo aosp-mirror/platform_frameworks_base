@@ -15,8 +15,7 @@
  */
 
 #define LOG_TAG "EffectReverb"
-//
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #include <cutils/log.h>
 #include <stdlib.h>
 #include <string.h>
@@ -143,6 +142,8 @@ int EffectCreate(effect_uuid_t *uuid,
 
     module->itfe = &gReverbInterface;
 
+    module->context.mState = REVERB_STATE_UNINITIALIZED;
+
     if (memcmp(&desc->type, SL_IID_PRESETREVERB, sizeof(effect_uuid_t)) == 0) {
         preset = 1;
     }
@@ -158,6 +159,8 @@ int EffectCreate(effect_uuid_t *uuid,
 
     *pInterface = (effect_interface_t) module;
 
+    module->context.mState = REVERB_STATE_INITIALIZED;
+
     LOGV("EffectLibCreateEffect %p ,size %d", module, sizeof(reverb_module_t));
 
     return 0;
@@ -170,6 +173,8 @@ int EffectRelease(effect_interface_t interface) {
     if (interface == NULL) {
         return -EINVAL;
     }
+
+    pRvbModule->context.mState = REVERB_STATE_UNINITIALIZED;
 
     free(pRvbModule);
     return 0;
@@ -194,6 +199,13 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
     }
 
     pReverb = (reverb_object_t*) &pRvbModule->context;
+
+    if (pReverb->mState == REVERB_STATE_UNINITIALIZED) {
+        return -EINVAL;
+    }
+    if (pReverb->mState == REVERB_STATE_INITIALIZED) {
+        return -ENODATA;
+    }
 
     //if bypassed or the preset forces the signal to be completely dry
     if (pReverb->m_bBypass != 0) {
@@ -257,13 +269,15 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
     return 0;
 }
 
+
 static int Reverb_Command(effect_interface_t self, int cmdCode, int cmdSize,
         void *pCmdData, int *replySize, void *pReplyData) {
     reverb_module_t *pRvbModule = (reverb_module_t *) self;
     reverb_object_t *pReverb;
     int retsize;
 
-    if (pRvbModule == NULL) {
+    if (pRvbModule == NULL ||
+            pRvbModule->context.mState == REVERB_STATE_UNINITIALIZED) {
         return -EINVAL;
     }
 
@@ -277,6 +291,9 @@ static int Reverb_Command(effect_interface_t self, int cmdCode, int cmdSize,
             return -EINVAL;
         }
         *(int *) pReplyData = Reverb_Init(pRvbModule, pReverb->m_Aux, pReverb->m_Preset);
+        if (*(int *) pReplyData == 0) {
+            pRvbModule->context.mState = REVERB_STATE_INITIALIZED;
+        }
         break;
     case EFFECT_CMD_CONFIGURE:
         if (pCmdData == NULL || cmdSize != sizeof(effect_config_t)
@@ -315,10 +332,25 @@ static int Reverb_Command(effect_interface_t self, int cmdCode, int cmdSize,
                 cmd->vsize, cmd->data + sizeof(int32_t));
         break;
     case EFFECT_CMD_ENABLE:
+        if (pReplyData == NULL || *replySize != sizeof(int)) {
+            return -EINVAL;
+        }
+        if (pReverb->mState != REVERB_STATE_INITIALIZED) {
+            return -ENOSYS;
+        }
+        pReverb->mState = REVERB_STATE_ACTIVE;
+        LOGV("EFFECT_CMD_ENABLE() OK");
+        *(int *)pReplyData = 0;
+        break;
     case EFFECT_CMD_DISABLE:
         if (pReplyData == NULL || *replySize != sizeof(int)) {
             return -EINVAL;
         }
+        if (pReverb->mState != REVERB_STATE_ACTIVE) {
+            return -ENOSYS;
+        }
+        pReverb->mState = REVERB_STATE_INITIALIZED;
+        LOGV("EFFECT_CMD_DISABLE() OK");
         *(int *)pReplyData = 0;
         break;
     case EFFECT_CMD_SET_DEVICE:
