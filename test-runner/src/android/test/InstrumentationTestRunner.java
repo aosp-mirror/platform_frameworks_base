@@ -496,9 +496,18 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         return null;
     }
 
+    /**
+     * Initialize the current thread as a looper.
+     * <p/>
+     * Exposed for unit testing.
+     */
+    void prepareLooper() {
+        Looper.prepare();
+    }
+
     @Override
     public void onStart() {
-        Looper.prepare();
+        prepareLooper();
 
         if (mJustCount) {
             mResults.putString(Instrumentation.REPORT_KEY_IDENTIFIER, REPORT_VALUE_ID);
@@ -521,6 +530,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                 long runTime = System.currentTimeMillis() - startTime;
 
                 resultPrinter.print(mTestRunner.getTestResult(), runTime);
+            } catch (Throwable t) {
+                // catch all exceptions so a more verbose error message can be outputted
+                writer.println(String.format("Test run aborted due to unexpected exception: %s",
+                                t.getMessage()));
+                t.printStackTrace(writer);
             } finally {
                 mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
                         String.format("\nTest results for %s=%s",
@@ -762,9 +776,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                             TimedTest.class).includeDetailedStats();
                 }
             } catch (SecurityException e) {
-                throw new IllegalStateException(e);
+                // ignore - the test with given name cannot be accessed. Will be handled during
+                // test execution
             } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
+                // ignore- the test with given name does not exist. Will be handled during test
+                // execution
             }
 
             if (mIsTimedTest && mIncludeDetailedStats) {
