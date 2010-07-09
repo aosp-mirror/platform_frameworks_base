@@ -2968,7 +2968,7 @@ public class ListView extends AbsListView {
             // fill a rect where the dividers would be for non-selectable items
             // If the list is opaque and the background is also opaque, we don't
             // need to draw anything since the background will do it for us
-            final boolean fillForMissingDividers = drawDividers && isOpaque() && !super.isOpaque();
+            final boolean fillForMissingDividers = isOpaque() && !super.isOpaque();
 
             if (fillForMissingDividers && mDividerPaint == null && mIsCacheColorOpaque) {
                 mDividerPaint = new Paint();
@@ -2978,7 +2978,7 @@ public class ListView extends AbsListView {
 
             final int listBottom = mBottom - mTop - mListPadding.bottom + mScrollY;
             if (!mStackFromBottom) {
-                int bottom = 0;
+                int bottom;
                 
                 final int scrollY = mScrollY;
                 for (int i = 0; i < count; i++) {
@@ -2987,18 +2987,16 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
                         // Don't draw dividers next to items that are not enabled
-                        if (drawDividers) {
-                            if ((areAllItemsSelectable ||
-                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                            adapter.isEnabled(first + i + 1))))) {
-                                bounds.top = bottom;
-                                bounds.bottom = bottom + dividerHeight;
-                                drawDivider(canvas, bounds, i);
-                            } else if (fillForMissingDividers) {
-                                bounds.top = bottom;
-                                bounds.bottom = bottom + dividerHeight;
-                                canvas.drawRect(bounds, paint);
-                            }
+                        if ((areAllItemsSelectable ||
+                                (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                        adapter.isEnabled(first + i + 1))))) {
+                            bounds.top = bottom;
+                            bounds.bottom = bottom + dividerHeight;
+                            drawDivider(canvas, bounds, i);
+                        } else if (fillForMissingDividers) {
+                            bounds.top = bottom;
+                            bounds.bottom = bottom + dividerHeight;
+                            canvas.drawRect(bounds, paint);
                         }
                     }
                 }
@@ -3014,7 +3012,7 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         top = child.getTop();
                         // Don't draw dividers next to items that are not enabled
-                        if (drawDividers && top > listTop) {
+                        if (top > listTop) {
                             if ((areAllItemsSelectable ||
                                     (adapter.isEnabled(first + i) && (i == count - 1 ||
                                             adapter.isEnabled(first + i + 1))))) {
@@ -3034,7 +3032,7 @@ public class ListView extends AbsListView {
                     }
                 }
                 
-                if (count > 0 && scrollY > 0 && drawDividers) {
+                if (count > 0 && scrollY > 0) {
                     bounds.top = listBottom;
                     bounds.bottom = listBottom + dividerHeight;
                     drawDivider(canvas, bounds, -1);
