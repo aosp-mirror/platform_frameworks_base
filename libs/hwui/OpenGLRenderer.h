@@ -32,10 +32,10 @@
 #include "Program.h"
 #include "Rect.h"
 #include "Snapshot.h"
-#include "Texture.h"
-#include "Layer.h"
 #include "TextureCache.h"
 #include "LayerCache.h"
+#include "PatchCache.h"
+#include "Vertex.h"
 
 namespace android {
 namespace uirenderer {
@@ -43,22 +43,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Support
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Simple structure to describe a vertex with a position.
- * This is used to draw filled rectangles without a texture.
- */
-struct SimpleVertex {
-    float position[2];
-}; // struct SimpleVertex
-
-/**
- * Simple structure to describe a vertex with a position and a texture.
- */
-struct TextureVertex {
-    float position[2];
-    float texture[2];
-}; // struct TextureVertex
 
 /**
  * Structure mapping Skia xfermodes to OpenGL blending factors.
@@ -198,6 +182,13 @@ private:
             float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = false);
 
     /**
+     * TODO: documentation
+     */
+    void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
+            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied,
+            GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
+
+    /**
      * Resets the texture coordinates stored in mDrawTextureVertices. Setting the values
      * back to default is achieved by calling:
      *
@@ -219,6 +210,12 @@ private:
      * @param mode Where to store the resulting xfermode
      */
     inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
+
+    /**
+     * TODO: documentation
+     */
+    inline void generateVertices(TextureVertex* vertex, float y, float v, const int32_t xDivs[],
+            uint32_t xCount, float xStretch, float xStretchTex, float width, float widthTex);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;
@@ -243,9 +240,9 @@ private:
     // Used to draw textured quads
     TextureVertex mDrawTextureVertices[4];
 
-    // Used to cache all drawBitmap textures
     TextureCache mTextureCache;
     LayerCache mLayerCache;
+    PatchCache mPatchCache;
 }; // class OpenGLRenderer
 
 }; // namespace uirenderer
