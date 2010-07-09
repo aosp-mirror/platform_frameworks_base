@@ -41,6 +41,11 @@ struct TextureVertex {
         vertex[0].texture[0] = u;
         vertex[0].texture[1] = v;
     }
+
+    static inline void setUV(TextureVertex* vertex, float u, float v) {
+        vertex[0].texture[0] = u;
+        vertex[0].texture[1] = v;
+    }
 }; // struct TextureVertex
 
 }; // namespace uirenderer
