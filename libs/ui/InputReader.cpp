@@ -189,7 +189,7 @@ void InputDevice::TrackballState::reset() {
 void InputDevice::TouchScreenState::reset() {
     lastTouch.clear();
     downTime = 0;
-    currentVirtualKey.down = false;
+    currentVirtualKey.status = CurrentVirtualKeyState::STATUS_UP;
 
     for (uint32_t i = 0; i < MAX_POINTERS; i++) {
         averagingTouchFilter.historyStart[i] = 0;
@@ -746,6 +746,29 @@ bool InputDevice::TouchScreenState::isPointInsideDisplay(int32_t x, int32_t y) c
         && y <= parameters.yAxis.maxValue;
 }
 
+const InputDevice::VirtualKey* InputDevice::TouchScreenState::findVirtualKeyHit() const {
+    int32_t x = currentTouch.pointers[0].x;
+    int32_t y = currentTouch.pointers[0].y;
+    for (size_t i = 0; i < virtualKeys.size(); i++) {
+        const InputDevice::VirtualKey& virtualKey = virtualKeys[i];
+
+#if DEBUG_VIRTUAL_KEYS
+        LOGD("VirtualKeys: Hit test (%d, %d): keyCode=%d, scanCode=%d, "
+                "left=%d, top=%d, right=%d, bottom=%d",
+                x, y,
+                virtualKey.keyCode, virtualKey.scanCode,
+                virtualKey.hitLeft, virtualKey.hitTop,
+                virtualKey.hitRight, virtualKey.hitBottom);
+#endif
+
+        if (virtualKey.isHit(x, y)) {
+            return & virtualKey;
+        }
+    }
+
+    return NULL;
+}
+
 
 // --- InputDevice::SingleTouchScreenState ---
 
@@ -1269,81 +1292,76 @@ void InputReader::onTouchScreenChanged(nsecs_t when,
 
 bool InputReader::consumeVirtualKeyTouches(nsecs_t when,
         InputDevice* device, uint32_t policyFlags) {
-    if (device->touchScreen.currentVirtualKey.down) {
+    switch (device->touchScreen.currentVirtualKey.status) {
+    case InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_CANCELED:
         if (device->touchScreen.currentTouch.pointerCount == 0) {
-            // Pointer went up while virtual key was down.  Send key up event.
-            device->touchScreen.currentVirtualKey.down = false;
+            // Pointer went up after virtual key canceled.
+            device->touchScreen.currentVirtualKey.status =
+                    InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_UP;
+        }
+        return true; // consumed
 
+    case InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_DOWN:
+        if (device->touchScreen.currentTouch.pointerCount == 0) {
+            // Pointer went up while virtual key was down.
+            device->touchScreen.currentVirtualKey.status =
+                    InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_UP;
 #if DEBUG_VIRTUAL_KEYS
             LOGD("VirtualKeys: Generating key up: keyCode=%d, scanCode=%d",
                     device->touchScreen.currentVirtualKey.keyCode,
                     device->touchScreen.currentVirtualKey.scanCode);
 #endif
-
             dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_UP,
                     KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY);
             return true; // consumed
         }
 
-        int32_t x = device->touchScreen.currentTouch.pointers[0].x;
-        int32_t y = device->touchScreen.currentTouch.pointers[0].y;
-        if (device->touchScreen.isPointInsideDisplay(x, y)
-                || device->touchScreen.currentTouch.pointerCount != 1) {
-            // Pointer moved inside the display area or another pointer also went down.
-            // Send key cancellation.
-            device->touchScreen.currentVirtualKey.down = false;
-
-#if DEBUG_VIRTUAL_KEYS
-            LOGD("VirtualKeys: Canceling key: keyCode=%d, scanCode=%d",
-                    device->touchScreen.currentVirtualKey.keyCode,
-                    device->touchScreen.currentVirtualKey.scanCode);
-#endif
-
-            dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_UP,
-                    KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY
-                            | KEY_EVENT_FLAG_CANCELED);
-
-            // Clear the last touch data so we will consider the pointer as having just been
-            // pressed down when generating subsequent motion events.
-            device->touchScreen.lastTouch.clear();
-            return false; // not consumed
+        if (device->touchScreen.currentTouch.pointerCount == 1) {
+            const InputDevice::VirtualKey* virtualKey = device->touchScreen.findVirtualKeyHit();
+            if (virtualKey
+                    && virtualKey->keyCode == device->touchScreen.currentVirtualKey.keyCode) {
+                // Pointer is still within the space of the virtual key.
+                return true; // consumed
+            }
         }
-    } else if (device->touchScreen.currentTouch.pointerCount == 1
-            && device->touchScreen.lastTouch.pointerCount == 0) {
-        int32_t x = device->touchScreen.currentTouch.pointers[0].x;
-        int32_t y = device->touchScreen.currentTouch.pointers[0].y;
-        for (size_t i = 0; i < device->touchScreen.virtualKeys.size(); i++) {
-            const InputDevice::VirtualKey& virtualKey = device->touchScreen.virtualKeys[i];
 
+        // Pointer left virtual key area or another pointer also went down.
+        // Send key cancellation.
+        device->touchScreen.currentVirtualKey.status =
+                InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_CANCELED;
 #if DEBUG_VIRTUAL_KEYS
-            LOGD("VirtualKeys: Hit test (%d, %d): keyCode=%d, scanCode=%d, "
-                    "left=%d, top=%d, right=%d, bottom=%d",
-                    x, y,
-                    virtualKey.keyCode, virtualKey.scanCode,
-                    virtualKey.hitLeft, virtualKey.hitTop,
-                    virtualKey.hitRight, virtualKey.hitBottom);
+        LOGD("VirtualKeys: Canceling key: keyCode=%d, scanCode=%d",
+                device->touchScreen.currentVirtualKey.keyCode,
+                device->touchScreen.currentVirtualKey.scanCode);
 #endif
+        dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_UP,
+                KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY
+                        | KEY_EVENT_FLAG_CANCELED);
+        return true; // consumed
 
-            if (virtualKey.isHit(x, y)) {
-                device->touchScreen.currentVirtualKey.down = true;
+    default:
+        if (device->touchScreen.currentTouch.pointerCount == 1
+                && device->touchScreen.lastTouch.pointerCount == 0) {
+            // Pointer just went down.  Check for virtual key hit.
+            const InputDevice::VirtualKey* virtualKey = device->touchScreen.findVirtualKeyHit();
+            if (virtualKey) {
+                device->touchScreen.currentVirtualKey.status =
+                        InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_DOWN;
                 device->touchScreen.currentVirtualKey.downTime = when;
-                device->touchScreen.currentVirtualKey.keyCode = virtualKey.keyCode;
-                device->touchScreen.currentVirtualKey.scanCode = virtualKey.scanCode;
-
+                device->touchScreen.currentVirtualKey.keyCode = virtualKey->keyCode;
+                device->touchScreen.currentVirtualKey.scanCode = virtualKey->scanCode;
 #if DEBUG_VIRTUAL_KEYS
-                    LOGD("VirtualKeys: Generating key down: keyCode=%d, scanCode=%d",
-                            device->touchScreen.currentVirtualKey.keyCode,
-                            device->touchScreen.currentVirtualKey.scanCode);
+                LOGD("VirtualKeys: Generating key down: keyCode=%d, scanCode=%d",
+                        device->touchScreen.currentVirtualKey.keyCode,
+                        device->touchScreen.currentVirtualKey.scanCode);
 #endif
-
                 dispatchVirtualKey(when, device, policyFlags, KEY_EVENT_ACTION_DOWN,
                         KEY_EVENT_FLAG_FROM_SYSTEM | KEY_EVENT_FLAG_VIRTUAL_HARD_KEY);
                 return true; // consumed
             }
         }
+        return false; // not consumed
     }
-
-    return false; // not consumed
 }
 
 void InputReader::dispatchVirtualKey(nsecs_t when,
@@ -1356,8 +1374,9 @@ void InputReader::dispatchVirtualKey(nsecs_t when,
     nsecs_t downTime = device->touchScreen.currentVirtualKey.downTime;
     int32_t metaState = globalMetaState();
 
-    mPolicy->virtualKeyFeedback(when, device->id, keyEventAction, keyEventFlags,
-            keyCode, scanCode, metaState, downTime);
+    if (keyEventAction == KEY_EVENT_ACTION_DOWN) {
+        mPolicy->virtualKeyDownFeedback();
+    }
 
     int32_t policyActions = mPolicy->interceptKey(when, device->id,
             keyEventAction == KEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
@@ -1852,7 +1871,7 @@ void InputReader::configureVirtualKeys(InputDevice* device) {
         uint32_t flags;
         if (mEventHub->scancodeToKeycode(device->id, virtualKey.scanCode,
                 & keyCode, & flags)) {
-            LOGI("  VirtualKey %d: could not obtain key code, ignoring", virtualKey.scanCode);
+            LOGW("  VirtualKey %d: could not obtain key code, ignoring", virtualKey.scanCode);
             device->touchScreen.virtualKeys.pop(); // drop the key
             continue;
         }
@@ -1933,7 +1952,8 @@ void InputReader::updateExportedVirtualKeyState() {
     for (size_t i = 0; i < mDevices.size(); i++) {
         InputDevice* device = mDevices.valueAt(i);
         if (device->isTouchScreen()) {
-            if (device->touchScreen.currentVirtualKey.down) {
+            if (device->touchScreen.currentVirtualKey.status
+                    == InputDevice::TouchScreenState::CurrentVirtualKeyState::STATUS_DOWN) {
                 keyCode = device->touchScreen.currentVirtualKey.keyCode;
                 scanCode = device->touchScreen.currentVirtualKey.scanCode;
             }

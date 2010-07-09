@@ -56,7 +56,6 @@ public class InputManager {
     private final Callbacks mCallbacks;
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
-    private final WindowManagerPolicy mWindowManagerPolicy;
     private final PowerManager mPowerManager;
     private final PowerManagerService mPowerManagerService;
     
@@ -103,12 +102,10 @@ public class InputManager {
     
     public InputManager(Context context,
             WindowManagerService windowManagerService,
-            WindowManagerPolicy windowManagerPolicy,
             PowerManager powerManager,
             PowerManagerService powerManagerService) {
         this.mContext = context;
         this.mWindowManagerService = windowManagerService;
-        this.mWindowManagerPolicy = windowManagerPolicy;
         this.mPowerManager = powerManager;
         this.mPowerManagerService = powerManagerService;
         
@@ -325,23 +322,8 @@ public class InputManager {
         private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
         
         @SuppressWarnings("unused")
-        public boolean isScreenOn() {
-            return mPowerManagerService.isScreenOn();
-        }
-        
-        @SuppressWarnings("unused")
-        public boolean isScreenBright() {
-            return mPowerManagerService.isScreenBright();
-        }
-        
-        @SuppressWarnings("unused")
-        public void virtualKeyFeedback(long whenNanos, int deviceId, int action, int flags,
-                int keyCode, int scanCode, int metaState, long downTimeNanos) {
-            KeyEvent keyEvent = new KeyEvent(downTimeNanos / 1000000,
-                    whenNanos / 1000000, action, keyCode, 0, metaState, scanCode, deviceId,
-                    flags);
-            
-            mWindowManagerService.virtualKeyFeedback(keyEvent);
+        public void virtualKeyDownFeedback() {
+            mWindowManagerService.mInputMonitor.virtualKeyDownFeedback();
         }
         
         @SuppressWarnings("unused")
@@ -356,7 +338,7 @@ public class InputManager {
         
         @SuppressWarnings("unused")
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
-            mWindowManagerPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
+            mWindowManagerService.mInputMonitor.notifyLidSwitchChanged(whenNanos, lidOpen);
         }
         
         @SuppressWarnings("unused")
@@ -380,17 +362,17 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public int interceptKeyBeforeQueueing(int deviceId, int type, int scanCode,
-                int keyCode, int policyFlags, int value, long whenNanos, boolean isScreenOn) {
-            return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(deviceId, type,
-                    scanCode, keyCode, policyFlags, value, whenNanos, isScreenOn);
+        public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down,
+                int policyFlags, boolean isScreenOn) {
+            return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(
+                    whenNanos, keyCode, down, policyFlags, isScreenOn);
         }
         
         @SuppressWarnings("unused")
-        public boolean interceptKeyBeforeDispatching(InputChannel focus, int keyCode,
-                int metaState, boolean down, int repeatCount, int policyFlags) {
+        public boolean interceptKeyBeforeDispatching(InputChannel focus, int action,
+                int flags, int keyCode, int metaState, int repeatCount, int policyFlags) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(focus,
-                    keyCode, metaState, down, repeatCount, policyFlags);
+                    action, flags, keyCode, metaState, repeatCount, policyFlags);
         }
         
         @SuppressWarnings("unused")
@@ -398,18 +380,6 @@ public class InputManager {
             return mContext.checkPermission(
                     android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)
                     == PackageManager.PERMISSION_GRANTED;
-        }
-        
-        @SuppressWarnings("unused")
-        public void goToSleep(long whenNanos) {
-            long when = whenNanos / 1000000;
-            mPowerManager.goToSleep(when);
-        }
-        
-        @SuppressWarnings("unused")
-        public void pokeUserActivity(long eventTimeNanos, int eventType) {
-            long eventTime = eventTimeNanos / 1000000;
-            mPowerManagerService.userActivity(eventTime, false, eventType, false);
         }
         
         @SuppressWarnings("unused")

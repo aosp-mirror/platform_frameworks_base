@@ -40,6 +40,7 @@
 #include "../../core/jni/android_view_KeyEvent.h"
 #include "../../core/jni/android_view_MotionEvent.h"
 #include "../../core/jni/android_view_InputChannel.h"
+#include "com_android_server_PowerManagerService.h"
 
 namespace android {
 
@@ -107,16 +108,6 @@ enum {
     LAST_SYSTEM_WINDOW      = 2999,
 };
 
-enum {
-    POWER_MANAGER_OTHER_EVENT = 0,
-    POWER_MANAGER_CHEEK_EVENT = 1,
-    POWER_MANAGER_TOUCH_EVENT = 2, // touch events are TOUCH for 300ms, and then either
-                                   // up events or LONG_TOUCH events.
-    POWER_MANAGER_LONG_TOUCH_EVENT = 3,
-    POWER_MANAGER_TOUCH_UP_EVENT = 4,
-    POWER_MANAGER_BUTTON_EVENT = 5, // Button and trackball events.
-};
-
 // Delay between reporting long touch events to the power manager.
 const nsecs_t EVENT_IGNORE_DURATION = 300 * 1000000LL; // 300 ms
 
@@ -133,20 +124,16 @@ const nsecs_t MIN_INPUT_DISPATCHING_TIMEOUT = 1000 * 1000000LL; // 1 sec
 static struct {
     jclass clazz;
 
-    jmethodID isScreenOn;
-    jmethodID isScreenBright;
     jmethodID notifyConfigurationChanged;
     jmethodID notifyLidSwitchChanged;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyInputChannelANR;
     jmethodID notifyInputChannelRecoveredFromANR;
     jmethodID notifyANR;
-    jmethodID virtualKeyFeedback;
+    jmethodID virtualKeyDownFeedback;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptKeyBeforeDispatching;
     jmethodID checkInjectEventsPermission;
-    jmethodID goToSleep;
-    jmethodID pokeUserActivity;
     jmethodID notifyAppSwitchComing;
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
@@ -228,9 +215,7 @@ public:
 
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation);
-    virtual void virtualKeyFeedback(nsecs_t when, int32_t deviceId,
-            int32_t action, int32_t flags, int32_t keyCode,
-            int32_t scanCode, int32_t metaState, nsecs_t downTime);
+    virtual void virtualKeyDownFeedback();
     virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
             bool down, int32_t keyCode, int32_t scanCode, uint32_t policyFlags);
     virtual int32_t interceptTrackball(nsecs_t when, bool buttonChanged, bool buttonDown,
@@ -321,7 +306,7 @@ private:
     int32_t mDisplayWidth, mDisplayHeight;
     int32_t mDisplayOrientation;
 
-    // Callbacks.
+    // Power manager interactions.
     bool isScreenOn();
     bool isScreenBright();
 
@@ -369,9 +354,9 @@ private:
 
     void releaseTouchedWindowLd();
 
-    int32_t identifyTrackballEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+    int32_t waitForTrackballEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
-    int32_t identifyTouchEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
+    int32_t waitForTouchEventTargets(MotionEvent* motionEvent, uint32_t policyFlags,
             int32_t injectorPid, int32_t injectorUid, Vector<InputTarget>& outTargets);
 
     bool interceptKeyBeforeDispatching(const InputTarget& target,
@@ -391,6 +376,7 @@ private:
     }
 
     static bool isAppSwitchKey(int32_t keyCode);
+    static bool isPolicyKey(int32_t keyCode, bool isScreenOn);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 };
 
@@ -420,6 +406,36 @@ NativeInputManager::~NativeInputManager() {
 
 bool NativeInputManager::isAppSwitchKey(int32_t keyCode) {
     return keyCode == KEYCODE_HOME || keyCode == KEYCODE_ENDCALL;
+}
+
+bool NativeInputManager::isPolicyKey(int32_t keyCode, bool isScreenOn) {
+    // Special keys that the WindowManagerPolicy might care about.
+    switch (keyCode) {
+    case KEYCODE_VOLUME_UP:
+    case KEYCODE_VOLUME_DOWN:
+    case KEYCODE_ENDCALL:
+    case KEYCODE_POWER:
+    case KEYCODE_CALL:
+    case KEYCODE_HOME:
+    case KEYCODE_MENU:
+    case KEYCODE_SEARCH:
+        // media keys
+    case KEYCODE_HEADSETHOOK:
+    case KEYCODE_MEDIA_PLAY_PAUSE:
+    case KEYCODE_MEDIA_STOP:
+    case KEYCODE_MEDIA_NEXT:
+    case KEYCODE_MEDIA_PREVIOUS:
+    case KEYCODE_MEDIA_REWIND:
+    case KEYCODE_MEDIA_FAST_FORWARD:
+        return true;
+    default:
+        // We need to pass all keys to the policy in the following cases:
+        // - screen is off
+        // - keyguard is visible
+        // - policy is performing key chording
+        //return ! isScreenOn || keyguardVisible || chording;
+        return true; // XXX stubbed out for now
+    }
 }
 
 bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -546,39 +562,22 @@ bool NativeInputManager::getDisplayInfo(int32_t displayId,
 }
 
 bool NativeInputManager::isScreenOn() {
-    JNIEnv* env = jniEnv();
-
-    jboolean result = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.isScreenOn);
-    if (checkAndClearExceptionFromCallback(env, "isScreenOn")) {
-        return true;
-    }
-    return result;
+    return android_server_PowerManagerService_isScreenOn();
 }
 
 bool NativeInputManager::isScreenBright() {
-    JNIEnv* env = jniEnv();
-
-    jboolean result = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.isScreenBright);
-    if (checkAndClearExceptionFromCallback(env, "isScreenBright")) {
-        return true;
-    }
-    return result;
+    return android_server_PowerManagerService_isScreenBright();
 }
 
-void NativeInputManager::virtualKeyFeedback(nsecs_t when, int32_t deviceId,
-        int32_t action, int32_t flags, int32_t keyCode,
-        int32_t scanCode, int32_t metaState, nsecs_t downTime) {
+void NativeInputManager::virtualKeyDownFeedback() {
 #if DEBUG_INPUT_READER_POLICY
-    LOGD("virtualKeyFeedback - when=%lld, deviceId=%d, action=%d, flags=%d, keyCode=%d, "
-            "scanCode=%d, metaState=%d, downTime=%lld",
-            when, deviceId, action, flags, keyCode, scanCode, metaState, downTime);
+    LOGD("virtualKeyDownFeedback");
 #endif
 
     JNIEnv* env = jniEnv();
 
-    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyFeedback,
-            when, deviceId, action, flags, keyCode, scanCode, metaState, downTime);
-    checkAndClearExceptionFromCallback(env, "virtualKeyFeedback");
+    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyDownFeedback);
+    checkAndClearExceptionFromCallback(env, "virtualKeyDownFeedback");
 }
 
 int32_t NativeInputManager::interceptKey(nsecs_t when,
@@ -593,16 +592,21 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
     const int32_t WM_ACTION_GO_TO_SLEEP = 4;
 
-    JNIEnv* env = jniEnv();
-
     bool isScreenOn = this->isScreenOn();
     bool isScreenBright = this->isScreenBright();
 
-    jint wmActions = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.interceptKeyBeforeQueueing,
-            deviceId, EV_KEY, scanCode, keyCode, policyFlags, down ? 1 : 0, when, isScreenOn);
-    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
-        wmActions = 0;
+    jint wmActions = 0;
+    if (isPolicyKey(keyCode, isScreenOn)) {
+        JNIEnv* env = jniEnv();
+
+        wmActions = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.interceptKeyBeforeQueueing,
+                when, keyCode, down, policyFlags, isScreenOn);
+        if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+            wmActions = 0;
+        }
+    } else {
+        wmActions = WM_ACTION_PASS_TO_USER;
     }
 
     int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
@@ -617,8 +621,7 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     }
 
     if (wmActions & WM_ACTION_GO_TO_SLEEP) {
-        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.goToSleep, when);
-        checkAndClearExceptionFromCallback(env, "goToSleep");
+        android_server_PowerManagerService_goToSleep(when);
     }
 
     if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
@@ -629,6 +632,8 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
         actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
 
         if (down && isAppSwitchKey(keyCode)) {
+            JNIEnv* env = jniEnv();
+
             env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyAppSwitchComing);
             checkAndClearExceptionFromCallback(env, "notifyAppSwitchComing");
 
@@ -1531,11 +1536,13 @@ int32_t NativeInputManager::waitForKeyEventTargets(KeyEvent* keyEvent, uint32_t 
         windowType = focusedWindow->layoutParamsType;
     } // release lock
 
-    const InputTarget& target = outTargets.top();
-    bool consumed = interceptKeyBeforeDispatching(target, keyEvent, policyFlags);
-    if (consumed) {
-        outTargets.clear();
-        return INPUT_EVENT_INJECTION_SUCCEEDED;
+    if (isPolicyKey(keyEvent->getKeyCode(), isScreenOn())) {
+        const InputTarget& target = outTargets.top();
+        bool consumed = interceptKeyBeforeDispatching(target, keyEvent, policyFlags);
+        if (consumed) {
+            outTargets.clear();
+            return INPUT_EVENT_INJECTION_SUCCEEDED;
+        }
     }
 
     pokeUserActivityIfNeeded(windowType, POWER_MANAGER_BUTTON_EVENT);
@@ -1552,11 +1559,11 @@ int32_t NativeInputManager::waitForMotionEventTargets(MotionEvent* motionEvent,
 
     switch (motionEvent->getNature()) {
     case INPUT_EVENT_NATURE_TRACKBALL:
-        return identifyTrackballEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
+        return waitForTrackballEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
                 outTargets);
 
     case INPUT_EVENT_NATURE_TOUCH:
-        return identifyTouchEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
+        return waitForTouchEventTargets(motionEvent, policyFlags, injectorPid, injectorUid,
                 outTargets);
 
     default:
@@ -1565,11 +1572,11 @@ int32_t NativeInputManager::waitForMotionEventTargets(MotionEvent* motionEvent,
     }
 }
 
-int32_t NativeInputManager::identifyTrackballEventTargets(MotionEvent* motionEvent,
+int32_t NativeInputManager::waitForTrackballEventTargets(MotionEvent* motionEvent,
         uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
         Vector<InputTarget>& outTargets) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("identifyTrackballEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+    LOGD("waitForTrackballEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
             policyFlags, injectorPid, injectorUid);
 #endif
 
@@ -1591,11 +1598,11 @@ int32_t NativeInputManager::identifyTrackballEventTargets(MotionEvent* motionEve
     return INPUT_EVENT_INJECTION_SUCCEEDED;
 }
 
-int32_t NativeInputManager::identifyTouchEventTargets(MotionEvent* motionEvent,
+int32_t NativeInputManager::waitForTouchEventTargets(MotionEvent* motionEvent,
         uint32_t policyFlags, int32_t injectorPid, int32_t injectorUid,
         Vector<InputTarget>& outTargets) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("identifyTouchEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
+    LOGD("waitForTouchEventTargets - policyFlags=%d, injectorPid=%d, injectorUid=%d",
             policyFlags, injectorPid, injectorUid);
 #endif
 
@@ -1642,8 +1649,8 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const InputTarget& target
     if (inputChannelObj) {
         jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
                 gCallbacksClassInfo.interceptKeyBeforeDispatching,
-                inputChannelObj, keyEvent->getKeyCode(), keyEvent->getMetaState(),
-                keyEvent->getAction() == KEY_EVENT_ACTION_DOWN,
+                inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
+                keyEvent->getKeyCode(), keyEvent->getMetaState(),
                 keyEvent->getRepeatCount(), policyFlags);
         bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
 
@@ -1665,10 +1672,7 @@ void NativeInputManager::pokeUserActivityIfNeeded(int32_t windowType, int32_t ev
 }
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
-    JNIEnv* env = jniEnv();
-    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.pokeUserActivity,
-            eventTime, eventType);
-    checkAndClearExceptionFromCallback(env, "pokeUserActivity");
+    android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
 
 void NativeInputManager::dumpDispatchStateLd() {
@@ -2082,12 +2086,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     FIND_CLASS(gCallbacksClassInfo.clazz, "com/android/server/InputManager$Callbacks");
 
-    GET_METHOD_ID(gCallbacksClassInfo.isScreenOn, gCallbacksClassInfo.clazz,
-            "isScreenOn", "()Z");
-
-    GET_METHOD_ID(gCallbacksClassInfo.isScreenBright, gCallbacksClassInfo.clazz,
-            "isScreenBright", "()Z");
-
     GET_METHOD_ID(gCallbacksClassInfo.notifyConfigurationChanged, gCallbacksClassInfo.clazz,
             "notifyConfigurationChanged", "(JIII)V");
 
@@ -2106,23 +2104,17 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.notifyANR, gCallbacksClassInfo.clazz,
             "notifyANR", "(Ljava/lang/Object;)J");
 
-    GET_METHOD_ID(gCallbacksClassInfo.virtualKeyFeedback, gCallbacksClassInfo.clazz,
-            "virtualKeyFeedback", "(JIIIIIIJ)V");
+    GET_METHOD_ID(gCallbacksClassInfo.virtualKeyDownFeedback, gCallbacksClassInfo.clazz,
+            "virtualKeyDownFeedback", "()V");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, gCallbacksClassInfo.clazz,
-            "interceptKeyBeforeQueueing", "(IIIIIIJZ)I");
+            "interceptKeyBeforeQueueing", "(JIZIZ)I");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, gCallbacksClassInfo.clazz,
-            "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIZII)Z");
+            "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIIIII)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
             "checkInjectEventsPermission", "(II)Z");
-
-    GET_METHOD_ID(gCallbacksClassInfo.goToSleep, gCallbacksClassInfo.clazz,
-            "goToSleep", "(J)V");
-
-    GET_METHOD_ID(gCallbacksClassInfo.pokeUserActivity, gCallbacksClassInfo.clazz,
-            "pokeUserActivity", "(JI)V");
 
     GET_METHOD_ID(gCallbacksClassInfo.notifyAppSwitchComing, gCallbacksClassInfo.clazz,
             "notifyAppSwitchComing", "()V");
