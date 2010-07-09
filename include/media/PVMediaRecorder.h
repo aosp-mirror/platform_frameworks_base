@@ -52,6 +52,7 @@ public:
     virtual status_t close();
     virtual status_t reset();
     virtual status_t getMaxAmplitude(int *max);
+    virtual status_t dump(int fd, const Vector<String16>& args) const;
 
 private:
     status_t doStop();

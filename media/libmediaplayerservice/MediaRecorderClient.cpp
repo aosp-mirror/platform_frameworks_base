@@ -329,5 +329,12 @@ status_t MediaRecorderClient::setListener(const sp<IMediaRecorderClient>& listen
     return mRecorder->setListener(listener);
 }
 
+status_t MediaRecorderClient::dump(int fd, const Vector<String16>& args) const {
+    if (mRecorder != NULL) {
+        return mRecorder->dump(fd, args);
+    }
+    return OK;
+}
+
 }; // namespace android
 
