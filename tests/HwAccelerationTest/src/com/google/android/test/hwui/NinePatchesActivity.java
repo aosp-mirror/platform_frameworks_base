@@ -34,6 +34,7 @@ public class NinePatchesActivity extends Activity {
                 FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
         b.setText("9 patches");
         layout.addView(b);
+        layout.setBackgroundColor(0xffffffff);
         
         setContentView(layout);
     }

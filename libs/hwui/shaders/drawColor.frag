@@ -1,9 +1,9 @@
 SHADER_SOURCE(gDrawColorFragmentShader,
 
-varying lowp vec4 outColor;
+uniform vec4 color;
 
 void main(void) {
-    gl_FragColor = outColor;
+    gl_FragColor = color;
 }
 
 );
