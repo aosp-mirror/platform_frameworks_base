@@ -87,7 +87,8 @@ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_C_INCLUDES := \
-	$(call include-path-for, graphics corecg)
+	$(call include-path-for, graphics corecg) \
+	system/media/opensles/include
 
 LOCAL_PRELINK_MODULE := false
 
