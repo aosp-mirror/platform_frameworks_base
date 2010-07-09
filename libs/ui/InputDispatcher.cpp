@@ -54,7 +54,7 @@ static inline nsecs_t now() {
 
 InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& policy) :
     mPolicy(policy) {
-    mPollLoop = new PollLoop();
+    mPollLoop = new PollLoop(false);
 
     mInboundQueue.head.refCount = -1;
     mInboundQueue.head.type = EventEntry::TYPE_SENTINEL;
