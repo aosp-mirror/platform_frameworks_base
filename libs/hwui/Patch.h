@@ -19,7 +19,7 @@
 
 #include <sys/types.h>
 
-#include <cstring>
+#include <SkBitmap.h>
 
 #include "Vertex.h"
 
@@ -56,62 +56,13 @@ struct PatchDescription {
  * indices to render the vertices.
  */
 struct Patch {
-    Patch(const uint32_t xCount, const uint32_t yCount): xCount(xCount + 2), yCount(yCount + 2) {
-        verticesCount = (xCount + 2) * (yCount + 2);
-        vertices = new TextureVertex[verticesCount];
+    Patch(const uint32_t xCount, const uint32_t yCount);
+    ~Patch();
 
-        // 2 triangles per patch, 3 vertices per triangle
-        indicesCount = (xCount + 1) * (yCount + 1) * 2 * 3;
-        indices = new uint16_t[indicesCount];
-
-        const uint32_t xNum = xCount + 1;
-        const uint32_t yNum = yCount + 1;
-
-        uint16_t* startIndices = indices;
-        uint32_t n = 0;
-        for (uint32_t y = 0; y < yNum; y++) {
-            for (uint32_t x = 0; x < xNum; x++) {
-                *startIndices++ = n;
-                *startIndices++ = n + 1;
-                *startIndices++ = n + xNum + 2;
-
-                *startIndices++ = n;
-                *startIndices++ = n + xNum + 2;
-                *startIndices++ = n + xNum + 1;
-
-                n += 1;
-            }
-            n += 1;
-        }
-    }
-
-    ~Patch() {
-        delete indices;
-        delete vertices;
-    }
-
-    void dump() {
-        LOGD("Vertices [");
-        for (uint32_t y = 0; y < yCount; y++) {
-            char buffer[512];
-            buffer[0] = '\0';
-            uint32_t offset = 0;
-            for (uint32_t x = 0; x < xCount; x++) {
-                TextureVertex* v = &vertices[y * xCount + x];
-                offset += sprintf(&buffer[offset], " (%.4f,%.4f)-(%.4f,%.4f)",
-                        v->position[0], v->position[1], v->texture[0], v->texture[1]);
-            }
-            LOGD("  [%s ]", buffer);
-        }
-        LOGD("]\nIndices [ ");
-        char buffer[4096];
-        buffer[0] = '\0';
-        uint32_t offset = 0;
-        for (uint32_t i = 0; i < indicesCount; i++) {
-            offset += sprintf(&buffer[offset], "%d ", indices[i]);
-        }
-        LOGD("  %s\n]", buffer);
-    }
+    void updateVertices(const SkBitmap* bitmap, float left, float top, float right, float bottom,
+            const int32_t* xDivs,  const int32_t* yDivs,
+            const uint32_t width, const uint32_t height);
+    void dump();
 
     uint32_t xCount;
     uint32_t yCount;
@@ -121,6 +72,11 @@ struct Patch {
 
     TextureVertex* vertices;
     uint32_t verticesCount;
+
+private:
+    static inline void generateVertices(TextureVertex* vertex, float y, float v,
+            const int32_t xDivs[], uint32_t xCount, float xStretch, float xStretchTex,
+            float width, float widthTex);
 }; // struct Patch
 
 }; // namespace uirenderer

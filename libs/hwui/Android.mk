@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
 	LayerCache.cpp \
 	Matrix.cpp \
 	OpenGLRenderer.cpp \
+	Patch.cpp \
 	PatchCache.cpp \
 	Program.cpp \
 	TextureCache.cpp

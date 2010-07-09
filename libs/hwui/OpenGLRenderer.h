@@ -242,12 +242,6 @@ private:
     inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
 
     /**
-     * TODO: documentation
-     */
-    inline void generateVertices(TextureVertex* vertex, float y, float v, const int32_t xDivs[],
-            uint32_t xCount, float xStretch, float xStretchTex, float width, float widthTex);
-
-    /**
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */
