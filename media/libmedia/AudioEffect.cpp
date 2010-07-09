@@ -52,7 +52,7 @@ AudioEffect::AudioEffect(const effect_uuid_t *type,
                 )
     : mStatus(NO_INIT)
 {
-    mStatus = set(type, uuid, priority, cbf, user, output, sessionId);
+    mStatus = set(type, uuid, priority, cbf, user, sessionId, output);
 }
 
 AudioEffect::AudioEffect(const char *typeStr,
@@ -84,7 +84,7 @@ AudioEffect::AudioEffect(const char *typeStr,
         }
     }
 
-    mStatus = set(pType, pUuid, priority, cbf, user, output, sessionId);
+    mStatus = set(pType, pUuid, priority, cbf, user, sessionId, output);
 }
 
 status_t AudioEffect::set(const effect_uuid_t *type,
