@@ -41,8 +41,6 @@ ProgramRaster::ProgramRaster(Context *rsc,
     mPointSmooth = pointSmooth;
     mLineSmooth = lineSmooth;
     mPointSprite = pointSprite;
-
-    mPointSize = 1.0f;
     mLineWidth = 1.0f;
 }
 
@@ -55,11 +53,6 @@ void ProgramRaster::setLineWidth(float s)
     mLineWidth = s;
 }
 
-void ProgramRaster::setPointSize(float s)
-{
-    mPointSize = s;
-}
-
 void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
 {
     if (state->mLast.get() == this) {
@@ -67,7 +60,6 @@ void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
     }
     state->mLast.set(this);
 
-    glPointSize(mPointSize);
     if (mPointSmooth) {
         glEnable(GL_POINT_SMOOTH);
     } else {
@@ -102,7 +94,7 @@ void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
 
 void ProgramRaster::serialize(OStream *stream) const
 {
-    
+
 }
 
 ProgramRaster *ProgramRaster::createFromStream(Context *rsc, IStream *stream)
@@ -145,12 +137,6 @@ RsProgramRaster rsi_ProgramRasterCreate(Context * rsc, RsElement in, RsElement o
                                           pointSprite);
     pr->incUserRef();
     return pr;
-}
-
-void rsi_ProgramRasterSetPointSize(Context * rsc, RsProgramRaster vpr, float s)
-{
-    ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
-    pr->setPointSize(s);
 }
 
 void rsi_ProgramRasterSetLineWidth(Context * rsc, RsProgramRaster vpr, float s)

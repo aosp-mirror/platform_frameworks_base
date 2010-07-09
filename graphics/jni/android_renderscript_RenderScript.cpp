@@ -1213,14 +1213,6 @@ nProgramRasterCreate(JNIEnv *_env, jobject _this, jint in, jint out,
 }
 
 static void
-nProgramRasterSetPointSize(JNIEnv *_env, jobject _this, jint vpr, jfloat v)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramRasterSetPointSize, con(%p), vpf(%p), value(%f)", con, (RsProgramRaster)vpr, v);
-    rsProgramRasterSetPointSize(con, (RsProgramFragment)vpr, v);
-}
-
-static void
 nProgramRasterSetLineWidth(JNIEnv *_env, jobject _this, jint vpr, jfloat v)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1482,7 +1474,6 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentCreate2",        "(Ljava/lang/String;[I)I",              (void*)nProgramFragmentCreate2 },
 
 {"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },
-{"nProgramRasterSetPointSize",     "(IF)V",                                (void*)nProgramRasterSetPointSize },
 {"nProgramRasterSetLineWidth",     "(IF)V",                                (void*)nProgramRasterSetLineWidth },
 
 {"nProgramVertexCreate",           "(Z)I",                                 (void*)nProgramVertexCreate },

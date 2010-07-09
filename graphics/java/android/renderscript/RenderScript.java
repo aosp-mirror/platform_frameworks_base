@@ -167,7 +167,6 @@ public class RenderScript {
 
     native int  nProgramRasterCreate(int in, int out, boolean pointSmooth, boolean lineSmooth, boolean pointSprite);
     native void nProgramRasterSetLineWidth(int pr, float v);
-    native void nProgramRasterSetPointSize(int pr, float v);
 
     native void nProgramBindConstants(int pv, int slot, int mID);
     native void nProgramBindTexture(int vpf, int slot, int a);

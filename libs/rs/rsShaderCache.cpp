@@ -101,8 +101,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
             glBindAttribLocation(pgm, 0, "ATTRIB_position");
             glBindAttribLocation(pgm, 1, "ATTRIB_color");
             glBindAttribLocation(pgm, 2, "ATTRIB_normal");
-            glBindAttribLocation(pgm, 3, "ATTRIB_pointSize");
-            glBindAttribLocation(pgm, 4, "ATTRIB_texture0");
+            glBindAttribLocation(pgm, 3, "ATTRIB_texture0");
         }
 
         //LOGE("e2 %x", glGetError());

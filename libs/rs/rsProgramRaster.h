@@ -41,17 +41,12 @@ public:
     static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
 
     void setLineWidth(float w);
-    void setPointSize(float s);
 
 protected:
     bool mPointSmooth;
     bool mLineSmooth;
     bool mPointSprite;
-
-    float mPointSize;
     float mLineWidth;
-
-
 };
 
 class ProgramRasterState

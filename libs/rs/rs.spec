@@ -360,11 +360,6 @@ ProgramRasterSetLineWidth {
 	param float lw
 }
 
-ProgramRasterSetPointSize{
-	param RsProgramRaster pr
-	param float ps
-}
-
 
 ProgramBindConstants {
 	param RsProgram vp
