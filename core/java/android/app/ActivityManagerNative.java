@@ -1294,6 +1294,19 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case DUMP_HEAP_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String process = data.readString();
+            boolean managed = data.readInt() != 0;
+            String path = data.readString();
+            ParcelFileDescriptor fd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean res = dumpHeap(process, managed, path, fd);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -2874,6 +2887,28 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    
+
+    public boolean dumpHeap(String process, boolean managed,
+            String path, ParcelFileDescriptor fd) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(process);
+        data.writeInt(managed ? 1 : 0);
+        data.writeString(path);
+        if (fd != null) {
+            data.writeInt(1);
+            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        mRemote.transact(DUMP_HEAP_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return res;
+    }
+
     private IBinder mRemote;
 }

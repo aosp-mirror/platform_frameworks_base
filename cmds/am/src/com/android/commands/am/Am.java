@@ -98,6 +98,8 @@ public class Am {
             sendBroadcast();
         } else if (op.equals("profile")) {
             runProfile();
+        } else if (op.equals("dumpheap")) {
+            runDumpHeap();
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
@@ -424,6 +426,28 @@ public class Am {
         }
     }
 
+    private void runDumpHeap() throws Exception {
+        boolean managed = !"-n".equals(nextOption());
+        String process = nextArgRequired();
+        String heapFile = nextArgRequired();
+        ParcelFileDescriptor fd = null;
+
+        try {
+            fd = ParcelFileDescriptor.open(
+                    new File(heapFile),
+                    ParcelFileDescriptor.MODE_CREATE |
+                    ParcelFileDescriptor.MODE_TRUNCATE |
+                    ParcelFileDescriptor.MODE_READ_WRITE);
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: Unable to open file: " + heapFile);
+            return;
+        }
+
+        if (!mAm.dumpHeap(process, managed, heapFile, fd)) {
+            throw new AndroidException("HEAP DUMP FAILED on process " + process);
+        }
+    }
+
     private class IntentReceiver extends IIntentReceiver.Stub {
         private boolean mFinished = false;
 
@@ -593,6 +617,8 @@ public class Am {
                 "\n" +
                 "    start profiling: am profile <PROCESS> start <FILE>\n" +
                 "    stop profiling: am profile <PROCESS> stop\n" +
+                "    dump heap: am dumpheap [flags] <PROCESS> <FILE>\n" +
+                "        -n: dump native heap instead of managed heap\n" +
                 "\n" +
                 "    <INTENT> specifications include these flags:\n" +
                 "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +

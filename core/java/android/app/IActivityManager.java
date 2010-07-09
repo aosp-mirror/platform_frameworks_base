@@ -316,7 +316,11 @@ public interface IActivityManager extends IInterface {
     
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException;
-    
+
+    // Cause the specified process to dump the specified heap.
+    public boolean dumpHeap(String process, boolean managed, String path,
+        ParcelFileDescriptor fd) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -533,4 +537,5 @@ public interface IActivityManager extends IInterface {
     int SET_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+111;
     int IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+112;
     int CRASH_APPLICATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+113;
+    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+114;
 }

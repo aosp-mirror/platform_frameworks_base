@@ -97,6 +97,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
     void profilerControl(boolean start, String path, ParcelFileDescriptor fd)
             throws RemoteException;
+    void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
+            throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
     void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException;
     static final int PACKAGE_REMOVED = 0;
@@ -140,4 +142,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int DISPATCH_PACKAGE_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int SCHEDULE_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
+    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
 }
