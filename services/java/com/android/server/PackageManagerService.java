@@ -4583,6 +4583,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     };
 
+    private static final boolean DEBUG_OBB = false;
+
     private static final void sendPackageBroadcast(String action, String pkg,
             Bundle extras, IIntentReceiver finishedReceiver) {
         IActivityManager am = ActivityManagerNative.getDefault();
@@ -4755,6 +4757,27 @@ class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_INSTALL) Log.v(TAG, "BM finishing package install for " + token);
         Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
         mHandler.sendMessage(msg);
+    }
+
+    public void setPackageObbPath(String packageName, String path) {
+        if (DEBUG_OBB)
+            Log.v(TAG, "Setting .obb path for " + packageName + " to: " + path);
+        PackageSetting pkgSetting;
+        final int uid = Binder.getCallingUid();
+        boolean allowedByPermission = false;
+        synchronized (mPackages) {
+            pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            if (!allowedByPermission && (uid != pkgSetting.userId)) {
+                throw new SecurityException("Permission denial: attempt to set .obb file from pid="
+                        + Binder.getCallingPid() + ", uid=" + uid + ", package uid="
+                        + pkgSetting.userId);
+            }
+            pkgSetting.obbPathString = path;
+            mSettings.writeLP();
+        }
     }
 
     private void processPendingInstall(final InstallArgs args, final int currentStatus) {
@@ -7118,6 +7141,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    pkg="); pw.println(ps.pkg);
                     pw.print("    codePath="); pw.println(ps.codePathString);
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
+                    pw.print("    obbPath="); pw.println(ps.obbPathString);
                     if (ps.pkg != null) {
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                         pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
@@ -7684,6 +7708,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String codePathString;
         File resourcePath;
         String resourcePathString;
+        String obbPathString;
         private long timeStamp;
         private String timeStampString = "0";
         int versionCode;
@@ -8684,6 +8709,9 @@ class PackageManagerService extends IPackageManager.Stub {
             if (pkg.installerPackageName != null) {
                 serializer.attribute(null, "installer", pkg.installerPackageName);
             }
+            if (pkg.obbPathString != null) {
+                serializer.attribute(null, "obbPath", pkg.obbPathString);
+            }
             pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
             if ((pkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
                 serializer.startTag(null, "perms");
@@ -9060,6 +9088,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String sharedIdStr = null;
             String codePathStr = null;
             String resourcePathStr = null;
+            String obbPathStr = null;
             String systemStr = null;
             String installerPackageName = null;
             String uidError = null;
@@ -9077,6 +9106,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
                 codePathStr = parser.getAttributeValue(null, "codePath");
                 resourcePathStr = parser.getAttributeValue(null, "resourcePath");
+                obbPathStr = parser.getAttributeValue(null, "obbPath");
                 version = parser.getAttributeValue(null, "version");
                 if (version != null) {
                     try {
@@ -9174,6 +9204,7 @@ class PackageManagerService extends IPackageManager.Stub {
             if (packageSetting != null) {
                 packageSetting.uidError = "true".equals(uidError);
                 packageSetting.installerPackageName = installerPackageName;
+                packageSetting.obbPathString = obbPathStr;
                 final String enabledStr = parser.getAttributeValue(null, "enabled");
                 if (enabledStr != null) {
                     if (enabledStr.equalsIgnoreCase("true")) {

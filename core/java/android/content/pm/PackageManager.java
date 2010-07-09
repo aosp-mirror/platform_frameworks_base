@@ -2193,4 +2193,17 @@ public abstract class PackageManager {
      */
     public abstract void movePackage(
             String packageName, IPackageMoveObserver observer, int flags);
+
+    /**
+     * Sets the Opaque Binary Blob (OBB) file location.
+     * <p>
+     * NOTE: The existence or format of this file is not currently checked, but
+     * it may be in the future.
+     * 
+     * @param packageName Name of the package with which to associate the .obb
+     *            file
+     * @param path Path on the filesystem to the .obb file
+     * @hide
+     */
+    public abstract void setPackageObbPath(String packageName, String path);
 }
