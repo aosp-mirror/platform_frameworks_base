@@ -179,10 +179,40 @@ private:
      * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = false);
+            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = true);
 
     /**
-     * TODO: documentation
+     * Draws a textured rectangle with the specified texture. The specified coordinates
+     * are transformed by the current snapshot's transform matrix.
+     *
+     * @param left The left coordinate of the rectangle
+     * @param top The top coordinate of the rectangle
+     * @param right The right coordinate of the rectangle
+     * @param bottom The bottom coordinate of the rectangle
+     * @param texture The texture to use
+     * @param paint The paint containing the alpha, blending mode, etc.
+     * @param isPremultiplied Indicates whether the texture has premultiplied alpha
+     */
+    void drawTextureRect(float left, float top, float right, float bottom, const Texture* texture,
+            const SkPaint* paint, bool isPremultiplied = true);
+
+    /**
+     * Draws a textured mesh with the specified texture. If the indices are omitted, the
+     * mesh is drawn as a simple quad.
+     *
+     * @param left The left coordinate of the rectangle
+     * @param top The top coordinate of the rectangle
+     * @param right The right coordinate of the rectangle
+     * @param bottom The bottom coordinate of the rectangle
+     * @param texture The texture name to map onto the rectangle
+     * @param alpha An additional translucency parameter, between 0.0f and 1.0f
+     * @param mode The blending mode
+     * @param blend True if the texture contains an alpha channel
+     * @param isPremultiplied Indicates whether the texture has premultiplied alpha
+     * @param vertices The vertices that define the mesh
+     * @param texCoords The texture coordinates of each vertex
+     * @param indices The indices of the vertices, can be NULL
+     * @param elementsCount The number of elements in the mesh, required by indices
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied,
@@ -217,6 +247,12 @@ private:
     inline void generateVertices(TextureVertex* vertex, float y, float v, const int32_t xDivs[],
             uint32_t xCount, float xStretch, float xStretchTex, float width, float widthTex);
 
+    /**
+     * Enable or disable blending as necessary. This function sets the appropriate
+     * blend function based on the specified xfermode.
+     */
+    inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied);
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
@@ -240,6 +276,12 @@ private:
     // Used to draw textured quads
     TextureVertex mDrawTextureVertices[4];
 
+    // Last known blend state
+    bool mBlend;
+    GLenum mLastSrcMode;
+    GLenum mLastDstMode;
+
+    // Various caches
     TextureCache mTextureCache;
     LayerCache mLayerCache;
     PatchCache mPatchCache;

@@ -95,6 +95,7 @@ static const Blender gBlends[] = {
 ///////////////////////////////////////////////////////////////////////////////
 
 OpenGLRenderer::OpenGLRenderer():
+        mBlend(false), mLastSrcMode(GL_ZERO), mLastDstMode(GL_ZERO),
         mTextureCache(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
         mLayerCache(MB(DEFAULT_LAYER_CACHE_SIZE)),
         mPatchCache(DEFAULT_PATCH_CACHE_SIZE) {
@@ -242,7 +243,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const Rect& rect = layer->layer;
 
     drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
-            layer->texture, layer->alpha, layer->mode, layer->blend, true);
+            layer->texture, layer->alpha, layer->mode, layer->blend);
 
     LayerSize size(rect.getWidth(), rect.getHeight());
     // Failing to add the layer to the cache should happen only if the
@@ -421,13 +422,7 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
     const Texture* texture = mTextureCache.get(bitmap);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    drawTextureRect(left, top, left + texture->width, top + texture->height, texture->id,
-            alpha / 255.0f, mode, texture->blend, true);
+    drawTextureRect(left, top, left + texture->width, top + texture->height, texture, paint);
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint) {
@@ -436,13 +431,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const 
     transform.mapRect(r);
 
     const Texture* texture = mTextureCache.get(bitmap);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    drawTextureRect(r.left, r.top, r.right, r.bottom, texture->id,
-            alpha / 255.0f, mode, texture->blend, true);
+    drawTextureRect(r.left, r.top, r.right, r.bottom, texture, paint);
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
@@ -450,10 +439,6 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
          const SkPaint* paint) {
     const Texture* texture = mTextureCache.get(bitmap);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
 
     const float width = texture->width;
     const float height = texture->height;
@@ -465,8 +450,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
     resetDrawTextureTexCoords(u1, v1, u2, v2);
 
-    drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture->id,
-            alpha / 255.0f, mode, texture->blend, true);
+    drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture, paint);
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
@@ -606,17 +590,12 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode) {
     const int alpha = (color >> 24) & 0xFF;
-    const bool blend = alpha < 255 || mode != SkXfermode::kSrcOver_Mode;
-
     const GLfloat a = alpha                  / 255.0f;
     const GLfloat r = ((color >> 16) & 0xFF) / 255.0f;
     const GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = ((color      ) & 0xFF) / 255.0f;
 
-    if (blend) {
-        glEnable(GL_BLEND);
-        glBlendFunc(gBlends[mode].src, gBlends[mode].dst);
-    }
+    chooseBlending(alpha < 255, mode, true);
 
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
@@ -633,10 +612,17 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
 
     glDisableVertexAttribArray(mDrawColorShader->position);
+}
 
-    if (blend) {
-        glDisable(GL_BLEND);
-    }
+void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
+        const Texture* texture, const SkPaint* paint, bool isPremultiplied) {
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode, texture->blend,
+            isPremultiplied, &mDrawTextureVertices[0].position[0],
+            &mDrawTextureVertices[0].texture[0], NULL);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -653,15 +639,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 
     mDrawTextureShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
 
-    if (blend || alpha < 1.0f || mode != SkXfermode::kSrcOver_Mode) {
-        GLenum sourceMode = gBlends[mode].src;
-        if (!isPremultiplied && sourceMode == GL_ONE) {
-            sourceMode = GL_SRC_ALPHA;
-        }
-
-        glEnable(GL_BLEND);
-        glBlendFunc(sourceMode, gBlends[mode].dst);
-    }
+    chooseBlending(blend || alpha < 1.0f, mode, isPremultiplied);
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -690,18 +668,40 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glDisableVertexAttribArray(mDrawTextureShader->texCoords);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_BLEND);
+}
+
+void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied) {
+    // In theory we should not blend if the mode is Src, but it's rare enough
+    // that it's not worth it
+    blend = blend || mode != SkXfermode::kSrcOver_Mode;
+    if (blend) {
+        if (!mBlend) {
+            glEnable(GL_BLEND);
+        }
+
+        GLenum sourceMode = gBlends[mode].src;
+        GLenum destMode = gBlends[mode].dst;
+        if (!isPremultiplied && sourceMode == GL_ONE) {
+            sourceMode = GL_SRC_ALPHA;
+        }
+
+        if (sourceMode != mLastSrcMode || destMode != mLastDstMode) {
+            glBlendFunc(sourceMode, destMode);
+            mLastSrcMode = sourceMode;
+            mLastDstMode = destMode;
+        }
+    } else if (mBlend) {
+        glDisable(GL_BLEND);
+    }
+    mBlend = blend;
 }
 
 void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
-    mDrawTextureVertices[0].texture[0] = u1;
-    mDrawTextureVertices[0].texture[1] = v1;
-    mDrawTextureVertices[1].texture[0] = u2;
-    mDrawTextureVertices[1].texture[1] = v1;
-    mDrawTextureVertices[2].texture[0] = u1;
-    mDrawTextureVertices[2].texture[1] = v2;
-    mDrawTextureVertices[3].texture[0] = u2;
-    mDrawTextureVertices[3].texture[1] = v2;
+    TextureVertex* v = &mDrawTextureVertices[0];
+    TextureVertex::setUV(v++, u1, v1);
+    TextureVertex::setUV(v++, u2, v1);
+    TextureVertex::setUV(v++, u1, v2);
+    TextureVertex::setUV(v++, u2, v2);
 }
 
 void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
