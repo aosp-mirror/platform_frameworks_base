@@ -227,13 +227,14 @@ public class FileFilter {
     }
 
     /**
-     * Checks if the file is a test or something else.
+     * Checks if the file is a test.
+     * Currently we run .html and .xhtml tests.
      *
      * @param testName
      * @return
      *      if the file is a test
      */
     public static boolean isTestFile(String testName) {
-        return testName.endsWith(".html");
+        return testName.endsWith(".html") || testName.endsWith(".xhtml");
     }
 }

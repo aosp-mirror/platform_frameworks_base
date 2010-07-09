@@ -77,7 +77,9 @@ public class FsUtils {
                 continue;
             }
 
-            if ((s.toLowerCase().endsWith(".html") || s.toLowerCase().endsWith(".xml"))
+            if ((s.toLowerCase().endsWith(".html")
+                    || s.toLowerCase().endsWith(".xml")
+                    || s.toLowerCase().endsWith(".xhtml"))
                     && !s.endsWith("TEMPLATE.html")) {
                 Log.v(LOGTAG, "Recording " + s);
                 bos.write(s.getBytes());
