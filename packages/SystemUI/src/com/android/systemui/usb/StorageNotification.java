@@ -244,27 +244,12 @@ public class StorageNotification extends StorageEventListener {
             intent.setClass(mContext, com.android.systemui.usb.UsbStorageActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            final boolean adbOn = 1 == Settings.Secure.getInt(
-                mContext.getContentResolver(),
-                Settings.Secure.ADB_ENABLED,
-                0);
-
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
             setUsbStorageNotification(
                     com.android.internal.R.string.usb_storage_notification_title,
                     com.android.internal.R.string.usb_storage_notification_message,
                     com.android.internal.R.drawable.stat_sys_data_usb,
                     false, true, pi);
-
-            if (POP_UMS_ACTIVITY_ON_CONNECT && !adbOn) {
-                // We assume that developers don't want to enable UMS every
-                // time they attach a device to a USB host. The average user,
-                // however, is looking to charge the phone (in which case this
-                // is harmless) or transfer files (in which case this coaches
-                // the user about how to complete that task and saves several
-                // steps).
-                mContext.startActivity(intent);
-            }
         } else {
             setUsbStorageNotification(0, 0, 0, false, false, null);
         }
@@ -313,6 +298,23 @@ public class StorageNotification extends StorageEventListener {
             }
 
             mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
+            final boolean adbOn = 1 == Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.ADB_ENABLED,
+                0);
+
+            if (POP_UMS_ACTIVITY_ON_CONNECT && !adbOn) {
+                // Pop up a full-screen alert to coach the user through enabling UMS. The average
+                // user has attached the device to USB either to charge the phone (in which case
+                // this is harmless) or transfer files, and in the latter case this alert saves
+                // several steps (as well as subtly indicates that you shouldn't mix UMS with other
+                // activities on the device).
+                //
+                // If ADB is enabled, however, we suppress this dialog (under the assumption that a
+                // developer (a) knows how to enable UMS, and (b) is probably using USB to install
+                // builds or use adb commands.
+                mUsbStorageNotification.fullScreenIntent = pi;
+            }
         }
     
         final int notificationId = mUsbStorageNotification.icon;
