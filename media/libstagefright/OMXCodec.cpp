@@ -948,7 +948,7 @@ status_t OMXCodec::getVideoProfileLevel(
 
         int32_t supportedProfile = static_cast<int32_t>(param.eProfile);
         int32_t supportedLevel = static_cast<int32_t>(param.eLevel);
-        CODEC_LOGV("Supported profile: %ld, level %ld",
+        CODEC_LOGV("Supported profile: %d, level %d",
             supportedProfile, supportedLevel);
 
         if (profile == supportedProfile &&

@@ -511,11 +511,17 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
             sp<Client> c = mClients[i].promote();
             if (c != 0) c->dump(fd, args);
         }
-        for (int i = 0, n = mMediaRecorderClients.size(); i < n; ++i) {
-            result.append(" MediaRecorderClient\n");
-            sp<MediaRecorderClient> c = mMediaRecorderClients[i].promote();
-            snprintf(buffer, 255, "  pid(%d)\n\n", c->mPid);
-            result.append(buffer);
+        if (mMediaRecorderClients.size() == 0) {
+                result.append(" No media recorder client\n\n");
+        } else {
+            for (int i = 0, n = mMediaRecorderClients.size(); i < n; ++i) {
+                sp<MediaRecorderClient> c = mMediaRecorderClients[i].promote();
+                snprintf(buffer, 255, " MediaRecorderClient pid(%d)\n", c->mPid);
+                result.append(buffer);
+                write(fd, result.string(), result.size());
+                result = "\n";
+                c->dump(fd, args);
+            }
         }
 
         result.append(" Files opened and/or mapped:\n");
