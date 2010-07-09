@@ -126,7 +126,7 @@ DrawColorProgram::DrawColorProgram(const char* vertex, const char* fragment):
 
 void DrawColorProgram::getAttribsAndUniforms() {
     position = addAttrib("position");
-    color = addAttrib("color");
+    color = addUniform("color");
     projection = addUniform("projection");
     modelView = addUniform("modelView");
     transform = addUniform("transform");

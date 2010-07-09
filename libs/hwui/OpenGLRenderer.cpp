@@ -469,9 +469,9 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
-    drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha, mode, texture->blend,
-            true, &mesh->vertices[0].position[0], &mesh->vertices[0].texture[0], mesh->indices,
-            mesh->indicesCount);
+    drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f, mode,
+            texture->blend, true, &mesh->vertices[0].position[0],
+            &mesh->vertices[0].texture[0], mesh->indices, mesh->indicesCount);
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -518,7 +518,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     glEnableVertexAttribArray(mDrawColorShader->position);
     glVertexAttribPointer(mDrawColorShader->position, 2, GL_FLOAT, GL_FALSE,
             gDrawColorVertexStride, p);
-    glVertexAttrib4f(mDrawColorShader->color, r, g, b, a);
+    glUniform4f(mDrawColorShader->color, r, g, b, a);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
 
@@ -558,6 +558,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(mDrawTextureShader->sampler, 0);
+    glUniform4f(mDrawTextureShader->color, 1.0f, 1.0f, 1.0f, alpha);
 
     glEnableVertexAttribArray(mDrawTextureShader->position);
     glVertexAttribPointer(mDrawTextureShader->position, 2, GL_FLOAT, GL_FALSE,
@@ -566,8 +567,6 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glEnableVertexAttribArray(mDrawTextureShader->texCoords);
     glVertexAttribPointer(mDrawTextureShader->texCoords, 2, GL_FLOAT, GL_FALSE,
             gDrawTextureVertexStride, texCoords);
-
-    glVertexAttrib4f(mDrawTextureShader->color, 1.0f, 1.0f, 1.0f, alpha);
 
     if (!indices) {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
