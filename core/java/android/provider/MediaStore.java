@@ -274,6 +274,19 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              */
             public static final String PARENT = "parent";
+
+            /**
+             * Identifier for the media table containing the object.
+             * Used internally by MediaProvider
+             * <P>Type: INTEGER</P>
+             */
+            public static final String MEDIA_TABLE = "media_table";
+
+            /**
+             * The ID of the object in its media table.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String MEDIA_ID = "media_id";
         }
     }
 
