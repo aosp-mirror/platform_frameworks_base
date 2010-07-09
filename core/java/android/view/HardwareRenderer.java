@@ -17,10 +17,8 @@
 
 package android.view;
 
-import android.content.res.CompatibilityInfo;
 import android.graphics.Canvas;
 import android.os.SystemClock;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -74,14 +72,8 @@ abstract class HardwareRenderer {
      * 
      * @param view The view to draw.
      * @param attachInfo AttachInfo tied to the specified view.
-     * @param translator Translator used to draw applications in compatibility mode.
-     * @param yoff The vertical offset for the drawing.
-     * @param density The density of the application
-     * @param scalingRequired Whether drawing should be scaled.
      */
-    abstract void draw(View view, View.AttachInfo attachInfo,
-            CompatibilityInfo.Translator translator, int yoff, int density,
-            boolean scalingRequired);
+    abstract void draw(View view, View.AttachInfo attachInfo, int yOffset);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -371,9 +363,7 @@ abstract class HardwareRenderer {
         }
 
         @Override
-        void draw(View view, View.AttachInfo attachInfo, CompatibilityInfo.Translator translator,
-                int yoff, int density, boolean scalingRequired) {
-
+        void draw(View view, View.AttachInfo attachInfo, int yOffset) {
             if (canDraw()) {
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 attachInfo.mIgnoreDirtyState = true;
@@ -383,14 +373,9 @@ abstract class HardwareRenderer {
 
                 Canvas canvas = mCanvas;
                 int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                canvas.translate(0, -yOffset);
+
                 try {
-                    canvas.translate(0, -yoff);
-                    if (translator != null) {
-                        translator.translateCanvas(canvas);
-                    }
-                    canvas.setDensity(density);
-                    canvas.setScreenDensity(scalingRequired ? DisplayMetrics.DENSITY_DEVICE : 0);
-    
                     view.draw(canvas);
                 } finally {
                     canvas.restoreToCount(saveCount);

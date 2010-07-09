@@ -362,53 +362,48 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawPatch(mRenderer, bitmap.mNativeBitmap, chunks, dst.left, dst.top, dst.right,
-                dst.bottom, nativePaint, bitmap.getDensity(), mDensity, mScreenDensity);
+        nDrawPatch(mRenderer, bitmap.mNativeBitmap, chunks, dst.left, dst.top,
+                dst.right, dst.bottom, nativePaint);
     }
 
     private native void nDrawPatch(int renderer, int bitmap, byte[] chunks, float left, float top,
-            float right, float bottom, int paint, int bitmapDensity, int canvasDensity, int screenDensity);
+            float right, float bottom, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint,
-                bitmap.getDensity(), mDensity, mScreenDensity);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint);
     }
+
+    private native void nDrawBitmap(int renderer, int bitmap, float left, float top, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, matrix.native_instance, nativePaint,
-                bitmap.getDensity(), mDensity, mScreenDensity);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, matrix.native_instance, nativePaint);
     }
 
-    private native void nDrawBitmap(int renderer, int bitmap, int matrix, int paint,
-            int bitmapDensity, int canvasDensity, int screenDensity);
+    private native void nDrawBitmap(int renderer, int bitmap, int matrix, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
-                bitmap.getDensity(), mDensity, mScreenDensity);
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint
+        );
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
-                bitmap.getDensity(), mDensity, mScreenDensity);
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint
+        );
     }
-
-    private native void nDrawBitmap(int renderer, int bitmap, float left, float top, int paint,
-            int bitmapDensity, int canvasDensity, int screenDensity);
 
     private native void nDrawBitmap(int renderer, int bitmap,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
-            float left, float top, float right, float bottom, int paint,
-            int bitmapDensity, int canvasDensity, int screenDensity);
+            float left, float top, float right, float bottom, int paint);
 
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
