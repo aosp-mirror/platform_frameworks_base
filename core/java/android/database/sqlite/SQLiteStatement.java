@@ -35,6 +35,8 @@ public class SQLiteStatement extends SQLiteProgram
     private static final boolean READ = true;
     private static final boolean WRITE = false;
 
+    private SQLiteDatabase mOrigDb;
+
     /**
      * Don't use SQLiteStatement constructor directly, please use
      * {@link SQLiteDatabase#compileStatement(String)}
@@ -53,12 +55,14 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
-        long timeStart = acquireAndLock(WRITE);
-        try {
-            native_execute();
-            mDatabase.logTimeStat(mSql, timeStart);
-        } finally {
-            releaseAndUnlock();
+        synchronized(this) {
+            long timeStart = acquireAndLock(WRITE);
+            try {
+                native_execute();
+                mDatabase.logTimeStat(mSql, timeStart);
+            } finally {
+                releaseAndUnlock();
+            }
         }
     }
 
@@ -72,13 +76,15 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
-        long timeStart = acquireAndLock(WRITE);
-        try {
-            native_execute();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return (mDatabase.lastChangeCount() > 0) ? mDatabase.lastInsertRow() : -1;
-        } finally {
-            releaseAndUnlock();
+        synchronized(this) {
+            long timeStart = acquireAndLock(WRITE);
+            try {
+                native_execute();
+                mDatabase.logTimeStat(mSql, timeStart);
+                return (mDatabase.lastChangeCount() > 0) ? mDatabase.lastInsertRow() : -1;
+            } finally {
+                releaseAndUnlock();
+            }
         }
     }
 
@@ -91,13 +97,15 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
-        long timeStart = acquireAndLock(READ);
-        try {
-            long retValue = native_1x1_long();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return retValue;
-        } finally {
-            releaseAndUnlock();
+        synchronized(this) {
+            long timeStart = acquireAndLock(READ);
+            try {
+                long retValue = native_1x1_long();
+                mDatabase.logTimeStat(mSql, timeStart);
+                return retValue;
+            } finally {
+                releaseAndUnlock();
+            }
         }
     }
 
@@ -110,13 +118,15 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
-        long timeStart = acquireAndLock(READ);
-        try {
-            String retValue = native_1x1_string();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return retValue;
-        } finally {
-            releaseAndUnlock();
+        synchronized(this) {
+            long timeStart = acquireAndLock(READ);
+            try {
+                String retValue = native_1x1_string();
+                mDatabase.logTimeStat(mSql, timeStart);
+                return retValue;
+            } finally {
+                releaseAndUnlock();
+            }
         }
     }
 
@@ -125,6 +135,7 @@ public class SQLiteStatement extends SQLiteProgram
      * this method does the following:
      * <ul>
      *   <li>make sure the database is open</li>
+     *   <li>get a database connection from the connection pool,if possible</li>
      *   <li>notifies {@link BlockGuard} of read/write</li>
      *   <li>get lock on the database</li>
      *   <li>acquire reference on this object</li>
@@ -135,7 +146,14 @@ public class SQLiteStatement extends SQLiteProgram
      * methods in this class.
      */
     private long acquireAndLock(boolean rwFlag) {
-        verifyDbAndCompileSql();
+        // use pooled database connection handles for SELECT SQL statements
+        mDatabase.verifyDbIsOpen();
+        SQLiteDatabase db = (getSqlStatementType(mSql) != SELECT_STMT) ? mDatabase
+                : mDatabase.getDbConnection(mSql);
+        // use the database connection obtained above
+        mOrigDb = mDatabase;
+        mDatabase = db;
+        nHandle = mDatabase.mNativeHandle;
         if (rwFlag == WRITE) {
             BlockGuard.getThreadPolicy().onWriteToDisk();
         } else {
@@ -145,6 +163,7 @@ public class SQLiteStatement extends SQLiteProgram
         mDatabase.lock();
         acquireReference();
         mDatabase.closePendingStatements();
+        compileAndbindAllArgs();
         return startTime;
     }
 
@@ -158,6 +177,9 @@ public class SQLiteStatement extends SQLiteProgram
         // release the compiled sql statement so that the caller's SQLiteStatement no longer
         // has a hard reference to a database object that may get deallocated at any point.
         releaseCompiledSqlIfNotInCache();
+        // restore the database connection handle to the original value
+        mDatabase = mOrigDb;
+        nHandle = mDatabase.mNativeHandle;
     }
 
     private final native void native_execute();

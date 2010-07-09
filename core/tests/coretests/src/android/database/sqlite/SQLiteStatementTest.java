@@ -158,14 +158,16 @@ public class SQLiteStatementTest extends AndroidTestCase {
         assertEquals(0, stmt.getSqlStatementId());
         int colValue = new Random().nextInt();
         stmt.bindLong(1, colValue);
-        // verify that the sql statement is now compiled
-        int n = stmt.nStatement;
-        assertTrue(n > 0);
-        assertEquals(n, stmt.getSqlStatementId());
+        // verify that the sql statement is still not compiled
+        assertEquals(0, stmt.getSqlStatementId());
         // should still be using the mDatabase connection - verify
         assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
         stmt.bindString(2, "blah" + colValue);
-        assertEquals(n, stmt.nStatement);
+        // verify that the sql statement is still not compiled
+        assertEquals(0, stmt.getSqlStatementId());
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
         stmt.executeInsert();
         // now that the statement is executed, pre-compiled statement should be released
         assertEquals(0, stmt.nStatement);
@@ -187,97 +189,25 @@ public class SQLiteStatementTest extends AndroidTestCase {
         assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
         assertEquals(mDatabase, stmt.mDatabase);
         stmt.bindString(1, "blah" + colValue);
-        // verify that the sql statement is now compiled
-        n = stmt.nStatement;
-        assertTrue(n > 0);
-        assertEquals(n, stmt.getSqlStatementId());
-        SQLiteDatabase dbUsed = mDatabase;
-        if (wal) {
-            // if wal is set, should be using a pooled connection handle
-            dbUsed = mDatabase.mConnectionPool.getConnectionList().get(0);
-            assertTrue(mDatabase.mNativeHandle != dbUsed.mNativeHandle);
-        }
-        assertEquals(dbUsed.mNativeHandle, stmt.nHandle);
-        assertEquals(dbUsed, stmt.mDatabase);
+        // verify that the sql statement is still not compiled
+        assertEquals(0, stmt.nStatement);
+        assertEquals(0, stmt.getSqlStatementId());
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
         // execute the statement
         Long l = stmt.simpleQueryForLong();
         assertEquals(colValue, l.intValue());
         // now that the statement is executed, pre-compiled statement should be released
         assertEquals(0, stmt.nStatement);
         assertEquals(0, stmt.getSqlStatementId());
-        // but the database handle should still remain attached to the statement
-        assertEquals(dbUsed.mNativeHandle, stmt.nHandle);
-        assertEquals(dbUsed, stmt.mDatabase);
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
         stmt.close();
         // pre-compiled SQL statement should still remain released from this object
         assertEquals(0, stmt.nStatement);
         assertEquals(0, stmt.getSqlStatementId());
         // but the database handle should still remain attached to the statement
-        assertEquals(dbUsed, stmt.mDatabase);
-    }
-
-    /**
-     * test to make sure SqliteStatement.nStatement is populated only during bind and execute calls.
-     */
-    public void testGetSqlStatementId() {
-        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
-                "num1 INTEGER, num2 INTEGER, image BLOB);");
-        final String statement = "DELETE FROM test WHERE _id=?;";
-        SQLiteStatement statementOne = mDatabase.compileStatement(statement);
-        // sql statement is NOT compiled until the bind or execute call.
-        statementOne.bindLong(1, 1);
-        SQLiteStatement statementTwo = mDatabase.compileStatement(statement);
-        statementTwo.bindLong(1, 1);
-        // since the same compiled statement is being accessed at the same time by 2 different
-        // objects, they each get their own statement id
-        assertTrue(statementOne.getSqlStatementId() != statementTwo.getSqlStatementId());
-        statementOne.close();
-        statementTwo.close();
-
-        // two SQLiteStatements referring to the same SQL statement should refer to the same
-        // pre-compiled SQl statement id if the SQLiteStatement objects are NOT in use at the same
-        // time
-        statementOne = mDatabase.compileStatement(statement);
-        statementOne.bindLong(1, 1);
-        // now that the SQL statement is compiled, get its pre-compiled SQL statement id
-        int n = statementOne.getSqlStatementId();
-        statementOne.close();
-        statementTwo = mDatabase.compileStatement(statement);
-        statementTwo.bindLong(1, 2); // use different value for bindarg, just for the heck of it
-        assertEquals(n, statementTwo.getSqlStatementId());
-        statementTwo.close();
-
-        // now try to compile 2 different statements and they should have different uniquerIds.
-        SQLiteStatement statement1 = mDatabase.compileStatement("DELETE FROM test WHERE _id > ?;");
-        statement1.bindLong(1, 1);
-        SQLiteStatement statement2 = mDatabase.compileStatement("DELETE FROM test WHERE _id < ?;");
-        statement2.bindLong(1, 11);
-        assertTrue(statement1.getSqlStatementId() != statement2.getSqlStatementId());
-        statement1.close();
-        statement2.close();
-    }
-
-    public void testOnAllReferencesReleased() {
-        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
-                "num1 INTEGER, num2 INTEGER, image BLOB);");
-        final String statement = "DELETE FROM test WHERE _id=?;";
-        SQLiteStatement statementOne = mDatabase.compileStatement(statement);
-        statementOne.bindLong(1, 1);
-        assertTrue(statementOne.getSqlStatementId() > 0);
-        statementOne.releaseReference();
-        assertEquals(0, statementOne.getSqlStatementId());
-        statementOne.close();
-    }
-
-    public void testOnAllReferencesReleasedFromContainer() {
-        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
-                "num1 INTEGER, num2 INTEGER, image BLOB);");
-        final String statement = "DELETE FROM test WHERE _id=?;";
-        SQLiteStatement statementOne = mDatabase.compileStatement(statement);
-        statementOne.bindLong(1, 1);
-        assertTrue(statementOne.getSqlStatementId() > 0);
-        statementOne.releaseReferenceFromContainer();
-        assertEquals(0, statementOne.getSqlStatementId());
-        statementOne.close();
+        assertEquals(mDatabase.mNativeHandle, stmt.nHandle);
+        assertEquals(mDatabase, stmt.mDatabase);
     }
 }
