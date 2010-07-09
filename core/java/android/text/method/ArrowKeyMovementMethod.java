@@ -16,23 +16,28 @@
 
 package android.text.method;
 
-import android.util.Log;
+import android.text.Layout;
+import android.text.NoCopySpan;
+import android.text.Selection;
+import android.text.Spannable;
 import android.view.KeyEvent;
-import android.graphics.Rect;
-import android.text.*;
-import android.widget.TextView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.MotionEvent;
+import android.widget.TextView;
+import android.widget.TextView.CursorController;
 
 // XXX this doesn't extend MetaKeyKeyListener because the signatures
 // don't match.  Need to figure that out.  Meanwhile the meta keys
 // won't work in fields that don't take input.
 
-public class
-ArrowKeyMovementMethod
-implements MovementMethod
-{
+public class ArrowKeyMovementMethod implements MovementMethod {
+    /**
+     * An optional controller for the cursor.
+     * Use {@link #setCursorController(CursorController)} to set this field.
+     */
+    protected CursorController mCursorController;
+
     private boolean up(TextView widget, Spannable buffer) {
         boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
                         KeyEvent.META_SHIFT_ON) == 1) ||
@@ -226,13 +231,22 @@ implements MovementMethod
         return false;
     }
 
-    public boolean onTrackballEvent(TextView widget, Spannable text,
-            MotionEvent event) {
+    public boolean onTrackballEvent(TextView widget, Spannable text, MotionEvent event) {
+        if (mCursorController != null) {
+            mCursorController.hide();
+        }
         return false;
     }
 
-    public boolean onTouchEvent(TextView widget, Spannable buffer,
-                                MotionEvent event) {
+    public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
+        if (mCursorController != null) {
+            return onTouchEventCursor(widget, buffer, event);
+        } else {
+            return onTouchEventStandard(widget, buffer, event);
+        }
+    }
+
+    private boolean onTouchEventStandard(TextView widget, Spannable buffer, MotionEvent event) {
         int initialScrollX = -1, initialScrollY = -1;
         if (event.getAction() == MotionEvent.ACTION_UP) {
             initialScrollX = Touch.getInitialScrollX(widget, buffer);
@@ -291,13 +305,14 @@ implements MovementMethod
                               (MetaKeyKeyListener.getMetaState(buffer,
                                 MetaKeyKeyListener.META_SELECTING) != 0);
 
+
                 if (cap && handled) {
                     // Before selecting, make sure we've moved out of the "slop".
                     // handled will be true, if we're in select mode AND we're
                     // OUT of the slop
 
                     // Turn long press off while we're selecting. User needs to
-                    // re-tap on the selection to enable longpress
+                    // re-tap on the selection to enable long press
                     widget.cancelLongPress();
 
                     // Update selection as we're moving the selection area.
@@ -418,6 +433,39 @@ implements MovementMethod
         }
 
         return handled;
+    }
+
+    private boolean onTouchEventCursor(TextView widget, Spannable buffer, MotionEvent event) {
+        if (widget.isFocused() && !widget.didTouchFocusSelect()) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_MOVE:
+                    widget.cancelLongPress();
+
+                    // Offset the current touch position (from controller to cursor)
+                    final int x = (int) event.getX() + mCursorController.getOffsetX();
+                    final int y = (int) event.getY() + mCursorController.getOffsetY();
+                    int offset = getOffset(x, y, widget);
+                    Selection.setSelection(buffer, offset);
+                    mCursorController.updatePosition();
+                    return true;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mCursorController = null;
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Defines the cursor controller.
+     *
+     * When set, this object can be used to handle events, that can be translated in cursor updates.
+     * @param cursorController A cursor controller implementation
+     */
+    public void setCursorController(CursorController cursorController) {
+        mCursorController = cursorController;
     }
 
     private static class DoubleTapState implements NoCopySpan {
