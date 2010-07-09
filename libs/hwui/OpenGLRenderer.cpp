@@ -463,104 +463,15 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    const uint32_t width = patch->numXDivs;
-    const uint32_t height = patch->numYDivs;
-
     Patch* mesh = mPatchCache.get(patch);
-
-    const uint32_t xStretchCount = (width + 1) >> 1;
-    const uint32_t yStretchCount = (height + 1) >> 1;
-
-    const int32_t* xDivs = &patch->xDivs[0];
-    const int32_t* yDivs = &patch->yDivs[0];
-
-    float xStretch = 0;
-    float yStretch = 0;
-    float xStretchTex = 0;
-    float yStretchTex = 0;
-
-    const float meshWidth = right - left;
-
-    const float bitmapWidth = float(bitmap->width());
-    const float bitmapHeight = float(bitmap->height());
-
-    if (xStretchCount > 0) {
-        uint32_t stretchSize = 0;
-        for (uint32_t i = 1; i < width; i += 2) {
-            stretchSize += xDivs[i] - xDivs[i - 1];
-        }
-        xStretchTex = (stretchSize / bitmapWidth) / xStretchCount;
-        const float fixed = bitmapWidth - stretchSize;
-        xStretch = (right - left - fixed) / xStretchCount;
-    }
-
-    if (yStretchCount > 0) {
-        uint32_t stretchSize = 0;
-        for (uint32_t i = 1; i < height; i += 2) {
-            stretchSize += yDivs[i] - yDivs[i - 1];
-        }
-        yStretchTex = (stretchSize / bitmapHeight) / yStretchCount;
-        const float fixed = bitmapHeight - stretchSize;
-        yStretch = (bottom - top - fixed) / yStretchCount;
-    }
-
-    float vy = 0.0f;
-    float ty = 0.0f;
-    TextureVertex* vertex = mesh->vertices;
-
-    generateVertices(vertex, 0.0f, 0.0f, xDivs, width, xStretch, xStretchTex,
-            meshWidth, bitmapWidth);
-    vertex += width + 2;
-
-    for (uint32_t y = 0; y < height; y++) {
-        if (y & 1) {
-            vy += yStretch;
-            ty += yStretchTex;
-        } else {
-            const float step = float(yDivs[y]);
-            vy += step;
-            ty += step / bitmapHeight;
-        }
-        generateVertices(vertex, vy, ty, xDivs, width, xStretch, xStretchTex,
-                meshWidth, bitmapWidth);
-        vertex += width + 2;
-    }
-
-    generateVertices(vertex, bottom - top, 1.0f, xDivs, width, xStretch, xStretchTex,
-            meshWidth, bitmapWidth);
+    mesh->updateVertices(bitmap, left, top, right, bottom,
+            &patch->xDivs[0], &patch->yDivs[0], patch->numXDivs, patch->numYDivs);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
     drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha, mode, texture->blend,
             true, &mesh->vertices[0].position[0], &mesh->vertices[0].texture[0], mesh->indices,
             mesh->indicesCount);
-}
-
-void OpenGLRenderer::generateVertices(TextureVertex* vertex, float y, float v,
-        const int32_t xDivs[], uint32_t xCount, float xStretch, float xStretchTex,
-        float width, float widthTex) {
-    float vx = 0.0f;
-    float tx = 0.0f;
-
-    TextureVertex::set(vertex, vx, y, tx, v);
-    vertex++;
-
-    for (uint32_t x = 0; x < xCount; x++) {
-        if (x & 1) {
-            vx += xStretch;
-            tx += xStretchTex;
-        } else {
-            const float step = float(xDivs[x]);
-            vx += step;
-            tx += step / widthTex;
-        }
-
-        TextureVertex::set(vertex, vx, y, tx, v);
-        vertex++;
-    }
-
-    TextureVertex::set(vertex, width, y, 1.0f, v);
-    vertex++;
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
