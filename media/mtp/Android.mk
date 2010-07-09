@@ -24,62 +24,19 @@ LOCAL_SRC_FILES:=                                       \
                   MtpDebug.cpp                          \
                   MtpDevice.cpp                         \
                   MtpDeviceInfo.cpp                     \
-                  MtpMediaScanner.cpp                   \
                   MtpObjectInfo.cpp                     \
                   MtpPacket.cpp                         \
                   MtpProperty.cpp                       \
                   MtpRequestPacket.cpp                  \
                   MtpResponsePacket.cpp                 \
                   MtpServer.cpp                         \
-                  MtpSqliteDatabase.cpp                 \
                   MtpStorageInfo.cpp                    \
                   MtpStringBuffer.cpp                   \
                   MtpStorage.cpp                        \
                   MtpUtils.cpp                          \
-                  SqliteDatabase.cpp                    \
-                  SqliteStatement.cpp                   \
 
 LOCAL_MODULE:= libmtp
-
-LOCAL_C_INCLUDES := external/sqlite/dist
 
 LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
 
 include $(BUILD_STATIC_LIBRARY)
-
-ifneq ($(TARGET_SIMULATOR),true)
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:=                                       \
-                  mtptest.cpp                           \
-
-LOCAL_MODULE:= mtptest
-
-LOCAL_CFLAGS := -DMTP_DEVICE
-
-LOCAL_SHARED_LIBRARIES := libutils libsqlite libcutils \
-	libmedia
-
-LOCAL_STATIC_LIBRARIES := libmtp
-
-include $(BUILD_EXECUTABLE)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := scantest
-LOCAL_SRC_FILES:=                                       \
-                  scantest.cpp                          \
-
-
-LOCAL_STATIC_LIBRARIES := libmtp
-
-LOCAL_C_INCLUDES := external/sqlite/dist
-LOCAL_SHARED_LIBRARIES := libutils libsqlite libmedia
-
-LOCAL_CFLAGS := -g
-LOCAL_LDFLAGS := -g
-
-include $(BUILD_EXECUTABLE)
-
-endif

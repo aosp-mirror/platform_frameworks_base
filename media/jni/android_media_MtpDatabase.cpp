@@ -36,7 +36,6 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 
-static jmethodID method_getObjectHandle;
 static jmethodID method_addFile;
 static jmethodID method_getObjectList;
 static jmethodID method_getObjectProperty;
@@ -62,8 +61,6 @@ public:
                                     MyMtpDatabase(JNIEnv *env, jobject client);
     virtual                         ~MyMtpDatabase();
     void                            cleanup(JNIEnv *env);
-
-    virtual MtpObjectHandle         getObjectHandle(const char* path);
 
     virtual MtpObjectHandle         addFile(const char* path,
                                             MtpObjectFormat format,
@@ -136,11 +133,6 @@ void MyMtpDatabase::cleanup(JNIEnv *env) {
 }
 
 MyMtpDatabase::~MyMtpDatabase() {
-}
-
-MtpObjectHandle MyMtpDatabase::getObjectHandle(const char* path) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    return env->CallIntMethod(mDatabase, method_getObjectHandle, env->NewStringUTF(path));
 }
 
 MtpObjectHandle MyMtpDatabase::addFile(const char* path,
@@ -403,11 +395,6 @@ int register_android_media_MtpDatabase(JNIEnv *env)
     clazz = env->FindClass("android/media/MtpDatabase");
     if (clazz == NULL) {
         LOGE("Can't find android/media/MtpDatabase");
-        return -1;
-    }
-    method_getObjectHandle = env->GetMethodID(clazz, "getObjectHandle", "(Ljava/lang/String;)I");
-    if (method_getObjectHandle == NULL) {
-        LOGE("Can't find getObjectHandle");
         return -1;
     }
     method_addFile = env->GetMethodID(clazz, "addFile", "(Ljava/lang/String;IIIJJ)I");

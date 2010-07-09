@@ -30,7 +30,6 @@
 #include "private/android_filesystem_config.h"
 
 #include "MtpServer.h"
-#include "MtpSqliteDatabase.h"  // REMOVE
 
 using namespace android;
 
