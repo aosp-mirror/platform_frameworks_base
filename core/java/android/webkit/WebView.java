@@ -22,14 +22,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
+import android.graphics.DrawFilter;
 import android.graphics.Interpolator;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -454,10 +455,6 @@ public class WebView extends AbsoluteLayout
     // true if onPause has been called (and not onResume)
     private boolean mIsPaused;
 
-    // true if, during a transition to a new page, we're delaying
-    // deleting a root layer until there's something to draw of the new page.
-    private boolean mDelayedDeleteRootLayer;
-
     /**
      * Customizable constant
      */
@@ -584,8 +581,8 @@ public class WebView extends AbsoluteLayout
     static final int SHOW_FULLSCREEN                    = 120;
     static final int HIDE_FULLSCREEN                    = 121;
     static final int DOM_FOCUS_CHANGED                  = 122;
-    static final int IMMEDIATE_REPAINT_MSG_ID           = 123;
-    static final int SET_ROOT_LAYER_MSG_ID              = 124;
+    static final int REPLACE_BASE_CONTENT               = 123;
+    // 124;
     static final int RETURN_LABEL                       = 125;
     static final int FIND_AGAIN                         = 126;
     static final int CENTER_FIT_RECT                    = 127;
@@ -633,8 +630,8 @@ public class WebView extends AbsoluteLayout
         "SHOW_FULLSCREEN", //                = 120;
         "HIDE_FULLSCREEN", //                = 121;
         "DOM_FOCUS_CHANGED", //              = 122;
-        "IMMEDIATE_REPAINT_MSG_ID", //       = 123;
-        "SET_ROOT_LAYER_MSG_ID", //          = 124;
+        "REPLACE_BASE_CONTENT", //           = 123;
+        "124", //                            = 124;
         "RETURN_LABEL", //                   = 125;
         "FIND_AGAIN", //                     = 126;
         "CENTER_FIT_RECT", //                = 127;
@@ -1691,6 +1688,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
+        nativeSetBaseLayer(0);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -1704,8 +1702,9 @@ public class WebView extends AbsoluteLayout
      *         bounds of the view.
      */
     public Picture capturePicture() {
-        if (null == mWebViewCore) return null; // check for out of memory tab
-        return mWebViewCore.copyContentPicture();
+        Picture result = new Picture();
+        nativeCopyBaseContentToPicture(result);
+        return result;
     }
 
     /**
@@ -3232,16 +3231,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void drawExtras(Canvas canvas, int extras, boolean animationsRunning) {
-        // If mNativeClass is 0, we should not reach here, so we do not
-        // need to check it again.
-        if (animationsRunning) {
-            canvas.setDrawFilter(mWebViewCore.mZoomFilter);
-        }
-        nativeDrawExtras(canvas, extras);
-        canvas.setDrawFilter(null);
-    }
-
     private void onZoomAnimationStart() {
         // If it is in password mode, turn it off so it does not draw misplaced.
         if (inEditingMode() && nativeFocusCandidateIsPassword()) {
@@ -3268,6 +3257,18 @@ public class WebView extends AbsoluteLayout
         onZoomAnimationEnd();
     }
 
+    private static final int ZOOM_BITS = Paint.FILTER_BITMAP_FLAG |
+                                         Paint.DITHER_FLAG |
+                                         Paint.SUBPIXEL_TEXT_FLAG;
+    private static final int SCROLL_BITS = Paint.FILTER_BITMAP_FLAG |
+                                           Paint.DITHER_FLAG;
+
+    private final DrawFilter mZoomFilter =
+            new PaintFlagsDrawFilter(ZOOM_BITS, Paint.LINEAR_TEXT_FLAG);
+    // If we need to trade better quality for speed, set mScrollFilter to null
+    private final DrawFilter mScrollFilter =
+            new PaintFlagsDrawFilter(SCROLL_BITS, 0);
+
     private void drawCoreAndCursorRing(Canvas canvas, int color,
         boolean drawCursorRing) {
         if (mDrawHistory) {
@@ -3275,6 +3276,7 @@ public class WebView extends AbsoluteLayout
             canvas.drawPicture(mHistoryPicture);
             return;
         }
+        if (mNativeClass == 0) return;
 
         boolean animateZoom = mZoomManager.isFixedLengthAnimationInProgress();
         boolean animateScroll = ((!mScroller.isFinished()
@@ -3309,10 +3311,7 @@ public class WebView extends AbsoluteLayout
             // we ask for a repaint.
             invalidate();
         }
-        mWebViewCore.drawContentPicture(canvas, color,
-                (mZoomManager.isZoomAnimating() || UIAnimationsRunning),
-                animateScroll);
-        if (mNativeClass == 0) return;
+
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
         if (DebugFlags.WEB_VIEW) {
@@ -3332,7 +3331,18 @@ public class WebView extends AbsoluteLayout
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
-        drawExtras(canvas, extras, UIAnimationsRunning);
+        DrawFilter df = null;
+        if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
+            df = mZoomFilter;
+        } else if (animateScroll) {
+            df = mScrollFilter;
+        }
+        canvas.setDrawFilter(df);
+        int content = nativeDraw(canvas, color, extras, true);
+        canvas.setDrawFilter(null);
+        if (content != 0) {
+            mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+        }
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -3368,7 +3378,7 @@ public class WebView extends AbsoluteLayout
     // Should only be called in UI thread
     void switchOutDrawHistory() {
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
-        if (mDrawHistory && mWebViewCore.pictureReady()) {
+        if (mDrawHistory && (getProgress() == 100 || nativeHasContent())) {
             mDrawHistory = false;
             mHistoryPicture = null;
             invalidate();
@@ -6036,16 +6046,14 @@ public class WebView extends AbsoluteLayout
                     mZoomManager.updateZoomRange(viewState, getViewWidth(), viewState.mScrollX);
                     break;
                 }
+                case REPLACE_BASE_CONTENT: {
+                    nativeReplaceBaseContent(msg.arg1);
+                    break;
+                }
                 case NEW_PICTURE_MSG_ID: {
-                    // If we've previously delayed deleting a root
-                    // layer, do it now.
-                    if (mDelayedDeleteRootLayer) {
-                        mDelayedDeleteRootLayer = false;
-                        nativeSetRootLayer(0);
-                    }
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-
+                    nativeSetBaseLayer(draw.mBaseLayer);
                     final Point viewSize = draw.mViewPoint;
                     WebViewCore.ViewState viewState = draw.mViewState;
                     boolean isPictureAfterFirstLayout = viewState != null;
@@ -6163,23 +6171,6 @@ public class WebView extends AbsoluteLayout
                         // we need to scale r from content into view coords,
                         // which viewInvalidate() does for us
                         viewInvalidate(r.left, r.top, r.right, r.bottom);
-                    }
-                    break;
-                }
-                case IMMEDIATE_REPAINT_MSG_ID: {
-                    invalidate();
-                    break;
-                }
-                case SET_ROOT_LAYER_MSG_ID: {
-                    if (0 == msg.arg1) {
-                        // Null indicates deleting the old layer, but
-                        // don't actually do so until we've got the
-                        // new page to display.
-                        mDelayedDeleteRootLayer = true;
-                    } else {
-                        mDelayedDeleteRootLayer = false;
-                        nativeSetRootLayer(msg.arg1);
-                        invalidate();
                     }
                     break;
                 }
@@ -6944,7 +6935,7 @@ public class WebView extends AbsoluteLayout
      * @hide only needs to be accessible to Browser and testing
      */
     public void drawPage(Canvas canvas) {
-        mWebViewCore.drawContentPicture(canvas, 0, false, false);
+        nativeDraw(canvas, 0, 0, false);
     }
 
     /**
@@ -6988,7 +6979,15 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorWantsKeyEvents();
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
-    private native void     nativeDrawExtras(Canvas canvas, int extra);
+
+    /**
+     * Draw the picture set with a background color and extra. If
+     * "splitIfNeeded" is true and the return value is not 0, the return value
+     * MUST be passed to WebViewCore with SPLIT_PICTURE_SET message so that the
+     * native allocation can be freed.
+     */
+    private native int nativeDraw(Canvas canvas, int color, int extra,
+            boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations();
     private native void     nativeExtendSelection(int x, int y);
@@ -7053,7 +7052,10 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetRootLayer(int layer);
+    private native void     nativeSetBaseLayer(int layer);
+    private native void     nativeReplaceBaseContent(int content);
+    private native void     nativeCopyBaseContentToPicture(Picture pict);
+    private native boolean  nativeHasContent();
     private native void     nativeSetSelectionPointer(boolean set,
             float scale, int x, int y);
     private native boolean  nativeStartSelection(int x, int y);
