@@ -17,6 +17,9 @@
 package android.database.sqlite;
 
 import android.util.Log;
+import android.util.Pair;
+
+import java.util.ArrayList;
 
 /**
  * A base class for compiled SQLite programs.
@@ -29,7 +32,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     private static final String TAG = "SQLiteProgram";
 
     /** the type of sql statement being processed by this object */
-    private static final int SELECT_STMT = 1;
+    /* package */ static final int SELECT_STMT = 1;
     private static final int UPDATE_STMT = 2;
     private static final int OTHER_STMT = 3;
 
@@ -63,13 +66,40 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     @Deprecated
     protected int nStatement = 0;
 
+    /**
+     * In the case of {@link SQLiteStatement}, this member stores the bindargs passed
+     * to the following methods, instead of actually doing the binding.
+     * <ul>
+     *   <li>{@link #bindBlob(int, byte[])}</li>
+     *   <li>{@link #bindDouble(int, double)}</li>
+     *   <li>{@link #bindLong(int, long)}</li>
+     *   <li>{@link #bindNull(int)}</li>
+     *   <li>{@link #bindString(int, String)}</li>
+     * </ul>
+     * <p>
+     * Each entry in the array is a Pair of
+     * <ol>
+     *   <li>bind arg position number</li>
+     *   <li>the value to be bound to the bindarg</li>
+     * </ol>
+     * <p>
+     * It is lazily initialized in the above bind methods
+     * and it is cleared in {@link #clearBindings()} method.
+     * <p>
+     * It is protected (in multi-threaded environment) by {@link SQLiteProgram}.this
+     */
+    private ArrayList<Pair<Integer, Object>> bindArgs = null;
+
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
         this(db, sql, true);
     }
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql, boolean compileFlag) {
         mSql = sql.trim();
-        attachObjectToDatabase(db);
+        db.acquireReference();
+        db.addSQLiteClosable(this);
+        mDatabase = db;
+        nHandle = db.mNativeHandle;
         if (compileFlag) {
             compileSql();
         }
@@ -120,7 +150,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         nStatement = mCompiledSql.nStatement;
     }
 
-    private int getSqlStatementType(String sql) {
+    /* package */ int getSqlStatementType(String sql) {
         if (mSql.length() < 6) {
             return OTHER_STMT;
         }
@@ -136,46 +166,11 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         return OTHER_STMT;
     }
 
-    private synchronized void attachObjectToDatabase(SQLiteDatabase db) {
-        db.acquireReference();
-        db.addSQLiteClosable(this);
-        mDatabase = db;
-        nHandle = db.mNativeHandle;
-    }
-
-    private synchronized void detachObjectFromDatabase() {
-        mDatabase.removeSQLiteClosable(this);
-        mDatabase.releaseReference();
-    }
-
-    /* package */ synchronized void verifyDbAndCompileSql() {
-        mDatabase.verifyDbIsOpen();
-        // use pooled database connection handles for SELECT SQL statements
-        SQLiteDatabase db = (getSqlStatementType(mSql) != SELECT_STMT) ? mDatabase
-                : mDatabase.getDbConnection(mSql);
-        if (!db.equals(mDatabase)) {
-            // the database connection handle to be used is not the same as the one supplied
-            // in the constructor. do some housekeeping.
-            detachObjectFromDatabase();
-            attachObjectToDatabase(db);
-        }
-        // compile the sql statement
-        if (nStatement > 0) {
-            // already compiled.
-            return;
-        }
-        mDatabase.lock();
-        try {
-            compileSql();
-        } finally {
-            mDatabase.unlock();
-        }
-    }
-
     @Override
     protected void onAllReferencesReleased() {
         releaseCompiledSqlIfNotInCache();
-        detachObjectFromDatabase();
+        mDatabase.removeSQLiteClosable(this);
+        mDatabase.releaseReference();
     }
 
     @Override
@@ -246,11 +241,17 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param index The 1-based index to the parameter to bind null to
      */
     public void bindNull(int index) {
+        mDatabase.verifyDbIsOpen();
         synchronized (this) {
-            verifyDbAndCompileSql();
             acquireReference();
             try {
-                native_bind_null(index);
+                if (this.nStatement == 0) {
+                    // since the SQL statement is not compiled, don't do the binding yet.
+                    // can be done before executing the SQL statement
+                    addToBindArgs(index, null);
+                } else {
+                    native_bind_null(index);
+                }
             } finally {
                 releaseReference();
             }
@@ -265,11 +266,15 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindLong(int index, long value) {
+        mDatabase.verifyDbIsOpen();
         synchronized (this) {
-            verifyDbAndCompileSql();
             acquireReference();
             try {
-                native_bind_long(index, value);
+                if (this.nStatement == 0) {
+                    addToBindArgs(index, value);
+                } else {
+                    native_bind_long(index, value);
+                }
             } finally {
                 releaseReference();
             }
@@ -284,11 +289,15 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindDouble(int index, double value) {
+        mDatabase.verifyDbIsOpen();
         synchronized (this) {
-            verifyDbAndCompileSql();
             acquireReference();
             try {
-                native_bind_double(index, value);
+                if (this.nStatement == 0) {
+                    addToBindArgs(index, value);
+                } else {
+                    native_bind_double(index, value);
+                }
             } finally {
                 releaseReference();
             }
@@ -306,11 +315,15 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
+        mDatabase.verifyDbIsOpen();
         synchronized (this) {
-            verifyDbAndCompileSql();
             acquireReference();
             try {
-                native_bind_string(index, value);
+                if (this.nStatement == 0) {
+                    addToBindArgs(index, value);
+                } else {
+                    native_bind_string(index, value);
+                }
             } finally {
                 releaseReference();
             }
@@ -328,11 +341,15 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
+        mDatabase.verifyDbIsOpen();
         synchronized (this) {
-            verifyDbAndCompileSql();
             acquireReference();
             try {
-                native_bind_blob(index, value);
+                if (this.nStatement == 0) {
+                    addToBindArgs(index, value);
+                } else {
+                    native_bind_blob(index, value);
+                }
             } finally {
                 releaseReference();
             }
@@ -344,6 +361,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void clearBindings() {
         synchronized (this) {
+            bindArgs = null;
             if (this.nStatement == 0) {
                 return;
             }
@@ -362,10 +380,39 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     public void close() {
         synchronized (this) {
+            bindArgs = null;
             if (nHandle == 0 || !mDatabase.isOpen()) {
                 return;
             }
             releaseReference();
+        }
+    }
+
+    private synchronized void addToBindArgs(int index, Object value) {
+        if (bindArgs == null) {
+            bindArgs = new ArrayList<Pair<Integer, Object>>();
+        }
+        bindArgs.add(new Pair<Integer, Object>(index, value));
+    }
+
+    /* package */ synchronized void compileAndbindAllArgs() {
+        assert nStatement == 0;
+        compileSql();
+        if (bindArgs == null) {
+            return;
+        }
+        for (Pair<Integer, Object> p : bindArgs) {
+            if (p.second == null) {
+                native_bind_null(p.first);
+            } else if (p.second instanceof Long) {
+                native_bind_long(p.first, (Long)p.second);
+            } else if (p.second instanceof Double) {
+                native_bind_double(p.first, (Double)p.second);
+            } else if (p.second instanceof byte[]) {
+                native_bind_blob(p.first, (byte[])p.second);
+            }  else {
+                native_bind_string(p.first, (String)p.second);
+            }
         }
     }
 

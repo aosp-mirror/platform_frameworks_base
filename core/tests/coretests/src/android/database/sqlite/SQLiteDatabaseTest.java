@@ -279,11 +279,24 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         }
     }
 
+    private static class ClassToTestSqlCompilationAndCaching extends SQLiteProgram {
+        private ClassToTestSqlCompilationAndCaching(SQLiteDatabase db, String sql) {
+            super(db, sql);
+        }
+        private static ClassToTestSqlCompilationAndCaching create(SQLiteDatabase db, String sql) {
+            db.lock();
+            try {
+                return new ClassToTestSqlCompilationAndCaching(db, sql);
+            } finally {
+                db.unlock();
+            }
+        }
+    }
+
     @SmallTest
     public void testLruCachingOfSqliteCompiledSqlObjs() {
         mDatabase.disableWriteAheadLogging();
         mDatabase.execSQL("CREATE TABLE test (i int, j int);");
-        mDatabase.execSQL("insert into test values(1,1);");
         // set cache size
         int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
         mDatabase.setMaxSqlCacheSize(N);
@@ -292,22 +305,24 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // insertion of (N+1)th entry, make sure 0th entry is closed
         ArrayList<Integer> stmtObjs = new ArrayList<Integer>();
         ArrayList<String> sqlStrings = new ArrayList<String>();
-        SQLiteStatement stmt0 = null;
+        int stmt0 = 0;
         for (int i = 0; i < N+1; i++) {
-            String s = "select * from test where i = " + i + " and j = ?";
+            String s = "insert into test values(" + i + ",?);";
             sqlStrings.add(s);
-            SQLiteStatement c = mDatabase.compileStatement(s);
-            c.bindLong(1, 1);
-            stmtObjs.add(i, c.getSqlStatementId());
+            ClassToTestSqlCompilationAndCaching c =
+                    ClassToTestSqlCompilationAndCaching.create(mDatabase, s);
+            int n = c.getSqlStatementId();
+            stmtObjs.add(i, n);
             if (i == 0) {
-                // save thie SQLiteStatement obj. we want to make sure it is thrown out of
-                // the cache and its handle is 0'ed.
-                stmt0 = c;
+                // save the statementId of this obj. we want to make sure it is thrown out of
+                // the cache at the end of this test.
+                stmt0 = n;
             }
             c.close();
         }
-        // is 0'th entry out of the cache?
-        assertEquals(0, stmt0.getSqlStatementId());
+        // is 0'th entry out of the cache? it should be in the list of statementIds
+        // corresponding to the pre-compiled sql statements to be finalized.
+        assertTrue(mDatabase.getQueuedUpStmtList().contains(stmt0));
         for (int i = 1; i < N+1; i++) {
             SQLiteCompiledSql compSql = mDatabase.getCompiledStatementForSql(sqlStrings.get(i));
             assertNotNull(compSql);
@@ -321,11 +336,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
                 "num1 INTEGER, num2 INTEGER, image BLOB);");
         final String statement = "DELETE FROM test WHERE _id=?;";
         SQLiteStatement statementDoNotClose = mDatabase.compileStatement(statement);
-        // SQl statement is compiled only at find bind or execute call
-        assertTrue(statementDoNotClose.getSqlStatementId() == 0);
         statementDoNotClose.bindLong(1, 1);
-        assertTrue(statementDoNotClose.getSqlStatementId() > 0);
-        int nStatement = statementDoNotClose.getSqlStatementId();
         /* do not close statementDoNotClose object.
          * That should leave it in SQLiteDatabase.mPrograms.
          * mDatabase.close() in tearDown() should release it.
@@ -340,24 +351,25 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
     public void testStatementClose() {
         mDatabase.execSQL("CREATE TABLE test (i int, j int);");
         // fill up statement cache in mDatabase\
-        int N = 26;
+        int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
         mDatabase.setMaxSqlCacheSize(N);
         SQLiteStatement stmt;
         int stmt0Id = 0;
         for (int i = 0; i < N; i ++) {
-            stmt = mDatabase.compileStatement("insert into test values(" + i + ", ?);");
-            stmt.bindLong(1, 1);
+            ClassToTestSqlCompilationAndCaching c =
+                    ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                            "insert into test values(" + i + ", ?);");
             // keep track of 0th entry
             if (i == 0) {
-                stmt0Id = stmt.getSqlStatementId();
+                stmt0Id = c.getSqlStatementId();
             }
-            stmt.executeInsert();
-            stmt.close();
+            c.close();
         }
 
         // add one more to the cache - and the above 'stmt0Id' should fall out of cache
-        SQLiteStatement stmt1 = mDatabase.compileStatement("insert into test values(100, ?);");
-        stmt1.bindLong(1, 1);
+        ClassToTestSqlCompilationAndCaching stmt1 =
+                ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                        "insert into test values(100, ?);");
         stmt1.close();
 
         // the above close() should have queuedUp the statement for finalization
@@ -381,18 +393,18 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // fill up statement cache in mDatabase in a thread
         Thread t1 = new Thread() {
             @Override public void run() {
-                int N = 26;
+                int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
                 mDatabase.setMaxSqlCacheSize(N);
                 SQLiteStatement stmt;
                 for (int i = 0; i < N; i ++) {
-                    stmt = mDatabase.compileStatement("insert into test values(" + i + ", ?);");
-                    stmt.bindLong(1,1);
+                    ClassToTestSqlCompilationAndCaching c =
+                        ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                                "insert into test values(" + i + ", ?);");
                     // keep track of 0th entry
                     if (i == 0) {
-                        setStmt0Id(stmt.getSqlStatementId());
+                        stmt0Id = c.getSqlStatementId();
                     }
-                    stmt.executeInsert();
-                    stmt.close();
+                    c.close();
                 }
             }
         };
@@ -404,9 +416,9 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // just for the heck of it, do it in a separate thread
         Thread t2 = new Thread() {
             @Override public void run() {
-                SQLiteStatement stmt1 = mDatabase.compileStatement(
-                        "insert into test values(100, ?);");
-                stmt1.bindLong(1, 1);
+                ClassToTestSqlCompilationAndCaching stmt1 =
+                        ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                                "insert into test values(100, ?);");
                 stmt1.close();
             }
         };
@@ -452,18 +464,18 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // fill up statement cache in mDatabase in a thread
         Thread t1 = new Thread() {
             @Override public void run() {
-                int N = 26;
+                int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
                 mDatabase.setMaxSqlCacheSize(N);
                 SQLiteStatement stmt;
                 for (int i = 0; i < N; i ++) {
-                    stmt = mDatabase.compileStatement("insert into test values(" + i + ", ?);");
-                    stmt.bindLong(1, 1);
+                    ClassToTestSqlCompilationAndCaching c =
+                            ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                                    "insert into test values(" + i + ", ?);");
                     // keep track of 0th entry
                     if (i == 0) {
-                        setStmt0Id(stmt.getSqlStatementId());
+                        stmt0Id = c.getSqlStatementId();
                     }
-                    stmt.executeInsert();
-                    stmt.close();
+                    c.close();
                 }
             }
         };
@@ -475,8 +487,9 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         // just for the heck of it, do it in a separate thread
         Thread t2 = new Thread() {
             @Override public void run() {
-                SQLiteStatement stmt1 = mDatabase.compileStatement(
-                        "insert into test values(100, ?);");
+                ClassToTestSqlCompilationAndCaching stmt1 =
+                        ClassToTestSqlCompilationAndCaching.create(mDatabase,
+                                "insert into test values(100, ?);");
                 stmt1.bindLong(1, 1);
                 stmt1.close();
             }
