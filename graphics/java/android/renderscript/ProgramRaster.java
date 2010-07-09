@@ -29,7 +29,6 @@ public class ProgramRaster extends BaseObj {
     boolean mPointSmooth;
     boolean mLineSmooth;
     boolean mPointSprite;
-    float mPointSize;
     float mLineWidth;
     Element mIn;
     Element mOut;
@@ -38,7 +37,6 @@ public class ProgramRaster extends BaseObj {
         super(rs);
         mID = id;
 
-        mPointSize = 1.0f;
         mLineWidth = 1.0f;
         mPointSmooth = false;
         mLineSmooth = false;
@@ -49,12 +47,6 @@ public class ProgramRaster extends BaseObj {
         mRS.validate();
         mLineWidth = w;
         mRS.nProgramRasterSetLineWidth(mID, w);
-    }
-
-    public void setPointSize(float s) {
-        mRS.validate();
-        mPointSize = s;
-        mRS.nProgramRasterSetPointSize(mID, s);
     }
 
     void internalInit() {

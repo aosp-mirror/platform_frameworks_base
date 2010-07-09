@@ -144,10 +144,8 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
                 slot = 1;
             } else if (mAttribs[ct].name == "normal") {
                 slot = 2;
-            } else if (mAttribs[ct].name == "pointSize") {
-                slot = 3;
             } else if (mAttribs[ct].name == "texture0") {
-                slot = 4;
+                slot = 3;
             } else {
                 continue;
             }

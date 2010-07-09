@@ -48,6 +48,23 @@ extern int64_t rsElapsedTimeMillis();
 extern int rsSendToClient(void *data, int cmdID, int len, int waitForSpace);
 
 // Script to Script
+typedef struct rs_script_call_rec {
+    rs_script script;
+    rs_allocation input;
+    rs_allocation output;
+
+    uint32_t xStart;
+    uint32_t xEnd;
+    uint32_t yStart;
+    uint32_t yEnd;
+    uint32_t zStart;
+    uint32_t zEnd;
+    uint32_t arrayStart;
+    uint32_t arrayEnd;
+
+    const void * usrData;
+} rs_script_call;
+
 extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input);
 extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, rs_allocation output);
 extern void __attribute__((overloadable))rsForEach(rs_script, rs_allocation input, int xStart, int xEnd);
