@@ -60,11 +60,6 @@ union MtpPropertyValue {
 #define MTP_PARENT_ROOT         0xFFFFFFFF       // parent is root of the storage
 #define kInvalidObjectHandle    0xFFFFFFFF
 
-// MtpObjectHandle bits and masks
-#define kObjectHandleMarkBit        0x80000000      // used for mark & sweep by MtpMediaScanner
-#define kObjectHandleTableMask      0x70000000      // mask for object table
-#define kObjectHandleIndexMask      0x0FFFFFFF      // mask for object index in file table
-
 class MtpStorage;
 class MtpDevice;
 class MtpProperty;

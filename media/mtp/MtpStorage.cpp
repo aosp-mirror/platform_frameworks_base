@@ -19,7 +19,6 @@
 #include "MtpDebug.h"
 #include "MtpDatabase.h"
 #include "MtpStorage.h"
-#include "MtpMediaScanner.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -76,11 +75,6 @@ uint64_t MtpStorage::getFreeSpace() {
 
 const char* MtpStorage::getDescription() const {
     return "Device Storage";
-}
-
-bool MtpStorage::scanFiles() {
-    MtpMediaScanner scanner(mStorageID, mFilePath, mDatabase);
-    return scanner.scanFiles();
 }
 
 }  // namespace android

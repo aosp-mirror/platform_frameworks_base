@@ -74,26 +74,6 @@ public class MtpDatabase {
         native_finalize();
     }
 
-    // called from native code
-    private int getObjectHandle(String path) {
-        Log.d(TAG, "getObjectHandle " + path);
-        Cursor c = null;
-        try {
-            c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                            PATH_WHERE, new String[] { path }, null);
-            if (c != null && c.moveToNext()) {
-                return c.getInt(0);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getObjectHandle", e);
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        return 0;
-    }
-
     private int addFile(String path, int format, int parent,
                          int storage, long size, long modified) {
         Log.d(TAG, "addFile " + path);

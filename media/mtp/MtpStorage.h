@@ -22,7 +22,6 @@
 namespace android {
 
 class MtpDatabase;
-class SqliteStatement;
 
 class MtpStorage {
 
@@ -44,8 +43,6 @@ public:
     uint64_t                getFreeSpace();
     const char*             getDescription() const;
     inline const char*      getPath() const { return mFilePath; }
-
-    bool                    scanFiles();
 };
 
 }; // namespace android

@@ -71,7 +71,6 @@ public:
     void                addStorage(const char* filePath);
     inline void         addStorage(MtpStorage* storage) { mStorages.push(storage); }
     MtpStorage*         getStorage(MtpStorageID id);
-    void                scanStorage();
     void                run();
 
     MtpProperty*        getObjectProperty(MtpPropertyCode propCode);

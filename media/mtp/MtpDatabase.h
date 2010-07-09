@@ -18,7 +18,6 @@
 #define _MTP_DATABASE_H
 
 #include "MtpTypes.h"
-#include "SqliteDatabase.h"
 
 namespace android {
 
@@ -28,7 +27,6 @@ class MtpDatabase {
 public:
     virtual ~MtpDatabase() {}
 
-    virtual MtpObjectHandle         getObjectHandle(const char* path) = 0;
     virtual MtpObjectHandle         addFile(const char* path,
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent,
@@ -51,9 +49,6 @@ public:
                                             MtpString& filePath,
                                             int64_t& fileLength) = 0;
     virtual bool                    deleteFile(MtpObjectHandle handle) = 0;
-
-    // helper for media scanner
-    virtual MtpObjectHandle*        getFileList(int& outCount) = 0;
 
     virtual void                    beginTransaction() = 0;
     virtual void                    commitTransaction() = 0;

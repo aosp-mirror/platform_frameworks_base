@@ -25,9 +25,9 @@
 #include <cutils/properties.h>
 
 #include "MtpDebug.h"
+#include "MtpDatabase.h"
 #include "MtpProperty.h"
 #include "MtpServer.h"
-#include "MtpSqliteDatabase.h"
 #include "MtpStorage.h"
 #include "MtpStringBuffer.h"
 
@@ -145,13 +145,6 @@ MtpStorage* MtpServer::getStorage(MtpStorageID id) {
             return storage;
     }
     return NULL;
-}
-
-void MtpServer::scanStorage() {
-    for (int i = 0; i < mStorages.size(); i++) {
-        MtpStorage* storage =  mStorages[i];
-        storage->scanFiles();
-    }
 }
 
 void MtpServer::run() {
