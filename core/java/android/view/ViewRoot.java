@@ -336,6 +336,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                             ((RootViewSurfaceTaker)view).willYouTakeTheSurface();
                     if (mSurfaceHolderCallback != null) {
                         mSurfaceHolder = new TakenSurfaceHolder();
+                        mSurfaceHolder.setFormat(PixelFormat.UNKNOWN);
                     }
                 }
                 Resources resources = mView.getContext().getResources();
@@ -650,7 +651,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             // object is not initialized to its backing store, but soon it
             // will be (assuming the window is visible).
             attachInfo.mSurface = mSurface;
-            attachInfo.mTranslucentWindow = lp.format != PixelFormat.OPAQUE;
+            attachInfo.mTranslucentWindow = PixelFormat.formatHasAlpha(lp.format);
             attachInfo.mHasWindowFocus = false;
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
@@ -816,8 +817,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (mSurfaceHolder != null) {
                 mSurfaceHolder.mSurfaceLock.lock();
                 mDrawingAllowed = true;
-                lp.format = mSurfaceHolder.getRequestedFormat();
-                lp.type = mSurfaceHolder.getRequestedType();
             }
 
             boolean hwIntialized = false;

@@ -51,7 +51,7 @@ int8_t android_app_read_cmd(struct android_app* android_app) {
     return -1;
 }
 
-void android_app_exec_cmd(struct android_app* android_app, int8_t cmd) {
+int32_t android_app_exec_cmd(struct android_app* android_app, int8_t cmd) {
     switch (cmd) {
         case APP_CMD_INPUT_CHANGED:
             LOGI("APP_CMD_INPUT_CHANGED\n");
@@ -93,6 +93,8 @@ void android_app_exec_cmd(struct android_app* android_app, int8_t cmd) {
             android_app->destroyRequested = 1;
             break;
     }
+    
+    return android_app->destroyRequested ? 0 : 1;
 }
 
 static void* android_app_entry(void* param) {

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-
 #ifndef ANDROID_NATIVE_WINDOW_H
 #define ANDROID_NATIVE_WINDOW_H
+
+#include <android/rect.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +34,27 @@ enum {
 
 struct ANativeWindow;
 typedef struct ANativeWindow ANativeWindow;
+
+typedef struct ANativeWindow_Buffer {
+    int32_t width;
+    int32_t height;
+    int32_t stride;
+    int32_t format;
+    void* bits;
+    
+    uint32_t reserved[6];
+} ANativeWindow_Buffer;
+
+/**
+ * Acquire a reference on the given ANativeWindow object.  This prevents the object
+ * from being deleted until the reference is removed.
+ */
+void ANativeWindow_acquire(ANativeWindow* window);
+
+/**
+ * Remove a reference that was previously acquired with ANativeWindow_acquire().
+ */
+void ANativeWindow_release(ANativeWindow* window);
 
 /*
  * Return the current width in pixels of the window surface.  Returns a
@@ -60,13 +82,22 @@ int32_t ANativeWindow_getFormat(ANativeWindow* window);
  * window's physical size, then it buffer will be scaled to match that size
  * when compositing it to the screen.
  *
- * The format may be one of the window format constants above.
- *
- * For all of these parameters, if 0 is supplied than the window's base
+ * For all of these parameters, if 0 is supplied then the window's base
  * value will come back in force.
  */
-int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width,
-        int32_t height, int32_t format);
+int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width, int32_t height);
+
+/**
+ * Lock the window's next drawing surface for writing.
+ */
+int32_t ANativeWindow_lock(ANativeWindow* window, ANativeWindow_Buffer* outBuffer,
+        ARect* inOutDirtyBounds);
+
+/**
+ * Unlock the window's drawing surface after previously locking it,
+ * posting the new buffer to the display.
+ */
+int32_t ANativeWindow_unlockAndPost(ANativeWindow* window);
 
 #ifdef __cplusplus
 };

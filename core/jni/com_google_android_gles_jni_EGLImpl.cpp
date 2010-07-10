@@ -16,6 +16,7 @@
 */
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_view_Surface.h>
 #include <utils/misc.h>
 
 #include <EGL/egl.h>
@@ -24,8 +25,6 @@
 #include <surfaceflinger/Surface.h>
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
-
-#include "android_view_Surface.h"
 
 namespace android {
 

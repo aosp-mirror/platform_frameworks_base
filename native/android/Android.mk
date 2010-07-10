@@ -6,17 +6,18 @@ include $(CLEAR_VARS)
 # our source files
 #
 LOCAL_SRC_FILES:= \
-    activity.cpp \
     input.cpp \
     looper.cpp \
+    native_activity.cpp \
     native_window.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-    libandroid_runtime \
     libcutils \
     libutils \
     libbinder \
-    libui
+    libui \
+    libsurfaceflinger_client \
+    libandroid_runtime
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
