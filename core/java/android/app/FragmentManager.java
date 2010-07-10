@@ -238,6 +238,7 @@ public class FragmentManager {
                     if (newState > Fragment.STARTED) {
                         if (DEBUG) Log.v(TAG, "moveto RESUMED: " + f);
                         f.mCalled = false;
+                        f.mResumed = true;
                         f.onResume();
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
@@ -256,12 +257,13 @@ public class FragmentManager {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onPause()");
                         }
+                        f.mResumed = false;
                     }
                 case Fragment.STARTED:
                     if (newState < Fragment.STARTED) {
                         if (DEBUG) Log.v(TAG, "movefrom STARTED: " + f);
                         f.mCalled = false;
-                        f.onStop();
+                        f.performStop();
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onStop()");

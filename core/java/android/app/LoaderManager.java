@@ -26,6 +26,12 @@ import android.util.SparseArray;
  * one or more {@link android.content.Loader} instances associated with it.
  */
 public class LoaderManager {
+    final SparseArray<LoaderInfo> mLoaders = new SparseArray<LoaderInfo>();
+    final SparseArray<LoaderInfo> mInactiveLoaders = new SparseArray<LoaderInfo>();
+    boolean mStarted;
+    boolean mRetaining;
+    boolean mRetainingStarted;
+    
     /**
      * Callback interface for a client to interact with the manager.
      */
@@ -35,81 +41,208 @@ public class LoaderManager {
     }
     
     final class LoaderInfo implements Loader.OnLoadCompleteListener<Object> {
-        public Bundle args;
-        public Loader<Object> loader;
-        public LoaderManager.LoaderCallbacks<Object> callback;
+        final int mId;
+        final Bundle mArgs;
+        LoaderManager.LoaderCallbacks<Object> mCallbacks;
+        Loader<Object> mLoader;
+        Object mData;
+        boolean mStarted;
+        boolean mRetaining;
+        boolean mRetainingStarted;
+        boolean mDestroyed;
+        boolean mListenerRegistered;
+        
+        public LoaderInfo(int id, Bundle args, LoaderManager.LoaderCallbacks<Object> callbacks) {
+            mId = id;
+            mArgs = args;
+            mCallbacks = callbacks;
+        }
+        
+        void start() {
+            if (mRetaining && mRetainingStarted) {
+                // Our owner is started, but we were being retained from a
+                // previous instance in the started state...  so there is really
+                // nothing to do here, since the loaders are still started.
+                mStarted = true;
+                return;
+            }
+
+            if (mLoader == null && mCallbacks != null) {
+               mLoader = mCallbacks.onCreateLoader(mId, mArgs);
+            }
+            if (mLoader != null) {
+                mLoader.registerListener(mId, this);
+                mListenerRegistered = true;
+                mLoader.startLoading();
+                mStarted = true;
+            }
+        }
+        
+        void retain() {
+            mRetaining = true;
+            mRetainingStarted = mStarted;
+            mStarted = false;
+            mCallbacks = null;
+        }
+        
+        void finishRetain() {
+            if (mRetaining) {
+                mRetaining = false;
+                if (mStarted != mRetainingStarted) {
+                    if (!mStarted) {
+                        // This loader was retained in a started state, but
+                        // at the end of retaining everything our owner is
+                        // no longer started...  so make it stop.
+                        stop();
+                    }
+                }
+                if (mStarted && mData != null && mCallbacks != null) {
+                    // This loader was retained, and now at the point of
+                    // finishing the retain we find we remain started, have
+                    // our data, and the owner has a new callback...  so
+                    // let's deliver the data now.
+                    mCallbacks.onLoadFinished(mLoader, mData);
+                }
+            }
+        }
+        
+        void stop() {
+            mStarted = false;
+            if (mLoader != null && mListenerRegistered) {
+                // Let the loader know we're done with it
+                mListenerRegistered = false;
+                mLoader.unregisterListener(this);
+            }
+        }
+        
+        void destroy() {
+            mDestroyed = true;
+            mCallbacks = null;
+            if (mLoader != null) {
+                if (mListenerRegistered) {
+                    mListenerRegistered = false;
+                    mLoader.unregisterListener(this);
+                }
+                mLoader.destroy();
+            }
+        }
         
         @Override public void onLoadComplete(Loader<Object> loader, Object data) {
+            if (mDestroyed) {
+                return;
+            }
+            
             // Notify of the new data so the app can switch out the old data before
             // we try to destroy it.
-            callback.onLoadFinished(loader, data);
+            mData = data;
+            if (mCallbacks != null) {
+                mCallbacks.onLoadFinished(loader, data);
+            }
 
             // Look for an inactive loader and destroy it if found
-            int id = loader.getId();
-            LoaderInfo info = mInactiveLoaders.get(id);
+            LoaderInfo info = mInactiveLoaders.get(mId);
             if (info != null) {
-                Loader<Object> oldLoader = info.loader;
+                Loader<Object> oldLoader = info.mLoader;
                 if (oldLoader != null) {
+                    oldLoader.unregisterListener(info);
                     oldLoader.destroy();
                 }
-                mInactiveLoaders.remove(id);
+                mInactiveLoaders.remove(mId);
             }
         }
     }
-
-    SparseArray<LoaderInfo> mLoaders = new SparseArray<LoaderInfo>();
-    SparseArray<LoaderInfo> mInactiveLoaders = new SparseArray<LoaderInfo>();
-    boolean mStarted;
     
     LoaderManager(boolean started) {
         mStarted = started;
     }
     
+    private LoaderInfo createLoader(int id, Bundle args,
+            LoaderManager.LoaderCallbacks<Object> callback) {
+        LoaderInfo info = new LoaderInfo(id, args,  (LoaderManager.LoaderCallbacks<Object>)callback);
+        mLoaders.put(id, info);
+        Loader<Object> loader = callback.onCreateLoader(id, args);
+        info.mLoader = (Loader<Object>)loader;
+        if (mStarted) {
+            // The activity will start all existing loaders in it's onStart(), so only start them
+            // here if we're past that point of the activitiy's life cycle
+            loader.registerListener(id, info);
+            loader.startLoading();
+        }
+        return info;
+    }
+    
     /**
-     * Associates a loader with this managers, registers the callbacks on it,
+     * Ensures a loader is initialized an active.  If the loader doesn't
+     * already exist, one is created and started.  Otherwise the last created
+     * loader is re-used.
+     * 
+     * <p>In either case, the given callback is associated with the loader, and
+     * will be called as the loader state changes.  If at the point of call
+     * the caller is in its started state, and the requested loader
+     * already exists and has generated its data, then
+     * callback.{@link LoaderCallbacks#onLoadFinished(Loader, Object)} will 
+     * be called immediately (inside of this function), so you must be prepared
+     * for this to happen.
+     */
+    @SuppressWarnings("unchecked")
+    public <D> Loader<D> initLoader(int id, Bundle args, LoaderManager.LoaderCallbacks<D> callback) {
+        LoaderInfo info = mLoaders.get(id);
+        
+        if (info == null) {
+            // Loader doesn't already exist; create.
+            info = createLoader(id, args,  (LoaderManager.LoaderCallbacks<Object>)callback);
+        } else {
+            info.mCallbacks = (LoaderManager.LoaderCallbacks<Object>)callback;
+        }
+        
+        if (info.mData != null && mStarted) {
+            // If the loader has already generated its data, report it now.
+            info.mCallbacks.onLoadFinished(info.mLoader, info.mData);
+        }
+        
+        return (Loader<D>)info.mLoader;
+    }
+    
+    /**
+     * Create a new loader in this manager, registers the callbacks to it,
      * and starts it loading.  If a loader with the same id has previously been
      * started it will automatically be destroyed when the new loader completes
      * its work. The callback will be delivered before the old loader
      * is destroyed.
      */
     @SuppressWarnings("unchecked")
-    public <D> Loader<D> startLoading(int id, Bundle args, LoaderManager.LoaderCallbacks<D> callback) {
+    public <D> Loader<D> restartLoader(int id, Bundle args, LoaderManager.LoaderCallbacks<D> callback) {
         LoaderInfo info = mLoaders.get(id);
         if (info != null) {
-            // Keep track of the previous instance of this loader so we can destroy
-            // it when the new one completes.
-            mInactiveLoaders.put(id, info);
+            if (mInactiveLoaders.get(id) != null) {
+                // We already have an inactive loader for this ID that we are
+                // waiting for!  Now we have three active loaders... let's just
+                // drop the one in the middle, since we are still waiting for
+                // its result but that result is already out of date.
+                info.destroy();
+            } else {
+                // Keep track of the previous instance of this loader so we can destroy
+                // it when the new one completes.
+                mInactiveLoaders.put(id, info);
+            }
         }
-        info = new LoaderInfo();
-        info.args = args;
-        info.callback = (LoaderManager.LoaderCallbacks<Object>)callback;
-        mLoaders.put(id, info);
-        Loader<D> loader = callback.onCreateLoader(id, args);
-        info.loader = (Loader<Object>)loader;
-        if (mStarted) {
-            // The activity will start all existing loaders in it's onStart(), so only start them
-            // here if we're past that point of the activitiy's life cycle
-            loader.registerListener(id, (OnLoadCompleteListener<D>)info);
-            loader.startLoading();
-        }
-        return loader;
         
+        info = createLoader(id, args,  (LoaderManager.LoaderCallbacks<Object>)callback);
+        return (Loader<D>)info.mLoader;
     }
     
     /**
      * Stops and removes the loader with the given ID.
      */
-    public void stopLoading(int id) {
-        if (mLoaders != null) {
-            int idx = mLoaders.indexOfKey(id);
-            if (idx >= 0) {
-                LoaderInfo info = mLoaders.valueAt(idx);
-                mLoaders.removeAt(idx);
-                Loader<Object> loader = info.loader;
-                if (loader != null) {
-                    loader.unregisterListener(info);
-                    loader.destroy();
-                }
+    public void stopLoader(int id) {
+        int idx = mLoaders.indexOfKey(id);
+        if (idx >= 0) {
+            LoaderInfo info = mLoaders.valueAt(idx);
+            mLoaders.removeAt(idx);
+            Loader<Object> loader = info.mLoader;
+            if (loader != null) {
+                loader.unregisterListener(info);
+                loader.destroy();
             }
         }
     }
@@ -122,7 +255,7 @@ public class LoaderManager {
     public <D> Loader<D> getLoader(int id) {
         LoaderInfo loaderInfo = mLoaders.get(id);
         if (loaderInfo != null) {
-            return (Loader<D>)mLoaders.get(id).loader;
+            return (Loader<D>)mLoaders.get(id).mLoader;
         }
         return null;
     }
@@ -131,50 +264,43 @@ public class LoaderManager {
         // Call out to sub classes so they can start their loaders
         // Let the existing loaders know that we want to be notified when a load is complete
         for (int i = mLoaders.size()-1; i >= 0; i--) {
-            LoaderInfo info = mLoaders.valueAt(i);
-            Loader<Object> loader = info.loader;
-            int id = mLoaders.keyAt(i);
-            if (loader == null) {
-               loader = info.callback.onCreateLoader(id, info.args);
-               info.loader = loader;
-            }
-            loader.registerListener(id, info);
-            loader.startLoading();
+            mLoaders.valueAt(i).start();
         }
-
         mStarted = true;
     }
     
     void doStop() {
         for (int i = mLoaders.size()-1; i >= 0; i--) {
-            LoaderInfo info = mLoaders.valueAt(i);
-            Loader<Object> loader = info.loader;
-            if (loader == null) {
-                continue;
-            }
-
-            // Let the loader know we're done with it
-            loader.unregisterListener(info);
-
-            // The loader isn't getting passed along to the next instance so ask it to stop loading
-            //if (!getActivity().isChangingConfigurations()) {
-            //    loader.stopLoading();
-            //}
+            mLoaders.valueAt(i).stop();
         }
-
         mStarted = false;
     }
     
+    void doRetain() {
+        mRetaining = true;
+        mStarted = false;
+        for (int i = mLoaders.size()-1; i >= 0; i--) {
+            mLoaders.valueAt(i).retain();
+        }
+    }
+    
+    void finishRetain() {
+        mRetaining = false;
+        for (int i = mLoaders.size()-1; i >= 0; i--) {
+            mLoaders.valueAt(i).finishRetain();
+        }
+    }
+    
     void doDestroy() {
-        if (mLoaders != null) {
+        if (!mRetaining) {
             for (int i = mLoaders.size()-1; i >= 0; i--) {
-                LoaderInfo info = mLoaders.valueAt(i);
-                Loader<Object> loader = info.loader;
-                if (loader == null) {
-                    continue;
-                }
-                loader.destroy();
+                mLoaders.valueAt(i).destroy();
             }
         }
+        
+        for (int i = mInactiveLoaders.size()-1; i >= 0; i--) {
+            mInactiveLoaders.valueAt(i).destroy();
+        }
+        mInactiveLoaders.clear();
     }
 }

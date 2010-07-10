@@ -158,6 +158,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // True if the fragment is in the list of added fragments.
     boolean mAdded;
     
+    // True if the fragment is in the resumed state.
+    boolean mResumed;
+    
     // Set to true if this fragment was instantiated from a layout file.
     boolean mFromLayout;
     
@@ -318,6 +321,14 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     final public boolean isAdded() {
         return mActivity != null && mActivity.mFragments.mAdded.contains(this);
+    }
+    
+    /**
+     * Return true if the fragment is in the resumed state.  This is true
+     * for the duration of {@link #onResume()} and {@link #onPause()} as well.
+     */
+    final public boolean isResumed() {
+        return mResumed;
     }
     
     /**
@@ -575,10 +586,6 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onStop() {
         mCalled = true;
-        mStarted = false;
-        if (mLoaderManager != null) {
-            mLoaderManager.doStop();
-        }
     }
     
     public void onLowMemory() {
@@ -745,5 +752,19 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public boolean onContextItemSelected(MenuItem item) {
         return false;
+    }
+    
+    void performStop() {
+        onStop();
+        if (mStarted) {
+            mStarted = false;
+            if (mLoaderManager != null) {
+                if (mActivity == null || !mActivity.mChangingConfigurations) {
+                    mLoaderManager.doStop();
+                } else {
+                    mLoaderManager.doRetain();
+                }
+            }
+        }
     }
 }

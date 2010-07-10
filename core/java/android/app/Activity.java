@@ -635,6 +635,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActivityThread mMainThread;
     Activity mParent;
     boolean mCalled;
+    boolean mStarted;
     private boolean mResumed;
     private boolean mStopped;
     boolean mFinished;
@@ -843,6 +844,9 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(Bundle savedInstanceState) {
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
+        if (mLastNonConfigurationInstances != null) {
+            mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
+        }
         if (savedInstanceState != null) {
             Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
             mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
@@ -985,6 +989,10 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onStart() {
         mCalled = true;
+        mStarted = true;
+        if (mLoaderManager != null) {
+            mLoaderManager.doStart();
+        }
     }
 
     /**
@@ -1522,7 +1530,20 @@ public class Activity extends ContextThemeWrapper
         Object activity = onRetainNonConfigurationInstance();
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
         ArrayList<Fragment> fragments = mFragments.retainNonConfig();
-        if (activity == null && children == null && fragments == null) {
+        boolean retainLoaders = false;
+        if (mAllLoaderManagers != null) {
+            // prune out any loader managers that were already stopped, so
+            // have nothing useful to retain.
+            for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
+                LoaderManager lm = mAllLoaderManagers.valueAt(i);
+                if (lm.mRetaining) {
+                    retainLoaders = true;
+                } else {
+                    mAllLoaderManagers.removeAt(i);
+                }
+            }
+        }
+        if (activity == null && children == null && fragments == null && !retainLoaders) {
             return null;
         }
         
@@ -1530,6 +1551,7 @@ public class Activity extends ContextThemeWrapper
         nci.activity = activity;
         nci.children = children;
         nci.fragments = fragments;
+        nci.loaders = mAllLoaderManagers;
         return nci;
     }
     
@@ -4065,6 +4087,11 @@ public class Activity extends ContextThemeWrapper
                 " did not call through to super.onStart()");
         }
         mFragments.dispatchStart();
+        if (mAllLoaderManagers != null) {
+            for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
+                mAllLoaderManagers.valueAt(i).finishRetain();
+            }
+        }
     }
     
     final void performRestart() {
@@ -4136,6 +4163,17 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStop() {
+        if (mStarted) {
+            mStarted = false;
+            if (mLoaderManager != null) {
+                if (!mChangingConfigurations) {
+                    mLoaderManager.doStop();
+                } else {
+                    mLoaderManager.doRetain();
+                }
+            }
+        }
+        
         if (!mStopped) {
             if (mWindow != null) {
                 mWindow.closeAllPanels();
