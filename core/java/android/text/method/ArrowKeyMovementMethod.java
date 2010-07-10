@@ -138,35 +138,6 @@ public class ArrowKeyMovementMethod implements MovementMethod {
         }
     }
 
-    private int getOffset(int x, int y, TextView widget){
-      // Converts the absolute X,Y coordinates to the character offset for the
-      // character whose position is closest to the specified
-      // horizontal position.
-      x -= widget.getTotalPaddingLeft();
-      y -= widget.getTotalPaddingTop();
-
-      // Clamp the position to inside of the view.
-      if (x < 0) {
-          x = 0;
-      } else if (x >= (widget.getWidth()-widget.getTotalPaddingRight())) {
-          x = widget.getWidth()-widget.getTotalPaddingRight() - 1;
-      }
-      if (y < 0) {
-          y = 0;
-      } else if (y >= (widget.getHeight()-widget.getTotalPaddingBottom())) {
-          y = widget.getHeight()-widget.getTotalPaddingBottom() - 1;
-      }
-
-      x += widget.getScrollX();
-      y += widget.getScrollY();
-
-      Layout layout = widget.getLayout();
-      int line = layout.getLineForVertical(y);
-
-      int offset = layout.getOffsetForHorizontal(line, x);
-      return offset;
-    }
-
     public boolean onKeyDown(TextView widget, Spannable buffer, int keyCode, KeyEvent event) {
         if (executeDown(widget, buffer, keyCode)) {
             MetaKeyKeyListener.adjustMetaAfterKeypress(buffer);
@@ -263,7 +234,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                               MetaKeyKeyListener.META_SELECTING) != 0);
               int x = (int) event.getX();
               int y = (int) event.getY();
-              int offset = getOffset(x, y, widget);
+              int offset = widget.getOffset(x, y);
 
               if (cap) {
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset,
@@ -320,7 +291,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                     // Get the current touch position
                     int x = (int) event.getX();
                     int y = (int) event.getY();
-                    int offset = getOffset(x, y, widget);
+                    int offset = widget.getOffset(x, y);
 
                     final OnePointFiveTapState[] tap = buffer.getSpans(0, buffer.length(),
                             OnePointFiveTapState.class);
@@ -366,7 +337,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
 
                 int x = (int) event.getX();
                 int y = (int) event.getY();
-                int off = getOffset(x, y, widget);
+                int off = widget.getOffset(x, y);
 
                 // XXX should do the same adjust for x as we do for the line.
 
@@ -442,11 +413,10 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                     widget.cancelLongPress();
 
                     // Offset the current touch position (from controller to cursor)
-                    final int x = (int) event.getX() + mCursorController.getOffsetX();
-                    final int y = (int) event.getY() + mCursorController.getOffsetY();
-                    int offset = getOffset(x, y, widget);
-                    Selection.setSelection(buffer, offset);
-                    mCursorController.updatePosition();
+                    final float x = event.getX() + mCursorController.getOffsetX();
+                    final float y = event.getY() + mCursorController.getOffsetY();
+                    int offset = widget.getOffset((int) x, (int) y);
+                    mCursorController.updatePosition(offset);
                     return true;
 
                 case MotionEvent.ACTION_UP:
