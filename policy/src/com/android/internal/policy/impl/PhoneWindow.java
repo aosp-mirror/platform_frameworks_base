@@ -27,6 +27,7 @@ import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
+import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarView;
@@ -77,8 +78,11 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Android-specific Window.
@@ -96,7 +100,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
      */
-    ContextMenuCallback mContextMenuCallback = new ContextMenuCallback(FEATURE_CONTEXT_MENU);
+    DialogMenuCallback mContextMenuCallback = new DialogMenuCallback(FEATURE_CONTEXT_MENU);
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
@@ -808,8 +812,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return true;
         }
 
-        // The window manager will give us a valid window token
-        new MenuDialogHelper(subMenu).show(null);
+        final Menu parentMenu = subMenu.getRootMenu();
+        final PanelFeatureState panel = findMenuPanel(parentMenu);
+
+        /*
+         * Use the panel open state to determine whether this is coming from an open panel
+         * or an action button. If it's an open panel we want to use MenuDialogHelper.
+         * If it's closed we want to grab the relevant view and create a popup anchored to it.
+         */
+        if (panel.isOpen) {
+            // The window manager will give us a valid window token
+            new MenuDialogHelper(subMenu).show(null);
+        } else {
+            new MenuPopupHelper(getContext(), subMenu).show();
+        }
 
         return true;
     }
@@ -2797,11 +2813,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * <li> Calls back to the callback's onMenuItemSelected when an item is
      * selected.
      */
-    private final class ContextMenuCallback implements MenuBuilder.Callback {
+    private final class DialogMenuCallback implements MenuBuilder.Callback {
         private int mFeatureId;
         private MenuDialogHelper mSubMenuHelper;
 
-        public ContextMenuCallback(int featureId) {
+        public DialogMenuCallback(int featureId) {
             mFeatureId = featureId;
         }
 

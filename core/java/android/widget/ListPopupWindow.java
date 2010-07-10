@@ -78,7 +78,7 @@ public class ListPopupWindow {
     private AdapterView.OnItemClickListener mItemClickListener;
     private AdapterView.OnItemSelectedListener mItemSelectedListener;
 
-    private final  ResizePopupRunnable mResizePopupRunnable = new ResizePopupRunnable();
+    private final ResizePopupRunnable mResizePopupRunnable = new ResizePopupRunnable();
     private final PopupTouchInterceptor mTouchInterceptor = new PopupTouchInterceptor();
     private final PopupScrollListener mScrollListener = new PopupScrollListener();
     private final ListSelectorHider mHideSelector = new ListSelectorHider();
@@ -429,6 +429,19 @@ public class ListPopupWindow {
      */
     public void setWidth(int width) {
         mDropDownWidth = width;
+    }
+
+    /**
+     * Sets the width of the popup window by the size of its content. The final width may be
+     * larger to accommodate styled window dressing.
+     *
+     * @param width Desired width of content in pixels.
+     */
+    public void setContentWidth(int width) {
+        Drawable popupBackground = mPopup.getBackground();
+        if (popupBackground != null) {
+            mDropDownWidth = popupBackground.getIntrinsicWidth() + width;
+        }
     }
 
     /**

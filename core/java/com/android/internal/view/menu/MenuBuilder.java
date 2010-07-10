@@ -55,7 +55,7 @@ public class MenuBuilder implements Menu {
     private static final String LOGTAG = "MenuBuilder";
     
     /** The number of different menu types */
-    public static final int NUM_TYPES = 4;
+    public static final int NUM_TYPES = 5;
     /** The menu type that represents the icon menu view */
     public static final int TYPE_ICON = 0;
     /** The menu type that represents the expanded menu view */
@@ -66,18 +66,22 @@ public class MenuBuilder implements Menu {
      * have an ItemView.
      */
     public static final int TYPE_DIALOG = 2;
-    
     /**
      * The menu type that represents a button in the application's action bar.
      */
     public static final int TYPE_ACTION_BUTTON = 3;
+    /**
+     * The menu type that represents a menu popup.
+     */
+    public static final int TYPE_POPUP = 4;
 
     private static final String VIEWS_TAG = "android:views";
-    
+
     // Order must be the same order as the TYPE_*
     static final int THEME_RES_FOR_TYPE[] = new int[] {
         com.android.internal.R.style.Theme_IconMenu,
         com.android.internal.R.style.Theme_ExpandedMenu,
+        0,
         0,
         0,
     };
@@ -88,6 +92,7 @@ public class MenuBuilder implements Menu {
         com.android.internal.R.layout.expanded_menu_layout,
         0,
         com.android.internal.R.layout.action_menu_layout,
+        0,
     };
 
     // Order must be the same order as the TYPE_*
@@ -96,6 +101,7 @@ public class MenuBuilder implements Menu {
         com.android.internal.R.layout.list_menu_item_layout,
         com.android.internal.R.layout.list_menu_item_layout,
         com.android.internal.R.layout.action_menu_item_layout,
+        com.android.internal.R.layout.list_menu_item_layout,
     };
 
     private static final int[]  sCategoryToOrder = new int[] {
@@ -1251,7 +1257,19 @@ public class MenuBuilder implements Menu {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            return ((MenuItemImpl) getItem(position)).getItemView(mMenuType, parent);
+            if (convertView != null) {
+                MenuView.ItemView itemView = (MenuView.ItemView) convertView;
+                itemView.getItemData().setItemView(mMenuType, null);
+
+                MenuItemImpl item = (MenuItemImpl) getItem(position);
+                itemView.initialize(item, mMenuType);
+                item.setItemView(mMenuType, itemView);
+                return convertView;
+            } else {
+                MenuItemImpl item = (MenuItemImpl) getItem(position);
+                item.setItemView(mMenuType, null);
+                return item.getItemView(mMenuType, parent);
+            }
         }
 
     }

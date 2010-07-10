@@ -583,6 +583,10 @@ public final class MenuItemImpl implements MenuItem {
         return (View) mItemViews[menuType].get();
     }
 
+    void setItemView(int menuType, ItemView view) {
+        mItemViews[menuType] = new WeakReference<ItemView>(view);
+    }
+
     /**
      * Create and initializes a menu item view that implements {@link MenuView.ItemView}.
      * @param menuType The type of menu to get a View for (must be one of
@@ -631,7 +635,10 @@ public final class MenuItemImpl implements MenuItem {
      * @return Whether the given menu type should show icons for menu items.
      */
     public boolean shouldShowIcon(int menuType) {
-        return menuType == MenuBuilder.TYPE_ICON || mMenu.getOptionalIconsVisible();
+        return menuType == MenuBuilder.TYPE_ICON ||
+                menuType == MenuBuilder.TYPE_ACTION_BUTTON ||
+                menuType == MenuBuilder.TYPE_POPUP ||
+                mMenu.getOptionalIconsVisible();
     }
     
     public boolean isActionButton() {
