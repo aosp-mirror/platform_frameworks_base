@@ -192,6 +192,11 @@ typedef void ANativeActivity_createFunc(ANativeActivity* activity,
  */
 extern ANativeActivity_createFunc ANativeActivity_onCreate;
 
+void ANativeActivity_setWindowFormat(ANativeActivity* activity, int32_t format);
+
+void ANativeActivity_setWindowFlags(ANativeActivity* activity,
+        uint32_t addFlags, uint32_t removeFlags);
+
 #ifdef __cplusplus
 };
 #endif

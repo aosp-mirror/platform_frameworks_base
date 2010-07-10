@@ -21,7 +21,8 @@
 #include <dlfcn.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <android/native_activity.h>
+#include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_app_NativeActivity.h>
 #include <surfaceflinger/Surface.h>
 #include <ui/egl/android_natives.h>
 #include <ui/InputTransport.h>
@@ -31,7 +32,6 @@
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
-#include "android_view_Surface.h"
 
 namespace android
 {
@@ -43,6 +43,48 @@ static struct {
     jmethodID setWindowFlags;
     jmethodID setWindowFormat;
 } gNativeActivityClassInfo;
+
+// ------------------------------------------------------------------------
+
+struct ActivityWork {
+    int32_t cmd;
+    int32_t arg1;
+    int32_t arg2;
+};
+
+enum {
+    CMD_DEF_KEY = 1,
+    CMD_SET_WINDOW_FORMAT,
+    CMD_SET_WINDOW_FLAGS,
+};
+
+static void write_work(int fd, int32_t cmd, int32_t arg1=0, int32_t arg2=0) {
+    ActivityWork work;
+    work.cmd = cmd;
+    work.arg1 = arg1;
+    work.arg2 = arg2;
+    
+restart:
+    int res = write(fd, &work, sizeof(work));
+    if (res < 0 && errno == EINTR) {
+        goto restart;
+    }
+    
+    if (res == sizeof(work)) return;
+    
+    if (res < 0) LOGW("Failed writing to work fd: %s", strerror(errno));
+    else LOGW("Truncated writing to work fd: %d", res);
+}
+
+static bool read_work(int fd, ActivityWork* outWork) {
+    int res = read(fd, outWork, sizeof(ActivityWork));
+    // no need to worry about EINTR, poll loop will just come back again.
+    if (res == sizeof(ActivityWork)) return true;
+    
+    if (res < 0) LOGW("Failed reading work fd: %s", strerror(errno));
+    else LOGW("Truncated reading work fd: %d", res);
+    return false;
+}
 
 // ------------------------------------------------------------------------
 
@@ -59,8 +101,7 @@ struct MyInputQueue : AInputQueue {
         mLock.lock();
         LOGI("Default key: pending=%d write=%d\n", mPendingKeys.size(), mWorkWrite);
         if (mPendingKeys.size() <= 0 && mWorkWrite >= 0) {
-            int8_t cmd = 1;
-            write(mWorkWrite, &cmd, sizeof(cmd));
+            write_work(mWorkWrite, CMD_DEF_KEY);
         }
         mPendingKeys.add(keyEvent);
         mLock.unlock();
@@ -90,9 +131,9 @@ struct MyInputQueue : AInputQueue {
 /*
  * Native state for interacting with the NativeActivity class.
  */
-struct NativeCode {
+struct NativeCode : public ANativeActivity {
     NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc) {
-        memset(&activity, sizeof(activity), 0);
+        memset((ANativeActivity*)this, sizeof(ANativeActivity), 0);
         memset(&callbacks, sizeof(callbacks), 0);
         dlhandle = _dlhandle;
         createActivityFunc = _createFunc;
@@ -103,8 +144,11 @@ struct NativeCode {
     }
     
     ~NativeCode() {
-        if (activity.env != NULL && activity.clazz != NULL) {
-            activity.env->DeleteGlobalRef(activity.clazz);
+        if (callbacks.onDestroy != NULL) {
+            callbacks.onDestroy(this);
+        }
+        if (env != NULL && clazz != NULL) {
+            env->DeleteGlobalRef(clazz);
         }
         if (pollLoop != NULL && mainWorkRead >= 0) {
             pollLoop->removeCallback(mainWorkRead);
@@ -114,9 +158,6 @@ struct NativeCode {
         }
         setSurface(NULL);
         setInputChannel(NULL);
-        if (callbacks.onDestroy != NULL) {
-            callbacks.onDestroy(&activity);
-        }
         if (mainWorkRead >= 0) close(mainWorkRead);
         if (mainWorkWrite >= 0) close(mainWorkWrite);
         if (dlhandle != NULL) {
@@ -129,7 +170,7 @@ struct NativeCode {
     
     void setSurface(jobject _surface) {
         if (_surface != NULL) {
-            nativeWindow = android_Surface_getNativeWindow(activity.env, _surface);
+            nativeWindow = android_Surface_getNativeWindow(env, _surface);
         } else {
             nativeWindow = NULL;
         }
@@ -138,14 +179,14 @@ struct NativeCode {
     status_t setInputChannel(jobject _channel) {
         if (inputChannel != NULL) {
             delete nativeInputQueue;
-            activity.env->DeleteGlobalRef(inputChannel);
+            env->DeleteGlobalRef(inputChannel);
         }
         inputChannel = NULL;
         nativeInputQueue = NULL;
         if (_channel != NULL) {
-            inputChannel = activity.env->NewGlobalRef(_channel);
+            inputChannel = env->NewGlobalRef(_channel);
             sp<InputChannel> ic =
-                    android_view_InputChannel_getInputChannel(activity.env, _channel);
+                    android_view_InputChannel_getInputChannel(env, _channel);
             if (ic != NULL) {
                 nativeInputQueue = new MyInputQueue(ic, mainWorkWrite);
                 if (nativeInputQueue->getConsumer().initialize() != android::OK) {
@@ -160,7 +201,6 @@ struct NativeCode {
         return OK;
     }
     
-    ANativeActivity activity;
     ANativeActivityCallbacks callbacks;
     
     void* dlhandle;
@@ -179,6 +219,18 @@ struct NativeCode {
     sp<PollLoop> pollLoop;
 };
 
+void android_NativeActivity_setWindowFormat(
+        ANativeActivity* activity, int32_t format) {
+    NativeCode* code = static_cast<NativeCode*>(activity);
+    write_work(code->mainWorkWrite, CMD_SET_WINDOW_FORMAT, format);
+}
+
+void android_NativeActivity_setWindowFlags(
+        ANativeActivity* activity, int32_t values, int32_t mask) {
+    NativeCode* code = static_cast<NativeCode*>(activity);
+    write_work(code->mainWorkWrite, CMD_SET_WINDOW_FLAGS, values, mask);
+}
+
 // ------------------------------------------------------------------------
 
 /*
@@ -186,19 +238,40 @@ struct NativeCode {
  */
 static bool mainWorkCallback(int fd, int events, void* data) {
     NativeCode* code = (NativeCode*)data;
-    if ((events & POLLIN) != 0) {
-        KeyEvent* keyEvent;
-        while ((keyEvent=code->nativeInputQueue->getNextEvent()) != NULL) {
-            jobject inputEventObj = android_view_KeyEvent_fromNative(
-                    code->activity.env, keyEvent);
-            code->activity.env->CallVoidMethod(code->activity.clazz,
-                    gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
-            int32_t res = code->nativeInputQueue->getConsumer().sendFinishedSignal();
-            if (res != OK) {
-                LOGW("Failed to send finished signal on channel '%s'.  status=%d",
-                        code->nativeInputQueue->getConsumer().getChannel()->getName().string(), res);
+    if ((events & POLLIN) == 0) {
+        return true;
+    }
+    
+    ActivityWork work;
+    if (!read_work(code->mainWorkRead, &work)) {
+        return true;
+    }
+    switch (work.cmd) {
+        case CMD_DEF_KEY: {
+            KeyEvent* keyEvent;
+            while ((keyEvent=code->nativeInputQueue->getNextEvent()) != NULL) {
+                jobject inputEventObj = android_view_KeyEvent_fromNative(
+                        code->env, keyEvent);
+                code->env->CallVoidMethod(code->clazz,
+                        gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
+                int32_t res = code->nativeInputQueue->getConsumer().sendFinishedSignal();
+                if (res != OK) {
+                    LOGW("Failed to send finished signal on channel '%s'.  status=%d",
+                            code->nativeInputQueue->getConsumer().getChannel()->getName().string(), res);
+                }
             }
-        }
+        } break;
+        case CMD_SET_WINDOW_FORMAT: {
+            code->env->CallVoidMethod(code->clazz,
+                    gNativeActivityClassInfo.setWindowFormat, work.arg1);
+        } break;
+        case CMD_SET_WINDOW_FLAGS: {
+            code->env->CallVoidMethod(code->clazz,
+                    gNativeActivityClassInfo.setWindowFlags, work.arg1, work.arg2);
+        } break;
+        default:
+            LOGW("Unknown work command: %d", work.cmd);
+            break;
     }
     
     return true;
@@ -243,28 +316,28 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
         code->mainWorkWrite = msgpipe[1];
         code->pollLoop->setCallback(code->mainWorkRead, POLLIN, mainWorkCallback, code);
         
-        code->activity.callbacks = &code->callbacks;
-        if (env->GetJavaVM(&code->activity.vm) < 0) {
+        code->ANativeActivity::callbacks = &code->callbacks;
+        if (env->GetJavaVM(&code->vm) < 0) {
             LOGW("NativeActivity GetJavaVM failed");
             delete code;
             return 0;
         }
-        code->activity.env = env;
-        code->activity.clazz = env->NewGlobalRef(clazz);
+        code->env = env;
+        code->clazz = env->NewGlobalRef(clazz);
         
         const char* dirStr = env->GetStringUTFChars(internalDataDir, NULL);
         code->internalDataPath = dirStr;
-        code->activity.internalDataPath = code->internalDataPath.string();
+        code->internalDataPath = code->internalDataPath.string();
         env->ReleaseStringUTFChars(path, dirStr);
     
         dirStr = env->GetStringUTFChars(externalDataDir, NULL);
         code->externalDataPath = dirStr;
-        code->activity.externalDataPath = code->externalDataPath.string();
+        code->externalDataPath = code->externalDataPath.string();
         env->ReleaseStringUTFChars(path, dirStr);
     
-        code->activity.sdkVersion = sdkVersion;
+        code->sdkVersion = sdkVersion;
         
-        code->createActivityFunc(&code->activity, NULL, 0);
+        code->createActivityFunc(code, NULL, 0);
     }
     
     return (jint)code;
@@ -285,7 +358,7 @@ onStart_native(JNIEnv* env, jobject clazz, jint handle)
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onStart != NULL) {
-            code->callbacks.onStart(&code->activity);
+            code->callbacks.onStart(code);
         }
     }
 }
@@ -296,7 +369,7 @@ onResume_native(JNIEnv* env, jobject clazz, jint handle)
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onResume != NULL) {
-            code->callbacks.onResume(&code->activity);
+            code->callbacks.onResume(code);
         }
     }
 }
@@ -308,7 +381,7 @@ onSaveInstanceState_native(JNIEnv* env, jobject clazz, jint handle)
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onSaveInstanceState != NULL) {
             size_t len = 0;
-            code->callbacks.onSaveInstanceState(&code->activity, &len);
+            code->callbacks.onSaveInstanceState(code, &len);
         }
     }
 }
@@ -319,7 +392,7 @@ onPause_native(JNIEnv* env, jobject clazz, jint handle)
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onPause != NULL) {
-            code->callbacks.onPause(&code->activity);
+            code->callbacks.onPause(code);
         }
     }
 }
@@ -330,7 +403,7 @@ onStop_native(JNIEnv* env, jobject clazz, jint handle)
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onStop != NULL) {
-            code->callbacks.onStop(&code->activity);
+            code->callbacks.onStop(code);
         }
     }
 }
@@ -341,7 +414,7 @@ onLowMemory_native(JNIEnv* env, jobject clazz, jint handle)
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onLowMemory != NULL) {
-            code->callbacks.onLowMemory(&code->activity);
+            code->callbacks.onLowMemory(code);
         }
     }
 }
@@ -352,7 +425,7 @@ onWindowFocusChanged_native(JNIEnv* env, jobject clazz, jint handle, jboolean fo
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->callbacks.onWindowFocusChanged != NULL) {
-            code->callbacks.onWindowFocusChanged(&code->activity, focused ? 1 : 0);
+            code->callbacks.onWindowFocusChanged(code, focused ? 1 : 0);
         }
     }
 }
@@ -364,7 +437,7 @@ onSurfaceCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
         NativeCode* code = (NativeCode*)handle;
         code->setSurface(surface);
         if (code->nativeWindow != NULL && code->callbacks.onNativeWindowCreated != NULL) {
-            code->callbacks.onNativeWindowCreated(&code->activity,
+            code->callbacks.onNativeWindowCreated(code,
                     code->nativeWindow.get());
         }
     }
@@ -380,11 +453,11 @@ onSurfaceChanged_native(JNIEnv* env, jobject clazz, jint handle, jobject surface
         code->setSurface(surface);
         if (oldNativeWindow != code->nativeWindow) {
             if (oldNativeWindow != NULL && code->callbacks.onNativeWindowDestroyed != NULL) {
-                code->callbacks.onNativeWindowDestroyed(&code->activity,
+                code->callbacks.onNativeWindowDestroyed(code,
                         oldNativeWindow.get());
             }
             if (code->nativeWindow != NULL && code->callbacks.onNativeWindowCreated != NULL) {
-                code->callbacks.onNativeWindowCreated(&code->activity,
+                code->callbacks.onNativeWindowCreated(code,
                         code->nativeWindow.get());
             }
         }
@@ -397,7 +470,7 @@ onSurfaceDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject surfa
     if (handle != 0) {
         NativeCode* code = (NativeCode*)handle;
         if (code->nativeWindow != NULL && code->callbacks.onNativeWindowDestroyed != NULL) {
-            code->callbacks.onNativeWindowDestroyed(&code->activity,
+            code->callbacks.onNativeWindowDestroyed(code,
                     code->nativeWindow.get());
         }
         code->setSurface(NULL);
@@ -416,7 +489,7 @@ onInputChannelCreated_native(JNIEnv* env, jobject clazz, jint handle, jobject ch
             return;
         }
         if (code->callbacks.onInputQueueCreated != NULL) {
-            code->callbacks.onInputQueueCreated(&code->activity,
+            code->callbacks.onInputQueueCreated(code,
                     code->nativeInputQueue);
         }
     }
@@ -429,7 +502,7 @@ onInputChannelDestroyed_native(JNIEnv* env, jobject clazz, jint handle, jobject 
         NativeCode* code = (NativeCode*)handle;
         if (code->nativeInputQueue != NULL
                 && code->callbacks.onInputQueueDestroyed != NULL) {
-            code->callbacks.onInputQueueDestroyed(&code->activity,
+            code->callbacks.onInputQueueDestroyed(code,
                     code->nativeInputQueue);
         }
         code->setInputChannel(NULL);

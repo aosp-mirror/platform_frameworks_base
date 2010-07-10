@@ -18,11 +18,11 @@
 
 namespace android {
 
-static inline int min(int a, int b) {
+static inline int32_t min(int32_t a, int32_t b) {
     return (a<b) ? a : b;
 }
 
-static inline int max(int a, int b) {
+static inline int32_t max(int32_t a, int32_t b) {
     return (a>b) ? a : b;
 }
 
@@ -53,7 +53,7 @@ bool Rect::operator < (const Rect& rhs) const
     return false;
 }
 
-Rect& Rect::offsetTo(int x, int y)
+Rect& Rect::offsetTo(int32_t x, int32_t y)
 {
     right -= left - x;
     bottom -= top - y;
@@ -62,7 +62,7 @@ Rect& Rect::offsetTo(int x, int y)
     return *this;
 }
 
-Rect& Rect::offsetBy(int x, int y)
+Rect& Rect::offsetBy(int32_t x, int32_t y)
 {
     left += x;
     top  += y;

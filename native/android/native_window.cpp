@@ -17,10 +17,27 @@
 #define LOG_TAG "Surface"
 #include <utils/Log.h>
 
-#include <android/native_window.h>
+#include <android/native_window_jni.h>
 #include <surfaceflinger/Surface.h>
+#include <android_runtime/android_view_Surface.h>
 
-using android::Surface;
+using namespace android;
+
+ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface) {
+    sp<ANativeWindow> win = android_Surface_getNativeWindow(env, surface);
+    if (win != NULL) {
+        win->incStrong((void*)ANativeWindow_acquire);
+    }
+    return win.get();
+}
+
+void ANativeWindow_acquire(ANativeWindow* window) {
+    window->incStrong((void*)ANativeWindow_acquire);
+}
+
+void ANativeWindow_release(ANativeWindow* window) {
+    window->decStrong((void*)ANativeWindow_acquire);
+}
 
 static int32_t getWindowProp(ANativeWindow* window, int what) {
     int value;
@@ -41,7 +58,40 @@ int32_t ANativeWindow_getFormat(ANativeWindow* window) {
 }
 
 int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width,
-        int32_t height, int32_t format) {
-    native_window_set_buffers_geometry(window, width, height, format);
+        int32_t height) {
+    native_window_set_buffers_geometry(window, width, height, 0);
     return 0;
+}
+
+int32_t ANativeWindow_lock(ANativeWindow* window, ANativeWindow_Buffer* outBuffer,
+        ARect* inOutDirtyBounds) {
+    Region dirtyRegion;
+    Region* dirtyParam = NULL;
+    if (inOutDirtyBounds != NULL) {
+        dirtyRegion.set(*(Rect*)inOutDirtyBounds);
+        dirtyParam = &dirtyRegion;
+    }
+    
+    Surface::SurfaceInfo info;
+    status_t res = static_cast<Surface*>(window)->lock(&info, dirtyParam);
+    if (res != OK) {
+        return -1;
+    }
+    
+    outBuffer->width = (int32_t)info.w;
+    outBuffer->height = (int32_t)info.h;
+    outBuffer->stride = (int32_t)info.s;
+    outBuffer->format = (int32_t)info.format;
+    outBuffer->bits = info.bits;
+    
+    if (inOutDirtyBounds != NULL) {
+        *inOutDirtyBounds = dirtyRegion.getBounds();
+    }
+    
+    return 0;
+}
+
+int32_t ANativeWindow_unlockAndPost(ANativeWindow* window) {
+    status_t res = static_cast<Surface*>(window)->unlockAndPost();
+    return res == android::OK ? 0 : -1;
 }

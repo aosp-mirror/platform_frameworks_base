@@ -52,10 +52,6 @@ struct android_app {
     // APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP; see below.
     int activityState;
 
-    // This is non-zero when the application's NativeActivity is being
-    // destroyed and waiting for the app thread to complete.
-    int destroyRequested;
-
     // -------------------------------------------------
     // Below are "private" implementation of the glue code.
 
@@ -66,6 +62,10 @@ struct android_app {
     int msgwrite;
 
     pthread_t thread;
+
+    // This is non-zero when the application's NativeActivity is being
+    // destroyed and waiting for the app thread to complete.
+    int destroyRequested;
 
     int running;
     int destroyed;
@@ -158,8 +158,11 @@ int8_t android_app_read_cmd(struct android_app* android_app);
 /**
  * Call with the command returned by android_app_read_cmd() to do the
  * default processing of the given command.
+ *
+ * Important: returns 0 if the app should exit.  You must ALWAYS check for
+ * a zero return and, if found, exit your android_main() function.
  */
-void android_app_exec_cmd(struct android_app* android_app, int8_t cmd);
+int32_t android_app_exec_cmd(struct android_app* android_app, int8_t cmd);
 
 /**
  * This is the function that application code must implement, representing

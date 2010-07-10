@@ -20,31 +20,28 @@
 #include <utils/TypeHelpers.h>
 #include <ui/Point.h>
 
+#include <android/rect.h>
+
 namespace android {
 
-class Rect
+class Rect : public ARect
 {
 public:
-    int left;
-    int top;
-    int right;
-    int bottom;
-
-    typedef int value_type;
+    typedef int32_t value_type;
 
     // we don't provide copy-ctor and operator= on purpose
     // because we want the compiler generated versions
 
     inline Rect() {
     }
-    inline Rect(int w, int h)
-        : left(0), top(0), right(w), bottom(h) {
+    inline Rect(int32_t w, int32_t h) {
+        left = top = 0; right = w; bottom = h;
     }
-    inline Rect(int l, int t, int r, int b)
-        : left(l), top(t), right(r), bottom(b) {
+    inline Rect(int32_t l, int32_t t, int32_t r, int32_t b) {
+        left = l; top = t; right = r; bottom = b;
     }
-    inline Rect(const Point& lt, const Point& rb) 
-        : left(lt.x), top(lt.y), right(rb.x), bottom(rb.y) {
+    inline Rect(const Point& lt, const Point& rb) {
+        left = lt.x; top = lt.y; right = rb.x; bottom = rb.y;
     }
 
     void makeInvalid();
@@ -68,12 +65,12 @@ public:
     }
 
     // rectangle's width
-    inline int width() const {
+    inline int32_t width() const {
         return right-left;
     }
     
     // rectangle's height
-    inline int height() const {
+    inline int32_t height() const {
         return bottom-top;
     }
 
@@ -136,12 +133,12 @@ public:
     const Rect operator + (const Point& rhs) const;
     const Rect operator - (const Point& rhs) const;
 
-    void translate(int dx, int dy) { // legacy, don't use.
+    void translate(int32_t dx, int32_t dy) { // legacy, don't use.
         offsetBy(dx, dy);
     }
  
-    Rect&   offsetTo(int x, int y);
-    Rect&   offsetBy(int x, int y);
+    Rect&   offsetTo(int32_t x, int32_t y);
+    Rect&   offsetBy(int32_t x, int32_t y);
     bool    intersect(const Rect& with, Rect* result) const;
 };
 
