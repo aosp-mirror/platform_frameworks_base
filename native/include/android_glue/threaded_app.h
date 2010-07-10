@@ -144,12 +144,6 @@ enum {
 };
 
 /**
- * Call if android_app->destroyRequested is non-zero.  Upon return, the
- * android_app structure is no longer valid and must not be touched.
- */
-void android_app_destroy(struct android_app* android_app);
-
-/**
  * Call when ALooper_pollAll() returns LOOPER_ID_MAIN, reading the next
  * app command message.
  */

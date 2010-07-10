@@ -29,18 +29,6 @@
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "threaded_app", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "threaded_app", __VA_ARGS__))
 
-void android_app_destroy(struct android_app* android_app) {
-    LOGI("android_app_destroy!");
-    pthread_mutex_lock(&android_app->mutex);
-    if (android_app->inputQueue != NULL) {
-        AInputQueue_detachLooper(android_app->inputQueue);
-    }
-    android_app->destroyed = 1;
-    pthread_cond_broadcast(&android_app->cond);
-    pthread_mutex_unlock(&android_app->mutex);
-    // Can't touch android_app object after this.
-}
-
 int8_t android_app_read_cmd(struct android_app* android_app) {
     int8_t cmd;
     if (read(android_app->msgread, &cmd, sizeof(cmd)) == sizeof(cmd)) {
@@ -97,6 +85,18 @@ int32_t android_app_exec_cmd(struct android_app* android_app, int8_t cmd) {
     return android_app->destroyRequested ? 0 : 1;
 }
 
+static void android_app_destroy(struct android_app* android_app) {
+    LOGI("android_app_destroy!");
+    pthread_mutex_lock(&android_app->mutex);
+    if (android_app->inputQueue != NULL) {
+        AInputQueue_detachLooper(android_app->inputQueue);
+    }
+    android_app->destroyed = 1;
+    pthread_cond_broadcast(&android_app->cond);
+    pthread_mutex_unlock(&android_app->mutex);
+    // Can't touch android_app object after this.
+}
+
 static void* android_app_entry(void* param) {
     struct android_app* android_app = (struct android_app*)param;
     
@@ -110,6 +110,8 @@ static void* android_app_entry(void* param) {
     pthread_mutex_unlock(&android_app->mutex);
     
     android_main(android_app);
+    
+    android_app_destroy(android_app);
     return NULL;
 }
 
