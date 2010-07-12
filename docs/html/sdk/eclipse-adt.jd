@@ -298,7 +298,7 @@ location:
 
 <p>Additionally, before you can configure or use ADT, you must install the
 Android SDK starter package, as described in <a
-href="installing.html#Installing">Downloading the SDK Starter Pacskage</a>.
+href="installing.html#Installing">Downloading the SDK Starter Package</a>.
 Specifically, you need to install a compatible version of the Android SDK Tools
 and at least one development platform. To simplify ADT setup, we recommend
 installing the Android SDK prior to installing ADT. </p>
