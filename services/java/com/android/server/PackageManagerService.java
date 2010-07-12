@@ -4764,7 +4764,9 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.v(TAG, "Setting .obb path for " + packageName + " to: " + path);
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
-        boolean allowedByPermission = false;
+        final int permission = mContext.checkCallingPermission(
+                android.Manifest.permission.INSTALL_PACKAGES);
+        final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         synchronized (mPackages) {
             pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null) {
