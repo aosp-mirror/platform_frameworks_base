@@ -347,8 +347,6 @@ ProgramStoreCreate {
 	}
 
 ProgramRasterCreate {
-	param RsElement in
-	param RsElement out
 	param bool pointSmooth
 	param bool lineSmooth
 	param bool pointSprite
@@ -360,6 +358,10 @@ ProgramRasterSetLineWidth {
 	param float lw
 }
 
+ProgramRasterSetCullMode {
+	param RsProgramRaster pr
+	param RsCullMode mode
+}
 
 ProgramBindConstants {
 	param RsProgram vp
@@ -490,6 +492,29 @@ MeshBindVertex {
 	param RsMesh mesh
 	param RsAllocation vtx
 	param uint32_t slot
+	}
+
+MeshGetVertexBufferCount {
+	param RsMesh mesh
+	param int32_t *numVtx
+	}
+
+MeshGetIndexCount {
+	param RsMesh mesh
+	param int32_t *numIdx
+	}
+
+MeshGetVertices {
+	param RsMesh mv
+	param RsAllocation *vtxData
+	param uint32_t vtxDataCount
+	}
+
+MeshGetIndices {
+	param RsMesh mv
+	param RsAllocation *va
+	param uint32_t *primType
+	param uint32_t idxDataCount
 	}
 
 AnimationCreate {

@@ -511,6 +511,9 @@ void FontState::issueDrawCommand() {
     ObjectBaseRef<const ProgramVertex> tmpV(mRSC->getVertex());
     mRSC->setVertex(mRSC->getDefaultProgramVertex());
 
+    ObjectBaseRef<const ProgramRaster> tmpR(mRSC->getRaster());
+    mRSC->setRaster(mRSC->getDefaultProgramRaster());
+
     ObjectBaseRef<const ProgramFragment> tmpF(mRSC->getFragment());
     mRSC->setFragment(mFontShaderF.get());
 
@@ -519,6 +522,7 @@ void FontState::issueDrawCommand() {
 
     if (!mRSC->setupCheck()) {
         mRSC->setVertex((ProgramVertex *)tmpV.get());
+        mRSC->setRaster((ProgramRaster *)tmpR.get());
         mRSC->setFragment((ProgramFragment *)tmpF.get());
         mRSC->setFragmentStore((ProgramStore *)tmpPS.get());
         return;
@@ -538,6 +542,7 @@ void FontState::issueDrawCommand() {
 
     // Reset the state
     mRSC->setVertex((ProgramVertex *)tmpV.get());
+    mRSC->setRaster((ProgramRaster *)tmpR.get());
     mRSC->setFragment((ProgramFragment *)tmpF.get());
     mRSC->setFragmentStore((ProgramStore *)tmpPS.get());
 }

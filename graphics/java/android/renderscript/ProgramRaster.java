@@ -26,12 +26,23 @@ import android.util.Log;
  *
  **/
 public class ProgramRaster extends BaseObj {
+
+    public enum CullMode {
+        BACK (0),
+        FRONT (1),
+        NONE (2);
+
+        int mID;
+        CullMode(int id) {
+            mID = id;
+        }
+    }
+
     boolean mPointSmooth;
     boolean mLineSmooth;
     boolean mPointSprite;
     float mLineWidth;
-    Element mIn;
-    Element mOut;
+    CullMode mCullMode;
 
     ProgramRaster(int id, RenderScript rs) {
         super(rs);
@@ -41,6 +52,8 @@ public class ProgramRaster extends BaseObj {
         mPointSmooth = false;
         mLineSmooth = false;
         mPointSprite = false;
+
+        mCullMode = CullMode.BACK;
     }
 
     public void setLineWidth(float w) {
@@ -49,45 +62,48 @@ public class ProgramRaster extends BaseObj {
         mRS.nProgramRasterSetLineWidth(mID, w);
     }
 
-    void internalInit() {
-        int inID = 0;
-        int outID = 0;
-        if (mIn != null) {
-            inID = mIn.mID;
-        }
-        if (mOut != null) {
-            outID = mOut.mID;
-        }
-        mID = mRS.nProgramRasterCreate(inID, outID, mPointSmooth, mLineSmooth, mPointSprite);
+    public void setCullMode(CullMode m) {
+        mRS.validate();
+        mCullMode = m;
+        mRS.nProgramRasterSetCullMode(mID, m.mID);
     }
-
 
     public static class Builder {
         RenderScript mRS;
-        ProgramRaster mPR;
+        boolean mPointSprite;
+        boolean mPointSmooth;
+        boolean mLineSmooth;
 
+        // Legacy to not break app in other projects, will be removed in cleanup pass
         public Builder(RenderScript rs, Element in, Element out) {
             mRS = rs;
-            mPR = new ProgramRaster(0, rs);
+            mPointSmooth = false;
+            mLineSmooth = false;
+            mPointSprite = false;
+        }
+
+        public Builder(RenderScript rs) {
+            mRS = rs;
+            mPointSmooth = false;
+            mLineSmooth = false;
+            mPointSprite = false;
         }
 
         public void setPointSpriteEnable(boolean enable) {
-            mPR.mPointSprite = enable;
+            mPointSprite = enable;
         }
 
         public void setPointSmoothEnable(boolean enable) {
-            mPR.mPointSmooth = enable;
+            mPointSmooth = enable;
         }
 
         public void setLineSmoothEnable(boolean enable) {
-            mPR.mLineSmooth = enable;
+            mLineSmooth = enable;
         }
 
-
         static synchronized ProgramRaster internalCreate(RenderScript rs, Builder b) {
-            b.mPR.internalInit();
-            ProgramRaster pr = b.mPR;
-            b.mPR = new ProgramRaster(0, b.mRS);
+            int id = rs.nProgramRasterCreate(b.mPointSmooth, b.mLineSmooth, b.mPointSprite);
+            ProgramRaster pr = new ProgramRaster(id, rs);
             return pr;
         }
 
@@ -98,6 +114,7 @@ public class ProgramRaster extends BaseObj {
     }
 
 }
+
 
 
 

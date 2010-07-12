@@ -81,5 +81,10 @@ class BaseObj {
         mRS.nObjDestroy(mID);
     }
 
+    // If an object came from an a3d file, java fields need to be
+    // created with objects from the native layer
+    void updateFromNative() {
+    }
+
 }
 

@@ -42,6 +42,7 @@ ProgramRaster::ProgramRaster(Context *rsc,
     mLineSmooth = lineSmooth;
     mPointSprite = pointSprite;
     mLineWidth = 1.0f;
+    mCull = RS_CULL_BACK;
 }
 
 ProgramRaster::~ProgramRaster()
@@ -51,14 +52,22 @@ ProgramRaster::~ProgramRaster()
 void ProgramRaster::setLineWidth(float s)
 {
     mLineWidth = s;
+    mDirty = true;
+}
+
+void ProgramRaster::setCullMode(RsCullMode mode)
+{
+    mCull = mode;
+    mDirty = true;
 }
 
 void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
 {
-    if (state->mLast.get() == this) {
+    if (state->mLast.get() == this && !mDirty) {
         return;
     }
     state->mLast.set(this);
+    mDirty = false;
 
     if (mPointSmooth) {
         glEnable(GL_POINT_SMOOTH);
@@ -82,14 +91,43 @@ void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
         }
 #endif //ANDROID_RS_BUILD_FOR_HOST
     }
+
+    switch(mCull) {
+        case RS_CULL_BACK:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case RS_CULL_FRONT:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            break;
+        case RS_CULL_NONE:
+            glDisable(GL_CULL_FACE);
+            break;
+    }
 }
 
 void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
 {
-    if (state->mLast.get() == this) {
+    if (state->mLast.get() == this && !mDirty) {
         return;
     }
     state->mLast.set(this);
+    mDirty = false;
+
+    switch(mCull) {
+        case RS_CULL_BACK:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case RS_CULL_FRONT:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            break;
+        case RS_CULL_NONE:
+            glDisable(GL_CULL_FACE);
+            break;
+    }
 }
 
 void ProgramRaster::serialize(OStream *stream) const
@@ -126,7 +164,7 @@ void ProgramRasterState::deinit(Context *rsc)
 namespace android {
 namespace renderscript {
 
-RsProgramRaster rsi_ProgramRasterCreate(Context * rsc, RsElement in, RsElement out,
+RsProgramRaster rsi_ProgramRasterCreate(Context * rsc,
                                       bool pointSmooth,
                                       bool lineSmooth,
                                       bool pointSprite)
@@ -143,6 +181,12 @@ void rsi_ProgramRasterSetLineWidth(Context * rsc, RsProgramRaster vpr, float s)
 {
     ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
     pr->setLineWidth(s);
+}
+
+void rsi_ProgramRasterSetCullMode(Context * rsc, RsProgramRaster vpr, RsCullMode mode)
+{
+    ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
+    pr->setCullMode(mode);
 }
 
 

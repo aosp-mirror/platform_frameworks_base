@@ -683,6 +683,14 @@ void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)
     a->read(data);
 }
 
+const void* rsi_AllocationGetType(Context *rsc, RsAllocation va)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->getType()->incUserRef();
+
+    return a->getType();
+}
+
 #endif //ANDROID_RS_BUILD_FOR_HOST
 
 }

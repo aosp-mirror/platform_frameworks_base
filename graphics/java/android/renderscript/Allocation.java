@@ -40,6 +40,11 @@ public class Allocation extends BaseObj {
         mType = t;
     }
 
+    Allocation(int id, RenderScript rs) {
+        super(rs);
+        mID = id;
+    }
+
     public Type getType() {
         return mType;
     }

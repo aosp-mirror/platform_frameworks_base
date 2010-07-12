@@ -59,6 +59,38 @@ public class Mesh extends BaseObj {
         return mPrimitives[slot];
     }
 
+    @Override
+    void updateFromNative() {
+        int vtxCount = mRS.nMeshGetVertexBufferCount(mID);
+        int idxCount = mRS.nMeshGetIndexCount(mID);
+
+        int[] vtxIDs = new int[vtxCount];
+        int[] idxIDs = new int[idxCount];
+        int[] primitives = new int[idxCount];
+
+        mRS.nMeshGetVertices(mID, vtxIDs, vtxCount);
+        mRS.nMeshGetIndices(mID, idxIDs, primitives, vtxCount);
+
+        mVertexBuffers = new Allocation[vtxCount];
+        mIndexBuffers = new Allocation[idxCount];
+        mPrimitives = new Primitive[idxCount];
+
+        for(int i = 0; i < vtxCount; i ++) {
+            if(vtxIDs[i] != 0) {
+                mVertexBuffers[i] = new Allocation(vtxIDs[i], mRS);
+                mVertexBuffers[i].updateFromNative();
+            }
+        }
+
+        for(int i = 0; i < idxCount; i ++) {
+            if(idxIDs[i] != 0) {
+                mIndexBuffers[i] = new Allocation(idxIDs[i], mRS);
+                mIndexBuffers[i].updateFromNative();
+            }
+            mPrimitives[i] = Primitive.values()[primitives[i]];
+        }
+    }
+
     public static class Builder {
         RenderScript mRS;
 
