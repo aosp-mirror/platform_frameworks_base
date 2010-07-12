@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/layout/list_content.xml
-**
-** Copyright 2006, The Android Open Source Project
+/* Copyright 2010, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -17,8 +15,42 @@
 ** limitations under the License.
 */
 -->
-<ListView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@android:id/list"
-    android:layout_width="match_parent" 
-    android:layout_height="match_parent"
-    android:drawSelectorOnTop="false"
-    />
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    
+    <LinearLayout android:id="@+id/progressContainer"
+            android:orientation="vertical"
+            android:layout_width="match_parent" 
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:gravity="center">
+        
+        <ProgressBar style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/loading"
+                android:paddingTop="4dip"
+                android:singleLine="true" />
+            
+    </LinearLayout>
+        
+    <FrameLayout android:id="@+id/listContainer"
+            android:layout_width="match_parent" 
+            android:layout_height="match_parent">
+            
+        <ListView android:id="@android:id/list"
+                android:layout_width="match_parent" 
+                android:layout_height="match_parent"
+                android:drawSelectorOnTop="false" />
+        <TextView android:id="@+android:id/internalEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+    </FrameLayout>
+        
+</FrameLayout>
