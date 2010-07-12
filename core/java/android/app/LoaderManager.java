@@ -180,7 +180,7 @@ public class LoaderManager {
      * will be called as the loader state changes.  If at the point of call
      * the caller is in its started state, and the requested loader
      * already exists and has generated its data, then
-     * callback.{@link LoaderCallbacks#onLoadFinished(Loader, Object)} will 
+     * callback. {@link LoaderCallbacks#onLoadFinished} will
      * be called immediately (inside of this function), so you must be prepared
      * for this to happen.
      */
