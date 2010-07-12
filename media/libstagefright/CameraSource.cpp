@@ -65,6 +65,11 @@ void CameraSourceListener::notify(int32_t msgType, int32_t ext1, int32_t ext2) {
 void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr) {
     LOGV("postData(%d, ptr:%p, size:%d)",
          msgType, dataPtr->pointer(), dataPtr->size());
+
+    sp<CameraSource> source = mSource.promote();
+    if (source.get() != NULL) {
+        source->dataCallback(msgType, dataPtr);
+    }
 }
 
 void CameraSourceListener::postDataTimestamp(
@@ -116,33 +121,17 @@ CameraSource *CameraSource::CreateFromCamera(const sp<Camera> &camera) {
     return new CameraSource(camera);
 }
 
-void CameraSource::enableTimeLapseMode(
-        int64_t timeBetweenTimeLapseFrameCaptureUs, int32_t videoFrameRate) {
-    LOGV("starting time lapse mode");
-    mTimeBetweenTimeLapseFrameCaptureUs = timeBetweenTimeLapseFrameCaptureUs;
-    mTimeBetweenTimeLapseVideoFramesUs = (1E6/videoFrameRate);
-}
-
-void CameraSource::disableTimeLapseMode() {
-    LOGV("stopping time lapse mode");
-    mTimeBetweenTimeLapseFrameCaptureUs = -1;
-    mTimeBetweenTimeLapseVideoFramesUs = 0;
-}
-
 CameraSource::CameraSource(const sp<Camera> &camera)
     : mCamera(camera),
-      mFirstFrameTimeUs(0),
-      mLastFrameTimestampUs(0),
       mNumFramesReceived(0),
+      mLastFrameTimestampUs(0),
+      mStarted(false),
+      mFirstFrameTimeUs(0),
       mNumFramesEncoded(0),
       mNumFramesDropped(0),
       mNumGlitches(0),
       mGlitchDurationThresholdUs(200000),
-      mCollectStats(false),
-      mStarted(false),
-      mTimeBetweenTimeLapseFrameCaptureUs(-1),
-      mTimeBetweenTimeLapseVideoFramesUs(0),
-      mLastTimeLapseFrameRealTimestampUs(0) {
+      mCollectStats(false) {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
@@ -177,13 +166,16 @@ CameraSource::CameraSource(const sp<Camera> &camera)
     mMeta->setInt32(kKeyHeight, height);
     mMeta->setInt32(kKeyStride, stride);
     mMeta->setInt32(kKeySliceHeight, sliceHeight);
-
 }
 
 CameraSource::~CameraSource() {
     if (mStarted) {
         stop();
     }
+}
+
+void CameraSource::startCameraRecording() {
+    CHECK_EQ(OK, mCamera->startRecording());
 }
 
 status_t CameraSource::start(MetaData *meta) {
@@ -203,11 +195,15 @@ status_t CameraSource::start(MetaData *meta) {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mCamera->setListener(new CameraSourceListener(this));
-    CHECK_EQ(OK, mCamera->startRecording());
+    startCameraRecording();
     IPCThreadState::self()->restoreCallingIdentity(token);
 
     mStarted = true;
     return OK;
+}
+
+void CameraSource::stopCameraRecording() {
+    mCamera->stopRecording();
 }
 
 status_t CameraSource::stop() {
@@ -218,7 +214,7 @@ status_t CameraSource::stop() {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mCamera->setListener(NULL);
-    mCamera->stopRecording();
+    stopCameraRecording();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
         LOGI("Waiting for outstanding frames being encoded: %d",
@@ -238,11 +234,15 @@ status_t CameraSource::stop() {
     return OK;
 }
 
+void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
+    mCamera->releaseRecordingFrame(frame);
+}
+
 void CameraSource::releaseQueuedFrames() {
     List<sp<IMemory> >::iterator it;
     while (!mFramesReceived.empty()) {
         it = mFramesReceived.begin();
-        mCamera->releaseRecordingFrame(*it);
+        releaseRecordingFrame(*it);
         mFramesReceived.erase(it);
         ++mNumFramesDropped;
     }
@@ -254,7 +254,7 @@ sp<MetaData> CameraSource::getFormat() {
 
 void CameraSource::releaseOneRecordingFrame(const sp<IMemory>& frame) {
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mCamera->releaseRecordingFrame(frame);
+    releaseRecordingFrame(frame);
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
@@ -263,7 +263,6 @@ void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
     for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
          it != mFramesBeingEncoded.end(); ++it) {
         if ((*it)->pointer() ==  buffer->data()) {
-
             releaseOneRecordingFrame((*it));
             mFramesBeingEncoded.erase(it);
             ++mNumFramesEncoded;
@@ -332,33 +331,11 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
         ++mNumGlitches;
     }
 
-    // time lapse
-    if(mTimeBetweenTimeLapseFrameCaptureUs >= 0) {
-        if(mLastTimeLapseFrameRealTimestampUs == 0) {
-            // First time lapse frame. Initialize mLastTimeLapseFrameRealTimestampUs
-            // to current time (timestampUs) and save frame data.
-            LOGV("dataCallbackTimestamp timelapse: initial frame");
-
-            mLastTimeLapseFrameRealTimestampUs = timestampUs;
-        } else if (timestampUs <
-                (mLastTimeLapseFrameRealTimestampUs + mTimeBetweenTimeLapseFrameCaptureUs)) {
-            // Skip all frames from last encoded frame until
-            // sufficient time (mTimeBetweenTimeLapseFrameCaptureUs) has passed.
-            // Tell the camera to release its recording frame and return.
-            LOGV("dataCallbackTimestamp timelapse: skipping intermediate frame");
-
-            releaseOneRecordingFrame(data);
-            return;
-        } else {
-            // Desired frame has arrived after mTimeBetweenTimeLapseFrameCaptureUs time:
-            // - Reset mLastTimeLapseFrameRealTimestampUs to current time.
-            // - Artificially modify timestampUs to be one frame time (1/framerate) ahead
-            // of the last encoded frame's time stamp.
-            LOGV("dataCallbackTimestamp timelapse: got timelapse frame");
-
-            mLastTimeLapseFrameRealTimestampUs = timestampUs;
-            timestampUs = mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
-        }
+    // May need to skip frame or modify timestamp. Currently implemented
+    // by the subclass CameraSourceTimeLapse.
+    if(skipCurrentFrame(timestampUs)) {
+        releaseOneRecordingFrame(data);
+        return;
     }
 
     mLastFrameTimestampUs = timestampUs;

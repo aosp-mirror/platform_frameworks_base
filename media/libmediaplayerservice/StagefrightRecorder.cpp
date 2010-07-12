@@ -24,6 +24,7 @@
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
+#include <media/stagefright/CameraSourceTimeLapse.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -895,11 +896,10 @@ status_t StagefrightRecorder::setupVideoEncoder(const sp<MediaWriter>& writer) {
     status_t err = setupCameraSource();
     if (err != OK) return err;
 
-    sp<CameraSource> cameraSource = CameraSource::CreateFromCamera(mCamera);
+    sp<CameraSource> cameraSource = (mCaptureTimeLapse) ?
+        CameraSourceTimeLapse::CreateFromCamera(mCamera, true, 3E6, mFrameRate):
+        CameraSource::CreateFromCamera(mCamera);
     CHECK(cameraSource != NULL);
-    if(mCaptureTimeLapse) {
-        cameraSource->enableTimeLapseMode(1E6, mFrameRate);
-    }
 
     sp<MetaData> enc_meta = new MetaData;
     enc_meta->setInt32(kKeyBitRate, mVideoBitRate);
