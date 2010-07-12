@@ -409,6 +409,13 @@ public final class ContactsContract {
         public static final String CONTACT_PRESENCE = "contact_presence";
 
         /**
+         * Contact Chat Capabilities. See {@link StatusColumns#CHAT_CAPABILITY} for individual
+         * definitions.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CONTACT_CHAT_CAPABILITY = "contact_chat_capability";
+
+        /**
          * Contact's latest status update.
          * <p>Type: TEXT</p>
          */
@@ -1950,6 +1957,29 @@ public final class ContactsContract {
          * <p>Type: NUMBER</p>
          */
         public static final String STATUS_ICON = "status_icon";
+
+        /**
+         * Contact's audio/video chat capability level.
+         * <P>Type: INTEGER (one of the values below)</P>
+         */
+        public static final String CHAT_CAPABILITY = "chat_capability";
+
+        /**
+         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates that the contact's device can
+         * display a video feed.
+         */
+        public static final int CAPABILITY_HAS_VIDEO_PLAYBACK_ONLY = 1;
+
+        /**
+         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates audio-chat capability.
+         */
+        public static final int CAPABILITY_HAS_VOICE = 2;
+
+        /**
+         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates that the contact's device has a
+         * camera that can be used for video chat (e.g. a front-facing camera on a phone).
+         */
+        public static final int CAPABILITY_HAS_CAMERA = 4;
     }
 
     /**
@@ -3091,6 +3121,25 @@ public final class ContactsContract {
      * <p>
      * Since presence status is inherently volatile, the content provider
      * may choose not to store this field in long-term storage.
+     * </p>
+     * </td>
+     * </tr>
+     * <tr>
+     * <td>int</td>
+     * <td>{@link #CHAT_CAPABILITY}</td>
+     * <td>read/write</td>
+     * <td>Contact IM chat compatibility value. The allowed values are:
+     * <p>
+     * <ul>
+     * <li>{@link #CAPABILITY_HAS_VIDEO_PLAYBACK_ONLY}</li>
+     * <li>{@link #CAPABILITY_HAS_VOICE}</li>
+     * <li>{@link #CAPABILITY_HAS_CAMERA}</li>
+     * </ul>
+     * </p>
+     * <p>
+     * Since chat compatibility is inherently volatile as the contact's availability moves from
+     * one device to another, the content provider may choose not to store this field in long-term
+     * storage.
      * </p>
      * </td>
      * </tr>
