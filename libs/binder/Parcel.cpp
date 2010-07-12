@@ -51,6 +51,9 @@
 // Note: must be kept in sync with android/os/StrictMode.java's PENALTY_GATHER
 #define STRICT_MODE_PENALTY_GATHER 0x100
 
+// Note: must be kept in sync with android/os/Parcel.java's EX_HAS_REPLY_HEADER
+#define EX_HAS_REPLY_HEADER -128
+
 // XXX This can be made public if we want to provide
 // support for typed data.
 struct small_flat_data
@@ -959,7 +962,15 @@ wp<IBinder> Parcel::readWeakBinder() const
 int32_t Parcel::readExceptionCode() const
 {
   int32_t exception_code = readAligned<int32_t>();
-  // TODO: skip over the response header here, once that's in.
+  if (exception_code == EX_HAS_REPLY_HEADER) {
+    int32_t header_size = readAligned<int32_t>();
+    // Skip over fat responses headers.  Not used (or propagated) in
+    // native code
+    setDataPosition(dataPosition() + header_size);
+    // And fat response headers are currently only used when there are no
+    // exceptions, so return no error:
+    return 0;
+  }
   return exception_code;
 }
 
