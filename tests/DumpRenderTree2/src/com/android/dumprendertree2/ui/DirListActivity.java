@@ -20,10 +20,16 @@ import com.android.dumprendertree2.FileFilter;
 import com.android.dumprendertree2.R;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +56,19 @@ public class DirListActivity extends ListActivity {
             File.separator + "LayoutTests";
 
     /** TODO: This is just a guess - think of a better way to achieve it */
-    private static final int MEAN_TITLE_CHAR_SIZE = 12;
+    private static final int MEAN_TITLE_CHAR_SIZE = 13;
+
+    private static final int PROGRESS_DIALOG_DELAY_MS = 200;
+
+    /** Code for the dialog, used in showDialog and onCreateDialog */
+    private static final int DIALOG_RUN_ABORT_DIR = 0;
+
+    /** Messages codes */
+    private static final int MSG_LOADED_ITEMS = 0;
+    private static final int MSG_SHOW_PROGRESS_DIALOG = 1;
+
+    /** Initialized lazily before first sProgressDialog.show() */
+    private static ProgressDialog sProgressDialog;
 
     private ListView mListView;
 
@@ -61,6 +79,28 @@ public class DirListActivity extends ListActivity {
      * TODO: This should not be a constant, but rather be configurable from somewhere.
      */
     private String mRootDirPath = ROOT_DIR_PATH;
+
+    /**
+     * A thread responsible for loading the contents of the directory from sd card
+     * and sending them via Message to main thread that then loads them into
+     * ListView
+     */
+    private class LoadListItemsThread extends Thread {
+        private Handler mHandler;
+        private String mRelativePath;
+
+        public LoadListItemsThread(String relativePath, Handler handler) {
+            mRelativePath = relativePath;
+            mHandler = handler;
+        }
+
+        @Override
+        public void run() {
+            Message msg = mHandler.obtainMessage(MSG_LOADED_ITEMS);
+            msg.obj = getDirList(mRelativePath);
+            mHandler.sendMessage(msg);
+        }
+    }
 
     /**
      * Very simple object to use inside ListView as an item.
@@ -149,14 +189,33 @@ public class DirListActivity extends ListActivity {
         mListView = getListView();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                ListItem item = (ListItem) adapterView.getItemAtPosition(position);
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ListItem item = (ListItem) parent.getItemAtPosition(position);
 
                 if (item.isDirectory()) {
                     showDir(item.getRelativePath());
                 } else {
                     /** TODO: run the test */
                 }
+            }
+        });
+
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                ListItem item = (ListItem) parent.getItemAtPosition(position);
+
+                if (item.isDirectory()) {
+                    Bundle arguments = new Bundle(1);
+                    arguments.putString("name", item.getName());
+                    arguments.putString("relativePath", item.getRelativePath());
+                    showDialog(DIALOG_RUN_ABORT_DIR, arguments);
+                } else {
+                    /** TODO: Maybe show some info about a test? */
+                }
+
+                return true;
             }
         });
 
@@ -189,6 +248,48 @@ public class DirListActivity extends ListActivity {
         setTitle(shortenTitle(mCurrentDirPath));
     }
 
+    @Override
+    protected Dialog onCreateDialog(int id, Bundle args) {
+        Dialog dialog = null;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        switch (id) {
+            case DIALOG_RUN_ABORT_DIR:
+                builder.setTitle(getText(R.string.dialog_run_abort_dir_title_prefix) + " " +
+                        args.getString("name"));
+                builder.setMessage(R.string.dialog_run_abort_dir_msg);
+                builder.setCancelable(true);
+
+                builder.setPositiveButton(R.string.dialog_run_abort_dir_ok_button,
+                        new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        /** TODO: Run tests from the dir */
+                        removeDialog(DIALOG_RUN_ABORT_DIR);
+                    }
+                });
+
+                builder.setNegativeButton(R.string.dialog_run_abort_dir_abort_button,
+                        new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        removeDialog(DIALOG_RUN_ABORT_DIR);
+                    }
+                });
+
+                dialog = builder.create();
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        removeDialog(DIALOG_RUN_ABORT_DIR);
+                    }
+                });
+                break;
+        }
+
+        return dialog;
+    }
+
     /**
      * Loads the contents of dir into the list view.
      *
@@ -197,8 +298,41 @@ public class DirListActivity extends ListActivity {
      */
     private void showDir(String dirPath) {
         mCurrentDirPath = dirPath;
-        setTitle(shortenTitle(dirPath));
-        setListAdapter(new DirListAdapter(this, getDirList(dirPath)));
+
+        /** Show progress dialog with a delay */
+        final Handler delayedDialogHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == MSG_SHOW_PROGRESS_DIALOG) {
+                    if (sProgressDialog == null) {
+                        sProgressDialog = new ProgressDialog(DirListActivity.this);
+                        sProgressDialog.setCancelable(false);
+                        sProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        sProgressDialog.setTitle(R.string.dialog_progress_title);
+                        sProgressDialog.setMessage(getText(R.string.dialog_progress_msg));
+                    }
+                    sProgressDialog.show();
+                }
+            }
+        };
+        Message msgShowDialog = delayedDialogHandler.obtainMessage(MSG_SHOW_PROGRESS_DIALOG);
+        delayedDialogHandler.sendMessageDelayed(msgShowDialog, PROGRESS_DIALOG_DELAY_MS);
+
+        /** Delegate loading contents from SD card to a new thread */
+        new LoadListItemsThread(mCurrentDirPath, new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == MSG_LOADED_ITEMS) {
+                    setListAdapter(new DirListAdapter(DirListActivity.this,
+                            (ListItem[])msg.obj));
+                    delayedDialogHandler.removeMessages(MSG_SHOW_PROGRESS_DIALOG);
+                    setTitle(shortenTitle(mCurrentDirPath));
+                    if (sProgressDialog != null) {
+                        sProgressDialog.dismiss();
+                    }
+                }
+            }
+        }).start();
     }
 
     /**
@@ -222,6 +356,8 @@ public class DirListActivity extends ListActivity {
      * Return the array with contents of the given directory.
      * First it contains the subfolders, then the files. Both sorted
      * alphabetically.
+     *
+     * The dirPath is relative.
      */
     private ListItem[] getDirList(String dirPath) {
         File dir = new File(mRootDirPath, dirPath);
