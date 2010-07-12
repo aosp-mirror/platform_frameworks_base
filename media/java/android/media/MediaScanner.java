@@ -305,6 +305,7 @@ public class MediaScanner
     private Uri mGenresUri;
     private Uri mPlaylistsUri;
     private boolean mProcessPlaylists, mProcessGenres;
+    private int mMtpObjectHandle;
 
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
@@ -625,6 +626,9 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.DATE_MODIFIED, mLastModified);
             map.put(MediaStore.MediaColumns.SIZE, mFileSize);
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
+            if (mMtpObjectHandle != 0) {
+                map.put(MediaStore.MediaColumns.MTP_OBJECT_HANDLE, mMtpObjectHandle);
+            }
 
             if (MediaFile.isVideoFileType(mFileType)) {
                 map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
@@ -1225,6 +1229,14 @@ public class MediaScanner
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             return null;
         }
+    }
+
+    public Uri scanMtpFile(String path, String volumeName, int objectHandle, int format) {
+        String mimeType = MediaFile.getMimeTypeForFormatCode(format);
+        mMtpObjectHandle = objectHandle;
+        Uri result = scanSingleFile(path, volumeName, mimeType);
+        mMtpObjectHandle = 0;
+        return result;
     }
 
     // returns the number of matching file/directory names, starting from the right

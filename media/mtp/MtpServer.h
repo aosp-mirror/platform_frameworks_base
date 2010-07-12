@@ -60,6 +60,7 @@ private:
 
     // handle for new object, set by SendObjectInfo and used by SendObject
     MtpObjectHandle     mSendObjectHandle;
+    MtpObjectFormat     mSendObjectFormat;
     MtpString           mSendObjectFilePath;
     size_t              mSendObjectFileSize;
 

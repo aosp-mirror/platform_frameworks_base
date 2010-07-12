@@ -17,6 +17,7 @@
 package android.media;
 
 import android.content.Context;
+import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.database.Cursor;
 import android.net.Uri;
@@ -57,6 +58,8 @@ public class MtpDatabase {
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
                                             + MtpObjects.ObjectColumns.FORMAT + "=?";
 
+    private final MediaScanner mMediaScanner;
+
     static {
         System.loadLibrary("media_jni");
     }
@@ -67,6 +70,7 @@ public class MtpDatabase {
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
         mObjectsUri = MtpObjects.getContentUri(volumeName);
+        mMediaScanner = new MediaScanner(context);
     }
 
     @Override
@@ -74,10 +78,35 @@ public class MtpDatabase {
         native_finalize();
     }
 
-    private int addFile(String path, int format, int parent,
+    private int beginSendObject(String path, int format, int parent,
                          int storage, long size, long modified) {
-        Log.d(TAG, "addFile " + path);
-        return 0;
+        ContentValues values = new ContentValues();
+        values.put(MtpObjects.ObjectColumns.DATA, path);
+        values.put(MtpObjects.ObjectColumns.FORMAT, format);
+        values.put(MtpObjects.ObjectColumns.PARENT, parent);
+        // storage is ignored for now
+        values.put(MtpObjects.ObjectColumns.SIZE, size);
+        values.put(MtpObjects.ObjectColumns.DATE_MODIFIED, modified);
+
+        try {
+            Uri uri = mMediaProvider.insert(mObjectsUri, values);
+            if (uri != null) {
+                return Integer.parseInt(uri.getPathSegments().get(2));
+            } else {
+                return -1;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in beginSendObject", e);
+            return -1;
+        }
+    }
+
+    private void endSendObject(String path, int handle, int format, boolean succeeded) {
+        if (succeeded) {
+            Uri uri = mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
+        } else {
+            deleteFile(handle);
+        }
     }
 
     private int[] getObjectList(int storageID, int format, int parent) {

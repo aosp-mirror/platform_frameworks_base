@@ -36,7 +36,8 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 
-static jmethodID method_addFile;
+static jmethodID method_beginSendObject;
+static jmethodID method_endSendObject;
 static jmethodID method_getObjectList;
 static jmethodID method_getObjectProperty;
 static jmethodID method_getObjectInfo;
@@ -62,12 +63,17 @@ public:
     virtual                         ~MyMtpDatabase();
     void                            cleanup(JNIEnv *env);
 
-    virtual MtpObjectHandle         addFile(const char* path,
+    virtual MtpObjectHandle         beginSendObject(const char* path,
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent,
                                             MtpStorageID storage,
                                             uint64_t size,
                                             time_t modified);
+
+    virtual void                    endSendObject(const char* path,
+                                            MtpObjectHandle handle,
+                                            MtpObjectFormat format,
+                                            bool succeeded);
 
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
                                     MtpObjectFormat format,
@@ -135,15 +141,22 @@ void MyMtpDatabase::cleanup(JNIEnv *env) {
 MyMtpDatabase::~MyMtpDatabase() {
 }
 
-MtpObjectHandle MyMtpDatabase::addFile(const char* path,
+MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent,
                                             MtpStorageID storage,
                                             uint64_t size,
                                             time_t modified) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    return env->CallIntMethod(mDatabase, method_addFile, env->NewStringUTF(path),
+    return env->CallIntMethod(mDatabase, method_beginSendObject, env->NewStringUTF(path),
                 (jint)format, (jint)parent, (jint)storage, (jlong)size, (jlong)modified);
+}
+
+void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
+                                MtpObjectFormat format, bool succeeded) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mDatabase, method_endSendObject, env->NewStringUTF(path),
+                        (jint)handle, (jint)format, (jboolean)succeeded);
 }
 
 MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
@@ -397,9 +410,14 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         LOGE("Can't find android/media/MtpDatabase");
         return -1;
     }
-    method_addFile = env->GetMethodID(clazz, "addFile", "(Ljava/lang/String;IIIJJ)I");
-    if (method_addFile == NULL) {
-        LOGE("Can't find addFile");
+    method_beginSendObject = env->GetMethodID(clazz, "beginSendObject", "(Ljava/lang/String;IIIJJ)I");
+    if (method_beginSendObject == NULL) {
+        LOGE("Can't find beginSendObject");
+        return -1;
+    }
+    method_endSendObject = env->GetMethodID(clazz, "endSendObject", "(Ljava/lang/String;IIZ)V");
+    if (method_endSendObject == NULL) {
+        LOGE("Can't find endSendObject");
         return -1;
     }
     method_getObjectList = env->GetMethodID(clazz, "getObjectList", "(III)[I");

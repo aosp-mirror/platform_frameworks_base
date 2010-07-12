@@ -123,6 +123,7 @@ MtpServer::MtpServer(int fd, MtpDatabase* database,
         mSessionID(0),
         mSessionOpen(false),
         mSendObjectHandle(kInvalidObjectHandle),
+        mSendObjectFormat(0),
         mSendObjectFileSize(0)
 {
     initObjectProperties();
@@ -519,8 +520,8 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     path += (const char *)name;
 
     mDatabase->beginTransaction();
-    MtpObjectHandle handle = mDatabase->addFile((const char*)path, format, parent, storageID, 
-                                    mSendObjectFileSize, modifiedTime);
+    MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
+            format, parent, storageID, mSendObjectFileSize, modifiedTime);
     if (handle == kInvalidObjectHandle) {
         mDatabase->rollbackTransaction();
         return MTP_RESPONSE_GENERAL_ERROR;
@@ -538,6 +539,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         mSendObjectFilePath = path;
         // save the handle for the SendObject call, which should follow
         mSendObjectHandle = handle;
+        mSendObjectFormat = format;
     }
 
     mResponse.setParameter(1, storageID);
@@ -548,13 +550,18 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
 }
 
 MtpResponseCode MtpServer::doSendObject() {
+    MtpResponseCode result = MTP_RESPONSE_OK;
+    mode_t mask;
+    int ret;
+
     if (mSendObjectHandle == kInvalidObjectHandle) {
         LOGE("Expected SendObjectInfo before SendObject");
-        return MTP_RESPONSE_NO_VALID_OBJECT_INFO;
+        result = MTP_RESPONSE_NO_VALID_OBJECT_INFO;
+        goto done;
     }
 
     // read the header
-    int ret = mData.readDataHeader(mFD);
+    ret = mData.readDataHeader(mFD);
     // FIXME - check for errors here.
 
     // reset so we don't attempt to send this back
@@ -563,11 +570,12 @@ MtpResponseCode MtpServer::doSendObject() {
     mtp_file_range  mfr;
     mfr.fd = open(mSendObjectFilePath, O_RDWR | O_CREAT | O_TRUNC);
     if (mfr.fd < 0) {
-        return MTP_RESPONSE_GENERAL_ERROR;
+        result = MTP_RESPONSE_GENERAL_ERROR;
+        goto done;
     }
     fchown(mfr.fd, getuid(), mFileGroup);
     // set permissions
-    mode_t mask = umask(0);
+    mask = umask(0);
     fchmod(mfr.fd, mFilePermission);
     umask(mask);
 
@@ -578,18 +586,22 @@ MtpResponseCode MtpServer::doSendObject() {
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
     close(mfr.fd);
 
-    // FIXME - we need to delete mSendObjectHandle from the database if this fails.
     LOGV("MTP_RECEIVE_FILE returned %d", ret);
-    mSendObjectHandle = kInvalidObjectHandle;
 
     if (ret < 0) {
         unlink(mSendObjectFilePath);
         if (errno == ECANCELED)
-            return MTP_RESPONSE_TRANSACTION_CANCELLED;
+            result = MTP_RESPONSE_TRANSACTION_CANCELLED;
         else
-            return MTP_RESPONSE_GENERAL_ERROR;
+            result = MTP_RESPONSE_GENERAL_ERROR;
     }
-    return MTP_RESPONSE_OK;
+
+done:
+    mDatabase->endSendObject(mSendObjectFilePath, mSendObjectHandle, mSendObjectFormat,
+            result == MTP_RESPONSE_OK);
+    mSendObjectHandle = kInvalidObjectHandle;
+    mSendObjectFormat = 0;
+    return result;
 }
 
 MtpResponseCode MtpServer::doDeleteObject() {

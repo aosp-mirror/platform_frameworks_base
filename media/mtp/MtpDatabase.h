@@ -27,16 +27,25 @@ class MtpDatabase {
 public:
     virtual ~MtpDatabase() {}
 
-    virtual MtpObjectHandle         addFile(const char* path,
+    // called from SendObjectInfo to reserve a database entry for the incoming file
+    virtual MtpObjectHandle         beginSendObject(const char* path,
                                             MtpObjectFormat format,
                                             MtpObjectHandle parent,
                                             MtpStorageID storage,
                                             uint64_t size,
                                             time_t modified) = 0;
 
+    // called to report success or failure of the SendObject file transfer
+    // success should signal a notification of the new object's creation,
+    // failure should remove the database entry created in beginSendObject
+    virtual void                    endSendObject(const char* path,
+                                            MtpObjectHandle handle,
+                                            MtpObjectFormat format,
+                                            bool succeeded) = 0;
+
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
-                                    MtpObjectFormat format,
-                                    MtpObjectHandle parent) = 0;
+                                            MtpObjectFormat format,
+                                            MtpObjectHandle parent) = 0;
 
     virtual MtpResponseCode         getObjectProperty(MtpObjectHandle handle,
                                             MtpObjectProperty property,

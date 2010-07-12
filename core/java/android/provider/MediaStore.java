@@ -237,6 +237,14 @@ public final class MediaStore {
          * <P>Type: TEXT</P>
          */
         public static final String MIME_TYPE = "mime_type";
+
+        /**
+         * The MTP object handle of a newly transfered file.
+         * Used internally by the MediaScanner
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String MTP_OBJECT_HANDLE = "mtp_object_handle";
      }
 
 

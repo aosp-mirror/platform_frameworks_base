@@ -107,6 +107,9 @@ public class MediaFile {
     // maps mime type to MTP format code
     private static HashMap<String, Integer> sMimeTypeToFormatMap
             = new HashMap<String, Integer>();
+    // maps MTP format code to mime type
+    private static HashMap<Integer, String> sFormatToMimeTypeMap
+            = new HashMap<Integer, String>();
 
     static void addFileType(String extension, int fileType, String mimeType) {
         sFileTypeMap.put(extension, new MediaFileType(fileType, mimeType));
@@ -117,6 +120,7 @@ public class MediaFile {
         addFileType(extension, fileType, mimeType);
         sFileTypeToFormatMap.put(extension, Integer.valueOf(mtpFormatCode));
         sMimeTypeToFormatMap.put(mimeType, Integer.valueOf(mtpFormatCode));
+        sFormatToMimeTypeMap.put(mtpFormatCode, mimeType);
     }
 
     private static boolean isWMAEnabled() {
@@ -252,5 +256,9 @@ public class MediaFile {
             }
         }
         return Mtp.Object.FORMAT_UNDEFINED;
+    }
+
+    public static String getMimeTypeForFormatCode(int formatCode) {
+        return sFormatToMimeTypeMap.get(formatCode);
     }
 }
