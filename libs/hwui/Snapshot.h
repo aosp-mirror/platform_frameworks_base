@@ -130,7 +130,7 @@ public:
     /**
      * Contains the previous ortho matrix.
      */
-    float orthoMatrix[16];
+    mat4 orthoMatrix;
 
 private:
     // Clipping rectangle mapped with the transform

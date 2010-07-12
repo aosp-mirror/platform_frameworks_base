@@ -118,6 +118,7 @@ OpenGLRenderer::OpenGLRenderer():
 
     mDrawColorShader = new DrawColorProgram;
     mDrawTextureShader = new DrawTextureProgram;
+    mCurrentShader = mDrawTextureShader;
 
     memcpy(mDrawTextureVertices, gDrawTextureVertices, sizeof(gDrawTextureVertices));
 }
@@ -136,9 +137,7 @@ OpenGLRenderer::~OpenGLRenderer() {
 void OpenGLRenderer::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
 
-    mat4 ortho;
-    ortho.loadOrtho(0, width, height, 0, -1, 1);
-    ortho.copyTo(mOrthoMatrix);
+    mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     mWidth = width;
     mHeight = height;
@@ -208,7 +207,7 @@ bool OpenGLRenderer::restoreSnapshot() {
     sp<Snapshot> previous = mSnapshot->previous;
 
     if (restoreOrtho) {
-        memcpy(mOrthoMatrix, current->orthoMatrix, sizeof(mOrthoMatrix));
+        mOrthoMatrix.load(current->orthoMatrix);
     }
 
     if (restoreLayer) {
@@ -333,12 +332,10 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     mSnapshot->flags = Snapshot::kFlagDirtyTransform | Snapshot::kFlagDirtyOrtho |
             Snapshot::kFlagClipSet;
-    memcpy(mSnapshot->orthoMatrix, mOrthoMatrix, sizeof(mOrthoMatrix));
+    mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     // Change the ortho projection
-    mat4 ortho;
-    ortho.loadOrtho(0.0f, right - left, bottom - top, 0.0f, 0.0f, 1.0f);
-    ortho.copyTo(mOrthoMatrix);
+    mOrthoMatrix.loadOrtho(0.0f, right - left, bottom - top, 0.0f, 0.0f, 1.0f);
 
     return true;
 }
@@ -511,7 +508,8 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    mDrawColorShader->use(&mOrthoMatrix[0], mModelView, mSnapshot->transform);
+    useShader(mDrawColorShader);
+    mDrawColorShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     const GLvoid* p = &gDrawColorVertices[0].position[0];
 
@@ -548,7 +546,8 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    mDrawTextureShader->use(&mOrthoMatrix[0], mModelView, mSnapshot->transform);
+    useShader(mDrawTextureShader);
+    mDrawTextureShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode, isPremultiplied);
 
@@ -604,6 +603,14 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPr
         glDisable(GL_BLEND);
     }
     mBlend = blend;
+}
+
+void OpenGLRenderer::useShader(const sp<Program>& shader) {
+    if (!shader->isInUse()) {
+        mCurrentShader->remove();
+        shader->use();
+        mCurrentShader = shader;
+    }
 }
 
 void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {

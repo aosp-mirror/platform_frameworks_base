@@ -59,6 +59,8 @@ Program::Program(const char* vertex, const char* fragment) {
         }
         glDeleteProgram(id);
     }
+
+    mUse = false;
 }
 
 Program::~Program() {
@@ -69,6 +71,11 @@ Program::~Program() {
 
 void Program::use() {
     glUseProgram(id);
+    mUse = true;
+}
+
+void Program::remove() {
+    mUse = false;
 }
 
 int Program::addAttrib(const char* name) {
@@ -130,13 +137,12 @@ void DrawColorProgram::getAttribsAndUniforms() {
     transform = addUniform("transform");
 }
 
-void DrawColorProgram::use(const float* projectionMatrix, const mat4& modelViewMatrix,
+void DrawColorProgram::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
         const mat4& transformMatrix) {
     mat4 t(projectionMatrix);
     t.multiply(transformMatrix);
     t.multiply(modelViewMatrix);
 
-    Program::use();
     glUniformMatrix4fv(transform, 1, GL_FALSE, &t.data[0]);
 }
 

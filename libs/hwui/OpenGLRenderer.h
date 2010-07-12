@@ -247,11 +247,19 @@ private:
      */
     inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied);
 
+    /**
+     * Use the specified shader with the current GL context. If the shader is already
+     * in use, it will not be bound again. If it is not in use, the current shader is
+     * marked unused and the specified shader becomes used and becomes the new
+     * current shader.
+     */
+    inline void useShader(const sp<Program>& shader);
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
     // Matrix used for ortho projection in shaders
-    float mOrthoMatrix[16];
+    mat4 mOrthoMatrix;
 
     // Model-view matrix used to position/size objects
     mat4 mModelView;
@@ -264,6 +272,7 @@ private:
     sp<Snapshot> mSnapshot;
 
     // Shaders
+    sp<Program> mCurrentShader;
     sp<DrawColorProgram> mDrawColorShader;
     sp<DrawTextureProgram> mDrawTextureShader;
 

@@ -46,6 +46,20 @@ public:
      */
     void use();
 
+    /**
+     * Marks this program as unused. This will not unbind
+     * the program from the GL context.
+     */
+    void remove();
+
+    /**
+     * Indicates whether this program is currently in use with
+     * the GL context.
+     */
+    inline bool isInUse() const {
+        return mUse;
+    }
+
 protected:
     /**
      * Adds an attribute with the specified name.
@@ -87,6 +101,8 @@ private:
     // Keeps track of attributes and uniforms slots
     KeyedVector<const char*, int> attributes;
     KeyedVector<const char*, int> uniforms;
+
+    bool mUse;
 }; // class Program
 
 /**
@@ -109,7 +125,7 @@ public:
      * Binds the program with the specified projection, modelView and
      * transform matrices.
      */
-    void use(const float* projectionMatrix, const mat4& modelViewMatrix,
+    void set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
              const mat4& transformMatrix);
 
     /**
