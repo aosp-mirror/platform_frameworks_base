@@ -869,8 +869,11 @@
   <public type="drawable" name="stat_sys_download" id="0x01080081" />
   <public type="drawable" name="stat_sys_download_done" id="0x01080082" />
   <public type="drawable" name="stat_sys_headset" id="0x01080083" />
+  <!-- @deprecated Replaced by a private asset in the phone app. -->
   <public type="drawable" name="stat_sys_phone_call" id="0x01080084" />
+  <!-- @deprecated Replaced by a private asset in the phone app. -->
   <public type="drawable" name="stat_sys_phone_call_forward" id="0x01080085" />
+  <!-- @deprecated Replaced by a private asset in the phone app. -->
   <public type="drawable" name="stat_sys_phone_call_on_hold" id="0x01080086" />
   <public type="drawable" name="stat_sys_speakerphone" id="0x01080087" />
   <public type="drawable" name="stat_sys_upload" id="0x01080088" />
@@ -1132,7 +1135,9 @@
   <public type="style" name="Widget.ProgressBar.Large.Inverse" id="0x0103005c" />
   <public type="style" name="Widget.ProgressBar.Small.Inverse" id="0x0103005d" />
 
+  <!-- @deprecated Replaced by a private asset in the phone app. -->
   <public type="drawable" name="stat_sys_vp_phone_call" id="0x010800a7" />
+  <!-- @deprecated Replaced by a private asset in the phone app. -->
   <public type="drawable" name="stat_sys_vp_phone_call_on_hold" id="0x010800a8" />
 
   <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
