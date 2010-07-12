@@ -980,7 +980,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void setInputMethodLocked(String id) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
-            throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
+            throw new IllegalArgumentException("Unknown id: " + id);
         }
 
         if (id.equals(mCurMethodId)) {
