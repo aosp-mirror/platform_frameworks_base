@@ -91,22 +91,24 @@ bool ObbFile::readFrom(const char* filename)
 
     fd = ::open(filename, O_RDONLY);
     if (fd < 0) {
+        LOGW("couldn't open file %s: %s", filename, strerror(errno));
         goto out;
     }
     success = readFrom(fd);
     close(fd);
 
-out:
     if (!success) {
-        LOGW("failed to read from %s\n", filename);
+        LOGW("failed to read from %s (fd=%d)\n", filename, fd);
     }
+
+out:
     return success;
 }
 
 bool ObbFile::readFrom(int fd)
 {
     if (fd < 0) {
-        LOGW("failed to read file\n");
+        LOGW("attempt to read from invalid fd\n");
         return false;
     }
 
@@ -149,8 +151,14 @@ bool ObbFile::parseObbFile(int fd)
         footerSize = get4LE((unsigned char*)footer);
         if (footerSize > (size_t)fileLength - kFooterTagSize
                 || footerSize > kMaxBufSize) {
-            LOGW("claimed footer size is too large (0x%08lx; file size is 0x%08llx)\n",
+            LOGW("claimed footer size is too large (0x%08zx; file size is 0x%08llx)\n",
                     footerSize, fileLength);
+            return false;
+        }
+
+        if (footerSize < kFooterMinSize) {
+            LOGW("claimed footer size is too small (%08zx; minimum size is 0x%x)\n",
+                    footerSize, kFooterMinSize);
             return false;
         }
     }
@@ -161,26 +169,22 @@ bool ObbFile::parseObbFile(int fd)
         return false;
     }
 
-    size_t readAmount = kMaxBufSize;
-    if (readAmount > footerSize)
-        readAmount = footerSize;
-
-    char* scanBuf = (char*)malloc(readAmount);
+    char* scanBuf = (char*)malloc(footerSize);
     if (scanBuf == NULL) {
         LOGW("couldn't allocate scanBuf: %s\n", strerror(errno));
         return false;
     }
 
-    actual = TEMP_FAILURE_RETRY(read(fd, scanBuf, readAmount));
+    actual = TEMP_FAILURE_RETRY(read(fd, scanBuf, footerSize));
     // readAmount is guaranteed to be less than kMaxBufSize
-    if (actual != (ssize_t)readAmount) {
+    if (actual != (ssize_t)footerSize) {
         LOGI("couldn't read ObbFile footer: %s\n", strerror(errno));
         free(scanBuf);
         return false;
     }
 
 #ifdef DEBUG
-    for (int i = 0; i < readAmount; ++i) {
+    for (int i = 0; i < footerSize; ++i) {
         LOGI("char: 0x%02x", scanBuf[i]);
     }
 #endif
@@ -197,7 +201,8 @@ bool ObbFile::parseObbFile(int fd)
     uint32_t packageNameLen = get4LE((unsigned char*)scanBuf + kPackageNameLenOffset);
     if (packageNameLen <= 0
             || packageNameLen > (footerSize - kPackageNameOffset)) {
-        LOGW("bad ObbFile package name length (0x%08x)\n", packageNameLen);
+        LOGW("bad ObbFile package name length (0x%04x; 0x%04x possible)\n",
+                packageNameLen, footerSize - kPackageNameOffset);
         free(scanBuf);
         return false;
     }
@@ -206,6 +211,11 @@ bool ObbFile::parseObbFile(int fd)
     mPackageName = String8(const_cast<char*>(packageName), packageNameLen);
 
     free(scanBuf);
+
+#ifdef DEBUG
+    LOGI("Obb scan succeeded: packageName=%s, version=%d\n", mPackageName.string(), mVersion);
+#endif
+
     return true;
 }
 
@@ -233,6 +243,8 @@ bool ObbFile::writeTo(int fd)
     if (fd < 0) {
         return false;
     }
+
+    my_lseek64(fd, 0, SEEK_END);
 
     if (mPackageName.size() == 0 || mVersion == -1) {
         LOGW("tried to write uninitialized ObbFile data");

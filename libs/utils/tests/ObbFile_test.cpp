@@ -22,6 +22,8 @@
 
 #include <gtest/gtest.h>
 
+#include <fcntl.h>
+
 namespace android {
 
 #define TEST_FILENAME "/test.obb"
@@ -39,6 +41,11 @@ protected:
         const int totalLen = strlen(mExternalStorage) + strlen(TEST_FILENAME) + 1;
         mFileName = new char[totalLen];
         snprintf(mFileName, totalLen, "%s%s", mExternalStorage, TEST_FILENAME);
+
+        int fd = ::open(mFileName, O_CREAT | O_TRUNC);
+        if (fd < 0) {
+            FAIL() << "Couldn't create " << mFileName << " for tests";
+        }
     }
 
     virtual void TearDown() {
@@ -46,8 +53,8 @@ protected:
 };
 
 TEST_F(ObbFileTest, ReadFailure) {
-	EXPECT_FALSE(mObbFile->readFrom(-1))
-			<< "No failure on invalid file descriptor";
+    EXPECT_FALSE(mObbFile->readFrom(-1))
+            << "No failure on invalid file descriptor";
 }
 
 TEST_F(ObbFileTest, WriteThenRead) {
@@ -66,10 +73,10 @@ TEST_F(ObbFileTest, WriteThenRead) {
             << "couldn't read from fake .obb file";
 
     EXPECT_EQ(versionNum, mObbFile->getVersion())
-			<< "version didn't come out the same as it went in";
+            << "version didn't come out the same as it went in";
     const char* currentPackageName = mObbFile->getPackageName().string();
     EXPECT_STREQ(packageName, currentPackageName)
-			<< "package name didn't come out the same as it went in";
+            << "package name didn't come out the same as it went in";
 }
 
 }
