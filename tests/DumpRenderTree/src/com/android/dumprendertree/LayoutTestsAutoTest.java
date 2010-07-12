@@ -222,14 +222,22 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         // The generic result is at <path>/<name>-expected.txt
         // First try the Android-specific result at
         // platform/android-<js-engine>/<path>/<name>-expected.txt
+        // then
+        // platform/android/<path>/<name>-expected.txt
         int pos = test.lastIndexOf('.');
         if (pos == -1)
             return null;
         String genericExpectedResult = test.substring(0, pos) + "-expected.txt";
         String androidExpectedResultsDir = "platform/android-" + mJsEngine + "/";
-        String androidExpectedResult =
-            genericExpectedResult.replaceFirst(LAYOUT_TESTS_ROOT, LAYOUT_TESTS_ROOT + androidExpectedResultsDir);
+        String androidExpectedResult = genericExpectedResult.replaceFirst(LAYOUT_TESTS_ROOT,
+                LAYOUT_TESTS_ROOT + androidExpectedResultsDir);
         File f = new File(androidExpectedResult);
+        if (f.exists())
+            return androidExpectedResult;
+        androidExpectedResultsDir = "platform/android/";
+        androidExpectedResult = genericExpectedResult.replaceFirst(LAYOUT_TESTS_ROOT,
+                LAYOUT_TESTS_ROOT + androidExpectedResultsDir);
+        f = new File(androidExpectedResult);
         return f.exists() ? androidExpectedResult : genericExpectedResult;
     }
 
