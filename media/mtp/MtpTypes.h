@@ -28,6 +28,7 @@ typedef uint32_t uint128_t[4];
 
 typedef uint16_t MtpOperationCode;
 typedef uint16_t MtpResponseCode;
+typedef uint16_t MtpEventCode;
 typedef uint32_t MtpSessionID;
 typedef uint32_t MtpStorageID;
 typedef uint32_t MtpTransactionID;

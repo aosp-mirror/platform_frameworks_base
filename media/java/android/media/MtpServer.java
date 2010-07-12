@@ -47,6 +47,14 @@ public class MtpServer {
         native_stop();
     }
 
+    public void sendObjectAdded(int handle) {
+        native_send_object_added(handle);
+    }
+
+    public void sendObjectRemoved(int handle) {
+        native_send_object_removed(handle);
+    }
+
     // used by the JNI code
     private int mNativeContext;
 
@@ -54,4 +62,6 @@ public class MtpServer {
     private native final void native_finalize();
     private native final void native_start();
     private native final void native_stop();
+    private native final void native_send_object_added(int handle);
+    private native final void native_send_object_removed(int handle);
 }

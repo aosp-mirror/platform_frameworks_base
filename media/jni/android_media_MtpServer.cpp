@@ -50,12 +50,14 @@ static bool ExceptionCheck(void* env)
 class MtpThread : public Thread {
 private:
     MtpDatabase*    mDatabase;
+    MtpServer*      mServer;
     String8 mStoragePath;
     bool mDone;
+    Mutex           mMutex;
 
 public:
     MtpThread(MtpDatabase* database, const char* storagePath)
-        : mDatabase(database), mStoragePath(storagePath), mDone(false)
+        : mDatabase(database), mServer(NULL), mStoragePath(storagePath), mDone(false)
     {
     }
 
@@ -67,14 +69,19 @@ public:
             return false;
         }
 
-        MtpServer* server = new MtpServer(fd, mDatabase, AID_SDCARD_RW, 0664, 0775);
-        server->addStorage(mStoragePath);
+        mMutex.lock();
+        mServer = new MtpServer(fd, mDatabase, AID_SDCARD_RW, 0664, 0775);
+        mServer->addStorage(mStoragePath);
+        mMutex.unlock();
 
-        // temporary
-        LOGD("MtpThread server->run");
-        server->run();
+        LOGD("MtpThread mServer->run");
+        mServer->run();
         close(fd);
-        delete server;
+
+        mMutex.lock();
+        delete mServer;
+        mServer = NULL;
+        mMutex.unlock();
 
         bool done = mDone;
         if (done)
@@ -84,6 +91,24 @@ public:
     }
 
     void setDone() { mDone = true; }
+
+    void sendObjectAdded(MtpObjectHandle handle) {
+        mMutex.lock();
+        if (mServer)
+            mServer->sendObjectAdded(handle);
+        else
+            LOGE("sendObjectAdded called while disconnected\n");
+        mMutex.unlock();
+    }
+
+    void sendObjectRemoved(MtpObjectHandle handle) {
+        mMutex.lock();
+        if (mServer)
+            mServer->sendObjectRemoved(handle);
+        else
+            LOGE("sendObjectRemoved called while disconnected\n");
+        mMutex.unlock();
+    }
 };
 
 static void
@@ -126,14 +151,38 @@ android_media_MtpServer_stop(JNIEnv *env, jobject thiz)
     }
 }
 
+static void
+android_media_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle)
+{
+    LOGD("send_object_added %d\n", handle);
+    MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
+    if (thread)
+        thread->sendObjectAdded(handle);
+    else
+        LOGE("sendObjectAdded called while disconnected\n");
+}
+
+static void
+android_media_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle)
+{
+    LOGD("send_object_removed %d\n", handle);
+    MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
+    if (thread)
+        thread->sendObjectRemoved(handle);
+    else
+        LOGE("sendObjectRemoved called while disconnected\n");
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",            "(Landroid/media/MtpDatabase;Ljava/lang/String;)V",
+    {"native_setup",                "(Landroid/media/MtpDatabase;Ljava/lang/String;)V",
                                             (void *)android_media_MtpServer_setup},
-    {"native_finalize",         "()V",  (void *)android_media_MtpServer_finalize},
-    {"native_start",            "()V",  (void *)android_media_MtpServer_start},
-    {"native_stop",             "()V",  (void *)android_media_MtpServer_stop},
+    {"native_finalize",             "()V",  (void *)android_media_MtpServer_finalize},
+    {"native_start",                "()V",  (void *)android_media_MtpServer_start},
+    {"native_stop",                 "()V",  (void *)android_media_MtpServer_stop},
+    {"native_send_object_added",    "(I)V", (void *)android_media_MtpServer_send_object_added},
+    {"native_send_object_removed",  "(I)V", (void *)android_media_MtpServer_send_object_removed},
 };
 
 static const char* const kClassPathName = "android/media/MtpServer";
