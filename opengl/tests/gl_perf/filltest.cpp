@@ -19,6 +19,7 @@
 #include <time.h>
 #include <sched.h>
 #include <sys/resource.h>
+#include <string.h>
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
