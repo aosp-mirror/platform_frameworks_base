@@ -132,7 +132,7 @@ void endTimer(const char *str, int w, int h, double dc, int count) {
     double mpps = pixels / delta / 1000000;
     double dc60 = pixels / delta / (w * h) / 60;
 
-    printf("test %s, Mpps %f, dc = %f\n", str, mpps, dc60);
+    printf("%s, %f, %f\n", str, mpps, dc60);
 }
 
 static const char gVertexShader[] =
@@ -319,12 +319,12 @@ static void doSingleTest(uint32_t w, uint32_t h,
 
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_BLEND);
-    sprintf(str2, "Test varColor=%i, texCount=%i, modulate=%i, extraMath=%i, texSize=%i, blend=0",
+    sprintf(str2, "%i, %i, %i, %i, %i, 0",
             useVarColor, texCount, modulateFirstTex, extraMath, tex0);
     doLoop(w, h, str2);
 
     glEnable(GL_BLEND);
-    sprintf(str2, "Test varColor=%i, texCount=%i, modulate=%i, extraMath=%i, texSize=%i, blend=1",
+    sprintf(str2, "%i, %i, %i, %i, %i, 1",
             useVarColor, texCount, modulateFirstTex, extraMath, tex0);
     doLoop(w, h, str2);
 }
@@ -360,6 +360,8 @@ void genTextures() {
 bool doTest(uint32_t w, uint32_t h) {
     setupVA();
     genTextures();
+
+    printf("\nvarColor, texCount, modulate, extraMath, texSize, blend, Mpps, DC60\n");
 
     for (int texCount = 0; texCount < 3; texCount++) {
         for (int extraMath = 0; extraMath < 5; extraMath++) {

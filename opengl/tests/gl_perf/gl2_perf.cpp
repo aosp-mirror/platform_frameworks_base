@@ -31,18 +31,6 @@
 
 using namespace android;
 
-static void printGLString(const char *name, GLenum s) {
-    // fprintf(stderr, "printGLString %s, %d\n", name, s);
-    const char *v = (const char *) glGetString(s);
-    // int error = glGetError();
-    // fprintf(stderr, "glGetError() = %d, result of glGetString = %x\n", error,
-    //        (unsigned int) v);
-    // if ((v < (const char*) 0) || (v > (const char*) 0x10000))
-    //    fprintf(stderr, "GL %s = %s\n", name, v);
-    // else
-    //    fprintf(stderr, "GL %s = (null) 0x%08x\n", name, (unsigned int) v);
-    fprintf(stderr, "GL %s = %s\n", name, v);
-}
 
 static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE) {
     if (returnVal != EGL_TRUE) {
@@ -61,89 +49,6 @@ static void checkGlError(const char* op) {
             = glGetError()) {
         fprintf(stderr, "after %s() glError (0x%x)\n", op, error);
     }
-}
-
-void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
-
-#define X(VAL) {VAL, #VAL}
-    struct {EGLint attribute; const char* name;} names[] = {
-    X(EGL_BUFFER_SIZE),
-    X(EGL_ALPHA_SIZE),
-    X(EGL_BLUE_SIZE),
-    X(EGL_GREEN_SIZE),
-    X(EGL_RED_SIZE),
-    X(EGL_DEPTH_SIZE),
-    X(EGL_STENCIL_SIZE),
-    X(EGL_CONFIG_CAVEAT),
-    X(EGL_CONFIG_ID),
-    X(EGL_LEVEL),
-    X(EGL_MAX_PBUFFER_HEIGHT),
-    X(EGL_MAX_PBUFFER_PIXELS),
-    X(EGL_MAX_PBUFFER_WIDTH),
-    X(EGL_NATIVE_RENDERABLE),
-    X(EGL_NATIVE_VISUAL_ID),
-    X(EGL_NATIVE_VISUAL_TYPE),
-    X(EGL_SAMPLES),
-    X(EGL_SAMPLE_BUFFERS),
-    X(EGL_SURFACE_TYPE),
-    X(EGL_TRANSPARENT_TYPE),
-    X(EGL_TRANSPARENT_RED_VALUE),
-    X(EGL_TRANSPARENT_GREEN_VALUE),
-    X(EGL_TRANSPARENT_BLUE_VALUE),
-    X(EGL_BIND_TO_TEXTURE_RGB),
-    X(EGL_BIND_TO_TEXTURE_RGBA),
-    X(EGL_MIN_SWAP_INTERVAL),
-    X(EGL_MAX_SWAP_INTERVAL),
-    X(EGL_LUMINANCE_SIZE),
-    X(EGL_ALPHA_MASK_SIZE),
-    X(EGL_COLOR_BUFFER_TYPE),
-    X(EGL_RENDERABLE_TYPE),
-    X(EGL_CONFORMANT),
-   };
-#undef X
-
-    for (size_t j = 0; j < sizeof(names) / sizeof(names[0]); j++) {
-        EGLint value = -1;
-        EGLint returnVal = eglGetConfigAttrib(dpy, config, names[j].attribute, &value);
-        EGLint error = eglGetError();
-        if (returnVal && error == EGL_SUCCESS) {
-            printf(" %s: ", names[j].name);
-            printf("%d (0x%x)", value, value);
-        }
-    }
-    printf("\n");
-}
-
-int printEGLConfigurations(EGLDisplay dpy) {
-    EGLint numConfig = 0;
-    EGLint returnVal = eglGetConfigs(dpy, NULL, 0, &numConfig);
-    checkEglError("eglGetConfigs", returnVal);
-    if (!returnVal) {
-        return false;
-    }
-
-    printf("Number of EGL configuration: %d\n", numConfig);
-
-    EGLConfig* configs = (EGLConfig*) malloc(sizeof(EGLConfig) * numConfig);
-    if (! configs) {
-        printf("Could not allocate configs.\n");
-        return false;
-    }
-
-    returnVal = eglGetConfigs(dpy, configs, numConfig, &numConfig);
-    checkEglError("eglGetConfigs", returnVal);
-    if (!returnVal) {
-        free(configs);
-        return false;
-    }
-
-    for(int i = 0; i < numConfig; i++) {
-        printf("Configuration %d\n", i);
-        printEGLConfiguration(dpy, configs[i]);
-    }
-
-    free(configs);
-    return true;
 }
 
 bool doTest(uint32_t w, uint32_t h);
@@ -176,7 +81,6 @@ int main(int argc, char** argv) {
 
     returnValue = eglInitialize(dpy, &majorVersion, &minorVersion);
     checkEglError("eglInitialize", returnValue);
-    fprintf(stderr, "EGL version %d.%d\n", majorVersion, minorVersion);
     if (returnValue != EGL_TRUE) {
         printf("eglInitialize failed\n");
         return 0;
@@ -190,9 +94,6 @@ int main(int argc, char** argv) {
     }
 
     checkEglError("EGLUtils::selectConfigForNativeWindow");
-
-    printf("Chose this configuration:\n");
-    printEGLConfiguration(dpy, myConfig);
 
     surface = eglCreateWindowSurface(dpy, myConfig, window, NULL);
     checkEglError("eglCreateWindowSurface");
@@ -217,13 +118,6 @@ int main(int argc, char** argv) {
     eglQuerySurface(dpy, surface, EGL_HEIGHT, &h);
     checkEglError("eglQuerySurface");
     GLint dim = w < h ? w : h;
-
-    fprintf(stderr, "Window dimensions: %d x %d\n", w, h);
-
-    printGLString("Version", GL_VERSION);
-    printGLString("Vendor", GL_VENDOR);
-    printGLString("Renderer", GL_RENDERER);
-    printGLString("Extensions", GL_EXTENSIONS);
 
     glViewport(0, 0, w, h);
 
