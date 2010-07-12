@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 
 /**
- * Class for representing "Duration" object for STK.
+ * Class for representing "Duration" object for CAT.
  *
  * {@hide}
  */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Container class for STK menu (SET UP MENU, SELECT ITEM) parameters.
+ * Container class for CAT menu (SET UP MENU, SELECT ITEM) parameters.
  *
  */
 public class Menu implements Parcelable {

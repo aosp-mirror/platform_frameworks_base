@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.content.Context;
 import android.content.Intent;
@@ -111,17 +111,17 @@ class RilMessage {
  *
  * {@hide}
  */
-public class StkService extends Handler implements AppInterface {
+public class CatService extends Handler implements AppInterface {
 
     // Class members
     private static IccRecords mIccRecords;
 
     // Service members.
-    private static StkService sInstance;
+    private static CatService sInstance;
     private CommandsInterface mCmdIf;
     private Context mContext;
-    private StkCmdMessage mCurrntCmd = null;
-    private StkCmdMessage mMenuCmd = null;
+    private CatCmdMessage mCurrntCmd = null;
+    private CatCmdMessage mMenuCmd = null;
 
     private RilMessageDecoder mMsgDecoder = null;
 
@@ -146,7 +146,7 @@ public class StkService extends Handler implements AppInterface {
     private static final int DEV_ID_NETWORK     = 0x83;
 
     /* Intentionally private for singleton */
-    private StkService(CommandsInterface ci, IccRecords ir, Context context,
+    private CatService(CommandsInterface ci, IccRecords ir, Context context,
             IccFileHandler fh, IccCard ic) {
         if (ci == null || ir == null || context == null || fh == null
                 || ic == null) {
@@ -160,10 +160,10 @@ public class StkService extends Handler implements AppInterface {
         mMsgDecoder = RilMessageDecoder.getInstance(this, fh);
 
         // Register ril events handling.
-        mCmdIf.setOnStkSessionEnd(this, MSG_ID_SESSION_END, null);
-        mCmdIf.setOnStkProactiveCmd(this, MSG_ID_PROACTIVE_COMMAND, null);
-        mCmdIf.setOnStkEvent(this, MSG_ID_EVENT_NOTIFY, null);
-        mCmdIf.setOnStkCallSetUp(this, MSG_ID_CALL_SETUP, null);
+        mCmdIf.setOnCatSessionEnd(this, MSG_ID_SESSION_END, null);
+        mCmdIf.setOnCatProactiveCmd(this, MSG_ID_PROACTIVE_COMMAND, null);
+        mCmdIf.setOnCatEvent(this, MSG_ID_EVENT_NOTIFY, null);
+        mCmdIf.setOnCatCallSetUp(this, MSG_ID_CALL_SETUP, null);
         //mCmdIf.setOnSimRefresh(this, MSG_ID_REFRESH, null);
 
         mIccRecords = ir;
@@ -172,21 +172,21 @@ public class StkService extends Handler implements AppInterface {
         mIccRecords.registerForRecordsLoaded(this, MSG_ID_ICC_RECORDS_LOADED, null);
 
         mCmdIf.reportStkServiceIsRunning(null);
-        StkLog.d(this, "StkService: is running");
+        CatLog.d(this, "Is running");
     }
 
     public void dispose() {
         mIccRecords.unregisterForRecordsLoaded(this);
-        mCmdIf.unSetOnStkSessionEnd(this);
-        mCmdIf.unSetOnStkProactiveCmd(this);
-        mCmdIf.unSetOnStkEvent(this);
-        mCmdIf.unSetOnStkCallSetUp(this);
+        mCmdIf.unSetOnCatSessionEnd(this);
+        mCmdIf.unSetOnCatProactiveCmd(this);
+        mCmdIf.unSetOnCatEvent(this);
+        mCmdIf.unSetOnCatCallSetUp(this);
 
         this.removeCallbacksAndMessages(null);
     }
 
     protected void finalize() {
-        StkLog.d(this, "Service finalized");
+        CatLog.d(this, "Service finalized");
     }
 
     private void handleRilMsg(RilMessage rilMsg) {
@@ -241,9 +241,9 @@ public class StkService extends Handler implements AppInterface {
      *
      */
     private void handleProactiveCommand(CommandParams cmdParams) {
-        StkLog.d(this, cmdParams.getCommandType().name());
+        CatLog.d(this, cmdParams.getCommandType().name());
 
-        StkCmdMessage cmdMsg = new StkCmdMessage(cmdParams);
+        CatCmdMessage cmdMsg = new CatCmdMessage(cmdParams);
         switch (cmdParams.getCommandType()) {
         case SET_UP_MENU:
             if (removeMenu(cmdMsg.getMenu())) {
@@ -285,11 +285,11 @@ public class StkService extends Handler implements AppInterface {
             // nothing to do on telephony!
             break;
         default:
-            StkLog.d(this, "Unsupported command");
+            CatLog.d(this, "Unsupported command");
             return;
         }
         mCurrntCmd = cmdMsg;
-        Intent intent = new Intent(AppInterface.STK_CMD_ACTION);
+        Intent intent = new Intent(AppInterface.CAT_CMD_ACTION);
         intent.putExtra("STK CMD", cmdMsg);
         mContext.sendBroadcast(intent);
     }
@@ -299,10 +299,10 @@ public class StkService extends Handler implements AppInterface {
      *
      */
     private void handleSessionEnd() {
-        StkLog.d(this, "SESSION END");
+        CatLog.d(this, "SESSION END");
 
         mCurrntCmd = mMenuCmd;
-        Intent intent = new Intent(AppInterface.STK_SESSION_END_ACTION);
+        Intent intent = new Intent(AppInterface.CAT_SESSION_END_ACTION);
         mContext.sendBroadcast(intent);
     }
 
@@ -353,7 +353,7 @@ public class StkService extends Handler implements AppInterface {
         byte[] rawData = buf.toByteArray();
         String hexString = IccUtils.bytesToHexString(rawData);
         if (Config.LOGD) {
-            StkLog.d(this, "TERMINAL RESPONSE: " + hexString);
+            CatLog.d(this, "TERMINAL RESPONSE: " + hexString);
         }
 
         mCmdIf.sendTerminalResponse(hexString, null);
@@ -455,26 +455,26 @@ public class StkService extends Handler implements AppInterface {
      * @param ic Icc card
      * @return The only Service object in the system
      */
-    public static StkService getInstance(CommandsInterface ci, IccRecords ir,
+    public static CatService getInstance(CommandsInterface ci, IccRecords ir,
             Context context, IccFileHandler fh, IccCard ic) {
         if (sInstance == null) {
             if (ci == null || ir == null || context == null || fh == null
                     || ic == null) {
                 return null;
             }
-            HandlerThread thread = new HandlerThread("Stk Telephony service");
+            HandlerThread thread = new HandlerThread("Cat Telephony service");
             thread.start();
-            sInstance = new StkService(ci, ir, context, fh, ic);
-            StkLog.d(sInstance, "NEW sInstance");
+            sInstance = new CatService(ci, ir, context, fh, ic);
+            CatLog.d(sInstance, "NEW sInstance");
         } else if ((ir != null) && (mIccRecords != ir)) {
-            StkLog.d(sInstance, "Reinitialize the Service with SIMRecords");
+            CatLog.d(sInstance, "Reinitialize the Service with SIMRecords");
             mIccRecords = ir;
 
             // re-Register for SIM ready event.
             mIccRecords.registerForRecordsLoaded(sInstance, MSG_ID_ICC_RECORDS_LOADED, null);
-            StkLog.d(sInstance, "sr changed reinitialize and return current sInstance");
+            CatLog.d(sInstance, "sr changed reinitialize and return current sInstance");
         } else {
-            StkLog.d(sInstance, "Return current sInstance");
+            CatLog.d(sInstance, "Return current sInstance");
         }
         return sInstance;
     }
@@ -496,7 +496,7 @@ public class StkService extends Handler implements AppInterface {
         case MSG_ID_PROACTIVE_COMMAND:
         case MSG_ID_EVENT_NOTIFY:
         case MSG_ID_REFRESH:
-            StkLog.d(this, "ril message arrived");
+            CatLog.d(this, "ril message arrived");
             String data = null;
             if (msg.obj != null) {
                 AsyncResult ar = (AsyncResult) msg.obj;
@@ -519,14 +519,14 @@ public class StkService extends Handler implements AppInterface {
             handleRilMsg((RilMessage) msg.obj);
             break;
         case MSG_ID_RESPONSE:
-            handleCmdResponse((StkResponseMessage) msg.obj);
+            handleCmdResponse((CatResponseMessage) msg.obj);
             break;
         default:
-            throw new AssertionError("Unrecognized STK command: " + msg.what);
+            throw new AssertionError("Unrecognized CAT command: " + msg.what);
         }
     }
 
-    public synchronized void onCmdResponse(StkResponseMessage resMsg) {
+    public synchronized void onCmdResponse(CatResponseMessage resMsg) {
         if (resMsg == null) {
             return;
         }
@@ -535,7 +535,7 @@ public class StkService extends Handler implements AppInterface {
         msg.sendToTarget();
     }
 
-    private boolean validateResponse(StkResponseMessage resMsg) {
+    private boolean validateResponse(CatResponseMessage resMsg) {
         if (mCurrntCmd != null) {
             return (resMsg.cmdDet.compareTo(mCurrntCmd.mCmdDet));
         }
@@ -548,13 +548,13 @@ public class StkService extends Handler implements AppInterface {
                 return true;
             }
         } catch (NullPointerException e) {
-            StkLog.d(this, "Unable to get Menu's items size");
+            CatLog.d(this, "Unable to get Menu's items size");
             return true;
         }
         return false;
     }
 
-    private void handleCmdResponse(StkResponseMessage resMsg) {
+    private void handleCmdResponse(CatResponseMessage resMsg) {
         // Make sure the response details match the last valid command. An invalid
         // response is a one that doesn't have a corresponding proactive command
         // and sending it can "confuse" the baseband/ril.
@@ -563,7 +563,7 @@ public class StkService extends Handler implements AppInterface {
         // by the framework inside the history stack. That activity will be
         // available for relaunch using the latest application dialog
         // (long press on the home button). Relaunching that activity can send
-        // the same command's result again to the StkService and can cause it to
+        // the same command's result again to the CatService and can cause it to
         // get out of sync with the SIM.
         if (!validateResponse(resMsg)) {
             return;

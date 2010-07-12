@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -79,7 +79,7 @@ class CommandParamsFactory extends Handler {
                 try {
                     cmdDet = ValueParser.retrieveCommandDetails(ctlvCmdDet);
                 } catch (ResultException e) {
-                    StkLog.d(this, "Failed to procees command details");
+                    CatLog.d(this, "Failed to procees command details");
                 }
             }
         }
@@ -259,7 +259,7 @@ class CommandParamsFactory extends Handler {
             List<ComprehensionTlv> ctlvs)
             throws ResultException {
 
-        StkLog.d(this, "process DisplayText");
+        CatLog.d(this, "process DisplayText");
 
         TextMessage textMsg = new TextMessage();
         IconId iconId = null;
@@ -319,7 +319,7 @@ class CommandParamsFactory extends Handler {
     private boolean processSetUpIdleModeText(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process SetUpIdleModeText");
+        CatLog.d(this, "process SetUpIdleModeText");
 
         TextMessage textMsg = new TextMessage();
         IconId iconId = null;
@@ -362,7 +362,7 @@ class CommandParamsFactory extends Handler {
     private boolean processGetInkey(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process GetInkey");
+        CatLog.d(this, "process GetInkey");
 
         Input input = new Input();
         IconId iconId = null;
@@ -412,7 +412,7 @@ class CommandParamsFactory extends Handler {
     private boolean processGetInput(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process GetInput");
+        CatLog.d(this, "process GetInput");
 
         Input input = new Input();
         IconId iconId = null;
@@ -476,7 +476,7 @@ class CommandParamsFactory extends Handler {
     private boolean processRefresh(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) {
 
-        StkLog.d(this, "process Refresh");
+        CatLog.d(this, "process Refresh");
 
         // REFRESH proactive command is rerouted by the baseband and handled by
         // the telephony layer. IDLE TEXT should be removed for a REFRESH command
@@ -505,7 +505,7 @@ class CommandParamsFactory extends Handler {
     private boolean processSelectItem(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process SelectItem");
+        CatLog.d(this, "process SelectItem");
 
         Menu menu = new Menu();
         IconId titleIconId = null;
@@ -534,7 +534,7 @@ class CommandParamsFactory extends Handler {
 
         ctlv = searchForTag(ComprehensionTlvTag.ITEM_ID, ctlvs);
         if (ctlv != null) {
-            // STK items are listed 1...n while list start at 0, need to
+            // CAT items are listed 1...n while list start at 0, need to
             // subtract one.
             menu.defaultItem = ValueParser.retrieveItemId(ctlv) - 1;
         }
@@ -602,7 +602,7 @@ class CommandParamsFactory extends Handler {
     private boolean processEventNotify(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process EventNotify");
+        CatLog.d(this, "process EventNotify");
 
         TextMessage textMsg = new TextMessage();
         IconId iconId = null;
@@ -645,7 +645,7 @@ class CommandParamsFactory extends Handler {
     private boolean processSetUpEventList(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) {
 
-        StkLog.d(this, "process SetUpEventList");
+        CatLog.d(this, "process SetUpEventList");
         //
         // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.EVENT_LIST,
         // ctlvs);
@@ -670,10 +670,10 @@ class CommandParamsFactory extends Handler {
      *         asynchronous processing is required.
      * @throws ResultException
      */
-     private boolean processLaunchBrowser(CommandDetails cmdDet,
+    private boolean processLaunchBrowser(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process LaunchBrowser");
+        CatLog.d(this, "process LaunchBrowser");
 
         TextMessage confirmMsg = new TextMessage();
         IconId iconId = null;
@@ -744,10 +744,10 @@ class CommandParamsFactory extends Handler {
      *         asynchronous processing is required.t
      * @throws ResultException
      */
-     private boolean processPlayTone(CommandDetails cmdDet,
+    private boolean processPlayTone(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
 
-        StkLog.d(this, "process PlayTone");
+        CatLog.d(this, "process PlayTone");
 
         Tone tone = null;
         TextMessage textMsg = new TextMessage();
@@ -810,9 +810,9 @@ class CommandParamsFactory extends Handler {
      * @return true if the command is processing is pending and additional
      *         asynchronous processing is required.
      */
-     private boolean processSetupCall(CommandDetails cmdDet,
+    private boolean processSetupCall(CommandDetails cmdDet,
             List<ComprehensionTlv> ctlvs) throws ResultException {
-        StkLog.d(this, "process SetupCall");
+        CatLog.d(this, "process SetupCall");
 
         Iterator<ComprehensionTlv> iter = ctlvs.iterator();
         ComprehensionTlv ctlv = null;

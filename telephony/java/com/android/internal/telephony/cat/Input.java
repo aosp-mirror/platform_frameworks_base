@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm.stk;
+package com.android.internal.telephony.cat;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Container class for STK GET INPUT, GET IN KEY commands parameters.
+ * Container class for CAT GET INPUT, GET IN KEY commands parameters.
  *
  */
 public class Input implements Parcelable {
