@@ -511,7 +511,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    mDrawColorShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
+    mDrawColorShader->use(&mOrthoMatrix[0], mModelView, mSnapshot->transform);
 
     const GLvoid* p = &gDrawColorVertices[0].position[0];
 
@@ -548,7 +548,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    mDrawTextureShader->use(&mOrthoMatrix[0], &mModelView.data[0], &mSnapshot->transform.data[0]);
+    mDrawTextureShader->use(&mOrthoMatrix[0], mModelView, mSnapshot->transform);
 
     chooseBlending(blend || alpha < 1.0f, mode, isPremultiplied);
 

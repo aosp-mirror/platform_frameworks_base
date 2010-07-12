@@ -127,17 +127,17 @@ DrawColorProgram::DrawColorProgram(const char* vertex, const char* fragment):
 void DrawColorProgram::getAttribsAndUniforms() {
     position = addAttrib("position");
     color = addUniform("color");
-    projection = addUniform("projection");
-    modelView = addUniform("modelView");
     transform = addUniform("transform");
 }
 
-void DrawColorProgram::use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
-        const GLfloat* transformMatrix) {
+void DrawColorProgram::use(const float* projectionMatrix, const mat4& modelViewMatrix,
+        const mat4& transformMatrix) {
+    mat4 t(projectionMatrix);
+    t.multiply(transformMatrix);
+    t.multiply(modelViewMatrix);
+
     Program::use();
-    glUniformMatrix4fv(projection, 1, GL_FALSE, projectionMatrix);
-    glUniformMatrix4fv(modelView, 1, GL_FALSE, modelViewMatrix);
-    glUniformMatrix4fv(transform, 1, GL_FALSE, transformMatrix);
+    glUniformMatrix4fv(transform, 1, GL_FALSE, &t.data[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

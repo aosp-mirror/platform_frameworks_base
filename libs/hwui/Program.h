@@ -23,6 +23,8 @@
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
 
+#include "Matrix.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -107,26 +109,18 @@ public:
      * Binds the program with the specified projection, modelView and
      * transform matrices.
      */
-    void use(const GLfloat* projectionMatrix, const GLfloat* modelViewMatrix,
-             const GLfloat* transformMatrix);
+    void use(const float* projectionMatrix, const mat4& modelViewMatrix,
+             const mat4& transformMatrix);
 
     /**
      * Name of the position attribute.
      */
     int position;
-    /**
-     * Name of the color attribute.
-     */
-    int color;
 
     /**
-     * Name of the projection uniform.
+     * Name of the color uniform.
      */
-    int projection;
-    /**
-     * Name of the modelView uniform.
-     */
-    int modelView;
+    int color;
     /**
      * Name of the transform uniform.
      */
@@ -146,7 +140,14 @@ class DrawTextureProgram: public DrawColorProgram {
 public:
     DrawTextureProgram();
 
+    /**
+     * Name of the texture sampler uniform.
+     */
     int sampler;
+
+    /**
+     * Name of the texture coordinates attribute.
+     */
     int texCoords;
 };
 
