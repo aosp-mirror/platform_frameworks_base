@@ -108,7 +108,7 @@ you. Our previous example can easily be rewritten with
   new DownloadImageTask().execute("http://example.com/image.png");
 }
 
-private class DownloadImageTask extends AsyncTask&lt;string, void,="" bitmap=""&gt; {
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
      protected Bitmap doInBackground(String... urls) {
          return loadImageFromNetwork(urls[0]);
      }
