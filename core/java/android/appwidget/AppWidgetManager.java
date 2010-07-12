@@ -292,7 +292,15 @@ public class AppWidgetManager {
      */
     public List<AppWidgetProviderInfo> getInstalledProviders() {
         try {
-            return sService.getInstalledProviders();
+            List<AppWidgetProviderInfo> providers = sService.getInstalledProviders();
+            for (AppWidgetProviderInfo info : providers) {
+                // Converting complex to dp.
+                info.minWidth =
+                        TypedValue.complexToDimensionPixelSize(info.minWidth, mDisplayMetrics);
+                info.minHeight =
+                        TypedValue.complexToDimensionPixelSize(info.minHeight, mDisplayMetrics);
+            }
+            return providers;
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
