@@ -62,8 +62,8 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                             logd("GET_RECORD_SIZE Size " + recordSize[0] +
                                     " total " + recordSize[1] +
                                     " #record " + recordSize[2]);
-                            mLock.notifyAll();
                         }
+                        mLock.notifyAll();
                     }
                     break;
                 case EVENT_UPDATE_DONE:
