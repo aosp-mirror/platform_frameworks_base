@@ -61,8 +61,6 @@ public class FileFilter {
     }
 
     public void reloadConfiguration() {
-        Log.d(LOG_TAG + "::reloadConfiguration", "Begin.");
-
         File txt_exp = new File(mRootDirPath, TEST_EXPECTATIONS_TXT_PATH);
 
         BufferedReader bufferedReader;
@@ -222,8 +220,7 @@ public class FileFilter {
      */
     public static boolean isTestDir(String dirName) {
         return (!dirName.equals("script-tests")
-                && !dirName.equals("resources")
-                && !dirName.startsWith("."));
+                && !dirName.equals("resources") && !dirName.startsWith("."));
     }
 
     /**
@@ -236,5 +233,56 @@ public class FileFilter {
      */
     public static boolean isTestFile(String testName) {
         return testName.endsWith(".html") || testName.endsWith(".xhtml");
+    }
+
+    /**
+     * Return the path to the file relative to the tests root dir
+     *
+     * @param filePath
+     * @return
+     *      the path relative to the tests root dir
+     */
+    public String getRelativePath(String filePath) {
+        File rootDir = new File(mRootDirPath);
+        return filePath.replaceFirst(rootDir.getPath() + File.separator, "");
+    }
+
+    /**
+     * Return the path to the file relative to the tests root dir
+     *
+     * @param filePath
+     * @return
+     *      the path relative to the tests root dir
+     */
+    public String getRelativePath(File file) {
+        return getRelativePath(file.getAbsolutePath());
+    }
+
+    public File getAbsoluteFile(String relativePath) {
+        return new File(mRootDirPath, relativePath);
+    }
+
+    public String getAboslutePath(String relativePath) {
+        return getAbsoluteFile(relativePath).getAbsolutePath();
+    }
+
+    /**
+     * If the path contains extension (e.g .foo at the end of the file) then it changes
+     * this (.foo) into newEnding (so it has to contain the dot if we want to preserve it).
+     *
+     * <p>If the path doesn't contain an extension, it adds the ending to the path.
+     *
+     * @param relativePath
+     * @param newEnding
+     * @return
+     *      a new path, containing the newExtension
+     */
+    public static String setPathEnding(String relativePath, String newEnding) {
+        int dotPos = relativePath.lastIndexOf('.');
+        if (dotPos == -1) {
+            return relativePath + newEnding;
+        }
+
+        return relativePath.substring(0, dotPos) + newEnding;
     }
 }

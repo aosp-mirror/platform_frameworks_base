@@ -24,5 +24,12 @@ limitations under the License.
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".LayoutTestsRunner"
+                  android:label="Layout tests' runner">
+        </activity>
     </application>
+
+    <uses-permission android:name="android.permission.WRITE_SDCARD" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest>
