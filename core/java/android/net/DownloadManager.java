@@ -24,6 +24,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,10 +113,10 @@ public class DownloadManager {
     public final static String COLUMN_BYTES_DOWNLOADED_SO_FAR = "bytes_so_far";
 
     /**
-     * Timestamp when the download was requested, in {@link System#currentTimeMillis
+     * Timestamp when the download was last modified, in {@link System#currentTimeMillis
      * System.currentTimeMillis()} (wall clock time in UTC).
      */
-    public final static String COLUMN_REQUESTED_TIMESTAMP = "requested_timestamp";
+    public final static String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
 
 
     /**
@@ -199,7 +200,7 @@ public class DownloadManager {
         COLUMN_STATUS,
         COLUMN_ERROR_CODE,
         COLUMN_BYTES_DOWNLOADED_SO_FAR,
-        COLUMN_REQUESTED_TIMESTAMP
+        COLUMN_LAST_MODIFIED_TIMESTAMP
     };
 
     // columns to request from DownloadProvider
@@ -212,12 +213,13 @@ public class DownloadManager {
         Downloads.COLUMN_TOTAL_BYTES,
         Downloads._DATA,
         Downloads.COLUMN_STATUS,
-        Downloads.COLUMN_CURRENT_BYTES
+        Downloads.COLUMN_CURRENT_BYTES,
+        Downloads.COLUMN_LAST_MODIFICATION,
     };
 
     private static final Set<String> LONG_COLUMNS = new HashSet<String>(
             Arrays.asList(COLUMN_ID, COLUMN_TOTAL_SIZE_BYTES, COLUMN_STATUS, COLUMN_ERROR_CODE,
-                          COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_REQUESTED_TIMESTAMP));
+                          COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP));
 
     /**
      * This class contains all the information necessary to request a new download.  The URI is the
@@ -340,8 +342,8 @@ public class DownloadManager {
             values.put(Downloads.COLUMN_URI, mUri.toString());
 
             if (mDestinationUri != null) {
-                // TODO destination support
-                throw new UnsupportedOperationException();
+                values.put(Downloads.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
+                values.put(Downloads.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
             } else {
                 values.put(Downloads.COLUMN_DESTINATION,
                            Downloads.DESTINATION_CACHE_PARTITION_PURGEABLE);
@@ -433,8 +435,8 @@ public class DownloadManager {
                 selection = joinStrings(" OR ", parts);
                 Log.w("DownloadManagerPublic", selection);
             }
-            // TODO: ordering
-            return resolver.query(uri, projection, selection, null, null);
+            String orderBy = Downloads.COLUMN_LAST_MODIFICATION + " DESC";
+            return resolver.query(uri, projection, selection, null, orderBy);
         }
 
         private String joinStrings(String joiner, Iterable<String> parts) {
@@ -625,7 +627,7 @@ public class DownloadManager {
                 return getUnderlyingString(Downloads.COLUMN_MIME_TYPE);
             }
             assert column.equals(COLUMN_LOCAL_URI);
-            return Uri.fromParts("file", getUnderlyingString(Downloads._DATA), null).toString();
+            return Uri.fromFile(new File(getUnderlyingString(Downloads._DATA))).toString();
         }
 
         private long translateLong(String column) {
@@ -649,8 +651,8 @@ public class DownloadManager {
             if (column.equals(COLUMN_BYTES_DOWNLOADED_SO_FAR)) {
                 return getUnderlyingLong(Downloads.COLUMN_CURRENT_BYTES);
             }
-            assert column.equals(COLUMN_REQUESTED_TIMESTAMP);
-            throw new UnsupportedOperationException(); // TODO
+            assert column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP);
+            return getUnderlyingLong(Downloads.COLUMN_LAST_MODIFICATION);
         }
 
         private long translateErrorCode(int status) {
