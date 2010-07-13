@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r4-windows.zip
-ndk.win_bytes=45778965
-ndk.win_checksum=1eded98a7f5cd5e71f8ac74565f73f11
+ndk.win_download=android-ndk-r4b-windows.zip
+ndk.win_bytes=45792835
+ndk.win_checksum=e397145e155a639be53ee4b6db8ad511
 
-ndk.mac_download=android-ndk-r4-darwin-x86.zip
-ndk.mac_bytes=50572163
-ndk.mac_checksum=b7d5f149fecf951c05a79b045f00419f
+ndk.mac_download=android-ndk-r4b-darwin-x86.zip
+ndk.mac_bytes=50586041
+ndk.mac_checksum=41dbd54335fb828ee408eab17103a1b0
 
-ndk.linux_download=android-ndk-r4-linux-x86.zip
-ndk.linux_bytes=49450682
-ndk.linux_checksum=0892b0637d45d145e045cc68e163dee3
+ndk.linux_download=android-ndk-r4b-linux-x86.zip
+ndk.linux_bytes=49464776
+ndk.linux_checksum=2deabcb125c219b34140975b710f00ec
 
 page.title=Android NDK
 @jd:body
@@ -62,8 +62,15 @@ padding: .25em 1em;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
-Android NDK, Revision 4</a> <em>(May 2010)</em>
+Android NDK, Revision 4b</a> <em>(June 2010)</em>
   <div class="toggleme">
+<dl>
+<dt>NDK r4b notes:</dt>
+<dd><p>Includes fixes for several issues in the NDK build and debugging scripts
+&mdash; if you are using NDK r4, we recommend downloading the NDK r4b build. For
+detailed information the changes in this release, read the CHANGES.TXT document
+included in the downloaded NDK package.</p></dd>
+</dl>
 
 <dl>
 <dt>General notes:</dt>
@@ -114,7 +121,7 @@ code.</li>
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
 Android NDK, Revision 3</a> <em>(March 2010)</em>
   <div class="toggleme">
 
