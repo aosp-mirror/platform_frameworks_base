@@ -103,6 +103,11 @@ public:
     
     status_t            writeObject(const flat_binder_object& val, bool nullMetaData);
 
+    // Like Parcel.java's writeNoException().  Just writes a zero int32.
+    // Currently the native implementation doesn't do any of the StrictMode
+    // stack gathering and serialization that the Java implementation does.
+    status_t            writeNoException();
+
     void                remove(size_t start, size_t amt);
     
     status_t            read(void* outData, size_t len) const;
@@ -125,7 +130,14 @@ public:
     sp<IBinder>         readStrongBinder() const;
     wp<IBinder>         readWeakBinder() const;
     status_t            read(Flattenable& val) const;
-    
+
+    // Like Parcel.java's readExceptionCode().  Reads the first int32
+    // off of a Parcel's header, returning 0 or the negative error
+    // code on exceptions, but also deals with skipping over rich
+    // response headers.  Callers should use this to read & parse the
+    // response headers rather than doing it by hand.
+    int32_t             readExceptionCode() const;
+
     // Retrieve native_handle from the parcel. This returns a copy of the
     // parcel's native_handle (the caller takes ownership). The caller
     // must free the native_handle with native_handle_close() and 

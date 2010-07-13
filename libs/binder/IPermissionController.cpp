@@ -36,7 +36,7 @@ public:
         : BpInterface<IPermissionController>(impl)
     {
     }
-        
+
     virtual bool checkPermission(const String16& permission, int32_t pid, int32_t uid)
     {
         Parcel data, reply;
@@ -46,7 +46,7 @@ public:
         data.writeInt32(uid);
         remote()->transact(CHECK_PERMISSION_TRANSACTION, data, &reply);
         // fail on exception
-        if (reply.readInt32() != 0) return 0;
+        if (reply.readExceptionCode() != 0) return 0;
         return reply.readInt32() != 0;
     }
 };
@@ -66,8 +66,7 @@ status_t BnPermissionController::onTransact(
             int32_t pid = data.readInt32();
             int32_t uid = data.readInt32();
             bool res = checkPermission(permission, pid, uid);
-            // write exception
-            reply->writeInt32(0);
+            reply->writeNoException();
             reply->writeInt32(res ? 1 : 0);
             return NO_ERROR;
         } break;
@@ -77,4 +76,3 @@ status_t BnPermissionController::onTransact(
 }
 
 }; // namespace android
-
