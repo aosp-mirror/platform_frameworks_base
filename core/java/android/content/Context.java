@@ -1561,6 +1561,15 @@ public abstract class Context {
     public static final String UI_MODE_SERVICE = "uimode";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.net.DownloadManager} for requesting HTTP downloads.
+     *
+     * @see #getSystemService
+     * @hide (TODO) for now
+     */
+    public static final String DOWNLOAD_SERVICE = "download";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
