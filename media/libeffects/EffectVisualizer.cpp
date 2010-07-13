@@ -231,7 +231,7 @@ extern "C" int Visualizer_process(
         return -EINVAL;
     }
     if (pContext->mState != VISUALIZER_STATE_ACTIVE) {
-        return -ENOSYS;
+        return -ENODATA;
     }
 
     if (inBuffer == NULL || inBuffer->raw == NULL ||

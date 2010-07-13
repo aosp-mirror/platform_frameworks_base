@@ -223,6 +223,11 @@ typedef struct audio_buffer_s audio_buffer_t;
 //          samples as specified in output buffer descriptor. If the buffer descriptor
 //          is not specified the function must use either the buffer or the
 //          buffer provider function installed by the EFFECT_CMD_CONFIGURE command.
+//          The effect framework will call the process() function after the EFFECT_CMD_ENABLE
+//          command is received and until the EFFECT_CMD_DISABLE is received. When the engine
+//          receives the EFFECT_CMD_DISABLE command it should turn off the effect gracefully
+//          and when done indicate that it is OK to stop calling the process() function by
+//          returning the -ENODATA status.
 //
 //    NOTE: the process() function implementation should be "real-time safe" that is
 //      it should not perform blocking calls: malloc/free, sleep, read/write/open/close,
@@ -239,6 +244,8 @@ typedef struct audio_buffer_s audio_buffer_t;
 //
 //    Output:
 //        returned value:    0 successful operation
+//                          -ENODATA the engine has finished the disable phase and the framework
+//                                  can stop calling process()
 //                          -EINVAL invalid interface handle or
 //                                  invalid input/output buffer description
 ////////////////////////////////////////////////////////////////////////////////
