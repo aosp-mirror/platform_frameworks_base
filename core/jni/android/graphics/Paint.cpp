@@ -32,6 +32,7 @@
 #include "SkTypeface.h"
 #include "SkXfermode.h"
 #include "unicode/ushape.h"
+#include "TextLayout.h"
 
 // temporary for debugging
 #include <utils/Log.h>
@@ -403,56 +404,14 @@ public:
         return count;
     }
 
-    static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, const jchar *text, jint start, jint count, jint contextCount, jint flags,
+    static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, const jchar *text,
+                                    jint start, jint count, jint contextCount, jint flags,
                                     jfloatArray advances, jint advancesIndex) {
         jfloat advancesArray[count];
-        jchar buffer[contextCount];
+        jfloat totalAdvance;
 
-        SkScalar* scalarArray = (SkScalar *)advancesArray;
-        jfloat totalAdvance = 0;
-
-        // this is where we'd call harfbuzz
-        // for now we just use ushape.c
-
-        int widths;
-        if (flags & 0x1) { // rtl, call arabic shaping in case
-            UErrorCode status = U_ZERO_ERROR;
-            // Use fixed length since we need to keep start and count valid
-            u_shapeArabic(text, contextCount, buffer, contextCount,
-                          U_SHAPE_LENGTH_FIXED_SPACES_NEAR |
-                          U_SHAPE_TEXT_DIRECTION_LOGICAL | U_SHAPE_LETTERS_SHAPE |
-                          U_SHAPE_X_LAMALEF_SUB_ALTERNATE, &status);
-            // we shouldn't fail unless there's an out of memory condition,
-            // in which case we're hosed anyway
-            for (int i = start, e = i + count; i < e; ++i) {
-              if (buffer[i] == 0xffff) {
-                buffer[i] = 0x200b; // zero-width-space for skia
-              }
-            }
-            widths = paint->getTextWidths(buffer + start, count << 1, scalarArray);
-        } else {
-            widths = paint->getTextWidths(text + start, count << 1, scalarArray);
-        }
-
-        if (widths < count) {
-            // Skia operates on code points, not code units, so surrogate pairs return only
-            // one value. Expand the result so we have one value per UTF-16 code unit.
-
-            // Note, skia's getTextWidth gets confused if it encounters a surrogate pair,
-            // leaving the remaining widths zero.  Not nice.
-            const jchar *chars = text + start;
-            for (int i = 0, p = 0; i < widths; ++i) {
-                totalAdvance += advancesArray[p++] = SkScalarToFloat(scalarArray[i]);
-                if (p < count && chars[p] >= 0xdc00 && chars[p] < 0xe000 &&
-                        chars[p-1] >= 0xd800 && chars[p-1] < 0xdc00) {
-                    advancesArray[p++] = 0;
-                }
-            }
-        } else {
-            for (int i = 0; i < count; i++) {
-                totalAdvance += advancesArray[i] = SkScalarToFloat(scalarArray[i]);
-            }
-        }
+        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
+                                       advancesArray, totalAdvance);
 
         if (advances != NULL) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
@@ -580,19 +539,25 @@ public:
         return result;
     }
 
-    static void getTextPath___CIIFFPath(JNIEnv* env, jobject clazz, SkPaint* paint, jcharArray text, int index, int count, jfloat x, jfloat y, SkPath* path) {
-        const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        paint->getTextPath(textArray + index, count << 1, SkFloatToScalar(x), SkFloatToScalar(y), path);
-        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
-                                      JNI_ABORT);
+    static void getTextPath(JNIEnv* env, SkPaint* paint, const jchar* text, jint count,
+                            jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
+        TextLayout::getTextPath(paint, text, count, bidiFlags, x, y, path);
     }
- 
-    static void getTextPath__StringIIFFPath(JNIEnv* env, jobject clazz, SkPaint* paint, jstring text, int start, int end, jfloat x, jfloat y, SkPath* path) {
+
+    static void getTextPath___C(JNIEnv* env, jobject clazz, SkPaint* paint, jint bidiFlags,
+            jcharArray text, int index, int count, jfloat x, jfloat y, SkPath* path) {
+        const jchar* textArray = env->GetCharArrayElements(text, NULL);
+        getTextPath(env, paint, textArray + index, count, bidiFlags, x, y, path);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
+    }
+
+    static void getTextPath__String(JNIEnv* env, jobject clazz, SkPaint* paint, jint bidiFlags,
+            jstring text, int start, int end, jfloat x, jfloat y, SkPath* path) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        paint->getTextPath(textArray + start, (end - start) << 1, SkFloatToScalar(x), SkFloatToScalar(y), path);
+        getTextPath(env, paint, textArray + start, end - start, bidiFlags, x, y, path);
         env->ReleaseStringChars(text, textArray);
     }
- 
+
     static void setShadowLayer(JNIEnv* env, jobject jpaint, jfloat radius,
                                jfloat dx, jfloat dy, int color) {
         NPE_CHECK_RETURN_VOID(env, jpaint);
@@ -767,8 +732,8 @@ static JNINativeMethod methods[] = {
     {"native_getTextRunCursor", "(I[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
     {"native_getTextRunCursor", "(ILjava/lang/String;IIIII)I",
         (void*) SkPaintGlue::getTextRunCursor__String},
-    {"native_getTextPath","(I[CIIFFI)V", (void*) SkPaintGlue::getTextPath___CIIFFPath},
-    {"native_getTextPath","(ILjava/lang/String;IIFFI)V", (void*) SkPaintGlue::getTextPath__StringIIFFPath},
+    {"native_getTextPath","(II[CIIFFI)V", (void*) SkPaintGlue::getTextPath___C},
+    {"native_getTextPath","(IILjava/lang/String;IIFFI)V", (void*) SkPaintGlue::getTextPath__String},
     {"nativeGetStringBounds", "(ILjava/lang/String;IILandroid/graphics/Rect;)V",
                                         (void*) SkPaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(I[CIILandroid/graphics/Rect;)V",

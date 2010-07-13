@@ -30,6 +30,8 @@
 #include "SkBoundaryPatch.h"
 #include "SkMeshUtils.h"
 
+#include "TextLayout.h"
+
 #include "unicode/ubidi.h"
 #include "unicode/ushape.h"
 
@@ -56,24 +58,6 @@ namespace android {
 
 class SkCanvasGlue {
 public:
-
-    enum {
-      kDirection_LTR = 0,
-      kDirection_RTL = 1
-    };
-
-    enum {
-      kDirection_Mask = 0x1
-    };
-
-    enum {
-      kBidi_LTR = 0,
-      kBidi_RTL = 1,
-      kBidi_Default_LTR = 2,
-      kBidi_Default_RTL = 3,
-      kBidi_Force_LTR = 4,
-      kBidi_Force_RTL = 5
-    };
 
     static void finalizer(JNIEnv* env, jobject clazz, SkCanvas* canvas) {
         canvas->unref();
@@ -767,192 +751,12 @@ public:
                              indices, indexCount, *paint);
     }
 
-    /**
-     * Character-based Arabic shaping.
-     *
-     * We'll use harfbuzz and glyph-based shaping instead once we're set up for it.
-     *
-     * @context the text context
-     * @start the start of the text to render
-     * @count the length of the text to render, start + count  must be <= contextCount
-     * @contextCount the length of the context
-     * @shaped where to put the shaped text, must have capacity for count uchars
-     * @return the length of the shaped text, or -1 if error
-     */
-    static int shapeRtlText(const jchar* context, jsize start, jsize count, jsize contextCount,
-                            jchar* shaped, UErrorCode &status) {
-        jchar buffer[contextCount];
-
-        // Use fixed length since we need to keep start and count valid
-        u_shapeArabic(context, contextCount, buffer, contextCount,
-                       U_SHAPE_LENGTH_FIXED_SPACES_NEAR |
-                       U_SHAPE_TEXT_DIRECTION_LOGICAL | U_SHAPE_LETTERS_SHAPE |
-                       U_SHAPE_X_LAMALEF_SUB_ALTERNATE, &status);
-
-        if (U_SUCCESS(status)) {
-            // trim out 0xffff following ligatures, if any
-            int end = 0;
-            for (int i = start, e = start + count; i < e; ++i) {
-                if (buffer[i] != 0xffff) {
-                    buffer[end++] = buffer[i];
-                }
-            }
-            count = end;
-            // LOG(LOG_INFO, "CSRTL", "start %d count %d ccount %d\n", start, count, contextCount);
-            ubidi_writeReverse(buffer, count, shaped, count, UBIDI_DO_MIRRORING | UBIDI_OUTPUT_REVERSE
-                               | UBIDI_KEEP_BASE_COMBINING, &status);
-            if (U_SUCCESS(status)) {
-                return count;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * Basic character-based layout supporting rtl and arabic shaping.
-     * Runs bidi on the text and generates a reordered, shaped line in buffer, returning
-     * the length.
-     * @text the text
-     * @len the length of the text in uchars
-     * @dir receives the resolved paragraph direction
-     * @buffer the buffer to receive the reordered, shaped line.  Must have capacity of
-     * at least len jchars.
-     * @flags line bidi flags
-     * @return the length of the reordered, shaped line, or -1 if error
-     */
-    static jint layoutLine(const jchar* text, jint len, jint flags, int &dir, jchar* buffer,
-            UErrorCode &status) {
-        static int RTL_OPTS = UBIDI_DO_MIRRORING | UBIDI_KEEP_BASE_COMBINING |
-                UBIDI_REMOVE_BIDI_CONTROLS | UBIDI_OUTPUT_REVERSE;
-
-        UBiDiLevel bidiReq = 0;
-        switch (flags) {
-          case kBidi_LTR: bidiReq = 0; break; // no ICU constant, canonical LTR level
-          case kBidi_RTL: bidiReq = 1; break; // no ICU constant, canonical RTL level
-          case kBidi_Default_LTR: bidiReq = UBIDI_DEFAULT_LTR; break;
-          case kBidi_Default_RTL: bidiReq = UBIDI_DEFAULT_RTL; break;
-          case kBidi_Force_LTR: memcpy(buffer, text, len * sizeof(jchar)); return len;
-          case kBidi_Force_RTL: return shapeRtlText(text, 0, len, len, buffer, status);
-        }
-
-        int32_t result = -1;
-
-        UBiDi* bidi = ubidi_open();
-        if (bidi) {
-            ubidi_setPara(bidi, text, len, bidiReq, NULL, &status);
-            if (U_SUCCESS(status)) {
-                dir = ubidi_getParaLevel(bidi) & 0x1; // 0 if ltr, 1 if rtl
-
-                int rc = ubidi_countRuns(bidi, &status);
-                if (U_SUCCESS(status)) {
-                    // LOG(LOG_INFO, "LAYOUT", "para bidiReq=%d dir=%d rc=%d\n", bidiReq, dir, rc);
-
-                    int32_t slen = 0;
-                    for (int i = 0; i < rc; ++i) {
-                        int32_t start;
-                        int32_t length;
-                        UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &start, &length);
-                        // LOG(LOG_INFO, "LAYOUT", "  [%2d] runDir=%d start=%3d len=%3d\n", i, runDir, start, length);
-                        if (runDir == UBIDI_RTL) {
-                            slen += shapeRtlText(text + start, 0, length, length, buffer + slen, status);
-                        } else {
-                            memcpy(buffer + slen, text + start, length * sizeof(jchar));
-                            slen += length;
-                        }
-                    }
-                    if (U_SUCCESS(status)) {
-                        result = slen;
-                    }
-                }
-            }
-            ubidi_close(bidi);
-        }
-
-        return result;
-    }
-
-    // Returns true if we might need layout.  If bidiFlags force LTR, assume no layout, if
-    // bidiFlags indicate there probably is RTL, assume we do, otherwise scan the text
-    // looking for a character >= the first RTL character in unicode and assume we do if
-    // we find one.
-    static bool needsLayout(const jchar* text, jint len, jint bidiFlags) {
-        if (bidiFlags == kBidi_Force_LTR) {
-            return false;
-        }
-        if ((bidiFlags == kBidi_RTL) || (bidiFlags == kBidi_Default_RTL) ||
-                bidiFlags == kBidi_Force_RTL) {
-            return true;
-        }
-        for (int i = 0; i < len; ++i) {
-            if (text[i] >= 0x0590) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Draws a paragraph of text on a single line, running bidi and shaping
-    static void drawText(JNIEnv* env, SkCanvas* canvas, const jchar* text, jsize len,
-                           jfloat x, jfloat y, int bidiFlags, SkPaint* paint) {
-
-        SkScalar x_ = SkFloatToScalar(x);
-        SkScalar y_ = SkFloatToScalar(y);
-
-        SkPaint::Align horiz = paint->getTextAlign();
-
-        const jchar *workText = text;
-        jchar *buffer = NULL;
-        int dir = kDirection_LTR;
-        if (needsLayout(text, len, bidiFlags)) {
-            buffer =(jchar *) malloc(len * sizeof(jchar));
-            if (!buffer) {
-                return;
-            }
-            UErrorCode status = U_ZERO_ERROR;
-            len = layoutLine(text, len, bidiFlags, dir, buffer, status); // might change len, dir
-            if (!U_SUCCESS(status)) {
-                LOG(LOG_WARN, "LAYOUT", "drawText error %d\n", status);
-                free(buffer);
-                return; // can't render
-            }
-
-            workText = buffer; // use the shaped text
-        }
-
-        bool trimLeft = false;
-        bool trimRight = false;
-
-        switch (horiz) {
-        case SkPaint::kLeft_Align: trimLeft = dir & kDirection_Mask; break;
-        case SkPaint::kCenter_Align: trimLeft = trimRight = true; break;
-        case SkPaint::kRight_Align: trimRight = !(dir & kDirection_Mask);
-        default: break;
-        }
-        const jchar* workLimit = workText + len;
-
-        if (trimLeft) {
-            while (workText < workLimit && *workText == ' ') {
-                ++workText;
-            }
-        }
-        if (trimRight) {
-            while (workLimit > workText && *(workLimit - 1) == ' ') {
-                --workLimit;
-            }
-        }
-        int32_t workBytes = (workLimit - workText) << 1;
-
-        canvas->drawText(workText, workBytes, x_, y_, *paint);
-
-        free(buffer);
-    }
 
     static void drawText___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
                                       jcharArray text, int index, int count,
                                       jfloat x, jfloat y, int flags, SkPaint* paint) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        drawText(env, canvas, textArray + index, count, x, y, flags, paint);
+        TextLayout::drawText(paint, textArray + index, count, flags, x, y, canvas);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     }
 
@@ -961,31 +765,8 @@ public:
                                           int start, int end,
                                           jfloat x, jfloat y, int flags, SkPaint* paint) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        drawText(env, canvas, textArray + start, end - start, x, y, flags, paint);
+        TextLayout::drawText(paint, textArray + start, end - start, flags, x, y, canvas);
         env->ReleaseStringChars(text, textArray);
-    }
-
-    // Draws a unidirectional run of text.
-    static void drawTextRun(JNIEnv* env, SkCanvas* canvas, const jchar* chars,
-                              jint start, jint count, jint contextCount,
-                              jfloat x, jfloat y, int dirFlags, SkPaint* paint) {
-
-        SkScalar x_ = SkFloatToScalar(x);
-        SkScalar y_ = SkFloatToScalar(y);
-
-        uint8_t rtl = dirFlags & 0x1;
-        if (rtl) {
-            SkAutoSTMalloc<80, jchar> buffer(contextCount);
-            UErrorCode status = U_ZERO_ERROR;
-            count = shapeRtlText(chars, start, count, contextCount, buffer.get(), status);
-            if (U_SUCCESS(status)) {
-                canvas->drawText(buffer.get(), count << 1, x_, y_, *paint);
-            } else {
-                LOG(LOG_WARN, "LAYOUT", "drawTextRun error %d\n", status);
-            }
-        } else {
-            canvas->drawText(chars + start, count << 1, x_, y_, *paint);
-        }
     }
 
     static void drawTextRun___CIIIIFFIPaint(
@@ -994,8 +775,8 @@ public:
         jfloat x, jfloat y, int dirFlags, SkPaint* paint) {
 
         jchar* chars = env->GetCharArrayElements(text, NULL);
-        drawTextRun(env, canvas, chars + contextIndex, index - contextIndex,
-                      count, contextCount, x, y, dirFlags, paint);
+        TextLayout::drawTextRun(paint, chars + contextIndex, index - contextIndex,
+                                count, contextCount, dirFlags, x, y, canvas);
         env->ReleaseCharArrayElements(text, chars, JNI_ABORT);
     }
 
@@ -1007,8 +788,8 @@ public:
         jint count = end - start;
         jint contextCount = contextEnd - contextStart;
         const jchar* chars = env->GetStringChars(text, NULL);
-        drawTextRun(env, canvas, chars + contextStart, start - contextStart,
-                      count, contextCount, x, y, dirFlags, paint);
+        TextLayout::drawTextRun(paint, chars + contextStart, start - contextStart,
+                                count, contextCount, dirFlags, x, y, canvas);
         env->ReleaseStringChars(text, chars);
     }
 
@@ -1059,31 +840,13 @@ public:
         delete[] posPtr;
     }
 
-    static void drawTextOnPath(JNIEnv *env, SkCanvas* canvas, const jchar* text, int count,
-            int bidiFlags, SkPath* path, jfloat hOffset, jfloat vOffset, SkPaint* paint) {
-
-        if (!needsLayout(text, count, bidiFlags)) {
-            canvas->drawTextOnPathHV(text, count << 1, *path,
-                SkFloatToScalar(hOffset), SkFloatToScalar(vOffset), *paint);
-            return;
-        }
-
-        SkAutoSTMalloc<80, jchar> buffer(count);
-        int dir = kDirection_LTR;
-        UErrorCode status = U_ZERO_ERROR;
-        count = layoutLine(text, count, bidiFlags, dir, buffer.get(), status);
-        if (U_SUCCESS(status)) {
-            canvas->drawTextOnPathHV(buffer.get(), count << 1, *path,
-                SkFloatToScalar(hOffset), SkFloatToScalar(vOffset), *paint);
-        }
-    }
-
     static void drawTextOnPath___CIIPathFFPaint(JNIEnv* env, jobject,
             SkCanvas* canvas, jcharArray text, int index, int count,
             SkPath* path, jfloat hOffset, jfloat vOffset, jint bidiFlags, SkPaint* paint) {
 
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        drawTextOnPath(env, canvas, textArray, count, bidiFlags, path, hOffset, vOffset, paint);
+        TextLayout::drawTextOnPath(paint, textArray, count, bidiFlags, hOffset, vOffset,
+                                   path, canvas);
         env->ReleaseCharArrayElements(text, textArray, 0);
     }
 
@@ -1092,7 +855,8 @@ public:
             jfloat hOffset, jfloat vOffset, jint bidiFlags, SkPaint* paint) {
         const jchar* text_ = env->GetStringChars(text, NULL);
         int count = env->GetStringLength(text);
-        drawTextOnPath(env, canvas, text_, count, bidiFlags, path, hOffset, vOffset, paint);
+        TextLayout::drawTextOnPath(paint, text_, count, bidiFlags, hOffset, vOffset,
+                                   path, canvas);
         env->ReleaseStringChars(text, text_);
     }
 
