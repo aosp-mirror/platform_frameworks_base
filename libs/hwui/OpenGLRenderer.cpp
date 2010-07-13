@@ -243,7 +243,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const Rect& rect = layer->layer;
 
     drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
-            layer->texture, layer->alpha, layer->mode, layer->blend, true);
+            layer->texture, layer->alpha, layer->mode, layer->blend);
 
     LayerSize size(rect.getWidth(), rect.getHeight());
     // Failing to add the layer to the cache should happen only if the
@@ -486,8 +486,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
-    drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f, mode,
-            texture->blend, true, &mesh->vertices[0].position[0],
+    drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
+            mode, texture->blend, &mesh->vertices[0].position[0],
             &mesh->vertices[0].texture[0], mesh->indices, mesh->indicesCount);
 }
 
@@ -532,7 +532,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     const GLfloat b = ((color      ) & 0xFF) / 255.0f;
 
     // Pre-multiplication happens when setting the shader color
-    chooseBlending(alpha < 255, mode, true);
+    chooseBlending(alpha < 255, mode);
 
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
@@ -552,24 +552,23 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        const Texture* texture, const SkPaint* paint, bool isPremultiplied) {
+        const Texture* texture, const SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
-            texture->blend, isPremultiplied, &mDrawTextureVertices[0].position[0],
-            &mDrawTextureVertices[0].texture[0], NULL);
+    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode, texture->blend,
+            &mDrawTextureVertices[0].position[0], &mDrawTextureVertices[0].texture[0], NULL);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied) {
-    drawTextureMesh(left, top, right, bottom, texture, alpha, mode, blend, isPremultiplied,
+        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend) {
+    drawTextureMesh(left, top, right, bottom, texture, alpha, mode, blend,
             &mDrawTextureVertices[0].position[0], &mDrawTextureVertices[0].texture[0], NULL);
 }
 
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied,
+        GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount) {
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
@@ -577,17 +576,14 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     useShader(mDrawTextureShader);
     mDrawTextureShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
-    chooseBlending(blend || alpha < 1.0f, mode, isPremultiplied);
+    chooseBlending(blend || alpha < 1.0f, mode);
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
     // TODO handle tiling and filtering here
 
-    if (isPremultiplied) {
-        glUniform4f(mDrawTextureShader->color, alpha, alpha, alpha, alpha);
-    } else {
-        glUniform4f(mDrawTextureShader->color, 1.0f, 1.0f, 1.0f, alpha);
-    }
+    // Always premultiplied
+    glUniform4f(mDrawTextureShader->color, alpha, alpha, alpha, alpha);
 
     glVertexAttribPointer(mDrawTextureShader->position, 2, GL_FLOAT, GL_FALSE,
             gDrawTextureVertexStride, vertices);
@@ -597,7 +593,6 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     if (!indices) {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
     } else {
-        // TODO: Use triangle strip instead
         glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_SHORT, indices);
     }
 

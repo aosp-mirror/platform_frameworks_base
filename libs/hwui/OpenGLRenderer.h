@@ -176,10 +176,9 @@ private:
      * @param alpha An additional translucency parameter, between 0.0f and 1.0f
      * @param mode The blending mode
      * @param blend True if the texture contains an alpha channel
-     * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = true);
+            float alpha, SkXfermode::Mode mode, bool blend);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -191,10 +190,9 @@ private:
      * @param bottom The bottom coordinate of the rectangle
      * @param texture The texture to use
      * @param paint The paint containing the alpha, blending mode, etc.
-     * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
-    void drawTextureRect(float left, float top, float right, float bottom, const Texture* texture,
-            const SkPaint* paint, bool isPremultiplied = true);
+    void drawTextureRect(float left, float top, float right, float bottom,
+            const Texture* texture, const SkPaint* paint);
 
     /**
      * Draws a textured mesh with the specified texture. If the indices are omitted, the
@@ -208,14 +206,13 @@ private:
      * @param alpha An additional translucency parameter, between 0.0f and 1.0f
      * @param mode The blending mode
      * @param blend True if the texture contains an alpha channel
-     * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      * @param vertices The vertices that define the mesh
      * @param texCoords The texture coordinates of each vertex
      * @param indices The indices of the vertices, can be NULL
      * @param elementsCount The number of elements in the mesh, required by indices
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied,
+            float alpha, SkXfermode::Mode mode, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLvoid* indices, GLsizei elementsCount = 0);
 
     /**
@@ -245,7 +242,7 @@ private:
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */
-    inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied);
+    inline void chooseBlending(bool blend, SkXfermode::Mode mode, bool isPremultiplied = true);
 
     /**
      * Use the specified shader with the current GL context. If the shader is already
