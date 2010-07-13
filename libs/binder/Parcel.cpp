@@ -754,6 +754,11 @@ restart_write:
     goto restart_write;
 }
 
+status_t Parcel::writeNoException()
+{
+    return writeInt32(0);
+}
+
 void Parcel::remove(size_t start, size_t amt)
 {
     LOG_ALWAYS_FATAL("Parcel::remove() not yet implemented!");
@@ -942,6 +947,12 @@ wp<IBinder> Parcel::readWeakBinder() const
     return val;
 }
 
+int32_t Parcel::readExceptionCode() const
+{
+  int32_t exception_code = readAligned<int32_t>();
+  // TODO: skip over the response header here, once that's in.
+  return exception_code;
+}
 
 native_handle* Parcel::readNativeHandle() const
 {
