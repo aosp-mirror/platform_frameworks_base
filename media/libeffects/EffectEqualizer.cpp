@@ -30,6 +30,12 @@
 // effect_interface_t interface implementation for equalizer effect
 extern "C" const struct effect_interface_s gEqualizerInterface;
 
+enum equalizer_state_e {
+    EQUALIZER_STATE_UNINITIALIZED,
+    EQUALIZER_STATE_INITIALIZED,
+    EQUALIZER_STATE_ACTIVE,
+};
+
 namespace android {
 namespace {
 
@@ -100,6 +106,7 @@ struct EqualizerContext {
     effect_config_t config;
     FormatAdapter adapter;
     AudioEqualizer * pEqualizer;
+    uint32_t state;
 };
 
 //--- local function prototypes
@@ -151,6 +158,7 @@ extern "C" int EffectCreate(effect_uuid_t *uuid,
 
     pContext->itfe = &gEqualizerInterface;
     pContext->pEqualizer = NULL;
+    pContext->state = EQUALIZER_STATE_UNINITIALIZED;
 
     ret = Equalizer_init(pContext);
     if (ret < 0) {
@@ -160,6 +168,7 @@ extern "C" int EffectCreate(effect_uuid_t *uuid,
     }
 
     *pInterface = (effect_interface_t)pContext;
+    pContext->state = EQUALIZER_STATE_INITIALIZED;
 
     LOGV("EffectLibCreateEffect %p, size %d", pContext, AudioEqualizer::GetInstanceSize(kNumBands)+sizeof(EqualizerContext));
 
@@ -175,6 +184,7 @@ extern "C" int EffectRelease(effect_interface_t interface) {
         return -EINVAL;
     }
 
+    pContext->state = EQUALIZER_STATE_UNINITIALIZED;
     pContext->pEqualizer->free();
     delete pContext;
 
@@ -528,6 +538,13 @@ extern "C" int Equalizer_process(effect_interface_t self, audio_buffer_t *inBuff
         return -EINVAL;
     }
 
+    if (pContext->state == EQUALIZER_STATE_UNINITIALIZED) {
+        return -EINVAL;
+    }
+    if (pContext->state == EQUALIZER_STATE_INITIALIZED) {
+        return -ENODATA;
+    }
+
     pContext->adapter.process(inBuffer->raw, outBuffer->raw, outBuffer->frameCount);
 
     return 0;
@@ -539,7 +556,7 @@ extern "C" int Equalizer_command(effect_interface_t self, int cmdCode, int cmdSi
     android::EqualizerContext * pContext = (android::EqualizerContext *) self;
     int retsize;
 
-    if (pContext == NULL) {
+    if (pContext == NULL || pContext->state == EQUALIZER_STATE_UNINITIALIZED) {
         return -EINVAL;
     }
 
@@ -594,10 +611,25 @@ extern "C" int Equalizer_command(effect_interface_t self, int cmdCode, int cmdSi
                 p->data + p->psize);
         } break;
     case EFFECT_CMD_ENABLE:
+        if (pReplyData == NULL || *replySize != sizeof(int)) {
+            return -EINVAL;
+        }
+        if (pContext->state != EQUALIZER_STATE_INITIALIZED) {
+            return -ENOSYS;
+        }
+        pContext->state = EQUALIZER_STATE_ACTIVE;
+        LOGV("EFFECT_CMD_ENABLE() OK");
+        *(int *)pReplyData = 0;
+        break;
     case EFFECT_CMD_DISABLE:
         if (pReplyData == NULL || *replySize != sizeof(int)) {
             return -EINVAL;
         }
+        if (pContext->state != EQUALIZER_STATE_ACTIVE) {
+            return -ENOSYS;
+        }
+        pContext->state = EQUALIZER_STATE_INITIALIZED;
+        LOGV("EFFECT_CMD_DISABLE() OK");
         *(int *)pReplyData = 0;
         break;
     case EFFECT_CMD_SET_DEVICE:
