@@ -21,6 +21,8 @@ import android.util.Slog;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.InetAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -41,11 +43,13 @@ class ViewServer implements Runnable {
      */
     public static final int VIEW_SERVER_DEFAULT_PORT = 4939;
 
+    private static final int VIEW_SERVER_MAX_CONNECTIONS = 10;
+
     // Debug facility
     private static final String LOG_TAG = "ViewServer";
 
-    private static final String VALUE_PROTOCOL_VERSION = "2";
-    private static final String VALUE_SERVER_VERSION = "3";
+    private static final String VALUE_PROTOCOL_VERSION = "3";
+    private static final String VALUE_SERVER_VERSION = "4";
 
     // Protocol commands
     // Returns the protocol version
@@ -54,12 +58,16 @@ class ViewServer implements Runnable {
     private static final String COMMAND_SERVER_VERSION = "SERVER";
     // Lists all of the available windows in the system
     private static final String COMMAND_WINDOW_MANAGER_LIST = "LIST";
+    // Keeps a connection open and notifies when the list of windows changes
+    private static final String COMMAND_WINDOW_MANAGER_AUTOLIST = "AUTOLIST";
 
     private ServerSocket mServer;
     private Thread mThread;
 
     private final WindowManagerService mWindowManager;
     private final int mPort;
+
+    private ExecutorService mThreadPool;
 
     /**
      * Creates a new ViewServer associated with the specified window manager.
@@ -103,8 +111,9 @@ class ViewServer implements Runnable {
             return false;
         }
 
-        mServer = new ServerSocket(mPort, 1, InetAddress.getLocalHost());
+        mServer = new ServerSocket(mPort, VIEW_SERVER_MAX_CONNECTIONS, InetAddress.getLocalHost());
         mThread = new Thread(this, "Remote View Server [port=" + mPort + "]");
+        mThreadPool = Executors.newFixedThreadPool(VIEW_SERVER_MAX_CONNECTIONS);
         mThread.start();
 
         return true;
@@ -122,7 +131,16 @@ class ViewServer implements Runnable {
      */
     boolean stop() {
         if (mThread != null) {
+
             mThread.interrupt();
+            if (mThreadPool != null) {
+                try {
+                    mThreadPool.shutdownNow();
+                } catch (SecurityException e) {
+                    Slog.w(LOG_TAG, "Could not stop all view server threads");
+                }
+            }
+            mThreadPool = null;
             mThread = null;
             try {
                 mServer.close();
@@ -152,62 +170,21 @@ class ViewServer implements Runnable {
      * Main server loop.
      */
     public void run() {
-        final ServerSocket server = mServer;
-
         while (Thread.currentThread() == mThread) {
-            Socket client = null;
             // Any uncaught exception will crash the system process
             try {
-                client = server.accept();
-
-                BufferedReader in = null;
-                try {
-                    in = new BufferedReader(new InputStreamReader(client.getInputStream()), 1024);
-
-                    final String request = in.readLine();
-
-                    String command;
-                    String parameters;
-
-                    int index = request.indexOf(' ');
-                    if (index == -1) {
-                        command = request;
-                        parameters = "";
-                    } else {
-                        command = request.substring(0, index);
-                        parameters = request.substring(index + 1);
-                    }
-
-                    boolean result;
-                    if (COMMAND_PROTOCOL_VERSION.equalsIgnoreCase(command)) {
-                        result = writeValue(client, VALUE_PROTOCOL_VERSION);
-                    } else if (COMMAND_SERVER_VERSION.equalsIgnoreCase(command)) {
-                        result = writeValue(client, VALUE_SERVER_VERSION);
-                    } else if (COMMAND_WINDOW_MANAGER_LIST.equalsIgnoreCase(command)) {
-                        result = mWindowManager.viewServerListWindows(client);
-                    } else {
-                        result = mWindowManager.viewServerWindowCommand(client,
-                                command, parameters);
-                    }
-
-                    if (!result) {
-                        Slog.w(LOG_TAG, "An error occured with the command: " + command);
-                    }
-                } finally {
-                    if (in != null) {
-                        in.close();
-                    }
-                }
-            } catch (Exception e) {
-                Slog.w(LOG_TAG, "Connection error: ", e);
-            } finally {
-                if (client != null) {
+                Socket client = mServer.accept();
+                if(mThreadPool != null) {
+                    mThreadPool.submit(new ViewServerWorker(client));
+                } else {
                     try {
                         client.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
+            } catch (Exception e) {
+                Slog.w(LOG_TAG, "Connection error: ", e);
             }
         }
     }
@@ -234,5 +211,107 @@ class ViewServer implements Runnable {
             }
         }
         return result;
+    }
+
+    class ViewServerWorker implements Runnable, WindowManagerService.WindowChangeListener {
+        private Socket mClient;
+        private boolean mNeedWindowListUpdate;
+        public ViewServerWorker(Socket client) {
+            mClient = client;
+        }
+
+        public void run() {
+
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(new InputStreamReader(mClient.getInputStream()), 1024);
+
+                final String request = in.readLine();
+
+                String command;
+                String parameters;
+
+                int index = request.indexOf(' ');
+                if (index == -1) {
+                    command = request;
+                    parameters = "";
+                } else {
+                    command = request.substring(0, index);
+                    parameters = request.substring(index + 1);
+                }
+
+                boolean result;
+                if (COMMAND_PROTOCOL_VERSION.equalsIgnoreCase(command)) {
+                    result = writeValue(mClient, VALUE_PROTOCOL_VERSION);
+                } else if (COMMAND_SERVER_VERSION.equalsIgnoreCase(command)) {
+                    result = writeValue(mClient, VALUE_SERVER_VERSION);
+                } else if (COMMAND_WINDOW_MANAGER_LIST.equalsIgnoreCase(command)) {
+                    result = mWindowManager.viewServerListWindows(mClient);
+                } else if(COMMAND_WINDOW_MANAGER_AUTOLIST.equalsIgnoreCase(command)) {
+                    result = windowManagerAutolistLoop();
+                } else {
+                    result = mWindowManager.viewServerWindowCommand(mClient,
+                            command, parameters);
+                }
+
+                if (!result) {
+                    Slog.w(LOG_TAG, "An error occured with the command: " + command);
+                }
+            } catch(IOException e) {
+                Slog.w(LOG_TAG, "Connection error: ", e);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (mClient != null) {
+                    try {
+                        mClient.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        public void windowsChanged() {
+            synchronized(this) {
+                mNeedWindowListUpdate = true;
+                notifyAll();
+            }
+        }
+
+        private boolean windowManagerAutolistLoop() {
+            mWindowManager.addWindowChangeListener(this);
+            BufferedWriter out = null;
+            try {
+                out = new BufferedWriter(new OutputStreamWriter(mClient.getOutputStream()));
+                while (!Thread.interrupted()) {
+                    synchronized (this) {
+                        while (!mNeedWindowListUpdate) {
+                            wait();
+                        }
+                        mNeedWindowListUpdate = false;
+                    }
+                    out.write("UPDATE\n");
+                    out.flush();
+                }
+            } catch (Exception e) {
+                Slog.w(LOG_TAG, "Connection error: ", e);
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                    }
+                }
+                mWindowManager.removeWindowChangeListener(this);
+            }
+            return true;
+        }
     }
 }
