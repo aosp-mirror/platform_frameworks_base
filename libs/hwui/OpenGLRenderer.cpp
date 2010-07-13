@@ -128,6 +128,7 @@ OpenGLRenderer::~OpenGLRenderer() {
 
     mTextureCache.clear();
     mLayerCache.clear();
+    mPatchCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,7 +243,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const Rect& rect = layer->layer;
 
     drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
-            layer->texture, layer->alpha, layer->mode, layer->blend);
+            layer->texture, layer->alpha, layer->mode, layer->blend, true);
 
     LayerSize size(rect.getWidth(), rect.getHeight());
     // Failing to add the layer to the cache should happen only if the
@@ -418,14 +419,25 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom) 
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
+    const float right = left + bitmap->width();
+    const float bottom = top + bitmap->height();
+
+    if (quickReject(left, top, right, bottom)) {
+        return;
+    }
+
     const Texture* texture = mTextureCache.get(bitmap);
-    drawTextureRect(left, top, left + texture->width, top + texture->height, texture, paint);
+    drawTextureRect(left, top, right, bottom, texture, paint);
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint) {
     Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
     const mat4 transform(*matrix);
     transform.mapRect(r);
+
+    if (quickReject(r.left, r.top, r.right, r.bottom)) {
+        return;
+    }
 
     const Texture* texture = mTextureCache.get(bitmap);
     drawTextureRect(r.left, r.top, r.right, r.bottom, texture, paint);
@@ -435,6 +447,10 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
          const SkPaint* paint) {
+    if (quickReject(dstLeft, dstTop, dstRight, dstBottom)) {
+        return;
+    }
+
     const Texture* texture = mTextureCache.get(bitmap);
 
     const float width = texture->width;
@@ -454,6 +470,10 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
 void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, const SkPaint* paint) {
+    if (quickReject(left, top, right, bottom)) {
+        return;
+    }
+
     const Texture* texture = mTextureCache.get(bitmap);
 
     int alpha;
@@ -477,6 +497,10 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, const SkPaint* p) {
+    if (quickReject(left, top, right, bottom)) {
+        return;
+    }
+
     SkXfermode::Mode mode;
 
     const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
@@ -495,6 +519,10 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     drawColorRect(left, top, right, bottom, color, mode);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Drawing implementation
+///////////////////////////////////////////////////////////////////////////////
+
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode) {
     const int alpha = (color >> 24) & 0xFF;
@@ -503,24 +531,24 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     const GLfloat g = ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = ((color      ) & 0xFF) / 255.0f;
 
+    // Pre-multiplication happens when setting the shader color
     chooseBlending(alpha < 255, mode, true);
 
     mModelView.loadTranslate(left, top, 0.0f);
     mModelView.scale(right - left, bottom - top, 1.0f);
 
-    useShader(mDrawColorShader);
+    const bool inUse = useShader(mDrawColorShader);
     mDrawColorShader->set(mOrthoMatrix, mModelView, mSnapshot->transform);
 
-    const GLvoid* p = &gDrawColorVertices[0].position[0];
-
-    glEnableVertexAttribArray(mDrawColorShader->position);
-    glVertexAttribPointer(mDrawColorShader->position, 2, GL_FLOAT, GL_FALSE,
-            gDrawColorVertexStride, p);
-    glUniform4f(mDrawColorShader->color, r, g, b, a);
+    if (!inUse) {
+        const GLvoid* p = &gDrawColorVertices[0].position[0];
+        glVertexAttribPointer(mDrawColorShader->position, 2, GL_FLOAT, GL_FALSE,
+                gDrawColorVertexStride, p);
+    }
+    // Render using pre-multiplied alpha
+    glUniform4f(mDrawColorShader->color, r * a, g * a, b * a, a);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawColorVertexCount);
-
-    glDisableVertexAttribArray(mDrawColorShader->position);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -529,8 +557,8 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode, texture->blend,
-            isPremultiplied, &mDrawTextureVertices[0].position[0],
+    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
+            texture->blend, texture->blend, &mDrawTextureVertices[0].position[0],
             &mDrawTextureVertices[0].texture[0], NULL);
 }
 
@@ -555,26 +583,23 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 
     // TODO handle tiling and filtering here
 
-    glActiveTexture(GL_TEXTURE0);
-    glUniform1i(mDrawTextureShader->sampler, 0);
-    glUniform4f(mDrawTextureShader->color, 1.0f, 1.0f, 1.0f, alpha);
+    if (isPremultiplied) {
+        glUniform4f(mDrawTextureShader->color, alpha, alpha, alpha, alpha);
+    } else {
+        glUniform4f(mDrawTextureShader->color, 1.0f, 1.0f, 1.0f, alpha);
+    }
 
-    glEnableVertexAttribArray(mDrawTextureShader->position);
     glVertexAttribPointer(mDrawTextureShader->position, 2, GL_FLOAT, GL_FALSE,
             gDrawTextureVertexStride, vertices);
-
-    glEnableVertexAttribArray(mDrawTextureShader->texCoords);
     glVertexAttribPointer(mDrawTextureShader->texCoords, 2, GL_FLOAT, GL_FALSE,
             gDrawTextureVertexStride, texCoords);
 
     if (!indices) {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gDrawTextureVertexCount);
     } else {
+        // TODO: Use triangle strip instead
         glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_SHORT, indices);
     }
-
-    glDisableVertexAttribArray(mDrawTextureShader->position);
-    glDisableVertexAttribArray(mDrawTextureShader->texCoords);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -605,12 +630,14 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode, bool isPr
     mBlend = blend;
 }
 
-void OpenGLRenderer::useShader(const sp<Program>& shader) {
+bool OpenGLRenderer::useShader(const sp<Program>& shader) {
     if (!shader->isInUse()) {
         mCurrentShader->remove();
         shader->use();
         mCurrentShader = shader;
+        return false;
     }
+    return true;
 }
 
 void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
