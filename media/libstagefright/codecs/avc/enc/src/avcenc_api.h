@@ -28,6 +28,9 @@ and necessary type defitionitions and enumerations.
 #include "avcapi_common.h"
 #endif
 
+// For memset, etc
+#include <string.h>
+
 /**
  This enumeration is used for the status returned from the library interface.
 */
