@@ -725,12 +725,10 @@ nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, jint native_asset)
 static int
 nFileA3DGetNumIndexEntries(JNIEnv *_env, jobject _this, jint fileA3D)
 {
-    LOGV("______nFileA3D %u", (uint32_t) fileA3D);
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
 
     int32_t numEntries = 0;
     rsFileA3DGetNumIndexEntries(con, &numEntries, (RsFile)fileA3D);
-    LOGV("______nFileA3D NumEntries %u", (uint32_t) numEntries);
     return numEntries;
 }
 
@@ -1203,13 +1201,12 @@ nProgramVertexCreate2(JNIEnv *_env, jobject _this, jstring shader, jintArray par
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramRasterCreate(JNIEnv *_env, jobject _this, jint in, jint out,
-                     jboolean pointSmooth, jboolean lineSmooth, jboolean pointSprite)
+nProgramRasterCreate(JNIEnv *_env, jobject _this, jboolean pointSmooth, jboolean lineSmooth, jboolean pointSprite)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramRasterCreate, con(%p), in(%p), out(%p), pointSmooth(%i), lineSmooth(%i), pointSprite(%i)",
-            con, (RsElement)in, (RsElement)out, pointSmooth, lineSmooth, pointSprite);
-    return (jint)rsProgramRasterCreate(con, (RsElement)in, (RsElement)out, pointSmooth, lineSmooth, pointSprite);
+    LOG_API("nProgramRasterCreate, con(%p), pointSmooth(%i), lineSmooth(%i), pointSprite(%i)",
+            con, pointSmooth, lineSmooth, pointSprite);
+    return (jint)rsProgramRasterCreate(con, pointSmooth, lineSmooth, pointSprite);
 }
 
 static void
@@ -1217,7 +1214,15 @@ nProgramRasterSetLineWidth(JNIEnv *_env, jobject _this, jint vpr, jfloat v)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramRasterSetLineWidth, con(%p), vpf(%p), value(%f)", con, (RsProgramRaster)vpr, v);
-    rsProgramRasterSetLineWidth(con, (RsProgramFragment)vpr, v);
+    rsProgramRasterSetLineWidth(con, (RsProgramRaster)vpr, v);
+}
+
+static void
+nProgramRasterSetCullMode(JNIEnv *_env, jobject _this, jint vpr, jint v)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramRasterSetCullMode, con(%p), vpf(%p), value(%i)", con, (RsProgramRaster)vpr, v);
+    rsProgramRasterSetCullMode(con, (RsProgramRaster)vpr, (RsCullMode)v);
 }
 
 
@@ -1352,19 +1357,75 @@ nMeshCreate(JNIEnv *_env, jobject _this, jint vtxCount, jint idxCount)
 }
 
 static void
-nMeshBindVertex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint slot)
+nMeshBindVertex(JNIEnv *_env, jobject _this, jint mesh, jint alloc, jint slot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nMeshBindVertex, con(%p), Mesh(%p), Alloc(%p), slot(%i)", con, (RsMesh)s, (RsAllocation)alloc, slot);
-    rsMeshBindVertex(con, (RsMesh)s, (RsAllocation)alloc, slot);
+    LOG_API("nMeshBindVertex, con(%p), Mesh(%p), Alloc(%p), slot(%i)", con, (RsMesh)mesh, (RsAllocation)alloc, slot);
+    rsMeshBindVertex(con, (RsMesh)mesh, (RsAllocation)alloc, slot);
 }
 
 static void
-nMeshBindIndex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint primID, jint slot)
+nMeshBindIndex(JNIEnv *_env, jobject _this, jint mesh, jint alloc, jint primID, jint slot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nMeshBindIndex, con(%p), Mesh(%p), Alloc(%p)", con, (RsMesh)s, (RsAllocation)alloc);
-    rsMeshBindIndex(con, (RsMesh)s, (RsAllocation)alloc, primID, slot);
+    LOG_API("nMeshBindIndex, con(%p), Mesh(%p), Alloc(%p)", con, (RsMesh)mesh, (RsAllocation)alloc);
+    rsMeshBindIndex(con, (RsMesh)mesh, (RsAllocation)alloc, primID, slot);
+}
+
+static jint
+nMeshGetVertexBufferCount(JNIEnv *_env, jobject _this, jint mesh)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshGetVertexBufferCount, con(%p), Mesh(%p)", con, (RsMesh)mesh);
+    jint vtxCount = 0;
+    rsMeshGetVertexBufferCount(con, (RsMesh)mesh, &vtxCount);
+    return vtxCount;
+}
+
+static jint
+nMeshGetIndexCount(JNIEnv *_env, jobject _this, jint mesh)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshGetIndexCount, con(%p), Mesh(%p)", con, (RsMesh)mesh);
+    jint idxCount = 0;
+    rsMeshGetIndexCount(con, (RsMesh)mesh, &idxCount);
+    return idxCount;
+}
+
+static void
+nMeshGetVertices(JNIEnv *_env, jobject _this, jint mesh, jintArray _ids, int numVtxIDs)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshGetVertices, con(%p), Mesh(%p)", con, (RsMesh)mesh);
+
+    RsAllocation *allocs = (RsAllocation*)malloc((uint32_t)numVtxIDs * sizeof(RsAllocation));
+    rsMeshGetVertices(con, (RsMesh)mesh, allocs, (uint32_t)numVtxIDs);
+
+    for(jint i = 0; i < numVtxIDs; i ++) {
+        _env->SetIntArrayRegion(_ids, i, 1, (const jint*)&allocs[i]);
+    }
+
+    free(allocs);
+}
+
+static void
+nMeshGetIndices(JNIEnv *_env, jobject _this, jint mesh, jintArray _idxIds, jintArray _primitives, int numIndices)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nMeshGetVertices, con(%p), Mesh(%p)", con, (RsMesh)mesh);
+
+    RsAllocation *allocs = (RsAllocation*)malloc((uint32_t)numIndices * sizeof(RsAllocation));
+    uint32_t *prims= (uint32_t*)malloc((uint32_t)numIndices * sizeof(uint32_t));
+
+    rsMeshGetIndices(con, (RsMesh)mesh, allocs, prims, (uint32_t)numIndices);
+
+    for(jint i = 0; i < numIndices; i ++) {
+        _env->SetIntArrayRegion(_idxIds, i, 1, (const jint*)&allocs[i]);
+        _env->SetIntArrayRegion(_primitives, i, 1, (const jint*)&prims[i]);
+    }
+
+    free(allocs);
+    free(prims);
 }
 
 // ---------------------------------------------------------------------------
@@ -1473,8 +1534,9 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentCreate",         "([I)I",                                (void*)nProgramFragmentCreate },
 {"nProgramFragmentCreate2",        "(Ljava/lang/String;[I)I",              (void*)nProgramFragmentCreate2 },
 
-{"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },
+{"nProgramRasterCreate",           "(ZZZ)I",                             (void*)nProgramRasterCreate },
 {"nProgramRasterSetLineWidth",     "(IF)V",                                (void*)nProgramRasterSetLineWidth },
+{"nProgramRasterSetCullMode",      "(II)V",                                (void*)nProgramRasterSetCullMode },
 
 {"nProgramVertexCreate",           "(Z)I",                                 (void*)nProgramVertexCreate },
 {"nProgramVertexCreate2",          "(Ljava/lang/String;[I)I",              (void*)nProgramVertexCreate2 },
@@ -1499,6 +1561,11 @@ static JNINativeMethod methods[] = {
 {"nMeshCreate",                    "(II)I",                                (void*)nMeshCreate },
 {"nMeshBindVertex",                "(III)V",                               (void*)nMeshBindVertex },
 {"nMeshBindIndex",                 "(IIII)V",                              (void*)nMeshBindIndex },
+
+{"nMeshGetVertexBufferCount",     "(I)I",                                 (void*)nMeshGetVertexBufferCount },
+{"nMeshGetIndexCount",             "(I)I",                                 (void*)nMeshGetIndexCount },
+{"nMeshGetVertices",               "(I[II)V",                             (void*)nMeshGetVertices },
+{"nMeshGetIndices",                "(I[I[II)V",                            (void*)nMeshGetIndices },
 
 };
 
@@ -1532,3 +1599,4 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 bail:
     return result;
 }
+

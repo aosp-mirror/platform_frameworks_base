@@ -244,6 +244,12 @@ enum RsA3DClassID {
     RS_A3D_CLASS_ID_SCRIPT_C
 };
 
+enum RsCullMode {
+    RS_CULL_BACK,
+    RS_CULL_FRONT,
+    RS_CULL_NONE
+};
+
 typedef struct {
     RsA3DClassID classID;
     const char* objectName;

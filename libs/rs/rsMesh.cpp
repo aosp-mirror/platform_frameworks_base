@@ -271,4 +271,45 @@ void rsi_MeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primTy
     sm->updateGLPrimitives();
 }
 
+void rsi_MeshGetVertexBufferCount(Context *rsc, RsMesh mv, int32_t *numVtx)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    *numVtx = sm->mVertexBufferCount;
+}
+
+void rsi_MeshGetIndexCount(Context *rsc, RsMesh mv, int32_t *numIdx)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    *numIdx = sm->mPrimitivesCount;
+}
+
+void rsi_MeshGetVertices(Context *rsc, RsMesh mv, RsAllocation *vtxData, uint32_t vtxDataCount)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    rsAssert(vtxDataCount == sm->mVertexBufferCount);
+
+    for(uint32_t ct = 0; ct < vtxDataCount; ct ++) {
+        vtxData[ct] = sm->mVertexBuffers[ct].get();
+        sm->mVertexBuffers[ct]->incUserRef();
+    }
+}
+
+void rsi_MeshGetIndices(Context *rsc, RsMesh mv, RsAllocation *va, uint32_t *primType, uint32_t idxDataCount)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    rsAssert(idxDataCount == sm->mPrimitivesCount);
+
+    for(uint32_t ct = 0; ct < idxDataCount; ct ++) {
+        va[ct] = sm->mPrimitives[ct]->mIndexBuffer.get();
+        primType[ct] = sm->mPrimitives[ct]->mPrimitive;
+        if(sm->mPrimitives[ct]->mIndexBuffer.get()) {
+            sm->mPrimitives[ct]->mIndexBuffer->incUserRef();
+        }
+    }
+
+}
+
+
+
+
 }}

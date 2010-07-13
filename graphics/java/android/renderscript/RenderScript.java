@@ -165,8 +165,9 @@ public class RenderScript {
     native void nProgramStoreDither(boolean enable);
     native int  nProgramStoreCreate();
 
-    native int  nProgramRasterCreate(int in, int out, boolean pointSmooth, boolean lineSmooth, boolean pointSprite);
+    native int  nProgramRasterCreate(boolean pointSmooth, boolean lineSmooth, boolean pointSprite);
     native void nProgramRasterSetLineWidth(int pr, float v);
+    native void nProgramRasterSetCullMode(int pr, int mode);
 
     native void nProgramBindConstants(int pv, int slot, int mID);
     native void nProgramBindTexture(int vpf, int slot, int a);
@@ -188,6 +189,10 @@ public class RenderScript {
     native int  nMeshCreate(int vtxCount, int indexCount);
     native void nMeshBindVertex(int id, int alloc, int slot);
     native void nMeshBindIndex(int id, int alloc, int prim, int slot);
+    native int  nMeshGetVertexBufferCount(int id);
+    native int  nMeshGetIndexCount(int id);
+    native void nMeshGetVertices(int id, int[] vtxIds, int vtxIdCount);
+    native void nMeshGetIndices(int id, int[] idxIds, int[] primitives, int vtxIdCount);
 
     native void nAnimationBegin(int attribCount, int keyframeCount);
     native void nAnimationAdd(float time, float[] attribs);
@@ -355,5 +360,6 @@ public class RenderScript {
         return 0;
     }
 }
+
 
 
