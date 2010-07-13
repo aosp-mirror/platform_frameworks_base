@@ -49,6 +49,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -67,9 +68,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private Context mContext;
 
+    private static final HashSet<String> mValidTables = new HashSet<String>();
+
+    static {
+        mValidTables.add("system");
+        mValidTables.add("secure");
+        mValidTables.add("bluetooth_devices");
+        mValidTables.add("bookmarks");
+
+        // These are old.
+        mValidTables.add("favorites");
+        mValidTables.add("gservices");
+        mValidTables.add("old_favorites");
+    }
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
+    }
+
+    public static boolean isValidTable(String name) {
+        return mValidTables.contains(name);
     }
 
     private void createSecureTable(SQLiteDatabase db) {
