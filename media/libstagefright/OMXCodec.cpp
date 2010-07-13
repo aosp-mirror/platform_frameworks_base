@@ -25,6 +25,7 @@
 #include "include/AMRWBDecoder.h"
 #include "include/AMRWBEncoder.h"
 #include "include/AVCDecoder.h"
+#include "include/AVCEncoder.h"
 #include "include/M4vH263Decoder.h"
 #include "include/MP3Decoder.h"
 #include "include/VorbisDecoder.h"
@@ -81,6 +82,7 @@ FACTORY_CREATE(VPXDecoder)
 FACTORY_CREATE_ENCODER(AMRNBEncoder)
 FACTORY_CREATE_ENCODER(AMRWBEncoder)
 FACTORY_CREATE_ENCODER(AACEncoder)
+FACTORY_CREATE_ENCODER(AVCEncoder)
 
 static sp<MediaSource> InstantiateSoftwareEncoder(
         const char *name, const sp<MediaSource> &source,
@@ -94,6 +96,7 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
         FACTORY_REF(AMRNBEncoder)
         FACTORY_REF(AMRWBEncoder)
         FACTORY_REF(AACEncoder)
+        FACTORY_REF(AVCEncoder)
     };
     for (size_t i = 0;
          i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
@@ -186,6 +189,7 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.encoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.encoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "AVCEncoder" },
 //    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcenc" },
 };
 
