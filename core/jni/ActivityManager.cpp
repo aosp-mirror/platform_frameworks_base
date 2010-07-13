@@ -39,7 +39,7 @@ int openContentProviderFile(const String16& uri)
         data.writeString16(uri);
         status_t ret = am->transact(OPEN_CONTENT_URI_TRANSACTION, data, &reply);
         if (ret == NO_ERROR) {
-            int32_t exceptionCode = reply.readInt32();
+            int32_t exceptionCode = reply.readExceptionCode();
             if (!exceptionCode) {
                 // Success is indicated here by a nonzero int followed by the fd;
                 // failure by a zero int with no data following.
