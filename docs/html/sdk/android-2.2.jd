@@ -2,7 +2,6 @@ page.title=Android 2.2 Platform
 sdk.platform.version=2.2
 sdk.platform.apiLevel=8
 sdk.platform.majorMinor=minor
-sdk.platform.deployableDate=May 2010
 
 @jd:body
 
@@ -118,6 +117,30 @@ function toggleDiv(link) {
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2010)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>System Image:</dt>
+<dd>
+<ul>
+<li>Adds default Search Widget.</li>
+<li>Includes proper provisioning for the platform's Backup Manager. For more information about how to use the Backup Manager, see <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>.</li>
+<li>Updates the Android 2.2 system image to FRF91.</li>
+</ul>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
         Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2010)</em></a>
   <div class="toggleme">
 <dl>
@@ -134,7 +157,6 @@ function toggleDiv(link) {
 </dl>
  </div>
 </div>
-
 
 <h2 id="api-level">API Level</h2>
 

@@ -139,7 +139,7 @@ function toggleDiv(link) {
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
         Android 1.5, Revision 3</a> <em>(July 2009)</em></a>
   <div class="toggleme">
 <dl>
