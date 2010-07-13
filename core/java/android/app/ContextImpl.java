@@ -67,6 +67,7 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.DownloadManager;
 import android.net.ThrottleManager;
 import android.net.IThrottleManager;
 import android.net.Uri;
@@ -199,6 +200,7 @@ class ContextImpl extends Context {
     private DropBoxManager mDropBoxManager = null;
     private DevicePolicyManager mDevicePolicyManager = null;
     private UiModeManager mUiModeManager = null;
+    private DownloadManager mDownloadManager = null;
 
     private final Object mSync = new Object();
 
@@ -973,6 +975,8 @@ class ContextImpl extends Context {
             return getDevicePolicyManager();
         } else if (UI_MODE_SERVICE.equals(name)) {
             return getUiModeManager();
+        } else if (DOWNLOAD_SERVICE.equals(name)) {
+            return getDownloadManager();
         }
 
         return null;
@@ -1189,6 +1193,15 @@ class ContextImpl extends Context {
             }
         }
         return mUiModeManager;
+    }
+
+    private DownloadManager getDownloadManager() {
+        synchronized (mSync) {
+            if (mDownloadManager == null) {
+                mDownloadManager = new DownloadManager(getContentResolver());
+            }
+        }
+        return mDownloadManager;
     }
 
     @Override
