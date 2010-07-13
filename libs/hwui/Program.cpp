@@ -146,6 +146,16 @@ void DrawColorProgram::set(const mat4& projectionMatrix, const mat4& modelViewMa
     glUniformMatrix4fv(transform, 1, GL_FALSE, &t.data[0]);
 }
 
+void DrawColorProgram::use() {
+    Program::use();
+    glEnableVertexAttribArray(position);
+}
+
+void DrawColorProgram::remove() {
+    Program::remove();
+    glDisableVertexAttribArray(position);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Draw texture
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,6 +164,18 @@ DrawTextureProgram::DrawTextureProgram():
         DrawColorProgram(gDrawTextureVertexShader, gDrawTextureFragmentShader) {
     texCoords = addAttrib("texCoords");
     sampler = addUniform("sampler");
+}
+
+void DrawTextureProgram::use() {
+    DrawColorProgram::use();
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(sampler, 0);
+    glEnableVertexAttribArray(texCoords);
+}
+
+void DrawTextureProgram::remove() {
+    DrawColorProgram::remove();
+    glDisableVertexAttribArray(texCoords);
 }
 
 }; // namespace uirenderer

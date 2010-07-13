@@ -179,7 +179,7 @@ private:
      * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, GLuint texture,
-            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = true);
+            float alpha, SkXfermode::Mode mode, bool blend, bool isPremultiplied = false);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -194,7 +194,7 @@ private:
      * @param isPremultiplied Indicates whether the texture has premultiplied alpha
      */
     void drawTextureRect(float left, float top, float right, float bottom, const Texture* texture,
-            const SkPaint* paint, bool isPremultiplied = true);
+            const SkPaint* paint, bool isPremultiplied = false);
 
     /**
      * Draws a textured mesh with the specified texture. If the indices are omitted, the
@@ -252,8 +252,10 @@ private:
      * in use, it will not be bound again. If it is not in use, the current shader is
      * marked unused and the specified shader becomes used and becomes the new
      * current shader.
+     *
+     * @return true If the specified shader was already in use, false otherwise.
      */
-    inline void useShader(const sp<Program>& shader);
+    inline bool useShader(const sp<Program>& shader);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;

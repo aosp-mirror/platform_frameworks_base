@@ -45,6 +45,10 @@ class GLES20Canvas extends Canvas {
     
     private final float[] mPoint = new float[2];
     private final float[] mLine = new float[4];
+    
+    private final Rect mClipBounds = new Rect();
+
+    private DrawFilter mFilter;
 
     ///////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -164,6 +168,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean clipRect(Rect rect, Region.Op op) {
+        // TODO: Implement
         throw new UnsupportedOperationException();
     }
 
@@ -174,6 +179,7 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public boolean clipRect(RectF rect, Region.Op op) {
+        // TODO: Implement
         throw new UnsupportedOperationException();
     }
 
@@ -336,12 +342,14 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void setDrawFilter(DrawFilter filter) {
-        throw new UnsupportedOperationException();
+        // Don't crash, but ignore the draw filter
+        // TODO: Implement PaintDrawFilter
+        mFilter = filter;
     }
 
     @Override
     public DrawFilter getDrawFilter() {
-        throw new UnsupportedOperationException();
+        return mFilter;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -408,7 +416,11 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
             int width, int height, boolean hasAlpha, Paint paint) {
-        // TODO: Implement
+        final Bitmap.Config config = hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+        final Bitmap b = Bitmap.createBitmap(colors, offset, stride, width, height, config);
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawBitmap(mRenderer, b.mNativeBitmap, x, y, nativePaint);
+        b.recycle();
     }
 
     @Override
@@ -420,7 +432,7 @@ class GLES20Canvas extends Canvas {
     @Override
     public void drawBitmapMesh(Bitmap bitmap, int meshWidth, int meshHeight, float[] verts,
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
@@ -466,7 +478,9 @@ class GLES20Canvas extends Canvas {
 
     @Override
     public void drawPaint(Paint paint) {
-        // TODO: Implement
+        final Rect r = mClipBounds;
+        nGetClipBounds(mRenderer, r);
+        drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
 
     @Override
@@ -591,6 +605,6 @@ class GLES20Canvas extends Canvas {
     public void drawVertices(VertexMode mode, int vertexCount, float[] verts, int vertOffset,
             float[] texs, int texOffset, int[] colors, int colorOffset, short[] indices,
             int indexOffset, int indexCount, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 }

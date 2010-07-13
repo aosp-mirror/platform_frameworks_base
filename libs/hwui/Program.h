@@ -39,18 +39,18 @@ public:
      * shaders sources.
      */
     Program(const char* vertex, const char* fragment);
-    ~Program();
+    virtual ~Program();
 
     /**
      * Binds this program to the GL context.
      */
-    void use();
+    virtual void use();
 
     /**
      * Marks this program as unused. This will not unbind
      * the program from the GL context.
      */
-    void remove();
+    virtual void remove();
 
     /**
      * Indicates whether this program is currently in use with
@@ -129,6 +129,17 @@ public:
              const mat4& transformMatrix);
 
     /**
+     * Binds this program to the GL context.
+     */
+    virtual void use();
+
+    /**
+     * Marks this program as unused. This will not unbind
+     * the program from the GL context.
+     */
+    virtual void remove();
+
+    /**
      * Name of the position attribute.
      */
     int position;
@@ -155,6 +166,17 @@ protected:
 class DrawTextureProgram: public DrawColorProgram {
 public:
     DrawTextureProgram();
+
+    /**
+     * Binds this program to the GL context.
+     */
+    virtual void use();
+
+    /**
+     * Marks this program as unused. This will not unbind
+     * the program from the GL context.
+     */
+    virtual void remove();
 
     /**
      * Name of the texture sampler uniform.
