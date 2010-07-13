@@ -27,6 +27,7 @@
 #include "include/AVCDecoder.h"
 #include "include/AVCEncoder.h"
 #include "include/M4vH263Decoder.h"
+#include "include/M4vH263Encoder.h"
 #include "include/MP3Decoder.h"
 #include "include/VorbisDecoder.h"
 #include "include/VPXDecoder.h"
@@ -83,6 +84,7 @@ FACTORY_CREATE_ENCODER(AMRNBEncoder)
 FACTORY_CREATE_ENCODER(AMRWBEncoder)
 FACTORY_CREATE_ENCODER(AACEncoder)
 FACTORY_CREATE_ENCODER(AVCEncoder)
+FACTORY_CREATE_ENCODER(M4vH263Encoder)
 
 static sp<MediaSource> InstantiateSoftwareEncoder(
         const char *name, const sp<MediaSource> &source,
@@ -97,6 +99,7 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
         FACTORY_REF(AMRWBEncoder)
         FACTORY_REF(AACEncoder)
         FACTORY_REF(AVCEncoder)
+        FACTORY_REF(M4vH263Encoder)
     };
     for (size_t i = 0;
          i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
@@ -181,10 +184,12 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Encoder" },
 //    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4enc" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.encoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.encoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Encoder" },
 //    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263enc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.encoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.encoder.avc" },
