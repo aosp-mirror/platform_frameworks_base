@@ -1047,6 +1047,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             closeClosable();
             // finalize ALL statements queued up so far
             closePendingStatements();
+            releaseCustomFunctions();
             // close this database instance - regardless of its reference count value
             dbclose();
             if (mConnectionPool != null) {
@@ -1081,6 +1082,54 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Native call to close the database.
      */
     private native void dbclose();
+
+    /**
+     * A callback interface for a custom sqlite3 function.
+     * This can be used to create a function that can be called from
+     * sqlite3 database triggers.
+     * @hide
+     */
+    public interface CustomFunction {
+        public void callback(String[] args);
+    }
+
+    /**
+     * Registers a CustomFunction callback as a function that can be called from
+     * sqlite3 database triggers.
+     * @param name the name of the sqlite3 function
+     * @param numArgs the number of arguments for the function
+     * @param function callback to call when the function is executed
+     * @hide
+     */
+    public void addCustomFunction(String name, int numArgs, CustomFunction function) {
+        verifyDbIsOpen();
+        synchronized (mCustomFunctions) {
+            int ref = native_addCustomFunction(name, numArgs, function);
+            if (ref != 0) {
+                // save a reference to the function for cleanup later
+                mCustomFunctions.add(new Integer(ref));
+            } else {
+                throw new SQLiteException("failed to add custom function " + name);
+            }
+        }
+    }
+
+    private void releaseCustomFunctions() {
+        synchronized (mCustomFunctions) {
+            for (int i = 0; i < mCustomFunctions.size(); i++) {
+                Integer function = mCustomFunctions.get(i);
+                native_releaseCustomFunction(function.intValue());
+            }
+            mCustomFunctions.clear();
+        }
+    }
+
+    // list of CustomFunction references so we can clean up when the database closes
+    private final ArrayList<Integer> mCustomFunctions =
+            new ArrayList<Integer>();
+
+    private native int native_addCustomFunction(String name, int numArgs, CustomFunction function);
+    private native void native_releaseCustomFunction(int function);
 
     /**
      * Gets the database version.
@@ -1959,12 +2008,17 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     @Override
-    protected void finalize() {
-        if (isOpen()) {
-            Log.e(TAG, "close() was never explicitly called on database '" +
-                    mPath + "' ", mStackTrace);
-            closeClosable();
-            onAllReferencesReleased();
+    protected void finalize() throws Throwable {
+        try {
+            if (isOpen()) {
+                Log.e(TAG, "close() was never explicitly called on database '" +
+                        mPath + "' ", mStackTrace);
+                closeClosable();
+                onAllReferencesReleased();
+                releaseCustomFunctions();
+            }
+        } finally {
+            super.finalize();
         }
     }
 
